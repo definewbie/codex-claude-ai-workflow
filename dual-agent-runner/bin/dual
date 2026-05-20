@@ -1,0 +1,2058 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 程序说明：
+#   dual-agent-runner 的主入口脚本，负责把一次用户任务组织成可追溯的双 Agent 工作流。
+# 参数说明：
+#   支持 dual init、dual cleanup，以及普通任务运行参数；详细参数见 usage 函数。
+# 关键步骤：
+#   1. 解析命令行和 .agent/config.json。
+#   2. 选择默认 worktree 安全模式或显式 in-place 模式。
+#   3. 初始化 .agent/runs/<run_id>/ run ledger。
+#   4. 依次调用 Claude / Codex，并采集 Git、验证、PR、通知和最终报告。
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TOOL_VERSION="0.3.0"
+RUN_FINALIZED=0
+
+# shellcheck source=../lib/event.sh
+source "$ROOT_DIR/lib/event.sh"
+# shellcheck source=../lib/agent.sh
+source "$ROOT_DIR/lib/agent.sh"
+# shellcheck source=../lib/git.sh
+source "$ROOT_DIR/lib/git.sh"
+# shellcheck source=../lib/verify.sh
+source "$ROOT_DIR/lib/verify.sh"
+# shellcheck source=../lib/report.sh
+source "$ROOT_DIR/lib/report.sh"
+
+# 函数：usage
+# 作用：输出 dual 命令的帮助信息。
+# 参数：无。
+# 关键步骤：列出子命令、常用调用方式和全部 CLI 参数，供 --help 或参数错误时查看。
+usage() {
+  cat <<'USAGE'
+Usage:
+  dual init
+  dual cleanup --worktree-dir <path> [--delete-branch]
+  dual "task description"
+  dual --test "npm test" "task description"
+  dual --workdir /path/to/repo --test "npm test" "task description"
+  dual --worktree --branch ai/my-task "task description"
+  dual --create-pr --pr-base main "task description"
+
+Options:
+  --workdir PATH          Target git repository. Defaults to current directory.
+  --test COMMAND          Optional runner-level verification command.
+  --allow-test-failure    Return success even when the runner verification command fails.
+  --skip-final-acceptance Skip the Codex final acceptance step.
+  --dry-run               Create the run ledger and prompts without calling acpx.
+  --worktree              Backward-compatible no-op; worktree mode is the default.
+  --in-place              Run directly in the selected workdir without a worktree.
+  --allow-main-in-place   Allow --in-place on main/master.
+  --attach-existing       Reuse an existing worktree by --worktree-dir or --branch.
+  --worktree-dir PATH     Worktree directory.
+  --branch BRANCH         Branch to use for worktree or normal git execution.
+  --create-pr             Commit changes, push the branch, and create a GitHub PR.
+  --pr-base BRANCH        PR base branch. Defaults to config or main.
+  --pr-title TITLE        PR title. Defaults to a generated title.
+  --pr-draft              Create the PR as draft.
+  --notify-command CMD    Run a shell command at the end with DUAL_* env vars.
+  --notify-on WHEN        Notification timing: always, success, or failure.
+  -h, --help              Show this help.
+USAGE
+}
+
+# 函数：die
+# 作用：统一输出错误信息并退出。
+# 参数：
+#   $@ - 要显示给用户的错误文本。
+# 关键步骤：给错误增加 dual: 前缀，写入 stderr，并以退出码 1 结束。
+die() {
+  echo "dual: $*" >&2
+  exit 1
+}
+
+# 函数：write_project_file
+# 作用：写入 dual init 需要生成的项目级文件。
+# 参数：
+#   $1 - file，目标文件路径。
+#   $2 - content，要写入的完整文本内容。
+# 关键步骤：
+#   1. 确保目标目录存在。
+#   2. 使用 printf 写入文本，覆盖同名文件。
+write_project_file() {
+  local file="$1"
+  local content="$2"
+
+  mkdir -p "$(dirname "$file")"
+  printf '%s\n' "$content" > "$file"
+}
+
+# 函数：init_current_repo
+# 作用：执行 dual init，在当前仓库生成 CLAUDE.md、AGENTS.md 和 .agent/config.json。
+# 参数：无。
+# 关键步骤：
+#   1. 如果当前目录在 Git 仓库内，定位到仓库根目录。
+#   2. 生成 Claude 主控 Agent 说明。
+#   3. 生成 Codex 外部审视者说明。
+#   4. 写入默认 .agent/config.json。
+init_current_repo() {
+  local init_dir
+
+  init_dir="$(pwd)"
+  if command -v git >/dev/null 2>&1 && git -C "$init_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    init_dir="$(git -C "$init_dir" rev-parse --show-toplevel)"
+  fi
+
+  mkdir -p "$init_dir/.agent"
+
+  write_project_file "$init_dir/CLAUDE.md" '# Claude Agent Guide
+
+Claude is the main control Agent for this repository.
+
+## Responsibilities
+
+- PRD analysis
+- Architecture design
+- Implementation
+- Testing
+- Change reporting
+
+## Operating Rules
+
+- Claude is the only Agent allowed to modify code.
+- Codex feedback is external review, not a command stream.
+- Prioritize Codex Must Fix items before other notes.
+- Do not expand the requested scope.
+- Do not perform unrelated refactors.
+- Keep changes focused, verifiable, and easy to trace in the run ledger.
+'
+
+  write_project_file "$init_dir/AGENTS.md" '# Codex Reviewer Guide
+
+Codex is the external reviewer for this repository.
+
+## Roles
+
+- Product manager
+- Architect
+- Final user proxy
+
+## Operating Rules
+
+- Codex does not modify business code.
+- Codex does not perform line-by-line code review.
+- Codex only outputs structured review and acceptance notes.
+- Codex focuses on product completeness, architecture consistency, and user acceptance.
+- Codex review should identify Must Fix items clearly when acceptance is blocked.
+'
+
+  write_project_file "$init_dir/.agent/config.json" '{
+  "claude_session": "claude-main",
+  "codex_session": "codex-reviewer",
+  "max_review_rounds": 1,
+  "default_test_command": "",
+  "artifact_retention": "keep",
+  "worktree": {
+    "enabled": true,
+    "base_dir": "..",
+    "branch_prefix": "ai"
+  },
+  "pr": {
+    "enabled": false,
+    "base": "main",
+    "draft": true
+  },
+  "notification": {
+    "enabled": false,
+    "command": "",
+    "on": "failure"
+  }
+}'
+
+  printf 'Initialized dual-agent-runner files in %s\n' "$init_dir"
+}
+
+# 函数：require_command
+# 作用：检查外部命令是否存在，不存在时给出清晰安装提示。
+# 参数：
+#   $1 - command_name，要检查的命令名。
+#   $2 - install_hint，缺失时显示的安装或初始化提示。
+# 关键步骤：使用 command -v 检查 PATH，失败时调用 die。
+require_command() {
+  local command_name="$1"
+  local install_hint="$2"
+
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    die "missing required command: $command_name. $install_hint"
+  fi
+}
+
+# 函数：detect_acpx_version
+# 作用：探测当前 acpx 版本，写入 run.json 作为可追溯元数据。
+# 参数：无。
+# 关键步骤：
+#   1. 执行 acpx --version，但不让失败中断主流程。
+#   2. 取第一行版本输出。
+#   3. 无法获取时返回 unavailable。
+detect_acpx_version() {
+  local version_output
+  local version_exit
+
+  set +e
+  version_output="$(acpx --version 2>&1)"
+  version_exit=$?
+  set -e
+
+  if [[ "$version_exit" -ne 0 || -z "$version_output" ]]; then
+    printf 'unavailable\n'
+    return 0
+  fi
+
+  printf '%s\n' "$version_output" | sed -n '1p'
+}
+
+# 函数：parse_args
+# 作用：解析 dual CLI 参数，并初始化后续状态机需要的全局变量。
+# 参数：
+#   $@ - 用户传给 dual 的全部命令行参数。
+# 关键步骤：
+#   1. 识别 init 和 cleanup 子命令。
+#   2. 解析 workdir、worktree/in-place、PR、notification、dry-run、验证等选项。
+#   3. 将剩余参数合并为 USER_REQUEST。
+#   4. 做基础冲突校验，例如 --worktree-dir 不能和 --in-place 同时使用。
+parse_args() {
+  WORKDIR="$(pwd)"
+  TEST_COMMAND=""
+  TEST_COMMAND_SET="false"
+  SUBCOMMAND=""
+  ALLOW_TEST_FAILURE="false"
+  SKIP_FINAL_ACCEPTANCE="false"
+  DRY_RUN="false"
+  DESIGN_DECISION=""
+  FINAL_DECISION=""
+  WORKTREE_ENABLED="true"
+  WORKTREE_ATTACHED="false"
+  EXECUTION_MODE="worktree"
+  IN_PLACE="false"
+  ALLOW_MAIN_IN_PLACE="false"
+  ATTACH_EXISTING="false"
+  WORKTREE_DIR=""
+  WORKTREE_DIR_SET="false"
+  BRANCH_OVERRIDE=""
+  BRANCH_OVERRIDE_SET="false"
+  WORKTREE_BASE_DIR=".."
+  WORKTREE_BRANCH_PREFIX="ai"
+  CREATE_PR="false"
+  CREATE_PR_SET="false"
+  PR_BASE="main"
+  PR_BASE_SET="false"
+  PR_TITLE=""
+  PR_TITLE_SET="false"
+  PR_DRAFT="false"
+  PR_DRAFT_SET="false"
+  NOTIFY_ENABLED="false"
+  NOTIFY_COMMAND=""
+  NOTIFY_COMMAND_SET="false"
+  NOTIFY_ON="failure"
+  NOTIFY_ON_SET="false"
+
+  if [[ "${1:-}" == "init" ]]; then
+    SUBCOMMAND="init"
+    shift
+    [[ $# -eq 0 ]] || die "dual init does not accept extra arguments"
+    return 0
+  fi
+
+  if [[ "${1:-}" == "cleanup" ]]; then
+    SUBCOMMAND="cleanup"
+    shift
+    CLEANUP_WORKTREE_DIR=""
+    CLEANUP_DELETE_BRANCH="false"
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --worktree-dir)
+          [[ $# -ge 2 ]] || die "cleanup --worktree-dir requires a path"
+          CLEANUP_WORKTREE_DIR="$2"
+          shift 2
+          ;;
+        --delete-branch)
+          CLEANUP_DELETE_BRANCH="true"
+          shift
+          ;;
+        -h|--help)
+          usage
+          exit 0
+          ;;
+        *)
+          die "unknown cleanup option: $1"
+          ;;
+      esac
+    done
+    [[ -n "$CLEANUP_WORKTREE_DIR" ]] || die "cleanup requires --worktree-dir <path>"
+    return 0
+  fi
+
+  local args=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --workdir)
+        [[ $# -ge 2 ]] || die "--workdir requires a path"
+        WORKDIR="$2"
+        shift 2
+        ;;
+      --test)
+        [[ $# -ge 2 ]] || die "--test requires a command"
+        TEST_COMMAND="$2"
+        TEST_COMMAND_SET="true"
+        shift 2
+        ;;
+      --allow-test-failure)
+        ALLOW_TEST_FAILURE="true"
+        shift
+        ;;
+      --skip-final-acceptance)
+        SKIP_FINAL_ACCEPTANCE="true"
+        shift
+        ;;
+      --dry-run)
+        DRY_RUN="true"
+        shift
+        ;;
+      --worktree)
+        WORKTREE_ENABLED="true"
+        EXECUTION_MODE="worktree"
+        shift
+        ;;
+      --in-place)
+        WORKTREE_ENABLED="false"
+        EXECUTION_MODE="in-place"
+        IN_PLACE="true"
+        shift
+        ;;
+      --allow-main-in-place)
+        ALLOW_MAIN_IN_PLACE="true"
+        shift
+        ;;
+      --attach-existing)
+        ATTACH_EXISTING="true"
+        WORKTREE_ENABLED="true"
+        EXECUTION_MODE="worktree"
+        shift
+        ;;
+      --worktree-dir)
+        [[ $# -ge 2 ]] || die "--worktree-dir requires a path"
+        WORKTREE_DIR="$2"
+        WORKTREE_DIR_SET="true"
+        shift 2
+        ;;
+      --branch)
+        [[ $# -ge 2 ]] || die "--branch requires a branch name"
+        BRANCH_OVERRIDE="$2"
+        BRANCH_OVERRIDE_SET="true"
+        shift 2
+        ;;
+      --create-pr)
+        CREATE_PR="true"
+        CREATE_PR_SET="true"
+        shift
+        ;;
+      --pr-base)
+        [[ $# -ge 2 ]] || die "--pr-base requires a branch name"
+        PR_BASE="$2"
+        PR_BASE_SET="true"
+        shift 2
+        ;;
+      --pr-title)
+        [[ $# -ge 2 ]] || die "--pr-title requires a title"
+        PR_TITLE="$2"
+        PR_TITLE_SET="true"
+        shift 2
+        ;;
+      --pr-draft)
+        PR_DRAFT="true"
+        PR_DRAFT_SET="true"
+        shift
+        ;;
+      --notify-command)
+        [[ $# -ge 2 ]] || die "--notify-command requires a command"
+        NOTIFY_COMMAND="$2"
+        NOTIFY_COMMAND_SET="true"
+        NOTIFY_ENABLED="true"
+        shift 2
+        ;;
+      --notify-on)
+        [[ $# -ge 2 ]] || die "--notify-on requires always, success, or failure"
+        case "$2" in
+          always|success|failure) NOTIFY_ON="$2" ;;
+          *) die "--notify-on must be one of: always, success, failure" ;;
+        esac
+        NOTIFY_ON_SET="true"
+        shift 2
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      --)
+        shift
+        while [[ $# -gt 0 ]]; do
+          args+=("$1")
+          shift
+        done
+        ;;
+      -*)
+        die "unknown option: $1"
+        ;;
+      *)
+        args+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  [[ "${#args[@]}" -gt 0 ]] || die "missing task description"
+  USER_REQUEST="${args[*]}"
+
+  if [[ "$IN_PLACE" == "true" && "$WORKTREE_DIR_SET" == "true" ]]; then
+    die "--worktree-dir cannot be used with --in-place"
+  fi
+}
+
+# 函数：extract_decision
+# 作用：从 Codex 输出中提取 Decision 结果，用于质量门禁。
+# 参数：
+#   $1 - file，要解析的输出文件。
+#   $@ - 允许匹配的 Decision token，例如 PASS、BLOCKED、REJECT。
+# 关键步骤：
+#   1. 逐行查找包含 Decision 的文本。
+#   2. 将文本转为大写，避免大小写差异。
+#   3. 匹配第一个合法 token 并输出。
+extract_decision() {
+  local file="$1"
+  shift
+
+  [[ -f "$file" ]] || return 1
+
+  local line
+  local upper_line
+  local token
+
+  while IFS= read -r line; do
+    upper_line="$(printf '%s\n' "$line" | tr '[:lower:]' '[:upper:]')"
+    [[ "$upper_line" == *"DECISION"* ]] || continue
+
+    for token in "$@"; do
+      if printf '%s\n' "$upper_line" | grep -Eq "(^|[^A-Z_])${token}([^A-Z_]|$)"; then
+        printf '%s\n' "$token"
+        return 0
+      fi
+    done
+  done < "$file"
+
+  return 1
+}
+
+# 函数：load_config
+# 作用：读取目标仓库 .agent/config.json，并把默认配置合并进当前运行参数。
+# 参数：无。依赖 WORKDIR 和 parse_args 已初始化的选项变量。
+# 关键步骤：
+#   1. 设置内置默认值。
+#   2. 如果配置文件不存在，直接使用默认值。
+#   3. 校验 JSON 格式并读取 session、worktree、PR、notification、默认测试命令。
+#   4. 保持命令行参数优先级高于配置文件。
+load_config() {
+  CONFIG_FILE="$WORKDIR/.agent/config.json"
+  CLAUDE_SESSION="claude-main"
+  CODEX_SESSION="codex-reviewer"
+  MAX_REVIEW_ROUNDS="1"
+  DEFAULT_TEST_COMMAND=""
+  ARTIFACT_RETENTION="keep"
+  WORKTREE_BASE_DIR=".."
+  WORKTREE_BRANCH_PREFIX="ai"
+
+  if [[ ! -f "$CONFIG_FILE" ]]; then
+    return 0
+  fi
+
+  jq empty "$CONFIG_FILE" >/dev/null 2>&1 || die "invalid JSON config: $CONFIG_FILE"
+
+  CLAUDE_SESSION="$(jq -r '.claude_session // "claude-main"' "$CONFIG_FILE")"
+  CODEX_SESSION="$(jq -r '.codex_session // "codex-reviewer"' "$CONFIG_FILE")"
+  MAX_REVIEW_ROUNDS="$(jq -r '.max_review_rounds // 1' "$CONFIG_FILE")"
+  DEFAULT_TEST_COMMAND="$(jq -r '.default_test_command // ""' "$CONFIG_FILE")"
+  ARTIFACT_RETENTION="$(jq -r '.artifact_retention // "keep"' "$CONFIG_FILE")"
+  WORKTREE_BASE_DIR="$(jq -r '.worktree.base_dir // ".."' "$CONFIG_FILE")"
+  WORKTREE_BRANCH_PREFIX="$(jq -r '.worktree.branch_prefix // "ai"' "$CONFIG_FILE")"
+
+  if [[ "$IN_PLACE" != "true" && "$(jq -r '.worktree.enabled // true' "$CONFIG_FILE")" == "true" ]]; then
+    WORKTREE_ENABLED="true"
+    EXECUTION_MODE="worktree"
+  fi
+
+  if [[ "$CREATE_PR_SET" != "true" && "$(jq -r '.pr.enabled // false' "$CONFIG_FILE")" == "true" ]]; then
+    CREATE_PR="true"
+  fi
+
+  if [[ "$PR_BASE_SET" != "true" ]]; then
+    PR_BASE="$(jq -r '.pr.base // "main"' "$CONFIG_FILE")"
+  fi
+
+  if [[ "$PR_DRAFT_SET" != "true" && "$(jq -r '.pr.draft // false' "$CONFIG_FILE")" == "true" ]]; then
+    PR_DRAFT="true"
+  fi
+
+  if [[ "$NOTIFY_COMMAND_SET" != "true" ]]; then
+    NOTIFY_COMMAND="$(jq -r '.notification.command // ""' "$CONFIG_FILE")"
+  fi
+
+  if [[ "$NOTIFY_ON_SET" != "true" ]]; then
+    NOTIFY_ON="$(jq -r '.notification.on // "failure"' "$CONFIG_FILE")"
+    case "$NOTIFY_ON" in
+      always|success|failure) ;;
+      *) die "invalid notification.on in config: $NOTIFY_ON" ;;
+    esac
+  fi
+
+  if [[ "$NOTIFY_COMMAND_SET" != "true" && "$(jq -r '.notification.enabled // false' "$CONFIG_FILE")" == "true" && -n "$NOTIFY_COMMAND" ]]; then
+    NOTIFY_ENABLED="true"
+  fi
+
+  if [[ "$TEST_COMMAND_SET" != "true" && -n "$DEFAULT_TEST_COMMAND" ]]; then
+    TEST_COMMAND="$DEFAULT_TEST_COMMAND"
+  fi
+}
+
+# 函数：normalize_workdir
+# 作用：把 WORKDIR 规范化为绝对路径，并探测 Git 可用性、分支和基准提交。
+# 参数：无。依赖 WORKDIR。
+# 关键步骤：
+#   1. 确认目录存在并转为物理绝对路径。
+#   2. 检查 git 命令和当前目录是否在 Git 仓库内。
+#   3. 如果是 Git 仓库，切到仓库根目录并记录 BRANCH、BASE_COMMIT。
+#   4. 如果不是 Git 仓库，记录 GIT_UNAVAILABLE_REASON，供报告和事件使用。
+normalize_workdir() {
+  [[ -d "$WORKDIR" ]] || die "workdir does not exist: $WORKDIR"
+
+  WORKDIR="$(cd "$WORKDIR" && pwd -P)"
+
+  GIT_AVAILABLE="false"
+  GIT_UNAVAILABLE_REASON="git command not found"
+  BRANCH="unavailable"
+  BASE_COMMIT="unavailable"
+
+  if command -v git >/dev/null 2>&1; then
+    GIT_UNAVAILABLE_REASON="not a git repository"
+    if git -C "$WORKDIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      GIT_AVAILABLE="true"
+      WORKDIR="$(git -C "$WORKDIR" rev-parse --show-toplevel)"
+      BRANCH="$(git_branch)"
+      BASE_COMMIT="$(git_base_commit)"
+      GIT_UNAVAILABLE_REASON=""
+    fi
+  fi
+}
+
+# 函数：new_run_id
+# 作用：生成一次 dual run 的唯一 ID。
+# 参数：无。
+# 关键步骤：使用 UTC 时间戳和当前进程 PID 拼接，保证同机并发时尽量不冲突。
+new_run_id() {
+  printf '%s-%s\n' "$(date -u +"%Y%m%dT%H%M%SZ")" "$$"
+}
+
+# 函数：init_run
+# 作用：初始化 run ledger 目录、基础文件和 run.json。
+# 参数：无。依赖 RUN_ID、WORKDIR、USER_REQUEST、配置和执行模式全局变量。
+# 关键步骤：
+#   1. 补齐 STARTED_AT 和 RUN_ID。
+#   2. 创建 .agent/runs/<run_id>/ 下的 outputs、snapshots、verification、prompts、steps。
+#   3. 写入 00-user-request.md。
+#   4. 初始化 run.json，并记录 run_started 事件。
+init_run() {
+  if [[ -z "${STARTED_AT:-}" ]]; then
+    STARTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  fi
+  if [[ -z "${RUN_ID:-}" ]]; then
+    RUN_ID="$(new_run_id)"
+  fi
+  RUN_DIR="$WORKDIR/.agent/runs/$RUN_ID"
+  EVENTS_FILE="$RUN_DIR/events.jsonl"
+  OUTPUTS_DIR="$RUN_DIR/outputs"
+  SNAPSHOTS_DIR="$RUN_DIR/snapshots"
+  VERIFICATION_DIR="$RUN_DIR/verification"
+  PROMPTS_DIR="$RUN_DIR/prompts"
+  STEPS_DIR="$RUN_DIR/steps"
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    ACPX_VERSION="not checked (dry-run)"
+  else
+    ACPX_VERSION="$(detect_acpx_version)"
+  fi
+
+  mkdir -p "$OUTPUTS_DIR" "$SNAPSHOTS_DIR" "$VERIFICATION_DIR" "$PROMPTS_DIR" "$STEPS_DIR"
+
+  printf '%s\n' "$USER_REQUEST" > "$RUN_DIR/00-user-request.md"
+
+  jq -cn \
+    --arg run_id "$RUN_ID" \
+    --arg tool_version "$TOOL_VERSION" \
+    --arg acpx_version "$ACPX_VERSION" \
+    --arg started_at "$STARTED_AT" \
+    --arg original_workdir "${ORIGINAL_WORKDIR:-$WORKDIR}" \
+    --arg workdir "$WORKDIR" \
+    --arg execution_mode "$EXECUTION_MODE" \
+    --arg worktree_enabled "$WORKTREE_ENABLED" \
+    --arg worktree_dir "${WORKTREE_DIR:-}" \
+    --arg branch "$BRANCH" \
+    --arg base_branch "${BASE_BRANCH:-$BRANCH}" \
+    --arg base_commit "$BASE_COMMIT" \
+    --arg cleanup_command "$(cleanup_command_text)" \
+    --arg test_command "${TEST_COMMAND:-}" \
+    --arg config_file "${CONFIG_FILE:-}" \
+    --arg claude_session "$CLAUDE_SESSION" \
+    --arg codex_session "$CODEX_SESSION" \
+    --arg max_review_rounds "$MAX_REVIEW_ROUNDS" \
+    --arg artifact_retention "$ARTIFACT_RETENTION" \
+    --arg worktree_base_dir "$WORKTREE_BASE_DIR" \
+    --arg worktree_branch_prefix "$WORKTREE_BRANCH_PREFIX" \
+    --arg allow_test_failure "$ALLOW_TEST_FAILURE" \
+    --arg skip_final_acceptance "$SKIP_FINAL_ACCEPTANCE" \
+    --arg dry_run "$DRY_RUN" \
+    --arg create_pr "$CREATE_PR" \
+    --arg pr_base "$PR_BASE" \
+    --arg pr_branch "$BRANCH" \
+    --arg pr_draft "$PR_DRAFT" \
+    --arg notify_enabled "$NOTIFY_ENABLED" \
+    --arg notify_on "$NOTIFY_ON" \
+    --arg user_request "$USER_REQUEST" \
+    '{
+      run_id: $run_id,
+      tool_version: $tool_version,
+      acpx_version: $acpx_version,
+      original_workdir: $original_workdir,
+      workdir: $workdir,
+      effective_workdir: $workdir,
+      execution_mode: $execution_mode,
+      worktree_enabled: ($worktree_enabled == "true"),
+      worktree_dir: (if $worktree_dir == "" then null else $worktree_dir end),
+      branch: $branch,
+      base_branch: $base_branch,
+      base_commit: $base_commit,
+      cleanup_command: $cleanup_command,
+      review_commands: (if $base_branch == "unavailable" then
+        [
+          ("cd " + $workdir),
+          "git status",
+          "# git diff unavailable outside a git repository"
+        ]
+      else
+        [
+          ("cd " + $workdir),
+          "git status",
+          ("git diff " + $base_branch + "...HEAD")
+        ]
+      end),
+      started_at: $started_at,
+      finished_at: null,
+      status: "running",
+      test_command: (if $test_command == "" then null else $test_command end),
+      config_file: (if $config_file == "" then null else $config_file end),
+      config: {
+        claude_session: $claude_session,
+        codex_session: $codex_session,
+        max_review_rounds: ($max_review_rounds | tonumber),
+        artifact_retention: $artifact_retention,
+        worktree: {
+          enabled: ($worktree_enabled == "true"),
+          base_dir: $worktree_base_dir,
+          branch_prefix: $worktree_branch_prefix
+        },
+        pr: {
+          enabled: ($create_pr == "true"),
+          base: $pr_base,
+          draft: ($pr_draft == "true")
+        },
+        notification: {
+          enabled: ($notify_enabled == "true"),
+          on: $notify_on
+        }
+      },
+      quality_gates: {
+        allow_test_failure: ($allow_test_failure == "true"),
+        skip_final_acceptance: ($skip_final_acceptance == "true"),
+        dry_run: ($dry_run == "true"),
+        design_decision: null,
+        final_decision: null
+      },
+      pr_enabled: ($create_pr == "true"),
+      pr_created: false,
+      pr_url: null,
+      pr_base: $pr_base,
+      pr_branch: $pr_branch,
+      pr_draft: ($pr_draft == "true"),
+      notification: {
+        enabled: ($notify_enabled == "true"),
+        on: $notify_on,
+        status: "not_requested",
+        exit_code: null
+      },
+      user_request: $user_request
+    }' > "$RUN_DIR/run.json"
+
+  event "run_started" "$(jq -cn \
+    --arg run_id "$RUN_ID" \
+    --arg actor "dual" \
+    --arg workdir "$WORKDIR" \
+    --arg original_workdir "${ORIGINAL_WORKDIR:-$WORKDIR}" \
+    --arg run_dir "$RUN_DIR" \
+    --arg execution_mode "$EXECUTION_MODE" \
+    --arg branch "$BRANCH" \
+    --arg base_branch "${BASE_BRANCH:-$BRANCH}" \
+    --arg base_commit "$BASE_COMMIT" \
+    --arg tool_version "$TOOL_VERSION" \
+    --arg acpx_version "$ACPX_VERSION" \
+    '{run_id: $run_id, actor: $actor, data: {execution_mode: $execution_mode, original_workdir: $original_workdir, effective_workdir: $workdir, run_dir: $run_dir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit, tool_version: $tool_version, acpx_version: $acpx_version}}')"
+}
+
+# 函数：update_quality_gate
+# 作用：更新 run.json 中 quality_gates 的单个门禁结果。
+# 参数：
+#   $1 - key，门禁字段名，例如 design_decision 或 final_decision。
+#   $2 - value，门禁值，例如 PASS、BLOCKED、ACCEPT、REJECT。
+# 关键步骤：通过临时文件写入 jq 更新结果，再原子替换 run.json。
+update_quality_gate() {
+  local key="$1"
+  local value="$2"
+  local tmp_file
+
+  tmp_file="$RUN_DIR/run.json.tmp"
+  jq \
+    --arg key "$key" \
+    --arg value "$value" \
+    '.quality_gates[$key] = $value' \
+    "$RUN_DIR/run.json" > "$tmp_file"
+  mv "$tmp_file" "$RUN_DIR/run.json"
+}
+
+# 函数：update_run_json
+# 作用：用传入的 jq filter 更新 run.json，供通用字段更新复用。
+# 参数：
+#   $1 - jq_filter，要应用到 run.json 的 jq 表达式。
+# 关键步骤：写入临时文件后 mv 覆盖，避免半截写入。
+update_run_json() {
+  local jq_filter="$1"
+  local tmp_file
+
+  tmp_file="$RUN_DIR/run.json.tmp"
+  jq "$jq_filter" "$RUN_DIR/run.json" > "$tmp_file"
+  mv "$tmp_file" "$RUN_DIR/run.json"
+}
+
+# 函数：set_run_identity
+# 作用：提前确定 STARTED_AT 和 RUN_ID，便于 worktree 创建前也能记录账本。
+# 参数：无。
+# 关键步骤：如果变量尚未设置，则生成当前 UTC 开始时间和 run_id。
+set_run_identity() {
+  if [[ -z "${STARTED_AT:-}" ]]; then
+    STARTED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  fi
+  if [[ -z "${RUN_ID:-}" ]]; then
+    RUN_ID="$(new_run_id)"
+  fi
+}
+
+# 函数：run_id_slug
+# 作用：把 RUN_ID 转成适合作为分支名或目录名的一段 slug。
+# 参数：无。依赖 RUN_ID。
+# 关键步骤：保留字母、数字、点、下划线、短横线，清理首尾短横线。
+run_id_slug() {
+  printf '%s' "$RUN_ID" | tr -cs 'A-Za-z0-9._-' '-' | sed 's/^-//; s/-$//'
+}
+
+# 函数：repo_parent_dir
+# 作用：返回原始仓库的父目录，用于计算默认 worktree 目录。
+# 参数：无。依赖 ORIGINAL_WORKDIR。
+# 关键步骤：调用 dirname 输出父级路径。
+repo_parent_dir() {
+  dirname "$ORIGINAL_WORKDIR"
+}
+
+# 函数：cleanup_command_text
+# 作用：生成本次 run 对应的清理命令文本，写入 run.json 和 final-report.md。
+# 参数：无。依赖 WORKTREE_ENABLED、ORIGINAL_WORKDIR、WORKTREE_DIR、BRANCH。
+# 关键步骤：
+#   1. worktree 模式输出 git worktree remove 和 branch -D。
+#   2. in-place 模式输出 N/A 说明。
+cleanup_command_text() {
+  if [[ "$WORKTREE_ENABLED" == "true" ]]; then
+    printf 'git -C %q worktree remove %q && git -C %q branch -D %q\n' \
+      "$ORIGINAL_WORKDIR" "$WORKTREE_DIR" "$ORIGINAL_WORKDIR" "$BRANCH"
+  else
+    printf 'N/A for in-place execution.\n'
+  fi
+}
+
+# 函数：print_run_started
+# 作用：在终端输出 run 启动摘要，让用户知道实际执行目录和分支。
+# 参数：无。
+# 关键步骤：打印 Mode、Original repo、Effective workdir、Worktree、Branch、Run ID。
+print_run_started() {
+  printf 'Dual run started\n'
+  printf 'Mode: %s\n' "$EXECUTION_MODE"
+  printf 'Original repo: %s\n' "${ORIGINAL_WORKDIR:-$WORKDIR}"
+  printf 'Effective workdir: %s\n' "$WORKDIR"
+  if [[ "$WORKTREE_ENABLED" == "true" ]]; then
+    printf 'Worktree: %s\n' "$WORKTREE_DIR"
+  fi
+  printf 'Branch: %s\n' "$BRANCH"
+  printf 'Run ID: %s\n' "$RUN_ID"
+}
+
+# 函数：print_run_finished
+# 作用：在终端输出 run 结束摘要、报告路径、复查命令和清理命令。
+# 参数：
+#   $1 - exit_code，主流程最终退出码。
+# 关键步骤：
+#   1. 根据退出码显示 Completed 或 Finished with exit code。
+#   2. 输出 final-report.md 路径。
+#   3. 输出 git status / git diff 复查命令。
+#   4. worktree 模式额外输出 cleanup 命令。
+print_run_finished() {
+  local exit_code="$1"
+
+  if [[ "$exit_code" -eq 0 ]]; then
+    printf 'Completed.\n'
+  else
+    printf 'Finished with exit code %s.\n' "$exit_code"
+  fi
+  printf 'Report: %s\n\n' "$RUN_DIR/final-report.md"
+  printf 'Review:\n'
+  printf '  cd %s\n' "$WORKDIR"
+  printf '  git status\n'
+  if [[ "${GIT_AVAILABLE:-false}" == "true" ]]; then
+    printf '  git diff %s...HEAD\n' "$BASE_BRANCH"
+  else
+    printf '  # git diff unavailable outside a git repository\n'
+  fi
+  if [[ "$WORKTREE_ENABLED" == "true" ]]; then
+    printf '\nCleanup:\n'
+    printf '  git -C %s worktree remove %s\n' "$ORIGINAL_WORKDIR" "$WORKTREE_DIR"
+    printf '  git -C %s branch -D %s\n' "$ORIGINAL_WORKDIR" "$BRANCH"
+  fi
+}
+
+# 函数：cleanup_worktree
+# 作用：实现 dual cleanup 子命令，移除指定 worktree，并可选删除对应分支。
+# 参数：无。依赖 CLEANUP_WORKTREE_DIR 和 CLEANUP_DELETE_BRANCH。
+# 关键步骤：
+#   1. 校验目标目录是 Git worktree。
+#   2. 记录当前分支和 git common dir，便于后续删除分支。
+#   3. 执行 git worktree remove。
+#   4. 如果指定 --delete-branch，则只在能确定分支时删除。
+cleanup_worktree() {
+  local target="$CLEANUP_WORKTREE_DIR"
+  local target_abs
+  local branch_name=""
+  local git_common_dir=""
+
+  require_command "git" "Install git first."
+  [[ -d "$target" ]] || die "worktree directory does not exist: $target"
+
+  target_abs="$(cd "$target" && pwd -P)"
+
+  if ! git -C "$target_abs" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    die "not a git worktree: $target_abs"
+  fi
+
+  branch_name="$(git -C "$target_abs" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  git_common_dir="$(git -C "$target_abs" rev-parse --git-common-dir 2>/dev/null || true)"
+  if [[ -n "$git_common_dir" && "$git_common_dir" != /* ]]; then
+    git_common_dir="$(cd "$target_abs/$git_common_dir" && pwd -P)"
+  fi
+
+  printf 'Removing worktree: %s\n' "$target_abs"
+  local remove_exit=0
+  set +e
+  git -C "$target_abs" worktree remove "$target_abs"
+  remove_exit=$?
+  set -e
+  if [[ "$remove_exit" -ne 0 ]]; then
+    printf 'Failed to remove worktree: %s\n' "$target_abs" >&2
+    printf 'Git refused to remove it, usually because it contains modified or untracked files.\n' >&2
+    printf 'Inspect it first, then run git worktree remove manually if you want to force cleanup.\n' >&2
+    return "$remove_exit"
+  fi
+  printf 'Removed worktree: %s\n' "$target_abs"
+
+  if [[ "${CLEANUP_DELETE_BRANCH:-false}" == "true" ]]; then
+    if [[ -z "$branch_name" || "$branch_name" == "HEAD" ]]; then
+      printf 'Branch could not be determined; not deleting any branch.\n' >&2
+      return 0
+    fi
+    if [[ -z "$git_common_dir" ]]; then
+      printf 'Git common directory could not be determined; not deleting branch %s.\n' "$branch_name" >&2
+      return 0
+    fi
+    printf 'Deleting branch: %s\n' "$branch_name"
+    git --git-dir="$git_common_dir" branch -D "$branch_name"
+  fi
+}
+
+# 函数：absolute_new_path
+# 作用：把用户指定或自动生成的 worktree 路径转换成绝对路径。
+# 参数：
+#   $1 - path，可能是绝对路径，也可能是相对路径。
+#   $2 - base，相对路径解析时使用的基准目录。
+# 关键步骤：
+#   1. 绝对路径直接返回。
+#   2. 相对路径先创建父目录，再输出规范化后的绝对路径。
+absolute_new_path() {
+  local path="$1"
+  local base="$2"
+  local parent
+  local name
+
+  case "$path" in
+    /*)
+      printf '%s\n' "$path"
+      ;;
+    *)
+      parent="$(dirname "$path")"
+      name="$(basename "$path")"
+      mkdir -p "$base/$parent"
+      printf '%s/%s\n' "$(cd "$base/$parent" && pwd -P)" "$name"
+      ;;
+  esac
+}
+
+# 函数：prepare_branch_if_requested
+# 作用：in-place 模式下处理 --branch，切换或创建用户指定分支。
+# 参数：无。依赖 BRANCH_OVERRIDE、WORKDIR、GIT_AVAILABLE。
+# 关键步骤：
+#   1. worktree 模式不在这里处理分支，直接返回。
+#   2. 要求当前目录必须是 Git 仓库。
+#   3. 分支存在则 checkout，不存在则 checkout -b。
+#   4. 更新 BRANCH 和 BASE_COMMIT。
+prepare_branch_if_requested() {
+  if [[ "$WORKTREE_ENABLED" == "true" || "$BRANCH_OVERRIDE_SET" != "true" ]]; then
+    return 0
+  fi
+
+  [[ "${GIT_AVAILABLE:-false}" == "true" ]] || die "--branch requires a git repository"
+
+  if git -C "$WORKDIR" show-ref --verify --quiet "refs/heads/$BRANCH_OVERRIDE"; then
+    git -C "$WORKDIR" checkout "$BRANCH_OVERRIDE" >/dev/null 2>&1 || die "failed to checkout branch: $BRANCH_OVERRIDE"
+  else
+    git -C "$WORKDIR" checkout -b "$BRANCH_OVERRIDE" >/dev/null 2>&1 || die "failed to create branch: $BRANCH_OVERRIDE"
+  fi
+
+  BRANCH="$(git_branch)"
+  BASE_COMMIT="$(git_base_commit)"
+}
+
+# 函数：write_worktree_failure_ledger
+# 作用：worktree 创建失败时，在原始仓库写入最小 run ledger，避免失败没有账本。
+# 参数：
+#   $1 - reason，失败原因。
+# 关键步骤：
+#   1. 临时把 WORKDIR 恢复为 ORIGINAL_WORKDIR。
+#   2. 初始化 run ledger 和 run.json。
+#   3. 记录 execution_mode_selected、git_unavailable、worktree_create_failed 等事件。
+#   4. 标记 run 状态为 worktree_failed 并生成 final-report.md。
+write_worktree_failure_ledger() {
+  local reason="$1"
+
+  WORKDIR="$ORIGINAL_WORKDIR"
+  GIT_AVAILABLE="$ORIGINAL_GIT_AVAILABLE"
+  BRANCH="$ORIGINAL_BRANCH"
+  BASE_COMMIT="$ORIGINAL_BASE_COMMIT"
+  init_run
+  event "execution_mode_selected" "$(jq -cn \
+    --arg actor "dual" \
+    --arg execution_mode "$EXECUTION_MODE" \
+    --arg original_workdir "$ORIGINAL_WORKDIR" \
+    --arg worktree_dir "${WORKTREE_DIR:-}" \
+    --arg branch "$BRANCH" \
+    --arg base_branch "${BASE_BRANCH:-$BRANCH}" \
+    --arg base_commit "$BASE_COMMIT" \
+    '{actor: $actor, data: {execution_mode: $execution_mode, original_workdir: $original_workdir, worktree_dir: $worktree_dir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+  if [[ "${ORIGINAL_GIT_AVAILABLE:-false}" != "true" ]]; then
+    event "git_unavailable" "$(jq -cn \
+      --arg actor "git" \
+      --arg reason "${GIT_UNAVAILABLE_REASON:-git unavailable}" \
+      --arg original_workdir "$ORIGINAL_WORKDIR" \
+      '{actor: $actor, data: {reason: $reason, original_workdir: $original_workdir}}')"
+  fi
+  event "worktree_create_started" "$(jq -cn \
+    --arg actor "git" \
+    --arg output_path "${WORKTREE_DIR:-}" \
+    '{actor: $actor, output_path: $output_path}')"
+  event "worktree_create_failed" "$(jq -cn \
+    --arg actor "git" \
+    --arg output_path "${WORKTREE_DIR:-}" \
+    --arg reason "$reason" \
+    '{actor: $actor, output_path: $output_path, exit_code: 5, data: {reason: $reason}}')"
+  update_run_status "worktree_failed"
+  generate_final_report
+}
+
+# 函数：find_worktree_for_branch
+# 作用：根据分支名查找已经存在并关联的 Git worktree。
+# 参数：
+#   $1 - branch，要查找的本地分支名。
+# 关键步骤：
+#   1. 读取 git worktree list --porcelain。
+#   2. 解析 worktree 和 branch 行。
+#   3. 找到匹配分支后输出 worktree 路径。
+find_worktree_for_branch() {
+  local branch="$1"
+  local current_worktree=""
+  local current_branch=""
+
+  while IFS= read -r line; do
+    case "$line" in
+      worktree\ *)
+        current_worktree="${line#worktree }"
+        current_branch=""
+        ;;
+      branch\ refs/heads/*)
+        current_branch="${line#branch refs/heads/}"
+        if [[ "$current_branch" == "$branch" && -n "$current_worktree" ]]; then
+          printf '%s\n' "$current_worktree"
+          return 0
+        fi
+        ;;
+    esac
+  done < <(git -C "$ORIGINAL_WORKDIR" worktree list --porcelain)
+
+  return 1
+}
+
+# 函数：attach_existing_worktree
+# 作用：在 --attach-existing 模式下复用已有 worktree。
+# 参数：无。依赖 WORKTREE_DIR 或 BRANCH_OVERRIDE。
+# 关键步骤：
+#   1. 如果指定 --worktree-dir，校验该目录是 Git worktree 并切换过去。
+#   2. 否则如果指定 --branch，查找该分支已有 worktree。
+#   3. 成功后 normalize_workdir，并标记 WORKTREE_ATTACHED=true。
+attach_existing_worktree() {
+  if [[ -n "$WORKTREE_DIR" ]]; then
+    [[ -d "$WORKTREE_DIR" ]] || return 1
+    git -C "$WORKTREE_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+    WORKDIR="$WORKTREE_DIR"
+    normalize_workdir
+    WORKTREE_ATTACHED="true"
+    return 0
+  fi
+
+  if [[ -n "$BRANCH_OVERRIDE" ]]; then
+    local existing_worktree
+    existing_worktree="$(find_worktree_for_branch "$BRANCH_OVERRIDE" || true)"
+    if [[ -n "$existing_worktree" ]]; then
+      WORKTREE_DIR="$existing_worktree"
+      WORKDIR="$existing_worktree"
+      normalize_workdir
+      WORKTREE_ATTACHED="true"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+# 函数：create_worktree_if_requested
+# 作用：默认安全模式下创建或复用 worktree，并把 WORKDIR 切到有效执行目录。
+# 参数：无。依赖 ORIGINAL_WORKDIR、RUN_ID、BRANCH_OVERRIDE、WORKTREE_DIR 等全局变量。
+# 关键步骤：
+#   1. 非 worktree 模式直接返回。
+#   2. 非 Git 目录默认拒绝，并生成失败账本。
+#   3. 自动生成分支名和 worktree 目录。
+#   4. 处理 --attach-existing、目录冲突和 git worktree add 失败。
+#   5. 创建成功后切换 WORKDIR 并重新探测 Git 状态。
+create_worktree_if_requested() {
+  if [[ "$WORKTREE_ENABLED" != "true" ]]; then
+    return 0
+  fi
+
+  if [[ "${ORIGINAL_GIT_AVAILABLE:-false}" != "true" ]]; then
+    WORKTREE_DIR="${WORKTREE_DIR:-}"
+    write_worktree_failure_ledger "Default execution mode requires a git repository because dual uses git worktree for safety. Use --in-place to run in a non-git directory."
+    echo "Default execution mode requires a git repository because dual uses git worktree for safety." >&2
+    echo "Use --in-place to run in a non-git directory." >&2
+    return 5
+  fi
+
+  if [[ -z "$BRANCH_OVERRIDE" ]]; then
+    BRANCH_OVERRIDE="$WORKTREE_BRANCH_PREFIX/$(run_id_slug)"
+  fi
+
+  if [[ "$ATTACH_EXISTING" == "true" && "$WORKTREE_DIR_SET" != "true" ]]; then
+    if attach_existing_worktree; then
+      return 0
+    fi
+  fi
+
+  if [[ -z "$WORKTREE_DIR" ]]; then
+    local repo_name
+    repo_name="$(basename "$ORIGINAL_WORKDIR")"
+    WORKTREE_DIR="$(repo_parent_dir)/${repo_name}-agent-runs/$(run_id_slug)"
+  fi
+
+  WORKTREE_DIR="$(absolute_new_path "$WORKTREE_DIR" "$ORIGINAL_WORKDIR")"
+
+  if [[ "$ATTACH_EXISTING" == "true" ]]; then
+    if attach_existing_worktree; then
+      return 0
+    fi
+    write_worktree_failure_ledger "requested existing worktree was not found or is invalid"
+    echo "dual: requested existing worktree was not found or is invalid" >&2
+    return 5
+  fi
+
+  if [[ -e "$WORKTREE_DIR" ]]; then
+    write_worktree_failure_ledger "worktree directory already exists; use --attach-existing to reuse it"
+    echo "dual: worktree directory already exists: $WORKTREE_DIR" >&2
+    echo "Use --attach-existing to reuse an existing worktree." >&2
+    return 5
+  fi
+
+  local stdout_log
+  local stderr_log
+  stdout_log="/private/tmp/dual-worktree-${RUN_ID}.stdout.log"
+  stderr_log="/private/tmp/dual-worktree-${RUN_ID}.stderr.log"
+
+  set +e
+  git -C "$ORIGINAL_WORKDIR" worktree add "$WORKTREE_DIR" -b "$BRANCH_OVERRIDE" >"$stdout_log" 2>"$stderr_log"
+  local worktree_exit=$?
+  set -e
+
+  if [[ "$worktree_exit" -ne 0 ]]; then
+    local reason
+    reason="$(tail -n 20 "$stderr_log" 2>/dev/null | tr '\n' ' ')"
+    write_worktree_failure_ledger "${reason:-git worktree add failed}"
+    echo "dual: failed to create worktree: ${reason:-git worktree add failed}" >&2
+    return 5
+  fi
+
+  WORKDIR="$WORKTREE_DIR"
+  normalize_workdir
+  WORKTREE_ATTACHED="false"
+}
+
+# 函数：git_has_worktree_changes
+# 作用：判断当前有效工作目录是否存在需要提交到 PR 的业务变更。
+# 参数：无。依赖 WORKDIR 和 RUN_ID。
+# 关键步骤：读取 git status --short，并排除当前 run ledger 目录，避免账本文件本身触发 PR。
+git_has_worktree_changes() {
+  [[ -n "$(git -C "$WORKDIR" status --short -- . ":(exclude).agent/runs/$RUN_ID")" ]]
+}
+
+# 函数：git_branch_ahead_count
+# 作用：计算当前分支相对 PR base 的 ahead commit 数。
+# 参数：无。依赖 WORKDIR 和 PR_BASE。
+# 关键步骤：
+#   1. 优先使用 origin/<pr_base>。
+#   2. 找不到远端基线时退回本地 <pr_base>。
+#   3. 基线仍不可用时返回 0，避免阻塞无变更判断。
+git_branch_ahead_count() {
+  local base_ref="origin/$PR_BASE"
+
+  if ! git -C "$WORKDIR" rev-parse --verify "$base_ref" >/dev/null 2>&1; then
+    base_ref="$PR_BASE"
+  fi
+
+  if ! git -C "$WORKDIR" rev-parse --verify "$base_ref" >/dev/null 2>&1; then
+    printf '0\n'
+    return 0
+  fi
+
+  git -C "$WORKDIR" rev-list --count "${base_ref}..HEAD"
+}
+
+# 函数：update_pr_json
+# 作用：更新 run.json 中 PR 创建状态。
+# 参数：
+#   $1 - created，JSON boolean，表示 PR 是否创建成功。
+#   $2 - url，PR URL，失败或跳过时可为空。
+#   $3 - status，PR 状态，例如 created、failed、skipped_no_changes。
+#   $4 - error_tail，可选错误摘要。
+# 关键步骤：使用 jq 写入 pr_created、pr_url、pr_status、pr_error_tail。
+update_pr_json() {
+  local created="$1"
+  local url="$2"
+  local status="$3"
+  local error_tail="${4:-}"
+  local tmp_file
+
+  tmp_file="$RUN_DIR/run.json.tmp"
+  jq \
+    --argjson created "$created" \
+    --arg url "$url" \
+    --arg status "$status" \
+    --arg error_tail "$error_tail" \
+    '.pr_created = $created
+      | .pr_url = (if $url == "" then null else $url end)
+      | .pr_status = $status
+      | .pr_error_tail = (if $error_tail == "" then null else $error_tail end)' \
+    "$RUN_DIR/run.json" > "$tmp_file"
+  mv "$tmp_file" "$RUN_DIR/run.json"
+}
+
+# 函数：generate_pr_body
+# 作用：生成 gh pr create 使用的 PR body 文件。
+# 参数：无。依赖 PR_DIR、RUN_DIR、OUTPUTS_DIR、VERIFICATION_DIR、SNAPSHOTS_DIR。
+# 关键步骤：
+#   1. 写入用户需求和 Claude 实现摘要。
+#   2. 写入 developer self-test 和 verification.json。
+#   3. 写入 Codex final acceptance、diff stat 和 run artifacts。
+#   4. 在 Risks / Notes 中提示先审阅 run ledger。
+generate_pr_body() {
+  local body_file="$PR_DIR/pr-body.md"
+
+  {
+    printf '# Dual Agent Run PR\n\n'
+    printf '## User Request\n\n'
+    printf '```text\n'
+    cat "$RUN_DIR/00-user-request.md"
+    printf '```\n\n'
+
+    printf '## Summary\n\n'
+    append_file_or_placeholder "$OUTPUTS_DIR/03-claude-implement.md" "No Claude implementation summary captured."
+    printf '\n'
+
+    printf '## Verification\n\n'
+    if [[ -f "$VERIFICATION_DIR/developer-self-test.md" ]]; then
+      printf '### Developer Self-Test\n\n'
+      append_file_or_placeholder "$VERIFICATION_DIR/developer-self-test.md" "No developer self-test report captured."
+      printf '\n'
+    fi
+    printf '### Verification Metadata\n\n'
+    if [[ -f "$VERIFICATION_DIR/verification.json" ]]; then
+      printf '```json\n'
+      jq '.' "$VERIFICATION_DIR/verification.json"
+      printf '```\n'
+    else
+      printf 'No verification metadata captured.\n'
+    fi
+    printf '\n'
+
+    printf '## Codex Final Acceptance\n\n'
+    append_file_or_placeholder "$OUTPUTS_DIR/04-codex-final-acceptance.md" "No Codex final acceptance output captured."
+    printf '\n'
+
+    printf '## Changed Files\n\n'
+    if [[ -s "$SNAPSHOTS_DIR/diff.stat" ]]; then
+      printf '```text\n'
+      cat "$SNAPSHOTS_DIR/diff.stat"
+      printf '```\n'
+    else
+      printf 'No diff stat captured.\n'
+    fi
+    printf '\n'
+
+    printf '## Run Artifacts\n\n'
+    printf -- '- Run report: `%s`\n' "$RUN_DIR/final-report.md"
+    printf -- '- Events: `%s`\n' "$EVENTS_FILE"
+    printf -- '- Diff patch: `%s`\n' "$SNAPSHOTS_DIR/diff.patch"
+    printf '\n'
+
+    printf '## Risks / Notes\n\n'
+    printf -- '- Generated by `dual-agent-runner`.\n'
+    printf -- '- Review the run ledger before merging.\n'
+  } > "$body_file"
+}
+
+# 函数：run_pr_if_requested
+# 作用：根据 --create-pr 执行自动提交、推送和 GitHub PR 创建。
+# 参数：无。依赖 CREATE_PR、WORKDIR、RUN_DIR、PR_BASE、PR_TITLE、PR_DRAFT 等全局变量。
+# 关键步骤：
+#   1. 未启用 PR 时仅更新状态为 not_requested。
+#   2. 校验 dry-run、Git 仓库、gh CLI、分支、origin remote 和是否有变更。
+#   3. 有未提交变更时自动 git add/commit。
+#   4. 生成 PR body，push 分支，然后调用 gh pr create。
+#   5. 保存 gh stdout/stderr、PR URL 和失败摘要；PR 失败返回退出码 6。
+run_pr_if_requested() {
+  if [[ "$CREATE_PR" != "true" ]]; then
+    update_pr_json false "" "not_requested" ""
+    return 0
+  fi
+
+  PR_DIR="$RUN_DIR/pr"
+  mkdir -p "$PR_DIR"
+
+  event "pr_prepare_started" "$(jq -cn \
+    --arg actor "gh" \
+    --arg output_path "$PR_DIR" \
+    '{actor: $actor, output_path: $output_path}')"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    update_pr_json false "" "skipped_dry_run" ""
+    event "pr_skipped_no_changes" "$(jq -cn --arg actor "gh" '{actor: $actor, data: {reason: "dry-run requested"}}')"
+    return 0
+  fi
+
+  if [[ "${GIT_AVAILABLE:-false}" != "true" ]]; then
+    update_pr_json false "" "failed" "not a git repository"
+    event "pr_create_failed" "$(jq -cn --arg actor "gh" '{actor: $actor, exit_code: 6, data: {reason: "not a git repository"}}')"
+    return 6
+  fi
+
+  if ! command -v gh >/dev/null 2>&1; then
+    update_pr_json false "" "failed" "gh CLI not found"
+    event "pr_create_failed" "$(jq -cn --arg actor "gh" '{actor: $actor, exit_code: 6, data: {reason: "gh CLI not found"}}')"
+    return 6
+  fi
+
+  BRANCH="$(git_branch)"
+  if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
+    update_pr_json false "" "failed" "refusing to create PR from main/master"
+    event "pr_create_failed" "$(jq -cn --arg actor "gh" --arg branch "$BRANCH" '{actor: $actor, exit_code: 6, data: {reason: "refusing main/master branch", branch: $branch}}')"
+    return 6
+  fi
+
+  if ! git -C "$WORKDIR" remote get-url origin >/dev/null 2>&1; then
+    update_pr_json false "" "failed" "origin remote not found"
+    event "pr_create_failed" "$(jq -cn --arg actor "gh" '{actor: $actor, exit_code: 6, data: {reason: "origin remote not found"}}')"
+    return 6
+  fi
+
+  local ahead_count
+  ahead_count="$(git_branch_ahead_count)"
+
+  if ! git_has_worktree_changes && [[ "$ahead_count" == "0" ]]; then
+    update_pr_json false "" "skipped_no_changes" ""
+    event "pr_skipped_no_changes" "$(jq -cn --arg actor "gh" --arg branch "$BRANCH" '{actor: $actor, data: {branch: $branch}}')"
+    return 0
+  fi
+
+  if git_has_worktree_changes; then
+    local commit_msg_file="$PR_DIR/commit-message.txt"
+    {
+      printf 'feat: dual agent task %s\n\n' "$RUN_ID"
+      printf '%s\n\n' "$USER_REQUEST"
+      printf 'Run report: .agent/runs/%s/final-report.md\n' "$RUN_ID"
+    } > "$commit_msg_file"
+
+    git -C "$WORKDIR" add -A
+    local commit_stdout="$PR_DIR/git-commit.stdout.log"
+    local commit_stderr="$PR_DIR/git-commit.stderr.log"
+    local commit_exit=0
+    set +e
+    git -C "$WORKDIR" commit -F "$commit_msg_file" >"$commit_stdout" 2>"$commit_stderr"
+    commit_exit=$?
+    set -e
+    if [[ "$commit_exit" -ne 0 ]]; then
+      local commit_error_tail
+      commit_error_tail="$(tail -n 20 "$commit_stderr" 2>/dev/null | tr '\n' ' ')"
+      update_pr_json false "" "failed" "$commit_error_tail"
+      event "pr_create_failed" "$(jq -cn --arg actor "git" --arg step "pr" --arg output_path "$commit_stderr" --arg error_tail "$commit_error_tail" '{actor: $actor, step: $step, output_path: $output_path, exit_code: 6, data: {phase: "commit", stderr_tail: $error_tail}}')"
+      return 6
+    fi
+    event "pr_commit_created" "$(jq -cn --arg actor "git" --arg step "pr" --arg output_path "$commit_msg_file" '{actor: $actor, step: $step, output_path: $output_path}')"
+  fi
+
+  generate_pr_body
+
+  event "pr_push_started" "$(jq -cn --arg actor "git" --arg step "pr" --arg branch "$BRANCH" '{actor: $actor, step: $step, data: {branch: $branch}}')"
+  local push_stdout="$PR_DIR/git-push.stdout.log"
+  local push_stderr="$PR_DIR/git-push.stderr.log"
+  local push_exit=0
+  set +e
+  git -C "$WORKDIR" push -u origin "$BRANCH" >"$push_stdout" 2>"$push_stderr"
+  push_exit=$?
+  set -e
+  if [[ "$push_exit" -ne 0 ]]; then
+    local push_error_tail
+    push_error_tail="$(tail -n 20 "$push_stderr" 2>/dev/null | tr '\n' ' ')"
+    update_pr_json false "" "failed" "$push_error_tail"
+    event "pr_create_failed" "$(jq -cn --arg actor "git" --arg step "pr" --arg output_path "$push_stderr" --arg error_tail "$push_error_tail" '{actor: $actor, step: $step, output_path: $output_path, exit_code: 6, data: {phase: "push", stderr_tail: $error_tail}}')"
+    return 6
+  fi
+  event "pr_push_completed" "$(jq -cn --arg actor "git" --arg step "pr" --arg branch "$BRANCH" '{actor: $actor, step: $step, data: {branch: $branch}}')"
+
+  if [[ -z "$PR_TITLE" ]]; then
+    PR_TITLE="Dual agent task ${RUN_ID}"
+  fi
+
+  local stdout_log="$PR_DIR/gh-pr-create.stdout.log"
+  local stderr_log="$PR_DIR/gh-pr-create.stderr.log"
+  local gh_exit=0
+
+  event "pr_create_started" "$(jq -cn --arg actor "gh" --arg step "pr" --arg output_path "$PR_DIR/pr-body.md" '{actor: $actor, step: $step, output_path: $output_path}')"
+  set +e
+  if [[ "$PR_DRAFT" == "true" ]]; then
+    (cd "$WORKDIR" && gh pr create --base "$PR_BASE" --head "$BRANCH" --title "$PR_TITLE" --body-file "$PR_DIR/pr-body.md" --draft) >"$stdout_log" 2>"$stderr_log"
+  else
+    (cd "$WORKDIR" && gh pr create --base "$PR_BASE" --head "$BRANCH" --title "$PR_TITLE" --body-file "$PR_DIR/pr-body.md") >"$stdout_log" 2>"$stderr_log"
+  fi
+  gh_exit=$?
+  set -e
+
+  if [[ "$gh_exit" -ne 0 ]]; then
+    local error_tail
+    error_tail="$(tail -n 20 "$stderr_log" 2>/dev/null | tr '\n' ' ')"
+    update_pr_json false "" "failed" "$error_tail"
+    event "pr_create_failed" "$(jq -cn --arg actor "gh" --arg step "pr" --arg output_path "$stderr_log" --arg error_tail "$error_tail" '{actor: $actor, step: $step, output_path: $output_path, exit_code: 6, data: {stderr_tail: $error_tail}}')"
+    return 6
+  fi
+
+  local pr_url
+  pr_url="$(sed -n '1p' "$stdout_log")"
+  printf '%s\n' "$pr_url" > "$PR_DIR/pr-url.txt"
+  update_pr_json true "$pr_url" "created" ""
+  event "pr_create_completed" "$(jq -cn --arg actor "gh" --arg step "pr" --arg output_path "$PR_DIR/pr-url.txt" --arg pr_url "$pr_url" '{actor: $actor, step: $step, output_path: $output_path, data: {pr_url: $pr_url}}')"
+  return 0
+}
+
+# 函数：update_notification_json
+# 作用：更新 run.json 中通知执行状态。
+# 参数：
+#   $1 - status，通知状态，例如 completed、failed、skipped。
+#   $2 - exit_code，通知命令退出码；没有执行时传 null。
+# 关键步骤：通过 jq 更新 notification.status 和 notification.exit_code。
+update_notification_json() {
+  local status="$1"
+  local exit_code="$2"
+  local tmp_file
+
+  tmp_file="$RUN_DIR/run.json.tmp"
+  jq \
+    --arg status "$status" \
+    --argjson exit_code "$exit_code" \
+    '.notification.status = $status | .notification.exit_code = $exit_code' \
+    "$RUN_DIR/run.json" > "$tmp_file"
+  mv "$tmp_file" "$RUN_DIR/run.json"
+}
+
+# 函数：run_notification
+# 作用：在 run 结束时按策略执行用户配置的通知命令。
+# 参数：
+#   $1 - main_exit_code，主流程最终退出码，用于判断 success/failure 通知策略。
+# 关键步骤：
+#   1. 未配置 notify-command 时记录 notification_skipped。
+#   2. 根据 --notify-on 判断是否需要通知。
+#   3. 导出 DUAL_* 环境变量，包括执行模式、worktree、报告路径、PR URL 等。
+#   4. 执行通知命令，保存 stdout/stderr；通知失败不覆盖主流程退出码。
+run_notification() {
+  local main_exit_code="$1"
+  local run_status
+  local should_notify="false"
+
+  if [[ "$NOTIFY_ENABLED" != "true" || -z "$NOTIFY_COMMAND" ]]; then
+    update_notification_json "not_requested" null
+    event "notification_skipped" "$(jq -cn --arg actor "notification" '{actor: $actor, data: {reason: "notification command not configured"}}')"
+    return 0
+  fi
+
+  run_status="$(jq -r '.status // "unknown"' "$RUN_DIR/run.json")"
+
+  case "$NOTIFY_ON" in
+    always)
+      should_notify="true"
+      ;;
+    success)
+      if [[ "$main_exit_code" -eq 0 ]]; then
+        should_notify="true"
+      fi
+      ;;
+    failure)
+      if [[ "$main_exit_code" -ne 0 ]]; then
+        should_notify="true"
+      fi
+      ;;
+  esac
+
+  if [[ "$should_notify" != "true" ]]; then
+    update_notification_json "skipped" null
+    event "notification_skipped" "$(jq -cn --arg actor "notification" --arg notify_on "$NOTIFY_ON" --arg status "$run_status" '{actor: $actor, data: {notify_on: $notify_on, status: $status}}')"
+    return 0
+  fi
+
+  local notification_dir="$RUN_DIR/notification"
+  local stdout_log="$notification_dir/notify.stdout.log"
+  local stderr_log="$notification_dir/notify.stderr.log"
+  local notify_exit=0
+
+  mkdir -p "$notification_dir"
+
+  local test_exit_code
+  local pr_url
+  test_exit_code="null"
+  pr_url=""
+  if [[ -f "$VERIFICATION_DIR/verification.json" ]]; then
+    test_exit_code="$(jq -r '.runner_test_exit_code // .test_exit_code // "null"' "$VERIFICATION_DIR/verification.json")"
+  fi
+  pr_url="$(jq -r '.pr_url // ""' "$RUN_DIR/run.json")"
+
+  event "notification_started" "$(jq -cn --arg actor "notification" --arg output_path "$notification_dir" '{actor: $actor, output_path: $output_path}')"
+  set +e
+  (
+    export DUAL_RUN_ID="$RUN_ID"
+    export DUAL_STATUS="$run_status"
+    export DUAL_TASK="$USER_REQUEST"
+    export DUAL_WORKDIR="$WORKDIR"
+    export DUAL_ORIGINAL_WORKDIR="${ORIGINAL_WORKDIR:-$WORKDIR}"
+    export DUAL_EXECUTION_MODE="$EXECUTION_MODE"
+    export DUAL_WORKTREE_DIR="${WORKTREE_DIR:-}"
+    export DUAL_BRANCH="$BRANCH"
+    export DUAL_REPORT_PATH="$RUN_DIR/final-report.md"
+    export DUAL_FINAL_DECISION="${FINAL_DECISION:-}"
+    export DUAL_TEST_EXIT_CODE="$test_exit_code"
+    export DUAL_PR_URL="$pr_url"
+    cd "$WORKDIR" && bash -lc "$NOTIFY_COMMAND"
+  ) >"$stdout_log" 2>"$stderr_log"
+  notify_exit=$?
+  set -e
+
+  update_notification_json "$(if [[ "$notify_exit" -eq 0 ]]; then printf 'completed'; else printf 'failed'; fi)" "$notify_exit"
+
+  if [[ "$notify_exit" -eq 0 ]]; then
+    event "notification_completed" "$(jq -cn --arg actor "notification" --arg output_path "$stdout_log" '{actor: $actor, output_path: $output_path, exit_code: 0}')"
+  else
+    event "notification_failed" "$(jq -cn --arg actor "notification" --arg output_path "$stderr_log" --argjson exit_code "$notify_exit" '{actor: $actor, output_path: $output_path, exit_code: $exit_code}')"
+  fi
+
+  return 0
+}
+
+# 函数：finish_run
+# 作用：统一收尾流程，生成报告、可选创建 PR、执行通知并输出终端摘要。
+# 参数：
+#   $1 - exit_code，当前主流程希望返回的退出码。
+#   $2 - message，可选错误或状态提示，写入 stderr。
+# 关键步骤：
+#   1. 先生成一次 final-report.md，确保后续 PR body 能引用报告。
+#   2. 如果启用 PR 且主流程成功或 dry-run，则尝试创建 PR。
+#   3. PR 失败时把最终退出码改为 6。
+#   4. 执行通知，再生成最终版报告。
+#   5. 输出 Review/Cleanup 命令并返回最终退出码。
+finish_run() {
+  local exit_code="$1"
+  local message="${2:-}"
+  local pr_exit=0
+
+  generate_final_report
+
+  if [[ "$CREATE_PR" == "true" ]]; then
+    if [[ "$exit_code" -eq 0 || "$DRY_RUN" == "true" ]]; then
+      if run_pr_if_requested; then
+        pr_exit=0
+      else
+        pr_exit=$?
+      fi
+
+      if [[ "$pr_exit" -ne 0 ]]; then
+        update_run_status "pr_failed"
+        exit_code=6
+      fi
+    else
+      update_pr_json false "" "skipped_due_to_run_status" ""
+      event "pr_skipped_no_changes" "$(jq -cn \
+        --arg actor "gh" \
+        --argjson exit_code "$exit_code" \
+        '{actor: $actor, data: {reason: "run did not finish successfully", exit_code: $exit_code}}')"
+    fi
+  else
+    run_pr_if_requested || true
+  fi
+
+  generate_final_report
+  run_notification "$exit_code"
+  generate_final_report
+
+  if [[ -n "$message" ]]; then
+    echo "$message" >&2
+  fi
+
+  print_run_finished "$exit_code"
+
+  return "$exit_code"
+}
+
+# 函数：update_run_status
+# 作用：更新 run.json 的 status 和 finished_at。
+# 参数：
+#   $1 - status，新的 run 状态，例如 completed、blocked、rejected、verification_failed。
+# 关键步骤：
+#   1. 写入当前 UTC finished_at。
+#   2. 更新 status。
+#   3. 非 running 状态时标记 RUN_FINALIZED，避免 EXIT trap 重复写失败状态。
+update_run_status() {
+  local status="$1"
+  local finished_at
+  local tmp_file
+
+  finished_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  tmp_file="$RUN_DIR/run.json.tmp"
+
+  jq \
+    --arg status "$status" \
+    --arg finished_at "$finished_at" \
+    '.status = $status | .finished_at = $finished_at' \
+    "$RUN_DIR/run.json" > "$tmp_file"
+  mv "$tmp_file" "$RUN_DIR/run.json"
+
+  if [[ "$status" != "running" ]]; then
+    RUN_FINALIZED=1
+  fi
+}
+
+# 函数：mark_failed_on_exit
+# 作用：兜底处理异常退出，防止脚本中途失败但 run.json 仍停留在 running。
+# 参数：无。通过 trap EXIT 调用，读取上一条命令退出码。
+# 关键步骤：
+#   1. 仅在退出码非 0、尚未 finalize、run.json 已存在时执行。
+#   2. 标记状态 failed。
+#   3. 写入 run_failed 事件，说明 dual 在完成前退出。
+mark_failed_on_exit() {
+  local exit_code=$?
+
+  if [[ "$exit_code" -ne 0 && "${RUN_FINALIZED:-0}" -eq 0 && -n "${RUN_DIR:-}" && -f "${RUN_DIR:-}/run.json" ]]; then
+    set +e
+    update_run_status "failed"
+    event "run_failed" "$(jq -cn \
+      --arg actor "dual" \
+      --argjson exit_code "$exit_code" \
+      '{actor: $actor, exit_code: $exit_code, data: {reason: "dual exited before completion"}}')"
+    set -e
+  fi
+}
+
+# 函数：prompt_header
+# 作用：为每个渲染后的 prompt 添加统一运行上下文。
+# 参数：
+#   $1 - title，prompt 标题。
+# 关键步骤：输出 Run ID、Workdir、Run dir、Base commit 和原始用户需求。
+prompt_header() {
+  local title="$1"
+
+  cat <<EOF
+# $title
+
+## Run Context
+
+- Run ID: $RUN_ID
+- Workdir: $WORKDIR
+- Run dir: $RUN_DIR
+- Base commit: $BASE_COMMIT
+
+## User Request
+
+\`\`\`text
+$(cat "$RUN_DIR/00-user-request.md")
+\`\`\`
+
+EOF
+}
+
+# 函数：append_output_if_exists
+# 作用：把前置 Agent 阶段输出追加到后续 prompt 中。
+# 参数：
+#   $1 - title，追加章节标题。
+#   $2 - file，要追加的 Markdown 文件。
+# 关键步骤：文件存在时以 markdown 代码块形式嵌入，文件不存在则静默跳过。
+append_output_if_exists() {
+  local title="$1"
+  local file="$2"
+
+  if [[ -f "$file" ]]; then
+    {
+      printf '\n## %s\n\n' "$title"
+      printf '```markdown\n'
+      cat "$file"
+      printf '\n```\n'
+    }
+  fi
+}
+
+# 函数：append_file_block_if_exists
+# 作用：把证据文件追加到 prompt 中，并指定代码块语言。
+# 参数：
+#   $1 - title，追加章节标题。
+#   $2 - file，要追加的文件路径。
+#   $3 - language，可选代码块语言，默认 text。
+# 关键步骤：文件存在时输出标题、代码块语言、文件内容；文件不存在则跳过。
+append_file_block_if_exists() {
+  local title="$1"
+  local file="$2"
+  local language="${3:-text}"
+
+  if [[ -f "$file" ]]; then
+    {
+      printf '\n## %s\n\n' "$title"
+      printf '```%s\n' "$language"
+      cat "$file"
+      printf '\n```\n'
+    }
+  fi
+}
+
+# 函数：render_prompt
+# 作用：把 prompts/ 下的模板渲染成本次 run 专属 prompt 文件。
+# 参数：
+#   $1 - step，模板和输出文件名，例如 04-codex-final-acceptance。
+#   $2 - title，写入 prompt header 的标题。
+# 关键步骤：
+#   1. 校验模板存在。
+#   2. 先写统一运行上下文，再追加模板正文。
+#   3. 按阶段追加上游 Agent 输出、Git 证据、自测报告和 verification.json。
+#   4. 输出渲染后的 prompt 文件路径，供 run_agent 调用。
+render_prompt() {
+  local step="$1"
+  local title="$2"
+  local template="$ROOT_DIR/prompts/${step}.md"
+  local rendered="$PROMPTS_DIR/${step}.md"
+
+  [[ -f "$template" ]] || die "prompt template not found: $template"
+
+  {
+    prompt_header "$title"
+    cat "$template"
+
+    case "$step" in
+      02-codex-review)
+        append_output_if_exists "Claude PRD and Architecture Output" "$OUTPUTS_DIR/01-claude-prd-architecture.md"
+        ;;
+      03-claude-implement)
+        append_output_if_exists "Claude PRD and Architecture Output" "$OUTPUTS_DIR/01-claude-prd-architecture.md"
+        append_output_if_exists "Codex Review Output" "$OUTPUTS_DIR/02-codex-review.md"
+        ;;
+      04-codex-final-acceptance)
+        append_output_if_exists "Claude PRD and Architecture Output" "$OUTPUTS_DIR/01-claude-prd-architecture.md"
+        append_output_if_exists "Codex Review Output" "$OUTPUTS_DIR/02-codex-review.md"
+        append_output_if_exists "Claude Implementation Output" "$OUTPUTS_DIR/03-claude-implement.md"
+        append_file_block_if_exists "Git Status Before" "$SNAPSHOTS_DIR/git-status-before.txt" "text"
+        append_file_block_if_exists "Git Status After" "$SNAPSHOTS_DIR/git-status-after.txt" "text"
+        append_file_block_if_exists "Git Diff Stat" "$SNAPSHOTS_DIR/diff.stat" "text"
+        append_file_block_if_exists "Developer Self-Test Report" "$VERIFICATION_DIR/developer-self-test.md" "markdown"
+        append_file_block_if_exists "Verification JSON" "$VERIFICATION_DIR/verification.json" "json"
+        append_file_block_if_exists "Runner Test Output" "$VERIFICATION_DIR/runner-test-output.log" "text"
+        append_file_block_if_exists "Legacy Test Output" "$VERIFICATION_DIR/test-output.log" "text"
+        ;;
+    esac
+  } > "$rendered"
+
+  printf '%s\n' "$rendered"
+}
+
+# 函数：main
+# 作用：dual 的主状态机，串起参数、环境选择、Agent 流程、质量门禁、验证、报告、PR 和通知。
+# 参数：
+#   $@ - 用户传入 dual 的全部命令行参数。
+# 关键步骤：
+#   1. 解析参数并处理 init/cleanup 子命令。
+#   2. 检查 jq、读取配置、选择默认 worktree 或 in-place 模式。
+#   3. 初始化 run ledger，记录执行环境和 Git 基线。
+#   4. 依次运行 Claude 架构、Codex 设计审视、Claude 实现、验证、Codex 最终验收。
+#   5. 根据 BLOCKED、REJECT、测试失败等门禁设置状态和退出码。
+#   6. 统一进入 finish_run，完成报告、PR、通知和终端输出。
+main() {
+  parse_args "$@"
+
+  if [[ "${SUBCOMMAND:-}" == "init" ]]; then
+    init_current_repo
+    return 0
+  fi
+
+  if [[ "${SUBCOMMAND:-}" == "cleanup" ]]; then
+    cleanup_worktree
+    return 0
+  fi
+
+  require_command "jq" "Install jq first, for example: brew install jq"
+
+  normalize_workdir
+  ORIGINAL_WORKDIR="$WORKDIR"
+  ORIGINAL_GIT_AVAILABLE="$GIT_AVAILABLE"
+  ORIGINAL_BRANCH="$BRANCH"
+  ORIGINAL_BASE_COMMIT="$BASE_COMMIT"
+  BASE_BRANCH="$ORIGINAL_BRANCH"
+
+  load_config
+
+  set_run_identity
+  if [[ "$WORKTREE_ENABLED" == "true" && "${ORIGINAL_GIT_AVAILABLE:-false}" == "true" && "${DRY_RUN:-false}" != "true" ]]; then
+    require_command "acpx" "Install acpx and make sure it is on PATH, then initialize Claude and Codex sessions."
+  fi
+
+  if ! create_worktree_if_requested; then
+    return 5
+  fi
+
+  if [[ "$WORKTREE_ENABLED" != "true" && "${GIT_AVAILABLE:-false}" == "true" && ( "$BRANCH" == "main" || "$BRANCH" == "master" ) && "$ALLOW_MAIN_IN_PLACE" != "true" ]]; then
+    init_run
+    trap mark_failed_on_exit EXIT
+    event "execution_mode_selected" "$(jq -cn \
+      --arg actor "dual" \
+      --arg execution_mode "$EXECUTION_MODE" \
+      --arg original_workdir "$ORIGINAL_WORKDIR" \
+      --arg effective_workdir "$WORKDIR" \
+      --arg branch "$BRANCH" \
+      --arg base_branch "$BASE_BRANCH" \
+      --arg base_commit "$BASE_COMMIT" \
+      '{actor: $actor, data: {execution_mode: $execution_mode, original_workdir: $original_workdir, effective_workdir: $effective_workdir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+    event "in_place_selected" "$(jq -cn \
+      --arg actor "dual" \
+      --arg original_workdir "$ORIGINAL_WORKDIR" \
+      --arg effective_workdir "$WORKDIR" \
+      --arg branch "$BRANCH" \
+      --arg base_branch "$BASE_BRANCH" \
+      --arg base_commit "$BASE_COMMIT" \
+      '{actor: $actor, data: {original_workdir: $original_workdir, effective_workdir: $effective_workdir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+    event "cleanup_command_generated" "$(jq -cn \
+      --arg actor "dual" \
+      --arg cleanup_command "$(cleanup_command_text)" \
+      '{actor: $actor, data: {cleanup_command: $cleanup_command}}')"
+    event "effective_workdir_selected" "$(jq -cn \
+      --arg actor "dual" \
+      --arg original_workdir "$ORIGINAL_WORKDIR" \
+      --arg effective_workdir "$WORKDIR" \
+      --arg branch "$BRANCH" \
+      --arg base_branch "$BASE_BRANCH" \
+      --arg base_commit "$BASE_COMMIT" \
+      '{actor: $actor, data: {original_workdir: $original_workdir, effective_workdir: $effective_workdir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+    event "in_place_rejected_protected_branch" "$(jq -cn \
+      --arg actor "dual" \
+      --arg branch "$BRANCH" \
+      --arg reason "protected branch requires --allow-main-in-place" \
+      '{actor: $actor, exit_code: 1, data: {branch: $branch, reason: $reason}}')"
+    update_run_status "in_place_rejected"
+    finish_run 1 "Refusing to run in-place on protected branch: $BRANCH
+Use --allow-main-in-place to override, or run without --in-place to use the default worktree mode."
+    return $?
+  fi
+
+  if [[ "$WORKTREE_ENABLED" != "true" ]]; then
+    prepare_branch_if_requested
+  fi
+
+  init_run
+  trap mark_failed_on_exit EXIT
+
+  event "execution_mode_selected" "$(jq -cn \
+    --arg actor "dual" \
+    --arg execution_mode "$EXECUTION_MODE" \
+    --arg original_workdir "$ORIGINAL_WORKDIR" \
+    --arg effective_workdir "$WORKDIR" \
+    --arg worktree_dir "${WORKTREE_DIR:-}" \
+    --arg branch "$BRANCH" \
+    --arg base_branch "$BASE_BRANCH" \
+    --arg base_commit "$BASE_COMMIT" \
+    '{actor: $actor, data: {execution_mode: $execution_mode, original_workdir: $original_workdir, effective_workdir: $effective_workdir, worktree_dir: $worktree_dir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+
+  if [[ "$WORKTREE_ENABLED" == "true" ]]; then
+    if [[ "$WORKTREE_ATTACHED" == "true" ]]; then
+      event "worktree_attached_existing" "$(jq -cn \
+        --arg actor "git" \
+        --arg output_path "$WORKTREE_DIR" \
+        --arg branch "$BRANCH" \
+        --arg original_workdir "$ORIGINAL_WORKDIR" \
+        --arg effective_workdir "$WORKDIR" \
+        --arg base_branch "$BASE_BRANCH" \
+        --arg base_commit "$BASE_COMMIT" \
+        '{actor: $actor, output_path: $output_path, data: {original_workdir: $original_workdir, effective_workdir: $effective_workdir, worktree_dir: $output_path, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+    else
+      event "worktree_create_started" "$(jq -cn \
+        --arg actor "git" \
+        --arg output_path "$WORKTREE_DIR" \
+        --arg branch "$BRANCH" \
+        --arg original_workdir "$ORIGINAL_WORKDIR" \
+        --arg base_branch "$BASE_BRANCH" \
+        --arg base_commit "$BASE_COMMIT" \
+        '{actor: $actor, output_path: $output_path, data: {original_workdir: $original_workdir, worktree_dir: $output_path, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+      event "worktree_create_completed" "$(jq -cn \
+        --arg actor "git" \
+        --arg output_path "$WORKTREE_DIR" \
+        --arg branch "$BRANCH" \
+        --arg original_workdir "$ORIGINAL_WORKDIR" \
+        --arg effective_workdir "$WORKDIR" \
+        --arg base_branch "$BASE_BRANCH" \
+        --arg base_commit "$BASE_COMMIT" \
+        '{actor: $actor, output_path: $output_path, data: {original_workdir: $original_workdir, effective_workdir: $effective_workdir, worktree_dir: $output_path, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+    fi
+    event "cleanup_command_generated" "$(jq -cn \
+      --arg actor "dual" \
+      --arg cleanup_command "$(cleanup_command_text)" \
+      '{actor: $actor, data: {cleanup_command: $cleanup_command}}')"
+  else
+    event "in_place_selected" "$(jq -cn \
+      --arg actor "dual" \
+      --arg original_workdir "$ORIGINAL_WORKDIR" \
+      --arg effective_workdir "$WORKDIR" \
+      --arg branch "$BRANCH" \
+      --arg base_branch "$BASE_BRANCH" \
+      --arg base_commit "$BASE_COMMIT" \
+      '{actor: $actor, data: {original_workdir: $original_workdir, effective_workdir: $effective_workdir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+    event "cleanup_command_generated" "$(jq -cn \
+      --arg actor "dual" \
+      --arg cleanup_command "$(cleanup_command_text)" \
+      '{actor: $actor, data: {cleanup_command: $cleanup_command}}')"
+
+    if [[ "${GIT_AVAILABLE:-false}" != "true" ]]; then
+      event "git_unavailable" "$(jq -cn \
+        --arg actor "git" \
+        --arg reason "${GIT_UNAVAILABLE_REASON:-git unavailable}" \
+        --arg original_workdir "$ORIGINAL_WORKDIR" \
+        --arg effective_workdir "$WORKDIR" \
+        '{actor: $actor, data: {reason: $reason, original_workdir: $original_workdir, effective_workdir: $effective_workdir}}')"
+    fi
+
+    if [[ ( "$BRANCH" == "main" || "$BRANCH" == "master" ) && "$ALLOW_MAIN_IN_PLACE" != "true" ]]; then
+      event "in_place_rejected_protected_branch" "$(jq -cn \
+        --arg actor "dual" \
+        --arg branch "$BRANCH" \
+        --arg reason "protected branch requires --allow-main-in-place" \
+        '{actor: $actor, exit_code: 1, data: {branch: $branch, reason: $reason}}')"
+      update_run_status "in_place_rejected"
+      finish_run 1 "Refusing to run in-place on protected branch: $BRANCH
+Use --allow-main-in-place to override, or run without --in-place to use the default worktree mode."
+      return $?
+    fi
+  fi
+
+  event "effective_workdir_selected" "$(jq -cn \
+    --arg actor "dual" \
+    --arg original_workdir "$ORIGINAL_WORKDIR" \
+    --arg effective_workdir "$WORKDIR" \
+    --arg worktree_dir "${WORKTREE_DIR:-}" \
+    --arg branch "$BRANCH" \
+    --arg base_branch "$BASE_BRANCH" \
+    --arg base_commit "$BASE_COMMIT" \
+    '{actor: $actor, data: {original_workdir: $original_workdir, effective_workdir: $effective_workdir, worktree_dir: $worktree_dir, branch: $branch, base_branch: $base_branch, base_commit: $base_commit}}')"
+
+  print_run_started
+
+  if [[ "${DRY_RUN:-false}" != "true" && "$WORKTREE_ENABLED" != "true" ]]; then
+    require_command "acpx" "Install acpx and make sure it is on PATH, then initialize Claude and Codex sessions."
+  fi
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    render_prompt "01-claude-prd-architecture" "Claude PRD and Architecture" >/dev/null
+    render_prompt "02-codex-review" "Codex Architecture Review" >/dev/null
+    render_prompt "03-claude-implement" "Claude Implementation" >/dev/null
+    render_prompt "04-codex-final-acceptance" "Codex Final Acceptance" >/dev/null
+    update_run_status "dry_run"
+    event "run_dry_run_completed" "$(jq -cn \
+      --arg actor "dual" \
+      --arg output_path "$PROMPTS_DIR" \
+      '{actor: $actor, output_path: $output_path, data: {reason: "dry-run requested"}}')"
+    finish_run 0
+    return $?
+  fi
+
+  capture_git_before
+
+  local prompt_file
+
+  prompt_file="$(render_prompt "01-claude-prd-architecture" "Claude PRD and Architecture")"
+  run_agent "01-claude-prd-architecture" "claude" "$CLAUDE_SESSION" "$prompt_file"
+
+  prompt_file="$(render_prompt "02-codex-review" "Codex Architecture Review")"
+  run_agent "02-codex-review" "codex" "$CODEX_SESSION" "$prompt_file"
+
+  DESIGN_DECISION="$(extract_decision "$OUTPUTS_DIR/02-codex-review.md" "PASS" "NEEDS_REVISION" "BLOCKED" || true)"
+  if [[ -n "$DESIGN_DECISION" ]]; then
+    update_quality_gate "design_decision" "$DESIGN_DECISION"
+    event "quality_gate_design_decision" "$(jq -cn \
+      --arg actor "codex" \
+      --arg step "02-codex-review" \
+      --arg session "$CODEX_SESSION" \
+      --arg output_path "$OUTPUTS_DIR/02-codex-review.md" \
+      --arg decision "$DESIGN_DECISION" \
+      '{actor: $actor, step: $step, session: $session, output_path: $output_path, data: {decision: $decision}}')"
+  fi
+
+  if [[ "$DESIGN_DECISION" == "BLOCKED" ]]; then
+    capture_git_after
+    update_run_status "blocked"
+    event "run_blocked" "$(jq -cn \
+      --arg actor "codex" \
+      --arg step "02-codex-review" \
+      --arg session "$CODEX_SESSION" \
+      --arg output_path "$OUTPUTS_DIR/02-codex-review.md" \
+      '{actor: $actor, step: $step, session: $session, output_path: $output_path, exit_code: 4, data: {reason: "Codex design review blocked implementation"}}')"
+    finish_run 4 "Dual agent run blocked before implementation: $RUN_DIR"
+    return $?
+  fi
+
+  prompt_file="$(render_prompt "03-claude-implement" "Claude Implementation")"
+  run_agent "03-claude-implement" "claude" "$CLAUDE_SESSION" "$prompt_file"
+
+  local test_exit_code=0
+  if run_verification; then
+    test_exit_code=0
+  else
+    test_exit_code=$?
+  fi
+
+  capture_git_after
+
+  if [[ "$SKIP_FINAL_ACCEPTANCE" == "true" ]]; then
+    event "final_acceptance_skipped" "$(jq -cn \
+      --arg actor "dual" \
+      '{actor: $actor, data: {reason: "skip-final-acceptance requested"}}')"
+  else
+    prompt_file="$(render_prompt "04-codex-final-acceptance" "Codex Final Acceptance")"
+    run_agent "04-codex-final-acceptance" "codex" "$CODEX_SESSION" "$prompt_file"
+
+    FINAL_DECISION="$(extract_decision "$OUTPUTS_DIR/04-codex-final-acceptance.md" "ACCEPT_WITH_NOTES" "ACCEPT" "REJECT" || true)"
+    if [[ -n "$FINAL_DECISION" ]]; then
+      update_quality_gate "final_decision" "$FINAL_DECISION"
+      event "quality_gate_final_decision" "$(jq -cn \
+        --arg actor "codex" \
+        --arg step "04-codex-final-acceptance" \
+        --arg session "$CODEX_SESSION" \
+        --arg output_path "$OUTPUTS_DIR/04-codex-final-acceptance.md" \
+        --arg decision "$FINAL_DECISION" \
+        '{actor: $actor, step: $step, session: $session, output_path: $output_path, data: {decision: $decision}}')"
+    fi
+
+    if [[ "$FINAL_DECISION" == "REJECT" ]]; then
+      update_run_status "rejected"
+      event "run_rejected" "$(jq -cn \
+        --arg actor "codex" \
+        --arg step "04-codex-final-acceptance" \
+        --arg session "$CODEX_SESSION" \
+        --arg output_path "$OUTPUTS_DIR/04-codex-final-acceptance.md" \
+        '{actor: $actor, step: $step, session: $session, output_path: $output_path, exit_code: 2, data: {reason: "Codex final acceptance rejected the run"}}')"
+      finish_run 2 "Dual agent run rejected by final acceptance: $RUN_DIR"
+      return $?
+    fi
+  fi
+
+  if [[ "$test_exit_code" -ne 0 ]]; then
+    if [[ "$ALLOW_TEST_FAILURE" == "true" ]]; then
+      update_run_status "completed_with_test_failure"
+      event "verification_failure_allowed" "$(jq -cn \
+        --arg actor "verify" \
+        --arg output_path "$VERIFICATION_DIR/verification.json" \
+        --argjson test_exit_code "$test_exit_code" \
+        '{actor: $actor, output_path: $output_path, exit_code: $test_exit_code, data: {reason: "allow-test-failure requested"}}')"
+      event "run_completed" "$(jq -cn \
+        --arg actor "dual" \
+        --arg output_path "$RUN_DIR/final-report.md" \
+        '{actor: $actor, output_path: $output_path}')"
+      finish_run 0
+      return $?
+    fi
+
+    update_run_status "verification_failed"
+    event "run_failed" "$(jq -cn \
+      --arg actor "verify" \
+      --arg reason "test command failed" \
+      --argjson test_exit_code "$test_exit_code" \
+      '{actor: $actor, exit_code: 3, data: {reason: $reason, test_exit_code: $test_exit_code}}')"
+    finish_run 3 "Dual agent run finished with failing verification: $RUN_DIR"
+    return $?
+  fi
+
+  update_run_status "completed"
+  event "run_completed" "$(jq -cn \
+    --arg actor "dual" \
+    --arg output_path "$RUN_DIR/final-report.md" \
+    '{actor: $actor, output_path: $output_path}')"
+  finish_run 0
+}
+
+main "$@"
