@@ -40,6 +40,11 @@ public final class AcpxAgentTransport {
     private AcpxRunResult run(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
         var command = new ArrayList<String>();
         command.add("acpx");
+        command.add("--timeout");
+        command.add("600");
+        command.add("--approve-reads");
+        command.add("--non-interactive-permissions");
+        command.add("fail");
         command.add(agent);
         command.add("-s");
         command.add(request.sessionName());

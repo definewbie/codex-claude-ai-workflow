@@ -131,6 +131,15 @@ dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar
 alias dualctl='java -jar /absolute/path/to/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar'
 ```
 
+建议先确认 CLI 本身能启动：
+
+```bash
+dualctl --help
+dualctl start --help
+dualctl resume --help
+dualctl review approve --help
+```
+
 ## acpx Sessions
 
 Agent 调用统一走 acpx：
@@ -152,6 +161,14 @@ acpx codex -s codex-reviewer -f <prompt_file>
 acpx claude sessions new --name claude-main
 acpx codex sessions new --name codex-reviewer
 ```
+
+当前 Java 版调用 acpx 时会加上保守的非交互边界：
+
+```bash
+acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
+```
+
+含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。后续实现 implementation 阶段前，需要把权限策略做成可配置项。
 
 如果 acpx runtime 返回 reconnect、额度不足、登录失效等错误，ledger 会保留 stdout/stderr 和节点状态，但不会替你修复 agent runtime。
 
@@ -200,7 +217,12 @@ Next: dualctl resume --workdir <effective worktree> <workstream_id>
 dualctl status --workdir <effective_worktree> <workstream_id>
 ```
 
-输出包含 legacy design-loop ledger 和新的 workflow current state。过渡期两套文件会同时存在；后续会逐步收敛到 workflow ledger。
+输出分两块：
+
+- `Legacy snapshot`：旧 design-loop ledger 的兼容快照，字段可能不会随着新 workflow 每一步同步更新。
+- `Workflow`：新的 workflow current state，是当前 `resume` / `review` 真正使用的状态。
+
+过渡期两套文件会同时存在；判断当前真实 active node 时，以 `Workflow` 区块和 `.agent/workstreams/<workstream_id>/workflow/current.json` 为准。
 
 ### Resume
 
@@ -302,7 +324,25 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 
 ### Real acpx Smoke
 
-先确认或创建 session：
+推荐使用一个明确的临时 worktree 目录，方便跑完清理：
+
+```bash
+cd /path/to/repo
+dualctl start \
+  --branch ai/smoke-dualctl \
+  --worktree-dir /tmp/dualctl-smoke \
+  "smoke: update README one line"
+```
+
+启动后记下输出里的：
+
+```text
+Workstream: <workstream_id>
+Workspace: <effective_worktree>
+Branch: <branch>
+```
+
+确认或创建 session。通常 `resume` 会自动创建缺失 session；如果你想提前验证，也可以手工执行：
 
 ```bash
 cd <effective_worktree>
@@ -310,11 +350,42 @@ acpx claude sessions new --name claude-main
 acpx codex sessions new --name codex-reviewer
 ```
 
-推进一个节点：
+推进 Claude intake 节点：
 
 ```bash
 dualctl resume --workdir <effective_worktree> <workstream_id>
 ```
+
+预期 active node 从 `intake.claude_brainstorm` 推进到 `intake.codex_product_review`。
+
+继续推进 Codex review：
+
+```bash
+dualctl resume --workdir <effective_worktree> <workstream_id>
+```
+
+预期 active node 推进到 `intake.decision`。
+
+再推进 decision 到人工卡点：
+
+```bash
+dualctl resume --workdir <effective_worktree> <workstream_id>
+dualctl status --workdir <effective_worktree> <workstream_id>
+```
+
+预期：
+
+- `Workflow status: WAITING_FOR_HUMAN` 或 `Workflow -> Status: WAITING_FOR_HUMAN`。
+- `Open gates` 出现 `gate-...human_requirement_review...`。
+
+批准卡点：
+
+```bash
+dualctl review approve --workdir <effective_worktree> <workstream_id>
+dualctl status --workdir <effective_worktree> <workstream_id>
+```
+
+预期 active node 进入 `design.claude_design`。到这里就可以停止 smoke，不必继续跑完整生命周期。
 
 预期：
 
@@ -322,6 +393,19 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 - Agent prompt 写入 `.agent/workstreams/<workstream_id>/runs/<run_id>/prompts/`。
 - stdout/stderr 写入 `.agent/workstreams/<workstream_id>/runs/<run_id>/outputs/`。
 - 失败时 workflow current 会停在 `FAILED` 或 `BLOCKED`，现场不丢失。
+
+本仓库已经验证过一次最小真实链路：
+
+```text
+start -> status -> resume(Claude) -> resume(Codex) -> resume(decision) -> review approve
+```
+
+验证结果：
+
+- worktree 创建成功。
+- Claude 和 Codex 都通过 acpx 完成一次真实调用。
+- run outputs、prompts、events.jsonl、workflow/current.json 均落盘。
+- human gate 能打开并被 `review approve` 推进。
 
 ## Worktree Cleanup
 
@@ -379,6 +463,18 @@ acpx codex sessions new --name codex-reviewer
 
 ```bash
 dualctl resume --workdir <effective_worktree> <workstream_id>
+```
+
+### `git worktree add` 报权限错误
+
+如果在受限 sandbox 中运行，`git worktree add` 需要写原始仓库的 `.git` 目录和目标 worktree 目录。请在正常终端执行，或给当前环境授予创建 worktree 的权限。
+
+### `git worktree add` 报分支目录冲突
+
+如果已有 `ai` 分支，Git 可能无法再创建 `ai/<name>` 这种层级分支。解决方式是指定一个不冲突的分支名：
+
+```bash
+dualctl start --branch ai-smoke-dualctl "任务描述"
 ```
 
 ### `workflow ledger already initialized`

@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.util.concurrent.Callable;
 
 @Component
-@Command(name = "revise", description = "Request another design revision.")
+@Command(name = "revise", description = "Request another design revision.", mixinStandardHelpOptions = true)
 public final class ReviewReviseCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");

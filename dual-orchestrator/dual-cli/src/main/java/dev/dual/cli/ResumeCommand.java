@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Component
-@Command(name = "resume", description = "Resume a paused workstream.")
+@Command(name = "resume", description = "Resume a paused workstream.", mixinStandardHelpOptions = true)
 public final class ResumeCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");

@@ -6,6 +6,7 @@ import picocli.CommandLine.Command;
 @Component
 @Command(
         name = "review",
+        mixinStandardHelpOptions = true,
         description = "Apply human review decisions.",
         subcommands = {
                 ReviewApproveCommand.class,

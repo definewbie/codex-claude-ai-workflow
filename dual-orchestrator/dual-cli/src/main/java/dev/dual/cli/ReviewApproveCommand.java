@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 @Component
-@Command(name = "approve", description = "Approve the current human review gate.")
+@Command(name = "approve", description = "Approve the current human review gate.", mixinStandardHelpOptions = true)
 public final class ReviewApproveCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");

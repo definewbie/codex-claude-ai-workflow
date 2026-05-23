@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.concurrent.Callable;
 
 @Component
-@Command(name = "start", description = "Start a design-loop workstream.")
+@Command(name = "start", description = "Start an agent lifecycle workstream.", mixinStandardHelpOptions = true)
 public final class StartCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Repository directory. Defaults to current directory.")
     Path workdir = Path.of(".");
