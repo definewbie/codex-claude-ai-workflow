@@ -24,6 +24,10 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
         var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
         var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
@@ -53,6 +57,13 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(true, result.result().get("prepared"));
         assertTrue(Files.walk(tempDir.resolve(".agent"))
                 .anyMatch(path -> path.getFileName().toString().equals("design-claude.md")));
+        var promptPath = Files.walk(tempDir.resolve(".agent"))
+                .filter(path -> path.getFileName().toString().equals("design-claude.md"))
+                .findFirst()
+                .orElseThrow();
+        var prompt = Files.readString(promptPath);
+        assertTrue(prompt.contains("Claude Design"));
+        assertTrue(prompt.contains("Clarify the request first."));
     }
 
     @Test

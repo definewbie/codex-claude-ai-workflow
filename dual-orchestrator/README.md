@@ -47,6 +47,7 @@ Runtime 只认识三类节点：
 - handler SPI 和 registry。
 - thin lifecycle workflow definition。
 - `acpx.agent_run` TaskHandler。
+- resources-based Agent prompt templates。
 - human review gate。
 - review decision handler。
 - artifact validation handler。
@@ -84,6 +85,7 @@ dual-runtime
 dual-adapter-acpx
   acpx transport
   acpx.agent_run TaskHandler
+  Agent prompt templates
 
 dual-adapter-git
   git repo and worktree support
@@ -171,6 +173,44 @@ acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
 含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。后续实现 implementation 阶段前，需要把权限策略做成可配置项。
 
 如果 acpx runtime 返回 reconnect、额度不足、登录失效等错误，ledger 会保留 stdout/stderr 和节点状态，但不会替你修复 agent runtime。
+
+## Prompt Templates
+
+Agent prompt 不再写在 Java 字符串里。`AcpxAgentTaskHandler` 会根据 workflow node 的 `prompt_template` 读取 resources：
+
+```text
+dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/
+  intake-claude-brainstorm.md
+  intake-codex-product-review.md
+  design-claude.md
+  design-codex-review.md
+  plan-claude.md
+  plan-codex-review.md
+  implement-claude.md
+  implement-claude-self-test.md
+  acceptance-codex-review.md
+  stage-claude-handoff.md
+```
+
+渲染时会注入：
+
+```text
+{{workstream_id}}
+{{node_id}}
+{{prompt_template}}
+{{ledger_path}}
+{{requirement}}
+```
+
+模板第一版遵守几个原则：
+
+- Claude 是主控 developer / architect，只有 Claude 可以修改业务代码。
+- Codex 是外部 reviewer / verifier，不修改业务代码。
+- 每个阶段都有明确 Markdown section。
+- Codex review 和 acceptance 都必须输出 `Decision`。
+- 每个 prompt 末尾都有 `dual-control` block，后续 decision handler 会从这里解析结构化结果。
+
+当前 decision handler 仍使用默认决策，还没有解析 `dual-control`。也就是说，这些模板已经给未来结构化路由铺路，但当前 workflow route 仍是 MVP 默认值。
 
 ## Commands
 

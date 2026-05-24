@@ -13,6 +13,7 @@ import java.util.Map;
 public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AcpxAgentTransport transport;
     private final boolean prepareOnly;
+    private final AgentPromptRenderer promptRenderer;
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         if (transport == null) {
@@ -20,6 +21,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         }
         this.transport = transport;
         this.prepareOnly = prepareOnly;
+        this.promptRenderer = new AgentPromptRenderer();
     }
 
     @Override
@@ -47,7 +49,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
         Files.createDirectories(promptPath.getParent());
         Files.createDirectories(stdoutPath.getParent());
-        Files.writeString(promptPath, promptFor(context.workstreamId(), context.definition().id(), promptTemplate), StandardCharsets.UTF_8);
+        Files.writeString(
+                promptPath,
+                promptRenderer.render(context.workspaceRoot(), context.workstreamId(), context.definition().id(), promptTemplate),
+                StandardCharsets.UTF_8
+        );
 
         if (prepareOnly) {
             return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(promptPath).toString()), Map.of(
@@ -87,15 +93,4 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return text;
     }
 
-    private static String promptFor(String workstreamId, String nodeId, String promptTemplate) {
-        return """
-                # Agent Task
-
-                Workstream: %s
-                Node: %s
-                Prompt template: %s
-
-                Read the repository and the `.agent/workstreams/%s` ledger. Produce the artifact requested by this lifecycle stage. Write concise Markdown output and include a machine-readable control block when the prompt asks for one.
-                """.formatted(workstreamId, nodeId, promptTemplate, workstreamId);
-    }
 }
