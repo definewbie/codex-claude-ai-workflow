@@ -73,6 +73,21 @@ class WorkflowDefinitionLoaderTest {
     }
 
     @Test
+    void repositoryWorkflowExampleMatchesBuiltInLifecycleShape() throws Exception {
+        var expected = new LifecycleWorkflowDefinitionFactory().thinMainline();
+        var actual = new WorkflowDefinitionLoader().load(Path.of("../workflows/agent-lifecycle.v1.json"));
+
+        assertEquals(expected.workflowId(), actual.workflowId());
+        assertEquals(expected.version(), actual.version());
+        assertEquals(expected.entryNodeId(), actual.entryNodeId());
+        assertEquals(expected.nodes().size(), actual.nodes().size());
+        assertEquals(expected.edges().size(), actual.edges().size());
+        assertEquals(expected.node("context.implement_claude").handlerType(), actual.node("context.implement_claude").handlerType());
+        assertEquals(expected.node("acceptance.codex_verifier_review").config().get("prompt_template"),
+                actual.node("acceptance.codex_verifier_review").config().get("prompt_template"));
+    }
+
+    @Test
     void failsWhenWorkflowReferencesMissingNode() throws Exception {
         var workflowPath = tempDir.resolve("broken-workflow.json");
         Files.writeString(workflowPath, """

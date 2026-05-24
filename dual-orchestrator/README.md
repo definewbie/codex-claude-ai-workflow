@@ -283,6 +283,12 @@ dualctl start --branch ai/my-task --worktree-dir ../repo-my-task "任务描述"
 dualctl start --workflow ./workflow.json "任务描述"
 ```
 
+使用仓库内置示例 workflow：
+
+```bash
+dualctl start --workflow dual-orchestrator/workflows/agent-lifecycle.v1.json "任务描述"
+```
+
 如果不传 `--workflow`，默认使用内置的 `agent-lifecycle@1`。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
 
 最小 workflow 示例：
@@ -858,7 +864,7 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 ## Current Limits
 
 - 仍是 CLI-first，没有 API server / scheduler。
-- workflow definition 目前是 Java factory，不是外部配置文件。
+- workflow 已支持 JSON 文件加载；更高级的条件表达式、并行节点和 schema 版本迁移还没做。
 - artifact validation 仍是薄实现。
 - context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
 - recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
