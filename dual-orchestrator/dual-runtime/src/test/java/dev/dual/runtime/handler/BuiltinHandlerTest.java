@@ -502,17 +502,51 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void nextStagePromptHandlerReturnsArtifactReference() throws Exception {
+    void nextStagePromptHandlerGeneratesPromptFromHandoff() throws Exception {
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md");
+        Files.createDirectories(handoff.getParent());
+        Files.writeString(handoff, """
+                # Handoff
+
+                ## Completed Work
+
+                Implemented the accepted batch.
+
+                ## Suggested Next Prompt
+
+                Start the next batch by reviewing A6 before writing code.
+                Keep scope narrow.
+
+                ```dual-control
+                decision: HANDOFF_READY
+                summary: ready
+                ```
+                """);
+
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
                 "ws",
                 taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                node("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage")
+                node(
+                        "stage.generate_next_prompt",
+                        NodeKind.TASK,
+                        "prompt.generate_next_stage",
+                        List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md")
+                )
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertTrue(result.outputRefs().contains("artifact://next-stage-prompt"));
+        var promptRef = ".agent/workstreams/ws/artifacts/next-stage/next-stage-prompt.md";
+        assertTrue(result.outputRefs().contains(promptRef));
+        assertEquals(promptRef, result.result().get("prompt_path"));
+        assertEquals(true, result.result().get("used_suggested_prompt_section"));
+
+        var markdown = Files.readString(tempDir.resolve(promptRef));
+        assertTrue(markdown.contains("Start the next batch by reviewing A6 before writing code."));
+        assertTrue(markdown.contains("Keep scope narrow."));
+        assertTrue(markdown.contains("## Handoff Context"));
+        assertTrue(markdown.contains("Implemented the accepted batch."));
     }
 
     private static NodeDefinition gateDefinition() {

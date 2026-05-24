@@ -29,7 +29,7 @@ Runtime 只认识三类节点：
 5. Codex acceptance review
 6. Stage handoff and next-stage prompt
 
-第一版很多节点还是薄实现：next-stage prompt 仍是占位式 handler；artifact validation 已经会采集 Git evidence，供后续 Codex acceptance 使用。`acpx.agent_run` 已经能通过 `acpx` 调 Claude / Codex，decision handler 已经能解析 Agent 输出里的 `dual-control` block。
+第一版仍是薄 mainline，但几个关键节点已经开始落地：artifact validation 会采集 Git evidence，next-stage prompt 会根据 Claude handoff 生成下一阶段提示词，`acpx.agent_run` 能通过 `acpx` 调 Claude / Codex，decision handler 能解析 Agent 输出里的 `dual-control` block。
 
 ## 当前能力
 
@@ -628,6 +628,14 @@ dualctl review revise \
 `include_sections` 会覆盖 profile 的默认章节，适合临时做更窄的验收包或补证据包。
 
 Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个短预览。这样 Agent 可以优先读同一份上下文，减少人工 copy/paste，也给后续 token budget、summary、session handoff 留出统一入口。
+
+`stage.generate_next_prompt` 会读取 Claude handoff 输出，优先提取 `## Suggested Next Prompt` 章节，并生成：
+
+```text
+.agent/workstreams/<workstream_id>/artifacts/next-stage/next-stage-prompt.md
+```
+
+这个文件是下一阶段的人类 review 入口之一。它会保留 handoff 原文作为上下文，但把建议提示词单独放在 `## Prompt`，方便确认后复制到下一轮或后续自动启动新 workstream。
 
 `implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：
 
