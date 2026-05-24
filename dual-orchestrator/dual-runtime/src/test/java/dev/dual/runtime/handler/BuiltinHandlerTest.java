@@ -264,6 +264,62 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void contextPackageIncludesRecentWorkflowIterationHistory() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var iterationsDir = workstreamDir.resolve("iterations");
+        Files.createDirectories(iterationsDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Continue the rejected implementation.\n");
+        Files.writeString(iterationsDir.resolve("iter-001.json"), """
+                {
+                  "schemaVersion": 1,
+                  "iterationId": "iter-001",
+                  "parentIterationId": "",
+                  "number": 1,
+                  "stageId": "stage-intake",
+                  "status": "active",
+                  "triggerNodeInstanceId": "",
+                  "triggerAction": "workflow_started",
+                  "targetNodeDefinitionId": "intake.claude_brainstorm",
+                  "reason": "Initial workflow iteration.",
+                  "createdAt": "2026-05-24T00:00:00Z"
+                }
+                """);
+        Files.writeString(iterationsDir.resolve("iter-002.json"), """
+                {
+                  "schemaVersion": 1,
+                  "iterationId": "iter-002",
+                  "parentIterationId": "iter-001",
+                  "number": 2,
+                  "stageId": "stage-implement",
+                  "status": "active",
+                  "triggerNodeInstanceId": "node-acceptance-decision-012",
+                  "triggerAction": "REJECT",
+                  "targetNodeDefinitionId": "context.implement_claude",
+                  "reason": "Acceptance evidence is incomplete; add concrete verification before asking Codex again.",
+                  "createdAt": "2026-05-24T01:00:00Z"
+                }
+                """);
+
+        var handler = new ContextBuildPackageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "implement.claude_implement"
+                )),
+                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
+        ));
+
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("## Iteration History"));
+        assertTrue(markdown.contains("### iter-002"));
+        assertTrue(markdown.contains("- Parent: iter-001"));
+        assertTrue(markdown.contains("- Trigger: REJECT"));
+        assertTrue(markdown.contains("- Target Node: context.implement_claude"));
+        assertTrue(markdown.contains("Acceptance evidence is incomplete"));
+    }
+
+    @Test
     void nextStagePromptHandlerReturnsArtifactReference() throws Exception {
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(

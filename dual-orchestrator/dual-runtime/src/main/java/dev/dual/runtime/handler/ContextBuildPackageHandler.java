@@ -67,6 +67,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.append("## Input Artifacts\n\n");
         appendInputArtifacts(builder, context);
 
+        builder.append("## Iteration History\n\n");
+        appendIterationHistory(builder, workstreamDir);
+
         builder.append("## Human Feedback\n\n");
         appendHumanFeedback(builder, workstreamDir);
 
@@ -156,7 +159,47 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
+    private static void appendIterationHistory(StringBuilder builder, Path workstreamDir) throws IOException {
+        var iterationsDir = workstreamDir.resolve("iterations");
+        if (!Files.exists(iterationsDir)) {
+            builder.append("(no workflow iteration history yet)\n\n");
+            return;
+        }
+        try (Stream<Path> paths = Files.list(iterationsDir)) {
+            var iterations = paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .map(ContextBuildPackageHandler::readJsonUnchecked)
+                    .filter(iteration -> !text(iteration.get("iterationId")).isBlank())
+                    .sorted(Comparator.comparingInt(ContextBuildPackageHandler::iterationNumber).reversed())
+                    .limit(5)
+                    .toList();
+            if (iterations.isEmpty()) {
+                builder.append("(no workflow iteration history yet)\n\n");
+                return;
+            }
+            for (Map<String, Object> iteration : iterations) {
+                builder.append("### ").append(text(iteration.get("iterationId"))).append("\n\n");
+                builder.append("- Parent: ").append(blankAsNone(text(iteration.get("parentIterationId")))).append("\n");
+                builder.append("- Trigger: ").append(text(iteration.get("triggerAction"))).append("\n");
+                builder.append("- Target Node: ").append(text(iteration.get("targetNodeDefinitionId"))).append("\n");
+                builder.append("- Created At: ").append(text(iteration.get("createdAt"))).append("\n");
+                var reason = text(iteration.get("reason"));
+                if (!reason.isBlank()) {
+                    builder.append("\n```text\n");
+                    builder.append(reason.stripTrailing());
+                    builder.append("\n```\n");
+                }
+                builder.append("\n");
+            }
+        }
+    }
+
     private static Map<String, Object> readNodeUnchecked(Path path) {
+        return readJsonUnchecked(path);
+    }
+
+    private static Map<String, Object> readJsonUnchecked(Path path) {
         try {
             return OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
         } catch (IOException e) {
@@ -261,5 +304,21 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private static int iterationNumber(Map<String, Object> iteration) {
+        var number = iteration.get("number");
+        if (number instanceof Number numeric) {
+            return numeric.intValue();
+        }
+        var iterationId = text(iteration.get("iterationId"));
+        if (iterationId.matches("iter-\\d{3}")) {
+            return Integer.parseInt(iterationId.substring("iter-".length()));
+        }
+        return 0;
+    }
+
+    private static String blankAsNone(String value) {
+        return value == null || value.isBlank() ? "(none)" : value;
     }
 }

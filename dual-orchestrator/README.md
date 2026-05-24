@@ -493,6 +493,7 @@ dualctl review revise \
 
 - user requirement。
 - 上一个节点传来的 input artifacts。
+- 最近 workflow iteration history，包括 `revise` / `NEEDS_REVISION` / `REJECT` 的触发原因。
 - 最近 human gate feedback，例如 `review revise --feedback-file` 写入的 Must Fix / 修改意见。
 - Git evidence 指针和 `git-evidence.json` 摘要。
 - events、workflow current、nodes、runs 等 ledger 指针。
