@@ -29,7 +29,7 @@ Runtime 只认识三类节点：
 5. Codex acceptance review
 6. Stage handoff and next-stage prompt
 
-第一版很多节点还是薄实现：内部 decision handler 使用默认决策，artifact validation 和 next-stage prompt 还是占位式 handler。`acpx.agent_run` 已经能通过 `acpx` 调 Claude / Codex。
+第一版很多节点还是薄实现：artifact validation 和 next-stage prompt 还是占位式 handler。`acpx.agent_run` 已经能通过 `acpx` 调 Claude / Codex，decision handler 已经能解析 Agent 输出里的 `dual-control` block。
 
 ## 当前能力
 
@@ -208,9 +208,33 @@ dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/
 - Codex 是外部 reviewer / verifier，不修改业务代码。
 - 每个阶段都有明确 Markdown section。
 - Codex review 和 acceptance 都必须输出 `Decision`。
-- 每个 prompt 末尾都有 `dual-control` block，后续 decision handler 会从这里解析结构化结果。
+- 每个 prompt 末尾都有 `dual-control` block，decision handler 会从这里解析结构化结果。
 
-当前 decision handler 仍使用默认决策，还没有解析 `dual-control`。也就是说，这些模板已经给未来结构化路由铺路，但当前 workflow route 仍是 MVP 默认值。
+`dual-control` 格式：
+
+````text
+```dual-control
+decision: PASS
+summary: one short sentence
+```
+````
+
+当前解析策略是严格失败：
+
+- Decision node 只读取上一个节点传入的 `inputRefs`。
+- 找不到 fenced `dual-control` block，会把 workflow 标记为 `FAILED`。
+- `decision` 不在当前阶段允许集合内，会把 workflow 标记为 `FAILED`。
+- `BLOCKED` 会把 workflow 标记为 `BLOCKED`，不会继续路由。
+- `NEEDS_REVISION` / `REJECT` 会沿 workflow definition 中配置的 revision edge 返回对应 Claude 节点。
+
+当前允许值：
+
+| Decision Node | Allowed Decisions |
+| --- | --- |
+| `intake.decision` | `PASS`, `NEEDS_REVISION`, `BLOCKED` |
+| `design.decision` | `PASS`, `NEEDS_REVISION`, `BLOCKED` |
+| `plan.decision` | `READY_TO_IMPLEMENT`, `NEEDS_REVISION`, `BLOCKED` |
+| `acceptance.decision` | `ACCEPT`, `ACCEPT_WITH_NOTES`, `REJECT`, `BLOCKED` |
 
 ## Commands
 
@@ -543,7 +567,6 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 
 - 仍是 CLI-first，没有 API server / scheduler。
 - workflow definition 目前是 Java factory，不是外部配置文件。
-- decision handler 当前使用默认决策，还没有解析真实 Codex structured review。
 - artifact validation 仍是薄实现。
 - context package / recovery gate 还没实现。
 - PR / notification 还没接入 Java 版。

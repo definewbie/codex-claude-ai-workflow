@@ -1,26 +1,82 @@
 package dev.dual.runtime.handler;
 
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.NodeStatus;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class ReviewDecisionHandler implements DecisionHandler {
+    private final DualControlBlockParser parser = new DualControlBlockParser();
+
     @Override
     public String type() {
         return "review.decision";
     }
 
     @Override
-    public NodeResult evaluate(DecisionContext context) {
-        var decision = switch (context.definition().id()) {
-            case "plan.decision" -> "READY_TO_IMPLEMENT";
-            case "acceptance.decision" -> "ACCEPT";
-            default -> "PASS";
-        };
+    public NodeResult evaluate(DecisionContext context) throws Exception {
+        var control = readLatestControlBlock(context);
+        if (control == null) {
+            return failed("MISSING_DUAL_CONTROL", "No dual-control block found in decision input refs.", context);
+        }
+        var decision = control.required("decision");
+        var allowed = allowedDecisions(context.definition().id());
+        if (!allowed.contains(decision)) {
+            return failed("INVALID_DECISION", "Unsupported decision for " + context.definition().id() + ": " + decision, context);
+        }
+        if ("BLOCKED".equals(decision)) {
+            return new NodeResult(decision, NodeStatus.BLOCKED, List.of(), Map.of(
+                    "decision", decision,
+                    "source", "dual-control",
+                    "summary", control.values().getOrDefault("summary", "")
+            ), "dual-control decision is BLOCKED");
+        }
         return NodeResult.completed(decision, List.of(), Map.of(
                 "decision", decision,
-                "source", "milestone-1-default"
+                "source", "dual-control",
+                "summary", control.values().getOrDefault("summary", "")
         ));
+    }
+
+    private DualControlBlock readLatestControlBlock(DecisionContext context) throws Exception {
+        var refs = context.instance().inputRefs();
+        for (int i = refs.size() - 1; i >= 0; i--) {
+            var ref = refs.get(i);
+            if (ref.startsWith("artifact://")) {
+                continue;
+            }
+            var path = context.workspaceRoot().resolve(ref).normalize();
+            if (!path.startsWith(context.workspaceRoot()) || !Files.exists(path)) {
+                continue;
+            }
+            var content = Files.readString(path, StandardCharsets.UTF_8);
+            var parsed = parser.parse(content);
+            if (parsed.isPresent()) {
+                return parsed.get();
+            }
+        }
+        return null;
+    }
+
+    private NodeResult failed(String reason, String message, DecisionContext context) {
+        return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
+                "reason", reason,
+                "message", message,
+                "input_refs", context.instance().inputRefs()
+        ), message);
+    }
+
+    private Set<String> allowedDecisions(String nodeId) {
+        var decisions = switch (nodeId) {
+            case "plan.decision" -> List.of("READY_TO_IMPLEMENT", "NEEDS_REVISION", "BLOCKED");
+            case "acceptance.decision" -> List.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT", "BLOCKED");
+            default -> List.of("PASS", "NEEDS_REVISION", "BLOCKED");
+        };
+        return new LinkedHashSet<>(decisions);
     }
 }

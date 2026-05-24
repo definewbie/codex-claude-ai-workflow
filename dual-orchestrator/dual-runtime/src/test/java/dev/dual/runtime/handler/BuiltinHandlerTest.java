@@ -8,6 +8,7 @@ import dev.dual.core.workflow.NodeStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -35,23 +36,61 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void reviewDecisionUsesStageSpecificDefaultOutcome() throws Exception {
+    void reviewDecisionReadsDualControlOutcomeFromInputRef() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                # Review
+
+                ```dual-control
+                decision: READY_TO_IMPLEMENT
+                summary: plan is ready
+                ```
+                """);
         var handler = new ReviewDecisionHandler();
         var plan = handler.evaluate(new DecisionHandler.DecisionContext(
                 tempDir,
                 "ws",
                 decisionDefinition("plan.decision"),
-                node("plan.decision", NodeKind.DECISION, "review.decision")
-        ));
-        var acceptance = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("acceptance.decision"),
-                node("acceptance.decision", NodeKind.DECISION, "review.decision")
+                node("plan.decision", NodeKind.DECISION, "review.decision", List.of(output))
         ));
 
         assertEquals("READY_TO_IMPLEMENT", plan.outcome());
-        assertEquals("ACCEPT", acceptance.outcome());
+        assertEquals(NodeStatus.COMPLETED, plan.status());
+        assertEquals("dual-control", plan.result().get("source"));
+    }
+
+    @Test
+    void reviewDecisionFailsWhenDualControlIsMissing() throws Exception {
+        var output = writeOutput("codex-review.md", "# Review\nNo control block.\n");
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("intake.decision"),
+                node("intake.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("MISSING_DUAL_CONTROL", result.outcome());
+    }
+
+    @Test
+    void reviewDecisionBlocksOnBlockedDecision() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                ```dual-control
+                decision: BLOCKED
+                summary: requirement conflicts with repository constraints
+                ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.BLOCKED, result.status());
+        assertEquals("BLOCKED", result.outcome());
     }
 
     @Test
@@ -97,6 +136,10 @@ class BuiltinHandlerTest {
     }
 
     private static NodeInstance node(String id, NodeKind kind, String handlerType) {
+        return node(id, kind, handlerType, List.of());
+    }
+
+    private static NodeInstance node(String id, NodeKind kind, String handlerType, List<String> inputRefs) {
         return new NodeInstance(
                 "node-" + id.replace('.', '-'),
                 id,
@@ -105,12 +148,19 @@ class BuiltinHandlerTest {
                 NodeStatus.READY,
                 "stage-test",
                 "iter-001",
-                List.of(),
+                inputRefs,
                 List.of(),
                 Map.of(),
                 null,
                 null,
                 null
         );
+    }
+
+    private String writeOutput(String name, String content) throws Exception {
+        var path = tempDir.resolve(".agent").resolve("workstreams").resolve("ws").resolve("runs").resolve("run-001").resolve("outputs").resolve(name);
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, content);
+        return tempDir.relativize(path).toString();
     }
 }

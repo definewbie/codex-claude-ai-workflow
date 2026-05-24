@@ -110,6 +110,44 @@ class WorkflowRuntimeTest {
         assertTrue(result.message().contains("FAILED"));
     }
 
+    @Test
+    void decisionRoutesUsingDualControlOutcome() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-decision-runtime"));
+        Files.createDirectories(paths.workstreamDir());
+        var output = writeOutput("ws-decision-runtime", "review.md", """
+                ```dual-control
+                decision: REJECT
+                summary: acceptance failed
+                ```
+                """);
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "seed.task",
+                List.of(
+                        new NodeDefinition("seed.task", NodeKind.TASK, "output.task", Map.of("output_ref", output)),
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                        new NodeDefinition("implement.claude_implement", NodeKind.TASK, "fake.task", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("seed.task", "completed", "acceptance.decision"),
+                        new EdgeDefinition("acceptance.decision", "REJECT", "implement.claude_implement")
+                )
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-decision-runtime", definition);
+
+        var runtime = new WorkflowRuntime(
+                ledger,
+                new HandlerRegistry(List.of(new FakeTask(), new OutputTask()), List.of(new dev.dual.runtime.handler.ReviewDecisionHandler()), List.of())
+        );
+        runtime.resume(new WorkflowCommand(tempDir, "ws-decision-runtime"));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-decision-runtime"));
+
+        assertEquals(WorkflowStatus.RUNNING, result.status());
+        assertEquals("implement.claude_implement", result.activeNode());
+    }
+
     private static final class FakeTask implements TaskHandler {
         @Override
         public String type() {
@@ -146,6 +184,18 @@ class WorkflowRuntimeTest {
         }
     }
 
+    private static final class OutputTask implements TaskHandler {
+        @Override
+        public String type() {
+            return "output.task";
+        }
+
+        @Override
+        public NodeResult execute(TaskContext context) {
+            return NodeResult.completed("completed", List.of((String) context.definition().config().get("output_ref")), Map.of("ok", true));
+        }
+    }
+
     private static final class UnusedDecision implements DecisionHandler {
         @Override
         public String type() {
@@ -156,5 +206,12 @@ class WorkflowRuntimeTest {
         public NodeResult evaluate(DecisionContext context) {
             return NodeResult.completed("PASS", List.of(), Map.of());
         }
+    }
+
+    private String writeOutput(String workstreamId, String name, String content) throws Exception {
+        var path = tempDir.resolve(".agent").resolve("workstreams").resolve(workstreamId).resolve("runs").resolve("run-001").resolve("outputs").resolve(name);
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, content);
+        return tempDir.relativize(path).toString();
     }
 }
