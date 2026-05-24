@@ -390,9 +390,11 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 
 ```bash
 dualctl runs --workdir <effective_worktree> <workstream_id>
+dualctl runs --workdir <effective_worktree> --failed <workstream_id>
+dualctl runs --workdir <effective_worktree> --agent codex --latest <workstream_id>
 ```
 
-输出包含 run id、状态、agent、node、exit code、duration 和 failure reason。它读取：
+输出包含 run id、状态、agent、node、exit code、duration 和 failure reason。排障时可以用 `--failed` 只看失败 run，用 `--agent claude|codex` 只看某个 Agent，用 `--status` 按状态过滤，用 `--latest` 只取最后一条匹配结果。它读取：
 
 ```text
 .agent/workstreams/<workstream_id>/runs/<run_id>/run.json
