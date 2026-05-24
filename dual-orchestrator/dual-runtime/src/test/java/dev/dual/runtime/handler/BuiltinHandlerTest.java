@@ -337,6 +337,70 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void contextPackageUsesProfileToKeepImplementationContextFocused() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.md");
+        var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
+        Files.createDirectories(planOutput.getParent());
+        Files.createDirectories(evidence.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement approved plan.\n");
+        Files.writeString(planOutput, "READY_TO_IMPLEMENT with one note.\n");
+        Files.writeString(evidence, "{\"available\":true}\n");
+
+        var handler = new ContextBuildPackageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "implement.claude_implement",
+                        "profile", "implementation"
+                )),
+                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
+        ));
+
+        assertEquals("implementation", result.result().get("profile"));
+        assertTrue(((List<?>) result.result().get("sections")).contains("recent_agent_outputs"));
+        assertFalse(((List<?>) result.result().get("sections")).contains("git_evidence"));
+
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Profile: implementation"));
+        assertTrue(markdown.contains("READY_TO_IMPLEMENT with one note."));
+        assertFalse(markdown.contains("## Git Evidence"));
+        assertFalse(markdown.contains("\"available\":true"));
+    }
+
+    @Test
+    void contextPackageAllowsExplicitSectionsAndSnippetLimits() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var output = workstreamDir.resolve("runs/run-003/outputs/long.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Keep this focused.\n");
+        Files.writeString(output, "abcdefghijklmnopqrstuvwxyz\n");
+
+        var handler = new ContextBuildPackageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                new NodeDefinition("context.custom", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "custom.agent",
+                        "profile", "acceptance",
+                        "include_sections", List.of("requirement", "recent_agent_outputs"),
+                        "max_snippet_chars", 10,
+                        "max_recent_agent_outputs", 1
+                )),
+                node("context.custom", NodeKind.TASK, "context.build_package", List.of())
+        ));
+
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Included Sections: requirement, recent_agent_outputs"));
+        assertTrue(markdown.contains("Keep this focused."));
+        assertTrue(markdown.contains("abcdefghij"));
+        assertTrue(markdown.contains("[truncated; read full artifact"));
+        assertFalse(markdown.contains("## Git Evidence"));
+        assertFalse(markdown.contains("## Ledger Pointers"));
+    }
+
+    @Test
     void contextPackageIncludesHumanGateFeedbackFromNodeResult() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var nodesDir = workstreamDir.resolve("nodes");

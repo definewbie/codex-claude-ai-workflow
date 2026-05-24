@@ -19,7 +19,8 @@
       "handlerType": "context.build_package",
       "config": {
         "target_node": "intake.codex_product_review",
-        "purpose": "Package Claude intake output for Codex product review."
+        "purpose": "Package Claude intake output for Codex product review.",
+        "profile": "product_review"
       }
     },
     {
@@ -62,7 +63,8 @@
       "handlerType": "context.build_package",
       "config": {
         "target_node": "design.codex_arch_review",
-        "purpose": "Package Claude design and prior review context for Codex architecture review."
+        "purpose": "Package Claude design and prior review context for Codex architecture review.",
+        "profile": "architecture_review"
       }
     },
     {
@@ -105,7 +107,8 @@
       "handlerType": "context.build_package",
       "config": {
         "target_node": "plan.codex_plan_review",
-        "purpose": "Package Claude plan and design context for Codex plan review."
+        "purpose": "Package Claude plan and design context for Codex plan review.",
+        "profile": "plan_review"
       }
     },
     {
@@ -138,7 +141,8 @@
       "handlerType": "context.build_package",
       "config": {
         "target_node": "implement.claude_implement",
-        "purpose": "Package approved plan and review history for Claude implementation."
+        "purpose": "Package approved plan and review history for Claude implementation.",
+        "profile": "implementation"
       }
     },
     {
@@ -173,7 +177,8 @@
       "handlerType": "context.build_package",
       "config": {
         "target_node": "acceptance.codex_verifier_review",
-        "purpose": "Package implementation output, self-test report, and Git evidence for Codex acceptance."
+        "purpose": "Package implementation output, self-test report, and Git evidence for Codex acceptance.",
+        "profile": "acceptance"
       }
     },
     {

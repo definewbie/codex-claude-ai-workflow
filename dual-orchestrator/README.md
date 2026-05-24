@@ -606,6 +606,27 @@ dualctl review revise \
 - Git evidence 指针和 `git-evidence.json` 摘要。
 - events、workflow current、nodes、runs 等 ledger 指针。
 
+上下文包支持 profile，避免每个阶段都塞同一堆材料：
+
+- `product_review`：需求、直接输入、最近 Agent 输出、账本指针。
+- `architecture_review`：需求、直接输入、人工反馈、最近 Agent 输出、账本指针。
+- `plan_review`：需求、直接输入、iteration history、人工反馈、最近 Agent 输出、账本指针。
+- `implementation`：需求、直接输入、iteration history、人工反馈、最近 Agent 输出、账本指针。
+- `acceptance`：需求、直接输入、iteration history、人工反馈、最近 Agent 输出、Git evidence、账本指针。
+
+自定义 workflow 可以在 `context.build_package` 节点里配置：
+
+```json
+{
+  "profile": "acceptance",
+  "include_sections": ["requirement", "recent_agent_outputs", "git_evidence"],
+  "max_snippet_chars": 4000,
+  "max_recent_agent_outputs": 8
+}
+```
+
+`include_sections` 会覆盖 profile 的默认章节，适合临时做更窄的验收包或补证据包。
+
 Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个短预览。这样 Agent 可以优先读同一份上下文，减少人工 copy/paste，也给后续 token budget、summary、session handoff 留出统一入口。
 
 `implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：

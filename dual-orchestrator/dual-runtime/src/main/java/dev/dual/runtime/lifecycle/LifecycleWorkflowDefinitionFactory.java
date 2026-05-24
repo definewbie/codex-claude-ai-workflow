@@ -17,29 +17,34 @@ public final class LifecycleWorkflowDefinitionFactory {
                 List.of(
                         agentTask("intake.claude_brainstorm", "claude", "claude-main", "intake-claude-brainstorm"),
                         contextTask("context.intake_codex_product_review", "intake.codex_product_review",
-                                "Package Claude intake output for Codex product review."),
+                                "Package Claude intake output for Codex product review.",
+                                "product_review"),
                         agentTask("intake.codex_product_review", "codex", "codex-reviewer", "intake-codex-product-review"),
                         decision("intake.decision"),
                         gate("gate.human_requirement_review"),
                         agentTask("design.claude_design", "claude", "claude-main", "design-claude"),
                         contextTask("context.design_codex_arch_review", "design.codex_arch_review",
-                                "Package Claude design and prior review context for Codex architecture review."),
+                                "Package Claude design and prior review context for Codex architecture review.",
+                                "architecture_review"),
                         agentTask("design.codex_arch_review", "codex", "codex-reviewer", "design-codex-review"),
                         decision("design.decision"),
                         gate("gate.human_design_approval"),
                         agentTask("plan.claude_plan", "claude", "claude-main", "plan-claude"),
                         contextTask("context.plan_codex_plan_review", "plan.codex_plan_review",
-                                "Package Claude plan and design context for Codex plan review."),
+                                "Package Claude plan and design context for Codex plan review.",
+                                "plan_review"),
                         agentTask("plan.codex_plan_review", "codex", "codex-reviewer", "plan-codex-review"),
                         decision("plan.decision"),
                         gate("gate.human_plan_approval"),
                         contextTask("context.implement_claude", "implement.claude_implement",
-                                "Package approved plan and review history for Claude implementation."),
+                                "Package approved plan and review history for Claude implementation.",
+                                "implementation"),
                         agentTask("implement.claude_implement", "claude", "claude-main", "implement-claude"),
                         agentTask("implement.claude_self_test_report", "claude", "claude-main", "implement-claude-self-test"),
                         task("implement.artifact_validation", "artifact.validate"),
                         contextTask("context.acceptance_codex_verifier_review", "acceptance.codex_verifier_review",
-                                "Package implementation output, self-test report, and Git evidence for Codex acceptance."),
+                                "Package implementation output, self-test report, and Git evidence for Codex acceptance.",
+                                "acceptance"),
                         agentTask("acceptance.codex_verifier_review", "codex", "codex-reviewer", "acceptance-codex-review"),
                         decision("acceptance.decision"),
                         gate("gate.human_acceptance"),
@@ -99,10 +104,11 @@ public final class LifecycleWorkflowDefinitionFactory {
         return new NodeDefinition(id, NodeKind.TASK, handlerType, Map.of());
     }
 
-    private static NodeDefinition contextTask(String id, String targetNode, String purpose) {
+    private static NodeDefinition contextTask(String id, String targetNode, String purpose, String profile) {
         return new NodeDefinition(id, NodeKind.TASK, "context.build_package", Map.of(
                 "target_node", targetNode,
-                "purpose", purpose
+                "purpose", purpose,
+                "profile", profile
         ));
     }
 

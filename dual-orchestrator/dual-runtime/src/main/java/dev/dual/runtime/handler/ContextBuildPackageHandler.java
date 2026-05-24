@@ -18,9 +18,19 @@ import java.util.stream.Stream;
 
 public final class ContextBuildPackageHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
+    private static final int MAX_RECENT_AGENT_OUTPUTS = 8;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final List<String> FULL_SECTIONS = List.of(
+            "requirement",
+            "input_artifacts",
+            "iteration_history",
+            "human_feedback",
+            "recent_agent_outputs",
+            "git_evidence",
+            "ledger_pointers"
+    );
 
     @Override
     public String type() {
@@ -44,6 +54,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var result = new LinkedHashMap<String, Object>();
         result.put("context_package", packageRef);
         result.put("target_node", configText(context, "target_node", ""));
+        result.put("profile", profile(context));
+        result.put("sections", sections(context));
         result.put("input_ref_count", context.instance().inputRefs().size());
         result.put("generated_at", Instant.now().toString());
         return NodeResult.completed("completed", List.of(packageRef), result);
@@ -52,6 +64,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     private static String renderPackage(TaskContext context, Path workstreamDir) throws IOException {
         var targetNode = configText(context, "target_node", "(not specified)");
         var purpose = configText(context, "purpose", "Prepare focused context for the next agent step.");
+        var profile = profile(context);
+        var sections = sections(context);
+        var maxSnippetChars = maxSnippetChars(context);
+        var maxRecentAgentOutputs = maxRecentAgentOutputs(context);
         var requirement = readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)");
         var builder = new StringBuilder();
         builder.append("# Context Package\n\n");
@@ -61,33 +77,53 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.append("- Generated At: ").append(Instant.now()).append("\n");
         builder.append("- Purpose: ").append(purpose).append("\n\n");
 
-        builder.append("## User Requirement\n\n");
-        builder.append(requirement).append("\n\n");
+        builder.append("## Context Contract\n\n");
+        builder.append("- Profile: ").append(profile).append("\n");
+        builder.append("- Included Sections: ").append(String.join(", ", sections)).append("\n");
+        builder.append("- Max Snippet Chars: ").append(maxSnippetChars).append("\n");
+        builder.append("- Max Recent Agent Outputs: ").append(maxRecentAgentOutputs).append("\n\n");
 
-        builder.append("## Input Artifacts\n\n");
-        appendInputArtifacts(builder, context);
+        if (sections.contains("requirement")) {
+            builder.append("## User Requirement\n\n");
+            builder.append(requirement).append("\n\n");
+        }
 
-        builder.append("## Iteration History\n\n");
-        appendIterationHistory(builder, workstreamDir);
+        if (sections.contains("input_artifacts")) {
+            builder.append("## Input Artifacts\n\n");
+            appendInputArtifacts(builder, context, maxSnippetChars);
+        }
 
-        builder.append("## Human Feedback\n\n");
-        appendHumanFeedback(builder, workstreamDir);
+        if (sections.contains("iteration_history")) {
+            builder.append("## Iteration History\n\n");
+            appendIterationHistory(builder, workstreamDir);
+        }
 
-        builder.append("## Recent Agent Outputs\n\n");
-        appendRecentAgentOutputs(builder, workstreamDir);
+        if (sections.contains("human_feedback")) {
+            builder.append("## Human Feedback\n\n");
+            appendHumanFeedback(builder, workstreamDir);
+        }
 
-        builder.append("## Git Evidence\n\n");
-        appendGitEvidence(builder, workstreamDir);
+        if (sections.contains("recent_agent_outputs")) {
+            builder.append("## Recent Agent Outputs\n\n");
+            appendRecentAgentOutputs(builder, workstreamDir, maxSnippetChars, maxRecentAgentOutputs);
+        }
 
-        builder.append("## Ledger Pointers\n\n");
-        builder.append("- Events: ").append(toDisplayRef(workstreamDir.resolve("events.jsonl"))).append("\n");
-        builder.append("- Workflow current: ").append(toDisplayRef(workstreamDir.resolve("workflow/current.json"))).append("\n");
-        builder.append("- Node state directory: ").append(toDisplayRef(workstreamDir.resolve("nodes"))).append("\n");
-        builder.append("- Agent runs directory: ").append(toDisplayRef(workstreamDir.resolve("runs"))).append("\n");
+        if (sections.contains("git_evidence")) {
+            builder.append("## Git Evidence\n\n");
+            appendGitEvidence(builder, workstreamDir, maxSnippetChars);
+        }
+
+        if (sections.contains("ledger_pointers")) {
+            builder.append("## Ledger Pointers\n\n");
+            builder.append("- Events: ").append(toDisplayRef(workstreamDir.resolve("events.jsonl"))).append("\n");
+            builder.append("- Workflow current: ").append(toDisplayRef(workstreamDir.resolve("workflow/current.json"))).append("\n");
+            builder.append("- Node state directory: ").append(toDisplayRef(workstreamDir.resolve("nodes"))).append("\n");
+            builder.append("- Agent runs directory: ").append(toDisplayRef(workstreamDir.resolve("runs"))).append("\n");
+        }
         return builder.toString();
     }
 
-    private static void appendInputArtifacts(StringBuilder builder, TaskContext context) throws IOException {
+    private static void appendInputArtifacts(StringBuilder builder, TaskContext context, int maxSnippetChars) throws IOException {
         if (context.instance().inputRefs().isEmpty()) {
             builder.append("(no direct input refs)\n\n");
             return;
@@ -100,12 +136,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 continue;
             }
             builder.append("```text\n");
-            builder.append(snippet(path));
+            builder.append(snippet(path, maxSnippetChars));
             builder.append("\n```\n\n");
         }
     }
 
-    private static void appendGitEvidence(StringBuilder builder, Path workstreamDir) throws IOException {
+    private static void appendGitEvidence(StringBuilder builder, Path workstreamDir, int maxSnippetChars) throws IOException {
         var evidenceDir = workstreamDir.resolve("artifacts/git-evidence");
         if (!Files.exists(evidenceDir)) {
             builder.append("(git evidence not generated yet)\n\n");
@@ -123,7 +159,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var evidenceJson = evidenceDir.resolve("git-evidence.json");
         if (Files.exists(evidenceJson)) {
             builder.append("```json\n");
-            builder.append(snippet(evidenceJson));
+            builder.append(snippet(evidenceJson, maxSnippetChars));
             builder.append("\n```\n\n");
         }
     }
@@ -230,7 +266,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         return Map.of();
     }
 
-    private static void appendRecentAgentOutputs(StringBuilder builder, Path workstreamDir) throws IOException {
+    private static void appendRecentAgentOutputs(StringBuilder builder, Path workstreamDir, int maxSnippetChars, int maxRecentAgentOutputs) throws IOException {
         var runsDir = workstreamDir.resolve("runs");
         if (!Files.exists(runsDir)) {
             builder.append("(no agent runs yet)\n\n");
@@ -242,7 +278,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     .filter(ContextBuildPackageHandler::isAgentOutput)
                     .filter(path -> path.getFileName().toString().endsWith(".md"))
                     .sorted(Comparator.comparing(ContextBuildPackageHandler::lastModified).reversed())
-                    .limit(8)
+                    .limit(maxRecentAgentOutputs)
                     .toList();
             if (outputs.isEmpty()) {
                 builder.append("(no markdown agent outputs yet)\n\n");
@@ -251,7 +287,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             for (Path output : outputs) {
                 builder.append("### ").append(toDisplayRef(output)).append("\n\n");
                 builder.append("```text\n");
-                builder.append(snippet(output));
+                builder.append(snippet(output, maxSnippetChars));
                 builder.append("\n```\n\n");
             }
         }
@@ -270,12 +306,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
-    private static String snippet(Path path) throws IOException {
+    private static String snippet(Path path, int maxSnippetChars) throws IOException {
         var content = Files.readString(path, StandardCharsets.UTF_8);
-        if (content.length() <= MAX_SNIPPET_CHARS) {
+        if (content.length() <= maxSnippetChars) {
             return content.stripTrailing();
         }
-        return content.substring(0, MAX_SNIPPET_CHARS).stripTrailing()
+        return content.substring(0, maxSnippetChars).stripTrailing()
                 + "\n\n[truncated; read full artifact at " + toDisplayRef(path) + "]";
     }
 
@@ -290,6 +326,82 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var value = context.definition().config().get(key);
         if (value instanceof String text && !text.isBlank()) {
             return text;
+        }
+        return fallback;
+    }
+
+    private static String profile(TaskContext context) {
+        return configText(context, "profile", "full");
+    }
+
+    private static List<String> sections(TaskContext context) {
+        var override = context.definition().config().get("include_sections");
+        if (override instanceof List<?> values && !values.isEmpty()) {
+            return values.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .filter(section -> FULL_SECTIONS.contains(section))
+                    .distinct()
+                    .toList();
+        }
+        return switch (profile(context)) {
+            case "product_review" -> List.of(
+                    "requirement",
+                    "input_artifacts",
+                    "recent_agent_outputs",
+                    "ledger_pointers"
+            );
+            case "architecture_review" -> List.of(
+                    "requirement",
+                    "input_artifacts",
+                    "human_feedback",
+                    "recent_agent_outputs",
+                    "ledger_pointers"
+            );
+            case "plan_review" -> List.of(
+                    "requirement",
+                    "input_artifacts",
+                    "iteration_history",
+                    "human_feedback",
+                    "recent_agent_outputs",
+                    "ledger_pointers"
+            );
+            case "implementation" -> List.of(
+                    "requirement",
+                    "input_artifacts",
+                    "iteration_history",
+                    "human_feedback",
+                    "recent_agent_outputs",
+                    "ledger_pointers"
+            );
+            case "acceptance" -> List.of(
+                    "requirement",
+                    "input_artifacts",
+                    "iteration_history",
+                    "human_feedback",
+                    "recent_agent_outputs",
+                    "git_evidence",
+                    "ledger_pointers"
+            );
+            default -> FULL_SECTIONS;
+        };
+    }
+
+    private static int maxSnippetChars(TaskContext context) {
+        return positiveIntConfig(context, "max_snippet_chars", MAX_SNIPPET_CHARS);
+    }
+
+    private static int maxRecentAgentOutputs(TaskContext context) {
+        return positiveIntConfig(context, "max_recent_agent_outputs", MAX_RECENT_AGENT_OUTPUTS);
+    }
+
+    private static int positiveIntConfig(TaskContext context, String key, int fallback) {
+        var value = context.definition().config().get(key);
+        if (value instanceof Number number && number.intValue() > 0) {
+            return number.intValue();
+        }
+        if (value instanceof String text && text.matches("\\d+")) {
+            return Integer.parseInt(text);
         }
         return fallback;
     }
