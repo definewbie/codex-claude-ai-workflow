@@ -8,6 +8,7 @@ import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.lifecycle.WorkflowDefinitionLoader;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -34,6 +35,9 @@ public final class StartCommand implements Callable<Integer> {
     @Option(names = "--worktree-dir", description = "Worktree directory.")
     Path worktreeDir;
 
+    @Option(names = "--workflow", description = "Workflow definition JSON file. Defaults to built-in agent lifecycle.")
+    Path workflowPath;
+
     @Parameters(index = "0", arity = "0..1", description = "Inline requirement text.")
     String inlineRequirement;
 
@@ -42,6 +46,9 @@ public final class StartCommand implements Callable<Integer> {
         var requirement = readRequirement();
         var git = new GitWorkspaceService();
         var repo = git.inspect(workdir.toAbsolutePath().normalize());
+        var workflowDefinition = new WorkflowDefinitionLoader().loadOrDefault(
+                workflowPath == null ? null : workflowPath.toAbsolutePath().normalize()
+        );
 
         var ids = new DualIdGenerator(Clock.systemUTC());
         var workstreamId = ids.workstreamId();
@@ -74,7 +81,6 @@ public final class StartCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(selectedWorktree, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), "start"))) {
             new FileLedgerStore().initializeWorkstream(paths, workstream, workspace, requirement);
-            var workflowDefinition = new dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactory().thinMainline();
             new dev.dual.ledger.file.WorkflowFileLedger().initialize(paths, "wf-" + workstreamId.value(), workflowDefinition);
         }
 
@@ -87,7 +93,10 @@ public final class StartCommand implements Callable<Integer> {
         System.out.println("Branch: " + selectedBranch);
         System.out.println();
         System.out.println("Ledger: " + paths.workstreamDir());
-        System.out.println("Workflow: agent-lifecycle@1");
+        System.out.println("Workflow: " + workflowDefinition.workflowId() + "@" + workflowDefinition.version());
+        if (workflowPath != null) {
+            System.out.println("Workflow source: " + workflowPath.toAbsolutePath().normalize());
+        }
         System.out.println("Next: dualctl resume --workdir " + selectedWorktree + " " + workstreamId.value());
         return 0;
     }

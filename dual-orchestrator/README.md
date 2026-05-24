@@ -277,6 +277,51 @@ dualctl start --workdir /path/to/repo --task-file ./requirement.md
 dualctl start --branch ai/my-task --worktree-dir ../repo-my-task "任务描述"
 ```
 
+指定 workflow 定义文件：
+
+```bash
+dualctl start --workflow ./workflow.json "任务描述"
+```
+
+如果不传 `--workflow`，默认使用内置的 `agent-lifecycle@1`。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
+
+最小 workflow 示例：
+
+```json
+{
+  "workflowId": "custom-lifecycle",
+  "version": 1,
+  "entryNodeId": "intake.claude_brainstorm",
+  "nodes": [
+    {
+      "id": "intake.claude_brainstorm",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "claude",
+        "session": "claude-main",
+        "prompt_template": "intake-claude-brainstorm"
+      }
+    },
+    {
+      "id": "gate.human_requirement_review",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "allowed_actions": ["approve", "revise"]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "intake.claude_brainstorm",
+      "on": "completed",
+      "to": "gate.human_requirement_review"
+    }
+  ]
+}
+```
+
 启动后会打印：
 
 ```text
