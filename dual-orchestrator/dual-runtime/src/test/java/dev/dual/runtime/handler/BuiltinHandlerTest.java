@@ -76,6 +76,49 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void reviewDecisionFailsStructurallyWhenDualControlMissesDecision() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                ```dual-control
+                summary: forgot the decision
+                ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
+        assertTrue(((List<?>) result.result().get("allowed_decisions")).contains("PASS"));
+        assertEquals("forgot the decision", ((Map<?, ?>) result.result().get("control_values")).get("summary"));
+    }
+
+    @Test
+    void reviewDecisionFailsWithAllowedDecisionsWhenDecisionIsUnsupported() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                ```dual-control
+                decision: ACCEPT
+                summary: wrong decision family
+                ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_DECISION", result.outcome());
+        assertTrue(((List<?>) result.result().get("allowed_decisions")).contains("NEEDS_REVISION"));
+        assertEquals("ACCEPT", ((Map<?, ?>) result.result().get("control_values")).get("decision"));
+    }
+
+    @Test
     void reviewDecisionBlocksOnBlockedDecision() throws Exception {
         var output = writeOutput("codex-review.md", """
                 ```dual-control

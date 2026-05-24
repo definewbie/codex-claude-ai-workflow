@@ -24,10 +24,13 @@ public final class ReviewDecisionHandler implements DecisionHandler {
         if (control == null) {
             return failed("MISSING_DUAL_CONTROL", "No dual-control block found in decision input refs.", context);
         }
-        var decision = control.required("decision");
         var allowed = allowedDecisions(context.definition().id());
+        var decision = control.values().getOrDefault("decision", "").trim();
+        if (decision.isBlank()) {
+            return failed("INVALID_DUAL_CONTROL", "dual-control missing required key: decision", context, allowed, control);
+        }
         if (!allowed.contains(decision)) {
-            return failed("INVALID_DECISION", "Unsupported decision for " + context.definition().id() + ": " + decision, context);
+            return failed("INVALID_DECISION", "Unsupported decision for " + context.definition().id() + ": " + decision, context, allowed, control);
         }
         if ("BLOCKED".equals(decision)) {
             return new NodeResult(decision, NodeStatus.BLOCKED, List.of(), Map.of(
@@ -64,10 +67,16 @@ public final class ReviewDecisionHandler implements DecisionHandler {
     }
 
     private NodeResult failed(String reason, String message, DecisionContext context) {
+        return failed(reason, message, context, Set.of(), null);
+    }
+
+    private NodeResult failed(String reason, String message, DecisionContext context, Set<String> allowed, DualControlBlock control) {
         return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
                 "reason", reason,
                 "message", message,
-                "input_refs", context.instance().inputRefs()
+                "input_refs", context.instance().inputRefs(),
+                "allowed_decisions", List.copyOf(allowed),
+                "control_values", control == null ? Map.of() : control.values()
         ), message);
     }
 

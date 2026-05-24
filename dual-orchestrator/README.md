@@ -224,6 +224,7 @@ summary: one short sentence
 
 - Decision node 只读取上一个节点传入的 `inputRefs`。
 - 找不到 fenced `dual-control` block，会把 workflow 标记为 `FAILED`。
+- 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 标记为 `FAILED`，并在 node result 中记录已解析字段和允许值。
 - `decision` 不在当前阶段允许集合内，会把 workflow 标记为 `FAILED`。
 - `BLOCKED` 会把 workflow 标记为 `BLOCKED`，不会继续路由。
 - `NEEDS_REVISION` / `REJECT` 会沿 workflow definition 中配置的 revision edge 返回对应 Claude 节点。
