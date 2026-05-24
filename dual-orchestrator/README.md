@@ -301,6 +301,12 @@ dualctl workflow validate dual-orchestrator/workflows/agent-lifecycle.v1.json
 dualctl workflow validate --allow-unknown-handlers ./workflow.json
 ```
 
+`dualctl start --workflow` 也会做同样的 handler 检查，避免创建 worktree 后才在 `resume` 阶段发现 handler 拼错。如果确实要使用外部 runtime handler，启动时也需要显式放行：
+
+```bash
+dualctl start --workflow ./workflow.json --allow-unknown-handlers "任务描述"
+```
+
 导出内置默认 workflow 作为自定义起点：
 
 ```bash

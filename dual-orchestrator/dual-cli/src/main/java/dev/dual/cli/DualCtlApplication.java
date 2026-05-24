@@ -30,6 +30,10 @@ public class DualCtlApplication {
 
         ExitCodeRunner(CommandLine commandLine, DualCtlCommand command) {
             this.commandLine = commandLine;
+            this.commandLine.setExecutionExceptionHandler((ex, cmd, parseResult) -> {
+                cmd.getErr().println("dualctl: " + ex.getMessage());
+                return cmd.getCommandSpec().exitCodeOnExecutionException();
+            });
             this.command = command;
         }
 

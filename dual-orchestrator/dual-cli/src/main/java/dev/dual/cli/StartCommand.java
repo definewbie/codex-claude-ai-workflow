@@ -38,6 +38,9 @@ public final class StartCommand implements Callable<Integer> {
     @Option(names = "--workflow", description = "Workflow definition JSON file. Defaults to built-in agent lifecycle.")
     Path workflowPath;
 
+    @Option(names = "--allow-unknown-handlers", description = "Allow workflow handler types not built into this CLI.")
+    boolean allowUnknownHandlers;
+
     @Parameters(index = "0", arity = "0..1", description = "Inline requirement text.")
     String inlineRequirement;
 
@@ -49,6 +52,7 @@ public final class StartCommand implements Callable<Integer> {
         var workflowDefinition = new WorkflowDefinitionLoader().loadOrDefault(
                 workflowPath == null ? null : workflowPath.toAbsolutePath().normalize()
         );
+        validateHandlers(workflowDefinition);
 
         var ids = new DualIdGenerator(Clock.systemUTC());
         var workstreamId = ids.workstreamId();
@@ -119,5 +123,20 @@ public final class StartCommand implements Callable<Integer> {
                 .filter(line -> !line.isBlank())
                 .findFirst()
                 .orElse("Untitled workstream");
+    }
+
+    private void validateHandlers(dev.dual.core.workflow.WorkflowDefinition definition) {
+        var unknownHandlers = definition.nodes().stream()
+                .map(node -> node.handlerType())
+                .distinct()
+                .sorted()
+                .filter(handler -> !CliSupportedHandlers.TYPES.contains(handler))
+                .toList();
+        if (!unknownHandlers.isEmpty() && !allowUnknownHandlers) {
+            throw new IllegalArgumentException(
+                    "workflow contains handler types not built into this CLI: " + unknownHandlers
+                            + ". Use --allow-unknown-handlers if these handlers are provided by an external runtime."
+            );
+        }
     }
 }
