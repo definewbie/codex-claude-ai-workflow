@@ -11,6 +11,7 @@ import picocli.CommandLine.Parameters;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -28,6 +29,12 @@ public final class EventsCommand implements Callable<Integer> {
     @Option(names = "--raw", description = "Print raw JSONL lines.")
     boolean raw;
 
+    @Option(names = "--type", description = "Filter by event type.")
+    String type;
+
+    @Option(names = "--contains", description = "Filter events whose raw JSON contains this text.")
+    String contains;
+
     @Parameters(index = "0")
     String workstreamId;
 
@@ -43,7 +50,7 @@ public final class EventsCommand implements Callable<Integer> {
             return 0;
         }
 
-        var lines = tail(Files.readAllLines(paths.eventsJsonl()), limit);
+        var lines = tail(filter(Files.readAllLines(paths.eventsJsonl())), limit);
         for (String line : lines) {
             if (raw) {
                 System.out.println(line);
@@ -52,6 +59,29 @@ public final class EventsCommand implements Callable<Integer> {
             }
         }
         return 0;
+    }
+
+    private List<String> filter(List<String> lines) {
+        return lines.stream()
+                .filter(this::matchesType)
+                .filter(this::matchesContains)
+                .toList();
+    }
+
+    private boolean matchesType(String line) {
+        if (type == null || type.isBlank()) {
+            return true;
+        }
+        try {
+            var event = objectMapper.readValue(line, Map.class);
+            return equalsIgnoreCase(text(event.get("event_type")), type);
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private boolean matchesContains(String line) {
+        return contains == null || contains.isBlank() || line.contains(contains);
     }
 
     private static List<String> tail(List<String> lines, int limit) {
@@ -72,5 +102,10 @@ public final class EventsCommand implements Callable<Integer> {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private static boolean equalsIgnoreCase(String left, String right) {
+        return left != null && right != null
+                && left.toLowerCase(Locale.ROOT).equals(right.toLowerCase(Locale.ROOT));
     }
 }

@@ -407,6 +407,8 @@ dualctl runs --workdir <effective_worktree> --agent codex --latest <workstream_i
 ```bash
 dualctl events --workdir <effective_worktree> <workstream_id>
 dualctl events --workdir <effective_worktree> --limit 50 <workstream_id>
+dualctl events --workdir <effective_worktree> --type node_completed <workstream_id>
+dualctl events --workdir <effective_worktree> --contains rate_limit <workstream_id>
 ```
 
 输出原始 JSONL，方便脚本处理：
