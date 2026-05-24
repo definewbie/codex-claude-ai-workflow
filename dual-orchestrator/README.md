@@ -303,6 +303,21 @@ dualctl runs --workdir <effective_worktree> <workstream_id>
 .agent/workstreams/<workstream_id>/runs/<run_id>/run.json
 ```
 
+### Events
+
+查看最近 workflow events：
+
+```bash
+dualctl events --workdir <effective_worktree> <workstream_id>
+dualctl events --workdir <effective_worktree> --limit 50 <workstream_id>
+```
+
+输出原始 JSONL，方便脚本处理：
+
+```bash
+dualctl events --workdir <effective_worktree> --raw <workstream_id>
+```
+
 ### Inspect
 
 查看当前 active node：

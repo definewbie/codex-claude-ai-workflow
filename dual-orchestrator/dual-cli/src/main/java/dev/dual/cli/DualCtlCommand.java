@@ -11,6 +11,7 @@ import picocli.CommandLine.Command;
         subcommands = {
                 StartCommand.class,
                 StatusCommand.class,
+                EventsCommand.class,
                 RunsCommand.class,
                 InspectCommand.class,
                 ResumeCommand.class,
