@@ -295,6 +295,12 @@ dualctl start --workflow dual-orchestrator/workflows/agent-lifecycle.v1.json "�
 dualctl workflow validate dual-orchestrator/workflows/agent-lifecycle.v1.json
 ```
 
+`workflow validate` 会检查结构合法性，也会检查 handler type 是否属于当前 CLI 内置能力。未来如果使用外部 runtime 提供的 handler，可以显式放行：
+
+```bash
+dualctl workflow validate --allow-unknown-handlers ./workflow.json
+```
+
 导出内置默认 workflow 作为自定义起点：
 
 ```bash
