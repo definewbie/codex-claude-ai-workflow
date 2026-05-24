@@ -295,6 +295,12 @@ dualctl start --workflow dual-orchestrator/workflows/agent-lifecycle.v1.json "�
 dualctl workflow validate dual-orchestrator/workflows/agent-lifecycle.v1.json
 ```
 
+导出内置默认 workflow 作为自定义起点：
+
+```bash
+dualctl workflow print-default --output ./workflow.json
+```
+
 如果不传 `--workflow`，默认使用内置的 `agent-lifecycle@1`。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
 
 最小 workflow 示例：
