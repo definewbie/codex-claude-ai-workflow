@@ -93,17 +93,28 @@ public final class InspectCommand implements Callable<Integer> {
         System.out.println("Prompt: " + run.promptPath());
         System.out.println("Output: " + run.outputPath());
         System.out.println("Stderr: " + run.stderrPath());
+        System.out.println("Prompt metadata: " + run.promptMetadataPath());
+        System.out.println("Output metadata: " + run.outputMetadataPath());
+        System.out.println("Stderr metadata: " + run.stderrMetadataPath());
         System.out.println("Command: " + run.command());
 
         if (show != null && !show.isBlank()) {
-            var path = switch (show) {
-                case "prompt" -> workspaceRoot.resolve(run.promptPath());
-                case "output" -> workspaceRoot.resolve(run.outputPath());
-                case "stderr" -> workspaceRoot.resolve(run.stderrPath());
-                default -> throw new IllegalArgumentException("--show for --run must be prompt, output, or stderr");
+            var ref = switch (show) {
+                case "prompt" -> run.promptPath();
+                case "output" -> run.outputPath();
+                case "stderr" -> run.stderrPath();
+                case "prompt-meta" -> run.promptMetadataPath();
+                case "output-meta" -> run.outputMetadataPath();
+                case "stderr-meta" -> run.stderrMetadataPath();
+                default -> throw new IllegalArgumentException("--show for --run must be prompt, output, stderr, prompt-meta, output-meta, or stderr-meta");
             };
             System.out.println();
             System.out.println("----- " + show + " -----");
+            if (ref == null || ref.isBlank()) {
+                System.out.println("(file not available)");
+                return;
+            }
+            var path = workspaceRoot.resolve(ref);
             if (Files.exists(path)) {
                 System.out.print(Files.readString(path));
             } else {

@@ -5,10 +5,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 
 final class AgentRunMetadataWriter {
@@ -30,6 +34,23 @@ final class AgentRunMetadataWriter {
             Path stdoutPath,
             Path stderrPath
     ) throws IOException {
+        var promptMetadataPath = metadataPath(promptPath);
+        writeArtifactMetadata(
+                workspaceRoot,
+                promptMetadataPath,
+                artifactDocument(
+                        workspaceRoot,
+                        workstreamId,
+                        nodeId,
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        "prompt",
+                        "text/markdown",
+                        promptPath
+                )
+        );
         write(workspaceRoot, runDir, new AgentRunDocument(
                 1,
                 runId,
@@ -42,6 +63,9 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, promptPath),
                 relative(workspaceRoot, stdoutPath),
                 relative(workspaceRoot, stderrPath),
+                relative(workspaceRoot, promptMetadataPath),
+                null,
+                null,
                 List.of(),
                 null,
                 null,
@@ -68,6 +92,57 @@ final class AgentRunMetadataWriter {
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure
     ) throws IOException {
+        var promptMetadataPath = metadataPath(promptPath);
+        var outputMetadataPath = metadataPath(stdoutPath);
+        var stderrMetadataPath = metadataPath(stderrPath);
+        writeArtifactMetadata(
+                workspaceRoot,
+                promptMetadataPath,
+                artifactDocument(
+                        workspaceRoot,
+                        workstreamId,
+                        nodeId,
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        "prompt",
+                        "text/markdown",
+                        promptPath
+                )
+        );
+        writeArtifactMetadata(
+                workspaceRoot,
+                outputMetadataPath,
+                artifactDocument(
+                        workspaceRoot,
+                        workstreamId,
+                        nodeId,
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        "output",
+                        "text/markdown",
+                        stdoutPath
+                )
+        );
+        writeArtifactMetadata(
+                workspaceRoot,
+                stderrMetadataPath,
+                artifactDocument(
+                        workspaceRoot,
+                        workstreamId,
+                        nodeId,
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        "stderr",
+                        "text/plain",
+                        stderrPath
+                )
+        );
         write(workspaceRoot, runDir, new AgentRunDocument(
                 1,
                 runId,
@@ -80,6 +155,9 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, promptPath),
                 relative(workspaceRoot, stdoutPath),
                 relative(workspaceRoot, stderrPath),
+                relative(workspaceRoot, promptMetadataPath),
+                relative(workspaceRoot, outputMetadataPath),
+                relative(workspaceRoot, stderrMetadataPath),
                 result.command(),
                 result.startedAt(),
                 result.finishedAt(),
@@ -94,6 +172,63 @@ final class AgentRunMetadataWriter {
     private void write(Path workspaceRoot, Path runDir, AgentRunDocument document) throws IOException {
         Files.createDirectories(runDir);
         objectMapper.writeValue(runDir.resolve("run.json").toFile(), document);
+    }
+
+    private void writeArtifactMetadata(Path workspaceRoot, Path metadataPath, AgentArtifactDocument document) throws IOException {
+        Files.createDirectories(metadataPath.getParent());
+        objectMapper.writeValue(metadataPath.toFile(), document);
+    }
+
+    private AgentArtifactDocument artifactDocument(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            String artifactType,
+            String contentType,
+            Path artifactPath
+    ) throws IOException {
+        var bytes = Files.exists(artifactPath) ? Files.readAllBytes(artifactPath) : new byte[0];
+        return new AgentArtifactDocument(
+                1,
+                artifactType,
+                runId,
+                workstreamId,
+                nodeId,
+                agent,
+                session,
+                promptTemplate,
+                workspaceRoot.toString(),
+                relative(workspaceRoot, artifactPath),
+                contentType,
+                bytes.length,
+                lineCount(bytes),
+                sha256(bytes),
+                Instant.now()
+        );
+    }
+
+    private Path metadataPath(Path artifactPath) {
+        return artifactPath.resolveSibling(artifactPath.getFileName() + ".meta.json");
+    }
+
+    private long lineCount(byte[] bytes) {
+        if (bytes.length == 0) {
+            return 0;
+        }
+        var text = new String(bytes, StandardCharsets.UTF_8);
+        return text.lines().count();
+    }
+
+    private String sha256(byte[] bytes) throws IOException {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException("SHA-256 digest is not available", e);
+        }
     }
 
     private String relative(Path workspaceRoot, Path path) {

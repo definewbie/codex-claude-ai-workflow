@@ -11,6 +11,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,53 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"status\" : \"prepared\""));
         assertTrue(runMetadata.contains("\"nodeId\" : \"design.claude_design\""));
         assertTrue(runMetadata.contains("\"promptPath\" :"));
+        assertTrue(runMetadata.contains("\"promptMetadataPath\" :"));
+        var promptMetadataPath = tempDir.resolve(runMetadataPath.getParent().resolve("prompts/design-claude.md.meta.json"));
+        assertTrue(Files.exists(promptMetadataPath));
+        var promptMetadata = Files.readString(promptMetadataPath);
+        assertTrue(promptMetadata.contains("\"artifactType\" : \"prompt\""));
+        assertTrue(promptMetadata.contains("\"sha256\" :"));
+        assertTrue(promptMetadata.contains("\"byteSize\" :"));
+    }
+
+    @Test
+    void completedRunWritesArtifactMetadataSidecars() throws Exception {
+        var runDir = tempDir.resolve(".agent/workstreams/ws-test/runs/run-001");
+        var promptPath = runDir.resolve("prompts/design-claude.md");
+        var outputPath = runDir.resolve("outputs/design-claude.md");
+        var stderrPath = runDir.resolve("outputs/design-claude.stderr.log");
+        Files.createDirectories(promptPath.getParent());
+        Files.createDirectories(outputPath.getParent());
+        Files.writeString(promptPath, "# Prompt\n");
+        Files.writeString(outputPath, "# Output\nDecision text.\n");
+        Files.writeString(stderrPath, "");
+
+        var startedAt = Instant.parse("2026-05-24T00:00:00Z");
+        var finishedAt = Instant.parse("2026-05-24T00:00:03Z");
+        new AgentRunMetadataWriter().writeCompleted(
+                tempDir,
+                "ws-test",
+                "design.claude_design",
+                "claude",
+                "claude-main",
+                "design-claude",
+                "run-001",
+                runDir,
+                promptPath,
+                outputPath,
+                stderrPath,
+                new AcpxRunResult(0, startedAt, finishedAt, List.of("acpx", "claude")),
+                null
+        );
+
+        var runMetadata = Files.readString(runDir.resolve("run.json"));
+        assertTrue(runMetadata.contains("\"outputMetadataPath\" :"));
+        assertTrue(runMetadata.contains("\"durationMs\" : 3000"));
+        var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.md.meta.json"));
+        assertTrue(outputMetadata.contains("\"artifactType\" : \"output\""));
+        assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.md\""));
+        assertTrue(outputMetadata.contains("\"lineCount\" : 2"));
+        assertTrue(outputMetadata.contains("\"sha256\" :"));
     }
 
     @Test

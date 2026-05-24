@@ -365,6 +365,7 @@ dualctl inspect --workdir <effective_worktree> --run <run_id> <workstream_id>
 dualctl inspect --workdir <effective_worktree> --run <run_id> --show prompt <workstream_id>
 dualctl inspect --workdir <effective_worktree> --run <run_id> --show output <workstream_id>
 dualctl inspect --workdir <effective_worktree> --run <run_id> --show stderr <workstream_id>
+dualctl inspect --workdir <effective_worktree> --run <run_id> --show output-meta <workstream_id>
 ```
 
 这是只读命令，不会修改 ledger。
@@ -495,6 +496,9 @@ dualctl review revise \
 - `promptPath`
 - `outputPath`
 - `stderrPath`
+- `promptMetadataPath`
+- `outputMetadataPath`
+- `stderrMetadataPath`
 - `command`
 - `startedAt`
 - `finishedAt`
@@ -505,6 +509,8 @@ dualctl review revise \
 - `recoverable`
 
 这是后续 `inspect/tail` 和只读 UI 的基础数据源。
+
+`promptPath` / `outputPath` / `stderrPath` 旁边会生成对应的 `*.meta.json` sidecar，记录 artifact type、路径、字节数、行数、SHA-256、run id、node id、agent、session 等信息。Markdown 仍然是人读的主要材料，sidecar 用于审计、去重、UI 展示和后续自动校验。
 
 `context.build_package` 会在关键 Agent step 前生成上下文包，例如 Codex review、Claude implementation、Codex final acceptance。上下文包不是新事实源，而是从 ledger 里把本轮 Agent 最该读的东西装到一个 Markdown 文件：
 
