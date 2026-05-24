@@ -761,6 +761,31 @@ dualctl start --branch ai-smoke-dualctl "任务描述"
 
 同一个 workstream 已经有 workflow ledger。不要重复 `start` 同一个账本；使用 `status` / `resume` 继续。
 
+### `INVALID_DUAL_CONTROL`
+
+Codex review / final acceptance 这类 decision 节点要求 Agent 输出一个严格的 contract block：
+
+````markdown
+```dual-control
+decision: PASS
+summary: 一句话说明判断依据
+```
+````
+
+当前校验规则：
+
+- 只能有一个 `dual-control` block。
+- block 内必须是 `key: value` 行。
+- `decision` 必须存在，并且属于当前节点允许的取值。
+- 如果最新输出里的 block 格式错误，不会回退读取更早的旧输出。
+
+修正 Agent 输出后执行：
+
+```bash
+dualctl retry --workdir <effective_worktree> --note "fixed dual-control output" <workstream_id>
+dualctl resume --workdir <effective_worktree> <workstream_id>
+```
+
 ### `missing handler`
 
 workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。这通常是开发期配置错误。

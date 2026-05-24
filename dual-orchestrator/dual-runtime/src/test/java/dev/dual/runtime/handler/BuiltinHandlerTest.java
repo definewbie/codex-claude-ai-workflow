@@ -119,6 +119,81 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void reviewDecisionFailsWhenDualControlHasMalformedLine() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                ```dual-control
+                decision PASS
+                summary: malformed contract
+                ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
+        var parseError = (Map<?, ?>) result.result().get("parse_error");
+        assertEquals("MALFORMED_DUAL_CONTROL_LINE", parseError.get("code"));
+    }
+
+    @Test
+    void reviewDecisionFailsWhenOutputContainsMultipleDualControlBlocks() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                ```dual-control
+                decision: PASS
+                ```
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
+        var parseError = (Map<?, ?>) result.result().get("parse_error");
+        assertEquals("MULTIPLE_DUAL_CONTROL_BLOCKS", parseError.get("code"));
+    }
+
+    @Test
+    void reviewDecisionDoesNotFallBackToOlderOutputWhenLatestControlBlockIsInvalid() throws Exception {
+        var older = writeOutput("older-codex-review.md", """
+                ```dual-control
+                decision: PASS
+                summary: stale pass
+                ```
+                """);
+        var latest = writeOutput("latest-codex-review.md", """
+                ```dual-control
+                decision PASS
+                summary: latest output is malformed
+                ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(older, latest))
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
+        var parseError = (Map<?, ?>) result.result().get("parse_error");
+        assertEquals("MALFORMED_DUAL_CONTROL_LINE", parseError.get("code"));
+    }
+
+    @Test
     void reviewDecisionBlocksOnBlockedDecision() throws Exception {
         var output = writeOutput("codex-review.md", """
                 ```dual-control

@@ -20,10 +20,14 @@ public final class ReviewDecisionHandler implements DecisionHandler {
 
     @Override
     public NodeResult evaluate(DecisionContext context) throws Exception {
-        var control = readLatestControlBlock(context);
-        if (control == null) {
+        var parseResult = readLatestControlBlock(context);
+        if (parseResult.isMissing()) {
             return failed("MISSING_DUAL_CONTROL", "No dual-control block found in decision input refs.", context);
         }
+        if (!parseResult.valid()) {
+            return failed("INVALID_DUAL_CONTROL", parseResult.message(), context, Set.of(), null, parseResult);
+        }
+        var control = parseResult.block();
         var allowed = allowedDecisions(context.definition().id());
         var decision = control.values().getOrDefault("decision", "").trim();
         if (decision.isBlank()) {
@@ -46,7 +50,7 @@ public final class ReviewDecisionHandler implements DecisionHandler {
         ));
     }
 
-    private DualControlBlock readLatestControlBlock(DecisionContext context) throws Exception {
+    private DualControlParseResult readLatestControlBlock(DecisionContext context) throws Exception {
         var refs = context.instance().inputRefs();
         for (int i = refs.size() - 1; i >= 0; i--) {
             var ref = refs.get(i);
@@ -59,11 +63,14 @@ public final class ReviewDecisionHandler implements DecisionHandler {
             }
             var content = Files.readString(path, StandardCharsets.UTF_8);
             var parsed = parser.parse(content);
-            if (parsed.isPresent()) {
-                return parsed.get();
+            if (parsed.valid()) {
+                return parsed;
+            }
+            if (!parsed.isMissing()) {
+                return parsed;
             }
         }
-        return null;
+        return DualControlParseResult.missing();
     }
 
     private NodeResult failed(String reason, String message, DecisionContext context) {
@@ -71,12 +78,21 @@ public final class ReviewDecisionHandler implements DecisionHandler {
     }
 
     private NodeResult failed(String reason, String message, DecisionContext context, Set<String> allowed, DualControlBlock control) {
+        return failed(reason, message, context, allowed, control, null);
+    }
+
+    private NodeResult failed(String reason, String message, DecisionContext context, Set<String> allowed, DualControlBlock control, DualControlParseResult parseResult) {
         return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
                 "reason", reason,
                 "message", message,
                 "input_refs", context.instance().inputRefs(),
                 "allowed_decisions", List.copyOf(allowed),
-                "control_values", control == null ? Map.of() : control.values()
+                "control_values", control == null ? Map.of() : control.values(),
+                "parse_error", parseResult == null ? Map.of() : Map.of(
+                        "code", parseResult.errorCode(),
+                        "message", parseResult.message(),
+                        "details", parseResult.details()
+                )
         ), message);
     }
 
