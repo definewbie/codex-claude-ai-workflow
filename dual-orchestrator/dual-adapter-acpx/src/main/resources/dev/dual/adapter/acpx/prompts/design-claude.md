@@ -13,6 +13,10 @@ Do not implement code in this stage. Produce an implementation-ready design that
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown design artifact with these sections:

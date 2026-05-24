@@ -153,6 +153,72 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void contextPackageIncludesRequirementInputArtifactAndGitEvidencePointers() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var input = workstreamDir.resolve("runs/run-001/outputs/design.md");
+        var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
+        Files.createDirectories(input.getParent());
+        Files.createDirectories(evidence.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build context packages.\n");
+        Files.writeString(input, "Claude design output.\n");
+        Files.writeString(evidence, "{\"available\":true}\n");
+
+        var handler = new ContextBuildPackageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                new NodeDefinition("context.design_codex_arch_review", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "design.codex_arch_review",
+                        "purpose", "Package design for Codex."
+                )),
+                node(
+                        "context.design_codex_arch_review",
+                        NodeKind.TASK,
+                        "context.build_package",
+                        List.of(".agent/workstreams/ws/runs/run-001/outputs/design.md")
+                )
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("completed", result.outcome());
+        assertEquals("design.codex_arch_review", result.result().get("target_node"));
+        var packageRef = (String) result.result().get("context_package");
+        assertTrue(result.outputRefs().contains(packageRef));
+
+        var markdown = Files.readString(tempDir.resolve(packageRef));
+        assertTrue(markdown.contains("Target Node: design.codex_arch_review"));
+        assertTrue(markdown.contains("Build context packages."));
+        assertTrue(markdown.contains("Claude design output."));
+        assertTrue(markdown.contains("## Recent Agent Outputs"));
+        assertTrue(markdown.contains("git-evidence.json"));
+        assertTrue(markdown.contains("\"available\":true"));
+    }
+
+    @Test
+    void contextPackageIncludesRecentAgentOutputsAfterHumanGateWithNoInputRefs() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.md");
+        Files.createDirectories(planOutput.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement approved plan.\n");
+        Files.writeString(planOutput, "READY_TO_IMPLEMENT with one note.\n");
+
+        var handler = new ContextBuildPackageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "implement.claude_implement"
+                )),
+                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
+        ));
+
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Implement approved plan."));
+        assertTrue(markdown.contains("READY_TO_IMPLEMENT with one note."));
+        assertTrue(markdown.contains("plan-codex-review.md"));
+    }
+
+    @Test
     void nextStagePromptHandlerReturnsArtifactReference() throws Exception {
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(

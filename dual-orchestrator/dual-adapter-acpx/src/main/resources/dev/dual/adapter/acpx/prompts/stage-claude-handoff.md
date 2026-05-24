@@ -13,6 +13,10 @@ Summarize the current state so a fresh session can continue without relying on h
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown handoff with these sections:

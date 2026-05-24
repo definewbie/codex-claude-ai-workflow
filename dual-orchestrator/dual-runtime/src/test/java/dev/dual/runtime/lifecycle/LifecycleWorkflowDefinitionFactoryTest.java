@@ -18,11 +18,16 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertEquals(NodeKind.TASK, definition.node("intake.claude_brainstorm").kind());
         assertEquals(NodeKind.TASK, definition.node("design.codex_arch_review").kind());
         assertEquals(NodeKind.TASK, definition.node("plan.claude_plan").kind());
+        assertEquals(NodeKind.TASK, definition.node("context.implement_claude").kind());
         assertEquals(NodeKind.TASK, definition.node("implement.claude_implement").kind());
+        assertEquals(NodeKind.TASK, definition.node("context.acceptance_codex_verifier_review").kind());
         assertEquals(NodeKind.TASK, definition.node("acceptance.codex_verifier_review").kind());
         assertEquals(NodeKind.TASK, definition.node("stage.generate_next_prompt").kind());
         assertEquals(NodeKind.GATE, definition.node("gate.human_design_approval").kind());
+        assertEquals("context.build_package", definition.node("context.implement_claude").handlerType());
         assertTrue(definition.edgesFrom("intake.claude_brainstorm").stream()
+                .anyMatch(edge -> edge.to().equals("context.intake_codex_product_review")));
+        assertTrue(definition.edgesFrom("context.intake_codex_product_review").stream()
                 .anyMatch(edge -> edge.to().equals("intake.codex_product_review")));
     }
 

@@ -13,6 +13,10 @@ Read the repository and the workstream ledger. Clarify the user request before i
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a concise Markdown artifact with these sections:

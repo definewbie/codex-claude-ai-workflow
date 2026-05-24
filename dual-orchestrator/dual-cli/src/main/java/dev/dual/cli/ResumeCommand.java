@@ -10,6 +10,7 @@ import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.WorkflowCommand;
 import dev.dual.runtime.WorkflowRuntime;
 import dev.dual.runtime.handler.ArtifactValidateHandler;
+import dev.dual.runtime.handler.ContextBuildPackageHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.HumanReviewGateHandler;
 import dev.dual.runtime.handler.PromptGenerateNextStageHandler;
@@ -48,6 +49,7 @@ public final class ResumeCommand implements Callable<Integer> {
                     List.of(
                             new AcpxAgentTaskHandler(new AcpxAgentTransport(), false),
                             new ArtifactValidateHandler(),
+                            new ContextBuildPackageHandler(),
                             new PromptGenerateNextStageHandler()
                     ),
                     List.of(new ReviewDecisionHandler()),

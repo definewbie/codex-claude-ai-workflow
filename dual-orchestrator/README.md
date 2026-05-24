@@ -50,6 +50,7 @@ Runtime 只认识三类节点：
 - resources-based Agent prompt templates。
 - human review gate。
 - review decision handler。
+- context package handler，会在关键 Agent step 前装配可读上下文。
 - artifact validation handler，会落盘 Git status / diff / changed files。
 - next-stage prompt handler。
 - `dualctl start/status/resume/review approve/review revise` 接入 workflow ledger。
@@ -401,6 +402,8 @@ dualctl review revise \
     <node_instance_id>.json
   gates/
     <gate_id>.json
+  context/
+    <context_node_instance_id>.md
   runs/
     <run_id>/
       run.json
@@ -447,6 +450,15 @@ dualctl review revise \
 - `recoverable`
 
 这是后续 `inspect/tail` 和只读 UI 的基础数据源。
+
+`context.build_package` 会在关键 Agent step 前生成上下文包，例如 Codex review、Claude implementation、Codex final acceptance。上下文包不是新事实源，而是从 ledger 里把本轮 Agent 最该读的东西装到一个 Markdown 文件：
+
+- user requirement。
+- 上一个节点传来的 input artifacts。
+- Git evidence 指针和 `git-evidence.json` 摘要。
+- events、workflow current、nodes、runs 等 ledger 指针。
+
+Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个短预览。这样 Agent 可以优先读同一份上下文，减少人工 copy/paste，也给后续 token budget、summary、session handoff 留出统一入口。
 
 `implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：
 
@@ -690,4 +702,5 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - workflow definition 目前是 Java factory，不是外部配置文件。
 - artifact validation 仍是薄实现。
 - context package / recovery gate 还没实现。
+- recovery gate 还没实现。
 - PR / notification 还没接入 Java 版。

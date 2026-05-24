@@ -13,6 +13,10 @@ Run or inspect whatever validation is appropriate for the repository and change 
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown self-test report with these sections:

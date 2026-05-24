@@ -55,7 +55,13 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         Files.createDirectories(stdoutPath.getParent());
         Files.writeString(
                 promptPath,
-                promptRenderer.render(context.workspaceRoot(), context.workstreamId(), context.definition().id(), promptTemplate),
+                promptRenderer.render(
+                        context.workspaceRoot(),
+                        context.workstreamId(),
+                        context.definition().id(),
+                        promptTemplate,
+                        context.instance().inputRefs()
+                ),
                 StandardCharsets.UTF_8
         );
 

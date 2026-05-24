@@ -13,6 +13,10 @@ Do not modify files. Review whether Claude's design is coherent, scoped, impleme
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown review with these sections:

@@ -13,6 +13,10 @@ Do not implement code in this stage. Keep the plan small enough to execute and v
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown plan with these sections:

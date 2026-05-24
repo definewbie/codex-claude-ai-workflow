@@ -13,6 +13,10 @@ Do not modify files. Do not perform line-by-line code review. Focus on product c
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a concise Markdown artifact with these sections:

@@ -13,6 +13,10 @@ Do not modify files.
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown review with these sections:

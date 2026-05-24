@@ -13,6 +13,10 @@ Implement the approved plan. Keep the change scoped. Do not perform unrelated re
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 After implementation, write a Markdown artifact with these sections:

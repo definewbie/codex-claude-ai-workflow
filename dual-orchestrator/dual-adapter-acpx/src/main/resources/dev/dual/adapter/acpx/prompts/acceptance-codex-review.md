@@ -21,6 +21,10 @@ Use `git-evidence.json`, `git-status-short.txt`, `diff.stat`, `diff.patch`, and 
 
 {{requirement}}
 
+## Context Package
+
+{{context_package}}
+
 ## Output Contract
 
 Write a Markdown acceptance report with these sections:
