@@ -443,6 +443,39 @@ public final class WorkflowFileLedger {
         writeInstanceFromCurrent(paths, resumed, now);
     }
 
+    public void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
+        var current = loadCurrent(paths);
+        if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY) {
+            throw new IOException("workflow is not waiting for recovery: " + current.status());
+        }
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            throw new IOException("no active recovery node to abort");
+        }
+        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var eventId = nextEventId(current.lastEventId());
+        appendEvent(paths, eventId, "workflow_aborted", Map.of(
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId(),
+                "note", note == null ? "" : note,
+                "recovery_gate_ids", current.openGateIds()
+        ));
+        var now = Instant.now();
+        var aborted = new WorkflowCurrentDocument(
+                1,
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.FAILED,
+                List.of(),
+                List.of(),
+                eventId,
+                now
+        );
+        jsonWriter.write(paths.workflowCurrentJson(), aborted);
+        writeInstanceFromCurrent(paths, aborted, now);
+    }
+
     private void writeInstanceFromCurrent(WorkstreamPaths paths, WorkflowCurrentDocument current, Instant updatedAt)
             throws IOException {
         var existing = objectMapper.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);

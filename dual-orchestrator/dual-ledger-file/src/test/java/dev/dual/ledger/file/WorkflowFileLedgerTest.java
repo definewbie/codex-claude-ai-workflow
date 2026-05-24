@@ -261,6 +261,53 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void abortRecoveryMarksWorkflowFailedAndClearsActiveNodes() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-abort"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-abort", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "INVALID_DUAL_CONTROL", List.of(), Map.of());
+
+        ledger.abortRecovery(paths, "not worth continuing");
+
+        var aborted = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.FAILED, aborted.status());
+        assertTrue(aborted.activeNodeInstanceIds().isEmpty());
+        assertTrue(aborted.openGateIds().isEmpty());
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("workflow_aborted"));
+        assertTrue(events.contains("not worth continuing"));
+    }
+
+    @Test
+    void abortRecoveryRejectsNonRecoveryWorkflow() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-abort-ready"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-abort-ready", definition);
+
+        var error = assertThrows(java.io.IOException.class, () -> ledger.abortRecovery(paths, "not in recovery"));
+
+        assertTrue(error.getMessage().contains("not waiting for recovery"));
+    }
+
+    @Test
     void retryRejectsNonRetryableActiveNode() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-retry-ready"));
         Files.createDirectories(paths.workstreamDir());

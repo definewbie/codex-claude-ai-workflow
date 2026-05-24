@@ -406,6 +406,17 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 
 在 `WAITING_FOR_RECOVERY` 状态下直接执行 `dualctl resume` 不会重新跑 Agent；它只会提示先执行 `dualctl retry`。这避免了 rate limit、context window、输出契约错误还没处理时被重复触发。
 
+如果确认这个 workstream 不再继续，可以终止 recovery：
+
+```bash
+dualctl recovery abort \
+  --workdir <effective_worktree> \
+  --note "scope changed; stop this workstream" \
+  <workstream_id>
+```
+
+`recovery abort` 会把 workflow 标记为 `FAILED`，清空 active node / open gate，并写入 `workflow_aborted` event。它不会删除 worktree、代码改动或 ledger。
+
 ### Human Review
 
 批准当前 gate：
@@ -772,5 +783,5 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - workflow definition 目前是 Java factory，不是外部配置文件。
 - artifact validation 仍是薄实现。
 - context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
-- recovery gate 已有最小实现，但还没有 `abort` 命令、交互式修复向导或自动分类。
+- recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
 - PR / notification 还没接入 Java 版。
