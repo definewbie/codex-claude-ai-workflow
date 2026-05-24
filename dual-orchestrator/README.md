@@ -488,6 +488,7 @@ dualctl review revise \
 
 - user requirement。
 - 上一个节点传来的 input artifacts。
+- 最近 human gate feedback，例如 `review revise --feedback-file` 写入的 Must Fix / 修改意见。
 - Git evidence 指针和 `git-evidence.json` 摘要。
 - events、workflow current、nodes、runs 等 ledger 指针。
 
@@ -734,6 +735,6 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - 仍是 CLI-first，没有 API server / scheduler。
 - workflow definition 目前是 Java factory，不是外部配置文件。
 - artifact validation 仍是薄实现。
-- context package / recovery gate 还没实现。
+- context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
 - recovery gate 还没实现。
 - PR / notification 还没接入 Java 版。

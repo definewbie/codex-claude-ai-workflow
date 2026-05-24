@@ -219,6 +219,51 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void contextPackageIncludesHumanGateFeedbackFromNodeResult() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var nodesDir = workstreamDir.resolve("nodes");
+        Files.createDirectories(nodesDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Revise the design.\n");
+        Files.writeString(nodesDir.resolve("node-gate-human-design-approval-007.json"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-gate-human-design-approval-007",
+                  "nodeDefinitionId": "gate.human_design_approval",
+                  "kind": "GATE",
+                  "handlerType": "human.review",
+                  "status": "COMPLETED",
+                  "stageId": "stage-gate",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "outputRefs": [],
+                  "result": {
+                    "human_action": "revise",
+                    "note": "Codex Must Fix: narrow the implementation scope before coding."
+                  },
+                  "runRef": null,
+                  "startedAt": null,
+                  "finishedAt": "2026-05-24T01:00:00Z"
+                }
+                """);
+
+        var handler = new ContextBuildPackageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "implement.claude_implement"
+                )),
+                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
+        ));
+
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("## Human Feedback"));
+        assertTrue(markdown.contains("gate.human_design_approval"));
+        assertTrue(markdown.contains("Action: revise"));
+        assertTrue(markdown.contains("Codex Must Fix: narrow the implementation scope before coding."));
+    }
+
+    @Test
     void nextStagePromptHandlerReturnsArtifactReference() throws Exception {
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(

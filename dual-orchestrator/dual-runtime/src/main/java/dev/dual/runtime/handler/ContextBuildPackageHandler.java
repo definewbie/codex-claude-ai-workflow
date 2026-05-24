@@ -1,5 +1,7 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeResult;
 
 import java.io.IOException;
@@ -11,10 +13,14 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class ContextBuildPackageHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
 
     @Override
     public String type() {
@@ -60,6 +66,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         builder.append("## Input Artifacts\n\n");
         appendInputArtifacts(builder, context);
+
+        builder.append("## Human Feedback\n\n");
+        appendHumanFeedback(builder, workstreamDir);
 
         builder.append("## Recent Agent Outputs\n\n");
         appendRecentAgentOutputs(builder, workstreamDir);
@@ -114,6 +123,68 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             builder.append(snippet(evidenceJson));
             builder.append("\n```\n\n");
         }
+    }
+
+    private static void appendHumanFeedback(StringBuilder builder, Path workstreamDir) throws IOException {
+        var nodesDir = workstreamDir.resolve("nodes");
+        if (!Files.exists(nodesDir)) {
+            builder.append("(no workflow node state yet)\n\n");
+            return;
+        }
+        try (Stream<Path> paths = Files.list(nodesDir)) {
+            var feedbackNodes = paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .map(ContextBuildPackageHandler::readNodeUnchecked)
+                    .filter(ContextBuildPackageHandler::hasHumanFeedback)
+                    .sorted(Comparator.comparing(ContextBuildPackageHandler::finishedAtText).reversed())
+                    .limit(5)
+                    .toList();
+            if (feedbackNodes.isEmpty()) {
+                builder.append("(no human gate feedback yet)\n\n");
+                return;
+            }
+            for (Map<String, Object> node : feedbackNodes) {
+                var result = resultMap(node);
+                builder.append("### ").append(text(node.get("nodeDefinitionId"))).append("\n\n");
+                builder.append("- Action: ").append(text(result.get("human_action"))).append("\n");
+                builder.append("- Finished At: ").append(text(node.get("finishedAt"))).append("\n\n");
+                builder.append("```text\n");
+                builder.append(text(result.get("note")).stripTrailing());
+                builder.append("\n```\n\n");
+            }
+        }
+    }
+
+    private static Map<String, Object> readNodeUnchecked(Path path) {
+        try {
+            return OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
+        } catch (IOException e) {
+            return Map.of();
+        }
+    }
+
+    private static boolean hasHumanFeedback(Map<String, Object> node) {
+        var result = resultMap(node);
+        return result.containsKey("human_action") && !text(result.get("note")).isBlank();
+    }
+
+    private static String finishedAtText(Map<String, Object> node) {
+        return text(node.get("finishedAt"));
+    }
+
+    private static Map<String, Object> resultMap(Map<String, Object> node) {
+        var result = node.get("result");
+        if (result instanceof Map<?, ?> map) {
+            var copy = new LinkedHashMap<String, Object>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    copy.put(key, entry.getValue());
+                }
+            }
+            return copy;
+        }
+        return Map.of();
     }
 
     private static void appendRecentAgentOutputs(StringBuilder builder, Path workstreamDir) throws IOException {
@@ -186,5 +257,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static String toDisplayRef(Path path) {
         return path.toAbsolutePath().normalize().toString();
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 }
