@@ -14,7 +14,7 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
     }
 
     public Path runsDir() {
-        return agentDir().resolve("runs");
+        return workstreamDir().resolve("runs");
     }
 
     public Path runDir(dev.dual.core.id.DualId runId) {

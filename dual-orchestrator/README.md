@@ -288,6 +288,50 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 
 过渡期两套文件会同时存在；判断当前真实 active node 时，以 `Workflow` 区块和 `.agent/workstreams/<workstream_id>/workflow/current.json` 为准。
 
+### Runs
+
+列出当前 workstream 的 Agent run：
+
+```bash
+dualctl runs --workdir <effective_worktree> <workstream_id>
+```
+
+输出包含 run id、状态、agent、node、exit code、duration 和 failure reason。它读取：
+
+```text
+.agent/workstreams/<workstream_id>/runs/<run_id>/run.json
+```
+
+### Inspect
+
+查看当前 active node：
+
+```bash
+dualctl inspect --workdir <effective_worktree> <workstream_id>
+```
+
+查看指定 node：
+
+```bash
+dualctl inspect --workdir <effective_worktree> --node <node_instance_id> <workstream_id>
+```
+
+查看指定 run：
+
+```bash
+dualctl inspect --workdir <effective_worktree> --run <run_id> <workstream_id>
+```
+
+直接查看 run 的 prompt / output / stderr：
+
+```bash
+dualctl inspect --workdir <effective_worktree> --run <run_id> --show prompt <workstream_id>
+dualctl inspect --workdir <effective_worktree> --run <run_id> --show output <workstream_id>
+dualctl inspect --workdir <effective_worktree> --run <run_id> --show stderr <workstream_id>
+```
+
+这是只读命令，不会修改 ledger。
+
 ### Resume
 
 ```bash
