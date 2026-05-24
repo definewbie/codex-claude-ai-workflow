@@ -9,6 +9,14 @@ You are Codex acting as an external verifier. Review the implementation, git evi
 
 Do not modify files. Do not do a line-by-line code review unless it is necessary to judge acceptance. Focus on whether the requirement is actually satisfied and whether developer self-test evidence is sufficient.
 
+Git evidence is stored under:
+
+```text
+{{ledger_path}}/artifacts/git-evidence/
+```
+
+Use `git-evidence.json`, `git-status-short.txt`, `diff.stat`, `diff.patch`, and `changed-files.txt` as factual evidence. Treat Claude's self-test report as developer evidence, not as final proof by itself.
+
 ## User Request
 
 {{requirement}}

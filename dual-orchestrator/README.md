@@ -29,7 +29,7 @@ Runtime 只认识三类节点：
 5. Codex acceptance review
 6. Stage handoff and next-stage prompt
 
-第一版很多节点还是薄实现：artifact validation 和 next-stage prompt 还是占位式 handler。`acpx.agent_run` 已经能通过 `acpx` 调 Claude / Codex，decision handler 已经能解析 Agent 输出里的 `dual-control` block。
+第一版很多节点还是薄实现：next-stage prompt 仍是占位式 handler；artifact validation 已经会采集 Git evidence，供后续 Codex acceptance 使用。`acpx.agent_run` 已经能通过 `acpx` 调 Claude / Codex，decision handler 已经能解析 Agent 输出里的 `dual-control` block。
 
 ## 当前能力
 
@@ -50,7 +50,7 @@ Runtime 只认识三类节点：
 - resources-based Agent prompt templates。
 - human review gate。
 - review decision handler。
-- artifact validation handler。
+- artifact validation handler，会落盘 Git status / diff / changed files。
 - next-stage prompt handler。
 - `dualctl start/status/resume/review approve/review revise` 接入 workflow ledger。
 
@@ -406,6 +406,16 @@ dualctl review revise \
       run.json
       prompts/
       outputs/
+  artifacts/
+    git-evidence/
+      git-evidence.json
+      base-commit.txt
+      branch.txt
+      git-root.txt
+      git-status-short.txt
+      diff.stat
+      diff.patch
+      changed-files.txt
   events.jsonl
 ```
 
@@ -437,6 +447,16 @@ dualctl review revise \
 - `recoverable`
 
 这是后续 `inspect/tail` 和只读 UI 的基础数据源。
+
+`implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：
+
+- `git-status-short.txt`：当前 worktree 的 `git status --short`。
+- `diff.stat`：`git diff --stat`。
+- `diff.patch`：`git diff`，不包含未跟踪文件内容。
+- `changed-files.txt`：从 porcelain status 提取的变更文件列表，包含未跟踪文件名。
+- `git-evidence.json`：稳定索引，包含 `available`、`workdir`、`gitRoot`、`branch`、`baseCommit`、`hasChanges`、`changedFileCount`、`generatedAt`、`error`。
+
+如果当前目录不是 Git repo，handler 不会把 workflow 打崩；它会写入 `available=false` 的 `git-evidence.json`，让后续验收报告明确说明 Git evidence 不可用。
 
 过渡期仍会看到旧 design-loop ledger：
 

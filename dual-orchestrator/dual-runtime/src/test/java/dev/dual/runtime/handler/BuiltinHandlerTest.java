@@ -8,12 +8,14 @@ import dev.dual.core.workflow.NodeStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BuiltinHandlerTest {
@@ -94,7 +96,17 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void artifactValidationCompletesForMilestoneOne() throws Exception {
+    void artifactValidationCollectsGitEvidence() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+        Files.writeString(tempDir.resolve("README.md"), "after\n");
+        Files.createDirectories(tempDir.resolve(".agent"));
+        Files.writeString(tempDir.resolve(".agent/noise.log"), "ledger noise\n");
+
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
@@ -105,6 +117,39 @@ class BuiltinHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
+        assertEquals(true, result.result().get("git_available"));
+        assertEquals(true, result.result().get("has_changes"));
+        assertEquals(1, result.result().get("changed_file_count"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/artifacts/git-evidence/git-evidence.json"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/artifacts/git-evidence/diff.patch"));
+
+        var evidenceDir = tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence");
+        assertTrue(Files.readString(evidenceDir.resolve("git-evidence.json")).contains("\"available\" : true"));
+        assertTrue(Files.readString(evidenceDir.resolve("git-status-short.txt")).contains("README.md"));
+        assertFalse(Files.readString(evidenceDir.resolve("git-status-short.txt")).contains(".agent"));
+        assertTrue(Files.readString(evidenceDir.resolve("diff.patch")).contains("-before"));
+        assertTrue(Files.readString(evidenceDir.resolve("changed-files.txt")).contains("README.md"));
+    }
+
+    @Test
+    void artifactValidationMarksGitUnavailableWithoutFailingWorkflow() throws Exception {
+        var handler = new ArtifactValidateHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("completed", result.outcome());
+        assertEquals(false, result.result().get("git_available"));
+        assertEquals(false, result.result().get("has_changes"));
+        assertEquals(0, result.result().get("changed_file_count"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/artifacts/git-evidence/git-evidence.json"));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence/diff.patch")));
+        assertTrue(Files.readString(tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence/git-evidence.json"))
+                .contains("\"available\" : false"));
     }
 
     @Test
@@ -162,5 +207,20 @@ class BuiltinHandlerTest {
         Files.createDirectories(path.getParent());
         Files.writeString(path, content);
         return tempDir.relativize(path).toString();
+    }
+
+    private static void git(Path workdir, String... args) throws Exception {
+        var command = new java.util.ArrayList<String>();
+        command.add("git");
+        command.addAll(List.of(args));
+        var process = new ProcessBuilder(command)
+                .directory(workdir.toFile())
+                .redirectErrorStream(true)
+                .start();
+        var output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        var exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new AssertionError("git command failed: " + command + "\n" + output);
+        }
     }
 }
