@@ -41,6 +41,7 @@ public final class WorkflowFileLedger {
         Files.createDirectories(paths.workflowDir());
         Files.createDirectories(paths.nodesDir());
         Files.createDirectories(paths.gatesDir());
+        Files.createDirectories(paths.iterationsDir());
 
         var now = Instant.now();
         var entry = definition.node(definition.entryNodeId());
@@ -59,6 +60,7 @@ public final class WorkflowFileLedger {
                 definition.nodes(),
                 definition.edges()
         ));
+        jsonWriter.write(paths.iterationJson("iter-001"), WorkflowIterationDocument.initial(entry.id(), now));
         jsonWriter.write(paths.workflowInstanceJson(), new WorkflowInstanceDocument(
                 1,
                 workflowInstanceId,
@@ -188,6 +190,22 @@ public final class WorkflowFileLedger {
         var nextDefinition = definition.node(edge.get().to());
         var nextNodeInstanceId = nodeInstanceId(nextDefinition.id(), currentEventNumber(current.lastEventId()) + 1);
         var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
+        var nextIterationId = node.iterationId();
+        var iterationStartedPayload = Map.<String, Object>of();
+        if (startsRevisionIteration(outcome)) {
+            var nextIteration = nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
+            Files.createDirectories(paths.iterationsDir());
+            jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
+            nextIterationId = nextIteration.iterationId();
+            iterationStartedPayload = Map.of(
+                    "iteration_id", nextIteration.iterationId(),
+                    "parent_iteration_id", nextIteration.parentIterationId(),
+                    "trigger_node_instance_id", nextIteration.triggerNodeInstanceId(),
+                    "trigger_action", nextIteration.triggerAction(),
+                    "target_node_definition_id", nextIteration.targetNodeDefinitionId(),
+                    "reason", nextIteration.reason()
+            );
+        }
         var nextNode = new NodeInstanceDocument(
                 1,
                 nextNodeInstanceId,
@@ -196,7 +214,7 @@ public final class WorkflowFileLedger {
                 nextDefinition.handlerType(),
                 nextStatus,
                 stageId(nextDefinition.id()),
-                node.iterationId(),
+                nextIterationId,
                 outputRefs,
                 List.of(),
                 Map.of(),
@@ -233,6 +251,10 @@ public final class WorkflowFileLedger {
                 "node_instance_id", nextNodeInstanceId,
                 "gate_id", gateId
         ));
+        if (!iterationStartedPayload.isEmpty()) {
+            appendEvent(paths, nextEventId(eventId), "iteration_started", iterationStartedPayload);
+            eventId = nextEventId(eventId);
+        }
         var now = Instant.now();
         var next = new WorkflowCurrentDocument(
                 1,
@@ -436,6 +458,69 @@ public final class WorkflowFileLedger {
             }
         }
         return 1;
+    }
+
+    private WorkflowIterationDocument nextRevisionIteration(
+            WorkstreamPaths paths,
+            NodeInstanceDocument triggerNode,
+            String triggerAction,
+            String targetNodeDefinitionId,
+            Map<String, Object> result
+    ) throws IOException {
+        var nextNumber = maxIterationNumber(paths) + 1;
+        var iterationId = "iter-" + String.format("%03d", nextNumber);
+        return WorkflowIterationDocument.revision(
+                iterationId,
+                nextNumber,
+                triggerNode.iterationId(),
+                triggerNode.nodeInstanceId(),
+                triggerAction,
+                targetNodeDefinitionId,
+                revisionReason(result),
+                Instant.now()
+        );
+    }
+
+    private int maxIterationNumber(WorkstreamPaths paths) throws IOException {
+        if (!Files.exists(paths.iterationsDir())) {
+            return 1;
+        }
+        try (var stream = Files.list(paths.iterationsDir())) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString())
+                    .filter(name -> name.matches("iter-\\d{3}\\.json"))
+                    .mapToInt(name -> Integer.parseInt(name.substring("iter-".length(), "iter-000".length())))
+                    .max()
+                    .orElse(1);
+        }
+    }
+
+    private static boolean startsRevisionIteration(String outcome) {
+        return "revise".equals(outcome) || "NEEDS_REVISION".equals(outcome) || "REJECT".equals(outcome);
+    }
+
+    private static String revisionReason(Map<String, Object> result) {
+        if (result == null || result.isEmpty()) {
+            return "";
+        }
+        var note = text(result.get("note"));
+        if (!note.isBlank()) {
+            return note;
+        }
+        var summary = text(result.get("summary"));
+        if (!summary.isBlank()) {
+            return summary;
+        }
+        var reason = text(result.get("reason"));
+        if (!reason.isBlank()) {
+            return reason;
+        }
+        return "";
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
     private static String stageId(String nodeDefinitionId) {

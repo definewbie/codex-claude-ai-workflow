@@ -77,6 +77,14 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("nodes");
     }
 
+    public Path iterationsDir() {
+        return workstreamDir().resolve("iterations");
+    }
+
+    public Path iterationJson(String iterationId) {
+        return iterationsDir().resolve(iterationId + ".json");
+    }
+
     public Path nodeJson(String nodeInstanceId) {
         return nodesDir().resolve(nodeInstanceId + ".json");
     }

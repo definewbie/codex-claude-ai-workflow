@@ -49,6 +49,10 @@ public final class StatusCommand implements Callable<Integer> {
             System.out.println("  Status: " + current.status());
             System.out.println("  Active nodes: " + current.activeNodeInstanceIds());
             System.out.println("  Open gates: " + current.openGateIds());
+            if (!current.activeNodeInstanceIds().isEmpty()) {
+                var node = new WorkflowFileLedger().loadNode(paths, current.activeNodeInstanceIds().get(0));
+                System.out.println("  Active iteration: " + node.iterationId());
+            }
         }
         return 0;
     }

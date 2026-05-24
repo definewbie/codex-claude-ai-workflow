@@ -53,6 +53,8 @@ class WorkflowFileLedgerTest {
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         assertEquals(NodeStatus.READY, node.status());
         assertEquals("intake.claude_brainstorm", node.nodeDefinitionId());
+        assertEquals("iter-001", node.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-001")).contains("\"triggerAction\" : \"workflow_started\""));
     }
 
     @Test
@@ -93,8 +95,78 @@ class WorkflowFileLedgerTest {
         assertEquals("second", nextNode.nodeDefinitionId());
         assertEquals(NodeKind.GATE, nextNode.kind());
         assertEquals(NodeStatus.WAITING, nextNode.status());
+        assertEquals("iter-001", nextNode.iterationId());
         assertEquals(List.of("first-output.md"), nextNode.inputRefs());
         assertTrue(Files.exists(paths.gateJson("gate-" + nextNode.nodeInstanceId())));
+    }
+
+    @Test
+    void revisionOutcomeStartsNextWorkflowIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-revision"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("gate.review", "revise", "design.claude_design"))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-revision", definition);
+        var current = ledger.loadCurrent(paths);
+        var gate = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, gate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
+                "human_action", "revise",
+                "note", "Narrow the design before implementation."
+        ));
+
+        var routed = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, routed.activeNodeInstanceIds().get(0));
+        assertEquals("design.claude_design", next.nodeDefinitionId());
+        assertEquals("iter-002", next.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"parentIterationId\" : \"iter-001\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"triggerAction\" : \"revise\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"targetNodeDefinitionId\" : \"design.claude_design\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("Narrow the design before implementation."));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("iteration_started"));
+    }
+
+    @Test
+    void rejectDecisionStartsNextWorkflowIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reject"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "acceptance.decision",
+                List.of(
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of())
+                ),
+                List.of(new EdgeDefinition("acceptance.decision", "REJECT", "context.implement_claude"))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-reject", definition);
+        var current = ledger.loadCurrent(paths);
+        var decision = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED, "REJECT", List.of(), Map.of(
+                "decision", "REJECT",
+                "summary", "Acceptance evidence is incomplete."
+        ));
+
+        var routed = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, routed.activeNodeInstanceIds().get(0));
+        assertEquals("context.implement_claude", next.nodeDefinitionId());
+        assertEquals("iter-002", next.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"triggerAction\" : \"REJECT\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("Acceptance evidence is incomplete."));
     }
 
     @Test
@@ -178,6 +250,8 @@ class WorkflowFileLedgerTest {
         var retryNode = ledger.loadNode(paths, retryCurrent.activeNodeInstanceIds().get(0));
         assertEquals(WorkflowStatus.RUNNING, retryCurrent.status());
         assertEquals(NodeStatus.READY, retryNode.status());
+        assertEquals("iter-001", retryNode.iterationId());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
         assertTrue(retryNode.outputRefs().isEmpty());
         assertEquals("FAILED", retryNode.result().get("retry_of_status"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_retry_requested"));

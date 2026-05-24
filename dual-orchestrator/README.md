@@ -421,6 +421,8 @@ dualctl review revise \
 
 `approve` / `revise` 都会写 workflow event，并按 workflow edge 进入下一个节点。
 
+`revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
+
 ## Ledger
 
 每个 workstream 在 effective worktree 中写入：
@@ -433,6 +435,9 @@ dualctl review revise \
     current.json
   nodes/
     <node_instance_id>.json
+  iterations/
+    iter-001.json
+    iter-002.json
   gates/
     <gate_id>.json
   context/
@@ -518,6 +523,32 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 ```
 
 事实流是 `events.jsonl`，`workflow/current.json` 是为了快速 `status` / `resume` 的快照。
+
+### Workflow Iteration
+
+workflow iteration 表示一次有业务意义的尝试，不是命令执行次数。
+
+- `approve` / `completed`：沿用当前 iteration。
+- `retry`：沿用当前 iteration，只重新执行当前失败或阻塞的 node。
+- `revise` / `NEEDS_REVISION` / `REJECT`：开启新 iteration，例如 `iter-002`。
+
+每个 iteration 会写到：
+
+```text
+.agent/workstreams/<workstream_id>/iterations/<iteration_id>.json
+```
+
+revision iteration 会记录：
+
+- `parentIterationId`：上一轮。
+- `triggerNodeInstanceId`：哪个 gate / decision 触发。
+- `triggerAction`：`revise`、`NEEDS_REVISION` 或 `REJECT`。
+- `targetNodeDefinitionId`：回到哪个节点继续。
+- `reason`：来自 human feedback、Codex summary 或错误原因的摘要。
+
+这个模型能区分两类情况：工具失败、quota、context window、格式错误属于执行层恢复，应该 `retry`；Codex 或人明确要求修改产出，才进入下一轮 iteration。这样账本能表达“业务版本在收敛”，也不会把 acpx 断线误记成新一版。
+
+当前仍有一个风险：iteration 只能说明“为什么进入下一轮”，不能保证 Agent 一定完整处理了反馈。业务满足性仍需要看 context package、Agent output、Git evidence、Codex acceptance 和 human gate 的组合证据。后续可以继续补强 output contract validation 和 acceptance checklist。
 
 ## Smoke Tests
 
