@@ -52,6 +52,9 @@ public final class StatusCommand implements Callable<Integer> {
             if (!current.activeNodeInstanceIds().isEmpty()) {
                 var node = new WorkflowFileLedger().loadNode(paths, current.activeNodeInstanceIds().get(0));
                 System.out.println("  Active iteration: " + node.iterationId());
+                if (current.status() == dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY) {
+                    System.out.println("  Recovery: fix the external cause, then run dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
+                }
             }
         }
         return 0;

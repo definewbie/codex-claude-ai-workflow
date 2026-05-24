@@ -387,7 +387,7 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 
 ### Retry
 
-如果当前 active node 因为 agent runtime、quota、context window 或 prompt contract 问题进入 `FAILED` / `BLOCKED`，先修复外部问题，再显式 retry：
+如果当前 active node 因为 agent runtime、quota、context window 或 prompt contract 问题进入 `FAILED` / `BLOCKED`，workflow 会停在 `WAITING_FOR_RECOVERY`，并打开一个 recovery gate。先修复外部问题，再显式 retry：
 
 ```bash
 dualctl retry --workdir <effective_worktree> --note "claude session reconnected" <workstream_id>
@@ -400,8 +400,11 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 - 把该 node 标记回 `READY`。
 - 清空该 node 的旧 output refs。
 - 记录 `node_retry_requested` event。
+- 清空当前 recovery gate，使 workflow 回到 `RUNNING`。
 
 这样可以保留失败现场，同时让下一次 `resume` 重新执行同一个 node。
+
+在 `WAITING_FOR_RECOVERY` 状态下直接执行 `dualctl resume` 不会重新跑 Agent；它只会提示先执行 `dualctl retry`。这避免了 rate limit、context window、输出契约错误还没处理时被重复触发。
 
 ### Human Review
 
@@ -769,5 +772,5 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - workflow definition 目前是 Java factory，不是外部配置文件。
 - artifact validation 仍是薄实现。
 - context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
-- recovery gate 还没实现。
+- recovery gate 已有最小实现，但还没有 `abort` 命令、交互式修复向导或自动分类。
 - PR / notification 还没接入 Java 版。

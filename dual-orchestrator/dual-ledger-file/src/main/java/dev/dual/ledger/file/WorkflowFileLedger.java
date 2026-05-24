@@ -326,11 +326,28 @@ public final class WorkflowFileLedger {
             String outcome
     ) throws IOException {
         var eventId = nextEventId(current.lastEventId());
-        var workflowStatus = nodeStatus == NodeStatus.BLOCKED ? WorkflowStatus.BLOCKED : WorkflowStatus.FAILED;
+        var workflowStatus = WorkflowStatus.WAITING_FOR_RECOVERY;
+        var recoveryGateId = "recovery-" + node.nodeInstanceId();
+        jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument(
+                1,
+                recoveryGateId,
+                node.nodeInstanceId(),
+                "recovery.review",
+                "open",
+                List.of("retry", "abort"),
+                Instant.now(),
+                null,
+                Map.of(
+                        "node", node.nodeDefinitionId(),
+                        "node_status", nodeStatus.name(),
+                        "outcome", outcome
+                )
+        ));
         appendEvent(paths, eventId, "node_" + nodeStatus.name().toLowerCase(), Map.of(
                 "node", node.nodeDefinitionId(),
                 "node_status", nodeStatus.name(),
-                "outcome", outcome
+                "outcome", outcome,
+                "recovery_gate_id", recoveryGateId
         ));
         var now = Instant.now();
         var stopped = new WorkflowCurrentDocument(
@@ -341,7 +358,7 @@ public final class WorkflowFileLedger {
                 current.definitionVersion(),
                 workflowStatus,
                 List.of(node.nodeInstanceId()),
-                List.of(),
+                List.of(recoveryGateId),
                 eventId,
                 now
         );
@@ -406,7 +423,8 @@ public final class WorkflowFileLedger {
                 "node", node.nodeDefinitionId(),
                 "node_instance_id", node.nodeInstanceId(),
                 "previous_status", node.status().name(),
-                "note", note == null ? "" : note
+                "note", note == null ? "" : note,
+                "recovery_gate_ids", current.openGateIds()
         ));
         var now = Instant.now();
         var resumed = new WorkflowCurrentDocument(

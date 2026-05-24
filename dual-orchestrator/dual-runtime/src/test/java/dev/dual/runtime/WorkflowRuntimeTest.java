@@ -105,9 +105,14 @@ class WorkflowRuntimeTest {
         );
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-failed-runtime"));
 
-        assertEquals(WorkflowStatus.FAILED, result.status());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
         assertEquals("task.one", result.activeNode());
         assertTrue(result.message().contains("FAILED"));
+
+        var recoveryResult = runtime.resume(new WorkflowCommand(tempDir, "ws-failed-runtime"));
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, recoveryResult.status());
+        assertEquals("task.one", recoveryResult.activeNode());
+        assertTrue(recoveryResult.message().contains("waiting for recovery"));
     }
 
     @Test

@@ -219,11 +219,13 @@ class WorkflowFileLedgerTest {
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "completed", List.of(), Map.of("exit_code", 4));
 
         var stopped = ledger.loadCurrent(paths);
-        assertEquals(WorkflowStatus.FAILED, stopped.status());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
         assertEquals(List.of(node.nodeInstanceId()), stopped.activeNodeInstanceIds());
-        assertTrue(stopped.openGateIds().isEmpty());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), stopped.openGateIds());
+        assertTrue(Files.exists(paths.gateJson("recovery-" + node.nodeInstanceId())));
         assertFalse(Files.exists(paths.nodeJson("node-second-002")));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_failed"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("recovery_gate_id"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains(stopped.lastEventId()));
     }
 
@@ -250,6 +252,7 @@ class WorkflowFileLedgerTest {
         var retryNode = ledger.loadNode(paths, retryCurrent.activeNodeInstanceIds().get(0));
         assertEquals(WorkflowStatus.RUNNING, retryCurrent.status());
         assertEquals(NodeStatus.READY, retryNode.status());
+        assertTrue(retryCurrent.openGateIds().isEmpty());
         assertEquals("iter-001", retryNode.iterationId());
         assertFalse(Files.exists(paths.iterationJson("iter-002")));
         assertTrue(retryNode.outputRefs().isEmpty());
@@ -299,8 +302,9 @@ class WorkflowFileLedgerTest {
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.BLOCKED, "completed", List.of(), Map.of());
 
         var stopped = ledger.loadCurrent(paths);
-        assertEquals(WorkflowStatus.BLOCKED, stopped.status());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
         assertEquals(List.of(node.nodeInstanceId()), stopped.activeNodeInstanceIds());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), stopped.openGateIds());
         assertFalse(Files.exists(paths.nodeJson("node-second-002")));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_blocked"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains(stopped.lastEventId()));

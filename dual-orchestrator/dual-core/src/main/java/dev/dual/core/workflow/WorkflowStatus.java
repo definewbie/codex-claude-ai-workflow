@@ -4,6 +4,7 @@ public enum WorkflowStatus {
     CREATED,
     RUNNING,
     WAITING_FOR_HUMAN,
+    WAITING_FOR_RECOVERY,
     BLOCKED,
     COMPLETED,
     FAILED

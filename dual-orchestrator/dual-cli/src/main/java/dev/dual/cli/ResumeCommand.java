@@ -62,7 +62,7 @@ public final class ResumeCommand implements Callable<Integer> {
             System.out.println("Workflow status: " + result.status());
             System.out.println("Active node: " + result.activeNode());
             System.out.println(result.message());
-            return result.status() == WorkflowStatus.FAILED ? 1 : 0;
+            return result.status() == WorkflowStatus.FAILED || result.status() == WorkflowStatus.WAITING_FOR_RECOVERY ? 1 : 0;
         }
     }
 }

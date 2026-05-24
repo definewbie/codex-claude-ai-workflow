@@ -33,6 +33,10 @@ public final class WorkflowRuntime {
         if (current.activeNodeInstanceIds().isEmpty()) {
             return new WorkflowRuntimeResult(command.workstreamId(), current.status(), "", "workflow has no active node");
         }
+        if (current.status() == WorkflowStatus.WAITING_FOR_RECOVERY) {
+            var active = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0)).nodeDefinitionId();
+            return new WorkflowRuntimeResult(command.workstreamId(), current.status(), active, "waiting for recovery; run dualctl retry after fixing the cause");
+        }
 
         var node = ledger.loadCoreNode(paths, current.activeNodeInstanceIds().get(0));
         var nodeDefinition = definition.node(node.nodeDefinitionId());
