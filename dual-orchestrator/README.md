@@ -317,6 +317,13 @@ dualctl inspect --workdir <effective_worktree> <workstream_id>
 dualctl inspect --workdir <effective_worktree> --node <node_instance_id> <workstream_id>
 ```
 
+直接查看当前 active node 或指定 node 关联的 context package：
+
+```bash
+dualctl inspect --workdir <effective_worktree> --show context <workstream_id>
+dualctl inspect --workdir <effective_worktree> --node <node_instance_id> --show context <workstream_id>
+```
+
 查看指定 run：
 
 ```bash

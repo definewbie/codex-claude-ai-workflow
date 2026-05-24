@@ -10,6 +10,8 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @Component
@@ -24,7 +26,7 @@ public final class InspectCommand implements Callable<Integer> {
     @Option(names = "--run", description = "Run id to inspect.")
     String runId;
 
-    @Option(names = "--show", description = "For --run, show prompt, output, or stderr.")
+    @Option(names = "--show", description = "Show prompt, output, stderr, or context.")
     String show;
 
     @Parameters(index = "0")
@@ -66,6 +68,14 @@ public final class InspectCommand implements Callable<Integer> {
         System.out.println("Result: " + node.result());
         System.out.println("Started: " + node.startedAt());
         System.out.println("Finished: " + node.finishedAt());
+
+        if ("context".equals(show)) {
+            System.out.println();
+            System.out.println("----- context -----");
+            showContext(paths, node.inputRefs(), node.outputRefs());
+        } else if (show != null && !show.isBlank()) {
+            throw new IllegalArgumentException("--show for node inspect must be context");
+        }
     }
 
     private void inspectRun(Path workspaceRoot, WorkstreamPaths paths) throws Exception {
@@ -90,12 +100,40 @@ public final class InspectCommand implements Callable<Integer> {
                 case "prompt" -> workspaceRoot.resolve(run.promptPath());
                 case "output" -> workspaceRoot.resolve(run.outputPath());
                 case "stderr" -> workspaceRoot.resolve(run.stderrPath());
-                default -> throw new IllegalArgumentException("--show must be prompt, output, or stderr");
+                default -> throw new IllegalArgumentException("--show for --run must be prompt, output, or stderr");
             };
             System.out.println();
             System.out.println("----- " + show + " -----");
             if (Files.exists(path)) {
                 System.out.print(Files.readString(path));
+            } else {
+                System.out.println("(file not found: " + path + ")");
+            }
+        }
+    }
+
+    private void showContext(WorkstreamPaths paths, List<String> inputRefs, List<String> outputRefs)
+            throws Exception {
+        var refs = new ArrayList<String>();
+        refs.addAll(outputRefs);
+        refs.addAll(inputRefs);
+        var contextRefs = refs.stream()
+                .filter(ref -> ref.contains("/context/") && ref.endsWith(".md"))
+                .distinct()
+                .toList();
+        if (contextRefs.isEmpty()) {
+            System.out.println("(no context package ref on this node)");
+            return;
+        }
+        for (String contextRef : contextRefs) {
+            var path = paths.workspaceRoot().resolve(contextRef).normalize();
+            System.out.println("Path: " + contextRef);
+            if (Files.exists(path)) {
+                var content = Files.readString(path);
+                System.out.print(content);
+                if (!content.endsWith(System.lineSeparator())) {
+                    System.out.println();
+                }
             } else {
                 System.out.println("(file not found: " + path + ")");
             }
