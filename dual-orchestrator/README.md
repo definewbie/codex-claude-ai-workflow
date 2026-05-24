@@ -473,6 +473,17 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 - Decision node：调用 DecisionHandler 并选择 edge。
 - Gate node：停住，等待 `review approve` 或 `review revise`。
 
+### Run
+
+`run` 会连续执行 active node，直到遇到人工卡点、恢复卡点、失败或 workflow 完成：
+
+```bash
+dualctl run --workdir <effective_worktree> <workstream_id>
+dualctl run --workdir <effective_worktree> --max-steps 50 <workstream_id>
+```
+
+这是真实使用时的主推进命令。`resume` 仍保留用于单步排查。
+
 ### Retry
 
 如果当前 active node 因为 agent runtime、quota、context window 或 prompt contract 问题进入 `FAILED` / `BLOCKED`，workflow 会停在 `WAITING_FOR_RECOVERY`，并打开一个 recovery gate。先修复外部问题，再显式 retry：
@@ -789,7 +800,7 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 本仓库已经验证过一次最小真实链路：
 
 ```text
-start -> status -> resume(Claude) -> resume(Codex) -> resume(decision) -> review approve
+start -> run(直到 human gate) -> review approve
 ```
 
 验证结果：

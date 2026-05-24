@@ -16,6 +16,7 @@ import picocli.CommandLine.Command;
                 RunsCommand.class,
                 InspectCommand.class,
                 ResumeCommand.class,
+                RunCommand.class,
                 RetryCommand.class,
                 RecoveryCommand.class,
                 ReviewCommand.class,

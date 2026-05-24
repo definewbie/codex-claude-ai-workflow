@@ -1,20 +1,10 @@
 package dev.dual.cli;
 
-import dev.dual.adapter.acpx.AcpxAgentTaskHandler;
-import dev.dual.adapter.acpx.AcpxAgentTransport;
 import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.LockOwner;
-import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.WorkflowCommand;
-import dev.dual.runtime.WorkflowRuntime;
-import dev.dual.runtime.handler.ArtifactValidateHandler;
-import dev.dual.runtime.handler.ContextBuildPackageHandler;
-import dev.dual.runtime.handler.HandlerRegistry;
-import dev.dual.runtime.handler.HumanReviewGateHandler;
-import dev.dual.runtime.handler.PromptGenerateNextStageHandler;
-import dev.dual.runtime.handler.ReviewDecisionHandler;
 
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -22,7 +12,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 @Component
@@ -45,17 +34,7 @@ public final class ResumeCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "resume"))) {
-            var registry = new HandlerRegistry(
-                    List.of(
-                            new AcpxAgentTaskHandler(new AcpxAgentTransport(), false),
-                            new ArtifactValidateHandler(),
-                            new ContextBuildPackageHandler(),
-                            new PromptGenerateNextStageHandler()
-                    ),
-                    List.of(new ReviewDecisionHandler()),
-                    List.of(new HumanReviewGateHandler())
-            );
-            var result = new WorkflowRuntime(new WorkflowFileLedger(), registry)
+            var result = new CliWorkflowRuntimeFactory().create()
                     .resume(new WorkflowCommand(workspaceRoot, workstreamId));
 
             System.out.println("Workstream: " + result.workstreamId());
