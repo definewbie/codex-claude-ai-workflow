@@ -10,12 +10,13 @@ import picocli.CommandLine.Command;
         description = "Inspect and validate workflow definition files.",
         subcommands = {
                 WorkflowValidateCommand.class,
-                WorkflowPrintDefaultCommand.class
+                WorkflowPrintDefaultCommand.class,
+                WorkflowHandlersCommand.class
         }
 )
 public final class WorkflowCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use workflow validate or workflow print-default.");
+        System.out.println("Use workflow validate, workflow print-default, or workflow handlers.");
     }
 }
