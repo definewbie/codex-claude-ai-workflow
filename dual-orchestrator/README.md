@@ -239,6 +239,17 @@ summary: one short sentence
 
 ## Commands
 
+### Doctor
+
+检查本机和 worktree 是否具备运行条件：
+
+```bash
+dualctl doctor --workdir <effective_worktree>
+dualctl doctor --workdir <effective_worktree> <workstream_id>
+```
+
+`doctor` 会检查 Git、当前目录是否是 Git repo、acpx 是否可用。传入 `workstream_id` 时，还会检查 workflow current、events、runs、context、Git evidence 等 ledger 文件是否存在。`context` / `git evidence` 这类阶段性产物没生成时只会显示 `WARN`，不会当成阻断错误。
+
 ### Start
 
 在目标 Git 仓库里执行：
