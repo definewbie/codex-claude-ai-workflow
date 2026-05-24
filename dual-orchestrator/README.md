@@ -296,8 +296,8 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 
 输出分两块：
 
-- `Legacy snapshot`：旧 design-loop ledger 的兼容快照，字段可能不会随着新 workflow 每一步同步更新。
 - `Workflow`：新的 workflow current state，是当前 `resume` / `review` 真正使用的状态。
+- `Compatibility snapshot (legacy, may be stale)`：旧 design-loop ledger 的兼容快照，字段可能不会随着新 workflow 每一步同步更新。
 
 过渡期两套文件会同时存在；判断当前真实 active node 时，以 `Workflow` 区块和 `.agent/workstreams/<workstream_id>/workflow/current.json` 为准。
 

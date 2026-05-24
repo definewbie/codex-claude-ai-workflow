@@ -30,19 +30,11 @@ public final class StatusCommand implements Callable<Integer> {
         System.out.println("Branch: " + status.workspace().branch());
         System.out.println("Ledger: " + status.workstreamDir());
 
-        System.out.println();
-        System.out.println("Legacy snapshot:");
-        System.out.println("  Status: " + status.workstream().status());
-        System.out.println("  Stage: " + status.stage().type() + " (" + status.stage().status() + ")");
-        System.out.println("  Iteration: " + status.iteration().iterationId() + " (" + status.iteration().status() + ")");
-        System.out.println("  Checkpoint: " + status.checkpoint().checkpointId());
-        System.out.println("  Pending action: " + status.checkpoint().pendingAction());
-        System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
-
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         if (Files.exists(paths.workflowCurrentJson())) {
-            var current = new WorkflowFileLedger().loadCurrent(paths);
+            var workflowLedger = new WorkflowFileLedger();
+            var current = workflowLedger.loadCurrent(paths);
             System.out.println();
             System.out.println("Workflow:");
             System.out.println("  Definition: " + current.workflowId() + "@" + current.definitionVersion());
@@ -50,13 +42,23 @@ public final class StatusCommand implements Callable<Integer> {
             System.out.println("  Active nodes: " + current.activeNodeInstanceIds());
             System.out.println("  Open gates: " + current.openGateIds());
             if (!current.activeNodeInstanceIds().isEmpty()) {
-                var node = new WorkflowFileLedger().loadNode(paths, current.activeNodeInstanceIds().get(0));
+                var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+                System.out.println("  Active node definition: " + node.nodeDefinitionId());
                 System.out.println("  Active iteration: " + node.iterationId());
                 if (current.status() == dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY) {
                     System.out.println("  Recovery: fix the external cause, then run dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
                 }
             }
         }
+
+        System.out.println();
+        System.out.println("Compatibility snapshot (legacy, may be stale):");
+        System.out.println("  Status: " + status.workstream().status());
+        System.out.println("  Stage: " + status.stage().type() + " (" + status.stage().status() + ")");
+        System.out.println("  Iteration: " + status.iteration().iterationId() + " (" + status.iteration().status() + ")");
+        System.out.println("  Checkpoint: " + status.checkpoint().checkpointId());
+        System.out.println("  Pending action: " + status.checkpoint().pendingAction());
+        System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
         return 0;
     }
 }
