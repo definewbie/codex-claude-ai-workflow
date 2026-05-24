@@ -156,6 +156,53 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void retryActiveFailedNodeSetsItReadyAgain() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-retry"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-retry", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "RECOVERABLE_AGENT_RECONNECT", List.of("stderr.log"), Map.of("recoverable", true));
+
+        ledger.retryActiveNode(paths, "session reconnected");
+
+        var retryCurrent = ledger.loadCurrent(paths);
+        var retryNode = ledger.loadNode(paths, retryCurrent.activeNodeInstanceIds().get(0));
+        assertEquals(WorkflowStatus.RUNNING, retryCurrent.status());
+        assertEquals(NodeStatus.READY, retryNode.status());
+        assertTrue(retryNode.outputRefs().isEmpty());
+        assertEquals("FAILED", retryNode.result().get("retry_of_status"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_retry_requested"));
+    }
+
+    @Test
+    void retryRejectsNonRetryableActiveNode() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-retry-ready"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-retry-ready", definition);
+
+        var error = assertThrows(java.io.IOException.class, () -> ledger.retryActiveNode(paths, "not failed"));
+
+        assertTrue(error.getMessage().contains("not retryable"));
+    }
+
+    @Test
     void blockedNodeStopsWorkflowWithoutRoutingNextNode() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-blocked"));
         Files.createDirectories(paths.workstreamDir());

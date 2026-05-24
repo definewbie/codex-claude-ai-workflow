@@ -14,6 +14,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AcpxAgentTransport transport;
     private final boolean prepareOnly;
     private final AgentPromptRenderer promptRenderer;
+    private final AcpxFailureClassifier failureClassifier;
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         if (transport == null) {
@@ -22,6 +23,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.transport = transport;
         this.prepareOnly = prepareOnly;
         this.promptRenderer = new AgentPromptRenderer();
+        this.failureClassifier = new AcpxFailureClassifier();
     }
 
     @Override
@@ -69,12 +71,20 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
         if (result.exitCode() != 0) {
+            var failure = failureClassifier.classify(stderrPath, result.exitCode());
             return new NodeResult(
-                    "failed",
+                    failure.reason(),
                     NodeStatus.FAILED,
                     List.of(context.workspaceRoot().relativize(stderrPath).toString()),
-                    Map.of("run_id", runId, "exit_code", result.exitCode(), "agent", agent, "session", session),
-                    "acpx exited with " + result.exitCode()
+                    Map.of(
+                            "run_id", runId,
+                            "exit_code", result.exitCode(),
+                            "agent", agent,
+                            "session", session,
+                            "failure_reason", failure.reason(),
+                            "recoverable", failure.recoverable()
+                    ),
+                    failure.message()
             );
         }
         return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(

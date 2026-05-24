@@ -12,6 +12,7 @@ import picocli.CommandLine.Command;
                 StartCommand.class,
                 StatusCommand.class,
                 ResumeCommand.class,
+                RetryCommand.class,
                 ReviewCommand.class
         }
 )

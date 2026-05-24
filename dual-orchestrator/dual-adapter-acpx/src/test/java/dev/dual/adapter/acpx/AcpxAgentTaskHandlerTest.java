@@ -94,4 +94,16 @@ class AcpxAgentTaskHandlerTest {
                 handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance)));
         assertTrue(error.getMessage().contains("unsupported agent"));
     }
+
+    @Test
+    void classifiesReconnectFailureAsRecoverable() throws Exception {
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(stderr, "[acpx] session claude-main · agent needs reconnect\n");
+
+        var failure = new AcpxFailureClassifier().classify(stderr, 5);
+
+        assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
+        assertEquals(true, failure.recoverable());
+        assertTrue(failure.message().contains("dualctl retry"));
+    }
 }

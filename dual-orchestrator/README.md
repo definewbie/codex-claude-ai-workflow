@@ -306,6 +306,24 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 - Decision node：调用 DecisionHandler 并选择 edge。
 - Gate node：停住，等待 `review approve` 或 `review revise`。
 
+### Retry
+
+如果当前 active node 因为 agent runtime、quota、context window 或 prompt contract 问题进入 `FAILED` / `BLOCKED`，先修复外部问题，再显式 retry：
+
+```bash
+dualctl retry --workdir <effective_worktree> --note "claude session reconnected" <workstream_id>
+dualctl resume --workdir <effective_worktree> <workstream_id>
+```
+
+`retry` 不会直接执行 Agent。它只会：
+
+- 校验当前 active node 是 `FAILED` 或 `BLOCKED`。
+- 把该 node 标记回 `READY`。
+- 清空该 node 的旧 output refs。
+- 记录 `node_retry_requested` event。
+
+这样可以保留失败现场，同时让下一次 `resume` 重新执行同一个 node。
+
 ### Human Review
 
 批准当前 gate：
@@ -526,7 +544,15 @@ acpx codex sessions new --name codex-reviewer
 处理后重新执行：
 
 ```bash
+dualctl retry --workdir <effective_worktree> --note "agent reconnected" <workstream_id>
 dualctl resume --workdir <effective_worktree> <workstream_id>
+```
+
+acpx adapter 会把这类错误标记为：
+
+```text
+failure_reason: RECOVERABLE_AGENT_RECONNECT
+recoverable: true
 ```
 
 ### `git worktree add` 报权限错误

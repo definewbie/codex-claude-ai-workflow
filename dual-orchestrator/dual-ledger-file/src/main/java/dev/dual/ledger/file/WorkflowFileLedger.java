@@ -349,6 +349,60 @@ public final class WorkflowFileLedger {
         ));
     }
 
+    public void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
+        var current = loadCurrent(paths);
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            throw new IOException("no active node to retry");
+        }
+        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
+        if (node.status() != NodeStatus.FAILED && node.status() != NodeStatus.BLOCKED) {
+            throw new IOException("active node is not retryable: " + node.nodeDefinitionId() + " (" + node.status() + ")");
+        }
+        var retry = new NodeInstanceDocument(
+                node.schemaVersion(),
+                node.nodeInstanceId(),
+                node.nodeDefinitionId(),
+                node.kind(),
+                node.handlerType(),
+                NodeStatus.READY,
+                node.stageId(),
+                node.iterationId(),
+                node.inputRefs(),
+                List.of(),
+                Map.of(
+                        "retry_of_status", node.status().name(),
+                        "retry_note", note == null ? "" : note
+                ),
+                node.runRef(),
+                null,
+                null
+        );
+        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), retry);
+
+        var eventId = nextEventId(current.lastEventId());
+        appendEvent(paths, eventId, "node_retry_requested", Map.of(
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId(),
+                "previous_status", node.status().name(),
+                "note", note == null ? "" : note
+        ));
+        var now = Instant.now();
+        var resumed = new WorkflowCurrentDocument(
+                1,
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.RUNNING,
+                List.of(node.nodeInstanceId()),
+                List.of(),
+                eventId,
+                now
+        );
+        jsonWriter.write(paths.workflowCurrentJson(), resumed);
+        writeInstanceFromCurrent(paths, resumed, now);
+    }
+
     private void writeInstanceFromCurrent(WorkstreamPaths paths, WorkflowCurrentDocument current, Instant updatedAt)
             throws IOException {
         var existing = objectMapper.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);
