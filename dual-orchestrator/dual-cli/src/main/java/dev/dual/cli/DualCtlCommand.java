@@ -18,7 +18,8 @@ import picocli.CommandLine.Command;
                 ResumeCommand.class,
                 RetryCommand.class,
                 RecoveryCommand.class,
-                ReviewCommand.class
+                ReviewCommand.class,
+                WorkflowCommand.class
         }
 )
 public final class DualCtlCommand implements Runnable {
