@@ -64,6 +64,13 @@ class AcpxAgentTaskHandlerTest {
         var prompt = Files.readString(promptPath);
         assertTrue(prompt.contains("Claude Design"));
         assertTrue(prompt.contains("Clarify the request first."));
+        var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+        assertTrue(Files.exists(runMetadataPath));
+        var runMetadata = Files.readString(runMetadataPath);
+        assertTrue(runMetadata.contains("\"schemaVersion\" : 1"));
+        assertTrue(runMetadata.contains("\"status\" : \"prepared\""));
+        assertTrue(runMetadata.contains("\"nodeId\" : \"design.claude_design\""));
+        assertTrue(runMetadata.contains("\"promptPath\" :"));
     }
 
     @Test

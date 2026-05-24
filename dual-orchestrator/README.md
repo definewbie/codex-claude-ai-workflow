@@ -359,10 +359,40 @@ dualctl review revise \
     <gate_id>.json
   runs/
     <run_id>/
+      run.json
       prompts/
       outputs/
   events.jsonl
 ```
+
+每次 `acpx.agent_run` 都会写一个结构化 run metadata：
+
+```text
+.agent/workstreams/<workstream_id>/runs/<run_id>/run.json
+```
+
+当前字段包括：
+
+- `runId`
+- `workstreamId`
+- `nodeId`
+- `agent`
+- `session`
+- `promptTemplate`
+- `workdir`
+- `promptPath`
+- `outputPath`
+- `stderrPath`
+- `command`
+- `startedAt`
+- `finishedAt`
+- `durationMs`
+- `exitCode`
+- `status`
+- `failureReason`
+- `recoverable`
+
+这是后续 `inspect/tail` 和只读 UI 的基础数据源。
 
 过渡期仍会看到旧 design-loop ledger：
 
@@ -472,6 +502,7 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 预期：
 
 - 当前 active node 被执行。
+- Agent run metadata 写入 `.agent/workstreams/<workstream_id>/runs/<run_id>/run.json`。
 - Agent prompt 写入 `.agent/workstreams/<workstream_id>/runs/<run_id>/prompts/`。
 - stdout/stderr 写入 `.agent/workstreams/<workstream_id>/runs/<run_id>/outputs/`。
 - 失败时 workflow current 会停在 `FAILED` 或 `BLOCKED`，现场不丢失。

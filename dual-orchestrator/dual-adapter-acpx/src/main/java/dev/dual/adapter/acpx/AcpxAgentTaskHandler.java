@@ -15,6 +15,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final boolean prepareOnly;
     private final AgentPromptRenderer promptRenderer;
     private final AcpxFailureClassifier failureClassifier;
+    private final AgentRunMetadataWriter metadataWriter;
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         if (transport == null) {
@@ -24,6 +25,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.prepareOnly = prepareOnly;
         this.promptRenderer = new AgentPromptRenderer();
         this.failureClassifier = new AcpxFailureClassifier();
+        this.metadataWriter = new AgentRunMetadataWriter();
     }
 
     @Override
@@ -58,8 +60,22 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         );
 
         if (prepareOnly) {
+            metadataWriter.writePrepared(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    context.definition().id(),
+                    agent,
+                    session,
+                    promptTemplate,
+                    runId,
+                    runDir,
+                    promptPath,
+                    stdoutPath,
+                    stderrPath
+            );
             return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(promptPath).toString()), Map.of(
                     "run_id", runId,
+                    "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                     "agent", agent,
                     "session", session,
                     "prepared", true
@@ -72,12 +88,28 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 : transport.runCodexDesignReview(request);
         if (result.exitCode() != 0) {
             var failure = failureClassifier.classify(stderrPath, result.exitCode());
+            metadataWriter.writeCompleted(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    context.definition().id(),
+                    agent,
+                    session,
+                    promptTemplate,
+                    runId,
+                    runDir,
+                    promptPath,
+                    stdoutPath,
+                    stderrPath,
+                    result,
+                    failure
+            );
             return new NodeResult(
                     failure.reason(),
                     NodeStatus.FAILED,
                     List.of(context.workspaceRoot().relativize(stderrPath).toString()),
                     Map.of(
                             "run_id", runId,
+                            "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                             "exit_code", result.exitCode(),
                             "agent", agent,
                             "session", session,
@@ -87,8 +119,24 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     failure.message()
             );
         }
+        metadataWriter.writeCompleted(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                context.definition().id(),
+                agent,
+                session,
+                promptTemplate,
+                runId,
+                runDir,
+                promptPath,
+                stdoutPath,
+                stderrPath,
+                result,
+                null
+        );
         return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(
                 "run_id", runId,
+                "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                 "agent", agent,
                 "session", session,
                 "exit_code", result.exitCode()
