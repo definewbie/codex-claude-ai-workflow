@@ -288,6 +288,8 @@ Workflow: agent-lifecycle@1
 Next: dualctl resume --workdir <effective worktree> <workstream_id>
 ```
 
+创建 worktree 时，`dualctl` 会把 `.agent/` 追加到本地 Git exclude（`git rev-parse --git-path info/exclude` 指向的位置），避免 run ledger 出现在业务仓库的 `git status` 里。它不会修改项目自己的 `.gitignore`。
+
 ### Status
 
 ```bash
