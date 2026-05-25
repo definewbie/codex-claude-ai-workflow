@@ -25,6 +25,12 @@ public final class ReviewReviseCommand implements Callable<Integer> {
     @Option(names = "--feedback-file", required = true)
     Path feedbackFile;
 
+    @Option(names = "--run", description = "After requesting revision, immediately run until the next gate, recovery, failure, or completion.")
+    boolean runImmediately;
+
+    @Option(names = "--max-steps", description = "Maximum workflow nodes to execute when --run is used. Defaults to ${DEFAULT-VALUE}.")
+    int maxSteps = 20;
+
     @Override
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
@@ -37,7 +43,13 @@ public final class ReviewReviseCommand implements Callable<Integer> {
         System.out.println("Human gate revision requested");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Feedback: " + feedbackFile.toAbsolutePath().normalize());
-        System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);
-        return 0;
+        if (!runImmediately) {
+            System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);
+            return 0;
+        }
+        System.out.println("Running workflow until next gate...");
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
+            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+        }
     }
 }

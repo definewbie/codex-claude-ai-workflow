@@ -537,6 +537,7 @@ dualctl recovery abort \
 
 ```bash
 dualctl review approve --workdir <effective_worktree> <workstream_id>
+dualctl review approve --workdir <effective_worktree> --run <workstream_id>
 ```
 
 要求 revision：
@@ -546,9 +547,14 @@ dualctl review revise \
   --workdir <effective_worktree> \
   --feedback-file ./human-feedback.md \
   <workstream_id>
+dualctl review revise \
+  --workdir <effective_worktree> \
+  --feedback-file ./human-feedback.md \
+  --run \
+  <workstream_id>
 ```
 
-`approve` / `revise` 都会写 workflow event，并按 workflow edge 进入下一个节点。Gate 会把自己的输入 artifact 继续传给下一个节点，所以人工批准不会切断上一阶段生成的上下文。
+`approve` / `revise` 都会写 workflow event，并按 workflow edge 进入下一个节点。传 `--run` 时，CLI 会在 gate 处理完成后继续推进到下一个人工卡点、恢复卡点、失败或完成。Gate 会把自己的输入 artifact 继续传给下一个节点，所以人工批准不会切断上一阶段生成的上下文。
 
 `revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`gate.human_next_stage_approval` 的 `approve` 也会开启新的 workflow iteration，并把 `next-stage-prompt.md` 传回 `intake.claude_brainstorm`，让同一个 workstream 能继续下一阶段生命周期。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
 

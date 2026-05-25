@@ -18,6 +18,12 @@ public final class ReviewApproveCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
+    @Option(names = "--run", description = "After approval, immediately run until the next gate, recovery, failure, or completion.")
+    boolean runImmediately;
+
+    @Option(names = "--max-steps", description = "Maximum workflow nodes to execute when --run is used. Defaults to ${DEFAULT-VALUE}.")
+    int maxSteps = 20;
+
     @Parameters(index = "0")
     String workstreamId;
 
@@ -31,7 +37,13 @@ public final class ReviewApproveCommand implements Callable<Integer> {
         }
         System.out.println("Human gate approved");
         System.out.println("Workstream: " + workstreamId);
-        System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);
-        return 0;
+        if (!runImmediately) {
+            System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);
+            return 0;
+        }
+        System.out.println("Running workflow until next gate...");
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
+            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+        }
     }
 }
