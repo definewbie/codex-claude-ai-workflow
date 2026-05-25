@@ -27,9 +27,10 @@ Runtime 只认识三类节点：
 3. Planning
 4. Implementation and Claude self-test report
 5. Codex acceptance review
-6. Stage handoff and next-stage prompt
+6. Final report
+7. Stage handoff and next-stage prompt
 
-第一版仍是薄 mainline，但几个关键节点已经开始落地：artifact validation 会采集 Git evidence，next-stage prompt 会根据 Claude handoff 生成下一阶段提示词，`acpx.agent_run` 能通过 `acpx` 调 Claude / Codex，decision handler 能解析 Agent 输出里的 `dual-control` block。
+第一版仍是薄 mainline，但几个关键节点已经开始落地：artifact validation 会采集 Git evidence，final report 会把验收、研发自测和 Git evidence 收口成报告，next-stage prompt 会根据 Claude handoff 生成下一阶段提示词，`acpx.agent_run` 能通过 `acpx` 调 Claude / Codex，decision handler 能解析 Agent 输出里的 `dual-control` block。
 
 ## 当前能力
 
@@ -585,6 +586,9 @@ dualctl review revise \
       diff.stat
       diff.patch
       changed-files.txt
+  reports/
+    iter-001-final-report.md
+    latest-final-report.md
   events.jsonl
 ```
 
@@ -671,6 +675,15 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 - `git-evidence.json`：稳定索引，包含 `available`、`workdir`、`gitRoot`、`branch`、`baseCommit`、`hasChanges`、`changedFileCount`、`generatedAt`、`error`。
 
 如果当前目录不是 Git repo，handler 不会把 workflow 打崩；它会写入 `available=false` 的 `git-evidence.json`，让后续验收报告明确说明 Git evidence 不可用。
+
+`acceptance.generate_final_report` 会在 Codex acceptance decision 为 `ACCEPT` 或 `ACCEPT_WITH_NOTES` 后生成：
+
+```text
+.agent/workstreams/<workstream_id>/reports/<iteration_id>-final-report.md
+.agent/workstreams/<workstream_id>/reports/latest-final-report.md
+```
+
+报告会汇总 user request、Codex acceptance 摘要、Claude self-test 摘要、Git evidence 指针和最近 Agent 输出。它不替代 Codex 验收，只负责把本轮结果固定成一个人和后续自动化都能引用的交付物。
 
 过渡期仍会看到旧 design-loop ledger：
 
@@ -953,7 +966,7 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 
 - 仍是 CLI-first，没有 API server / scheduler。
 - workflow 已支持 JSON 文件加载；更高级的条件表达式、并行节点和 schema 版本迁移还没做。
-- artifact validation 仍是薄实现。
+- artifact validation 和 final report 仍是薄实现。
 - context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
 - recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
 - PR / notification 还没接入 Java 版。

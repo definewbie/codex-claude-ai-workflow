@@ -9,6 +9,7 @@ final class CliSupportedHandlers {
             "context.build_package",
             "human.review",
             "prompt.generate_next_stage",
+            "report.generate_final",
             "review.decision"
     );
 

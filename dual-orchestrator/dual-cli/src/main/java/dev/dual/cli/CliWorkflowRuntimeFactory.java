@@ -9,6 +9,7 @@ import dev.dual.runtime.handler.ContextBuildPackageHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.HumanReviewGateHandler;
 import dev.dual.runtime.handler.PromptGenerateNextStageHandler;
+import dev.dual.runtime.handler.ReportGenerateFinalHandler;
 import dev.dual.runtime.handler.ReviewDecisionHandler;
 
 import java.util.List;
@@ -20,7 +21,8 @@ final class CliWorkflowRuntimeFactory {
                         new AcpxAgentTaskHandler(new AcpxAgentTransport(), false),
                         new ArtifactValidateHandler(),
                         new ContextBuildPackageHandler(),
-                        new PromptGenerateNextStageHandler()
+                        new PromptGenerateNextStageHandler(),
+                        new ReportGenerateFinalHandler()
                 ),
                 List.of(new ReviewDecisionHandler()),
                 List.of(new HumanReviewGateHandler())

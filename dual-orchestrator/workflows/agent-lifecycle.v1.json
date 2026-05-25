@@ -199,6 +199,12 @@
       "config": {}
     },
     {
+      "id": "acceptance.generate_final_report",
+      "kind": "TASK",
+      "handlerType": "report.generate_final",
+      "config": {}
+    },
+    {
       "id": "gate.human_acceptance",
       "kind": "GATE",
       "handlerType": "human.review",
@@ -259,9 +265,10 @@
     { "from": "implement.artifact_validation", "on": "completed", "to": "context.acceptance_codex_verifier_review" },
     { "from": "context.acceptance_codex_verifier_review", "on": "completed", "to": "acceptance.codex_verifier_review" },
     { "from": "acceptance.codex_verifier_review", "on": "completed", "to": "acceptance.decision" },
-    { "from": "acceptance.decision", "on": "ACCEPT", "to": "gate.human_acceptance" },
-    { "from": "acceptance.decision", "on": "ACCEPT_WITH_NOTES", "to": "gate.human_acceptance" },
+    { "from": "acceptance.decision", "on": "ACCEPT", "to": "acceptance.generate_final_report" },
+    { "from": "acceptance.decision", "on": "ACCEPT_WITH_NOTES", "to": "acceptance.generate_final_report" },
     { "from": "acceptance.decision", "on": "REJECT", "to": "context.implement_claude" },
+    { "from": "acceptance.generate_final_report", "on": "completed", "to": "gate.human_acceptance" },
     { "from": "gate.human_acceptance", "on": "approved", "to": "stage.claude_handoff" },
     { "from": "gate.human_acceptance", "on": "revise", "to": "context.implement_claude" },
     { "from": "stage.claude_handoff", "on": "completed", "to": "stage.generate_next_prompt" },

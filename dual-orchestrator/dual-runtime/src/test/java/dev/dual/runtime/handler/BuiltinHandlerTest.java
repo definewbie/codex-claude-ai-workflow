@@ -549,6 +549,43 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("Implemented the accepted batch."));
     }
 
+    @Test
+    void finalReportHandlerGeneratesAcceptanceReport() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var selfTest = workstreamDir.resolve("runs/run-010/outputs/implement-claude-self-test.md");
+        var acceptance = workstreamDir.resolve("runs/run-011/outputs/acceptance-codex-review.md");
+        var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
+        Files.createDirectories(selfTest.getParent());
+        Files.createDirectories(acceptance.getParent());
+        Files.createDirectories(evidence.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Ship the accepted lifecycle batch.\n");
+        Files.writeString(selfTest, "Developer self-test passed.\n");
+        Files.writeString(acceptance, "Codex accepts the implementation.\n");
+        Files.writeString(evidence, "{\"available\":true,\"hasChanges\":true}\n");
+        Files.writeString(evidence.getParent().resolve("changed-files.txt"), "README.md\n");
+
+        var handler = new ReportGenerateFinalHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("acceptance.generate_final_report", "report.generate_final"),
+                node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("completed", result.outcome());
+        assertEquals(".agent/workstreams/ws/reports/iter-001-final-report.md", result.result().get("report_path"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/reports/latest-final-report.md"));
+
+        var markdown = Files.readString(tempDir.resolve(".agent/workstreams/ws/reports/iter-001-final-report.md"));
+        assertTrue(markdown.contains("# Dual Final Report"));
+        assertTrue(markdown.contains("Ship the accepted lifecycle batch."));
+        assertTrue(markdown.contains("Developer self-test passed."));
+        assertTrue(markdown.contains("Codex accepts the implementation."));
+        assertTrue(markdown.contains("changed-files.txt"));
+        assertTrue(markdown.contains("\"hasChanges\":true"));
+    }
+
     private static NodeDefinition gateDefinition() {
         return new NodeDefinition("gate.human_design_approval", NodeKind.GATE, "human.review", Map.of(
                 "allowed_actions", List.of("approve", "revise")
