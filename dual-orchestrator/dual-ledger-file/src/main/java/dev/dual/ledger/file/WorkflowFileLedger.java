@@ -2,6 +2,7 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeStatus;
@@ -236,7 +237,7 @@ public final class WorkflowFileLedger {
                     nextNodeInstanceId,
                     nextDefinition.handlerType(),
                     "open",
-                    List.of("approve", "revise"),
+                    allowedActions(nextDefinition),
                     Instant.now(),
                     null,
                     Map.of()
@@ -379,7 +380,9 @@ public final class WorkflowFileLedger {
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
         }
-        if (definition.edgesFrom(node.nodeDefinitionId()).stream().noneMatch(edge -> edge.on().equals(action))) {
+        var hasEdge = definition.edgesFrom(node.nodeDefinitionId()).stream().anyMatch(edge -> edge.on().equals(action));
+        var actionAllowed = allowedActions(definition.node(node.nodeDefinitionId())).contains(action);
+        if (!hasEdge && !actionAllowed) {
             throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
         }
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, action, node.inputRefs(), Map.of(
@@ -552,6 +555,17 @@ public final class WorkflowFileLedger {
                 || "NEEDS_REVISION".equals(outcome)
                 || "REJECT".equals(outcome)
                 || ("gate.human_next_stage_approval".equals(nodeDefinitionId) && "approved".equals(outcome));
+    }
+
+    private static List<String> allowedActions(NodeDefinition definition) {
+        var configured = definition.config().get("allowed_actions");
+        if (configured instanceof List<?> list && !list.isEmpty()) {
+            return list.stream()
+                    .map(String::valueOf)
+                    .filter(action -> !action.isBlank())
+                    .toList();
+        }
+        return List.of("approve", "revise");
     }
 
     private static String revisionReason(Map<String, Object> result) {

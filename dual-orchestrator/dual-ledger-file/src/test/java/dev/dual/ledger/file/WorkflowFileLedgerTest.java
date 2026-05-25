@@ -236,6 +236,62 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void allowedGateActionWithoutEdgeCompletesWorkflow() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-complete"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "gate.human_next_stage_approval",
+                List.of(new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                        "allowed_actions", List.of("approve", "revise", "complete")
+                ))),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-gate-complete", definition);
+
+        ledger.resolveOpenGate(paths, definition, "complete", "all stages accepted");
+
+        var completed = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, completed.status());
+        assertTrue(completed.activeNodeInstanceIds().isEmpty());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_completed"));
+        var node = ledger.loadNode(paths, "node-gate-human_next_stage_approval-001");
+        assertEquals("complete", node.result().get("human_action"));
+    }
+
+    @Test
+    void gateDocumentUsesConfiguredAllowedActions() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-actions"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "revise", "complete")
+                        ))
+                ),
+                List.of(new EdgeDefinition("first", "completed", "gate.human_next_stage_approval"))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-gate-actions", definition);
+        var current = ledger.loadCurrent(paths);
+        var first = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var routed = ledger.loadCurrent(paths);
+        var gateJson = Files.readString(paths.gateJson(routed.openGateIds().get(0)));
+        assertTrue(gateJson.contains("\"complete\""));
+    }
+
+    @Test
     void failedNodeStopsWorkflowWithoutRoutingNextNode() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-failed"));
         Files.createDirectories(paths.workstreamDir());

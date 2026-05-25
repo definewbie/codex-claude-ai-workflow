@@ -51,7 +51,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         gate("gate.human_acceptance"),
                         agentTask("stage.claude_handoff", "claude", "claude-main", "stage-claude-handoff"),
                         task("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                        gate("gate.human_next_stage_approval")
+                        gate("gate.human_next_stage_approval", List.of("approve", "revise", "complete"))
                 ),
                 List.of(
                         edge("intake.claude_brainstorm", "completed", "context.intake_codex_product_review"),
@@ -129,8 +129,12 @@ public final class LifecycleWorkflowDefinitionFactory {
     }
 
     private static NodeDefinition gate(String id) {
+        return gate(id, List.of("approve", "revise"));
+    }
+
+    private static NodeDefinition gate(String id, List<String> allowedActions) {
         return new NodeDefinition(id, NodeKind.GATE, "human.review", Map.of(
-                "allowed_actions", List.of("approve", "revise")
+                "allowed_actions", allowedActions
         ));
     }
 

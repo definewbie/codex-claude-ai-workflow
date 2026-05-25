@@ -233,7 +233,7 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
-        "allowed_actions": ["approve", "revise"]
+        "allowed_actions": ["approve", "revise", "complete"]
       }
     }
   ],
