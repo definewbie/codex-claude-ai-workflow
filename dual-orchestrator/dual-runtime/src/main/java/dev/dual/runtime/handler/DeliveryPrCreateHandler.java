@@ -84,7 +84,24 @@ public final class DeliveryPrCreateHandler implements TaskHandler {
         result.put("draft", draft);
         result.put("commit_created", commitResult.result().getOrDefault("commit_created", false));
         result.put("created_at", Instant.now().toString());
+        DeliveryLedgerWriter.update(deliveryDir, Map.of(
+                "status", "pr_created",
+                "prCreated", true,
+                "prUrl", prUrl,
+                "branch", head,
+                "base", base,
+                "draft", draft,
+                "commitCreated", commitResult.result().getOrDefault("commit_created", false)
+        ));
+        DeliveryReportUpdater.update(workstreamDir(context), "pr_created", text(commitResult.result().get("commit")), prUrl);
         return NodeResult.completed("pr_created", List.of(prUrlRef), result);
+    }
+
+    private static Path workstreamDir(TaskContext context) {
+        return context.workspaceRoot()
+                .resolve(".agent")
+                .resolve("workstreams")
+                .resolve(context.workstreamId());
     }
 
     private static CommandResult ghCreate(Path workdir, String ghCommand, String base, String head, String title, Path prBody, boolean draft)
@@ -158,6 +175,10 @@ public final class DeliveryPrCreateHandler implements TaskHandler {
             }
         }
         return text.strip();
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
     private static String toWorkspaceRef(Path workspaceRoot, Path path) {

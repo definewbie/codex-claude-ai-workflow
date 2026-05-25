@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class DeliveryCommitHandler implements TaskHandler {
     @Override
@@ -36,6 +37,11 @@ public final class DeliveryCommitHandler implements TaskHandler {
             return failed("git_status_failed", statusBefore.output());
         }
         if (statusBefore.output().isBlank()) {
+            DeliveryLedgerWriter.update(deliveryDir(context), Map.of(
+                    "status", "skipped_no_changes",
+                    "commitCreated", false,
+                    "reason", "no business changes"
+            ));
             return NodeResult.completed("skipped_no_changes", List.of(), MapBuilder.of(
                     "commit_created", false,
                     "reason", "no business changes"
@@ -60,7 +66,25 @@ public final class DeliveryCommitHandler implements TaskHandler {
         result.put("commit", rev.output().trim());
         result.put("status_before", statusBefore.output());
         result.put("commit_message_path", toWorkspaceRef(context, commitMessage));
+        DeliveryLedgerWriter.update(deliveryDir(context), Map.of(
+                "status", "committed",
+                "commitCreated", true,
+                "commit", rev.output().trim(),
+                "commitMessagePath", toWorkspaceRef(context, commitMessage)
+        ));
+        DeliveryReportUpdater.update(workstreamDir(context), "committed", rev.output().trim(), "");
         return NodeResult.completed("committed", List.of(toWorkspaceRef(context, commitMessage)), result);
+    }
+
+    private static java.nio.file.Path workstreamDir(TaskContext context) {
+        return context.workspaceRoot()
+                .resolve(".agent")
+                .resolve("workstreams")
+                .resolve(context.workstreamId());
+    }
+
+    private static java.nio.file.Path deliveryDir(TaskContext context) {
+        return workstreamDir(context).resolve("delivery");
     }
 
     private static NodeResult failed(String outcome, String output) {

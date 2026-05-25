@@ -643,7 +643,9 @@ class BuiltinHandlerTest {
 
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var deliveryDir = workstreamDir.resolve("delivery");
+        var reportsDir = workstreamDir.resolve("reports");
         Files.createDirectories(deliveryDir);
+        Files.createDirectories(reportsDir);
         Files.writeString(deliveryDir.resolve("commit-message.txt"), """
                 feat: dual agent task ws
 
@@ -651,6 +653,7 @@ class BuiltinHandlerTest {
 
                 Run report: .agent/workstreams/ws/reports/latest-final-report.md
                 """);
+        Files.writeString(reportsDir.resolve("latest-final-report.md"), "# Dual Final Report\n\nAccepted.\n");
         Files.writeString(tempDir.resolve("README.md"), "after\n");
         Files.writeString(workstreamDir.resolve("ledger-noise.txt"), "do not commit\n");
 
@@ -669,6 +672,15 @@ class BuiltinHandlerTest {
         assertEquals("feat: dual agent task ws", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
         assertTrue(gitOutput(tempDir, "show", "--name-only", "--pretty=", "HEAD").contains("README.md"));
         assertFalse(gitOutput(tempDir, "show", "--name-only", "--pretty=", "HEAD").contains(".agent"));
+
+        var deliveryJson = Files.readString(workstreamDir.resolve("delivery").resolve("delivery.json"));
+        assertTrue(deliveryJson.contains("\"commitCreated\" : true"));
+        assertTrue(deliveryJson.contains("\"commit\" : \"" + result.result().get("commit") + "\""));
+        assertTrue(deliveryJson.contains("\"status\" : \"committed\""));
+        var finalReport = Files.readString(reportsDir.resolve("latest-final-report.md"));
+        assertTrue(finalReport.contains("## Delivery"));
+        assertTrue(finalReport.contains("- Status: committed"));
+        assertTrue(finalReport.contains("- Commit: " + result.result().get("commit")));
     }
 
     @Test
@@ -697,6 +709,7 @@ class BuiltinHandlerTest {
         assertEquals("skipped_no_changes", result.outcome());
         assertEquals(false, result.result().get("commit_created"));
         assertEquals("init", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
+        assertTrue(Files.readString(deliveryDir.resolve("delivery.json")).contains("\"status\" : \"skipped_no_changes\""));
     }
 
     @Test
@@ -715,9 +728,12 @@ class BuiltinHandlerTest {
         git(repo, "remote", "add", "origin", remote.toString());
 
         var deliveryDir = repo.resolve(".agent").resolve("workstreams").resolve("ws").resolve("delivery");
+        var reportsDir = repo.resolve(".agent").resolve("workstreams").resolve("ws").resolve("reports");
         Files.createDirectories(deliveryDir);
+        Files.createDirectories(reportsDir);
         Files.writeString(deliveryDir.resolve("commit-message.txt"), "feat: dual agent task ws\n");
         Files.writeString(deliveryDir.resolve("pr-body.md"), "# Dual Agent Run PR\n");
+        Files.writeString(reportsDir.resolve("latest-final-report.md"), "# Dual Final Report\n\nAccepted.\n");
         Files.writeString(repo.resolve("README.md"), "after\n");
 
         var fakeGh = tempDir.resolve("fake-gh.sh");
@@ -752,6 +768,16 @@ class BuiltinHandlerTest {
         assertTrue(Files.readString(deliveryDir.resolve("fake-gh-args.txt")).contains("pr create"));
         assertTrue(Files.readString(deliveryDir.resolve("fake-gh-args.txt")).contains("--draft"));
         assertEquals("feat: dual agent task ws", gitOutput(repo, "log", "-1", "--pretty=%s").trim());
+
+        var deliveryJson = Files.readString(deliveryDir.resolve("delivery.json"));
+        assertTrue(deliveryJson.contains("\"status\" : \"pr_created\""));
+        assertTrue(deliveryJson.contains("\"prCreated\" : true"));
+        assertTrue(deliveryJson.contains("\"prUrl\" : \"https://github.com/example/repo/pull/123\""));
+        assertTrue(deliveryJson.contains("\"branch\" : \"ai/ws\""));
+        var finalReport = Files.readString(reportsDir.resolve("latest-final-report.md"));
+        assertTrue(finalReport.contains("## Delivery"));
+        assertTrue(finalReport.contains("- Status: pr_created"));
+        assertTrue(finalReport.contains("- PR URL: https://github.com/example/repo/pull/123"));
     }
 
     private static NodeDefinition gateDefinition() {

@@ -1,5 +1,7 @@
 package dev.dual.cli;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
@@ -10,11 +12,16 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @Component
 @Command(name = "status", description = "Show workstream status.", mixinStandardHelpOptions = true)
 public final class StatusCommand implements Callable<Integer> {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
+
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
@@ -51,6 +58,23 @@ public final class StatusCommand implements Callable<Integer> {
             }
         }
 
+        var deliveryJson = paths.workstreamDir().resolve("delivery").resolve("delivery.json");
+        if (Files.exists(deliveryJson)) {
+            var delivery = OBJECT_MAPPER.readValue(deliveryJson.toFile(), MAP_TYPE);
+            System.out.println();
+            System.out.println("Delivery:");
+            System.out.println("  Status: " + text(delivery.get("status")));
+            if (Boolean.TRUE.equals(delivery.get("commitCreated"))) {
+                System.out.println("  Commit: " + text(delivery.get("commit")));
+            }
+            if (Boolean.TRUE.equals(delivery.get("prCreated"))) {
+                System.out.println("  PR URL: " + text(delivery.get("prUrl")));
+            }
+            if (delivery.containsKey("updatedAt")) {
+                System.out.println("  Updated at: " + text(delivery.get("updatedAt")));
+            }
+        }
+
         System.out.println();
         System.out.println("Compatibility snapshot (legacy, may be stale):");
         System.out.println("  Status: " + status.workstream().status());
@@ -60,5 +84,9 @@ public final class StatusCommand implements Callable<Integer> {
         System.out.println("  Pending action: " + status.checkpoint().pendingAction());
         System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
         return 0;
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 }

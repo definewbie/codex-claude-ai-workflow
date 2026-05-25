@@ -713,6 +713,7 @@ dualctl delivery commit --workdir <effective_worktree> <workstream_id>
 ```
 
 `delivery commit` 会用生成的 commit message 执行 `git commit`，并排除 `.agent` 运行账本；如果没有 `.agent` 之外的业务改动，会跳过提交。
+执行结果会写入 `.agent/workstreams/<workstream_id>/delivery/delivery.json`，并刷新 `reports/latest-final-report.md` 里的 `## Delivery` 段。
 
 需要创建 PR 时执行：
 
@@ -729,6 +730,8 @@ dualctl delivery create-pr --workdir <effective_worktree> --title "feat: my task
 .agent/workstreams/<workstream_id>/delivery/gh-pr-create.stderr.log
 .agent/workstreams/<workstream_id>/delivery/pr-url.txt
 ```
+
+`dualctl status` 会读取 `delivery.json` 并显示 delivery status、commit hash 和 PR URL。
 
 过渡期仍会看到旧 design-loop ledger：
 
