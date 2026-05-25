@@ -177,7 +177,7 @@ public final class WorkflowFileLedger {
         jsonWriter.write(paths.nodeJson(nodeInstanceId), finished);
 
         if (completedStatus != NodeStatus.COMPLETED) {
-            stopOnNonCompletedNode(paths, current, node, completedStatus, outcome);
+            stopOnNonCompletedNode(paths, current, node, completedStatus, outcome, result);
             return;
         }
 
@@ -333,32 +333,28 @@ public final class WorkflowFileLedger {
             WorkflowCurrentDocument current,
             NodeInstanceDocument node,
             NodeStatus nodeStatus,
-            String outcome
+            String outcome,
+            Map<String, Object> result
     ) throws IOException {
         var eventId = nextEventId(current.lastEventId());
         var workflowStatus = WorkflowStatus.WAITING_FOR_RECOVERY;
         var recoveryGateId = "recovery-" + node.nodeInstanceId();
+        var controlRepair = isControlRepairFailure(outcome, result);
+        var gateResult = recoveryGateResult(node, nodeStatus, outcome, result, controlRepair);
         jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument(
                 1,
                 recoveryGateId,
                 node.nodeInstanceId(),
-                "recovery.review",
+                controlRepair ? "control.repair" : "recovery.review",
                 "open",
                 List.of("retry", "abort"),
                 Instant.now(),
                 null,
-                Map.of(
-                        "node", node.nodeDefinitionId(),
-                        "node_status", nodeStatus.name(),
-                        "outcome", outcome
-                )
+                gateResult
         ));
-        appendEvent(paths, eventId, "node_" + nodeStatus.name().toLowerCase(), Map.of(
-                "node", node.nodeDefinitionId(),
-                "node_status", nodeStatus.name(),
-                "outcome", outcome,
-                "recovery_gate_id", recoveryGateId
-        ));
+        var eventPayload = new LinkedHashMap<>(gateResult);
+        eventPayload.put("recovery_gate_id", recoveryGateId);
+        appendEvent(paths, eventId, controlRepair ? "control_repair_required" : "node_" + nodeStatus.name().toLowerCase(), eventPayload);
         var now = Instant.now();
         var stopped = new WorkflowCurrentDocument(
                 1,
@@ -374,6 +370,27 @@ public final class WorkflowFileLedger {
         );
         jsonWriter.write(paths.workflowCurrentJson(), stopped);
         writeInstanceFromCurrent(paths, stopped, now);
+    }
+
+    private static Map<String, Object> recoveryGateResult(
+            NodeInstanceDocument node,
+            NodeStatus nodeStatus,
+            String outcome,
+            Map<String, Object> result,
+            boolean controlRepair
+    ) {
+        var gateResult = new LinkedHashMap<String, Object>();
+        gateResult.put("node", node.nodeDefinitionId());
+        gateResult.put("node_status", nodeStatus.name());
+        gateResult.put("outcome", outcome);
+        if (controlRepair) {
+            gateResult.put("reason", text(firstNonBlank(resultValue(result, "reason"), outcome)));
+            gateResult.put("message", text(resultValue(result, "message")));
+            gateResult.put("input_refs", resultValueOrDefault(result, "input_refs", List.of()));
+            gateResult.put("allowed_decisions", resultValueOrDefault(result, "allowed_decisions", List.of()));
+            gateResult.put("parse_error", resultValueOrDefault(result, "parse_error", Map.of()));
+        }
+        return gateResult;
     }
 
     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
@@ -690,6 +707,26 @@ public final class WorkflowFileLedger {
             }
         }
         return -1;
+    }
+
+    private static boolean isControlRepairFailure(String outcome, Map<String, Object> result) {
+        var reason = text(firstNonBlank(resultValue(result, "reason"), outcome));
+        return "MISSING_DUAL_CONTROL".equals(reason)
+                || "INVALID_DUAL_CONTROL".equals(reason)
+                || "INVALID_DECISION".equals(reason);
+    }
+
+    private static Object resultValue(Map<String, Object> result, String key) {
+        return result == null ? null : result.get(key);
+    }
+
+    private static Object resultValueOrDefault(Map<String, Object> result, String key, Object fallback) {
+        var value = resultValue(result, key);
+        return value == null ? fallback : value;
+    }
+
+    private static Object firstNonBlank(Object first, Object second) {
+        return text(first).isBlank() ? second : first;
     }
 
     private static List<String> allowedActions(NodeDefinition definition) {

@@ -368,6 +368,41 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void invalidControlOutputOpensControlRepairGate() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-control-repair"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.decision",
+                List.of(new NodeDefinition("design.decision", NodeKind.DECISION, "review.decision", Map.of())),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-control-repair", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "INVALID_DUAL_CONTROL", List.of(), Map.of(
+                "reason", "INVALID_DUAL_CONTROL",
+                "message", "dual-control missing required key: decision",
+                "input_refs", List.of("runs/run-1/outputs/design-codex-review.md")
+        ));
+
+        var stopped = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), stopped.openGateIds());
+        var gateJson = Files.readString(paths.gateJson(stopped.openGateIds().get(0)));
+        assertTrue(gateJson.contains("\"gateType\" : \"control.repair\""));
+        assertTrue(gateJson.contains("\"reason\" : \"INVALID_DUAL_CONTROL\""));
+        assertTrue(gateJson.contains("dual-control missing required key"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("control_repair_required"));
+        assertTrue(events.contains("runs/run-1/outputs/design-codex-review.md"));
+    }
+
+    @Test
     void retryActiveFailedNodeSetsItReadyAgain() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-retry"));
         Files.createDirectories(paths.workstreamDir());
