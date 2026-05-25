@@ -152,7 +152,8 @@
       "config": {
         "agent": "claude",
         "session": "claude-main",
-        "prompt_template": "implement-claude"
+        "prompt_template": "implement-claude",
+        "approve_all": true
       }
     },
     {

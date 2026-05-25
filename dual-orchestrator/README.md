@@ -165,13 +165,21 @@ acpx claude sessions new --name claude-main
 acpx codex sessions new --name codex-reviewer
 ```
 
-当前 Java 版调用 acpx 时会加上保守的非交互边界：
+默认 Agent 调用会加上保守的非交互边界：
 
 ```bash
 acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
 ```
 
-含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。后续实现 implementation 阶段前，需要把权限策略做成可配置项。
+含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。
+
+内置 lifecycle 只在 `implement.claude_implement` 节点启用写权限：
+
+```bash
+acpx --timeout 600 --approve-all ...
+```
+
+这是因为 Claude implementation 是唯一应该修改业务代码的主控节点；Codex review / acceptance 仍然保持只读审视。
 
 如果 acpx runtime 返回 reconnect、额度不足、登录失效等错误，ledger 会保留 stdout/stderr 和节点状态，但不会替你修复 agent runtime。
 

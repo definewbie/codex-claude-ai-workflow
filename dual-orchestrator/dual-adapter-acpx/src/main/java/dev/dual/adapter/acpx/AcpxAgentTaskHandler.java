@@ -88,7 +88,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             ));
         }
 
-        var request = new AcpxRunRequest(context.workspaceRoot(), session, promptPath, stdoutPath, stderrPath);
+        var request = new AcpxRunRequest(context.workspaceRoot(), session, promptPath, stdoutPath, stderrPath, approveAll(context));
         var result = "claude".equals(agent)
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
@@ -157,4 +157,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return text;
     }
 
+    private static boolean approveAll(TaskContext context) {
+        var value = context.definition().config().get("approve_all");
+        return Boolean.TRUE.equals(value);
+    }
 }

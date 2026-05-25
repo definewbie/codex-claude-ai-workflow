@@ -7,6 +7,7 @@ public record AcpxRunRequest(
         String sessionName,
         Path promptPath,
         Path stdoutPath,
-        Path stderrPath
+        Path stderrPath,
+        boolean approveAll
 ) {
 }

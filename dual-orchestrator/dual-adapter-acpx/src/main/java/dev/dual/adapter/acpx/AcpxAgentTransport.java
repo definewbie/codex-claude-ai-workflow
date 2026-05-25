@@ -42,9 +42,13 @@ public final class AcpxAgentTransport {
         command.add("acpx");
         command.add("--timeout");
         command.add("600");
-        command.add("--approve-reads");
-        command.add("--non-interactive-permissions");
-        command.add("fail");
+        if (request.approveAll()) {
+            command.add("--approve-all");
+        } else {
+            command.add("--approve-reads");
+            command.add("--non-interactive-permissions");
+            command.add("fail");
+        }
         command.add(agent);
         command.add("-s");
         command.add(request.sessionName());

@@ -39,7 +39,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         contextTask("context.implement_claude", "implement.claude_implement",
                                 "Package approved plan and review history for Claude implementation.",
                                 "implementation"),
-                        agentTask("implement.claude_implement", "claude", "claude-main", "implement-claude"),
+                        writableAgentTask("implement.claude_implement", "claude", "claude-main", "implement-claude"),
                         agentTask("implement.claude_self_test_report", "claude", "claude-main", "implement-claude-self-test"),
                         task("implement.artifact_validation", "artifact.validate"),
                         contextTask("context.acceptance_codex_verifier_review", "acceptance.codex_verifier_review",
@@ -97,6 +97,15 @@ public final class LifecycleWorkflowDefinitionFactory {
                 "agent", agent,
                 "session", session,
                 "prompt_template", promptTemplate
+        ));
+    }
+
+    private static NodeDefinition writableAgentTask(String id, String agent, String session, String promptTemplate) {
+        return new NodeDefinition(id, NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", agent,
+                "session", session,
+                "prompt_template", promptTemplate,
+                "approve_all", true
         ));
     }
 
