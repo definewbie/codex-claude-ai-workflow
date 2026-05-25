@@ -52,6 +52,29 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void includesDirectInputArtifactsWhenProvidedByInputRefs() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var nextPromptPath = workstreamDir.resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md");
+        Files.createDirectories(nextPromptPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+        Files.writeString(nextPromptPath, "# Next Stage Prompt\n\nImplement the approved follow-up.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(
+                        tempDir,
+                        "ws-test",
+                        "intake.claude_brainstorm",
+                        "intake-claude-brainstorm",
+                        List.of(".agent/workstreams/ws-test/artifacts/next-stage/next-stage-prompt.md")
+                );
+
+        assertTrue(prompt.contains("### Direct Input Artifacts"));
+        assertTrue(prompt.contains(".agent/workstreams/ws-test/artifacts/next-stage/next-stage-prompt.md"));
+        assertTrue(prompt.contains("Implement the approved follow-up."));
+    }
+
+
+    @Test
     void failsClearlyWhenTemplateIsMissing() {
         var error = assertThrows(IllegalArgumentException.class, () ->
                 new AgentPromptRenderer().render(tempDir, "ws-test", "bad.node", "missing-template", List.of()));

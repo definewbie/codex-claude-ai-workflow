@@ -137,6 +137,45 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void nextStageApprovalStartsNextWorkflowIterationAndCarriesPrompt() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "stage.generate_next_prompt",
+                List.of(
+                        new NodeDefinition("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
+                        new EdgeDefinition("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-next-stage", definition);
+        var current = ledger.loadCurrent(paths);
+        var generator = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var nextPrompt = ".agent/workstreams/ws-next-stage/artifacts/next-stage/next-stage-prompt.md";
+        ledger.completeAndRoute(paths, definition, generator.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(nextPrompt), Map.of(
+                "prompt_path", nextPrompt
+        ));
+
+        ledger.resolveOpenGate(paths, definition, "approved", "continue to next stage");
+
+        var routed = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, routed.activeNodeInstanceIds().get(0));
+        assertEquals("intake.claude_brainstorm", next.nodeDefinitionId());
+        assertEquals("iter-002", next.iterationId());
+        assertEquals(List.of(nextPrompt), next.inputRefs());
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"triggerAction\" : \"approved\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"targetNodeDefinitionId\" : \"intake.claude_brainstorm\""));
+    }
+
+    @Test
     void rejectDecisionStartsNextWorkflowIteration() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-reject"));
         Files.createDirectories(paths.workstreamDir());

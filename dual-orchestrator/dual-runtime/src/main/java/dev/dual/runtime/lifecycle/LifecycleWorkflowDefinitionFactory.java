@@ -87,6 +87,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         edge("gate.human_acceptance", "revise", "context.implement_claude"),
                         edge("stage.claude_handoff", "completed", "stage.generate_next_prompt"),
                         edge("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
+                        edge("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm"),
                         edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff")
                 )
         );

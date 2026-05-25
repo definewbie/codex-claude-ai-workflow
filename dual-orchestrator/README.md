@@ -547,9 +547,9 @@ dualctl review revise \
   <workstream_id>
 ```
 
-`approve` / `revise` 都会写 workflow event，并按 workflow edge 进入下一个节点。
+`approve` / `revise` 都会写 workflow event，并按 workflow edge 进入下一个节点。Gate 会把自己的输入 artifact 继续传给下一个节点，所以人工批准不会切断上一阶段生成的上下文。
 
-`revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
+`revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`gate.human_next_stage_approval` 的 `approve` 也会开启新的 workflow iteration，并把 `next-stage-prompt.md` 传回 `intake.claude_brainstorm`，让同一个 workstream 能继续下一阶段生命周期。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
 
 ## Ledger
 
@@ -660,7 +660,7 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 .agent/workstreams/<workstream_id>/artifacts/next-stage/next-stage-prompt.md
 ```
 
-这个文件是下一阶段的人类 review 入口之一。它会保留 handoff 原文作为上下文，但把建议提示词单独放在 `## Prompt`，方便确认后复制到下一轮或后续自动启动新 workstream。
+这个文件是下一阶段的人类 review 入口之一。它会保留 handoff 原文作为上下文，但把建议提示词单独放在 `## Prompt`。当 `gate.human_next_stage_approval` 被批准后，workflow 会回到 `intake.claude_brainstorm` 开启下一轮 iteration，并把这个文件作为 direct input artifact 展开到 Claude prompt 中。
 
 `implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：
 

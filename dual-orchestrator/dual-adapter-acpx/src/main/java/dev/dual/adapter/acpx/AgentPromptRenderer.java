@@ -55,10 +55,25 @@ final class AgentPromptRenderer {
         var contextRefs = inputRefs.stream()
                 .filter(ref -> ref.contains("/context/") && ref.endsWith(".md"))
                 .toList();
-        if (contextRefs.isEmpty()) {
+        var directInputRefs = inputRefs.stream()
+                .filter(ref -> !contextRefs.contains(ref))
+                .toList();
+        if (contextRefs.isEmpty() && directInputRefs.isEmpty()) {
             return "(no context package provided)";
         }
         var builder = new StringBuilder();
+        if (!directInputRefs.isEmpty()) {
+            builder.append("### Direct Input Artifacts\n\n");
+            for (String inputRef : directInputRefs) {
+                var path = workspaceRoot.resolve(inputRef).normalize();
+                builder.append("- ").append(inputRef).append("\n");
+                if (Files.exists(path) && Files.isRegularFile(path)) {
+                    builder.append("\n```text\n");
+                    builder.append(readContextPreview(path));
+                    builder.append("\n```\n\n");
+                }
+            }
+        }
         for (String contextRef : contextRefs) {
             var path = workspaceRoot.resolve(contextRef).normalize();
             builder.append("- ").append(contextRef).append("\n");

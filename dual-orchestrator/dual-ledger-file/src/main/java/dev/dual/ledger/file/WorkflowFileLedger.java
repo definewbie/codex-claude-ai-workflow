@@ -192,7 +192,7 @@ public final class WorkflowFileLedger {
         var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
         var nextIterationId = node.iterationId();
         var iterationStartedPayload = Map.<String, Object>of();
-        if (startsRevisionIteration(outcome)) {
+        if (startsNewIteration(node.nodeDefinitionId(), outcome)) {
             var nextIteration = nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
             Files.createDirectories(paths.iterationsDir());
             jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
@@ -382,7 +382,7 @@ public final class WorkflowFileLedger {
         if (definition.edgesFrom(node.nodeDefinitionId()).stream().noneMatch(edge -> edge.on().equals(action))) {
             throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
         }
-        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, action, List.of(), Map.of(
+        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, action, node.inputRefs(), Map.of(
                 "human_action", action,
                 "note", note == null ? "" : note
         ));
@@ -547,8 +547,11 @@ public final class WorkflowFileLedger {
         }
     }
 
-    private static boolean startsRevisionIteration(String outcome) {
-        return "revise".equals(outcome) || "NEEDS_REVISION".equals(outcome) || "REJECT".equals(outcome);
+    private static boolean startsNewIteration(String nodeDefinitionId, String outcome) {
+        return "revise".equals(outcome)
+                || "NEEDS_REVISION".equals(outcome)
+                || "REJECT".equals(outcome)
+                || ("gate.human_next_stage_approval".equals(nodeDefinitionId) && "approved".equals(outcome));
     }
 
     private static String revisionReason(Map<String, Object> result) {
