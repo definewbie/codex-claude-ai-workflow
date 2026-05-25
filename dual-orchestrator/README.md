@@ -351,6 +351,9 @@ dualctl workflow print-default --output ./workflow.json
     "delivery": {
       "base": "main",
       "draft": true
+    },
+    "revision": {
+      "max_revisions": 1
     }
   },
   "nodes": [
@@ -387,7 +390,8 @@ dualctl workflow print-default --output ./workflow.json
 - `defaults.sessions.claude` 会填充 `agent=claude` 且没有显式 `session` 的 `acpx.agent_run` 节点。
 - `defaults.sessions.codex` 会填充 `agent=codex` 且没有显式 `session` 的 `acpx.agent_run` 节点。
 - `defaults.delivery` 会填充 `delivery.create_pr` 节点缺失的 `base`、`draft` 等配置。
-- 节点自己的 `config` 优先级更高；一旦节点显式写了 `session`、`base` 或 `draft`，不会被 defaults 覆盖。
+- `defaults.revision.max_revisions` 会填充 `review.decision` 和 `human.review` 节点缺失的 revision 上限。达到上限后，workflow 会停在 recovery gate，不会无限开新 iteration。
+- 节点自己的 `config` 优先级更高；一旦节点显式写了 `session`、`base`、`draft` 或 `max_revisions`，不会被 defaults 覆盖。
 
 启动后会打印：
 

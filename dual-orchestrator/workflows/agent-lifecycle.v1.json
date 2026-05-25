@@ -10,6 +10,9 @@
     "delivery": {
       "base": "main",
       "draft": true
+    },
+    "revision": {
+      "max_revisions": 1
     }
   },
   "nodes": [

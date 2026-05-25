@@ -25,6 +25,8 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertEquals(NodeKind.TASK, definition.node("delivery.prepare_pr").kind());
         assertEquals(NodeKind.TASK, definition.node("stage.generate_next_prompt").kind());
         assertEquals(NodeKind.GATE, definition.node("gate.human_design_approval").kind());
+        assertEquals(1, definition.node("design.decision").config().get("max_revisions"));
+        assertEquals(1, definition.node("gate.human_design_approval").config().get("max_revisions"));
         assertEquals("context.build_package", definition.node("context.implement_claude").handlerType());
         assertTrue(definition.edgesFrom("intake.claude_brainstorm").stream()
                 .anyMatch(edge -> edge.to().equals("context.intake_codex_product_review")));

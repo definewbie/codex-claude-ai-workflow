@@ -59,6 +59,9 @@ public final class WorkflowDefinitionLoader {
         if ("delivery.create_pr".equals(node.handlerType())) {
             applyObjectDefaults(config, objectMap(defaults.get("delivery")));
         }
+        if ("review.decision".equals(node.handlerType()) || "human.review".equals(node.handlerType())) {
+            applyObjectDefaults(config, objectMap(defaults.get("revision")));
+        }
         return new NodeDefinition(node.id(), node.kind(), node.handlerType(), config);
     }
 

@@ -80,6 +80,9 @@ class WorkflowDefinitionLoaderTest {
                     "delivery": {
                       "base": "develop",
                       "draft": true
+                    },
+                    "revision": {
+                      "max_revisions": 1
                     }
                   },
                   "nodes": [
@@ -107,6 +110,20 @@ class WorkflowDefinitionLoaderTest {
                       "kind": "TASK",
                       "handlerType": "delivery.create_pr",
                       "config": {}
+                    },
+                    {
+                      "id": "design.decision",
+                      "kind": "DECISION",
+                      "handlerType": "review.decision",
+                      "config": {}
+                    },
+                    {
+                      "id": "gate.human_design_approval",
+                      "kind": "GATE",
+                      "handlerType": "human.review",
+                      "config": {
+                        "max_revisions": 3
+                      }
                     }
                   ],
                   "edges": [
@@ -130,6 +147,8 @@ class WorkflowDefinitionLoaderTest {
         assertEquals("explicit-codex", definition.node("review.codex").config().get("session"));
         assertEquals("develop", definition.node("delivery.create_pr").config().get("base"));
         assertEquals(true, definition.node("delivery.create_pr").config().get("draft"));
+        assertEquals(1, definition.node("design.decision").config().get("max_revisions"));
+        assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"));
     }
 
     @Test

@@ -137,6 +137,49 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void revisionOutcomeStopsAtRecoveryWhenRevisionLimitIsReached() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-revision-limit"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of("max_revisions", 1)),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("gate.review", "revise", "design.claude_design"),
+                        new EdgeDefinition("design.claude_design", "completed", "gate.review")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-revision-limit", definition);
+        var firstGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, firstGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
+                "note", "First revision."
+        ));
+        var design = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, design.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var secondGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, secondGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
+                "note", "Second revision should stop."
+        ));
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
+        assertEquals(List.of(secondGate.nodeInstanceId()), current.activeNodeInstanceIds());
+        assertFalse(Files.exists(paths.iterationJson("iter-003")));
+        var stoppedGate = ledger.loadNode(paths, secondGate.nodeInstanceId());
+        assertEquals(NodeStatus.BLOCKED, stoppedGate.status());
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("revision_limit_reached"));
+        assertTrue(events.contains("\"max_revisions\":1"));
+    }
+
+    @Test
     void nextStageApprovalStartsNextWorkflowIterationAndCarriesPrompt() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage"));
         Files.createDirectories(paths.workstreamDir());
@@ -146,7 +189,7 @@ class WorkflowFileLedgerTest {
                 "stage.generate_next_prompt",
                 List.of(
                         new NodeDefinition("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage", Map.of()),
-                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of("max_revisions", 0)),
                         new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of())
                 ),
                 List.of(

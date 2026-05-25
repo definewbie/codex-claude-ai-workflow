@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class LifecycleWorkflowDefinitionFactory {
+    private static final int DEFAULT_MAX_REVISIONS = 1;
+
     public WorkflowDefinition thinMainline() {
         return new WorkflowDefinition(
                 "agent-lifecycle",
@@ -127,7 +129,9 @@ public final class LifecycleWorkflowDefinitionFactory {
     }
 
     private static NodeDefinition decision(String id) {
-        return new NodeDefinition(id, NodeKind.DECISION, "review.decision", Map.of());
+        return new NodeDefinition(id, NodeKind.DECISION, "review.decision", Map.of(
+                "max_revisions", DEFAULT_MAX_REVISIONS
+        ));
     }
 
     private static NodeDefinition gate(String id) {
@@ -136,7 +140,8 @@ public final class LifecycleWorkflowDefinitionFactory {
 
     private static NodeDefinition gate(String id, List<String> allowedActions) {
         return new NodeDefinition(id, NodeKind.GATE, "human.review", Map.of(
-                "allowed_actions", allowedActions
+                "allowed_actions", allowedActions,
+                "max_revisions", DEFAULT_MAX_REVISIONS
         ));
     }
 

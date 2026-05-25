@@ -12,6 +12,7 @@ import dev.dual.core.workflow.WorkflowStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -194,6 +195,14 @@ public final class WorkflowFileLedger {
         var nextIterationId = node.iterationId();
         var iterationStartedPayload = Map.<String, Object>of();
         if (startsNewIteration(node.nodeDefinitionId(), outcome)) {
+            if (isRevisionAction(outcome)) {
+                var maxRevisions = maxRevisions(definition.node(node.nodeDefinitionId()));
+                var currentRevisionCount = revisionCount(paths, nextDefinition.id());
+                if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
+                    blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
+                    return;
+                }
+            }
             var nextIteration = nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
             Files.createDirectories(paths.iterationsDir());
             jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
@@ -535,6 +544,86 @@ public final class WorkflowFileLedger {
         );
     }
 
+    private void blockOnRevisionLimit(
+            WorkstreamPaths paths,
+            WorkflowCurrentDocument current,
+            NodeInstanceDocument node,
+            List<String> outputRefs,
+            Map<String, Object> result,
+            String outcome,
+            int maxRevisions,
+            int currentRevisionCount
+    ) throws IOException {
+        var blockedResult = new LinkedHashMap<String, Object>();
+        if (result != null) {
+            blockedResult.putAll(result);
+        }
+        blockedResult.put("reason", "revision_limit_reached");
+        blockedResult.put("outcome", outcome);
+        blockedResult.put("max_revisions", maxRevisions);
+        blockedResult.put("current_revision_count", currentRevisionCount);
+        var now = Instant.now();
+        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), new NodeInstanceDocument(
+                node.schemaVersion(),
+                node.nodeInstanceId(),
+                node.nodeDefinitionId(),
+                node.kind(),
+                node.handlerType(),
+                NodeStatus.BLOCKED,
+                node.stageId(),
+                node.iterationId(),
+                node.inputRefs(),
+                outputRefs,
+                blockedResult,
+                node.runRef(),
+                node.startedAt(),
+                now
+        ));
+
+        var recoveryGateId = "recovery-" + node.nodeInstanceId();
+        jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument(
+                1,
+                recoveryGateId,
+                node.nodeInstanceId(),
+                "recovery.review",
+                "open",
+                List.of("retry", "abort"),
+                now,
+                null,
+                Map.of(
+                        "node", node.nodeDefinitionId(),
+                        "node_status", NodeStatus.BLOCKED.name(),
+                        "outcome", outcome,
+                        "reason", "revision_limit_reached",
+                        "max_revisions", maxRevisions,
+                        "current_revision_count", currentRevisionCount
+                )
+        ));
+        var eventId = nextEventId(current.lastEventId());
+        appendEvent(paths, eventId, "revision_limit_reached", Map.of(
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId(),
+                "outcome", outcome,
+                "max_revisions", maxRevisions,
+                "current_revision_count", currentRevisionCount,
+                "recovery_gate_id", recoveryGateId
+        ));
+        var stopped = new WorkflowCurrentDocument(
+                1,
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.WAITING_FOR_RECOVERY,
+                List.of(node.nodeInstanceId()),
+                List.of(recoveryGateId),
+                eventId,
+                now
+        );
+        jsonWriter.write(paths.workflowCurrentJson(), stopped);
+        writeInstanceFromCurrent(paths, stopped, now);
+    }
+
     private int maxIterationNumber(WorkstreamPaths paths) throws IOException {
         if (!Files.exists(paths.iterationsDir())) {
             return 1;
@@ -550,11 +639,57 @@ public final class WorkflowFileLedger {
         }
     }
 
+    private int revisionCount(WorkstreamPaths paths, String targetNodeDefinitionId) throws IOException {
+        if (!Files.exists(paths.iterationsDir())) {
+            return 0;
+        }
+        var targetStage = stageId(targetNodeDefinitionId);
+        try (var stream = Files.list(paths.iterationsDir())) {
+            return (int) stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().matches("iter-\\d{3}\\.json"))
+                    .map(path -> readIterationOrNull(path))
+                    .filter(iteration -> iteration != null)
+                    .filter(iteration -> targetStage.equals(iteration.stageId()))
+                    .filter(iteration -> isRevisionAction(iteration.triggerAction()))
+                    .count();
+        }
+    }
+
+    private WorkflowIterationDocument readIterationOrNull(Path path) {
+        try {
+            return objectMapper.readValue(path.toFile(), WorkflowIterationDocument.class);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     private static boolean startsNewIteration(String nodeDefinitionId, String outcome) {
         return "revise".equals(outcome)
                 || "NEEDS_REVISION".equals(outcome)
                 || "REJECT".equals(outcome)
                 || ("gate.human_next_stage_approval".equals(nodeDefinitionId) && "approved".equals(outcome));
+    }
+
+    private static boolean isRevisionAction(String outcome) {
+        return "revise".equals(outcome)
+                || "NEEDS_REVISION".equals(outcome)
+                || "REJECT".equals(outcome);
+    }
+
+    private static int maxRevisions(NodeDefinition definition) {
+        var configured = definition.config().get("max_revisions");
+        if (configured instanceof Number number) {
+            return number.intValue();
+        }
+        if (configured instanceof String text && !text.isBlank()) {
+            try {
+                return Integer.parseInt(text);
+            } catch (NumberFormatException ignored) {
+                return -1;
+            }
+        }
+        return -1;
     }
 
     private static List<String> allowedActions(NodeDefinition definition) {
