@@ -697,6 +697,23 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 
 报告会汇总 user request、Codex acceptance 摘要、Claude self-test 摘要、Git evidence 指针和最近 Agent 输出。它不替代 Codex 验收，只负责把本轮结果固定成一个人和后续自动化都能引用的交付物。
 
+`delivery.prepare_pr` 会在 final report 后生成交付材料：
+
+```text
+.agent/workstreams/<workstream_id>/delivery/commit-message.txt
+.agent/workstreams/<workstream_id>/delivery/pr-body.md
+```
+
+`commit-message.txt` 用于提交 worktree 中的业务改动，`pr-body.md` 汇总 user request、verification、Codex final acceptance、changed files 和 run artifacts。默认 workflow 只准备材料，不自动提交、不自动 push。
+
+需要提交业务改动时执行：
+
+```bash
+dualctl delivery commit --workdir <effective_worktree> <workstream_id>
+```
+
+`delivery commit` 会用生成的 commit message 执行 `git commit`，并排除 `.agent` 运行账本；如果没有 `.agent` 之外的业务改动，会跳过提交。
+
 过渡期仍会看到旧 design-loop ledger：
 
 ```text
@@ -981,4 +998,4 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - artifact validation 和 final report 仍是薄实现。
 - context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
 - recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
-- PR / notification 还没接入 Java 版。
+- PR create / notification 还没接入 Java 版。

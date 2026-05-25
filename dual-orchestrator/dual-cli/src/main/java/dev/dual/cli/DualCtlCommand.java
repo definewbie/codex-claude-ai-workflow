@@ -10,6 +10,7 @@ import picocli.CommandLine.Command;
         description = "Lifecycle orchestrator for dual-agent design loops.",
         subcommands = {
                 StartCommand.class,
+                DeliveryCommand.class,
                 DoctorCommand.class,
                 StatusCommand.class,
                 EventsCommand.class,

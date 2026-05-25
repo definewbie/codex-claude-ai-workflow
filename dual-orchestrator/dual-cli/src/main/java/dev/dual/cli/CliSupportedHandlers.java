@@ -7,6 +7,8 @@ final class CliSupportedHandlers {
             "acpx.agent_run",
             "artifact.validate",
             "context.build_package",
+            "delivery.git_commit",
+            "delivery.prepare_pr",
             "human.review",
             "prompt.generate_next_stage",
             "report.generate_final",

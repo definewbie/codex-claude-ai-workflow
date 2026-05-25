@@ -205,6 +205,12 @@
       "config": {}
     },
     {
+      "id": "delivery.prepare_pr",
+      "kind": "TASK",
+      "handlerType": "delivery.prepare_pr",
+      "config": {}
+    },
+    {
       "id": "gate.human_acceptance",
       "kind": "GATE",
       "handlerType": "human.review",
@@ -268,7 +274,8 @@
     { "from": "acceptance.decision", "on": "ACCEPT", "to": "acceptance.generate_final_report" },
     { "from": "acceptance.decision", "on": "ACCEPT_WITH_NOTES", "to": "acceptance.generate_final_report" },
     { "from": "acceptance.decision", "on": "REJECT", "to": "context.implement_claude" },
-    { "from": "acceptance.generate_final_report", "on": "completed", "to": "gate.human_acceptance" },
+    { "from": "acceptance.generate_final_report", "on": "completed", "to": "delivery.prepare_pr" },
+    { "from": "delivery.prepare_pr", "on": "completed", "to": "gate.human_acceptance" },
     { "from": "gate.human_acceptance", "on": "approved", "to": "stage.claude_handoff" },
     { "from": "gate.human_acceptance", "on": "revise", "to": "context.implement_claude" },
     { "from": "stage.claude_handoff", "on": "completed", "to": "stage.generate_next_prompt" },

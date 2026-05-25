@@ -586,6 +586,117 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("\"hasChanges\":true"));
     }
 
+    @Test
+    void deliveryPrepareHandlerGeneratesCommitMessageAndPrBody() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var report = workstreamDir.resolve("reports/latest-final-report.md");
+        var acceptance = workstreamDir.resolve("runs/run-011/outputs/acceptance-codex-review.md");
+        var evidenceDir = workstreamDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(report.getParent());
+        Files.createDirectories(acceptance.getParent());
+        Files.createDirectories(evidenceDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add lifecycle delivery support.\n");
+        Files.writeString(report, "# Dual Final Report\n\nAccepted and ready.\n");
+        Files.writeString(acceptance, "Codex accepts with notes.\n");
+        Files.writeString(evidenceDir.resolve("changed-files.txt"), "dual-orchestrator/README.md\n");
+        Files.writeString(evidenceDir.resolve("diff.stat"), " dual-orchestrator/README.md | 2 ++\n");
+
+        var handler = new DeliveryPrepareHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("delivery.prepare_pr", "delivery.prepare_pr"),
+                node("delivery.prepare_pr", NodeKind.TASK, "delivery.prepare_pr")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("completed", result.outcome());
+        assertEquals(".agent/workstreams/ws/delivery/commit-message.txt", result.result().get("commit_message_path"));
+        assertEquals(".agent/workstreams/ws/delivery/pr-body.md", result.result().get("pr_body_path"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/delivery/commit-message.txt"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/delivery/pr-body.md"));
+
+        var commitMessage = Files.readString(tempDir.resolve(".agent/workstreams/ws/delivery/commit-message.txt"));
+        assertTrue(commitMessage.contains("feat: dual agent task ws"));
+        assertTrue(commitMessage.contains("Add lifecycle delivery support."));
+        assertTrue(commitMessage.contains("Run report: .agent/workstreams/ws/reports/latest-final-report.md"));
+
+        var prBody = Files.readString(tempDir.resolve(".agent/workstreams/ws/delivery/pr-body.md"));
+        assertTrue(prBody.contains("# Dual Agent Run PR"));
+        assertTrue(prBody.contains("## User Request"));
+        assertTrue(prBody.contains("## Verification"));
+        assertTrue(prBody.contains("## Codex Final Acceptance"));
+        assertTrue(prBody.contains("dual-orchestrator/README.md"));
+        assertTrue(prBody.contains("latest-final-report.md"));
+    }
+
+    @Test
+    void deliveryCommitHandlerCommitsBusinessChangesWithoutAgentLedger() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
+        var deliveryDir = workstreamDir.resolve("delivery");
+        Files.createDirectories(deliveryDir);
+        Files.writeString(deliveryDir.resolve("commit-message.txt"), """
+                feat: dual agent task ws
+
+                Add lifecycle delivery support.
+
+                Run report: .agent/workstreams/ws/reports/latest-final-report.md
+                """);
+        Files.writeString(tempDir.resolve("README.md"), "after\n");
+        Files.writeString(workstreamDir.resolve("ledger-noise.txt"), "do not commit\n");
+
+        var handler = new DeliveryCommitHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("delivery.git_commit", "delivery.git_commit"),
+                node("delivery.git_commit", NodeKind.TASK, "delivery.git_commit")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("committed", result.outcome());
+        assertEquals(true, result.result().get("commit_created"));
+        assertTrue(((String) result.result().get("commit")).matches("[0-9a-f]{40}"));
+        assertEquals("feat: dual agent task ws", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
+        assertTrue(gitOutput(tempDir, "show", "--name-only", "--pretty=", "HEAD").contains("README.md"));
+        assertFalse(gitOutput(tempDir, "show", "--name-only", "--pretty=", "HEAD").contains(".agent"));
+    }
+
+    @Test
+    void deliveryCommitHandlerSkipsWhenNoBusinessChangesExist() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+
+        var deliveryDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws").resolve("delivery");
+        Files.createDirectories(deliveryDir);
+        Files.writeString(deliveryDir.resolve("commit-message.txt"), "feat: dual agent task ws\n");
+        Files.writeString(deliveryDir.resolve("note.txt"), "ledger only\n");
+
+        var handler = new DeliveryCommitHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("delivery.git_commit", "delivery.git_commit"),
+                node("delivery.git_commit", NodeKind.TASK, "delivery.git_commit")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("skipped_no_changes", result.outcome());
+        assertEquals(false, result.result().get("commit_created"));
+        assertEquals("init", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
+    }
+
     private static NodeDefinition gateDefinition() {
         return new NodeDefinition("gate.human_design_approval", NodeKind.GATE, "human.review", Map.of(
                 "allowed_actions", List.of("approve", "revise")
@@ -630,6 +741,10 @@ class BuiltinHandlerTest {
     }
 
     private static void git(Path workdir, String... args) throws Exception {
+        gitOutput(workdir, args);
+    }
+
+    private static String gitOutput(Path workdir, String... args) throws Exception {
         var command = new java.util.ArrayList<String>();
         command.add("git");
         command.addAll(List.of(args));
@@ -642,5 +757,6 @@ class BuiltinHandlerTest {
         if (exitCode != 0) {
             throw new AssertionError("git command failed: " + command + "\n" + output);
         }
+        return output;
     }
 }
