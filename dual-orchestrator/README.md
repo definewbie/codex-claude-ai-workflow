@@ -343,6 +343,16 @@ dualctl workflow print-default --output ./workflow.json
   "workflowId": "custom-lifecycle",
   "version": 1,
   "entryNodeId": "intake.claude_brainstorm",
+  "defaults": {
+    "sessions": {
+      "claude": "claude-main",
+      "codex": "codex-reviewer"
+    },
+    "delivery": {
+      "base": "main",
+      "draft": true
+    }
+  },
   "nodes": [
     {
       "id": "intake.claude_brainstorm",
@@ -350,7 +360,6 @@ dualctl workflow print-default --output ./workflow.json
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "intake-claude-brainstorm"
       }
     },
@@ -372,6 +381,13 @@ dualctl workflow print-default --output ./workflow.json
   ]
 }
 ```
+
+`defaults` 是可选的，用来减少 workflow 文件重复配置：
+
+- `defaults.sessions.claude` 会填充 `agent=claude` 且没有显式 `session` 的 `acpx.agent_run` 节点。
+- `defaults.sessions.codex` 会填充 `agent=codex` 且没有显式 `session` 的 `acpx.agent_run` 节点。
+- `defaults.delivery` 会填充 `delivery.create_pr` 节点缺失的 `base`、`draft` 等配置。
+- 节点自己的 `config` 优先级更高；一旦节点显式写了 `session`、`base` 或 `draft`，不会被 defaults 覆盖。
 
 启动后会打印：
 

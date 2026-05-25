@@ -65,6 +65,74 @@ class WorkflowDefinitionLoaderTest {
     }
 
     @Test
+    void appliesWorkflowDefaultsToNodeConfigWhenNodeOmitsValues() throws Exception {
+        var workflowPath = tempDir.resolve("workflow-defaults.json");
+        Files.writeString(workflowPath, """
+                {
+                  "workflowId": "custom-lifecycle",
+                  "version": 1,
+                  "entryNodeId": "intake.claude_brainstorm",
+                  "defaults": {
+                    "sessions": {
+                      "claude": "team-claude",
+                      "codex": "team-codex"
+                    },
+                    "delivery": {
+                      "base": "develop",
+                      "draft": true
+                    }
+                  },
+                  "nodes": [
+                    {
+                      "id": "intake.claude_brainstorm",
+                      "kind": "TASK",
+                      "handlerType": "acpx.agent_run",
+                      "config": {
+                        "agent": "claude",
+                        "prompt_template": "intake-claude-brainstorm"
+                      }
+                    },
+                    {
+                      "id": "review.codex",
+                      "kind": "TASK",
+                      "handlerType": "acpx.agent_run",
+                      "config": {
+                        "agent": "codex",
+                        "session": "explicit-codex",
+                        "prompt_template": "intake-codex-product-review"
+                      }
+                    },
+                    {
+                      "id": "delivery.create_pr",
+                      "kind": "TASK",
+                      "handlerType": "delivery.create_pr",
+                      "config": {}
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "from": "intake.claude_brainstorm",
+                      "on": "completed",
+                      "to": "review.codex"
+                    },
+                    {
+                      "from": "review.codex",
+                      "on": "completed",
+                      "to": "delivery.create_pr"
+                    }
+                  ]
+                }
+                """);
+
+        var definition = new WorkflowDefinitionLoader().load(workflowPath);
+
+        assertEquals("team-claude", definition.node("intake.claude_brainstorm").config().get("session"));
+        assertEquals("explicit-codex", definition.node("review.codex").config().get("session"));
+        assertEquals("develop", definition.node("delivery.create_pr").config().get("base"));
+        assertEquals(true, definition.node("delivery.create_pr").config().get("draft"));
+    }
+
+    @Test
     void fallsBackToBuiltInWorkflowWhenPathIsNull() throws Exception {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null);
 

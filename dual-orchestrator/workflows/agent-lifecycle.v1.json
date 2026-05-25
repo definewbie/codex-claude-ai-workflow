@@ -2,6 +2,16 @@
   "workflowId": "agent-lifecycle",
   "version": 1,
   "entryNodeId": "intake.claude_brainstorm",
+  "defaults": {
+    "sessions": {
+      "claude": "claude-main",
+      "codex": "codex-reviewer"
+    },
+    "delivery": {
+      "base": "main",
+      "draft": true
+    }
+  },
   "nodes": [
     {
       "id": "intake.claude_brainstorm",
@@ -9,7 +19,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "intake-claude-brainstorm"
       }
     },
@@ -29,7 +38,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "codex",
-        "session": "codex-reviewer",
         "prompt_template": "intake-codex-product-review"
       }
     },
@@ -53,7 +61,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "design-claude"
       }
     },
@@ -73,7 +80,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "codex",
-        "session": "codex-reviewer",
         "prompt_template": "design-codex-review"
       }
     },
@@ -97,7 +103,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "plan-claude"
       }
     },
@@ -117,7 +122,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "codex",
-        "session": "codex-reviewer",
         "prompt_template": "plan-codex-review"
       }
     },
@@ -151,7 +155,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "implement-claude",
         "approve_all": true
       }
@@ -162,7 +165,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "implement-claude-self-test"
       }
     },
@@ -188,7 +190,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "codex",
-        "session": "codex-reviewer",
         "prompt_template": "acceptance-codex-review"
       }
     },
@@ -224,7 +225,6 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "session": "claude-main",
         "prompt_template": "stage-claude-handoff"
       }
     },
