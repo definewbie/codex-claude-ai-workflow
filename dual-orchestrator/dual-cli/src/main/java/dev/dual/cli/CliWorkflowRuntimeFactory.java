@@ -8,6 +8,7 @@ import dev.dual.runtime.handler.ArtifactValidateHandler;
 import dev.dual.runtime.handler.ContextBuildPackageHandler;
 import dev.dual.runtime.handler.DeliveryCommitHandler;
 import dev.dual.runtime.handler.DeliveryPrepareHandler;
+import dev.dual.runtime.handler.DeliveryPrCreateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.HumanReviewGateHandler;
 import dev.dual.runtime.handler.PromptGenerateNextStageHandler;
@@ -25,6 +26,7 @@ final class CliWorkflowRuntimeFactory {
                         new ContextBuildPackageHandler(),
                         new DeliveryCommitHandler(),
                         new DeliveryPrepareHandler(),
+                        new DeliveryPrCreateHandler(),
                         new PromptGenerateNextStageHandler(),
                         new ReportGenerateFinalHandler()
                 ),

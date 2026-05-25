@@ -11,8 +11,10 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -695,6 +697,61 @@ class BuiltinHandlerTest {
         assertEquals("skipped_no_changes", result.outcome());
         assertEquals(false, result.result().get("commit_created"));
         assertEquals("init", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
+    }
+
+    @Test
+    void deliveryPrCreateHandlerPushesBranchAndRunsGhCreate() throws Exception {
+        var repo = tempDir.resolve("repo");
+        var remote = tempDir.resolve("remote.git");
+        Files.createDirectories(repo);
+        git(repo, "init");
+        git(repo, "config", "user.email", "dual@example.test");
+        git(repo, "config", "user.name", "Dual Test");
+        Files.writeString(repo.resolve("README.md"), "before\n");
+        git(repo, "add", "README.md");
+        git(repo, "commit", "-m", "init");
+        git(repo, "checkout", "-b", "ai/ws");
+        git(remote.getParent(), "init", "--bare", remote.toString());
+        git(repo, "remote", "add", "origin", remote.toString());
+
+        var deliveryDir = repo.resolve(".agent").resolve("workstreams").resolve("ws").resolve("delivery");
+        Files.createDirectories(deliveryDir);
+        Files.writeString(deliveryDir.resolve("commit-message.txt"), "feat: dual agent task ws\n");
+        Files.writeString(deliveryDir.resolve("pr-body.md"), "# Dual Agent Run PR\n");
+        Files.writeString(repo.resolve("README.md"), "after\n");
+
+        var fakeGh = tempDir.resolve("fake-gh.sh");
+        Files.writeString(fakeGh, """
+                #!/bin/sh
+                echo "$@" > "$PWD/.agent/workstreams/ws/delivery/fake-gh-args.txt"
+                echo "https://github.com/example/repo/pull/123"
+                """);
+        Files.setPosixFilePermissions(fakeGh, Set.of(
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE,
+                PosixFilePermission.OWNER_EXECUTE
+        ));
+
+        var handler = new DeliveryPrCreateHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                repo,
+                "ws",
+                new NodeDefinition("delivery.create_pr", NodeKind.TASK, "delivery.create_pr", Map.of(
+                        "gh_command", fakeGh.toString(),
+                        "base", "main",
+                        "draft", true
+                )),
+                node("delivery.create_pr", NodeKind.TASK, "delivery.create_pr")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("pr_created", result.outcome());
+        assertEquals(true, result.result().get("pr_created"));
+        assertEquals("https://github.com/example/repo/pull/123", result.result().get("pr_url"));
+        assertTrue(Files.readString(deliveryDir.resolve("pr-url.txt")).contains("https://github.com/example/repo/pull/123"));
+        assertTrue(Files.readString(deliveryDir.resolve("fake-gh-args.txt")).contains("pr create"));
+        assertTrue(Files.readString(deliveryDir.resolve("fake-gh-args.txt")).contains("--draft"));
+        assertEquals("feat: dual agent task ws", gitOutput(repo, "log", "-1", "--pretty=%s").trim());
     }
 
     private static NodeDefinition gateDefinition() {

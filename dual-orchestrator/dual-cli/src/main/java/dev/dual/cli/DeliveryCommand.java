@@ -9,12 +9,13 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         description = "Prepare or create delivery artifacts.",
         subcommands = {
-                DeliveryCommitCommand.class
+                DeliveryCommitCommand.class,
+                DeliveryCreatePrCommand.class
         }
 )
 public final class DeliveryCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use delivery commit.");
+        System.out.println("Use delivery commit or delivery create-pr.");
     }
 }

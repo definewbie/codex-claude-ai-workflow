@@ -714,6 +714,22 @@ dualctl delivery commit --workdir <effective_worktree> <workstream_id>
 
 `delivery commit` 会用生成的 commit message 执行 `git commit`，并排除 `.agent` 运行账本；如果没有 `.agent` 之外的业务改动，会跳过提交。
 
+需要创建 PR 时执行：
+
+```bash
+dualctl delivery create-pr --workdir <effective_worktree> <workstream_id>
+dualctl delivery create-pr --workdir <effective_worktree> --base main --draft <workstream_id>
+dualctl delivery create-pr --workdir <effective_worktree> --title "feat: my task" <workstream_id>
+```
+
+`delivery create-pr` 会先确保业务改动已提交，然后执行 `git push -u origin <branch>` 和 `gh pr create`。它要求当前分支不是 `main` / `master`，并且 worktree 有可识别的 `origin` remote。gh 输出会保存到：
+
+```text
+.agent/workstreams/<workstream_id>/delivery/gh-pr-create.stdout.log
+.agent/workstreams/<workstream_id>/delivery/gh-pr-create.stderr.log
+.agent/workstreams/<workstream_id>/delivery/pr-url.txt
+```
+
 过渡期仍会看到旧 design-loop ledger：
 
 ```text
@@ -998,4 +1014,4 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - artifact validation 和 final report 仍是薄实现。
 - context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
 - recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
-- PR create / notification 还没接入 Java 版。
+- notification 还没接入 Java 版。
