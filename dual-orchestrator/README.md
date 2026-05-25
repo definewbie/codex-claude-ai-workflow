@@ -265,6 +265,12 @@ dualctl start "给 README 增加一段项目说明"
 dualctl start --task-file ./requirement.md
 ```
 
+启动后直接推进到第一个人工卡点：
+
+```bash
+dualctl start --run --task-file ./requirement.md
+```
+
 指定目标仓库：
 
 ```bash

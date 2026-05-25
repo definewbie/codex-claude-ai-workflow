@@ -41,6 +41,12 @@ public final class StartCommand implements Callable<Integer> {
     @Option(names = "--allow-unknown-handlers", description = "Allow workflow handler types not built into this CLI.")
     boolean allowUnknownHandlers;
 
+    @Option(names = "--run", description = "Start and immediately run until the next gate, recovery, failure, or completion.")
+    boolean runImmediately;
+
+    @Option(names = "--max-steps", description = "Maximum workflow nodes to execute when --run is used. Defaults to ${DEFAULT-VALUE}.")
+    int maxSteps = 20;
+
     @Parameters(index = "0", arity = "0..1", description = "Inline requirement text.")
     String inlineRequirement;
 
@@ -101,8 +107,16 @@ public final class StartCommand implements Callable<Integer> {
         if (workflowPath != null) {
             System.out.println("Workflow source: " + workflowPath.toAbsolutePath().normalize());
         }
-        System.out.println("Next: dualctl resume --workdir " + selectedWorktree + " " + workstreamId.value());
-        return 0;
+        if (!runImmediately) {
+            System.out.println("Next: dualctl run --workdir " + selectedWorktree + " " + workstreamId.value());
+            return 0;
+        }
+
+        System.out.println();
+        System.out.println("Running workflow until next gate...");
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), "run"))) {
+            return new CliWorkflowLoop().run(selectedWorktree, workstreamId.value(), maxSteps);
+        }
     }
 
     private String readRequirement() throws Exception {
