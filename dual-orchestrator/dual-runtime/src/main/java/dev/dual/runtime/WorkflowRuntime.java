@@ -4,6 +4,7 @@ import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowStatus;
+import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.handler.DecisionHandler;
@@ -12,6 +13,8 @@ import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
 public final class WorkflowRuntime {
+    private static final int DEFAULT_MAX_AUTO_RETRIES = 3;
+
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
 
@@ -38,13 +41,28 @@ public final class WorkflowRuntime {
             return new WorkflowRuntimeResult(command.workstreamId(), current.status(), active, "waiting for recovery; run dualctl retry after fixing the cause");
         }
 
-        var node = ledger.loadCoreNode(paths, current.activeNodeInstanceIds().get(0));
-        var nodeDefinition = definition.node(node.nodeDefinitionId());
+        var nodeDoc = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
+
         if (nodeDefinition.kind() == NodeKind.GATE) {
+            var node = ledger.loadCoreNode(paths, current.activeNodeInstanceIds().get(0));
             handlers.gate(nodeDefinition.handlerType())
                     .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, nodeDefinition.id(), "waiting for human review");
         }
+
+        // Status guard: resolve node into an executable state
+        var guardResult = resolveNodeForExecution(paths, nodeDoc);
+        if (guardResult == null) {
+            return new WorkflowRuntimeResult(command.workstreamId(), current.status(), nodeDoc.nodeDefinitionId(), statusRejectionMessage(nodeDoc));
+        }
+
+        // Mark RUNNING with current PID
+        long pid = ProcessHandle.current().pid();
+        ledger.markRunning(paths, nodeDoc.nodeInstanceId(), pid);
+
+        // Reload as core NodeInstance for handler context
+        var node = ledger.loadCoreNode(paths, nodeDoc.nodeInstanceId());
 
         var result = switch (nodeDefinition.kind()) {
             case TASK -> handlers.task(nodeDefinition.handlerType())
@@ -62,5 +80,61 @@ public final class WorkflowRuntime {
         }
         var message = result.status() == NodeStatus.COMPLETED ? "resumed workflow" : "workflow stopped at " + result.status();
         return new WorkflowRuntimeResult(command.workstreamId(), next.status(), active, message);
+    }
+
+    private Boolean resolveNodeForExecution(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+        return switch (node.status()) {
+            case READY -> true;
+            case RUNNING -> resolveRunningNode(paths, node);
+            case FAILED -> resolveFailedNode(paths, node);
+            case BLOCKED, WAITING, COMPLETED, CREATED, SKIPPED -> null;
+        };
+    }
+
+    private Boolean resolveRunningNode(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+        var pidValue = node.result().get("running_pid");
+        if (pidValue instanceof Number number) {
+            var alive = ProcessHandle.of(number.longValue()).map(ProcessHandle::isAlive).orElse(false);
+            if (alive) {
+                return null;
+            }
+        }
+        // PID is dead — just allow execution. markRunning() will overwrite the stale RUNNING state.
+        return true;
+    }
+
+    private Boolean resolveFailedNode(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+        var recoverable = node.result().get("acpx_failure.recoverable");
+        if (!Boolean.TRUE.equals(recoverable)) {
+            return null;
+        }
+        var countValue = node.result().getOrDefault("auto_retry_count", 0);
+        var count = (countValue instanceof Number n) ? n.intValue() : 0;
+        if (count >= DEFAULT_MAX_AUTO_RETRIES) {
+            return null;
+        }
+        ledger.autoRetryNode(paths, node.nodeInstanceId());
+        return true;
+    }
+
+    private String statusRejectionMessage(NodeInstanceDocument node) {
+        return switch (node.status()) {
+            case RUNNING -> {
+                var pid = node.result().get("running_pid");
+                yield "node " + node.nodeDefinitionId() + " is RUNNING (PID=" + pid + "), agent process still alive";
+            }
+            case FAILED -> {
+                var count = node.result().getOrDefault("auto_retry_count", 0);
+                if (count instanceof Number n && n.intValue() >= DEFAULT_MAX_AUTO_RETRIES) {
+                    yield "node " + node.nodeDefinitionId() + " FAILED, auto-retry limit reached (" + n.intValue() + "), use dualctl retry";
+                }
+                yield "node " + node.nodeDefinitionId() + " FAILED (not recoverable), use dualctl retry";
+            }
+            case BLOCKED -> "node " + node.nodeDefinitionId() + " BLOCKED (revision limit), use dualctl retry or recovery abort";
+            case WAITING -> "node " + node.nodeDefinitionId() + " is WAITING, not executable via resume";
+            case COMPLETED -> "node " + node.nodeDefinitionId() + " already COMPLETED, should not be active";
+            case CREATED, SKIPPED -> "node " + node.nodeDefinitionId() + " has illegal status: " + node.status();
+            default -> "unexpected node status: " + node.status();
+        };
     }
 }
