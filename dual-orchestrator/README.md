@@ -59,11 +59,11 @@ Runtime 只认识三类节点：
 - Prompt 注入防护：`dual-control` block 解析锚定行首，只认 terminal block，不回退旧文件。
 - Revision loop 上限 + recovery gate。
 - 158 个单元测试覆盖全部 handler、ledger、control block 解析。
+- Agent artifact contract registry（`ContractRegistry`），per-node output schema 校验。
+- Prompt 模板变量加载时校验，防止引用未知变量。
 
 仍未完成：
 
-- Agent artifact contract 强化（per-node output schema 校验）。
-- Prompt 模板变量校验。
 - Context package 总预算和 handoff 结构化。
 - 完整生命周期真实 smoke。
 - API server / scheduler。
@@ -242,18 +242,22 @@ summary: one short sentence
 - Terminal block 之后不能有非空白内容，否则以 `NON_TERMINAL_CONTROL_BLOCK` 停到 `control.repair` recovery gate。
 - Blockquote `> ```dual-control` 和嵌套 code fence 中的 `dual-control` 不会被匹配（regex 锚定行首 `^`）。
 - 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 停到 `control.repair` recovery gate。
-- `decision` 不在当前阶段允许集合内，会以 `INVALID_DECISION` 停到 `control.repair` recovery gate。
+- `decision` 不在当前阶段允许集合内，会以 `CONTRACT_VIOLATION`（映射为 `INVALID_DUAL_CONTROL`）停到 `control.repair` recovery gate。
 - `BLOCKED` 会把 workflow 标记为 `BLOCKED`，不会继续路由。
 - `NEEDS_REVISION` / `REJECT` 会沿 workflow definition 中配置的 revision edge 返回对应 Claude 节点。
 
-当前允许值：
+合法 decision 值由 `ContractRegistry` 定义（单一真相源）：
 
 | Decision Node | Allowed Decisions |
 | --- | --- |
-| `intake.decision` | `PASS`, `NEEDS_REVISION`, `BLOCKED` |
-| `design.decision` | `PASS`, `NEEDS_REVISION`, `BLOCKED` |
+| `intake.decision` | `READY_FOR_PRODUCT_REVIEW`, `NEEDS_REVISION`, `BLOCKED` |
+| `design.decision` | `READY_FOR_ARCH_REVIEW`, `NEEDS_REVISION`, `BLOCKED` |
 | `plan.decision` | `READY_TO_IMPLEMENT`, `NEEDS_REVISION`, `BLOCKED` |
 | `acceptance.decision` | `ACCEPT`, `ACCEPT_WITH_NOTES`, `REJECT`, `BLOCKED` |
+
+每个 agent task node 也有对应的 output contract，定义其合法的 `decision` 值域和 required keys（`decision` + `summary`）。`ContractRegistry` 保证 decision node 的 `allowedDecisions` 与 workflow edge `on` 值和 agent prompt 模板声明的值域一致。
+
+Prompt 模板变量在加载时校验：如果模板引用了非 `KNOWN_VARIABLES` 集合（`workstream_id`, `node_id`, `prompt_template`, `ledger_path`, `requirement`, `context_package`）中的 `{{variable}}`，会立即报错。
 
 ## Commands
 

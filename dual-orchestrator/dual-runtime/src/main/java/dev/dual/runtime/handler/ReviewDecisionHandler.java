@@ -25,7 +25,8 @@ public final class ReviewDecisionHandler implements DecisionHandler {
             return failed("MISSING_DUAL_CONTROL", "No dual-control block found in decision input refs.", context);
         }
         if (!parseResult.valid()) {
-            return failed("INVALID_DUAL_CONTROL", parseResult.message(), context, Set.of(), null, parseResult);
+            var allowed = allowedDecisions(context.definition().id());
+            return failed("INVALID_DUAL_CONTROL", parseResult.message(), context, allowed, null, parseResult);
         }
         var control = parseResult.block();
         var allowed = allowedDecisions(context.definition().id());
@@ -52,6 +53,8 @@ public final class ReviewDecisionHandler implements DecisionHandler {
 
     private DualControlParseResult readLatestControlBlock(DecisionContext context) throws Exception {
         var refs = context.instance().inputRefs();
+        var nodeId = context.definition().id();
+        var hasContract = ContractRegistry.hasContract(nodeId);
         for (int i = refs.size() - 1; i >= 0; i--) {
             var ref = refs.get(i);
             if (ref.startsWith("artifact://")) {
@@ -62,10 +65,12 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                 continue;
             }
             var content = Files.readString(path, StandardCharsets.UTF_8);
-            var parsed = parser.parse(content);
-            // Return whatever we found in this file — valid, invalid, or missing.
-            // Do NOT fall back to older files: the latest output is the authoritative
-            // source. Falling back could accept stale or injected blocks from earlier stages.
+            DualControlParseResult parsed;
+            if (hasContract) {
+                parsed = parser.parse(content, ContractRegistry.forNode(nodeId));
+            } else {
+                parsed = parser.parse(content);
+            }
             return parsed;
         }
         return DualControlParseResult.missing();
@@ -95,11 +100,9 @@ public final class ReviewDecisionHandler implements DecisionHandler {
     }
 
     private Set<String> allowedDecisions(String nodeId) {
-        var decisions = switch (nodeId) {
-            case "plan.decision" -> List.of("READY_TO_IMPLEMENT", "NEEDS_REVISION", "BLOCKED");
-            case "acceptance.decision" -> List.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT", "BLOCKED");
-            default -> List.of("PASS", "NEEDS_REVISION", "BLOCKED");
-        };
-        return new LinkedHashSet<>(decisions);
+        if (ContractRegistry.hasContract(nodeId)) {
+            return ContractRegistry.forNode(nodeId).allowedDecisions();
+        }
+        return new LinkedHashSet<>(List.of("PASS", "NEEDS_REVISION", "BLOCKED"));
     }
 }

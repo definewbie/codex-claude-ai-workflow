@@ -5,10 +5,18 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 final class AgentPromptRenderer {
     private static final String TEMPLATE_ROOT = "dev/dual/adapter/acpx/prompts/";
+    private static final Set<String> KNOWN_VARIABLES = Set.of(
+            "workstream_id", "node_id", "prompt_template",
+            "ledger_path", "requirement", "context_package"
+    );
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
 
     String render(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
         var template = loadTemplate(promptTemplate);
@@ -31,9 +39,27 @@ final class AgentPromptRenderer {
             if (stream == null) {
                 throw new IllegalArgumentException("missing prompt template resource: " + resource);
             }
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            var content = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            validateTemplateVariables(promptTemplate, content);
+            return content;
         } catch (IOException e) {
             throw new UncheckedIOException("failed to load prompt template: " + resource, e);
+        }
+    }
+
+    private void validateTemplateVariables(String templateName, String templateContent) {
+        var matcher = VARIABLE_PATTERN.matcher(templateContent);
+        var unknown = new LinkedHashSet<String>();
+        while (matcher.find()) {
+            var variable = matcher.group(1);
+            if (!KNOWN_VARIABLES.contains(variable)) {
+                unknown.add(variable);
+            }
+        }
+        if (!unknown.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "prompt template '" + templateName + "' references unknown variables: " + unknown
+                            + ". Known: " + KNOWN_VARIABLES);
         }
     }
 

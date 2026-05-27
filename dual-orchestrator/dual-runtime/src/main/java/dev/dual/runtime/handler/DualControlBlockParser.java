@@ -15,6 +15,23 @@ final class DualControlBlockParser {
             Pattern.DOTALL
     );
 
+    DualControlParseResult parse(String markdown, NodeOutputContract contract) {
+        var result = parse(markdown);
+        if (!result.valid()) {
+            return result;
+        }
+        try {
+            contract.validate(result.block());
+        } catch (IllegalArgumentException e) {
+            return DualControlParseResult.invalid(
+                    "CONTRACT_VIOLATION",
+                    e.getMessage(),
+                    Map.of("node_id", contract.nodeId())
+            );
+        }
+        return result;
+    }
+
     DualControlParseResult parse(String markdown) {
         if (markdown == null || markdown.isBlank()) {
             return DualControlParseResult.missing();

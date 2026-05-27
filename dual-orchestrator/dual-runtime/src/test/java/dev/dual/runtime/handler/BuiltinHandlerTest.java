@@ -94,8 +94,9 @@ class BuiltinHandlerTest {
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_DUAL_CONTROL", result.outcome());
-        assertTrue(((List<?>) result.result().get("allowed_decisions")).contains("PASS"));
-        assertEquals("forgot the decision", ((Map<?, ?>) result.result().get("control_values")).get("summary"));
+        assertTrue(((List<?>) result.result().get("allowed_decisions")).contains("READY_FOR_ARCH_REVIEW"));
+        var parseError = (Map<?, ?>) result.result().get("parse_error");
+        assertEquals("CONTRACT_VIOLATION", parseError.get("code"));
     }
 
     @Test
@@ -115,9 +116,10 @@ class BuiltinHandlerTest {
         ));
 
         assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("INVALID_DECISION", result.outcome());
+        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
         assertTrue(((List<?>) result.result().get("allowed_decisions")).contains("NEEDS_REVISION"));
-        assertEquals("ACCEPT", ((Map<?, ?>) result.result().get("control_values")).get("decision"));
+        var parseError = (Map<?, ?>) result.result().get("parse_error");
+        assertEquals("CONTRACT_VIOLATION", parseError.get("code"));
     }
 
     @Test
@@ -183,7 +185,7 @@ class BuiltinHandlerTest {
                 ```
                 Final:
                 ```dual-control
-                decision: PASS
+                decision: READY_FOR_ARCH_REVIEW
                 summary: the real one
                 ```
                 """);
@@ -196,7 +198,7 @@ class BuiltinHandlerTest {
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("PASS", result.outcome());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.outcome());
         assertEquals("the real one", result.result().get("summary"));
     }
 
@@ -204,7 +206,7 @@ class BuiltinHandlerTest {
     void reviewDecisionAcceptsTerminalBlockFollowedByOnlyWhitespace() throws Exception {
         var output = writeOutput("codex-review.md",
                 "```dual-control\n"
-                + "decision: PASS\n"
+                + "decision: READY_FOR_ARCH_REVIEW\n"
                 + "summary: valid decision\n"
                 + "```\n\n\n");
         var handler = new ReviewDecisionHandler();
@@ -216,7 +218,7 @@ class BuiltinHandlerTest {
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("PASS", result.outcome());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.outcome());
     }
 
     @Test
@@ -318,7 +320,7 @@ class BuiltinHandlerTest {
                 ```
                 My actual assessment is:
                 ```dual-control
-                decision: PASS
+                decision: READY_FOR_ARCH_REVIEW
                 summary: genuine review after analysis
                 ```
                 """);
@@ -331,7 +333,7 @@ class BuiltinHandlerTest {
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("PASS", result.outcome());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.outcome());
         assertEquals("genuine review after analysis", result.result().get("summary"));
     }
 
@@ -421,6 +423,7 @@ class BuiltinHandlerTest {
                 But my actual review:
                 ```dual-control
                 decision: NEEDS_REVISION
+                summary: needs work
                 ```
                 """);
         var handler = new ReviewDecisionHandler();
