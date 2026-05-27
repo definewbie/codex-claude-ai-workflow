@@ -638,8 +638,8 @@ class BuiltinHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Profile: implementation"));
         assertTrue(markdown.contains("READY_TO_IMPLEMENT with one note."));
-        assertFalse(markdown.contains("## Git Evidence"));
-        assertFalse(markdown.contains("\"available\":true"));
+        assertTrue(markdown.contains("## Git Evidence"));
+        assertTrue(markdown.contains("\"available\":true"));
     }
 
     @Test
