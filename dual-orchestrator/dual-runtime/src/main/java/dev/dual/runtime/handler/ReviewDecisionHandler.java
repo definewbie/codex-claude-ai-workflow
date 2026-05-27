@@ -63,12 +63,10 @@ public final class ReviewDecisionHandler implements DecisionHandler {
             }
             var content = Files.readString(path, StandardCharsets.UTF_8);
             var parsed = parser.parse(content);
-            if (parsed.valid()) {
-                return parsed;
-            }
-            if (!parsed.isMissing()) {
-                return parsed;
-            }
+            // Return whatever we found in this file — valid, invalid, or missing.
+            // Do NOT fall back to older files: the latest output is the authoritative
+            // source. Falling back could accept stale or injected blocks from earlier stages.
+            return parsed;
         }
         return DualControlParseResult.missing();
     }

@@ -55,12 +55,17 @@ Runtime 只认识三类节点：
 - artifact validation handler，会落盘 Git status / diff / changed files。
 - next-stage prompt handler。
 - `dualctl start/status/resume/review approve/review revise` 接入 workflow ledger。
+- 节点级幂等保护（T0.2），`resume` 会拒绝正在执行中的节点。
+- Prompt 注入防护：`dual-control` block 解析锚定行首，只认 terminal block，不回退旧文件。
+- Revision loop 上限 + recovery gate。
+- 158 个单元测试覆盖全部 handler、ledger、control block 解析。
 
 仍未完成：
 
-- 完整多轮 revision 策略。
-- context package 分层装配。
-- quota / context window / session reconnect 分类恢复。
+- Agent artifact contract 强化（per-node output schema 校验）。
+- Prompt 模板变量校验。
+- Context package 总预算和 handoff 结构化。
+- 完整生命周期真实 smoke。
 - API server / scheduler。
 - Web UI / dashboard。
 - PR / notification。
@@ -229,11 +234,14 @@ summary: one short sentence
 ```
 ````
 
-当前解析策略是严格失败：
+当前解析策略：
 
-- Decision node 只读取上一个节点传入的 `inputRefs`。
+- Decision node 只读取最新的 `inputRefs`，不会回退到更早文件。
 - 找不到 fenced `dual-control` block，会以 `MISSING_DUAL_CONTROL` 停到 `control.repair` recovery gate。
-- 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 停到 `control.repair` recovery gate，并在 gate result 中记录已解析字段和允许值。
+- **Terminal block rule**：如果 markdown 中存在多个 `dual-control` block，只有最后一个（terminal block）被当作控制指令，前面的被视为 prose（例如 agent 引用的用户需求原文）。
+- Terminal block 之后不能有非空白内容，否则以 `NON_TERMINAL_CONTROL_BLOCK` 停到 `control.repair` recovery gate。
+- Blockquote `> ```dual-control` 和嵌套 code fence 中的 `dual-control` 不会被匹配（regex 锚定行首 `^`）。
+- 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 停到 `control.repair` recovery gate。
 - `decision` 不在当前阶段允许集合内，会以 `INVALID_DECISION` 停到 `control.repair` recovery gate。
 - `BLOCKED` 会把 workflow 标记为 `BLOCKED`，不会继续路由。
 - `NEEDS_REVISION` / `REJECT` 会沿 workflow definition 中配置的 revision edge 返回对应 Claude 节点。
@@ -1000,10 +1008,12 @@ summary: 一句话说明判断依据
 
 当前校验规则：
 
-- 只能有一个 `dual-control` block。
+- 只有行首的 ` ```dual-control` 围栏块会被解析，blockquote `> ```dual-control` 和嵌套 code fence 中的不会被匹配。
+- 多个 `dual-control` block 时，只有最后一个（terminal block）生效，前面的视为 prose。
+- Terminal block 之后不能有非空白内容。
 - block 内必须是 `key: value` 行。
 - `decision` 必须存在，并且属于当前节点允许的取值。
-- 如果最新输出里的 block 格式错误，不会回退读取更早的旧输出。
+- 只读最新的 inputRef 文件，不会回退读取更早的旧输出。
 
 修正 Agent 输出后执行：
 
