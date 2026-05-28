@@ -61,15 +61,19 @@ Runtime 只认识三类节点：
 - 247 个单元测试覆盖全部 handler、ledger、control block 解析、contract registry、prompt 一致性、context governance 和 workflow 集成。
 - Agent artifact contract registry（`ContractRegistry`），per-node output schema 校验。
 - Prompt 模板变量加载时校验，防止引用未知变量。
-- Context governance 架构：6 profile 各自拥有 budget-controlled 渲染管线，priority-based degradation，硬上限 budget enforcement。
-- `handoff.json` sidecar：从 agent handoff markdown 解析生成结构化 JSON，下游 handler 可直接消费。
+- Context governance 架构：6 profile 各自拥有 budget-controlled 渲染管线，priority-based degradation，硬上限 budget enforcement。per-profile config overrides（`max_snippet_chars` 等）。
+- `handoff.json` sidecar：从 agent handoff markdown 解析生成结构化 JSON，下游 handler 可直接消费 `completedWork`（iteration_history section）和 `openRisks`（human_feedback section）。
+- Configurable retry policies：per-failure-type 策略（RATE_LIMIT / SESSION_MISSING / AGENT_RECONNECT / CONTEXT_WINDOW），指数退避 + `Thread.sleep`，node-level config override。
+- `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
+- Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
+- ~280 个单元测试。
 
 仍未完成：
 
-- 完整生命周期真实 smoke。
+- 完整生命周期真实 smoke（需要 Codex quota）。
 - API server / scheduler。
 - Web UI / dashboard。
-- PR / notification。
+- Notification 集成。
 - 正式安装脚本。
 
 ## Modules
@@ -80,7 +84,8 @@ dual-core
   workflow model
 
 dual-ledger-file
-  file ledger
+  WorkflowFileLedger (facade)
+  RoutingEngine · NodeStateWriter · RevisionTracker · LedgerEventLog · LedgerUtils
   workflow/current/nodes/gates/events
   local lock
 
@@ -1061,7 +1066,6 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 
 - 仍是 CLI-first，没有 API server / scheduler。
 - workflow 已支持 JSON 文件加载；更高级的条件表达式、并行节点和 schema 版本迁移还没做。
-- artifact validation 和 final report 仍是薄实现。
-- context package 已有 budget-controlled governance pipeline（6 profile，priority-based degradation），但没有 token-level budgeting 或 adaptive compression。
-- recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
+- context package 已有 budget-controlled governance pipeline（6 profile，priority-based degradation，per-profile config overrides），但没有 token-level budgeting 或 adaptive compression。
+- auto-retry 按 failure type 自动分类并指数退避重试，但还没有交互式修复向导。
 - notification 还没接入 Java 版。
