@@ -80,21 +80,41 @@ class RunningStateGuardTest {
     }
 
     @Test
-    void failedRecoverableAutoRetries() throws Exception {
+    void failedRecoverableAutoRetriesThroughWaitingForRecovery() throws Exception {
         var paths = setup("ws-auto-retry");
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-auto-retry", SINGLE_TASK);
 
-        // Simulate a FAILED node with recoverable=true
+        // Simulate a FAILED node that was routed through stopOnNonCompletedNode
+        // (workflow is WAITING_FOR_RECOVERY, node is FAILED with recoverable=true)
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
-                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "rate_limit", "auto_retry_count", 0));
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT", "auto_retry_count", 0));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-auto-retry"));
 
         assertEquals(WorkflowStatus.COMPLETED, result.status());
         assertTrue(result.message().contains("resumed"));
+    }
+
+    @Test
+    void failedRecoverableRateLimitAllowsFiveRetries() throws Exception {
+        var paths = setup("ws-rate-limit");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-rate-limit", SINGLE_TASK);
+
+        // 4 retries still allowed (policy allows 5)
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT", "auto_retry_count", 4));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-rate-limit"));
+
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
     }
 
     @Test
@@ -105,12 +125,15 @@ class RunningStateGuardTest {
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
-                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "rate_limit", "auto_retry_count", 3));
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT", "auto_retry_count", 5));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-over-threshold"));
 
         assertTrue(result.message().contains("auto-retry limit reached"));
+        assertTrue(result.message().contains("5/5"));
+        assertTrue(result.message().contains("RECOVERABLE_RATE_LIMIT"));
     }
 
     @Test
@@ -122,6 +145,7 @@ class RunningStateGuardTest {
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
                 Map.of("acpx_failure.recoverable", false, "acpx_failure.reason", "fatal_error"));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-not-recoverable"));
@@ -138,11 +162,49 @@ class RunningStateGuardTest {
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.BLOCKED,
                 Map.of("reason", "revision_limit_reached"));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-blocked"));
 
         assertTrue(result.message().contains("BLOCKED"));
+    }
+
+    @Test
+    void contextWindowAllowsFewerRetriesThanRateLimit() throws Exception {
+        var paths = setup("ws-ctx-window");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-ctx-window", SINGLE_TASK);
+
+        // CONTEXT_WINDOW policy allows max 2 retries, so count=2 should be rejected
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_CONTEXT_WINDOW", "auto_retry_count", 2));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-ctx-window"));
+
+        assertTrue(result.message().contains("auto-retry limit reached"));
+        assertTrue(result.message().contains("2/2"));
+    }
+
+    @Test
+    void unknownRecoverableFailureUsesDefaultPolicy() throws Exception {
+        var paths = setup("ws-unknown");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-unknown", SINGLE_TASK);
+
+        // Unknown reason gets default policy (max 3)
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "UNKNOWN_TRANSIENT", "auto_retry_count", 2));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-unknown"));
+
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
     }
 
     // --- Helpers ---
@@ -169,13 +231,24 @@ class RunningStateGuardTest {
                 node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(),
                 merged, node.runRef(), node.startedAt(), null
         );
-        // Use ledger's internal writer by calling markRunning (which writes via jsonWriter)
-        // For direct status manipulation, use a workaround:
-        // Write through ledger's jsonWriter via reflection-free approach
         var field = WorkflowFileLedger.class.getDeclaredField("jsonWriter");
         field.setAccessible(true);
         var writer = (dev.dual.ledger.file.AtomicJsonWriter) field.get(ledger);
         writer.write(paths.nodeJson(node.nodeInstanceId()), updated);
+    }
+
+    private void setWorkflowStatus(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowStatus status) throws Exception {
+        var current = ledger.loadCurrent(paths);
+        var updated = new dev.dual.ledger.file.WorkflowCurrentDocument(
+                current.schemaVersion(), current.workstreamId(), current.workflowInstanceId(),
+                current.workflowId(), current.definitionVersion(), status,
+                current.activeNodeInstanceIds(), current.openGateIds(), current.lastEventId(),
+                java.time.Instant.now()
+        );
+        var field = WorkflowFileLedger.class.getDeclaredField("jsonWriter");
+        field.setAccessible(true);
+        var writer = (dev.dual.ledger.file.AtomicJsonWriter) field.get(ledger);
+        writer.write(paths.workflowCurrentJson(), updated);
     }
 
     private static final class OkTask implements TaskHandler {

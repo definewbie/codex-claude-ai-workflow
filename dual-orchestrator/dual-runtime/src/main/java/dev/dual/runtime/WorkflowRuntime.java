@@ -13,8 +13,6 @@ import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
 public final class WorkflowRuntime {
-    private static final int DEFAULT_MAX_AUTO_RETRIES = 3;
-
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
 
@@ -36,9 +34,17 @@ public final class WorkflowRuntime {
         if (current.activeNodeInstanceIds().isEmpty()) {
             return new WorkflowRuntimeResult(command.workstreamId(), current.status(), "", "workflow has no active node");
         }
+
+        // WAITING_FOR_RECOVERY: check auto-retry before rejecting
         if (current.status() == WorkflowStatus.WAITING_FOR_RECOVERY) {
-            var active = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0)).nodeDefinitionId();
-            return new WorkflowRuntimeResult(command.workstreamId(), current.status(), active, "waiting for recovery; run dualctl retry after fixing the cause");
+            var nodeDoc = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+            if (nodeDoc.status() == NodeStatus.FAILED && attemptAutoRetry(paths, nodeDoc)) {
+                // Node was reset to READY; fall through to execution below.
+                // Reload current since autoRetryNode updates it.
+                current = ledger.loadCurrent(paths);
+            } else {
+                return new WorkflowRuntimeResult(command.workstreamId(), current.status(), nodeDoc.nodeDefinitionId(), statusRejectionMessage(nodeDoc));
+            }
         }
 
         var nodeDoc = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
@@ -82,12 +88,30 @@ public final class WorkflowRuntime {
         return new WorkflowRuntimeResult(command.workstreamId(), next.status(), active, message);
     }
 
+    private boolean attemptAutoRetry(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+        var recoverable = node.result().get("acpx_failure.recoverable");
+        if (!Boolean.TRUE.equals(recoverable)) {
+            return false;
+        }
+        var reasonValue = node.result().getOrDefault("acpx_failure.reason", "");
+        var reason = reasonValue instanceof String s ? s : String.valueOf(reasonValue);
+        var policy = RetryStrategies.forReason(reason);
+
+        var countValue = node.result().getOrDefault("auto_retry_count", 0);
+        var count = (countValue instanceof Number n) ? n.intValue() : 0;
+        if (count >= policy.maxRetries()) {
+            return false;
+        }
+
+        ledger.autoRetryNode(paths, node.nodeInstanceId());
+        return true;
+    }
+
     private Boolean resolveNodeForExecution(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
         return switch (node.status()) {
             case READY -> true;
             case RUNNING -> resolveRunningNode(paths, node);
-            case FAILED -> resolveFailedNode(paths, node);
-            case BLOCKED, WAITING, COMPLETED, CREATED, SKIPPED -> null;
+            case BLOCKED, WAITING, COMPLETED, CREATED, SKIPPED, FAILED -> null;
         };
     }
 
@@ -103,20 +127,6 @@ public final class WorkflowRuntime {
         return true;
     }
 
-    private Boolean resolveFailedNode(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
-        var recoverable = node.result().get("acpx_failure.recoverable");
-        if (!Boolean.TRUE.equals(recoverable)) {
-            return null;
-        }
-        var countValue = node.result().getOrDefault("auto_retry_count", 0);
-        var count = (countValue instanceof Number n) ? n.intValue() : 0;
-        if (count >= DEFAULT_MAX_AUTO_RETRIES) {
-            return null;
-        }
-        ledger.autoRetryNode(paths, node.nodeInstanceId());
-        return true;
-    }
-
     private String statusRejectionMessage(NodeInstanceDocument node) {
         return switch (node.status()) {
             case RUNNING -> {
@@ -124,9 +134,14 @@ public final class WorkflowRuntime {
                 yield "node " + node.nodeDefinitionId() + " is RUNNING (PID=" + pid + "), agent process still alive";
             }
             case FAILED -> {
-                var count = node.result().getOrDefault("auto_retry_count", 0);
-                if (count instanceof Number n && n.intValue() >= DEFAULT_MAX_AUTO_RETRIES) {
-                    yield "node " + node.nodeDefinitionId() + " FAILED, auto-retry limit reached (" + n.intValue() + "), use dualctl retry";
+                var recoverable = node.result().get("acpx_failure.recoverable");
+                if (Boolean.TRUE.equals(recoverable)) {
+                    var reasonValue = node.result().getOrDefault("acpx_failure.reason", "");
+                    var reason = reasonValue instanceof String s ? s : String.valueOf(reasonValue);
+                    var policy = RetryStrategies.forReason(reason);
+                    var count = node.result().getOrDefault("auto_retry_count", 0);
+                    var countInt = (count instanceof Number n) ? n.intValue() : 0;
+                    yield "node " + node.nodeDefinitionId() + " FAILED, auto-retry limit reached (" + countInt + "/" + policy.maxRetries() + " for " + reason + "), use dualctl retry";
                 }
                 yield "node " + node.nodeDefinitionId() + " FAILED (not recoverable), use dualctl retry";
             }
