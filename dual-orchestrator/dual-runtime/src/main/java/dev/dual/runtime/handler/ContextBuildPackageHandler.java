@@ -80,6 +80,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static NodeResult executeGoverned(TaskContext context, Path workstreamDir, Path packagePath, String profileName) throws IOException {
         var budget = ContextProfiles.budgetFor(profileName);
+        var handoffJson = loadHandoffJson(workstreamDir);
 
         // Phase 2: Resolve section availability
         var resolved = new ArrayList<ResolvedSection>();
@@ -122,7 +123,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 continue;
             }
             var before = builder.length();
-            appendGovernedSection(builder, rs, context, workstreamDir);
+            appendGovernedSection(builder, rs, context, workstreamDir, handoffJson);
             rs.renderedChars = builder.length() - before;
         }
 
@@ -145,7 +146,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     }
                     continue;
                 }
-                appendGovernedSection(builder, rs, context, workstreamDir);
+                appendGovernedSection(builder, rs, context, workstreamDir, handoffJson);
             }
             if (builder.length() > budget.totalBudget()) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(),
@@ -236,7 +237,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     private static void appendGovernedSection(StringBuilder builder, ResolvedSection rs,
-                                               TaskContext context, Path workstreamDir) throws IOException {
+                                               TaskContext context, Path workstreamDir,
+                                               Map<String, Object> handoffJson) throws IOException {
         builder.append("## ").append(sectionTitle(rs.req.section())).append("\n\n");
         var strategy = rs.degraded ? rs.req.degradeTo().strategy() : Degradation.FULL;
         var maxItems = rs.degraded ? rs.req.degradeTo().maxItems() : 0;
@@ -267,7 +269,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
             case "git_evidence" -> {
                 if (strategy == Degradation.DIFF_STAT) {
-                    appendGitEvidenceDiffStat(builder, workstreamDir);
+                    appendGitEvidenceDiffStat(builder, workstreamDir, handoffJson);
                 } else {
                     appendGitEvidence(builder, workstreamDir, maxSnippetChars(context));
                 }
@@ -388,19 +390,26 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
-    private static void appendGitEvidenceDiffStat(StringBuilder builder, Path workstreamDir) throws IOException {
+    private static void appendGitEvidenceDiffStat(StringBuilder builder, Path workstreamDir,
+                                                   Map<String, Object> handoffJson) throws IOException {
         var evidenceDir = workstreamDir.resolve("artifacts/git-evidence");
-        if (!Files.exists(evidenceDir)) {
+        var changedFilesPath = evidenceDir.resolve("changed-files.txt");
+
+        builder.append("### Changed Files\n\n");
+        if (Files.exists(changedFilesPath)) {
+            builder.append("```text\n");
+            builder.append(snippet(changedFilesPath, 2_000));
+            builder.append("\n```\n\n");
+        } else if (handoffJson.get("changedFiles") instanceof List<?> files && !files.isEmpty()) {
+            for (var file : files) {
+                builder.append("- ").append(file).append("\n");
+            }
+            builder.append("\n");
+        } else if (!Files.exists(evidenceDir)) {
             builder.append("(git evidence not generated yet)\n\n");
             return;
         }
-        var changedFiles = evidenceDir.resolve("changed-files.txt");
-        if (Files.exists(changedFiles)) {
-            builder.append("### Changed Files\n\n");
-            builder.append("```text\n");
-            builder.append(snippet(changedFiles, 2_000));
-            builder.append("\n```\n\n");
-        }
+
         var diffStat = evidenceDir.resolve("diff.stat");
         if (Files.exists(diffStat)) {
             builder.append("### Diff Stat\n\n");
@@ -813,5 +822,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static String blankAsNone(String value) {
         return value == null || value.isBlank() ? "(none)" : value;
+    }
+
+    private static Map<String, Object> loadHandoffJson(Path workstreamDir) {
+        var path = workstreamDir.resolve("artifacts/next-stage/handoff.json");
+        if (!Files.exists(path)) return Map.of();
+        return readJsonUnchecked(path);
     }
 }
