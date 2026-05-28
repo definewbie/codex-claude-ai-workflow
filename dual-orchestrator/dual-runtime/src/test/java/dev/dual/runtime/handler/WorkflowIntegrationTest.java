@@ -224,6 +224,280 @@ class WorkflowIntegrationTest {
                 "Should fail due to budget: " + errorMsg);
     }
 
+    // --- Extended integration tests ---
+
+    @Test
+    void chain5_needsRevisionLoopWithContextCarryover() throws Exception {
+        fixture.writeRequirement("Design caching layer.\n");
+        fixture.writeAgentOutput("design-claude.md", """
+                # Design
+
+                Proposed Redis-based caching.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Caching layer design complete
+                ```
+                """);
+
+        // Codex review rejects → NEEDS_REVISION
+        fixture.writeAgentOutput("codex-arch-review-reject.md", """
+                # Architecture Review
+
+                Missing cache invalidation strategy.
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Must address cache invalidation
+                ```
+                """);
+
+        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-reject.md";
+        var decisionHandler = new ReviewDecisionHandler();
+        var rejectResult = decisionHandler.evaluate(decisionContext(
+                "design.decision",
+                List.of(reviewRef)
+        ));
+        assertEquals(NodeStatus.COMPLETED, rejectResult.status());
+        assertEquals("NEEDS_REVISION", rejectResult.outcome());
+
+        // Write iteration history simulating the rejection
+        var iterationsDir = tempDir.resolve(".agent/workstreams/ws-int/iterations");
+        Files.createDirectories(iterationsDir);
+        Files.writeString(iterationsDir.resolve("iter-001.json"), """
+                {
+                  "iterationId": "iter-001",
+                  "parentIterationId": null,
+                  "number": 1,
+                  "stageId": "stage-design",
+                  "status": "active",
+                  "triggerNodeInstanceId": "node-design-decision-001",
+                  "triggerAction": "START",
+                  "targetNodeDefinitionId": "design.claude_design",
+                  "reason": "",
+                  "createdAt": "2026-05-28T08:00:00Z"
+                }
+                """);
+        Files.writeString(iterationsDir.resolve("iter-002.json"), """
+                {
+                  "iterationId": "iter-002",
+                  "parentIterationId": "iter-001",
+                  "number": 2,
+                  "stageId": "stage-design",
+                  "status": "active",
+                  "triggerNodeInstanceId": "node-design-decision-001",
+                  "triggerAction": "NEEDS_REVISION",
+                  "targetNodeDefinitionId": "design.claude_design",
+                  "reason": "Missing cache invalidation strategy",
+                  "createdAt": "2026-05-28T08:05:00Z"
+                }
+                """);
+
+        // Revised design output
+        fixture.writeAgentOutput("design-claude-v2.md", """
+                # Design v2
+
+                Added cache invalidation via TTL + event bus.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Revised design with invalidation strategy
+                ```
+                """);
+
+        var revisedRef = ".agent/workstreams/ws-int/runs/run-001/outputs/design-claude-v2.md";
+
+        // Build context for the revised iteration — should include iteration history
+        var ctxHandler = new ContextBuildPackageHandler();
+        var ctxResult = ctxHandler.execute(taskContext(
+                "context.design_claude",
+                "context.build_package",
+                List.of(revisedRef)
+        ));
+        assertEquals(NodeStatus.COMPLETED, ctxResult.status());
+
+        var packagePath = (String) ctxResult.result().get("context_package");
+        var markdown = Files.readString(tempDir.resolve(packagePath), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("Design caching layer"), "Requirement must be present");
+        assertTrue(markdown.contains("iter-002"), "Iteration history must include the rejection loop");
+        assertTrue(markdown.contains("NEEDS_REVISION"), "Must show the trigger action");
+        assertTrue(markdown.contains("Missing cache invalidation"), "Must include rejection reason");
+
+        // Round 2: architecture review approves
+        fixture.writeAgentOutput("codex-arch-review-approve.md", """
+                # Architecture Review v2
+
+                LGTM.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Invalidation strategy addresses concern
+                ```
+                """);
+        var approveReviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-approve.md";
+        var approveResult = decisionHandler.evaluate(decisionContext(
+                "design.decision",
+                List.of(approveReviewRef)
+        ));
+        assertEquals("READY_FOR_ARCH_REVIEW", approveResult.outcome());
+    }
+
+    @Test
+    void chain6_blockedDecisionPath() throws Exception {
+        fixture.writeAgentOutput("codex-review-blocked.md", """
+                # Review
+
+                Critical blocker found: API key is hardcoded.
+
+                ```dual-control
+                decision: BLOCKED
+                summary: Hardcoded API key is a security violation
+                ```
+                """);
+
+        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-review-blocked.md";
+        var handler = new ReviewDecisionHandler();
+
+        var result = handler.evaluate(decisionContext(
+                "acceptance.decision",
+                List.of(reviewRef)
+        ));
+
+        assertEquals(NodeStatus.BLOCKED, result.status());
+        assertEquals("BLOCKED", result.outcome());
+        assertEquals("BLOCKED", result.result().get("decision"));
+        assertEquals("Hardcoded API key is a security violation", result.result().get("summary"));
+        assertEquals("dual-control", result.result().get("source"));
+    }
+
+    @Test
+    void chain7_multiProfileGovernance() throws Exception {
+        fixture.writeRequirement("Full feature.\n");
+        fixture.writeAgentOutput("agent-1.md", "## Output 1\n\nSome agent content.\n");
+        fixture.writeGitEvidence("M src/A.java\nM src/B.java", "2 files changed, 100 insertions(+)", null);
+
+        // Write human feedback
+        var nodesDir = tempDir.resolve(".agent/workstreams/ws-int/nodes");
+        Files.createDirectories(nodesDir);
+        Files.writeString(nodesDir.resolve("node-gate-human-approval-001.json"), """
+                {
+                  "nodeInstanceId": "node-gate-human-approval-001",
+                  "nodeDefinitionId": "gate.human_design_approval",
+                  "finishedAt": "2026-05-28T09:00:00Z",
+                  "result": {
+                    "human_action": "revise",
+                    "note": "Please add error handling for edge cases"
+                  }
+                }
+                """);
+
+        // product_review: should NOT have human_feedback, git_evidence
+        var productResult = buildContextPackage("product_review");
+        var productMd = readPackageMarkdown(productResult);
+        assertTrue(productMd.contains("## Context Governance"), "product_review should have governance");
+        assertTrue(productMd.contains("User Requirement"));
+        assertTrue(productMd.contains("Recent Agent Outputs"));
+        assertFalse(productMd.contains("## Human Feedback"), "product_review should NOT have human_feedback");
+        assertFalse(productMd.contains("## Git Evidence"), "product_review should NOT have git_evidence");
+        assertFalse(productMd.contains("## Iteration History"), "product_review should NOT have iteration_history");
+
+        // acceptance: should have EVERYTHING including git_evidence
+        var acceptanceResult = buildContextPackage("acceptance");
+        var acceptanceMd = readPackageMarkdown(acceptanceResult);
+        assertTrue(acceptanceMd.contains("User Requirement"));
+        assertTrue(acceptanceMd.contains("## Git Evidence"), "acceptance should have git_evidence");
+        assertTrue(acceptanceMd.contains("## Human Feedback"), "acceptance should have human_feedback");
+
+        // full: should have everything, requirement is PLACEHOLDER-friendly
+        var fullResult = buildContextPackage("full");
+        var fullMd = readPackageMarkdown(fullResult);
+        assertTrue(fullMd.contains("## Context Governance"));
+        assertTrue(fullMd.contains("User Requirement"));
+
+        // Verify profile-specific budget enforcement
+        var productBudget = ContextProfiles.budgetFor("product_review");
+        assertTrue(productMd.length() <= productBudget.totalBudget(),
+                "product_review (" + productMd.length() + ") must fit " + productBudget.totalBudget() + " budget");
+
+        var acceptanceBudget = ContextProfiles.budgetFor("acceptance");
+        assertTrue(acceptanceMd.length() <= acceptanceBudget.totalBudget(),
+                "acceptance (" + acceptanceMd.length() + ") must fit " + acceptanceBudget.totalBudget() + " budget");
+    }
+
+    @Test
+    void chain8_handoffJsonFromEmptyHandoff() throws Exception {
+        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.md";
+        fixture.writeHandoff("""
+                # Minimal Handoff
+
+                Done with this batch.
+
+                ```dual-control
+                decision: HANDOFF_READY
+                summary: Minimal completion
+                ```
+                """);
+
+        var handler = new PromptGenerateNextStageHandler();
+        var result = handler.execute(taskContext(
+                "stage.generate_next_prompt",
+                "prompt.generate_next_stage",
+                List.of(handoffRef)
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+
+        var handoffJsonRef = ".agent/workstreams/ws-int/artifacts/next-stage/handoff.json";
+        assertTrue(Files.exists(tempDir.resolve(handoffJsonRef)));
+
+        var mapper = new ObjectMapper();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> json = mapper.readValue(
+                tempDir.resolve(handoffJsonRef).toFile(), Map.class);
+
+        assertEquals(1, json.get("schemaVersion"));
+        assertEquals("ws-int", json.get("workstreamId"));
+        assertEquals("stage-test", json.get("stageId"));
+        assertEquals("iter-001", json.get("iterationId"));
+
+        @SuppressWarnings("unchecked")
+        var completedWork = (List<String>) json.get("completedWork");
+        assertTrue(completedWork.isEmpty(), "No Completed Work section → empty array");
+
+        @SuppressWarnings("unchecked")
+        var changedFiles = (List<String>) json.get("changedFiles");
+        assertTrue(changedFiles.isEmpty(), "No Changed Files section → empty array");
+
+        @SuppressWarnings("unchecked")
+        var openRisks = (List<String>) json.get("openRisks");
+        assertTrue(openRisks.isEmpty(), "No Open Risks section → empty array");
+
+        var verificationState = (String) json.get("verificationState");
+        assertTrue(verificationState.isEmpty(), "No Verification State section → empty string");
+
+        assertTrue(((String) json.get("generatedAt")).startsWith("202"));
+    }
+
+    // --- Helpers ---
+
+    private NodeResult buildContextPackage(String profile) throws Exception {
+        var handler = new ContextBuildPackageHandler();
+        return handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-int",
+                new NodeDefinition("context.test", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "next.agent",
+                        "profile", profile
+                )),
+                node("context.test", NodeKind.TASK, "context.build_package", List.of())
+        ));
+    }
+
+    private String readPackageMarkdown(NodeResult result) throws Exception {
+        var packagePath = (String) result.result().get("context_package");
+        return Files.readString(tempDir.resolve(packagePath), StandardCharsets.UTF_8);
+    }
+
     private TaskHandler.TaskContext taskContext(String nodeId, String handlerType, List<String> inputRefs) {
         return new TaskHandler.TaskContext(
                 tempDir,
