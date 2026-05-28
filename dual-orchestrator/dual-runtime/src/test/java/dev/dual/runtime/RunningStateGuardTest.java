@@ -207,6 +207,61 @@ class RunningStateGuardTest {
         assertEquals(WorkflowStatus.COMPLETED, result.status());
     }
 
+    @Test
+    void configOverrideTakesPrecedenceOverPolicy() throws Exception {
+        var definition = new WorkflowDefinition(
+                "test-lifecycle", 1, "task.under_test",
+                List.of(new NodeDefinition("task.under_test", NodeKind.TASK, "test.handler",
+                        Map.of("retry.max_retries", 1))),
+                List.of()
+        );
+        var paths = setup("ws-config-override");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-config-override", definition);
+
+        // Default policy for UNKNOWN_TRANSIENT is max 3, but config says max 1.
+        // count=1 should hit the config limit even though default policy would allow more.
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "UNKNOWN_TRANSIENT", "auto_retry_count", 1));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-config-override"));
+
+        assertTrue(result.message().contains("auto-retry limit reached"));
+    }
+
+    @Test
+    void retryDelayRecordedInEvent() throws Exception {
+        var paths = setup("ws-delay-event");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-delay-event", SINGLE_TASK);
+
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
+                Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT", "auto_retry_count", 0));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-delay-event"));
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
+
+        // Verify the event log contains retry_delay_ms
+        var eventsPath = paths.eventsJsonl();
+        var events = Files.readAllLines(eventsPath).stream()
+                .map(line -> {
+                    try { return new com.fasterxml.jackson.databind.ObjectMapper().readValue(line, java.util.Map.class); }
+                    catch (Exception e) { return java.util.Map.of(); }
+                })
+                .filter(e -> "node_auto_retry".equals(e.get("event_type")))
+                .toList();
+        assertEquals(1, events.size());
+        @SuppressWarnings("unchecked")
+        var payload = (java.util.Map<String, Object>) events.get(0).get("payload");
+        assertEquals(3000L, ((Number) payload.get("retry_delay_ms")).longValue());
+    }
+
     // --- Helpers ---
 
     private WorkstreamPaths setup(String workstreamId) throws Exception {

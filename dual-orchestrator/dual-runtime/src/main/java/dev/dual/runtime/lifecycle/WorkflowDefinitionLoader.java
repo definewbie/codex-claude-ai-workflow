@@ -55,6 +55,7 @@ public final class WorkflowDefinitionLoader {
         var config = new LinkedHashMap<>(node.config());
         if ("acpx.agent_run".equals(node.handlerType())) {
             applySessionDefault(config, defaults);
+            applyRetryDefaults(config, objectMap(defaults.get("retry")));
         }
         if ("delivery.create_pr".equals(node.handlerType())) {
             applyObjectDefaults(config, objectMap(defaults.get("delivery")));
@@ -63,6 +64,12 @@ public final class WorkflowDefinitionLoader {
             applyObjectDefaults(config, objectMap(defaults.get("revision")));
         }
         return new NodeDefinition(node.id(), node.kind(), node.handlerType(), config);
+    }
+
+    private static void applyRetryDefaults(LinkedHashMap<String, Object> config, Map<String, Object> retryDefaults) {
+        for (var entry : retryDefaults.entrySet()) {
+            config.putIfAbsent("retry." + entry.getKey(), entry.getValue());
+        }
     }
 
     private static void applySessionDefault(LinkedHashMap<String, Object> config, Map<String, Object> defaults) {

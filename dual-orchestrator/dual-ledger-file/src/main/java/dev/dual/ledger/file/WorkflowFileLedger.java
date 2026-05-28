@@ -441,6 +441,10 @@ public final class WorkflowFileLedger {
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
+        return autoRetryNode(paths, nodeInstanceId, 0);
+    }
+
+    public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId, long retryDelayMs) throws IOException {
         var node = loadNode(paths, nodeInstanceId);
         if (node.status() != NodeStatus.FAILED) {
             throw new IOException("auto-retry only applies to FAILED nodes, got: " + node.status());
@@ -472,12 +476,15 @@ public final class WorkflowFileLedger {
 
         var current = loadCurrent(paths);
         var eventId = nextEventId(current.lastEventId());
-        appendEvent(paths, eventId, "node_auto_retry", Map.of(
-                "node", node.nodeDefinitionId(),
-                "node_instance_id", node.nodeInstanceId(),
-                "previous_status", node.status().name(),
-                "auto_retry_count", retryCount + 1
-        ));
+        var eventPayload = new LinkedHashMap<String, Object>();
+        eventPayload.put("node", node.nodeDefinitionId());
+        eventPayload.put("node_instance_id", node.nodeInstanceId());
+        eventPayload.put("previous_status", node.status().name());
+        eventPayload.put("auto_retry_count", retryCount + 1);
+        if (retryDelayMs > 0) {
+            eventPayload.put("retry_delay_ms", retryDelayMs);
+        }
+        appendEvent(paths, eventId, "node_auto_retry", eventPayload);
         var now = Instant.now();
         var resumed = new WorkflowCurrentDocument(
                 1,

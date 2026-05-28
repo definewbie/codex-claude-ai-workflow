@@ -1,6 +1,7 @@
 package dev.dual.runtime;
 
 import dev.dual.core.id.DualId;
+import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowStatus;
@@ -11,6 +12,8 @@ import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
+
+import java.util.Map;
 
 public final class WorkflowRuntime {
     private final WorkflowFileLedger ledger;
@@ -38,9 +41,8 @@ public final class WorkflowRuntime {
         // WAITING_FOR_RECOVERY: check auto-retry before rejecting
         if (current.status() == WorkflowStatus.WAITING_FOR_RECOVERY) {
             var nodeDoc = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
-            if (nodeDoc.status() == NodeStatus.FAILED && attemptAutoRetry(paths, nodeDoc)) {
-                // Node was reset to READY; fall through to execution below.
-                // Reload current since autoRetryNode updates it.
+            var nodeDef = definition.node(nodeDoc.nodeDefinitionId());
+            if (nodeDoc.status() == NodeStatus.FAILED && attemptAutoRetry(paths, nodeDoc, nodeDef)) {
                 current = ledger.loadCurrent(paths);
             } else {
                 return new WorkflowRuntimeResult(command.workstreamId(), current.status(), nodeDoc.nodeDefinitionId(), statusRejectionMessage(nodeDoc));
@@ -88,14 +90,14 @@ public final class WorkflowRuntime {
         return new WorkflowRuntimeResult(command.workstreamId(), next.status(), active, message);
     }
 
-    private boolean attemptAutoRetry(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+    private boolean attemptAutoRetry(WorkstreamPaths paths, NodeInstanceDocument node, NodeDefinition nodeDef) throws Exception {
         var recoverable = node.result().get("acpx_failure.recoverable");
         if (!Boolean.TRUE.equals(recoverable)) {
             return false;
         }
         var reasonValue = node.result().getOrDefault("acpx_failure.reason", "");
         var reason = reasonValue instanceof String s ? s : String.valueOf(reasonValue);
-        var policy = RetryStrategies.forReason(reason);
+        var policy = resolveRetryPolicy(reason, nodeDef.config());
 
         var countValue = node.result().getOrDefault("auto_retry_count", 0);
         var count = (countValue instanceof Number n) ? n.intValue() : 0;
@@ -103,8 +105,24 @@ public final class WorkflowRuntime {
             return false;
         }
 
-        ledger.autoRetryNode(paths, node.nodeInstanceId());
+        var delay = policy.delayForAttempt(count + 1);
+        ledger.autoRetryNode(paths, node.nodeInstanceId(), delay);
         return true;
+    }
+
+    private static RetryPolicy resolveRetryPolicy(String failureReason, Map<String, Object> config) {
+        var defaultPolicy = RetryStrategies.forReason(failureReason);
+        var maxRetries = config.get("retry.max_retries");
+        var baseDelay = config.get("retry.base_delay_ms");
+        var multiplier = config.get("retry.backoff_multiplier");
+        if (maxRetries == null && baseDelay == null && multiplier == null) {
+            return defaultPolicy;
+        }
+        return new RetryPolicy(
+                maxRetries instanceof Number n ? n.intValue() : defaultPolicy.maxRetries(),
+                baseDelay instanceof Number n ? n.longValue() : defaultPolicy.baseDelayMs(),
+                multiplier instanceof Number n ? n.doubleValue() : defaultPolicy.backoffMultiplier()
+        );
     }
 
     private Boolean resolveNodeForExecution(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
