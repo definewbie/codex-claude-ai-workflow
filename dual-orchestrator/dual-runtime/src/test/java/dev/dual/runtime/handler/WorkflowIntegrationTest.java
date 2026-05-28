@@ -192,7 +192,7 @@ class WorkflowIntegrationTest {
         assertTrue(markdown.contains(largeRequirement.stripTrailing()),
                 "Requirement content must be preserved in full");
 
-        var budget = ImplementationProfile.budget();
+        var budget = ContextProfiles.implementation();
         assertTrue(markdown.length() <= budget.totalBudget(),
                 "Total markdown (" + markdown.length() + ") must be <= totalBudget (" + budget.totalBudget() + ")");
 

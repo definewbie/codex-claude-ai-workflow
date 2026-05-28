@@ -49,9 +49,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         Files.createDirectories(contextDir);
 
         var packagePath = contextDir.resolve(context.instance().nodeInstanceId() + ".md");
+        var profileName = profile(context);
+        var hasSectionOverride = context.definition().config().get("include_sections") instanceof List<?>;
 
-        if ("implementation".equals(profile(context))) {
-            return executeGoverned(context, workstreamDir, packagePath);
+        if (ContextProfiles.hasProfile(profileName) && !hasSectionOverride) {
+            return executeGoverned(context, workstreamDir, packagePath, profileName);
         }
 
         var markdown = renderPackage(context, workstreamDir);
@@ -61,19 +63,23 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     private static NodeResult buildLegacyResult(TaskContext context, Path packagePath) {
+        return buildLegacyResult(context, packagePath, sections(context));
+    }
+
+    private static NodeResult buildLegacyResult(TaskContext context, Path packagePath, List<String> includedSections) {
         var packageRef = toWorkspaceRef(context.workspaceRoot(), packagePath);
         var result = new LinkedHashMap<String, Object>();
         result.put("context_package", packageRef);
         result.put("target_node", configText(context, "target_node", ""));
         result.put("profile", profile(context));
-        result.put("sections", sections(context));
+        result.put("sections", includedSections);
         result.put("input_ref_count", context.instance().inputRefs().size());
         result.put("generated_at", Instant.now().toString());
         return NodeResult.completed("completed", List.of(packageRef), result);
     }
 
-    private static NodeResult executeGoverned(TaskContext context, Path workstreamDir, Path packagePath) throws IOException {
-        var budget = ImplementationProfile.budget();
+    private static NodeResult executeGoverned(TaskContext context, Path workstreamDir, Path packagePath, String profileName) throws IOException {
+        var budget = ContextProfiles.budgetFor(profileName);
 
         // Phase 2: Resolve section availability
         var resolved = new ArrayList<ResolvedSection>();
@@ -151,7 +157,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.replace(0, builder.indexOf("\n## Context Governance"), rebuildGovernedHeader(context, budget, sorted));
 
         Files.writeString(packagePath, builder.toString(), StandardCharsets.UTF_8);
-        return buildLegacyResult(context, packagePath);
+        var declaredSections = budget.sections().stream()
+                .map(SectionRequirement::section)
+                .toList();
+        return buildLegacyResult(context, packagePath, declaredSections);
     }
 
     private static boolean checkAvailability(SectionRequirement req, TaskContext context, Path workstreamDir) {

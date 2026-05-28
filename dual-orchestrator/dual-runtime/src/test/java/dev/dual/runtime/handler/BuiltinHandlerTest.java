@@ -633,7 +633,7 @@ class BuiltinHandlerTest {
 
         assertEquals("implementation", result.result().get("profile"));
         assertTrue(((List<?>) result.result().get("sections")).contains("recent_agent_outputs"));
-        assertFalse(((List<?>) result.result().get("sections")).contains("git_evidence"));
+        assertTrue(((List<?>) result.result().get("sections")).contains("git_evidence"));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Profile: implementation"));
@@ -1069,7 +1069,7 @@ class BuiltinHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("requirement.md not found"));
+        assertTrue(markdown.contains("(not available)") || markdown.contains("requirement.md not found"));
     }
 
     @Test
@@ -1113,7 +1113,8 @@ class BuiltinHandlerTest {
                 "ws",
                 new NodeDefinition("ctx.trunc", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.agent",
-                        "max_snippet_chars", 100
+                        "max_snippet_chars", 100,
+                        "include_sections", List.of("requirement", "input_artifacts", "recent_agent_outputs")
                 )),
                 node("ctx.trunc", NodeKind.TASK, "context.build_package",
                         List.of(".agent/workstreams/ws/runs/run-100/outputs/big.md"))
