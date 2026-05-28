@@ -2,27 +2,23 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import dev.dual.core.workflow.NodeDefinition;
-import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class WorkflowFileLedger {
     private final AtomicJsonWriter jsonWriter;
     private final ObjectMapper objectMapper;
-    private final ObjectMapper jsonlMapper;
+    private final LedgerEventLog eventLog;
+    private final RoutingEngine routingEngine;
+    private final NodeStateWriter nodeStateWriter;
 
     public WorkflowFileLedger() {
         this(new AtomicJsonWriter());
@@ -31,8 +27,12 @@ public final class WorkflowFileLedger {
     WorkflowFileLedger(AtomicJsonWriter jsonWriter) {
         this.jsonWriter = jsonWriter;
         this.objectMapper = jsonWriter.objectMapper();
-        this.jsonlMapper = jsonWriter.objectMapper().copy()
+        var jsonlMapper = jsonWriter.objectMapper().copy()
                 .disable(SerializationFeature.INDENT_OUTPUT);
+        this.eventLog = new LedgerEventLog(jsonWriter, jsonlMapper);
+        var revisionTracker = new RevisionTracker(jsonWriter, this.objectMapper, eventLog);
+        this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker);
+        this.nodeStateWriter = new NodeStateWriter(jsonWriter, this.objectMapper, eventLog);
     }
 
     public void initialize(WorkstreamPaths paths, String workflowInstanceId, WorkflowDefinition definition)
@@ -47,7 +47,7 @@ public final class WorkflowFileLedger {
 
         var now = Instant.now();
         var entry = definition.node(definition.entryNodeId());
-        var nodeInstanceId = nodeInstanceId(entry.id(), 1);
+        var nodeInstanceId = LedgerUtils.nodeInstanceId(entry.id(), 1);
         var eventId = "evt-000001";
 
         appendEvent(paths, eventId, "workflow_started", Map.of(
@@ -93,7 +93,7 @@ public final class WorkflowFileLedger {
                 entry.kind(),
                 entry.handlerType(),
                 NodeStatus.READY,
-                stageId(entry.id()),
+                LedgerUtils.stageId(entry.id()),
                 "iter-001",
                 List.of(),
                 List.of(),
@@ -151,716 +151,37 @@ public final class WorkflowFileLedger {
             List<String> outputRefs,
             Map<String, Object> result
     ) throws IOException {
-        var current = loadCurrent(paths);
-        if (!current.activeNodeInstanceIds().contains(nodeInstanceId)) {
-            throw new IOException("node is not active: " + nodeInstanceId);
-        }
-
-        var node = loadNode(paths, nodeInstanceId);
-        var finishedAt = Instant.now();
-        var finished = new NodeInstanceDocument(
-                node.schemaVersion(),
-                node.nodeInstanceId(),
-                node.nodeDefinitionId(),
-                node.kind(),
-                node.handlerType(),
-                completedStatus,
-                node.stageId(),
-                node.iterationId(),
-                node.inputRefs(),
-                outputRefs,
-                result,
-                node.runRef(),
-                node.startedAt(),
-                finishedAt
-        );
-        jsonWriter.write(paths.nodeJson(nodeInstanceId), finished);
-
-        if (completedStatus != NodeStatus.COMPLETED) {
-            stopOnNonCompletedNode(paths, current, node, completedStatus, outcome, result);
-            return;
-        }
-
-        var edge = definition.edgesFrom(node.nodeDefinitionId()).stream()
-                .filter(candidate -> candidate.on().equals(outcome))
-                .findFirst();
-        if (edge.isEmpty()) {
-            completeWorkflow(paths, current, node, outcome);
-            return;
-        }
-
-        var nextDefinition = definition.node(edge.get().to());
-        var nextNodeInstanceId = nodeInstanceId(nextDefinition.id(), currentEventNumber(current.lastEventId()) + 1);
-        var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
-        var nextIterationId = node.iterationId();
-        var iterationStartedPayload = Map.<String, Object>of();
-        if (startsNewIteration(node.nodeDefinitionId(), outcome)) {
-            if (isRevisionAction(outcome)) {
-                var maxRevisions = maxRevisions(definition.node(node.nodeDefinitionId()));
-                var currentRevisionCount = revisionCount(paths, nextDefinition.id());
-                if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
-                    blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
-                    return;
-                }
-            }
-            var nextIteration = nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
-            Files.createDirectories(paths.iterationsDir());
-            jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
-            nextIterationId = nextIteration.iterationId();
-            iterationStartedPayload = Map.of(
-                    "iteration_id", nextIteration.iterationId(),
-                    "parent_iteration_id", nextIteration.parentIterationId(),
-                    "trigger_node_instance_id", nextIteration.triggerNodeInstanceId(),
-                    "trigger_action", nextIteration.triggerAction(),
-                    "target_node_definition_id", nextIteration.targetNodeDefinitionId(),
-                    "reason", nextIteration.reason()
-            );
-        }
-        var nextNode = new NodeInstanceDocument(
-                1,
-                nextNodeInstanceId,
-                nextDefinition.id(),
-                nextDefinition.kind(),
-                nextDefinition.handlerType(),
-                nextStatus,
-                stageId(nextDefinition.id()),
-                nextIterationId,
-                outputRefs,
-                List.of(),
-                Map.of(),
-                null,
-                null,
-                null
-        );
-        jsonWriter.write(paths.nodeJson(nextNodeInstanceId), nextNode);
-
-        var status = nextDefinition.kind() == NodeKind.GATE ? WorkflowStatus.WAITING_FOR_HUMAN : WorkflowStatus.RUNNING;
-        var openGateIds = List.<String>of();
-        var gateId = "";
-        if (nextDefinition.kind() == NodeKind.GATE) {
-            gateId = "gate-" + nextNodeInstanceId;
-            openGateIds = List.of(gateId);
-            jsonWriter.write(paths.gateJson(gateId), new GateDocument(
-                    1,
-                    gateId,
-                    nextNodeInstanceId,
-                    nextDefinition.handlerType(),
-                    "open",
-                    allowedActions(nextDefinition),
-                    Instant.now(),
-                    null,
-                    Map.of()
-                ));
-        }
-
-        var eventId = nextEventId(current.lastEventId());
-        appendEvent(paths, eventId, "node_routed", Map.of(
-                "from", node.nodeDefinitionId(),
-                "outcome", outcome,
-                "to", nextDefinition.id(),
-                "node_instance_id", nextNodeInstanceId,
-                "gate_id", gateId
-        ));
-        if (!iterationStartedPayload.isEmpty()) {
-            appendEvent(paths, nextEventId(eventId), "iteration_started", iterationStartedPayload);
-            eventId = nextEventId(eventId);
-        }
-        var now = Instant.now();
-        var next = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                status,
-                List.of(nextNodeInstanceId),
-                openGateIds,
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), next);
-        writeInstanceFromCurrent(paths, next, now);
+        routingEngine.completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result);
     }
 
     public void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)
             throws IOException {
-        var event = new LinkedHashMap<String, Object>();
-        event.put("event_id", eventId);
-        event.put("ts", Instant.now().toString());
-        event.put("event_type", eventType);
-        event.put("payload", payload == null ? Map.of() : payload);
-        Files.createDirectories(paths.workstreamDir());
-        var line = jsonlMapper.writeValueAsString(event);
-        Files.writeString(
-                paths.eventsJsonl(),
-                line + System.lineSeparator(),
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.APPEND
-        );
-    }
-
-    private void completeWorkflow(
-            WorkstreamPaths paths,
-            WorkflowCurrentDocument current,
-            NodeInstanceDocument node,
-            String outcome
-    ) throws IOException {
-        var eventId = nextEventId(current.lastEventId());
-        appendEvent(paths, eventId, "workflow_completed", Map.of(
-                "last_node", node.nodeDefinitionId(),
-                "outcome", outcome
-        ));
-        var now = Instant.now();
-        var completed = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                WorkflowStatus.COMPLETED,
-                List.of(),
-                List.of(),
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), completed);
-        writeInstanceFromCurrent(paths, completed, now);
-    }
-
-    private void stopOnNonCompletedNode(
-            WorkstreamPaths paths,
-            WorkflowCurrentDocument current,
-            NodeInstanceDocument node,
-            NodeStatus nodeStatus,
-            String outcome,
-            Map<String, Object> result
-    ) throws IOException {
-        var eventId = nextEventId(current.lastEventId());
-        var workflowStatus = WorkflowStatus.WAITING_FOR_RECOVERY;
-        var recoveryGateId = "recovery-" + node.nodeInstanceId();
-        var controlRepair = isControlRepairFailure(outcome, result);
-        var gateResult = recoveryGateResult(node, nodeStatus, outcome, result, controlRepair);
-        jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument(
-                1,
-                recoveryGateId,
-                node.nodeInstanceId(),
-                controlRepair ? "control.repair" : "recovery.review",
-                "open",
-                List.of("retry", "abort"),
-                Instant.now(),
-                null,
-                gateResult
-        ));
-        var eventPayload = new LinkedHashMap<>(gateResult);
-        eventPayload.put("recovery_gate_id", recoveryGateId);
-        appendEvent(paths, eventId, controlRepair ? "control_repair_required" : "node_" + nodeStatus.name().toLowerCase(), eventPayload);
-        var now = Instant.now();
-        var stopped = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                workflowStatus,
-                List.of(node.nodeInstanceId()),
-                List.of(recoveryGateId),
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), stopped);
-        writeInstanceFromCurrent(paths, stopped, now);
-    }
-
-    private static Map<String, Object> recoveryGateResult(
-            NodeInstanceDocument node,
-            NodeStatus nodeStatus,
-            String outcome,
-            Map<String, Object> result,
-            boolean controlRepair
-    ) {
-        var gateResult = new LinkedHashMap<String, Object>();
-        gateResult.put("node", node.nodeDefinitionId());
-        gateResult.put("node_status", nodeStatus.name());
-        gateResult.put("outcome", outcome);
-        if (controlRepair) {
-            gateResult.put("reason", text(firstNonBlank(resultValue(result, "reason"), outcome)));
-            gateResult.put("message", text(resultValue(result, "message")));
-            gateResult.put("input_refs", resultValueOrDefault(result, "input_refs", List.of()));
-            gateResult.put("allowed_decisions", resultValueOrDefault(result, "allowed_decisions", List.of()));
-            gateResult.put("parse_error", resultValueOrDefault(result, "parse_error", Map.of()));
-        }
-        return gateResult;
+        eventLog.appendEvent(paths, eventId, eventType, payload);
     }
 
     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
             throws IOException {
-        if (action == null || action.isBlank()) {
-            throw new IOException("human gate action is required");
-        }
-        var current = loadCurrent(paths);
-        if (current.activeNodeInstanceIds().isEmpty()) {
-            throw new IOException("no active gate node");
-        }
-        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
-        if (node.kind() != NodeKind.GATE) {
-            throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
-        }
-        var hasEdge = definition.edgesFrom(node.nodeDefinitionId()).stream().anyMatch(edge -> edge.on().equals(action));
-        var actionAllowed = allowedActions(definition.node(node.nodeDefinitionId())).contains(action);
-        if (!hasEdge && !actionAllowed) {
-            throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
-        }
-        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, action, node.inputRefs(), Map.of(
-                "human_action", action,
-                "note", note == null ? "" : note
-        ));
+        routingEngine.resolveOpenGate(paths, definition, action, note);
     }
 
     public NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
-        var node = loadNode(paths, nodeInstanceId);
-        var now = Instant.now();
-        var updated = new NodeInstanceDocument(
-                node.schemaVersion(),
-                node.nodeInstanceId(),
-                node.nodeDefinitionId(),
-                node.kind(),
-                node.handlerType(),
-                NodeStatus.RUNNING,
-                node.stageId(),
-                node.iterationId(),
-                node.inputRefs(),
-                node.outputRefs(),
-                mergedResult(node.result(), Map.of("running_pid", pid)),
-                node.runRef(),
-                now,
-                null
-        );
-        jsonWriter.write(paths.nodeJson(nodeInstanceId), updated);
-        return updated;
+        return nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
-        return autoRetryNode(paths, nodeInstanceId, 0);
+        return nodeStateWriter.autoRetryNode(paths, nodeInstanceId);
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId, long retryDelayMs) throws IOException {
-        var node = loadNode(paths, nodeInstanceId);
-        if (node.status() != NodeStatus.FAILED) {
-            throw new IOException("auto-retry only applies to FAILED nodes, got: " + node.status());
-        }
-        var countValue = resultValueOrDefault(node.result(), "auto_retry_count", 0);
-        int retryCount = (countValue instanceof Number n) ? n.intValue() : 0;
-        var retry = new NodeInstanceDocument(
-                node.schemaVersion(),
-                node.nodeInstanceId(),
-                node.nodeDefinitionId(),
-                node.kind(),
-                node.handlerType(),
-                NodeStatus.READY,
-                node.stageId(),
-                node.iterationId(),
-                node.inputRefs(),
-                List.of(),
-                Map.of(
-                        "retry_of_status", node.status().name(),
-                        "auto_retry", true,
-                        "auto_retry_count", retryCount + 1,
-                        "previous_running_pid", resultValueOrDefault(node.result(), "running_pid", "")
-                ),
-                node.runRef(),
-                null,
-                null
-        );
-        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), retry);
-
-        var current = loadCurrent(paths);
-        var eventId = nextEventId(current.lastEventId());
-        var eventPayload = new LinkedHashMap<String, Object>();
-        eventPayload.put("node", node.nodeDefinitionId());
-        eventPayload.put("node_instance_id", node.nodeInstanceId());
-        eventPayload.put("previous_status", node.status().name());
-        eventPayload.put("auto_retry_count", retryCount + 1);
-        if (retryDelayMs > 0) {
-            eventPayload.put("retry_delay_ms", retryDelayMs);
-        }
-        appendEvent(paths, eventId, "node_auto_retry", eventPayload);
-        var now = Instant.now();
-        var resumed = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                WorkflowStatus.RUNNING,
-                List.of(node.nodeInstanceId()),
-                List.of(),
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), resumed);
-        writeInstanceFromCurrent(paths, resumed, now);
-        return retry;
+        return nodeStateWriter.autoRetryNode(paths, nodeInstanceId, retryDelayMs);
     }
 
     public void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
-        var current = loadCurrent(paths);
-        if (current.activeNodeInstanceIds().isEmpty()) {
-            throw new IOException("no active node to retry");
-        }
-        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
-        if (node.status() != NodeStatus.FAILED && node.status() != NodeStatus.BLOCKED) {
-            throw new IOException("active node is not retryable: " + node.nodeDefinitionId() + " (" + node.status() + ")");
-        }
-        var retry = new NodeInstanceDocument(
-                node.schemaVersion(),
-                node.nodeInstanceId(),
-                node.nodeDefinitionId(),
-                node.kind(),
-                node.handlerType(),
-                NodeStatus.READY,
-                node.stageId(),
-                node.iterationId(),
-                node.inputRefs(),
-                List.of(),
-                Map.of(
-                        "retry_of_status", node.status().name(),
-                        "retry_note", note == null ? "" : note
-                ),
-                node.runRef(),
-                null,
-                null
-        );
-        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), retry);
-
-        var eventId = nextEventId(current.lastEventId());
-        appendEvent(paths, eventId, "node_retry_requested", Map.of(
-                "node", node.nodeDefinitionId(),
-                "node_instance_id", node.nodeInstanceId(),
-                "previous_status", node.status().name(),
-                "note", note == null ? "" : note,
-                "recovery_gate_ids", current.openGateIds()
-        ));
-        var now = Instant.now();
-        var resumed = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                WorkflowStatus.RUNNING,
-                List.of(node.nodeInstanceId()),
-                List.of(),
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), resumed);
-        writeInstanceFromCurrent(paths, resumed, now);
+        nodeStateWriter.retryActiveNode(paths, note);
     }
 
     public void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
-        var current = loadCurrent(paths);
-        if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY) {
-            throw new IOException("workflow is not waiting for recovery: " + current.status());
-        }
-        if (current.activeNodeInstanceIds().isEmpty()) {
-            throw new IOException("no active recovery node to abort");
-        }
-        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
-        var eventId = nextEventId(current.lastEventId());
-        appendEvent(paths, eventId, "workflow_aborted", Map.of(
-                "node", node.nodeDefinitionId(),
-                "node_instance_id", node.nodeInstanceId(),
-                "note", note == null ? "" : note,
-                "recovery_gate_ids", current.openGateIds()
-        ));
-        var now = Instant.now();
-        var aborted = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                WorkflowStatus.FAILED,
-                List.of(),
-                List.of(),
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), aborted);
-        writeInstanceFromCurrent(paths, aborted, now);
+        nodeStateWriter.abortRecovery(paths, note);
     }
 
-    private void writeInstanceFromCurrent(WorkstreamPaths paths, WorkflowCurrentDocument current, Instant updatedAt)
-            throws IOException {
-        var existing = objectMapper.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);
-        jsonWriter.write(paths.workflowInstanceJson(), new WorkflowInstanceDocument(
-                existing.schemaVersion(),
-                existing.workflowInstanceId(),
-                existing.workflowId(),
-                existing.definitionVersion(),
-                current.status(),
-                current.activeNodeInstanceIds(),
-                current.lastEventId(),
-                existing.createdAt(),
-                updatedAt
-        ));
-    }
-
-    private static String nodeInstanceId(String nodeDefinitionId, int sequence) {
-        return "node-" + nodeDefinitionId.replace('.', '-') + "-" + String.format("%03d", sequence);
-    }
-
-    private static String nextEventId(String lastEventId) {
-        return "evt-" + String.format("%06d", currentEventNumber(lastEventId) + 1);
-    }
-
-    private static int currentEventNumber(String eventId) {
-        if (eventId != null && eventId.startsWith("evt-")) {
-            try {
-                return Integer.parseInt(eventId.substring("evt-".length()));
-            } catch (NumberFormatException ignored) {
-                return 1;
-            }
-        }
-        return 1;
-    }
-
-    private WorkflowIterationDocument nextRevisionIteration(
-            WorkstreamPaths paths,
-            NodeInstanceDocument triggerNode,
-            String triggerAction,
-            String targetNodeDefinitionId,
-            Map<String, Object> result
-    ) throws IOException {
-        var nextNumber = maxIterationNumber(paths) + 1;
-        var iterationId = "iter-" + String.format("%03d", nextNumber);
-        return WorkflowIterationDocument.revision(
-                iterationId,
-                nextNumber,
-                triggerNode.iterationId(),
-                triggerNode.nodeInstanceId(),
-                triggerAction,
-                targetNodeDefinitionId,
-                revisionReason(result),
-                Instant.now()
-        );
-    }
-
-    private void blockOnRevisionLimit(
-            WorkstreamPaths paths,
-            WorkflowCurrentDocument current,
-            NodeInstanceDocument node,
-            List<String> outputRefs,
-            Map<String, Object> result,
-            String outcome,
-            int maxRevisions,
-            int currentRevisionCount
-    ) throws IOException {
-        var blockedResult = new LinkedHashMap<String, Object>();
-        if (result != null) {
-            blockedResult.putAll(result);
-        }
-        blockedResult.put("reason", "revision_limit_reached");
-        blockedResult.put("outcome", outcome);
-        blockedResult.put("max_revisions", maxRevisions);
-        blockedResult.put("current_revision_count", currentRevisionCount);
-        var now = Instant.now();
-        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), new NodeInstanceDocument(
-                node.schemaVersion(),
-                node.nodeInstanceId(),
-                node.nodeDefinitionId(),
-                node.kind(),
-                node.handlerType(),
-                NodeStatus.BLOCKED,
-                node.stageId(),
-                node.iterationId(),
-                node.inputRefs(),
-                outputRefs,
-                blockedResult,
-                node.runRef(),
-                node.startedAt(),
-                now
-        ));
-
-        var recoveryGateId = "recovery-" + node.nodeInstanceId();
-        jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument(
-                1,
-                recoveryGateId,
-                node.nodeInstanceId(),
-                "recovery.review",
-                "open",
-                List.of("retry", "abort"),
-                now,
-                null,
-                Map.of(
-                        "node", node.nodeDefinitionId(),
-                        "node_status", NodeStatus.BLOCKED.name(),
-                        "outcome", outcome,
-                        "reason", "revision_limit_reached",
-                        "max_revisions", maxRevisions,
-                        "current_revision_count", currentRevisionCount
-                )
-        ));
-        var eventId = nextEventId(current.lastEventId());
-        appendEvent(paths, eventId, "revision_limit_reached", Map.of(
-                "node", node.nodeDefinitionId(),
-                "node_instance_id", node.nodeInstanceId(),
-                "outcome", outcome,
-                "max_revisions", maxRevisions,
-                "current_revision_count", currentRevisionCount,
-                "recovery_gate_id", recoveryGateId
-        ));
-        var stopped = new WorkflowCurrentDocument(
-                1,
-                current.workstreamId(),
-                current.workflowInstanceId(),
-                current.workflowId(),
-                current.definitionVersion(),
-                WorkflowStatus.WAITING_FOR_RECOVERY,
-                List.of(node.nodeInstanceId()),
-                List.of(recoveryGateId),
-                eventId,
-                now
-        );
-        jsonWriter.write(paths.workflowCurrentJson(), stopped);
-        writeInstanceFromCurrent(paths, stopped, now);
-    }
-
-    private int maxIterationNumber(WorkstreamPaths paths) throws IOException {
-        if (!Files.exists(paths.iterationsDir())) {
-            return 1;
-        }
-        try (var stream = Files.list(paths.iterationsDir())) {
-            return stream
-                    .filter(Files::isRegularFile)
-                    .map(path -> path.getFileName().toString())
-                    .filter(name -> name.matches("iter-\\d{3}\\.json"))
-                    .mapToInt(name -> Integer.parseInt(name.substring("iter-".length(), "iter-000".length())))
-                    .max()
-                    .orElse(1);
-        }
-    }
-
-    private int revisionCount(WorkstreamPaths paths, String targetNodeDefinitionId) throws IOException {
-        if (!Files.exists(paths.iterationsDir())) {
-            return 0;
-        }
-        var targetStage = stageId(targetNodeDefinitionId);
-        try (var stream = Files.list(paths.iterationsDir())) {
-            return (int) stream
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().matches("iter-\\d{3}\\.json"))
-                    .map(path -> readIterationOrNull(path))
-                    .filter(iteration -> iteration != null)
-                    .filter(iteration -> targetStage.equals(iteration.stageId()))
-                    .filter(iteration -> isRevisionAction(iteration.triggerAction()))
-                    .count();
-        }
-    }
-
-    private WorkflowIterationDocument readIterationOrNull(Path path) {
-        try {
-            return objectMapper.readValue(path.toFile(), WorkflowIterationDocument.class);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private static boolean startsNewIteration(String nodeDefinitionId, String outcome) {
-        return "revise".equals(outcome)
-                || "NEEDS_REVISION".equals(outcome)
-                || "REJECT".equals(outcome)
-                || ("gate.human_next_stage_approval".equals(nodeDefinitionId) && "approved".equals(outcome));
-    }
-
-    private static boolean isRevisionAction(String outcome) {
-        return "revise".equals(outcome)
-                || "NEEDS_REVISION".equals(outcome)
-                || "REJECT".equals(outcome);
-    }
-
-    private static int maxRevisions(NodeDefinition definition) {
-        var configured = definition.config().get("max_revisions");
-        if (configured instanceof Number number) {
-            return number.intValue();
-        }
-        if (configured instanceof String text && !text.isBlank()) {
-            try {
-                return Integer.parseInt(text);
-            } catch (NumberFormatException ignored) {
-                return -1;
-            }
-        }
-        return -1;
-    }
-
-    private static boolean isControlRepairFailure(String outcome, Map<String, Object> result) {
-        var reason = text(firstNonBlank(resultValue(result, "reason"), outcome));
-        return "MISSING_DUAL_CONTROL".equals(reason)
-                || "INVALID_DUAL_CONTROL".equals(reason)
-                || "INVALID_DECISION".equals(reason);
-    }
-
-    private static Object resultValue(Map<String, Object> result, String key) {
-        return result == null ? null : result.get(key);
-    }
-
-    private static Object resultValueOrDefault(Map<String, Object> result, String key, Object fallback) {
-        var value = resultValue(result, key);
-        return value == null ? fallback : value;
-    }
-
-    private static Object firstNonBlank(Object first, Object second) {
-        return text(first).isBlank() ? second : first;
-    }
-
-    private static List<String> allowedActions(NodeDefinition definition) {
-        var configured = definition.config().get("allowed_actions");
-        if (configured instanceof List<?> list && !list.isEmpty()) {
-            return list.stream()
-                    .map(String::valueOf)
-                    .filter(action -> !action.isBlank())
-                    .toList();
-        }
-        return List.of("approve", "revise");
-    }
-
-    private static String revisionReason(Map<String, Object> result) {
-        if (result == null || result.isEmpty()) {
-            return "";
-        }
-        var note = text(result.get("note"));
-        if (!note.isBlank()) {
-            return note;
-        }
-        var summary = text(result.get("summary"));
-        if (!summary.isBlank()) {
-            return summary;
-        }
-        var reason = text(result.get("reason"));
-        if (!reason.isBlank()) {
-            return reason;
-        }
-        return "";
-    }
-
-    private static Map<String, Object> mergedResult(Map<String, Object> existing, Map<String, Object> overrides) {
-        var merged = new LinkedHashMap<String, Object>();
-        if (existing != null) {
-            merged.putAll(existing);
-        }
-        merged.putAll(overrides);
-        return merged;
-    }
-
-    private static String text(Object value) {
-        return value == null ? "" : String.valueOf(value);
-    }
-
-    private static String stageId(String nodeDefinitionId) {
-        var separator = nodeDefinitionId.indexOf('.');
-        var prefix = separator > 0 ? nodeDefinitionId.substring(0, separator) : "workflow";
-        return "stage-" + prefix;
-    }
 }
