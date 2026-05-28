@@ -107,6 +107,9 @@ public final class WorkflowRuntime {
 
         var delay = policy.delayForAttempt(count + 1);
         ledger.autoRetryNode(paths, node.nodeInstanceId(), delay);
+        if (delay > 0) {
+            Thread.sleep(delay);
+        }
         return true;
     }
 

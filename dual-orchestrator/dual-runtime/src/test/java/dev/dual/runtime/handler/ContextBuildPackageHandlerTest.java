@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ContextBuildPackageHandlerTest {
@@ -158,14 +159,88 @@ class ContextBuildPackageHandlerTest {
         var nextStageDir = wsDir.resolve("artifacts/next-stage");
         Files.createDirectories(nextStageDir);
         Files.writeString(nextStageDir.resolve("handoff.json"), """
-                {"completedWork": "Implemented auth module", "openRisks": ["Token expiry"]}
+                {"completedWork": ["Implemented auth module", "Wrote tests"], "openRisks": ["Token expiry", "Rate limit"]}
                 """, StandardCharsets.UTF_8);
 
         var result = handler.execute(ctx("implementation", List.of()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        // Verify handler succeeds with handoff.json present (no crash)
-        assertTrue(result.result().containsKey("context_package"));
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Completed Work"));
+        assertTrue(markdown.contains("Implemented auth module"));
+        assertTrue(markdown.contains("Open Risks"));
+        assertTrue(markdown.contains("Token expiry"));
+    }
+
+    // --- Degraded path tests ---
+
+    @Test
+    void summaryRenderingShowsArtifactNames() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Summary test.", StandardCharsets.UTF_8);
+        var input = wsDir.resolve("runs/run-001/outputs/design.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "Design content here.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        // architecture_review renders input_artifacts (SUMMARY degradation policy)
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("design.md"));
+        assertTrue(markdown.contains("architecture_review"));
+    }
+
+    @Test
+    void gitEvidenceSectionRendersWhenPresent() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Git evidence test.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.createDirectories(wsDir.resolve("runs"));
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("diff.stat"), "3 files changed, 50 insertions(+), 10 deletions(-)\n", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Git Evidence"));
+        assertTrue(markdown.contains("diff.stat"));
+    }
+
+    @Test
+    void handoffOpenRisksAndCompletedWorkRendered() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Handoff content test.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var nextStageDir = wsDir.resolve("artifacts/next-stage");
+        Files.createDirectories(nextStageDir);
+        Files.writeString(nextStageDir.resolve("handoff.json"), """
+                {"completedWork": ["Built API", "Added tests"], "openRisks": ["Performance", "Security"]}
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Completed Work"));
+        assertTrue(markdown.contains("Built API"));
+        assertTrue(markdown.contains("Open Risks"));
+        assertTrue(markdown.contains("Performance"));
     }
 
     // --- Helper ---

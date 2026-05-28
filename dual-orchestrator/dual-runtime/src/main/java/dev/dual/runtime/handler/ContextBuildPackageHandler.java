@@ -123,7 +123,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 continue;
             }
             var before = builder.length();
-            appendGovernedSection(builder, rs, context, workstreamDir, handoffJson);
+            appendGovernedSection(builder, rs, context, workstreamDir, handoffJson, budget);
             rs.renderedChars = builder.length() - before;
         }
 
@@ -146,7 +146,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     }
                     continue;
                 }
-                appendGovernedSection(builder, rs, context, workstreamDir, handoffJson);
+                appendGovernedSection(builder, rs, context, workstreamDir, handoffJson, budget);
             }
             if (builder.length() > budget.totalBudget()) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(),
@@ -238,7 +238,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static void appendGovernedSection(StringBuilder builder, ResolvedSection rs,
                                                TaskContext context, Path workstreamDir,
-                                               Map<String, Object> handoffJson) throws IOException {
+                                               Map<String, Object> handoffJson,
+                                               ContextBudget budget) throws IOException {
         builder.append("## ").append(sectionTitle(rs.req.section())).append("\n\n");
         var strategy = rs.degraded ? rs.req.degradeTo().strategy() : Degradation.FULL;
         var maxItems = rs.degraded ? rs.req.degradeTo().maxItems() : 0;
@@ -251,7 +252,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 if (strategy == Degradation.SUMMARY) {
                     appendInputArtifactsSummary(builder, context);
                 } else {
-                    appendInputArtifacts(builder, context, maxSnippetChars(context));
+                    appendInputArtifacts(builder, context, maxSnippetChars(context, budget));
                 }
             }
             case "iteration_history" -> {
@@ -260,9 +261,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 } else {
                     appendIterationHistory(builder, workstreamDir);
                 }
+                appendCompletedWork(builder, handoffJson);
             }
             case "human_feedback" -> {
                 appendHumanFeedbackLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 3);
+                appendOpenRisks(builder, handoffJson);
             }
             case "recent_agent_outputs" -> {
                 appendRecentAgentOutputsLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 2);
@@ -271,7 +274,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 if (strategy == Degradation.DIFF_STAT) {
                     appendGitEvidenceDiffStat(builder, workstreamDir, handoffJson);
                 } else {
-                    appendGitEvidence(builder, workstreamDir, maxSnippetChars(context));
+                    appendGitEvidence(builder, workstreamDir, maxSnippetChars(context, budget));
                 }
             }
             case "ledger_pointers" -> {
@@ -416,6 +419,26 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             builder.append("```text\n");
             builder.append(snippet(diffStat, 1_000));
             builder.append("\n```\n\n");
+        }
+    }
+
+    private static void appendCompletedWork(StringBuilder builder, Map<String, Object> handoffJson) {
+        if (handoffJson.get("completedWork") instanceof List<?> items && !items.isEmpty()) {
+            builder.append("### Completed Work\n\n");
+            for (var item : items) {
+                builder.append("- ").append(item).append("\n");
+            }
+            builder.append("\n");
+        }
+    }
+
+    private static void appendOpenRisks(StringBuilder builder, Map<String, Object> handoffJson) {
+        if (handoffJson.get("openRisks") instanceof List<?> items && !items.isEmpty()) {
+            builder.append("### Open Risks\n\n");
+            for (var item : items) {
+                builder.append("- ").append(item).append("\n");
+            }
+            builder.append("\n");
         }
     }
 
@@ -778,14 +801,29 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     private static int maxSnippetChars(TaskContext context) {
-        return positiveIntConfig(context, "max_snippet_chars", MAX_SNIPPET_CHARS);
+        return positiveIntConfig(context, "max_snippet_chars", MAX_SNIPPET_CHARS, Map.of());
+    }
+
+    private static int maxSnippetChars(TaskContext context, ContextBudget budget) {
+        return positiveIntConfig(context, "max_snippet_chars", MAX_SNIPPET_CHARS, budget.configOverrides());
     }
 
     private static int maxRecentAgentOutputs(TaskContext context) {
-        return positiveIntConfig(context, "max_recent_agent_outputs", MAX_RECENT_AGENT_OUTPUTS);
+        return positiveIntConfig(context, "max_recent_agent_outputs", MAX_RECENT_AGENT_OUTPUTS, Map.of());
     }
 
-    private static int positiveIntConfig(TaskContext context, String key, int fallback) {
+    private static int maxRecentAgentOutputs(TaskContext context, ContextBudget budget) {
+        return positiveIntConfig(context, "max_recent_agent_outputs", MAX_RECENT_AGENT_OUTPUTS, budget.configOverrides());
+    }
+
+    private static int positiveIntConfig(TaskContext context, String key, int fallback, Map<String, Object> overrides) {
+        var override = overrides.get(key);
+        if (override instanceof Number number && number.intValue() > 0) {
+            return number.intValue();
+        }
+        if (override instanceof String text && text.matches("\\d+")) {
+            return Integer.parseInt(text);
+        }
         var value = context.definition().config().get(key);
         if (value instanceof Number number && number.intValue() > 0) {
             return number.intValue();

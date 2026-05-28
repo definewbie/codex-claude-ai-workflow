@@ -74,7 +74,7 @@ final class ContextProfiles {
                         MissingPolicy.SKIP, Priority.LOW,
                         new DegradationPolicy(Degradation.POINTER_ONLY, 0),
                         OverflowPolicy.DROP_OPTIONAL, 500)
-        ));
+        ), Map.of("max_snippet_chars", 2_000, "max_recent_agent_outputs", 3));
     }
 
     static ContextBudget architectureReview() {
@@ -99,7 +99,7 @@ final class ContextProfiles {
                         MissingPolicy.SKIP, Priority.LOW,
                         new DegradationPolicy(Degradation.POINTER_ONLY, 0),
                         OverflowPolicy.DROP_OPTIONAL, 500)
-        ));
+        ), Map.of("max_snippet_chars", 3_000, "max_recent_agent_outputs", 5));
     }
 
     static ContextBudget planReview() {
@@ -128,7 +128,7 @@ final class ContextProfiles {
                         MissingPolicy.SKIP, Priority.LOW,
                         new DegradationPolicy(Degradation.POINTER_ONLY, 0),
                         OverflowPolicy.DROP_OPTIONAL, 500)
-        ));
+        ), Map.of("max_snippet_chars", 3_000));
     }
 
     static ContextBudget acceptance() {
