@@ -248,7 +248,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         switch (rs.req.section()) {
             case "requirement" -> {
                 var content = readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)");
-                if (strategy == Degradation.ADAPTIVE) {
+                // ADAPTIVE: compress if content exceeds softBudget tokens, regardless of degraded flag
+                if (rs.req.degradeTo().strategy() == Degradation.ADAPTIVE
+                        && tokenCount(content) > rs.req.softBudget()) {
                     builder.append(snippetToTokens(content, rs.req.softBudget(), workstreamDir.resolve("requirement.md")));
                 } else {
                     builder.append(content);
