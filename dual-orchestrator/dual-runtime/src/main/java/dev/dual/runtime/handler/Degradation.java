@@ -6,5 +6,6 @@ enum Degradation {
     LATEST,
     DECISION_ONLY,
     DIFF_STAT,
-    POINTER_ONLY
+    POINTER_ONLY,
+    ADAPTIVE
 }
