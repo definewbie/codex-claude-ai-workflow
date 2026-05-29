@@ -278,6 +278,45 @@ class ContextBuildPackageHandlerTest {
                 "degraded git_evidence should reference diff stat, got: " + markdown);
     }
 
+    @Test
+    void budgetOverflowDegradesRecentAgentOutputsToLatest() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Short req.", StandardCharsets.UTF_8);
+
+        // Make input_artifacts available so its 6k softBudget is allocated,
+        // pushing git_evidence + recent_agent_outputs into degraded territory
+        var input = wsDir.resolve("runs/run-001/outputs/design.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "Design output.", StandardCharsets.UTF_8);
+
+        // Create multiple agent outputs — recent_agent_outputs is LOW priority,
+        // DegradationPolicy(LATEST, 2), degraded when budget overflows
+        Files.createDirectories(wsDir.resolve("runs/run-002/outputs"));
+        Files.createDirectories(wsDir.resolve("runs/run-003/outputs"));
+        Files.writeString(wsDir.resolve("runs/run-002/outputs/agent.md"), "Output from run 2.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-003/outputs/agent.md"), "Output from run 3.", StandardCharsets.UTF_8);
+
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("diff.stat"), "1 file changed\n", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        // Governance table should show recent_agent_outputs as degraded with "latest" level
+        assertTrue(markdown.contains("recent_agent_outputs"),
+                "recent_agent_outputs should appear in governance table, got: " + markdown);
+        assertTrue(markdown.contains("latest"),
+                "recent_agent_outputs should show degraded level 'latest', got: " + markdown);
+    }
+
     // --- Helper ---
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
