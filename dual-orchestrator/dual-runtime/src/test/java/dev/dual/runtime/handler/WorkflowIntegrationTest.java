@@ -395,6 +395,29 @@ class WorkflowIntegrationTest {
                 }
                 """);
 
+        // Write TaskContract artifact (required by acceptance profile's task_contract section)
+        var artifactsDir = tempDir.resolve(".agent/workstreams/ws-int/artifacts");
+        Files.createDirectories(artifactsDir);
+        Files.writeString(artifactsDir.resolve("task-contract.json"), """
+                {
+                  "id": "tc-test",
+                  "version": 1,
+                  "created_at": "2026-05-28T09:00:00Z",
+                  "objective": "Test objective",
+                  "scope": { "included": ["src/"], "excluded": [] },
+                  "acceptance_criteria": ["AC1"],
+                  "test_requirements": [],
+                  "constraints": [],
+                  "non_goals": [],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "status": "READY_FOR_REVIEW",
+                  "compilation_pass": 1,
+                  "source": { "raw_request_ref": "requirement.md", "created_by": "contract_compiler" }
+                }
+                """);
+
         // product_review: should NOT have human_feedback, git_evidence
         var productResult = buildContextPackage("product_review");
         var productMd = readPackageMarkdown(productResult);

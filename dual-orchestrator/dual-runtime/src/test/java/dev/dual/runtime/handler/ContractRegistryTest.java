@@ -41,8 +41,8 @@ class ContractRegistryTest {
     }
 
     @Test
-    void registryHas14Contracts() {
-        assertEquals(14, ContractRegistry.allNodeIds().size());
+    void registryHas15Contracts() {
+        assertEquals(15, ContractRegistry.allNodeIds().size());
     }
 
     @Test
