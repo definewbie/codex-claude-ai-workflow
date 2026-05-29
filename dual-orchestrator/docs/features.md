@@ -11,8 +11,8 @@
 
 - [x] T2.3 CheckpointDocument (319行) 单元测试
 - [x] T2.3 CodexReviewControl (105行) 单元测试
-- [ ] Budget overflow 降级测试：验证 DIFF_STAT / DECISION_ONLY 渲染在 budget 真正溢出时触发
-- [ ] Profile override 单元测试：验证 `maxSnippetChars(context, budget)` 返回 profile override > node config > 默认值
+- [x] Budget overflow 降级测试：验证 DIFF_STAT / DECISION_ONLY 渲染在 budget 真正溢出时触发
+- [x] Profile override 单元测试：验证 `maxSnippetChars(context, budget)` 返回 profile override > node config > 默认值
 
 ## P2 — 完善性
 
