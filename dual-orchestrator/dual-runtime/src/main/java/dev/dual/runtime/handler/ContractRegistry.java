@@ -68,6 +68,14 @@ public final class ContractRegistry {
             Set.of()
     );
 
+    // --- Contract nodes (task contract compilation) ---
+    private static final NodeOutputContract CONTRACT_COMPILE = new NodeOutputContract(
+            "contract.compile",
+            Set.of("decision", "summary"),
+            Set.of("READY_FOR_REVIEW", "NEEDS_CLARIFICATION", "NEEDS_SCOPE_REDUCTION", "REJECTED"),
+            Set.of("contract_id", "contract_status", "contract_version")
+    );
+
     // --- Decision nodes (edge routing contracts) ---
     private static final NodeOutputContract INTAKE_DECISION = new NodeOutputContract(
             "intake.decision",
@@ -108,7 +116,8 @@ public final class ContractRegistry {
             Map.entry("intake.decision", INTAKE_DECISION),
             Map.entry("design.decision", DESIGN_DECISION),
             Map.entry("plan.decision", PLAN_DECISION),
-            Map.entry("acceptance.decision", ACCEPTANCE_DECISION)
+            Map.entry("acceptance.decision", ACCEPTANCE_DECISION),
+            Map.entry("contract.compile", CONTRACT_COMPILE)
     );
 
     public static NodeOutputContract forNode(String nodeId) {
