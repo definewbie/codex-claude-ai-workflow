@@ -17,8 +17,8 @@
 ## P2 — 完善性
 
 - [x] T2.2 Prompt regression：用真实 Agent 输出验证 prompt 模板变量一致性
-- [ ] Token-level budgeting：context governance 从 char-level 改为 token 计算
-- [ ] Adaptive compression：context 超长时自动压缩/摘要
+- [x] Token-level budgeting：context governance 从 char-level 改为 token 计算
+- [x] Adaptive compression：context 超长时自动压缩/摘要
 
 ## P3 — 产品化基础设施
 

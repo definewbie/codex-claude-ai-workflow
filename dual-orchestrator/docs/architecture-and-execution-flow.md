@@ -350,21 +350,24 @@ sequenceDiagram
 
 ## 8. Context Governance 架构
 
-6 个预定义 profile，每个拥有独立的 budget、section 列表和降级策略：
+6 个预定义 profile，每个拥有独立的 **token-level** budget、section 列表和降级策略：
 
-| Profile | Budget | 典型用途 |
+| Profile | Token Budget | 典型用途 |
 |---|---|---|
-| `product_review` | 16k | Codex 产品需求审视 |
-| `architecture_review` | 20k | Codex 架构审视 |
-| `plan_review` | 22k | Codex 计划审视 |
-| `implementation` | 24k | Claude 实现阶段 |
-| `acceptance` | 26k | Codex 验收审视 |
-| `full` | 30k | 全量上下文 |
+| `product_review` | 4k tokens | Codex 产品需求审视 |
+| `architecture_review` | 5k tokens | Codex 架构审视 |
+| `plan_review` | 5.5k tokens | Codex 计划审视 |
+| `implementation` | 6k tokens | Claude 实现阶段 |
+| `acceptance` | 6.5k tokens | Codex 验收审视 |
+| `full` | 7.5k tokens | 全量上下文 |
+
+Budget 基于 token 计算（通过 `TokenEstimator` 接口，默认 ~4 chars/token 估算，可替换为 tiktoken 等真实 tokenizer）。
 
 每个 section 有 Priority（CRITICAL > HIGH > MEDIUM > LOW），budget 分配按优先级顺序。超出 budget 的低优先级 section 会降级：
 
 | 降级策略 | 效果 |
 |---|---|
+| `ADAPTIVE` | 自动压缩到 token 预算内，保留前 N token 内容 + 压缩标记 |
 | `SUMMARY` | 只显示文件名列表，不显示内容 |
 | `DECISION_ONLY` | 只显示决策记录 |
 | `DIFF_STAT` | 只显示 diff 统计 |

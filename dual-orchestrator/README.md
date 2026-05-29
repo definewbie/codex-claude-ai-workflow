@@ -61,12 +61,13 @@ Runtime 只认识三类节点：
 - 247 个单元测试覆盖全部 handler、ledger、control block 解析、contract registry、prompt 一致性、context governance 和 workflow 集成。
 - Agent artifact contract registry（`ContractRegistry`），per-node output schema 校验。
 - Prompt 模板变量加载时校验，防止引用未知变量。
-- Context governance 架构：6 profile 各自拥有 budget-controlled 渲染管线，priority-based degradation，硬上限 budget enforcement。per-profile config overrides（`max_snippet_chars` 等）。
+- Context governance 架构：6 profile 各自拥有 **token-level** budget-controlled 渲染管线，priority-based degradation（7 种策略含 ADAPTIVE 自适应压缩），token-aware budget enforcement。per-profile config overrides（`max_snippet_chars` 等）。
+- `TokenEstimator` SPI：默认 ~4 chars/token 估算，可替换为 tiktoken 等真实 tokenizer。
 - `handoff.json` sidecar：从 agent handoff markdown 解析生成结构化 JSON，下游 handler 可直接消费 `completedWork`（iteration_history section）和 `openRisks`（human_feedback section）。
 - Configurable retry policies：per-failure-type 策略（RATE_LIMIT / SESSION_MISSING / AGENT_RECONNECT / CONTEXT_WINDOW），指数退避 + `Thread.sleep`，node-level config override。
 - `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
 - Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
-- ~280 个单元测试。
+- ~300 个单元测试。
 
 仍未完成：
 
