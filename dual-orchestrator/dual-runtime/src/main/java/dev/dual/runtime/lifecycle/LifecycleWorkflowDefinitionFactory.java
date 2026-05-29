@@ -1,5 +1,6 @@
 package dev.dual.runtime.lifecycle;
 
+import dev.dual.core.workflow.EdgeCondition;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
@@ -94,7 +95,10 @@ public final class LifecycleWorkflowDefinitionFactory {
                         edge("stage.claude_handoff", "completed", "stage.generate_next_prompt"),
                         edge("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
                         edge("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm"),
-                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff")
+                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff"),
+                        // Example conditional edge: "complete" routes via condition
+                        edge("gate.human_next_stage_approval", "complete", "acceptance.generate_final_report",
+                                EdgeCondition.configEquals("completion_mode", "final_report"))
                 )
         );
     }
@@ -147,5 +151,9 @@ public final class LifecycleWorkflowDefinitionFactory {
 
     private static EdgeDefinition edge(String from, String on, String to) {
         return new EdgeDefinition(from, on, to);
+    }
+
+    private static EdgeDefinition edge(String from, String on, String to, EdgeCondition condition) {
+        return new EdgeDefinition(from, on, to, condition);
     }
 }
