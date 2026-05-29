@@ -2,6 +2,7 @@ package dev.dual.core.workflow;
 
 import java.util.List;
 import java.util.HashSet;
+import java.util.Map;
 
 public record WorkflowDefinition(
         String workflowId,
@@ -43,6 +44,18 @@ public record WorkflowDefinition(
 
     public List<EdgeDefinition> edgesFrom(String nodeId) {
         return edges.stream().filter(edge -> edge.from().equals(nodeId)).toList();
+    }
+
+    /**
+     * Find all edges from a node matching the given outcome, with condition evaluation.
+     * Each edge's {@link EdgeCondition} is evaluated against the routing context.
+     */
+    public List<EdgeDefinition> edgesFrom(String nodeId, String outcome, Map<String, Object> routingContext) {
+        return edges.stream()
+                .filter(edge -> edge.from().equals(nodeId))
+                .filter(edge -> edge.on().equals(outcome))
+                .filter(edge -> edge.condition().evaluate(routingContext))
+                .toList();
     }
 
     private static NodeDefinition nodeOrNull(String nodeId, List<NodeDefinition> candidates) {
