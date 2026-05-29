@@ -317,6 +317,46 @@ class ContextBuildPackageHandlerTest {
                 "recent_agent_outputs should show degraded level 'latest', got: " + markdown);
     }
 
+    @Test
+    void budgetOverflowDropsOptionalSectionsInPhase5() throws Exception {
+        Files.createDirectories(wsDir);
+        // Write a massive requirement to push actual rendered content past 24k budget
+        // This triggers Phase 5 post-render budget enforcement
+        Files.writeString(wsDir.resolve("requirement.md"), "R".repeat(20_000), StandardCharsets.UTF_8);
+
+        var input = wsDir.resolve("runs/run-001/outputs/design.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "A".repeat(3_000), StandardCharsets.UTF_8);
+
+        // Create large agent output to push total over budget
+        Files.createDirectories(wsDir.resolve("runs/run-002/outputs"));
+        Files.writeString(wsDir.resolve("runs/run-002/outputs/agent.md"), "B".repeat(2_000), StandardCharsets.UTF_8);
+
+        Files.createDirectories(wsDir.resolve("iterations"));
+        var iterDir = wsDir.resolve("iterations/001");
+        Files.createDirectories(iterDir);
+        Files.writeString(iterDir.resolve("summary.md"), "S".repeat(2_000), StandardCharsets.UTF_8);
+
+        Files.createDirectories(wsDir.resolve("nodes"));
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("diff.stat"), "10 files changed\n", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        // Phase 5 should have triggered — total should be within budget
+        // ledger_pointers (LOW, DROP_OPTIONAL) should be dropped by Phase 5
+        // The governance table is re-rendered after Phase 5 drops sections
+        assertFalse(markdown.length() > 24_500,
+                "Output should be within budget after Phase 5 enforcement, was " + markdown.length());
+    }
+
     // --- Helper ---
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
