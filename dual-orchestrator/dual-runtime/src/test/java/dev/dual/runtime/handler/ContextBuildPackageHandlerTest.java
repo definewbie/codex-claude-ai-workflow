@@ -243,6 +243,41 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Performance"));
     }
 
+    @Test
+    void budgetOverflowDegradesGitEvidenceToDiffStat() throws Exception {
+        Files.createDirectories(wsDir);
+        // Fill requirement to consume most of the 24k implementation budget
+        Files.writeString(wsDir.resolve("requirement.md"), "R".repeat(18_000), StandardCharsets.UTF_8);
+
+        var input = wsDir.resolve("runs/run-001/outputs/design.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "A".repeat(3_000), StandardCharsets.UTF_8);
+
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        // Full diff content that would be too large
+        var diffContent = "D".repeat(5_000);
+        Files.writeString(evidenceDir.resolve("diff.stat"), diffContent + "\n", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        // git_evidence is MEDIUM priority, should be degraded due to budget pressure
+        // Governance table should show "diff_stat" as level for git_evidence
+        assertTrue(markdown.contains("git_evidence") || markdown.contains("Git Evidence"),
+                "git_evidence section should appear in output, got: " + markdown);
+        // Should contain the diff stat, not the full 5k diff content
+        assertTrue(markdown.contains("diff_stat") || markdown.contains("diff.stat"),
+                "degraded git_evidence should reference diff stat, got: " + markdown);
+    }
+
     // --- Helper ---
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
