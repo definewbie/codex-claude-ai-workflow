@@ -1,4 +1,4 @@
-package dev.dual.ledger.file;
+    package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;

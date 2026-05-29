@@ -32,7 +32,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             "human_feedback",
             "recent_agent_outputs",
             "git_evidence",
-            "ledger_pointers"
+            "ledger_pointers",
+            "task_contract"
     );
 
     @Override
@@ -174,6 +175,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "recent_agent_outputs" -> Files.exists(workstreamDir.resolve("runs"));
             case "git_evidence" -> Files.exists(workstreamDir.resolve("artifacts/git-evidence"));
             case "ledger_pointers" -> Files.exists(workstreamDir.resolve("events.jsonl"));
+            case "task_contract" -> Files.exists(workstreamDir.resolve("artifacts/task-contract.json"));
             default -> false;
         };
     }
@@ -291,6 +293,47 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 builder.append("- Workflow current: ").append(toDisplayRef(workstreamDir.resolve("workflow/current.json"))).append("\n");
                 builder.append("- Node state directory: ").append(toDisplayRef(workstreamDir.resolve("nodes"))).append("\n");
                 builder.append("- Agent runs directory: ").append(toDisplayRef(workstreamDir.resolve("runs"))).append("\n\n");
+            }
+            case "task_contract" -> {
+                var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
+                if (Files.exists(contractPath)) {
+                    var contractJson = readJsonUnchecked(contractPath);
+                    builder.append("**Objective:** ").append(text(contractJson.get("objective"))).append("\n\n");
+                    builder.append("**Status:** ").append(text(contractJson.get("status"))).append("\n\n");
+                    if (contractJson.get("scope") instanceof Map<?,?> scope) {
+                        builder.append("**Scope Included:**\n");
+                        if (scope.get("included") instanceof List<?> included) {
+                            for (var item : included) builder.append("- ").append(item).append("\n");
+                        }
+                        builder.append("\n**Scope Excluded:**\n");
+                        if (scope.get("excluded") instanceof List<?> excluded) {
+                            for (var item : excluded) builder.append("- ").append(item).append("\n");
+                        }
+                        builder.append("\n");
+                    }
+                    if (contractJson.get("acceptance_criteria") instanceof List<?> ac && !ac.isEmpty()) {
+                        builder.append("**Acceptance Criteria:**\n");
+                        for (var item : ac) builder.append("- ").append(item).append("\n");
+                        builder.append("\n");
+                    }
+                    if (contractJson.get("non_goals") instanceof List<?> ng && !ng.isEmpty()) {
+                        builder.append("**Non-Goals:**\n");
+                        for (var item : ng) builder.append("- ").append(item).append("\n");
+                        builder.append("\n");
+                    }
+                    if (contractJson.get("constraints") instanceof List<?> c && !c.isEmpty()) {
+                        builder.append("**Constraints:**\n");
+                        for (var item : c) builder.append("- ").append(item).append("\n");
+                        builder.append("\n");
+                    }
+                    if (contractJson.get("risk_areas") instanceof List<?> ra && !ra.isEmpty()) {
+                        builder.append("**Risk Areas:**\n");
+                        for (var item : ra) builder.append("- ").append(item).append("\n");
+                        builder.append("\n");
+                    }
+                } else {
+                    builder.append("(task-contract.json not found)\n\n");
+                }
             }
             default -> builder.append("(unknown section)\n\n");
         }
@@ -460,6 +503,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "recent_agent_outputs" -> "Recent Agent Outputs";
             case "git_evidence" -> "Git Evidence";
             case "ledger_pointers" -> "Ledger Pointers";
+            case "task_contract" -> "TaskContract";
             default -> section;
         };
     }
@@ -822,6 +866,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     "human_feedback",
                     "recent_agent_outputs",
                     "git_evidence",
+                    "task_contract",
                     "ledger_pointers"
             );
             default -> FULL_SECTIONS;
