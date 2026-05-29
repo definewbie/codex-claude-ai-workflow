@@ -13,6 +13,12 @@ final class UnconditionalCondition implements EdgeCondition {
     }
 
     @Override
+    public String type() { return "unconditional"; }
+
+    @Override
+    public Map<String, Object> params() { return Map.of(); }
+
+    @Override
     public String toString() {
         return "*";
     }

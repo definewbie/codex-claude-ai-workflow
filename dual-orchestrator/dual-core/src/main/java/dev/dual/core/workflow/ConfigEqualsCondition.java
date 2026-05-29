@@ -20,6 +20,12 @@ final class ConfigEqualsCondition implements EdgeCondition {
         return expectedValue.equals(String.valueOf(value));
     }
 
+    @Override
+    public String type() { return "config_equals"; }
+
+    @Override
+    public Map<String, Object> params() { return Map.of("key", key, "value", expectedValue); }
+
     String key() { return key; }
     String expectedValue() { return expectedValue; }
 

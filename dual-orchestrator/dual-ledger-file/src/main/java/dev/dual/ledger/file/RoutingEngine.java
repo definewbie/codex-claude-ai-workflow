@@ -73,9 +73,13 @@ final class RoutingEngine {
             return;
         }
 
-        var edge = definition.edgesFrom(node.nodeDefinitionId()).stream()
-                .filter(candidate -> candidate.on().equals(outcome))
-                .findFirst();
+        // Build routing context for conditional edge evaluation
+        var routingContext = new LinkedHashMap<String, Object>();
+        routingContext.put("outcome", outcome);
+        if (result != null) routingContext.putAll(result);
+
+        var edge = definition.edgesFrom(node.nodeDefinitionId(), outcome, routingContext)
+                .stream().findFirst();
         if (edge.isEmpty()) {
             completeWorkflow(paths, current, node, outcome);
             return;

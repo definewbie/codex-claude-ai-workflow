@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.ledger.file.EdgeConditionModule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 public final class WorkflowDefinitionLoader {
     private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new EdgeConditionModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     public WorkflowDefinition loadOrDefault(Path workflowPath) throws IOException {
