@@ -449,7 +449,7 @@ Review the implementation against the TaskContract:
 
 Codex review 的 `dual-control` block 扩展：
 
-```text
+~~~~text
 ```dual-control
 decision: PASS
 summary: Implementation satisfies all acceptance criteria
@@ -457,7 +457,7 @@ contract_gaps: []
 out_of_scope_files: []
 missing_tests: []
 ```dual-control
-```
+~~~~
 
 新字段（向后兼容，缺失时不影响现有解析）：
 - `contract_gaps` — 发现的契约遗漏
