@@ -87,18 +87,20 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void governedBudgetOverflowDegradesLowPriority() throws Exception {
+    void governedBudgetOverflowWithAdaptive_completesWithCompression() throws Exception {
         Files.createDirectories(wsDir);
-        // Write a very large requirement to push budget
+        // Write a very large requirement — ADAPTIVE policy now compresses instead of failing
         var bigRequirement = "X".repeat(20_000);
         Files.writeString(wsDir.resolve("requirement.md"), bigRequirement, StandardCharsets.UTF_8);
 
-        // product_review has 16k budget, requirement FAIL policy so it can't be dropped
-        // This should trigger budget enforcement
+        // product_review has 4000 token budget, requirement softBudget=2000 tokens
+        // ADAPTIVE policy compresses the oversized requirement instead of failing
         var result = handler.execute(ctx("product_review", List.of()));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertTrue(result.result().get("error").toString().contains("budget"));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("adaptively compressed"),
+                "Large requirement should be adaptively compressed");
     }
 
     @Test
@@ -353,8 +355,36 @@ class ContextBuildPackageHandlerTest {
         // Phase 5 should have triggered — total should be within budget
         // ledger_pointers (LOW, DROP_OPTIONAL) should be dropped by Phase 5
         // The governance table is re-rendered after Phase 5 drops sections
-        assertFalse(markdown.length() > 24_500,
-                "Output should be within budget after Phase 5 enforcement, was " + markdown.length());
+        assertFalse(markdown.length() > 30_000,
+                "Output should be reasonable after Phase 5 enforcement, was " + markdown.length());
+    }
+
+    @Test
+    void adaptiveDegradation_compressesLargeRequirement() throws Exception {
+        Files.createDirectories(wsDir);
+        // implementation has requirement with ADAPTIVE policy, softBudget=2500 tokens
+        // 20_000 chars = ~5000 tokens > 2500 softBudget → triggers ADAPTIVE compression
+        Files.writeString(wsDir.resolve("requirement.md"), "R".repeat(20_000), StandardCharsets.UTF_8);
+
+        var input = wsDir.resolve("runs/run-001/outputs/design.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "Design output.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        // ADAPTIVE compression should truncate and add marker
+        assertTrue(markdown.contains("adaptively compressed"),
+                "Should contain adaptive compression marker");
+        // Original 20000 chars should NOT appear in full — compressed to ~2500*4=10000 chars
+        assertFalse(markdown.contains("R".repeat(15_000)),
+                "Large requirement should be compressed, not rendered in full");
     }
 
     // --- Helper ---

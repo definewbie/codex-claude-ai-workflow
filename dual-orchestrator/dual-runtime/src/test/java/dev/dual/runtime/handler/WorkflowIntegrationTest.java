@@ -193,8 +193,10 @@ class WorkflowIntegrationTest {
                 "Requirement content must be preserved in full");
 
         var budget = ContextProfiles.implementation();
-        assertTrue(markdown.length() <= budget.totalBudget(),
-                "Total markdown (" + markdown.length() + ") must be <= totalBudget (" + budget.totalBudget() + ")");
+        // Budget is now token-based; verify estimated tokens within budget
+        var estimatedTokens = (markdown.length() + 3) / 4;
+        assertTrue(estimatedTokens <= budget.totalBudget(),
+                "Estimated tokens (" + estimatedTokens + ") must be <= totalBudget (" + budget.totalBudget() + ")");
 
         assertTrue(markdown.contains("## Context Governance"));
         var govSection = markdown.substring(markdown.indexOf("## Context Governance"));
@@ -203,7 +205,7 @@ class WorkflowIntegrationTest {
     }
 
     @Test
-    void chain4_requirementOverHardLimitFails() throws Exception {
+    void chain4_oversizedRequirement_compressedByAdaptive() throws Exception {
         var oversizedRequirement = "R".repeat(25_000) + "\n";
         fixture.writeRequirement(oversizedRequirement);
 
@@ -218,10 +220,12 @@ class WorkflowIntegrationTest {
                 node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
         ));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        var errorMsg = (String) result.result().get("error");
-        assertTrue(errorMsg.contains("budget exceeded"),
-                "Should fail due to budget: " + errorMsg);
+        // ADAPTIVE policy now compresses oversized requirement instead of hard-failing
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var packagePath = (String) result.result().get("context_package");
+        var markdown = Files.readString(tempDir.resolve(packagePath), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("adaptively compressed"),
+                "Oversized requirement should be adaptively compressed");
     }
 
     // --- Extended integration tests ---
