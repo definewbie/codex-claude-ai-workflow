@@ -32,6 +32,6 @@
 
 ## P4 — Workflow Engine 增强
 
-- [ ] 条件表达式：edge 上支持条件判断（如 `if config.x == y`）
-- [ ] 并行节点：多个 Task 同时执行 + join 等待
-- [ ] Schema 版本迁移：ledger 文件结构升级时自动迁移旧数据
+- [x] 条件表达式：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 上支持条件判断
+- [x] 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume
+- [x] Schema 版本迁移：`LedgerMigrator` 框架，v1→v2 迁移（edge condition 字段），自动迁移旧数据

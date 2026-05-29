@@ -68,6 +68,9 @@ Runtime 只认识三类节点：
 - `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
 - Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
 - ~300 个单元测试。
+- 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
+- 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
+- Ledger schema 自动迁移：`LedgerMigrator` 框架（v1→v2），`WorkflowFileLedger.loadDefinition` 检测版本差异并升级。
 
 仍未完成：
 
@@ -1066,7 +1069,7 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 ## Current Limits
 
 - 仍是 CLI-first，没有 API server / scheduler。
-- workflow 已支持 JSON 文件加载；更高级的条件表达式、并行节点和 schema 版本迁移还没做。
+- workflow 已支持 JSON 文件加载、条件表达式（`EdgeCondition`）、并行节点（fan-out + sequential execution）和 schema 版本自动迁移（`LedgerMigrator`）。
 - context package 已有 budget-controlled governance pipeline（6 profile，priority-based degradation，per-profile config overrides），但没有 token-level budgeting 或 adaptive compression。
 - auto-retry 按 failure type 自动分类并指数退避重试，但还没有交互式修复向导。
 - notification 还没接入 Java 版。

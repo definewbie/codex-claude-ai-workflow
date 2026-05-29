@@ -373,3 +373,48 @@ Budget 基于 token 计算（通过 `TokenEstimator` 接口，默认 ~4 chars/to
 | `DIFF_STAT` | 只显示 diff 统计 |
 | `LATEST` | 只显示最近 N 条 |
 | `POINTER_ONLY` | 只显示文件路径 |
+
+## 9. P4: 条件表达式 / 并行节点 / Schema 迁移
+
+### 9.1 条件 Edge Routing
+
+EdgeDefinition 新增 `condition` 字段（`EdgeCondition` 接口），在 edge 匹配时求值：
+
+```
+EdgeDefinition(from, on, to, condition)
+                    ↑         ↑        ↑
+                 必须匹配   必须匹配   条件求值（可选）
+```
+
+**内置条件：**
+- `EdgeCondition.unconditional()` — 默认，始终匹配
+- `EdgeCondition.configEquals(key, value)` — context 中 `key == value` 时匹配
+
+**序列化：** `EdgeConditionModule`（Jackson）处理多态序列化，无条件 edge 序列化为 `null`，`ConfigEqualsCondition` 序列化为 `{"type": "config_equals", "params": {"key": "...", "value": "..."}}`
+
+**RoutingEngine 求值：** `completeAndRoute` 构建 routing context（outcome + result），调用 `definition.edgesFrom(nodeId, outcome, routingContext)` 过滤匹配条件。
+
+### 9.2 并行节点（Fan-out）
+
+当多个 edge 同时匹配时，RoutingEngine 激活所有目标节点：
+
+```
+Node A ──(DONE)──→ Node B   ← 同时激活
+         ──(DONE)──→ Node C   ← 同时激活
+```
+
+**活跃节点管理：** `completeAndRoute` 从 `activeNodeInstanceIds` 中移除已完成节点，添加所有后继节点。仅当活跃列表为空时标记 workflow COMPLETED。
+
+**顺序执行：** `WorkflowRuntime.resume` 遍历所有活跃节点快照，依次执行。每次执行后重新加载 current 状态。
+
+### 9.3 Schema 版本迁移
+
+`LedgerMigrator` 在 `WorkflowFileLedger.loadDefinition` 时检测版本差异并升级：
+
+```
+CURRENT_SCHEMA_VERSION = 2
+
+v1 → v2: edge 新增 condition 字段（null = 无条件）
+```
+
+迁移后的 JSON 自动回写磁盘。框架支持链式迁移（N → N+1 → N+2），未来版本只需添加新的迁移步骤。
