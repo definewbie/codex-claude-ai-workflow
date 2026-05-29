@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 public final class ContextBuildPackageHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
     private static final int MAX_RECENT_AGENT_OUTPUTS = 8;
+    private static final TokenEstimator TOKEN_ESTIMATOR = TokenEstimator.defaultEstimator();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -127,10 +128,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             rs.renderedChars = builder.length() - before;
         }
 
-        // Phase 5: Validate total budget
-        if (builder.length() > budget.totalBudget()) {
+        // Phase 5: Validate total budget (token-based)
+        if (tokenCount(builder.toString()) > budget.totalBudget()) {
             for (int i = sorted.size() - 1; i >= 0; i--) {
-                if (builder.length() <= budget.totalBudget()) break;
+                if (tokenCount(builder.toString()) <= budget.totalBudget()) break;
                 var rs = sorted.get(i);
                 if (!rs.available || rs.dropped) continue;
                 if (rs.req.overflowPolicy() == OverflowPolicy.FAIL) continue;
@@ -148,9 +149,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 }
                 appendGovernedSection(builder, rs, context, workstreamDir, handoffJson, budget);
             }
-            if (builder.length() > budget.totalBudget()) {
+            if (tokenCount(builder.toString()) > budget.totalBudget()) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(),
-                        Map.of("error", "budget exceeded: " + builder.length() + " > " + budget.totalBudget()), null);
+                        Map.of("error", "budget exceeded: " + tokenCount(builder.toString()) + " > " + budget.totalBudget() + " tokens"), null);
             }
         }
 
@@ -185,7 +186,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.append("- Target Node: ").append(configText(context, "target_node", "(not specified)")).append("\n");
         builder.append("- Generated At: ").append(Instant.now()).append("\n");
         builder.append("- Profile: ").append(profile(context)).append("\n");
-        builder.append("- Total: -- / ").append(formatChars(budget.totalBudget())).append(" budget\n\n");
+        builder.append("- Total: -- / ").append(formatTokens(budget.totalBudget())).append(" tokens budget\n\n");
 
         builder.append("## Context Governance\n\n");
         builder.append("| Section | Level | Degraded | Original | Current |\n");
@@ -197,8 +198,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 if (rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER) degraded = "-";
                 else degraded = "skip";
             }
-            var original = rs.available ? formatChars(rs.renderedChars) : "-";
-            var current = rs.available ? formatChars(rs.renderedChars) : "-";
+            var original = rs.available ? formatTokens(rs.renderedChars) : "-";
+            var current = rs.available ? formatTokens(rs.renderedChars) : "-";
             builder.append("| ").append(rs.req.section()).append(" | ").append(level)
                    .append(" | ").append(degraded).append(" | ").append(original)
                    .append(" | ").append(current).append(" |\n");
@@ -217,7 +218,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         sb.append("- Target Node: ").append(configText(context, "target_node", "(not specified)")).append("\n");
         sb.append("- Generated At: ").append(Instant.now()).append("\n");
         sb.append("- Profile: ").append(profile(context)).append("\n");
-        sb.append("- Total: ").append(formatChars(total)).append(" / ").append(formatChars(budget.totalBudget())).append(" budget\n\n");
+        sb.append("- Total: ").append(formatTokens(total)).append(" / ").append(formatTokens(budget.totalBudget())).append(" tokens\n\n");
 
         sb.append("## Context Governance\n\n");
         sb.append("| Section | Level | Degraded | Original | Current |\n");
@@ -229,8 +230,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 degraded = rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER ? "-" : "skip";
             }
             sb.append("| ").append(rs.req.section()).append(" | ").append(level)
-              .append(" | ").append(degraded).append(" | ").append(formatChars(rs.originalChars))
-              .append(" | ").append(formatChars(rs.renderedChars)).append(" |\n");
+              .append(" | ").append(degraded).append(" | ").append(formatTokens(rs.originalChars))
+              .append(" | ").append(formatTokens(rs.renderedChars)).append(" |\n");
         }
         sb.append("\nDegraded sections have full data at their original paths listed below.\n\n");
         return sb.toString();
@@ -246,7 +247,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         switch (rs.req.section()) {
             case "requirement" -> {
-                builder.append(readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)")).append("\n\n");
+                var content = readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)");
+                if (strategy == Degradation.ADAPTIVE) {
+                    builder.append(snippetToTokens(content, rs.req.softBudget(), workstreamDir.resolve("requirement.md")));
+                } else {
+                    builder.append(content);
+                }
+                builder.append("\n\n");
             }
             case "input_artifacts" -> {
                 if (strategy == Degradation.SUMMARY) {
@@ -458,6 +465,16 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     private static String formatChars(int chars) {
         if (chars < 1_000) return chars + "";
         return String.format("%.1fk", chars / 1_000.0);
+    }
+
+    private static int tokenCount(String text) {
+        return TOKEN_ESTIMATOR.estimate(text);
+    }
+
+    private static String formatTokens(int count) {
+        if (count <= 0) return "0";
+        if (count >= 1_000) return String.format("%.1fk", count / 1_000.0);
+        return String.valueOf(count);
     }
 
     private static final class ResolvedSection {
@@ -726,6 +743,15 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
         return content.substring(0, maxSnippetChars).stripTrailing()
                 + "\n\n[truncated; read full artifact at " + toDisplayRef(path) + "]";
+    }
+
+    private static String snippetToTokens(String content, int maxTokens, Path path) {
+        var tokens = tokenCount(content);
+        if (tokens <= maxTokens) return content.stripTrailing();
+        // Estimate char position from token budget (4 chars/token ratio)
+        var estimatedChars = Math.min(content.length(), maxTokens * 4);
+        var truncated = content.substring(0, estimatedChars).stripTrailing();
+        return truncated + "\n\n[adaptively compressed to ~" + maxTokens + " tokens; full data at " + toDisplayRef(path) + "]";
     }
 
     private static String readOrDefault(Path path, String fallback) throws IOException {
