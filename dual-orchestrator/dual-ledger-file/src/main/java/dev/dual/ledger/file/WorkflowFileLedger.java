@@ -8,6 +8,7 @@ import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
@@ -109,13 +110,24 @@ public final class WorkflowFileLedger {
     }
 
     public WorkflowDefinition loadDefinition(WorkstreamPaths paths) throws IOException {
-        var document = objectMapper.readValue(paths.workflowDefinitionJson().toFile(), WorkflowDefinitionDocument.class);
+        var jsonPath = paths.workflowDefinitionJson();
+        var json = Files.readString(jsonPath, StandardCharsets.UTF_8);
+        var doc = objectMapper.readValue(json, WorkflowDefinitionDocument.class);
+
+        // Migrate if schema version is older than current
+        if (doc.schemaVersion() < LedgerMigrator.currentVersion()) {
+            json = LedgerMigrator.migrate(json, doc.schemaVersion());
+            // Write migrated version back
+            Files.writeString(jsonPath, json, StandardCharsets.UTF_8);
+            doc = objectMapper.readValue(json, WorkflowDefinitionDocument.class);
+        }
+
         return new WorkflowDefinition(
-                document.workflowId(),
-                document.version(),
-                document.entryNodeId(),
-                document.nodes(),
-                document.edges()
+                doc.workflowId(),
+                doc.version(),
+                doc.entryNodeId(),
+                doc.nodes(),
+                doc.edges()
         );
     }
 
