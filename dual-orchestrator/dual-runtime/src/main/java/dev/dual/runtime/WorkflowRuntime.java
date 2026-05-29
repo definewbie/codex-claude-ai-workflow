@@ -13,6 +13,7 @@ import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public final class WorkflowRuntime {
@@ -49,45 +50,64 @@ public final class WorkflowRuntime {
             }
         }
 
-        var nodeDoc = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
-        var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
+        // Sequential multi-node execution: iterate all active nodes
+        var activeSnapshot = new ArrayList<>(current.activeNodeInstanceIds());
+        WorkflowRuntimeResult lastResult = null;
 
-        if (nodeDefinition.kind() == NodeKind.GATE) {
-            var node = ledger.loadCoreNode(paths, current.activeNodeInstanceIds().get(0));
-            handlers.gate(nodeDefinition.handlerType())
-                    .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
-            return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, nodeDefinition.id(), "waiting for human review");
+        for (var activeNodeId : activeSnapshot) {
+            // Reload state — previous iteration may have changed current
+            current = ledger.loadCurrent(paths);
+            if (current.activeNodeInstanceIds().isEmpty()) {
+                break;
+            }
+            if (!current.activeNodeInstanceIds().contains(activeNodeId)) {
+                continue;
+            }
+
+            var nodeDoc = ledger.loadNode(paths, activeNodeId);
+            var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
+
+            if (nodeDefinition.kind() == NodeKind.GATE) {
+                var node = ledger.loadCoreNode(paths, activeNodeId);
+                handlers.gate(nodeDefinition.handlerType())
+                        .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                lastResult = new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, nodeDefinition.id(), "waiting for human review");
+                continue;
+            }
+
+            // Status guard: resolve node into an executable state
+            var guardResult = resolveNodeForExecution(paths, nodeDoc);
+            if (guardResult == null) {
+                lastResult = new WorkflowRuntimeResult(command.workstreamId(), current.status(), nodeDoc.nodeDefinitionId(), statusRejectionMessage(nodeDoc));
+                continue;
+            }
+
+            // Mark RUNNING with current PID
+            long pid = ProcessHandle.current().pid();
+            ledger.markRunning(paths, nodeDoc.nodeInstanceId(), pid);
+
+            // Reload as core NodeInstance for handler context
+            var node = ledger.loadCoreNode(paths, nodeDoc.nodeInstanceId());
+
+            var result = switch (nodeDefinition.kind()) {
+                case TASK -> handlers.task(nodeDefinition.handlerType())
+                        .execute(new TaskHandler.TaskContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                case DECISION -> handlers.decision(nodeDefinition.handlerType())
+                        .evaluate(new DecisionHandler.DecisionContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                case GATE -> throw new IllegalStateException("gate nodes are handled before routing");
+            };
+
+            ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
+            var next = ledger.loadCurrent(paths);
+            var active = "";
+            if (!next.activeNodeInstanceIds().isEmpty()) {
+                active = ledger.loadNode(paths, next.activeNodeInstanceIds().get(0)).nodeDefinitionId();
+            }
+            var message = result.status() == NodeStatus.COMPLETED ? "resumed workflow" : "workflow stopped at " + result.status();
+            lastResult = new WorkflowRuntimeResult(command.workstreamId(), next.status(), active, message);
         }
 
-        // Status guard: resolve node into an executable state
-        var guardResult = resolveNodeForExecution(paths, nodeDoc);
-        if (guardResult == null) {
-            return new WorkflowRuntimeResult(command.workstreamId(), current.status(), nodeDoc.nodeDefinitionId(), statusRejectionMessage(nodeDoc));
-        }
-
-        // Mark RUNNING with current PID
-        long pid = ProcessHandle.current().pid();
-        ledger.markRunning(paths, nodeDoc.nodeInstanceId(), pid);
-
-        // Reload as core NodeInstance for handler context
-        var node = ledger.loadCoreNode(paths, nodeDoc.nodeInstanceId());
-
-        var result = switch (nodeDefinition.kind()) {
-            case TASK -> handlers.task(nodeDefinition.handlerType())
-                    .execute(new TaskHandler.TaskContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
-            case DECISION -> handlers.decision(nodeDefinition.handlerType())
-                    .evaluate(new DecisionHandler.DecisionContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
-            case GATE -> throw new IllegalStateException("gate nodes are handled before routing");
-        };
-
-        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
-        var next = ledger.loadCurrent(paths);
-        var active = "";
-        if (!next.activeNodeInstanceIds().isEmpty()) {
-            active = ledger.loadNode(paths, next.activeNodeInstanceIds().get(0)).nodeDefinitionId();
-        }
-        var message = result.status() == NodeStatus.COMPLETED ? "resumed workflow" : "workflow stopped at " + result.status();
-        return new WorkflowRuntimeResult(command.workstreamId(), next.status(), active, message);
+        return lastResult != null ? lastResult : new WorkflowRuntimeResult(command.workstreamId(), current.status(), "", "workflow has no active node");
     }
 
     private boolean attemptAutoRetry(WorkstreamPaths paths, NodeInstanceDocument node, NodeDefinition nodeDef) throws Exception {

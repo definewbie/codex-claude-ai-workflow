@@ -78,89 +78,104 @@ final class RoutingEngine {
         routingContext.put("outcome", outcome);
         if (result != null) routingContext.putAll(result);
 
-        var edge = definition.edgesFrom(node.nodeDefinitionId(), outcome, routingContext)
-                .stream().findFirst();
-        if (edge.isEmpty()) {
+        var matchingEdges = definition.edgesFrom(node.nodeDefinitionId(), outcome, routingContext);
+
+        // Fan-out: create successor nodes for all matching edges
+        var successorNodeIds = new java.util.ArrayList<String>();
+        var allOpenGateIds = new java.util.ArrayList<String>();
+        var lastEventId = current.lastEventId();
+        var workflowStatus = WorkflowStatus.RUNNING;
+
+        for (var edge : matchingEdges) {
+            var nextDefinition = definition.node(edge.to());
+            var eventNum = LedgerUtils.currentEventNumber(lastEventId) + 1;
+            var nextNodeInstanceId = LedgerUtils.nodeInstanceId(nextDefinition.id(), eventNum);
+            var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
+            var nextIterationId = node.iterationId();
+            var iterationStartedPayload = Map.<String, Object>of();
+            if (RevisionTracker.startsNewIteration(node.nodeDefinitionId(), outcome)) {
+                if (RevisionTracker.isRevisionAction(outcome)) {
+                    var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
+                    var currentRevisionCount = revisionTracker.revisionCount(paths, nextDefinition.id());
+                    if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
+                        revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
+                        return;
+                    }
+                }
+                var nextIteration = revisionTracker.nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
+                Files.createDirectories(paths.iterationsDir());
+                jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
+                nextIterationId = nextIteration.iterationId();
+                iterationStartedPayload = Map.of(
+                        "iteration_id", nextIteration.iterationId(),
+                        "parent_iteration_id", nextIteration.parentIterationId(),
+                        "trigger_node_instance_id", nextIteration.triggerNodeInstanceId(),
+                        "trigger_action", nextIteration.triggerAction(),
+                        "target_node_definition_id", nextIteration.targetNodeDefinitionId(),
+                        "reason", nextIteration.reason()
+                );
+            }
+            var nextNode = new NodeInstanceDocument(
+                    1,
+                    nextNodeInstanceId,
+                    nextDefinition.id(),
+                    nextDefinition.kind(),
+                    nextDefinition.handlerType(),
+                    nextStatus,
+                    LedgerUtils.stageId(nextDefinition.id()),
+                    nextIterationId,
+                    outputRefs,
+                    List.of(),
+                    Map.of(),
+                    null,
+                    null,
+                    null
+            );
+            jsonWriter.write(paths.nodeJson(nextNodeInstanceId), nextNode);
+
+            var gateId = "";
+            if (nextDefinition.kind() == NodeKind.GATE) {
+                gateId = "gate-" + nextNodeInstanceId;
+                allOpenGateIds.add(gateId);
+                workflowStatus = WorkflowStatus.WAITING_FOR_HUMAN;
+                jsonWriter.write(paths.gateJson(gateId), new GateDocument(
+                        1,
+                        gateId,
+                        nextNodeInstanceId,
+                        nextDefinition.handlerType(),
+                        "open",
+                        LedgerUtils.allowedActions(nextDefinition),
+                        Instant.now(),
+                        null,
+                        Map.of()
+                    ));
+            }
+
+            lastEventId = LedgerUtils.nextEventId(lastEventId);
+            eventLog.appendEvent(paths, lastEventId, "node_routed", Map.of(
+                    "from", node.nodeDefinitionId(),
+                    "outcome", outcome,
+                    "to", nextDefinition.id(),
+                    "node_instance_id", nextNodeInstanceId,
+                    "gate_id", gateId
+            ));
+            if (!iterationStartedPayload.isEmpty()) {
+                lastEventId = LedgerUtils.nextEventId(lastEventId);
+                eventLog.appendEvent(paths, lastEventId, "iteration_started", iterationStartedPayload);
+            }
+            successorNodeIds.add(nextNodeInstanceId);
+        }
+
+        // Compute remaining active: remove completed node, add successors
+        var nextActiveIds = new java.util.ArrayList<>(current.activeNodeInstanceIds());
+        nextActiveIds.remove(nodeInstanceId);
+        nextActiveIds.addAll(successorNodeIds);
+
+        if (nextActiveIds.isEmpty()) {
             completeWorkflow(paths, current, node, outcome);
             return;
         }
 
-        var nextDefinition = definition.node(edge.get().to());
-        var nextNodeInstanceId = LedgerUtils.nodeInstanceId(nextDefinition.id(), LedgerUtils.currentEventNumber(current.lastEventId()) + 1);
-        var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
-        var nextIterationId = node.iterationId();
-        var iterationStartedPayload = Map.<String, Object>of();
-        if (RevisionTracker.startsNewIteration(node.nodeDefinitionId(), outcome)) {
-            if (RevisionTracker.isRevisionAction(outcome)) {
-                var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
-                var currentRevisionCount = revisionTracker.revisionCount(paths, nextDefinition.id());
-                if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
-                    revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
-                    return;
-                }
-            }
-            var nextIteration = revisionTracker.nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
-            Files.createDirectories(paths.iterationsDir());
-            jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
-            nextIterationId = nextIteration.iterationId();
-            iterationStartedPayload = Map.of(
-                    "iteration_id", nextIteration.iterationId(),
-                    "parent_iteration_id", nextIteration.parentIterationId(),
-                    "trigger_node_instance_id", nextIteration.triggerNodeInstanceId(),
-                    "trigger_action", nextIteration.triggerAction(),
-                    "target_node_definition_id", nextIteration.targetNodeDefinitionId(),
-                    "reason", nextIteration.reason()
-            );
-        }
-        var nextNode = new NodeInstanceDocument(
-                1,
-                nextNodeInstanceId,
-                nextDefinition.id(),
-                nextDefinition.kind(),
-                nextDefinition.handlerType(),
-                nextStatus,
-                LedgerUtils.stageId(nextDefinition.id()),
-                nextIterationId,
-                outputRefs,
-                List.of(),
-                Map.of(),
-                null,
-                null,
-                null
-        );
-        jsonWriter.write(paths.nodeJson(nextNodeInstanceId), nextNode);
-
-        var status = nextDefinition.kind() == NodeKind.GATE ? WorkflowStatus.WAITING_FOR_HUMAN : WorkflowStatus.RUNNING;
-        var openGateIds = List.<String>of();
-        var gateId = "";
-        if (nextDefinition.kind() == NodeKind.GATE) {
-            gateId = "gate-" + nextNodeInstanceId;
-            openGateIds = List.of(gateId);
-            jsonWriter.write(paths.gateJson(gateId), new GateDocument(
-                    1,
-                    gateId,
-                    nextNodeInstanceId,
-                    nextDefinition.handlerType(),
-                    "open",
-                    LedgerUtils.allowedActions(nextDefinition),
-                    Instant.now(),
-                    null,
-                    Map.of()
-                ));
-        }
-
-        var eventId = LedgerUtils.nextEventId(current.lastEventId());
-        eventLog.appendEvent(paths, eventId, "node_routed", Map.of(
-                "from", node.nodeDefinitionId(),
-                "outcome", outcome,
-                "to", nextDefinition.id(),
-                "node_instance_id", nextNodeInstanceId,
-                "gate_id", gateId
-        ));
-        if (!iterationStartedPayload.isEmpty()) {
-            eventLog.appendEvent(paths, LedgerUtils.nextEventId(eventId), "iteration_started", iterationStartedPayload);
-            eventId = LedgerUtils.nextEventId(eventId);
-        }
         var now = Instant.now();
         var next = new WorkflowCurrentDocument(
                 1,
@@ -168,10 +183,10 @@ final class RoutingEngine {
                 current.workflowInstanceId(),
                 current.workflowId(),
                 current.definitionVersion(),
-                status,
-                List.of(nextNodeInstanceId),
-                openGateIds,
-                eventId,
+                workflowStatus,
+                List.copyOf(nextActiveIds),
+                List.copyOf(allOpenGateIds),
+                lastEventId,
                 now
         );
         jsonWriter.write(paths.workflowCurrentJson(), next);
