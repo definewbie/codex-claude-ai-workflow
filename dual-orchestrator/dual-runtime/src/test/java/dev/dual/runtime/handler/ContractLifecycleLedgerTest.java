@@ -63,9 +63,11 @@ class ContractLifecycleLedgerTest {
 
     @Test
     void contractEventTypesExistAsConstants() {
-        assertEquals("contract_compilation_started", ContractEventTypes.COMPILATION_STARTED);
+        // Emitted events
         assertEquals("contract_compilation_completed", ContractEventTypes.COMPILATION_COMPLETED);
-        assertEquals("contract_review_started", ContractEventTypes.REVIEW_STARTED);
+        assertEquals("failure_classified", ContractEventTypes.FAILURE_CLASSIFIED);
+
+        // Reserved for future gate-layer emission (not yet wired)
         assertEquals("contract_review_completed", ContractEventTypes.REVIEW_COMPLETED);
         assertEquals("contract_approved", ContractEventTypes.APPROVED);
         assertEquals("contract_requires_clarification", ContractEventTypes.REQUIRES_CLARIFICATION);
