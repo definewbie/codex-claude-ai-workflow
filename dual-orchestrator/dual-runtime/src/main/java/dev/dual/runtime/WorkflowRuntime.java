@@ -3,17 +3,20 @@ package dev.dual.runtime;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.ContractEventTypes;
 import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class WorkflowRuntime {
@@ -97,6 +100,7 @@ public final class WorkflowRuntime {
                 case GATE -> throw new IllegalStateException("gate nodes are handled before routing");
             };
 
+            emitDomainEvents(paths, nodeDefinition.id(), nodeDefinition.handlerType(), node.nodeInstanceId(), result);
             ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
             var next = ledger.loadCurrent(paths);
             var active = "";
@@ -108,6 +112,37 @@ public final class WorkflowRuntime {
         }
 
         return lastResult != null ? lastResult : new WorkflowRuntimeResult(command.workstreamId(), current.status(), "", "workflow has no active node");
+    }
+
+    private void emitDomainEvents(WorkstreamPaths paths, String nodeDefinitionId,
+                                 String handlerType, String nodeInstanceId,
+                                 NodeResult result) throws Exception {
+        if (result.status() != NodeStatus.COMPLETED) {
+            return;
+        }
+        String eventId = "domain-" + nodeInstanceId;
+
+        var commonPayload = new LinkedHashMap<String, Object>();
+        commonPayload.put("handler_type", handlerType);
+        commonPayload.put("node_id", nodeDefinitionId);
+        commonPayload.put("node_instance_id", nodeInstanceId);
+
+        switch (handlerType) {
+            case "contract.compile" -> {
+                commonPayload.put("contract_id", result.result().getOrDefault("contract_id", ""));
+                commonPayload.put("contract_status", result.result().getOrDefault("contract_status", ""));
+                ledger.appendEvent(paths, eventId,
+                        ContractEventTypes.COMPILATION_COMPLETED, commonPayload);
+            }
+            case "acceptance.failure_classify" -> {
+                commonPayload.put("category", result.result().getOrDefault("category", ""));
+                commonPayload.put("matched_rule", result.result().getOrDefault("matched_rule", ""));
+                commonPayload.put("review_decision", result.result().getOrDefault("review_decision", ""));
+                ledger.appendEvent(paths, eventId,
+                        ContractEventTypes.FAILURE_CLASSIFIED, commonPayload);
+            }
+            default -> { /* no domain event for this handler type */ }
+        }
     }
 
     private boolean attemptAutoRetry(WorkstreamPaths paths, NodeInstanceDocument node, NodeDefinition nodeDef) throws Exception {
