@@ -119,8 +119,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             "exit_code", result.exitCode(),
                             "agent", agent,
                             "session", session,
-                            "failure_reason", failure.reason(),
-                            "recoverable", failure.recoverable()
+                            "acpx_failure.reason", failure.reason(),
+                            "acpx_failure.recoverable", failure.recoverable()
                     ),
                     failure.message()
             );

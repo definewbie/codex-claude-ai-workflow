@@ -15,3 +15,9 @@ dual-agent-workflow-article.md
 
 # Java orchestrator build outputs
 dual-orchestrator/**/target/
+dual-orchestrator/todo.md
+dual-orchestrator/.understand-anything
+note.md
+todo.md
+smoke-test-full.md
+.codegraph

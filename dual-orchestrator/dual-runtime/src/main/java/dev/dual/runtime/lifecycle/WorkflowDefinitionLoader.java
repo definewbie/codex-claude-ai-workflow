@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.ledger.file.EdgeConditionModule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 public final class WorkflowDefinitionLoader {
     private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new EdgeConditionModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     public WorkflowDefinition loadOrDefault(Path workflowPath) throws IOException {
@@ -55,6 +57,7 @@ public final class WorkflowDefinitionLoader {
         var config = new LinkedHashMap<>(node.config());
         if ("acpx.agent_run".equals(node.handlerType())) {
             applySessionDefault(config, defaults);
+            applyRetryDefaults(config, objectMap(defaults.get("retry")));
         }
         if ("delivery.create_pr".equals(node.handlerType())) {
             applyObjectDefaults(config, objectMap(defaults.get("delivery")));
@@ -63,6 +66,12 @@ public final class WorkflowDefinitionLoader {
             applyObjectDefaults(config, objectMap(defaults.get("revision")));
         }
         return new NodeDefinition(node.id(), node.kind(), node.handlerType(), config);
+    }
+
+    private static void applyRetryDefaults(LinkedHashMap<String, Object> config, Map<String, Object> retryDefaults) {
+        for (var entry : retryDefaults.entrySet()) {
+            config.putIfAbsent("retry." + entry.getKey(), entry.getValue());
+        }
     }
 
     private static void applySessionDefault(LinkedHashMap<String, Object> config, Map<String, Object> defaults) {

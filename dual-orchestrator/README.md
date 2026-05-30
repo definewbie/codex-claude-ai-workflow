@@ -55,15 +55,29 @@ Runtime 只认识三类节点：
 - artifact validation handler，会落盘 Git status / diff / changed files。
 - next-stage prompt handler。
 - `dualctl start/status/resume/review approve/review revise` 接入 workflow ledger。
+- 节点级幂等保护（T0.2），`resume` 会拒绝正在执行中的节点。
+- Prompt 注入防护：`dual-control` block 解析锚定行首，只认 terminal block，不回退旧文件。
+- Revision loop 上限 + recovery gate。
+- 247 个单元测试覆盖全部 handler、ledger、control block 解析、contract registry、prompt 一致性、context governance 和 workflow 集成。
+- Agent artifact contract registry（`ContractRegistry`），per-node output schema 校验。
+- Prompt 模板变量加载时校验，防止引用未知变量。
+- Context governance 架构：6 profile 各自拥有 **token-level** budget-controlled 渲染管线，priority-based degradation（7 种策略含 ADAPTIVE 自适应压缩），token-aware budget enforcement。per-profile config overrides（`max_snippet_chars` 等）。
+- `TokenEstimator` SPI：默认 ~4 chars/token 估算，可替换为 tiktoken 等真实 tokenizer。
+- `handoff.json` sidecar：从 agent handoff markdown 解析生成结构化 JSON，下游 handler 可直接消费 `completedWork`（iteration_history section）和 `openRisks`（human_feedback section）。
+- Configurable retry policies：per-failure-type 策略（RATE_LIMIT / SESSION_MISSING / AGENT_RECONNECT / CONTEXT_WINDOW），指数退避 + `Thread.sleep`，node-level config override。
+- `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
+- Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
+- ~300 个单元测试。
+- 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
+- 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
+- Ledger schema 自动迁移：`LedgerMigrator` 框架（v1→v2），`WorkflowFileLedger.loadDefinition` 检测版本差异并升级。
 
 仍未完成：
 
-- 完整多轮 revision 策略。
-- context package 分层装配。
-- quota / context window / session reconnect 分类恢复。
+- 完整生命周期真实 smoke（需要 Codex quota）。
 - API server / scheduler。
 - Web UI / dashboard。
-- PR / notification。
+- Notification 集成。
 - 正式安装脚本。
 
 ## Modules
@@ -74,7 +88,8 @@ dual-core
   workflow model
 
 dual-ledger-file
-  file ledger
+  WorkflowFileLedger (facade)
+  RoutingEngine · NodeStateWriter · RevisionTracker · LedgerEventLog · LedgerUtils
   workflow/current/nodes/gates/events
   local lock
 
@@ -82,6 +97,8 @@ dual-runtime
   WorkflowRuntime
   HandlerRegistry
   built-in handlers
+  context governance pipeline
+  handoff.json sidecar
   lifecycle workflow definition
 
 dual-adapter-acpx
@@ -229,23 +246,30 @@ summary: one short sentence
 ```
 ````
 
-当前解析策略是严格失败：
+当前解析策略：
 
-- Decision node 只读取上一个节点传入的 `inputRefs`。
+- Decision node 只读取最新的 `inputRefs`，不会回退到更早文件。
 - 找不到 fenced `dual-control` block，会以 `MISSING_DUAL_CONTROL` 停到 `control.repair` recovery gate。
-- 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 停到 `control.repair` recovery gate，并在 gate result 中记录已解析字段和允许值。
-- `decision` 不在当前阶段允许集合内，会以 `INVALID_DECISION` 停到 `control.repair` recovery gate。
+- **Terminal block rule**：如果 markdown 中存在多个 `dual-control` block，只有最后一个（terminal block）被当作控制指令，前面的被视为 prose（例如 agent 引用的用户需求原文）。
+- Terminal block 之后不能有非空白内容，否则以 `NON_TERMINAL_CONTROL_BLOCK` 停到 `control.repair` recovery gate。
+- Blockquote `> ```dual-control` 和嵌套 code fence 中的 `dual-control` 不会被匹配（regex 锚定行首 `^`）。
+- 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 停到 `control.repair` recovery gate。
+- `decision` 不在当前阶段允许集合内，会以 `CONTRACT_VIOLATION`（映射为 `INVALID_DUAL_CONTROL`）停到 `control.repair` recovery gate。
 - `BLOCKED` 会把 workflow 标记为 `BLOCKED`，不会继续路由。
 - `NEEDS_REVISION` / `REJECT` 会沿 workflow definition 中配置的 revision edge 返回对应 Claude 节点。
 
-当前允许值：
+合法 decision 值由 `ContractRegistry` 定义（单一真相源）：
 
 | Decision Node | Allowed Decisions |
 | --- | --- |
-| `intake.decision` | `PASS`, `NEEDS_REVISION`, `BLOCKED` |
-| `design.decision` | `PASS`, `NEEDS_REVISION`, `BLOCKED` |
+| `intake.decision` | `READY_FOR_PRODUCT_REVIEW`, `NEEDS_REVISION`, `BLOCKED` |
+| `design.decision` | `READY_FOR_ARCH_REVIEW`, `NEEDS_REVISION`, `BLOCKED` |
 | `plan.decision` | `READY_TO_IMPLEMENT`, `NEEDS_REVISION`, `BLOCKED` |
 | `acceptance.decision` | `ACCEPT`, `ACCEPT_WITH_NOTES`, `REJECT`, `BLOCKED` |
+
+每个 agent task node 也有对应的 output contract，定义其合法的 `decision` 值域和 required keys（`decision` + `summary`）。`ContractRegistry` 保证 decision node 的 `allowedDecisions` 与 workflow edge `on` 值和 agent prompt 模板声明的值域一致。
+
+Prompt 模板变量在加载时校验：如果模板引用了非 `KNOWN_VARIABLES` 集合（`workstream_id`, `node_id`, `prompt_template`, `ledger_path`, `requirement`, `context_package`）中的 `{{variable}}`，会立即报错。
 
 ## Commands
 
@@ -667,13 +691,18 @@ dualctl review complete --workdir <effective_worktree> <workstream_id>
 - Git evidence 指针和 `git-evidence.json` 摘要。
 - events、workflow current、nodes、runs 等 ledger 指针。
 
-上下文包支持 profile，避免每个阶段都塞同一堆材料：
+上下文包通过 context governance 架构渲染，每个 profile 有独立的 budget 和 section degradation 策略：
 
-- `product_review`：需求、直接输入、最近 Agent 输出、账本指针。
-- `architecture_review`：需求、直接输入、人工反馈、最近 Agent 输出、账本指针。
-- `plan_review`：需求、直接输入、iteration history、人工反馈、最近 Agent 输出、账本指针。
-- `implementation`：需求、直接输入、iteration history、人工反馈、最近 Agent 输出、账本指针。
-- `acceptance`：需求、直接输入、iteration history、人工反馈、最近 Agent 输出、Git evidence、账本指针。
+| Profile | Budget | Sections | 特点 |
+| --- | --- | --- | --- |
+| `product_review` | 16k | requirement, input_artifacts, recent_agent_outputs, ledger_pointers | 轻量，聚焦需求+输出 |
+| `architecture_review` | 20k | +human_feedback | 需要人工反馈 |
+| `plan_review` | 22k | +iteration_history | 需要完整迭代历史 |
+| `implementation` | 24k | 全部 (含 git_evidence) | 最完整，budget 最严 |
+| `acceptance` | 26k | 全部 + git_evidence HIGH priority | 验收需要 git evidence |
+| `full` (default) | 30k | 全部 | 宽松预算，所有 section FULL |
+
+Governance pipeline 分 6 阶段：加载 profile → 检查 section 可用性 → 按 priority 分配 budget → 按 degradation 策略渲染 → 验证总 budget → 输出 governance summary table。每个 section 有自己的 `MissingPolicy`（FAIL/SKIP/PLACEHOLDER）、`Priority`（CRITICAL/HIGH/MEDIUM/LOW）、`Degradation` 策略（FULL/SUMMARY/LATEST/DECISION_ONLY/DIFF_STAT/POINTER_ONLY）和 `OverflowPolicy`（FAIL/DEGRADE/DROP_OPTIONAL）。超预算时从最低 priority section 开始降级，requirement section 不参与降级。
 
 自定义 workflow 可以在 `context.build_package` 节点里配置：
 
@@ -694,9 +723,14 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 
 ```text
 .agent/workstreams/<workstream_id>/artifacts/next-stage/next-stage-prompt.md
+.agent/workstreams/<workstream_id>/artifacts/next-stage/handoff.json
 ```
 
-这个文件是下一阶段的人类 review 入口之一。它会保留 handoff 原文作为上下文，但把建议提示词单独放在 `## Prompt`。当 `gate.human_next_stage_approval` 被批准后，workflow 会回到 `intake.claude_brainstorm` 开启下一轮 iteration，并把这个文件作为 direct input artifact 展开到 Claude prompt 中。
+`next-stage-prompt.md` 是下一阶段的人类 review 入口之一。它会保留 handoff 原文作为上下文，但把建议提示词单独放在 `## Prompt`。
+
+`handoff.json` 是从 agent handoff markdown 解析生成的结构化 sidecar，包含 `completedWork`、`changedFiles`、`openRisks`、`verificationState` 等字段。下游 `context.build_package` handler 在渲染 git_evidence DIFF_STAT 时会优先使用 `changedFiles` 数组作为数据源，避免重新解析 markdown。如果 handoff.json 不存在，handler 回退到文件读取。
+
+当 `gate.human_next_stage_approval` 被批准后，workflow 会回到 `intake.claude_brainstorm` 开启下一轮 iteration，并把这个文件作为 direct input artifact 展开到 Claude prompt 中。
 
 `implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：
 
@@ -1000,10 +1034,12 @@ summary: 一句话说明判断依据
 
 当前校验规则：
 
-- 只能有一个 `dual-control` block。
+- 只有行首的 ` ```dual-control` 围栏块会被解析，blockquote `> ```dual-control` 和嵌套 code fence 中的不会被匹配。
+- 多个 `dual-control` block 时，只有最后一个（terminal block）生效，前面的视为 prose。
+- Terminal block 之后不能有非空白内容。
 - block 内必须是 `key: value` 行。
 - `decision` 必须存在，并且属于当前节点允许的取值。
-- 如果最新输出里的 block 格式错误，不会回退读取更早的旧输出。
+- 只读最新的 inputRef 文件，不会回退读取更早的旧输出。
 
 修正 Agent 输出后执行：
 
@@ -1033,8 +1069,7 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 ## Current Limits
 
 - 仍是 CLI-first，没有 API server / scheduler。
-- workflow 已支持 JSON 文件加载；更高级的条件表达式、并行节点和 schema 版本迁移还没做。
-- artifact validation 和 final report 仍是薄实现。
-- context package 已经有薄实现，但还没有 token budget、摘要缓存、重要性排序。
-- recovery gate 已有最小实现，但还没有交互式修复向导或自动分类。
+- workflow 已支持 JSON 文件加载、条件表达式（`EdgeCondition`）、并行节点（fan-out + sequential execution）和 schema 版本自动迁移（`LedgerMigrator`）。
+- context package 已有 budget-controlled governance pipeline（6 profile，priority-based degradation，per-profile config overrides），但没有 token-level budgeting 或 adaptive compression。
+- auto-retry 按 failure type 自动分类并指数退避重试，但还没有交互式修复向导。
 - notification 还没接入 Java 版。

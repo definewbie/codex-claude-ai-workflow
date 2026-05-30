@@ -156,7 +156,7 @@
 
 - `stage-summary.md`
 - `handoff.md`
-- `handoff.json`
+- `handoff.json` — **已实现（T1.3）**。由 `PromptGenerateNextStageHandler` 从 agent handoff markdown 解析生成，包含 `completedWork`、`changedFiles`、`openRisks`、`verificationState` 等结构化字段。下游 `ContextBuildPackageHandler` 可直接消费，避免重新解析 markdown。
 - `next-stage-prompt.md`
 
 ### 3.6 Recovery / Continuation
@@ -981,29 +981,42 @@ Task 是否可重复执行必须显式建模。
 
 ## 15. Context Package
 
-Context package 是后续处理 token limit 的关键，不在第一版 engine skeleton 全量实现，但模型要预留。
+**已实现（T1.3）。** Context package 通过 governed rendering pipeline 生成，每个 profile 有独立的 budget、section 优先级和 degradation 策略。
 
-原则：
+设计原则：
 
 - 不把全部历史塞进 prompt。
 - 当前 node 只拿需要的 artifact refs。
-- 长历史通过 summary artifact 表达。
+- 长历史通过 degradation 策略降级（SUMMARY / LATEST / DECISION_ONLY / DIFF_STAT / POINTER_ONLY），不是 substring 截断。
 - context package 本身也是 artifact。
+- 超出 total budget 时从最低 priority section 开始降级或 DROP。
+- requirement section 不参与降级，超出硬上限直接 fail。
 
-未来结构：
+Governed pipeline 6 阶段：
 
-```json
-{
-  "context_package_id": "ctx-...",
-  "node_instance_id": "node-...",
-  "included_artifact_refs": [],
-  "summary_refs": [],
-  "excluded_refs": [],
-  "budget": {
-    "max_tokens": 80000
-  }
-}
-```
+1. 加载 profile → ContextBudget（通过 `ContextProfiles` 注册表）
+2. 检查每个 section 数据可用性 → MissingPolicy（FAIL / SKIP / PLACEHOLDER）
+3. 按 priority 排序分配 softBudget → OverflowPolicy（FAIL / DEGRADE / DROP_OPTIONAL）
+4. 按 degradation 策略渲染每个 section
+5. 验证总 budget，超标则从最低 priority 降级或 DROP
+6. 输出 Context Governance summary table
+
+6 个 profile budget：
+
+| Profile | Budget | 特点 |
+| --- | --- | --- |
+| product_review | 16k | 轻量，需求+输出 |
+| architecture_review | 20k | +human_feedback |
+| plan_review | 22k | +iteration_history |
+| implementation | 24k | 最严格，全部 section |
+| acceptance | 26k | git_evidence HIGH priority |
+| full (default) | 30k | 宽松，全部 FULL |
+
+Context package 同时消费 `handoff.json` sidecar：当 git_evidence 的 DIFF_STAT 渲染需要 changed files 但 `changed-files.txt` 不存在时，直接从 handoff.json 的 `changedFiles` 数组读取，避免重新解析 markdown。
+
+Schema 类型：`Degradation`, `DegradationPolicy`, `MissingPolicy`, `OverflowPolicy`, `Priority`, `SectionRequirement`, `ContextBudget`。Profile 注册表：`ContextProfiles`。
+
+详见：`dual-orchestrator/docs/superpowers/specs/2026-05-27-T1.3-context-governance-handoff-design.md`
 
 ## 16. 模块设计
 

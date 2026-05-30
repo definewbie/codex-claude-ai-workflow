@@ -1,6 +1,10 @@
 package dev.dual.core.workflow;
 
-public record EdgeDefinition(String from, String on, String to) {
+public record EdgeDefinition(String from, String on, String to, EdgeCondition condition) {
+    public EdgeDefinition(String from, String on, String to) {
+        this(from, on, to, EdgeCondition.unconditional());
+    }
+
     public EdgeDefinition {
         if (from == null || from.isBlank()) {
             throw new IllegalArgumentException("edge from is required");
@@ -10,6 +14,9 @@ public record EdgeDefinition(String from, String on, String to) {
         }
         if (to == null || to.isBlank()) {
             throw new IllegalArgumentException("edge to is required");
+        }
+        if (condition == null) {
+            condition = EdgeCondition.unconditional();
         }
     }
 }

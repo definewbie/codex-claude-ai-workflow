@@ -1,5 +1,6 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeResult;
 
 import java.io.IOException;
@@ -9,8 +10,11 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public final class PromptGenerateNextStageHandler implements TaskHandler {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Override
     public String type() {
         return "prompt.generate_next_stage";
@@ -31,15 +35,20 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var promptPath = outputDir.resolve("next-stage-prompt.md");
         Files.writeString(promptPath, renderPrompt(context, sourceRefs, suggestedPrompt, handoffText), StandardCharsets.UTF_8);
 
+        var handoffJsonPath = outputDir.resolve("handoff.json");
+        Files.writeString(handoffJsonPath, renderHandoffJson(context, sourceRefs, handoffText), StandardCharsets.UTF_8);
+
         var promptRef = toWorkspaceRef(context.workspaceRoot(), promptPath);
+        var handoffJsonRef = toWorkspaceRef(context.workspaceRoot(), handoffJsonPath);
         var result = new LinkedHashMap<String, Object>();
         result.put("generated", true);
         result.put("mode", "handoff-derived");
         result.put("prompt_path", promptRef);
+        result.put("handoff_json_path", handoffJsonRef);
         result.put("source_refs", sourceRefs);
         result.put("used_suggested_prompt_section", !suggestedPrompt.isBlank());
         result.put("generated_at", Instant.now().toString());
-        return NodeResult.completed("completed", List.of(promptRef), result);
+        return NodeResult.completed("completed", List.of(promptRef, handoffJsonRef), result);
     }
 
     private static String renderPrompt(TaskContext context, List<String> sourceRefs, String suggestedPrompt, String handoffText) {
@@ -108,5 +117,58 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
 
     private static String toWorkspaceRef(Path workspaceRoot, Path path) {
         return workspaceRoot.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
+    }
+
+    private static String renderHandoffJson(TaskContext context, List<String> sourceRefs, String handoffText) throws IOException {
+        var json = new LinkedHashMap<String, Object>();
+        json.put("schemaVersion", 1);
+        json.put("workstreamId", context.workstreamId());
+        json.put("stageId", context.instance().stageId());
+        json.put("iterationId", context.instance().iterationId());
+        json.put("sourceHandoffPath", sourceRefs.isEmpty() ? "" : sourceRefs.get(0));
+        json.put("completedWork", extractListSection(handoffText, "Completed Work"));
+        json.put("changedFiles", extractListSection(handoffText, "Changed Files"));
+        json.put("openRisks", extractListSection(handoffText, "Open Risks"));
+        json.put("verificationState", extractTextSection(handoffText, "Verification State"));
+        json.put("generatedAt", Instant.now().toString());
+        return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+    }
+
+    private static List<String> extractListSection(String text, String sectionName) {
+        var content = extractSectionContent(text, sectionName);
+        if (content.isBlank()) return List.of();
+        return content.lines()
+                .map(String::strip)
+                .filter(line -> line.startsWith("- ") || line.startsWith("* "))
+                .map(line -> line.substring(2).strip())
+                .filter(line -> !line.isBlank())
+                .toList();
+    }
+
+    private static String extractTextSection(String text, String sectionName) {
+        return extractSectionContent(text, sectionName).strip();
+    }
+
+    private static String extractSectionContent(String text, String sectionName) {
+        var lines = text.lines().toList();
+        var start = -1;
+        var headerPattern = Pattern.compile("^#{1,6}\\s+" + Pattern.quote(sectionName) + "\\s*$");
+        for (int i = 0; i < lines.size(); i++) {
+            if (headerPattern.matcher(lines.get(i)).matches()) {
+                start = i + 1;
+                break;
+            }
+        }
+        if (start < 0) return "";
+
+        var builder = new StringBuilder();
+        for (int i = start; i < lines.size(); i++) {
+            var line = lines.get(i);
+            if (line.matches("^#{1,6}\\s+.*$") || line.trim().equals("```dual-control")) {
+                break;
+            }
+            builder.append(line).append("\n");
+        }
+        return builder.toString().stripTrailing();
     }
 }

@@ -112,7 +112,7 @@ class WorkflowRuntimeTest {
         var recoveryResult = runtime.resume(new WorkflowCommand(tempDir, "ws-failed-runtime"));
         assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, recoveryResult.status());
         assertEquals("task.one", recoveryResult.activeNode());
-        assertTrue(recoveryResult.message().contains("waiting for recovery"));
+        assertTrue(recoveryResult.message().contains("not recoverable"));
     }
 
     @Test

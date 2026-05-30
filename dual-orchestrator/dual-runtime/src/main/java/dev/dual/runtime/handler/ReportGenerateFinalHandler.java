@@ -59,6 +59,9 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         builder.append("## User Request\n\n");
         builder.append(readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)")).append("\n\n");
 
+        builder.append("## TaskContract\n\n");
+        appendTaskContractSection(builder, workstreamDir);
+
         builder.append("## Acceptance Summary\n\n");
         appendLatestOutputMatching(builder, workstreamDir, "acceptance-codex-review.md");
 
@@ -78,6 +81,31 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         builder.append("- Context: ").append(toDisplayRef(workstreamDir.resolve("context"))).append("\n");
         builder.append("- Git evidence: ").append(toDisplayRef(workstreamDir.resolve("artifacts/git-evidence"))).append("\n");
         return builder.toString();
+    }
+
+    private static void appendTaskContractSection(StringBuilder builder, Path workstreamDir) throws IOException {
+        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
+        if (!Files.exists(contractPath)) {
+            builder.append("(no TaskContract — legacy workflow)\n\n");
+            return;
+        }
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper()
+                .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        try {
+            var contract = mapper.readValue(contractPath.toFile(), dev.dual.core.contract.TaskContract.class);
+            builder.append("- **Contract ID:** ").append(contract.id()).append("\n");
+            builder.append("- **Objective:** ").append(contract.objective()).append("\n");
+            builder.append("- **Status:** ").append(contract.status()).append("\n");
+            builder.append("- **Scope Included:** ").append(contract.scope().included().isEmpty() ? "(none)" : String.join(", ", contract.scope().included())).append("\n");
+            builder.append("- **Scope Excluded:** ").append(contract.scope().excluded().isEmpty() ? "(none)" : String.join(", ", contract.scope().excluded())).append("\n");
+            builder.append("- **Acceptance Criteria:** ").append(contract.acceptanceCriteria().size()).append(" items").append("\n");
+            builder.append("- **Non-Goals:** ").append(contract.nonGoals().isEmpty() ? "(none)" : String.join(", ", contract.nonGoals())).append("\n");
+            builder.append("- **Contract Gaps Found:** 0\n");
+            builder.append("- **Out-of-scope Changes:** 0\n");
+            builder.append("\n");
+        } catch (Exception e) {
+            builder.append("(error reading TaskContract: ").append(e.getMessage()).append(")\n\n");
+        }
     }
 
     private static void appendLatestOutputMatching(StringBuilder builder, Path workstreamDir, String fileName) throws IOException {

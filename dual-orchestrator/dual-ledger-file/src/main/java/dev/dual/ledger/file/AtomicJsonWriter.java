@@ -14,6 +14,7 @@ public final class AtomicJsonWriter {
     public AtomicJsonWriter() {
         this.objectMapper = new ObjectMapper()
                 .findAndRegisterModules()
+                .registerModule(new EdgeConditionModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .enable(SerializationFeature.INDENT_OUTPUT);
     }
