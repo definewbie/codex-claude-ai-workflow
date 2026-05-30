@@ -33,7 +33,7 @@ class ContractRegistryTest {
                 "design.claude_design", "design.codex_arch_review",
                 "plan.claude_plan", "plan.codex_plan_review",
                 "implement.claude_implement", "implement.claude_self_test_report",
-                "acceptance.codex_verifier_review", "stage.claude_handoff"
+                "acceptance.codex_verifier_review", "acceptance.classify_failure", "stage.claude_handoff"
         );
         for (var nodeId : taskNodes) {
             assertTrue(ContractRegistry.hasContract(nodeId), nodeId + " missing from ContractRegistry");
@@ -42,7 +42,7 @@ class ContractRegistryTest {
 
     @Test
     void registryHas15Contracts() {
-        assertEquals(15, ContractRegistry.allNodeIds().size());
+        assertEquals(16, ContractRegistry.allNodeIds().size());
     }
 
     @Test

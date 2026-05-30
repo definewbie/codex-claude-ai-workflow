@@ -62,6 +62,9 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         builder.append("## TaskContract\n\n");
         appendTaskContractSection(builder, workstreamDir);
 
+        builder.append("## Failure Classification\n\n");
+        appendFailureClassificationSection(builder, workstreamDir);
+
         builder.append("## Acceptance Summary\n\n");
         appendLatestOutputMatching(builder, workstreamDir, "acceptance-codex-review.md");
 
@@ -105,6 +108,36 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
             builder.append("\n");
         } catch (Exception e) {
             builder.append("(error reading TaskContract: ").append(e.getMessage()).append(")\n\n");
+        }
+    }
+
+    private static void appendFailureClassificationSection(StringBuilder builder, Path workstreamDir) throws IOException {
+        var classificationPath = workstreamDir.resolve("artifacts/failure-classification.json");
+        if (!Files.exists(classificationPath)) {
+            builder.append("(no failure classification — accepted or legacy workflow)\n\n");
+            return;
+        }
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper()
+                .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        try {
+            var tree = mapper.readTree(classificationPath.toFile());
+            builder.append("- **Category:** ").append(tree.path("category").asText("(unknown)")).append("\n");
+            builder.append("- **Reasoning:** ").append(tree.path("reasoning").asText("(none)")).append("\n");
+            builder.append("- **Suggested Action:** ").append(tree.path("suggested_action").asText("(none)")).append("\n");
+            builder.append("- **Matched Rule:** ").append(tree.path("matched_rule").asInt(0)).append("\n");
+            builder.append("- **Review Decision:** ").append(tree.path("review_decision").asText("(unknown)")).append("\n");
+            builder.append("- **Source:** ").append(tree.path("source").asText("(unknown)")).append("\n");
+            builder.append("- **Classified At:** ").append(tree.path("classified_at").asText("(unknown)")).append("\n");
+            var evidence = tree.path("evidence");
+            if (evidence.isArray() && !evidence.isEmpty()) {
+                builder.append("- **Evidence:**\n");
+                for (var item : evidence) {
+                    builder.append("  - ").append(item.asText()).append("\n");
+                }
+            }
+            builder.append("\n");
+        } catch (Exception e) {
+            builder.append("(error reading failure classification: ").append(e.getMessage()).append(")\n\n");
         }
     }
 
