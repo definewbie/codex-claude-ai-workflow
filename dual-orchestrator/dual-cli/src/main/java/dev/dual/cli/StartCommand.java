@@ -38,6 +38,9 @@ public final class StartCommand implements Callable<Integer> {
     @Option(names = "--workflow", description = "Workflow definition JSON file. Defaults to built-in agent lifecycle.")
     Path workflowPath;
 
+    @Option(names = "--workflow-variant", description = "Built-in workflow variant: thin (default), p5, p6.")
+    String workflowVariant;
+
     @Option(names = "--allow-unknown-handlers", description = "Allow workflow handler types not built into this CLI.")
     boolean allowUnknownHandlers;
 
@@ -56,7 +59,8 @@ public final class StartCommand implements Callable<Integer> {
         var git = new GitWorkspaceService();
         var repo = git.inspect(workdir.toAbsolutePath().normalize());
         var workflowDefinition = new WorkflowDefinitionLoader().loadOrDefault(
-                workflowPath == null ? null : workflowPath.toAbsolutePath().normalize()
+                workflowPath == null ? null : workflowPath.toAbsolutePath().normalize(),
+                workflowVariant
         );
         validateHandlers(workflowDefinition);
 
@@ -104,6 +108,9 @@ public final class StartCommand implements Callable<Integer> {
         System.out.println();
         System.out.println("Ledger: " + paths.workstreamDir());
         System.out.println("Workflow: " + workflowDefinition.workflowId() + "@" + workflowDefinition.version());
+        if (workflowVariant != null && !workflowVariant.isBlank()) {
+            System.out.println("Variant: " + workflowVariant);
+        }
         if (workflowPath != null) {
             System.out.println("Workflow source: " + workflowPath.toAbsolutePath().normalize());
         }

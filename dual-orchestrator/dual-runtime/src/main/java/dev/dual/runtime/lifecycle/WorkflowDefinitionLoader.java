@@ -20,10 +20,14 @@ public final class WorkflowDefinitionLoader {
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     public WorkflowDefinition loadOrDefault(Path workflowPath) throws IOException {
-        if (workflowPath == null) {
-            return new LifecycleWorkflowDefinitionFactory().thinMainline();
+        return loadOrDefault(workflowPath, null);
+    }
+
+    public WorkflowDefinition loadOrDefault(Path workflowPath, String variant) throws IOException {
+        if (workflowPath != null && Files.exists(workflowPath)) {
+            return load(workflowPath);
         }
-        return load(workflowPath);
+        return new LifecycleWorkflowDefinitionFactory().forVariant(variant);
     }
 
     public WorkflowDefinition load(Path workflowPath) throws IOException {
