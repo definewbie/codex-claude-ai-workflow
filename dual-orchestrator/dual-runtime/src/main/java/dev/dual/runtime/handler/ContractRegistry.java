@@ -76,6 +76,21 @@ public final class ContractRegistry {
             Set.of("contract_id", "contract_status", "contract_version")
     );
 
+    // --- Arbitration nodes (failure classification) ---
+    private static final NodeOutputContract ACCEPTANCE_CLASSIFY_FAILURE = new NodeOutputContract(
+            "acceptance.classify_failure",
+            Set.of("decision", "summary"),
+            Set.of(
+                    "REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY",
+                    "REJECT_IMPLEMENTATION_BUG", "REJECT_CONTEXT_INSUFFICIENT",
+                    "REJECT_TOOL_LIMITATION", "REJECT_REVIEW_NOISE",
+                    "NOTED_CONTRACT_GAP", "NOTED_CONTRACT_AMBIGUITY",
+                    "NOTED_IMPLEMENTATION_BUG", "NOTED_CONTEXT_INSUFFICIENT",
+                    "NOTED_TOOL_LIMITATION", "NOTED_REVIEW_NOISE"
+            ),
+            Set.of("category", "reasoning", "matched_rule", "classification_ref")
+    );
+
     // --- Decision nodes (edge routing contracts) ---
     private static final NodeOutputContract INTAKE_DECISION = new NodeOutputContract(
             "intake.decision",
@@ -117,7 +132,8 @@ public final class ContractRegistry {
             Map.entry("design.decision", DESIGN_DECISION),
             Map.entry("plan.decision", PLAN_DECISION),
             Map.entry("acceptance.decision", ACCEPTANCE_DECISION),
-            Map.entry("contract.compile", CONTRACT_COMPILE)
+            Map.entry("contract.compile", CONTRACT_COMPILE),
+            Map.entry("acceptance.classify_failure", ACCEPTANCE_CLASSIFY_FAILURE)
     );
 
     public static NodeOutputContract forNode(String nodeId) {

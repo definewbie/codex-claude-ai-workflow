@@ -10,4 +10,5 @@ public final class ContractEventTypes {
     public static final String REQUIRES_CLARIFICATION = "contract_requires_clarification";
     public static final String SCOPE_REDUCTION_REQUESTED = "contract_scope_reduction_requested";
     public static final String REJECTED = "contract_rejected";
+    public static final String FAILURE_CLASSIFIED = "failure_classified";
 }

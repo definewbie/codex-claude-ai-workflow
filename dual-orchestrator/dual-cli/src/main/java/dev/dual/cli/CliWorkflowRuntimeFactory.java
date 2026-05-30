@@ -7,6 +7,7 @@ import dev.dual.runtime.WorkflowRuntime;
 import dev.dual.runtime.handler.ArtifactValidateHandler;
 import dev.dual.runtime.handler.ContextBuildPackageHandler;
 import dev.dual.runtime.handler.ContractCompileHandler;
+import dev.dual.runtime.handler.FailureClassifyHandler;
 import dev.dual.runtime.handler.DeliveryCommitHandler;
 import dev.dual.runtime.handler.DeliveryPrepareHandler;
 import dev.dual.runtime.handler.DeliveryPrCreateHandler;
@@ -27,6 +28,7 @@ final class CliWorkflowRuntimeFactory {
                         new ContextBuildPackageHandler(),
                         new ContractCompileHandler(),
                         new DeliveryCommitHandler(),
+                        new FailureClassifyHandler(),
                         new DeliveryPrepareHandler(),
                         new DeliveryPrCreateHandler(),
                         new PromptGenerateNextStageHandler(),

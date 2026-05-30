@@ -5,6 +5,7 @@ import java.util.Set;
 final class CliSupportedHandlers {
     static final Set<String> TYPES = Set.of(
             "acpx.agent_run",
+            "acceptance.failure_classify",
             "artifact.validate",
             "context.build_package",
             "contract.compile",

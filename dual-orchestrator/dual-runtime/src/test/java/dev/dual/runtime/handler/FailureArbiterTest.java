@@ -1,0 +1,239 @@
+package dev.dual.runtime.handler;
+
+import dev.dual.core.arbitration.FailureCategory;
+import dev.dual.core.arbitration.FailureClassification;
+import dev.dual.core.contract.ContractStatus;
+import dev.dual.core.contract.TaskContract;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+class FailureArbiterTest {
+
+    private FailureArbiter arbiter;
+
+    @BeforeEach
+    void setUp() {
+        arbiter = new FailureArbiter();
+    }
+
+    // --- Rule 1: CONTRACT_GAP ---
+
+    @Test
+    void rule1_contractGap() {
+        var result = arbiter.classify(
+                List.of("missing acceptance criteria"),
+                null, null,
+                "some summary", null,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTRACT_GAP, result.category());
+        assertEquals(1, result.matchedRule());
+        assertEquals("REJECT", result.reviewDecision());
+        assertNotNull(result.classifiedAt());
+    }
+
+    // --- Rule 2: CONTRACT_AMBIGUITY ---
+
+    @Test
+    void rule2_contractAmbiguity_ambiguityNotes() {
+        var contract = minimalContract(
+                List.of("unclear requirement"),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null, null,
+                "summary", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTRACT_AMBIGUITY, result.category());
+        assertEquals(2, result.matchedRule());
+    }
+
+    @Test
+    void rule2_contractAmbiguity_emptyScope() {
+        var contract = minimalContract(
+                List.of(),
+                List.of(), // empty included scope
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null, null,
+                "summary", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTRACT_AMBIGUITY, result.category());
+        assertEquals(2, result.matchedRule());
+    }
+
+    @Test
+    void rule2_contractAmbiguity_weakCriteria() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("only one criterion") // fewer than 2 acceptance criteria
+        );
+        var result = arbiter.classify(
+                null, null, null,
+                "summary", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTRACT_AMBIGUITY, result.category());
+        assertEquals(2, result.matchedRule());
+    }
+
+    // --- Rule 3: IMPLEMENTATION_BUG (out of scope files) ---
+
+    @Test
+    void rule3_implementationBug() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null,
+                List.of("UnexpectedFile.java"),
+                null,
+                "summary", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(3, result.matchedRule());
+    }
+
+    // --- Rule 4: CONTEXT_INSUFFICIENT ---
+
+    @Test
+    void rule4_contextInsufficient() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null, null,
+                "The requirement is unclear and hard to follow", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTEXT_INSUFFICIENT, result.category());
+        assertEquals(4, result.matchedRule());
+    }
+
+    @Test
+    void rule4_contextInsufficient_insufficientKeyword() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null, null,
+                "Insufficient detail in the spec", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTEXT_INSUFFICIENT, result.category());
+        assertEquals(4, result.matchedRule());
+    }
+
+    // --- Rule 5: TOOL_LIMITATION ---
+
+    @Test
+    void rule5_toolLimitation() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null, null,
+                "summary", contract,
+                0, "REJECT"  // changedFileCount == 0
+        );
+        assertEquals(FailureCategory.TOOL_LIMITATION, result.category());
+        assertEquals(5, result.matchedRule());
+    }
+
+    // --- Rule 6: REVIEW_NOISE ---
+
+    @Test
+    void rule6_reviewNoise() {
+        var result = arbiter.classify(
+                null, null, null,
+                "minor stylistic issue", null,
+                5, "REJECT"
+        );
+        assertEquals(FailureCategory.REVIEW_NOISE, result.category());
+        assertEquals(6, result.matchedRule());
+    }
+
+    // --- Rule 7: fallback IMPLEMENTATION_BUG ---
+
+    @Test
+    void rule7_fallback_implementationBug() {
+        var contract = minimalContract(
+                List.of(),  // no ambiguity notes
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null,  // no contract gaps
+                null,  // no out of scope files
+                List.of("some test is missing"),  // missingTests present -> noOptionalFields is false
+                "doesn't pass", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(7, result.matchedRule());
+    }
+
+    // --- Cross-cutting: ACCEPT_WITH_NOTES ---
+
+    @Test
+    void acceptWithNotesClassification() {
+        var result = arbiter.classify(
+                List.of("gap in contract"),
+                null, null,
+                "summary", null,
+                3, "ACCEPT_WITH_NOTES"
+        );
+        assertEquals(FailureCategory.CONTRACT_GAP, result.category());
+        assertEquals("ACCEPT_WITH_NOTES", result.reviewDecision());
+    }
+
+    // --- Priority: contract gaps win over out-of-scope ---
+
+    @Test
+    void priority_order_contractGapOverImplementationBug() {
+        var result = arbiter.classify(
+                List.of("missing constraint"),
+                List.of("OutOfScope.java"),
+                null,
+                "summary", null,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.CONTRACT_GAP, result.category());
+        assertEquals(1, result.matchedRule());
+    }
+
+    // --- Helper ---
+
+    private TaskContract minimalContract(List<String> ambiguityNotes, List<String> included,
+                                         List<String> acceptanceCriteria) {
+        return new TaskContract(
+                "tc-test", 1, Instant.parse("2026-05-30T10:00:00Z"),
+                "Test objective",
+                new TaskContract.Scope(included, List.of()),
+                acceptanceCriteria, List.of(), List.of(), List.of(), List.of(),
+                ambiguityNotes, List.of(),
+                ContractStatus.READY_FOR_REVIEW, 1,
+                new TaskContract.Source("req.md", "test")
+        );
+    }
+}
