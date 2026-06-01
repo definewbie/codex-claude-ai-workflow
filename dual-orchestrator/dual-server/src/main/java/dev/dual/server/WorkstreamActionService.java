@@ -8,6 +8,7 @@ import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.WorkflowCommand;
 import dev.dual.runtime.WorkflowRuntimeResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
@@ -30,6 +31,7 @@ public class WorkstreamActionService {
     private final WorkflowFileLedger ledger;
     private final Supplier<WorkflowResumer> resumerFactory;
 
+    @Autowired
     public WorkstreamActionService(ServerWorkflowRuntimeFactory runtimeFactory) {
         this(new WorkflowFileLedger(), runtimeFactory::create);
     }
