@@ -122,6 +122,46 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new CompletingExitFiveTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+        var instance = new NodeInstance(
+                "node-intake",
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-intake",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("completed", result.outcome());
+        assertEquals(5, result.result().get("exit_code"));
+        assertEquals(true, result.result().get("acpx_exit_tolerated"));
+        assertTrue(result.outputRefs().get(0).endsWith("intake-claude-brainstorm.md"));
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"exitCode\" : 5"));
+        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+    }
+
+    @Test
     void rejectsUnsupportedAgent() {
         var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
         var definition = new NodeDefinition("design.bad_agent", NodeKind.TASK, "acpx.agent_run", Map.of(
@@ -160,5 +200,28 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
         assertEquals(true, failure.recoverable());
         assertTrue(failure.message().contains("dualctl retry"));
+    }
+
+    private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Requirement Restatement
+
+                    Add a small function.
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
     }
 }

@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class AcpxAgentTransport {
+public class AcpxAgentTransport {
     public boolean isAvailable(Path workdir) {
         try {
             var process = new ProcessBuilder("acpx", "--help")

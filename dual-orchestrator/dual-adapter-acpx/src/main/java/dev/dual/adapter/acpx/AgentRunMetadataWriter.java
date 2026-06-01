@@ -163,7 +163,7 @@ final class AgentRunMetadataWriter {
                 result.finishedAt(),
                 Duration.between(result.startedAt(), result.finishedAt()).toMillis(),
                 result.exitCode(),
-                result.exitCode() == 0 ? "completed" : "failed",
+                failure == null ? "completed" : "failed",
                 failure == null ? null : failure.reason(),
                 failure == null ? null : failure.recoverable()
         ));

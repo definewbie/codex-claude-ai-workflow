@@ -207,7 +207,7 @@ acpx --timeout 600 --approve-all ...
 
 这是因为 Claude implementation 是唯一应该修改业务代码的主控节点；Codex review / acceptance 仍然保持只读审视。
 
-如果 acpx runtime 返回 reconnect、额度不足、登录失效等错误，ledger 会保留 stdout/stderr 和节点状态，但不会替你修复 agent runtime。
+如果 acpx runtime 返回 reconnect、额度不足、登录失效等错误，ledger 会保留 stdout/stderr 和节点状态，但不会替你修复 agent runtime。一个例外是：acpx 返回非 0，但 stdout 已经包含完整 terminal `dual-control` block 且以 `[done] end_turn` 结束时，adapter 会把该 run 作为完成处理，并在 result 中记录 `acpx_exit_tolerated=true` 和原始 `exit_code`。
 
 ## Prompt Templates
 
@@ -1073,6 +1073,13 @@ acpx adapter 会把这类错误标记为：
 ```text
 failure_reason: RECOVERABLE_AGENT_RECONNECT
 recoverable: true
+```
+
+如果 stdout 已经完整结束，adapter 可能会容忍这次非 0 exit 并继续 workflow。可在对应 `run.json` 或 node result 中查看：
+
+```text
+acpx_exit_tolerated: true
+exit_code: 5
 ```
 
 ### `git worktree add` 报权限错误

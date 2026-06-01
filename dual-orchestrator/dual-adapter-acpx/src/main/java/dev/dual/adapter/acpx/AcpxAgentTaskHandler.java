@@ -16,6 +16,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AgentPromptRenderer promptRenderer;
     private final AcpxFailureClassifier failureClassifier;
     private final AgentRunMetadataWriter metadataWriter;
+    private final AgentOutputCompletionDetector completionDetector;
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         if (transport == null) {
@@ -26,6 +27,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.promptRenderer = new AgentPromptRenderer();
         this.failureClassifier = new AcpxFailureClassifier();
         this.metadataWriter = new AgentRunMetadataWriter();
+        this.completionDetector = new AgentOutputCompletionDetector();
     }
 
     @Override
@@ -93,6 +95,31 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
         if (result.exitCode() != 0) {
+            if (completionDetector.isComplete(stdoutPath)) {
+                metadataWriter.writeCompleted(
+                        context.workspaceRoot(),
+                        context.workstreamId(),
+                        context.definition().id(),
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        runDir,
+                        promptPath,
+                        stdoutPath,
+                        stderrPath,
+                        result,
+                        null
+                );
+                return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(
+                        "run_id", runId,
+                        "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
+                        "agent", agent,
+                        "session", session,
+                        "exit_code", result.exitCode(),
+                        "acpx_exit_tolerated", true
+                ));
+            }
             var failure = failureClassifier.classify(stderrPath, result.exitCode());
             metadataWriter.writeCompleted(
                     context.workspaceRoot(),
