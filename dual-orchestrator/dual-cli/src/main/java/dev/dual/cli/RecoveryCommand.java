@@ -9,12 +9,13 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         description = "Resolve workflow recovery states.",
         subcommands = {
+                RecoveryShowCommand.class,
                 RecoveryAbortCommand.class
         }
 )
 public final class RecoveryCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use recovery abort.");
+        System.out.println("Use recovery show or recovery abort.");
     }
 }

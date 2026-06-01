@@ -563,6 +563,12 @@ dualctl run --workdir <effective_worktree> --max-steps 50 <workstream_id>
 
 这份摘要会列出当前失败节点、handler、失败原因、acpx/session 信息、exit code、output refs，以及建议的 `dualctl retry` 命令。它是给人工恢复使用的入口，不替代 `nodes/*.json`、`events.jsonl` 和具体 run outputs。
 
+可以直接查看：
+
+```bash
+dualctl recovery show --workdir <effective_worktree> <workstream_id>
+```
+
 ```bash
 dualctl retry --workdir <effective_worktree> --note "claude session reconnected" <workstream_id>
 dualctl resume --workdir <effective_worktree> <workstream_id>
