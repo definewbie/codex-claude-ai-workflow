@@ -3,12 +3,14 @@ package dev.dual.server;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
+import dev.dual.core.workflow.NodeKind;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -97,6 +99,37 @@ public class WorkstreamQueryService {
             throw new IOException("timeline projection not found: " + paths.timelineJson());
         }
         return objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE);
+    }
+
+    public Map<String, Object> currentReview(Path workspaceRoot, String workstreamId) throws IOException {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        var current = workflowLedger.loadCurrent(paths);
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            throw new IOException("no active node for workstream: " + workstreamId);
+        }
+        var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        if (node.kind() != NodeKind.GATE) {
+            throw new IOException("active node is not a human gate: " + node.nodeDefinitionId());
+        }
+        var packetRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".md";
+        var packetJsonRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".json";
+        var packetPath = root.resolve(packetRef).normalize();
+        var packetJsonPath = root.resolve(packetJsonRef).normalize();
+        if (!packetPath.startsWith(root) || !Files.exists(packetPath)) {
+            throw new IOException("review packet not found: " + packetRef);
+        }
+
+        var response = new LinkedHashMap<String, Object>();
+        response.put("workstreamId", workstreamId);
+        response.put("gateNodeInstanceId", node.nodeInstanceId());
+        response.put("gateNodeDefinitionId", node.nodeDefinitionId());
+        response.put("packetPath", packetRef);
+        response.put("packetMarkdown", Files.readString(packetPath, StandardCharsets.UTF_8));
+        if (packetJsonPath.startsWith(root) && Files.exists(packetJsonPath)) {
+            response.put("packet", objectMapper.readValue(packetJsonPath.toFile(), MAP_TYPE));
+        }
+        return response;
     }
 
     private Map<String, Object> workstreamSummary(Path root, Path dir, Path workstreamJson) throws IOException {

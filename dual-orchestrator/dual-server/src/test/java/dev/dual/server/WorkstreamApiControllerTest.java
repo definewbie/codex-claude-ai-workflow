@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,28 @@ class WorkstreamApiControllerTest {
         var nodes = (List<Map<String, Object>>) timeline.get("nodes");
         assertEquals(2, nodes.size());
         assertEquals("first", nodes.get(0).get("nodeDefinitionId"));
+    }
+
+    @Test
+    void currentReviewReturnsActiveGatePacket() throws Exception {
+        var fixture = createWorkstream("ws-api-review");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var ledger = new WorkflowFileLedger();
+        var activeNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        var packetPath = paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".md");
+        Files.createDirectories(packetPath.getParent());
+        Files.writeString(packetPath, "# Human Review Packet\n\nRead this before approval.\n", StandardCharsets.UTF_8);
+        Files.writeString(paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".json"),
+                "{\"allowedActions\":[\"approve\",\"revise\"]}", StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.currentReview(fixture.workstreamId(), tempDir);
+
+        assertEquals(fixture.workstreamId(), response.get("workstreamId"));
+        assertEquals("review.gate", response.get("gateNodeDefinitionId"));
+        assertEquals(".agent/workstreams/" + fixture.workstreamId() + "/reviews/" + activeNodeId + ".md",
+                response.get("packetPath"));
+        assertEquals(true, response.get("packetMarkdown").toString().contains("Read this before approval."));
     }
 
     private WorkstreamApiController controller() {

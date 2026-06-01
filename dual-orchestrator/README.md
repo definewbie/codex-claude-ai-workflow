@@ -208,8 +208,11 @@ http://localhost:8080/
 
 - 输入 effective workdir，列出 workstreams。
 - 查看当前 status 和 timeline。
+- 当 workflow 停在 human review gate 时，展示当前 review packet。
 - 手动执行 scheduler tick。
 - 对选中的 workstream 执行 resume、retry、approve + run、revise + run、complete。
+
+这些按钮不是自动验收。`Approve + Run`、`Revise + Run`、`Complete` 只应该在人读完页面里的 `Human Review Packet` 后使用。Smoke 脚本为了自动化 E2E 会自动 approve gate；真实使用时，human review gate 的语义是“暂停，让人基于 packet 做决定”。
 
 常见用法：
 
@@ -225,6 +228,7 @@ http://localhost:8080/
 curl "http://localhost:8080/api/workstreams?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/status?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/timeline?workdir=<effective_worktree>"
+curl "http://localhost:8080/api/workstreams/<workstream_id>/review/current?workdir=<effective_worktree>"
 ```
 
 推进 workflow：

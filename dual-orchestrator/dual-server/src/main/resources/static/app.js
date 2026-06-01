@@ -15,10 +15,20 @@ const els = {
   workstreams: $("workstreams"),
   selectedTitle: $("selectedTitle"),
   selectedStatus: $("selectedStatus"),
+  actionHint: $("actionHint"),
   statusView: $("statusView"),
   timelineView: $("timelineView"),
   responseView: $("responseView"),
+  reviewPanel: $("reviewPanel"),
+  reviewPacket: $("reviewPacket"),
+  reviewGate: $("reviewGate"),
   feedback: $("feedback"),
+  resume: $("resume"),
+  approve: $("approve"),
+  complete: $("complete"),
+  retry: $("retry"),
+  revise: $("revise"),
+  tick: $("tick"),
 };
 
 els.workdir.value = state.workdir;
@@ -105,7 +115,8 @@ async function loadSelected() {
   if (!state.selectedId) {
     return;
   }
-  await Promise.all([loadStatus(), loadTimeline()]);
+  await loadStatus();
+  await Promise.all([loadTimeline(), loadReviewPacket()]);
 }
 
 async function loadStatus() {
@@ -115,6 +126,7 @@ async function loadStatus() {
     els.selectedTitle.textContent = state.selectedId;
     const workflow = data.workflow || {};
     setStatusBadge(workflow.status || "-");
+    updateActions(data);
     els.statusView.textContent = JSON.stringify(data, null, 2);
     setResponse(data);
   } catch (error) {
@@ -129,6 +141,26 @@ async function loadTimeline() {
     renderTimeline(data);
   } catch (error) {
     els.timelineView.textContent = JSON.stringify(error, null, 2);
+  }
+}
+
+async function loadReviewPacket() {
+  const status = state.status?.workflow?.status || "";
+  if (status !== "WAITING_FOR_HUMAN") {
+    els.reviewPanel.classList.add("hidden");
+    els.reviewPacket.textContent = "";
+    els.reviewGate.textContent = "";
+    return;
+  }
+  try {
+    const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/current?workdir=${workdirParam()}`);
+    els.reviewPanel.classList.remove("hidden");
+    els.reviewGate.textContent = data.gateNodeDefinitionId || "";
+    els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
+  } catch (error) {
+    els.reviewPanel.classList.remove("hidden");
+    els.reviewGate.textContent = "not available";
+    els.reviewPacket.textContent = JSON.stringify(error, null, 2);
   }
 }
 
@@ -158,6 +190,57 @@ function setStatusBadge(status) {
   if (status === "WAITING_FOR_HUMAN" || status === "RUNNING") kind = "warn";
   if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") kind = "bad";
   els.selectedStatus.className = `badge ${kind}`;
+}
+
+function updateActions(data) {
+  const workflow = data.workflow || {};
+  const status = workflow.status || "";
+  const activeNode = (workflow.activeNodes || [])[0] || {};
+  const activeKind = activeNode.kind || "";
+  const activeDefinition = activeNode.nodeDefinitionId || "";
+
+  setActionVisibility({
+    resume: status === "RUNNING",
+    approve: status === "WAITING_FOR_HUMAN",
+    complete: status === "WAITING_FOR_HUMAN" && activeDefinition.includes("next_stage"),
+    retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
+    revise: status === "WAITING_FOR_HUMAN",
+    tick: status === "RUNNING" || !state.selectedId,
+  });
+
+  els.feedback.parentElement.classList.toggle("hidden", status !== "WAITING_FOR_HUMAN");
+  els.revise.parentElement.classList.toggle("hidden", status !== "WAITING_FOR_HUMAN");
+
+  if (status === "COMPLETED") {
+    els.actionHint.textContent = "Workflow is completed. There are no remaining actions.";
+    return;
+  }
+  if (status === "WAITING_FOR_HUMAN") {
+    els.actionHint.textContent = activeDefinition.includes("next_stage")
+      ? "Read the review packet below. Complete finishes this workstream; Approve + Run starts another iteration."
+      : "Read the review packet below. Approve + Run continues; Revise + Run sends concrete feedback back into the loop.";
+    return;
+  }
+  if (status === "RUNNING") {
+    els.actionHint.textContent = `Workflow is running at ${activeDefinition || activeKind}. Resume advances up to Max steps; Scheduler Tick advances running workstreams in this workdir.`;
+    return;
+  }
+  if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") {
+    els.actionHint.textContent = "Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.";
+    return;
+  }
+  els.actionHint.textContent = state.selectedId
+    ? "No direct action is available for the current workflow state."
+    : "Select a workstream to see available actions.";
+}
+
+function setActionVisibility(visible) {
+  els.resume.classList.toggle("hidden", !visible.resume);
+  els.approve.classList.toggle("hidden", !visible.approve);
+  els.complete.classList.toggle("hidden", !visible.complete);
+  els.retry.classList.toggle("hidden", !visible.retry);
+  els.revise.classList.toggle("hidden", !visible.revise);
+  els.tick.disabled = !visible.tick;
 }
 
 async function postAction(action, body) {

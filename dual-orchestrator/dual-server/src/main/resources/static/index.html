@@ -44,6 +44,7 @@
             <h2 id="selectedTitle">No workstream selected</h2>
             <span id="selectedStatus" class="badge muted">-</span>
           </div>
+          <p id="actionHint" class="hint">Select a workstream to see available actions.</p>
           <div class="actions">
             <button id="resume">Resume</button>
             <button id="approve">Approve + Run</button>
@@ -73,6 +74,14 @@
             <div id="timelineView" class="timeline"></div>
           </section>
         </div>
+
+        <section id="reviewPanel" class="panel hidden">
+          <div class="panel-title">
+            <h2>Human Review Packet</h2>
+            <span id="reviewGate" class="subtle"></span>
+          </div>
+          <pre id="reviewPacket" class="markdown"></pre>
+        </section>
 
         <section class="panel">
           <div class="panel-title">

@@ -207,6 +207,16 @@ textarea {
   margin-bottom: 12px;
 }
 
+.hint {
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hidden {
+  display: none !important;
+}
+
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -214,7 +224,8 @@ textarea {
 }
 
 .json,
-.timeline {
+.timeline,
+.markdown {
   min-height: 260px;
   max-height: 520px;
   overflow: auto;
@@ -226,6 +237,12 @@ textarea {
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.markdown {
+  background: #fff;
+  color: var(--text);
+  white-space: pre-wrap;
 }
 
 .timeline {
