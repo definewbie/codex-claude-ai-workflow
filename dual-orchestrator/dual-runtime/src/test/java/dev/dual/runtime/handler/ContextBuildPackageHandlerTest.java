@@ -199,6 +199,40 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void recentAgentOutputsRenderContractSidecarSummary() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Sidecar summary test.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-001/outputs/design-codex-review.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, """
+                Long review body.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Architecture is ready.
+                ```
+                """, StandardCharsets.UTF_8);
+        Files.writeString(output.getParent().resolve("design-codex-review.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "design.codex_arch_review",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Architecture is ready.",
+                  "source_output_ref": ".agent/workstreams/ws-ctx/runs/run-001/outputs/design-codex-review.md"
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("architecture_review", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("design-codex-review.md"));
+        assertTrue(markdown.contains("- Contract: design.codex_arch_review"));
+        assertTrue(markdown.contains("- Decision: READY_FOR_ARCH_REVIEW"));
+        assertTrue(markdown.contains("- Summary: Architecture is ready."));
+    }
+
+    @Test
     void gitEvidenceSectionRendersWhenPresent() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Git evidence test.", StandardCharsets.UTF_8);

@@ -438,6 +438,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
             for (Path output : outputs) {
                 builder.append("### ").append(toDisplayRef(output)).append("\n\n");
+                appendAgentContractSummary(builder, output);
                 builder.append("```text\n");
                 builder.append(snippet(output, MAX_SNIPPET_CHARS));
                 builder.append("\n```\n\n");
@@ -762,11 +763,36 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
             for (Path output : outputs) {
                 builder.append("### ").append(toDisplayRef(output)).append("\n\n");
+                appendAgentContractSummary(builder, output);
                 builder.append("```text\n");
                 builder.append(snippet(output, maxSnippetChars));
                 builder.append("\n```\n\n");
             }
         }
+    }
+
+    private static void appendAgentContractSummary(StringBuilder builder, Path output) {
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        if (!Files.isRegularFile(sidecar)) {
+            return;
+        }
+        var contract = readJsonUnchecked(sidecar);
+        var nodeId = text(contract.get("node_id"));
+        var decision = text(contract.get("decision"));
+        var summary = text(contract.get("summary"));
+        if (nodeId.isBlank() && decision.isBlank() && summary.isBlank()) {
+            return;
+        }
+        if (!nodeId.isBlank()) {
+            builder.append("- Contract: ").append(nodeId).append("\n");
+        }
+        if (!decision.isBlank()) {
+            builder.append("- Decision: ").append(decision).append("\n");
+        }
+        if (!summary.isBlank()) {
+            builder.append("- Summary: ").append(summary).append("\n");
+        }
+        builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n\n");
     }
 
     private static boolean isAgentOutput(Path path) {

@@ -1,5 +1,6 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
@@ -7,11 +8,14 @@ import dev.dual.core.workflow.NodeStatus;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class ArtifactContractValidator {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final DualControlBlockParser parser = new DualControlBlockParser();
 
     public NodeResult validate(Path workspaceRoot, NodeDefinition nodeDefinition, NodeResult result) throws Exception {
@@ -45,12 +49,52 @@ public final class ArtifactContractValidator {
             }
             var parsed = parser.parse(Files.readString(path, StandardCharsets.UTF_8), contract);
             if (parsed.valid()) {
-                return result;
+                return withContractSidecar(root, nodeDefinition, result, contract, parsed.block(), ref, path);
             }
             lastInvalid = parsed;
             break;
         }
         return contractViolation(nodeDefinition, result, contract, lastInvalid);
+    }
+
+    private static NodeResult withContractSidecar(
+            Path root,
+            NodeDefinition nodeDefinition,
+            NodeResult result,
+            NodeOutputContract contract,
+            DualControlBlock block,
+            String outputRef,
+            Path outputPath
+    ) throws Exception {
+        var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
+        var sidecarRef = root.relativize(sidecarPath).toString();
+        var document = new LinkedHashMap<String, Object>();
+        document.put("artifact_type", "agent_output_contract");
+        document.put("node_id", nodeDefinition.id());
+        document.put("handler_type", nodeDefinition.handlerType());
+        document.put("decision", block.required("decision"));
+        document.put("summary", block.required("summary"));
+        document.put("required_keys", List.copyOf(contract.requiredKeys()));
+        document.put("allowed_decisions", List.copyOf(contract.allowedDecisions()));
+        document.put("source_output_ref", outputRef);
+        document.put("generated_at", Instant.now().toString());
+        document.put("control", block.values());
+        Files.writeString(
+                sidecarPath,
+                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
+                StandardCharsets.UTF_8
+        );
+
+        var outputRefs = new ArrayList<>(result.outputRefs());
+        if (!outputRefs.contains(sidecarRef)) {
+            outputRefs.add(sidecarRef);
+        }
+        var augmented = new LinkedHashMap<String, Object>();
+        augmented.putAll(result.result());
+        augmented.put("decision", block.required("decision"));
+        augmented.put("summary", block.required("summary"));
+        augmented.put("contract_sidecar_ref", sidecarRef);
+        return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
     }
 
     private static NodeResult contractViolation(

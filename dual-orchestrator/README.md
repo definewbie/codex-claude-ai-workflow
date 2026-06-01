@@ -363,7 +363,9 @@ summary: one short sentence
 | `plan.decision` | `READY_TO_IMPLEMENT`, `NEEDS_REVISION`, `BLOCKED` |
 | `acceptance.decision` | `ACCEPT`, `ACCEPT_WITH_NOTES`, `REJECT`, `BLOCKED` |
 
-每个 agent task node 也有对应的 output contract，定义其合法的 `decision` 值域和 required keys（`decision` + `summary`）。`ArtifactContractValidator` 会在 `acpx.agent_run` 完成后集中校验 Agent 输出 artifact；缺失 `dual-control`、缺少 required key、或 decision 越界都会让当前节点停到 recovery，不继续路由。`ContractRegistry` 保证 decision node 的 `allowedDecisions` 与 workflow edge `on` 值和 agent prompt 模板声明的值域一致。
+每个 agent task node 也有对应的 output contract，定义其合法的 `decision` 值域和 required keys（`decision` + `summary`）。`ArtifactContractValidator` 会在 `acpx.agent_run` 完成后集中校验 Agent 输出 artifact；缺失 `dual-control`、缺少 required key、或 decision 越界都会让当前节点停到 recovery，不继续路由。校验通过后，runtime 会在 Agent 输出旁写入 `*.contract.json` sidecar，例如 `design-codex-review.md` 对应 `design-codex-review.contract.json`，记录 node、decision、summary、source output 和 contract 值域。`ContractRegistry` 保证 decision node 的 `allowedDecisions` 与 workflow edge `on` 值和 agent prompt 模板声明的值域一致。
+
+Context Package 会优先读取这些 sidecar，把 `decision` / `summary` 作为结构化事实放在 Markdown 原文片段之前。这样后续 Agent 不需要从长篇 review 或 handoff 里重新猜关键状态；原文仍保留为可追溯证据。
 
 当前选择是“规则集中化”，不是“规则引擎化”：规则仍在 Java registry / validator 中，便于 IDE 导航、单元测试和快速调整。等 workflow contract 稳定、并且自定义 workflow 需要声明自己的 output contract 时，再考虑把这层迁移到 workflow JSON 配置。
 
@@ -1254,6 +1256,7 @@ summary: 一句话说明判断依据
 - block 内必须是 `key: value` 行。
 - `decision` 必须存在，并且属于当前节点允许的取值。
 - Agent task 输出还必须满足当前 node 的 `ContractRegistry`：例如 `summary` 必须存在且非空。
+- Agent task 校验通过后会生成相邻的 `*.contract.json` sidecar，后续 Context Package 会优先使用其中的结构化摘要。
 - 只读最新的 inputRef 文件，不会回退读取更早的旧输出。
 
 修正 Agent 输出后执行：
