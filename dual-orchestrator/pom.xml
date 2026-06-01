@@ -26,6 +26,7 @@
         <module>dual-adapter-acpx</module>
         <module>dual-adapter-git</module>
         <module>dual-cli</module>
+        <module>dual-server</module>
     </modules>
 
     <properties>

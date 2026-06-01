@@ -73,6 +73,7 @@ Runtime 只认识三类节点：
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
+- Local API Server MVP：`dual-server` 提供只读 HTTP API，用于读取 workflow status 和 timeline；暂不负责调度、审批动作或 UI。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
 - Ledger schema migration 暂不作为当前主线；schema 仍在快速演进，当前只保留最小兼容能力。
@@ -81,7 +82,7 @@ Runtime 只认识三类节点：
 
 - deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了边界分支引入 fake acpx。
 - 实时推送：还没有 SSE / file watch / WebSocket，当前 `dualctl watch` 是轮询式 CLI。
-- API server / scheduler。
+- Scheduler：还没有后台自动推进 workflow。
 - Web UI / dashboard。
 - Notification 集成。
 - 正式安装脚本。
@@ -117,6 +118,10 @@ dual-adapter-git
 
 dual-cli
   dualctl start/status/resume/review
+
+dual-server
+  local read-only HTTP API
+  status / timeline endpoints
 ```
 
 ## Dependencies
@@ -152,6 +157,12 @@ CLI jar：
 dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar
 ```
 
+API server jar：
+
+```text
+dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
 临时 alias：
 
 ```bash
@@ -168,6 +179,32 @@ dualctl review approve --help
 dualctl review show --help
 dualctl timeline --help
 ```
+
+## Local API Server
+
+`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 读模型入口。当前第一版只读 ledger，不启动 scheduler，也不会替你 approve/revise 人工卡点。
+
+构建：
+
+```bash
+cd dual-orchestrator
+mvn -pl dual-server -am package
+```
+
+启动：
+
+```bash
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+查询某个 workstream：
+
+```bash
+curl "http://localhost:8080/api/workstreams/<workstream_id>/status?workdir=<effective_worktree>"
+curl "http://localhost:8080/api/workstreams/<workstream_id>/timeline?workdir=<effective_worktree>"
+```
+
+两个接口都读取 `.agent/workstreams/<workstream_id>/` 下已经落盘的账本和 `timeline.json`。它们适合 UI、脚本或外部观察器消费；需要推进流程时，仍然使用 `dualctl resume` / `dualctl review approve` / `dualctl review revise`。
 
 ## acpx Sessions
 

@@ -140,6 +140,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
+- Local API Server MVP：`dual-server` 提供只读 HTTP API，可查询 workflow status 和 timeline。它是后续 dashboard / action API 的入口雏形，但当前不做 scheduler，也不替代 `dualctl review` / `dualctl resume`。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
 - 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过。classification 分支是边界路径，当前保留 `PASS-WARN` 语义；触发 classify 时会检查 calibration / recovery 产物。deterministic reject fixture 暂作为技术债。
@@ -160,7 +161,8 @@ status / failure / review read models
 | Tech Debt | deterministic p6 reject fixture | 真实 case 需要稳定覆盖 classify path 时再做 |
 | Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
-| P3 | Local UI dashboard | 在读模型稳定后做可视化 |
+| Done | Local API Server MVP | 只读 status / timeline HTTP API，先给 UI 和外部观察器一个稳定入口 |
+| P3 | Action API + Local UI dashboard | 在读模型稳定后增加 review/resume 写操作，再做可视化 |
 
 ### 4.2 长期路线
 
@@ -176,12 +178,14 @@ status / failure / review read models
 ## 5. 模块架构
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        dual-cli (dualctl)                       │
-│  start / status / resume / review approve / review revise /    │
-│  retry / recovery abort / inspect / events / runs / delivery   │
-└──────────────┬──────────────────────────────────────────────────┘
-               │
+┌───────────────────────────────┐  ┌───────────────────────────────┐
+│       dual-cli (dualctl)      │  │          dual-server          │
+│ start / resume / review /     │  │ read-only HTTP API: status /  │
+│ retry / delivery / status     │  │ timeline; future action API   │
+└──────────────┬────────────────┘  └──────────────┬────────────────┘
+               │                                  │
+               └────────────────┬─────────────────┘
+                                │
 ┌──────────────▼──────────────────────────────────────────────────┐
 │                      dual-runtime                               │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
@@ -238,6 +242,8 @@ status / failure / review read models
 │  NodeResult · DualId                                            │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+说明：`dual-cli` 负责写操作和推进 workflow；`dual-server` 当前只读 `dual-ledger-file` 生成的 status / timeline 读模型。后续如果增加 action API，才会从 server 调用 runtime 推进节点。
 
 ## 6. 三类节点
 

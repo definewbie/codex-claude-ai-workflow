@@ -234,6 +234,15 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - 一个极简 Web UI，读取 workstream ledger。
 - 初版只做 read-only + human gate action。
 
+当前状态：`dual-server` 第一版已完成只读 HTTP API，可以查询 workstream status 和 timeline。它还没有 scheduler，也没有 review approve / revise 这类写操作；这些动作仍然由 `dualctl` 执行。
+
+已提供接口：
+
+```text
+GET /api/workstreams/{workstreamId}/status?workdir=<effective_worktree>
+GET /api/workstreams/{workstreamId}/timeline?workdir=<effective_worktree>
+```
+
 页面优先级：
 
 1. Workstream list
@@ -338,7 +347,8 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 产出：
 
-- `dual-server`
+- `dual-server` read-only API（已完成第一版）
+- action API：review approve / revise、resume / retry
 - read-only workstream dashboard
 - gate approval/revision form
 
