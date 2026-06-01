@@ -120,4 +120,8 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
     public Path timelineJsonl() {
         return workstreamDir().resolve("timeline.jsonl");
     }
+
+    public Path timelineJson() {
+        return workstreamDir().resolve("timeline.json");
+    }
 }

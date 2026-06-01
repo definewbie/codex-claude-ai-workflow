@@ -17,7 +17,8 @@
   - 2026-06-01：`FailureClassifyHandler` 会为可校准分类写入 `calibration/candidates/<id>.json` 和 `.md`。`TOOL_LIMITATION` / `REVIEW_NOISE` 暂不生成候选，避免把一次性运行噪声沉淀为规则。
 - [x] Review packet artifact：为 human gate 生成稳定 review 包，后续 CLI/UI 共用。
   - 2026-06-01：`HumanReviewGateHandler` 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 可直接展示当前 gate packet。
-- [ ] Timeline projection：从 events/nodes/runs 生成稳定 `timeline.json`，作为 status/watch/UI 读模型。
+- [x] Timeline projection：从 workflow current 和 nodes 生成稳定 `timeline.json`，作为 status/watch/UI 读模型。
+  - 2026-06-01：`WorkflowFileLedger` 在初始化、路由、运行状态变化、retry/recovery 操作后自动更新 `timeline.json`；`dualctl timeline` 可展示节点概览。
 - [x] Failure summary：失败时生成 `recovery/current-failure.md`，聚合失败原因、证据和建议动作。
   - 2026-06-01：分类失败路径会写入当前失败摘要，并把分类 artifact / calibration candidate ref 关联进去。
 

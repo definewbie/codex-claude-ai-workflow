@@ -101,6 +101,40 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void writesTimelineProjectionFromWorkflowAndNodes() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-timeline"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("second", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(new EdgeDefinition("first", "completed", "second"))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-timeline", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("first-output.md"), Map.of("ok", true));
+
+        assertTrue(Files.exists(paths.timelineJson()));
+        var timeline = Files.readString(paths.timelineJson());
+        assertTrue(timeline.contains("\"schemaVersion\""));
+        assertTrue(timeline.contains("\"workstreamId\" : \"ws-timeline\""));
+        assertTrue(timeline.contains("\"workflowStatus\" : \"WAITING_FOR_HUMAN\""));
+        assertTrue(timeline.contains("\"activeNodeInstanceIds\""));
+        assertTrue(timeline.contains("\"nodeDefinitionId\" : \"first\""));
+        assertTrue(timeline.contains("\"status\" : \"COMPLETED\""));
+        assertTrue(timeline.contains("\"nodeDefinitionId\" : \"second\""));
+        assertTrue(timeline.contains("\"status\" : \"WAITING\""));
+        assertTrue(timeline.contains("\"durationMs\""));
+    }
+
+    @Test
     void revisionOutcomeStartsNextWorkflowIteration() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-revision"));
         Files.createDirectories(paths.workstreamDir());

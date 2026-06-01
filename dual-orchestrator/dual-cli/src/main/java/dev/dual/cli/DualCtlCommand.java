@@ -13,6 +13,7 @@ import picocli.CommandLine.Command;
                 DeliveryCommand.class,
                 DoctorCommand.class,
                 StatusCommand.class,
+                TimelineCommand.class,
                 EventsCommand.class,
                 RunsCommand.class,
                 InspectCommand.class,

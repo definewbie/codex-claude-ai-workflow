@@ -300,10 +300,12 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 原因：UI / watch / status 都需要这个读模型。
 
+当前状态：第一版已完成。`WorkflowFileLedger` 会在 workflow 初始化、节点路由、运行状态变化、retry/recovery 操作后自动更新 `timeline.json`，`dualctl timeline` 可以查看当前节点概览。
+
 产出：
 
 - `timeline.json`
-- `dualctl timeline` 或增强 `dualctl status`
+- `dualctl timeline`
 - 每个 node 的 duration、outcome、artifact refs
 
 ### Step 4：Failure summary
@@ -346,7 +348,7 @@ UI 是需要的，但不能让 UI 先于 calibration 和读模型。
 更稳的路径是：
 
 1. 先把 failure classification 已经产生的结果沉淀成 CalibrationCandidate。
-2. 再把 timeline、failure summary 做成稳定读模型。
+2. 再把 failure summary 做成更完整的稳定读模型。
 3. CLI 先消费这些读模型。
 4. UI 再消费同一套读模型。
 5. deterministic p6 reject fixture 等真实 REJECT 样本或稳定回归需求出现后再补。
@@ -373,11 +375,12 @@ UI 是需要的，但不能让 UI 先于 calibration 和读模型。
 dev-calibration-candidate-mvp
 ```
 
-目标只做三件事：
+目标收口为这些主线能力：
 
 1. CalibrationCandidate MVP
 2. Review packet + `dualctl review show`
-3. 最小 timeline / failure projection，供后续 `watch` 和 UI 消费
-4. 保留 p6 reject fixture 技术债，不在当前主线投入
+3. 最小 timeline projection，供后续 `watch` 和 UI 消费
+4. 最小 failure projection，供 recovery / watch / UI 消费
+5. 保留 p6 reject fixture 技术债，不在当前主线投入
 
 这些事情做好以后，再做 `dualctl watch` 和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。

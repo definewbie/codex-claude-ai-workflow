@@ -20,6 +20,7 @@ public final class WorkflowFileLedger {
     private final LedgerEventLog eventLog;
     private final RoutingEngine routingEngine;
     private final NodeStateWriter nodeStateWriter;
+    private final TimelineProjectionWriter timelineProjectionWriter;
 
     public WorkflowFileLedger() {
         this(new AtomicJsonWriter());
@@ -34,6 +35,7 @@ public final class WorkflowFileLedger {
         var revisionTracker = new RevisionTracker(jsonWriter, this.objectMapper, eventLog);
         this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker);
         this.nodeStateWriter = new NodeStateWriter(jsonWriter, this.objectMapper, eventLog);
+        this.timelineProjectionWriter = new TimelineProjectionWriter(jsonWriter, this.objectMapper);
     }
 
     public void initialize(WorkstreamPaths paths, String workflowInstanceId, WorkflowDefinition definition)
@@ -103,6 +105,7 @@ public final class WorkflowFileLedger {
                 null,
                 null
         ));
+        timelineProjectionWriter.write(paths);
     }
 
     public WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
@@ -164,6 +167,7 @@ public final class WorkflowFileLedger {
             Map<String, Object> result
     ) throws IOException {
         routingEngine.completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result);
+        timelineProjectionWriter.write(paths);
     }
 
     public void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)
@@ -174,26 +178,35 @@ public final class WorkflowFileLedger {
     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
             throws IOException {
         routingEngine.resolveOpenGate(paths, definition, action, note);
+        timelineProjectionWriter.write(paths);
     }
 
     public NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
-        return nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
+        var node = nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
+        timelineProjectionWriter.write(paths);
+        return node;
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
-        return nodeStateWriter.autoRetryNode(paths, nodeInstanceId);
+        var node = nodeStateWriter.autoRetryNode(paths, nodeInstanceId);
+        timelineProjectionWriter.write(paths);
+        return node;
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId, long retryDelayMs) throws IOException {
-        return nodeStateWriter.autoRetryNode(paths, nodeInstanceId, retryDelayMs);
+        var node = nodeStateWriter.autoRetryNode(paths, nodeInstanceId, retryDelayMs);
+        timelineProjectionWriter.write(paths);
+        return node;
     }
 
     public void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.retryActiveNode(paths, note);
+        timelineProjectionWriter.write(paths);
     }
 
     public void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.abortRecovery(paths, note);
+        timelineProjectionWriter.write(paths);
     }
 
 }

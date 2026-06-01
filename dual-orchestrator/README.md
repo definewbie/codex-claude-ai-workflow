@@ -52,6 +52,7 @@ Runtime 只认识三类节点：
 - human review gate。
 - review packet artifact：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`。
 - `dualctl review show`：展示当前人工卡点需要看的 review packet。
+- Timeline projection：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - review decision handler。
 - context package handler，会在关键 Agent step 前装配可读上下文。
 - artifact validation handler，会落盘 Git status / diff / changed files。
@@ -78,7 +79,7 @@ Runtime 只认识三类节点：
 仍未完成：
 
 - deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了边界分支引入 fake acpx。
-- Timeline projection / watch：还没有稳定的 `timeline.json` 读模型。
+- Watch mode：还没有轮询式终端 dashboard。
 - API server / scheduler。
 - Web UI / dashboard。
 - Notification 集成。
@@ -164,6 +165,7 @@ dualctl start --help
 dualctl resume --help
 dualctl review approve --help
 dualctl review show --help
+dualctl timeline --help
 ```
 
 ## acpx Sessions
@@ -596,6 +598,23 @@ dualctl review show --workdir <effective_worktree> <workstream_id>
 
 这个 packet 是后续 CLI watch / Web UI 共用的人工审查读模型，里面会列出 gate、允许动作、输入 artifacts 和关键内容摘录。
 
+### Timeline
+
+ledger 会自动维护当前 workstream 的进度读模型：
+
+```text
+.agent/workstreams/<workstream_id>/timeline.json
+```
+
+查看节点概览：
+
+```bash
+dualctl timeline --workdir <effective_worktree> <workstream_id>
+dualctl timeline --workdir <effective_worktree> --raw <workstream_id>
+```
+
+`timeline.json` 聚合 workflow current 和 nodes 快照，包含 workflow 状态、active nodes、open gates、每个 node 的状态、iteration、artifact refs 和 duration。后续 `watch` / Web UI 会优先消费这个读模型，而不是直接解析 ledger 原始文件。
+
 批准当前 gate：
 
 ```bash
@@ -812,6 +831,7 @@ dualctl delivery create-pr --workdir <effective_worktree> --title "feat: my task
 .agent/workstreams/<workstream_id>/
   workstream.json
   requirement.md
+  timeline.json
   timeline.jsonl
   current/
   stages/
