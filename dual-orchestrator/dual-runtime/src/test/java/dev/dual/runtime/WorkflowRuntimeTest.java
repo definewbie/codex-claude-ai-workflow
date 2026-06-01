@@ -155,6 +155,44 @@ class WorkflowRuntimeTest {
         assertEquals("implement.claude_implement", result.activeNode());
     }
 
+    @Test
+    void invalidAgentOutputContractStopsBeforeRouting() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-agent-contract"));
+        Files.createDirectories(paths.workstreamDir());
+        var invalidOutput = writeOutput("ws-agent-contract", "design-codex-review.md", """
+                Looks good.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                ```
+                """);
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.codex_arch_review",
+                List.of(
+                        new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of("output_ref", invalidOutput)),
+                        new NodeDefinition("design.decision", NodeKind.DECISION, "review.decision", Map.of())
+                ),
+                List.of(new EdgeDefinition("design.codex_arch_review", "completed", "design.decision"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-agent-contract", definition);
+
+        var runtime = new WorkflowRuntime(
+                ledger,
+                new HandlerRegistry(List.of(new AgentOutputTask()), List.of(new dev.dual.runtime.handler.ReviewDecisionHandler()), List.of())
+        );
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-agent-contract"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+        assertEquals("design.codex_arch_review", result.activeNode());
+        var node = ledger.loadNode(paths, "node-design-codex_arch_review-001");
+        assertEquals(NodeStatus.FAILED, node.status());
+        assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", node.result().get("reason"));
+        assertTrue(String.valueOf(node.result().get("message")).contains("summary"));
+    }
+
     private static final class FakeTask implements TaskHandler {
         @Override
         public String type() {
@@ -207,6 +245,22 @@ class WorkflowRuntimeTest {
         @Override
         public NodeResult execute(TaskContext context) {
             return NodeResult.completed("completed", List.of((String) context.definition().config().get("output_ref")), Map.of("ok", true));
+        }
+    }
+
+    private static final class AgentOutputTask implements TaskHandler {
+        @Override
+        public String type() {
+            return "acpx.agent_run";
+        }
+
+        @Override
+        public NodeResult execute(TaskContext context) {
+            return NodeResult.completed("completed", List.of((String) context.definition().config().get("output_ref")), Map.of(
+                    "agent", "codex",
+                    "session", "codex-reviewer",
+                    "exit_code", 0
+            ));
         }
     }
 

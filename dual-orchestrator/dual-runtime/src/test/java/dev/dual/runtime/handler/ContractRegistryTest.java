@@ -69,11 +69,11 @@ class ContractRegistryTest {
     static Stream<Object[]> validDecisionCases() {
         return Stream.of(
                 new Object[]{"intake.claude_brainstorm", "READY_FOR_PRODUCT_REVIEW"},
-                new Object[]{"intake.codex_product_review", "PASS"},
+                new Object[]{"intake.codex_product_review", "READY_FOR_PRODUCT_REVIEW"},
                 new Object[]{"intake.codex_product_review", "NEEDS_REVISION"},
                 new Object[]{"intake.codex_product_review", "BLOCKED"},
                 new Object[]{"design.claude_design", "READY_FOR_ARCH_REVIEW"},
-                new Object[]{"design.codex_arch_review", "PASS"},
+                new Object[]{"design.codex_arch_review", "READY_FOR_ARCH_REVIEW"},
                 new Object[]{"plan.claude_plan", "READY_FOR_PLAN_REVIEW"},
                 new Object[]{"plan.codex_plan_review", "READY_TO_IMPLEMENT"},
                 new Object[]{"implement.claude_implement", "IMPLEMENTED"},
@@ -103,7 +103,9 @@ class ContractRegistryTest {
         return Stream.of(
                 new Object[]{"intake.claude_brainstorm", "PASS"},
                 new Object[]{"intake.claude_brainstorm", "NEEDS_REVISION"},
+                new Object[]{"intake.codex_product_review", "PASS"},
                 new Object[]{"design.claude_design", "PASS"},
+                new Object[]{"design.codex_arch_review", "PASS"},
                 new Object[]{"plan.claude_plan", "PASS"},
                 new Object[]{"implement.claude_implement", "PASS"},
                 new Object[]{"implement.claude_self_test_report", "PASS"},

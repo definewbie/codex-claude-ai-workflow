@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class DualControlBlockParser {
+public final class DualControlBlockParser {
     // (?m) makes ^ match line start; ^ anchors prevent matching inside blockquotes
     // or indented contexts where ``` is not at the beginning of a line.
     private static final Pattern FENCED_BLOCK = Pattern.compile(
@@ -15,7 +15,7 @@ final class DualControlBlockParser {
             Pattern.DOTALL
     );
 
-    DualControlParseResult parse(String markdown, NodeOutputContract contract) {
+    public DualControlParseResult parse(String markdown, NodeOutputContract contract) {
         var result = parse(markdown);
         if (!result.valid()) {
             return result;
@@ -32,7 +32,7 @@ final class DualControlBlockParser {
         return result;
     }
 
-    DualControlParseResult parse(String markdown) {
+    public DualControlParseResult parse(String markdown) {
         if (markdown == null || markdown.isBlank()) {
             return DualControlParseResult.missing();
         }
@@ -133,35 +133,4 @@ final class DualControlBlockParser {
     }
 
     private record MatchedBlock(String body, int endPosition) {}
-}
-
-record DualControlParseResult(
-        DualControlBlock block,
-        String errorCode,
-        String message,
-        Map<String, Object> details
-) {
-    DualControlParseResult {
-        details = details == null ? Map.of() : Map.copyOf(details);
-    }
-
-    static DualControlParseResult valid(DualControlBlock block) {
-        return new DualControlParseResult(block, "", "", Map.of());
-    }
-
-    static DualControlParseResult missing() {
-        return new DualControlParseResult(null, "MISSING_DUAL_CONTROL", "No dual-control block found.", Map.of());
-    }
-
-    static DualControlParseResult invalid(String errorCode, String message, Map<String, Object> details) {
-        return new DualControlParseResult(null, errorCode, message, details);
-    }
-
-    boolean valid() {
-        return block != null;
-    }
-
-    boolean isMissing() {
-        return block == null && "MISSING_DUAL_CONTROL".equals(errorCode);
-    }
 }

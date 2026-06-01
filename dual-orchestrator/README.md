@@ -363,7 +363,9 @@ summary: one short sentence
 | `plan.decision` | `READY_TO_IMPLEMENT`, `NEEDS_REVISION`, `BLOCKED` |
 | `acceptance.decision` | `ACCEPT`, `ACCEPT_WITH_NOTES`, `REJECT`, `BLOCKED` |
 
-每个 agent task node 也有对应的 output contract，定义其合法的 `decision` 值域和 required keys（`decision` + `summary`）。`ContractRegistry` 保证 decision node 的 `allowedDecisions` 与 workflow edge `on` 值和 agent prompt 模板声明的值域一致。
+每个 agent task node 也有对应的 output contract，定义其合法的 `decision` 值域和 required keys（`decision` + `summary`）。`ArtifactContractValidator` 会在 `acpx.agent_run` 完成后集中校验 Agent 输出 artifact；缺失 `dual-control`、缺少 required key、或 decision 越界都会让当前节点停到 recovery，不继续路由。`ContractRegistry` 保证 decision node 的 `allowedDecisions` 与 workflow edge `on` 值和 agent prompt 模板声明的值域一致。
+
+当前选择是“规则集中化”，不是“规则引擎化”：规则仍在 Java registry / validator 中，便于 IDE 导航、单元测试和快速调整。等 workflow contract 稳定、并且自定义 workflow 需要声明自己的 output contract 时，再考虑把这层迁移到 workflow JSON 配置。
 
 Prompt 模板变量在加载时校验：如果模板引用了非 `KNOWN_VARIABLES` 集合（`workstream_id`, `node_id`, `prompt_template`, `ledger_path`, `requirement`, `context_package`）中的 `{{variable}}`，会立即报错。
 
@@ -1251,6 +1253,7 @@ summary: 一句话说明判断依据
 - Terminal block 之后不能有非空白内容。
 - block 内必须是 `key: value` 行。
 - `decision` 必须存在，并且属于当前节点允许的取值。
+- Agent task 输出还必须满足当前 node 的 `ContractRegistry`：例如 `summary` 必须存在且非空。
 - 只读最新的 inputRef 文件，不会回退读取更早的旧输出。
 
 修正 Agent 输出后执行：

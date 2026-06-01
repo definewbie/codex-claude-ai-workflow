@@ -16,7 +16,7 @@ public final class ContractRegistry {
     private static final NodeOutputContract INTAKE_PRODUCT_REVIEW = new NodeOutputContract(
             "intake.codex_product_review",
             Set.of("decision", "summary"),
-            Set.of("PASS", "NEEDS_REVISION", "BLOCKED"),
+            Set.of("READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED"),
             Set.of()
     );
     private static final NodeOutputContract DESIGN_CLAUDE = new NodeOutputContract(
@@ -28,7 +28,7 @@ public final class ContractRegistry {
     private static final NodeOutputContract DESIGN_ARCH_REVIEW = new NodeOutputContract(
             "design.codex_arch_review",
             Set.of("decision", "summary"),
-            Set.of("PASS", "NEEDS_REVISION", "BLOCKED"),
+            Set.of("READY_FOR_ARCH_REVIEW", "NEEDS_REVISION", "BLOCKED"),
             Set.of()
     );
     private static final NodeOutputContract PLAN_CLAUDE = new NodeOutputContract(

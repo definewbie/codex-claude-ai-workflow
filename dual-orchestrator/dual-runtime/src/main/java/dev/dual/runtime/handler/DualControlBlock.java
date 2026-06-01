@@ -4,12 +4,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-record DualControlBlock(Map<String, String> values) {
-    DualControlBlock {
+public record DualControlBlock(Map<String, String> values) {
+    public DualControlBlock {
         values = copy(values);
     }
 
-    String required(String key) {
+    public String required(String key) {
         var value = values.get(key);
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("dual-control missing required key: " + key);

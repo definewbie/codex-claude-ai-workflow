@@ -1,5 +1,7 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.runtime.handler.ContractRegistry;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -23,6 +26,19 @@ class PromptTemplateConsistencyTest {
             "ledger_path", "requirement", "context_package"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
+    private static final Pattern CONTROL_DECISION_PATTERN = Pattern.compile("(?m)^decision:\\s*([A-Z_|]+)\\s*$");
+    private static final Map<String, String> TEMPLATE_NODE_IDS = Map.of(
+            "intake-claude-brainstorm", "intake.claude_brainstorm",
+            "intake-codex-product-review", "intake.codex_product_review",
+            "design-claude", "design.claude_design",
+            "design-codex-review", "design.codex_arch_review",
+            "plan-claude", "plan.claude_plan",
+            "plan-codex-review", "plan.codex_plan_review",
+            "implement-claude", "implement.claude_implement",
+            "implement-claude-self-test", "implement.claude_self_test_report",
+            "acceptance-codex-review", "acceptance.codex_verifier_review",
+            "stage-claude-handoff", "stage.claude_handoff"
+    );
 
     static Stream<String> allTemplates() {
         return Stream.of(
@@ -60,6 +76,24 @@ class PromptTemplateConsistencyTest {
                 templateName + " missing 'decision:' key in dual-control contract");
         assertTrue(content.contains("summary:"),
                 templateName + " missing 'summary:' key in dual-control contract");
+    }
+
+    @ParameterizedTest
+    @MethodSource("allTemplates")
+    void templateDecisionValuesMatchRuntimeContract(String templateName) {
+        var content = loadTemplate(templateName);
+        var matcher = CONTROL_DECISION_PATTERN.matcher(content);
+        var declared = new java.util.LinkedHashSet<String>();
+        while (matcher.find()) {
+            declared.clear();
+            declared.addAll(List.of(matcher.group(1).split("\\|")));
+        }
+        assertFalse(declared.isEmpty(), templateName + " missing terminal decision value list");
+
+        var nodeId = TEMPLATE_NODE_IDS.get(templateName);
+        var contract = ContractRegistry.forNode(nodeId);
+        assertEquals(contract.allowedDecisions(), declared,
+                templateName + " decision values do not match " + nodeId + " runtime contract");
     }
 
     @ParameterizedTest

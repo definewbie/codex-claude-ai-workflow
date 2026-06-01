@@ -11,6 +11,7 @@ import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.ContractEventTypes;
 import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.GateHandler;
@@ -24,6 +25,7 @@ import java.util.Map;
 public final class WorkflowRuntime {
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
+    private final ArtifactContractValidator artifactContractValidator;
 
     public WorkflowRuntime(WorkflowFileLedger ledger, HandlerRegistry handlers) {
         if (ledger == null) {
@@ -34,6 +36,7 @@ public final class WorkflowRuntime {
         }
         this.ledger = ledger;
         this.handlers = handlers;
+        this.artifactContractValidator = new ArtifactContractValidator();
     }
 
     public WorkflowRuntimeResult resume(WorkflowCommand command) throws Exception {
@@ -102,6 +105,7 @@ public final class WorkflowRuntime {
                 case GATE -> throw new IllegalStateException("gate nodes are handled before routing");
             };
 
+            result = artifactContractValidator.validate(command.workspaceRoot(), nodeDefinition, result);
             emitDomainEvents(paths, nodeDefinition.id(), nodeDefinition.handlerType(), node.nodeInstanceId(), result);
             ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
             var next = ledger.loadCurrent(paths);
