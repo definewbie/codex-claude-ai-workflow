@@ -135,9 +135,11 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Context governance：profile、budget、degradation、placeholder/skip/fail。
 - TaskContract / ContractCompiler / ContractReviewGate。
 - FailureArbiter MVP。
+- CalibrationCandidate MVP：可校准的 failure classification 会生成 `calibration/candidates/<id>.json` 和 `.md`。
+- Failure summary MVP：分类失败路径会生成 `recovery/current-failure.md`。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
-- 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过，classification 分支仍需 deterministic fixture。
+- 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过，classification 分支仍需 deterministic fixture；当前脚本保留真实 acpx 语义，触发 classify 时会检查 calibration / recovery 产物。
 
 ## 4. 下一步设计方向
 
@@ -145,8 +147,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 
 ```text
 deterministic p6 reject fixture
-  → CalibrationCandidate MVP
-  → ReviewPacket / Timeline / FailureSummary
+  → ReviewPacket / Timeline projection
   → dualctl review show / watch
   → local dashboard
 ```
@@ -156,8 +157,8 @@ deterministic p6 reject fixture
 | 优先级 | 工作 | 原因 |
 |--------|------|------|
 | P0 | deterministic p6 reject fixture | 稳定验证 FailureArbiter / classify path |
-| P1 | CalibrationCandidate MVP | 让失败分类沉淀为可审查的改进候选 |
-| P1 | ReviewPacket / Timeline / FailureSummary | 为 CLI 和 UI 提供稳定读模型 |
+| P1 | ReviewPacket / Timeline projection | 为 CLI 和 UI 提供稳定读模型 |
+| P1 | Failure summary 扩展 | 把 acpx stderr、parser error、权限错误等执行失败也聚合进恢复摘要 |
 | P2 | `dualctl review show` / `dualctl watch` | 先用 CLI 验证人真正需要看的信息 |
 | P3 | Local UI dashboard | 在读模型稳定后做可视化 |
 

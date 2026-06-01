@@ -163,6 +163,64 @@ class FailureClassifyHandlerTest {
                 .contains("failure-classification.json"));
     }
 
+    @Test
+    void rejectContractGapWritesCalibrationCandidate() throws Exception {
+        writeMinimalContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of("decision", "REJECT",
+                        "summary", "Missing acceptance coverage",
+                        "contract_gaps", List.of("A6 source/status preservation was not explicit"))
+        ));
+
+        var candidatesDir = tempDir.resolve(".agent/workstreams/ws-fc/calibration/candidates");
+        assertTrue(Files.exists(candidatesDir));
+        List<Path> candidateFiles;
+        try (var stream = Files.list(candidatesDir)) {
+            candidateFiles = stream
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .toList();
+        }
+        assertEquals(1, candidateFiles.size());
+
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var json = mapper.readTree(candidateFiles.get(0).toFile());
+        assertEquals(1, json.get("schemaVersion").asInt());
+        assertEquals("ws-fc", json.get("sourceWorkstreamId").asText());
+        assertEquals("acceptance.classify_failure", json.get("sourceNodeId").asText());
+        assertEquals("CONTRACT_GAP", json.get("failureCategory").asText());
+        assertEquals("REJECT", json.get("reviewDecision").asText());
+        assertEquals("CONTRACT_TEMPLATE", json.get("proposedUpdateType").asText());
+        assertEquals("DRAFT", json.get("status").asText());
+        assertTrue(result.outputRefs().stream()
+                .anyMatch(ref -> ref.contains("/calibration/candidates/")));
+        assertTrue(result.result().containsKey("calibration_candidate_ref"));
+    }
+
+    @Test
+    void rejectWritesCurrentFailureSummary() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("", null, null);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of("decision", "REJECT", "summary", "Nothing was changed")
+        ));
+
+        var summaryPath = tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md");
+        assertTrue(Files.exists(summaryPath));
+        var summary = Files.readString(summaryPath, StandardCharsets.UTF_8);
+        assertTrue(summary.contains("# Current Failure"));
+        assertTrue(summary.contains("acceptance.classify_failure"));
+        assertTrue(summary.contains("REJECT"));
+        assertTrue(summary.contains("TOOL_LIMITATION"));
+        assertTrue(summary.contains("failure-classification.json"));
+        assertEquals(".agent/workstreams/ws-fc/recovery/current-failure.md",
+                result.result().get("failure_summary_ref"));
+    }
+
     // --- Helpers ---
 
     private void writeMinimalContract() throws Exception {

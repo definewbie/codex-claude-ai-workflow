@@ -47,7 +47,7 @@ deterministic failure evidence
 1. **deterministic p6 reject fixture**
    - 目标：稳定触发 `acceptance.classify_failure`，验证 failure classification 分支。
    - 当前 p6 smoke 能完整跑通，但分类分支是否触发取决于 Codex 是否 REJECT。
-   - 建议做法：新增一个 fixture case，让需求或检查标准明确包含一个容易被故意遗漏的验收点，或者支持一个 controlled fake reviewer mode。短期优先真实 acpx，但 classify 分支需要确定性样本。
+   - 建议做法：短期继续优先真实 acpx，不为了确定性而过早引入 fake reviewer。当前脚本在 classify 分支触发时会校验 failure classification、calibration candidate 和 failure summary；真正的 deterministic reject fixture 仍待单独设计。
 
 2. **status 字段校准**
    - 当前 `dualctl status` 会显示一些旧 checkpoint/stage 信息，比如 `Stage: design (pending)`，即使 workflow 已经跑到后面。
@@ -252,6 +252,8 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 原因：没有稳定触发 failure classification 的样本，CalibrationCandidate 无法可靠回归。
 
+当前状态：真实 acpx smoke 仍保留 `PASS-WARN`，不伪造 Codex REJECT。短期只补强“如果 classify 分支发生，就必须检查新产物”的断言。
+
 产出：
 
 - 一个 p6 reject smoke case
@@ -262,6 +264,8 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 ### Step 2：CalibrationCandidate MVP
 
 原因：这是 contract-driven harness 从“会分类失败”到“会沉淀经验”的关键一步。
+
+当前状态：第一版已落地在 `FailureClassifyHandler`。可校准分类会生成 JSON + Markdown 候选；`TOOL_LIMITATION` 和 `REVIEW_NOISE` 暂不生成候选，避免把一次性运行噪声变成长期规则。
 
 产出：
 
@@ -299,6 +303,8 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 ### Step 5：Failure summary
 
 原因：真实运行中失败一定会发生，恢复体验要比成功路径更重要。
+
+当前状态：分类失败路径已生成 `recovery/current-failure.md`，先覆盖 semantic failure 的恢复入口。后续还需要把 acpx stderr、parser error、权限错误等执行失败聚合进同一份摘要。
 
 产出：
 

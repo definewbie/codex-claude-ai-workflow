@@ -225,6 +225,20 @@ assert_p6_classify() {
       fail "events.jsonl missing failure_classified event (artifact exists but event missing)"
     fi
 
+    local candidate_count
+    candidate_count=$(fcount "$WS_DIR/calibration/candidates" "*.json")
+    if [[ "$candidate_count" -gt 0 ]]; then
+      ok "Calibration candidate(s): $candidate_count"
+    else
+      warn "No calibration candidate generated (classification category may not be calibratable)"
+    fi
+
+    if [[ -f "$WS_DIR/recovery/current-failure.md" ]]; then
+      ok "recovery/current-failure.md exists"
+    else
+      fail "recovery/current-failure.md missing (classify path was exercised)"
+    fi
+
     # Check report contains Failure Classification section if report exists
     local report_path="$WS_DIR/reports/latest-final-report.md"
     if [[ -f "$report_path" ]] && grep -qi "Failure Classification" "$report_path"; then
