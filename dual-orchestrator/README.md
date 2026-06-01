@@ -221,6 +221,14 @@ curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/revis
 
 `run=true&maxSteps=20` 可以在 approve / revise 后继续跑到下一个 gate、recovery、failure 或 completed。所有 action API 都复用 workflow ledger 和 workstream lock，和 CLI 使用同一套账本。CLI 仍然是主要操作入口；HTTP API 目前服务于后续 UI 和外部自动化。
 
+手动触发一次 scheduler tick：
+
+```bash
+curl -X POST "http://localhost:8080/api/scheduler/tick?workdir=<effective_worktree>&maxWorkstreams=10&maxStepsPerWorkstream=1"
+```
+
+第一版 scheduler 不常驻后台扫描，只在收到 tick 请求时工作。它会列出指定 `workdir` 下的 workstreams，只推进 `RUNNING` 状态的 workflow；已经等待人工 review、等待 recovery、失败、阻塞或完成的 workstream 会被跳过。
+
 ## acpx Sessions
 
 Agent 调用统一走 acpx：

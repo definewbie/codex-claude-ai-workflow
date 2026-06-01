@@ -246,7 +246,10 @@ POST /api/workstreams/{workstreamId}/resume?workdir=<effective_worktree>&maxStep
 POST /api/workstreams/{workstreamId}/retry?workdir=<effective_worktree>
 POST /api/workstreams/{workstreamId}/review/approve?workdir=<effective_worktree>&run=false
 POST /api/workstreams/{workstreamId}/review/revise?workdir=<effective_worktree>&run=false
+POST /api/scheduler/tick?workdir=<effective_worktree>&maxWorkstreams=10&maxStepsPerWorkstream=1
 ```
+
+Scheduler 当前是手动 tick，不是后台常驻扫描。它只推进 `RUNNING` workstreams；human gate、recovery、failed、blocked、completed 都会跳过，避免绕过人工卡点。
 
 页面优先级：
 
@@ -354,6 +357,7 @@ POST /api/workstreams/{workstreamId}/review/revise?workdir=<effective_worktree>&
 
 - `dual-server` status / timeline API（已完成第一版）
 - action API：review approve / revise、resume / retry（已完成第一版）
+- scheduler tick API（已完成第一版，非后台常驻）
 - read-only workstream dashboard
 - gate approval/revision form
 

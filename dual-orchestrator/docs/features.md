@@ -47,7 +47,8 @@
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖
-- [ ] T4.1 Scheduler：后台自动推进 workflow，扫描可恢复/可继续状态，脱离手动触发
+- [x] Scheduler tick MVP：`POST /api/scheduler/tick` 手动触发一次调度，只推进 `RUNNING` workstreams，遇到 human gate / recovery / failure / completed 会跳过。
+- [ ] T4.1 Background Scheduler：后台自动扫描和推进 workflow，支持 workspace roots registry、间隔配置和运行中保护。
 - [ ] T4.2 Web UI / Dashboard：可视化 workflow 状态、event 时间线、Agent 输出
 - [ ] T4.3 Notification：Slack / 邮件 / Webhook 推送状态变更
 - [ ] T4.4 安装脚本：`brew install` / `curl | sh` 等分发包
