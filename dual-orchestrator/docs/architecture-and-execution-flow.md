@@ -542,7 +542,7 @@ Budget 基于 token 计算（通过 `TokenEstimator` 接口，默认 ~4 chars/to
 | `LATEST` | 只显示最近 N 条 |
 | `POINTER_ONLY` | 只显示文件路径 |
 
-## 12. P4: 条件表达式 / 并行节点 / Schema 迁移
+## 12. P4: 条件表达式 / 并行节点
 
 ### 12.1 条件 Edge Routing
 
@@ -575,14 +575,17 @@ Node A ──(DONE)──→ Node B   ← 同时激活
 
 **顺序执行：** `WorkflowRuntime.resume` 遍历所有活跃节点快照，依次执行。每次执行后重新加载 current 状态。
 
-### 12.3 Schema 版本迁移
+## 13. Ledger schema migration 的当前立场
 
-`LedgerMigrator` 在 `WorkflowFileLedger.loadDefinition` 时检测版本差异并升级：
+当前项目还在快速演进，ledger schema 没有到稳定发布阶段，因此不把“完整历史账本迁移”作为近期目标。
 
-```
-CURRENT_SCHEMA_VERSION = 2
+现在代码里有一个很小的 `LedgerMigrator` 雏形，主要用于探索 workflow definition 这类结构化文件的读时兼容。但它不代表整个 `.agent/workstreams/<id>/` 目录都已经具备正式迁移能力，也不承诺所有旧 workstream 都能自动升级。
 
-v1 → v2: edge 新增 condition 字段（null = 无条件）
-```
+近期原则：
 
-迁移后的 JSON 自动回写磁盘。框架支持链式迁移（N → N+1 → N+2），未来版本只需添加新的迁移步骤。
+- 新 workstream 按当前 schema 生成。
+- 旧 workstream 如果是实验阶段产物，可以按需保留、归档或重新运行。
+- 不为尚未稳定的内部 ledger 文件投入完整 migration 成本。
+- 等 CalibrationCandidate、timeline projection、review packet 等读模型稳定后，再统一设计正式迁移策略。
+
+这和项目总体方向不冲突。dual-orchestrator 当前最重要的是把 harness 闭环跑稳：contract、verification、failure classification、calibration。数据迁移应该服务这个目标，而不是过早成为一个独立负担。

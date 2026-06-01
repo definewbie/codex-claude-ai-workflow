@@ -44,4 +44,4 @@
 
 - [x] 条件表达式：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 上支持条件判断
 - [x] 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume
-- [x] Schema 版本迁移：`LedgerMigrator` 框架，v1→v2 迁移（edge condition 字段），自动迁移旧数据
+- [ ] Ledger schema migration：当前框架仍在快速演进，暂不承诺完整历史账本迁移；仅保留最小兼容能力，等 schema 稳定后再设计正式迁移策略。
