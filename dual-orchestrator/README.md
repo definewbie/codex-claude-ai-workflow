@@ -72,6 +72,7 @@ Runtime 只认识三类节点：
 - Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
 - Failure summary MVP：分类失败路径会生成 `recovery/current-failure.md`。
+- Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
 - Ledger schema migration 暂不作为当前主线；schema 仍在快速演进，当前只保留最小兼容能力。
@@ -79,7 +80,7 @@ Runtime 只认识三类节点：
 仍未完成：
 
 - deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了边界分支引入 fake acpx。
-- Watch mode：还没有轮询式终端 dashboard。
+- 实时推送：还没有 SSE / file watch / WebSocket，当前 `dualctl watch` 是轮询式 CLI。
 - API server / scheduler。
 - Web UI / dashboard。
 - Notification 集成。
@@ -613,7 +614,15 @@ dualctl timeline --workdir <effective_worktree> <workstream_id>
 dualctl timeline --workdir <effective_worktree> --raw <workstream_id>
 ```
 
-`timeline.json` 聚合 workflow current 和 nodes 快照，包含 workflow 状态、active nodes、open gates、每个 node 的状态、iteration、artifact refs 和 duration。后续 `watch` / Web UI 会优先消费这个读模型，而不是直接解析 ledger 原始文件。
+持续观察进度：
+
+```bash
+dualctl watch --workdir <effective_worktree> <workstream_id>
+dualctl watch --workdir <effective_worktree> --once <workstream_id>
+dualctl watch --workdir <effective_worktree> --interval-ms 1000 <workstream_id>
+```
+
+`timeline.json` 聚合 workflow current 和 nodes 快照，包含 workflow 状态、active nodes、open gates、每个 node 的状态、iteration、artifact refs 和 duration。`watch` / Web UI 会优先消费这个读模型，而不是直接解析 ledger 原始文件。
 
 批准当前 gate：
 

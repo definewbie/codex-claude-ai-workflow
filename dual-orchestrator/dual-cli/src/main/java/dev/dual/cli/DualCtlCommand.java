@@ -14,6 +14,7 @@ import picocli.CommandLine.Command;
                 DoctorCommand.class,
                 StatusCommand.class,
                 TimelineCommand.class,
+                WatchCommand.class,
                 EventsCommand.class,
                 RunsCommand.class,
                 InspectCommand.class,

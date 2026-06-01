@@ -37,7 +37,8 @@
 
 ## P4 — 产品化基础设施
 
-- [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更
+- [x] Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
+- [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖
 - [ ] T4.1 Scheduler / API Server：HTTP API + 定时调度，脱离 CLI 手动推进

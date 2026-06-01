@@ -205,13 +205,15 @@ dualctl review show --workdir <workspace> <workstream_id>
 
 #### 3. Watch mode
 
+当前状态：第一版已完成。`dualctl watch` 基于 `timeline.json` 轮询展示当前 workflow 状态、active nodes、open gates 和最近节点；这不是 SSE/WebSocket 实时推送。
+
 命令形态：
 
 ```bash
 dualctl watch --workdir <workspace> <workstream_id>
 ```
 
-短期可以轮询 `workflow/current.json` 和 `events.jsonl`，不用一开始就做 SSE。
+短期采用轮询 `timeline.json`，不用一开始就做 SSE。
 
 显示：
 
@@ -324,6 +326,8 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 原因：不需要 Web UI 就能先解决“看进度”。
 
+当前状态：第一版已完成。
+
 产出：
 
 - `dualctl watch`
@@ -383,4 +387,4 @@ dev-calibration-candidate-mvp
 4. 最小 failure projection，供 recovery / watch / UI 消费
 5. 保留 p6 reject fixture 技术债，不在当前主线投入
 
-这些事情做好以后，再做 `dualctl watch` 和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。
+这些事情做好以后，再做 failure summary 扩展和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。
