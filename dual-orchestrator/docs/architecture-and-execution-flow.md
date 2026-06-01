@@ -149,7 +149,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 结合 long-term-plan 和真实 smoke 结果，下一步不应该先做完整 UI，而是把校准闭环的读模型补稳定：
 
 ```text
-Failure summary expansion
+status / failure / review read models
   → local dashboard
 ```
 
@@ -158,8 +158,8 @@ Failure summary expansion
 | 优先级 | 工作 | 原因 |
 |--------|------|------|
 | Tech Debt | deterministic p6 reject fixture | 真实 case 需要稳定覆盖 classify path 时再做 |
-| P0 | Failure summary 扩展 | 把 acpx stderr、parser error、权限错误等执行失败也聚合进恢复摘要 |
-| P2 | Local UI dashboard | 先消费稳定读模型，不直接解析 ledger 原始文件 |
+| Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
+| Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
 | P3 | Local UI dashboard | 在读模型稳定后做可视化 |
 
 ### 4.2 长期路线

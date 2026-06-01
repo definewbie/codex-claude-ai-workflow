@@ -50,9 +50,8 @@ deterministic failure evidence
    - 取舍：如果 Codex 实际上很少 REJECT，这条路径就是边界条件。当前不为了确定性引入 fake reviewer / controlled fixture；脚本只在 classify 分支真实触发时校验 failure classification、calibration candidate 和 failure summary。
 
 2. **status 字段校准**
-   - 当前 `dualctl status` 会显示一些旧 checkpoint/stage 信息，比如 `Stage: design (pending)`，即使 workflow 已经跑到后面。
-   - 这会影响 UI 和人工 review 的可信度。
-   - 需要整理 status 的数据来源，以 active node / workflow current 为准。
+   - 当前状态：已完成。`dualctl status` 默认以 workflow current / active node 为准，旧 checkpoint/stage 快照仅在 `--show-legacy` 时显示。
+   - 这给后续 UI/API 提供了更可信的状态口径。
 
 ### P1：CalibrationCandidate MVP
 

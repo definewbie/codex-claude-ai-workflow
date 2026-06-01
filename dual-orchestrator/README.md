@@ -447,9 +447,15 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 输出分两块：
 
 - `Workflow`：新的 workflow current state，是当前 `resume` / `review` 真正使用的状态。
-- `Compatibility snapshot (legacy, may be stale)`：旧 design-loop ledger 的兼容快照，字段可能不会随着新 workflow 每一步同步更新。
+- `Delivery`：如果已经执行交付阶段，会显示 delivery status、commit hash 和 PR URL。
 
-过渡期两套文件会同时存在；判断当前真实 active node 时，以 `Workflow` 区块和 `.agent/workstreams/<workstream_id>/workflow/current.json` 为准。
+默认不再显示旧 design-loop checkpoint/stage 快照，避免把 stale 字段误当成当前进度。排查旧账本时可以显式打开：
+
+```bash
+dualctl status --workdir <effective_worktree> --show-legacy <workstream_id>
+```
+
+判断当前真实 active node 时，以 `Workflow` 区块和 `.agent/workstreams/<workstream_id>/workflow/current.json` 为准。
 
 ### Runs
 

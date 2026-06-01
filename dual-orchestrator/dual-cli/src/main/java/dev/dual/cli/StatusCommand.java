@@ -25,6 +25,9 @@ public final class StatusCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
+    @Option(names = "--show-legacy", description = "Also print the compatibility checkpoint snapshot.")
+    boolean showLegacy;
+
     @Parameters(index = "0")
     String workstreamId;
 
@@ -39,7 +42,8 @@ public final class StatusCommand implements Callable<Integer> {
 
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
-        if (Files.exists(paths.workflowCurrentJson())) {
+        var hasWorkflowCurrent = Files.exists(paths.workflowCurrentJson());
+        if (hasWorkflowCurrent) {
             var workflowLedger = new WorkflowFileLedger();
             var current = workflowLedger.loadCurrent(paths);
             System.out.println();
@@ -75,14 +79,16 @@ public final class StatusCommand implements Callable<Integer> {
             }
         }
 
-        System.out.println();
-        System.out.println("Compatibility snapshot (legacy, may be stale):");
-        System.out.println("  Status: " + status.workstream().status());
-        System.out.println("  Stage: " + status.stage().type() + " (" + status.stage().status() + ")");
-        System.out.println("  Iteration: " + status.iteration().iterationId() + " (" + status.iteration().status() + ")");
-        System.out.println("  Checkpoint: " + status.checkpoint().checkpointId());
-        System.out.println("  Pending action: " + status.checkpoint().pendingAction());
-        System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
+        if (showLegacy || !hasWorkflowCurrent) {
+            System.out.println();
+            System.out.println("Compatibility snapshot (legacy, may be stale):");
+            System.out.println("  Status: " + status.workstream().status());
+            System.out.println("  Stage: " + status.stage().type() + " (" + status.stage().status() + ")");
+            System.out.println("  Iteration: " + status.iteration().iterationId() + " (" + status.iteration().status() + ")");
+            System.out.println("  Checkpoint: " + status.checkpoint().checkpointId());
+            System.out.println("  Pending action: " + status.checkpoint().pendingAction());
+            System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
+        }
         return 0;
     }
 
