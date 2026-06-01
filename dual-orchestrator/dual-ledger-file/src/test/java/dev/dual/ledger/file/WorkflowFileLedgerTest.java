@@ -436,7 +436,8 @@ class WorkflowFileLedgerTest {
         assertTrue(summary.contains(node.nodeInstanceId()));
         assertTrue(summary.contains("RECOVERABLE_RATE_LIMIT"));
         assertTrue(summary.contains("design.stderr.log"));
-        assertTrue(summary.contains("dualctl retry"));
+        assertTrue(summary.contains("dualctl retry --workdir " + tempDir.toAbsolutePath().normalize()));
+        assertFalse(summary.contains("--workstream-id"));
     }
 
     @Test

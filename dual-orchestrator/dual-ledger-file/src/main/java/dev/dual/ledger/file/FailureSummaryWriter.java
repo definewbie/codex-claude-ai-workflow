@@ -63,7 +63,9 @@ final class FailureSummaryWriter {
         content.append("\n## Suggested Action\n\n");
         content.append("- Inspect the evidence files listed above.\n");
         content.append("- Fix the external issue, agent session, prompt contract, or workspace state.\n");
-        content.append("- Resume with `dualctl retry --workstream-id ")
+        content.append("- Resume with `dualctl retry --workdir ")
+                .append(paths.workspaceRoot().toAbsolutePath().normalize())
+                .append(' ')
                 .append(paths.workstreamId().value())
                 .append("`.\n");
         return content.toString();
