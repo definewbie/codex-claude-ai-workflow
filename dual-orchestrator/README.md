@@ -71,7 +71,7 @@ Runtime 只认识三类节点：
 - `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
 - Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
-- Failure summary MVP：分类失败路径会生成 `recovery/current-failure.md`。
+- Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
@@ -554,6 +554,14 @@ dualctl run --workdir <effective_worktree> --max-steps 50 <workstream_id>
 ### Retry
 
 如果当前 active node 因为 agent runtime、quota、context window 或 prompt contract 问题进入 `FAILED` / `BLOCKED`，workflow 会停在 `WAITING_FOR_RECOVERY`，并打开一个 recovery gate。先修复外部问题，再显式 retry：
+
+失败现场会写入：
+
+```text
+.agent/workstreams/<workstream_id>/recovery/current-failure.md
+```
+
+这份摘要会列出当前失败节点、handler、失败原因、acpx/session 信息、exit code、output refs，以及建议的 `dualctl retry` 命令。它是给人工恢复使用的入口，不替代 `nodes/*.json`、`events.jsonl` 和具体 run outputs。
 
 ```bash
 dualctl retry --workdir <effective_worktree> --note "claude session reconnected" <workstream_id>

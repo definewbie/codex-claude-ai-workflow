@@ -124,4 +124,12 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
     public Path timelineJson() {
         return workstreamDir().resolve("timeline.json");
     }
+
+    public Path recoveryDir() {
+        return workstreamDir().resolve("recovery");
+    }
+
+    public Path currentFailureMarkdown() {
+        return recoveryDir().resolve("current-failure.md");
+    }
 }

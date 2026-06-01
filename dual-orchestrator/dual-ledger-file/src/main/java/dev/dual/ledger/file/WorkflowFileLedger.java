@@ -21,6 +21,7 @@ public final class WorkflowFileLedger {
     private final RoutingEngine routingEngine;
     private final NodeStateWriter nodeStateWriter;
     private final TimelineProjectionWriter timelineProjectionWriter;
+    private final FailureSummaryWriter failureSummaryWriter;
 
     public WorkflowFileLedger() {
         this(new AtomicJsonWriter());
@@ -36,6 +37,7 @@ public final class WorkflowFileLedger {
         this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker);
         this.nodeStateWriter = new NodeStateWriter(jsonWriter, this.objectMapper, eventLog);
         this.timelineProjectionWriter = new TimelineProjectionWriter(jsonWriter, this.objectMapper);
+        this.failureSummaryWriter = new FailureSummaryWriter(this.objectMapper);
     }
 
     public void initialize(WorkstreamPaths paths, String workflowInstanceId, WorkflowDefinition definition)
@@ -167,6 +169,9 @@ public final class WorkflowFileLedger {
             Map<String, Object> result
     ) throws IOException {
         routingEngine.completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result);
+        if (completedStatus == NodeStatus.FAILED || completedStatus == NodeStatus.BLOCKED) {
+            failureSummaryWriter.write(paths, nodeInstanceId);
+        }
         timelineProjectionWriter.write(paths);
     }
 

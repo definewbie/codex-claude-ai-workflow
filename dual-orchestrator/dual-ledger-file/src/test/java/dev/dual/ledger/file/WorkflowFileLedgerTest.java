@@ -402,6 +402,44 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void failedNodeWritesCurrentFailureSummary() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-failure-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.claude",
+                List.of(new NodeDefinition("design.claude", NodeKind.TASK, "agent.acpx", Map.of())),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-failure-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_RATE_LIMIT",
+                List.of(".agent/workstreams/ws-failure-summary/runs/run-001/outputs/design.stderr.log"),
+                Map.of(
+                        "run_id", "run-001",
+                        "exit_code", 4,
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT",
+                        "acpx_failure.recoverable", true
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("# Current Failure"));
+        assertTrue(summary.contains("design.claude"));
+        assertTrue(summary.contains(node.nodeInstanceId()));
+        assertTrue(summary.contains("RECOVERABLE_RATE_LIMIT"));
+        assertTrue(summary.contains("design.stderr.log"));
+        assertTrue(summary.contains("dualctl retry"));
+    }
+
+    @Test
     void invalidControlOutputOpensControlRepairGate() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-control-repair"));
         Files.createDirectories(paths.workstreamDir());

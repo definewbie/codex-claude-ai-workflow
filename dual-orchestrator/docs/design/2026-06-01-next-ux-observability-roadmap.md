@@ -314,7 +314,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 原因：真实运行中失败一定会发生，恢复体验要比成功路径更重要。
 
-当前状态：分类失败路径已生成 `recovery/current-failure.md`，先覆盖 semantic failure 的恢复入口。后续还需要把 acpx stderr、parser error、权限错误等执行失败聚合进同一份摘要。
+当前状态：ledger 已在普通 `FAILED` / `BLOCKED` 节点停住时生成 `recovery/current-failure.md`，覆盖 acpx exit code、失败原因、output refs 和 retry 提示。分类失败路径仍会生成更语义化的摘要，并关联 classification / calibration artifact。后续可以继续增强 stderr 摘录、parser error 摘录和权限错误分类，但不再阻塞当前主流程。
 
 产出：
 
