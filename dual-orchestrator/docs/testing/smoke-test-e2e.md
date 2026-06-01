@@ -102,8 +102,11 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 # 跳过 build（开发中反复跑时）
 ./scripts/smoke-test.sh --case thin-basic --skip-build --cleanup
 
-# 交互模式（每个 gate 暂停审阅）
+# 终端交互模式（脚本在每个 gate 询问是否 approve）
 ./scripts/smoke-test.sh --interactive --cleanup
+
+# UI 人审模式（脚本在每个 gate 等你去 Operator Panel 审阅和操作）
+./scripts/smoke-test.sh --case p5-contract-happy-path --manual-gates
 
 # 列出可用 case
 ./scripts/smoke-test.sh --list
@@ -148,6 +151,44 @@ http://localhost:8080/
 ```
 
 在页面顶部 `Effective workdir` 填入脚本输出里的 `Workspace`，点击 `Refresh`。页面可以列出 workstreams，查看 status / timeline，并执行 `Resume`、`Approve + Run`、`Complete`、`Retry`、`Revise + Run`。
+
+### UI 人审 Smoke
+
+`--manual-gates` 会把 gate 决策交给 Operator Panel：
+
+```bash
+cd dual-orchestrator
+mvn -pl dual-server -am package
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+另开一个终端：
+
+```bash
+cd dual-orchestrator
+./scripts/smoke-test.sh --case p5-contract-happy-path --manual-gates
+```
+
+每次 workflow 到达 human gate，脚本会打印：
+
+```text
+Open operator panel: http://localhost:8080
+Effective workdir: ...
+Workstream: ...
+Gate: ...
+Review packet: ...
+```
+
+操作步骤：
+
+1. 打开 `http://localhost:8080/`。
+2. 把 `Effective workdir` 填到页面顶部。
+3. 点击 `Refresh`，选中 workstream。
+4. 阅读 `Human Review Packet`。
+5. 根据 review 结果点击 `Approve + Run`、`Revise + Run` 或最后一个 gate 的 `Complete`。
+6. 回到 smoke 脚本按 Enter，脚本会重新读取状态并继续。
+
+这个模式不会自动 approve gate，适合验证 UI 和人工卡点语义。`--cleanup` 可以和 `--manual-gates` 一起使用，但调试 UI 时建议先不要加，便于保留 ledger。
 
 ## 每次 E2E 运行建议记录的数据
 

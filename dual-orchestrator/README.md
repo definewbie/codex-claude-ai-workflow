@@ -1038,6 +1038,15 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 
 然后打开 `http://localhost:8080/`，把脚本输出里的 `Workspace` 粘到页面顶部的 `Effective workdir`。
 
+如果想让 smoke 在每个 human gate 停下来，改由 Operator Panel 完成人工审阅和 approve：
+
+```bash
+cd dual-orchestrator
+./scripts/smoke-test.sh --case p5-contract-happy-path --manual-gates
+```
+
+脚本到达 gate 后会打印 Operator Panel 地址、effective workdir、workstream id 和 review packet 路径。你在页面里读完 `Human Review Packet`，点击 `Approve + Run`、`Revise + Run` 或最后一个 gate 的 `Complete`，再回到终端按 Enter。这个模式不会自动 approve gate。
+
 ### Real acpx Smoke
 
 完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 thin、p5、p6 三个真实 acpx case。

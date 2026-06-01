@@ -11,6 +11,7 @@
 #   ./scripts/smoke-test.sh --case all                   # Run all cases sequentially
 #   ./scripts/smoke-test.sh --list                       # List available cases
 #   ./scripts/smoke-test.sh --interactive                # Pause at each gate for review
+#   ./scripts/smoke-test.sh --manual-gates               # Pause at each gate for external UI/API approval
 #   ./scripts/smoke-test.sh --skip-build                 # Skip mvn package
 #   ./scripts/smoke-test.sh --cleanup                    # Delete fixture repo after test
 #   ./scripts/smoke-test.sh --with-github                # Enable GitHub remote repo creation
@@ -37,10 +38,12 @@ JAR_PATH="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
 MAX_APPROVE_ROUNDS=10
 
 INTERACTIVE=false
+MANUAL_GATES=false
 SKIP_BUILD=false
 CLEANUP=false
 WITH_GITHUB=false
 CASE_NAME="thin-basic"
+OPERATOR_URL="${DUAL_OPERATOR_URL:-http://localhost:8080}"
 
 # ─── Parse args ──────────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -66,6 +69,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     --interactive) INTERACTIVE=true ;;
+    --manual-gates) MANUAL_GATES=true ;;
     --skip-build)  SKIP_BUILD=true ;;
     --cleanup)     CLEANUP=true ;;
     --with-github) WITH_GITHUB=true ;;
@@ -188,6 +192,46 @@ fcount() {
     return 0
   fi
   find "$dir" -maxdepth 1 -name "$pattern" 2>/dev/null | wc -l | tr -d ' '
+}
+
+review_packet_ref_for_active_node() {
+  local active_node_def="$1"
+  local active_node_instance="$2"
+  if [[ -z "$active_node_instance" ]]; then
+    echo ""
+    return 0
+  fi
+  echo ".agent/workstreams/$WORKSTREAM_ID/reviews/$active_node_instance.md"
+}
+
+pause_for_manual_gate() {
+  local active_node_def="$1"
+  local active_node_instance="$2"
+  local is_final_gate="$3"
+  local packet_ref
+  packet_ref=$(review_packet_ref_for_active_node "$active_node_def" "$active_node_instance")
+
+  echo ""
+  log "=== Manual gate mode ==="
+  log "The workflow is paused for human review. The smoke script will not approve this gate."
+  log "Open operator panel: $OPERATOR_URL"
+  log "Effective workdir: $WORKSPACE_DIR"
+  log "Workstream: $WORKSTREAM_ID"
+  log "Gate: $active_node_def"
+  if [[ -n "$packet_ref" ]]; then
+    log "Review packet: $WORKSPACE_DIR/$packet_ref"
+  fi
+  if [[ "$is_final_gate" == true ]]; then
+    log "Final gate: use Complete in the UI to finish this workstream."
+  else
+    log "Use Approve + Run or Revise + Run in the UI, then return here."
+  fi
+  read -rp "$(echo -e "${BOLD}Press Enter after finishing the gate action in the UI, or type q to stop: ${RESET}")" REPLY
+  if [[ "$REPLY" =~ ^[Qq]$ ]]; then
+    FINAL_STATUS="USER_STOPPED"
+    return 1
+  fi
+  return 0
 }
 
 install_controlled_acpx() {
@@ -680,7 +724,11 @@ GITIGNORE
   fi
 
   # ─── Phase 2: Gate loop ─────────────────────────────────────────────────
-  step "Phase 2: Gate approval loop [$CASE_NAME]"
+  if [[ "$MANUAL_GATES" == true ]]; then
+    step "Phase 2: Manual gate loop [$CASE_NAME]"
+  else
+    step "Phase 2: Gate approval loop [$CASE_NAME]"
+  fi
 
   # gate.human_next_stage_approval has edge: approved → intake.claude_brainstorm (loops!)
   # To actually finish the workflow, we must use "review complete" on that gate.
@@ -736,11 +784,19 @@ GITIGNORE
 
     # Detect which gate we're at by parsing "Active node definition:" from status output
     ACTIVE_NODE_DEF=$(echo "$STATUS_OUTPUT" | sgrep "Active node definition:" | awk '{print $NF}')
+    ACTIVE_NODE_INSTANCE=$(echo "$STATUS_OUTPUT" | sgrep "Active nodes:" | sed -E 's/.*\[([^]]*)\].*/\1/' | cut -d',' -f1 | tr -d ' ')
 
     IS_FINAL_GATE=false
     if [[ "$ACTIVE_NODE_DEF" == "$CASE_FINAL_GATE" ]]; then
       IS_FINAL_GATE=true
       log "Detected final stage gate: $CASE_FINAL_GATE"
+    fi
+
+    if [[ "$MANUAL_GATES" == true ]]; then
+      if ! pause_for_manual_gate "$ACTIVE_NODE_DEF" "$ACTIVE_NODE_INSTANCE" "$IS_FINAL_GATE"; then
+        break
+      fi
+      continue
     fi
 
     if [[ "$INTERACTIVE" == true ]]; then
