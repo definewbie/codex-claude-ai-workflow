@@ -1,5 +1,6 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -882,6 +883,78 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("Keep scope narrow."));
         assertTrue(markdown.contains("## Handoff Context"));
         assertTrue(markdown.contains("Implemented the accepted batch."));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void nextStagePromptHandlerExtractsNumberedHandoffSections() throws Exception {
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.md");
+        Files.createDirectories(handoff.getParent());
+        Files.writeString(handoff, """
+                # Handoff
+
+                ## 1. Completed Work
+
+                Added `calculate(a, b)` to `main.py` and documented it in `README.md`.
+
+                ## 3. Changed Files
+
+                - main.py
+                - README.md
+
+                ## 4. Verification
+
+                `python main.py` still prints `world`; calculate returns expected sums.
+
+                ## 5. Open Risks
+
+                None.
+
+                ## 7. Suggested Next Prompt
+
+                Merge this completed smoke fixture change.
+
+                ```dual-control
+                decision: HANDOFF_READY
+                summary: ready
+                ```
+                """);
+
+        var handler = new PromptGenerateNextStageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
+                node(
+                        "stage.generate_next_prompt",
+                        NodeKind.TASK,
+                        "prompt.generate_next_stage",
+                        List.of(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.md")
+                )
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(true, result.result().get("used_suggested_prompt_section"));
+
+        var promptMarkdown = Files.readString(tempDir.resolve(".agent/workstreams/ws/artifacts/next-stage/next-stage-prompt.md"));
+        assertTrue(promptMarkdown.contains("Merge this completed smoke fixture change."));
+
+        var handoffJson = new ObjectMapper().readValue(
+                tempDir.resolve(".agent/workstreams/ws/artifacts/next-stage/handoff.json").toFile(),
+                Map.class
+        );
+        var completedWork = (List<String>) handoffJson.get("completedWork");
+        assertEquals(1, completedWork.size());
+        assertTrue(completedWork.get(0).contains("calculate"));
+
+        var changedFiles = (List<String>) handoffJson.get("changedFiles");
+        assertEquals(List.of("main.py", "README.md"), changedFiles);
+
+        var openRisks = (List<String>) handoffJson.get("openRisks");
+        assertEquals(List.of("None."), openRisks);
+
+        var verificationState = (String) handoffJson.get("verificationState");
+        assertTrue(verificationState.contains("python main.py"));
     }
 
     @Test

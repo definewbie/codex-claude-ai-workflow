@@ -883,7 +883,7 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 
 `next-stage-prompt.md` 是下一阶段的人类 review 入口之一。它会保留 handoff 原文作为上下文，但把建议提示词单独放在 `## Prompt`。
 
-`handoff.json` 是从 agent handoff markdown 解析生成的结构化 sidecar，包含 `completedWork`、`changedFiles`、`openRisks`、`verificationState` 等字段。下游 `context.build_package` handler 在渲染 git_evidence DIFF_STAT 时会优先使用 `changedFiles` 数组作为数据源，避免重新解析 markdown。如果 handoff.json 不存在，handler 回退到文件读取。
+`handoff.json` 是从 agent handoff markdown 解析生成的结构化 sidecar，包含 `completedWork`、`changedFiles`、`openRisks`、`verificationState` 等字段。解析器会容忍 `## 1. Completed Work` 这类编号标题，以及没有列表符号的段落式 handoff，避免 Agent 文风轻微漂移时丢失结构化上下文。下游 `context.build_package` handler 在渲染 git_evidence DIFF_STAT 时会优先使用 `changedFiles` 数组作为数据源，避免重新解析 markdown。如果 handoff.json 不存在，handler 回退到文件读取。
 
 当 `gate.human_next_stage_approval` 被批准后，workflow 会回到 `intake.claude_brainstorm` 开启下一轮 iteration，并把这个文件作为 direct input artifact 展开到 Claude prompt 中。
 

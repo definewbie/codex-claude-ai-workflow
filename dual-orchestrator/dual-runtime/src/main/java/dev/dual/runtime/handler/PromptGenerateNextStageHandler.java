@@ -96,7 +96,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var lines = handoffText.lines().toList();
         var start = -1;
         for (int i = 0; i < lines.size(); i++) {
-            if (lines.get(i).matches("^#{1,6}\\s+Suggested Next Prompt\\s*$")) {
+            if (headingMatches(lines.get(i), "Suggested Next Prompt")) {
                 start = i + 1;
                 break;
             }
@@ -107,7 +107,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var builder = new StringBuilder();
         for (int i = start; i < lines.size(); i++) {
             var line = lines.get(i);
-            if (line.matches("^#{1,6}\\s+.*$") || line.trim().equals("```dual-control")) {
+            if (isMarkdownHeading(line) || line.trim().equals("```dual-control")) {
                 break;
             }
             builder.append(line).append("\n");
@@ -129,32 +129,39 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         json.put("completedWork", extractListSection(handoffText, "Completed Work"));
         json.put("changedFiles", extractListSection(handoffText, "Changed Files"));
         json.put("openRisks", extractListSection(handoffText, "Open Risks"));
-        json.put("verificationState", extractTextSection(handoffText, "Verification State"));
+        json.put("verificationState", extractTextSection(handoffText, "Verification State", "Verification"));
         json.put("generatedAt", Instant.now().toString());
         return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(json);
     }
 
-    private static List<String> extractListSection(String text, String sectionName) {
-        var content = extractSectionContent(text, sectionName);
+    private static List<String> extractListSection(String text, String... sectionNames) {
+        var content = extractSectionContent(text, sectionNames);
         if (content.isBlank()) return List.of();
-        return content.lines()
+        var bullets = content.lines()
                 .map(String::strip)
                 .filter(line -> line.startsWith("- ") || line.startsWith("* "))
                 .map(line -> line.substring(2).strip())
                 .filter(line -> !line.isBlank())
                 .toList();
+        if (!bullets.isEmpty()) {
+            return bullets;
+        }
+        return content.lines()
+                .map(String::strip)
+                .filter(line -> !line.isBlank())
+                .filter(line -> !line.startsWith("```"))
+                .toList();
     }
 
-    private static String extractTextSection(String text, String sectionName) {
-        return extractSectionContent(text, sectionName).strip();
+    private static String extractTextSection(String text, String... sectionNames) {
+        return extractSectionContent(text, sectionNames).strip();
     }
 
-    private static String extractSectionContent(String text, String sectionName) {
+    private static String extractSectionContent(String text, String... sectionNames) {
         var lines = text.lines().toList();
         var start = -1;
-        var headerPattern = Pattern.compile("^#{1,6}\\s+" + Pattern.quote(sectionName) + "\\s*$");
         for (int i = 0; i < lines.size(); i++) {
-            if (headerPattern.matcher(lines.get(i)).matches()) {
+            if (headingMatches(lines.get(i), sectionNames)) {
                 start = i + 1;
                 break;
             }
@@ -164,11 +171,38 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var builder = new StringBuilder();
         for (int i = start; i < lines.size(); i++) {
             var line = lines.get(i);
-            if (line.matches("^#{1,6}\\s+.*$") || line.trim().equals("```dual-control")) {
+            if (isMarkdownHeading(line) || line.trim().equals("```dual-control")) {
                 break;
             }
             builder.append(line).append("\n");
         }
         return builder.toString().stripTrailing();
+    }
+
+    private static boolean headingMatches(String line, String... sectionNames) {
+        var title = normalizedHeadingTitle(line);
+        if (title.isBlank()) {
+            return false;
+        }
+        for (var sectionName : sectionNames) {
+            if (title.equalsIgnoreCase(sectionName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isMarkdownHeading(String line) {
+        return !normalizedHeadingTitle(line).isBlank();
+    }
+
+    private static String normalizedHeadingTitle(String line) {
+        var matcher = Pattern.compile("^#{1,6}\\s+(.+?)\\s*$").matcher(line);
+        if (!matcher.matches()) {
+            return "";
+        }
+        return matcher.group(1)
+                .replaceFirst("^\\d+[.)]\\s+", "")
+                .strip();
     }
 }
