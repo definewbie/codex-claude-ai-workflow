@@ -140,7 +140,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
-- Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workflow status / timeline，并执行最小 action：resume、retry、review approve/revise。它是后续 dashboard / scheduler 的入口雏形，但当前不做后台自动调度。
+- Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow status / timeline，并执行最小 action：resume、retry、review approve/revise。它是后续 dashboard / scheduler 的入口雏形，但当前不做后台自动调度。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
 - 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过。classification 分支是边界路径，当前保留 `PASS-WARN` 语义；触发 classify 时会检查 calibration / recovery 产物。deterministic reject fixture 暂作为技术债。

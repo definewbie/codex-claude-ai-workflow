@@ -201,6 +201,7 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 查询某个 workstream：
 
 ```bash
+curl "http://localhost:8080/api/workstreams?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/status?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/timeline?workdir=<effective_worktree>"
 ```

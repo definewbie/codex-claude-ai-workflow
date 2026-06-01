@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/workstreams/{workstreamId}")
+@RequestMapping("/api/workstreams")
 public class WorkstreamApiController {
     private final WorkstreamQueryService queryService;
     private final WorkstreamActionService actionService;
@@ -24,15 +24,29 @@ public class WorkstreamApiController {
         this.actionService = actionService;
     }
 
-    @GetMapping("/status")
+    @GetMapping
+    public Map<String, Object> list(
+            @RequestParam(defaultValue = ".") Path workdir
+    ) throws Exception {
+        return queryService.list(workdir);
+    }
+
     public Map<String, Object> status(
+            String workstreamId,
+            Path workdir
+    ) throws Exception {
+        return queryService.status(workdir, workstreamId);
+    }
+
+    @GetMapping("/{workstreamId}/status")
+    public Map<String, Object> statusByPath(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = ".") Path workdir
     ) throws Exception {
         return queryService.status(workdir, workstreamId);
     }
 
-    @GetMapping("/timeline")
+    @GetMapping("/{workstreamId}/timeline")
     public Map<String, Object> timeline(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = ".") Path workdir
@@ -40,7 +54,7 @@ public class WorkstreamApiController {
         return queryService.timeline(workdir, workstreamId);
     }
 
-    @PostMapping("/resume")
+    @PostMapping("/{workstreamId}/resume")
     public Map<String, Object> resume(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = ".") Path workdir,
@@ -49,7 +63,7 @@ public class WorkstreamApiController {
         return actionService.resume(workdir, workstreamId, maxSteps);
     }
 
-    @PostMapping("/retry")
+    @PostMapping("/{workstreamId}/retry")
     public Map<String, Object> retry(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = ".") Path workdir,
@@ -58,7 +72,7 @@ public class WorkstreamApiController {
         return actionService.retry(workdir, workstreamId, request == null ? "" : request.note());
     }
 
-    @PostMapping("/review/approve")
+    @PostMapping("/{workstreamId}/review/approve")
     public Map<String, Object> approve(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = ".") Path workdir,
@@ -68,7 +82,7 @@ public class WorkstreamApiController {
         return actionService.approve(workdir, workstreamId, run, maxSteps);
     }
 
-    @PostMapping("/review/revise")
+    @PostMapping("/{workstreamId}/review/revise")
     public Map<String, Object> revise(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = ".") Path workdir,

@@ -43,7 +43,7 @@
 ## P4 — 产品化基础设施
 
 - [x] Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
-- [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workflow status / timeline，并支持最小 action：resume、retry、review approve/revise；暂不包含 scheduler 或 UI。
+- [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow status / timeline，并支持最小 action：resume、retry、review approve/revise；暂不包含 scheduler 或 UI。
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖

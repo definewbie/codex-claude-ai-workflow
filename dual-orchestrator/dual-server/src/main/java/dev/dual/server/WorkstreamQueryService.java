@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,26 @@ public class WorkstreamQueryService {
         return response;
     }
 
+    public Map<String, Object> list(Path workspaceRoot) throws IOException {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var workstreamsDir = root.resolve(".agent").resolve("workstreams");
+        var items = new ArrayList<Map<String, Object>>();
+        if (Files.exists(workstreamsDir)) {
+            try (var stream = Files.list(workstreamsDir)) {
+                for (var dir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(Path::toString)).toList()) {
+                    var workstreamJson = dir.resolve("workstream.json");
+                    if (Files.exists(workstreamJson)) {
+                        items.add(workstreamSummary(root, dir, workstreamJson));
+                    }
+                }
+            }
+        }
+        var response = new LinkedHashMap<String, Object>();
+        response.put("workdir", root.toString());
+        response.put("workstreams", items);
+        return response;
+    }
+
     public Map<String, Object> timeline(Path workspaceRoot, String workstreamId) throws IOException {
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
@@ -75,6 +97,26 @@ public class WorkstreamQueryService {
             throw new IOException("timeline projection not found: " + paths.timelineJson());
         }
         return objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE);
+    }
+
+    private Map<String, Object> workstreamSummary(Path root, Path dir, Path workstreamJson) throws IOException {
+        var workstream = objectMapper.readValue(workstreamJson.toFile(), MAP_TYPE);
+        var item = new LinkedHashMap<String, Object>();
+        item.put("workstreamId", text(workstream.get("workstreamId")));
+        item.put("title", text(workstream.get("title")));
+        item.put("status", text(workstream.get("status")));
+        item.put("updatedAt", text(workstream.get("updatedAt")));
+        item.put("ledger", root.relativize(dir).toString());
+
+        var currentJson = dir.resolve("workflow").resolve("current.json");
+        if (Files.exists(currentJson)) {
+            var current = objectMapper.readValue(currentJson.toFile(), MAP_TYPE);
+            item.put("workflowId", text(current.get("workflowId")));
+            item.put("workflowStatus", text(current.get("status")));
+            item.put("activeNodeCount", sizeOf(current.get("activeNodeInstanceIds")));
+            item.put("openGateCount", sizeOf(current.get("openGateIds")));
+        }
+        return item;
     }
 
     private Map<String, Object> activeNode(WorkstreamPaths paths, String nodeId) {
@@ -92,6 +134,14 @@ public class WorkstreamQueryService {
         } catch (IOException e) {
             throw new WorkstreamQueryException(e);
         }
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private static int sizeOf(Object value) {
+        return value instanceof List<?> list ? list.size() : 0;
     }
 
     static final class WorkstreamQueryException extends RuntimeException {

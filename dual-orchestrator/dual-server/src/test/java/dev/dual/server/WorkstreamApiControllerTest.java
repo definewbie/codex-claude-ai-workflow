@@ -48,6 +48,23 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void listReturnsWorkstreamSummaries() throws Exception {
+        createWorkstream("ws-api-list-a");
+        createWorkstream("ws-api-list-b");
+        var controller = controller();
+
+        var response = controller.list(tempDir);
+
+        var workstreams = (List<Map<String, Object>>) response.get("workstreams");
+        assertEquals(2, workstreams.size());
+        assertEquals("ws-api-list-a", workstreams.get(0).get("workstreamId"));
+        assertEquals("WAITING_FOR_HUMAN", workstreams.get(0).get("workflowStatus"));
+        assertEquals(1, workstreams.get(0).get("openGateCount"));
+        assertFalse(workstreams.get(0).containsKey("legacy"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void timelineReturnsProjectionJson() throws Exception {
         var fixture = createWorkstream("ws-api-timeline");
         var controller = controller();
