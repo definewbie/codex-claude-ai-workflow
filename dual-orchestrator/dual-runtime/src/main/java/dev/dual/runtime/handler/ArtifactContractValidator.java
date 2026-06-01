@@ -47,9 +47,10 @@ public final class ArtifactContractValidator {
             if (!path.startsWith(root) || !Files.isRegularFile(path)) {
                 continue;
             }
-            var parsed = parser.parse(Files.readString(path, StandardCharsets.UTF_8), contract);
+            var markdown = Files.readString(path, StandardCharsets.UTF_8);
+            var parsed = parser.parse(markdown, contract);
             if (parsed.valid()) {
-                return withContractSidecar(root, nodeDefinition, result, contract, parsed.block(), ref, path);
+                return withContractSidecar(root, nodeDefinition, result, contract, parsed.block(), ref, path, markdown);
             }
             lastInvalid = parsed;
             break;
@@ -64,7 +65,8 @@ public final class ArtifactContractValidator {
             NodeOutputContract contract,
             DualControlBlock block,
             String outputRef,
-            Path outputPath
+            Path outputPath,
+            String markdown
     ) throws Exception {
         var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
         var sidecarRef = root.relativize(sidecarPath).toString();
@@ -79,6 +81,32 @@ public final class ArtifactContractValidator {
         document.put("source_output_ref", outputRef);
         document.put("generated_at", Instant.now().toString());
         document.put("control", block.values());
+        document.put("must_fix", MarkdownArtifactFields.listSection(
+                markdown,
+                "Must Fix",
+                "Gaps / Must Fix",
+                "Must Fix Before Implementation"
+        ));
+        document.put("open_risks", MarkdownArtifactFields.listSection(
+                markdown,
+                "Open Risks",
+                "Residual Risks",
+                "Residual Risk",
+                "Risks",
+                "Product Risks",
+                "Architecture Risks",
+                "Scope Risks",
+                "Test Coverage Risks",
+                "Known Risks"
+        ));
+        document.put("changed_files", MarkdownArtifactFields.listSection(markdown, "Changed Files"));
+        document.put("verification_summary", MarkdownArtifactFields.textSection(
+                markdown,
+                "Verification Summary",
+                "Verification State",
+                "Verification Adequacy",
+                "Self-Test Performed"
+        ));
         Files.writeString(
                 sidecarPath,
                 OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",

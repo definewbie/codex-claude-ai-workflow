@@ -65,6 +65,47 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void sidecarIncludesPipelineFieldsFromKnownMarkdownSections() throws Exception {
+        var outputRef = writeOutput("acceptance.md", """
+                # Acceptance
+
+                ## Gaps / Must Fix
+
+                - Add missing empty-state assertion.
+                - Confirm no out-of-scope files changed.
+
+                ## Changed Files
+
+                - src/main/App.java
+                - README.md
+
+                ## Verification Adequacy
+
+                Developer self-test is acceptable, but no regression smoke was run.
+
+                ## Residual Risks
+
+                - Manual QA still needed for mobile layout.
+
+                ```dual-control
+                decision: ACCEPT_WITH_NOTES
+                summary: Accepted with verification notes.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
+
+        var sidecar = Files.readString(tempDir.resolve("acceptance.contract.json"));
+        assertTrue(sidecar.contains("\"must_fix\""));
+        assertTrue(sidecar.contains("Add missing empty-state assertion."));
+        assertTrue(sidecar.contains("\"changed_files\""));
+        assertTrue(sidecar.contains("src/main/App.java"));
+        assertTrue(sidecar.contains("\"verification_summary\" : \"Developer self-test is acceptable, but no regression smoke was run.\""));
+        assertTrue(sidecar.contains("\"open_risks\""));
+        assertTrue(sidecar.contains("Manual QA still needed for mobile layout."));
+    }
+
+    @Test
     void failsMissingRequiredControlKey() throws Exception {
         var outputRef = writeOutput("review.md", """
                 Review passed.

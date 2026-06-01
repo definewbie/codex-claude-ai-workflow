@@ -218,6 +218,10 @@ class ContextBuildPackageHandlerTest {
                   "node_id": "design.codex_arch_review",
                   "decision": "READY_FOR_ARCH_REVIEW",
                   "summary": "Architecture is ready.",
+                  "must_fix": ["Clarify rollout scope"],
+                  "open_risks": ["Migration risk"],
+                  "changed_files": ["docs/design.md"],
+                  "verification_summary": "No runtime verification needed yet.",
                   "source_output_ref": ".agent/workstreams/ws-ctx/runs/run-001/outputs/design-codex-review.md"
                 }
                 """, StandardCharsets.UTF_8);
@@ -230,6 +234,10 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("- Contract: design.codex_arch_review"));
         assertTrue(markdown.contains("- Decision: READY_FOR_ARCH_REVIEW"));
         assertTrue(markdown.contains("- Summary: Architecture is ready."));
+        assertTrue(markdown.contains("- Must Fix: Clarify rollout scope"));
+        assertTrue(markdown.contains("- Open Risks: Migration risk"));
+        assertTrue(markdown.contains("- Changed Files: docs/design.md"));
+        assertTrue(markdown.contains("- Verification: No runtime verification needed yet."));
     }
 
     @Test

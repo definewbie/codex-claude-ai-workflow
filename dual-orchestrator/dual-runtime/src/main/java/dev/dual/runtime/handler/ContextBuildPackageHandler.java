@@ -792,7 +792,27 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (!summary.isBlank()) {
             builder.append("- Summary: ").append(summary).append("\n");
         }
+        appendListSummary(builder, "Must Fix", contract.get("must_fix"));
+        appendListSummary(builder, "Open Risks", contract.get("open_risks"));
+        appendListSummary(builder, "Changed Files", contract.get("changed_files"));
+        var verification = text(contract.get("verification_summary"));
+        if (!verification.isBlank()) {
+            builder.append("- Verification: ").append(verification.replace("\n", " / ")).append("\n");
+        }
         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n\n");
+    }
+
+    private static void appendListSummary(StringBuilder builder, String label, Object value) {
+        if (!(value instanceof List<?> items) || items.isEmpty()) {
+            return;
+        }
+        var texts = items.stream()
+                .map(ContextBuildPackageHandler::text)
+                .filter(item -> !item.isBlank())
+                .toList();
+        if (!texts.isEmpty()) {
+            builder.append("- ").append(label).append(": ").append(String.join("; ", texts)).append("\n");
+        }
     }
 
     private static boolean isAgentOutput(Path path) {
