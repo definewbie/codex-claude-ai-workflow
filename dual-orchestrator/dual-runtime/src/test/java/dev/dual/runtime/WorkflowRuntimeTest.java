@@ -47,15 +47,17 @@ class WorkflowRuntimeTest {
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-runtime", definition);
 
+        var gate = new FakeGate();
         var runtime = new WorkflowRuntime(
                 ledger,
-                new HandlerRegistry(List.of(new FakeTask()), List.of(), List.of(new FakeGate()))
+                new HandlerRegistry(List.of(new FakeTask()), List.of(), List.of(gate))
         );
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-runtime"));
 
         assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, result.status());
         assertEquals("gate.review", result.activeNode());
         assertTrue(result.message().contains("resumed"));
+        assertEquals(1, gate.openCount());
     }
 
     @Test
@@ -166,6 +168,8 @@ class WorkflowRuntimeTest {
     }
 
     private static final class FakeGate implements GateHandler {
+        private int openCount;
+
         @Override
         public String type() {
             return "human.review";
@@ -173,7 +177,12 @@ class WorkflowRuntimeTest {
 
         @Override
         public NodeResult openOrInspect(GateContext context) {
+            openCount++;
             return NodeResult.waiting("open", Map.of("allowed_actions", List.of("approve", "revise")));
+        }
+
+        int openCount() {
+            return openCount;
         }
     }
 

@@ -5,8 +5,10 @@ import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.handler.ContractEventTypes;
@@ -103,6 +105,7 @@ public final class WorkflowRuntime {
             emitDomainEvents(paths, nodeDefinition.id(), nodeDefinition.handlerType(), node.nodeInstanceId(), result);
             ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
             var next = ledger.loadCurrent(paths);
+            openWaitingGates(command, paths, definition, next);
             var active = "";
             if (!next.activeNodeInstanceIds().isEmpty()) {
                 active = ledger.loadNode(paths, next.activeNodeInstanceIds().get(0)).nodeDefinitionId();
@@ -112,6 +115,27 @@ public final class WorkflowRuntime {
         }
 
         return lastResult != null ? lastResult : new WorkflowRuntimeResult(command.workstreamId(), current.status(), "", "workflow has no active node");
+    }
+
+    private void openWaitingGates(
+            WorkflowCommand command,
+            WorkstreamPaths paths,
+            WorkflowDefinition definition,
+            WorkflowCurrentDocument current
+    ) throws Exception {
+        if (current.status() != WorkflowStatus.WAITING_FOR_HUMAN) {
+            return;
+        }
+        for (var activeNodeId : current.activeNodeInstanceIds()) {
+            var nodeDoc = ledger.loadNode(paths, activeNodeId);
+            if (nodeDoc.kind() != NodeKind.GATE) {
+                continue;
+            }
+            var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
+            var node = ledger.loadCoreNode(paths, activeNodeId);
+            handlers.gate(nodeDefinition.handlerType())
+                    .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+        }
     }
 
     private void emitDomainEvents(WorkstreamPaths paths, String nodeDefinitionId,
