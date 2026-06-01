@@ -251,7 +251,7 @@ summary: one short sentence
 - Decision node 只读取最新的 `inputRefs`，不会回退到更早文件。
 - 找不到 fenced `dual-control` block，会以 `MISSING_DUAL_CONTROL` 停到 `control.repair` recovery gate。
 - **Terminal block rule**：如果 markdown 中存在多个 `dual-control` block，只有最后一个（terminal block）被当作控制指令，前面的被视为 prose（例如 agent 引用的用户需求原文）。
-- Terminal block 之后不能有非空白内容，否则以 `NON_TERMINAL_CONTROL_BLOCK` 停到 `control.repair` recovery gate。
+- Terminal block 之后不能有非空白内容，否则以 `NON_TERMINAL_CONTROL_BLOCK` 停到 `control.repair` recovery gate；acpx 运行时追加的 `[done] end_turn` sentinel 会被忽略。
 - Blockquote `> ```dual-control` 和嵌套 code fence 中的 `dual-control` 不会被匹配（regex 锚定行首 `^`）。
 - 找到 `dual-control` 但缺少 `decision`，会以 `INVALID_DUAL_CONTROL` 停到 `control.repair` recovery gate。
 - `decision` 不在当前阶段允许集合内，会以 `CONTRACT_VIOLATION`（映射为 `INVALID_DUAL_CONTROL`）停到 `control.repair` recovery gate。
@@ -854,6 +854,8 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 - `status` 能看到 `Workflow: agent-lifecycle@1`。
 
 ### Real acpx Smoke
+
+完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 thin、p5、p6 三个 case。
 
 推荐使用一个明确的临时 worktree 目录，方便跑完清理：
 

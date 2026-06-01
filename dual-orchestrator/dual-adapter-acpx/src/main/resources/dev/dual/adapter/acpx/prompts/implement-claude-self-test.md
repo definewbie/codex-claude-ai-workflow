@@ -5,6 +5,12 @@ Node: {{node_id}}
 Template: {{prompt_template}}
 Ledger: {{ledger_path}}
 
+Ledger write policy:
+
+- Do not create, edit, or delete files under .agent/.
+- Only the orchestrator writes run ledger artifacts.
+- Return your artifact in stdout using the contract below.
+
 You are Claude reporting developer self-test evidence after implementation.
 
 Run or inspect whatever validation is appropriate for the repository and change scope. You may decide the right verification method. Be explicit about what was tested, what was not tested, and why.

@@ -99,15 +99,15 @@ configure_case() {
 
   case "$CASE_NAME" in
     thin-basic)
-      CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。"
+      CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出，不要让 python main.py 打印 goodbye。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
-      CASE_EXPECTED_ARTIFACTS=("reports/latest-final-report.md" "delivery/delivery.json" "artifacts/next-stage/next-stage-prompt.md")
+      CASE_EXPECTED_ARTIFACTS=("reports/latest-final-report.md" "delivery/commit-message.txt" "delivery/pr-body.md" "artifacts/next-stage/next-stage-prompt.md")
       CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "workflow_completed")
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "Acceptance Summary" "Git Evidence")
       ;;
     p5-contract-happy-path)
       CASE_VARIANT="p5"
-      CASE_TASK="给 main.py 添加一个 calculate 函数，接受两个数字参数并返回它们的和，并在 README 中说明。"
+      CASE_TASK="给 main.py 添加一个 calculate 函数，接受两个数字参数并返回它们的和，并在 README 中说明。不要修改 __main__ 运行输出。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
       CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "p5")
       CASE_EXPECTED_ARTIFACTS=("artifacts/task-contract.json" "artifacts/task-contract.md" "reports/latest-final-report.md")
@@ -117,7 +117,7 @@ configure_case() {
       ;;
     p6-reject-classify-path)
       CASE_VARIANT="p6"
-      CASE_TASK="给 main.py 添加一个 format_output 函数，接受一个字符串和一个格式类型参数（json/markdown/table），返回对应格式的字符串。同时在 README 中添加完整的 API 文档，包括参数说明、返回值格式和使用示例。"
+      CASE_TASK="给 main.py 添加一个 format_output 函数，接受 text 和 format_type 两个字符串参数。format_type 只支持 json、markdown、table，大小写敏感；json 必须返回紧凑 JSON 字符串 {\"text\":\"<text>\"}，实现建议使用 json.dumps({\"text\": text}, separators=(\",\", \":\"))；markdown 必须返回 '- <text>'；table 必须返回精确三行字符串 '| Text |\\n| --- |\\n| <text> |'；未知格式抛出 ValueError。README 要写完整 API 文档，包括参数、返回值、异常和三个精确返回值示例。不要修改 __main__ 运行输出。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
       CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "p6")
       CASE_EXPECTED_ARTIFACTS=("artifacts/task-contract.json")
@@ -147,6 +147,21 @@ dualctl() {
 # Do NOT use this with -q in if/while conditions — it always returns true.
 # For conditionals, use plain grep -q (set -e exempts commands inside if/while).
 sgrep() { grep "$@" || true; }
+
+# safe recursive delete: only remove directories owned by the current smoke case.
+safe_remove_dir() {
+  local target="${1:-}"
+  [[ -n "$target" ]] || return 0
+  case "$target" in
+    "$FIXTURE_DIR"|"$FIXTURE_DIR"/*|"${FIXTURE_DIR}-agent-runs"|"${FIXTURE_DIR}-agent-runs"/*)
+      rm -rf "$target"
+      ;;
+    *)
+      warn "Refusing to remove unsafe path: $target"
+      return 1
+      ;;
+  esac
+}
 
 # safe count: returns 0 when dir doesn't exist or has no matches.
 fcount() {
@@ -214,6 +229,8 @@ assert_p6_classify() {
     local report_path="$WS_DIR/reports/latest-final-report.md"
     if [[ -f "$report_path" ]] && grep -qi "Failure Classification" "$report_path"; then
       ok "Final report contains Failure Classification section"
+    else
+      fail "Final report missing Failure Classification section (classify path was exercised)"
     fi
   else
     # classify path not exercised — this is PASS-WARN, not FAIL
@@ -240,25 +257,32 @@ run_smoke_case() {
   CURRENT_ROUND=0
   FINAL_STATUS=""
   P6_CLASSIFY_NOT_EXERCISED=""
+  CLEANED_UP=false
 
   FIXTURE_DIR="/tmp/dual-smoke-${CASE_NAME}-$$"
   FIXTURE_REPO_NAME="dual-smoke-${CASE_NAME}-$$"
 
   # ─── Cleanup trap for this case ─────────────────────────────────────────
   do_cleanup() {
+    if [[ "$CLEANED_UP" == true ]]; then
+      return 0
+    fi
+    CLEANED_UP=true
     if [[ "$CLEANUP" != true ]]; then
       return 0
     fi
     if [[ -n "$WORKSPACE_DIR" && -d "$FIXTURE_DIR/.git" && -d "$WORKSPACE_DIR" ]]; then
-      git -C "$FIXTURE_DIR" worktree remove --force "$WORKSPACE_DIR" 2>/dev/null || rm -rf "$WORKSPACE_DIR"
+      git -C "$FIXTURE_DIR" worktree remove --force "$WORKSPACE_DIR" 2>/dev/null || safe_remove_dir "$WORKSPACE_DIR"
     elif [[ -n "$WORKSPACE_DIR" ]]; then
-      rm -rf "$WORKSPACE_DIR"
+      safe_remove_dir "$WORKSPACE_DIR"
     fi
-    rm -rf "$FIXTURE_DIR"
+    safe_remove_dir "$FIXTURE_DIR"
     if [[ "$HAS_GH_REPO" == true ]]; then
       gh repo delete "$FIXTURE_REPO_NAME" --yes 2>/dev/null || true
     fi
   }
+  trap do_cleanup EXIT
+  trap 'do_cleanup; exit 130' INT TERM
 
   # ─── Phase 0: Setup ─────────────────────────────────────────────────────
   step "Phase 0: Setup [$CASE_NAME]"
@@ -329,6 +353,11 @@ def hello():
 if __name__ == "__main__":
     print(hello())
 PY
+
+  cat > .gitignore << 'GITIGNORE'
+__pycache__/
+*.pyc
+GITIGNORE
 
   git add -A
   git commit -q -m "init: fixture project"
@@ -646,7 +675,7 @@ PY
         if [[ "$COUNT" -gt 0 ]]; then
           ok "  $event_type: $COUNT"
         else
-          warn "  $event_type: 0 (may not have been reached)"
+          fail "  $event_type: 0 (expected event missing)"
         fi
       done
     else
@@ -730,10 +759,13 @@ PY
   DELIVERY_DIR="$WS_DIR/delivery"
   if [[ -d "$DELIVERY_DIR" ]]; then
     ok "delivery/ directory exists"
-    verify_file "$DELIVERY_DIR/delivery.json"
+    verify_file "$DELIVERY_DIR/commit-message.txt"
+    verify_file "$DELIVERY_DIR/pr-body.md"
     if [[ -f "$DELIVERY_DIR/delivery.json" ]]; then
       DEL_STATUS=$(python3 -c "import json; print(json.load(open('$DELIVERY_DIR/delivery.json')).get('status','?'))" 2>/dev/null || echo "?")
       ok "Delivery status: $DEL_STATUS"
+    else
+      ok "delivery.json not present before explicit delivery commit/create-pr"
     fi
   else
     if [[ "$FINAL_STATUS" == "COMPLETED" ]]; then
@@ -822,6 +854,7 @@ PY
 
   # ─── Cleanup ────────────────────────────────────────────────────────────
   do_cleanup
+  trap - EXIT INT TERM
 }
 
 # ─── Report helpers ──────────────────────────────────────────────────────────
@@ -865,7 +898,12 @@ if [[ "$CASE_NAME" == "all" ]]; then
 
     CASE_NAME="$case_name"
     configure_case
-    run_smoke_case
+    if ! run_smoke_case; then
+      FAILED=true
+      [[ -n "$FINAL_STATUS" ]] || FINAL_STATUS="FATAL"
+      do_cleanup
+      trap - EXIT INT TERM
+    fi
 
     # Capture result — 3-tier: PASS / PASS-WARN / FAIL
     if [[ "$FAILED" == true ]]; then

@@ -52,6 +52,24 @@ class LifecycleWorkflowDefinitionFactoryTest {
     }
 
     @Test
+    void selfTestAgentCanRunVerificationCommands() {
+        var factory = new LifecycleWorkflowDefinitionFactory();
+
+        assertEquals(true, factory.thinMainline()
+                .node("implement.claude_self_test_report")
+                .config()
+                .get("approve_all"));
+        assertEquals(true, factory.p5Mainline()
+                .node("implement.claude_self_test_report")
+                .config()
+                .get("approve_all"));
+        assertEquals(true, factory.p6Mainline()
+                .node("implement.claude_self_test_report")
+                .config()
+                .get("approve_all"));
+    }
+
+    @Test
     void conditionalEdge_onNextStageApproval() {
         var definition = new LifecycleWorkflowDefinitionFactory().thinMainline();
 

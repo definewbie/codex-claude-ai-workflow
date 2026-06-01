@@ -27,6 +27,9 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Node: intake.claude_brainstorm"));
         assertTrue(prompt.contains("Build a safer agent workflow."));
         assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("Do not create, edit, or delete files under .agent/"));
+        assertTrue(prompt.contains("Only the orchestrator writes run ledger artifacts"));
+        assertTrue(prompt.contains("Explicitly address each Must Fix"));
     }
 
     @Test
@@ -49,6 +52,32 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("## Context Package"));
         assertTrue(prompt.contains(".agent/workstreams/ws-test/context/node-context.md"));
         assertTrue(prompt.contains("Important prior review."));
+    }
+
+    @Test
+    void intakeCodexPromptUsesDecisionValuesAcceptedByIntakeDecisionNode() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "intake.codex_product_review", "intake-codex-product-review", List.of());
+
+        assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED"));
+    }
+
+    @Test
+    void designCodexPromptUsesDecisionValuesAcceptedByDesignDecisionNode() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "design.codex_arch_review", "design-codex-review", List.of());
+
+        assertTrue(prompt.contains("READY_FOR_ARCH_REVIEW"));
+        assertTrue(prompt.contains("decision: READY_FOR_ARCH_REVIEW|NEEDS_REVISION|BLOCKED"));
     }
 
     @Test

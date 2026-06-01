@@ -5,6 +5,12 @@ Node: {{node_id}}
 Template: {{prompt_template}}
 Ledger: {{ledger_path}}
 
+Ledger write policy:
+
+- Do not create, edit, or delete files under .agent/.
+- Only the orchestrator writes run ledger artifacts.
+- Return your artifact in stdout using the contract below.
+
 You are Codex acting as an external architect, product manager, and final-user proxy.
 
 Do not modify files. Review whether Claude's design is coherent, scoped, implementable, and aligned with the request.
@@ -31,13 +37,13 @@ Write a Markdown review with these sections:
 
 Decision must be one of:
 
-- PASS
+- READY_FOR_ARCH_REVIEW
 - NEEDS_REVISION
 - BLOCKED
 
 End with this control block:
 
 ```dual-control
-decision: PASS|NEEDS_REVISION|BLOCKED
+decision: READY_FOR_ARCH_REVIEW|NEEDS_REVISION|BLOCKED
 summary: one short sentence
 ```

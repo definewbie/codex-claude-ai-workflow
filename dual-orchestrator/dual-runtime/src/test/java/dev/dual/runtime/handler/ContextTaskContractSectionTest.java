@@ -59,6 +59,19 @@ class ContextTaskContractSectionTest {
     }
 
     @Test
+    void taskContractSectionIsOptionalForThinWorkflowAcceptance() {
+        var budget = ContextProfiles.acceptance();
+        var taskContractSection = budget.sections().stream()
+                .filter(sr -> "task_contract".equals(sr.section()))
+                .findFirst();
+
+        assertTrue(taskContractSection.isPresent(),
+                "task_contract section should exist in acceptance profile");
+        assertEquals(MissingPolicy.PLACEHOLDER, taskContractSection.get().missingPolicy(),
+                "thin workflow has no task contract, so acceptance context must render a placeholder instead of failing");
+    }
+
+    @Test
     void contextPackageRendersTaskContractSection() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
@@ -118,5 +131,37 @@ class ContextTaskContractSectionTest {
                 "Context package should contain acceptance criteria");
         assertTrue(markdown.contains("AC2"),
                 "Context package should contain acceptance criteria");
+    }
+
+    @Test
+    void acceptancePackageWithoutTaskContractRendersPlaceholder() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
+
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("diff.stat"), "1 file changed\n", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var handler = new ContextBuildPackageHandler();
+        var context = new TaskHandler.TaskContext(
+                tempDir, "ws-ctx",
+                new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
+                        "target_node", "next.node",
+                        "profile", "acceptance"
+                )),
+                new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.COMPLETED, result.status(), "Thin workflow acceptance context should not require task-contract.json");
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("TaskContract"),
+                "Context package should keep a stable TaskContract section");
+        assertTrue(markdown.contains("(not available)"),
+                "Missing task contract should be visible to the reviewer as unavailable");
     }
 }

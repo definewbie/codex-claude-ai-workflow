@@ -92,7 +92,9 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 
 ## 每次 E2E 运行建议记录的数据
 
-以下数据用于后续改进脚本、开发 P7 calibration、以及评估 workflow variant 的实际表现。不需要自动化采集——从脚本输出和 `--cleanup` 前的 ledger 文件中手动摘录即可。
+以下数据用于后续改进脚本、开发 P7 calibration、以及评估 workflow variant 的实际表现。不需要自动化采集。
+
+如果要保留 ledger 供人工摘录，本次运行不要加 `--cleanup`；记录完成后再手动删除 fixture/worktree。`--cleanup` 更适合只关心脚本 exit code 的快速验证。
 
 ### 1. Run-Level Summary
 
@@ -113,7 +115,7 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 | task-contract.json | `$WS_DIR/artifacts/task-contract.json` | 是否存在；若存在记录 `contract_id`、`status`、`acceptanceCriteria` 条数 |
 | failure-classification.json | `$WS_DIR/artifacts/failure-classification.json` | 是否存在；若存在记录 `category`、`matched_rule`、`review_decision` |
 | final report | `$WS_DIR/reports/latest-final-report.md` | 是否存在 |
-| delivery artifact | `$WS_DIR/delivery/delivery.json` | 是否存在 |
+| delivery prepare artifacts | `$WS_DIR/delivery/commit-message.txt`, `$WS_DIR/delivery/pr-body.md` | 是否存在 |
 
 ### 3. Domain Event Summary
 
@@ -145,7 +147,7 @@ gate_rounds:        __
 task-contract.json: absent (thin has no contract)
 failure-classification.json: absent
 final_report:       present
-delivery:           present
+delivery_prepare:   present
 
 compilation_event:  absent
 failure_event:      absent

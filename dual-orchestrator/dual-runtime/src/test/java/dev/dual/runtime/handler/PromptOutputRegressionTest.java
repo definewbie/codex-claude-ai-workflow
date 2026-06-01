@@ -62,6 +62,24 @@ class PromptOutputRegressionTest {
         assertTrue(result.isMissing());
     }
 
+    @Test
+    void acpxEndTurnSentinelAfterControlBlock_isIgnored() {
+        var result = parser.parse("""
+                Review is complete.
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Needs a tighter scope.
+                ```
+
+                [done] end_turn
+                """);
+
+        assertTrue(result.valid(), "acpx end_turn sentinel should not invalidate the terminal block");
+        assertEquals("NEEDS_REVISION", result.block().required("decision"));
+        assertEquals("Needs a tighter scope.", result.block().required("summary"));
+    }
+
     // --- Helpers ---
 
     private static String loadSample(String sampleName) {

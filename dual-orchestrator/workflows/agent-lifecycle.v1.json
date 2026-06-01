@@ -168,7 +168,8 @@
       "handlerType": "acpx.agent_run",
       "config": {
         "agent": "claude",
-        "prompt_template": "implement-claude-self-test"
+        "prompt_template": "implement-claude-self-test",
+        "approve_all": true
       }
     },
     {

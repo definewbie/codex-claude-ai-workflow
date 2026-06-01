@@ -60,6 +60,8 @@ class BuiltinHandlerTest {
         assertEquals("READY_TO_IMPLEMENT", plan.outcome());
         assertEquals(NodeStatus.COMPLETED, plan.status());
         assertEquals("dual-control", plan.result().get("source"));
+        assertEquals(List.of(output), plan.outputRefs(),
+                "decision nodes must preserve the review artifact so revision routes can pass feedback to the next agent");
     }
 
     @Test

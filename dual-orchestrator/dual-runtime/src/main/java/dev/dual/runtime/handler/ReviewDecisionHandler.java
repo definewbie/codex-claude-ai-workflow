@@ -38,13 +38,13 @@ public final class ReviewDecisionHandler implements DecisionHandler {
             return failed("INVALID_DECISION", "Unsupported decision for " + context.definition().id() + ": " + decision, context, allowed, control);
         }
         if ("BLOCKED".equals(decision)) {
-            return new NodeResult(decision, NodeStatus.BLOCKED, List.of(), Map.of(
+            return new NodeResult(decision, NodeStatus.BLOCKED, context.instance().inputRefs(), Map.of(
                     "decision", decision,
                     "source", "dual-control",
                     "summary", control.values().getOrDefault("summary", "")
             ), "dual-control decision is BLOCKED");
         }
-        return NodeResult.completed(decision, List.of(), Map.of(
+        return NodeResult.completed(decision, context.instance().inputRefs(), Map.of(
                 "decision", decision,
                 "source", "dual-control",
                 "summary", control.values().getOrDefault("summary", "")

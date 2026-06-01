@@ -54,7 +54,7 @@ final class DualControlBlockParser {
 
         // The terminal block must be at the end of the markdown (only whitespace after it).
         String afterTerminal = markdown.substring(terminal.endPosition()).trim();
-        if (!afterTerminal.isEmpty()) {
+        if (!isAllowedTrailingSentinel(afterTerminal)) {
             return DualControlParseResult.invalid(
                     "NON_TERMINAL_CONTROL_BLOCK",
                     "dual-control block must be the last content in the output, but non-whitespace content follows it.",
@@ -64,6 +64,22 @@ final class DualControlBlockParser {
 
         // Validate the terminal block's content
         return parseBody(terminal.body());
+    }
+
+    private boolean isAllowedTrailingSentinel(String trailing) {
+        if (trailing.isEmpty()) {
+            return true;
+        }
+        for (var line : trailing.split("\\R")) {
+            var trimmed = line.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            if (!"[done] end_turn".equals(trimmed)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private DualControlParseResult parseBody(String body) {
