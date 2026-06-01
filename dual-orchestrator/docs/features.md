@@ -7,8 +7,8 @@
 - [x] T0.1 全生命周期 smoke：`start → delivery` 端到端真实跑通。
   - 2026-06-01：真实 acpx smoke 已覆盖 `thin-basic`、`p5-contract-happy-path`、`p6-reject-classify-path`。
   - p6 最新结果为 `PASS-WARN`：主流程完成，但 failure classification 分支未稳定触发。
-- [ ] T0.2 deterministic p6 reject fixture：稳定触发 `acceptance.classify_failure`，作为 FailureArbiter / CalibrationCandidate 回归样本。
-  - 2026-06-01：真实 acpx smoke 仍保留 `PASS-WARN` 语义；暂不引入 fake acpx。分类路径一旦触发，脚本会检查 calibration candidate 和 `recovery/current-failure.md`。
+- [ ] T0.2 deterministic p6 reject fixture：技术债。真实 acpx smoke 中 Codex 不一定 REJECT，这条分支目前按边界条件处理；暂不引入 fake acpx / controlled fixture。等真实 case 或 smoke 暴露稳定需求时再实现。
+  - 2026-06-01：真实 acpx smoke 仍保留 `PASS-WARN` 语义。分类路径一旦触发，脚本会检查 calibration candidate 和 `recovery/current-failure.md`。
 - [ ] T0.3 验证 auto-retry 端到端：Thread.sleep + 指数退避在真实 acpx failure 下验证。
 
 ## P1 — Contract-driven harness 闭环

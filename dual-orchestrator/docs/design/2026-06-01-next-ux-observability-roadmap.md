@@ -44,10 +44,10 @@ deterministic failure evidence
 
 这部分仍然是基础，不稳定的 UI 只是漂亮壳。
 
-1. **deterministic p6 reject fixture**
-   - 目标：稳定触发 `acceptance.classify_failure`，验证 failure classification 分支。
+1. **p6 reject path 作为技术债保留**
+   - 目标：当真实 case 需要时，再稳定触发 `acceptance.classify_failure`，验证 failure classification 分支。
    - 当前 p6 smoke 能完整跑通，但分类分支是否触发取决于 Codex 是否 REJECT。
-   - 建议做法：短期继续优先真实 acpx，不为了确定性而过早引入 fake reviewer。当前脚本在 classify 分支触发时会校验 failure classification、calibration candidate 和 failure summary；真正的 deterministic reject fixture 仍待单独设计。
+   - 取舍：如果 Codex 实际上很少 REJECT，这条路径就是边界条件。当前不为了确定性引入 fake reviewer / controlled fixture；脚本只在 classify 分支真实触发时校验 failure classification、calibration candidate 和 failure summary。
 
 2. **status 字段校准**
    - 当前 `dualctl status` 会显示一些旧 checkpoint/stage 信息，比如 `Stage: design (pending)`，即使 workflow 已经跑到后面。
@@ -248,11 +248,11 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 ## 推荐下一步实施顺序
 
-### Step 1：deterministic p6 reject fixture
+### Tech Debt：deterministic p6 reject fixture
 
-原因：没有稳定触发 failure classification 的样本，CalibrationCandidate 无法可靠回归。
+原因：没有稳定触发 failure classification 的样本时，相关分支无法做严格 E2E 回归。但它目前更像边界条件，不值得在主功能还没完全顺滑前投入 fixture 体系。
 
-当前状态：真实 acpx smoke 仍保留 `PASS-WARN`，不伪造 Codex REJECT。短期只补强“如果 classify 分支发生，就必须检查新产物”的断言。
+当前状态：真实 acpx smoke 仍保留 `PASS-WARN`，不伪造 Codex REJECT。短期只补强“如果 classify 分支发生，就必须检查新产物”的断言。等真实 smoke 或实际 workstream 遇到 REJECT 后，再根据现场数据决定是否补 controlled fixture。
 
 产出：
 
@@ -261,7 +261,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - 稳定出现 `failure_classified` event
 - 明确区分主流程成功和 classify 分支成功
 
-### Step 2：CalibrationCandidate MVP
+### Step 1：CalibrationCandidate MVP
 
 原因：这是 contract-driven harness 从“会分类失败”到“会沉淀经验”的关键一步。
 
@@ -280,7 +280,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `calibration/candidates/<id>.json`
 - `calibration/candidates/<id>.md`
 
-### Step 3：Review packet + review show
+### Step 2：Review packet + review show
 
 原因：这是 UI 的最小内核，也是当前人工 gate 最大痛点。
 
@@ -290,7 +290,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl review show`
 - 单测覆盖 gate packet 生成
 
-### Step 4：Timeline projection
+### Step 3：Timeline projection
 
 原因：UI / watch / status 都需要这个读模型。
 
@@ -300,7 +300,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl timeline` 或增强 `dualctl status`
 - 每个 node 的 duration、outcome、artifact refs
 
-### Step 5：Failure summary
+### Step 4：Failure summary
 
 原因：真实运行中失败一定会发生，恢复体验要比成功路径更重要。
 
@@ -312,7 +312,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl recovery show`
 - stderr / parser / acpx failure 分类聚合
 
-### Step 6：Watch mode
+### Step 5：Watch mode
 
 原因：不需要 Web UI 就能先解决“看进度”。
 
@@ -321,7 +321,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl watch`
 - 轮询式终端 dashboard
 
-### Step 7：Local dashboard MVP
+### Step 6：Local dashboard MVP
 
 原因：前面几个功能会自然沉淀出 API 和读模型，UI 到这个时候成本最低。
 
@@ -339,11 +339,11 @@ UI 是需要的，但不能让 UI 先于 calibration 和读模型。
 
 更稳的路径是：
 
-1. 先让 p6 failure classification 有稳定 E2E 样本。
-2. 把 failure classification 沉淀成 CalibrationCandidate。
-3. 再把 review packet、timeline、failure summary 做成稳定读模型。
-4. CLI 先消费这些读模型。
-5. UI 再消费同一套读模型。
+1. 先把 failure classification 已经产生的结果沉淀成 CalibrationCandidate。
+2. 再把 review packet、timeline、failure summary 做成稳定读模型。
+3. CLI 先消费这些读模型。
+4. UI 再消费同一套读模型。
+5. deterministic p6 reject fixture 等真实 REJECT 样本或稳定回归需求出现后再补。
 
 这样 UI 不是另起一套，而是自然长出来。
 
@@ -369,8 +369,8 @@ dev-calibration-candidate-mvp
 
 目标只做三件事：
 
-1. deterministic p6 reject fixture
-2. CalibrationCandidate MVP
-3. 最小 failure/review projection，供后续 `review show` 和 UI 消费
+1. CalibrationCandidate MVP
+2. 最小 failure/review projection，供后续 `review show` 和 UI 消费
+3. 保留 p6 reject fixture 技术债，不在当前主线投入
 
 这三件事做好以后，再做 `dualctl review show`、`dualctl watch` 和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。

@@ -139,15 +139,14 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Failure summary MVP：分类失败路径会生成 `recovery/current-failure.md`。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
-- 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过，classification 分支仍需 deterministic fixture；当前脚本保留真实 acpx 语义，触发 classify 时会检查 calibration / recovery 产物。
+- 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过。classification 分支是边界路径，当前保留 `PASS-WARN` 语义；触发 classify 时会检查 calibration / recovery 产物。deterministic reject fixture 暂作为技术债。
 
 ## 4. 下一步设计方向
 
-结合 long-term-plan 和真实 smoke 结果，下一步不应该先做完整 UI，而是补最小校准闭环：
+结合 long-term-plan 和真实 smoke 结果，下一步不应该先做完整 UI，而是把校准闭环的读模型补稳定：
 
 ```text
-deterministic p6 reject fixture
-  → ReviewPacket / Timeline projection
+ReviewPacket / Timeline projection
   → dualctl review show / watch
   → local dashboard
 ```
@@ -156,8 +155,8 @@ deterministic p6 reject fixture
 
 | 优先级 | 工作 | 原因 |
 |--------|------|------|
-| P0 | deterministic p6 reject fixture | 稳定验证 FailureArbiter / classify path |
-| P1 | ReviewPacket / Timeline projection | 为 CLI 和 UI 提供稳定读模型 |
+| Tech Debt | deterministic p6 reject fixture | 真实 case 需要稳定覆盖 classify path 时再做 |
+| P0 | ReviewPacket / Timeline projection | 为 CLI 和 UI 提供稳定读模型 |
 | P1 | Failure summary 扩展 | 把 acpx stderr、parser error、权限错误等执行失败也聚合进恢复摘要 |
 | P2 | `dualctl review show` / `dualctl watch` | 先用 CLI 验证人真正需要看的信息 |
 | P3 | Local UI dashboard | 在读模型稳定后做可视化 |
