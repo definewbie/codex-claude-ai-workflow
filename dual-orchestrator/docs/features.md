@@ -1,26 +1,36 @@
 # dual-orchestrator Future Features
 
-> Last updated: 2026-05-29
+> Last updated: 2026-06-01
 
 ## P0 — 验证（阻塞后续所有工作）
 
-- [ ] T0.1 全生命周期 smoke：`start → delivery` 端到端真实跑通（需要 Codex quota）
-- [ ] 验证 auto-retry 端到端：Thread.sleep + 指数退避在真实 acpx failure 下验证（依赖 T0.1）
+- [x] T0.1 全生命周期 smoke：`start → delivery` 端到端真实跑通。
+  - 2026-06-01：真实 acpx smoke 已覆盖 `thin-basic`、`p5-contract-happy-path`、`p6-reject-classify-path`。
+  - p6 最新结果为 `PASS-WARN`：主流程完成，但 failure classification 分支未稳定触发。
+- [ ] T0.2 deterministic p6 reject fixture：稳定触发 `acceptance.classify_failure`，作为 FailureArbiter / CalibrationCandidate 回归样本。
+- [ ] T0.3 验证 auto-retry 端到端：Thread.sleep + 指数退避在真实 acpx failure 下验证。
 
-## P1 — 技术债
+## P1 — Contract-driven harness 闭环
+
+- [ ] CalibrationCandidate MVP：从 FailureArbiter 输出生成 contract template / review checklist / context rule / regression test 候选。
+- [ ] Review packet artifact：为 human gate 生成稳定 review 包，后续 CLI/UI 共用。
+- [ ] Timeline projection：从 events/nodes/runs 生成稳定 `timeline.json`，作为 status/watch/UI 读模型。
+- [ ] Failure summary：失败时生成 `recovery/current-failure.md`，聚合失败原因、证据和建议动作。
+
+## P2 — 技术债
 
 - [x] T2.3 CheckpointDocument (319行) 单元测试
 - [x] T2.3 CodexReviewControl (105行) 单元测试
 - [x] Budget overflow 降级测试：验证 DIFF_STAT / DECISION_ONLY 渲染在 budget 真正溢出时触发
 - [x] Profile override 单元测试：验证 `maxSnippetChars(context, budget)` 返回 profile override > node config > 默认值
 
-## P2 — 完善性
+## P3 — 完善性
 
 - [x] T2.2 Prompt regression：用真实 Agent 输出验证 prompt 模板变量一致性
 - [x] Token-level budgeting：context governance 从 char-level 改为 token 计算
 - [x] Adaptive compression：context 超长时自动压缩/摘要
 
-## P3 — 产品化基础设施
+## P4 — 产品化基础设施
 
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
@@ -30,7 +40,7 @@
 - [ ] T4.3 Notification：Slack / 邮件 / Webhook 推送状态变更
 - [ ] T4.4 安装脚本：`brew install` / `curl | sh` 等分发包
 
-## P4 — Workflow Engine 增强
+## P5 — Workflow Engine 增强
 
 - [x] 条件表达式：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 上支持条件判断
 - [x] 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume

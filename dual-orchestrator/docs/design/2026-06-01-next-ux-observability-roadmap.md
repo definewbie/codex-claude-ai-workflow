@@ -1,7 +1,7 @@
-# 下一阶段功能规划：让完整生命周期更容易被人接住
+# 下一阶段功能规划：先补校准闭环，再做 review/UI
 
 日期：2026-06-01  
-目标：在主流程已经能真实跑起来之后，把下一步重点从“继续堆内部能力”转向“让人能舒服地观察、review、接管和恢复”。
+目标：在主流程已经能真实跑起来之后，把下一步重点从“workflow 能执行”推进到“harness 能从失败中变好”。人工 review 和 UI 很重要，但它们应该建立在稳定的校准数据、读模型和失败解释之上，而不是先做一个直接读取 ledger 原始文件的页面。
 
 ## 当前判断
 
@@ -15,15 +15,28 @@
 - 可以记录 run ledger、events、node state、agent runs、reports。
 - P5 TaskContract 和 P6 failure classify 已经接进 workflow variant。
 
-现在最明显的问题不是“缺一个新 handler”，而是使用体验：
+现在最明显的问题不只是“缺一个好用 UI”，而是有两层缺口：
 
-- 人在 review gate 前不知道该看什么。
-- 流程跑到哪里，需要翻 `events.jsonl` 或 `status`。
-- 失败原因虽然在 ledger 里，但定位成本高。
-- Agent 输出很多，缺少一个聚合视图。
-- 真实 E2E 的结果需要人工整理。
+1. **Harness 闭环缺口**
+   - FailureArbiter 已经能分类部分语义失败，但分类结果还没有沉淀成 calibration candidate。
+   - p6 classification 分支还缺确定性 E2E 样本。
+   - 失败没有进入“改 contract template / review checklist / context rule / regression test”的外环。
 
-所以接下来的功能优先级应该围绕“可观察、可 review、可恢复”展开。
+2. **人机协作体验缺口**
+   - 人在 review gate 前不知道该看什么。
+   - 流程跑到哪里，需要翻 `events.jsonl` 或 `status`。
+   - 失败原因虽然在 ledger 里，但定位成本高。
+   - Agent 输出很多，缺少一个聚合视图。
+
+所以接下来的优先级不应该是“先做 UI”，而应该是：
+
+```text
+deterministic failure evidence
+  → CalibrationCandidate
+  → review/timeline/failure projection
+  → CLI watch/review
+  → local UI
+```
 
 ## 从之前 TODO 中重新排序
 
@@ -41,9 +54,54 @@
    - 这会影响 UI 和人工 review 的可信度。
    - 需要整理 status 的数据来源，以 active node / workflow current 为准。
 
-### P1：人工 review gate 体验
+### P1：CalibrationCandidate MVP
 
-这是最值得马上开始的功能，因为它直接对应真实使用场景。
+这是 long-term-plan 中 P7 的最小闭环，也是比 UI 更重要的下一步。
+
+当前已有：
+
+- TaskContract / ContractCompiler
+- ContractReviewGate
+- FailureArbiter
+- iteration ledger
+- events.jsonl
+- final report / handoff
+
+还缺的是把失败分类沉淀成可审查、可提升的候选项。
+
+产物：
+
+```text
+.agent/workstreams/<id>/calibration/candidates/<candidate_id>.json
+.agent/workstreams/<id>/calibration/candidates/<candidate_id>.md
+```
+
+候选类型：
+
+- `CONTRACT_TEMPLATE`
+- `REVIEW_CHECKLIST`
+- `CONTEXT_RULE`
+- `PROMPT_TEMPLATE`
+- `REGRESSION_TEST`
+
+候选内容：
+
+- 来源 workstream / node / failure class
+- 证据 refs
+- 建议改什么
+- 为什么这不是一次性修复
+- 是否需要人审批
+- 状态：`DRAFT | APPROVED | REJECTED | PROMOTED`
+
+为什么它优先于 UI：
+
+- UI 只能让人更方便地看一次失败。
+- CalibrationCandidate 让系统能从失败中积累规则。
+- 没有这个层，FailureArbiter 的价值只停留在“这次该怎么路由”，还没有变成 harness 的长期学习能力。
+
+### P2：人工 review gate 体验
+
+这是用户体验上最明显的痛点，但它应该消费稳定读模型，而不是直接解析 ledger 原始结构。
 
 #### 1. `dualctl review show`
 
@@ -97,7 +155,7 @@ dualctl review show --workdir <workspace> <workstream_id>
 
 这个文件既能给 CLI 展示，也能给 UI 读取，还能作为通知内容。
 
-### P1：实时进度和失败原因
+### P2：实时进度和失败原因
 
 #### 1. Event projection
 
@@ -161,7 +219,7 @@ dualctl watch --workdir <workspace> <workstream_id>
 
 这会显著降低“人要盯着 console”的压力。
 
-### P2：轻量本地 UI
+### P3：轻量本地 UI
 
 UI 可以开始设计，但不建议第一步就做复杂前端。先做 local read-only dashboard。
 
@@ -190,7 +248,35 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 ## 推荐下一步实施顺序
 
-### Step 1：Review packet + review show
+### Step 1：deterministic p6 reject fixture
+
+原因：没有稳定触发 failure classification 的样本，CalibrationCandidate 无法可靠回归。
+
+产出：
+
+- 一个 p6 reject smoke case
+- 稳定生成 `failure-classification.json`
+- 稳定出现 `failure_classified` event
+- 明确区分主流程成功和 classify 分支成功
+
+### Step 2：CalibrationCandidate MVP
+
+原因：这是 contract-driven harness 从“会分类失败”到“会沉淀经验”的关键一步。
+
+产出：
+
+- calibration candidate schema
+- candidate writer handler
+- 从 FailureArbiter 输出生成 candidate
+- candidate markdown view
+- 单测和 fixture 验证
+
+产出：
+
+- `calibration/candidates/<id>.json`
+- `calibration/candidates/<id>.md`
+
+### Step 3：Review packet + review show
 
 原因：这是 UI 的最小内核，也是当前人工 gate 最大痛点。
 
@@ -200,7 +286,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl review show`
 - 单测覆盖 gate packet 生成
 
-### Step 2：Timeline projection
+### Step 4：Timeline projection
 
 原因：UI / watch / status 都需要这个读模型。
 
@@ -210,7 +296,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl timeline` 或增强 `dualctl status`
 - 每个 node 的 duration、outcome、artifact refs
 
-### Step 3：Failure summary
+### Step 5：Failure summary
 
 原因：真实运行中失败一定会发生，恢复体验要比成功路径更重要。
 
@@ -220,7 +306,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl recovery show`
 - stderr / parser / acpx failure 分类聚合
 
-### Step 4：Watch mode
+### Step 6：Watch mode
 
 原因：不需要 Web UI 就能先解决“看进度”。
 
@@ -229,7 +315,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - `dualctl watch`
 - 轮询式终端 dashboard
 
-### Step 5：Local dashboard MVP
+### Step 7：Local dashboard MVP
 
 原因：前面几个功能会自然沉淀出 API 和读模型，UI 到这个时候成本最低。
 
@@ -241,15 +327,17 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 ## 为什么不马上做完整 Web UI
 
-UI 是需要的，但不能让 UI 先于读模型。
+UI 是需要的，但不能让 UI 先于 calibration 和读模型。
 
 如果现在直接做页面，页面会被迫直接读各种 ledger 原始文件：`events.jsonl`、`nodes/*.json`、`runs/*/run.json`、outputs、reports。这样 UI 会和 ledger 内部结构强耦合，后面一改 ledger，UI 就碎。
 
 更稳的路径是：
 
-1. 先把 review packet、timeline、failure summary 做成稳定读模型。
-2. CLI 先消费这些读模型。
-3. UI 再消费同一套读模型。
+1. 先让 p6 failure classification 有稳定 E2E 样本。
+2. 把 failure classification 沉淀成 CalibrationCandidate。
+3. 再把 review packet、timeline、failure summary 做成稳定读模型。
+4. CLI 先消费这些读模型。
+5. UI 再消费同一套读模型。
 
 这样 UI 不是另起一套，而是自然长出来。
 
@@ -263,19 +351,20 @@ UI 是需要的，但不能让 UI 先于读模型。
 - 可以恢复，而不是只能重来。
 - 下一阶段 prompt / handoff 能继续接上。
 
-所以接下来最该做的不是更多 workflow 分支，而是让这个生命周期对人可见、可审、可恢复。
+所以接下来最该做的不是更多 workflow 分支，也不是马上做完整 UI，而是让这个生命周期形成最小学习闭环：失败能分类，分类能变成候选改进，候选能被人审，未来能提升为模板、规则或回归样本。
 
 ## 建议开工项
 
 下一批建议开一个小分支：
 
 ```text
-dev-review-packet-and-timeline
+dev-calibration-candidate-mvp
 ```
 
-目标只做两件事：
+目标只做三件事：
 
-1. Review packet artifact
-2. Timeline projection
+1. deterministic p6 reject fixture
+2. CalibrationCandidate MVP
+3. 最小 failure/review projection，供后续 `review show` 和 UI 消费
 
-这两件事做好以后，再做 `dualctl watch` 和本地 UI。它们是同一条路上的下一步，不会浪费。
+这三件事做好以后，再做 `dualctl review show`、`dualctl watch` 和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。

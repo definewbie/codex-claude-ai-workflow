@@ -1,10 +1,178 @@
-# dual-orchestrator 架构说明与执行流程
+# dual-orchestrator 总体设计与执行流程
 
-## 1. 项目定位
+## 1. 这不是一个“双 Agent 脚本”
 
-dual-orchestrator 是 Agent 生命周期编排器的 Java 实现。它不是一个单次命令脚本，而是一个 **workflow engine**——驱动多轮 Agent 交互，经过需求澄清、设计审视、人工卡点、计划、实现、自测、验收，最终生成下一阶段提示词。
+dual-orchestrator 最早从一个很朴素的问题开始：人夹在 Claude Code 和 Codex 之间来回复制粘贴，太累了。
 
-## 2. 模块架构
+但真正做下去以后，问题变得更清楚：我们缺的不是一个“同时调用两个 Agent 的脚本”，而是一个能把 AI 软件开发过程托住的 **engineering harness**。
+
+它要解决的不是“模型会不会写代码”，而是：
+
+- 需求是否被说清楚。
+- 设计是否被独立审视。
+- 实现是否有自测证据。
+- 验收是否对照同一份契约。
+- 失败时能不能知道是实现错、需求不清、上下文不够，还是工具失败。
+- 多轮之后，系统能不能从失败里沉淀经验，而不是每次重新踩坑。
+
+所以 dual-orchestrator 的定位是：
+
+> 一个 contract-driven、可审计、可恢复、可逐步校准的 AI engineering harness。
+
+Claude / Codex / acpx 都是其中的可替换部件。真正的核心是外层 harness：workflow、ledger、contract、context、review、failure arbiter、calibration。
+
+## 2. 核心思想
+
+### 2.1 Agent 分工
+
+当前系统采用三方结构：
+
+| 角色 | 职责 | 边界 |
+|------|------|------|
+| Claude | 主控 developer / architect，负责需求澄清、设计、计划、实现、自测、handoff | 可以修改业务代码 |
+| Codex | 外部 reviewer / verifier，负责产品、架构、计划、验收视角审视 | 不直接修改业务代码 |
+| Human | gate owner，负责关键节点审批、修订、阻断和最终判断 | 可以覆盖自动判断 |
+
+这不是为了制造“两个模型互相聊天”的戏剧感，而是为了让实现者和验证者分离。Claude 像开发者，Codex 像审视者，人是最终责任人。
+
+### 2.2 Contract first
+
+早期版本是：
+
+```text
+自然语言需求 → Agent 设计 → Agent 实现 → Agent 验收
+```
+
+现在的方向是：
+
+```text
+自然语言需求
+  → TaskContract
+  → Contract Review
+  → 实现
+  → 自测证据
+  → Codex 对照契约验收
+  → FailureArbiter 分类失败
+  → CalibrationCandidate 沉淀经验
+```
+
+TaskContract 的意义是给后续所有人一个共同锚点：目标是什么、范围是什么、非目标是什么、验收标准是什么、风险在哪里。
+
+没有契约，review 很容易变成“各说各话”。有契约，失败才有可能被分类：到底是 Claude 没实现，还是契约没写清楚，还是 Codex 误判。
+
+### 2.3 Ledger 是系统记忆
+
+每个 workstream 都有自己的账本：
+
+```text
+.agent/workstreams/<workstream_id>/
+```
+
+里面记录：
+
+- workflow 当前状态
+- 每个 node 的输入、输出、开始和结束时间
+- 每次 Agent run 的 prompt、stdout、stderr、metadata
+- human gate 状态
+- revision iteration
+- events timeline
+- reports / delivery artifacts
+
+这不是为了“多存点日志”，而是为了让系统能复盘。没有 ledger，就没有恢复、审计、metrics、replay，也没有未来的 calibration。
+
+### 2.4 Context 不是越多越好
+
+Agent 很容易被上下文撑爆，也很容易因为上下文缺失而猜测。
+
+dual-orchestrator 的 context governance 做了几件事：
+
+- 按场景分 profile：product review、architecture review、implementation、acceptance 等。
+- 每个 section 有优先级和 token budget。
+- 超预算时按规则降级：摘要、只保留 decision、只保留 diff stat、只给 pointer。
+- 缺失信息时区分 fail / placeholder / skip。
+
+这让上下文装配从“把所有东西塞进去”变成“按目的装配证据”。
+
+### 2.5 失败要被分类，而不是只重试
+
+系统已经有 execution recovery：rate limit、session missing、context window、agent reconnect、dual-control 格式问题等。
+
+但更重要的是 semantic failure：
+
+- `IMPLEMENTATION_BUG`
+- `CONTRACT_GAP`
+- `CONTRACT_AMBIGUITY`
+- `REVIEW_NOISE`
+- `CONTEXT_INSUFFICIENT`
+- `TOOL_LIMITATION`
+
+执行失败可以重试；语义失败不能盲目重试。它应该进入 FailureArbiter，然后路由到修实现、改契约、问人、或生成 calibration candidate。
+
+### 2.6 UI 重要，但不是最底层能力
+
+人工 review 和进度可视化很重要，后续一定要做。
+
+但 UI 不应该直接绑定 ledger 原始结构。更稳的路径是先沉淀稳定读模型：
+
+- review packet
+- timeline projection
+- failure summary
+- calibration candidate
+
+CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harness 能力的外显。
+
+## 3. 当前实现状态
+
+当前 dual-orchestrator 已经实现：
+
+- Java multi-module 项目结构。
+- `dualctl start/status/resume/review/retry/recovery/events/runs/delivery` CLI。
+- Git worktree 隔离执行。
+- Workflow runtime：Task / Decision / Gate 三类节点。
+- 文件账本：`workflow/current.json`、`nodes/*.json`、`gates/*.json`、`iterations/*.json`、`events.jsonl`。
+- acpx adapter：统一调用 Claude / Codex session。
+- prompt templates：覆盖 intake、design、plan、implementation、self-test、acceptance、handoff。
+- Context governance：profile、budget、degradation、placeholder/skip/fail。
+- TaskContract / ContractCompiler / ContractReviewGate。
+- FailureArbiter MVP。
+- Delivery prepare / commit / create-pr 基础管线。
+- 多 workflow variant：thin / p5 / p6。
+- 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过，classification 分支仍需 deterministic fixture。
+
+## 4. 下一步设计方向
+
+结合 long-term-plan 和真实 smoke 结果，下一步不应该先做完整 UI，而是补最小校准闭环：
+
+```text
+deterministic p6 reject fixture
+  → CalibrationCandidate MVP
+  → ReviewPacket / Timeline / FailureSummary
+  → dualctl review show / watch
+  → local dashboard
+```
+
+### 4.1 近期优先级
+
+| 优先级 | 工作 | 原因 |
+|--------|------|------|
+| P0 | deterministic p6 reject fixture | 稳定验证 FailureArbiter / classify path |
+| P1 | CalibrationCandidate MVP | 让失败分类沉淀为可审查的改进候选 |
+| P1 | ReviewPacket / Timeline / FailureSummary | 为 CLI 和 UI 提供稳定读模型 |
+| P2 | `dualctl review show` / `dualctl watch` | 先用 CLI 验证人真正需要看的信息 |
+| P3 | Local UI dashboard | 在读模型稳定后做可视化 |
+
+### 4.2 长期路线
+
+长期目标是通用 AI-native engineering harness：
+
+- Workflow Template System：开发、review、bugfix、docs、SRE RCA 等不同工作流。
+- Specialization Registry：不同领域注入专属 contract、checklist、context profile。
+- Multi-role Review：产品、架构、安全、测试、发布多视角 review。
+- Adversarial Test Agent：从契约生成反例和边界测试。
+- Knowledge Registry：版本化 contract template、review checklist、regression scenarios。
+- Metrics / Replay：统计 cycle time、failure class、review quality，并能 replay 历史 run 验证新规则。
+
+## 5. 模块架构
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -70,7 +238,7 @@ dual-orchestrator 是 Agent 生命周期编排器的 Java 实现。它不是一�
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 3. 三类节点
+## 6. 三类节点
 
 Runtime 只认识三种节点：
 
@@ -80,7 +248,7 @@ Runtime 只认识三种节点：
 | **Decision** | 读取结果，选择下一条 edge | `DecisionHandler.evaluate()` | `review.decision` |
 | **Gate** | 暂停等待人审批 | `GateHandler.openOrInspect()` | `human.review` |
 
-## 4. 生命周期 Workflow（thin mainline）
+## 7. 生命周期 Workflow（thin mainline）
 
 ```
 intake.claude_brainstorm
@@ -116,9 +284,9 @@ stage.claude_handoff
 
 每个 Decision 节点都有 `NEEDS_REVISION` / `REJECT` 分支，回到上游重新迭代。
 
-## 5. 核心执行流程
+## 8. 核心执行流程
 
-### 5.1 `dualctl start` — 初始化 Workstream
+### 8.1 `dualctl start` — 初始化 Workstream
 
 ```mermaid
 sequenceDiagram
@@ -137,7 +305,7 @@ sequenceDiagram
     StartCmd-->>User: workstream ws-xxx created, first node: intake.claude_brainstorm
 ```
 
-### 5.2 `dualctl resume` — 推进单个节点
+### 8.2 `dualctl resume` — 推进单个节点
 
 这是整个引擎的核心循环。每次 `resume` 执行一个节点。
 
@@ -193,7 +361,7 @@ sequenceDiagram
     ResumeCmd-->>User: "resumed workflow, next: design.claude_design"
 ```
 
-### 5.3 `dualctl review approve` — 通过人工卡点
+### 8.3 `dualctl review approve` — 通过人工卡点
 
 ```mermaid
 sequenceDiagram
@@ -214,7 +382,7 @@ sequenceDiagram
     RT-->>User: "gate approved, next: design.claude_design"
 ```
 
-### 5.4 Revision Loop — 修订回路
+### 8.4 Revision Loop — 修订回路
 
 当 Decision 节点返回 `NEEDS_REVISION` 或 Gate 返回 `revise` 时：
 
@@ -244,7 +412,7 @@ sequenceDiagram
     end
 ```
 
-### 5.5 Auto-Retry — 可恢复失败自动重试
+### 8.5 Auto-Retry — 可恢复失败自动重试
 
 ```mermaid
 sequenceDiagram
@@ -267,7 +435,7 @@ sequenceDiagram
     RT->>RT: continue resume with reset node
 ```
 
-### 5.6 Context Build — 受治理的上下文装配
+### 8.6 Context Build — 受治理的上下文装配
 
 在关键 Agent 步骤前，`context.build_package` handler 装配上下文：
 
@@ -300,7 +468,7 @@ sequenceDiagram
     Handler-->>Handler: NodeResult(COMPLETED, [context-package.md])
 ```
 
-## 6. Ledger 文件结构
+## 9. Ledger 文件结构
 
 每个 workstream 在磁盘上的状态：
 
@@ -333,7 +501,7 @@ sequenceDiagram
             └── claude-handoff.json
 ```
 
-## 7. Handler SPI
+## 10. Handler SPI
 
 所有 handler 通过 `handlerType` 字符串注册和查找：
 
@@ -348,7 +516,7 @@ sequenceDiagram
 | `prompt.generate_next_stage` | Task | 生成下一阶段提示词 |
 | `delivery.prepare_pr` | Task | 准备交付（PR） |
 
-## 8. Context Governance 架构
+## 11. Context Governance 架构
 
 6 个预定义 profile，每个拥有独立的 **token-level** budget、section 列表和降级策略：
 
@@ -374,9 +542,9 @@ Budget 基于 token 计算（通过 `TokenEstimator` 接口，默认 ~4 chars/to
 | `LATEST` | 只显示最近 N 条 |
 | `POINTER_ONLY` | 只显示文件路径 |
 
-## 9. P4: 条件表达式 / 并行节点 / Schema 迁移
+## 12. P4: 条件表达式 / 并行节点 / Schema 迁移
 
-### 9.1 条件 Edge Routing
+### 12.1 条件 Edge Routing
 
 EdgeDefinition 新增 `condition` 字段（`EdgeCondition` 接口），在 edge 匹配时求值：
 
@@ -394,7 +562,7 @@ EdgeDefinition(from, on, to, condition)
 
 **RoutingEngine 求值：** `completeAndRoute` 构建 routing context（outcome + result），调用 `definition.edgesFrom(nodeId, outcome, routingContext)` 过滤匹配条件。
 
-### 9.2 并行节点（Fan-out）
+### 12.2 并行节点（Fan-out）
 
 当多个 edge 同时匹配时，RoutingEngine 激活所有目标节点：
 
@@ -407,7 +575,7 @@ Node A ──(DONE)──→ Node B   ← 同时激活
 
 **顺序执行：** `WorkflowRuntime.resume` 遍历所有活跃节点快照，依次执行。每次执行后重新加载 current 状态。
 
-### 9.3 Schema 版本迁移
+### 12.3 Schema 版本迁移
 
 `LedgerMigrator` 在 `WorkflowFileLedger.loadDefinition` 时检测版本差异并升级：
 
