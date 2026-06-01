@@ -107,6 +107,8 @@ deterministic failure evidence
 
 先不用做 Web UI，先做一个 CLI 聚合视图，作为后续 UI API 的雏形。
 
+当前状态：第一版已落地。human gate 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 会展示当前 gate 的 packet。
+
 命令形态：
 
 ```bash
@@ -137,6 +139,8 @@ dualctl review show --workdir <workspace> <workstream_id>
 - 每次操作后输出 next command。
 
 #### 3. Review packet artifact
+
+当前状态：第一版已落地，作为 CLI 和未来 UI 共用的 review 读模型。
 
 每个 human gate 生成一个稳定文件：
 
@@ -284,6 +288,8 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 
 原因：这是 UI 的最小内核，也是当前人工 gate 最大痛点。
 
+当前状态：第一版已完成。
+
 产出：
 
 - `reviews/<gate_id>.md`
@@ -340,7 +346,7 @@ UI 是需要的，但不能让 UI 先于 calibration 和读模型。
 更稳的路径是：
 
 1. 先把 failure classification 已经产生的结果沉淀成 CalibrationCandidate。
-2. 再把 review packet、timeline、failure summary 做成稳定读模型。
+2. 再把 timeline、failure summary 做成稳定读模型。
 3. CLI 先消费这些读模型。
 4. UI 再消费同一套读模型。
 5. deterministic p6 reject fixture 等真实 REJECT 样本或稳定回归需求出现后再补。
@@ -370,7 +376,8 @@ dev-calibration-candidate-mvp
 目标只做三件事：
 
 1. CalibrationCandidate MVP
-2. 最小 failure/review projection，供后续 `review show` 和 UI 消费
-3. 保留 p6 reject fixture 技术债，不在当前主线投入
+2. Review packet + `dualctl review show`
+3. 最小 timeline / failure projection，供后续 `watch` 和 UI 消费
+4. 保留 p6 reject fixture 技术债，不在当前主线投入
 
-这三件事做好以后，再做 `dualctl review show`、`dualctl watch` 和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。
+这些事情做好以后，再做 `dualctl watch` 和本地 UI。这样 UI 解决的是 harness 的真实观察与校准问题，而不是只给 ledger 套一层页面。

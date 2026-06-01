@@ -50,6 +50,8 @@ Runtime 只认识三类节点：
 - `acpx.agent_run` TaskHandler。
 - resources-based Agent prompt templates。
 - human review gate。
+- review packet artifact：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`。
+- `dualctl review show`：展示当前人工卡点需要看的 review packet。
 - review decision handler。
 - context package handler，会在关键 Agent step 前装配可读上下文。
 - artifact validation handler，会落盘 Git status / diff / changed files。
@@ -58,7 +60,7 @@ Runtime 只认识三类节点：
 - 节点级幂等保护（T0.2），`resume` 会拒绝正在执行中的节点。
 - Prompt 注入防护：`dual-control` block 解析锚定行首，只认 terminal block，不回退旧文件。
 - Revision loop 上限 + recovery gate。
-- 247 个单元测试覆盖全部 handler、ledger、control block 解析、contract registry、prompt 一致性、context governance 和 workflow 集成。
+- 单元测试覆盖 handler、ledger、control block 解析、contract registry、prompt 一致性、context governance 和 workflow 集成。
 - Agent artifact contract registry（`ContractRegistry`），per-node output schema 校验。
 - Prompt 模板变量加载时校验，防止引用未知变量。
 - Context governance 架构：6 profile 各自拥有 **token-level** budget-controlled 渲染管线，priority-based degradation（7 种策略含 ADAPTIVE 自适应压缩），token-aware budget enforcement。per-profile config overrides（`max_snippet_chars` 等）。
@@ -67,14 +69,16 @@ Runtime 只认识三类节点：
 - Configurable retry policies：per-failure-type 策略（RATE_LIMIT / SESSION_MISSING / AGENT_RECONNECT / CONTEXT_WINDOW），指数退避 + `Thread.sleep`，node-level config override。
 - `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
 - Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
-- ~300 个单元测试。
+- CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
+- Failure summary MVP：分类失败路径会生成 `recovery/current-failure.md`。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
-- Ledger schema 自动迁移：`LedgerMigrator` 框架（v1→v2），`WorkflowFileLedger.loadDefinition` 检测版本差异并升级。
+- Ledger schema migration 暂不作为当前主线；schema 仍在快速演进，当前只保留最小兼容能力。
 
 仍未完成：
 
-- 完整生命周期真实 smoke（需要 Codex quota）。
+- deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了边界分支引入 fake acpx。
+- Timeline projection / watch：还没有稳定的 `timeline.json` 读模型。
 - API server / scheduler。
 - Web UI / dashboard。
 - Notification 集成。
@@ -159,6 +163,7 @@ dualctl --help
 dualctl start --help
 dualctl resume --help
 dualctl review approve --help
+dualctl review show --help
 ```
 
 ## acpx Sessions
@@ -576,6 +581,20 @@ dualctl recovery abort \
 `recovery abort` 会把 workflow 标记为 `FAILED`，清空 active node / open gate，并写入 `workflow_aborted` event。它不会删除 worktree、代码改动或 ledger。
 
 ### Human Review
+
+查看当前 gate 的 review packet：
+
+```bash
+dualctl review show --workdir <effective_worktree> <workstream_id>
+```
+
+`review show` 会读取当前 active gate 对应的：
+
+```text
+.agent/workstreams/<workstream_id>/reviews/<gate_node_instance_id>.md
+```
+
+这个 packet 是后续 CLI watch / Web UI 共用的人工审查读模型，里面会列出 gate、允许动作、输入 artifacts 和关键内容摘录。
 
 批准当前 gate：
 

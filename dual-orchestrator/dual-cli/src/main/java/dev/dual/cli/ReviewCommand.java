@@ -9,6 +9,7 @@ import picocli.CommandLine.Command;
         mixinStandardHelpOptions = true,
         description = "Apply human review decisions.",
         subcommands = {
+                ReviewShowCommand.class,
                 ReviewApproveCommand.class,
                 ReviewCompleteCommand.class,
                 ReviewReviseCommand.class
@@ -17,6 +18,6 @@ import picocli.CommandLine.Command;
 public final class ReviewCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use review approve, review revise, or review complete.");
+        System.out.println("Use review show, review approve, review revise, or review complete.");
     }
 }

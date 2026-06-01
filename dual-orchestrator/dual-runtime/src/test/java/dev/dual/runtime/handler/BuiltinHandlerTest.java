@@ -40,6 +40,66 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateWritesReviewPacket() throws Exception {
+        var inputRef = writeOutput("codex-review.md", """
+                # Codex Review
+
+                Decision: NEEDS_REVISION
+
+                Must Fix:
+                - Keep the implementation scope narrow.
+                """);
+        var gateNode = node("gate.human_design_approval", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        var result = handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
+        assertEquals(packetRef, result.result().get("review_packet"));
+        assertEquals(packetJsonRef, result.result().get("review_packet_json"));
+
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("# Human Review Packet"));
+        assertTrue(markdown.contains("gate.human_design_approval"));
+        assertTrue(markdown.contains("approve"));
+        assertTrue(markdown.contains("revise"));
+        assertTrue(markdown.contains(inputRef));
+        assertTrue(markdown.contains("Keep the implementation scope narrow."));
+
+        var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"schemaVersion\""));
+        assertTrue(json.contains("\"gateNodeDefinitionId\""));
+        assertTrue(json.contains("\"reviewPacketPath\""));
+    }
+
+    @Test
+    void humanGateReviewPacketDoesNotReadOutsideWorkspace() throws Exception {
+        var outside = tempDir.getParent().resolve("outside-review-secret.md");
+        Files.writeString(outside, "secret outside workspace", StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_design_approval", NodeKind.GATE, "human.review",
+                List.of("../outside-review-secret.md"));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("(artifact outside workspace)"));
+        assertFalse(markdown.contains("secret outside workspace"));
+    }
+
+    @Test
     void reviewDecisionReadsDualControlOutcomeFromInputRef() throws Exception {
         var output = writeOutput("codex-review.md", """
                 # Review
