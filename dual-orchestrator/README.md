@@ -80,7 +80,7 @@ Runtime 只认识三类节点：
 
 仍未完成：
 
-- deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了边界分支引入 fake acpx。
+- deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了 rejection 边界分支引入 fake acpx。当前只有 `lifecycle` smoke 使用 controlled fake acpx 来验证 happy path 主链路。
 - 实时推送：还没有 SSE / file watch / WebSocket，当前 `dualctl watch` 是轮询式 CLI。
 - Scheduler：还没有后台自动推进 workflow。
 - Web UI / dashboard。
@@ -183,7 +183,7 @@ dualctl timeline --help
 
 ## Local API Server
 
-`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它还不是 scheduler，不会在后台自动轮询推进 workflow。
+`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它也提供手动 scheduler tick，但还不是常驻后台调度器。
 
 构建：
 
@@ -981,9 +981,37 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 - `.agent/workstreams/<workstream_id>/events.jsonl` 包含 `workflow_started`。
 - `status` 能看到 `Workflow: agent-lifecycle@1`。
 
+### Controlled Lifecycle Smoke
+
+改 runtime、ledger、CLI 或 workflow routing 后，先跑这个。它会临时注入一个 controlled fake `acpx`，不调用真实 Claude/Codex，用来确定性验证完整生命周期 happy path：
+
+```bash
+cd dual-orchestrator
+./scripts/smoke-test.sh lifecycle --cleanup
+```
+
+预期：
+
+- workflow 从 `start --run` 跑到第一个 human gate。
+- 脚本自动 approve 中间 gate，并在最后 next-stage gate 执行 `review complete`。
+- 28 个 thin mainline 节点完成。
+- final report、delivery prepare artifact、next-stage prompt、handoff.json 都存在。
+- Git evidence 能看到 controlled implementation 对 `main.py` / `README.md` 的改动。
+
+这个 smoke 只验证编排主链路，不验证真实 Agent 能力。
+
 ### Real acpx Smoke
 
-完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 thin、p5、p6 三个 case。
+完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 thin、p5、p6 三个真实 acpx case。
+
+真实 acpx case：
+
+```bash
+cd dual-orchestrator
+./scripts/smoke-test.sh --case thin-basic --cleanup
+./scripts/smoke-test.sh --case p5-contract-happy-path --cleanup
+./scripts/smoke-test.sh --case p6-reject-classify-path --cleanup
+```
 
 推荐使用一个明确的临时 worktree 目录，方便跑完清理：
 
@@ -1205,8 +1233,8 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 
 ## Current Limits
 
-- 仍是 CLI-first，没有 API server / scheduler。
-- workflow 已支持 JSON 文件加载、条件表达式（`EdgeCondition`）、并行节点（fan-out + sequential execution）和 schema 版本自动迁移（`LedgerMigrator`）。
-- context package 已有 budget-controlled governance pipeline（6 profile，priority-based degradation，per-profile config overrides），但没有 token-level budgeting 或 adaptive compression。
+- 仍是 CLI-first；API server 已有 status / timeline / action / manual scheduler tick，暂时没有常驻 daemon 和 Web UI。
+- workflow 已支持 JSON 文件加载、条件表达式（`EdgeCondition`）和并行节点（fan-out + sequential execution）；schema 迁移暂不作为当前主线。
+- context package 已有 token-level budget-controlled governance pipeline（6 profile，priority-based degradation，adaptive compression，per-profile config overrides），但真实 tokenizer 仍待替换。
 - auto-retry 按 failure type 自动分类并指数退避重试，但还没有交互式修复向导。
 - notification 还没接入 Java 版。

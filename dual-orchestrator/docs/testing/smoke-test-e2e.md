@@ -2,17 +2,35 @@
 
 ## 脚本用途
 
-`scripts/smoke-test.sh` 是 dual-orchestrator 的端到端验证脚本，用于在真实 Codex + Claude cowork 环境中运行完整的 agent lifecycle，验证 workflow variant、artifact 产出、domain event 发射、report 生成等端到端行为。
+`scripts/smoke-test.sh` 是 dual-orchestrator 的端到端验证脚本，用于验证 agent lifecycle 的 workflow routing、run ledger、artifact 产出、domain event 发射、report 生成等端到端行为。
 
-**这不是确定性 fixture test framework。** 脚本依赖真实的 acpx agent 执行，agent 输出和 decision 结果是非确定性的。脚本验证的是"流程能跑通 + 关键产物存在"，而非"输出与预期完全一致"。
+脚本现在分两类 case：
+
+- `lifecycle`：controlled smoke。脚本临时注入一个 fake `acpx`，只模拟 happy path 的 Claude/Codex 输出，用来确定性验证完整生命周期主链路。
+- `thin-basic` / `p5-contract-happy-path` / `p6-reject-classify-path`：真实 acpx E2E。依赖真实 Claude/Codex cowork，验证真实 agent 调用能否跑通。
+
+真实 acpx case 不是确定性 fixture test framework。agent 输出和 decision 结果是非确定性的；脚本验证的是"流程能跑通 + 关键产物存在"，而非"输出与预期完全一致"。
 
 ## 前置条件
 
 - Java 17+, Maven
-- acpx (Claude/Codex CLI) 已安装并认证
+- `lifecycle` case 不需要真实 acpx；脚本会临时注入 controlled fake acpx
+- 真实 acpx case 需要 acpx (Claude/Codex CLI) 已安装并认证
 - gh CLI（仅 `--with-github` 时需要）
 
 ## 支持的 Case
+
+### lifecycle
+
+| 项 | 值 |
+|----|----|
+| Workflow variant | thin（默认，无 `--workflow-variant`） |
+| Agent transport | controlled fake acpx（脚本临时注入，只作用于本次 smoke） |
+| 任务 | 给 main.py 添加 goodbye 函数 |
+| 关键断言 | workflow 完成、28 个节点完成、5 个 gate 被处理、final report / delivery / next-stage prompt / handoff.json 存在、Git evidence 捕获 goodbye diff |
+| 预期结果 | PASS（COMPLETED） |
+
+这个 case 的目的不是评估 Claude/Codex 输出质量，而是快速验证 orchestration 主链路是否完整：start --run、gate loop、implementation evidence、acceptance report、delivery prepare、stage handoff、next-stage prompt、workflow complete。
 
 ### thin-basic
 
@@ -67,6 +85,9 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 ## 常用命令
 
 ```bash
+# controlled full lifecycle smoke：不调用真实 acpx，适合改 runtime / ledger / CLI 后快速验证主链路
+./scripts/smoke-test.sh lifecycle --cleanup
+
 # 默认 case（thin-basic）
 ./scripts/smoke-test.sh --cleanup
 

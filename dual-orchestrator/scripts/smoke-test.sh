@@ -3,7 +3,9 @@
 # smoke-test.sh — Full lifecycle smoke test for dual-orchestrator
 #
 # Usage:
+#   ./scripts/smoke-test.sh lifecycle                     # Controlled full lifecycle smoke, no real acpx calls
 #   ./scripts/smoke-test.sh                              # Default: thin-basic case
+#   ./scripts/smoke-test.sh --case lifecycle
 #   ./scripts/smoke-test.sh --case p5-contract-happy-path
 #   ./scripts/smoke-test.sh --case p6-reject-classify-path
 #   ./scripts/smoke-test.sh --case all                   # Run all cases sequentially
@@ -51,8 +53,12 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       ;;
+    lifecycle|thin-basic|p5-contract-happy-path|p6-reject-classify-path|all)
+      CASE_NAME="$1"
+      ;;
     --list)
       echo "Available E2E cases:"
+      echo "  lifecycle              Controlled thin lifecycle happy path with fake acpx"
       echo "  thin-basic             Thin mainline, full lifecycle happy path"
       echo "  p5-contract-happy-path P5 variant with contract compilation and review"
       echo "  p6-reject-classify-path P6 variant, best-effort classify_failure coverage"
@@ -85,6 +91,7 @@ CASE_EXPECTED_EVENTS=()
 CASE_EXPECTED_REPORT_SECTIONS=()
 CASE_VARIANT_ASSERT_FN=""
 CASE_DUALCTL_EXTRA_ARGS=()
+CASE_USE_CONTROLLED_ACPX=false
 
 configure_case() {
   # Reset all case config
@@ -96,8 +103,18 @@ configure_case() {
   CASE_EXPECTED_REPORT_SECTIONS=()
   CASE_VARIANT_ASSERT_FN=""
   CASE_DUALCTL_EXTRA_ARGS=()
+  CASE_USE_CONTROLLED_ACPX=false
 
   case "$CASE_NAME" in
+    lifecycle)
+      CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出。"
+      CASE_FINAL_GATE="gate.human_next_stage_approval"
+      CASE_USE_CONTROLLED_ACPX=true
+      CASE_EXPECTED_ARTIFACTS=("reports/latest-final-report.md" "delivery/commit-message.txt" "delivery/pr-body.md" "artifacts/next-stage/next-stage-prompt.md")
+      CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "workflow_completed")
+      CASE_EXPECTED_REPORT_SECTIONS=("User Request" "Acceptance Summary" "Developer Self-Test Summary" "Git Evidence" "Run Artifacts")
+      CASE_VARIANT_ASSERT_FN="assert_lifecycle_controlled"
+      ;;
     thin-basic)
       CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出，不要让 python main.py 打印 goodbye。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
@@ -126,7 +143,7 @@ configure_case() {
       CASE_VARIANT_ASSERT_FN="assert_p6_classify"
       ;;
     *)
-      echo "Unknown case: $CASE_NAME. Supported: thin-basic, p5-contract-happy-path, p6-reject-classify-path, all"
+      echo "Unknown case: $CASE_NAME. Supported: lifecycle, thin-basic, p5-contract-happy-path, p6-reject-classify-path, all"
       exit 1
       ;;
   esac
@@ -153,7 +170,7 @@ safe_remove_dir() {
   local target="${1:-}"
   [[ -n "$target" ]] || return 0
   case "$target" in
-    "$FIXTURE_DIR"|"$FIXTURE_DIR"/*|"${FIXTURE_DIR}-agent-runs"|"${FIXTURE_DIR}-agent-runs"/*)
+    "$FIXTURE_DIR"|"$FIXTURE_DIR"/*|"${FIXTURE_DIR}-agent-runs"|"${FIXTURE_DIR}-agent-runs"/*|/tmp/dual-smoke-acpx-*)
       rm -rf "$target"
       ;;
     *)
@@ -173,7 +190,171 @@ fcount() {
   find "$dir" -maxdepth 1 -name "$pattern" 2>/dev/null | wc -l | tr -d ' '
 }
 
+install_controlled_acpx() {
+  local bin_dir="$1"
+  mkdir -p "$bin_dir"
+  cat > "$bin_dir/acpx" <<'FAKE_ACPX'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--help" ]]; then
+  echo "controlled smoke acpx"
+  exit 0
+fi
+if [[ "${1:-}" == "--version" ]]; then
+  echo "controlled-smoke-acpx 1.0"
+  exit 0
+fi
+
+agent=""
+prompt=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    claude|codex)
+      agent="$1"
+      if [[ "${2:-}" == "sessions" && "${3:-}" == "new" ]]; then
+        echo "created controlled $agent session"
+        exit 0
+      fi
+      shift
+      ;;
+    -f)
+      shift
+      prompt="${1:-}"
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+template="$(basename "${prompt:-unknown.md}")"
+
+write_control() {
+  local decision="$1"
+  local summary="$2"
+  cat <<EOF
+## Controlled Smoke Output
+
+Agent: ${agent:-unknown}
+Template: ${template}
+
+${summary}
+
+\`\`\`dual-control
+decision: ${decision}
+summary: ${summary}
+\`\`\`
+EOF
+}
+
+case "$template" in
+  intake-claude-brainstorm.md)
+    write_control "READY_FOR_PRODUCT_REVIEW" "Requirement is clear enough for product review."
+    ;;
+  intake-codex-product-review.md)
+    write_control "READY_FOR_PRODUCT_REVIEW" "Product review passed for controlled smoke."
+    ;;
+  design-claude.md)
+    write_control "READY_FOR_ARCH_REVIEW" "Design is intentionally small and ready for architecture review."
+    ;;
+  design-codex-review.md)
+    write_control "READY_FOR_ARCH_REVIEW" "Architecture review passed for controlled smoke."
+    ;;
+  plan-claude.md)
+    write_control "READY_FOR_PLAN_REVIEW" "Plan keeps the change scoped to main.py and README.md."
+    ;;
+  plan-codex-review.md)
+    write_control "READY_TO_IMPLEMENT" "Plan is ready to implement."
+    ;;
+  implement-claude.md)
+    if [[ -f main.py ]] && ! grep -q "def goodbye" main.py; then
+      cat >> main.py <<'PY'
+
+def goodbye():
+    return "goodbye"
+PY
+    fi
+    if [[ -f README.md ]] && ! grep -q "goodbye" README.md; then
+      cat >> README.md <<'README'
+
+## goodbye
+
+`goodbye()` returns `goodbye`.
+README
+    fi
+    write_control "IMPLEMENTED" "Implemented goodbye() and README documentation."
+    ;;
+  implement-claude-self-test.md)
+    python3 - <<'PY'
+import main
+assert main.hello() == "world"
+assert main.goodbye() == "goodbye"
+PY
+    write_control "SELF_TEST_COMPLETE" "Self-test passed: hello() and goodbye() behave as expected."
+    ;;
+  acceptance-codex-review.md)
+    write_control "ACCEPT" "Controlled verifier accepted the implementation evidence."
+    ;;
+  stage-claude-handoff.md)
+    cat <<'EOF'
+## Handoff
+
+Completed work:
+- Added goodbye() to main.py.
+- Documented goodbye() in README.md.
+
+Open risks:
+- None for controlled smoke.
+
+Recommended next step:
+- Use the generated report and next-stage prompt as handoff artifacts.
+
+```dual-control
+decision: HANDOFF_READY
+summary: Handoff is ready for the next stage.
+```
+EOF
+    ;;
+  *)
+    write_control "PASS" "Default controlled smoke response."
+    ;;
+esac
+FAKE_ACPX
+  chmod +x "$bin_dir/acpx"
+}
+
 # ─── Variant-specific assertion functions ────────────────────────────────────
+
+assert_lifecycle_controlled() {
+  step "Controlled Lifecycle Assertions"
+
+  if [[ -f "$WORKSPACE_DIR/main.py" ]] && grep -q "def goodbye" "$WORKSPACE_DIR/main.py"; then
+    ok "main.py contains goodbye()"
+  else
+    fail "main.py missing goodbye()"
+  fi
+
+  if [[ -f "$WORKSPACE_DIR/README.md" ]] && grep -q "goodbye" "$WORKSPACE_DIR/README.md"; then
+    ok "README documents goodbye()"
+  else
+    fail "README missing goodbye() documentation"
+  fi
+
+  if [[ -f "$WS_DIR/artifacts/git-evidence/diff.patch" ]] && grep -q "def goodbye" "$WS_DIR/artifacts/git-evidence/diff.patch"; then
+    ok "Git evidence captures goodbye() diff"
+  else
+    fail "Git evidence diff.patch missing goodbye()"
+  fi
+
+  local handoff_json="$WS_DIR/artifacts/next-stage/handoff.json"
+  if [[ -f "$handoff_json" ]]; then
+    ok "handoff.json exists"
+  else
+    fail "handoff.json missing"
+  fi
+}
 
 assert_p5_contract() {
   step "P5 Contract Assertions"
@@ -272,9 +453,11 @@ run_smoke_case() {
   FINAL_STATUS=""
   P6_CLASSIFY_NOT_EXERCISED=""
   CLEANED_UP=false
+  PATH_BEFORE_CONTROLLED_ACPX=""
 
   FIXTURE_DIR="/tmp/dual-smoke-${CASE_NAME}-$$"
   FIXTURE_REPO_NAME="dual-smoke-${CASE_NAME}-$$"
+  CONTROLLED_ACPX_DIR="/tmp/dual-smoke-acpx-${CASE_NAME}-$$"
 
   # ─── Cleanup trap for this case ─────────────────────────────────────────
   do_cleanup() {
@@ -282,6 +465,10 @@ run_smoke_case() {
       return 0
     fi
     CLEANED_UP=true
+    if [[ -n "$PATH_BEFORE_CONTROLLED_ACPX" ]]; then
+      export PATH="$PATH_BEFORE_CONTROLLED_ACPX"
+    fi
+    safe_remove_dir "$CONTROLLED_ACPX_DIR"
     if [[ "$CLEANUP" != true ]]; then
       return 0
     fi
@@ -326,7 +513,14 @@ run_smoke_case() {
   }
   ok "dualctl is runnable"
 
-  # 0.3 Verify acpx (required — agent runs will fail without it)
+  # 0.3 Verify acpx (real acpx for E2E cases, controlled fake acpx for lifecycle)
+  if [[ "$CASE_USE_CONTROLLED_ACPX" == true ]]; then
+    install_controlled_acpx "$CONTROLLED_ACPX_DIR"
+    PATH_BEFORE_CONTROLLED_ACPX="$PATH"
+    export PATH="$CONTROLLED_ACPX_DIR:$PATH"
+    ok "controlled acpx installed for lifecycle smoke"
+  fi
+
   if command -v acpx &> /dev/null; then
     ok "acpx found: $(acpx --version 2>/dev/null || echo 'version unknown')"
   else
@@ -891,7 +1085,7 @@ print_case_report() {
 
 # ─── --case all mode ─────────────────────────────────────────────────────────
 if [[ "$CASE_NAME" == "all" ]]; then
-  ALL_CASES=("thin-basic" "p5-contract-happy-path" "p6-reject-classify-path")
+  ALL_CASES=("lifecycle" "thin-basic" "p5-contract-happy-path" "p6-reject-classify-path")
   ALL_RESULTS=()
   ALL_PASS=true
 
