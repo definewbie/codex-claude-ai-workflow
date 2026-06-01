@@ -73,7 +73,7 @@ Runtime 只认识三类节点：
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
-- Local API Server MVP：`dual-server` 提供只读 HTTP API，用于读取 workflow status 和 timeline；暂不负责调度、审批动作或 UI。
+- Local API Server MVP：`dual-server` 提供 HTTP API，用于读取 workflow status / timeline，并执行最小 action：resume、retry、review approve/revise；暂不负责后台调度或 UI。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
 - Ledger schema migration 暂不作为当前主线；schema 仍在快速演进，当前只保留最小兼容能力。
@@ -120,8 +120,9 @@ dual-cli
   dualctl start/status/resume/review
 
 dual-server
-  local read-only HTTP API
-  status / timeline endpoints
+  local HTTP API
+  status / timeline read endpoints
+  resume / retry / review approve / review revise action endpoints
 ```
 
 ## Dependencies
@@ -182,7 +183,7 @@ dualctl timeline --help
 
 ## Local API Server
 
-`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 读模型入口。当前第一版只读 ledger，不启动 scheduler，也不会替你 approve/revise 人工卡点。
+`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它还不是 scheduler，不会在后台自动轮询推进 workflow。
 
 构建：
 
@@ -204,7 +205,20 @@ curl "http://localhost:8080/api/workstreams/<workstream_id>/status?workdir=<effe
 curl "http://localhost:8080/api/workstreams/<workstream_id>/timeline?workdir=<effective_worktree>"
 ```
 
-两个接口都读取 `.agent/workstreams/<workstream_id>/` 下已经落盘的账本和 `timeline.json`。它们适合 UI、脚本或外部观察器消费；需要推进流程时，仍然使用 `dualctl resume` / `dualctl review approve` / `dualctl review revise`。
+推进 workflow：
+
+```bash
+curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/resume?workdir=<effective_worktree>&maxSteps=1"
+curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/retry?workdir=<effective_worktree>" \
+  -H "Content-Type: application/json" \
+  -d '{"note":"fixed external cause"}'
+curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/approve?workdir=<effective_worktree>&run=false"
+curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/revise?workdir=<effective_worktree>&run=false" \
+  -H "Content-Type: application/json" \
+  -d '{"feedback":"Please address the Must Fix items before implementation."}'
+```
+
+`run=true&maxSteps=20` 可以在 approve / revise 后继续跑到下一个 gate、recovery、failure 或 completed。所有 action API 都复用 workflow ledger 和 workstream lock，和 CLI 使用同一套账本。CLI 仍然是主要操作入口；HTTP API 目前服务于后续 UI 和外部自动化。
 
 ## acpx Sessions
 

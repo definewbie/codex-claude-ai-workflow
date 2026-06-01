@@ -62,7 +62,12 @@ class WorkstreamApiControllerTest {
     }
 
     private WorkstreamApiController controller() {
-        return new WorkstreamApiController(new WorkstreamQueryService(new ObjectMapper()));
+        return new WorkstreamApiController(
+                new WorkstreamQueryService(new ObjectMapper()),
+                new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                        new dev.dual.runtime.WorkflowRuntimeResult(command.workstreamId(),
+                                dev.dual.core.workflow.WorkflowStatus.COMPLETED, "", "unused"))
+        );
     }
 
     private Fixture createWorkstream(String workstreamIdValue) throws Exception {
