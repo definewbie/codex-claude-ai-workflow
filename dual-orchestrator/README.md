@@ -198,6 +198,27 @@ mvn -pl dual-server -am package
 java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 ```
 
+打开本地 operator panel：
+
+```text
+http://localhost:8080/
+```
+
+这个页面是一个很薄的调用 UI，不是完整 dashboard。它直接调用下面这些 HTTP API，可以做几件日常 E2E 操作：
+
+- 输入 effective workdir，列出 workstreams。
+- 查看当前 status 和 timeline。
+- 手动执行 scheduler tick。
+- 对选中的 workstream 执行 resume、retry、approve + run、revise + run、complete。
+
+常见用法：
+
+1. 先用 `dualctl start` 或 smoke script 创建一个 workstream。
+2. 启动 `dual-server`。
+3. 打开 `http://localhost:8080/`。
+4. 在页面顶部填入 start 输出里的 `Workspace`，点击 `Refresh`。
+5. 选中 workstream 后查看 status / timeline，遇到 human gate 时点 `Approve + Run` 或 `Complete`。
+
 查询某个 workstream：
 
 ```bash
@@ -214,6 +235,9 @@ curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/retry?workdi
   -H "Content-Type: application/json" \
   -d '{"note":"fixed external cause"}'
 curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/approve?workdir=<effective_worktree>&run=false"
+curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/complete?workdir=<effective_worktree>" \
+  -H "Content-Type: application/json" \
+  -d '{"note":"completed from API"}'
 curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/revise?workdir=<effective_worktree>&run=false" \
   -H "Content-Type: application/json" \
   -d '{"feedback":"Please address the Must Fix items before implementation."}'
@@ -999,6 +1023,16 @@ cd dual-orchestrator
 - Git evidence 能看到 controlled implementation 对 `main.py` / `README.md` 的改动。
 
 这个 smoke 只验证编排主链路，不验证真实 Agent 能力。
+
+如果想保留 ledger 给 operator panel 查看，不要加 `--cleanup`：
+
+```bash
+cd dual-orchestrator
+./scripts/smoke-test.sh lifecycle --skip-build
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+然后打开 `http://localhost:8080/`，把脚本输出里的 `Workspace` 粘到页面顶部的 `Effective workdir`。
 
 ### Real acpx Smoke
 

@@ -70,7 +70,7 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 
 ### all
 
-顺序运行上述 3 个 case，每个 case 使用独立的 fixture 目录。共享一次 build。最终输出 per-case 结果汇总。
+顺序运行 `lifecycle`、`thin-basic`、`p5-contract-happy-path`、`p6-reject-classify-path`，每个 case 使用独立的 fixture 目录。共享一次 build。最终输出 per-case 结果汇总。
 
 ## 结果语义
 
@@ -88,14 +88,15 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 # controlled full lifecycle smoke：不调用真实 acpx，适合改 runtime / ledger / CLI 后快速验证主链路
 ./scripts/smoke-test.sh lifecycle --cleanup
 
-# 默认 case（thin-basic）
+# 默认 case（thin-basic，真实 acpx）
 ./scripts/smoke-test.sh --cleanup
 
-# 指定 case
+# 指定真实 acpx case
+./scripts/smoke-test.sh --case thin-basic --cleanup
 ./scripts/smoke-test.sh --case p5-contract-happy-path --cleanup
 ./scripts/smoke-test.sh --case p6-reject-classify-path --cleanup
 
-# 运行全部 case
+# 运行全部 case：先 controlled lifecycle，再真实 thin/p5/p6
 ./scripts/smoke-test.sh --case all --cleanup
 
 # 跳过 build（开发中反复跑时）
@@ -110,6 +111,43 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 # 帮助
 ./scripts/smoke-test.sh --help
 ```
+
+## 用 Operator Panel 查看 Smoke Ledger
+
+如果要用本地 UI 查看某次 smoke 的 status / timeline / gate 状态，不要使用 `--cleanup`，否则脚本结束后会删除 fixture 和 worktree：
+
+```bash
+cd dual-orchestrator
+
+# controlled smoke，适合快速验证 UI 和主链路
+./scripts/smoke-test.sh lifecycle --skip-build
+
+# 或者真实 acpx E2E
+./scripts/smoke-test.sh --case thin-basic --skip-build
+```
+
+脚本会输出：
+
+```text
+Workspace: /tmp/...-agent-runs/<workstream_id>
+Workstream: <workstream_id>
+```
+
+启动 server：
+
+```bash
+cd dual-orchestrator
+mvn -pl dual-server -am package
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+打开：
+
+```text
+http://localhost:8080/
+```
+
+在页面顶部 `Effective workdir` 填入脚本输出里的 `Workspace`，点击 `Refresh`。页面可以列出 workstreams，查看 status / timeline，并执行 `Resume`、`Approve + Run`、`Complete`、`Retry`、`Revise + Run`。
 
 ## 每次 E2E 运行建议记录的数据
 

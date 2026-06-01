@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dual Operator Panel</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>Dual Operator Panel</h1>
+        <p>Local workflow status, timeline, and human-gate actions.</p>
+      </div>
+      <span id="connection" class="badge muted">Idle</span>
+    </header>
+
+    <section class="toolbar">
+      <label class="field field-grow">
+        <span>Effective workdir</span>
+        <input id="workdir" type="text" placeholder="/path/to/effective/worktree">
+      </label>
+      <label class="field compact">
+        <span>Max steps</span>
+        <input id="maxSteps" type="number" min="1" value="20">
+      </label>
+      <button id="refresh">Refresh</button>
+      <button id="tick">Scheduler Tick</button>
+    </section>
+
+    <section class="layout">
+      <aside class="panel list-panel">
+        <div class="panel-title">
+          <h2>Workstreams</h2>
+          <span id="count" class="subtle">0</span>
+        </div>
+        <div id="workstreams" class="workstreams"></div>
+      </aside>
+
+      <section class="main-panel">
+        <div class="panel">
+          <div class="panel-title">
+            <h2 id="selectedTitle">No workstream selected</h2>
+            <span id="selectedStatus" class="badge muted">-</span>
+          </div>
+          <div class="actions">
+            <button id="resume">Resume</button>
+            <button id="approve">Approve + Run</button>
+            <button id="complete">Complete</button>
+            <button id="retry">Retry</button>
+          </div>
+          <label class="field">
+            <span>Revise feedback</span>
+            <textarea id="feedback" rows="3" placeholder="Feedback for review revise"></textarea>
+          </label>
+          <div class="actions">
+            <button id="revise">Revise + Run</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Status</h2>
+            </div>
+            <pre id="statusView" class="json">{}</pre>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Timeline</h2>
+            </div>
+            <div id="timelineView" class="timeline"></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Last Response</h2>
+          </div>
+          <pre id="responseView" class="json">{}</pre>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

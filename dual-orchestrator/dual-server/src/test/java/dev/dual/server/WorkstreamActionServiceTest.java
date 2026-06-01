@@ -63,6 +63,25 @@ class WorkstreamActionServiceTest {
     }
 
     @Test
+    void completeResolvesCurrentHumanGateAndCompletesWorkflow() throws Exception {
+        var paths = createWorkstream("ws-complete", completeGateDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
+        var response = service.complete(tempDir, "ws-complete", "done");
+
+        assertEquals("review.complete", response.get("action"));
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, current.status());
+        assertEquals(List.of(), current.activeNodeInstanceIds());
+    }
+
+
+    @Test
     void retryMarksActiveFailedNodeReady() throws Exception {
         var paths = createWorkstream("ws-retry", simpleDefinition());
         var ledger = new WorkflowFileLedger();
@@ -112,6 +131,22 @@ class WorkstreamActionServiceTest {
                 List.of(
                         new EdgeDefinition("before.gate", "completed", "gate.review"),
                         new EdgeDefinition("gate.review", "approved", "after.approve")
+                )
+        );
+    }
+
+    private static WorkflowDefinition completeGateDefinition() {
+        return new WorkflowDefinition(
+                "api-action-workflow",
+                1,
+                "before.gate",
+                List.of(
+                        new NodeDefinition("before.gate", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review",
+                                Map.of("allowed_actions", List.of("approve", "revise", "complete")))
+                ),
+                List.of(
+                        new EdgeDefinition("before.gate", "completed", "gate.review")
                 )
         );
     }

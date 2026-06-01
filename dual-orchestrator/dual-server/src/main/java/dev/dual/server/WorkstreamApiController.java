@@ -82,6 +82,15 @@ public class WorkstreamApiController {
         return actionService.approve(workdir, workstreamId, run, maxSteps);
     }
 
+    @PostMapping("/{workstreamId}/review/complete")
+    public Map<String, Object> complete(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = ".") Path workdir,
+            @RequestBody(required = false) ReviewCompleteRequest request
+    ) throws Exception {
+        return actionService.complete(workdir, workstreamId, request == null ? "" : request.note());
+    }
+
     @PostMapping("/{workstreamId}/review/revise")
     public Map<String, Object> revise(
             @PathVariable String workstreamId,
@@ -105,5 +114,8 @@ public class WorkstreamApiController {
     }
 
     public record ReviewReviseRequest(String feedback) {
+    }
+
+    public record ReviewCompleteRequest(String note) {
     }
 }

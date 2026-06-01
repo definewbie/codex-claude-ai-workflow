@@ -70,6 +70,12 @@ public class WorkstreamActionService {
         return actionResponse("review.approve", workstreamId, "human gate approved");
     }
 
+    public Map<String, Object> complete(Path workspaceRoot, String workstreamId, String note) throws Exception {
+        var root = normalize(workspaceRoot);
+        resolveGate(root, workstreamId, "complete", note == null || note.isBlank() ? "completed from API" : note);
+        return actionResponse("review.complete", workstreamId, "human gate completed");
+    }
+
     public Map<String, Object> revise(Path workspaceRoot, String workstreamId, String feedback,
                                       boolean runImmediately, int maxSteps) throws Exception {
         if (feedback == null || feedback.isBlank()) {
