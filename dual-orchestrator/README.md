@@ -1065,6 +1065,39 @@ cd dual-orchestrator
 ./scripts/smoke-test.sh --case p6-reject-classify-path --cleanup
 ```
 
+### Real Repository Lifecycle Case
+
+如果要在真实项目里验证 dual 能不能接管一个小任务，又不想手工盯每个 human gate，可以用 `run-real-case.sh`。它会：
+
+- 构建 `dualctl`。
+- 在目标 repo 创建默认安全 worktree。
+- 启动 lifecycle workflow。
+- 自动 approve 中间 human gates。
+- 在最后 next-stage gate 执行 `review complete`，避免开启下一轮。
+- 采集 status、timeline、events、runs、recovery、Git diff 证据。
+- 生成一份报告到 `docs/testing/real-case-reports/<timestamp>/report.md`。
+
+它不会自动提交、不会 push、不会创建 PR，也不会删除原始 repo。`--cleanup-worktree` 只会在报告生成后删除本次创建的 worktree。
+
+示例：
+
+```bash
+cd dual-orchestrator
+
+./scripts/run-real-case.sh \
+  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
+  --task-file /tmp/dual-real-cases/cancer-clinic-case-001.md \
+  --variant p6
+```
+
+跑完后查看：
+
+```bash
+cat docs/testing/real-case-reports/<timestamp>/report.md
+```
+
+这个脚本适合验证编排主链路，不等于业务最终验收。真实交付前仍然应该人工查看 final report、Codex acceptance、Git diff 和 handoff。
+
 推荐使用一个明确的临时 worktree 目录，方便跑完清理：
 
 ```bash
