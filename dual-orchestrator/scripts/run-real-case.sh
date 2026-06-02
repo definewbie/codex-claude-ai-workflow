@@ -61,6 +61,18 @@ dualctl() {
   java -jar "$JAR_PATH" "$@"
 }
 
+handle_interrupt() {
+  FINAL_STATUS="INTERRUPTED"
+  log "Interrupted. Collecting current evidence before exit..."
+  collect_evidence || true
+  write_report || true
+  if [[ -n "$WORKSPACE_DIR" && -n "$WORKSTREAM_ID" ]]; then
+    log "Inspect: java -jar \"$JAR_PATH\" status --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
+    log "Resume:  java -jar \"$JAR_PATH\" resume --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
+  fi
+  exit 130
+}
+
 abs_path() {
   local path="$1"
   if [[ "$path" = /* ]]; then
@@ -186,6 +198,7 @@ start_workstream() {
   log "Workstream: $WORKSTREAM_ID"
   log "Workspace:  $WORKSPACE_DIR"
   log "Ledger:     $WS_DIR"
+  print_step_lines "$(cat "$CASE_DIR/logs/start.log")"
 }
 
 status_snapshot() {
@@ -201,6 +214,36 @@ active_node_definition() {
   printf '%s\n' "$1" | awk '/Active node definition:/ { value = $NF } END { print value }'
 }
 
+workflow_status() {
+  printf '%s\n' "$1" | awk '/^  Status:/ { value = $2 } END { print value }'
+}
+
+active_nodes() {
+  printf '%s\n' "$1" | awk '/^  Active nodes:/ { sub(/^  Active nodes: /, ""); value = $0 } END { print value }'
+}
+
+open_gates() {
+  printf '%s\n' "$1" | awk '/^  Open gates:/ { sub(/^  Open gates: /, ""); value = $0 } END { print value }'
+}
+
+print_status_summary() {
+  local label="$1"
+  local status_output="$2"
+  local status active_def active_ids gates
+  status="$(workflow_status "$status_output")"
+  active_def="$(active_node_definition "$status_output")"
+  active_ids="$(active_nodes "$status_output")"
+  gates="$(open_gates "$status_output")"
+  log "Status [$label]: ${status:-unknown}; active=${active_def:-unknown}; nodes=${active_ids:-[]}; gates=${gates:-[]}"
+}
+
+print_step_lines() {
+  local output="$1"
+  printf '%s\n' "$output" | awk '/^Step / { print }' | while IFS= read -r line; do
+    log "  $line"
+  done
+}
+
 run_gate_loop() {
   local round=0
   while [[ "$round" -lt "$MAX_GATES" ]]; do
@@ -210,6 +253,7 @@ run_gate_loop() {
     local status_output
     status_output="$(current_status_text)"
     printf '%s\n' "$status_output" >"$CASE_DIR/logs/status-gate-$round.log"
+    print_status_summary "gate-$round" "$status_output"
 
     if grep -q 'COMPLETED' "$CASE_DIR/logs/status-gate-$round.log"; then
       FINAL_STATUS="COMPLETED"
@@ -249,6 +293,7 @@ run_gate_loop() {
       FINAL_STATUS="APPROVE_FAILED"
       return 1
     fi
+    print_step_lines "$(cat "$CASE_DIR/logs/review-approve-$round.log")"
 
     if grep -q 'COMPLETED' "$CASE_DIR/logs/review-approve-$round.log"; then
       FINAL_STATUS="COMPLETED"
@@ -312,6 +357,16 @@ write_report() {
     echo "- Ledger: ${WS_DIR:-unknown}"
     echo "- Task File: $TASK_FILE"
     echo
+    echo "## Final Status Snapshot"
+    echo
+    echo '```text'
+    if [[ -f "$CASE_DIR/logs/status-final.log" ]]; then
+      cat "$CASE_DIR/logs/status-final.log"
+    elif [[ -f "$CASE_DIR/logs/status-after-start.log" ]]; then
+      cat "$CASE_DIR/logs/status-after-start.log"
+    fi
+    echo '```'
+    echo
     echo "## Artifacts"
     echo
     echo "| Artifact | Status | Path |"
@@ -372,6 +427,7 @@ main() {
   validate_inputs
   build_project
   init_case_dir
+  trap handle_interrupt INT TERM
   start_workstream
   status_snapshot "after-start" || true
 
@@ -380,6 +436,7 @@ main() {
   fi
 
   collect_evidence
+  status_snapshot "final" || true
   write_report
   cleanup_worktree
 

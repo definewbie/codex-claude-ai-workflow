@@ -55,7 +55,11 @@ public final class StatusCommand implements Callable<Integer> {
             if (!current.activeNodeInstanceIds().isEmpty()) {
                 var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));
                 System.out.println("  Active node definition: " + node.nodeDefinitionId());
+                System.out.println("  Active node status: " + node.status());
                 System.out.println("  Active iteration: " + node.iterationId());
+                if (node.status() == dev.dual.core.workflow.NodeStatus.RUNNING) {
+                    System.out.println("  Running PID: " + runningPidStatus(node.result().get("running_pid")));
+                }
                 if (current.status() == dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY) {
                     System.out.println("  Recovery: fix the external cause, then run dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
                 }
@@ -94,5 +98,14 @@ public final class StatusCommand implements Callable<Integer> {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private static String runningPidStatus(Object value) {
+        if (!(value instanceof Number number)) {
+            return "(missing)";
+        }
+        var pid = number.longValue();
+        var alive = ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false);
+        return pid + (alive ? " (alive)" : " (stale)");
     }
 }

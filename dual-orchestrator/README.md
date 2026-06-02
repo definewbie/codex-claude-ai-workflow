@@ -1075,9 +1075,11 @@ cd dual-orchestrator
 - 自动 approve 中间 human gates。
 - 在最后 next-stage gate 执行 `review complete`，避免开启下一轮。
 - 采集 status、timeline、events、runs、recovery、Git diff 证据。
+- 在终端打印每轮 workflow status、active node、open gates 和执行 step，方便不用翻日志也能知道跑到哪里。
 - 生成一份报告到 `docs/testing/real-case-reports/<timestamp>/report.md`。
 
 它不会自动提交、不会 push、不会创建 PR，也不会删除原始 repo。`--cleanup-worktree` 只会在报告生成后删除本次创建的 worktree。
+如果用 `Ctrl+C` 中断，脚本会尽量采集当前 evidence 并写出中断报告，报告里会保留后续 `status` / `resume` 命令。
 
 示例：
 

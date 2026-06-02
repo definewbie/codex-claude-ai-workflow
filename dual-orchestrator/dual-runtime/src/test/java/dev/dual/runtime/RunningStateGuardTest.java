@@ -60,6 +60,7 @@ class RunningStateGuardTest {
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-dead-pid"));
 
         assertEquals(WorkflowStatus.COMPLETED, result.status());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_detected"));
     }
 
     @Test

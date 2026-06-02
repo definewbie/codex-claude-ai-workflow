@@ -222,13 +222,26 @@ public final class WorkflowRuntime {
     private Boolean resolveRunningNode(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
         var pidValue = node.result().get("running_pid");
         if (pidValue instanceof Number number) {
-            var alive = ProcessHandle.of(number.longValue()).map(ProcessHandle::isAlive).orElse(false);
+            var pid = number.longValue();
+            var alive = ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false);
             if (alive) {
                 return null;
             }
+            emitStaleRunningEvent(paths, node, pid);
+            return true;
         }
-        // PID is dead — just allow execution. markRunning() will overwrite the stale RUNNING state.
+        emitStaleRunningEvent(paths, node, "");
         return true;
+    }
+
+    private void emitStaleRunningEvent(WorkstreamPaths paths, NodeInstanceDocument node, Object pid) throws Exception {
+        ledger.appendEvent(paths, "stale-running-" + node.nodeInstanceId() + "-" + System.currentTimeMillis(),
+                "node_stale_running_detected", Map.of(
+                        "node", node.nodeDefinitionId(),
+                        "node_instance_id", node.nodeInstanceId(),
+                        "previous_running_pid", pid,
+                        "action", "resume_will_reexecute_node"
+                ));
     }
 
     private String statusRejectionMessage(NodeInstanceDocument node) {
