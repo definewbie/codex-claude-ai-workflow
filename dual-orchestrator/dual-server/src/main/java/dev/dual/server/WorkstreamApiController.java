@@ -26,9 +26,9 @@ public class WorkstreamApiController {
 
     @GetMapping
     public Map<String, Object> list(
-            @RequestParam(defaultValue = ".") Path workdir
+            @RequestParam(defaultValue = "") String workdir
     ) throws Exception {
-        return queryService.list(workdir);
+        return queryService.list(workdirPath(workdir));
     }
 
     public Map<String, Object> status(
@@ -41,73 +41,80 @@ public class WorkstreamApiController {
     @GetMapping("/{workstreamId}/status")
     public Map<String, Object> statusByPath(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir
+            @RequestParam(defaultValue = "") String workdir
     ) throws Exception {
-        return queryService.status(workdir, workstreamId);
+        return queryService.status(workdirPath(workdir), workstreamId);
     }
 
     @GetMapping("/{workstreamId}/timeline")
     public Map<String, Object> timeline(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir
+            @RequestParam(defaultValue = "") String workdir
     ) throws Exception {
-        return queryService.timeline(workdir, workstreamId);
+        return queryService.timeline(workdirPath(workdir), workstreamId);
     }
 
     @GetMapping("/{workstreamId}/review/current")
     public Map<String, Object> currentReview(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir
+            @RequestParam(defaultValue = "") String workdir
     ) throws Exception {
-        return queryService.currentReview(workdir, workstreamId);
+        return queryService.currentReview(workdirPath(workdir), workstreamId);
     }
 
     @PostMapping("/{workstreamId}/resume")
     public Map<String, Object> resume(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir,
+            @RequestParam(defaultValue = "") String workdir,
             @RequestParam(defaultValue = "1") int maxSteps
     ) throws Exception {
-        return actionService.resume(workdir, workstreamId, maxSteps);
+        return actionService.resume(workdirPath(workdir), workstreamId, maxSteps);
     }
 
     @PostMapping("/{workstreamId}/retry")
     public Map<String, Object> retry(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir,
+            @RequestParam(defaultValue = "") String workdir,
             @RequestBody(required = false) RetryRequest request
     ) throws Exception {
-        return actionService.retry(workdir, workstreamId, request == null ? "" : request.note());
+        return actionService.retry(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
     @PostMapping("/{workstreamId}/review/approve")
     public Map<String, Object> approve(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir,
+            @RequestParam(defaultValue = "") String workdir,
             @RequestParam(defaultValue = "false") boolean run,
             @RequestParam(defaultValue = "20") int maxSteps
     ) throws Exception {
-        return actionService.approve(workdir, workstreamId, run, maxSteps);
+        return actionService.approve(workdirPath(workdir), workstreamId, run, maxSteps);
     }
 
     @PostMapping("/{workstreamId}/review/complete")
     public Map<String, Object> complete(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir,
+            @RequestParam(defaultValue = "") String workdir,
             @RequestBody(required = false) ReviewCompleteRequest request
     ) throws Exception {
-        return actionService.complete(workdir, workstreamId, request == null ? "" : request.note());
+        return actionService.complete(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
     @PostMapping("/{workstreamId}/review/revise")
     public Map<String, Object> revise(
             @PathVariable String workstreamId,
-            @RequestParam(defaultValue = ".") Path workdir,
+            @RequestParam(defaultValue = "") String workdir,
             @RequestParam(defaultValue = "false") boolean run,
             @RequestParam(defaultValue = "20") int maxSteps,
             @RequestBody(required = false) ReviewReviseRequest request
     ) throws Exception {
-        return actionService.revise(workdir, workstreamId, request == null ? "" : request.feedback(), run, maxSteps);
+        return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), run, maxSteps);
+    }
+
+    private static Path workdirPath(String workdir) {
+        if (workdir == null || workdir.isBlank()) {
+            return Path.of(System.getProperty("user.dir"));
+        }
+        return Path.of(workdir);
     }
 
     @ExceptionHandler(Exception.class)

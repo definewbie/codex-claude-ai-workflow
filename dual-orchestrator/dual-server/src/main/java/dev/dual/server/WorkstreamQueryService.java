@@ -13,11 +13,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 public class WorkstreamQueryService {
@@ -64,6 +67,7 @@ public class WorkstreamQueryService {
                     "updatedAt", current.updatedAt()
             ));
         }
+        response.put("artifactContracts", artifactContracts(root, paths));
 
         var deliveryJson = paths.workstreamDir().resolve("delivery").resolve("delivery.json");
         if (Files.exists(deliveryJson)) {
@@ -166,6 +170,66 @@ public class WorkstreamQueryService {
             );
         } catch (IOException e) {
             throw new WorkstreamQueryException(e);
+        }
+    }
+
+    private List<Map<String, Object>> artifactContracts(Path root, WorkstreamPaths paths) throws IOException {
+        if (!Files.exists(paths.runsDir())) {
+            return List.of();
+        }
+        try (Stream<Path> stream = Files.walk(paths.runsDir())) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".contract.json"))
+                    .sorted(Comparator.comparing(WorkstreamQueryService::lastModified).reversed())
+                    .limit(12)
+                    .map(path -> artifactContract(root, path))
+                    .toList();
+        }
+    }
+
+    private Map<String, Object> artifactContract(Path root, Path path) {
+        var source = readJson(path);
+        var item = new LinkedHashMap<String, Object>();
+        for (var key : List.of(
+                "artifact_type",
+                "node_id",
+                "handler_type",
+                "decision",
+                "summary",
+                "must_fix",
+                "open_risks",
+                "changed_files",
+                "verification_summary",
+                "source_output_ref",
+                "generated_at"
+        )) {
+            item.put(key, source.getOrDefault(key, defaultValueFor(key)));
+        }
+        item.put("sidecar_ref", root.relativize(path.toAbsolutePath().normalize()).toString());
+        return item;
+    }
+
+    private Map<String, Object> readJson(Path path) {
+        try {
+            return objectMapper.readValue(path.toFile(), MAP_TYPE);
+        } catch (IOException e) {
+            return Map.of();
+        }
+    }
+
+    private static Object defaultValueFor(String key) {
+        return switch (key) {
+            case "must_fix", "open_risks", "changed_files" -> List.of();
+            default -> "";
+        };
+    }
+
+    private static Instant lastModified(Path path) {
+        try {
+            return Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toInstant();
+        } catch (IOException ignored) {
+            return Instant.EPOCH;
         }
     }
 

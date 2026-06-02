@@ -50,12 +50,45 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void statusReturnsArtifactContractSummaries() throws Exception {
+        var fixture = createWorkstream("ws-api-contracts");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var sidecar = paths.workstreamDir().resolve("runs/run-001/outputs/design-codex-review.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "design.codex_arch_review",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Architecture is ready.",
+                  "must_fix": ["Clarify rollout scope"],
+                  "open_risks": ["Migration risk"],
+                  "changed_files": ["docs/design.md"],
+                  "verification_summary": "No runtime verification needed yet.",
+                  "source_output_ref": ".agent/workstreams/ws-api-contracts/runs/run-001/outputs/design-codex-review.md"
+                }
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.status(fixture.workstreamId(), tempDir);
+
+        var contracts = (List<Map<String, Object>>) response.get("artifactContracts");
+        assertEquals(1, contracts.size());
+        assertEquals("design.codex_arch_review", contracts.get(0).get("node_id"));
+        assertEquals("READY_FOR_ARCH_REVIEW", contracts.get(0).get("decision"));
+        assertEquals(List.of("Clarify rollout scope"), contracts.get(0).get("must_fix"));
+        assertEquals(".agent/workstreams/ws-api-contracts/runs/run-001/outputs/design-codex-review.contract.json",
+                contracts.get(0).get("sidecar_ref"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void listReturnsWorkstreamSummaries() throws Exception {
         createWorkstream("ws-api-list-a");
         createWorkstream("ws-api-list-b");
         var controller = controller();
 
-        var response = controller.list(tempDir);
+        var response = controller.list(tempDir.toString());
 
         var workstreams = (List<Map<String, Object>>) response.get("workstreams");
         assertEquals(2, workstreams.size());
@@ -71,7 +104,7 @@ class WorkstreamApiControllerTest {
         var fixture = createWorkstream("ws-api-timeline");
         var controller = controller();
 
-        var timeline = controller.timeline(fixture.workstreamId(), tempDir);
+        var timeline = controller.timeline(fixture.workstreamId(), tempDir.toString());
 
         assertEquals(fixture.workstreamId(), timeline.get("workstreamId"));
         assertEquals("WAITING_FOR_HUMAN", timeline.get("workflowStatus"));
@@ -93,7 +126,7 @@ class WorkstreamApiControllerTest {
                 "{\"allowedActions\":[\"approve\",\"revise\"]}", StandardCharsets.UTF_8);
         var controller = controller();
 
-        var response = controller.currentReview(fixture.workstreamId(), tempDir);
+        var response = controller.currentReview(fixture.workstreamId(), tempDir.toString());
 
         assertEquals(fixture.workstreamId(), response.get("workstreamId"));
         assertEquals("review.gate", response.get("gateNodeDefinitionId"));

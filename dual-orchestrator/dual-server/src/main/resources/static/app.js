@@ -18,6 +18,7 @@ const els = {
   actionHint: $("actionHint"),
   statusView: $("statusView"),
   timelineView: $("timelineView"),
+  artifactSummary: $("artifactSummary"),
   responseView: $("responseView"),
   reviewPanel: $("reviewPanel"),
   reviewPacket: $("reviewPacket"),
@@ -45,7 +46,7 @@ function setResponse(value) {
 function workdirParam() {
   const workdir = els.workdir.value.trim();
   localStorage.setItem("dual.workdir", workdir);
-  return encodeURIComponent(workdir || ".");
+  return encodeURIComponent(workdir);
 }
 
 async function request(path, options = {}) {
@@ -127,6 +128,7 @@ async function loadStatus() {
     const workflow = data.workflow || {};
     setStatusBadge(workflow.status || "-");
     updateActions(data);
+    renderArtifactSummary(data.artifactContracts || []);
     els.statusView.textContent = JSON.stringify(data, null, 2);
     setResponse(data);
   } catch (error) {
@@ -162,6 +164,40 @@ async function loadReviewPacket() {
     els.reviewGate.textContent = "not available";
     els.reviewPacket.textContent = JSON.stringify(error, null, 2);
   }
+}
+
+function renderArtifactSummary(contracts) {
+  els.artifactSummary.innerHTML = "";
+  if (!contracts.length) {
+    const empty = document.createElement("p");
+    empty.className = "subtle";
+    empty.textContent = "No agent artifact contract sidecars yet.";
+    els.artifactSummary.appendChild(empty);
+    return;
+  }
+  for (const contract of contracts.slice(0, 8)) {
+    const item = document.createElement("article");
+    item.className = "artifact-item";
+    item.innerHTML = `
+      <div class="artifact-head">
+        <strong>${escapeHtml(contract.node_id || "(agent output)")}</strong>
+        <span class="badge muted">${escapeHtml(contract.decision || "-")}</span>
+      </div>
+      <p>${escapeHtml(contract.summary || "")}</p>
+      ${artifactLine("Must Fix", contract.must_fix)}
+      ${artifactLine("Open Risks", contract.open_risks)}
+      ${artifactLine("Changed Files", contract.changed_files)}
+      ${artifactLine("Verification", contract.verification_summary)}
+      <span class="artifact-ref">${escapeHtml(contract.sidecar_ref || "")}</span>
+    `;
+    els.artifactSummary.appendChild(item);
+  }
+}
+
+function artifactLine(label, value) {
+  const values = Array.isArray(value) ? value.filter(Boolean) : value ? [value] : [];
+  if (!values.length) return "";
+  return `<div class="artifact-line"><span>${escapeHtml(label)}</span><p>${escapeHtml(values.join("; "))}</p></div>`;
 }
 
 function renderTimeline(data) {
