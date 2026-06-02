@@ -1,6 +1,6 @@
-# dual-orchestrator Future Features
+# dual-orchestrator Roadmap
 
-> Last updated: 2026-06-01
+> Last updated: 2026-06-02
 
 ## P0 — 验证（阻塞后续所有工作）
 
@@ -9,9 +9,18 @@
   - 2026-06-01：`thin-basic` 在最新分支复跑通过，最终 `COMPLETED`，28 nodes / 11 agent runs / 5 gate rounds。
   - 2026-06-01：`p5-contract-happy-path` 在最新分支复跑通过，最终 `COMPLETED`，30 nodes / 11 agent runs / 6 gate rounds，TaskContract artifact 和 `contract_compilation_completed` event 均通过。
   - 2026-06-01：`p6-reject-classify-path` 在最新分支复跑为 `PASS-WARN`，最终 `COMPLETED`，30 nodes / 11 agent runs / 6 gate rounds；Codex acceptance 为 `ACCEPT`，所以 failure classification 分支未触发。
-- [ ] T0.2 deterministic p6 reject fixture：技术债。真实 acpx smoke 中 Codex 不一定 REJECT，这条分支目前按边界条件处理；暂不引入 fake acpx / controlled fixture。等真实 case 或 smoke 暴露稳定需求时再实现。
-  - 2026-06-01：真实 acpx smoke 仍保留 `PASS-WARN` 语义。分类路径一旦触发，脚本会检查 calibration candidate 和 `recovery/current-failure.md`。
-- [ ] T0.3 验证 auto-retry 端到端：Thread.sleep + 指数退避在真实 acpx failure 下验证。
+- [x] T0.2 p6 semantic repair real case：真实复杂仓库中触发 Codex `REJECT` 后能进入分类和修复闭环。
+  - 2026-06-02：`cancer-clinic` p6 长 case 跑通，workstream `ws-20260602T121712Z-V7WM`，最终 `COMPLETED`。
+  - 这次真实 run 触发了两轮 Codex acceptance `REJECT`，系统路由到 `acceptance.classify_failure`，再回到 Claude repair，第三次 acceptance 通过。
+  - 原始仓库保持干净，改动发生在 worktree：`miniprogram/src/pages/treatment-event/index.vue | 4 ++++`。
+- [ ] T0.3 deterministic p6 reject fixture：技术债。真实 case 已证明 repair 主线可工作；暂不为了一个边界分支引入 fake acpx / controlled fixture。只有当 CI 需要稳定、可重复覆盖 reject 分支时再实现。
+- [ ] T0.4 验证 auto-retry 端到端：Thread.sleep + 指数退避在真实 acpx failure 下验证。
+
+## P0 结论
+
+主生命周期的基本目标已经达到：系统能在真实项目里完成需求澄清、contract、设计/计划 review、人工 gate、Claude 实现、自测、Codex 验收、失败分类、修复循环、final report、delivery artifacts 和下一阶段 handoff。
+
+这不等于产品已经完成。下一阶段不再优先补边角易用性，而是把真实长 run 的可观测、人工 review 和可重复评估做稳。
 
 ## P1 — Contract-driven harness 闭环
 
@@ -53,7 +62,15 @@
 - [ ] T4.3 Notification：Slack / 邮件 / Webhook 推送状态变更
 - [ ] T4.4 安装脚本：`brew install` / `curl | sh` 等分发包
 
-## P5 — Workflow Engine 增强
+## P5 — 主线后续优先级
+
+下面三件事比继续打磨小按钮、小提示更接近长期目标：
+
+1. **Real-case benchmark loop**：沉淀 2-3 个真实仓库任务，定期跑 p6，记录完成率、rejection repair 次数、耗时、失败类型和人工介入点。
+2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
+3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
+
+## P6 — Workflow Engine 增强
 
 - [x] 条件表达式：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 上支持条件判断
 - [x] 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume

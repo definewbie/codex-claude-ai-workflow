@@ -11,6 +11,8 @@
 
 真实 acpx case 不是确定性 fixture test framework。agent 输出和 decision 结果是非确定性的；脚本验证的是"流程能跑通 + 关键产物存在"，而非"输出与预期完全一致"。
 
+真实复杂仓库验证则用 `scripts/run-real-case.sh`。它不替代 smoke，而是验证长链路：真实 worktree、真实 acpx、真实项目上下文、真实 Agent 工具调用、真实 rejection repair loop。
+
 ## 前置条件
 
 - Java 17+, Maven
@@ -67,6 +69,34 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 - **如果 rejection 路径触发**：验证 `failure-classification.json`、`failure_classified` 事件、report section，结果为 PASS
 - **如果 acceptance 产出 ACCEPT**：跳过分类断言，输出 warn 日志，结果为 PASS-WARN（不视为失败）
 - **如果 workflow 出错或必需 artifact 缺失**：结果为 FAIL
+
+## Real Repo Long Case
+
+当改动触及 workflow 主链路、failure classification、context package、artifact contract 或 acpx adapter 时，建议至少跑一次真实复杂仓库 case。fixture smoke 可以证明 routing 便宜、可重复；真实 repo case 才能暴露上下文装配、Agent 工具调用、项目复杂度和 semantic repair 的问题。
+
+当前保留的真实长 case：
+
+```bash
+./scripts/run-real-case.sh \
+  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
+  --task-file /tmp/dual-real-cases/cancer-clinic-case-001.md \
+  --variant p6
+```
+
+最近一次通过记录：
+
+| 字段 | 值 |
+|------|----|
+| Time | 2026-06-02T12:17:11Z → 2026-06-02T12:34:26Z |
+| Workstream | `ws-20260602T121712Z-V7WM` |
+| Variant | `p6` / `agent-lifecycle-p6@3` |
+| Final status | `COMPLETED` |
+| Report | `dual-orchestrator/docs/testing/real-case-reports/20260602T121711Z/report.md` |
+| Repair loop | Codex acceptance `REJECT` 触发两次，均路由到 failure classification + Claude repair，第三次验收通过 |
+| Original repo | 保持干净 |
+| Worktree diff | `miniprogram/src/pages/treatment-event/index.vue | 4 ++++` |
+
+不要把这个 case 当成每次小改都必须跑的快速测试。它消耗时间和 Agent quota，适合主功能变更、长链路变更、或者准备宣布“主线已验证”之前运行。
 
 ### all
 

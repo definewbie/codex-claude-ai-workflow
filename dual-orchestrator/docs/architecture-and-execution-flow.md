@@ -143,27 +143,37 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler tick MVP 已支持手动触发一次调度，只推进 `RUNNING` workstreams；当前仍不做后台自动扫描。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
-- 真实 acpx smoke：thin / p5 已通过；p6 主流程已通过。classification 分支是边界路径，当前保留 `PASS-WARN` 语义；触发 classify 时会检查 calibration / recovery 产物。deterministic reject fixture 暂作为技术债。
+- 真实 acpx smoke：thin / p5 已通过；fixture p6 仍保留 `PASS-WARN` 语义，因为 Codex 是否拒绝不可控。
+- 真实复杂仓库 p6 长 case：2026-06-02 在 `cancer-clinic` 跑通，workstream `ws-20260602T121712Z-V7WM`，最终 `COMPLETED`。这次 run 中 Codex acceptance 连续两次 `REJECT`，系统进入 failure classification，再路由回 Claude repair，第三次验收通过。
+
+这个结果说明：主生命周期的基本目标已经达到。系统已经能在真实仓库里跑完“需求 → contract → review → gate → 实现 → 自测 → 验收 → reject repair → delivery → handoff”的闭环。
+
+但这还不是完整产品。下一步不应该继续围绕边界 fixture 打转，而是把真实长 run 变得更可观察、更容易人工 review、更容易重复评估。
 
 ## 4. 下一步设计方向
 
-结合 long-term-plan 和真实 smoke 结果，下一步不应该先做完整 UI，而是把校准闭环的读模型补稳定：
+结合 long-term-plan 和真实长 case 结果，下一步的目标是把“能跑通”推进到“能放心交给系统跑”。UI 很重要，但它应该建立在稳定读模型之上，而不是直接绑定 ledger 原始文件。
 
 ```text
-status / failure / review read models
-  → local dashboard
+real-case benchmark
+  → review / failure / artifact read models
+    → operator dashboard
+      → background scheduler
 ```
 
 ### 4.1 近期优先级
 
 | 优先级 | 工作 | 原因 |
 |--------|------|------|
-| Tech Debt | deterministic p6 reject fixture | 真实 case 需要稳定覆盖 classify path 时再做 |
+| Done | p6 real repair loop | `cancer-clinic` 真实长 case 已触发两轮 REJECT → classify → repair → ACCEPT |
+| Tech Debt | deterministic p6 reject fixture | 只有 CI 需要可重复覆盖 reject 边界时再做 |
 | Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
 | Done | Local API Server MVP | status / timeline + 最小 action API，先给 UI 和外部观察器一个稳定入口 |
 | Done | Scheduler tick MVP | 手动触发一次调度，只推进 RUNNING workstreams，不绕过 human gate / recovery |
-| P3 | Background scheduler + Local UI dashboard | 在 API 稳定后增加后台自动推进和可视化 |
+| P1 | Real-case benchmark loop | 用 2-3 个真实任务持续验证 p6，而不是只靠低复杂度 fixture |
+| P1 | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |
+| P2 | Background scheduler | 在人工 gate 和 recovery 语义稳定后再做后台自动推进 |
 
 ### 4.2 长期路线
 
@@ -175,6 +185,14 @@ status / failure / review read models
 - Adversarial Test Agent：从契约生成反例和边界测试。
 - Knowledge Registry：版本化 contract template、review checklist、regression scenarios。
 - Metrics / Replay：统计 cycle time、failure class、review quality，并能 replay 历史 run 验证新规则。
+
+### 4.3 当前路线取舍
+
+现在不优先做三类事：
+
+1. 不急着引入复杂规则引擎。当前选择是规则集中化，先让 contract / validator / workflow definition 保持可读、可测、可改。
+2. 不急着补 schema migration。账本 schema 仍在演进，历史数据还少，正式迁移框架的短期收益不高。
+3. 不急着堆多 Agent。Claude developer + Codex verifier + Human gate 已经能跑完整生命周期；多角色 review 和对抗 tester 等真实痛点出现后再加。
 
 ## 5. 模块架构
 

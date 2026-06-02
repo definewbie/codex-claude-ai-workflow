@@ -8,7 +8,9 @@ Bash 版 `dual-agent-runner` 证明了 `acpx`、worktree、run ledger、报告�
 需求澄清 -> 设计审视 -> 人工卡点 -> 计划 -> 实现 -> 自测 -> 验收 -> 下一阶段提示词
 ```
 
-当前仍是 MVP。它已经有 workflow runtime 骨架和一条薄的 lifecycle mainline，但还不是完整自动化产品。
+当前仍是 MVP，但核心目标已经从“能不能调用两个 Agent”推进到“能不能在真实仓库里跑完整生命周期”。2026-06-02 的 `cancer-clinic` 真实 p6 长 case 已经跑到 `COMPLETED`：Codex acceptance 连续两次 `REJECT`，系统都能把失败分类、路由回 Claude 修复，最后通过验收并生成 delivery / handoff / next-stage artifacts。
+
+这说明主生命周期已经基本跑通。它还不是完整产品，后续重点是把真实长 run 的观测、人工 review、指标和交付体验做稳。
 
 ## Workflow Engine Model
 
@@ -80,7 +82,7 @@ Runtime 只认识三类节点：
 
 仍未完成：
 
-- deterministic p6 reject fixture：真实 acpx smoke 保持 `PASS-WARN`，不为了 rejection 边界分支引入 fake acpx。当前只有 `lifecycle` smoke 使用 controlled fake acpx 来验证 happy path 主链路。
+- deterministic p6 reject fixture：真实 `cancer-clinic` p6 长 case 已覆盖 Codex `REJECT` → failure classification → Claude repair → final acceptance 的主修复闭环。为了一个边界分支引入 fake acpx 的收益暂时不高；只有当 CI 需要稳定、可重复覆盖这条分支时再补 controlled fixture。
 - 实时推送：还没有 SSE / file watch / WebSocket，当前 `dualctl watch` 是轮询式 CLI。
 - Scheduler：还没有后台自动推进 workflow。
 - Web UI / dashboard。

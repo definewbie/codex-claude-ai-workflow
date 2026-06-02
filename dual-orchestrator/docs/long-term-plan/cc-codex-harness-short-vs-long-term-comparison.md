@@ -21,6 +21,24 @@ Dual-Agent Workflow 当前实现版
 长期版本：General AI-Native Engineering Harness Platform
 ```
 
+## 0.1 2026-06-02 状态更新
+
+这份对比最初用于规划 short-term contract-driven upgrade。现在短期版本的主干已经基本落地：
+
+- TaskContract / ContractCompiler MVP 已实现。
+- ContractReviewGate 已进入 p5 / p6 lifecycle。
+- FailureArbiter MVP 已实现。
+- CalibrationCandidate MVP 已实现。
+- Review packet、timeline、failure summary、artifact sidecar 已作为读模型落地。
+- `cancer-clinic` 真实 p6 长 case 已跑通，并实际触发两轮 Codex `REJECT` → failure classification → Claude repair → final acceptance。
+
+因此下一步不再是“是否要做 contract-driven harness”，而是把它从可运行 MVP 推向可交付 MVP：
+
+1. 用 2-3 个真实仓库任务建立 benchmark loop。
+2. 让人工 review 能看懂证据、风险和当前 gate，而不是只看到按钮。
+3. 把 failure classification / calibration candidate 从 artifact 变成可评估、可提升的工程闭环。
+4. 等主线稳定后，再考虑多角色 review、对抗测试、policy engine 和后台调度。
+
 ---
 
 ## 1. 总体定位对比
@@ -42,21 +60,21 @@ Dual-Agent Workflow 当前实现版
 |---|---:|---|---|
 | Workflow Runtime | 已有 Task / Decision / Gate | 保持不大改 | 支持更多 workflow template |
 | Run Ledger / Trace | 已有 events.jsonl / current.json | 增加 contract / failure / calibration 事件 | 支持跨 run 查询、指标、回放 |
-| Artifact Contract | 已有 node output contract | 增加 TaskContract artifact | 通用 artifact schema registry |
+| Artifact Contract | 已有 node output contract + TaskContract MVP | 强化真实 case 中的字段质量 | 通用 artifact schema registry |
 | Context Governance | 已有 profile / budget / degradation | 接入 TaskContract 上下文 | 支持 domain-specific context profiles |
 | Claude Implement | 已有 | 保持 | 变成可插拔 implementation agent |
 | Codex Review | 已有 | 增加 failureClass 输出 | 多角色 review / adversarial test agent |
 | Human Gate | 已有 | 增加 contract review gate | policy-driven gate / approval workflow |
-| Failure Handling | 已有执行失败处理 | 增加 Failure Arbiter | 失败进入 calibration loop |
+| Failure Handling | 已有执行失败处理 + FailureArbiter MVP | 强化真实 failure evidence 和 repair route | 失败进入 calibration loop |
 | Specialization | 可能还弱 | 暂不强做 | Specialization Registry |
 | Metrics | 基础 ledger 可推导 | 简单 run summary | harness-level metrics dashboard / CLI |
-| Knowledge Evolution | final report / handoff | CalibrationCandidate | Versioned knowledge registry |
+| Knowledge Evolution | final report / handoff + CalibrationCandidate MVP | 评估和提升候选规则 | Versioned knowledge registry |
 
 ---
 
 # 3. 短期版本：Contract-Driven Harness Upgrade
 
-## 3.1 短期目标
+## 3.1 短期目标（已基本达成）
 
 短期不要重做平台。目标是把当前系统从：
 
@@ -189,6 +207,8 @@ contract first
 failure classification
 calibration seed
 ```
+
+这些能力目前已经进入实现主线。后续短期工作不再是“补概念”，而是围绕真实 run 打磨证据质量、人工审阅体验和可重复评估。
 
 ---
 

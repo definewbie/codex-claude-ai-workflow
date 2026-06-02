@@ -6,6 +6,29 @@
 
 ---
 
+## 0 2026-06-02 状态更新
+
+这份 gap analysis 的方向仍然有效，但部分“缺口”已经被后续实现补上。
+
+已经从 gap 变成 MVP 的能力：
+
+- **TaskContract / ContractCompiler**：已进入 p5 / p6 workflow，作为任务目标、范围、约束和验收标准的结构化锚点。
+- **Semantic FailureArbiter**：已实现 MVP，并在 `cancer-clinic` 真实 p6 长 case 中验证。Codex acceptance 两次 `REJECT` 后，系统进入 failure classification，再回到 Claude repair，最后通过验收。
+- **CalibrationCandidate**：已能从可校准失败生成候选 artifact，但还没有进入跨 run 统计、人工提升和版本化知识库。
+- **Review packet / timeline / failure summary**：已形成 CLI / API / UI 可消费的读模型。
+
+仍然是长期缺口的能力：
+
+- Adversarial Test Agent。
+- Multi-role Review。
+- Knowledge Registry。
+- Metrics / Replay。
+- Policy Engine。
+
+因此后续路线要调整：不再把 P5/P6/P7 当作待启动的大功能，而是把它们视为已经跑通的 MVP。下一阶段优先做真实 case benchmark、人工 review 体验、failure/calibration follow-through。多角色和对抗测试继续后置。
+
+---
+
 ## 1 论文核心思想
 
 ### 1.1 核心论点
@@ -84,10 +107,10 @@ dual 当前是 **Claude implement + Codex review + Human gate** 的三方结构�
 
 | # | 差距 | 论文机制 | dual 现状 | 性质 |
 |---|------|---------|----------|------|
-| 1 | **TaskContract / ContractCompiler** | 需求先编译为显式契约（objective、scope、constraints、acceptance criteria、risk areas、ambiguity notes） | 需求直接进 prompt，无结构化 feature contract | 架构缺口 |
+| 1 | **TaskContract / ContractCompiler** | 需求先编译为显式契约（objective、scope、constraints、acceptance criteria、risk areas、ambiguity notes） | MVP 已实现，需继续提升真实 case 字段质量 | 已进入主线 |
 | 2 | **Adversarial Test Agent** | 独立 tester agent 从契约生成测试，与 implementer 解耦 | Codex review 是审视不是测试，不生成对抗测试 | 角色缺口 |
-| 3 | **Semantic FailureArbiter** | 四路仲裁器分类失败根因 | dual 有 execution failure recovery，但缺少语义失败分类 | 验证缺口 |
-| 4 | **Outer-loop Calibration** | 失败分类 → 模式检测 → 校准候选 → 人审 → 版本化提升 → 更新契约模板 | 有 iteration 记录作为数据基础，但没有 calibration layer | 闭环缺口 |
+| 3 | **Semantic FailureArbiter** | 四路仲裁器分类失败根因 | MVP 已实现，并在真实 p6 repair loop 中验证 | 已进入主线 |
+| 4 | **Outer-loop Calibration** | 失败分类 → 模式检测 → 校准候选 → 人审 → 版本化提升 → 更新契约模板 | 已有 CalibrationCandidate MVP，缺跨 run 评估和版本化提升 | 闭环缺口 |
 | 5 | **Multi-role Review** | Product / Arch / Security / QA / Deploy 多维度角色分离审查 | Claude + Codex + Human 三方，尚未多角色专业化 | 角色扩展 |
 
 ### 3.2 Execution Failure vs Semantic Failure
@@ -103,7 +126,7 @@ dual 已经有完善的 **execution failure recovery**，这不应被低估：
 - `INVALID_DUAL_CONTROL` / `MISSING_DUAL_CONTROL` — prompt contract 违约
 - `CONTROL_REPAIR` — 非终止 block 等格式问题
 
-**未覆盖（Semantic Failure Arbiter）：**
+**已开始覆盖（Semantic Failure Arbiter MVP）：**
 - `IMPLEMENTATION_BUG` — 实现正确但不符合意图
 - `CONTRACT_GAP` — 契约遗漏了业务逻辑（论文支付案例的核心失败）
 - `REVIEW_NOISE` — 审视者误判
@@ -111,7 +134,7 @@ dual 已经有完善的 **execution failure recovery**，这不应被低估：
 - `CONTEXT_INSUFFICIENT` — 上下文不足导致 agent 猜测
 - `TOOL_LIMITATION` — 工具返回成功但证据不足、能力不足或上下文不完整（注意：acpx / git 调用级失败已走 execution recovery；此处指工具能力边界的语义问题）
 
-**结论：** dual 现有 recovery 解决的是**执行失败**（agent runtime 问题）；论文启发要补的是**语义失败分类与后续路由**（产出质量问题）。
+**结论：** dual 现有 recovery 解决的是**执行失败**（agent runtime 问题）；FailureArbiter MVP 解决了第一层**语义失败分类与后续路由**。下一步不是继续扩分类名，而是用真实 case 验证分类是否帮助系统更快修复、更少误修。
 
 ### 3.3 ContractRegistry 的定位
 
@@ -181,41 +204,47 @@ dual 已经走在 harness 方向上：它具备 workflow runtime、角色分离�
 
 但它当前仍偏 **workflow execution harness**，尚未完全成为 **contract-driven verification harness**。
 
-主要缺口按优先级排序：
+主要缺口按当前优先级排序：
 
-1. **TaskContract / ContractCompiler** — 后续验证和校准的输入基础
-2. **FailureArbiter** — 让失败具备可路由语义
-3. **CalibrationCandidate** — 最小外环
-4. **Adversarial Test Agent / Multi-role Review** — 成本更高，适合后置
+1. **Real-case benchmark / metrics** — 用真实任务持续评估 p6 是否稳定，而不是只靠一次成功。
+2. **Operator-grade review UX** — 人工 gate 要能看懂证据、风险、Must Fix、当前 failure，不只是点击 approve。
+3. **Calibration follow-through** — CalibrationCandidate 已生成，但还需要评估、提升和版本化。
+4. **Adversarial Test Agent / Multi-role Review** — 成本更高，适合在主线稳定后后置。
 
 ---
 
-## 6 P5–P8 路线建议
+## 6 P5–P9 路线建议（更新）
 
 ```
-P5：TaskContract + ContractCompiler
+P5：TaskContract + ContractCompiler（Done / MVP）
     - 定义 TaskContract schema（objective / scope / constraints / acceptance criteria / risk areas）
     - 实现 ContractCompiler：从需求 + workflow context 编译为结构化契约
     - 契约作为 agent prompt 的结构化输入，替代纯文本需求
     - 依赖：无（独立基础设施）
 
-P6：FailureArbiter
+P6：FailureArbiter（Done / MVP）
     - 扩展失败分类：execution（已有）+ semantic（新增）
     - 语义分类：CONTRACT_GAP / IMPLEMENTATION_BUG / REVIEW_NOISE / CONTEXT_INSUFFICIENT / CONTRACT_AMBIGUITY
     - 分类结果写入 events.jsonl + iteration record
     - 不同分类路由到不同恢复策略
     - 依赖：P5（TaskContract 作为分类输入）
 
-P7：CalibrationCandidate
+P7：CalibrationCandidate（Done / MVP seed）
     - 跨 iteration / workstream 的重复失败模式检测
     - 生成校准候选：建议修改 contract template / review checklist / context rule
     - 人审校准候选 → 版本化提升
     - 依赖：P6（失败分类作为检测输入）
 
-P8：Adversarial Test Agent / Multi-role Review
+P8：Real-case benchmark + operator review UX
+    - 沉淀 2-3 个真实任务作为长 case
+    - 记录完成率、repair loop、耗时、失败类型、人工 gate 决策
+    - UI/CLI 围绕 review packet、timeline、artifact sidecar、failure summary 展示
+    - 依赖：P5-P7 已落地
+
+P9：Adversarial Test Agent / Multi-role Review
     - 独立 tester agent 从 TaskContract 生成对抗测试
     - Codex review 扩展为多维度（product / architecture / security / QA）
-    - 依赖：P5（TaskContract，reviewer 需要对照契约）
+    - 依赖：P5（TaskContract，reviewer 需要对照契约）和 P8（真实 benchmark 证明需要更多 reviewer）
     - 可利用 P6 的 failure classification 做 review quality 反馈，但不是硬依赖
 ```
 
@@ -228,14 +257,13 @@ P8：Adversarial Test Agent / Multi-role Review
 
 ---
 
-## 7 是否建议进入短期版 Contract-Driven Harness 设计实现
+## 7 是否建议进入下一阶段
 
-**建议：是。**
+**建议：是，但不是继续堆概念能力。**
 
 理由：
-- P5（TaskContract + ContractCompiler）是独立基础设施，不依赖现有代码改造
-- 它可以在现有 intake 阶段注入，不破坏已有 workflow
-- 它为 P6-P8 提供锚点，没有它后续验证和校准缺乏结构化输入
-- 实现成本可控：定义 schema + compiler + 在 agent prompt 中引用
+- P5-P7 MVP 已落地，真实 p6 长 case 证明主生命周期可以跑完。
+- 现在最有价值的是让系统在真实任务中更可观察、更可审、更可重复评估。
+- 多角色 reviewer、对抗测试、policy engine 都有长期价值，但短期成本较高，且需要真实 benchmark 指出具体痛点。
 
-建议下一步：**写 P5 的详细设计文档**（TaskContract schema、ContractCompiler 算法、与现有 intake 节点的集成方式）。
+建议下一步：**Real-case benchmark + Operator review UX**。先把完整生命周期的运行质量看清楚，再决定是否引入更多 agent 角色或更复杂策略。
