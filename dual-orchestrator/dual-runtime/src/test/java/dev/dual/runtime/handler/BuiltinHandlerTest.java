@@ -126,6 +126,40 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void reviewDecisionFallsBackToContractSidecarWhenMarkdownControlIsTruncated() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                # Review
+
+                READY_FOR_PRODUCT_REVIEW
+
+                ```dual-control
+                """);
+        var sidecar = writeOutput("codex-review.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.codex_product_review",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Proceed with a documentation-only task.",
+                  "control": {
+                    "decision": "READY_FOR_PRODUCT_REVIEW",
+                    "summary": "Proceed with a documentation-only task."
+                  }
+                }
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("intake.decision"),
+                node("intake.decision", NodeKind.DECISION, "review.decision", List.of(output, sidecar))
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("READY_FOR_PRODUCT_REVIEW", result.outcome());
+        assertEquals("Proceed with a documentation-only task.", result.result().get("summary"));
+    }
+
+    @Test
     void reviewDecisionFailsWhenDualControlIsMissing() throws Exception {
         var output = writeOutput("codex-review.md", "# Review\nNo control block.\n");
         var handler = new ReviewDecisionHandler();

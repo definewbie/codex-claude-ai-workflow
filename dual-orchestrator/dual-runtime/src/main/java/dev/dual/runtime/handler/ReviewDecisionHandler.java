@@ -1,5 +1,7 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
@@ -11,6 +13,10 @@ import java.util.Map;
 import java.util.Set;
 
 public final class ReviewDecisionHandler implements DecisionHandler {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
+
     private final DualControlBlockParser parser = new DualControlBlockParser();
 
     @Override
@@ -64,6 +70,13 @@ public final class ReviewDecisionHandler implements DecisionHandler {
             if (!path.startsWith(context.workspaceRoot()) || !Files.exists(path)) {
                 continue;
             }
+            if (path.getFileName().toString().endsWith(".contract.json")) {
+                var parsed = parseContractSidecar(path);
+                if (parsed.valid()) {
+                    return parsed;
+                }
+                continue;
+            }
             var content = Files.readString(path, StandardCharsets.UTF_8);
             DualControlParseResult parsed;
             if (hasContract) {
@@ -72,6 +85,33 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                 parsed = parser.parse(content);
             }
             return parsed;
+        }
+        return DualControlParseResult.missing();
+    }
+
+    private DualControlParseResult parseContractSidecar(java.nio.file.Path path) {
+        try {
+            var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
+            var values = new java.util.LinkedHashMap<String, String>();
+            var control = document.get("control");
+            if (control instanceof Map<?, ?> map) {
+                for (var entry : map.entrySet()) {
+                    if (entry.getKey() != null && entry.getValue() != null) {
+                        values.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+                    }
+                }
+            }
+            if (!values.containsKey("decision") && document.get("decision") != null) {
+                values.put("decision", String.valueOf(document.get("decision")));
+            }
+            if (!values.containsKey("summary") && document.get("summary") != null) {
+                values.put("summary", String.valueOf(document.get("summary")));
+            }
+            if (values.containsKey("decision")) {
+                return DualControlParseResult.valid(new DualControlBlock(values));
+            }
+        } catch (Exception ignored) {
+            // Invalid sidecars are ignored so older Markdown refs can still be parsed.
         }
         return DualControlParseResult.missing();
     }
