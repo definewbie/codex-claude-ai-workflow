@@ -650,6 +650,25 @@ dualctl run --workdir <effective_worktree> --max-steps 50 <workstream_id>
 
 这是真实使用时的主推进命令。`resume` 仍保留用于单步排查。
 
+### Autorun
+
+`autorun` 用于“无人值守验证主链路”：它会在每次遇到中间 human gate 时自动批准，然后继续执行；遇到最终 `gate.human_next_stage_approval` 时自动 `complete`，避免把同一个 workstream 带入下一轮。
+
+```bash
+dualctl autorun --workdir <effective_worktree> <workstream_id>
+dualctl autorun --workdir <effective_worktree> --max-steps 80 --max-gates 12 <workstream_id>
+```
+
+它会在以下情况停住：
+
+- workflow 完成。
+- 进入 `WAITING_FOR_RECOVERY`。
+- 进入 `FAILED` / `BLOCKED`。
+- 同一个 gate 在本次 `autorun` 中第二次出现，说明 workflow 进入了验收失败后的修复回路，需要人工查看原因。
+- 超过 `--max-gates`。
+
+`autorun` 适合 smoke test、真实仓库小样本验证和“先让系统跑完主链路”的场景。它不是人工审查的替代品；正式交付前仍然应该查看 review packet、final report、Codex acceptance 和 Git diff。需要人工逐关确认时，继续使用 `run` + `review approve|revise`。
+
 ### Retry
 
 如果当前 active node 因为 agent runtime、quota、context window 或 prompt contract 问题进入 `FAILED` / `BLOCKED`，workflow 会停在 `WAITING_FOR_RECOVERY`，并打开一个 recovery gate。先修复外部问题，再显式 retry：
@@ -765,6 +784,8 @@ dualctl review complete --workdir <effective_worktree> <workstream_id>
 ```
 
 `approve` / `revise` / `complete` 都会写 workflow event，并按 workflow edge 进入下一个节点或结束 workflow。传 `--run` 时，CLI 会在 gate 处理完成后继续推进到下一个人工卡点、恢复卡点、失败或完成。Gate 会把自己的输入 artifact 继续传给下一个节点，所以人工批准不会切断上一阶段生成的上下文。
+
+如果希望一次性跨过所有中间 gate，用 `dualctl autorun`，不要反复手工执行 `review approve --run`。
 
 `revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`gate.human_next_stage_approval` 的 `approve` 会开启新的 workflow iteration，并把 `next-stage-prompt.md` 传回 `intake.claude_brainstorm`，让同一个 workstream 继续下一阶段生命周期；`complete` 则表示当前 workstream 已经收口，不再进入下一轮。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
 
@@ -1072,7 +1093,7 @@ cd dual-orchestrator
 - 构建 `dualctl`。
 - 在目标 repo 创建默认安全 worktree。
 - 启动 lifecycle workflow。
-- 自动 approve 中间 human gates。
+- 调用 `dualctl autorun` 自动 approve 中间 human gates。
 - 在最后 next-stage gate 执行 `review complete`，避免开启下一轮。
 - 采集 status、timeline、events、runs、recovery、Git diff 证据。
 - 在终端打印每轮 workflow status、active node、open gates 和执行 step，方便不用翻日志也能知道跑到哪里。

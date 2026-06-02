@@ -2,9 +2,9 @@
 #
 # run-real-case.sh — Run a real repository through dual-orchestrator lifecycle.
 #
-# This script is intentionally small: it starts one workstream, auto-approves
-# human gates for orchestration validation, and writes a report. It does not
-# commit, push, create PRs, or delete the original repository.
+# This script is intentionally small: it starts one workstream, delegates
+# cross-gate driving to dualctl autorun, and writes a report. It does not commit,
+# push, create PRs, or delete the original repository.
 #
 # Usage:
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md
@@ -239,77 +239,30 @@ print_status_summary() {
 
 print_step_lines() {
   local output="$1"
-  printf '%s\n' "$output" | awk '/^Step / { print }' | while IFS= read -r line; do
+  printf '%s\n' "$output" | awk '/^Step |^Status: |^Gate |^Autorun / { print }' | while IFS= read -r line; do
     log "  $line"
   done
 }
 
-run_gate_loop() {
-  local round=0
-  while [[ "$round" -lt "$MAX_GATES" ]]; do
-    round=$((round + 1))
-    log "Gate round $round"
+run_autorun() {
+  log "Autorunning workflow across gates..."
+  if dualctl autorun \
+    --workdir "$WORKSPACE_DIR" \
+    --max-steps "$MAX_STEPS" \
+    --max-gates "$MAX_GATES" \
+    "$WORKSTREAM_ID" >"$CASE_DIR/logs/autorun.log" 2>&1; then
+    print_step_lines "$(cat "$CASE_DIR/logs/autorun.log")"
+    FINAL_STATUS="COMPLETED"
+    return 0
+  fi
 
-    local status_output
-    status_output="$(current_status_text)"
-    printf '%s\n' "$status_output" >"$CASE_DIR/logs/status-gate-$round.log"
-    print_status_summary "gate-$round" "$status_output"
-
-    if grep -q 'COMPLETED' "$CASE_DIR/logs/status-gate-$round.log"; then
-      FINAL_STATUS="COMPLETED"
-      return 0
-    fi
-    if grep -q 'FAILED' "$CASE_DIR/logs/status-gate-$round.log"; then
-      FINAL_STATUS="FAILED"
-      return 1
-    fi
-    if grep -q 'BLOCKED' "$CASE_DIR/logs/status-gate-$round.log"; then
-      FINAL_STATUS="BLOCKED"
-      return 1
-    fi
-    if grep -q 'WAITING_FOR_RECOVERY' "$CASE_DIR/logs/status-gate-$round.log"; then
-      FINAL_STATUS="WAITING_FOR_RECOVERY"
-      return 1
-    fi
-
-    local active_def
-    active_def="$(active_node_definition "$status_output")"
-    log "Active gate: ${active_def:-unknown}"
-
-    if [[ "$active_def" == "gate.human_next_stage_approval" ]]; then
-      log "Completing final next-stage gate."
-      if ! dualctl review complete --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/review-complete-$round.log" 2>&1; then
-        cat "$CASE_DIR/logs/review-complete-$round.log"
-        FINAL_STATUS="COMPLETE_FAILED"
-        return 1
-      fi
-      FINAL_STATUS="COMPLETED"
-      return 0
-    fi
-
-    log "Auto-approving gate and continuing."
-    if ! dualctl review approve --workdir "$WORKSPACE_DIR" --run --max-steps "$MAX_STEPS" "$WORKSTREAM_ID" >"$CASE_DIR/logs/review-approve-$round.log" 2>&1; then
-      cat "$CASE_DIR/logs/review-approve-$round.log"
-      FINAL_STATUS="APPROVE_FAILED"
-      return 1
-    fi
-    print_step_lines "$(cat "$CASE_DIR/logs/review-approve-$round.log")"
-
-    if grep -q 'COMPLETED' "$CASE_DIR/logs/review-approve-$round.log"; then
-      FINAL_STATUS="COMPLETED"
-      return 0
-    fi
-    if grep -q 'FAILED' "$CASE_DIR/logs/review-approve-$round.log"; then
-      FINAL_STATUS="FAILED"
-      return 1
-    fi
-    if grep -q 'WAITING_FOR_RECOVERY' "$CASE_DIR/logs/review-approve-$round.log"; then
-      FINAL_STATUS="WAITING_FOR_RECOVERY"
-      return 1
-    fi
-  done
-
-  FINAL_STATUS="MAX_GATES_EXCEEDED"
+  cat "$CASE_DIR/logs/autorun.log"
+  print_step_lines "$(cat "$CASE_DIR/logs/autorun.log")"
+  local status_output
+  status_output="$(current_status_text || true)"
+  printf '%s\n' "$status_output" >"$CASE_DIR/logs/status-after-autorun-failure.log"
+  FINAL_STATUS="$(workflow_status "$status_output")"
+  [[ -n "$FINAL_STATUS" ]] || FINAL_STATUS="AUTORUN_FAILED"
   return 1
 }
 
@@ -431,7 +384,7 @@ main() {
   start_workstream
   status_snapshot "after-start" || true
 
-  if run_gate_loop; then
+  if run_autorun; then
     FINAL_STATUS="COMPLETED"
   fi
 
