@@ -13,6 +13,12 @@
 
 真实复杂仓库验证则用 `scripts/run-real-case.sh`。它不替代 smoke，而是验证长链路：真实 worktree、真实 acpx、真实项目上下文、真实 Agent 工具调用、真实 rejection repair loop。
 
+真实 benchmark case 定义和报告入口：
+
+```text
+dual-orchestrator/docs/testing/real-case-benchmarks/
+```
+
 ## 前置条件
 
 - Java 17+, Maven
@@ -79,7 +85,7 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 ```bash
 ./scripts/run-real-case.sh \
   --repo /Users/kriswang/work/projects/ai/cancer-clinic \
-  --task-file /tmp/dual-real-cases/cancer-clinic-case-001.md \
+  --task-file dual-orchestrator/docs/testing/real-case-benchmarks/cases/cancer-clinic-small-ui.md \
   --variant p6
 ```
 
@@ -92,6 +98,7 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 | Variant | `p6` / `agent-lifecycle-p6@3` |
 | Final status | `COMPLETED` |
 | Report | `dual-orchestrator/docs/testing/real-case-reports/20260602T121711Z/report.md` |
+| Benchmark report | `dual-orchestrator/docs/testing/real-case-benchmarks/reports/2026-06-02-cancer-clinic-small-ui.md` |
 | Repair loop | Codex acceptance `REJECT` 触发两次，均路由到 failure classification + Claude repair，第三次验收通过 |
 | Original repo | 保持干净 |
 | Worktree diff | `miniprogram/src/pages/treatment-event/index.vue | 4 ++++` |

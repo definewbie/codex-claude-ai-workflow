@@ -70,6 +70,12 @@
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
 
+当前 benchmark 入口：
+
+```text
+dual-orchestrator/docs/testing/real-case-benchmarks/
+```
+
 ## P6 — Workflow Engine 增强
 
 - [x] 条件表达式：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 上支持条件判断
