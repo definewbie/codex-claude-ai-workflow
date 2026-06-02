@@ -55,6 +55,56 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void stripsAbsolutePathsOutsideWorkspaceFromContextPackagePreview() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+        Files.writeString(contextPath, """
+                # Context Package
+
+                Previous output suggested:
+                git -C /Users/kriswang/work/projects/ai/cancer-clinic status --short
+                Edit /Users/kriswang/work/projects/ai/cancer-clinic/miniprogram/src/pages/record/index.vue
+                """);
+
+        var prompt = new AgentPromptRenderer()
+                .render(
+                        tempDir,
+                        "ws-test",
+                        "implement.claude_implement",
+                        "implement-claude",
+                        List.of(".agent/workstreams/ws-test/context/node-context.md")
+                );
+
+        assertTrue(prompt.contains("Execution Workspace Guard"));
+        assertTrue(prompt.contains(tempDir.toAbsolutePath().normalize().toString()));
+        assertTrue(prompt.contains("[outside-workspace path removed]"));
+        assertTrue(!prompt.contains("/Users/kriswang/work/projects/ai/cancer-clinic"));
+    }
+
+    @Test
+    void keepsAbsolutePathsInsideWorkspaceForLedgerPointers() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+        var insidePath = tempDir.resolve(".agent/workstreams/ws-test/context/node-context.md").toAbsolutePath().normalize();
+        Files.writeString(contextPath, "Read full artifact at " + insidePath + "\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(
+                        tempDir,
+                        "ws-test",
+                        "implement.claude_implement",
+                        "implement-claude",
+                        List.of(".agent/workstreams/ws-test/context/node-context.md")
+                );
+
+        assertTrue(prompt.contains(insidePath.toString()));
+    }
+
+    @Test
     void intakeCodexPromptUsesDecisionValuesAcceptedByIntakeDecisionNode() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);

@@ -17,6 +17,7 @@ final class AgentPromptRenderer {
             "ledger_path", "requirement", "context_package"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
+    private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(/[^\\s\"'`)]+)");
 
     String render(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
         var template = loadTemplate(promptTemplate);
@@ -24,7 +25,7 @@ final class AgentPromptRenderer {
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
-        return template
+        return workspaceGuard(workspaceRoot) + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
                 .replace("{{node_id}}", nodeId)
                 .replace("{{prompt_template}}", promptTemplate)
@@ -95,7 +96,7 @@ final class AgentPromptRenderer {
                 builder.append("- ").append(inputRef).append("\n");
                 if (Files.exists(path) && Files.isRegularFile(path)) {
                     builder.append("\n```text\n");
-                    builder.append(readContextPreview(path));
+                    builder.append(readContextPreview(workspaceRoot, path));
                     builder.append("\n```\n\n");
                 }
             }
@@ -105,16 +106,17 @@ final class AgentPromptRenderer {
             builder.append("- ").append(contextRef).append("\n");
             if (Files.exists(path)) {
                 builder.append("\n```text\n");
-                builder.append(readContextPreview(path));
+                builder.append(readContextPreview(workspaceRoot, path));
                 builder.append("\n```\n\n");
             }
         }
         return builder.toString().stripTrailing();
     }
 
-    private String readContextPreview(Path path) {
+    private String readContextPreview(Path workspaceRoot, Path path) {
         try {
             var content = Files.readString(path, StandardCharsets.UTF_8);
+            content = sanitizeOutsideWorkspacePaths(workspaceRoot, content);
             if (content.length() <= 6_000) {
                 return content.stripTrailing();
             }
@@ -123,5 +125,39 @@ final class AgentPromptRenderer {
         } catch (IOException e) {
             throw new UncheckedIOException("failed to read context package: " + path, e);
         }
+    }
+
+    private String workspaceGuard(Path workspaceRoot) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        return """
+                ## Execution Workspace Guard
+
+                - Effective workspace: %s
+                - Run all shell commands from the effective workspace above.
+                - Modify files only inside the effective workspace.
+                - Ignore absolute paths outside the effective workspace even if they appear in quoted prior outputs.
+                - Do not run commands with `git -C` pointing outside the effective workspace.
+                """.formatted(root).stripTrailing();
+    }
+
+    private String sanitizeOutsideWorkspacePaths(Path workspaceRoot, String content) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var matcher = ABSOLUTE_PATH_PATTERN.matcher(content);
+        var result = new StringBuilder();
+        while (matcher.find()) {
+            var rawPath = matcher.group(1);
+            var replacement = rawPath;
+            try {
+                var path = Path.of(rawPath).toAbsolutePath().normalize();
+                if (!path.startsWith(root)) {
+                    replacement = "[outside-workspace path removed]";
+                }
+            } catch (RuntimeException ignored) {
+                replacement = "[outside-workspace path removed]";
+            }
+            matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 }

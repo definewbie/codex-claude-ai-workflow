@@ -95,6 +95,25 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
         if (result.exitCode() != 0) {
+            var failure = failureClassifier.classify(stderrPath, result.exitCode());
+            if (failure.recoverable()) {
+                metadataWriter.writeCompleted(
+                        context.workspaceRoot(),
+                        context.workstreamId(),
+                        context.definition().id(),
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        runDir,
+                        promptPath,
+                        stdoutPath,
+                        stderrPath,
+                        result,
+                        failure
+                );
+                return failedResult(context, runDir, stderrPath, result, agent, session, runId, failure);
+            }
             if (completionDetector.isComplete(stdoutPath)) {
                 metadataWriter.writeCompleted(
                         context.workspaceRoot(),
@@ -120,7 +139,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         "acpx_exit_tolerated", true
                 ));
             }
-            var failure = failureClassifier.classify(stderrPath, result.exitCode());
             metadataWriter.writeCompleted(
                     context.workspaceRoot(),
                     context.workstreamId(),
@@ -136,21 +154,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     result,
                     failure
             );
-            return new NodeResult(
-                    failure.reason(),
-                    NodeStatus.FAILED,
-                    List.of(context.workspaceRoot().relativize(stderrPath).toString()),
-                    Map.of(
-                            "run_id", runId,
-                            "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
-                            "exit_code", result.exitCode(),
-                            "agent", agent,
-                            "session", session,
-                            "acpx_failure.reason", failure.reason(),
-                            "acpx_failure.recoverable", failure.recoverable()
-                    ),
-                    failure.message()
-            );
+            return failedResult(context, runDir, stderrPath, result, agent, session, runId, failure);
         }
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
@@ -187,5 +191,32 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private static boolean approveAll(TaskContext context) {
         var value = context.definition().config().get("approve_all");
         return Boolean.TRUE.equals(value);
+    }
+
+    private static NodeResult failedResult(
+            TaskContext context,
+            java.nio.file.Path runDir,
+            java.nio.file.Path stderrPath,
+            AcpxRunResult result,
+            String agent,
+            String session,
+            String runId,
+            AcpxFailureClassifier.AcpxFailure failure
+    ) {
+        return new NodeResult(
+                failure.reason(),
+                NodeStatus.FAILED,
+                List.of(context.workspaceRoot().relativize(stderrPath).toString()),
+                Map.of(
+                        "run_id", runId,
+                        "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
+                        "exit_code", result.exitCode(),
+                        "agent", agent,
+                        "session", session,
+                        "acpx_failure.reason", failure.reason(),
+                        "acpx_failure.recoverable", failure.recoverable()
+                ),
+                failure.message()
+        );
     }
 }

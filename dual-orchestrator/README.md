@@ -296,7 +296,9 @@ acpx --timeout 600 --approve-all ...
 
 这是因为 Claude implementation 是唯一应该修改业务代码的主控节点；Codex review / acceptance 仍然保持只读审视。
 
-如果 acpx runtime 返回 reconnect、额度不足、登录失效等错误，ledger 会保留 stdout/stderr 和节点状态，但不会替你修复 agent runtime。一个例外是：acpx 返回非 0，但 stdout 已经包含完整 terminal `dual-control` block 且以 `[done] end_turn` 结束时，adapter 会把该 run 作为完成处理，并在 result 中记录 `acpx_exit_tolerated=true` 和原始 `exit_code`。
+如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr，并把节点停到 recovery；它不会替你修复 agent runtime。只有在 stderr 不属于已知可恢复错误，且 stdout 已经包含完整 terminal `dual-control` block 并以 `[done] end_turn` 结束时，adapter 才会容忍这次非 0 exit，并在 result 中记录 `acpx_exit_tolerated=true` 和原始 `exit_code`。
+
+所有 Agent prompt 都会带 `Execution Workspace Guard`，明确唯一有效工作目录，并在上下文预览中隐藏 workspace 外的绝对路径。这样做是为了避免 Agent 从历史输出里照抄原始 repo 路径，绕过 worktree 隔离。
 
 ## Prompt Templates
 
@@ -762,6 +764,15 @@ dualctl watch --workdir <effective_worktree> --interval-ms 1000 <workstream_id>
 dualctl review approve --workdir <effective_worktree> <workstream_id>
 dualctl review approve --workdir <effective_worktree> --run <workstream_id>
 ```
+
+对支持更多动作的 gate，例如 `contract_review` 的 `clarify`、`reduce_scope`、`reject`，使用通用 decide 命令：
+
+```bash
+dualctl review decide --workdir <effective_worktree> --action reject --note "contract is empty" <workstream_id>
+dualctl review decide --workdir <effective_worktree> --action clarify --note "scope.included is empty" --run <workstream_id>
+```
+
+`review decide --action approve` 会在需要时兼容老 edge 名 `approved`。
 
 要求 revision：
 
@@ -1264,19 +1275,14 @@ dualctl retry --workdir <effective_worktree> --note "agent reconnected" <workstr
 dualctl resume --workdir <effective_worktree> <workstream_id>
 ```
 
-acpx adapter 会把这类错误标记为：
+acpx adapter 会把这类错误标记为 recovery：
 
 ```text
 failure_reason: RECOVERABLE_AGENT_RECONNECT
 recoverable: true
 ```
 
-如果 stdout 已经完整结束，adapter 可能会容忍这次非 0 exit 并继续 workflow。可在对应 `run.json` 或 node result 中查看：
-
-```text
-acpx_exit_tolerated: true
-exit_code: 5
-```
+即使 stdout 已经完整结束，只要 stderr 明确包含 `agent needs reconnect`，也不会继续 workflow。先恢复 agent session，再执行 `retry` / `resume`。
 
 ### `git worktree add` 报权限错误
 
