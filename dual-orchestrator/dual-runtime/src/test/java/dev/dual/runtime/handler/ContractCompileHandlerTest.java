@@ -98,4 +98,109 @@ class ContractCompileHandlerTest {
         assertFalse(contract.acceptanceCriteria().isEmpty(), "AC should not be empty");
         assertEquals(ContractStatus.READY_FOR_REVIEW, contract.status());
     }
+
+    @Test
+    void executeCompilesContractFromReviewedIntakeArtifact(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                目标：
+                在真实项目中选择一个低风险小改动。
+                """, StandardCharsets.UTF_8);
+        var reviewRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-codex-product-review.md";
+        Files.writeString(tempDir.resolve(reviewRef), """
+                ## 1. Decision
+
+                READY_FOR_PRODUCT_REVIEW
+
+                The proposed task, adding a root `README.md`, is appropriately scoped.
+
+                ## 6. User Acceptance Notes
+
+                Acceptance should require:
+
+                - A root-level `README.md` exists.
+                - It explains project purpose, tech stack, local development startup, and directory structure.
+                - No business code, schema, backend API, or unrelated files are modified.
+                """, StandardCharsets.UTF_8);
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(reviewRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        NodeResult result = handler.execute(context);
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
+        assertTrue(json.contains("README.md"), "Contract should use reviewed intake artifact details");
+        assertTrue(json.contains("root-level"), "Contract should include acceptance criteria from review");
+        assertTrue(json.contains("\"included\" : [ \"README.md\" ]"), "Contract scope should include README.md");
+        assertFalse(json.contains("\"objective\" : \"目标：\""), "Contract objective should not be the raw heading");
+    }
+
+    @Test
+    void recompileStillUsesLatestIntakeArtifactsWhenInputRefsPointToOldContract(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        var artifactsDir = workstreamDir.resolve("artifacts");
+        Files.createDirectories(outputDir);
+        Files.createDirectories(artifactsDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                目标：
+                在真实项目中选择一个低风险小改动。
+                """, StandardCharsets.UTF_8);
+        Files.writeString(outputDir.resolve("intake-claude-brainstorm.md"), """
+                ## 1. Requirement Restatement
+
+                **选定任务：为项目根目录创建 `README.md`。**
+
+                ## 4. Scope Boundaries
+
+                **变更清单：** 新增 1 文件 `README.md`，约 60 行。
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: README task ready
+                ```
+                """, StandardCharsets.UTF_8);
+        Files.writeString(artifactsDir.resolve("task-contract.md"), """
+                # Task Contract
+
+                ## Objective
+
+                目标：
+                """, StandardCharsets.UTF_8);
+
+        var oldContractRef = ".agent/workstreams/" + WORKSTREAM_ID + "/artifacts/task-contract.md";
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(oldContractRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        handler.execute(context);
+
+        var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
+        assertTrue(json.contains("为项目根目录创建 README.md"), "Recompile should recover objective from intake artifacts");
+        assertTrue(json.contains("\"included\" : [ \"README.md\" ]"), "Recompile should recover README.md scope");
+    }
 }

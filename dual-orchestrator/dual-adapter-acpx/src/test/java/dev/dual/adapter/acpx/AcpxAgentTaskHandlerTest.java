@@ -200,6 +200,82 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void treatsReconnectStderrAsRecoverableFailureEvenWhenExitCodeIsZero() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new ReconnectExitZeroTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+        var instance = new NodeInstance(
+                "node-intake",
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-intake",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.outcome());
+        assertEquals(0, result.result().get("exit_code"));
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"exitCode\" : 0"));
+        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_RECONNECT\""));
+    }
+
+    @Test
+    void completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new CompletingReconnectExitZeroTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+        var instance = new NodeInstance(
+                "node-intake",
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-intake",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(true, result.result().get("acpx_recoverable_stderr_ignored"));
+        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.result().get("acpx_failure.reason"));
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"exitCode\" : 0"));
+        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+    }
+
+    @Test
     void rejectsUnsupportedAgent() {
         var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
         var definition = new NodeDefinition("design.bad_agent", NodeKind.TASK, "acpx.agent_run", Map.of(
@@ -283,6 +359,46 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class ReconnectExitZeroTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Requirement Restatement
+
+                    The agent stopped before writing the terminal control block.
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class CompletingReconnectExitZeroTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Requirement Restatement
+
+                    Add a README.
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: true
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
         }
     }
 }

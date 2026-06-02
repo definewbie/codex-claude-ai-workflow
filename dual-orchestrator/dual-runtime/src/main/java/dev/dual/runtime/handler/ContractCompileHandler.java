@@ -19,10 +19,6 @@ import java.util.regex.Pattern;
 public final class ContractCompileHandler implements TaskHandler {
 
     private static final Pattern FILE_REF_PATTERN = Pattern.compile("`([^`]+)`");
-    private static final Pattern CONSTRAINT_PATTERN = Pattern.compile(
-            "(?i)(under|no more than|max|chinese|中文)"
-    );
-
     @Override
     public String type() {
         return "contract.compile";
@@ -46,7 +42,8 @@ public final class ContractCompileHandler implements TaskHandler {
         }
 
         var requirementText = Files.readString(requirementPath, StandardCharsets.UTF_8);
-        var contract = compile(requirementText, context.workstreamId());
+        var sourceText = buildSourceText(context, requirementText);
+        var contract = compile(sourceText, context.workstreamId());
 
         // Validate and potentially patch
         var errors = TaskContractValidator.validate(contract);
@@ -113,11 +110,7 @@ public final class ContractCompileHandler implements TaskHandler {
         var objective = extractObjective(requirementText);
         var included = extractIncludedScope(requirementText);
         var constraints = extractConstraints(requirementText);
-        var acceptanceCriteria = List.of(
-                "Implementation achieves: " + objective,
-                "No files changed outside scope",
-                "Tests pass"
-        );
+        var acceptanceCriteria = extractAcceptanceCriteria(requirementText, objective);
 
         return new TaskContract(
                 "tc-" + workstreamId + "-v1",
@@ -142,10 +135,30 @@ public final class ContractCompileHandler implements TaskHandler {
     }
 
     private String extractObjective(String text) {
+        for (var line : text.lines().toList()) {
+            var trimmed = cleanLine(line);
+            if (trimmed.contains("选定任务")) {
+                var objective = afterMarker(trimmed, "选定任务");
+                if (!objective.isBlank()) {
+                    return objective;
+                }
+            }
+            var lower = trimmed.toLowerCase();
+            if (lower.contains("proposed task") && lower.contains("readme")) {
+                return trimmed;
+            }
+            if (lower.contains("create") && lower.contains("readme")) {
+                return trimmed;
+            }
+        }
+
         var lines = text.lines().iterator();
         while (lines.hasNext()) {
-            var line = lines.next().trim();
+            var line = cleanLine(lines.next());
             if (line.isBlank() || line.startsWith("#")) {
+                continue;
+            }
+            if (line.endsWith("：") || line.endsWith(":")) {
                 continue;
             }
             return line;
@@ -157,15 +170,131 @@ public final class ContractCompileHandler implements TaskHandler {
         var matcher = FILE_REF_PATTERN.matcher(text);
         var included = new java.util.LinkedHashSet<String>();
         while (matcher.find()) {
-            included.add(matcher.group(1));
+            var fileRef = normalizeFileRef(matcher.group(1));
+            if (!fileRef.isBlank()) {
+                included.add(fileRef);
+            }
+        }
+        if (text.contains("README.md")) {
+            included.add("README.md");
+        }
+        if (included.contains("README.md") && text.toLowerCase().contains("readme")) {
+            return List.of("README.md");
         }
         return List.copyOf(included);
     }
 
     private List<String> extractConstraints(String text) {
         return text.lines()
-                .filter(line -> CONSTRAINT_PATTERN.matcher(line).find())
-                .map(String::trim)
+                .map(ContractCompileHandler::cleanLine)
+                .filter(line -> line.startsWith("Constraints:")
+                        || line.startsWith("Constraint:")
+                        || line.startsWith("约束")
+                        || line.startsWith("必须遵守")
+                        || line.startsWith("不要修改")
+                        || line.startsWith("不要改动")
+                        || line.startsWith("不要扩大")
+                        || line.startsWith("不要做"))
+                .map(ContractCompileHandler::cleanLine)
                 .toList();
+    }
+
+    private List<String> extractAcceptanceCriteria(String text, String objective) {
+        var criteria = new java.util.LinkedHashSet<String>();
+        var capture = false;
+        for (var rawLine : text.lines().toList()) {
+            var rawTrimmed = rawLine.trim();
+            var line = cleanLine(rawLine);
+            var lower = line.toLowerCase();
+            if (lower.contains("acceptance should require") || lower.contains("user acceptance notes")
+                    || line.contains("验收标准")) {
+                capture = true;
+                continue;
+            }
+            if (capture && line.startsWith("## ")) {
+                capture = false;
+            }
+            if (capture && (rawTrimmed.startsWith("- ") || rawTrimmed.startsWith("* "))) {
+                criteria.add(cleanLine(rawLine));
+            }
+        }
+
+        if (criteria.isEmpty()) {
+            criteria.add("Implementation achieves: " + objective);
+            criteria.add("No files changed outside scope");
+            criteria.add("Tests pass");
+        }
+        return List.copyOf(criteria);
+    }
+
+    private String buildSourceText(TaskContext context, String requirementText) throws IOException {
+        var builder = new StringBuilder(requirementText);
+        for (var inputRef : context.instance().inputRefs()) {
+            var path = context.workspaceRoot().resolve(inputRef).normalize();
+            if (Files.isRegularFile(path) && path.toString().endsWith(".md")) {
+                builder.append("\n\n## Input Artifact: ").append(inputRef).append("\n\n");
+                builder.append(Files.readString(path, StandardCharsets.UTF_8));
+            }
+        }
+        appendLatestIntakeArtifacts(context, builder);
+        return builder.toString();
+    }
+
+    private void appendLatestIntakeArtifacts(TaskContext context, StringBuilder builder) throws IOException {
+        var runsDir = context.workspaceRoot()
+                .resolve(".agent")
+                .resolve("workstreams")
+                .resolve(context.workstreamId())
+                .resolve("runs");
+        if (!Files.isDirectory(runsDir)) {
+            return;
+        }
+        try (var paths = Files.walk(runsDir)) {
+            var artifacts = paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().contains("/outputs/intake-"))
+                    .filter(path -> path.toString().endsWith(".md"))
+                    .sorted()
+                    .toList();
+            for (var artifact : artifacts) {
+                builder.append("\n\n## Intake Artifact: ")
+                        .append(context.workspaceRoot().relativize(artifact))
+                        .append("\n\n");
+                builder.append(Files.readString(artifact, StandardCharsets.UTF_8));
+            }
+        }
+    }
+
+    private static String cleanLine(String line) {
+        var cleaned = line.trim();
+        while (cleaned.startsWith("- ") || cleaned.startsWith("* ")) {
+            cleaned = cleaned.substring(2).trim();
+        }
+        return cleaned
+                .replace("**", "")
+                .replace("`", "")
+                .trim();
+    }
+
+    private String afterMarker(String line, String marker) {
+        var index = line.indexOf(marker);
+        if (index < 0) {
+            return "";
+        }
+        var value = line.substring(index + marker.length()).trim();
+        while (value.startsWith("：") || value.startsWith(":")) {
+            value = value.substring(1).trim();
+        }
+        return value;
+    }
+
+    private String normalizeFileRef(String value) {
+        var cleaned = value.trim()
+                .replaceAll("[。。，，；;：:]+$", "")
+                .trim();
+        if (!cleaned.matches("(?i).+\\.(md|txt|json|ya?ml|vue|ts|js|java|py|sh)$")) {
+            return "";
+        }
+        return cleaned;
     }
 }

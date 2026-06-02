@@ -105,21 +105,15 @@ class FailureClassifyHandlerTest {
     @Test
     void outcomeStringFormat() throws Exception {
         writeMinimalContract();
-        // No git evidence at all — changedFileCount = -1, no contract gaps, no scope files,
-        // no keywords in summary, no ambiguity → arbiter rules: Rule 6 REVIEW_NOISE
-        // if contract is clean, otherwise Rule 7 IMPLEMENTATION_BUG.
-        // But: contract has < 2 AC items triggers CONTRACT_AMBIGUITY (Rule 2).
-        // Use a clean contract to get predictable behavior.
         writeCleanContract();
         // No git evidence → changedFileCount = -1
 
         var handler = new FailureClassifyHandler();
         var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT", "summary", "Nothing was done")
+                Map.of("decision", "REJECT", "summary", "minor stylistic issue")
         ));
 
-        // With clean contract (2 AC items, no ambiguity), no gaps, no out-of-scope,
-        // no keywords, changedFileCount=-1: Rule 6 → REVIEW_NOISE
+        // REVIEW_NOISE is now reserved for explicit non-blocking review noise signals.
         assertEquals("REJECT_REVIEW_NOISE", result.outcome());
         assertEquals("REVIEW_NOISE", result.result().get("category"));
     }

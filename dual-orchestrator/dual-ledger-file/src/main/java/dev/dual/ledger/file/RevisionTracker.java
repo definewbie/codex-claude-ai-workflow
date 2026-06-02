@@ -165,17 +165,22 @@ final class RevisionTracker {
         }
     }
 
-    static boolean startsNewIteration(String nodeDefinitionId, String outcome) {
+    static boolean startsNewIteration(String nodeDefinitionId, String outcome, String targetNodeDefinitionId) {
+        if ("REJECT".equals(outcome) && "acceptance.classify_failure".equals(targetNodeDefinitionId)) {
+            return false;
+        }
         return "revise".equals(outcome)
                 || "NEEDS_REVISION".equals(outcome)
                 || "REJECT".equals(outcome)
+                || outcome.startsWith("REJECT_")
                 || ("gate.human_next_stage_approval".equals(nodeDefinitionId) && "approved".equals(outcome));
     }
 
     static boolean isRevisionAction(String outcome) {
         return "revise".equals(outcome)
                 || "NEEDS_REVISION".equals(outcome)
-                || "REJECT".equals(outcome);
+                || "REJECT".equals(outcome)
+                || outcome.startsWith("REJECT_");
     }
 
     static int maxRevisions(NodeDefinition definition) {

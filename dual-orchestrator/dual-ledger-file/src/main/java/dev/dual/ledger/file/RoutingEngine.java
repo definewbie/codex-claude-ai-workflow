@@ -93,7 +93,7 @@ final class RoutingEngine {
             var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
             var nextIterationId = node.iterationId();
             var iterationStartedPayload = Map.<String, Object>of();
-            if (RevisionTracker.startsNewIteration(node.nodeDefinitionId(), outcome)) {
+            if (RevisionTracker.startsNewIteration(node.nodeDefinitionId(), outcome, nextDefinition.id())) {
                 if (RevisionTracker.isRevisionAction(outcome)) {
                     var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
                     var currentRevisionCount = revisionTracker.revisionCount(paths, nextDefinition.id());

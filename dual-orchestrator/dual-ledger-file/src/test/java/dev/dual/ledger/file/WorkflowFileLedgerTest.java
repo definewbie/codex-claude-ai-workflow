@@ -214,6 +214,53 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void acceptanceRejectRoutesToClassifierBeforeStartingRepairIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-reject"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle-p6",
+                3,
+                "acceptance.decision",
+                List.of(
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of("max_revisions", 1)),
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("acceptance.decision", "REJECT", "acceptance.classify_failure"),
+                        new EdgeDefinition("acceptance.classify_failure", "REJECT_IMPLEMENTATION_BUG", "context.implement_claude")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-acceptance-reject", definition);
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED, "REJECT", List.of("review.md"), Map.of(
+                "decision", "REJECT",
+                "summary", "README has a factual error."
+        ));
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.RUNNING, current.status());
+        var classifier = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("acceptance.classify_failure", classifier.nodeDefinitionId());
+        assertEquals("iter-001", classifier.iterationId());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+
+        ledger.completeAndRoute(paths, definition, classifier.nodeInstanceId(), NodeStatus.COMPLETED,
+                "REJECT_IMPLEMENTATION_BUG", List.of("failure-classification.json"), Map.of(
+                        "category", "IMPLEMENTATION_BUG"
+                ));
+
+        current = ledger.loadCurrent(paths);
+        var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertTrue(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
     void nextStageApprovalStartsNextWorkflowIterationAndCarriesPrompt() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage"));
         Files.createDirectories(paths.workstreamDir());

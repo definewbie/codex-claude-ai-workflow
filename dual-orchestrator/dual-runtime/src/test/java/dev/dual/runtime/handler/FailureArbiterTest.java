@@ -173,6 +173,19 @@ class FailureArbiterTest {
         assertEquals(6, result.matchedRule());
     }
 
+    @Test
+    void rejectWithoutStructuredFieldsDefaultsToImplementationBug() {
+        var result = arbiter.classify(
+                null, null, null,
+                "Acceptance remains blocked because README.md still says 16 pages while the project has 17 pages.",
+                null,
+                1,
+                "REJECT"
+        );
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(7, result.matchedRule());
+    }
+
     // --- Rule 7: fallback IMPLEMENTATION_BUG ---
 
     @Test

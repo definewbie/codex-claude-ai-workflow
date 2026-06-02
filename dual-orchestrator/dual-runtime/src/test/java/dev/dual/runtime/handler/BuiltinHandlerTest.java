@@ -620,6 +620,34 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void artifactValidationIncludesUntrackedFilesInPatch() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve(".gitkeep"), "init\n");
+        git(tempDir, "add", ".gitkeep");
+        git(tempDir, "commit", "-m", "init");
+        Files.writeString(tempDir.resolve("README.md"), "new file\n");
+
+        var handler = new ArtifactValidateHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(1, result.result().get("changed_file_count"));
+
+        var evidenceDir = tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence");
+        assertTrue(Files.readString(evidenceDir.resolve("git-status-short.txt")).contains("?? README.md"));
+        assertTrue(Files.readString(evidenceDir.resolve("changed-files.txt")).contains("README.md"));
+        assertTrue(Files.readString(evidenceDir.resolve("diff.patch")).contains("+new file"));
+        assertTrue(Files.readString(evidenceDir.resolve("diff.stat")).contains("README.md"));
+    }
+
+    @Test
     void artifactValidationMarksGitUnavailableWithoutFailingWorkflow() throws Exception {
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(

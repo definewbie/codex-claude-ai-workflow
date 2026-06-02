@@ -94,13 +94,15 @@ public final class FailureArbiter {
         }
 
         // Rule 6: REVIEW_NOISE
+        // A hard REJECT with changed files should bias toward repair unless the
+        // review summary itself clearly says the issue is non-blocking noise.
         boolean hasGaps = contractGaps != null && !contractGaps.isEmpty();
         boolean hasOOS = outOfScopeFiles != null && !outOfScopeFiles.isEmpty();
         boolean hasMissing = missingTests != null && !missingTests.isEmpty();
         boolean noOptionalFields = !hasGaps && !hasOOS && !hasMissing;
         boolean noAmbiguity = taskContract == null ||
                 (taskContract.ambiguityNotes() == null || taskContract.ambiguityNotes().isEmpty());
-        if (noOptionalFields && noAmbiguity) {
+        if (noOptionalFields && noAmbiguity && isLikelyReviewNoise(reviewDecision, reviewSummary)) {
             return build(FailureCategory.REVIEW_NOISE, 6,
                     "No structured failure indicators found — likely reviewer noise",
                     "Re-run acceptance review automatically",
@@ -112,6 +114,21 @@ public final class FailureArbiter {
                 "Default classification — assume implementation needs fixing",
                 "Re-implement addressing review feedback",
                 List.of(), reviewDecision);
+    }
+
+    private boolean isLikelyReviewNoise(String reviewDecision, String reviewSummary) {
+        if (!"REJECT".equals(reviewDecision)) {
+            return true;
+        }
+        if (reviewSummary == null || reviewSummary.isBlank()) {
+            return false;
+        }
+        var lower = reviewSummary.toLowerCase();
+        return lower.contains("review noise")
+                || lower.contains("non-blocking")
+                || lower.contains("non blocking")
+                || lower.contains("minor stylistic")
+                || lower.contains("preference only");
     }
 
     private FailureClassification build(FailureCategory category, int rule,

@@ -88,8 +88,8 @@ public final class ArtifactValidateHandler implements TaskHandler {
         var branch = git(workdir, "branch", "--show-current").output().trim();
         var baseCommit = git(workdir, "rev-parse", "HEAD").output().trim();
         var statusShort = git(workdir, "status", "--short", "--", ".", ":!.agent").output();
-        var diffStat = git(workdir, "diff", "--stat", "--", ".", ":!.agent").output();
-        var diffPatch = git(workdir, "diff", "--", ".", ":!.agent").output();
+        var diffStat = buildDiffStat(workdir, statusShort);
+        var diffPatch = buildDiffPatch(workdir, statusShort);
         var changedFiles = changedFilesFromStatus(statusShort);
 
         write(evidenceDir.resolve("git-root.txt"), gitRoot.output().trim() + "\n");
@@ -128,6 +128,43 @@ public final class ArtifactValidateHandler implements TaskHandler {
             changedFiles.add(line.substring(3).trim());
         }
         return changedFiles;
+    }
+
+    private static String buildDiffStat(Path workdir, String statusShort) throws IOException, InterruptedException {
+        var builder = new StringBuilder();
+        builder.append(git(workdir, "diff", "--stat", "--", ".", ":!.agent").output());
+        for (String file : untrackedFilesFromStatus(statusShort)) {
+            var result = git(workdir, "diff", "--no-index", "--stat", "--", "/dev/null", file);
+            if (!result.output().isBlank()) {
+                builder.append(result.output());
+            }
+        }
+        return builder.toString();
+    }
+
+    private static String buildDiffPatch(Path workdir, String statusShort) throws IOException, InterruptedException {
+        var builder = new StringBuilder();
+        builder.append(git(workdir, "diff", "--", ".", ":!.agent").output());
+        for (String file : untrackedFilesFromStatus(statusShort)) {
+            var result = git(workdir, "diff", "--no-index", "--", "/dev/null", file);
+            if (!result.output().isBlank()) {
+                builder.append(result.output());
+            }
+        }
+        return builder.toString();
+    }
+
+    private static List<String> untrackedFilesFromStatus(String statusShort) {
+        var files = new ArrayList<String>();
+        for (String line : statusShort.split("\\R")) {
+            if (line.startsWith("?? ") && line.length() > 3) {
+                var file = line.substring(3).trim();
+                if (!file.startsWith(".agent/")) {
+                    files.add(file);
+                }
+            }
+        }
+        return files;
     }
 
     private static void write(Path path, String content) throws IOException {

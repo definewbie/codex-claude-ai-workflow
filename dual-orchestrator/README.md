@@ -288,15 +288,15 @@ acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
 
 含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。
 
-内置 lifecycle 只在 `implement.claude_implement` 节点启用写权限：
+较小的 `thin` / `p5` lifecycle 仍然尽量保守，只在实现和自测相关 Claude 节点启用写权限。完整真实生命周期 `p6` 会让所有 acpx Agent 节点使用：
 
 ```bash
 acpx --timeout 600 --approve-all ...
 ```
 
-这是因为 Claude implementation 是唯一应该修改业务代码的主控节点；Codex review / acceptance 仍然保持只读审视。
+原因是 p6 的 intake / design / plan / acceptance 都可能需要通过 Agent 工具读取项目、执行 `git diff`、运行测试或生成证据；在非交互模式下使用 `--approve-reads --non-interactive-permissions fail` 会让这类工具调用直接失败。安全边界主要由默认 worktree、`Execution Workspace Guard` 和 prompt contract 共同承担：Claude 是主控开发者；Codex 仍然只做外部审视和验收，不应修改业务代码。
 
-如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr，并把节点停到 recovery；它不会替你修复 agent runtime。只有在 stderr 不属于已知可恢复错误，且 stdout 已经包含完整 terminal `dual-control` block 并以 `[done] end_turn` 结束时，adapter 才会容忍这次非 0 exit，并在 result 中记录 `acpx_exit_tolerated=true` 和原始 `exit_code`。
+如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr，并把节点停到 recovery；它不会替你修复 agent runtime。一个例外是：当 `exit_code=0` 且 stdout 已经包含完整 terminal `dual-control` block 并以 `[done] end_turn` 结束时，adapter 会接受该产物，同时在 result 中记录 `acpx_recoverable_stderr_ignored=true`。如果 exit code 非 0，但 stdout 已完整，adapter 只会在 stderr 不属于已知可恢复错误时容忍这次非 0 exit，并记录 `acpx_exit_tolerated=true` 和原始 `exit_code`。
 
 所有 Agent prompt 都会带 `Execution Workspace Guard`，明确唯一有效工作目录，并在上下文预览中隐藏 workspace 外的绝对路径。这样做是为了避免 Agent 从历史输出里照抄原始 repo 路径，绕过 worktree 隔离。
 

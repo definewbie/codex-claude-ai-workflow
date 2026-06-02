@@ -20,6 +20,21 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
+    void p6AgentNodesCanRunNonInteractiveToolsInsideWorktree() {
+        WorkflowDefinition wf = factory.p6Mainline();
+
+        var agentNodes = wf.nodes().stream()
+                .filter(node -> "acpx.agent_run".equals(node.handlerType()))
+                .toList();
+
+        assertFalse(agentNodes.isEmpty(), "p6 should contain acpx agent nodes");
+        for (var node : agentNodes) {
+            assertEquals(true, node.config().get("approve_all"),
+                    "p6 agent node should be able to run tools non-interactively: " + node.id());
+        }
+    }
+
+    @Test
     void p6MainlineAcceptRoutesToReport() {
         WorkflowDefinition wf = factory.p6Mainline();
 
