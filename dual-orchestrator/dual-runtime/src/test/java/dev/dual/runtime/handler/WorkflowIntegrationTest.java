@@ -161,6 +161,84 @@ class WorkflowIntegrationTest {
     }
 
     @Test
+    void chain2b_handoffJsonExtractsChineseHeadingsAndTables() throws Exception {
+        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.md";
+        fixture.writeHandoff("""
+                # Claude Stage Handoff
+
+                ## 1. 已完成的工作
+
+                B4 新用户引导卡片已在 `miniprogram/src/pages/record/index.vue` 中实现。
+
+                **实现细节：**
+                - `hasNoRecords` 计算属性：`!currentCycle && historyGroups.length === 0`
+                - `goToRetro()` 函数：带上 `planId`
+
+                ## 3. 变更文件
+
+                | 文件 | 变更 | Diff |
+                |------|------|------|
+                | `miniprogram/src/pages/record/index.vue` | 新增 B4 引导卡片 | +27 行 |
+
+                ## 4. 验证状态
+
+                | 检查 | 结果 |
+                |------|------|
+                | grep B4 文案 | 通过 |
+                | npm run build | 跳过，缺少 node_modules |
+
+                ## 5. 开放风险
+
+                | 风险 | 影响 | 缓解措施 |
+                |------|------|----------|
+                | 未执行构建检查 | 语法错误可能仍未被发现 | 在集成环境运行 |
+                | 未进行运行时 UI 测试 | 视觉渲染和触摸交互未经验证 | 微信开发者工具验证 |
+
+                ## 7. 建议的下一步提示
+
+                没有特定的下一个提示。
+
+                ```dual-control
+                decision: HANDOFF_READY
+                summary: B4 引导卡片已实现
+                ```
+                """);
+
+        var handler = new PromptGenerateNextStageHandler();
+        var result = handler.execute(taskContext(
+                "stage.generate_next_prompt",
+                "prompt.generate_next_stage",
+                List.of(handoffRef)
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+
+        var handoffJsonRef = ".agent/workstreams/ws-int/artifacts/next-stage/handoff.json";
+        var mapper = new ObjectMapper();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> json = mapper.readValue(
+                tempDir.resolve(handoffJsonRef).toFile(), Map.class);
+
+        @SuppressWarnings("unchecked")
+        var completedWork = (List<String>) json.get("completedWork");
+        assertFalse(completedWork.isEmpty());
+        assertTrue(completedWork.stream().anyMatch(line -> line.contains("B4 新用户引导卡片")));
+        assertTrue(completedWork.stream().anyMatch(line -> line.contains("hasNoRecords")));
+
+        @SuppressWarnings("unchecked")
+        var changedFiles = (List<String>) json.get("changedFiles");
+        assertEquals(List.of("miniprogram/src/pages/record/index.vue"), changedFiles);
+
+        @SuppressWarnings("unchecked")
+        var openRisks = (List<String>) json.get("openRisks");
+        assertEquals(List.of("未执行构建检查", "未进行运行时 UI 测试"), openRisks);
+
+        var verificationState = (String) json.get("verificationState");
+        assertTrue(verificationState.contains("grep B4 文案"));
+        assertTrue(verificationState.contains("缺少 node_modules"));
+    }
+
+    @Test
     void chain3_budgetGovernanceUnderOversizedInputs() throws Exception {
         var largeRequirement = "A".repeat(8_000) + "\n";
         fixture.writeRequirement(largeRequirement);

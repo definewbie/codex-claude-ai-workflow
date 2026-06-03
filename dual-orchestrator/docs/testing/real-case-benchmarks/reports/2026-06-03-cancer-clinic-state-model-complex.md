@@ -122,5 +122,6 @@ PASS-WARN
 ## Follow-up
 
 - Improve structured handoff extraction or require a stricter handoff artifact block.
+  - Follow-up fix: `PromptGenerateNextStageHandler` now recognizes Chinese handoff headings and Markdown table sections, so future `handoff.json` generation should preserve `completedWork`, `changedFiles`, `openRisks`, and `verificationState` from this style of handoff.
 - Keep state-model validation in future real cases, especially when testing recovery and revision loops.
 - Do not spend more quota on this B4 case unless the business change is going to be merged and needs runtime validation.

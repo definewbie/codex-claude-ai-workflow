@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -96,7 +97,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var lines = handoffText.lines().toList();
         var start = -1;
         for (int i = 0; i < lines.size(); i++) {
-            if (headingMatches(lines.get(i), "Suggested Next Prompt")) {
+            if (headingMatches(lines.get(i), "Suggested Next Prompt", "建议的下一步提示", "下一步提示")) {
                 start = i + 1;
                 break;
             }
@@ -126,10 +127,14 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         json.put("stageId", context.instance().stageId());
         json.put("iterationId", context.instance().iterationId());
         json.put("sourceHandoffPath", sourceRefs.isEmpty() ? "" : sourceRefs.get(0));
-        json.put("completedWork", extractListSection(handoffText, "Completed Work"));
-        json.put("changedFiles", extractListSection(handoffText, "Changed Files"));
-        json.put("openRisks", extractListSection(handoffText, "Open Risks"));
-        json.put("verificationState", extractTextSection(handoffText, "Verification State", "Verification"));
+        json.put("completedWork", extractListSection(handoffText,
+                "Completed Work", "已完成的工作", "已完成工作", "完成的工作", "工作完成情况"));
+        json.put("changedFiles", extractListSection(handoffText,
+                "Changed Files", "Changed File", "变更文件", "修改文件", "改动文件"));
+        json.put("openRisks", extractListSection(handoffText,
+                "Open Risks", "Residual Risks", "开放风险", "残余风险", "剩余风险", "风险点"));
+        json.put("verificationState", extractTextSection(handoffText,
+                "Verification State", "Verification", "验证状态", "验证结果", "自测状态", "自测结果"));
         json.put("generatedAt", Instant.now().toString());
         return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(json);
     }
@@ -137,20 +142,25 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
     private static List<String> extractListSection(String text, String... sectionNames) {
         var content = extractSectionContent(text, sectionNames);
         if (content.isBlank()) return List.of();
-        var bullets = content.lines()
-                .map(String::strip)
-                .filter(line -> line.startsWith("- ") || line.startsWith("* "))
-                .map(line -> line.substring(2).strip())
-                .filter(line -> !line.isBlank())
-                .toList();
-        if (!bullets.isEmpty()) {
-            return bullets;
+        var tableItems = extractTableFirstColumn(content);
+        if (!tableItems.isEmpty()) {
+            return tableItems;
         }
-        return content.lines()
-                .map(String::strip)
-                .filter(line -> !line.isBlank())
-                .filter(line -> !line.startsWith("```"))
-                .toList();
+
+        var items = new ArrayList<String>();
+        for (var rawLine : content.lines().toList()) {
+            var line = rawLine.strip();
+            if (line.isBlank() || line.startsWith("```") || line.startsWith("|")) {
+                continue;
+            }
+            if (line.startsWith("- ") || line.startsWith("* ")) {
+                line = line.substring(2).strip();
+            }
+            if (!line.isBlank()) {
+                items.add(line);
+            }
+        }
+        return items;
     }
 
     private static String extractTextSection(String text, String... sectionNames) {
@@ -177,6 +187,61 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
             builder.append(line).append("\n");
         }
         return builder.toString().stripTrailing();
+    }
+
+    private static List<String> extractTableFirstColumn(String content) {
+        var items = new ArrayList<String>();
+        var insideTableBody = false;
+        for (var rawLine : content.lines().toList()) {
+            var line = rawLine.strip();
+            if (!line.startsWith("|") || !line.endsWith("|")) {
+                continue;
+            }
+
+            var cells = parseTableCells(line);
+            if (cells.isEmpty()) {
+                continue;
+            }
+            if (isTableSeparator(cells)) {
+                insideTableBody = true;
+                continue;
+            }
+            if (!insideTableBody) {
+                continue;
+            }
+
+            var firstCell = cleanMarkdownCell(cells.get(0));
+            if (!firstCell.isBlank()) {
+                items.add(firstCell);
+            }
+        }
+        return items;
+    }
+
+    private static List<String> parseTableCells(String line) {
+        var trimmed = line;
+        if (trimmed.startsWith("|")) {
+            trimmed = trimmed.substring(1);
+        }
+        if (trimmed.endsWith("|")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return Pattern.compile("\\|").splitAsStream(trimmed)
+                .map(String::strip)
+                .toList();
+    }
+
+    private static boolean isTableSeparator(List<String> cells) {
+        return cells.stream()
+                .allMatch(cell -> cell.matches(":?-{3,}:?"));
+    }
+
+    private static String cleanMarkdownCell(String cell) {
+        var cleaned = cell.strip();
+        if (cleaned.startsWith("`") && cleaned.endsWith("`") && cleaned.length() > 1) {
+            cleaned = cleaned.substring(1, cleaned.length() - 1);
+        }
+        return cleaned.strip();
     }
 
     private static boolean headingMatches(String line, String... sectionNames) {
