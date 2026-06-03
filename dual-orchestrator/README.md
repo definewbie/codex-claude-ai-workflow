@@ -220,7 +220,7 @@ http://localhost:8080/
 - 输入 effective workdir，列出 workstreams。
 - 查看当前 status 和 timeline。
 - 查看最近的 Agent artifact contract sidecars 摘要，包括 decision、summary、must fix、风险、变更文件和验证摘要。
-- 当 workflow 停在 human review gate 时，展示当前 review packet。
+- 当 workflow 停在 human review gate 时，展示当前 review packet；页面会先渲染 TaskContract / Decision / Must Fix / Git Evidence 等结构化审查卡片，原始 Markdown packet 保留在折叠区。
 - 手动执行 scheduler tick。
 - 对选中的 workstream 执行 resume、retry、approve + run、revise + run、complete。
 

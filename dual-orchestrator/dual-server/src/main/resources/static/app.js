@@ -21,6 +21,7 @@ const els = {
   artifactSummary: $("artifactSummary"),
   responseView: $("responseView"),
   reviewPanel: $("reviewPanel"),
+  reviewStructured: $("reviewStructured"),
   reviewPacket: $("reviewPacket"),
   reviewGate: $("reviewGate"),
   feedback: $("feedback"),
@@ -150,6 +151,7 @@ async function loadReviewPacket() {
   const status = state.status?.workflow?.status || "";
   if (status !== "WAITING_FOR_HUMAN") {
     els.reviewPanel.classList.add("hidden");
+    els.reviewStructured.innerHTML = "";
     els.reviewPacket.textContent = "";
     els.reviewGate.textContent = "";
     return;
@@ -158,12 +160,112 @@ async function loadReviewPacket() {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/current?workdir=${workdirParam()}`);
     els.reviewPanel.classList.remove("hidden");
     els.reviewGate.textContent = data.gateNodeDefinitionId || "";
+    renderReviewStructured(data.packet || {});
     els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
   } catch (error) {
     els.reviewPanel.classList.remove("hidden");
     els.reviewGate.textContent = "not available";
+    els.reviewStructured.innerHTML = "";
     els.reviewPacket.textContent = JSON.stringify(error, null, 2);
   }
+}
+
+function renderReviewStructured(packet) {
+  els.reviewStructured.innerHTML = "";
+  if (!packet || !Object.keys(packet).length) {
+    const empty = document.createElement("p");
+    empty.className = "subtle";
+    empty.textContent = "Structured packet data is not available. Read the raw packet below.";
+    els.reviewStructured.appendChild(empty);
+    return;
+  }
+
+  const header = document.createElement("section");
+  header.className = "review-card review-card-primary";
+  const decision = packet.latestAgentDecision || {};
+  const contract = packet.taskContract || {};
+  header.innerHTML = `
+    <div class="review-card-head">
+      <div>
+        <span class="eyebrow">Review focus</span>
+        <h3>${escapeHtml(contract.objective || packet.gateNodeDefinitionId || "Human review")}</h3>
+      </div>
+      ${decision.decision ? `<span class="badge ${decisionBadgeKind(decision.decision)}">${escapeHtml(decision.decision)}</span>` : ""}
+    </div>
+    ${decision.summary ? `<p>${escapeHtml(decision.summary)}</p>` : ""}
+    ${reviewList("Must Fix", decision.mustFix)}
+    ${reviewList("Open Risks", decision.openRisks)}
+  `;
+  els.reviewStructured.appendChild(header);
+
+  appendReviewSection("Task Contract", [
+    reviewKeyValue("Status", contract.status),
+    reviewList("Included Scope", contract.includedScope),
+    reviewList("Excluded Scope", contract.excludedScope),
+    reviewList("Acceptance Criteria", contract.acceptanceCriteria),
+    reviewList("Test Requirements", contract.testRequirements),
+    reviewList("Constraints", contract.constraints),
+  ]);
+
+  const evidence = packet.gitEvidence || {};
+  appendReviewSection("Git Evidence", [
+    reviewList("Changed Files", evidence.changedFiles),
+    reviewPre("Diff Stat", evidence.diffStat),
+    reviewPre("Status", evidence.statusShort),
+  ]);
+
+  const delivery = packet.delivery || {};
+  appendReviewSection("Delivery Artifacts", [
+    reviewKeyValue("PR Body", delivery.prBodyPath),
+    reviewKeyValue("Commit Message", delivery.commitMessagePath),
+  ]);
+}
+
+function appendReviewSection(title, rows) {
+  const content = rows.filter(Boolean).join("");
+  if (!content) return;
+  const section = document.createElement("section");
+  section.className = "review-card";
+  section.innerHTML = `<h3>${escapeHtml(title)}</h3>${content}`;
+  els.reviewStructured.appendChild(section);
+}
+
+function reviewKeyValue(label, value) {
+  if (!value) return "";
+  return `
+    <div class="review-row">
+      <span>${escapeHtml(label)}</span>
+      <p>${escapeHtml(value)}</p>
+    </div>
+  `;
+}
+
+function reviewList(label, value) {
+  const values = Array.isArray(value) ? value.filter(Boolean) : value ? [value] : [];
+  if (!values.length) return "";
+  return `
+    <div class="review-row">
+      <span>${escapeHtml(label)}</span>
+      <ul>${values.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    </div>
+  `;
+}
+
+function reviewPre(label, value) {
+  if (!value) return "";
+  return `
+    <div class="review-row review-row-block">
+      <span>${escapeHtml(label)}</span>
+      <pre>${escapeHtml(value)}</pre>
+    </div>
+  `;
+}
+
+function decisionBadgeKind(decision) {
+  if (decision.includes("NOTES") || decision.includes("REVISION")) return "warn";
+  if (decision.includes("ACCEPT") || decision.includes("READY")) return "ok";
+  if (decision.includes("REJECT") || decision.includes("BLOCKED")) return "bad";
+  return "muted";
 }
 
 function renderArtifactSummary(contracts) {
