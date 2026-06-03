@@ -23,7 +23,8 @@ class PromptTemplateConsistencyTest {
     private static final String TEMPLATE_ROOT = "dev/dual/adapter/acpx/prompts/";
     private static final Set<String> KNOWN_VARIABLES = Set.of(
             "workstream_id", "node_id", "prompt_template",
-            "ledger_path", "requirement", "context_package"
+            "ledger_path", "requirement", "context_package",
+            "contract_review_principles"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
     private static final Pattern CONTROL_DECISION_PATTERN = Pattern.compile("(?m)^decision:\\s*([A-Z_|]+)\\s*$");

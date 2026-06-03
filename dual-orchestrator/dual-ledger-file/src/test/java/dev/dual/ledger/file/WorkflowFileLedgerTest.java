@@ -208,6 +208,11 @@ class WorkflowFileLedgerTest {
         assertFalse(Files.exists(paths.iterationJson("iter-003")));
         var stoppedGate = ledger.loadNode(paths, secondGate.nodeInstanceId());
         assertEquals(NodeStatus.BLOCKED, stoppedGate.status());
+        assertTrue(Files.exists(paths.currentFailureMarkdown()),
+                "Revision-limit recovery should write current-failure.md for operator visibility");
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("revision_limit_reached"));
+        assertTrue(summary.contains(secondGate.nodeDefinitionId()));
         var events = Files.readString(paths.eventsJsonl());
         assertTrue(events.contains("revision_limit_reached"));
         assertTrue(events.contains("\"max_revisions\":1"));

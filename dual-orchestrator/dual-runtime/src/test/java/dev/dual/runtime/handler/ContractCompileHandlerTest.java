@@ -203,4 +203,243 @@ class ContractCompileHandlerTest {
         assertTrue(json.contains("为项目根目录创建 README.md"), "Recompile should recover objective from intake artifacts");
         assertTrue(json.contains("\"included\" : [ \"README.md\" ]"), "Recompile should recover README.md scope");
     }
+
+    @Test
+    void compileMaterializesScopeConstraintsNonGoalsRisksAndTestsFromFeatureSliceText() {
+        var handler = new ContractCompileHandler();
+        var sourceText = """
+                # Benchmark Case: cancer-clinic-feature-slice
+
+                ## 目标
+
+                验证 dual-orchestrator 能否在真实业务功能切片中保持 contract、context、自测证据和 Codex acceptance 的一致性。
+
+                ## File 1: `miniprogram/src/pages/record/index.vue`
+
+                Add a B4 empty state guidance card for plans with no treatment records.
+
+                ## File 2: `miniprogram/src/pages/treatment-record/index.vue`
+
+                Add a prominent upload report button and align labels.
+
+                ## In Scope
+
+                - B4: New user empty state guidance card in `record/index.vue`.
+                - B1: Prominent "上传报告" button in `treatment-record/index.vue`.
+                - Title: "第 N 周期" -> "第 N 次治疗".
+
+                ## Non-Goals
+
+                - No backend changes.
+                - No database migration.
+                - No event chain display on treatment-record page.
+                - No changes to report upload flow.
+
+                ## Constraints
+
+                - Do not modify backend API or schema.
+                - Reuse existing `goTo('/pages/examination/index')`.
+                - Exactly two frontend files should change.
+
+                ## Risks
+
+                | Risk | Severity | Mitigation |
+                |------|----------|------------|
+                | Forbidden medical assurance wording accidentally introduced | High | Grep changed files |
+
+                ## Test Strategy
+
+                - Run `cd miniprogram && npm run build:mp-weixin`.
+                - Grep for forbidden terms.
+                - Verify empty and non-empty exam states both show exactly one prominent upload button.
+                """;
+
+        var contract = handler.compile(sourceText, WORKSTREAM_ID);
+
+        assertTrue(contract.scope().included().contains("miniprogram/src/pages/record/index.vue"));
+        assertTrue(contract.scope().included().contains("miniprogram/src/pages/treatment-record/index.vue"));
+        assertFalse(contract.scope().excluded().isEmpty(), "Excluded scope should be materialized");
+        assertFalse(contract.constraints().isEmpty(), "Constraints should be materialized");
+        assertFalse(contract.nonGoals().isEmpty(), "Non-goals should be materialized");
+        assertFalse(contract.riskAreas().isEmpty(), "Risk areas should be materialized");
+        assertFalse(contract.testRequirements().isEmpty(), "Test requirements should be materialized");
+        assertTrue(contract.testRequirements().stream().anyMatch(value -> value.contains("build:mp-weixin")));
+    }
+
+    @Test
+    void compileDoesNotLetHistoricalReadmeOrContextMetadataPolluteContract() {
+        var handler = new ContractCompileHandler();
+        var sourceText = """
+                # Benchmark Case
+
+                The old example task mentioned `README.md`, but the selected task changed later.
+
+                ## Scope
+
+                **Included:**
+                - Implement status actions in `miniprogram/src/pages/treatment-event/index.vue`.
+
+                **Excluded:**
+                - No backend/schema change is needed.
+
+                ## User Acceptance Notes
+
+                Acceptance should require:
+
+                - 用户可以在治疗安排详情页点击“标记完成”。
+                - 用户可以选择延期日期并提交延期。
+                - 不修改后端 API 或数据库 schema。
+
+                - Workstream: ws-should-not-enter-contract
+                - Builder Node: context.intake_codex_product_review
+                - Generated At: 2026-06-02T22:04:54Z
+
+                ## Context Package
+
+                - Total: 9.8k / 4.0k tokens
+                """;
+
+        var contract = handler.compile(sourceText, WORKSTREAM_ID);
+
+        assertEquals(
+                List.of("miniprogram/src/pages/treatment-event/index.vue"),
+                contract.scope().included(),
+                "Historical README references should not override the concrete feature file");
+        assertFalse(
+                contract.acceptanceCriteria().stream().anyMatch(value -> value.contains("Workstream")),
+                "Ledger metadata should not become acceptance criteria");
+        assertFalse(
+                contract.acceptanceCriteria().stream().anyMatch(value -> value.contains("Builder Node")),
+                "Context package metadata should not become acceptance criteria");
+        assertTrue(
+                contract.acceptanceCriteria().stream().anyMatch(value -> value.contains("标记完成")),
+                "Real acceptance criteria should be preserved");
+    }
+
+    @Test
+    void executeCompilesCanonicalContractFromTaskContractProposalArtifact(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                需求里曾经举过 `README.md` 的例子，但最终选定的是治疗事件详情页状态操作。
+                """, StandardCharsets.UTF_8);
+
+        var intakeRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-claude-brainstorm.md";
+        Files.writeString(tempDir.resolve(intakeRef), """
+                # Brainstorm
+
+                Some prose can still mention `README.md` and ledger-looking metadata.
+
+                - Workstream: ws-should-not-enter-contract
+                - Builder Node: context.intake_codex_product_review
+
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "在治疗安排详情页添加标记完成和延期状态操作",
+                  "scope": {
+                    "included": ["miniprogram/src/pages/treatment-event/index.vue"],
+                    "excluded": ["不改后端 API", "不改数据库 schema"]
+                  },
+                  "acceptance_criteria": [
+                    "用户可以点击标记完成并刷新页面状态",
+                    "用户可以选择延期日期并提交延期"
+                  ],
+                  "constraints": ["不引入无关重构"],
+                  "non_goals": ["不修改 record 页面"],
+                  "risk_areas": ["状态变更必须是用户手动触发"],
+                  "test_requirements": ["运行 miniprogram 构建"],
+                  "evidence_refs": ["miniprogram/src/pages/treatment-event/index.vue"],
+                  "open_questions": []
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: proposal ready
+                ```
+                """, StandardCharsets.UTF_8);
+
+        Files.createDirectories(tempDir.resolve("miniprogram/src/pages/treatment-event"));
+        Files.writeString(tempDir.resolve("miniprogram/src/pages/treatment-event/index.vue"), "<template />\n");
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(intakeRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
+        assertTrue(json.contains("在治疗安排详情页添加标记完成和延期状态操作"));
+        assertTrue(json.contains("\"included\" : [ \"miniprogram/src/pages/treatment-event/index.vue\" ]"));
+        assertFalse(json.contains("README.md"), "Historical prose references must not pollute proposal-based contract");
+        assertFalse(json.contains("Workstream:"), "Ledger metadata must not pollute proposal-based contract");
+        assertTrue(json.contains("\"createdBy\" : \"task_contract_proposal\""));
+    }
+
+    @Test
+    void executeFailsInvalidTaskContractProposalInsteadOfFallingBackToMarkdown(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                This prose mentions `README.md`, but an invalid proposal must not fallback to Markdown extraction.
+                """, StandardCharsets.UTF_8);
+
+        var intakeRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-claude-brainstorm.md";
+        Files.writeString(tempDir.resolve(intakeRef), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Bad proposal",
+                  "scope": {
+                    "included": ["Workstream: ws-noise"],
+                    "excluded": []
+                  },
+                  "acceptance_criteria": [],
+                  "constraints": [],
+                  "non_goals": [],
+                  "risk_areas": [],
+                  "test_requirements": [],
+                  "evidence_refs": [],
+                  "open_questions": []
+                }
+                </dual-artifact>
+                """, StandardCharsets.UTF_8);
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(intakeRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
+        assertFalse(Files.exists(workstreamDir.resolve("artifacts/task-contract.json")),
+                "Invalid proposal must not write canonical TaskContract");
+    }
 }

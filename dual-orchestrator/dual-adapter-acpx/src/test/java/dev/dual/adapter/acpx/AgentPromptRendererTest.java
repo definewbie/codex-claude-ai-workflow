@@ -30,6 +30,8 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Do not create, edit, or delete files under .agent/"));
         assertTrue(prompt.contains("Only the orchestrator writes run ledger artifacts"));
         assertTrue(prompt.contains("Explicitly address each Must Fix"));
+        assertTrue(prompt.contains("<dual-artifact type=\"task_contract_proposal\" version=\"1\">"));
+        assertTrue(prompt.contains("\"artifact_type\": \"task_contract_proposal\""));
     }
 
     @Test
@@ -114,7 +116,27 @@ class AgentPromptRendererTest {
                 .render(tempDir, "ws-test", "intake.codex_product_review", "intake-codex-product-review", List.of());
 
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("task_contract_proposal"));
+        assertTrue(prompt.contains("Intent fidelity"));
         assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED"));
+    }
+
+    @Test
+    void intakeCodexPromptIncludesProjectContractReviewPrinciples() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var templatesDir = tempDir.resolve(".agent").resolve("templates");
+        Files.createDirectories(workstreamDir);
+        Files.createDirectories(templatesDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
+        Files.writeString(
+                templatesDir.resolve("contract-review-principles.md"),
+                "- Project principle: never introduce medical assurance wording.\n"
+        );
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "intake.codex_product_review", "intake-codex-product-review", List.of());
+
+        assertTrue(prompt.contains("Project principle: never introduce medical assurance wording."));
     }
 
     @Test

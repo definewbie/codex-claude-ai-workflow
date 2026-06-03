@@ -12,9 +12,11 @@ import java.util.regex.Pattern;
 
 final class AgentPromptRenderer {
     private static final String TEMPLATE_ROOT = "dev/dual/adapter/acpx/prompts/";
+    private static final String PRINCIPLE_TEMPLATE_ROOT = "dev/dual/adapter/acpx/templates/";
     private static final Set<String> KNOWN_VARIABLES = Set.of(
             "workstream_id", "node_id", "prompt_template",
-            "ledger_path", "requirement", "context_package"
+            "ledger_path", "requirement", "context_package",
+            "contract_review_principles"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
     private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(/[^\\s\"'`)]+)");
@@ -25,13 +27,15 @@ final class AgentPromptRenderer {
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
+        var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         return workspaceGuard(workspaceRoot) + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
                 .replace("{{node_id}}", nodeId)
                 .replace("{{prompt_template}}", promptTemplate)
                 .replace("{{ledger_path}}", workstreamDir)
                 .replace("{{requirement}}", requirement)
-                .replace("{{context_package}}", contextPackage);
+                .replace("{{context_package}}", contextPackage)
+                .replace("{{contract_review_principles}}", contractReviewPrinciples);
     }
 
     private String loadTemplate(String promptTemplate) {
@@ -73,6 +77,35 @@ final class AgentPromptRenderer {
         } catch (IOException e) {
             throw new UncheckedIOException("failed to read requirement: " + path, e);
         }
+    }
+
+    private String principleTemplate(Path workspaceRoot, String templateName) {
+        var builder = new StringBuilder(loadPrincipleResource(templateName).stripTrailing());
+        appendProjectPrinciple(builder, workspaceRoot.resolve(".agent").resolve("templates").resolve(templateName));
+        appendProjectPrinciple(builder, workspaceRoot.resolve(".agent").resolve("templates").resolve("domain-principles.md"));
+        return builder.toString().stripTrailing();
+    }
+
+    private String loadPrincipleResource(String templateName) {
+        var resource = PRINCIPLE_TEMPLATE_ROOT + templateName;
+        try (var stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource)) {
+            if (stream == null) {
+                return "(no built-in principle template found: " + templateName + ")";
+            }
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("failed to load principle template: " + resource, e);
+        }
+    }
+
+    private void appendProjectPrinciple(StringBuilder builder, Path path) {
+        if (!Files.isRegularFile(path)) {
+            return;
+        }
+        builder.append("\n\n## Project Principles: ")
+                .append(path.getFileName())
+                .append("\n\n")
+                .append(readIfExists(path).stripTrailing());
     }
 
     private String contextPackageSection(Path workspaceRoot, List<String> inputRefs) {

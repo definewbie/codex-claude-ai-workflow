@@ -48,10 +48,15 @@ public final class FailureClassifyHandler implements TaskHandler {
             taskContract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
         }
 
-        // Extract review decision and metadata from instance result map
+        // Extract review decision and metadata from instance result map or upstream
+        // acceptance output sidecar. The classify node result is often empty
+        // because routing comes from the previous decision node.
         var instanceResult = context.instance().result();
-        String reviewDecision = extractString(instanceResult, "decision", "REJECT");
-        String reviewSummary = extractString(instanceResult, "summary", "");
+        var reviewMetadata = readReviewMetadata(context);
+        String reviewDecision = extractString(instanceResult, "decision",
+                extractString(reviewMetadata, "decision", "REJECT"));
+        String reviewSummary = extractString(instanceResult, "summary",
+                extractString(reviewMetadata, "summary", ""));
 
         @SuppressWarnings("unchecked")
         List<String> contractGaps = (List<String>) instanceResult.getOrDefault("contract_gaps", List.of());
@@ -98,12 +103,36 @@ public final class FailureClassifyHandler implements TaskHandler {
             result.put("calibration_candidate_ref", candidateRef);
         }
 
-        var summaryRef = writeCurrentFailureSummary(
-                context, workstreamDir, classification, classificationRef, candidateRef);
-        outputRefs.add(summaryRef);
-        result.put("failure_summary_ref", summaryRef);
+        if ("REJECT".equals(reviewDecision)) {
+            var summaryRef = writeCurrentFailureSummary(
+                    context, workstreamDir, classification, classificationRef, candidateRef);
+            outputRefs.add(summaryRef);
+            result.put("failure_summary_ref", summaryRef);
+        }
 
         return NodeResult.completed(outcome, outputRefs, result);
+    }
+
+    private Map<String, Object> readReviewMetadata(TaskContext context) throws IOException {
+        for (var inputRef : context.instance().inputRefs()) {
+            if (!inputRef.endsWith(".contract.json")) {
+                continue;
+            }
+            var path = context.workspaceRoot().resolve(inputRef).normalize();
+            if (!Files.isRegularFile(path)) {
+                continue;
+            }
+            var json = objectMapper.readTree(path.toFile());
+            var metadata = new LinkedHashMap<String, Object>();
+            if (json.hasNonNull("decision")) {
+                metadata.put("decision", json.get("decision").asText());
+            }
+            if (json.hasNonNull("summary")) {
+                metadata.put("summary", json.get("summary").asText());
+            }
+            return metadata;
+        }
+        return Map.of();
     }
 
     private String extractString(Map<String, Object> map, String key, String defaultValue) {

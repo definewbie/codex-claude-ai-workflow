@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,6 +81,52 @@ class FailureClassifyHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertTrue(result.outcome().startsWith("NOTED_"));
         assertEquals("NOTED_IMPLEMENTATION_BUG", result.outcome());
+    }
+
+    @Test
+    void classifyAcceptWithNotesReviewNoiseUsesNonBlockingAction() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of("decision", "ACCEPT_WITH_NOTES",
+                        "summary", "Accepted with only manual runtime verification notes.")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("NOTED_REVIEW_NOISE", result.outcome());
+        assertEquals("REVIEW_NOISE", result.result().get("category"));
+        assertEquals("Record non-blocking acceptance notes and continue", result.result().get("suggested_action"));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")),
+                "ACCEPT_WITH_NOTES review noise should not create a current failure summary");
+    }
+
+    @Test
+    void classifyReadsAcceptWithNotesDecisionFromInputContractSidecar() throws Exception {
+        writeMinimalContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Implementation accepted with notes about contract quality."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of(),
+                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("NOTED_CONTRACT_AMBIGUITY", result.outcome());
+        assertEquals("ACCEPT_WITH_NOTES", result.result().get("review_decision"));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")),
+                "ACCEPT_WITH_NOTES classification should not create a current failure summary");
     }
 
     @Test
@@ -259,6 +306,10 @@ class FailureClassifyHandlerTest {
     }
 
     private TaskHandler.TaskContext taskContext(Map<String, Object> instanceResult) {
+        return taskContext(instanceResult, List.of());
+    }
+
+    private TaskHandler.TaskContext taskContext(Map<String, Object> instanceResult, List<String> inputRefs) {
         return new TaskHandler.TaskContext(
                 tempDir,
                 "ws-fc",
@@ -272,7 +323,7 @@ class FailureClassifyHandlerTest {
                         NodeStatus.READY,
                         "stage-acceptance",
                         "iter-001",
-                        List.of(),
+                        inputRefs,
                         List.of(),
                         instanceResult,
                         "run-001",

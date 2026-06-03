@@ -103,9 +103,12 @@ public final class FailureArbiter {
         boolean noAmbiguity = taskContract == null ||
                 (taskContract.ambiguityNotes() == null || taskContract.ambiguityNotes().isEmpty());
         if (noOptionalFields && noAmbiguity && isLikelyReviewNoise(reviewDecision, reviewSummary)) {
+            var suggestedAction = "REJECT".equals(reviewDecision)
+                    ? "Re-run acceptance review automatically"
+                    : "Record non-blocking acceptance notes and continue";
             return build(FailureCategory.REVIEW_NOISE, 6,
                     "No structured failure indicators found — likely reviewer noise",
-                    "Re-run acceptance review automatically",
+                    suggestedAction,
                     List.of(), reviewDecision);
         }
 

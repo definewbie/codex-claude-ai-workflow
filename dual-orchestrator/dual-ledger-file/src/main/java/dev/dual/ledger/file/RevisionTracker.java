@@ -17,11 +17,13 @@ final class RevisionTracker {
     private final AtomicJsonWriter jsonWriter;
     private final ObjectMapper objectMapper;
     private final LedgerEventLog eventLog;
+    private final FailureSummaryWriter failureSummaryWriter;
 
     RevisionTracker(AtomicJsonWriter jsonWriter, ObjectMapper objectMapper, LedgerEventLog eventLog) {
         this.jsonWriter = jsonWriter;
         this.objectMapper = objectMapper;
         this.eventLog = eventLog;
+        this.failureSummaryWriter = new FailureSummaryWriter(objectMapper);
     }
 
     WorkflowIterationDocument nextRevisionIteration(
@@ -123,6 +125,7 @@ final class RevisionTracker {
         );
         jsonWriter.write(paths.workflowCurrentJson(), stopped);
         eventLog.writeInstanceFromCurrent(paths, stopped, now);
+        failureSummaryWriter.write(paths, node.nodeInstanceId());
     }
 
     int maxIterationNumber(WorkstreamPaths paths) throws IOException {

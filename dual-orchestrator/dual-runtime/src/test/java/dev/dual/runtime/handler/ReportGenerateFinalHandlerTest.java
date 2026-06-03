@@ -92,6 +92,37 @@ class ReportGenerateFinalHandlerTest {
     }
 
     @Test
+    void acceptWithNotesClassificationIsRenderedAsNotesNotFailure() throws Exception {
+        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-notes");
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Notes report.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/failure-classification.json"), """
+                {
+                  "category": "REVIEW_NOISE",
+                  "reasoning": "No blocking issue.",
+                  "suggested_action": "Record non-blocking acceptance notes and continue",
+                  "matched_rule": 6,
+                  "review_decision": "ACCEPT_WITH_NOTES",
+                  "source": "deterministic",
+                  "classified_at": "2026-06-03T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new ReportGenerateFinalHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-notes",
+                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
+                new NodeInstance("node-005", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+        ));
+
+        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
+        assertTrue(report.contains("## Acceptance Notes Classification"));
+        assertTrue(report.contains("Record non-blocking acceptance notes and continue"));
+        assertTrue(!report.contains("## Failure Classification"));
+    }
+
+    @Test
     void filenamesIncludeIterationId() throws Exception {
         var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-filename");
         Files.createDirectories(wsDir);

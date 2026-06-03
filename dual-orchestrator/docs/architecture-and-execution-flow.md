@@ -58,6 +58,8 @@ Claude / Codex / acpx 都是其中的可替换部件。真正的核心是外层 
 
 TaskContract 的意义是给后续所有人一个共同锚点：目标是什么、范围是什么、非目标是什么、验收标准是什么、风险在哪里。
 
+2026-06-03 的真实 benchmark 暴露出一个重要修正：TaskContract 不应该靠 Java 从 Agent 的自然语言 Markdown 里猜出来。新的方向是 artifact-driven contract negotiation：Claude 输出结构化 `task_contract_proposal`，系统只做 JSON/schema/path/metadata 等机械校验，Codex 按原则审议 proposal，通过后才生成 canonical TaskContract。Markdown 继续给人看，但不再作为状态机事实来源。
+
 没有契约，review 很容易变成“各说各话”。有契约，失败才有可能被分类：到底是 Claude 没实现，还是契约没写清楚，还是 Codex 误判。
 
 ### 2.3 Ledger 是系统记忆
