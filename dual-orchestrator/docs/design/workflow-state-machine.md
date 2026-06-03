@@ -288,6 +288,28 @@ The important state-machine point:
 - events recorded `node_failed`, `node_retry_requested`, then `contract_compilation_completed`;
 - final workflow status became `COMPLETED`.
 
+`cancer-clinic-state-model-complex` on 2026-06-03 validated the ordinary linear P6 path:
+
+```text
+start --run
+  -> gate.human_requirement_review WAITING_FOR_HUMAN
+  -> autorun approved 6 human gates
+  -> long Agent calls stayed RUNNING with visible active node and PID
+  -> acceptance ACCEPT_WITH_NOTES
+  -> gate.human_next_stage_approval complete
+  -> workflow COMPLETED with active nodes []
+```
+
+The important state-machine point:
+
+- every human pause had an explicit open gate id;
+- long-running Agent calls were inspectable through `status`;
+- no recovery gate was opened;
+- no revision iteration was created;
+- final workflow status became `COMPLETED`.
+
+This case did not validate recovery or revision loops. It should be read as evidence for the normal gate-driven path, not as proof that every edge path is covered.
+
 ## 11. Command Semantics
 
 | Command | What it does |

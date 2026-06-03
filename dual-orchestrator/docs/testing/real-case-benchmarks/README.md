@@ -18,6 +18,7 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 | `cases/cancer-clinic-small-ui.md` | Small UI change | 验证 p6 主生命周期和真实 repair loop | 2026-06-02 已通过 |
 | `cases/cancer-clinic-feature-slice.md` | Medium feature slice | 验证 contract / context / self-test / acceptance 在中等功能切片上的质量 | 2026-06-03 修复后通过，`PASS-WARN` |
 | `cases/cancer-clinic-rejection-prone.md` | Rejection-prone case | 验证 Codex `REJECT` 后的 failure classification 和 repair route | 2026-06-03 已通过，`PASS-WARN`；本轮未触发 REJECT，但暴露并修复 contract source bug |
+| `cases/cancer-clinic-state-model-complex.md` | Complex bounded frontend case | 带着状态机文档验证 P6 gate / active node / completion 语义 | 2026-06-03 已通过，`PASS-WARN`；暴露 handoff JSON 抽取偏弱 |
 
 ## 运行方式
 
@@ -65,6 +66,7 @@ dual-orchestrator/docs/testing/real-case-benchmarks/reports/
 
 | Date | Case | Workstream | Result | Notes |
 |------|------|------------|--------|-------|
+| 2026-06-03 | `cancer-clinic-state-model-complex` | `ws-20260603T080441Z-NDK2` | `PASS-WARN` | B4 新用户治疗记录引导完成；6 个 human gate、10 次 Agent run、31 个 timeline nodes，最终 `COMPLETED`；状态模型线性主链路表现正常，未触发 recovery/revision；`handoff.json` 存在但结构化字段为空，需要后续强化。 |
 | 2026-06-03 | `cancer-clinic-rejection-prone` | `ws-20260603T065831Z-R255` | `PASS-WARN` | B2 保存后引导完成；Codex `ACCEPT_WITH_NOTES`，未触发 REJECT；real-case 暴露 `contract.compile` 错读 Codex review 中引用 artifact 的 bug，修复后同一 workstream retry 到 `COMPLETED`。 |
 | 2026-06-03 | `cancer-clinic-feature-slice` | `ws-20260603T045849Z-RGEL` | `PASS-WARN` | Artifact-driven contract proposal 修复后完整跑到 `COMPLETED`；Codex acceptance 为 `ACCEPT_WITH_NOTES`，仍建议做 WeChat DevTools/device 验证。 |
 | 2026-06-02 | `cancer-clinic-small-ui` | `ws-20260602T121712Z-V7WM` | `COMPLETED` | Codex acceptance 两次 `REJECT`，系统两次进入 failure classification + Claude repair，第三次验收通过。原始 repo 保持干净。 |
@@ -75,6 +77,7 @@ dual-orchestrator/docs/testing/real-case-benchmarks/reports/
 dual-orchestrator/docs/testing/real-case-reports/20260602T121711Z/report.md
 dual-orchestrator/docs/testing/real-case-reports/20260603T045848Z/report.md
 dual-orchestrator/docs/testing/real-case-reports/20260603T065830Z/report.md
+dual-orchestrator/docs/testing/real-case-reports/20260603T080441Z/report.md
 ```
 
 ## 何时运行
