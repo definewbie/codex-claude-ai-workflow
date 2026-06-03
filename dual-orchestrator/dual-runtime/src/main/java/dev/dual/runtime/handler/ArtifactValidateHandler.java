@@ -44,7 +44,8 @@ public final class ArtifactValidateHandler implements TaskHandler {
                 "git-status-short.txt",
                 "diff.stat",
                 "diff.patch",
-                "changed-files.txt"
+                "changed-files.txt",
+                "hygiene-warnings.txt"
         )) {
             var path = evidenceDir.resolve(fileName);
             if (Files.exists(path)) {
@@ -58,6 +59,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
         result.put("git_available", evidence.available());
         result.put("has_changes", evidence.hasChanges());
         result.put("changed_file_count", evidence.changedFileCount());
+        result.put("hygiene_warning_count", evidence.hygieneWarningCount());
         result.put("evidence_path", toWorkspaceRef(
                 context.workspaceRoot(),
                 evidenceDir.resolve("git-evidence.json")
@@ -80,6 +82,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
                     null,
                     false,
                     0,
+                    0,
                     generatedAt,
                     "git repository unavailable: " + gitRoot.output().trim()
             );
@@ -91,6 +94,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
         var diffStat = buildDiffStat(workdir, statusShort);
         var diffPatch = buildDiffPatch(workdir, statusShort);
         var changedFiles = changedFilesFromStatus(statusShort);
+        var hygieneWarnings = hygieneWarnings(changedFiles);
 
         write(evidenceDir.resolve("git-root.txt"), gitRoot.output().trim() + "\n");
         write(evidenceDir.resolve("branch.txt"), branch + "\n");
@@ -100,6 +104,9 @@ public final class ArtifactValidateHandler implements TaskHandler {
         write(evidenceDir.resolve("diff.patch"), diffPatch);
         var changedFilesText = String.join("\n", changedFiles) + (changedFiles.isEmpty() ? "" : "\n");
         write(evidenceDir.resolve("changed-files.txt"), changedFilesText);
+        if (!hygieneWarnings.isEmpty()) {
+            write(evidenceDir.resolve("hygiene-warnings.txt"), String.join("\n", hygieneWarnings) + "\n");
+        }
 
         return new GitEvidence(
                 "1",
@@ -110,6 +117,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
                 baseCommit,
                 !statusShort.isBlank(),
                 changedFiles.size(),
+                hygieneWarnings.size(),
                 generatedAt,
                 null
         );
@@ -134,6 +142,9 @@ public final class ArtifactValidateHandler implements TaskHandler {
         var builder = new StringBuilder();
         builder.append(git(workdir, "diff", "--stat", "--", ".", ":!.agent").output());
         for (String file : untrackedFilesFromStatus(statusShort)) {
+            if (Files.isDirectory(workdir.resolve(file))) {
+                continue;
+            }
             var result = git(workdir, "diff", "--no-index", "--stat", "--", "/dev/null", file);
             if (!result.output().isBlank()) {
                 builder.append(result.output());
@@ -146,6 +157,9 @@ public final class ArtifactValidateHandler implements TaskHandler {
         var builder = new StringBuilder();
         builder.append(git(workdir, "diff", "--", ".", ":!.agent").output());
         for (String file : untrackedFilesFromStatus(statusShort)) {
+            if (Files.isDirectory(workdir.resolve(file))) {
+                continue;
+            }
             var result = git(workdir, "diff", "--no-index", "--", "/dev/null", file);
             if (!result.output().isBlank()) {
                 builder.append(result.output());
@@ -167,6 +181,32 @@ public final class ArtifactValidateHandler implements TaskHandler {
         return files;
     }
 
+    private static List<String> hygieneWarnings(List<String> changedFiles) {
+        var warnings = new ArrayList<String>();
+        for (String file : changedFiles) {
+            if (isLikelyGeneratedByproduct(file)) {
+                warnings.add(file + " looks like a generated self-test byproduct; remove it unless it is an intentional deliverable.");
+            }
+        }
+        return warnings;
+    }
+
+    private static boolean isLikelyGeneratedByproduct(String file) {
+        return file.equals("__pycache__/")
+                || file.startsWith("__pycache__/")
+                || file.contains("/__pycache__/")
+                || file.equals(".pytest_cache/")
+                || file.startsWith(".pytest_cache/")
+                || file.contains("/.pytest_cache/")
+                || file.endsWith(".pyc")
+                || file.endsWith(".pyo")
+                || file.endsWith(".coverage")
+                || file.endsWith(".tmp")
+                || file.endsWith(".log")
+                || file.equals(".DS_Store")
+                || file.endsWith("/.DS_Store");
+    }
+
     private static void write(Path path, String content) throws IOException {
         Files.writeString(path, content, StandardCharsets.UTF_8);
     }
@@ -181,6 +221,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
         json.put("baseCommit", evidence.baseCommit());
         json.put("hasChanges", evidence.hasChanges());
         json.put("changedFileCount", evidence.changedFileCount());
+        json.put("hygieneWarningCount", evidence.hygieneWarningCount());
         json.put("generatedAt", evidence.generatedAt());
         json.put("error", evidence.error());
         OBJECT_MAPPER.writeValue(path.toFile(), json);
@@ -215,6 +256,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
             String baseCommit,
             boolean hasChanges,
             int changedFileCount,
+            int hygieneWarningCount,
             String generatedAt,
             String error
     ) {

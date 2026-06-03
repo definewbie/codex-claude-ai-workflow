@@ -166,13 +166,27 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
             builder.append("(git evidence not generated)\n\n");
             return;
         }
-        for (String fileName : List.of("git-evidence.json", "git-status-short.txt", "diff.stat", "changed-files.txt", "diff.patch")) {
+        for (String fileName : List.of(
+                "git-evidence.json",
+                "git-status-short.txt",
+                "diff.stat",
+                "changed-files.txt",
+                "hygiene-warnings.txt",
+                "diff.patch"
+        )) {
             var path = evidenceDir.resolve(fileName);
             if (Files.exists(path)) {
                 builder.append("- ").append(fileName).append(": ").append(toDisplayRef(path)).append("\n");
             }
         }
         builder.append("\n");
+        var hygieneWarnings = evidenceDir.resolve("hygiene-warnings.txt");
+        if (Files.exists(hygieneWarnings) && !Files.readString(hygieneWarnings, StandardCharsets.UTF_8).isBlank()) {
+            builder.append("## Repository Hygiene Warnings\n\n");
+            builder.append("```text\n");
+            builder.append(snippet(hygieneWarnings, MAX_SNIPPET_CHARS));
+            builder.append("\n```\n\n");
+        }
         var evidenceJson = evidenceDir.resolve("git-evidence.json");
         if (Files.exists(evidenceJson)) {
             builder.append("```json\n");

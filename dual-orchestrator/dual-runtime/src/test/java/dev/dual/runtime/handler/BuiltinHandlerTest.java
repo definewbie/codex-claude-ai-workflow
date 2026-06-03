@@ -768,6 +768,36 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void artifactValidationWritesHygieneWarningsForGeneratedByproducts() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve(".gitkeep"), "init\n");
+        git(tempDir, "add", ".gitkeep");
+        git(tempDir, "commit", "-m", "init");
+        Files.createDirectories(tempDir.resolve("__pycache__"));
+        Files.writeString(tempDir.resolve("__pycache__/main.cpython-313.pyc"), "compiled\n");
+
+        var handler = new ArtifactValidateHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(1, result.result().get("hygiene_warning_count"));
+        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/artifacts/git-evidence/hygiene-warnings.txt"));
+
+        var evidenceDir = tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence");
+        assertTrue(Files.readString(evidenceDir.resolve("changed-files.txt")).contains("__pycache__/"));
+        assertTrue(Files.readString(evidenceDir.resolve("hygiene-warnings.txt")).contains("__pycache__/"));
+        assertTrue(Files.readString(evidenceDir.resolve("git-evidence.json")).contains("\"hygieneWarningCount\" : 1"));
+        assertFalse(Files.readString(evidenceDir.resolve("diff.stat")).contains("__pycache__/null"));
+    }
+
+    @Test
     void artifactValidationMarksGitUnavailableWithoutFailingWorkflow() throws Exception {
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(

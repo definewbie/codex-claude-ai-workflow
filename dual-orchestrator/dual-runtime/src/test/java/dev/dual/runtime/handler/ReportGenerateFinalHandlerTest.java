@@ -123,6 +123,35 @@ class ReportGenerateFinalHandlerTest {
     }
 
     @Test
+    void gitEvidenceHygieneWarningsAreRendered() throws Exception {
+        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-hygiene");
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Hygiene report.", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), """
+                {
+                  "available": true,
+                  "hygieneWarningCount": 1
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("hygiene-warnings.txt"), """
+                __pycache__/ looks like a generated self-test byproduct; remove it unless it is an intentional deliverable.
+                """, StandardCharsets.UTF_8);
+
+        var handler = new ReportGenerateFinalHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-hygiene",
+                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
+                new NodeInstance("node-006", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+        ));
+
+        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
+        assertTrue(report.contains("## Repository Hygiene Warnings"));
+        assertTrue(report.contains("__pycache__/ looks like a generated self-test byproduct"));
+    }
+
+    @Test
     void filenamesIncludeIterationId() throws Exception {
         var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-filename");
         Files.createDirectories(wsDir);
