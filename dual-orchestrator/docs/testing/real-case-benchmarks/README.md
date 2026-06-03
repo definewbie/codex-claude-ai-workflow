@@ -16,7 +16,7 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 | Case | 类型 | 目的 | 状态 |
 |------|------|------|------|
 | `cases/cancer-clinic-small-ui.md` | Small UI change | 验证 p6 主生命周期和真实 repair loop | 2026-06-02 已通过 |
-| `cases/cancer-clinic-feature-slice.md` | Medium feature slice | 验证 contract / context / self-test / acceptance 在中等功能切片上的质量 | 2026-06-03 失败，暴露 TaskContract materialization gap |
+| `cases/cancer-clinic-feature-slice.md` | Medium feature slice | 验证 contract / context / self-test / acceptance 在中等功能切片上的质量 | 2026-06-03 修复后通过，`PASS-WARN` |
 | `cases/cancer-clinic-rejection-prone.md` | Rejection-prone case | 验证 Codex `REJECT` 后的 failure classification 和 repair route | 待运行 |
 
 ## 运行方式
@@ -58,19 +58,21 @@ dual-orchestrator/docs/testing/real-case-benchmarks/reports/
 - final diff stat
 - 原始 repo 是否干净
 - final report / handoff / delivery artifact 是否存在
+- `summary.json` 是否存在，可用于后续趋势比较
 - 人工观察：误修、漏修、过度实现、证据是否足够
 
 ## 最近通过记录
 
 | Date | Case | Workstream | Result | Notes |
 |------|------|------------|--------|-------|
-| 2026-06-03 | `cancer-clinic-feature-slice` | `ws-20260602T211852Z-WCBQ` | `WAITING_FOR_RECOVERY` | Codex design review 两次指出实际 TaskContract artifact 仍为空字段；workflow 在 revision limit 后停到 recovery。 |
+| 2026-06-03 | `cancer-clinic-feature-slice` | `ws-20260603T045849Z-RGEL` | `PASS-WARN` | Artifact-driven contract proposal 修复后完整跑到 `COMPLETED`；Codex acceptance 为 `ACCEPT_WITH_NOTES`，仍建议做 WeChat DevTools/device 验证。 |
 | 2026-06-02 | `cancer-clinic-small-ui` | `ws-20260602T121712Z-V7WM` | `COMPLETED` | Codex acceptance 两次 `REJECT`，系统两次进入 failure classification + Claude repair，第三次验收通过。原始 repo 保持干净。 |
 
 详细原始报告：
 
 ```text
 dual-orchestrator/docs/testing/real-case-reports/20260602T121711Z/report.md
+dual-orchestrator/docs/testing/real-case-reports/20260603T045848Z/report.md
 ```
 
 ## 何时运行

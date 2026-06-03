@@ -268,6 +268,7 @@ run_autorun() {
 
 collect_evidence() {
   [[ -n "$WORKSPACE_DIR" && -d "$WORKSPACE_DIR" ]] || return 0
+  git -C "$REPO" status --short >"$CASE_DIR/logs/original-git-status-short.log" 2>&1 || true
   git -C "$WORKSPACE_DIR" status --short >"$CASE_DIR/logs/git-status-short.log" 2>&1 || true
   git -C "$WORKSPACE_DIR" diff --stat >"$CASE_DIR/logs/git-diff-stat.log" 2>&1 || true
   git -C "$WORKSPACE_DIR" diff >"$CASE_DIR/logs/git-diff.patch" 2>&1 || true
@@ -275,6 +276,116 @@ collect_evidence() {
   dualctl events --workdir "$WORKSPACE_DIR" --limit 100 "$WORKSTREAM_ID" >"$CASE_DIR/logs/events.log" 2>&1 || true
   dualctl runs --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/runs.log" 2>&1 || true
   dualctl recovery show --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/recovery.log" 2>&1 || true
+}
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+count_lines_matching() {
+  local file="$1"
+  local pattern="$2"
+  [[ -f "$file" ]] || {
+    printf '0'
+    return
+  }
+  local count
+  count="$(grep -c "$pattern" "$file" 2>/dev/null || true)"
+  printf '%s' "${count:-0}"
+}
+
+agent_run_count() {
+  local runs_log="$CASE_DIR/logs/runs.log"
+  [[ -f "$runs_log" ]] || {
+    printf '0'
+    return
+  }
+  awk 'NR > 1 && NF { count++ } END { print count + 0 }' "$runs_log"
+}
+
+acceptance_decisions_json() {
+  [[ -n "$WS_DIR" && -d "$WS_DIR/runs" ]] || {
+    printf '[]'
+    return
+  }
+  local first=true
+  printf '['
+  while IFS= read -r file; do
+    local decision
+    decision="$(grep -E '"decision"[[:space:]]*:' "$file" | head -1 | sed -E 's/.*"decision"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+    [[ -n "$decision" ]] || continue
+    if [[ "$first" == true ]]; then
+      first=false
+    else
+      printf ', '
+    fi
+    printf '"%s"' "$(json_escape "$decision")"
+  done < <(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null | sort)
+  printf ']'
+}
+
+artifact_present_bool() {
+  local ref="$1"
+  if [[ -f "$WS_DIR/$ref" ]]; then
+    printf 'true'
+  else
+    printf 'false'
+  fi
+}
+
+original_repo_clean_bool() {
+  local file="$CASE_DIR/logs/original-git-status-short.log"
+  if [[ -f "$file" && ! -s "$file" ]]; then
+    printf 'true'
+  else
+    printf 'false'
+  fi
+}
+
+write_summary_json() {
+  local summary="$CASE_DIR/summary.json"
+  local gate_rounds node_count run_count iteration_count design_revision_count reject_count
+  local original_clean final_report_present handoff_present next_prompt_present delivery_body_present
+  gate_rounds="$(count_lines_matching "$CASE_DIR/logs/autorun.log" '^Gate ')"
+  node_count="$(count_lines_matching "$CASE_DIR/logs/timeline.log" '^  ')"
+  run_count="$(agent_run_count)"
+  iteration_count="$(count_lines_matching "$WS_DIR/events.jsonl" '"event_type":"iteration_started"')"
+  design_revision_count="$(count_lines_matching "$WS_DIR/events.jsonl" '"outcome":"NEEDS_REVISION"')"
+  reject_count="$(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null \
+    -exec grep -h '"decision"[[:space:]]*:[[:space:]]*"REJECT"' {} \; | wc -l | tr -d '[:space:]')"
+  original_clean="$(original_repo_clean_bool)"
+  final_report_present="$(artifact_present_bool "reports/latest-final-report.md")"
+  handoff_present="$(artifact_present_bool "artifacts/next-stage/handoff.json")"
+  next_prompt_present="$(artifact_present_bool "artifacts/next-stage/next-stage-prompt.md")"
+  delivery_body_present="$(artifact_present_bool "delivery/pr-body.md")"
+
+  {
+    echo "{"
+    echo "  \"started_at\": \"$(json_escape "$STARTED_AT")\","
+    echo "  \"finished_at\": \"$(json_escape "$FINISHED_AT")\","
+    echo "  \"final_status\": \"$(json_escape "$FINAL_STATUS")\","
+    echo "  \"variant\": \"$(json_escape "$VARIANT")\","
+    echo "  \"repo\": \"$(json_escape "$REPO")\","
+    echo "  \"task_file\": \"$(json_escape "$TASK_FILE")\","
+    echo "  \"workstream\": \"$(json_escape "${WORKSTREAM_ID:-unknown}")\","
+    echo "  \"effective_workdir\": \"$(json_escape "${WORKSPACE_DIR:-unknown}")\","
+    echo "  \"ledger\": \"$(json_escape "${WS_DIR:-unknown}")\","
+    echo "  \"gate_rounds\": $gate_rounds,"
+    echo "  \"agent_run_count\": $run_count,"
+    echo "  \"timeline_node_count\": $node_count,"
+    echo "  \"iteration_count\": $iteration_count,"
+    echo "  \"design_revision_count\": $design_revision_count,"
+    echo "  \"acceptance_decisions\": $(acceptance_decisions_json),"
+    echo "  \"acceptance_reject_count\": $reject_count,"
+    echo "  \"original_repo_clean\": $original_clean,"
+    echo "  \"artifacts\": {"
+    echo "    \"final_report\": $final_report_present,"
+    echo "    \"handoff_json\": $handoff_present,"
+    echo "    \"next_stage_prompt\": $next_prompt_present,"
+    echo "    \"delivery_pr_body\": $delivery_body_present"
+    echo "  }"
+    echo "}"
+  } >"$summary"
 }
 
 artifact_status() {
@@ -288,6 +399,7 @@ artifact_status() {
 
 write_report() {
   FINISHED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  write_summary_json
   local report="$CASE_DIR/report.md"
   local final_report="$WS_DIR/reports/latest-final-report.md"
   local handoff_json="$WS_DIR/artifacts/next-stage/handoff.json"
@@ -309,6 +421,23 @@ write_report() {
     echo "- Effective Workdir: ${WORKSPACE_DIR:-unknown}"
     echo "- Ledger: ${WS_DIR:-unknown}"
     echo "- Task File: $TASK_FILE"
+    echo
+    echo "## Metrics"
+    echo
+    echo "- Gate Rounds: $(count_lines_matching "$CASE_DIR/logs/autorun.log" '^Gate ')"
+    echo "- Agent Runs: $(agent_run_count)"
+    echo "- Timeline Nodes: $(count_lines_matching "$CASE_DIR/logs/timeline.log" '^  ')"
+    echo "- Iteration Starts: $(count_lines_matching "$WS_DIR/events.jsonl" '"event_type":"iteration_started"')"
+    echo "- Design Revisions: $(count_lines_matching "$WS_DIR/events.jsonl" '"outcome":"NEEDS_REVISION"')"
+    echo "- Acceptance Decisions: $(acceptance_decisions_json)"
+    echo "- Acceptance Reject Count: $(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null -exec grep -h '"decision"[[:space:]]*:[[:space:]]*"REJECT"' {} \; | wc -l | tr -d '[:space:]')"
+    echo "- Original Repo Clean: $(original_repo_clean_bool)"
+    echo
+    echo "## Summary JSON"
+    echo
+    echo '```text'
+    echo "$CASE_DIR/summary.json"
+    echo '```'
     echo
     echo "## Final Status Snapshot"
     echo

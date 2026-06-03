@@ -16,6 +16,12 @@
 | Duration | |
 | Final status | |
 
+## Summary JSON
+
+```text
+docs/testing/real-case-reports/<timestamp>/summary.json
+```
+
 ## Result Summary
 
 | 字段 | 值 |

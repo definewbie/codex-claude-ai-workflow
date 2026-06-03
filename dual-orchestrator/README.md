@@ -1111,6 +1111,7 @@ cd dual-orchestrator
 - 采集 status、timeline、events、runs、recovery、Git diff 证据。
 - 在终端打印每轮 workflow status、active node、open gates 和执行 step，方便不用翻日志也能知道跑到哪里。
 - 生成一份报告到 `docs/testing/real-case-reports/<timestamp>/report.md`。
+- 生成机器可读摘要到 `docs/testing/real-case-reports/<timestamp>/summary.json`，记录 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、artifact presence 和原始 repo 是否干净。
 
 它不会自动提交、不会 push、不会创建 PR，也不会删除原始 repo。`--cleanup-worktree` 只会在报告生成后删除本次创建的 worktree。
 如果用 `Ctrl+C` 中断，脚本会尽量采集当前 evidence 并写出中断报告，报告里会保留后续 `status` / `resume` 命令。
@@ -1130,6 +1131,7 @@ cd dual-orchestrator
 
 ```bash
 cat docs/testing/real-case-reports/<timestamp>/report.md
+jq . docs/testing/real-case-reports/<timestamp>/summary.json
 ```
 
 这个脚本适合验证编排主链路，不等于业务最终验收。真实交付前仍然应该人工查看 final report、Codex acceptance、Git diff 和 handoff。

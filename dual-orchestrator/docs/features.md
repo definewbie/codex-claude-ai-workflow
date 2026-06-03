@@ -67,6 +67,7 @@
 下面三件事比继续打磨小按钮、小提示更接近长期目标：
 
 1. **Real-case benchmark loop**：沉淀 2-3 个真实仓库任务，定期跑 p6，记录完成率、rejection repair 次数、耗时、失败类型和人工介入点。
+   - 2026-06-03：`run-real-case.sh` 开始生成 `summary.json`，把 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、artifact presence 和原始 repo clean 状态沉淀为机器可读数据。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
 
