@@ -106,7 +106,7 @@ deterministic failure evidence
 
 先不用做 Web UI，先做一个 CLI 聚合视图，作为后续 UI API 的雏形。
 
-当前状态：第一版已落地。human gate 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 会展示当前 gate 的 packet。
+当前状态：第一版已落地。human gate 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 会展示当前 gate 的 packet。CLI 在 `resume` / `run` 停到 human gate 时，会直接打印 `review show` 命令和 packet 路径。
 
 命令形态：
 

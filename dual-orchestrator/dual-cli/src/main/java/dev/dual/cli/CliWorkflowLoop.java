@@ -35,8 +35,7 @@ final class CliWorkflowLoop {
 
     private void printNextAction(WorkflowStatus status, Path workspaceRoot, String workstreamId) {
         if (status == WorkflowStatus.WAITING_FOR_HUMAN) {
-            System.out.println("Next: dualctl status --workdir " + workspaceRoot + " " + workstreamId);
-            System.out.println("Then: dualctl review approve|revise --workdir " + workspaceRoot + " " + workstreamId);
+            ReviewPacketCliHints.print(System.out, status, workspaceRoot, workstreamId);
         } else if (status == WorkflowStatus.WAITING_FOR_RECOVERY) {
             System.out.println("Next: fix the external cause, then dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
         }
