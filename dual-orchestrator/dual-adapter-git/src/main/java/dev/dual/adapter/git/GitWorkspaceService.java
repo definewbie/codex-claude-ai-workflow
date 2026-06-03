@@ -7,7 +7,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public final class GitWorkspaceService {
-    private static final String LEDGER_EXCLUDE = ".agent/";
+    private static final List<String> LOCAL_TOOL_EXCLUDES = List.of(".agent/", ".serena/");
     private final GitCommand gitCommand;
 
     public GitWorkspaceService() {
@@ -36,15 +36,24 @@ public final class GitWorkspaceService {
     private void installLedgerExclude(Path worktreeDir) throws IOException, InterruptedException {
         var excludePath = Path.of(gitCommand.run(worktreeDir, "rev-parse", "--git-path", "info/exclude"));
         Files.createDirectories(excludePath.getParent());
-        if (Files.exists(excludePath)) {
-            var lines = Files.readAllLines(excludePath);
-            if (lines.stream().map(String::trim).anyMatch(LEDGER_EXCLUDE::equals)) {
-                return;
-            }
+        var existing = Files.exists(excludePath)
+                ? Files.readAllLines(excludePath).stream().map(String::trim).toList()
+                : List.<String>of();
+        var missing = LOCAL_TOOL_EXCLUDES.stream()
+                .filter(exclude -> !existing.contains(exclude))
+                .toList();
+        if (missing.isEmpty()) {
+            return;
         }
+        var lines = new java.util.ArrayList<String>();
+        if (Files.exists(excludePath)) {
+            lines.add("");
+        }
+        lines.add("# dual-orchestrator local run and tool artifacts");
+        lines.addAll(missing);
         Files.write(
                 excludePath,
-                List.of("", "# dual-orchestrator run ledger", LEDGER_EXCLUDE),
+                lines,
                 StandardOpenOption.CREATE,
                 StandardOpenOption.APPEND
         );

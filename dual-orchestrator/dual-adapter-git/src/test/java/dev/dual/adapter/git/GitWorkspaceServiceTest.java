@@ -15,7 +15,7 @@ class GitWorkspaceServiceTest {
     Path tempDir;
 
     @Test
-    void createWorktreeInstallsLocalExcludeForAgentLedger() throws Exception {
+    void createWorktreeInstallsLocalExcludeForLocalToolArtifacts() throws Exception {
         var repo = tempDir.resolve("repo");
         var worktree = tempDir.resolve("repo-worktree");
         Files.createDirectories(repo);
@@ -29,13 +29,17 @@ class GitWorkspaceServiceTest {
         new GitWorkspaceService().createWorktree(repo, worktree, "ai/test-worktree");
         Files.createDirectories(worktree.resolve(".agent/workstreams/ws-test"));
         Files.writeString(worktree.resolve(".agent/workstreams/ws-test/events.jsonl"), "{}\n");
+        Files.createDirectories(worktree.resolve(".serena"));
+        Files.writeString(worktree.resolve(".serena/project.yml"), "project_name: test\n");
 
         var excludePath = Path.of(git(worktree, "rev-parse", "--git-path", "info/exclude"));
         var exclude = Files.readString(excludePath);
         var status = git(worktree, "status", "--short");
 
         assertTrue(exclude.contains(".agent/"));
+        assertTrue(exclude.contains(".serena/"));
         assertFalse(status.contains(".agent"));
+        assertFalse(status.contains(".serena"));
     }
 
     private static String git(Path workdir, String... args) throws Exception {

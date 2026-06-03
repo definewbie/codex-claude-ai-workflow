@@ -152,7 +152,7 @@ After `fix: extract structured handoff from localized markdown`, this case was r
   - `openRisks` includes build/runtime verification gaps.
   - `verificationState` preserves the verification table.
 - The state model also exercised a real revision iteration: initial intake product review identified ambiguity around "no treatment records", then Claude revised intake and the workflow continued in `iter-002`.
-- New non-blocking issue: Codex/Serena tooling created an untracked `.serena/` directory inside the worktree. It did not dirty the original repo and did not affect the code diff, but it does pollute worktree `git status`.
+- Follow-up fix: Codex/Serena tooling can create `.serena/` project metadata inside the worktree. `dualctl` now adds `.serena/` to the worktree-local Git exclude alongside `.agent/`, and the acpx adapter cleans up Codex-context Serena MCP processes that were newly started during the agent run.
 
 ### Re-run Verdict
 
@@ -160,4 +160,4 @@ After `fix: extract structured handoff from localized markdown`, this case was r
 PASS-WARN
 ```
 
-The original handoff issue is fixed on the real online path. Remaining warnings are deferred build/runtime UI verification and `.serena/` workspace pollution.
+The original handoff issue is fixed on the real online path. Remaining warning is deferred build/runtime UI verification. The `.serena/` workspace pollution found during this run has a follow-up fix in the dual adapter layer.

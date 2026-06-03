@@ -66,7 +66,7 @@ dual-orchestrator/docs/testing/real-case-benchmarks/reports/
 
 | Date | Case | Workstream | Result | Notes |
 |------|------|------------|--------|-------|
-| 2026-06-03 | `cancer-clinic-state-model-complex` re-run | `ws-20260603T101635Z-VT82` | `PASS-WARN` | 修复 handoff parser 后真实 acpx 路径复跑通过；`handoff.json` 已能提取 `completedWork` / `changedFiles` / `openRisks` / `verificationState`；本轮触发 1 次 intake revision iteration；发现 `.serena/` 未跟踪目录污染 worktree status。 |
+| 2026-06-03 | `cancer-clinic-state-model-complex` re-run | `ws-20260603T101635Z-VT82` | `PASS-WARN` | 修复 handoff parser 后真实 acpx 路径复跑通过；`handoff.json` 已能提取 `completedWork` / `changedFiles` / `openRisks` / `verificationState`；本轮触发 1 次 intake revision iteration；发现 `.serena/` 未跟踪目录污染 worktree status，后续已在 adapter 层修复。 |
 | 2026-06-03 | `cancer-clinic-state-model-complex` | `ws-20260603T080441Z-NDK2` | `PASS-WARN` | B4 新用户治疗记录引导完成；6 个 human gate、10 次 Agent run、31 个 timeline nodes，最终 `COMPLETED`；状态模型线性主链路表现正常，未触发 recovery/revision；`handoff.json` 存在但结构化字段为空，需要后续强化。 |
 | 2026-06-03 | `cancer-clinic-rejection-prone` | `ws-20260603T065831Z-R255` | `PASS-WARN` | B2 保存后引导完成；Codex `ACCEPT_WITH_NOTES`，未触发 REJECT；real-case 暴露 `contract.compile` 错读 Codex review 中引用 artifact 的 bug，修复后同一 workstream retry 到 `COMPLETED`。 |
 | 2026-06-03 | `cancer-clinic-feature-slice` | `ws-20260603T045849Z-RGEL` | `PASS-WARN` | Artifact-driven contract proposal 修复后完整跑到 `COMPLETED`；Codex acceptance 为 `ACCEPT_WITH_NOTES`，仍建议做 WeChat DevTools/device 验证。 |

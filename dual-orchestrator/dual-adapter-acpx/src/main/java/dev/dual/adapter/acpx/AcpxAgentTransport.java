@@ -5,6 +5,11 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 public class AcpxAgentTransport {
     public boolean isAvailable(Path workdir) {
@@ -55,14 +60,22 @@ public class AcpxAgentTransport {
         command.add("-f");
         command.add(request.promptPath().toString());
 
+        var managedProcessBaseline = managedToolPids();
         var startedAt = Instant.now();
         var process = new ProcessBuilder(command)
                 .directory(request.workdir().toFile())
                 .redirectOutput(request.stdoutPath().toFile())
                 .redirectError(request.stderrPath().toFile())
                 .start();
-        var exitCode = process.waitFor();
-        return new AcpxRunResult(exitCode, startedAt, Instant.now(), List.copyOf(command));
+        try {
+            var exitCode = process.waitFor();
+            return new AcpxRunResult(exitCode, startedAt, Instant.now(), List.copyOf(command));
+        } finally {
+            if (process.isAlive()) {
+                process.destroyForcibly();
+            }
+            cleanupManagedToolsStartedByRun(managedProcessBaseline);
+        }
     }
 
     private void createSession(String agent, Path workdir, String sessionName) throws IOException, InterruptedException {
@@ -82,6 +95,51 @@ public class AcpxAgentTransport {
             return java.nio.file.Files.readString(stderrPath).contains("No acpx session found");
         } catch (IOException ignored) {
             return false;
+        }
+    }
+
+    private Set<Long> managedToolPids() {
+        return ProcessHandle.allProcesses()
+                .map(this::processInfo)
+                .filter(process -> AcpxProcessCleanupPolicy.shouldCleanup(process, Set.of()))
+                .map(AcpxProcessCleanupPolicy.ProcessInfo::pid)
+                .collect(Collectors.toSet());
+    }
+
+    private void cleanupManagedToolsStartedByRun(Set<Long> knownBefore) {
+        ProcessHandle.allProcesses()
+                .filter(handle -> AcpxProcessCleanupPolicy.shouldCleanup(processInfo(handle), knownBefore))
+                .forEach(this::terminateProcessTree);
+    }
+
+    private AcpxProcessCleanupPolicy.ProcessInfo processInfo(ProcessHandle handle) {
+        return new AcpxProcessCleanupPolicy.ProcessInfo(
+                handle.pid(),
+                handle.info().commandLine().orElse("")
+        );
+    }
+
+    private void terminateProcessTree(ProcessHandle handle) {
+        handle.descendants().forEach(this::terminateProcess);
+        terminateProcess(handle);
+    }
+
+    private void terminateProcess(ProcessHandle handle) {
+        if (!handle.isAlive() || handle.pid() == ProcessHandle.current().pid()) {
+            return;
+        }
+        handle.destroy();
+        try {
+            if (!handle.onExit().get(2, TimeUnit.SECONDS).isAlive()) {
+                return;
+            }
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException | TimeoutException ignored) {
+            // Escalate to a forceful destroy below.
+        }
+        if (handle.isAlive()) {
+            handle.destroyForcibly();
         }
     }
 }

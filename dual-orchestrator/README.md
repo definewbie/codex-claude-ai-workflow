@@ -542,7 +542,7 @@ Workflow: agent-lifecycle@1
 Next: dualctl resume --workdir <effective worktree> <workstream_id>
 ```
 
-创建 worktree 时，`dualctl` 会把 `.agent/` 追加到本地 Git exclude（`git rev-parse --git-path info/exclude` 指向的位置），避免 run ledger 出现在业务仓库的 `git status` 里。它不会修改项目自己的 `.gitignore`。
+创建 worktree 时，`dualctl` 会把 `.agent/` 和 `.serena/` 追加到本地 Git exclude（`git rev-parse --git-path info/exclude` 指向的位置），避免 run ledger 和 Codex/Serena 这类本地工具元数据出现在业务仓库的 `git status` 里。它不会修改项目自己的 `.gitignore`。
 
 ### Status
 
@@ -1328,6 +1328,12 @@ recoverable: true
 ```
 
 即使 stdout 已经完整结束，只要 stderr 明确包含 `agent needs reconnect`，也不会继续 workflow。先恢复 agent session，再执行 `retry` / `resume`。
+
+### `.serena/` 出现在 worktree 里
+
+如果 Codex 配置了 Serena MCP，`acpx codex` 可能会按当前 worktree 自动生成 `.serena/` 项目元数据。新创建的 worktree 会在本地 Git exclude 中忽略 `.serena/`，避免它污染 diff / PR 证据；`acpx` agent run 结束后也会回收本次运行中新启动的 Codex-context Serena MCP 进程。
+
+这个处理只影响本次 worktree 和本次新启动的 Serena 进程，不会修改目标仓库 `.gitignore`，也不会禁用用户全局的 Serena 配置。
 
 ### `git worktree add` 报权限错误
 
