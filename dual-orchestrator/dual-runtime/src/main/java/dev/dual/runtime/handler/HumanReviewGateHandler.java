@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,25 +208,55 @@ public final class HumanReviewGateHandler implements GateHandler {
         for (int i = context.instance().inputRefs().size() - 1; i >= 0; i--) {
             var ref = context.instance().inputRefs().get(i);
             var sidecar = resolveInsideWorkspace(context.workspaceRoot(), ref.replaceFirst("\\.md$", ".contract.json"));
-            if (sidecar == null || !Files.isRegularFile(sidecar)) {
-                continue;
+            var summary = agentDecisionFromSidecar(context, sidecar);
+            if (!summary.isEmpty()) {
+                return summary;
             }
-            var json = readJson(sidecar);
-            if (json.isEmpty()) {
-                continue;
+        }
+        return latestRunAgentDecision(context);
+    }
+
+    private Map<String, Object> latestRunAgentDecision(GateContext context) {
+        var runsDir = workstreamDir(context).resolve("runs");
+        if (!Files.isDirectory(runsDir)) {
+            return Map.of();
+        }
+        try (var paths = Files.walk(runsDir)) {
+            var sidecars = paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".contract.json"))
+                    .sorted(Comparator.comparing(path -> path.toAbsolutePath().normalize().toString()))
+                    .toList();
+            for (int i = sidecars.size() - 1; i >= 0; i--) {
+                var summary = agentDecisionFromSidecar(context, sidecars.get(i));
+                if (!summary.isEmpty()) {
+                    return summary;
+                }
             }
-            var summary = new LinkedHashMap<String, Object>();
-            summary.put("nodeId", text(json.get("node_id")));
-            summary.put("decision", text(json.get("decision")));
-            summary.put("summary", text(json.get("summary")));
-            summary.put("mustFix", stringList(json.get("must_fix")));
-            summary.put("openRisks", stringList(json.get("open_risks")));
-            summary.put("changedFiles", stringList(json.get("changed_files")));
-            summary.put("verificationSummary", text(json.get("verification_summary")));
-            summary.put("sidecarPath", displayRef(context.workspaceRoot(), sidecar));
-            return summary;
+        } catch (Exception ignored) {
+            return Map.of();
         }
         return Map.of();
+    }
+
+    private Map<String, Object> agentDecisionFromSidecar(GateContext context, Path sidecar) {
+        if (sidecar == null || !Files.isRegularFile(sidecar)) {
+            return Map.of();
+        }
+        var json = readJson(sidecar);
+        if (json.isEmpty() || text(json.get("decision")).isBlank()) {
+            return Map.of();
+        }
+        var summary = new LinkedHashMap<String, Object>();
+        summary.put("nodeId", text(json.get("node_id")));
+        summary.put("decision", text(json.get("decision")));
+        summary.put("summary", text(json.get("summary")));
+        summary.put("mustFix", stringList(json.get("must_fix")));
+        summary.put("openRisks", stringList(json.get("open_risks")));
+        summary.put("changedFiles", stringList(json.get("changed_files")));
+        summary.put("verificationSummary", text(json.get("verification_summary")));
+        summary.put("sidecarPath", displayRef(context.workspaceRoot(), sidecar));
+        return summary;
     }
 
     private Map<String, Object> gitEvidenceSummary(GateContext context) {

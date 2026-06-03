@@ -160,6 +160,46 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateReviewPacketFallsBackToLatestRunDecisionWhenGateInputsAreDeliveryOnly() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
+        var deliveryDir = workstreamDir.resolve("delivery");
+        var outputsDir = workstreamDir.resolve("runs/run-100/outputs");
+        Files.createDirectories(deliveryDir);
+        Files.createDirectories(outputsDir);
+        Files.writeString(deliveryDir.resolve("pr-body.md"), "# PR Body\n", StandardCharsets.UTF_8);
+        Files.writeString(deliveryDir.resolve("commit-message.txt"), "feat: packet smoke\n", StandardCharsets.UTF_8);
+        Files.writeString(outputsDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Functional requirements are met, but cleanup is needed.",
+                  "must_fix": ["Remove generated cache files before handoff."],
+                  "open_risks": [],
+                  "changed_files": ["README.md", "main.py"],
+                  "verification_summary": "Verified by inspection."
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(
+                ".agent/workstreams/ws/delivery/commit-message.txt",
+                ".agent/workstreams/ws/delivery/pr-body.md"
+        ));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
+        assertTrue(markdown.contains("Functional requirements are met, but cleanup is needed."));
+        assertTrue(markdown.contains("Remove generated cache files before handoff."));
+    }
+
+    @Test
     void humanGateReviewPacketDoesNotReadOutsideWorkspace() throws Exception {
         var outside = tempDir.getParent().resolve("outside-review-secret.md");
         Files.writeString(outside, "secret outside workspace", StandardCharsets.UTF_8);
