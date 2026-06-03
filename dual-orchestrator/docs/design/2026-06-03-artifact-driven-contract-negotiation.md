@@ -7,7 +7,7 @@
 > - `docs/long-term-plan/cc-codex-harness-short-vs-long-term-comparison.md`
 > - `docs/design/P5-task-contract-and-contract-compiler.md`
 
-> 2026-06-03 实现进度：已落地 P0 最小修复。`ContractCompileHandler` 现在优先读取 `<dual-artifact type="task_contract_proposal" version="1">`，通过机械校验后生成 canonical TaskContract；invalid proposal 会失败而不是 fallback 到 Markdown。Claude intake prompt 已要求输出 proposal，Codex intake prompt 已注入 contract review principles，原则模板支持内置资源和项目 `.agent/templates/` 补充。
+> 2026-06-03 实现进度：已落地 P0 最小修复。`ContractCompileHandler` 现在优先读取可信 Claude intake 输出中的 `<dual-artifact type="task_contract_proposal" version="1">`，通过机械校验后生成 canonical TaskContract；invalid proposal 会失败而不是 fallback 到 Markdown。Claude intake prompt 已要求输出 proposal，Codex intake prompt 已注入 contract review principles，原则模板支持内置资源和项目 `.agent/templates/` 补充。
 
 ---
 
@@ -176,6 +176,7 @@ Claude contract proposal
 - Markdown 正文可以自由表达，不影响状态机事实。
 - 如果有多个同类型 block，第一版只接受最后一个 terminal block，并记录 warning。
 - block 缺失或 JSON invalid 时，不 fallback 到 Markdown 抽取。
+- 对 `task_contract_proposal`，第一版只信任 Claude intake 输出。Codex review Markdown 里可能引用 Claude 的 artifact、带行号摘录或复述 JSON，这些内容不能作为 canonical proposal 来源。
 
 第一版支持：
 

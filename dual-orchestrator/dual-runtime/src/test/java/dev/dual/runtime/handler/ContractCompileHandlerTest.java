@@ -391,6 +391,80 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void executeUsesTrustedClaudeProposalWhenReviewOutputQuotesMalformedArtifact(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                实现补录页保存后引导。
+                """, StandardCharsets.UTF_8);
+
+        var intakeRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-claude-brainstorm.md";
+        Files.writeString(tempDir.resolve(intakeRef), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "补录既往治疗保存成功后展示引导卡片",
+                  "scope": {
+                    "included": ["miniprogram/src/pages/retro/index.vue"],
+                    "excluded": ["不改后端 API"]
+                  },
+                  "acceptance_criteria": [
+                    "保存成功后显示引导卡片",
+                    "主按钮跳转治疗记录详情页"
+                  ],
+                  "constraints": ["只做 B2"],
+                  "non_goals": ["不创建检查报告"],
+                  "risk_areas": ["跳转目标不能选错"],
+                  "test_requirements": ["运行前端构建"],
+                  "evidence_refs": ["miniprogram/src/pages/retro/index.vue"],
+                  "open_questions": []
+                }
+                </dual-artifact>
+                """, StandardCharsets.UTF_8);
+
+        var reviewRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-codex-product-review.md";
+        Files.writeString(tempDir.resolve(reviewRef), """
+                ## Decision
+
+                READY_FOR_PRODUCT_REVIEW
+
+                The review output quoted a line-numbered artifact from Claude:
+
+                <dual-artifact type="task_contract_proposal" version="1">
+                400: {
+                401:   "artifact_type": "task_contract_proposal"
+                402: }
+                </dual-artifact>
+                """, StandardCharsets.UTF_8);
+
+        Files.createDirectories(tempDir.resolve("miniprogram/src/pages/retro"));
+        Files.writeString(tempDir.resolve("miniprogram/src/pages/retro/index.vue"), "<template />\n");
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(reviewRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
+        assertTrue(json.contains("补录既往治疗保存成功后展示引导卡片"));
+        assertTrue(json.contains("\"included\" : [ \"miniprogram/src/pages/retro/index.vue\" ]"));
+    }
+
+    @Test
     void executeFailsInvalidTaskContractProposalInsteadOfFallingBackToMarkdown(@TempDir Path tempDir) throws Exception {
         var handler = new ContractCompileHandler();
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);

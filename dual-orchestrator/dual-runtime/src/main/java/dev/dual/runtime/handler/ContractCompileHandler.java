@@ -49,7 +49,7 @@ public final class ContractCompileHandler implements TaskHandler {
 
         var requirementText = Files.readString(requirementPath, StandardCharsets.UTF_8);
         var sourceText = buildSourceText(context, requirementText);
-        var proposalResult = compileFromProposal(sourceText, context);
+        var proposalResult = compileFromProposal(buildTrustedProposalSourceText(context), context);
         if (proposalResult.failed() != null) {
             return proposalResult.failed();
         }
@@ -425,6 +425,31 @@ public final class ContractCompileHandler implements TaskHandler {
         return builder.toString();
     }
 
+    private String buildTrustedProposalSourceText(TaskContext context) throws IOException {
+        var builder = new StringBuilder();
+        for (var inputRef : context.instance().inputRefs()) {
+            if (!isClaudeIntakeOutputRef(inputRef)) {
+                continue;
+            }
+            appendMarkdownRef(context, builder, "Trusted Proposal Input", inputRef);
+        }
+        appendLatestClaudeIntakeArtifacts(context, builder);
+        return builder.toString();
+    }
+
+    private void appendMarkdownRef(
+            TaskContext context,
+            StringBuilder builder,
+            String label,
+            String inputRef
+    ) throws IOException {
+        var path = context.workspaceRoot().resolve(inputRef).normalize();
+        if (Files.isRegularFile(path) && path.toString().endsWith(".md")) {
+            builder.append("\n\n## ").append(label).append(": ").append(inputRef).append("\n\n");
+            builder.append(Files.readString(path, StandardCharsets.UTF_8));
+        }
+    }
+
     private void appendLatestIntakeArtifacts(TaskContext context, StringBuilder builder) throws IOException {
         var runsDir = context.workspaceRoot()
                 .resolve(".agent")
@@ -448,6 +473,36 @@ public final class ContractCompileHandler implements TaskHandler {
                 builder.append(Files.readString(artifact, StandardCharsets.UTF_8));
             }
         }
+    }
+
+    private void appendLatestClaudeIntakeArtifacts(TaskContext context, StringBuilder builder) throws IOException {
+        var runsDir = context.workspaceRoot()
+                .resolve(".agent")
+                .resolve("workstreams")
+                .resolve(context.workstreamId())
+                .resolve("runs");
+        if (!Files.isDirectory(runsDir)) {
+            return;
+        }
+        try (var paths = Files.walk(runsDir)) {
+            var artifacts = paths
+                    .filter(Files::isRegularFile)
+                    .filter(path -> isClaudeIntakeOutputRef(context.workspaceRoot().relativize(path).toString()))
+                    .sorted()
+                    .toList();
+            for (var artifact : artifacts) {
+                builder.append("\n\n## Trusted Claude Intake Artifact: ")
+                        .append(context.workspaceRoot().relativize(artifact))
+                        .append("\n\n");
+                builder.append(Files.readString(artifact, StandardCharsets.UTF_8));
+            }
+        }
+    }
+
+    private static boolean isClaudeIntakeOutputRef(String ref) {
+        var normalized = ref.replace('\\', '/');
+        return normalized.contains("/outputs/intake-claude-brainstorm.md")
+                || normalized.endsWith("outputs/intake-claude-brainstorm.md");
     }
 
     private static String cleanLine(String line) {

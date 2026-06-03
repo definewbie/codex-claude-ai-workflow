@@ -12,6 +12,15 @@ Bash 版 `dual-agent-runner` 证明了 `acpx`、worktree、run ledger、报告�
 
 这说明主生命周期已经基本跑通。它还不是完整产品，后续重点是把真实长 run 的观测、人工 review、指标和交付体验做稳。
 
+## Documentation
+
+建议阅读顺序：
+
+- `docs/README.md`：当前文档入口，区分 current docs 和历史 handoff。
+- `docs/architecture-and-execution-flow.md`：总体设计和执行流程。
+- `docs/design/workflow-state-machine.md`：workflow / node / gate / recovery 状态机说明。
+- `docs/testing/real-case-benchmarks/README.md`：真实 case benchmark 入口和报告索引。
+
 ## Workflow Engine Model
 
 `dualctl` 运行的是 Agent lifecycle workflow，不是单次命令脚本。
