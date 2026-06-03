@@ -125,3 +125,39 @@ PASS-WARN
   - Follow-up fix: `PromptGenerateNextStageHandler` now recognizes Chinese handoff headings and Markdown table sections, so future `handoff.json` generation should preserve `completedWork`, `changedFiles`, `openRisks`, and `verificationState` from this style of handoff.
 - Keep state-model validation in future real cases, especially when testing recovery and revision loops.
 - Do not spend more quota on this B4 case unless the business change is going to be merged and needs runtime validation.
+
+## Re-run After Handoff Parser Fix
+
+After `fix: extract structured handoff from localized markdown`, this case was run again to validate the real acpx path, not only the unit test path.
+
+| 字段 | 值 |
+|------|----|
+| Date | 2026-06-03 |
+| Workstream | `ws-20260603T101635Z-VT82` |
+| Effective workdir | `/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260603T101635Z-VT82` |
+| Report | `dual-orchestrator/docs/testing/real-case-reports/20260603T101634Z/report.md` |
+| Final status | `COMPLETED` |
+| Agent run count | 12 |
+| Gate rounds | 6 |
+| Timeline nodes | 35 |
+| Iterations | 1 revision iteration |
+| Acceptance decision | `ACCEPT_WITH_NOTES` |
+| Original repo clean | yes |
+
+### Re-run Findings
+
+- The real `handoff.json` is now structured and useful:
+  - `completedWork` includes the B4 completion summary and lifecycle stages.
+  - `changedFiles` includes `miniprogram/src/pages/record/index.vue`.
+  - `openRisks` includes build/runtime verification gaps.
+  - `verificationState` preserves the verification table.
+- The state model also exercised a real revision iteration: initial intake product review identified ambiguity around "no treatment records", then Claude revised intake and the workflow continued in `iter-002`.
+- New non-blocking issue: Codex/Serena tooling created an untracked `.serena/` directory inside the worktree. It did not dirty the original repo and did not affect the code diff, but it does pollute worktree `git status`.
+
+### Re-run Verdict
+
+```text
+PASS-WARN
+```
+
+The original handoff issue is fixed on the real online path. Remaining warnings are deferred build/runtime UI verification and `.serena/` workspace pollution.
