@@ -149,12 +149,13 @@ dualctl review show --workdir <workspace> <workstream_id>
 
 内容就是这次 review 需要看的最小包：
 
+- TaskContract objective / scope / acceptance criteria
 - Decision
 - Must Fix
 - Summary
-- Changed files
+- Changed files / diff stat
 - Verification/self-test
-- Links to full artifacts
+- Delivery artifacts and links to full artifacts
 
 这个文件既能给 CLI 展示，也能给 UI 读取，还能作为通知内容。
 

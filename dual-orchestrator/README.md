@@ -774,7 +774,7 @@ dualctl review show --workdir <effective_worktree> <workstream_id>
 .agent/workstreams/<workstream_id>/reviews/<gate_node_instance_id>.md
 ```
 
-这个 packet 是后续 CLI watch / Web UI 共用的人工审查读模型，里面会列出 gate、允许动作、输入 artifacts 和关键内容摘录。
+这个 packet 是后续 CLI watch / Web UI 共用的人工审查读模型，里面会列出 gate、允许动作、TaskContract、最新 Agent decision / Must Fix、Git evidence、delivery artifacts、输入 artifacts 和关键内容摘录。
 
 当 `dualctl resume`、`dualctl run` 或 `dualctl review approve --run` 停在 human gate 时，终端会直接打印 `dualctl review show ...` 和当前 packet 路径，优先按这份 packet 做人工判断。
 

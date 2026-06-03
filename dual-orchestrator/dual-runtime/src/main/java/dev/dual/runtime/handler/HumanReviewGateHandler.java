@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,10 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("allowedActions", allowedActions);
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("reviewPacketPath", packetRef);
+        packet.put("taskContract", taskContractSummary(context));
+        packet.put("latestAgentDecision", latestAgentDecision(context));
+        packet.put("gitEvidence", gitEvidenceSummary(context));
+        packet.put("delivery", deliverySummary(context));
         packet.put("createdAt", Instant.now().toString());
 
         objectMapper.writeValue(packetJsonPath.toFile(), packet);
@@ -91,6 +96,12 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("- Use `approve` only when the current gate is good enough to continue.\n");
         builder.append("- Use `revise` when the agent should address concrete feedback first.\n\n");
 
+        appendReviewSummary(builder, context);
+        appendTaskContract(builder, context);
+        appendLatestAgentDecision(builder, context);
+        appendGitEvidence(builder, context);
+        appendDelivery(builder, context);
+
         builder.append("## Input Artifacts\n\n");
         if (context.instance().inputRefs().isEmpty()) {
             builder.append("No input artifacts were attached to this gate.\n");
@@ -105,10 +116,150 @@ public final class HumanReviewGateHandler implements GateHandler {
         return builder.toString();
     }
 
+    private void appendReviewSummary(StringBuilder builder, GateContext context) {
+        builder.append("## Review Summary\n\n");
+        var contract = taskContractSummary(context);
+        var decision = latestAgentDecision(context);
+        appendField(builder, "Objective", text(contract.get("objective")));
+        appendField(builder, "Latest Decision", text(decision.get("decision")));
+        appendField(builder, "Latest Summary", text(decision.get("summary")));
+        appendList(builder, "Must Fix", decision.get("mustFix"));
+        appendList(builder, "Open Risks", decision.get("openRisks"));
+        builder.append("\n");
+    }
+
+    private void appendTaskContract(StringBuilder builder, GateContext context) {
+        var contract = taskContractSummary(context);
+        if (contract.isEmpty()) {
+            return;
+        }
+        builder.append("## Task Contract\n\n");
+        appendField(builder, "Objective", text(contract.get("objective")));
+        appendField(builder, "Status", text(contract.get("status")));
+        appendList(builder, "Included Scope", contract.get("includedScope"));
+        appendList(builder, "Excluded Scope", contract.get("excludedScope"));
+        appendList(builder, "Acceptance Criteria", contract.get("acceptanceCriteria"));
+        appendList(builder, "Test Requirements", contract.get("testRequirements"));
+        appendList(builder, "Constraints", contract.get("constraints"));
+        builder.append("\n");
+    }
+
+    private void appendLatestAgentDecision(StringBuilder builder, GateContext context) {
+        var decision = latestAgentDecision(context);
+        if (decision.isEmpty()) {
+            return;
+        }
+        builder.append("## Latest Agent Decision\n\n");
+        appendField(builder, "Node", text(decision.get("nodeId")));
+        appendField(builder, "Decision", text(decision.get("decision")));
+        appendField(builder, "Summary", text(decision.get("summary")));
+        appendList(builder, "Must Fix", decision.get("mustFix"));
+        appendList(builder, "Open Risks", decision.get("openRisks"));
+        appendList(builder, "Changed Files", decision.get("changedFiles"));
+        appendField(builder, "Verification", text(decision.get("verificationSummary")));
+        appendField(builder, "Contract Sidecar", text(decision.get("sidecarPath")));
+        builder.append("\n");
+    }
+
+    private void appendGitEvidence(StringBuilder builder, GateContext context) {
+        var evidence = gitEvidenceSummary(context);
+        if (evidence.isEmpty()) {
+            return;
+        }
+        builder.append("## Git Evidence\n\n");
+        appendList(builder, "Changed Files", evidence.get("changedFiles"));
+        appendPreformatted(builder, "Diff Stat", text(evidence.get("diffStat")));
+        appendPreformatted(builder, "Status", text(evidence.get("statusShort")));
+        builder.append("\n");
+    }
+
+    private void appendDelivery(StringBuilder builder, GateContext context) {
+        var delivery = deliverySummary(context);
+        if (delivery.isEmpty()) {
+            return;
+        }
+        builder.append("## Delivery Artifacts\n\n");
+        appendField(builder, "PR Body", text(delivery.get("prBodyPath")));
+        appendField(builder, "Commit Message", text(delivery.get("commitMessagePath")));
+        builder.append("\n");
+    }
+
+    private Map<String, Object> taskContractSummary(GateContext context) {
+        var path = workstreamDir(context).resolve("artifacts/task-contract.json");
+        var json = readJson(path);
+        if (json.isEmpty()) {
+            return Map.of();
+        }
+        var summary = new LinkedHashMap<String, Object>();
+        summary.put("objective", text(json.get("objective")));
+        summary.put("status", text(json.get("status")));
+        var scope = objectMap(json.get("scope"));
+        summary.put("includedScope", stringList(scope.get("included")));
+        summary.put("excludedScope", stringList(scope.get("excluded")));
+        summary.put("acceptanceCriteria", stringList(json.get("acceptance_criteria")));
+        summary.put("testRequirements", stringList(json.get("test_requirements")));
+        summary.put("constraints", stringList(json.get("constraints")));
+        summary.put("path", displayRef(context.workspaceRoot(), path));
+        return summary;
+    }
+
+    private Map<String, Object> latestAgentDecision(GateContext context) {
+        for (int i = context.instance().inputRefs().size() - 1; i >= 0; i--) {
+            var ref = context.instance().inputRefs().get(i);
+            var sidecar = resolveInsideWorkspace(context.workspaceRoot(), ref.replaceFirst("\\.md$", ".contract.json"));
+            if (sidecar == null || !Files.isRegularFile(sidecar)) {
+                continue;
+            }
+            var json = readJson(sidecar);
+            if (json.isEmpty()) {
+                continue;
+            }
+            var summary = new LinkedHashMap<String, Object>();
+            summary.put("nodeId", text(json.get("node_id")));
+            summary.put("decision", text(json.get("decision")));
+            summary.put("summary", text(json.get("summary")));
+            summary.put("mustFix", stringList(json.get("must_fix")));
+            summary.put("openRisks", stringList(json.get("open_risks")));
+            summary.put("changedFiles", stringList(json.get("changed_files")));
+            summary.put("verificationSummary", text(json.get("verification_summary")));
+            summary.put("sidecarPath", displayRef(context.workspaceRoot(), sidecar));
+            return summary;
+        }
+        return Map.of();
+    }
+
+    private Map<String, Object> gitEvidenceSummary(GateContext context) {
+        var evidenceDir = workstreamDir(context).resolve("artifacts/git-evidence");
+        var changedFiles = readLines(evidenceDir.resolve("changed-files.txt"));
+        var diffStat = readText(evidenceDir.resolve("diff.stat"));
+        var status = readText(evidenceDir.resolve("git-status-short.txt"));
+        if (changedFiles.isEmpty() && diffStat.isBlank() && status.isBlank()) {
+            return Map.of();
+        }
+        var summary = new LinkedHashMap<String, Object>();
+        summary.put("changedFiles", changedFiles);
+        summary.put("diffStat", diffStat);
+        summary.put("statusShort", status);
+        return summary;
+    }
+
+    private Map<String, Object> deliverySummary(GateContext context) {
+        var deliveryDir = workstreamDir(context).resolve("delivery");
+        var summary = new LinkedHashMap<String, Object>();
+        var prBody = deliveryDir.resolve("pr-body.md");
+        var commitMessage = deliveryDir.resolve("commit-message.txt");
+        if (Files.isRegularFile(prBody)) {
+            summary.put("prBodyPath", displayRef(context.workspaceRoot(), prBody));
+        }
+        if (Files.isRegularFile(commitMessage)) {
+            summary.put("commitMessagePath", displayRef(context.workspaceRoot(), commitMessage));
+        }
+        return summary;
+    }
+
     private String readSnippet(Path workspaceRoot, String ref) throws Exception {
-        var root = workspaceRoot.toAbsolutePath().normalize();
-        var path = root.resolve(ref).normalize();
-        if (!path.startsWith(root)) {
+        var path = resolveInsideWorkspace(workspaceRoot, ref);
+        if (path == null) {
             return "(artifact outside workspace)";
         }
         if (!Files.exists(path) || !Files.isRegularFile(path)) {
@@ -120,5 +271,120 @@ public final class HumanReviewGateHandler implements GateHandler {
         }
         return content.substring(0, MAX_INPUT_SNIPPET_CHARS)
                 + "\n\n... truncated for review packet ...";
+    }
+
+    private Path workstreamDir(GateContext context) {
+        return context.workspaceRoot()
+                .resolve(".agent/workstreams")
+                .resolve(context.workstreamId())
+                .normalize();
+    }
+
+    private Path resolveInsideWorkspace(Path workspaceRoot, String ref) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var path = root.resolve(ref).normalize();
+        if (!path.startsWith(root)) {
+            return null;
+        }
+        return path;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> readJson(Path path) {
+        try {
+            if (!Files.isRegularFile(path)) {
+                return Map.of();
+            }
+            return objectMapper.readValue(path.toFile(), Map.class);
+        } catch (Exception ignored) {
+            return Map.of();
+        }
+    }
+
+    private Map<String, Object> objectMap(Object value) {
+        if (!(value instanceof Map<?, ?> source)) {
+            return Map.of();
+        }
+        var copy = new LinkedHashMap<String, Object>();
+        for (var entry : source.entrySet()) {
+            if (entry.getKey() instanceof String key) {
+                copy.put(key, entry.getValue());
+            }
+        }
+        return copy;
+    }
+
+    private List<String> readLines(Path path) {
+        var text = readText(path);
+        if (text.isBlank()) {
+            return List.of();
+        }
+        return text.lines()
+                .map(String::trim)
+                .filter(line -> !line.isBlank())
+                .toList();
+    }
+
+    private String readText(Path path) {
+        try {
+            if (!Files.isRegularFile(path)) {
+                return "";
+            }
+            return Files.readString(path, StandardCharsets.UTF_8).trim();
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private List<String> stringList(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var result = new ArrayList<String>();
+        for (var item : items) {
+            var text = text(item);
+            if (!text.isBlank()) {
+                result.add(text);
+            }
+        }
+        return List.copyOf(result);
+    }
+
+    private void appendField(StringBuilder builder, String label, String value) {
+        if (!value.isBlank()) {
+            builder.append("- ").append(label).append(": ").append(value.replace("\n", " / ")).append("\n");
+        }
+    }
+
+    private void appendList(StringBuilder builder, String label, Object value) {
+        var items = stringList(value);
+        if (items.isEmpty()) {
+            return;
+        }
+        builder.append("- ").append(label).append(":\n");
+        for (var item : items) {
+            builder.append("  - ").append(item.replace("\n", " / ")).append("\n");
+        }
+    }
+
+    private void appendPreformatted(StringBuilder builder, String label, String value) {
+        if (value.isBlank()) {
+            return;
+        }
+        builder.append("### ").append(label).append("\n\n");
+        builder.append("```text\n").append(value).append("\n```\n\n");
+    }
+
+    private String displayRef(Path workspaceRoot, Path path) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var normalized = path.toAbsolutePath().normalize();
+        if (normalized.startsWith(root)) {
+            return root.relativize(normalized).toString();
+        }
+        return normalized.toString();
+    }
+
+    private String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
     }
 }

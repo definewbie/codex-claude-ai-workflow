@@ -80,6 +80,86 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateReviewPacketSummarizesContractDecisionEvidenceAndDelivery() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
+        var artifactsDir = workstreamDir.resolve("artifacts");
+        var evidenceDir = artifactsDir.resolve("git-evidence");
+        var deliveryDir = workstreamDir.resolve("delivery");
+        Files.createDirectories(evidenceDir);
+        Files.createDirectories(deliveryDir);
+        Files.writeString(artifactsDir.resolve("task-contract.json"), """
+                {
+                  "id": "task-ws",
+                  "version": 1,
+                  "created_at": "2026-06-03T00:00:00Z",
+                  "objective": "Improve treatment record empty state",
+                  "scope": {
+                    "included": ["miniprogram/src/pages/record/index.vue"],
+                    "excluded": ["backend/"]
+                  },
+                  "acceptance_criteria": ["Shows an empty state", "Does not change backend"],
+                  "test_requirements": ["Developer self-test"],
+                  "constraints": ["Keep scope narrow"],
+                  "non_goals": [],
+                  "risk_areas": ["WeChat runtime"],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "status": "READY",
+                  "compilation_pass": 1,
+                  "source": {"rawRequestRef": "requirement.md", "createdBy": "dual"}
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("changed-files.txt"), "miniprogram/src/pages/record/index.vue\n", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("diff.stat"), "1 file changed, 12 insertions(+)\n", StandardCharsets.UTF_8);
+        Files.writeString(deliveryDir.resolve("pr-body.md"), "# PR Body\n\nVerification complete.\n", StandardCharsets.UTF_8);
+
+        var inputRef = writeOutput("acceptance-codex-review.md", """
+                # Codex Acceptance
+
+                Decision: ACCEPT_WITH_NOTES
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Implementation satisfies the contract with runtime verification notes.",
+                  "must_fix": [],
+                  "open_risks": ["WeChat UI was not manually exercised"],
+                  "changed_files": ["miniprogram/src/pages/record/index.vue"],
+                  "verification_summary": "Self-test completed; runtime UI not exercised."
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("## Review Summary"));
+        assertTrue(markdown.contains("Improve treatment record empty state"));
+        assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
+        assertTrue(markdown.contains("Implementation satisfies the contract"));
+        assertTrue(markdown.contains("WeChat UI was not manually exercised"));
+        assertTrue(markdown.contains("miniprogram/src/pages/record/index.vue"));
+        assertTrue(markdown.contains("1 file changed, 12 insertions(+)"));
+        assertTrue(markdown.contains("delivery/pr-body.md"));
+
+        var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
+        var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"taskContract\""));
+        assertTrue(json.contains("\"latestAgentDecision\""));
+        assertTrue(json.contains("\"gitEvidence\""));
+        assertTrue(json.contains("\"delivery\""));
+    }
+
+    @Test
     void humanGateReviewPacketDoesNotReadOutsideWorkspace() throws Exception {
         var outside = tempDir.getParent().resolve("outside-review-secret.md");
         Files.writeString(outside, "secret outside workspace", StandardCharsets.UTF_8);
