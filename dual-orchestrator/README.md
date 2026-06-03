@@ -719,6 +719,38 @@ dualctl recovery abort \
 
 `recovery abort` 会把 workflow 标记为 `FAILED`，清空 active node / open gate，并写入 `workflow_aborted` event。它不会删除 worktree、代码改动或 ledger。
 
+### Calibration
+
+当 Codex acceptance 触发可校准失败时，FailureArbiter 会把失败沉淀成候选：
+
+```text
+.agent/workstreams/<workstream_id>/calibration/candidates/<candidate_id>.json
+.agent/workstreams/<workstream_id>/calibration/candidates/<candidate_id>.md
+```
+
+候选不会自动修改模板、规则或代码。它只是记录“这类失败将来可能值得提升为 contract template / context rule / regression test”的证据。
+
+查看候选：
+
+```bash
+dualctl calibration list --workdir <effective_worktree> <workstream_id>
+dualctl calibration show --workdir <effective_worktree> <workstream_id> <candidate_id>
+dualctl calibration show --workdir <effective_worktree> --json <workstream_id> <candidate_id>
+```
+
+人工决策候选：
+
+```bash
+dualctl calibration decide \
+  --workdir <effective_worktree> \
+  --status accepted \
+  --note "Promote this into the contract template later" \
+  <workstream_id> \
+  <candidate_id>
+```
+
+`decide` 只会更新 candidate JSON 的 `status`、`decidedAt` 和 `decisionNotes`。真正把候选提升到模板或测试，仍然需要单独的人审改动。
+
 ### Human Review
 
 查看当前 gate 的 review packet：

@@ -23,6 +23,7 @@ import picocli.CommandLine.Command;
                 AutoRunCommand.class,
                 RetryCommand.class,
                 RecoveryCommand.class,
+                CalibrationCommand.class,
                 ReviewCommand.class,
                 WorkflowCommand.class
         }

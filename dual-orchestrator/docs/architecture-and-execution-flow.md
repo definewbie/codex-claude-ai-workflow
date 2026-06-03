@@ -137,7 +137,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Context governance：profile、budget、degradation、placeholder/skip/fail。
 - TaskContract / ContractCompiler / ContractReviewGate。
 - FailureArbiter MVP。
-- CalibrationCandidate MVP：可校准的 failure classification 会生成 `calibration/candidates/<id>.json` 和 `.md`。
+- CalibrationCandidate MVP：可校准的 failure classification 会生成 `calibration/candidates/<id>.json` 和 `.md`；`dualctl calibration list/show/decide` 可把候选变成人工可评估、可采纳/拒绝/延后的账本资产。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
