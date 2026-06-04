@@ -235,7 +235,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 - 一个极简 Web UI，读取 workstream ledger。
 - 初版只做 read-only + human gate action。
 
-当前状态：`dual-server` 第一版已完成本地 HTTP API，可以查询 workstream status / timeline，也可以执行最小 action：resume、retry、review approve/revise。它还没有 scheduler，也没有 UI；`dualctl` 仍然是主要操作入口。
+当前状态：`dual-server` 第一版已完成本地 HTTP API，可以查询 workstream status / timeline，也可以执行最小 action：resume、retry、review approve/revise。Scheduler 已支持手动 tick 和默认关闭的后台周期调度；UI 仍是很薄的 operator panel；`dualctl` 仍然是主要操作入口。
 
 已提供接口：
 
@@ -248,9 +248,11 @@ POST /api/workstreams/{workstreamId}/retry?workdir=<effective_worktree>
 POST /api/workstreams/{workstreamId}/review/approve?workdir=<effective_worktree>&run=false
 POST /api/workstreams/{workstreamId}/review/revise?workdir=<effective_worktree>&run=false
 POST /api/scheduler/tick?workdir=<effective_worktree>&maxWorkstreams=10&maxStepsPerWorkstream=1
+GET /api/scheduler/background/status
+POST /api/scheduler/background/run-once
 ```
 
-Scheduler 当前是手动 tick，不是后台常驻扫描。它只推进 `RUNNING` workstreams；human gate、recovery、failed、blocked、completed 都会跳过，避免绕过人工卡点。
+Scheduler 可以手动 tick，也可以通过 `dual.scheduler.enabled=true` 和 `dual.scheduler.workdirs` 开启后台周期调度。两种模式都只推进 `RUNNING` workstreams；human gate、recovery、failed、blocked、completed 都会跳过，避免绕过人工卡点。
 
 页面优先级：
 

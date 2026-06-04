@@ -144,7 +144,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
-- Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler tick MVP 已支持手动触发一次调度，只推进 `RUNNING` workstreams；当前仍不做后台自动扫描。
+- Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；两者都只推进 `RUNNING` workstreams，不绕过 human gate / recovery / failure。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
 - 真实 acpx smoke：thin / p5 已通过；fixture p6 仍保留 `PASS-WARN` 语义，因为 Codex 是否拒绝不可控。
@@ -175,7 +175,7 @@ real-case benchmark
 | Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
 | Done | Local API Server MVP | status / timeline + 最小 action API，先给 UI 和外部观察器一个稳定入口 |
-| Done | Scheduler tick MVP | 手动触发一次调度，只推进 RUNNING workstreams，不绕过 human gate / recovery |
+| Done | Scheduler tick + background MVP | 手动或后台周期调度，只推进 RUNNING workstreams，不绕过 human gate / recovery |
 | P1 | Real-case benchmark loop | 用 2-3 个真实任务持续验证 p6，而不是只靠低复杂度 fixture |
 | P1 | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |
 | P2 | Background scheduler | 在人工 gate 和 recovery 语义稳定后再做后台自动推进 |
@@ -204,8 +204,8 @@ real-case benchmark
 ```
 ┌───────────────────────────────┐  ┌───────────────────────────────┐
 │       dual-cli (dualctl)      │  │          dual-server          │
-│ start / resume / review /     │  │ read-only HTTP API: status /  │
-│ retry / delivery / status     │  │ timeline; action + tick API   │
+│ start / resume / review /     │  │ read API: status / timeline;  │
+│ retry / delivery / status     │  │ action + scheduler API        │
 └──────────────┬────────────────┘  └──────────────┬────────────────┘
                │                                  │
                └────────────────┬─────────────────┘
@@ -267,7 +267,7 @@ real-case benchmark
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-说明：`dual-cli` 仍然是主要操作入口；`dual-server` 当前暴露 status / timeline 读模型，并把 resume、retry、review approve/revise 包装成最小 action API。Scheduler tick 只是一次性手动调度，不是后台常驻自动扫描。
+说明：`dual-cli` 仍然是主要操作入口；`dual-server` 当前暴露 status / timeline 读模型，并把 resume、retry、review approve/revise 包装成最小 action API。Scheduler 可以手动 tick，也可以通过配置启用后台周期调度；默认关闭，且不会自动通过 human gate。
 
 ## 6. 三类节点
 

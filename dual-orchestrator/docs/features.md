@@ -53,12 +53,12 @@
 ## P4 — 产品化基础设施
 
 - [x] Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
-- [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow status / timeline，并支持最小 action：resume、retry、review approve/revise；暂不包含 scheduler 或 UI。
+- [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow status / timeline，并支持最小 action：resume、retry、review approve/revise。
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖
 - [x] Scheduler tick MVP：`POST /api/scheduler/tick` 手动触发一次调度，只推进 `RUNNING` workstreams，遇到 human gate / recovery / failure / completed 会跳过。
-- [ ] T4.1 Background Scheduler：后台自动扫描和推进 workflow，支持 workspace roots registry、间隔配置和运行中保护。
+- [x] T4.1 Background Scheduler MVP：默认关闭；配置 `dual.scheduler.enabled=true` 和 `dual.scheduler.workdirs` 后周期调用 tick，支持间隔、max workstreams、max steps 配置，并用运行中保护避免重入。
 - [ ] T4.2 Web UI / Dashboard：可视化 workflow 状态、event 时间线、Agent 输出
 - [ ] T4.3 Notification：Slack / 邮件 / Webhook 推送状态变更
 - [ ] T4.4 安装脚本：`brew install` / `curl | sh` 等分发包
@@ -71,9 +71,8 @@
    - 2026-06-03：`run-real-case.sh` 开始生成 `summary.json`，把 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、artifact presence 和原始 repo clean 状态沉淀为机器可读数据。
    - 2026-06-03：`cancer-clinic-rejection-prone` 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
    - 2026-06-04：`real-case-benchmark-summary.sh` 聚合所有 `summary.json`，生成 `testing/real-case-benchmarks/benchmark-index.md`，让真实 run 从零散报告变成可比较的 benchmark set。
-2. **Background Scheduler**：让系统自动推进可继续的 workstream，停在 human gate / recovery / failure；目标是从“人不断敲 resume”走向“系统自己推进，人只在关键卡点介入”。
-3. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
-4. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
+2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
+3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
 
 当前 benchmark 入口：

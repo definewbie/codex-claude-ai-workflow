@@ -84,7 +84,7 @@ Runtime 只认识三类节点：
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
-- Local API Server MVP：`dual-server` 提供 HTTP API，用于读取 workflow status / timeline，并执行最小 action：resume、retry、review approve/revise；暂不负责后台调度或 UI。
+- Local API Server MVP：`dual-server` 提供 HTTP API，用于读取 workflow status / timeline，并执行最小 action：resume、retry、review approve/revise；scheduler 支持手动 tick 和默认关闭的后台周期调度。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
 - Ledger schema migration 暂不作为当前主线；schema 仍在快速演进，当前只保留最小兼容能力。
@@ -93,7 +93,7 @@ Runtime 只认识三类节点：
 
 - deterministic p6 reject fixture：真实 `cancer-clinic` p6 长 case 已覆盖 Codex `REJECT` → failure classification → Claude repair → final acceptance 的主修复闭环。为了一个边界分支引入 fake acpx 的收益暂时不高；只有当 CI 需要稳定、可重复覆盖这条分支时再补 controlled fixture。
 - 实时推送：还没有 SSE / file watch / WebSocket，当前 `dualctl watch` 是轮询式 CLI。
-- Scheduler：还没有后台自动推进 workflow。
+- Scheduler：已有默认关闭的后台周期调度；仍不会自动通过 human gate、recovery 或 failure。
 - Web UI / dashboard。
 - Notification 集成。
 - 正式安装脚本。
@@ -194,7 +194,7 @@ dualctl timeline --help
 
 ## Local API Server
 
-`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它也提供手动 scheduler tick，但还不是常驻后台调度器。
+`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它也提供 scheduler：默认关闭，可以手动 tick，也可以通过配置打开后台周期调度。
 
 构建：
 
@@ -267,7 +267,32 @@ curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/revis
 curl -X POST "http://localhost:8080/api/scheduler/tick?workdir=<effective_worktree>&maxWorkstreams=10&maxStepsPerWorkstream=1"
 ```
 
-第一版 scheduler 不常驻后台扫描，只在收到 tick 请求时工作。它会列出指定 `workdir` 下的 workstreams，只推进 `RUNNING` 状态的 workflow；已经等待人工 review、等待 recovery、失败、阻塞或完成的 workstream 会被跳过。
+手动 tick 会列出指定 `workdir` 下的 workstreams，只推进 `RUNNING` 状态的 workflow；已经等待人工 review、等待 recovery、失败、阻塞或完成的 workstream 会被跳过。
+
+后台 scheduler 默认关闭。打开方式：
+
+```bash
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar \
+  --dual.scheduler.enabled=true \
+  --dual.scheduler.workdirs=/path/to/effective-worktree-1,/path/to/effective-worktree-2 \
+  --dual.scheduler.interval-ms=30000 \
+  --dual.scheduler.max-workstreams=10 \
+  --dual.scheduler.max-steps-per-workstream=1
+```
+
+查看后台 scheduler 状态：
+
+```bash
+curl "http://localhost:8080/api/scheduler/background/status"
+```
+
+立即触发一次后台 scheduler run：
+
+```bash
+curl -X POST "http://localhost:8080/api/scheduler/background/run-once"
+```
+
+后台 scheduler 和手动 tick 使用同一套规则：只推进 `RUNNING` workstream，不自动 approve human gate，不自动修复 recovery，不绕过失败状态。同一时间如果已有后台 tick 在运行，新的后台 tick 会被跳过。
 
 ## acpx Sessions
 
@@ -1402,7 +1427,7 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 
 ## Current Limits
 
-- 仍是 CLI-first；API server 已有 status / timeline / action / manual scheduler tick，暂时没有常驻 daemon 和 Web UI。
+- 仍是 CLI-first；API server 已有 status / timeline / action / scheduler tick / 默认关闭的 background scheduler，Web UI 仍是很薄的 operator panel。
 - workflow 已支持 JSON 文件加载、条件表达式（`EdgeCondition`）和并行节点（fan-out + sequential execution）；schema 迁移暂不作为当前主线。
 - context package 已有 token-level budget-controlled governance pipeline（6 profile，priority-based degradation，adaptive compression，per-profile config overrides），但真实 tokenizer 仍待替换。
 - auto-retry 按 failure type 自动分类并指数退避重试，但还没有交互式修复向导。
