@@ -30,15 +30,12 @@ final class CliWorkflowLoop {
             }
         }
         System.out.println("Stopped after --max-steps=" + maxSteps + ". Run again to continue.");
+        CliNextActionHints.print(System.out, WorkflowStatus.RUNNING, workspaceRoot, workstreamId);
         return 1;
     }
 
     private void printNextAction(WorkflowStatus status, Path workspaceRoot, String workstreamId) {
-        if (status == WorkflowStatus.WAITING_FOR_HUMAN) {
-            ReviewPacketCliHints.print(System.out, status, workspaceRoot, workstreamId);
-        } else if (status == WorkflowStatus.WAITING_FOR_RECOVERY) {
-            System.out.println("Next: fix the external cause, then dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
-        }
+        CliNextActionHints.print(System.out, status, workspaceRoot, workstreamId);
     }
 
     private int exitCode(WorkflowStatus status) {

@@ -692,6 +692,13 @@ dualctl run --workdir <effective_worktree> --max-steps 50 <workstream_id>
 
 这是真实使用时的主推进命令。`resume` 仍保留用于单步排查。
 
+当 `run` 或 `resume` 停住时，CLI 会打印 `Next actions`：
+
+- `WAITING_FOR_HUMAN`：显示 `review show`、当前 review packet 路径，以及 `review approve --run` / `review revise --run` 命令。
+- `WAITING_FOR_RECOVERY` / `FAILED` / `BLOCKED`：显示 `recovery show`、当前 failure summary 路径，以及 `retry` 命令。
+- `COMPLETED`：显示 final report 路径和 `summary` 命令，提醒先查看交付产物。
+- 超过 `--max-steps`：显示继续运行的 `run` 命令。
+
 ### Autorun
 
 `autorun` 用于“无人值守验证主链路”：它会在每次遇到中间 human gate 时自动批准，然后继续执行；遇到最终 `gate.human_next_stage_approval` 时自动 `complete`，避免把同一个 workstream 带入下一轮。
@@ -821,7 +828,7 @@ dualctl review show --workdir <effective_worktree> <workstream_id>
 
 这个 packet 是后续 CLI watch / Web UI 共用的人工审查读模型，里面会列出 gate、允许动作、TaskContract、最新 Agent decision / Must Fix、Git evidence、delivery artifacts、输入 artifacts 和关键内容摘录。
 
-当 `dualctl resume`、`dualctl run` 或 `dualctl review approve --run` 停在 human gate 时，终端会直接打印 `dualctl review show ...` 和当前 packet 路径，优先按这份 packet 做人工判断。
+当 `dualctl resume`、`dualctl run` 或 `dualctl review approve --run` 停在 human gate 时，终端会直接打印 `Next actions`、`dualctl review show ...` 和当前 packet 路径，优先按这份 packet 做人工判断。
 
 ### Timeline
 

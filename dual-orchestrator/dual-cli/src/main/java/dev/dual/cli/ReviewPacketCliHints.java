@@ -23,7 +23,7 @@ final class ReviewPacketCliHints {
         out.println("Then: dualctl review approve|revise --workdir " + workspaceRoot + " " + workstreamId);
     }
 
-    private static java.util.Optional<Path> packetPath(Path workspaceRoot, String workstreamId) {
+    static java.util.Optional<Path> packetPath(Path workspaceRoot, String workstreamId) {
         try {
             var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
             var ledger = new WorkflowFileLedger();
