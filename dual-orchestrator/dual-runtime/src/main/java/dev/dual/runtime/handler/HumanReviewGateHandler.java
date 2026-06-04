@@ -76,6 +76,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("latestAgentDecision", latestAgentDecision(context));
         packet.put("gitEvidence", gitEvidenceSummary(context));
         packet.put("delivery", deliverySummary(context));
+        packet.put("operatorGuidance", operatorGuidance(context, allowedActions));
         packet.put("createdAt", Instant.now().toString());
 
         objectMapper.writeValue(packetJsonPath.toFile(), packet);
@@ -91,6 +92,8 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("- Stage: ").append(context.instance().stageId()).append("\n");
         builder.append("- Iteration: ").append(context.instance().iterationId()).append("\n");
         builder.append("- Allowed Actions: ").append(String.join(", ", allowedActions)).append("\n\n");
+
+        appendOperatorGuidance(builder, context, allowedActions);
 
         builder.append("## Review Focus\n\n");
         builder.append("- Read the referenced artifacts before approving.\n");
@@ -115,6 +118,18 @@ public final class HumanReviewGateHandler implements GateHandler {
             }
         }
         return builder.toString();
+    }
+
+    private void appendOperatorGuidance(StringBuilder builder, GateContext context, List<String> allowedActions) {
+        var guidance = operatorGuidance(context, allowedActions);
+        if (guidance.isEmpty()) {
+            return;
+        }
+        builder.append("## Operator Guidance\n\n");
+        appendField(builder, "Recommended Action", text(guidance.get("recommendedAction")));
+        appendField(builder, "Reason", text(guidance.get("reason")));
+        appendList(builder, "Suggested Checks", guidance.get("suggestedChecks"));
+        builder.append("\n");
     }
 
     private void appendReviewSummary(StringBuilder builder, GateContext context) {
@@ -286,6 +301,67 @@ public final class HumanReviewGateHandler implements GateHandler {
             summary.put("commitMessagePath", displayRef(context.workspaceRoot(), commitMessage));
         }
         return summary;
+    }
+
+    private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions) {
+        var decision = latestAgentDecision(context);
+        var decisionText = text(decision.get("decision"));
+        var mustFix = stringList(decision.get("mustFix"));
+        var openRisks = stringList(decision.get("openRisks"));
+        var gateId = context.instance().nodeDefinitionId();
+
+        var guidance = new LinkedHashMap<String, Object>();
+        if (allowedActions.contains("complete") && gateId.contains("next_stage")) {
+            guidance.put("recommendedAction", "complete");
+            guidance.put("reason", "This is a next-stage gate. Complete the current workstream when the handoff and next-stage prompt are acceptable.");
+        } else if (!mustFix.isEmpty() && allowedActions.contains("revise")) {
+            guidance.put("recommendedAction", "revise");
+            guidance.put("reason", "The latest agent decision still contains Must Fix items.");
+        } else if (isNegativeDecision(decisionText) && allowedActions.contains("revise")) {
+            guidance.put("recommendedAction", "revise");
+            guidance.put("reason", "The latest agent decision indicates the work is not ready to continue.");
+        } else if (isPositiveDecision(decisionText) && allowedActions.contains("approve")) {
+            guidance.put("recommendedAction", "approve");
+            guidance.put("reason", "The latest agent decision is positive. Approve only after checking the packet evidence.");
+        } else {
+            guidance.put("recommendedAction", allowedActions.isEmpty() ? "inspect" : allowedActions.get(0));
+            guidance.put("reason", "No decisive recommendation is available. Read the packet and choose an allowed action.");
+        }
+        guidance.put("suggestedChecks", suggestedChecks(gateId, mustFix, openRisks));
+        return guidance;
+    }
+
+    private List<String> suggestedChecks(String gateId, List<String> mustFix, List<String> openRisks) {
+        var checks = new ArrayList<String>();
+        checks.add("Confirm the TaskContract objective, scope, non-goals, and acceptance criteria still match the task.");
+        if (!mustFix.isEmpty()) {
+            checks.add("Do not approve until every Must Fix item is addressed or explicitly accepted by the human reviewer.");
+        }
+        if (!openRisks.isEmpty()) {
+            checks.add("Review open risks and decide whether they are acceptable for this stage.");
+        }
+        if (gateId.contains("acceptance")) {
+            checks.add("Compare Codex acceptance, developer self-test evidence, Git evidence, and changed files before approval.");
+        } else if (gateId.contains("design") || gateId.contains("plan")) {
+            checks.add("Check whether the design or plan stays inside scope and avoids unnecessary implementation detail.");
+        } else if (gateId.contains("next_stage")) {
+            checks.add("Check the handoff and next-stage prompt before completing the current workstream.");
+        }
+        return List.copyOf(checks);
+    }
+
+    private boolean isPositiveDecision(String decision) {
+        return decision.contains("ACCEPT")
+                || decision.contains("PASS")
+                || decision.contains("READY")
+                || decision.contains("APPROVE");
+    }
+
+    private boolean isNegativeDecision(String decision) {
+        return decision.contains("REJECT")
+                || decision.contains("NEEDS_REVISION")
+                || decision.contains("BLOCKED")
+                || decision.contains("FAIL");
     }
 
     private String readSnippet(Path workspaceRoot, String ref) throws Exception {

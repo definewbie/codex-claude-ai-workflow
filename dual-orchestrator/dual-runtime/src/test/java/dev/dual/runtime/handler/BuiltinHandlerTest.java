@@ -143,6 +143,8 @@ class BuiltinHandlerTest {
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
         assertTrue(markdown.contains("## Review Summary"));
+        assertTrue(markdown.contains("## Operator Guidance"));
+        assertTrue(markdown.contains("Recommended Action: approve"));
         assertTrue(markdown.contains("Improve treatment record empty state"));
         assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
         assertTrue(markdown.contains("Implementation satisfies the contract"));
@@ -157,6 +159,48 @@ class BuiltinHandlerTest {
         assertTrue(json.contains("\"latestAgentDecision\""));
         assertTrue(json.contains("\"gitEvidence\""));
         assertTrue(json.contains("\"delivery\""));
+        assertTrue(json.contains("\"operatorGuidance\""));
+        assertTrue(json.contains("\"recommendedAction\" : \"approve\""));
+    }
+
+    @Test
+    void humanGateReviewPacketRecommendsReviseWhenMustFixExists() throws Exception {
+        var inputRef = writeOutput("acceptance-codex-review.md", """
+                # Codex Acceptance
+
+                Decision: REJECT
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "Acceptance failed.",
+                  "must_fix": ["Restore the required empty state copy."],
+                  "open_risks": [],
+                  "changed_files": ["miniprogram/src/pages/record/index.vue"],
+                  "verification_summary": "Verifier found a product acceptance gap."
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("Recommended Action: revise"));
+        assertTrue(markdown.contains("The latest agent decision still contains Must Fix items."));
+
+        var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
+        var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"recommendedAction\" : \"revise\""));
+        assertTrue(json.contains("Do not approve until every Must Fix item is addressed"));
     }
 
     @Test

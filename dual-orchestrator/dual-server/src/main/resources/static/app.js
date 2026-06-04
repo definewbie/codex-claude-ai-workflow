@@ -184,15 +184,18 @@ function renderReviewStructured(packet) {
   header.className = "review-card review-card-primary";
   const decision = packet.latestAgentDecision || {};
   const contract = packet.taskContract || {};
+  const guidance = packet.operatorGuidance || {};
   header.innerHTML = `
     <div class="review-card-head">
       <div>
         <span class="eyebrow">Review focus</span>
         <h3>${escapeHtml(contract.objective || packet.gateNodeDefinitionId || "Human review")}</h3>
       </div>
-      ${decision.decision ? `<span class="badge ${decisionBadgeKind(decision.decision)}">${escapeHtml(decision.decision)}</span>` : ""}
+      ${guidance.recommendedAction ? `<span class="badge ${actionBadgeKind(guidance.recommendedAction)}">${escapeHtml(guidance.recommendedAction)}</span>` : ""}
     </div>
+    ${guidance.reason ? `<p><strong>Recommended:</strong> ${escapeHtml(guidance.reason)}</p>` : ""}
     ${decision.summary ? `<p>${escapeHtml(decision.summary)}</p>` : ""}
+    ${reviewList("Suggested Checks", guidance.suggestedChecks)}
     ${reviewList("Must Fix", decision.mustFix)}
     ${reviewList("Open Risks", decision.openRisks)}
   `;
@@ -265,6 +268,12 @@ function decisionBadgeKind(decision) {
   if (decision.includes("NOTES") || decision.includes("REVISION")) return "warn";
   if (decision.includes("ACCEPT") || decision.includes("READY")) return "ok";
   if (decision.includes("REJECT") || decision.includes("BLOCKED")) return "bad";
+  return "muted";
+}
+
+function actionBadgeKind(action) {
+  if (action === "approve" || action === "complete") return "ok";
+  if (action === "revise") return "warn";
   return "muted";
 }
 

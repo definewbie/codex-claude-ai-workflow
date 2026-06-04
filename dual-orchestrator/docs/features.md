@@ -29,6 +29,7 @@
   - 2026-06-03：`dualctl calibration list/show/decide` 可查看候选并记录人工采纳/拒绝/延后判断；暂不自动提升到模板，避免过早规则引擎化。
 - [x] Review packet artifact：为 human gate 生成稳定 review 包，后续 CLI/UI 共用。
   - 2026-06-01：`HumanReviewGateHandler` 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 可直接展示当前 gate packet。
+  - 2026-06-04：review packet 增加 `operatorGuidance`，包含推荐动作、原因和建议检查项；operator panel 会在结构化卡片里展示。
 - [x] Timeline projection：从 workflow current 和 nodes 生成稳定 `timeline.json`，作为 status/watch/UI 读模型。
   - 2026-06-01：`WorkflowFileLedger` 在初始化、路由、运行状态变化、retry/recovery 操作后自动更新 `timeline.json`；`dualctl timeline` 可展示节点概览。
 - [x] Status workflow-first：`dualctl status` 默认以 workflow current 为准，旧 checkpoint/stage 快照仅在 `--show-legacy` 时显示。
@@ -72,6 +73,7 @@
    - 2026-06-03：`cancer-clinic-rejection-prone` 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
    - 2026-06-04：`real-case-benchmark-summary.sh` 聚合所有 `summary.json`，生成 `testing/real-case-benchmarks/benchmark-index.md`，让真实 run 从零散报告变成可比较的 benchmark set。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
+   - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项。后续如果继续做，应优先补 failure/recovery 视图，而不是继续美化按钮。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
 
