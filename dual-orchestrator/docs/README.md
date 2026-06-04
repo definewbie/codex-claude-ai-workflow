@@ -1,7 +1,7 @@
 # dual-orchestrator Docs
 
 > Status: current docs index
-> Last updated: 2026-06-03
+> Last updated: 2026-06-04
 
 This directory contains both current design documents and historical handoff notes. Prefer the current documents below when trying to understand the system.
 
@@ -10,6 +10,7 @@ This directory contains both current design documents and historical handoff not
 | Purpose | Document |
 |---|---|
 | Quickstart from install to first run | `quickstart.md` |
+| Whitepaper-to-project mapping | `whitepaper-mapping.md` |
 | Overall product and architecture narrative | `architecture-and-execution-flow.md` |
 | Runtime state model and operator commands | `design/workflow-state-machine.md` |
 | Current roadmap / feature status | `features.md` |

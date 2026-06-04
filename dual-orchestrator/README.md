@@ -18,6 +18,7 @@ Bash 版 `dual-agent-runner` 证明了 `acpx`、worktree、run ledger、报告�
 
 - `docs/quickstart.md`：从安装到第一个 smoke / real-case 的最短路径。
 - `docs/README.md`：当前文档入口，区分 current docs 和历史 handoff。
+- `docs/whitepaper-mapping.md`：项目如何对应 AI 时代研发效能白皮书的核心观点。
 - `docs/architecture-and-execution-flow.md`：总体设计和执行流程。
 - `docs/design/workflow-state-machine.md`：workflow / node / gate / recovery 状态机说明。
 - `docs/testing/real-case-benchmarks/README.md`：真实 case benchmark 入口和报告索引。
@@ -66,6 +67,7 @@ Runtime 只认识三类节点：
 - review packet operator guidance：human gate 会给出推荐动作、原因和建议检查项，帮助人判断 approve / revise / complete。
 - `dualctl review show`：展示当前人工卡点需要看的 review packet。
 - Timeline projection：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
+- Trace CLI：`dualctl trace` 一屏展示当前 status、active node、open gate、acceptance、repair loops、timeline、关键 artifacts 和下一步命令。
 - Workstream summary：`dualctl summary` 会聚合 timeline、recovery、delivery、calibration 和 final report，方便真实 case 复盘。
 - review decision handler。
 - context package handler，会在关键 Agent step 前装配可读上下文。
@@ -234,6 +236,7 @@ dualctl start --help
 dualctl resume --help
 dualctl review approve --help
 dualctl review show --help
+dualctl trace --help
 dualctl timeline --help
 ```
 
@@ -258,6 +261,14 @@ cat docs/testing/real-case-reports/<timestamp>/report.md
 jq . docs/testing/real-case-reports/<timestamp>/summary.json
 cat docs/testing/real-case-benchmarks/benchmark-index.md
 ```
+
+如果要直接看某个 workstream 当前跑到哪里，先用一屏 trace：
+
+```bash
+dualctl trace --workdir <effective_worktree> <workstream_id>
+```
+
+`trace` 会把当前节点、open gate、最近 timeline、final acceptance、repair loop、关键 artifact 和下一步命令放在一起。需要深挖时，再看 `status` / `timeline` / `runs` / `events`。
 
 结果判断：
 
@@ -921,6 +932,16 @@ dualctl review show --workdir <effective_worktree> <workstream_id>
 这个 packet 是后续 CLI watch / Web UI 共用的人工审查读模型，里面会列出 gate、允许动作、TaskContract、最新 Agent decision / Must Fix、Git evidence、delivery artifacts、输入 artifacts 和关键内容摘录。
 
 当 `dualctl resume`、`dualctl run` 或 `dualctl review approve --run` 停在 human gate 时，终端会直接打印 `Next actions`、`dualctl review show ...` 和当前 packet 路径，优先按这份 packet 做人工判断。
+
+### Trace
+
+追踪长任务时，优先用一屏 trace：
+
+```bash
+dualctl trace --workdir <effective_worktree> <workstream_id>
+```
+
+`trace` 只读取现有 ledger，不改变 workflow 状态。它会聚合 status、当前节点、open gates、Codex final acceptance、repair loops、最近 timeline、最近 agent runs、关键 artifacts 和下一步推荐命令。
 
 ### Timeline
 

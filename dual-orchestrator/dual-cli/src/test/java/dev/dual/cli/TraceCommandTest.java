@@ -1,0 +1,185 @@
+package dev.dual.cli;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class TraceCommandTest {
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void printsOneScreenTraceForCompletedWorkstream() throws Exception {
+        writeCompletedLedger();
+
+        var command = new TraceCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-trace";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Trace"));
+        assertTrue(printed.contains("Workstream: ws-trace"));
+        assertTrue(printed.contains("Status: COMPLETED"));
+        assertTrue(printed.contains("Final Acceptance: ACCEPT_WITH_NOTES"));
+        assertTrue(printed.contains("Repair Loops: 1"));
+        assertTrue(printed.contains("Verification Confidence: MEDIUM"));
+        assertTrue(printed.contains("[ok] intake.claude_brainstorm"));
+        assertTrue(printed.contains("[loop] repair: REJECT_IMPLEMENTATION_BUG"));
+        assertTrue(printed.contains("[ok] delivery.prepare_pr"));
+        assertTrue(printed.contains("Final Report:"));
+        assertTrue(printed.contains("Handoff JSON:"));
+        assertTrue(printed.contains("dualctl summary --workdir"));
+    }
+
+    @Test
+    void printsRecoveryNextActionForFailedWorkstream() throws Exception {
+        writeFailedLedger();
+
+        var command = new TraceCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-trace";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Status: WAITING_FOR_RECOVERY"));
+        assertTrue(printed.contains("Current Node: acceptance.classify_failure"));
+        assertTrue(printed.contains("dualctl recovery show --workdir"));
+        assertTrue(printed.contains("dualctl retry --workdir"));
+    }
+
+    private void writeCompletedLedger() throws Exception {
+        writeBaseLedger("COMPLETED", """
+                "activeNodeInstanceIds": [],
+                "openGateIds": [],
+                """);
+        writeSummary("""
+                {
+                  "final_status": "COMPLETED",
+                  "final_acceptance_decision": "ACCEPT_WITH_NOTES",
+                  "repair_loop_count": 1,
+                  "verification_confidence": "MEDIUM",
+                  "original_repo_clean": true
+                }
+                """);
+    }
+
+    private void writeFailedLedger() throws Exception {
+        writeBaseLedger("WAITING_FOR_RECOVERY", """
+                "activeNodeInstanceIds": ["node-failed"],
+                "openGateIds": [],
+                """);
+        writeSummary("""
+                {
+                  "final_status": "WAITING_FOR_RECOVERY",
+                  "final_acceptance_decision": "REJECT",
+                  "repair_loop_count": 0,
+                  "verification_confidence": "LOW",
+                  "original_repo_clean": true
+                }
+                """);
+    }
+
+    private void writeBaseLedger(String status, String activeBlock) throws Exception {
+        var root = tempDir.resolve(".agent/workstreams/ws-trace");
+        Files.createDirectories(root.resolve("reports"));
+        Files.createDirectories(root.resolve("artifacts/next-stage"));
+        Files.createDirectories(root.resolve("delivery"));
+        Files.createDirectories(root.resolve("runs/run-1"));
+        Files.writeString(root.resolve("reports/latest-final-report.md"), "# Final\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("artifacts/next-stage/handoff.json"), "{}", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("artifacts/next-stage/next-stage-prompt.md"), "# Next\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("delivery/pr-body.md"), "# PR\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("runs/run-1/run.json"), """
+                {
+                  "schemaVersion": 1,
+                  "runId": "run-1",
+                  "workstreamId": "ws-trace",
+                  "nodeId": "acceptance.codex_verifier_review",
+                  "agent": "codex",
+                  "session": "codex-reviewer",
+                  "durationMs": 123,
+                  "exitCode": 0,
+                  "status": "completed"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("events.jsonl"), """
+                {"event_type":"node_routed","payload":{"outcome":"REJECT_IMPLEMENTATION_BUG"}}
+                {"event_type":"iteration_started","payload":{"trigger_action":"REJECT_IMPLEMENTATION_BUG"}}
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("timeline.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-trace",
+                  "workflowId": "agent-lifecycle-p6",
+                  "definitionVersion": 3,
+                  "workflowStatus": "%s",
+                  %s
+                  "updatedAt": "2026-06-04T00:00:00Z",
+                  "nodes": [
+                    {
+                      "nodeDefinitionId": "intake.claude_brainstorm",
+                      "kind": "TASK",
+                      "status": "COMPLETED",
+                      "iterationId": "iter-001",
+                      "durationMs": 10
+                    },
+                    {
+                      "nodeDefinitionId": "acceptance.classify_failure",
+                      "kind": "TASK",
+                      "status": "COMPLETED",
+                      "iterationId": "iter-002",
+                      "durationMs": 20,
+                      "outcome": "REJECT_IMPLEMENTATION_BUG"
+                    },
+                    {
+                      "nodeDefinitionId": "delivery.prepare_pr",
+                      "kind": "TASK",
+                      "status": "COMPLETED",
+                      "iterationId": "iter-003",
+                      "durationMs": 30
+                    },
+                    {
+                      "nodeInstanceId": "node-failed",
+                      "nodeDefinitionId": "acceptance.classify_failure",
+                      "kind": "TASK",
+                      "status": "FAILED",
+                      "iterationId": "iter-003",
+                      "durationMs": 40
+                    }
+                  ]
+                }
+                """.formatted(status, activeBlock), StandardCharsets.UTF_8);
+    }
+
+    private void writeSummary(String json) throws Exception {
+        var dir = tempDir.resolve(".agent/workstreams/ws-trace/reports");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("real-case-summary.json"), json, StandardCharsets.UTF_8);
+    }
+
+    private String captureStdout(ThrowingCallable callable) throws Exception {
+        var originalOut = System.out;
+        var out = new ByteArrayOutputStream();
+        try {
+            System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+            assertEquals(0, callable.call());
+        } finally {
+            System.setOut(originalOut);
+        }
+        return out.toString(StandardCharsets.UTF_8);
+    }
+
+    @FunctionalInterface
+    private interface ThrowingCallable {
+        int call() throws Exception;
+    }
+}

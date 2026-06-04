@@ -106,6 +106,16 @@ Use the effective workdir and workstream id printed by `start` or
 `run-real-case.sh`:
 
 ```bash
+dualctl trace --workdir <effective_workdir> <workstream_id>
+```
+
+`trace` is the easiest first read. It prints the current status, active node,
+open gate, recent timeline, final acceptance decision, repair loops, important
+artifacts, and the next command to run.
+
+For deeper inspection:
+
+```bash
 dualctl status --workdir <effective_workdir> <workstream_id>
 dualctl timeline --workdir <effective_workdir> <workstream_id>
 dualctl runs --workdir <effective_workdir> <workstream_id>
