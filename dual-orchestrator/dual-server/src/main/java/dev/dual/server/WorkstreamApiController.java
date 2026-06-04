@@ -62,6 +62,14 @@ public class WorkstreamApiController {
         return queryService.currentReview(workdirPath(workdir), workstreamId);
     }
 
+    @GetMapping("/{workstreamId}/recovery/current")
+    public Map<String, Object> currentRecovery(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir
+    ) throws Exception {
+        return queryService.currentRecovery(workdirPath(workdir), workstreamId);
+    }
+
     @PostMapping("/{workstreamId}/resume")
     public Map<String, Object> resume(
             @PathVariable String workstreamId,

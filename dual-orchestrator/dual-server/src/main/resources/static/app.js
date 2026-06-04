@@ -24,6 +24,9 @@ const els = {
   reviewStructured: $("reviewStructured"),
   reviewPacket: $("reviewPacket"),
   reviewGate: $("reviewGate"),
+  recoveryPanel: $("recoveryPanel"),
+  recoveryMarkdown: $("recoveryMarkdown"),
+  recoveryPath: $("recoveryPath"),
   feedback: $("feedback"),
   resume: $("resume"),
   approve: $("approve"),
@@ -118,7 +121,7 @@ async function loadSelected() {
     return;
   }
   await loadStatus();
-  await Promise.all([loadTimeline(), loadReviewPacket()]);
+  await Promise.all([loadTimeline(), loadReviewPacket(), loadRecoverySummary()]);
 }
 
 async function loadStatus() {
@@ -167,6 +170,33 @@ async function loadReviewPacket() {
     els.reviewGate.textContent = "not available";
     els.reviewStructured.innerHTML = "";
     els.reviewPacket.textContent = JSON.stringify(error, null, 2);
+  }
+}
+
+async function loadRecoverySummary() {
+  const status = state.status?.workflow?.status || "";
+  const stopped = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY"].includes(status);
+  if (!stopped) {
+    els.recoveryPanel.classList.add("hidden");
+    els.recoveryMarkdown.textContent = "";
+    els.recoveryPath.textContent = "";
+    return;
+  }
+  try {
+    const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/recovery/current?workdir=${workdirParam()}`);
+    if (!data.available) {
+      els.recoveryPanel.classList.add("hidden");
+      els.recoveryMarkdown.textContent = "";
+      els.recoveryPath.textContent = "";
+      return;
+    }
+    els.recoveryPanel.classList.remove("hidden");
+    els.recoveryPath.textContent = data.recoveryPath || "";
+    els.recoveryMarkdown.textContent = data.markdown || "";
+  } catch (error) {
+    els.recoveryPanel.classList.remove("hidden");
+    els.recoveryPath.textContent = "not available";
+    els.recoveryMarkdown.textContent = JSON.stringify(error, null, 2);
   }
 }
 

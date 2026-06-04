@@ -222,6 +222,7 @@ http://localhost:8080/
 - 查看当前 status 和 timeline。
 - 查看最近的 Agent artifact contract sidecars 摘要，包括 decision、summary、must fix、风险、变更文件和验证摘要。
 - 当 workflow 停在 human review gate 时，展示当前 review packet；页面会先渲染推荐动作、TaskContract / Decision / Must Fix / Git Evidence 等结构化审查卡片，原始 Markdown packet 保留在折叠区。
+- 当 workflow 停在 failed / blocked / waiting for recovery 状态时，展示 `recovery/current-failure.md`。
 - 手动执行 scheduler tick。
 - 对选中的 workstream 执行 resume、retry、approve + run、revise + run、complete。
 
@@ -242,6 +243,7 @@ curl "http://localhost:8080/api/workstreams?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/status?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/timeline?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/review/current?workdir=<effective_worktree>"
+curl "http://localhost:8080/api/workstreams/<workstream_id>/recovery/current?workdir=<effective_worktree>"
 ```
 
 推进 workflow：

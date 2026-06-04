@@ -136,6 +136,27 @@ public class WorkstreamQueryService {
         return response;
     }
 
+    public Map<String, Object> currentRecovery(Path workspaceRoot, String workstreamId) throws IOException {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        var failurePath = paths.currentFailureMarkdown();
+        var failureRef = root.relativize(failurePath.toAbsolutePath().normalize()).toString();
+
+        var response = new LinkedHashMap<String, Object>();
+        response.put("workstreamId", workstreamId);
+        response.put("recoveryPath", failureRef);
+        if (!Files.isRegularFile(failurePath)) {
+            response.put("available", false);
+            response.put("message", "No current failure summary found.");
+            response.put("markdown", "");
+            return response;
+        }
+        response.put("available", true);
+        response.put("message", "Current failure summary is available.");
+        response.put("markdown", Files.readString(failurePath, StandardCharsets.UTF_8));
+        return response;
+    }
+
     private Map<String, Object> workstreamSummary(Path root, Path dir, Path workstreamJson) throws IOException {
         var workstream = objectMapper.readValue(workstreamJson.toFile(), MAP_TYPE);
         var item = new LinkedHashMap<String, Object>();

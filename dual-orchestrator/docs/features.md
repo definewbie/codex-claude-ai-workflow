@@ -37,6 +37,7 @@
   - 2026-06-01：普通 `FAILED` / `BLOCKED` 节点会由 ledger 写入当前失败摘要，包含 node、handler、原因、exit code、output refs 和 retry 提示。
   - 2026-06-01：分类失败路径会写入语义化失败摘要，并把分类 artifact / calibration candidate ref 关联进去。
   - 2026-06-01：`dualctl recovery show` 可直接展示当前失败摘要。
+  - 2026-06-04：`dual-server` 增加 `/api/workstreams/{id}/recovery/current`，operator panel 在 stopped/recovery 状态展示当前失败摘要。
 
 ## P2 — 技术债
 
@@ -73,7 +74,7 @@
    - 2026-06-03：`cancer-clinic-rejection-prone` 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
    - 2026-06-04：`real-case-benchmark-summary.sh` 聚合所有 `summary.json`，生成 `testing/real-case-benchmarks/benchmark-index.md`，让真实 run 从零散报告变成可比较的 benchmark set。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
-   - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项。后续如果继续做，应优先补 failure/recovery 视图，而不是继续美化按钮。
+   - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项；stopped/recovery 状态已显示当前失败摘要。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
 

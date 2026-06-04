@@ -135,6 +135,38 @@ class WorkstreamApiControllerTest {
         assertEquals(true, response.get("packetMarkdown").toString().contains("Read this before approval."));
     }
 
+    @Test
+    void currentRecoveryReturnsFailureSummaryWhenPresent() throws Exception {
+        var fixture = createWorkstream("ws-api-recovery");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.createDirectories(paths.recoveryDir());
+        Files.writeString(paths.currentFailureMarkdown(), """
+                # Current Failure
+
+                - Node: acceptance.classify_failure
+                - Category: IMPLEMENTATION_BUG
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.currentRecovery(fixture.workstreamId(), tempDir.toString());
+
+        assertEquals(true, response.get("available"));
+        assertEquals(".agent/workstreams/" + fixture.workstreamId() + "/recovery/current-failure.md",
+                response.get("recoveryPath"));
+        assertEquals(true, response.get("markdown").toString().contains("IMPLEMENTATION_BUG"));
+    }
+
+    @Test
+    void currentRecoveryReturnsUnavailableWhenMissing() throws Exception {
+        var fixture = createWorkstream("ws-api-no-recovery");
+        var controller = controller();
+
+        var response = controller.currentRecovery(fixture.workstreamId(), tempDir.toString());
+
+        assertEquals(false, response.get("available"));
+        assertEquals("", response.get("markdown"));
+    }
+
     private WorkstreamApiController controller() {
         return new WorkstreamApiController(
                 new WorkstreamQueryService(new ObjectMapper()),

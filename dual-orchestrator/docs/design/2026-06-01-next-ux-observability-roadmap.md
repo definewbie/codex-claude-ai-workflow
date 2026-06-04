@@ -243,6 +243,7 @@ UI 可以开始设计，但不建议第一步就做复杂前端。先做 local r
 GET /api/workstreams?workdir=<effective_worktree>
 GET /api/workstreams/{workstreamId}/status?workdir=<effective_worktree>
 GET /api/workstreams/{workstreamId}/timeline?workdir=<effective_worktree>
+GET /api/workstreams/{workstreamId}/recovery/current?workdir=<effective_worktree>
 POST /api/workstreams/{workstreamId}/resume?workdir=<effective_worktree>&maxSteps=1
 POST /api/workstreams/{workstreamId}/retry?workdir=<effective_worktree>
 POST /api/workstreams/{workstreamId}/review/approve?workdir=<effective_worktree>&run=false
