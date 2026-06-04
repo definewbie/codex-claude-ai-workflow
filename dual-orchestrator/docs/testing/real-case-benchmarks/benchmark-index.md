@@ -1,6 +1,6 @@
 # Real-case Benchmark Index
 
-> Generated: 2026-06-04T10:57:02Z
+> Generated: 2026-06-04T11:08:15Z
 > Source: docs/testing/real-case-reports
 
 ## Aggregate

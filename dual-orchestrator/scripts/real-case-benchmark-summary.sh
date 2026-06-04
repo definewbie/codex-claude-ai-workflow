@@ -105,6 +105,21 @@ json_int() {
   printf '%s\n' "$value"
 }
 
+json_has_key() {
+  local file="$1"
+  local key="$2"
+  jq -e --arg key "$key" 'has($key)' "$file" >/dev/null 2>&1
+}
+
+repair_loop_count() {
+  local file="$1"
+  if json_has_key "$file" "repair_loop_count"; then
+    json_int "$file" '.repair_loop_count'
+  else
+    json_int "$file" '.acceptance_reject_count'
+  fi
+}
+
 relative_ref() {
   local path="$1"
   if [[ "$path" == "$PROJECT_ROOT/"* ]]; then
@@ -205,7 +220,7 @@ write_markdown() {
     [[ "$(json_value "$file" '.final_status')" == "COMPLETED" ]] && completed=$((completed + 1))
     [[ "$(json_value "$file" '.original_repo_clean')" == "true" ]] && clean=$((clean + 1))
     reject_total=$((reject_total + $(json_int "$file" '.acceptance_reject_count')))
-    repair_total=$((repair_total + $(json_int "$file" '.repair_loop_count')))
+    repair_total=$((repair_total + $(repair_loop_count "$file")))
     gate_total=$((gate_total + $(json_int "$file" '.gate_rounds')))
     agent_total=$((agent_total + $(json_int "$file" '.agent_run_count')))
   done
@@ -254,7 +269,7 @@ EOF
     if [[ -z "$final_decision" ]]; then
       final_decision="$(jq -r '(.acceptance_decisions // []) | last // "none"' "$file")"
     fi
-    repair_loops="$(json_int "$file" '.repair_loop_count')"
+    repair_loops="$(repair_loop_count "$file")"
     confidence="$(json_value "$file" '.verification_confidence')"
     [[ -n "$confidence" ]] || confidence="$(confidence_from_decision "$final_decision")"
     repo_clean="$(json_value "$file" '.original_repo_clean')"
