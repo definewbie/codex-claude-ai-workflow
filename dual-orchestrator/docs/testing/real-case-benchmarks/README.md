@@ -50,7 +50,9 @@ docs/testing/real-case-benchmarks/benchmark-index.md
 - 每条 run 的轻量分级：`PASS` / `PASS-WARN` / `FAIL`
 - run 是否都到达 `COMPLETED`
 - gate 轮数和 Agent run 次数是否异常增加
-- Codex acceptance 是否出现 `REJECT`
+- Codex final acceptance 是否通过
+- 是否经历 `REJECT -> repair`，以及 repair loop 次数
+- verification confidence 是否仍停留在 `MEDIUM` / `LOW`
 - 原始 repo 是否保持干净
 - final report / handoff / next-stage prompt / delivery PR body 是否齐全
 
@@ -69,6 +71,16 @@ Benchmark index 的 `Grade` 是轻量体检结果，不替代人工读详细报�
 `Reason` 列给出触发分级的第一条原因。这个规则故意保持简单，目标是帮助比较真实 run 的健康度，不做复杂规则引擎。
 
 `run-real-case.sh` 也会把同一套 grade 写入单次 `summary.json` 和 `report.md`。聚合脚本仍会按同一规则重新计算一次，所以早期没有 grade 字段的历史 summary 也能进入 index。
+
+新的 summary 会额外记录：
+
+- `final_acceptance_decision`
+- `had_acceptance_reject`
+- `repair_loop_count`
+- `verification_confidence`
+- `verification_confidence_reason`
+
+这些字段用来区分“流程跑完了”和“验收证据足够可信”。例如 `ACCEPT_WITH_NOTES` 会被标记为 `MEDIUM` confidence；这不是脚本失败，但说明下一轮主线增强应继续补证据质量。
 
 `--update-benchmark-index` 默认关闭，避免临时调试 run 自动改文档。需要把一次真实 run 纳入 benchmark set 时再显式开启。
 

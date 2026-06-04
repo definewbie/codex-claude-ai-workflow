@@ -8,9 +8,9 @@ Bash 版 `dual-agent-runner` 证明了 `acpx`、worktree、run ledger、报告�
 需求澄清 -> 设计审视 -> 人工卡点 -> 计划 -> 实现 -> 自测 -> 验收 -> 下一阶段提示词
 ```
 
-当前仍是 MVP，但核心目标已经从“能不能调用两个 Agent”推进到“能不能在真实仓库里跑完整生命周期”。2026-06-02 的 `cancer-clinic` 真实 p6 长 case 已经跑到 `COMPLETED`：Codex acceptance 连续两次 `REJECT`，系统都能把失败分类、路由回 Claude 修复，最后通过验收并生成 delivery / handoff / next-stage artifacts。
+当前仍是 MVP，但核心目标已经从“能不能调用两个 Agent”推进到“能不能在真实仓库里跑完整生命周期”。2026-06-04 的 `cancer-clinic-feature-slice` 真实 P6 case 已经跑到 `COMPLETED`：Codex acceptance 先 `REJECT`，系统完成 failure classification、路由回 Claude 修复，第二次验收 `ACCEPT_WITH_NOTES`，并生成 delivery / handoff / next-stage artifacts。
 
-这说明主生命周期已经基本跑通。它还不是完整产品，后续重点是把真实长 run 的观测、人工 review、指标和交付体验做稳。
+这说明 MVP 主生命周期已经功能性闭环。它还不是完整产品；当前最重要的缺口不是再加 UI 或边角命令，而是把研发自测、上下文证据和 Codex acceptance 的可信度继续做实，让 `PASS-WARN` 更少依赖人工复读报告。
 
 ## Documentation
 
@@ -193,6 +193,46 @@ dualctl review approve --help
 dualctl review show --help
 dualctl timeline --help
 ```
+
+## Recommended MVP Flow
+
+当前推荐的 MVP 主线验证方式是：用真实仓库、真实 `acpx`、真实 worktree 跑一条受控需求，并让系统自动跨过中间 human gates。这个流程用于验证编排闭环，不等于最终业务验收。
+
+```bash
+cd dual-orchestrator
+
+./scripts/run-real-case.sh \
+  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
+  --task-file docs/testing/real-case-benchmarks/cases/cancer-clinic-feature-slice.md \
+  --variant p6 \
+  --update-benchmark-index
+```
+
+跑完后先看三类证据：
+
+```bash
+cat docs/testing/real-case-reports/<timestamp>/report.md
+jq . docs/testing/real-case-reports/<timestamp>/summary.json
+cat docs/testing/real-case-benchmarks/benchmark-index.md
+```
+
+结果判断：
+
+- `PASS`：workflow 完成、原始仓库干净、关键 artifact 齐全、最终 Codex acceptance 没有 notes。
+- `PASS-WARN`：主生命周期跑完了，但仍有需要人工关注的不确定性，例如 `ACCEPT_WITH_NOTES`、经历过 `REJECT -> repair`，或 build/runtime 证据不足。
+- `FAIL`：workflow 没完成、原始仓库被污染，或 final report / handoff / delivery artifact 缺失。
+
+对 MVP 主线来说，最重要的字段是：
+
+- `final_status`
+- `final_acceptance_decision`
+- `had_acceptance_reject`
+- `repair_loop_count`
+- `verification_confidence`
+- `original_repo_clean`
+- `artifacts`
+
+2026-06-04 的 `cancer-clinic-feature-slice` P6 run 已验证：系统能从 intake 跑到 delivery，经历一次 Codex `REJECT` 后自动进入 repair loop，最终以 `ACCEPT_WITH_NOTES` 完成，并保持原始仓库干净。详见 `docs/mvp-mainline-validation.md`。
 
 ## Local API Server
 
@@ -1233,7 +1273,7 @@ cd dual-orchestrator
 - 采集 status、timeline、events、runs、recovery、Git diff 证据。
 - 在终端打印每轮 workflow status、active node、open gates 和执行 step，方便不用翻日志也能知道跑到哪里。
 - 生成一份报告到 `docs/testing/real-case-reports/<timestamp>/report.md`。
-- 生成机器可读摘要到 `docs/testing/real-case-reports/<timestamp>/summary.json`，记录 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、artifact presence 和原始 repo 是否干净。
+- 生成机器可读摘要到 `docs/testing/real-case-reports/<timestamp>/summary.json`，记录 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、final acceptance decision、repair loop count、verification confidence、artifact presence 和原始 repo 是否干净。
 
 它不会自动提交、不会 push、不会创建 PR，也不会删除原始 repo。`--cleanup-worktree` 只会在报告生成后删除本次创建的 worktree。
 如果用 `Ctrl+C` 中断，脚本会尽量采集当前 evidence 并写出中断报告，报告里会保留后续 `status` / `resume` 命令。
@@ -1257,6 +1297,8 @@ jq . docs/testing/real-case-reports/<timestamp>/summary.json
 ```
 
 这个脚本适合验证编排主链路，不等于业务最终验收。真实交付前仍然应该人工查看 final report、Codex acceptance、Git diff 和 handoff。
+
+如果结果是 `PASS-WARN`，先看 `summary.json` 里的 `verification_confidence` 和 `report.md` 里的 acceptance metrics。`MEDIUM` 通常表示主链路已经完成，但 Codex 仍然保留 build/runtime/self-test 证据不足等 notes；这类问题属于后续主线增强，不应该简单当成脚本失败。
 
 推荐使用一个明确的临时 worktree 目录，方便跑完清理：
 

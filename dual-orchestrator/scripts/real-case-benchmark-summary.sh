@@ -169,6 +169,16 @@ benchmark_grade_reason() {
   real_case_grade_reason "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects"
 }
 
+confidence_from_decision() {
+  local final_decision="$1"
+  case "$final_decision" in
+    ACCEPT) printf 'HIGH' ;;
+    ACCEPT_WITH_NOTES) printf 'MEDIUM' ;;
+    REJECT) printf 'LOW' ;;
+    *) printf 'UNKNOWN' ;;
+  esac
+}
+
 write_markdown() {
   local -a files=("$@")
   local total=${#files[@]}
@@ -178,6 +188,7 @@ write_markdown() {
   local fail_count=0
   local clean=0
   local reject_total=0
+  local repair_total=0
   local gate_total=0
   local agent_total=0
   local generated_at
@@ -194,6 +205,7 @@ write_markdown() {
     [[ "$(json_value "$file" '.final_status')" == "COMPLETED" ]] && completed=$((completed + 1))
     [[ "$(json_value "$file" '.original_repo_clean')" == "true" ]] && clean=$((clean + 1))
     reject_total=$((reject_total + $(json_int "$file" '.acceptance_reject_count')))
+    repair_total=$((repair_total + $(json_int "$file" '.repair_loop_count')))
     gate_total=$((gate_total + $(json_int "$file" '.gate_rounds')))
     agent_total=$((agent_total + $(json_int "$file" '.agent_run_count')))
   done
@@ -215,17 +227,18 @@ write_markdown() {
 | Completed | $completed |
 | Original repo clean | $clean |
 | Acceptance rejects | $reject_total |
+| Repair loops | $repair_total |
 | Gate rounds | $gate_total |
 | Agent runs | $agent_total |
 
 ## Runs
 
-| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Acceptance decisions | Rejects | Repo clean | Artifacts | Report |
-| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- |
+| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Final acceptance | Repair loops | Confidence | Repo clean | Artifacts | Report |
+| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
 EOF
 
   for file in "${files[@]}"; do
-    local run_dir report_ref date case variant status workstream gates agent_runs decisions rejects repo_clean artifacts grade reason
+    local run_dir report_ref date case variant status workstream gates agent_runs final_decision repair_loops confidence repo_clean artifacts grade reason
     run_dir="$(dirname "$file")"
     report_ref="$(relative_ref "$run_dir/report.md")"
     date="$(basename "$run_dir")"
@@ -237,13 +250,18 @@ EOF
     workstream="$(json_value "$file" '.workstream')"
     gates="$(json_int "$file" '.gate_rounds')"
     agent_runs="$(json_int "$file" '.agent_run_count')"
-    decisions="$(jq -r '(.acceptance_decisions // []) | join(", ")' "$file")"
-    rejects="$(json_int "$file" '.acceptance_reject_count')"
+    final_decision="$(json_value "$file" '.final_acceptance_decision')"
+    if [[ -z "$final_decision" ]]; then
+      final_decision="$(jq -r '(.acceptance_decisions // []) | last // "none"' "$file")"
+    fi
+    repair_loops="$(json_int "$file" '.repair_loop_count')"
+    confidence="$(json_value "$file" '.verification_confidence')"
+    [[ -n "$confidence" ]] || confidence="$(confidence_from_decision "$final_decision")"
     repo_clean="$(json_value "$file" '.original_repo_clean')"
     artifacts="$(artifact_health "$file")"
-    printf '| %s | `%s` | %s | %s | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
+    printf '| %s | `%s` | %s | %s | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
       "$date" "$case" "$grade" "$reason" "$variant" "$status" "$workstream" "$gates" "$agent_runs" \
-      "${decisions:-none}" "$rejects" "$repo_clean" "$artifacts" "$report_ref" "$date"
+      "${final_decision:-none}" "$repair_loops" "$confidence" "$repo_clean" "$artifacts" "$report_ref" "$date"
   done
 
   cat <<'EOF'

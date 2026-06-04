@@ -17,6 +17,9 @@ human gates, recovery, and benchmark evidence connected.
 - Agent runs: 15
 - Timeline nodes: 43
 - Acceptance decisions: `REJECT`, then `ACCEPT_WITH_NOTES`
+- Final acceptance decision: `ACCEPT_WITH_NOTES`
+- Repair loop count: 1
+- Verification confidence: `MEDIUM`
 - Original repo clean: `true`
 
 ## What This Validated
@@ -57,6 +60,29 @@ can drive a complete lifecycle, survive one verifier rejection, produce delivery
 artifacts, and leave the original repo clean.
 
 The result is still `PASS-WARN`, not a final product-quality `PASS`, because
-Codex accepted with notes about unavailable build/runtime verification. The next
-mainline work should focus on reducing this uncertainty in context, self-test,
-and acceptance evidence without adding side features.
+Codex accepted with notes about unavailable build/runtime verification.
+
+## Remaining Mainline Gaps
+
+These are still on the main path. They should be handled before spending more
+time on UI, notification, or scheduler polish:
+
+1. Self-test evidence is too dependent on what Claude chooses to report. The
+   workflow should make it easier for Claude to state exactly which checks were
+   run, which were skipped, and why.
+2. Codex acceptance can identify missing runtime/build evidence, but the summary
+   should keep surfacing that as verification confidence instead of hiding it
+   behind a generic `PASS-WARN`.
+3. Context package and handoff are sufficient for this bounded case, but longer
+   lifecycle runs still need better evidence retention around decisions, changed
+   files, self-test results, and unresolved risks.
+4. Repair loops work for at least one verifier rejection, but the benchmark set
+   should continue tracking repair loop count and final acceptance confidence so
+   regressions are visible.
+
+## Next Mainline Step
+
+The next useful implementation step is to strengthen self-test and acceptance
+evidence contracts without over-specifying how agents test. The orchestrator
+should ask for structured evidence and expose confidence, while Claude and Codex
+remain responsible for professional judgment.

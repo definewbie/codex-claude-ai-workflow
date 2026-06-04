@@ -353,6 +353,15 @@ acceptance_decisions_text() {
   acceptance_decisions_json | sed 's/^\[//; s/\]$//; s/"//g'
 }
 
+final_acceptance_decision() {
+  local decisions="$1"
+  if [[ -z "$decisions" ]]; then
+    printf 'none'
+    return
+  fi
+  printf '%s' "$decisions" | awk -F',' '{ value=$NF; gsub(/^[[:space:]]+|[[:space:]]+$/, "", value); print value }'
+}
+
 acceptance_reject_count() {
   [[ -n "$WS_DIR" && -d "$WS_DIR/runs" ]] || {
     printf '0'
@@ -367,6 +376,61 @@ acceptance_reject_count() {
     fi
   done < <(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null | sort)
   printf '%s' "$count"
+}
+
+bool_from_count() {
+  local count="$1"
+  if [[ "$count" -gt 0 ]]; then
+    printf 'true'
+  else
+    printf 'false'
+  fi
+}
+
+verification_confidence() {
+  local final_decision="$1"
+  local missing="$2"
+  case "$final_decision" in
+    ACCEPT)
+      if [[ -z "$missing" ]]; then
+        printf 'HIGH'
+      else
+        printf 'MEDIUM'
+      fi
+      ;;
+    ACCEPT_WITH_NOTES)
+      printf 'MEDIUM'
+      ;;
+    REJECT)
+      printf 'LOW'
+      ;;
+    *)
+      printf 'UNKNOWN'
+      ;;
+  esac
+}
+
+verification_confidence_reason() {
+  local final_decision="$1"
+  local missing="$2"
+  case "$final_decision" in
+    ACCEPT)
+      if [[ -z "$missing" ]]; then
+        printf 'accepted_without_notes'
+      else
+        printf 'accepted_but_missing_artifacts=%s' "$missing"
+      fi
+      ;;
+    ACCEPT_WITH_NOTES)
+      printf 'accepted_with_notes'
+      ;;
+    REJECT)
+      printf 'final_acceptance_rejected'
+      ;;
+    *)
+      printf 'no_final_acceptance_decision'
+      ;;
+  esac
 }
 
 artifact_present_bool() {
@@ -406,7 +470,7 @@ write_summary_json() {
   local summary="$CASE_DIR/summary.json"
   local gate_rounds node_count run_count iteration_count design_revision_count reject_count
   local original_clean final_report_present handoff_present next_prompt_present delivery_body_present workstream_summary_present
-  local decisions missing grade reason
+  local decisions final_decision missing grade reason confidence confidence_reason
   gate_rounds="$(count_lines_matching "$CASE_DIR/logs/autorun.log" '^Gate ')"
   node_count="$(count_lines_matching "$CASE_DIR/logs/timeline.log" '^  ')"
   run_count="$(agent_run_count)"
@@ -421,6 +485,9 @@ write_summary_json() {
   decisions="$(acceptance_decisions_text)"
   missing="$(missing_artifacts)"
   reject_count="$(acceptance_reject_count)"
+  final_decision="$(final_acceptance_decision "$decisions")"
+  confidence="$(verification_confidence "$final_decision" "$missing")"
+  confidence_reason="$(verification_confidence_reason "$final_decision" "$missing")"
   grade="$(real_case_grade "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
   reason="$(real_case_grade_reason "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
 
@@ -442,7 +509,12 @@ write_summary_json() {
     echo "  \"iteration_count\": $iteration_count,"
     echo "  \"design_revision_count\": $design_revision_count,"
     echo "  \"acceptance_decisions\": $(acceptance_decisions_json),"
+    echo "  \"final_acceptance_decision\": \"$(json_escape "$final_decision")\","
     echo "  \"acceptance_reject_count\": $reject_count,"
+    echo "  \"had_acceptance_reject\": $(bool_from_count "$reject_count"),"
+    echo "  \"repair_loop_count\": $reject_count,"
+    echo "  \"verification_confidence\": \"$(json_escape "$confidence")\","
+    echo "  \"verification_confidence_reason\": \"$(json_escape "$confidence_reason")\","
     echo "  \"original_repo_clean\": $original_clean,"
     echo "  \"benchmark_grade\": \"$(json_escape "$grade")\","
     echo "  \"benchmark_grade_reason\": \"$(json_escape "$reason")\","
@@ -477,9 +549,15 @@ write_report() {
   local next_prompt="$WS_DIR/artifacts/next-stage/next-stage-prompt.md"
   local delivery_body="$WS_DIR/delivery/pr-body.md"
   local delivery_commit="$WS_DIR/delivery/commit-message.txt"
-  local grade reason
+  local grade reason decisions final_decision reject_count missing confidence confidence_reason
   grade="$(grep -E '"benchmark_grade"[[:space:]]*:' "$summary" | sed -E 's/.*"benchmark_grade"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
   reason="$(grep -E '"benchmark_grade_reason"[[:space:]]*:' "$summary" | sed -E 's/.*"benchmark_grade_reason"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+  decisions="$(acceptance_decisions_text)"
+  final_decision="$(final_acceptance_decision "$decisions")"
+  reject_count="$(acceptance_reject_count)"
+  missing="$(missing_artifacts)"
+  confidence="$(verification_confidence "$final_decision" "$missing")"
+  confidence_reason="$(verification_confidence_reason "$final_decision" "$missing")"
 
   {
     echo "# Real Lifecycle Case Report"
@@ -504,7 +582,12 @@ write_report() {
     echo "- Iteration Starts: $(count_lines_matching "$WS_DIR/events.jsonl" '"event_type":"iteration_started"')"
     echo "- Design Revisions: $(count_lines_matching "$WS_DIR/events.jsonl" '"outcome":"NEEDS_REVISION"')"
     echo "- Acceptance Decisions: $(acceptance_decisions_json)"
-    echo "- Acceptance Reject Count: $(acceptance_reject_count)"
+    echo "- Acceptance Reject Count: $reject_count"
+    echo "- Final Acceptance Decision: $final_decision"
+    echo "- Had Acceptance Reject: $(bool_from_count "$reject_count")"
+    echo "- Repair Loop Count: $reject_count"
+    echo "- Verification Confidence: $confidence"
+    echo "- Verification Confidence Reason: $confidence_reason"
     echo "- Original Repo Clean: $(original_repo_clean_bool)"
     echo "- Benchmark Grade: ${grade:-unknown}"
     echo "- Benchmark Reason: ${reason:-unknown}"
