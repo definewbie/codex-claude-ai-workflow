@@ -183,13 +183,15 @@ start_workstream() {
   if ! dualctl "${args[@]}" >"$CASE_DIR/logs/start.log" 2>&1; then
     cat "$CASE_DIR/logs/start.log"
     fail "dualctl start failed"
+    parse_started_workstream || true
     FINAL_STATUS="START_FAILED"
+    collect_evidence || true
+    status_snapshot "final" || true
     write_report
     exit 1
   fi
 
-  WORKSTREAM_ID="$(awk '/^Workstream:/ { value = $2 } END { print value }' "$CASE_DIR/logs/start.log")"
-  WORKSPACE_DIR="$(awk '/^Workspace:/ { value = $2 } END { print value }' "$CASE_DIR/logs/start.log")"
+  parse_started_workstream
 
   [[ -n "$WORKSTREAM_ID" ]] || { cat "$CASE_DIR/logs/start.log"; fail "could not parse Workstream"; exit 1; }
   [[ -n "$WORKSPACE_DIR" ]] || { cat "$CASE_DIR/logs/start.log"; fail "could not parse Workspace"; exit 1; }
@@ -199,6 +201,17 @@ start_workstream() {
   log "Workspace:  $WORKSPACE_DIR"
   log "Ledger:     $WS_DIR"
   print_step_lines "$(cat "$CASE_DIR/logs/start.log")"
+}
+
+parse_started_workstream() {
+  [[ -f "$CASE_DIR/logs/start.log" ]] || return 1
+  WORKSTREAM_ID="$(awk '/^Workstream:/ { value = $2 } END { print value }' "$CASE_DIR/logs/start.log")"
+  WORKSPACE_DIR="$(awk '/^Workspace:/ { value = $2 } END { print value }' "$CASE_DIR/logs/start.log")"
+  if [[ -n "$WORKSTREAM_ID" && -n "$WORKSPACE_DIR" ]]; then
+    WS_DIR="$WORKSPACE_DIR/.agent/workstreams/$WORKSTREAM_ID"
+    return 0
+  fi
+  return 1
 }
 
 status_snapshot() {
