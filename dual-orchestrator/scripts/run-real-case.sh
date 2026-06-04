@@ -18,6 +18,9 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 JAR_PATH="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
 REPORT_ROOT="$PROJECT_ROOT/docs/testing/real-case-reports"
 
+# shellcheck source=scripts/lib/real-case-grade.sh
+source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
+
 REPO=""
 TASK_FILE=""
 VARIANT="p6"
@@ -338,6 +341,10 @@ acceptance_decisions_json() {
   printf ']'
 }
 
+acceptance_decisions_text() {
+  acceptance_decisions_json | sed 's/^\[//; s/\]$//; s/"//g'
+}
+
 artifact_present_bool() {
   local ref="$1"
   if [[ -f "$WS_DIR/$ref" ]]; then
@@ -345,6 +352,17 @@ artifact_present_bool() {
   else
     printf 'false'
   fi
+}
+
+missing_artifacts() {
+  local missing=()
+  [[ "$(artifact_present_bool "reports/latest-final-report.md")" == "true" ]] || missing+=("final_report")
+  [[ "$(artifact_present_bool "artifacts/next-stage/handoff.json")" == "true" ]] || missing+=("handoff_json")
+  [[ "$(artifact_present_bool "artifacts/next-stage/next-stage-prompt.md")" == "true" ]] || missing+=("next_stage_prompt")
+  [[ "$(artifact_present_bool "delivery/pr-body.md")" == "true" ]] || missing+=("delivery_pr_body")
+  [[ "$(artifact_present_bool "reports/workstream-summary.md")" == "true" ]] || missing+=("workstream_summary")
+  local IFS=,
+  printf '%s' "${missing[*]}"
 }
 
 original_repo_clean_bool() {
@@ -360,6 +378,7 @@ write_summary_json() {
   local summary="$CASE_DIR/summary.json"
   local gate_rounds node_count run_count iteration_count design_revision_count reject_count
   local original_clean final_report_present handoff_present next_prompt_present delivery_body_present workstream_summary_present
+  local decisions missing grade reason
   gate_rounds="$(count_lines_matching "$CASE_DIR/logs/autorun.log" '^Gate ')"
   node_count="$(count_lines_matching "$CASE_DIR/logs/timeline.log" '^  ')"
   run_count="$(agent_run_count)"
@@ -373,6 +392,10 @@ write_summary_json() {
   next_prompt_present="$(artifact_present_bool "artifacts/next-stage/next-stage-prompt.md")"
   delivery_body_present="$(artifact_present_bool "delivery/pr-body.md")"
   workstream_summary_present="$(artifact_present_bool "reports/workstream-summary.md")"
+  decisions="$(acceptance_decisions_text)"
+  missing="$(missing_artifacts)"
+  grade="$(real_case_grade "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
+  reason="$(real_case_grade_reason "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
 
   {
     echo "{"
@@ -394,6 +417,8 @@ write_summary_json() {
     echo "  \"acceptance_decisions\": $(acceptance_decisions_json),"
     echo "  \"acceptance_reject_count\": $reject_count,"
     echo "  \"original_repo_clean\": $original_clean,"
+    echo "  \"benchmark_grade\": \"$(json_escape "$grade")\","
+    echo "  \"benchmark_grade_reason\": \"$(json_escape "$reason")\","
     echo "  \"artifacts\": {"
     echo "    \"final_report\": $final_report_present,"
     echo "    \"handoff_json\": $handoff_present,"
@@ -418,12 +443,16 @@ write_report() {
   FINISHED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   write_summary_json
   local report="$CASE_DIR/report.md"
+  local summary="$CASE_DIR/summary.json"
   local final_report="$WS_DIR/reports/latest-final-report.md"
   local workstream_summary="$WS_DIR/reports/workstream-summary.md"
   local handoff_json="$WS_DIR/artifacts/next-stage/handoff.json"
   local next_prompt="$WS_DIR/artifacts/next-stage/next-stage-prompt.md"
   local delivery_body="$WS_DIR/delivery/pr-body.md"
   local delivery_commit="$WS_DIR/delivery/commit-message.txt"
+  local grade reason
+  grade="$(grep -E '"benchmark_grade"[[:space:]]*:' "$summary" | sed -E 's/.*"benchmark_grade"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+  reason="$(grep -E '"benchmark_grade_reason"[[:space:]]*:' "$summary" | sed -E 's/.*"benchmark_grade_reason"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
 
   {
     echo "# Real Lifecycle Case Report"
@@ -450,6 +479,8 @@ write_report() {
     echo "- Acceptance Decisions: $(acceptance_decisions_json)"
     echo "- Acceptance Reject Count: $(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null -exec grep -h '"decision"[[:space:]]*:[[:space:]]*"REJECT"' {} \; | wc -l | tr -d '[:space:]')"
     echo "- Original Repo Clean: $(original_repo_clean_bool)"
+    echo "- Benchmark Grade: ${grade:-unknown}"
+    echo "- Benchmark Reason: ${reason:-unknown}"
     echo
     echo "## Summary JSON"
     echo

@@ -17,6 +17,9 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPORTS_DIR="$PROJECT_ROOT/docs/testing/real-case-reports"
 OUTPUT="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-index.md"
 
+# shellcheck source=scripts/lib/real-case-grade.sh
+source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -144,58 +147,26 @@ case_name() {
   printf '%s' "${name%.*}"
 }
 
-acceptance_has() {
-  local file="$1"
-  local decision="$2"
-  jq -e --arg decision "$decision" '
-    (.acceptance_decisions // []) | index($decision) != null
-  ' "$file" >/dev/null
-}
-
 benchmark_grade() {
   local file="$1"
-  local status repo_clean missing_artifacts rejects
+  local status repo_clean missing_artifacts rejects decisions
   status="$(json_value "$file" '.final_status')"
   repo_clean="$(json_value "$file" '.original_repo_clean')"
   missing_artifacts="$(missing_artifacts "$file")"
   rejects="$(json_int "$file" '.acceptance_reject_count')"
-
-  if [[ "$status" != "COMPLETED" ]]; then
-    printf 'FAIL'
-  elif [[ "$repo_clean" != "true" ]]; then
-    printf 'FAIL'
-  elif [[ -n "$missing_artifacts" ]]; then
-    printf 'FAIL'
-  elif acceptance_has "$file" "ACCEPT_WITH_NOTES"; then
-    printf 'PASS-WARN'
-  elif [[ "$rejects" -gt 0 ]]; then
-    printf 'PASS-WARN'
-  else
-    printf 'PASS'
-  fi
+  decisions="$(jq -r '(.acceptance_decisions // []) | join(", ")' "$file")"
+  real_case_grade "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects"
 }
 
 benchmark_grade_reason() {
   local file="$1"
-  local status repo_clean missing_artifacts rejects
+  local status repo_clean missing_artifacts rejects decisions
   status="$(json_value "$file" '.final_status')"
   repo_clean="$(json_value "$file" '.original_repo_clean')"
   missing_artifacts="$(missing_artifacts "$file")"
   rejects="$(json_int "$file" '.acceptance_reject_count')"
-
-  if [[ "$status" != "COMPLETED" ]]; then
-    printf 'status=%s' "$status"
-  elif [[ "$repo_clean" != "true" ]]; then
-    printf 'original_repo_dirty'
-  elif [[ -n "$missing_artifacts" ]]; then
-    printf 'missing_artifacts=%s' "$missing_artifacts"
-  elif acceptance_has "$file" "ACCEPT_WITH_NOTES"; then
-    printf 'accepted_with_notes'
-  elif [[ "$rejects" -gt 0 ]]; then
-    printf 'repaired_rejects=%s' "$rejects"
-  else
-    printf 'ok'
-  fi
+  decisions="$(jq -r '(.acceptance_decisions // []) | join(", ")' "$file")"
+  real_case_grade_reason "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects"
 }
 
 write_markdown() {

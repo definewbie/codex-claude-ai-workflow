@@ -58,6 +58,8 @@ Benchmark index 的 `Grade` 是轻量体检结果，不替代人工读详细报�
 
 `Reason` 列给出触发分级的第一条原因。这个规则故意保持简单，目标是帮助比较真实 run 的健康度，不做复杂规则引擎。
 
+`run-real-case.sh` 也会把同一套 grade 写入单次 `summary.json` 和 `report.md`。聚合脚本仍会按同一规则重新计算一次，所以早期没有 grade 字段的历史 summary 也能进入 index。
+
 ## 运行方式
 
 真实 case 使用现有脚本，不额外引入 benchmark runner：
