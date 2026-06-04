@@ -90,6 +90,8 @@ dual-orchestrator/docs/testing/real-case-benchmarks/reports/
 
 | Date | Case | Workstream | Result | Notes |
 |------|------|------------|--------|-------|
+| 2026-06-04 | `cancer-clinic-doc-constraints-smoke` | `ws-20260604T080522Z-LQ87` | `COMPLETED` | 文档边界约束小任务完整跑通；6 个 human gate、10 次 Agent run、Codex `ACCEPT_WITH_NOTES`；验证 acpx reconnect 完整 stdout 修复后真实生命周期仍可完成。 |
+| 2026-06-04 | reconnect diagnostic run | `ws-20260604T063104Z-H878` | `START_FAILED` | 诊断 run 保留在 benchmark index 中作为失败样本；根因是 acpx 返回 reconnect exit 但 stdout 已完整，后续已修复并用 `cancer-clinic-doc-constraints-smoke` 复验通过。 |
 | 2026-06-03 | `cancer-clinic-state-model-complex` re-run | `ws-20260603T101635Z-VT82` | `PASS-WARN` | 修复 handoff parser 后真实 acpx 路径复跑通过；`handoff.json` 已能提取 `completedWork` / `changedFiles` / `openRisks` / `verificationState`；本轮触发 1 次 intake revision iteration；发现 `.serena/` 未跟踪目录污染 worktree status，后续已在 adapter 层修复。 |
 | 2026-06-03 | `cancer-clinic-state-model-complex` | `ws-20260603T080441Z-NDK2` | `PASS-WARN` | B4 新用户治疗记录引导完成；6 个 human gate、10 次 Agent run、31 个 timeline nodes，最终 `COMPLETED`；状态模型线性主链路表现正常，未触发 recovery/revision；`handoff.json` 存在但结构化字段为空，需要后续强化。 |
 | 2026-06-03 | `cancer-clinic-rejection-prone` | `ws-20260603T065831Z-R255` | `PASS-WARN` | B2 保存后引导完成；Codex `ACCEPT_WITH_NOTES`，未触发 REJECT；real-case 暴露 `contract.compile` 错读 Codex review 中引用 artifact 的 bug，修复后同一 workstream retry 到 `COMPLETED`。 |
@@ -104,6 +106,8 @@ dual-orchestrator/docs/testing/real-case-reports/20260603T045848Z/report.md
 dual-orchestrator/docs/testing/real-case-reports/20260603T065830Z/report.md
 dual-orchestrator/docs/testing/real-case-reports/20260603T080441Z/report.md
 dual-orchestrator/docs/testing/real-case-reports/20260603T101634Z/report.md
+dual-orchestrator/docs/testing/real-case-reports/20260604T063104Z/report.md
+dual-orchestrator/docs/testing/real-case-reports/20260604T080521Z/report.md
 ```
 
 ## 何时运行

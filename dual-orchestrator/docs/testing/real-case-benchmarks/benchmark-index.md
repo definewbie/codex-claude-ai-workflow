@@ -1,18 +1,18 @@
 # Real-case Benchmark Index
 
-> Generated: 2026-06-04T04:52:22Z
+> Generated: 2026-06-04T08:18:05Z
 > Source: docs/testing/real-case-reports
 
 ## Aggregate
 
 | Metric | Value |
 | --- | --- |
-| Runs | 6 |
-| Completed | 6 |
-| Original repo clean | 6 |
+| Runs | 8 |
+| Completed | 7 |
+| Original repo clean | 8 |
 | Acceptance rejects | 0 |
-| Gate rounds | 35 |
-| Agent runs | 64 |
+| Gate rounds | 41 |
+| Agent runs | 75 |
 
 ## Runs
 
@@ -24,6 +24,8 @@
 | 20260603T101634Z | p6 | COMPLETED | `ws-20260603T101635Z-VT82` | 6 | 12 | ACCEPT_WITH_NOTES | 0 | true | ok | [docs/testing/real-case-reports/20260603T101634Z/report.md](../real-case-reports/20260603T101634Z/report.md) |
 | 20260603T133603Z | p5 | COMPLETED | `ws-20260603T133604Z-AVKD` | 6 | 10 | ACCEPT_WITH_NOTES | 0 | true | ok | [docs/testing/real-case-reports/20260603T133603Z/report.md](../real-case-reports/20260603T133603Z/report.md) |
 | 20260603T143042Z | p5 | COMPLETED | `ws-20260603T143043Z-2HH2` | 6 | 10 | ACCEPT | 0 | true | ok | [docs/testing/real-case-reports/20260603T143042Z/report.md](../real-case-reports/20260603T143042Z/report.md) |
+| 20260604T063104Z | p5 | START_FAILED | `ws-20260604T063104Z-H878` | 0 | 1 | none | 0 | true | missing: final_report,handoff_json,next_stage_prompt,delivery_pr_body | [docs/testing/real-case-reports/20260604T063104Z/report.md](../real-case-reports/20260604T063104Z/report.md) |
+| 20260604T080521Z | p5 | COMPLETED | `ws-20260604T080522Z-LQ87` | 6 | 10 | ACCEPT_WITH_NOTES | 0 | true | ok | [docs/testing/real-case-reports/20260604T080521Z/report.md](../real-case-reports/20260604T080521Z/report.md) |
 
 ## How To Update
 
