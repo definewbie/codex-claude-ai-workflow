@@ -98,7 +98,7 @@ Runtime 只认识三类节点：
 - Scheduler：已有默认关闭的后台周期调度；仍不会自动通过 human gate、recovery 或 failure。
 - Web UI / dashboard。
 - Notification 集成。
-- 正式安装脚本。
+- Homebrew / Docker / native image 等正式分发包。
 
 ## Modules
 
@@ -177,7 +177,49 @@ API server jar：
 dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 ```
 
-临时 alias：
+## Install
+
+本地安装脚本会构建 CLI/server jar，把它们复制到用户目录，并生成 `dualctl` / `dual-server` wrapper。默认安装到 `$HOME/.local`，不需要 root，也不会修改 shell profile。
+
+```bash
+cd dual-orchestrator
+./scripts/install.sh
+```
+
+指定安装目录：
+
+```bash
+./scripts/install.sh --prefix "$HOME/.local"
+```
+
+如果已经构建过，只安装现有 jar：
+
+```bash
+./scripts/install.sh --skip-build
+```
+
+只安装 CLI：
+
+```bash
+./scripts/install.sh --no-server
+```
+
+安装后确认：
+
+```bash
+$HOME/.local/bin/dualctl --help
+$HOME/.local/bin/dualctl doctor --workdir /path/to/git/repo
+```
+
+如果 `$HOME/.local/bin` 不在 `PATH`，加入 shell profile：
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+安装脚本是当前开源雏形的本地安装方式。Homebrew、Docker、native image 这类正式分发方式还没有做。
+
+开发时也可以使用临时 alias：
 
 ```bash
 alias dualctl='java -jar /absolute/path/to/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar'

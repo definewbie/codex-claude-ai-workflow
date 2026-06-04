@@ -66,7 +66,7 @@
 - [x] T4.1 Background Scheduler MVP：默认关闭；配置 `dual.scheduler.enabled=true` 和 `dual.scheduler.workdirs` 后周期调用 tick，支持间隔、max workstreams、max steps 配置，并用运行中保护避免重入。
 - [ ] T4.2 Web UI / Dashboard：可视化 workflow 状态、event 时间线、Agent 输出
 - [ ] T4.3 Notification：Slack / 邮件 / Webhook 推送状态变更
-- [ ] T4.4 安装脚本：`brew install` / `curl | sh` 等分发包
+- [x] T4.4 Local install script MVP：`scripts/install.sh` 构建并安装 `dualctl` / `dual-server` wrapper 到用户 prefix；Homebrew / Docker / native image 等正式分发后置。
 
 ## P5 — 主线后续优先级
 
