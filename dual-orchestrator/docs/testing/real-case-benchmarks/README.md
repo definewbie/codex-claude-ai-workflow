@@ -36,6 +36,7 @@ docs/testing/real-case-benchmarks/benchmark-index.md
 
 这个索引用来快速观察：
 
+- 每条 run 对应哪个 task/case
 - run 是否都到达 `COMPLETED`
 - gate 轮数和 Agent run 次数是否异常增加
 - Codex acceptance 是否出现 `REJECT`

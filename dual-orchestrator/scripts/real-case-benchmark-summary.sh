@@ -127,6 +127,18 @@ artifact_health() {
   fi
 }
 
+case_name() {
+  local file="$1"
+  local task_file name
+  task_file="$(json_value "$file" '.task_file')"
+  if [[ -z "$task_file" ]]; then
+    printf 'unknown'
+    return
+  fi
+  name="$(basename "$task_file")"
+  printf '%s' "${name%.*}"
+}
+
 write_markdown() {
   local -a files=("$@")
   local total=${#files[@]}
@@ -165,15 +177,16 @@ write_markdown() {
 
 ## Runs
 
-| Date | Variant | Status | Workstream | Gates | Agent runs | Acceptance decisions | Rejects | Repo clean | Artifacts | Report |
-| --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- |
+| Date | Case | Variant | Status | Workstream | Gates | Agent runs | Acceptance decisions | Rejects | Repo clean | Artifacts | Report |
+| --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- |
 EOF
 
   for file in "${files[@]}"; do
-    local run_dir report_ref date variant status workstream gates agent_runs decisions rejects repo_clean artifacts
+    local run_dir report_ref date case variant status workstream gates agent_runs decisions rejects repo_clean artifacts
     run_dir="$(dirname "$file")"
     report_ref="$(relative_ref "$run_dir/report.md")"
     date="$(basename "$run_dir")"
+    case="$(case_name "$file")"
     variant="$(json_value "$file" '.variant')"
     status="$(json_value "$file" '.final_status')"
     workstream="$(json_value "$file" '.workstream')"
@@ -183,8 +196,8 @@ EOF
     rejects="$(json_int "$file" '.acceptance_reject_count')"
     repo_clean="$(json_value "$file" '.original_repo_clean')"
     artifacts="$(artifact_health "$file")"
-    printf '| %s | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
-      "$date" "$variant" "$status" "$workstream" "$gates" "$agent_runs" \
+    printf '| %s | `%s` | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
+      "$date" "$case" "$variant" "$status" "$workstream" "$gates" "$agent_runs" \
       "${decisions:-none}" "$rejects" "$repo_clean" "$artifacts" "$report_ref" "$date"
   done
 
