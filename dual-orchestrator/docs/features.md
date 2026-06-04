@@ -1,6 +1,6 @@
 # dual-orchestrator Roadmap
 
-> Last updated: 2026-06-02
+> Last updated: 2026-06-04
 
 ## P0 — 验证（阻塞后续所有工作）
 
@@ -67,11 +67,13 @@
 
 下面三件事比继续打磨小按钮、小提示更接近长期目标：
 
-1. **Real-case benchmark loop**：沉淀 2-3 个真实仓库任务，定期跑 p6，记录完成率、rejection repair 次数、耗时、失败类型和人工介入点。
+1. **Real-case benchmark loop**：沉淀 3-5 个真实仓库任务，定期跑 p6，记录完成率、rejection repair 次数、耗时、失败类型和人工介入点。
    - 2026-06-03：`run-real-case.sh` 开始生成 `summary.json`，把 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、artifact presence 和原始 repo clean 状态沉淀为机器可读数据。
    - 2026-06-03：`cancer-clinic-rejection-prone` 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
-2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
-3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
+   - 2026-06-04：`real-case-benchmark-summary.sh` 聚合所有 `summary.json`，生成 `testing/real-case-benchmarks/benchmark-index.md`，让真实 run 从零散报告变成可比较的 benchmark set。
+2. **Background Scheduler**：让系统自动推进可继续的 workstream，停在 human gate / recovery / failure；目标是从“人不断敲 resume”走向“系统自己推进，人只在关键卡点介入”。
+3. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
+4. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
 
 当前 benchmark 入口：

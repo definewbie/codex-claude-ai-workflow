@@ -15,6 +15,7 @@ This directory contains both current design documents and historical handoff not
 | Artifact-driven TaskContract design | `design/2026-06-03-artifact-driven-contract-negotiation.md` |
 | Failure classification design | `design/P6-failure-arbiter.md` |
 | Real-case benchmark entry | `testing/real-case-benchmarks/README.md` |
+| Real-case benchmark index | `testing/real-case-benchmarks/benchmark-index.md` |
 | Smoke / E2E usage | `testing/smoke-test-e2e.md` |
 
 ## Historical / Reference Documents

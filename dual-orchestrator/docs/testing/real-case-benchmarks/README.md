@@ -20,6 +20,30 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 | `cases/cancer-clinic-rejection-prone.md` | Rejection-prone case | 验证 Codex `REJECT` 后的 failure classification 和 repair route | 2026-06-03 已通过，`PASS-WARN`；本轮未触发 REJECT，但暴露并修复 contract source bug |
 | `cases/cancer-clinic-state-model-complex.md` | Complex bounded frontend case | 带着状态机文档验证 P6 gate / active node / completion 语义 | 2026-06-03 已通过，`PASS-WARN`；暴露 handoff JSON 抽取偏弱 |
 
+## Benchmark Index
+
+真实 case 跑完后，`run-real-case.sh` 会在 `docs/testing/real-case-reports/<timestamp>/summary.json` 写入机器可读摘要。用下面的脚本把所有摘要聚合成一个对比索引：
+
+```bash
+./scripts/real-case-benchmark-summary.sh
+```
+
+输出：
+
+```text
+docs/testing/real-case-benchmarks/benchmark-index.md
+```
+
+这个索引用来快速观察：
+
+- run 是否都到达 `COMPLETED`
+- gate 轮数和 Agent run 次数是否异常增加
+- Codex acceptance 是否出现 `REJECT`
+- 原始 repo 是否保持干净
+- final report / handoff / next-stage prompt / delivery PR body 是否齐全
+
+它只统计包含 `summary.json` 的 run。早期没有 summary 的历史报告保留为人工参考，不做迁移补录。
+
 ## 运行方式
 
 真实 case 使用现有脚本，不额外引入 benchmark runner：
