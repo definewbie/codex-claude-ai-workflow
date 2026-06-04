@@ -16,6 +16,7 @@ Bash 版 `dual-agent-runner` 证明了 `acpx`、worktree、run ledger、报告�
 
 建议阅读顺序：
 
+- `docs/quickstart.md`：从安装到第一个 smoke / real-case 的最短路径。
 - `docs/README.md`：当前文档入口，区分 current docs 和历史 handoff。
 - `docs/architecture-and-execution-flow.md`：总体设计和执行流程。
 - `docs/design/workflow-state-machine.md`：workflow / node / gate / recovery 状态机说明。

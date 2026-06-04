@@ -9,6 +9,7 @@ This directory contains both current design documents and historical handoff not
 
 | Purpose | Document |
 |---|---|
+| Quickstart from install to first run | `quickstart.md` |
 | Overall product and architecture narrative | `architecture-and-execution-flow.md` |
 | Runtime state model and operator commands | `design/workflow-state-machine.md` |
 | Current roadmap / feature status | `features.md` |
