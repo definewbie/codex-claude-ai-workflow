@@ -26,8 +26,43 @@ class RecoveryShowCommandTest {
     Path tempDir;
 
     @Test
-    void showPrintsCurrentFailureSummary() throws Exception {
+    void showPrintsRecoverableRuntimeAssessmentAndCurrentFailureSummary() throws Exception {
         var workstreamId = "ws-recovery-show";
+        writeFailure(workstreamId, NodeStatus.FAILED, "RECOVERABLE_RATE_LIMIT", Map.of(
+                "exit_code", 4,
+                "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT",
+                "acpx_failure.recoverable", true
+        ));
+
+        var printed = runShow(workstreamId);
+
+        assertTrue(printed.contains("Recovery Assessment"));
+        assertTrue(printed.contains("- Classification: recoverable_agent_runtime"));
+        assertTrue(printed.contains("- Retry Readiness: RETRY_AFTER_EXTERNAL_FIX"));
+        assertTrue(printed.contains("dualctl retry --workdir " + tempDir.toAbsolutePath().normalize() + " " + workstreamId));
+        assertTrue(printed.contains("Current Failure"));
+        assertTrue(printed.contains("RECOVERABLE_RATE_LIMIT"));
+        assertTrue(printed.contains("design.stderr.log"));
+        assertTrue(printed.contains(".agent/workstreams/" + workstreamId + "/recovery/current-failure.md"));
+    }
+
+    @Test
+    void showWarnsRevisionLimitNeedsHumanDecision() throws Exception {
+        var workstreamId = "ws-revision-limit";
+        writeFailure(workstreamId, NodeStatus.BLOCKED, "revision_limit_reached", Map.of(
+                "reason", "revision_limit_reached",
+                "decision", "NEEDS_REVISION"
+        ));
+
+        var printed = runShow(workstreamId);
+
+        assertTrue(printed.contains("- Classification: semantic_revision_limit"));
+        assertTrue(printed.contains("- Retry Readiness: NEEDS_HUMAN_DECISION"));
+        assertTrue(printed.contains("Blind retry will likely repeat the same loop."));
+        assertTrue(printed.contains("dualctl recovery abort --workdir " + tempDir.toAbsolutePath().normalize() + " " + workstreamId));
+    }
+
+    private void writeFailure(String workstreamId, NodeStatus nodeStatus, String outcome, Map<String, Object> result) throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
         Files.createDirectories(paths.workstreamDir());
         var definition = new WorkflowDefinition(
@@ -40,15 +75,13 @@ class RecoveryShowCommandTest {
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-recovery-show", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
-        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
-                "RECOVERABLE_RATE_LIMIT",
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), nodeStatus,
+                outcome,
                 List.of(".agent/workstreams/" + workstreamId + "/runs/run-001/outputs/design.stderr.log"),
-                Map.of(
-                        "exit_code", 4,
-                        "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT",
-                        "acpx_failure.recoverable", true
-                ));
+                result);
+    }
 
+    private String runShow(String workstreamId) throws Exception {
         var command = new RecoveryShowCommand();
         command.workdir = tempDir;
         command.workstreamId = workstreamId;
@@ -62,10 +95,6 @@ class RecoveryShowCommandTest {
             System.setOut(originalOut);
         }
 
-        var printed = out.toString(StandardCharsets.UTF_8);
-        assertTrue(printed.contains("Current Failure"));
-        assertTrue(printed.contains("RECOVERABLE_RATE_LIMIT"));
-        assertTrue(printed.contains("design.stderr.log"));
-        assertTrue(printed.contains(".agent/workstreams/" + workstreamId + "/recovery/current-failure.md"));
+        return out.toString(StandardCharsets.UTF_8);
     }
 }

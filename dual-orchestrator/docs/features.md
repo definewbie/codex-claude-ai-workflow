@@ -85,6 +85,7 @@
    - 2026-06-04：CLI 在 `run` / `resume` 停住时统一打印 `Next actions`，覆盖 human gate、recovery、completed 和 max-steps，降低真实操作时翻 ledger 的成本。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
+   - 2026-06-04：`dualctl recovery show` 在原始 failure summary 前增加 `Recovery Assessment`，提示分类、retry readiness、原因和建议命令，帮助真实运行中快速判断能否 retry。
 
 当前 benchmark 入口：
 

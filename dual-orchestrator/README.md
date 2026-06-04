@@ -736,6 +736,15 @@ dualctl autorun --workdir <effective_worktree> --max-steps 80 --max-gates 12 <wo
 dualctl recovery show --workdir <effective_worktree> <workstream_id>
 ```
 
+`recovery show` 会先打印 `Recovery Assessment`，给出：
+
+- `Classification`：例如 `recoverable_agent_runtime`、`semantic_revision_limit`、`artifact_contract_failure`。
+- `Retry Readiness`：例如 `RETRY_AFTER_EXTERNAL_FIX`、`NEEDS_HUMAN_DECISION`。
+- `Reason`：为什么建议这么处理。
+- `Suggested Command`：下一条建议命令。
+
+这层判断故意保持轻量，只帮助操作员判断“能不能 retry、是不是要先人工处理”。详细证据仍在下面的 `current-failure.md` 正文里。
+
 ```bash
 dualctl retry --workdir <effective_worktree> --note "claude session reconnected" <workstream_id>
 dualctl resume --workdir <effective_worktree> <workstream_id>
