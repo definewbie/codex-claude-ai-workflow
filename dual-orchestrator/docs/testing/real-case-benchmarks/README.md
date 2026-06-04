@@ -22,7 +22,7 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 
 ## Benchmark Index
 
-真实 case 跑完后，`run-real-case.sh` 会在 `docs/testing/real-case-reports/<timestamp>/summary.json` 写入机器可读摘要。用下面的脚本把所有摘要聚合成一个对比索引：
+真实 case 跑完后，`run-real-case.sh` 会在 workstream ledger 里生成 `reports/workstream-summary.md`，并在 `docs/testing/real-case-reports/<timestamp>/summary.json` 写入机器可读摘要。用下面的脚本把所有摘要聚合成一个对比索引：
 
 ```bash
 ./scripts/real-case-benchmark-summary.sh
@@ -82,7 +82,7 @@ dual-orchestrator/docs/testing/real-case-benchmarks/reports/
 - failure classification 类型
 - final diff stat
 - 原始 repo 是否干净
-- final report / handoff / delivery artifact 是否存在
+- final report / workstream summary / handoff / delivery artifact 是否存在
 - `summary.json` 是否存在，可用于后续趋势比较
 - 人工观察：误修、漏修、过度实现、证据是否足够
 

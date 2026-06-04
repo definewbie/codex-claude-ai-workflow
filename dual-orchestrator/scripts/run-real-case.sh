@@ -276,6 +276,7 @@ collect_evidence() {
   dualctl events --workdir "$WORKSPACE_DIR" --limit 100 "$WORKSTREAM_ID" >"$CASE_DIR/logs/events.log" 2>&1 || true
   dualctl runs --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/runs.log" 2>&1 || true
   dualctl recovery show --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/recovery.log" 2>&1 || true
+  dualctl summary --workdir "$WORKSPACE_DIR" --write "$WORKSTREAM_ID" >"$CASE_DIR/logs/workstream-summary.log" 2>&1 || true
 }
 
 json_escape() {
@@ -345,7 +346,7 @@ original_repo_clean_bool() {
 write_summary_json() {
   local summary="$CASE_DIR/summary.json"
   local gate_rounds node_count run_count iteration_count design_revision_count reject_count
-  local original_clean final_report_present handoff_present next_prompt_present delivery_body_present
+  local original_clean final_report_present handoff_present next_prompt_present delivery_body_present workstream_summary_present
   gate_rounds="$(count_lines_matching "$CASE_DIR/logs/autorun.log" '^Gate ')"
   node_count="$(count_lines_matching "$CASE_DIR/logs/timeline.log" '^  ')"
   run_count="$(agent_run_count)"
@@ -358,6 +359,7 @@ write_summary_json() {
   handoff_present="$(artifact_present_bool "artifacts/next-stage/handoff.json")"
   next_prompt_present="$(artifact_present_bool "artifacts/next-stage/next-stage-prompt.md")"
   delivery_body_present="$(artifact_present_bool "delivery/pr-body.md")"
+  workstream_summary_present="$(artifact_present_bool "reports/workstream-summary.md")"
 
   {
     echo "{"
@@ -370,6 +372,7 @@ write_summary_json() {
     echo "  \"workstream\": \"$(json_escape "${WORKSTREAM_ID:-unknown}")\","
     echo "  \"effective_workdir\": \"$(json_escape "${WORKSPACE_DIR:-unknown}")\","
     echo "  \"ledger\": \"$(json_escape "${WS_DIR:-unknown}")\","
+    echo "  \"workstream_summary\": \"$(json_escape "${WS_DIR:-unknown}/reports/workstream-summary.md")\","
     echo "  \"gate_rounds\": $gate_rounds,"
     echo "  \"agent_run_count\": $run_count,"
     echo "  \"timeline_node_count\": $node_count,"
@@ -382,7 +385,8 @@ write_summary_json() {
     echo "    \"final_report\": $final_report_present,"
     echo "    \"handoff_json\": $handoff_present,"
     echo "    \"next_stage_prompt\": $next_prompt_present,"
-    echo "    \"delivery_pr_body\": $delivery_body_present"
+    echo "    \"delivery_pr_body\": $delivery_body_present,"
+    echo "    \"workstream_summary\": $workstream_summary_present"
     echo "  }"
     echo "}"
   } >"$summary"
@@ -402,6 +406,7 @@ write_report() {
   write_summary_json
   local report="$CASE_DIR/report.md"
   local final_report="$WS_DIR/reports/latest-final-report.md"
+  local workstream_summary="$WS_DIR/reports/workstream-summary.md"
   local handoff_json="$WS_DIR/artifacts/next-stage/handoff.json"
   local next_prompt="$WS_DIR/artifacts/next-stage/next-stage-prompt.md"
   local delivery_body="$WS_DIR/delivery/pr-body.md"
@@ -455,6 +460,7 @@ write_report() {
     echo "| --- | --- | --- |"
     if [[ -n "$WS_DIR" ]]; then
       echo "| Final Report | $(artifact_status "reports/latest-final-report.md") | $final_report |"
+      echo "| Workstream Summary | $(artifact_status "reports/workstream-summary.md") | $workstream_summary |"
       echo "| Handoff JSON | $(artifact_status "artifacts/next-stage/handoff.json") | $handoff_json |"
       echo "| Next-stage Prompt | $(artifact_status "artifacts/next-stage/next-stage-prompt.md") | $next_prompt |"
       echo "| Delivery PR Body | $(artifact_status "delivery/pr-body.md") | $delivery_body |"
@@ -477,6 +483,7 @@ write_report() {
     echo
     echo '```bash'
     echo "java -jar \"$JAR_PATH\" status --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
+    echo "java -jar \"$JAR_PATH\" summary --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
     echo "java -jar \"$JAR_PATH\" timeline --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
     echo "java -jar \"$JAR_PATH\" runs --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
     echo "java -jar \"$JAR_PATH\" recovery show --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
