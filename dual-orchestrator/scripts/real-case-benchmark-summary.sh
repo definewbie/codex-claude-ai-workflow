@@ -114,17 +114,22 @@ relative_ref() {
 artifact_health() {
   local file="$1"
   local missing
-  missing="$(jq -r '
-    .artifacts // {}
-    | to_entries
-    | map(select(.value != true) | .key)
-    | join(",")
-  ' "$file")"
+  missing="$(missing_artifacts "$file")"
   if [[ -z "$missing" ]]; then
     printf 'ok'
   else
     printf 'missing: %s' "$missing"
   fi
+}
+
+missing_artifacts() {
+  local file="$1"
+  jq -r '
+    .artifacts // {}
+    | to_entries
+    | map(select(.value != true) | .key)
+    | join(",")
+  ' "$file"
 }
 
 case_name() {
@@ -139,10 +144,67 @@ case_name() {
   printf '%s' "${name%.*}"
 }
 
+acceptance_has() {
+  local file="$1"
+  local decision="$2"
+  jq -e --arg decision "$decision" '
+    (.acceptance_decisions // []) | index($decision) != null
+  ' "$file" >/dev/null
+}
+
+benchmark_grade() {
+  local file="$1"
+  local status repo_clean missing_artifacts rejects
+  status="$(json_value "$file" '.final_status')"
+  repo_clean="$(json_value "$file" '.original_repo_clean')"
+  missing_artifacts="$(missing_artifacts "$file")"
+  rejects="$(json_int "$file" '.acceptance_reject_count')"
+
+  if [[ "$status" != "COMPLETED" ]]; then
+    printf 'FAIL'
+  elif [[ "$repo_clean" != "true" ]]; then
+    printf 'FAIL'
+  elif [[ -n "$missing_artifacts" ]]; then
+    printf 'FAIL'
+  elif acceptance_has "$file" "ACCEPT_WITH_NOTES"; then
+    printf 'PASS-WARN'
+  elif [[ "$rejects" -gt 0 ]]; then
+    printf 'PASS-WARN'
+  else
+    printf 'PASS'
+  fi
+}
+
+benchmark_grade_reason() {
+  local file="$1"
+  local status repo_clean missing_artifacts rejects
+  status="$(json_value "$file" '.final_status')"
+  repo_clean="$(json_value "$file" '.original_repo_clean')"
+  missing_artifacts="$(missing_artifacts "$file")"
+  rejects="$(json_int "$file" '.acceptance_reject_count')"
+
+  if [[ "$status" != "COMPLETED" ]]; then
+    printf 'status=%s' "$status"
+  elif [[ "$repo_clean" != "true" ]]; then
+    printf 'original_repo_dirty'
+  elif [[ -n "$missing_artifacts" ]]; then
+    printf 'missing_artifacts=%s' "$missing_artifacts"
+  elif acceptance_has "$file" "ACCEPT_WITH_NOTES"; then
+    printf 'accepted_with_notes'
+  elif [[ "$rejects" -gt 0 ]]; then
+    printf 'repaired_rejects=%s' "$rejects"
+  else
+    printf 'ok'
+  fi
+}
+
 write_markdown() {
   local -a files=("$@")
   local total=${#files[@]}
   local completed=0
+  local pass=0
+  local pass_warn=0
+  local fail_count=0
   local clean=0
   local reject_total=0
   local gate_total=0
@@ -151,6 +213,13 @@ write_markdown() {
   generated_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
   for file in "${files[@]}"; do
+    local grade
+    grade="$(benchmark_grade "$file")"
+    case "$grade" in
+      PASS) pass=$((pass + 1)) ;;
+      PASS-WARN) pass_warn=$((pass_warn + 1)) ;;
+      FAIL) fail_count=$((fail_count + 1)) ;;
+    esac
     [[ "$(json_value "$file" '.final_status')" == "COMPLETED" ]] && completed=$((completed + 1))
     [[ "$(json_value "$file" '.original_repo_clean')" == "true" ]] && clean=$((clean + 1))
     reject_total=$((reject_total + $(json_int "$file" '.acceptance_reject_count')))
@@ -169,6 +238,9 @@ write_markdown() {
 | Metric | Value |
 | --- | --- |
 | Runs | $total |
+| PASS | $pass |
+| PASS-WARN | $pass_warn |
+| FAIL | $fail_count |
 | Completed | $completed |
 | Original repo clean | $clean |
 | Acceptance rejects | $reject_total |
@@ -177,16 +249,18 @@ write_markdown() {
 
 ## Runs
 
-| Date | Case | Variant | Status | Workstream | Gates | Agent runs | Acceptance decisions | Rejects | Repo clean | Artifacts | Report |
-| --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- |
+| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Acceptance decisions | Rejects | Repo clean | Artifacts | Report |
+| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- |
 EOF
 
   for file in "${files[@]}"; do
-    local run_dir report_ref date case variant status workstream gates agent_runs decisions rejects repo_clean artifacts
+    local run_dir report_ref date case variant status workstream gates agent_runs decisions rejects repo_clean artifacts grade reason
     run_dir="$(dirname "$file")"
     report_ref="$(relative_ref "$run_dir/report.md")"
     date="$(basename "$run_dir")"
     case="$(case_name "$file")"
+    grade="$(benchmark_grade "$file")"
+    reason="$(benchmark_grade_reason "$file")"
     variant="$(json_value "$file" '.variant')"
     status="$(json_value "$file" '.final_status')"
     workstream="$(json_value "$file" '.workstream')"
@@ -196,8 +270,8 @@ EOF
     rejects="$(json_int "$file" '.acceptance_reject_count')"
     repo_clean="$(json_value "$file" '.original_repo_clean')"
     artifacts="$(artifact_health "$file")"
-    printf '| %s | `%s` | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
-      "$date" "$case" "$variant" "$status" "$workstream" "$gates" "$agent_runs" \
+    printf '| %s | `%s` | %s | %s | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
+      "$date" "$case" "$grade" "$reason" "$variant" "$status" "$workstream" "$gates" "$agent_runs" \
       "${decisions:-none}" "$rejects" "$repo_clean" "$artifacts" "$report_ref" "$date"
   done
 

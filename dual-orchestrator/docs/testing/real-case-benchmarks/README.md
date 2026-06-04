@@ -37,6 +37,7 @@ docs/testing/real-case-benchmarks/benchmark-index.md
 这个索引用来快速观察：
 
 - 每条 run 对应哪个 task/case
+- 每条 run 的轻量分级：`PASS` / `PASS-WARN` / `FAIL`
 - run 是否都到达 `COMPLETED`
 - gate 轮数和 Agent run 次数是否异常增加
 - Codex acceptance 是否出现 `REJECT`
@@ -44,6 +45,18 @@ docs/testing/real-case-benchmarks/benchmark-index.md
 - final report / handoff / next-stage prompt / delivery PR body 是否齐全
 
 它只统计包含 `summary.json` 的 run。早期没有 summary 的历史报告保留为人工参考，不做迁移补录。
+
+### Result Grading
+
+Benchmark index 的 `Grade` 是轻量体检结果，不替代人工读详细报告：
+
+| Grade | 含义 |
+|-------|------|
+| `PASS` | workflow 完成、原始 repo 干净、关键 artifact 齐全、Codex 没有 notes/reject。 |
+| `PASS-WARN` | workflow 完成且关键证据齐全，但存在注意事项，例如 `ACCEPT_WITH_NOTES` 或经历过 reject/repair。 |
+| `FAIL` | workflow 未完成、原始 repo 被污染，或 final report / handoff / next-stage prompt / delivery body 等关键 artifact 缺失。 |
+
+`Reason` 列给出触发分级的第一条原因。这个规则故意保持简单，目标是帮助比较真实 run 的健康度，不做复杂规则引擎。
 
 ## 运行方式
 

@@ -77,6 +77,7 @@
    - 2026-06-03：`cancer-clinic-rejection-prone` 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
    - 2026-06-04：`real-case-benchmark-summary.sh` 聚合所有 `summary.json`，生成 `testing/real-case-benchmarks/benchmark-index.md`，让真实 run 从零散报告变成可比较的 benchmark set。
    - 2026-06-04：`cancer-clinic-doc-constraints-smoke` 跑到 `COMPLETED`，验证 acpx reconnect 完整 stdout 修复后真实生命周期仍可完成；前一个 `START_FAILED` 诊断 run 保留在 benchmark index 中作为失败样本。
+   - 2026-06-04：benchmark index 增加 `PASS` / `PASS-WARN` / `FAIL` 轻量分级和 reason，帮助快速判断真实 run 健康度。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
    - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项；stopped/recovery 状态已显示当前失败摘要。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
