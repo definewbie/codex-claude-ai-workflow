@@ -353,6 +353,22 @@ acceptance_decisions_text() {
   acceptance_decisions_json | sed 's/^\[//; s/\]$//; s/"//g'
 }
 
+acceptance_reject_count() {
+  [[ -n "$WS_DIR" && -d "$WS_DIR/runs" ]] || {
+    printf '0'
+    return
+  }
+  local count=0
+  while IFS= read -r file; do
+    local decision
+    decision="$(grep -E '"decision"[[:space:]]*:' "$file" | head -1 | sed -E 's/.*"decision"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+    if [[ "$decision" == "REJECT" ]]; then
+      count=$((count + 1))
+    fi
+  done < <(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null | sort)
+  printf '%s' "$count"
+}
+
 artifact_present_bool() {
   local ref="$1"
   if [[ -f "$WS_DIR/$ref" ]]; then
@@ -369,6 +385,10 @@ missing_artifacts() {
   [[ "$(artifact_present_bool "artifacts/next-stage/next-stage-prompt.md")" == "true" ]] || missing+=("next_stage_prompt")
   [[ "$(artifact_present_bool "delivery/pr-body.md")" == "true" ]] || missing+=("delivery_pr_body")
   [[ "$(artifact_present_bool "reports/workstream-summary.md")" == "true" ]] || missing+=("workstream_summary")
+  if [[ "${#missing[@]}" -eq 0 ]]; then
+    printf ''
+    return
+  fi
   local IFS=,
   printf '%s' "${missing[*]}"
 }
@@ -392,8 +412,6 @@ write_summary_json() {
   run_count="$(agent_run_count)"
   iteration_count="$(count_lines_matching "$WS_DIR/events.jsonl" '"event_type":"iteration_started"')"
   design_revision_count="$(count_lines_matching "$WS_DIR/events.jsonl" '"outcome":"NEEDS_REVISION"')"
-  reject_count="$(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null \
-    -exec grep -h '"decision"[[:space:]]*:[[:space:]]*"REJECT"' {} \; | wc -l | tr -d '[:space:]')"
   original_clean="$(original_repo_clean_bool)"
   final_report_present="$(artifact_present_bool "reports/latest-final-report.md")"
   handoff_present="$(artifact_present_bool "artifacts/next-stage/handoff.json")"
@@ -402,6 +420,7 @@ write_summary_json() {
   workstream_summary_present="$(artifact_present_bool "reports/workstream-summary.md")"
   decisions="$(acceptance_decisions_text)"
   missing="$(missing_artifacts)"
+  reject_count="$(acceptance_reject_count)"
   grade="$(real_case_grade "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
   reason="$(real_case_grade_reason "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
 
@@ -485,7 +504,7 @@ write_report() {
     echo "- Iteration Starts: $(count_lines_matching "$WS_DIR/events.jsonl" '"event_type":"iteration_started"')"
     echo "- Design Revisions: $(count_lines_matching "$WS_DIR/events.jsonl" '"outcome":"NEEDS_REVISION"')"
     echo "- Acceptance Decisions: $(acceptance_decisions_json)"
-    echo "- Acceptance Reject Count: $(find "$WS_DIR/runs" -path '*/outputs/acceptance-codex-review.contract.json' -type f 2>/dev/null -exec grep -h '"decision"[[:space:]]*:[[:space:]]*"REJECT"' {} \; | wc -l | tr -d '[:space:]')"
+    echo "- Acceptance Reject Count: $(acceptance_reject_count)"
     echo "- Original Repo Clean: $(original_repo_clean_bool)"
     echo "- Benchmark Grade: ${grade:-unknown}"
     echo "- Benchmark Reason: ${reason:-unknown}"
