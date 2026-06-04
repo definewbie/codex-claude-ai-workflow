@@ -65,6 +65,7 @@ Runtime 只认识三类节点：
 - review packet operator guidance：human gate 会给出推荐动作、原因和建议检查项，帮助人判断 approve / revise / complete。
 - `dualctl review show`：展示当前人工卡点需要看的 review packet。
 - Timeline projection：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
+- Workstream summary：`dualctl summary` 会聚合 timeline、recovery、delivery、calibration 和 final report，方便真实 case 复盘。
 - review decision handler。
 - context package handler，会在关键 Agent step 前装配可读上下文。
 - artifact validation handler，会落盘 Git status / diff / changed files。
@@ -846,6 +847,24 @@ dualctl watch --workdir <effective_worktree> --interval-ms 1000 <workstream_id>
 ```
 
 `timeline.json` 聚合 workflow current 和 nodes 快照，包含 workflow 状态、active nodes、open gates、每个 node 的状态、iteration、artifact refs 和 duration。`watch` / Web UI 会优先消费这个读模型，而不是直接解析 ledger 原始文件。
+
+### Workstream Summary
+
+排障或复盘真实 case 时，可以生成一份紧凑 summary：
+
+```bash
+dualctl summary --workdir <effective_worktree> <workstream_id>
+dualctl summary --workdir <effective_worktree> --write <workstream_id>
+dualctl summary --workdir <effective_worktree> --output /tmp/workstream-summary.md <workstream_id>
+```
+
+`summary` 只读取现有 ledger，不改变 workflow 状态。它会聚合 workflow status、active nodes、open gates、推荐下一步动作、最近 timeline、final report、recovery summary、delivery 状态、calibration candidates 和 apply plans。
+
+`--write` 默认写入：
+
+```text
+.agent/workstreams/<workstream_id>/reports/workstream-summary.md
+```
 
 批准当前 gate：
 

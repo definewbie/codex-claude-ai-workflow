@@ -33,6 +33,8 @@
   - 2026-06-04：review packet 增加 `operatorGuidance`，包含推荐动作、原因和建议检查项；operator panel 会在结构化卡片里展示。
 - [x] Timeline projection：从 workflow current 和 nodes 生成稳定 `timeline.json`，作为 status/watch/UI 读模型。
   - 2026-06-01：`WorkflowFileLedger` 在初始化、路由、运行状态变化、retry/recovery 操作后自动更新 `timeline.json`；`dualctl timeline` 可展示节点概览。
+- [x] Workstream summary：从 ledger 聚合真实 run 复盘视图。
+  - 2026-06-04：`dualctl summary` 会聚合 timeline、推荐下一步动作、final report、recovery summary、delivery、calibration candidates 和 apply plans；`--write` 可写入 `reports/workstream-summary.md`。
 - [x] Status workflow-first：`dualctl status` 默认以 workflow current 为准，旧 checkpoint/stage 快照仅在 `--show-legacy` 时显示。
 - [x] Failure summary：失败时生成 `recovery/current-failure.md`，聚合失败原因、证据和建议动作。
   - 2026-06-01：普通 `FAILED` / `BLOCKED` 节点会由 ledger 写入当前失败摘要，包含 node、handler、原因、exit code、output refs 和 retry 提示。

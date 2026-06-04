@@ -130,7 +130,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 当前 dual-orchestrator 已经实现：
 
 - Java multi-module 项目结构。
-- `dualctl start/status/resume/review/retry/recovery/events/runs/delivery` CLI。
+- `dualctl start/status/summary/resume/review/retry/recovery/events/runs/delivery` CLI。
 - Git worktree 隔离执行。
 - Workflow runtime：Task / Decision / Gate 三类节点。
 - 文件账本：`workflow/current.json`、`nodes/*.json`、`gates/*.json`、`iterations/*.json`、`events.jsonl`。
@@ -143,6 +143,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
+- Workstream summary MVP：`dualctl summary` 聚合 timeline、next action、final report、recovery、delivery 和 calibration 读模型，用于真实 case 复盘。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
 - Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；两者都只推进 `RUNNING` workstreams，不绕过 human gate / recovery / failure。
 - Delivery prepare / commit / create-pr 基础管线。
