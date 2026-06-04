@@ -10,6 +10,7 @@
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --variant p6
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --cleanup-worktree
+#   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --update-benchmark-index
 #
 
 set -euo pipefail
@@ -28,6 +29,7 @@ MAX_STEPS=80
 MAX_GATES=12
 SKIP_BUILD=false
 CLEANUP_WORKTREE=false
+UPDATE_BENCHMARK_INDEX=false
 
 WORKSTREAM_ID=""
 WORKSPACE_DIR=""
@@ -50,6 +52,7 @@ Options:
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Do not run Maven package before starting.
   --cleanup-worktree        Remove the created worktree after report generation.
+  --update-benchmark-index  Refresh docs/testing/real-case-benchmarks/benchmark-index.md after writing this case report.
   -h, --help                Show this help.
 
 The script auto-approves human gates. Use it for lifecycle validation, not final
@@ -69,6 +72,7 @@ handle_interrupt() {
   log "Interrupted. Collecting current evidence before exit..."
   collect_evidence || true
   write_report || true
+  update_benchmark_index || true
   if [[ -n "$WORKSPACE_DIR" && -n "$WORKSTREAM_ID" ]]; then
     log "Inspect: java -jar \"$JAR_PATH\" status --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
     log "Resume:  java -jar \"$JAR_PATH\" resume --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
@@ -113,6 +117,9 @@ parse_args() {
         ;;
       --cleanup-worktree)
         CLEANUP_WORKTREE=true
+        ;;
+      --update-benchmark-index)
+        UPDATE_BENCHMARK_INDEX=true
         ;;
       -h|--help)
         usage
@@ -191,6 +198,7 @@ start_workstream() {
     collect_evidence || true
     status_snapshot "final" || true
     write_report
+    update_benchmark_index
     exit 1
   fi
 
@@ -555,6 +563,13 @@ cleanup_worktree() {
   git -C "$REPO" worktree remove --force "$WORKSPACE_DIR" || true
 }
 
+update_benchmark_index() {
+  [[ "$UPDATE_BENCHMARK_INDEX" == true ]] || return 0
+  log "Updating benchmark index..."
+  "$PROJECT_ROOT/scripts/real-case-benchmark-summary.sh" >"$CASE_DIR/logs/update-benchmark-index.log" 2>&1
+  cat "$CASE_DIR/logs/update-benchmark-index.log"
+}
+
 main() {
   parse_args "$@"
   validate_inputs
@@ -571,6 +586,7 @@ main() {
   collect_evidence
   status_snapshot "final" || true
   write_report
+  update_benchmark_index
   cleanup_worktree
 
   if [[ "$FINAL_STATUS" == "COMPLETED" ]]; then

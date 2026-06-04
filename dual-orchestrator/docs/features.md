@@ -79,6 +79,7 @@
    - 2026-06-04：`cancer-clinic-doc-constraints-smoke` 跑到 `COMPLETED`，验证 acpx reconnect 完整 stdout 修复后真实生命周期仍可完成；前一个 `START_FAILED` 诊断 run 保留在 benchmark index 中作为失败样本。
    - 2026-06-04：benchmark index 增加 `PASS` / `PASS-WARN` / `FAIL` 轻量分级和 reason，帮助快速判断真实 run 健康度。
    - 2026-06-04：`run-real-case.sh` 的单次 `summary.json` 和 `report.md` 也写入同一套 benchmark grade，单次报告和聚合 index 口径一致。
+   - 2026-06-04：`run-real-case.sh --update-benchmark-index` 可在真实 case 结束后自动刷新 benchmark index；默认关闭，避免临时调试 run 改动文档。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
    - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项；stopped/recovery 状态已显示当前失败摘要。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
