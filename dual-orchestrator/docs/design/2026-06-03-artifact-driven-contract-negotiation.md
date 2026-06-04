@@ -410,8 +410,11 @@ templates/handoff-principles.md
 ```bash
 dualctl calibration list
 dualctl calibration show <candidate-id>
-dualctl calibration promote <candidate-id>
+dualctl calibration decide <candidate-id>
+dualctl calibration plan <candidate-id>
 ```
+
+`plan` 只生成人工可审的 apply plan，不自动修改模板。真正的 `promote` 需要等真实候选积累后再评估。
 
 ---
 
@@ -495,7 +498,8 @@ dualctl calibration promote <candidate-id>
 
 等真实 case 产生 2-3 个候选后再做：
 
-- `dualctl calibration list/show/promote`
+- `dualctl calibration list/show/decide/plan` 先把候选变成可审阅 apply plan
+- 是否增加 `promote` 命令需要重新评估，避免在规则还不稳定时自动改模板
 - append 到 `.agent/templates/*`
 - template version metadata
 - replay 验证新模板是否改善历史 run

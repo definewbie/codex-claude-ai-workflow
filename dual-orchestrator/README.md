@@ -82,7 +82,7 @@ Runtime 只认识三类节点：
 - Configurable retry policies：per-failure-type 策略（RATE_LIMIT / SESSION_MISSING / AGENT_RECONNECT / CONTEXT_WINDOW），指数退避 + `Thread.sleep`，node-level config override。
 - `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
 - Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
-- CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` 和 `.md`。
+- CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` / `.md`，并可通过 `dualctl calibration plan` 生成可审阅 apply plan。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
 - Local API Server MVP：`dual-server` 提供 HTTP API，用于读取 workflow status / timeline，并执行最小 action：resume、retry、review approve/revise；scheduler 支持手动 tick 和默认关闭的后台周期调度。
@@ -786,7 +786,23 @@ dualctl calibration decide \
   <candidate_id>
 ```
 
-`decide` 只会更新 candidate JSON 的 `status`、`decidedAt` 和 `decisionNotes`。真正把候选提升到模板或测试，仍然需要单独的人审改动。
+生成人工可审的 apply plan：
+
+```bash
+dualctl calibration plan \
+  --workdir <effective_worktree> \
+  <workstream_id> \
+  <candidate_id>
+```
+
+`plan` 会写入：
+
+```text
+.agent/workstreams/<workstream_id>/calibration/apply-plans/<candidate_id>.json
+.agent/workstreams/<workstream_id>/calibration/apply-plans/<candidate_id>.md
+```
+
+`decide` 只会更新 candidate JSON 的 `status`、`decidedAt` 和 `decisionNotes`。`plan` 只会生成下一步建议，不会修改 prompt、contract template、context rule、workflow definition 或测试。真正把候选提升到模板或测试，仍然需要单独的人审改动。
 
 ### Human Review
 

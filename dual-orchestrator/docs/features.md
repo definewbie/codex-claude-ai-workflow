@@ -27,6 +27,7 @@
 - [x] CalibrationCandidate MVP：从 FailureArbiter 输出生成 contract template / context rule / regression test 候选。
   - 2026-06-01：`FailureClassifyHandler` 会为可校准分类写入 `calibration/candidates/<id>.json` 和 `.md`。`TOOL_LIMITATION` / `REVIEW_NOISE` 暂不生成候选，避免把一次性运行噪声沉淀为规则。
   - 2026-06-03：`dualctl calibration list/show/decide` 可查看候选并记录人工采纳/拒绝/延后判断；暂不自动提升到模板，避免过早规则引擎化。
+  - 2026-06-04：`dualctl calibration plan` 可把候选转成 `calibration/apply-plans/<id>.json` 和 `.md`，沉淀建议目标、证据和人工处理动作；仍不自动修改模板、规则或测试。
 - [x] Review packet artifact：为 human gate 生成稳定 review 包，后续 CLI/UI 共用。
   - 2026-06-01：`HumanReviewGateHandler` 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 可直接展示当前 gate packet。
   - 2026-06-04：review packet 增加 `operatorGuidance`，包含推荐动作、原因和建议检查项；operator panel 会在结构化卡片里展示。

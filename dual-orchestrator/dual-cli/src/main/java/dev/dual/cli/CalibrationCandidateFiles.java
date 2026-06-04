@@ -23,6 +23,21 @@ final class CalibrationCandidateFiles {
         return jsonPath.resolveSibling(fileName.substring(0, fileName.length() - ".json".length()) + ".md");
     }
 
+    static Path applyPlansDir(Path workdir, String workstreamId) {
+        var paths = new WorkstreamPaths(workdir.toAbsolutePath().normalize(), new DualId(workstreamId));
+        return paths.workstreamDir().resolve("calibration").resolve("apply-plans");
+    }
+
+    static Path applyPlanJson(Path workdir, String workstreamId, String candidateId) {
+        var safeId = normalizeCandidateId(candidateId);
+        return applyPlansDir(workdir, workstreamId).resolve(safeId + ".json").normalize();
+    }
+
+    static Path applyPlanMarkdown(Path jsonPath) {
+        var fileName = jsonPath.getFileName().toString();
+        return jsonPath.resolveSibling(fileName.substring(0, fileName.length() - ".json".length()) + ".md");
+    }
+
     static String normalizeCandidateId(String candidateId) {
         if (candidateId == null || candidateId.isBlank()) {
             throw new IllegalArgumentException("candidate id is required");

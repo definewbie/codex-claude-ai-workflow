@@ -65,6 +65,40 @@ class CalibrationCommandTest {
         assertTrue(json.contains("\"decidedAt\""));
     }
 
+    @Test
+    void planWritesApplyPlanWithoutChangingCandidate() throws Exception {
+        writeCandidate("candidate-4", "ACCEPTED");
+        var before = Files.readString(candidateJson("candidate-4"), StandardCharsets.UTF_8);
+
+        var command = new CalibrationPlanCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-cal";
+        command.candidateId = "candidate-4";
+
+        var printed = captureStdout(command::call);
+
+        var planJson = tempDir.resolve(".agent/workstreams/ws-cal/calibration/apply-plans/candidate-4.json");
+        var planMd = tempDir.resolve(".agent/workstreams/ws-cal/calibration/apply-plans/candidate-4.md");
+        assertTrue(Files.isRegularFile(planJson));
+        assertTrue(Files.isRegularFile(planMd));
+
+        var json = Files.readString(planJson, StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"candidateId\" : \"candidate-4\""));
+        assertTrue(json.contains("\"candidateStatus\" : \"ACCEPTED\""));
+        assertTrue(json.contains("\"proposedTargetArea\" : \"Task contract template or contract compiler checklist\""));
+        assertTrue(json.contains("\"status\" : \"PROPOSED\""));
+
+        var markdown = Files.readString(planMd, StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("# Calibration Apply Plan"));
+        assertTrue(markdown.contains("## Recommended Human Action"));
+        assertTrue(markdown.contains("## Not Applied Automatically"));
+        assertTrue(markdown.contains("This command does not modify prompts"));
+
+        assertEquals(before, Files.readString(candidateJson("candidate-4"), StandardCharsets.UTF_8));
+        assertTrue(printed.contains("Calibration apply plan created"));
+        assertTrue(printed.contains("candidate-4"));
+    }
+
     private String captureStdout(ThrowingCallable callable) throws Exception {
         var originalOut = System.out;
         var out = new ByteArrayOutputStream();
