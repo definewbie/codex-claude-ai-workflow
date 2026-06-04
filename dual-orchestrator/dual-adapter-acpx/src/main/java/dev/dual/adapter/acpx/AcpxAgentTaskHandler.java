@@ -129,6 +129,36 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     completedResult
             );
         }
+        if (failure.recoverable() && outputComplete) {
+            metadataWriter.writeCompleted(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    context.definition().id(),
+                    agent,
+                    session,
+                    promptTemplate,
+                    runId,
+                    runDir,
+                    promptPath,
+                    stdoutPath,
+                    stderrPath,
+                    result,
+                    null
+            );
+            var completedResult = new LinkedHashMap<String, Object>();
+            completedResult.put("run_id", runId);
+            completedResult.put("run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString());
+            completedResult.put("agent", agent);
+            completedResult.put("session", session);
+            completedResult.put("exit_code", result.exitCode());
+            completedResult.put("acpx_recoverable_stderr_ignored", true);
+            completedResult.put("acpx_failure.reason", failure.reason());
+            return NodeResult.completed(
+                    "completed",
+                    List.of(context.workspaceRoot().relativize(stdoutPath).toString()),
+                    completedResult
+            );
+        }
         if (failure.recoverable()) {
             metadataWriter.writeCompleted(
                     context.workspaceRoot(),

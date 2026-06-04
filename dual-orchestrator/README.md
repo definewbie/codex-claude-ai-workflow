@@ -336,7 +336,7 @@ acpx --timeout 600 --approve-all ...
 
 原因是 p6 的 intake / design / plan / acceptance 都可能需要通过 Agent 工具读取项目、执行 `git diff`、运行测试或生成证据；在非交互模式下使用 `--approve-reads --non-interactive-permissions fail` 会让这类工具调用直接失败。安全边界主要由默认 worktree、`Execution Workspace Guard` 和 prompt contract 共同承担：Claude 是主控开发者；Codex 仍然只做外部审视和验收，不应修改业务代码。
 
-如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr，并把节点停到 recovery；它不会替你修复 agent runtime。一个例外是：当 `exit_code=0` 且 stdout 已经包含完整 terminal `dual-control` block 并以 `[done] end_turn` 结束时，adapter 会接受该产物，同时在 result 中记录 `acpx_recoverable_stderr_ignored=true`。如果 exit code 非 0，但 stdout 已完整，adapter 只会在 stderr 不属于已知可恢复错误时容忍这次非 0 exit，并记录 `acpx_exit_tolerated=true` 和原始 `exit_code`。
+如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr。若 stdout 已经包含完整 terminal `dual-control` block，并以 `[done] end_turn` 结束，adapter 会接受该产物，同时在 result 中记录 `acpx_recoverable_stderr_ignored=true` 和原始 `exit_code`。如果 stdout 不完整，节点仍会停到 recovery；dual 不会替你修复 agent runtime。
 
 所有 Agent prompt 都会带 `Execution Workspace Guard`，明确唯一有效工作目录，并在上下文预览中隐藏 workspace 外的绝对路径。这样做是为了避免 Agent 从历史输出里照抄原始 repo 路径，绕过 worktree 隔离。
 
@@ -1392,7 +1392,7 @@ failure_reason: RECOVERABLE_AGENT_RECONNECT
 recoverable: true
 ```
 
-即使 stdout 已经完整结束，只要 stderr 明确包含 `agent needs reconnect`，也不会继续 workflow。先恢复 agent session，再执行 `retry` / `resume`。
+如果 stdout 没有完整 terminal `dual-control` block 或没有 `[done] end_turn`，workflow 会停在 recovery。先恢复 agent session，再执行 `retry` / `resume`。如果 stdout 已经完整结束，adapter 会接受这次产物并记录 `acpx_recoverable_stderr_ignored=true`，让 workflow 继续路由。
 
 ### `.serena/` 出现在 worktree 里
 

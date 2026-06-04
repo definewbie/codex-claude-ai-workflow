@@ -162,7 +162,7 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void treatsReconnectExitAsRecoverableFailureEvenWhenStdoutLooksComplete() throws Exception {
+    void completesReconnectExitWhenStdoutHasCompleteTerminalArtifact() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -191,12 +191,14 @@ class AcpxAgentTaskHandlerTest {
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.outcome());
-        assertEquals(true, result.result().get("acpx_failure.recoverable"));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("completed", result.outcome());
+        assertEquals(5, result.result().get("exit_code"));
+        assertEquals(true, result.result().get("acpx_recoverable_stderr_ignored"));
+        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.result().get("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
-        assertTrue(runMetadata.contains("\"status\" : \"failed\""));
+        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
     }
 
     @Test
