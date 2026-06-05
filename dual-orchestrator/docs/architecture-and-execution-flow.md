@@ -144,6 +144,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - Workstream summary MVP：`dualctl summary` 聚合 timeline、next action、final report、recovery、delivery 和 calibration 读模型，用于真实 case 复盘。
+- Agent status protocol：Agent 输出里的 `dual-control` 块只表达“提议状态”；runtime 读取最后一个顶层状态块，忽略后续运行 epilogue，再由 node output contract 校验状态是否允许，最后才更新 ledger 和路由。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
 - Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow overview / status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；两者都只推进 `RUNNING` workstreams，不绕过 human gate / recovery / failure。
 - Delivery prepare / commit / create-pr 基础管线。

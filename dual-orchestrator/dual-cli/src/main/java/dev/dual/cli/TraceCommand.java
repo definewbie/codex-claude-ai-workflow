@@ -56,7 +56,7 @@ public final class TraceCommand implements Callable<Integer> {
         var repairLoopCount = Math.max(acceptance.repairLoopCount(), repairActions.size());
         var status = text(timeline.get("workflowStatus"), "UNKNOWN");
         var currentNode = currentNode(nodes, activeNodes);
-        var artifacts = artifacts(paths);
+        var artifacts = artifacts(paths, status);
         var nextAction = nextAction(paths, status, openGates);
         var attention = attention(paths, status, currentNode, openGates, acceptance, repairLoopCount, artifacts);
 
@@ -356,15 +356,18 @@ public final class TraceCommand implements Callable<Integer> {
         return items;
     }
 
-    private List<ArtifactRef> artifacts(WorkstreamPaths paths) {
-        return List.of(
+    private List<ArtifactRef> artifacts(WorkstreamPaths paths, String status) {
+        var artifacts = new ArrayList<>(List.of(
                 new ArtifactRef("Final Report", paths.workstreamDir().resolve("reports").resolve("latest-final-report.md"), true),
                 new ArtifactRef("Workstream Summary", paths.workstreamDir().resolve("reports").resolve("workstream-summary.md"), true),
                 new ArtifactRef("Handoff JSON", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"), true),
                 new ArtifactRef("Next-stage Prompt", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"), true),
-                new ArtifactRef("Delivery PR Body", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"), false),
-                new ArtifactRef("Current Failure", paths.currentFailureMarkdown(), false)
-        );
+                new ArtifactRef("Delivery PR Body", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"), false)
+        ));
+        if ("FAILED".equals(status) || "BLOCKED".equals(status) || "WAITING_FOR_RECOVERY".equals(status)) {
+            artifacts.add(new ArtifactRef("Current Failure", paths.currentFailureMarkdown(), false));
+        }
+        return artifacts;
     }
 
     private List<Map<String, Object>> recent(List<Map<String, Object>> nodes, int limit) {

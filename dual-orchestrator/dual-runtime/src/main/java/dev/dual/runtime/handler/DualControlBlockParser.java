@@ -4,17 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class DualControlBlockParser {
-    // (?m) makes ^ match line start; ^ anchors prevent matching inside blockquotes
-    // or indented contexts where ``` is not at the beginning of a line.
-    private static final Pattern FENCED_BLOCK = Pattern.compile(
-            "(?m)^```dual-control\\s*\\R(?<body>.*?)\\R^```",
-            Pattern.DOTALL
-    );
-
     public DualControlParseResult parse(String markdown, NodeOutputContract contract) {
         var result = parse(markdown);
         if (!result.valid()) {
@@ -37,52 +28,76 @@ public final class DualControlBlockParser {
             return DualControlParseResult.missing();
         }
 
-        // Find all dual-control blocks and their end positions
-        var matcher = FENCED_BLOCK.matcher(markdown);
-        List<MatchedBlock> blocks = new ArrayList<>();
-        while (matcher.find()) {
-            blocks.add(new MatchedBlock(matcher.group("body"), matcher.end()));
-        }
+        var blocks = topLevelControlBlocks(markdown);
 
         if (blocks.isEmpty()) {
             return DualControlParseResult.missing();
         }
 
-        // Terminal control block rule: only the last block is the control block.
+        // Status protocol rule: only the last top-level block is the control block.
         // Earlier blocks are treated as prose/quotes (e.g., user input quoted by the agent).
         var terminal = blocks.get(blocks.size() - 1);
 
-        // The terminal block must be at the end of the markdown (only whitespace after it).
-        String afterTerminal = markdown.substring(terminal.endPosition()).trim();
-        if (!isAllowedTrailingSentinel(afterTerminal)) {
-            return DualControlParseResult.invalid(
-                    "NON_TERMINAL_CONTROL_BLOCK",
-                    "dual-control block must be the last content in the output, but non-whitespace content follows it.",
-                    Map.of("trailing_length", afterTerminal.length())
-            );
-        }
-
-        // Validate the terminal block's content
-        return parseBody(terminal.body());
+        return parseBody(terminal.body(), blocks.size());
     }
 
-    private boolean isAllowedTrailingSentinel(String trailing) {
-        if (trailing.isEmpty()) {
-            return true;
-        }
-        for (var line : trailing.split("\\R")) {
-            var trimmed = line.trim();
-            if (trimmed.isEmpty()) {
+    private static List<MatchedBlock> topLevelControlBlocks(String markdown) {
+        var lines = markdown.lines().toList();
+        var blocks = new ArrayList<MatchedBlock>();
+        boolean insideOtherFence = false;
+        String otherFenceMarker = "";
+        for (int i = 0; i < lines.size(); i++) {
+            var line = lines.get(i);
+            if (insideOtherFence) {
+                if (line.startsWith(otherFenceMarker)) {
+                    insideOtherFence = false;
+                    otherFenceMarker = "";
+                }
                 continue;
             }
-            if (!"[done] end_turn".equals(trimmed)) {
-                return false;
+            if (isTopLevelControlFence(line)) {
+                var body = new StringBuilder();
+                for (int j = i + 1; j < lines.size(); j++) {
+                    var candidate = lines.get(j);
+                    if (candidate.startsWith("```")) {
+                        blocks.add(new MatchedBlock(body.toString().stripTrailing()));
+                        i = j;
+                        break;
+                    }
+                    body.append(candidate).append("\n");
+                    if (j == lines.size() - 1) {
+                        i = j;
+                    }
+                }
+                continue;
+            }
+            if (isTopLevelNonControlFence(line)) {
+                insideOtherFence = true;
+                otherFenceMarker = fenceMarker(line);
             }
         }
-        return true;
+        return List.copyOf(blocks);
     }
 
-    private DualControlParseResult parseBody(String body) {
+    private static boolean isTopLevelControlFence(String line) {
+        return line != null && line.matches("^```dual-control\\s*$");
+    }
+
+    private static boolean isTopLevelNonControlFence(String line) {
+        return line != null
+                && line.matches("^`{3,}.*$")
+                && !isTopLevelControlFence(line);
+    }
+
+    private static String fenceMarker(String line) {
+        var count = 0;
+        while (count < line.length() && line.charAt(count) == '`') {
+            count++;
+        }
+        return "`".repeat(Math.max(3, count));
+    }
+
+    private DualControlParseResult parseBody(String body, int blockCount) {
         var values = new LinkedHashMap<String, String>();
         var malformedLines = new ArrayList<String>();
         var duplicateKeys = new ArrayList<String>();
@@ -129,8 +144,13 @@ public final class DualControlBlockParser {
                     Map.of()
             );
         }
-        return DualControlParseResult.valid(new DualControlBlock(values));
+        return DualControlParseResult.valid(new DualControlBlock(values), Map.of(
+                "control_source", Map.of(
+                        "block_selection", "LAST_TOP_LEVEL_DUAL_CONTROL",
+                        "candidate_count", blockCount
+                )
+        ));
     }
 
-    private record MatchedBlock(String body, int endPosition) {}
+    private record MatchedBlock(String body) {}
 }

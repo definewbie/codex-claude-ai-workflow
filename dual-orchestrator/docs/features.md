@@ -45,6 +45,7 @@
   - 2026-06-05：Claude self-test prompt 要求明确 `Checks Run`、`Checks Skipped`、`Evidence`、`Missing Evidence` 和残余风险。
   - 2026-06-05：Codex final acceptance prompt 要求独立判断自测充分性，并区分 blocking gaps、missing evidence 和 non-blocking acceptance notes。
   - 2026-06-05：agent output contract sidecar 会抽取 checks、evidence、missing evidence 和 acceptance notes；final report 增加 `Verification Evidence` 结构化摘要。
+  - 2026-06-05：Agent 的 `dual-control` 块被视为“提议状态”，orchestrator 只读取最后一个顶层状态块，并由 node output contract 校验合法状态后再路由；Agent 在状态块后的运行 epilogue 不再导致主流程误停。
 
 ## P2 — 技术债
 
@@ -63,6 +64,7 @@
 
 - [x] Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
 - [x] Trace CLI MVP：`dualctl trace` 一屏展示 status、当前节点、open gate、acceptance、repair loops、timeline、关键 artifacts 和下一步命令。
+  - 2026-06-05：完成态 trace 不再展示陈旧 `recovery/current-failure.md`；失败 / blocked / recovery 状态仍显示当前恢复摘要。
 - [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow overview / status / timeline，并支持最小 action：resume、retry、review approve/revise。
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集

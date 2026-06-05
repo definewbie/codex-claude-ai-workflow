@@ -43,6 +43,7 @@ class TraceCommandTest {
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
         assertTrue(printed.contains("Final Report:"));
         assertTrue(printed.contains("Handoff JSON:"));
+        assertFalse(printed.contains("Current Failure:"));
         assertTrue(printed.contains("dualctl summary --workdir"));
     }
 
@@ -63,6 +64,7 @@ class TraceCommandTest {
         assertTrue(printed.contains("[warning] Verification confidence is LOW"));
         assertTrue(printed.contains("dualctl recovery show --workdir"));
         assertTrue(printed.contains("dualctl retry --workdir"));
+        assertTrue(printed.contains("Current Failure:"));
     }
 
     @Test
@@ -126,11 +128,13 @@ class TraceCommandTest {
         Files.createDirectories(root.resolve("reports"));
         Files.createDirectories(root.resolve("artifacts/next-stage"));
         Files.createDirectories(root.resolve("delivery"));
+        Files.createDirectories(root.resolve("recovery"));
         Files.createDirectories(root.resolve("runs/run-1"));
         Files.writeString(root.resolve("reports/latest-final-report.md"), "# Final\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("artifacts/next-stage/handoff.json"), "{}", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("artifacts/next-stage/next-stage-prompt.md"), "# Next\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("delivery/pr-body.md"), "# PR\n", StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("recovery/current-failure.md"), "# Current Failure\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("runs/run-1/run.json"), """
                 {
                   "schemaVersion": 1,

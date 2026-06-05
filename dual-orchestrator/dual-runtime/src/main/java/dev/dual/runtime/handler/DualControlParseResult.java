@@ -16,6 +16,10 @@ public record DualControlParseResult(
         return new DualControlParseResult(block, "", "", Map.of());
     }
 
+    static DualControlParseResult valid(DualControlBlock block, Map<String, Object> details) {
+        return new DualControlParseResult(block, "", "", details);
+    }
+
     static DualControlParseResult missing() {
         return new DualControlParseResult(null, "MISSING_DUAL_CONTROL", "No dual-control block found.", Map.of());
     }

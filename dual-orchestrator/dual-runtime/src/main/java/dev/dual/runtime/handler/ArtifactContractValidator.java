@@ -50,7 +50,7 @@ public final class ArtifactContractValidator {
             var markdown = Files.readString(path, StandardCharsets.UTF_8);
             var parsed = parser.parse(markdown, contract);
             if (parsed.valid()) {
-                return withContractSidecar(root, nodeDefinition, result, contract, parsed.block(), ref, path, markdown);
+                return withContractSidecar(root, nodeDefinition, result, contract, parsed, ref, path, markdown);
             }
             lastInvalid = parsed;
             break;
@@ -63,11 +63,12 @@ public final class ArtifactContractValidator {
             NodeDefinition nodeDefinition,
             NodeResult result,
             NodeOutputContract contract,
-            DualControlBlock block,
+            DualControlParseResult parsed,
             String outputRef,
             Path outputPath,
             String markdown
     ) throws Exception {
+        var block = parsed.block();
         var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
         var sidecarRef = root.relativize(sidecarPath).toString();
         var document = new LinkedHashMap<String, Object>();
@@ -81,6 +82,7 @@ public final class ArtifactContractValidator {
         document.put("source_output_ref", outputRef);
         document.put("generated_at", Instant.now().toString());
         document.put("control", block.values());
+        document.put("control_source", parsed.details().getOrDefault("control_source", Map.of()));
         document.put("must_fix", MarkdownArtifactFields.listSection(
                 markdown,
                 "Must Fix",

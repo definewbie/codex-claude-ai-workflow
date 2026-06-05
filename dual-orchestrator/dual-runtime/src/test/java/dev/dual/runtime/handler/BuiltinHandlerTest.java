@@ -576,21 +576,19 @@ class BuiltinHandlerTest {
         ));
 
         assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
-        var parseError = (Map<?, ?>) result.result().get("parse_error");
-        assertEquals("NON_TERMINAL_CONTROL_BLOCK", parseError.get("code"));
+        assertEquals("MISSING_DUAL_CONTROL", result.outcome());
     }
 
     @Test
-    void reviewDecisionRejectsTerminalBlockFollowedByOtherCodeFence() throws Exception {
+    void reviewDecisionUsesStatusBlockAndIgnoresTrailingCodeFence() throws Exception {
         var output = writeOutput("codex-review.md", """
                 ```dual-control
-                decision: PASS
-                summary: looks terminal
+                decision: READY_FOR_ARCH_REVIEW
+                summary: valid status
                 ```
 
                 ```plain
-                additional notes after control block
+                additional notes after status block
                 ```
                 """);
         var handler = new ReviewDecisionHandler();
@@ -601,10 +599,9 @@ class BuiltinHandlerTest {
                 node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
         ));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
-        var parseError = (Map<?, ?>) result.result().get("parse_error");
-        assertEquals("NON_TERMINAL_CONTROL_BLOCK", parseError.get("code"));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.outcome());
+        assertEquals("valid status", result.result().get("summary"));
     }
 
     @Test
@@ -620,6 +617,36 @@ class BuiltinHandlerTest {
                 decision: READY_FOR_ARCH_REVIEW
                 summary: genuine review after analysis
                 ```
+                """);
+        var handler = new ReviewDecisionHandler();
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("design.decision"),
+                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.outcome());
+        assertEquals("genuine review after analysis", result.result().get("summary"));
+    }
+
+    @Test
+    void reviewDecisionAcceptsTerminalBlockWithBenignAgentEpilogue() throws Exception {
+        var output = writeOutput("codex-review.md", """
+                Implementation complete.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: genuine review after analysis
+                ```
+
+                [plan]
+                  - [completed] Produce final response
+
+                完成。输出已记录，等待下一步验收。
+
+                [done] end_turn
                 """);
         var handler = new ReviewDecisionHandler();
         var result = handler.evaluate(new DecisionHandler.DecisionContext(
@@ -655,14 +682,14 @@ class BuiltinHandlerTest {
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_DUAL_CONTROL", result.outcome());
         var parseError = (Map<?, ?>) result.result().get("parse_error");
-        assertEquals("NON_TERMINAL_CONTROL_BLOCK", parseError.get("code"));
+        assertEquals("CONTRACT_VIOLATION", parseError.get("code"));
     }
 
     @Test
-    void reviewDecisionRejectsTerminalBlockFollowedByContent() throws Exception {
+    void reviewDecisionUsesStatusBlockAndIgnoresTrailingNaturalLanguage() throws Exception {
         var output = writeOutput("codex-review.md", """
                 ```dual-control
-                decision: PASS
+                decision: READY_FOR_ARCH_REVIEW
                 summary: valid decision
                 ```
 
@@ -676,10 +703,9 @@ class BuiltinHandlerTest {
                 node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
         ));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("INVALID_DUAL_CONTROL", result.outcome());
-        var parseError = (Map<?, ?>) result.result().get("parse_error");
-        assertEquals("NON_TERMINAL_CONTROL_BLOCK", parseError.get("code"));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.outcome());
+        assertEquals("valid decision", result.result().get("summary"));
     }
 
     @Test
