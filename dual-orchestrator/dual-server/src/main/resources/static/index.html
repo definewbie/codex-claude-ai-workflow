@@ -45,6 +45,27 @@
             <span id="selectedStatus" class="badge muted">-</span>
           </div>
           <p id="actionHint" class="hint">Select a workstream to see available actions.</p>
+          <div id="overviewCards" class="overview-grid"></div>
+          <div class="overview-row">
+            <section>
+              <span class="eyebrow">Why stopped / running</span>
+              <p id="overviewWhy">Select a workstream to inspect the current workflow state.</p>
+            </section>
+            <section>
+              <span class="eyebrow">Next action</span>
+              <p id="overviewNext">-</p>
+            </section>
+          </div>
+          <div class="overview-split">
+            <section>
+              <div class="mini-title">Recent timeline</div>
+              <div id="overviewTimeline" class="mini-list"></div>
+            </section>
+            <section>
+              <div class="mini-title">Key artifacts</div>
+              <div id="overviewArtifacts" class="mini-list"></div>
+            </section>
+          </div>
           <div class="actions">
             <button id="resume">Resume</button>
             <button id="approve">Approve + Run</button>

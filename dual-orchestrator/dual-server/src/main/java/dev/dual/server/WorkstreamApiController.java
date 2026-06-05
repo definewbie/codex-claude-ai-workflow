@@ -54,6 +54,14 @@ public class WorkstreamApiController {
         return queryService.timeline(workdirPath(workdir), workstreamId);
     }
 
+    @GetMapping("/{workstreamId}/overview")
+    public Map<String, Object> overview(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir
+    ) throws Exception {
+        return queryService.overview(workdirPath(workdir), workstreamId);
+    }
+
     @GetMapping("/{workstreamId}/review/current")
     public Map<String, Object> currentReview(
             @PathVariable String workstreamId,

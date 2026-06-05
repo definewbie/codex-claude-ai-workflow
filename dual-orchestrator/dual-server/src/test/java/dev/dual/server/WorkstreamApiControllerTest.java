@@ -114,6 +114,52 @@ class WorkstreamApiControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void overviewReturnsTraceSummary() throws Exception {
+        var fixture = createWorkstream("ws-api-overview");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.createDirectories(paths.workstreamDir().resolve("reports"));
+        Files.writeString(paths.workstreamDir().resolve("reports").resolve("real-case-summary.json"), """
+                {
+                  "final_status": "COMPLETED",
+                  "final_acceptance_decision": "ACCEPT_WITH_NOTES",
+                  "repair_loop_count": 1,
+                  "verification_confidence": "MEDIUM"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(paths.runsDir().resolve("run-001"));
+        Files.writeString(paths.runsDir().resolve("run-001").resolve("run.json"), """
+                {
+                  "runId": "run-001",
+                  "agent": "codex",
+                  "nodeId": "acceptance.codex_verifier_review",
+                  "status": "completed",
+                  "durationMs": 42
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(paths.eventsJsonl(), """
+                {"event_type":"iteration_started","payload":{"trigger_action":"REJECT_IMPLEMENTATION_BUG"}}
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var workflow = (Map<String, Object>) response.get("workflow");
+        assertEquals("WAITING_FOR_HUMAN", workflow.get("status"));
+        assertEquals("review.gate", workflow.get("currentNode"));
+        var acceptance = (Map<String, Object>) response.get("acceptance");
+        assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
+        assertEquals("MEDIUM", acceptance.get("verificationConfidence"));
+        assertEquals(1, acceptance.get("repairLoopCount"));
+        assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
+        assertEquals(true, response.get("nextAction").toString().contains("dualctl review show"));
+        assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
+        assertEquals(1, ((List<Map<String, Object>>) response.get("latestAgentRuns")).size());
+        var artifacts = (Map<String, Object>) response.get("artifacts");
+        assertEquals(true, artifacts.containsKey("finalReport"));
+    }
+
+    @Test
     void currentReviewReturnsActiveGatePacket() throws Exception {
         var fixture = createWorkstream("ws-api-review");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));

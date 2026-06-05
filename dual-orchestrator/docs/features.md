@@ -59,7 +59,7 @@
 
 - [x] Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
 - [x] Trace CLI MVP：`dualctl trace` 一屏展示 status、当前节点、open gate、acceptance、repair loops、timeline、关键 artifacts 和下一步命令。
-- [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow status / timeline，并支持最小 action：resume、retry、review approve/revise。
+- [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow overview / status / timeline，并支持最小 action：resume、retry、review approve/revise。
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖
@@ -83,6 +83,7 @@
    - 2026-06-04：`run-real-case.sh --update-benchmark-index` 可在真实 case 结束后自动刷新 benchmark index；默认关闭，避免临时调试 run 改动文档。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
    - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项；stopped/recovery 状态已显示当前失败摘要。
+   - 2026-06-05：operator panel 首屏增加 trace-style overview，和 `dualctl trace` 一样先回答“现在跑到哪、为什么停、下一步做什么”。
    - 2026-06-04：CLI 在 `run` / `resume` 停住时统一打印 `Next actions`，覆盖 human gate、recovery、completed 和 max-steps，降低真实操作时翻 ledger 的成本。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。

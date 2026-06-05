@@ -16,6 +16,11 @@ const els = {
   selectedTitle: $("selectedTitle"),
   selectedStatus: $("selectedStatus"),
   actionHint: $("actionHint"),
+  overviewCards: $("overviewCards"),
+  overviewWhy: $("overviewWhy"),
+  overviewNext: $("overviewNext"),
+  overviewTimeline: $("overviewTimeline"),
+  overviewArtifacts: $("overviewArtifacts"),
   statusView: $("statusView"),
   timelineView: $("timelineView"),
   artifactSummary: $("artifactSummary"),
@@ -121,7 +126,7 @@ async function loadSelected() {
     return;
   }
   await loadStatus();
-  await Promise.all([loadTimeline(), loadReviewPacket(), loadRecoverySummary()]);
+  await Promise.all([loadOverview(), loadTimeline(), loadReviewPacket(), loadRecoverySummary()]);
 }
 
 async function loadStatus() {
@@ -147,6 +152,87 @@ async function loadTimeline() {
     renderTimeline(data);
   } catch (error) {
     els.timelineView.textContent = JSON.stringify(error, null, 2);
+  }
+}
+
+async function loadOverview() {
+  try {
+    const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/overview?workdir=${workdirParam()}`);
+    state.overview = data;
+    renderOverview(data);
+  } catch (error) {
+    renderOverviewError(error);
+  }
+}
+
+function renderOverview(data) {
+  const workflow = data.workflow || {};
+  const acceptance = data.acceptance || {};
+  renderOverviewCards([
+    ["Current", workflow.currentNode || workflow.status || "-"],
+    ["Acceptance", acceptance.finalDecision || "none"],
+    ["Repair loops", acceptance.repairLoopCount ?? 0],
+    ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
+  ]);
+  els.overviewWhy.textContent = data.whyStopped || "-";
+  els.overviewNext.textContent = data.nextAction || "-";
+  renderOverviewTimeline(data.recentTimeline || []);
+  renderOverviewArtifacts(data.artifacts || {});
+}
+
+function renderOverviewError(error) {
+  els.overviewCards.innerHTML = "";
+  els.overviewWhy.textContent = "Overview is not available.";
+  els.overviewNext.textContent = JSON.stringify(error);
+  els.overviewTimeline.innerHTML = "";
+  els.overviewArtifacts.innerHTML = "";
+}
+
+function renderOverviewCards(items) {
+  els.overviewCards.innerHTML = "";
+  for (const [label, value] of items) {
+    const card = document.createElement("section");
+    card.className = "overview-card";
+    card.innerHTML = `
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    `;
+    els.overviewCards.appendChild(card);
+  }
+}
+
+function renderOverviewTimeline(nodes) {
+  els.overviewTimeline.innerHTML = "";
+  if (!nodes.length) {
+    els.overviewTimeline.textContent = "No timeline yet.";
+    return;
+  }
+  for (const node of nodes.slice(-6)) {
+    const item = document.createElement("div");
+    item.className = "mini-item";
+    item.innerHTML = `
+      <strong>${escapeHtml(node.nodeDefinitionId || "(node)")}</strong>
+      <span>${escapeHtml([node.status, node.iterationId].filter(Boolean).join(" · "))}</span>
+    `;
+    els.overviewTimeline.appendChild(item);
+  }
+}
+
+function renderOverviewArtifacts(artifacts) {
+  els.overviewArtifacts.innerHTML = "";
+  const entries = Object.entries(artifacts);
+  if (!entries.length) {
+    els.overviewArtifacts.textContent = "No artifacts yet.";
+    return;
+  }
+  for (const [key, artifact] of entries) {
+    const item = document.createElement("div");
+    item.className = `mini-item ${artifact.available ? "" : "muted-item"}`;
+    item.innerHTML = `
+      <strong>${escapeHtml(labelize(key))}</strong>
+      <span>${escapeHtml(artifact.available ? artifact.path : "missing")}</span>
+    `;
+    els.overviewArtifacts.appendChild(item);
   }
 }
 
@@ -444,6 +530,12 @@ function maxSteps() {
 
 function selectedBase() {
   return `/api/workstreams/${encodeURIComponent(state.selectedId)}`;
+}
+
+function labelize(value) {
+  return String(value)
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (letter) => letter.toUpperCase());
 }
 
 function escapeHtml(value) {

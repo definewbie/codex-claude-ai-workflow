@@ -89,7 +89,7 @@ Runtime 只认识三类节点：
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` / `.md`，并可通过 `dualctl calibration plan` 生成可审阅 apply plan。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
-- Local API Server MVP：`dual-server` 提供 HTTP API，用于读取 workflow status / timeline，并执行最小 action：resume、retry、review approve/revise；scheduler 支持手动 tick 和默认关闭的后台周期调度。
+- Local API Server MVP：`dual-server` 提供 HTTP API，用于读取 workflow overview / status / timeline，并执行最小 action：resume、retry、review approve/revise；scheduler 支持手动 tick 和默认关闭的后台周期调度。
 - 条件 edge routing：`EdgeCondition` 接口 + `ConfigEqualsCondition` 实现，edge 支持条件判断（`if config.x == y`），`EdgeConditionModule` Jackson 序列化。
 - 并行节点：fan-out edge routing 激活多个后续节点 + sequential multi-node resume（单线程语义，一次 `resume` 依次执行所有 active nodes）。
 - Ledger schema migration 暂不作为当前主线；schema 仍在快速演进，当前只保留最小兼容能力。
@@ -290,7 +290,7 @@ dualctl trace --workdir <effective_worktree> <workstream_id>
 
 ## Local API Server
 
-`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它也提供 scheduler：默认关闭，可以手动 tick，也可以通过配置打开后台周期调度。
+`dual-server` 是给后续 dashboard / automation 用的本地 HTTP 入口。当前第一版读取 ledger 里的 overview / status / timeline，并提供最小 action API 来推进人工卡点和失败恢复。它也提供 scheduler：默认关闭，可以手动 tick，也可以通过配置打开后台周期调度。
 
 构建：
 
@@ -314,7 +314,8 @@ http://localhost:8080/
 这个页面是一个很薄的调用 UI，不是完整 dashboard。它直接调用下面这些 HTTP API，可以做几件日常 E2E 操作：
 
 - 输入 effective workdir，列出 workstreams。
-- 查看当前 status 和 timeline。
+- 首屏 overview 回答“现在跑到哪、为什么停、下一步做什么”，并展示 acceptance、repair loops、最近 timeline 和关键 artifacts。
+- 查看当前 status 和 timeline 详情。
 - 查看最近的 Agent artifact contract sidecars 摘要，包括 decision、summary、must fix、风险、变更文件和验证摘要。
 - 当 workflow 停在 human review gate 时，展示当前 review packet；页面会先渲染推荐动作、TaskContract / Decision / Must Fix / Git Evidence 等结构化审查卡片，原始 Markdown packet 保留在折叠区。
 - 当 workflow 停在 failed / blocked / waiting for recovery 状态时，展示 `recovery/current-failure.md`。
@@ -329,12 +330,13 @@ http://localhost:8080/
 2. 启动 `dual-server`。
 3. 打开 `http://localhost:8080/`。
 4. 在页面顶部填入 start 输出里的 `Workspace`，点击 `Refresh`。
-5. 选中 workstream 后查看 status / timeline，遇到 human gate 时点 `Approve + Run` 或 `Complete`。
+5. 选中 workstream 后先看首屏 overview，再按需查看 status / timeline；遇到 human gate 时点 `Approve + Run` 或 `Complete`。
 
 查询某个 workstream：
 
 ```bash
 curl "http://localhost:8080/api/workstreams?workdir=<effective_worktree>"
+curl "http://localhost:8080/api/workstreams/<workstream_id>/overview?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/status?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/timeline?workdir=<effective_worktree>"
 curl "http://localhost:8080/api/workstreams/<workstream_id>/review/current?workdir=<effective_worktree>"
