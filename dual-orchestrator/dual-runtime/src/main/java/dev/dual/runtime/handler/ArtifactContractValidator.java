@@ -100,6 +100,39 @@ public final class ArtifactContractValidator {
                 "Known Risks"
         ));
         document.put("changed_files", MarkdownArtifactFields.listSection(markdown, "Changed Files"));
+        document.put("checks_run", MarkdownArtifactFields.listSection(
+                markdown,
+                "Checks Run",
+                "Commands Run",
+                "Manual Checks",
+                "Validation Performed"
+        ));
+        document.put("checks_skipped", MarkdownArtifactFields.listSection(
+                markdown,
+                "Checks Skipped",
+                "Failed / Skipped Checks",
+                "Skipped Checks",
+                "Not Tested"
+        ));
+        document.put("evidence", MarkdownArtifactFields.listSection(
+                markdown,
+                "Evidence",
+                "Acceptance Evidence",
+                "Verification Evidence"
+        ));
+        document.put("missing_evidence", MarkdownArtifactFields.listSection(
+                markdown,
+                "Missing Evidence",
+                "Missing Tests",
+                "Verification Gaps",
+                "Evidence Gaps"
+        ));
+        document.put("acceptance_notes", MarkdownArtifactFields.listSection(
+                markdown,
+                "Acceptance Notes",
+                "Notes",
+                "Non-blocking Notes"
+        ));
         document.put("verification_summary", MarkdownArtifactFields.textSection(
                 markdown,
                 "Verification Summary",

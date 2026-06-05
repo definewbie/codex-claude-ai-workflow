@@ -2,6 +2,9 @@ package dev.dual.runtime.handler;
 
 import dev.dual.core.workflow.NodeResult;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,6 +19,7 @@ import java.util.stream.Stream;
 public final class ReportGenerateFinalHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
     private static final int MAX_RECENT_OUTPUTS = 8;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public String type() {
@@ -63,6 +67,9 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         appendTaskContractSection(builder, workstreamDir);
 
         appendFailureClassificationSection(builder, workstreamDir);
+
+        builder.append("## Verification Evidence\n\n");
+        appendVerificationEvidence(builder, workstreamDir);
 
         builder.append("## Acceptance Summary\n\n");
         appendLatestOutputMatching(builder, workstreamDir, "acceptance-codex-review.md");
@@ -145,6 +152,60 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         } catch (Exception e) {
             builder.append("## Failure Classification\n\n");
             builder.append("(error reading failure classification: ").append(e.getMessage()).append(")\n\n");
+        }
+    }
+
+    private static void appendVerificationEvidence(StringBuilder builder, Path workstreamDir) throws IOException {
+        var selfTest = latestFileMatching(workstreamDir.resolve("runs"), "implement-claude-self-test.contract.json");
+        var acceptance = latestFileMatching(workstreamDir.resolve("runs"), "acceptance-codex-review.contract.json");
+        if (selfTest == null && acceptance == null) {
+            builder.append("(structured verification evidence not available)\n\n");
+            return;
+        }
+        if (selfTest != null) {
+            appendContractEvidence(builder, "Developer Self-Test Evidence", selfTest);
+        }
+        if (acceptance != null) {
+            appendContractEvidence(builder, "Codex Acceptance Evidence", acceptance);
+        }
+    }
+
+    private static void appendContractEvidence(StringBuilder builder, String title, Path sidecar) throws IOException {
+        builder.append("### ").append(title).append("\n\n");
+        builder.append("- Source: ").append(toDisplayRef(sidecar)).append("\n");
+        try {
+            var json = OBJECT_MAPPER.readTree(sidecar.toFile());
+            appendJsonField(builder, "Decision", json.path("decision").asText(""));
+            appendJsonField(builder, "Summary", json.path("summary").asText(""));
+            appendJsonField(builder, "Verification Summary", json.path("verification_summary").asText(""));
+            appendJsonList(builder, "Checks Run", json.path("checks_run"));
+            appendJsonList(builder, "Checks Skipped", json.path("checks_skipped"));
+            appendJsonList(builder, "Evidence", json.path("evidence"));
+            appendJsonList(builder, "Missing Evidence", json.path("missing_evidence"));
+            appendJsonList(builder, "Acceptance Notes", json.path("acceptance_notes"));
+        } catch (Exception e) {
+            builder.append("- Error reading structured evidence: ").append(e.getMessage()).append("\n");
+        }
+        builder.append("\n");
+    }
+
+    private static void appendJsonField(StringBuilder builder, String label, String value) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        builder.append("- **").append(label).append(":** ").append(value).append("\n");
+    }
+
+    private static void appendJsonList(StringBuilder builder, String label, JsonNode node) {
+        if (node == null || !node.isArray() || node.isEmpty()) {
+            return;
+        }
+        builder.append("- **").append(label).append(":**\n");
+        for (var item : node) {
+            var text = item.asText("");
+            if (!text.isBlank()) {
+                builder.append("  - ").append(text).append("\n");
+            }
         }
     }
 

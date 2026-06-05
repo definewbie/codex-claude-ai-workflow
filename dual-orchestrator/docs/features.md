@@ -1,6 +1,6 @@
 # dual-orchestrator Roadmap
 
-> Last updated: 2026-06-04
+> Last updated: 2026-06-05
 
 ## P0 — 验证（阻塞后续所有工作）
 
@@ -41,6 +41,10 @@
   - 2026-06-01：分类失败路径会写入语义化失败摘要，并把分类 artifact / calibration candidate ref 关联进去。
   - 2026-06-01：`dualctl recovery show` 可直接展示当前失败摘要。
   - 2026-06-04：`dual-server` 增加 `/api/workstreams/{id}/recovery/current`，operator panel 在 stopped/recovery 状态展示当前失败摘要。
+- [x] Self-test / acceptance evidence contract：不规定测试命令，但要求 Agent 输出可追溯的验证证据。
+  - 2026-06-05：Claude self-test prompt 要求明确 `Checks Run`、`Checks Skipped`、`Evidence`、`Missing Evidence` 和残余风险。
+  - 2026-06-05：Codex final acceptance prompt 要求独立判断自测充分性，并区分 blocking gaps、missing evidence 和 non-blocking acceptance notes。
+  - 2026-06-05：agent output contract sidecar 会抽取 checks、evidence、missing evidence 和 acceptance notes；final report 增加 `Verification Evidence` 结构化摘要。
 
 ## P2 — 技术债
 

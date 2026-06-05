@@ -106,6 +106,53 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void sidecarIncludesStructuredVerificationEvidence() throws Exception {
+        var outputRef = writeOutput("self-test.md", """
+                # Self-Test
+
+                ## Checks Run
+
+                - npm test
+                - inspected changed route manually
+
+                ## Checks Skipped
+
+                - device smoke: simulator unavailable
+
+                ## Evidence
+
+                - Test output showed 24 passing tests.
+
+                ## Missing Evidence
+
+                - No physical device validation.
+
+                ## Acceptance Notes
+
+                - Runtime visual check should happen before release.
+
+                ```dual-control
+                decision: SELF_TEST_COMPLETE
+                summary: Self-test completed with one runtime gap.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+        validator.validate(tempDir, agentNode("implement.claude_self_test_report"), result);
+
+        var sidecar = Files.readString(tempDir.resolve("self-test.contract.json"));
+        assertTrue(sidecar.contains("\"checks_run\""));
+        assertTrue(sidecar.contains("npm test"));
+        assertTrue(sidecar.contains("\"checks_skipped\""));
+        assertTrue(sidecar.contains("simulator unavailable"));
+        assertTrue(sidecar.contains("\"evidence\""));
+        assertTrue(sidecar.contains("24 passing tests"));
+        assertTrue(sidecar.contains("\"missing_evidence\""));
+        assertTrue(sidecar.contains("No physical device validation."));
+        assertTrue(sidecar.contains("\"acceptance_notes\""));
+        assertTrue(sidecar.contains("Runtime visual check should happen before release."));
+    }
+
+    @Test
     void failsMissingRequiredControlKey() throws Exception {
         var outputRef = writeOutput("review.md", """
                 Review passed.

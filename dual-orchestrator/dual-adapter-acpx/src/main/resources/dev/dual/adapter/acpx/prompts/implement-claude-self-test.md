@@ -30,12 +30,18 @@ Before finalizing the report, check repository hygiene. Report whether your vali
 Write a Markdown self-test report with these sections:
 
 1. Verification Summary
-2. Commands Run
-3. Manual Checks
+2. Checks Run
+3. Checks Skipped
 4. Evidence
 5. Repository Hygiene
-6. Failed / Skipped Checks
+6. Missing Evidence
 7. Residual Risk
+
+For `Checks Run`, include commands, manual checks, inspections, or reasoning-based
+validation you actually performed. For `Checks Skipped` and `Missing Evidence`,
+state what was not verified and why. Do not invent test results. It is acceptable
+to skip checks when the repository, toolchain, or task scope makes them
+unavailable, but the reason must be explicit.
 
 End with this control block:
 

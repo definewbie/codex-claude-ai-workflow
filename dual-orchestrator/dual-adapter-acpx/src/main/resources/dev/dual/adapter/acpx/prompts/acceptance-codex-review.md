@@ -42,7 +42,14 @@ Write a Markdown acceptance report with these sections:
 5. Architecture Acceptance
 6. User Acceptance
 7. Verification Adequacy
-8. Residual Risks
+8. Missing Evidence
+9. Acceptance Notes
+10. Residual Risks
+
+When judging verification, explicitly assess Claude's self-test report. Treat
+missing runtime, build, typecheck, or manual evidence as `Missing Evidence` if it
+matters to acceptance. Use `Acceptance Notes` for non-blocking follow-up. Do not
+mark a blocking gap as a note.
 
 Decision must be one of:
 

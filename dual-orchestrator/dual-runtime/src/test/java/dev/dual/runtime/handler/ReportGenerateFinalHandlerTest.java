@@ -152,6 +152,52 @@ class ReportGenerateFinalHandlerTest {
     }
 
     @Test
+    void structuredVerificationEvidenceIsRendered() throws Exception {
+        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-evidence");
+        var outputsDir = wsDir.resolve("runs/run-007/outputs");
+        Files.createDirectories(outputsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Evidence report.", StandardCharsets.UTF_8);
+        Files.writeString(outputsDir.resolve("implement-claude-self-test.contract.json"), """
+                {
+                  "node_id": "implement.claude_self_test_report",
+                  "decision": "SELF_TEST_COMPLETE",
+                  "summary": "Self-test completed with one runtime gap.",
+                  "checks_run": ["npm test"],
+                  "checks_skipped": ["device smoke: simulator unavailable"],
+                  "evidence": ["Test output showed 24 passing tests."],
+                  "missing_evidence": ["No physical device validation."],
+                  "verification_summary": "Developer evidence is mostly sufficient."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(outputsDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Accepted with runtime validation note.",
+                  "missing_evidence": ["No physical device validation."],
+                  "acceptance_notes": ["Run visual smoke before release."],
+                  "verification_summary": "Evidence is adequate for merge with notes."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new ReportGenerateFinalHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-evidence",
+                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
+                new NodeInstance("node-007", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+        ));
+
+        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
+        assertTrue(report.contains("## Verification Evidence"));
+        assertTrue(report.contains("Self-test completed with one runtime gap."));
+        assertTrue(report.contains("npm test"));
+        assertTrue(report.contains("device smoke: simulator unavailable"));
+        assertTrue(report.contains("No physical device validation."));
+        assertTrue(report.contains("Run visual smoke before release."));
+    }
+
+    @Test
     void filenamesIncludeIterationId() throws Exception {
         var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-filename");
         Files.createDirectories(wsDir);

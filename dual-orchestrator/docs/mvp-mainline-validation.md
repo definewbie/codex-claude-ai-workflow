@@ -67,22 +67,36 @@ Codex accepted with notes about unavailable build/runtime verification.
 These are still on the main path. They should be handled before spending more
 time on UI, notification, or scheduler polish:
 
-1. Self-test evidence is too dependent on what Claude chooses to report. The
-   workflow should make it easier for Claude to state exactly which checks were
-   run, which were skipped, and why.
-2. Codex acceptance can identify missing runtime/build evidence, but the summary
+1. Codex acceptance can identify missing runtime/build evidence, but the summary
    should keep surfacing that as verification confidence instead of hiding it
    behind a generic `PASS-WARN`.
-3. Context package and handoff are sufficient for this bounded case, but longer
+2. Context package and handoff are sufficient for this bounded case, but longer
    lifecycle runs still need better evidence retention around decisions, changed
    files, self-test results, and unresolved risks.
-4. Repair loops work for at least one verifier rejection, but the benchmark set
+3. Repair loops work for at least one verifier rejection, but the benchmark set
    should continue tracking repair loop count and final acceptance confidence so
    regressions are visible.
 
+## 2026-06-05 Evidence Contract Update
+
+The self-test evidence gap has a first implementation pass:
+
+- Claude self-test prompts now ask for `Checks Run`, `Checks Skipped`,
+  `Evidence`, `Missing Evidence`, repository hygiene, and residual risk.
+- Codex acceptance prompts now ask for explicit verification adequacy, missing
+  evidence, and acceptance notes.
+- Agent output contract sidecars extract structured checks, evidence, missing
+  evidence, and acceptance notes.
+- Final reports render a `Verification Evidence` section so reviewers can see
+  what was tested and what remains unverified without digging through every raw
+  Agent output.
+
+This does not force a script-level test command. Claude still chooses the right
+validation method, Codex judges whether the evidence is enough, and the
+orchestrator preserves the evidence for review.
+
 ## Next Mainline Step
 
-The next useful implementation step is to strengthen self-test and acceptance
-evidence contracts without over-specifying how agents test. The orchestrator
-should ask for structured evidence and expose confidence, while Claude and Codex
-remain responsible for professional judgment.
+The next useful implementation step is to rerun a bounded internal real case and
+verify that the new structured evidence improves the final report and human
+review packet without making the Agent behavior brittle.
