@@ -64,7 +64,7 @@ dualctl doctor --workdir /path/to/repo
 ./scripts/run-real-case.sh \
   --repo /path/to/repo \
   --task-file /path/to/task.md \
-  --variant p6
+  --variant full
 ```
 
 查看当前跑到哪里：

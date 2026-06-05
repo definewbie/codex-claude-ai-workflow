@@ -36,6 +36,17 @@ class StartCommandVariantTest {
     }
 
     @Test
+    void fullVariantAlias_usesP6Mainline() throws Exception {
+        // Simulates: dualctl start --workflow-variant=full
+        var wf = loader.loadOrDefault(null, "full");
+        assertEquals("agent-lifecycle-p6", wf.workflowId(),
+                "--workflow-variant=full should use the complete lifecycle");
+        assertEquals(3, wf.version());
+        assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
+                "full lifecycle should contain classify_failure node");
+    }
+
+    @Test
     void p5Variant_usesP5Mainline() throws Exception {
         // Simulates: dualctl start --workflow-variant=p5
         var wf = loader.loadOrDefault(null, "p5");
@@ -47,6 +58,17 @@ class StartCommandVariantTest {
                 "p5Mainline should contain contract.compile node");
         assertThrows(IllegalArgumentException.class, () -> wf.node("acceptance.classify_failure"),
                 "p5Mainline should NOT contain classify_failure node");
+    }
+
+    @Test
+    void contractVariantAlias_usesP5Mainline() throws Exception {
+        // Simulates: dualctl start --workflow-variant=contract
+        var wf = loader.loadOrDefault(null, "contract");
+        assertEquals("agent-lifecycle-p5", wf.workflowId(),
+                "--workflow-variant=contract should use the contract lifecycle");
+        assertEquals(2, wf.version());
+        assertDoesNotThrow(() -> wf.node("contract.compile"),
+                "contract lifecycle should contain contract.compile node");
     }
 
     @Test

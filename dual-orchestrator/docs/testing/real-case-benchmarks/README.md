@@ -15,7 +15,7 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 
 | Case | 类型 | 目的 | 状态 |
 |------|------|------|------|
-| `cases/cancer-clinic-small-ui.md` | Small UI change | 验证 p6 主生命周期和真实 repair loop | 2026-06-02 已通过 |
+| `cases/cancer-clinic-small-ui.md` | Small UI change | 验证 full lifecycle 和真实 repair loop | 2026-06-02 已通过 |
 | `cases/cancer-clinic-feature-slice.md` | Medium feature slice | 验证 contract / context / self-test / acceptance 在中等功能切片上的质量 | 2026-06-03 修复后通过，`PASS-WARN` |
 | `cases/cancer-clinic-rejection-prone.md` | Rejection-prone case | 验证 Codex `REJECT` 后的 failure classification 和 repair route | 2026-06-03 已通过，`PASS-WARN`；本轮未触发 REJECT，但暴露并修复 contract source bug |
 | `cases/cancer-clinic-state-model-complex.md` | Complex bounded frontend case | 带着状态机文档验证 P6 gate / active node / completion 语义 | 2026-06-03 已通过，`PASS-WARN`；暴露 handoff JSON 抽取偏弱 |
@@ -34,7 +34,7 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 ./scripts/run-real-case.sh \
   --repo /Users/kriswang/work/projects/ai/cancer-clinic \
   --task-file dual-orchestrator/docs/testing/real-case-benchmarks/cases/cancer-clinic-small-ui.md \
-  --variant p6 \
+  --variant full \
   --update-benchmark-index
 ```
 
@@ -92,7 +92,7 @@ Benchmark index 的 `Grade` 是轻量体检结果，不替代人工读详细报�
 ./scripts/run-real-case.sh \
   --repo /Users/kriswang/work/projects/ai/cancer-clinic \
   --task-file dual-orchestrator/docs/testing/real-case-benchmarks/cases/cancer-clinic-small-ui.md \
-  --variant p6
+  --variant full
 ```
 
 运行前确认：

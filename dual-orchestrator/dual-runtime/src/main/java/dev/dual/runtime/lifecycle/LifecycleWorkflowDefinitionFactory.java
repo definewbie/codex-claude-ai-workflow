@@ -315,11 +315,13 @@ public final class LifecycleWorkflowDefinitionFactory {
     public WorkflowDefinition forVariant(String variant) {
         String normalized = variant == null ? "" : variant.trim().toLowerCase();
         return switch (normalized) {
-            case "p5" -> p5Mainline();
-            case "p6" -> p6Mainline();
-            case "", "thin" -> thinMainline();
+            case "p5", "contract" -> p5Mainline();
+            case "p6", "full" -> p6Mainline();
+            case "", "thin", "baseline" -> thinMainline();
             default -> throw new IllegalArgumentException(
-                    "unknown workflow variant: " + variant + ". Supported: thin, p5, p6");
+                    "unknown workflow variant: " + variant
+                            + ". Supported: baseline, contract, full"
+                            + " (legacy aliases: thin, p5, p6)");
         };
     }
 

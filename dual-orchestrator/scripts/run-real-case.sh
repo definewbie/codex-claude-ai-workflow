@@ -8,7 +8,7 @@
 #
 # Usage:
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md
-#   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --variant p6
+#   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --variant full
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --cleanup-worktree
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --update-benchmark-index
 #
@@ -24,7 +24,7 @@ source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
 
 REPO=""
 TASK_FILE=""
-VARIANT="p6"
+VARIANT="full"
 MAX_STEPS=80
 MAX_GATES=12
 SKIP_BUILD=false
@@ -47,7 +47,9 @@ Usage:
 Options:
   --repo <path>             Target git repository.
   --task-file <path>        Requirement markdown file.
-  --variant <thin|p5|p6>    Workflow variant. Default: p6.
+  --variant <baseline|contract|full>
+                            Workflow variant. Default: full.
+                            Legacy aliases are also accepted: thin, p5, p6.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Do not run Maven package before starting.
@@ -153,8 +155,8 @@ validate_inputs() {
     exit 1
   }
   case "$VARIANT" in
-    thin|p5|p6) ;;
-    *) fail "--variant must be thin, p5, or p6"; exit 1 ;;
+    baseline|contract|full|thin|p5|p6) ;;
+    *) fail "--variant must be baseline, contract, or full"; exit 1 ;;
   esac
 }
 
@@ -185,7 +187,7 @@ init_case_dir() {
 start_workstream() {
   log "Starting workstream in repo: $REPO"
   local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS")
-  if [[ "$VARIANT" != "thin" ]]; then
+  if [[ "$VARIANT" != "thin" && "$VARIANT" != "baseline" ]]; then
     args+=(--workflow-variant "$VARIANT")
   fi
   args+=(--task-file "$TASK_FILE")

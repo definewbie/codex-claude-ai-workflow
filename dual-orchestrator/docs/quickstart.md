@@ -67,7 +67,7 @@ Use a real Git repo and a bounded task file:
 ./scripts/run-real-case.sh \
   --repo /path/to/your/repo \
   --task-file docs/testing/real-case-benchmarks/cases/cancer-clinic-feature-slice.md \
-  --variant p6
+  --variant full
 ```
 
 For your own project, replace `--task-file` with a small markdown requirement.

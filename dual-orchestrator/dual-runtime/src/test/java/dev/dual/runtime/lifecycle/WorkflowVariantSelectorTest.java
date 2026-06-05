@@ -48,8 +48,16 @@ class WorkflowVariantSelectorTest {
     }
 
     @Test
+    void forVariant_professionalAliases_returnExpectedMainlines() {
+        assertEquals("agent-lifecycle", factory.forVariant("baseline").workflowId());
+        assertEquals("agent-lifecycle-p5", factory.forVariant("contract").workflowId());
+        assertEquals("agent-lifecycle-p6", factory.forVariant("full").workflowId());
+    }
+
+    @Test
     void forVariant_normalizesCaseAndWhitespace() {
         assertEquals("agent-lifecycle-p6", factory.forVariant("  P6  ").workflowId());
+        assertEquals("agent-lifecycle-p6", factory.forVariant("  FULL  ").workflowId());
         assertEquals("agent-lifecycle-p5", factory.forVariant("P5").workflowId());
         assertEquals("agent-lifecycle", factory.forVariant(" THIN ").workflowId());
     }
