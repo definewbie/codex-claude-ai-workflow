@@ -19,6 +19,7 @@ const els = {
   overviewCards: $("overviewCards"),
   overviewWhy: $("overviewWhy"),
   overviewNext: $("overviewNext"),
+  overviewAttention: $("overviewAttention"),
   overviewTimeline: $("overviewTimeline"),
   overviewArtifacts: $("overviewArtifacts"),
   statusView: $("statusView"),
@@ -176,6 +177,7 @@ function renderOverview(data) {
   ]);
   els.overviewWhy.textContent = data.whyStopped || "-";
   els.overviewNext.textContent = data.nextAction || "-";
+  renderOverviewAttention(data.attention || []);
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
 }
@@ -184,6 +186,7 @@ function renderOverviewError(error) {
   els.overviewCards.innerHTML = "";
   els.overviewWhy.textContent = "Overview is not available.";
   els.overviewNext.textContent = JSON.stringify(error);
+  els.overviewAttention.innerHTML = "";
   els.overviewTimeline.innerHTML = "";
   els.overviewArtifacts.innerHTML = "";
 }
@@ -198,6 +201,26 @@ function renderOverviewCards(items) {
       <strong>${escapeHtml(value)}</strong>
     `;
     els.overviewCards.appendChild(card);
+  }
+}
+
+function renderOverviewAttention(items) {
+  els.overviewAttention.innerHTML = "";
+  if (!items.length) {
+    els.overviewAttention.textContent = "No attention items.";
+    return;
+  }
+  for (const item of items) {
+    const row = document.createElement("article");
+    row.className = `attention-item ${attentionClass(item.severity)}`;
+    row.innerHTML = `
+      <div>
+        <strong>${escapeHtml(item.title || "Attention")}</strong>
+        <p>${escapeHtml(item.detail || "")}</p>
+        ${item.command ? `<code>${escapeHtml(item.command)}</code>` : ""}
+      </div>
+    `;
+    els.overviewAttention.appendChild(row);
   }
 }
 
@@ -536,6 +559,13 @@ function labelize(value) {
   return String(value)
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function attentionClass(severity) {
+  if (severity === "critical") return "attention-critical";
+  if (severity === "warning") return "attention-warning";
+  if (severity === "ok") return "attention-ok";
+  return "attention-info";
 }
 
 function escapeHtml(value) {

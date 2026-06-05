@@ -314,7 +314,7 @@ http://localhost:8080/
 这个页面是一个很薄的调用 UI，不是完整 dashboard。它直接调用下面这些 HTTP API，可以做几件日常 E2E 操作：
 
 - 输入 effective workdir，列出 workstreams。
-- 首屏 overview 回答“现在跑到哪、为什么停、下一步做什么”，并展示 acceptance、repair loops、最近 timeline 和关键 artifacts。
+- 首屏 overview 回答“现在跑到哪、为什么停、下一步做什么”，并展示 attention items、acceptance、repair loops、最近 timeline 和关键 artifacts。
 - 查看当前 status 和 timeline 详情。
 - 查看最近的 Agent artifact contract sidecars 摘要，包括 decision、summary、must fix、风险、变更文件和验证摘要。
 - 当 workflow 停在 human review gate 时，展示当前 review packet；页面会先渲染推荐动作、TaskContract / Decision / Must Fix / Git Evidence 等结构化审查卡片，原始 Markdown packet 保留在折叠区。

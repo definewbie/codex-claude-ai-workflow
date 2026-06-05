@@ -120,6 +120,8 @@ public class WorkstreamQueryService {
         var repairActions = repairActions(paths, summary);
         var finalAcceptance = finalAcceptance(paths, summary);
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
+        var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
+        var artifacts = artifacts(root, paths);
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
@@ -136,15 +138,16 @@ public class WorkstreamQueryService {
         ));
         response.put("acceptance", Map.of(
                 "finalDecision", finalAcceptance,
-                "verificationConfidence", text(summary.get("verification_confidence"), confidence(finalAcceptance)),
+                "verificationConfidence", verificationConfidence,
                 "repairLoopCount", repairLoopCount,
                 "repairActions", repairActions
         ));
         response.put("whyStopped", whyStopped(status, currentNode(nodes, activeNodeIds), openGateIds));
         response.put("nextAction", nextAction(root, workstreamId, status, openGateIds));
+        response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount, artifacts));
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
         response.put("latestAgentRuns", latestAgentRuns(root, paths, 6));
-        response.put("artifacts", artifacts(root, paths));
+        response.put("artifacts", artifacts);
         return response;
     }
 
@@ -373,6 +376,109 @@ public class WorkstreamQueryService {
             return "Review the open gate: dualctl review show " + base;
         }
         return "Continue workflow: dualctl run " + base;
+    }
+
+    private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
+                                                String verificationConfidence, int repairLoopCount,
+                                                Map<String, Object> artifacts) {
+        var items = new ArrayList<Map<String, Object>>();
+        var base = "--workdir \"" + root + "\" " + workstreamId;
+        if ("WAITING_FOR_HUMAN".equals(status)) {
+            items.add(attentionItem(
+                    "info",
+                    "Human gate is open",
+                    "Read the current review packet before approving, revising, or completing the workstream.",
+                    "dualctl review show " + base
+            ));
+        }
+        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
+            items.add(attentionItem(
+                    "critical",
+                    "Workflow needs recovery",
+                    "Inspect the current failure summary and only retry after the external cause or ledger issue is understood.",
+                    "dualctl recovery show " + base
+            ));
+        }
+        if ("ACCEPT_WITH_NOTES".equals(finalAcceptance)) {
+            items.add(attentionItem(
+                    "warning",
+                    "Accepted with notes",
+                    "The lifecycle completed, but Codex left notes. Review the final report before treating this as delivery-ready.",
+                    "dualctl summary " + base
+            ));
+        } else if ("REJECT".equals(finalAcceptance)) {
+            items.add(attentionItem(
+                    "critical",
+                    "Final acceptance rejected",
+                    "Do not deliver until the rejection has been classified and repaired.",
+                    "dualctl recovery show " + base
+            ));
+        }
+        if ("LOW".equals(verificationConfidence) || "UNKNOWN".equals(verificationConfidence)) {
+            items.add(attentionItem(
+                    "warning",
+                    "Verification confidence is " + verificationConfidence,
+                    "Evidence is weak or missing. Read the self-test report, Git evidence, and Codex acceptance output.",
+                    "dualctl summary " + base
+            ));
+        }
+        if (repairLoopCount > 0) {
+            items.add(attentionItem(
+                    "info",
+                    "Repair loop occurred",
+                    "This run required " + repairLoopCount + " repair loop(s). Check the repaired diff and final acceptance notes.",
+                    "dualctl timeline " + base
+            ));
+        }
+        if ("COMPLETED".equals(status)) {
+            for (var entry : artifacts.entrySet()) {
+                var artifact = mapValue(entry.getValue());
+                if (!Boolean.TRUE.equals(artifact.get("available")) && requiredArtifact(entry.getKey())) {
+                    items.add(attentionItem(
+                            "warning",
+                            "Missing " + humanArtifactName(entry.getKey()),
+                            "A key lifecycle artifact is missing from the ledger.",
+                            "dualctl summary " + base
+                    ));
+                }
+            }
+        }
+        if (items.isEmpty() && "COMPLETED".equals(status) && "ACCEPT".equals(finalAcceptance)) {
+            items.add(attentionItem(
+                    "ok",
+                    "No obvious follow-up",
+                    "The workflow completed with ACCEPT and required artifacts are present.",
+                    "dualctl summary " + base
+            ));
+        }
+        return items;
+    }
+
+    private Map<String, Object> attentionItem(String severity, String title, String detail, String command) {
+        var item = new LinkedHashMap<String, Object>();
+        item.put("severity", severity);
+        item.put("title", title);
+        item.put("detail", detail);
+        item.put("command", command);
+        return item;
+    }
+
+    private boolean requiredArtifact(String key) {
+        return switch (key) {
+            case "finalReport", "workstreamSummary", "handoffJson", "nextStagePrompt" -> true;
+            default -> false;
+        };
+    }
+
+    private String humanArtifactName(String key) {
+        return switch (key) {
+            case "finalReport" -> "final report";
+            case "workstreamSummary" -> "workstream summary";
+            case "handoffJson" -> "handoff JSON";
+            case "nextStagePrompt" -> "next-stage prompt";
+            case "deliveryPrBody" -> "delivery PR body";
+            default -> key;
+        };
     }
 
     private Map<String, Object> timelineItem(Map<String, Object> node) {

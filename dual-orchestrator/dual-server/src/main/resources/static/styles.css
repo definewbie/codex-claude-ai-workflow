@@ -222,7 +222,8 @@ textarea {
 
 .overview-card,
 .overview-row section,
-.overview-split section {
+.overview-split section,
+.overview-attention {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #fff;
@@ -268,6 +269,62 @@ textarea {
   margin-top: 8px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.overview-attention {
+  margin-bottom: 12px;
+}
+
+.attention-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.attention-item {
+  border-left: 3px solid var(--line);
+  padding: 8px 10px;
+  background: #fbfcfe;
+}
+
+.attention-item strong {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.attention-item p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.attention-item code {
+  display: block;
+  margin-top: 6px;
+  color: var(--text);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.attention-critical {
+  border-left-color: var(--bad);
+}
+
+.attention-warning {
+  border-left-color: var(--warn);
+}
+
+.attention-ok {
+  border-left-color: var(--ok);
+}
+
+.attention-info {
+  border-left-color: var(--accent);
 }
 
 .mini-item {

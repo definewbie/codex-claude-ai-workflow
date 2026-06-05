@@ -153,6 +153,10 @@ class WorkstreamApiControllerTest {
         assertEquals(1, acceptance.get("repairLoopCount"));
         assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
         assertEquals(true, response.get("nextAction").toString().contains("dualctl review show"));
+        var attention = (List<Map<String, Object>>) response.get("attention");
+        assertEquals(true, attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
+        assertEquals(true, attention.stream().anyMatch(item -> "Repair loop occurred".equals(item.get("title"))));
+        assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
         assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
         assertEquals(1, ((List<Map<String, Object>>) response.get("latestAgentRuns")).size());
         var artifacts = (Map<String, Object>) response.get("artifacts");

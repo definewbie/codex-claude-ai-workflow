@@ -84,6 +84,7 @@
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
    - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项；stopped/recovery 状态已显示当前失败摘要。
    - 2026-06-05：operator panel 首屏增加 trace-style overview，和 `dualctl trace` 一样先回答“现在跑到哪、为什么停、下一步做什么”。
+   - 2026-06-05：overview 增加 attention items，对 `ACCEPT_WITH_NOTES`、低置信度、repair loop、missing artifacts、recovery 等状态给出人工关注点和建议命令。
    - 2026-06-04：CLI 在 `run` / `resume` 停住时统一打印 `Next actions`，覆盖 human gate、recovery、completed 和 max-steps，降低真实操作时翻 ledger 的成本。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
    - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
