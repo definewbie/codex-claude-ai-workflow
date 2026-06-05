@@ -384,7 +384,9 @@ repair_loop_count() {
     printf '0'
     return
   }
-  grep -c '"event_type":"iteration_started".*"trigger_action":"REJECT_' "$events" 2>/dev/null || printf '0'
+  local count
+  count="$(grep -c '"event_type":"iteration_started".*"trigger_action":"REJECT_' "$events" 2>/dev/null || true)"
+  printf '%s' "${count:-0}"
 }
 
 bool_from_count() {

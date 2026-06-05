@@ -1,22 +1,22 @@
 # Real-case Benchmark Index
 
-> Generated: 2026-06-04T11:08:15Z
+> Generated: 2026-06-05T09:27:03Z
 > Source: docs/testing/real-case-reports
 
 ## Aggregate
 
 | Metric | Value |
 | --- | --- |
-| Runs | 9 |
+| Runs | 10 |
 | PASS | 1 |
-| PASS-WARN | 7 |
+| PASS-WARN | 8 |
 | FAIL | 1 |
-| Completed | 8 |
-| Original repo clean | 9 |
+| Completed | 9 |
+| Original repo clean | 10 |
 | Acceptance rejects | 1 |
 | Repair loops | 1 |
-| Gate rounds | 47 |
-| Agent runs | 90 |
+| Gate rounds | 53 |
+| Agent runs | 102 |
 
 ## Runs
 
@@ -31,6 +31,7 @@
 | 20260604T063104Z | `hygiene-smoke` | FAIL | status=START_FAILED | p5 | START_FAILED | `ws-20260604T063104Z-H878` | 0 | 1 | none | 0 | UNKNOWN | true | missing: final_report,handoff_json,next_stage_prompt,delivery_pr_body | [docs/testing/real-case-reports/20260604T063104Z/report.md](../real-case-reports/20260604T063104Z/report.md) |
 | 20260604T080521Z | `cancer-clinic-doc-constraints-smoke` | PASS-WARN | accepted_with_notes | p5 | COMPLETED | `ws-20260604T080522Z-LQ87` | 6 | 10 | ACCEPT_WITH_NOTES | 0 | MEDIUM | true | ok | [docs/testing/real-case-reports/20260604T080521Z/report.md](../real-case-reports/20260604T080521Z/report.md) |
 | 20260604T102337Z | `cancer-clinic-feature-slice` | PASS-WARN | accepted_with_notes | p6 | COMPLETED | `ws-20260604T102338Z-X9E4` | 6 | 15 | ACCEPT_WITH_NOTES | 1 | MEDIUM | true | ok | [docs/testing/real-case-reports/20260604T102337Z/report.md](../real-case-reports/20260604T102337Z/report.md) |
+| 20260605T090949Z | `cancer-clinic-small-ui` | PASS-WARN | accepted_with_notes | p6 | COMPLETED | `ws-20260605T090950Z-2HEU` | 6 | 12 | ACCEPT_WITH_NOTES | 0 | MEDIUM | true | ok | [docs/testing/real-case-reports/20260605T090949Z/report.md](../real-case-reports/20260605T090949Z/report.md) |
 
 ## How To Update
 
