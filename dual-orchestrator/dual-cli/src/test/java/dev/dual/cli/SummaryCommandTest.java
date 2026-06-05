@@ -34,6 +34,10 @@ class SummaryCommandTest {
         assertTrue(printed.contains("candidate-1=ACCEPTED"));
         assertTrue(printed.contains("- Calibration Apply Plans: 1"));
         assertTrue(printed.contains("- Delivery: prepared, commit=abc123"));
+
+        var summary = tempDir.resolve(".agent/workstreams/ws-summary/reports/workstream-summary.md");
+        assertTrue(Files.isRegularFile(summary));
+        assertTrue(Files.readString(summary, StandardCharsets.UTF_8).contains("- Status: WAITING_FOR_HUMAN"));
     }
 
     @Test
@@ -50,7 +54,7 @@ class SummaryCommandTest {
         var summary = tempDir.resolve(".agent/workstreams/ws-summary/reports/workstream-summary.md");
         assertTrue(Files.isRegularFile(summary));
         assertTrue(Files.readString(summary, StandardCharsets.UTF_8).contains("- Status: COMPLETED"));
-        assertTrue(printed.contains("Workstream summary written"));
+        assertTrue(printed.contains("# Workstream Summary"));
     }
 
     private void writeLedger(String status) throws Exception {

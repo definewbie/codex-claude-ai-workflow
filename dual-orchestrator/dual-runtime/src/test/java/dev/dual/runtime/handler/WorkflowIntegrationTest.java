@@ -174,7 +174,7 @@ class WorkflowIntegrationTest {
                 - `hasNoRecords` 计算属性：`!currentCycle && historyGroups.length === 0`
                 - `goToRetro()` 函数：带上 `planId`
 
-                ## 3. 变更文件
+                ## 3. 变更的文件
 
                 | 文件 | 变更 | Diff |
                 |------|------|------|
@@ -532,6 +532,7 @@ class WorkflowIntegrationTest {
     @Test
     void chain8_handoffJsonFromEmptyHandoff() throws Exception {
         var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.md";
+        fixture.writeGitEvidence("M miniprogram/src/pages/record/index.vue", "1 file changed, 5 insertions(+)", null);
         fixture.writeHandoff("""
                 # Minimal Handoff
 
@@ -571,7 +572,7 @@ class WorkflowIntegrationTest {
 
         @SuppressWarnings("unchecked")
         var changedFiles = (List<String>) json.get("changedFiles");
-        assertTrue(changedFiles.isEmpty(), "No Changed Files section → empty array");
+        assertEquals(List.of("miniprogram/src/pages/record/index.vue"), changedFiles);
 
         @SuppressWarnings("unchecked")
         var openRisks = (List<String>) json.get("openRisks");

@@ -129,8 +129,12 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         json.put("sourceHandoffPath", sourceRefs.isEmpty() ? "" : sourceRefs.get(0));
         json.put("completedWork", extractListSection(handoffText,
                 "Completed Work", "已完成的工作", "已完成工作", "完成的工作", "工作完成情况"));
-        json.put("changedFiles", extractListSection(handoffText,
-                "Changed Files", "Changed File", "变更文件", "修改文件", "改动文件"));
+        var changedFiles = extractListSection(handoffText,
+                "Changed Files", "Changed File", "变更文件", "变更的文件", "修改文件", "改动文件");
+        if (changedFiles.isEmpty()) {
+            changedFiles = changedFilesFromGitEvidence(context);
+        }
+        json.put("changedFiles", changedFiles);
         json.put("openRisks", extractListSection(handoffText,
                 "Open Risks", "Residual Risks", "开放风险", "残余风险", "剩余风险", "风险点"));
         json.put("verificationState", extractTextSection(handoffText,
@@ -161,6 +165,23 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
             }
         }
         return items;
+    }
+
+    private static List<String> changedFilesFromGitEvidence(TaskContext context) throws IOException {
+        var path = context.workspaceRoot()
+                .resolve(".agent")
+                .resolve("workstreams")
+                .resolve(context.workstreamId())
+                .resolve("artifacts")
+                .resolve("git-evidence")
+                .resolve("changed-files.txt");
+        if (!Files.isRegularFile(path)) {
+            return List.of();
+        }
+        return Files.readAllLines(path, StandardCharsets.UTF_8).stream()
+                .map(String::strip)
+                .filter(line -> !line.isBlank())
+                .toList();
     }
 
     private static String extractTextSection(String text, String... sectionNames) {

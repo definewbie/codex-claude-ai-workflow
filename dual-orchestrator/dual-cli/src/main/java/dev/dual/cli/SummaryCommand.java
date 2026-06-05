@@ -48,17 +48,11 @@ public final class SummaryCommand implements Callable<Integer> {
         }
 
         var markdown = render(paths);
-        if (write || output != null) {
-            var target = output == null
-                    ? paths.workstreamDir().resolve("reports").resolve("workstream-summary.md")
-                    : output.toAbsolutePath().normalize();
-            Files.createDirectories(target.getParent());
-            Files.writeString(target, markdown, StandardCharsets.UTF_8);
-            System.out.println("Workstream summary written");
-            System.out.println("Path: " + target);
-            return 0;
-        }
-
+        var target = output == null
+                ? paths.workstreamDir().resolve("reports").resolve("workstream-summary.md")
+                : output.toAbsolutePath().normalize();
+        Files.createDirectories(target.getParent());
+        Files.writeString(target, markdown, StandardCharsets.UTF_8);
         System.out.print(markdown);
         return 0;
     }

@@ -216,7 +216,7 @@ class BuiltinHandlerTest {
                   "node_id": "intake.codex_product_review",
                   "decision": "READY_FOR_PRODUCT_REVIEW",
                   "summary": "TaskContract is scoped and ready.",
-                  "must_fix": ["None."],
+                  "must_fix": ["None blocking."],
                   "open_risks": ["Low risk."],
                   "changed_files": [],
                   "verification_summary": ""
