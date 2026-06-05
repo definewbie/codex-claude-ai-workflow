@@ -32,6 +32,11 @@ class TraceCommandTest {
         assertTrue(printed.contains("Final Acceptance: ACCEPT_WITH_NOTES"));
         assertTrue(printed.contains("Repair Loops: 1"));
         assertTrue(printed.contains("Verification Confidence: MEDIUM"));
+        assertTrue(printed.contains("Why:"));
+        assertTrue(printed.contains("workflow completed"));
+        assertTrue(printed.contains("Attention:"));
+        assertTrue(printed.contains("[warning] Accepted with notes"));
+        assertTrue(printed.contains("[info] Repair loop occurred"));
         assertTrue(printed.contains("[ok] intake.claude_brainstorm"));
         assertTrue(printed.contains("[loop] repair: REJECT_IMPLEMENTATION_BUG"));
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
@@ -52,6 +57,9 @@ class TraceCommandTest {
 
         assertTrue(printed.contains("Status: WAITING_FOR_RECOVERY"));
         assertTrue(printed.contains("Current Node: acceptance.classify_failure"));
+        assertTrue(printed.contains("[critical] Workflow needs recovery"));
+        assertTrue(printed.contains("[critical] Final acceptance rejected"));
+        assertTrue(printed.contains("[warning] Verification confidence is LOW"));
         assertTrue(printed.contains("dualctl recovery show --workdir"));
         assertTrue(printed.contains("dualctl retry --workdir"));
     }

@@ -110,8 +110,18 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 ```
 
 `trace` is the easiest first read. It prints the current status, active node,
-open gate, recent timeline, final acceptance decision, repair loops, important
-artifacts, and the next command to run.
+why the workflow stopped, attention items, recent timeline, final acceptance
+decision, repair loops, important artifacts, and the next command to run.
+
+If the workflow is waiting for human review:
+
+```bash
+dualctl review show --workdir <effective_workdir> <workstream_id>
+dualctl approve --run --workdir <effective_workdir> <workstream_id>
+```
+
+`dualctl approve`, `dualctl revise`, and `dualctl complete` are shortcuts for
+the longer `dualctl review ...` commands.
 
 For deeper inspection:
 

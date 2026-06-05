@@ -54,18 +54,41 @@ public final class TraceCommand implements Callable<Integer> {
         var acceptance = acceptance(paths, summary);
         var repairActions = repairActions(paths, summary);
         var repairLoopCount = Math.max(acceptance.repairLoopCount(), repairActions.size());
+        var status = text(timeline.get("workflowStatus"), "UNKNOWN");
+        var currentNode = currentNode(nodes, activeNodes);
+        var artifacts = artifacts(paths);
+        var nextAction = nextAction(paths, status, openGates);
+        var attention = attention(paths, status, currentNode, openGates, acceptance, repairLoopCount, artifacts);
 
         System.out.println("Trace");
         System.out.println("Workstream: " + paths.workstreamId().value());
         System.out.println("Workspace: " + paths.workspaceRoot());
         System.out.println("Ledger: " + paths.workstreamDir());
         System.out.println("Workflow: " + text(timeline.get("workflowId")) + "@" + text(timeline.get("definitionVersion")));
-        System.out.println("Status: " + text(timeline.get("workflowStatus"), "UNKNOWN"));
-        System.out.println("Current Node: " + currentNode(nodes, activeNodes));
+        System.out.println("Status: " + status);
+        System.out.println("Current Node: " + currentNode);
         System.out.println("Open Gates: " + emptyDash(openGates));
         System.out.println("Final Acceptance: " + acceptance.finalDecision());
         System.out.println("Repair Loops: " + repairLoopCount);
         System.out.println("Verification Confidence: " + acceptance.verificationConfidence());
+        System.out.println();
+
+        System.out.println("Why:");
+        System.out.println("  " + why(status, currentNode, openGates));
+        System.out.println();
+
+        System.out.println("Attention:");
+        if (attention.isEmpty()) {
+            System.out.println("  -");
+        } else {
+            for (var item : attention) {
+                System.out.println("  [" + item.severity() + "] " + item.title());
+                System.out.println("    " + item.detail());
+                if (!item.command().isBlank()) {
+                    System.out.println("    Command: " + item.command());
+                }
+            }
+        }
         System.out.println();
 
         System.out.println("Timeline:");
@@ -94,16 +117,13 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println();
 
         System.out.println("Artifacts:");
-        printArtifact("Final Report", paths.workstreamDir().resolve("reports").resolve("latest-final-report.md"));
-        printArtifact("Workstream Summary", paths.workstreamDir().resolve("reports").resolve("workstream-summary.md"));
-        printArtifact("Handoff JSON", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"));
-        printArtifact("Next-stage Prompt", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"));
-        printArtifact("Delivery PR Body", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"));
-        printArtifact("Current Failure", paths.currentFailureMarkdown());
+        for (var artifact : artifacts) {
+            printArtifact(artifact.label(), artifact.path());
+        }
         System.out.println();
 
         System.out.println("Next:");
-        System.out.println(nextAction(paths, text(timeline.get("workflowStatus")), openGates));
+        System.out.println(nextAction);
         return 0;
     }
 
@@ -244,6 +264,108 @@ public final class TraceCommand implements Callable<Integer> {
         return "dualctl run " + base;
     }
 
+    private String why(String status, String currentNode, List<String> openGates) {
+        if ("WAITING_FOR_HUMAN".equals(status)) {
+            return "waiting for human review gate" + gateSuffix(openGates);
+        }
+        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
+            return "stopped at " + empty(currentNode, "current node") + " because recovery is required";
+        }
+        if ("COMPLETED".equals(status)) {
+            return "workflow completed";
+        }
+        if ("RUNNING".equals(status)) {
+            return "workflow is running at " + empty(currentNode, "current node");
+        }
+        return "status is " + empty(status, "unknown");
+    }
+
+    private List<AttentionItem> attention(WorkstreamPaths paths, String status, String currentNode,
+                                          List<String> openGates, Acceptance acceptance,
+                                          int repairLoopCount, List<ArtifactRef> artifacts) {
+        var items = new ArrayList<AttentionItem>();
+        var base = "--workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value();
+        if ("WAITING_FOR_HUMAN".equals(status)) {
+            items.add(new AttentionItem(
+                    "info",
+                    "Human gate is open",
+                    "Read the review packet before approving, revising, or completing the workstream.",
+                    "dualctl review show " + base
+            ));
+        }
+        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
+            items.add(new AttentionItem(
+                    "critical",
+                    "Workflow needs recovery",
+                    "Inspect the failure summary for " + empty(currentNode, "the active node") + " before retrying.",
+                    "dualctl recovery show " + base
+            ));
+        }
+        if ("ACCEPT_WITH_NOTES".equals(acceptance.finalDecision())) {
+            items.add(new AttentionItem(
+                    "warning",
+                    "Accepted with notes",
+                    "Codex accepted the run but left notes. Review the final report before delivery.",
+                    "dualctl summary " + base
+            ));
+        } else if ("REJECT".equals(acceptance.finalDecision())) {
+            items.add(new AttentionItem(
+                    "critical",
+                    "Final acceptance rejected",
+                    "Do not deliver until the rejection has been classified and repaired.",
+                    "dualctl recovery show " + base
+            ));
+        }
+        if ("LOW".equals(acceptance.verificationConfidence()) || "UNKNOWN".equals(acceptance.verificationConfidence())) {
+            items.add(new AttentionItem(
+                    "warning",
+                    "Verification confidence is " + acceptance.verificationConfidence(),
+                    "Evidence is weak or missing. Read the self-test report, Git evidence, and Codex acceptance output.",
+                    "dualctl summary " + base
+            ));
+        }
+        if (repairLoopCount > 0) {
+            items.add(new AttentionItem(
+                    "info",
+                    "Repair loop occurred",
+                    "This run required " + repairLoopCount + " repair loop(s). Check the repaired diff and final acceptance notes.",
+                    "dualctl timeline " + base
+            ));
+        }
+        if ("COMPLETED".equals(status)) {
+            for (var artifact : artifacts) {
+                if (artifact.required() && !Files.isRegularFile(artifact.path())) {
+                    items.add(new AttentionItem(
+                            "warning",
+                            "Missing " + artifact.label(),
+                            "A key lifecycle artifact is missing from the ledger.",
+                            "dualctl summary " + base
+                    ));
+                }
+            }
+        }
+        if (items.isEmpty() && "COMPLETED".equals(status) && "ACCEPT".equals(acceptance.finalDecision())) {
+            items.add(new AttentionItem(
+                    "ok",
+                    "No obvious follow-up",
+                    "The workflow completed with ACCEPT and required artifacts are present.",
+                    "dualctl summary " + base
+            ));
+        }
+        return items;
+    }
+
+    private List<ArtifactRef> artifacts(WorkstreamPaths paths) {
+        return List.of(
+                new ArtifactRef("Final Report", paths.workstreamDir().resolve("reports").resolve("latest-final-report.md"), true),
+                new ArtifactRef("Workstream Summary", paths.workstreamDir().resolve("reports").resolve("workstream-summary.md"), true),
+                new ArtifactRef("Handoff JSON", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"), true),
+                new ArtifactRef("Next-stage Prompt", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"), true),
+                new ArtifactRef("Delivery PR Body", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"), false),
+                new ArtifactRef("Current Failure", paths.currentFailureMarkdown(), false)
+        );
+    }
+
     private List<Map<String, Object>> recent(List<Map<String, Object>> nodes, int limit) {
         return nodes.stream()
                 .skip(Math.max(0, nodes.size() - limit))
@@ -304,6 +426,14 @@ public final class TraceCommand implements Callable<Integer> {
         return values.isEmpty() ? "-" : String.join(", ", values);
     }
 
+    private String empty(String value, String fallback) {
+        return value == null || value.isBlank() || "-".equals(value) ? fallback : value;
+    }
+
+    private String gateSuffix(List<String> openGates) {
+        return openGates.isEmpty() ? "" : ": " + String.join(", ", openGates);
+    }
+
     private String quote(Path path) {
         return "\"" + path + "\"";
     }
@@ -320,5 +450,11 @@ public final class TraceCommand implements Callable<Integer> {
     }
 
     private record Acceptance(String finalDecision, int repairLoopCount, String verificationConfidence) {
+    }
+
+    private record ArtifactRef(String label, Path path, boolean required) {
+    }
+
+    private record AttentionItem(String severity, String title, String detail, String command) {
     }
 }

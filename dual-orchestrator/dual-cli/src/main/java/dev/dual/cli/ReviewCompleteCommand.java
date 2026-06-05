@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 
 @Component
 @Command(name = "complete", description = "Complete the current human review gate and finish the workflow.", mixinStandardHelpOptions = true)
-public final class ReviewCompleteCommand implements Callable<Integer> {
+public class ReviewCompleteCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
