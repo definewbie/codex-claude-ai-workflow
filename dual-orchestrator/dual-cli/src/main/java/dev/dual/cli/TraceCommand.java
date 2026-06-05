@@ -242,7 +242,7 @@ public final class TraceCommand implements Callable<Integer> {
         if ("WAITING_FOR_HUMAN".equals(status)) {
             return """
                     dualctl review show %s
-                    dualctl review approve --run %s
+                    dualctl approve --run %s
                     """.formatted(base, base).strip();
         }
         if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
@@ -316,7 +316,8 @@ public final class TraceCommand implements Callable<Integer> {
                     "dualctl recovery show " + base
             ));
         }
-        if ("LOW".equals(acceptance.verificationConfidence()) || "UNKNOWN".equals(acceptance.verificationConfidence())) {
+        if (!"none".equals(acceptance.finalDecision())
+                && ("LOW".equals(acceptance.verificationConfidence()) || "UNKNOWN".equals(acceptance.verificationConfidence()))) {
             items.add(new AttentionItem(
                     "warning",
                     "Verification confidence is " + acceptance.verificationConfidence(),

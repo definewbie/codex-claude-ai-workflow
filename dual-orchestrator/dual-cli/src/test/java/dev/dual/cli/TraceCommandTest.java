@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TraceCommandTest {
@@ -64,6 +65,22 @@ class TraceCommandTest {
         assertTrue(printed.contains("dualctl retry --workdir"));
     }
 
+    @Test
+    void doesNotWarnAboutVerificationConfidenceBeforeAcceptance() throws Exception {
+        writeHumanGateLedger();
+
+        var command = new TraceCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-trace";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Status: WAITING_FOR_HUMAN"));
+        assertTrue(printed.contains("[info] Human gate is open"));
+        assertTrue(printed.contains("dualctl approve --run --workdir"));
+        assertFalse(printed.contains("[warning] Verification confidence is UNKNOWN"));
+    }
+
     private void writeCompletedLedger() throws Exception {
         writeBaseLedger("COMPLETED", """
                 "activeNodeInstanceIds": [],
@@ -94,6 +111,14 @@ class TraceCommandTest {
                   "original_repo_clean": true
                 }
                 """);
+    }
+
+    private void writeHumanGateLedger() throws Exception {
+        writeBaseLedger("WAITING_FOR_HUMAN", """
+                "activeNodeInstanceIds": ["node-human-gate"],
+                "openGateIds": ["gate-node-human-gate"],
+                """);
+        writeSummary("{}");
     }
 
     private void writeBaseLedger(String status, String activeBlock) throws Exception {
@@ -154,6 +179,13 @@ class TraceCommandTest {
                       "status": "COMPLETED",
                       "iterationId": "iter-003",
                       "durationMs": 30
+                    },
+                    {
+                      "nodeInstanceId": "node-human-gate",
+                      "nodeDefinitionId": "gate.human_requirement_review",
+                      "kind": "GATE",
+                      "status": "WAITING",
+                      "iterationId": "iter-001"
                     },
                     {
                       "nodeInstanceId": "node-failed",

@@ -20,7 +20,8 @@ final class ReviewPacketCliHints {
         out.println("Next: dualctl review show --workdir " + workspaceRoot + " " + workstreamId);
         packetPath(workspaceRoot, workstreamId).ifPresent(packet ->
                 out.println("Review packet: " + packet));
-        out.println("Then: dualctl review approve|revise --workdir " + workspaceRoot + " " + workstreamId);
+        out.println("Then: dualctl approve --run --workdir " + workspaceRoot + " " + workstreamId);
+        out.println("Or:   dualctl revise --feedback-file feedback.md --run --workdir " + workspaceRoot + " " + workstreamId);
     }
 
     static java.util.Optional<Path> packetPath(Path workspaceRoot, String workstreamId) {

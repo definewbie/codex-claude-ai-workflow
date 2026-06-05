@@ -131,7 +131,7 @@ public final class SummaryCommand implements Callable<Integer> {
         if ("WAITING_FOR_HUMAN".equals(status)) {
             return "Review the current packet, then approve or revise:\n\n```bash\n"
                     + "dualctl review show --workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value() + "\n"
-                    + "dualctl review approve --workdir " + quote(paths.workspaceRoot()) + " --run " + paths.workstreamId().value() + "\n"
+                    + "dualctl approve --workdir " + quote(paths.workspaceRoot()) + " --run " + paths.workstreamId().value() + "\n"
                     + "```";
         }
         if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {

@@ -414,7 +414,8 @@ public class WorkstreamQueryService {
                     "dualctl recovery show " + base
             ));
         }
-        if ("LOW".equals(verificationConfidence) || "UNKNOWN".equals(verificationConfidence)) {
+        if (!"none".equals(finalAcceptance)
+                && ("LOW".equals(verificationConfidence) || "UNKNOWN".equals(verificationConfidence))) {
             items.add(attentionItem(
                     "warning",
                     "Verification confidence is " + verificationConfidence,

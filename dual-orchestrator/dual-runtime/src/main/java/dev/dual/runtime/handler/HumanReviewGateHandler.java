@@ -266,8 +266,8 @@ public final class HumanReviewGateHandler implements GateHandler {
         summary.put("nodeId", text(json.get("node_id")));
         summary.put("decision", text(json.get("decision")));
         summary.put("summary", text(json.get("summary")));
-        summary.put("mustFix", stringList(json.get("must_fix")));
-        summary.put("openRisks", stringList(json.get("open_risks")));
+        summary.put("mustFix", meaningfulList(json.get("must_fix")));
+        summary.put("openRisks", meaningfulList(json.get("open_risks")));
         summary.put("changedFiles", stringList(json.get("changed_files")));
         summary.put("verificationSummary", text(json.get("verification_summary")));
         summary.put("sidecarPath", displayRef(context.workspaceRoot(), sidecar));
@@ -348,6 +348,21 @@ public final class HumanReviewGateHandler implements GateHandler {
             checks.add("Check the handoff and next-stage prompt before completing the current workstream.");
         }
         return List.copyOf(checks);
+    }
+
+    private List<String> meaningfulList(Object value) {
+        return stringList(value).stream()
+                .filter(item -> {
+                    var normalized = item.trim().toLowerCase();
+                    return !normalized.isBlank()
+                            && !normalized.equals("none")
+                            && !normalized.equals("none.")
+                            && !normalized.equals("n/a")
+                            && !normalized.equals("na")
+                            && !normalized.equals("无")
+                            && !normalized.equals("无。");
+                })
+                .toList();
     }
 
     private boolean isPositiveDecision(String decision) {

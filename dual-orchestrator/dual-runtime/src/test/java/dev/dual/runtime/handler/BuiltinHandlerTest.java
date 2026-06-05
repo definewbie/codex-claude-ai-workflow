@@ -204,6 +204,42 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateReviewPacketIgnoresNonePlaceholderMustFix() throws Exception {
+        var inputRef = writeOutput("intake-codex-product-review.md", """
+                # Codex Review
+
+                Decision: READY_FOR_PRODUCT_REVIEW
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "intake.codex_product_review",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "TaskContract is scoped and ready.",
+                  "must_fix": ["None."],
+                  "open_risks": ["Low risk."],
+                  "changed_files": [],
+                  "verification_summary": ""
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("Recommended Action: approve"));
+        assertFalse(markdown.contains("The latest agent decision still contains Must Fix items."));
+        assertFalse(markdown.contains("Do not approve until every Must Fix item is addressed"));
+    }
+
+    @Test
     void humanGateReviewPacketFallsBackToLatestRunDecisionWhenGateInputsAreDeliveryOnly() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
         var deliveryDir = workstreamDir.resolve("delivery");

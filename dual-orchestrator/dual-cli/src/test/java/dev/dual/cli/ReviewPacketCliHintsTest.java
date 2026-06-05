@@ -58,6 +58,7 @@ class ReviewPacketCliHintsTest {
         var printed = out.toString(StandardCharsets.UTF_8);
         assertTrue(printed.contains("Review packet: " + tempDir.resolve(".agent/workstreams/" + workstreamId + "/reviews/node-gate-human_design_approval-002.md")));
         assertTrue(printed.contains("Next: dualctl review show --workdir " + tempDir + " " + workstreamId));
-        assertTrue(printed.contains("Then: dualctl review approve|revise --workdir " + tempDir + " " + workstreamId));
+        assertTrue(printed.contains("Then: dualctl approve --run --workdir " + tempDir + " " + workstreamId));
+        assertTrue(printed.contains("Or:   dualctl revise --feedback-file feedback.md --run --workdir " + tempDir + " " + workstreamId));
     }
 }
