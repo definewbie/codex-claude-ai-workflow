@@ -13,9 +13,20 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class HumanReviewGateHandler implements GateHandler {
     private static final int MAX_INPUT_SNIPPET_CHARS = 4000;
+    private static final Set<String> POSITIVE_DECISIONS = Set.of(
+            "ACCEPT", "ACCEPT_WITH_NOTES", "PASS",
+            "READY_FOR_PRODUCT_REVIEW", "READY_FOR_ARCH_REVIEW",
+            "READY_FOR_PLAN_REVIEW", "READY_TO_IMPLEMENT",
+            "IMPLEMENTED", "SELF_TEST_COMPLETE", "HANDOFF_READY"
+    );
+    private static final Set<String> NEGATIVE_DECISIONS = Set.of(
+            "REJECT", "NEEDS_REVISION", "BLOCKED",
+            "SELF_TEST_INCOMPLETE"
+    );
     private final ObjectMapper objectMapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -139,7 +150,9 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendField(builder, "Objective", text(contract.get("objective")));
         appendField(builder, "Latest Decision", text(decision.get("decision")));
         appendField(builder, "Latest Summary", text(decision.get("summary")));
+        appendField(builder, "Blocking", text(decision.get("blocking")));
         appendList(builder, "Must Fix", decision.get("mustFix"));
+        appendList(builder, "Missing Evidence", decision.get("missingEvidence"));
         appendList(builder, "Open Risks", decision.get("openRisks"));
         builder.append("\n");
     }
@@ -169,7 +182,9 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendField(builder, "Node", text(decision.get("nodeId")));
         appendField(builder, "Decision", text(decision.get("decision")));
         appendField(builder, "Summary", text(decision.get("summary")));
+        appendField(builder, "Blocking", text(decision.get("blocking")));
         appendList(builder, "Must Fix", decision.get("mustFix"));
+        appendList(builder, "Missing Evidence", decision.get("missingEvidence"));
         appendList(builder, "Open Risks", decision.get("openRisks"));
         appendList(builder, "Changed Files", decision.get("changedFiles"));
         appendField(builder, "Verification", text(decision.get("verificationSummary")));
@@ -266,7 +281,9 @@ public final class HumanReviewGateHandler implements GateHandler {
         summary.put("nodeId", text(json.get("node_id")));
         summary.put("decision", text(json.get("decision")));
         summary.put("summary", text(json.get("summary")));
+        summary.put("blocking", booleanValue(json.get("blocking")));
         summary.put("mustFix", meaningfulList(json.get("must_fix")));
+        summary.put("missingEvidence", meaningfulList(json.get("missing_evidence")));
         summary.put("openRisks", meaningfulList(json.get("open_risks")));
         summary.put("changedFiles", stringList(json.get("changed_files")));
         summary.put("verificationSummary", text(json.get("verification_summary")));
@@ -306,7 +323,9 @@ public final class HumanReviewGateHandler implements GateHandler {
     private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions) {
         var decision = latestAgentDecision(context);
         var decisionText = text(decision.get("decision"));
+        var blocking = Boolean.TRUE.equals(decision.get("blocking"));
         var mustFix = stringList(decision.get("mustFix"));
+        var missingEvidence = stringList(decision.get("missingEvidence"));
         var openRisks = stringList(decision.get("openRisks"));
         var gateId = context.instance().nodeDefinitionId();
 
@@ -314,9 +333,15 @@ public final class HumanReviewGateHandler implements GateHandler {
         if (allowedActions.contains("complete") && gateId.contains("next_stage")) {
             guidance.put("recommendedAction", "complete");
             guidance.put("reason", "This is a next-stage gate. Complete the current workstream when the handoff and next-stage prompt are acceptable.");
+        } else if (blocking && allowedActions.contains("revise")) {
+            guidance.put("recommendedAction", "revise");
+            guidance.put("reason", "The latest structured review marks the issue as blocking.");
         } else if (!mustFix.isEmpty() && allowedActions.contains("revise")) {
             guidance.put("recommendedAction", "revise");
             guidance.put("reason", "The latest agent decision still contains Must Fix items.");
+        } else if (gateId.contains("acceptance") && !missingEvidence.isEmpty() && allowedActions.contains("revise")) {
+            guidance.put("recommendedAction", "revise");
+            guidance.put("reason", "The latest acceptance review reports missing evidence.");
         } else if (isNegativeDecision(decisionText) && allowedActions.contains("revise")) {
             guidance.put("recommendedAction", "revise");
             guidance.put("reason", "The latest agent decision indicates the work is not ready to continue.");
@@ -327,15 +352,23 @@ public final class HumanReviewGateHandler implements GateHandler {
             guidance.put("recommendedAction", allowedActions.isEmpty() ? "inspect" : allowedActions.get(0));
             guidance.put("reason", "No decisive recommendation is available. Read the packet and choose an allowed action.");
         }
-        guidance.put("suggestedChecks", suggestedChecks(gateId, mustFix, openRisks));
+        guidance.put("suggestedChecks", suggestedChecks(gateId, mustFix, missingEvidence, openRisks));
         return guidance;
     }
 
-    private List<String> suggestedChecks(String gateId, List<String> mustFix, List<String> openRisks) {
+    private List<String> suggestedChecks(
+            String gateId,
+            List<String> mustFix,
+            List<String> missingEvidence,
+            List<String> openRisks
+    ) {
         var checks = new ArrayList<String>();
         checks.add("Confirm the TaskContract objective, scope, non-goals, and acceptance criteria still match the task.");
         if (!mustFix.isEmpty()) {
             checks.add("Do not approve until every Must Fix item is addressed or explicitly accepted by the human reviewer.");
+        }
+        if (!missingEvidence.isEmpty()) {
+            checks.add("Check whether missing evidence is acceptable for this gate or requires another agent pass.");
         }
         if (!openRisks.isEmpty()) {
             checks.add("Review open risks and decide whether they are acceptable for this stage.");
@@ -370,17 +403,11 @@ public final class HumanReviewGateHandler implements GateHandler {
     }
 
     private boolean isPositiveDecision(String decision) {
-        return decision.contains("ACCEPT")
-                || decision.contains("PASS")
-                || decision.contains("READY")
-                || decision.contains("APPROVE");
+        return POSITIVE_DECISIONS.contains(decision);
     }
 
     private boolean isNegativeDecision(String decision) {
-        return decision.contains("REJECT")
-                || decision.contains("NEEDS_REVISION")
-                || decision.contains("BLOCKED")
-                || decision.contains("FAIL");
+        return NEGATIVE_DECISIONS.contains(decision);
     }
 
     private String readSnippet(Path workspaceRoot, String ref) throws Exception {
@@ -474,6 +501,13 @@ public final class HumanReviewGateHandler implements GateHandler {
             }
         }
         return List.copyOf(result);
+    }
+
+    private boolean booleanValue(Object value) {
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        return Boolean.parseBoolean(text(value));
     }
 
     private void appendField(StringBuilder builder, String label, String value) {

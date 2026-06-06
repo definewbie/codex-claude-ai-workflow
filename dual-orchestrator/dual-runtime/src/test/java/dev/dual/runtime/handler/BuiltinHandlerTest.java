@@ -204,6 +204,88 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateReviewPacketRecommendsReviseWhenStructuredReviewIsBlocking() throws Exception {
+        var inputRef = writeOutput("acceptance-codex-review.md", """
+                # Codex Acceptance
+
+                Decision: ACCEPT_WITH_NOTES
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Acceptance needs one more evidence pass.",
+                  "blocking": true,
+                  "must_fix": [],
+                  "missing_evidence": ["No build output was attached."],
+                  "open_risks": [],
+                  "changed_files": ["README.md"],
+                  "verification_summary": "Missing build evidence."
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("Recommended Action: revise"));
+        assertTrue(markdown.contains("The latest structured review marks the issue as blocking."));
+        assertTrue(markdown.contains("Missing Evidence"));
+        assertTrue(markdown.contains("No build output was attached."));
+
+        var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
+        var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"blocking\" : true"));
+        assertTrue(json.contains("\"recommendedAction\" : \"revise\""));
+    }
+
+    @Test
+    void humanGateReviewPacketRecommendsReviseWhenAcceptanceEvidenceIsMissing() throws Exception {
+        var inputRef = writeOutput("acceptance-codex-review.md", """
+                # Codex Acceptance
+
+                Decision: ACCEPT_WITH_NOTES
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Implementation may be acceptable, but evidence is incomplete.",
+                  "blocking": false,
+                  "must_fix": [],
+                  "missing_evidence": ["No runtime upload flow check was reported."],
+                  "open_risks": [],
+                  "changed_files": ["README.md"],
+                  "verification_summary": "Runtime evidence missing."
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("Recommended Action: revise"));
+        assertTrue(markdown.contains("The latest acceptance review reports missing evidence."));
+        assertTrue(markdown.contains("No runtime upload flow check was reported."));
+    }
+
+    @Test
     void humanGateReviewPacketIgnoresNonePlaceholderMustFix() throws Exception {
         var inputRef = writeOutput("intake-codex-product-review.md", """
                 # Codex Review
