@@ -93,6 +93,7 @@ public final class ArtifactContractValidator {
         document.put("control", block.values());
         document.put("control_source", parsed.details().getOrDefault("control_source", Map.of()));
         addEvidenceFields(document, structured, markdown);
+        AgentContractSemantics.addSidecarFields(document);
         Files.writeString(
                 sidecarPath,
                 OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
@@ -126,7 +127,8 @@ public final class ArtifactContractValidator {
         }
         try {
             var rawDocument = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
-            var artifact = toStructuredArtifact(expectedType, AgentStructuredArtifactDocument.from(rawDocument));
+            var structuredDocument = AgentStructuredArtifactDocument.from(rawDocument);
+            var artifact = toStructuredArtifact(expectedType, structuredDocument);
             if (!expectedType.equals(artifact.artifactType())) {
                 return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                         "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
@@ -157,6 +159,10 @@ public final class ArtifactContractValidator {
                         "structured artifact missing required field: summary",
                         Map.of("required_artifact_type", expectedType)
                 ));
+            }
+            var semanticFailure = AgentContractSemantics.validateStructuredArtifact(expectedType, structuredDocument);
+            if (semanticFailure.isPresent()) {
+                return StructuredArtifactResult.failed(semanticFailure.get());
             }
             return StructuredArtifactResult.valid(expectedType, artifact);
         } catch (Exception e) {

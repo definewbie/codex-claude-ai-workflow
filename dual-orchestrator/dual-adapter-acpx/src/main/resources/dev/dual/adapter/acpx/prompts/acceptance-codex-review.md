@@ -52,11 +52,16 @@ matters to acceptance. Use `Acceptance Notes` for non-blocking follow-up. Do not
 mark a blocking gap as a note.
 
 Before the final `dual-control` block, include this exact structured artifact envelope. Fill it with facts from your review. Use empty arrays when a list has no items. Keep `decision` consistent with the final control block.
+Set `lifecycle_status` from your judgment, not from wording style:
+`ACCEPTED`, `ACCEPTED_WITH_NOTES`, `REJECTED`, `BLOCKED`, or `INSUFFICIENT_EVIDENCE`.
+Do not put blocking issues or material missing evidence under `acceptance_notes`;
+use `must_fix` or `missing_evidence` and choose a rejecting/blocking status instead.
 
 <dual-artifact type="acceptance_review" version="1">
 {
   "artifact_type": "acceptance_review",
   "schema_version": 1,
+  "lifecycle_status": "ACCEPTED_WITH_NOTES",
   "decision": "{{decision_example}}",
   "summary": "one short sentence",
   "blocking": false,

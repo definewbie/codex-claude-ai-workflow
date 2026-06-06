@@ -44,11 +44,15 @@ to skip checks when the repository, toolchain, or task scope makes them
 unavailable, but the reason must be explicit.
 
 Before the final `dual-control` block, include this exact structured artifact envelope. Fill it with the checks and evidence you actually used. Use empty arrays when a list has no items. Keep `decision` consistent with the final control block.
+Set `lifecycle_status` to `READY` when developer self-test is complete enough
+for external verification, `INSUFFICIENT_EVIDENCE` when important validation is
+missing, or `BLOCKED` when you cannot continue.
 
 <dual-artifact type="self_test_report" version="1">
 {
   "artifact_type": "self_test_report",
   "schema_version": 1,
+  "lifecycle_status": "READY",
   "decision": "{{decision_example}}",
   "summary": "one short sentence",
   "checks_run": ["command, manual check, inspection, or reasoning-based validation"],

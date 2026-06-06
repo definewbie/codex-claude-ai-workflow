@@ -20,6 +20,7 @@ import java.util.Optional;
  */
 record AgentOutputContractDocument(
         String nodeId,
+        String lifecycleStatus,
         String decision,
         String summary,
         boolean blocking,
@@ -45,6 +46,7 @@ record AgentOutputContractDocument(
     static AgentOutputContractDocument from(Map<String, Object> document) {
         return new AgentOutputContractDocument(
                 text(document.get("node_id")),
+                text(document.get("lifecycle_status")),
                 text(document.get("decision")),
                 text(document.get("summary")),
                 booleanValue(document.get("blocking")),
@@ -94,6 +96,15 @@ record AgentOutputContractDocument(
             document.put("context_gaps", contextGaps);
             document.put("reason", reason);
             return document;
+        }
+
+        boolean isEmpty() {
+            return categoryHint.isBlank()
+                    && contractGaps.isEmpty()
+                    && outOfScopeFiles.isEmpty()
+                    && missingTests.isEmpty()
+                    && contextGaps.isEmpty()
+                    && reason.isBlank();
         }
     }
 

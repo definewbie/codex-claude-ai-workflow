@@ -36,11 +36,14 @@ Write a Markdown handoff with these sections:
 7. Suggested Next Prompt
 
 Before the final `dual-control` block, include this exact structured artifact envelope. Fill it with enough state for a fresh session to continue safely. Use empty arrays when a list has no items. Keep `decision` consistent with the final control block.
+Set `lifecycle_status` to `READY` when the next stage can safely start, or
+`BLOCKED` if the handoff cannot support continuation.
 
 <dual-artifact type="stage_handoff" version="1">
 {
   "artifact_type": "stage_handoff",
   "schema_version": 1,
+  "lifecycle_status": "READY",
   "decision": "{{decision_example}}",
   "summary": "one short sentence",
   "completed_work": [],
