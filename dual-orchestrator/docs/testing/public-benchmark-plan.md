@@ -106,14 +106,28 @@ including paths, business details, or workstream ledgers.
 
 ## Next Implementation Step
 
-Create a public sample app only when the orchestrator lifecycle is stable enough
-that the benchmark will test product behavior instead of constantly chasing
-framework churn.
+The first public benchmark sample now exists:
 
-The first public benchmark should be modest but real:
+```text
+examples/issue-flow-app/
+docs/testing/real-case-benchmarks/cases/public-issue-flow-review-state.md
+scripts/prepare-public-benchmark-repo.sh
+```
 
-1. Create or choose a public sample app.
-2. Add one public benchmark case with clear acceptance criteria.
-3. Run it with `run-real-case.sh`.
-4. Commit the sanitized benchmark report and index.
-5. Keep private benchmark reports out of the public release branch.
+It is a small issue workflow app with explicit state transitions, dashboard
+summary data, product notes, and Node built-in tests. It is intentionally
+modest, but it is no longer a one-function toy fixture.
+
+Run it by preparing a disposable git repo:
+
+```bash
+./scripts/prepare-public-benchmark-repo.sh
+```
+
+Then run the printed `run-real-case.sh` command.
+
+The next public benchmark step is to run this case with real `acpx`, inspect the
+report, and only then commit a sanitized benchmark report if it does not contain
+private machine paths or tokens.
+
+Keep private benchmark reports out of the public release branch.

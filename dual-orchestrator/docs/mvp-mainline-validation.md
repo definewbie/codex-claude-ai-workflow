@@ -138,8 +138,12 @@ mainline closure items have first-pass implementations:
 
 Release-quality MVP still needs:
 
-1. A public, repeatable real-case benchmark that does not depend on the private
-   `cancer-clinic` project.
+1. A public, repeatable real-case benchmark run that does not depend on the
+   private `cancer-clinic` project.
+   - First sample/case now exists: `examples/issue-flow-app/` plus
+     `cases/public-issue-flow-review-state.md`.
+   - Next evidence step: run it with real `acpx` and commit only sanitized
+     report/index material.
 2. A short install-to-first-run path that does not reference private benchmark
    cases.
 3. Continued regression fixtures for real structured artifacts whenever a

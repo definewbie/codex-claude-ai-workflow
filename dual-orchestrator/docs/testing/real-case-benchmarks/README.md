@@ -13,6 +13,12 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 
 ## 当前 Case Set
 
+Public reusable benchmark:
+
+| Case | 类型 | 目的 | 状态 |
+|------|------|------|------|
+| `cases/public-issue-flow-review-state.md` | Public sample app feature | 验证公开样例仓库上的 contract / context / self-test / acceptance / handoff 主生命周期 | Ready to run |
+
 Current cases are private development benchmarks. They are useful for internal
 hardening, but they are not the public onboarding path and should not be copied
 into open-source release material without sanitization. See
@@ -92,6 +98,28 @@ Benchmark index 的 `Grade` 是轻量体检结果，不替代人工读详细报�
 ## 运行方式
 
 真实 case 使用现有脚本，不额外引入 benchmark runner：
+
+Public reusable case:
+
+```bash
+./scripts/prepare-public-benchmark-repo.sh
+```
+
+The script prints a ready-to-run `run-real-case.sh` command. The generated repo
+is a disposable git repository under `/tmp` by default.
+
+Equivalent manual flow:
+
+```bash
+./scripts/prepare-public-benchmark-repo.sh --dest /tmp/dual-issue-flow-benchmark
+
+./scripts/run-real-case.sh \
+  --repo /tmp/dual-issue-flow-benchmark \
+  --task-file dual-orchestrator/docs/testing/real-case-benchmarks/cases/public-issue-flow-review-state.md \
+  --variant full
+```
+
+Private internal case example:
 
 ```bash
 ./scripts/run-real-case.sh \

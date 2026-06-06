@@ -83,6 +83,16 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 - 关键 artifacts
 - 下一步建议命令
 
+## Public Benchmark
+
+项目内置了一个公开、可复用的小型 benchmark app，适合验证真实生命周期而不依赖私有仓库：
+
+```bash
+./scripts/prepare-public-benchmark-repo.sh
+```
+
+脚本会把 `examples/issue-flow-app` 复制到 `/tmp` 下的临时 git repo，并打印可直接运行的 `run-real-case.sh` 命令。
+
 ## 人工 Review
 
 当 workflow 停在 human gate：
