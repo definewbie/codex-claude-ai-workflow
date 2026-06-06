@@ -169,11 +169,16 @@ async function loadOverview() {
 function renderOverview(data) {
   const workflow = data.workflow || {};
   const acceptance = data.acceptance || {};
+  const metrics = data.metrics || {};
   renderOverviewCards([
     ["Current", workflow.currentNode || workflow.status || "-"],
     ["Acceptance", acceptance.finalDecision || "none"],
     ["Repair loops", acceptance.repairLoopCount ?? 0],
     ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
+    ["Agent runs", metrics.agentRunCount ?? "-"],
+    ["Nodes", metrics.nodeCount ?? "-"],
+    ["Gates", metrics.gateCount ?? "-"],
+    ["Duration", durationLabel(metrics.totalNodeDurationMs)],
   ]);
   els.overviewWhy.textContent = data.whyStopped || "-";
   els.overviewNext.textContent = data.nextAction || "-";
@@ -202,6 +207,26 @@ function renderOverviewCards(items) {
     `;
     els.overviewCards.appendChild(card);
   }
+}
+
+function durationLabel(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+  const ms = Number(value);
+  if (!Number.isFinite(ms)) {
+    return String(value);
+  }
+  if (ms < 1000) {
+    return `${ms} ms`;
+  }
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) {
+    return `${seconds} s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return remainder ? `${minutes}m ${remainder}s` : `${minutes}m`;
 }
 
 function renderOverviewAttention(items) {
