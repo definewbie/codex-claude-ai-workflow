@@ -1,6 +1,6 @@
 # dual-orchestrator Roadmap
 
-> Last updated: 2026-06-05
+> Last updated: 2026-06-06
 
 ## P0 — 验证（阻塞后续所有工作）
 
@@ -46,6 +46,12 @@
   - 2026-06-05：Codex final acceptance prompt 要求独立判断自测充分性，并区分 blocking gaps、missing evidence 和 non-blocking acceptance notes。
   - 2026-06-05：agent output contract sidecar 会抽取 checks、evidence、missing evidence 和 acceptance notes；final report 增加 `Verification Evidence` 结构化摘要。
   - 2026-06-05：Agent 的 `dual-control` 块被视为“提议状态”，orchestrator 只读取最后一个顶层状态块，并由 node output contract 校验合法状态后再路由；Agent 在状态块后的运行 epilogue 不再导致主流程误停。
+- [x] Strict structured artifact boundary：Markdown 给人读，机器事实来自 typed `<dual-artifact>` 和 contract sidecar。
+  - 2026-06-06：prompt allowed decisions / required control keys 由 `ContractRegistry` 注入，避免 prompt 和 Java contract 双份维护。
+  - 2026-06-06：self-test、acceptance、handoff 缺少合法 structured artifact 时严格失败，不再从 Markdown section 猜机器事实。
+  - 2026-06-06：`contract.compile` 缺少可信 Claude `task_contract_proposal` 时失败，不再从需求 Markdown 生成 canonical TaskContract。
+  - 2026-06-06：FailureArbiter 读取 `contract_gaps`、`out_of_scope_files`、`missing_tests`、`context_gaps` 等结构化字段，不再用 review summary keyword 做主分类。
+  - 2026-06-06：Human review packet / operator guidance 读取 sidecar 中的 `blocking`、`must_fix`、`missing_evidence`、`open_risks`，减少自然语言漂移对流程推荐的影响。
 
 ## P2 — 技术债
 

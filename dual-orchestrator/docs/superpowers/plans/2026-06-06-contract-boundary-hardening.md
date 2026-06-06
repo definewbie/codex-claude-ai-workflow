@@ -36,7 +36,7 @@
 
 ## Task 1: Prompt Contract Single Source
 
-- [ ] **Step 1: Write failing renderer test**
+- [x] **Step 1: Write failing renderer test**
 
 Add a test in `AgentPromptRendererTest` that renders `acceptance-codex-review` for `acceptance.codex_verifier_review` and asserts:
 
@@ -47,7 +47,7 @@ assertTrue(rendered.contains("REJECT"));
 assertFalse(rendered.contains("ACCEPT|ACCEPT_WITH_NOTES|REJECT"));
 ```
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run:
 
@@ -57,7 +57,7 @@ mvn -pl dual-adapter-acpx -Dtest=AgentPromptRendererTest test
 
 Expected: FAIL because `{{allowed_decisions}}` is not rendered yet or templates still hardcode pipe lists.
 
-- [ ] **Step 3: Implement renderer variables**
+- [x] **Step 3: Implement renderer variables**
 
 Update `AgentPromptRenderer` to read `node_id`, call `ContractRegistry.forNode(nodeId)` when available, and inject:
 
@@ -66,11 +66,11 @@ Update `AgentPromptRenderer` to read `node_id`, call `ContractRegistry.forNode(n
 {{required_control_keys}}
 ```
 
-- [ ] **Step 4: Update prompt templates**
+- [x] **Step 4: Update prompt templates**
 
 Replace hardcoded decision lists in agent prompts with injected allowed decisions and required control keys.
 
-- [ ] **Step 5: Run prompt tests**
+- [x] **Step 5: Run prompt tests**
 
 Run:
 
@@ -82,7 +82,7 @@ Expected: PASS.
 
 ## Task 2: Structured Artifact Validator
 
-- [ ] **Step 1: Write failing validator tests**
+- [x] **Step 1: Write failing validator tests**
 
 Add tests in `ArtifactContractValidatorTest`:
 
@@ -90,7 +90,7 @@ Add tests in `ArtifactContractValidatorTest`:
 - completed `acceptance.codex_verifier_review` with artifact decision different from `dual-control` fails with `CONTROL_ARTIFACT_DECISION_MISMATCH`.
 - valid acceptance artifact writes sidecar fields from JSON, not Markdown headings.
 
-- [ ] **Step 2: Run tests and verify RED**
+- [x] **Step 2: Run tests and verify RED**
 
 Run:
 
@@ -100,7 +100,7 @@ mvn -pl dual-runtime -Dtest=ArtifactContractValidatorTest test
 
 Expected: FAIL because structured artifact validation is not implemented.
 
-- [ ] **Step 3: Implement typed artifact parsing**
+- [x] **Step 3: Implement typed artifact parsing**
 
 Create focused parser / validator code that:
 
@@ -109,7 +109,7 @@ Create focused parser / validator code that:
 - validates required fields and enum decisions.
 - rejects missing / invalid artifacts with stable error codes.
 
-- [ ] **Step 4: Wire into `ArtifactContractValidator`**
+- [x] **Step 4: Wire into `ArtifactContractValidator`**
 
 Require structured artifacts for:
 
@@ -117,7 +117,7 @@ Require structured artifacts for:
 - `acceptance.codex_verifier_review` -> `acceptance_review`
 - `stage.claude_handoff` -> `stage_handoff`
 
-- [ ] **Step 5: Run runtime tests**
+- [x] **Step 5: Run runtime tests**
 
 Run:
 
@@ -129,11 +129,11 @@ Expected: PASS.
 
 ## Task 3: Contract Compile Strict Mode
 
-- [ ] **Step 1: Write failing contract compile test**
+- [x] **Step 1: Write failing contract compile test**
 
 Add or update `ContractCompileHandlerTest` so a missing `task_contract_proposal` returns `TASK_CONTRACT_PROPOSAL_MISSING` and does not write `task-contract.json`.
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run:
 
@@ -143,11 +143,11 @@ mvn -pl dual-runtime -Dtest=ContractCompileHandlerTest test
 
 Expected: FAIL because Markdown fallback still generates a contract.
 
-- [ ] **Step 3: Remove default semantic fallback**
+- [x] **Step 3: Remove default semantic fallback**
 
 Change `ContractCompileHandler` so `compileFromProposal(...)` is required by default. Keep old extraction helpers only if tests still cover a clearly named legacy mode; do not call them in strict mode.
 
-- [ ] **Step 4: Run contract tests**
+- [x] **Step 4: Run contract tests**
 
 Run:
 
@@ -159,7 +159,7 @@ Expected: PASS.
 
 ## Task 4: Failure Classification From Fields
 
-- [ ] **Step 1: Write failing arbiter tests**
+- [x] **Step 1: Write failing arbiter tests**
 
 Add tests showing:
 
@@ -167,7 +167,7 @@ Add tests showing:
 - non-empty `contract_gaps` classifies as `CONTRACT_GAP`.
 - non-empty `out_of_scope_files` classifies as `IMPLEMENTATION_BUG`.
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run:
 
@@ -177,11 +177,11 @@ mvn -pl dual-runtime -Dtest=FailureArbiterTest,FailureClassifyHandlerTest test
 
 Expected: FAIL for the summary keyword case.
 
-- [ ] **Step 3: Update arbiter rules**
+- [x] **Step 3: Update arbiter rules**
 
 Remove summary keyword matching from primary classification. Keep summary in diagnostic output only.
 
-- [ ] **Step 4: Run failure classification tests**
+- [x] **Step 4: Run failure classification tests**
 
 Run:
 
@@ -193,11 +193,11 @@ Expected: PASS.
 
 ## Task 5: Human Guidance From Structured Fields
 
-- [ ] **Step 1: Write failing review packet test**
+- [x] **Step 1: Write failing review packet test**
 
 Add or update `ReviewPacketCliHintsTest` / `BuiltinHandlerTest` so Markdown text containing `Must Fix` does not trigger `revise` unless structured sidecar has blocking fields.
 
-- [ ] **Step 2: Run test and verify RED**
+- [x] **Step 2: Run test and verify RED**
 
 Run:
 
@@ -207,7 +207,7 @@ mvn -pl dual-cli,dual-runtime -am -Dtest=ReviewPacketCliHintsTest,BuiltinHandler
 
 Expected: FAIL because guidance still uses Markdown-derived fields.
 
-- [ ] **Step 3: Update guidance source**
+- [x] **Step 3: Update guidance source**
 
 Read guidance from structured sidecar fields:
 
@@ -217,7 +217,7 @@ Read guidance from structured sidecar fields:
 - `open_risks`
 - optional `recommended_human_action`
 
-- [ ] **Step 4: Run CLI/runtime tests**
+- [x] **Step 4: Run CLI/runtime tests**
 
 Run:
 
@@ -229,7 +229,7 @@ Expected: PASS.
 
 ## Task 6: Full Verification and Real Case
 
-- [ ] **Step 1: Run main module tests**
+- [x] **Step 1: Run main module tests**
 
 Run:
 
@@ -248,11 +248,11 @@ Expected:
 - If it passes, record strict structured artifact compatibility.
 - If it fails on missing structured artifact, fix prompt/schema first. Do not add Markdown fallback.
 
-- [ ] **Step 3: Update docs**
+- [x] **Step 3: Update docs**
 
 Update `docs/features.md` and `docs/architecture-and-execution-flow.md` with the implemented strict structured artifact boundary.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Commit with:
 

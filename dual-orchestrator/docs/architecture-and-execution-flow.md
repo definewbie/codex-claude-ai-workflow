@@ -62,6 +62,8 @@ TaskContract 的意义是给后续所有人一个共同锚点：目标是什么�
 
 同一天的 `cancer-clinic-rejection-prone` benchmark 又补了一条边界：canonical contract 不只要来自结构化 artifact，还要来自可信角色的可信输出。`contract.compile` 只信任 Claude intake 输出中的 `task_contract_proposal`；Codex review 里引用、摘录或复述的 artifact 只作为审阅内容，不再被当成 proposal 来源。
 
+2026-06-06 之后，这条边界进一步收紧：Agent 输出被拆成 Markdown report 和 typed `<dual-artifact>` 两层。Markdown 继续服务人类阅读；orchestrator 只把 `task_contract_proposal`、`self_test_report`、`acceptance_review`、`stage_handoff` 等结构化 artifact 作为机器事实来源。缺失或非法 artifact 会让节点失败，系统不会回退到 Markdown 标题、段落或 summary keyword 里继续猜。
+
 没有契约，review 很容易变成“各说各话”。有契约，失败才有可能被分类：到底是 Claude 没实现，还是契约没写清楚，还是 Codex 误判。
 
 ### 2.3 Ledger 是系统记忆
@@ -145,6 +147,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - Workstream summary MVP：`dualctl summary` 聚合 timeline、next action、final report、recovery、delivery 和 calibration 读模型，用于真实 case 复盘。
 - Agent status protocol：Agent 输出里的 `dual-control` 块只表达“提议状态”；runtime 读取最后一个顶层状态块，忽略后续运行 epilogue，再由 node output contract 校验状态是否允许，最后才更新 ledger 和路由。
+- Strict structured artifact boundary：prompt contract 由 `ContractRegistry` 注入；self-test / acceptance / handoff 必须输出 typed `<dual-artifact>`；`contract.compile` 只从可信 Claude `task_contract_proposal` 生成 canonical TaskContract；FailureArbiter 和 human review guidance 读取结构化字段，而不是 Markdown section 或 summary keyword。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
 - Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow overview / status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；两者都只推进 `RUNNING` workstreams，不绕过 human gate / recovery / failure。
 - Delivery prepare / commit / create-pr 基础管线。

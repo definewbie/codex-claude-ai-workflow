@@ -1,12 +1,24 @@
 # Contract Boundary Hardening 设计
 
 > 日期：2026-06-06
-> 状态：已确认设计
+> 状态：已实现主干
 > 关联文档：
 > - `docs/design/2026-06-03-artifact-driven-contract-negotiation.md`
 > - `docs/design/P5-task-contract-and-contract-compiler.md`
 > - `docs/design/P6-failure-arbiter.md`
 > - `docs/design/workflow-state-machine.md`
+
+## 0. 实现状态
+
+2026-06-06 已完成主干落地：
+
+- prompt allowed decisions / required control keys 由 `ContractRegistry` 注入。
+- self-test / acceptance / handoff 要求 typed `<dual-artifact>`，缺失或非法时严格失败。
+- `contract.compile` 默认不再从 Markdown 猜 canonical TaskContract，缺少 `task_contract_proposal` 时失败。
+- failure classification 改为读取结构化 failure fields，不再用 review summary keyword 做主分类。
+- human review packet / operator guidance 优先读取 structured sidecar 中的 `blocking`、`must_fix`、`missing_evidence`、`open_risks`。
+
+已通过 `mvn -pl dual-cli,dual-server -am test`。真实 case 仍需要继续作为 prompt/schema 兼容性验证，不应通过恢复 Markdown fallback 来绕过 strict failure。
 
 ## 1. 背景
 
