@@ -776,10 +776,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (!Files.isRegularFile(sidecar)) {
             return;
         }
-        var contract = readJsonUnchecked(sidecar);
-        var nodeId = text(contract.get("node_id"));
-        var decision = text(contract.get("decision"));
-        var summary = text(contract.get("summary"));
+        var contract = AgentOutputContractDocument.read(sidecar, OBJECT_MAPPER);
+        if (contract.isEmpty()) {
+            return;
+        }
+        var nodeId = contract.get().nodeId();
+        var decision = contract.get().decision();
+        var summary = contract.get().summary();
         if (nodeId.isBlank() && decision.isBlank() && summary.isBlank()) {
             return;
         }
@@ -792,10 +795,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (!summary.isBlank()) {
             builder.append("- Summary: ").append(summary).append("\n");
         }
-        appendListSummary(builder, "Must Fix", contract.get("must_fix"));
-        appendListSummary(builder, "Open Risks", contract.get("open_risks"));
-        appendListSummary(builder, "Changed Files", contract.get("changed_files"));
-        var verification = text(contract.get("verification_summary"));
+        appendListSummary(builder, "Must Fix", contract.get().mustFix());
+        appendListSummary(builder, "Open Risks", contract.get().openRisks());
+        appendListSummary(builder, "Changed Files", contract.get().changedFiles());
+        var verification = contract.get().verificationSummary();
         if (!verification.isBlank()) {
             builder.append("- Verification: ").append(verification.replace("\n", " / ")).append("\n");
         }

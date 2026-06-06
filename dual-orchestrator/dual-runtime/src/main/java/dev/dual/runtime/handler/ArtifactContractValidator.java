@@ -125,16 +125,16 @@ public final class ArtifactContractValidator {
             ));
         }
         try {
-            var document = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
-            var artifactType = text(document.get("artifact_type"));
-            if (!expectedType.equals(artifactType)) {
+            var rawDocument = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
+            var artifact = toStructuredArtifact(expectedType, rawDocument);
+            if (!expectedType.equals(artifact.artifactType())) {
                 return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                         "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
-                        "structured artifact has wrong artifact_type: " + artifactType,
-                        Map.of("required_artifact_type", expectedType, "actual_artifact_type", artifactType)
+                        "structured artifact has wrong artifact_type: " + artifact.artifactType(),
+                        Map.of("required_artifact_type", expectedType, "actual_artifact_type", artifact.artifactType())
                 ));
             }
-            var decision = text(document.get("decision"));
+            var decision = artifact.decision();
             var controlDecision = parsed.block().required("decision");
             if (decision.isBlank()) {
                 return StructuredArtifactResult.failed(DualControlParseResult.invalid(
@@ -151,14 +151,14 @@ public final class ArtifactContractValidator {
                         Map.of("control_decision", controlDecision, "artifact_decision", decision)
                 ));
             }
-            if (text(document.get("summary")).isBlank()) {
+            if (artifact.summary().isBlank()) {
                 return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                         "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
                         "structured artifact missing required field: summary",
                         Map.of("required_artifact_type", expectedType)
                 ));
             }
-            return StructuredArtifactResult.valid(expectedType, document);
+            return StructuredArtifactResult.valid(expectedType, artifact);
         } catch (Exception e) {
             return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                     "STRUCTURED_ARTIFACT_PARSE_FAILED",
@@ -177,24 +177,58 @@ public final class ArtifactContractValidator {
         };
     }
 
+    private static StructuredAgentArtifact toStructuredArtifact(String expectedType, Map<String, Object> document) {
+        return switch (expectedType) {
+            case "self_test_report" -> new SelfTestReportArtifact(
+                    text(document.get("artifact_type")),
+                    text(document.get("decision")),
+                    text(document.get("summary")),
+                    stringList(document.get("checks_run")),
+                    stringList(document.get("checks_skipped")),
+                    stringList(document.get("evidence")),
+                    stringList(document.get("missing_evidence")),
+                    stringList(document.get("acceptance_notes")),
+                    text(document.get("verification_summary"))
+            );
+            case "acceptance_review" -> new AcceptanceReviewArtifact(
+                    text(document.get("artifact_type")),
+                    text(document.get("decision")),
+                    text(document.get("summary")),
+                    booleanValue(document.get("blocking")),
+                    stringList(document.get("checks")),
+                    stringList(document.get("evidence")),
+                    stringList(document.get("missing_evidence")),
+                    stringList(document.get("must_fix")),
+                    stringList(document.get("acceptance_notes")),
+                    stringList(document.get("open_risks")),
+                    stringList(document.get("changed_files")),
+                    text(document.get("verification_summary")),
+                    AgentOutputContractDocument.FailureFields.from(objectMap(document.get("failure")))
+            );
+            case "stage_handoff" -> new StageHandoffArtifact(
+                    text(document.get("artifact_type")),
+                    text(document.get("decision")),
+                    text(document.get("summary")),
+                    stringList(document.get("completed_work")),
+                    stringList(document.get("important_decisions")),
+                    stringList(document.get("changed_files")),
+                    text(document.get("verification_state")),
+                    stringList(document.get("open_risks")),
+                    text(document.get("recommended_next_stage")),
+                    text(document.get("suggested_next_prompt"))
+            );
+            default -> throw new IllegalArgumentException("unsupported structured artifact type: " + expectedType);
+        };
+    }
+
     private static void addEvidenceFields(
             Map<String, Object> document,
             StructuredArtifactResult structured,
             String markdown
     ) {
-        if (structured.document() != null) {
+        if (structured.artifact() != null) {
             document.put("source_artifact_type", structured.type());
-            putStructured(document, structured.document(), "must_fix");
-            putStructured(document, structured.document(), "open_risks");
-            putStructured(document, structured.document(), "changed_files");
-            putStructured(document, structured.document(), "checks_run", "checks_run", "checks");
-            putStructured(document, structured.document(), "checks_skipped");
-            putStructured(document, structured.document(), "evidence");
-            putStructured(document, structured.document(), "missing_evidence");
-            putStructured(document, structured.document(), "acceptance_notes");
-            putStructured(document, structured.document(), "verification_summary");
-            putStructured(document, structured.document(), "blocking");
-            putStructured(document, structured.document(), "failure");
+            structured.artifact().writeSidecarFields(document);
             return;
         }
         document.put("must_fix", MarkdownArtifactFields.listSection(
@@ -258,22 +292,38 @@ public final class ArtifactContractValidator {
         ));
     }
 
-    private static void putStructured(Map<String, Object> target, Map<String, Object> source, String key) {
-        putStructured(target, source, key, key);
-    }
-
-    private static void putStructured(Map<String, Object> target, Map<String, Object> source, String targetKey, String... sourceKeys) {
-        for (var sourceKey : sourceKeys) {
-            if (source.containsKey(sourceKey)) {
-                target.put(targetKey, source.get(sourceKey));
-                return;
-            }
-        }
-        target.put(targetKey, List.of());
-    }
-
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private static List<String> stringList(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        return items.stream()
+                .filter(item -> item != null && !String.valueOf(item).isBlank())
+                .map(item -> String.valueOf(item).trim())
+                .toList();
+    }
+
+    private static boolean booleanValue(Object value) {
+        if (value instanceof Boolean bool) {
+            return bool;
+        }
+        return Boolean.parseBoolean(text(value));
+    }
+
+    private static Map<String, Object> objectMap(Object value) {
+        if (!(value instanceof Map<?, ?> source)) {
+            return Map.of();
+        }
+        var copy = new LinkedHashMap<String, Object>();
+        for (var entry : source.entrySet()) {
+            if (entry.getKey() instanceof String key) {
+                copy.put(key, entry.getValue());
+            }
+        }
+        return copy;
     }
 
     private static NodeResult contractViolation(
@@ -310,13 +360,116 @@ public final class ArtifactContractValidator {
         );
     }
 
-    private record StructuredArtifactResult(String type, Map<String, Object> document, DualControlParseResult failure) {
+    private sealed interface StructuredAgentArtifact permits
+            SelfTestReportArtifact,
+            AcceptanceReviewArtifact,
+            StageHandoffArtifact {
+        String artifactType();
+
+        String decision();
+
+        String summary();
+
+        void writeSidecarFields(Map<String, Object> document);
+    }
+
+    private record SelfTestReportArtifact(
+            String artifactType,
+            String decision,
+            String summary,
+            List<String> checksRun,
+            List<String> checksSkipped,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> acceptanceNotes,
+            String verificationSummary
+    ) implements StructuredAgentArtifact {
+        @Override
+        public void writeSidecarFields(Map<String, Object> document) {
+            document.put("must_fix", List.of());
+            document.put("open_risks", List.of());
+            document.put("changed_files", List.of());
+            document.put("checks_run", checksRun);
+            document.put("checks_skipped", checksSkipped);
+            document.put("evidence", evidence);
+            document.put("missing_evidence", missingEvidence);
+            document.put("acceptance_notes", acceptanceNotes);
+            document.put("verification_summary", verificationSummary);
+            document.put("blocking", false);
+            document.put("failure", AgentOutputContractDocument.FailureFields.empty().toMap());
+        }
+    }
+
+    private record AcceptanceReviewArtifact(
+            String artifactType,
+            String decision,
+            String summary,
+            boolean blocking,
+            List<String> checks,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> mustFix,
+            List<String> acceptanceNotes,
+            List<String> openRisks,
+            List<String> changedFiles,
+            String verificationSummary,
+            AgentOutputContractDocument.FailureFields failure
+    ) implements StructuredAgentArtifact {
+        @Override
+        public void writeSidecarFields(Map<String, Object> document) {
+            document.put("must_fix", mustFix);
+            document.put("open_risks", openRisks);
+            document.put("changed_files", changedFiles);
+            document.put("checks_run", checks);
+            document.put("checks_skipped", List.of());
+            document.put("evidence", evidence);
+            document.put("missing_evidence", missingEvidence);
+            document.put("acceptance_notes", acceptanceNotes);
+            document.put("verification_summary", verificationSummary);
+            document.put("blocking", blocking);
+            document.put("failure", failure.toMap());
+        }
+    }
+
+    private record StageHandoffArtifact(
+            String artifactType,
+            String decision,
+            String summary,
+            List<String> completedWork,
+            List<String> importantDecisions,
+            List<String> changedFiles,
+            String verificationState,
+            List<String> openRisks,
+            String recommendedNextStage,
+            String suggestedNextPrompt
+    ) implements StructuredAgentArtifact {
+        @Override
+        public void writeSidecarFields(Map<String, Object> document) {
+            document.put("must_fix", List.of());
+            document.put("open_risks", openRisks);
+            document.put("changed_files", changedFiles);
+            document.put("checks_run", List.of());
+            document.put("checks_skipped", List.of());
+            document.put("evidence", completedWork);
+            document.put("missing_evidence", List.of());
+            document.put("acceptance_notes", List.of());
+            document.put("verification_summary", verificationState);
+            document.put("blocking", false);
+            document.put("failure", AgentOutputContractDocument.FailureFields.empty().toMap());
+            document.put("completed_work", completedWork);
+            document.put("important_decisions", importantDecisions);
+            document.put("recommended_next_stage", recommendedNextStage);
+            document.put("suggested_next_prompt", suggestedNextPrompt);
+        }
+    }
+
+    private record StructuredArtifactResult(String type, StructuredAgentArtifact artifact, DualControlParseResult failure) {
         static StructuredArtifactResult none() {
             return new StructuredArtifactResult("", null, null);
         }
 
-        static StructuredArtifactResult valid(String type, Map<String, Object> document) {
-            return new StructuredArtifactResult(type, document, null);
+        static StructuredArtifactResult valid(String type, StructuredAgentArtifact artifact) {
+            return new StructuredArtifactResult(type, artifact, null);
         }
 
         static StructuredArtifactResult failed(DualControlParseResult failure) {

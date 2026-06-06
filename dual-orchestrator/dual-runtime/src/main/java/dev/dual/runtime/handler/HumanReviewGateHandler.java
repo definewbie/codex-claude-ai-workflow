@@ -273,22 +273,11 @@ public final class HumanReviewGateHandler implements GateHandler {
         if (sidecar == null || !Files.isRegularFile(sidecar)) {
             return Map.of();
         }
-        var json = readJson(sidecar);
-        if (json.isEmpty() || text(json.get("decision")).isBlank()) {
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper);
+        if (document.isEmpty() || !document.get().hasDecision()) {
             return Map.of();
         }
-        var summary = new LinkedHashMap<String, Object>();
-        summary.put("nodeId", text(json.get("node_id")));
-        summary.put("decision", text(json.get("decision")));
-        summary.put("summary", text(json.get("summary")));
-        summary.put("blocking", booleanValue(json.get("blocking")));
-        summary.put("mustFix", meaningfulList(json.get("must_fix")));
-        summary.put("missingEvidence", meaningfulList(json.get("missing_evidence")));
-        summary.put("openRisks", meaningfulList(json.get("open_risks")));
-        summary.put("changedFiles", stringList(json.get("changed_files")));
-        summary.put("verificationSummary", text(json.get("verification_summary")));
-        summary.put("sidecarPath", displayRef(context.workspaceRoot(), sidecar));
-        return summary;
+        return document.get().toReviewPacketMap(displayRef(context.workspaceRoot(), sidecar));
     }
 
     private Map<String, Object> gitEvidenceSummary(GateContext context) {
@@ -381,25 +370,6 @@ public final class HumanReviewGateHandler implements GateHandler {
             checks.add("Check the handoff and next-stage prompt before completing the current workstream.");
         }
         return List.copyOf(checks);
-    }
-
-    private List<String> meaningfulList(Object value) {
-        return stringList(value).stream()
-                .filter(item -> {
-                    var normalized = item.trim().toLowerCase();
-                    return !normalized.isBlank()
-                            && !normalized.equals("none")
-                            && !normalized.equals("none.")
-                            && !normalized.equals("none blocking")
-                            && !normalized.equals("none blocking.")
-                            && !normalized.equals("no blocking issues")
-                            && !normalized.equals("no blocking issues.")
-                            && !normalized.equals("n/a")
-                            && !normalized.equals("na")
-                            && !normalized.equals("无")
-                            && !normalized.equals("无。");
-                })
-                .toList();
     }
 
     private boolean isPositiveDecision(String decision) {
@@ -501,13 +471,6 @@ public final class HumanReviewGateHandler implements GateHandler {
             }
         }
         return List.copyOf(result);
-    }
-
-    private boolean booleanValue(Object value) {
-        if (value instanceof Boolean bool) {
-            return bool;
-        }
-        return Boolean.parseBoolean(text(value));
     }
 
     private void appendField(StringBuilder builder, String label, String value) {

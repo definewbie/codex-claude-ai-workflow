@@ -54,18 +54,18 @@ public final class FailureClassifyHandler implements TaskHandler {
         var instanceResult = context.instance().result();
         var reviewMetadata = readReviewMetadata(context);
         String reviewDecision = extractString(instanceResult, "decision",
-                extractString(reviewMetadata, "decision", "REJECT"));
+                reviewMetadata.map(AgentOutputContractDocument::decision).filter(value -> !value.isBlank()).orElse("REJECT"));
         String reviewSummary = extractString(instanceResult, "summary",
-                extractString(reviewMetadata, "summary", ""));
+                reviewMetadata.map(AgentOutputContractDocument::summary).orElse(""));
 
         List<String> contractGaps = extractStringList(instanceResult, "contract_gaps",
-                extractStringList(reviewMetadata, "contract_gaps", List.of()));
+                reviewMetadata.map(metadata -> metadata.failure().contractGaps()).orElse(List.of()));
         List<String> outOfScopeFiles = extractStringList(instanceResult, "out_of_scope_files",
-                extractStringList(reviewMetadata, "out_of_scope_files", List.of()));
+                reviewMetadata.map(metadata -> metadata.failure().outOfScopeFiles()).orElse(List.of()));
         List<String> missingTests = extractStringList(instanceResult, "missing_tests",
-                extractStringList(reviewMetadata, "missing_tests", List.of()));
+                reviewMetadata.map(metadata -> metadata.failure().missingTests()).orElse(List.of()));
         List<String> contextGaps = extractStringList(instanceResult, "context_gaps",
-                extractStringList(reviewMetadata, "context_gaps", List.of()));
+                reviewMetadata.map(metadata -> metadata.failure().contextGaps()).orElse(List.of()));
 
         // Read git evidence for changed file count
         int changedFileCount = readChangedFileCount(workstreamDir);
@@ -115,7 +115,7 @@ public final class FailureClassifyHandler implements TaskHandler {
         return NodeResult.completed(outcome, outputRefs, result);
     }
 
-    private Map<String, Object> readReviewMetadata(TaskContext context) throws IOException {
+    private java.util.Optional<AgentOutputContractDocument> readReviewMetadata(TaskContext context) throws IOException {
         for (var inputRef : context.instance().inputRefs()) {
             if (!inputRef.endsWith(".contract.json")) {
                 continue;
@@ -124,33 +124,9 @@ public final class FailureClassifyHandler implements TaskHandler {
             if (!Files.isRegularFile(path)) {
                 continue;
             }
-            var json = objectMapper.readTree(path.toFile());
-            var metadata = new LinkedHashMap<String, Object>();
-            if (json.hasNonNull("decision")) {
-                metadata.put("decision", json.get("decision").asText());
-            }
-            if (json.hasNonNull("summary")) {
-                metadata.put("summary", json.get("summary").asText());
-            }
-            if (json.has("failure") && json.get("failure").isObject()) {
-                var failure = json.get("failure");
-                copyArray(metadata, failure, "contract_gaps");
-                copyArray(metadata, failure, "out_of_scope_files");
-                copyArray(metadata, failure, "missing_tests");
-                copyArray(metadata, failure, "context_gaps");
-            }
-            return metadata;
+            return AgentOutputContractDocument.read(path, objectMapper);
         }
-        return Map.of();
-    }
-
-    private void copyArray(Map<String, Object> metadata, com.fasterxml.jackson.databind.JsonNode source, String key) {
-        if (!source.has(key) || !source.get(key).isArray()) {
-            return;
-        }
-        var values = new ArrayList<String>();
-        source.get(key).forEach(value -> values.add(value.asText()));
-        metadata.put(key, values);
+        return java.util.Optional.empty();
     }
 
     private String extractString(Map<String, Object> map, String key, String defaultValue) {
