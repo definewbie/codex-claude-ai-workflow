@@ -64,13 +64,20 @@ This is the quickest sanity check for the CLI/workflow path.
 Use a real Git repo and a bounded task file:
 
 ```bash
+cat > /tmp/dual-task.md <<'EOF'
+Update the README with a short "Local Development" section.
+Keep the change documentation-only. Do not modify source code.
+EOF
+
 ./scripts/run-real-case.sh \
   --repo /path/to/your/repo \
-  --task-file docs/testing/real-case-benchmarks/cases/cancer-clinic-feature-slice.md \
+  --task-file /tmp/dual-task.md \
   --variant full
 ```
 
-For your own project, replace `--task-file` with a small markdown requirement.
+Use a small task first. The private benchmark cases under
+`docs/testing/real-case-benchmarks/cases/` are development evidence for this
+repository, not public quickstart fixtures.
 
 The script creates a safe worktree, starts the lifecycle, auto-approves
 intermediate gates for benchmark purposes, and writes a report.

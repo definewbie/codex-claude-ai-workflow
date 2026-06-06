@@ -100,3 +100,37 @@ orchestrator preserves the evidence for review.
 The next useful implementation step is to rerun a bounded internal real case and
 verify that the new structured evidence improves the final report and human
 review packet without making the Agent behavior brittle.
+
+## 2026-06-06 Semantic Artifact Boundary
+
+The artifact boundary now has a first semantic consistency layer:
+
+- Structured agent artifacts may declare `lifecycle_status`.
+- Runtime derives canonical status from `decision` and rejects unknown or
+  conflicting declared status.
+- Contract sidecars include `lifecycle_status` and `evidence_state`.
+- Final acceptance `ACCEPT` / `ACCEPT_WITH_NOTES` cannot carry blocking
+  evidence, `must_fix`, or material `missing_evidence`.
+- Final acceptance `REJECT` must include blocking evidence, missing evidence,
+  must-fix items, or a failure reason.
+
+This keeps the harness aligned with the paper's central point: the model may
+judge the work, but the surrounding system validates, records, and routes
+explicit state and evidence.
+
+The first public, non-domain fixture regression set now covers:
+
+- `ACCEPT_WITH_NOTES` with non-blocking notes.
+- `REJECT` with blocking missing evidence.
+- `SELF_TEST_INCOMPLETE` with insufficient developer evidence.
+
+## Updated MVP Gap
+
+The main lifecycle is functionally closed, but release-quality MVP still needs:
+
+1. A public, repeatable real-case benchmark that does not depend on the private
+   `cancer-clinic` project.
+2. A short install-to-first-run path that does not reference private benchmark
+   cases.
+3. Continued regression fixtures for real structured artifacts whenever a
+   real-case run exposes a new stable artifact shape.

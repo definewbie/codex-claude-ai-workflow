@@ -52,6 +52,8 @@
   - 2026-06-06：`contract.compile` 缺少可信 Claude `task_contract_proposal` 时失败，不再从需求 Markdown 生成 canonical TaskContract。
   - 2026-06-06：FailureArbiter 读取 `contract_gaps`、`out_of_scope_files`、`missing_tests`、`context_gaps` 等结构化字段，不再用 review summary keyword 做主分类。
   - 2026-06-06：Human review packet / operator guidance 读取 sidecar 中的 `blocking`、`must_fix`、`missing_evidence`、`open_risks`，减少自然语言漂移对流程推荐的影响。
+  - 2026-06-06：Agent structured artifact 增加 canonical `lifecycle_status`，runtime 会派生并校验状态一致性；sidecar 增加 `evidence_state`，用于 CLI/UI 判断 blocking、must fix、missing evidence 和 acceptance notes。
+  - 2026-06-06：新增公开、去业务化 artifact fixture regression，覆盖 `ACCEPT_WITH_NOTES`、`REJECT` 和 `SELF_TEST_INCOMPLETE` 三类关键样本，避免 contract 继续漂回自然语言解析。
 
 ## P2 — 技术债
 

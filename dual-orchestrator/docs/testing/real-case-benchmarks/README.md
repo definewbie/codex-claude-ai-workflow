@@ -13,6 +13,11 @@ Real-case benchmark 用来验证 dual-orchestrator 在真实仓库里的生命�
 
 ## 当前 Case Set
 
+Current cases are private development benchmarks. They are useful for internal
+hardening, but they are not the public onboarding path and should not be copied
+into open-source release material without sanitization. See
+`../public-benchmark-plan.md` for the public benchmark direction.
+
 | Case | 类型 | 目的 | 状态 |
 |------|------|------|------|
 | `cases/cancer-clinic-small-ui.md` | Small UI change | 验证 full lifecycle 和真实 repair loop | 2026-06-02 已通过 |
