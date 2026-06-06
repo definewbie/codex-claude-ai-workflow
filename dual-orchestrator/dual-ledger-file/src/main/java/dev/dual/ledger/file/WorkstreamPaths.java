@@ -125,6 +125,18 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("timeline.json");
     }
 
+    public Path metricsDir() {
+        return workstreamDir().resolve("metrics");
+    }
+
+    public Path workstreamMetricsJson() {
+        return metricsDir().resolve("workstream-metrics.json");
+    }
+
+    public Path workstreamMetricsMarkdown() {
+        return metricsDir().resolve("workstream-metrics.md");
+    }
+
     public Path recoveryDir() {
         return workstreamDir().resolve("recovery");
     }

@@ -159,6 +159,9 @@ class WorkstreamApiControllerTest {
         assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
         assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
         assertEquals(1, ((List<Map<String, Object>>) response.get("latestAgentRuns")).size());
+        var metrics = (Map<String, Object>) response.get("metrics");
+        assertEquals(fixture.workstreamId(), metrics.get("workstreamId"));
+        assertEquals(2, metrics.get("nodeCount"));
         var artifacts = (Map<String, Object>) response.get("artifacts");
         assertEquals(true, artifacts.containsKey("finalReport"));
     }

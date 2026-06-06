@@ -170,6 +170,19 @@ class WorkflowFileLedgerTest {
         assertTrue(timeline.contains("\"nodeDefinitionId\" : \"second\""));
         assertTrue(timeline.contains("\"status\" : \"WAITING\""));
         assertTrue(timeline.contains("\"durationMs\""));
+
+        assertTrue(Files.exists(paths.workstreamMetricsJson()));
+        assertTrue(Files.exists(paths.workstreamMetricsMarkdown()));
+        var metrics = Files.readString(paths.workstreamMetricsJson());
+        assertTrue(metrics.contains("\"workstreamId\" : \"ws-timeline\""));
+        assertTrue(metrics.contains("\"workflowStatus\" : \"WAITING_FOR_HUMAN\""));
+        assertTrue(metrics.contains("\"nodeCount\" : 2"));
+        assertTrue(metrics.contains("\"gateCount\" : 1"));
+        assertTrue(metrics.contains("\"completedCount\" : 1"));
+        assertTrue(metrics.contains("\"waitingCount\" : 1"));
+        assertTrue(metrics.contains("\"totalNodeDurationMs\""));
+        assertTrue(metrics.contains("\"longestNodes\""));
+        assertTrue(Files.readString(paths.workstreamMetricsMarkdown()).contains("# Workstream Metrics"));
     }
 
     @Test

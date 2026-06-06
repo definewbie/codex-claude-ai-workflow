@@ -59,6 +59,7 @@ public final class SummaryCommand implements Callable<Integer> {
 
     private String render(WorkstreamPaths paths) throws Exception {
         var timeline = readMap(paths.timelineJson());
+        var metrics = readMap(paths.workstreamMetricsJson());
         var delivery = readMap(paths.workstreamDir().resolve("delivery").resolve("delivery.json"));
         var activeNodes = listOfText(timeline.get("activeNodeInstanceIds"));
         var openGates = listOfText(timeline.get("openGateIds"));
@@ -79,6 +80,17 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("- Active Nodes: " + emptyDash(activeNodes));
         lines.add("- Open Gates: " + emptyDash(openGates));
         lines.add("- Updated At: " + text(timeline.get("updatedAt")));
+        lines.add("");
+        lines.add("## Metrics");
+        lines.add("");
+        lines.add("- Nodes: " + text(metrics.get("nodeCount"), "unavailable"));
+        lines.add("- Agent Runs: " + text(metrics.get("agentRunCount"), "unavailable"));
+        lines.add("- Gates: " + text(metrics.get("gateCount"), "unavailable"));
+        lines.add("- Decisions: " + text(metrics.get("decisionCount"), "unavailable"));
+        lines.add("- Iterations: " + text(metrics.get("iterationCount"), "unavailable"));
+        lines.add("- Revisions: " + text(metrics.get("revisionCount"), "unavailable"));
+        lines.add("- Total Node Duration(ms): " + text(metrics.get("totalNodeDurationMs"), "unavailable"));
+        lines.add("- Metrics: " + presence(paths.workstreamMetricsMarkdown()));
         lines.add("");
         lines.add("## Recommended Next Action");
         lines.add("");

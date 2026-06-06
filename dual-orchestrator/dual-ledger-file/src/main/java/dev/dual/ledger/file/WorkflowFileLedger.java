@@ -21,6 +21,7 @@ public final class WorkflowFileLedger {
     private final RoutingEngine routingEngine;
     private final NodeStateWriter nodeStateWriter;
     private final TimelineProjectionWriter timelineProjectionWriter;
+    private final MetricsProjectionWriter metricsProjectionWriter;
     private final FailureSummaryWriter failureSummaryWriter;
 
     public WorkflowFileLedger() {
@@ -37,6 +38,7 @@ public final class WorkflowFileLedger {
         this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker);
         this.nodeStateWriter = new NodeStateWriter(jsonWriter, this.objectMapper, eventLog);
         this.timelineProjectionWriter = new TimelineProjectionWriter(jsonWriter, this.objectMapper);
+        this.metricsProjectionWriter = new MetricsProjectionWriter(jsonWriter, this.objectMapper);
         this.failureSummaryWriter = new FailureSummaryWriter(this.objectMapper);
     }
 
@@ -107,7 +109,7 @@ public final class WorkflowFileLedger {
                 null,
                 null
         ));
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
     }
 
     public WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
@@ -172,7 +174,7 @@ public final class WorkflowFileLedger {
         if (completedStatus == NodeStatus.FAILED || completedStatus == NodeStatus.BLOCKED) {
             failureSummaryWriter.write(paths, nodeInstanceId);
         }
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
     }
 
     public void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)
@@ -183,35 +185,39 @@ public final class WorkflowFileLedger {
     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
             throws IOException {
         routingEngine.resolveOpenGate(paths, definition, action, note);
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
     }
 
     public NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
         var node = nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
         return node;
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
         var node = nodeStateWriter.autoRetryNode(paths, nodeInstanceId);
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
         return node;
     }
 
     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId, long retryDelayMs) throws IOException {
         var node = nodeStateWriter.autoRetryNode(paths, nodeInstanceId, retryDelayMs);
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
         return node;
     }
 
     public void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.retryActiveNode(paths, note);
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
     }
 
     public void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.abortRecovery(paths, note);
-        timelineProjectionWriter.write(paths);
+        refreshProjections(paths);
     }
 
+    private void refreshProjections(WorkstreamPaths paths) throws IOException {
+        timelineProjectionWriter.write(paths);
+        metricsProjectionWriter.write(paths);
+    }
 }

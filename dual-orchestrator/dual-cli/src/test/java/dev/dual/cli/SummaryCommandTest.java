@@ -29,6 +29,9 @@ class SummaryCommandTest {
         assertTrue(printed.contains("# Workstream Summary"));
         assertTrue(printed.contains("- Workstream: ws-summary"));
         assertTrue(printed.contains("- Status: WAITING_FOR_HUMAN"));
+        assertTrue(printed.contains("## Metrics"));
+        assertTrue(printed.contains("- Nodes: 2"));
+        assertTrue(printed.contains("- Agent Runs: 1"));
         assertTrue(printed.contains("dualctl review show"));
         assertTrue(printed.contains("| design.codex_arch_review | task | COMPLETED | iter-001 | 42 |"));
         assertTrue(printed.contains("candidate-1=ACCEPTED"));
@@ -64,6 +67,7 @@ class SummaryCommandTest {
         Files.createDirectories(root.resolve("delivery"));
         Files.createDirectories(root.resolve("calibration/candidates"));
         Files.createDirectories(root.resolve("calibration/apply-plans"));
+        Files.createDirectories(root.resolve("metrics"));
         Files.writeString(root.resolve("reports/latest-final-report.md"), "# Final\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("recovery/current-failure.md"), "# Failure\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("delivery/delivery.json"), """
@@ -107,6 +111,21 @@ class SummaryCommandTest {
                   ]
                 }
                 """.formatted(status), StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("metrics/workstream-metrics.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-summary",
+                  "workflowStatus": "%s",
+                  "nodeCount": 2,
+                  "agentRunCount": 1,
+                  "gateCount": 1,
+                  "decisionCount": 0,
+                  "iterationCount": 1,
+                  "revisionCount": 0,
+                  "totalNodeDurationMs": 42
+                }
+                """.formatted(status), StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("metrics/workstream-metrics.md"), "# Workstream Metrics\n", StandardCharsets.UTF_8);
     }
 
     private String captureStdout(ThrowingCallable callable) throws Exception {

@@ -112,6 +112,7 @@ public class WorkstreamQueryService {
             throw new IOException("timeline projection not found: " + paths.timelineJson());
         }
         var timeline = objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE);
+        var metrics = readJson(paths.workstreamMetricsJson());
         var summary = readJson(paths.workstreamDir().resolve("reports").resolve("real-case-summary.json"));
         var nodes = mapList(timeline.get("nodes"));
         var activeNodeIds = textList(timeline.get("activeNodeInstanceIds"));
@@ -145,6 +146,7 @@ public class WorkstreamQueryService {
         response.put("whyStopped", whyStopped(status, currentNode(nodes, activeNodeIds), openGateIds));
         response.put("nextAction", nextAction(root, workstreamId, status, openGateIds));
         response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount, artifacts));
+        response.put("metrics", metrics);
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
         response.put("latestAgentRuns", latestAgentRuns(root, paths, 6));
         response.put("artifacts", artifacts);

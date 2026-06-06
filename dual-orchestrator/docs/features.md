@@ -35,6 +35,8 @@
   - 2026-06-01：`WorkflowFileLedger` 在初始化、路由、运行状态变化、retry/recovery 操作后自动更新 `timeline.json`；`dualctl timeline` 可展示节点概览。
 - [x] Workstream summary：从 ledger 聚合真实 run 复盘视图。
   - 2026-06-04：`dualctl summary` 会聚合 timeline、推荐下一步动作、final report、recovery summary、delivery、calibration candidates 和 apply plans；`--write` 可写入 `reports/workstream-summary.md`。
+- [x] Workstream metrics projection：从 workflow current、nodes 和 iterations 生成轻量指标读模型。
+  - 2026-06-06：`WorkflowFileLedger` 自动更新 `metrics/workstream-metrics.json` 和 `.md`，记录节点数、agent run 数、gate/decision 数、iteration/revision 数、状态计数、总节点耗时和最长节点；`dualctl summary` 和 `dual-server overview` 复用该投影。token 用量等 provider 级指标后续在 adapter 层补充。
 - [x] Status workflow-first：`dualctl status` 默认以 workflow current 为准，旧 checkpoint/stage 快照仅在 `--show-legacy` 时显示。
 - [x] Failure summary：失败时生成 `recovery/current-failure.md`，聚合失败原因、证据和建议动作。
   - 2026-06-01：普通 `FAILED` / `BLOCKED` 节点会由 ledger 写入当前失败摘要，包含 node、handler、原因、exit code、output refs 和 retry 提示。
@@ -89,7 +91,8 @@
   - 2026-06-05：完成态 trace 不再展示陈旧 `recovery/current-failure.md`；失败 / blocked / recovery 状态仍显示当前恢复摘要。
 - [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow overview / status / timeline，并支持最小 action：resume、retry、review approve/revise。
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
-- [ ] T3.2 Metrics 收集：token 用量、延迟、成功率等指标采集
+- [x] T3.2 Metrics projection MVP：节点 / gate / iteration / duration 指标进入 ledger、CLI summary 和 API overview。
+- [ ] Provider metrics：token 用量、模型成本、agent/provider 成功率等 adapter 层指标采集。
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖
 - [x] Scheduler tick MVP：`POST /api/scheduler/tick` 手动触发一次调度，只推进 `RUNNING` workstreams，遇到 human gate / recovery / failure / completed 会跳过。
 - [x] T4.1 Background Scheduler MVP：默认关闭；配置 `dual.scheduler.enabled=true` 和 `dual.scheduler.workdirs` 后周期调用 tick，支持间隔、max workstreams、max steps 配置，并用运行中保护避免重入。

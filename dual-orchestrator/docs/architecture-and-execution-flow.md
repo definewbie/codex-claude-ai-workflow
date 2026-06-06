@@ -145,7 +145,8 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
-- Workstream summary MVP：`dualctl summary` 聚合 timeline、next action、final report、recovery、delivery 和 calibration 读模型，用于真实 case 复盘。
+- Workstream metrics projection MVP：ledger 自动生成 `metrics/workstream-metrics.json` / `.md`，聚合节点、agent run、gate、decision、iteration、revision、状态计数和节点耗时；CLI summary 与 API overview 复用同一读模型。
+- Workstream summary MVP：`dualctl summary` 聚合 timeline、metrics、next action、final report、recovery、delivery 和 calibration 读模型，用于真实 case 复盘。
 - Agent status protocol：Agent 输出里的 `dual-control` 块只表达“提议状态”；runtime 读取最后一个顶层状态块，忽略后续运行 epilogue，再由 node output contract 校验状态是否允许，最后才更新 ledger 和路由。
 - Strict structured artifact boundary：prompt contract 由 `ContractRegistry` 注入；self-test / acceptance / handoff 必须输出 typed `<dual-artifact>`；`contract.compile` 只从可信 Claude `task_contract_proposal` 生成 canonical TaskContract；FailureArbiter 和 human review guidance 读取结构化字段，而不是 Markdown section 或 summary keyword。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
@@ -181,9 +182,10 @@ real-case benchmark
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
 | Done | Local API Server MVP | overview / status / timeline + 最小 action API，先给 UI 和外部观察器一个稳定入口 |
 | Done | Scheduler tick + background MVP | 手动或后台周期调度，只推进 RUNNING workstreams，不绕过 human gate / recovery |
+| Done | Metrics projection MVP | ledger 自动生成节点、gate、iteration、duration 指标，CLI summary 和 API overview 复用同一读模型 |
 | P1 | Real-case benchmark loop | 用 2-3 个真实任务持续验证 p6，而不是只靠低复杂度 fixture |
 | P1 | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |
-| P2 | Background scheduler | 在人工 gate 和 recovery 语义稳定后再做后台自动推进 |
+| P2 | Provider metrics | 在 adapter 层补 token、成本、provider 成功率等更细指标 |
 
 ### 4.2 长期路线
 
