@@ -67,10 +67,18 @@ Rules for the proposal:
 - Do not include ledger metadata such as Workstream, Builder Node, Generated At, Context Package, or tool traces inside the JSON values.
 - If a human decision is genuinely needed, put the question in `open_questions` and set `needs_human_input: true` in the control block.
 
+Allowed decisions:
+
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
+
 End with this control block:
 
 ```dual-control
-decision: READY_FOR_PRODUCT_REVIEW
+decision: {{decision_example}}
 needs_human_input: true|false
 summary: one short sentence
 ```

@@ -1,5 +1,7 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.runtime.handler.ContractRegistry;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +18,8 @@ final class AgentPromptRenderer {
     private static final Set<String> KNOWN_VARIABLES = Set.of(
             "workstream_id", "node_id", "prompt_template",
             "ledger_path", "requirement", "context_package",
-            "contract_review_principles"
+            "contract_review_principles", "allowed_decisions",
+            "required_control_keys", "decision_example"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
     private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(/[^\\s\"'`)]+)");
@@ -28,6 +31,7 @@ final class AgentPromptRenderer {
         var requirement = readIfExists(requirementPath);
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
+        var promptContract = promptContract(nodeId);
         return workspaceGuard(workspaceRoot) + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
                 .replace("{{node_id}}", nodeId)
@@ -35,7 +39,32 @@ final class AgentPromptRenderer {
                 .replace("{{ledger_path}}", workstreamDir)
                 .replace("{{requirement}}", requirement)
                 .replace("{{context_package}}", contextPackage)
-                .replace("{{contract_review_principles}}", contractReviewPrinciples);
+                .replace("{{contract_review_principles}}", contractReviewPrinciples)
+                .replace("{{allowed_decisions}}", promptContract.allowedDecisions())
+                .replace("{{required_control_keys}}", promptContract.requiredControlKeys())
+                .replace("{{decision_example}}", promptContract.decisionExample());
+    }
+
+    private PromptContract promptContract(String nodeId) {
+        if (!ContractRegistry.hasContract(nodeId)) {
+            return new PromptContract("- (no runtime contract registered)", "- decision\n- summary", "<one allowed decision>");
+        }
+        var contract = ContractRegistry.forNode(nodeId);
+        return new PromptContract(
+                bulletList(contract.allowedDecisions()),
+                bulletList(contract.requiredKeys()),
+                contract.allowedDecisions().size() == 1
+                        ? contract.allowedDecisions().iterator().next()
+                        : "<one allowed decision>"
+        );
+    }
+
+    private String bulletList(Set<String> values) {
+        return values.stream()
+                .sorted()
+                .map(value -> "- " + value)
+                .reduce((left, right) -> left + "\n" + right)
+                .orElse("- (none)");
     }
 
     private String loadTemplate(String promptTemplate) {
@@ -193,4 +222,6 @@ final class AgentPromptRenderer {
         matcher.appendTail(result);
         return result.toString();
     }
+
+    private record PromptContract(String allowedDecisions, String requiredControlKeys, String decisionExample) {}
 }

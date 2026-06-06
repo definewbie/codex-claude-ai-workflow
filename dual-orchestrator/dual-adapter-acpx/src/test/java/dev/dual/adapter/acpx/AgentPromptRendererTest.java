@@ -118,7 +118,11 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
         assertTrue(prompt.contains("task_contract_proposal"));
         assertTrue(prompt.contains("Intent fidelity"));
-        assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED"));
+        assertTrue(prompt.contains("decision: <one allowed decision>"));
+        assertTrue(prompt.contains("- READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("- NEEDS_REVISION"));
+        assertTrue(prompt.contains("- BLOCKED"));
+        assertTrue(!prompt.contains("READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED"));
     }
 
     @Test
@@ -149,7 +153,29 @@ class AgentPromptRendererTest {
                 .render(tempDir, "ws-test", "design.codex_arch_review", "design-codex-review", List.of());
 
         assertTrue(prompt.contains("READY_FOR_ARCH_REVIEW"));
-        assertTrue(prompt.contains("decision: READY_FOR_ARCH_REVIEW|NEEDS_REVISION|BLOCKED"));
+        assertTrue(prompt.contains("- READY_FOR_ARCH_REVIEW"));
+        assertTrue(prompt.contains("- NEEDS_REVISION"));
+        assertTrue(prompt.contains("- BLOCKED"));
+        assertTrue(!prompt.contains("READY_FOR_ARCH_REVIEW|NEEDS_REVISION|BLOCKED"));
+    }
+
+    @Test
+    void acceptancePromptInjectsDecisionValuesFromRuntimeContract() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "acceptance.codex_verifier_review", "acceptance-codex-review", List.of());
+
+        assertTrue(prompt.contains("Allowed decisions:"));
+        assertTrue(prompt.contains("- ACCEPT"));
+        assertTrue(prompt.contains("- ACCEPT_WITH_NOTES"));
+        assertTrue(prompt.contains("- REJECT"));
+        assertTrue(prompt.contains("Required control keys:"));
+        assertTrue(prompt.contains("- decision"));
+        assertTrue(prompt.contains("- summary"));
+        assertTrue(!prompt.contains("ACCEPT|ACCEPT_WITH_NOTES|REJECT"));
     }
 
     @Test

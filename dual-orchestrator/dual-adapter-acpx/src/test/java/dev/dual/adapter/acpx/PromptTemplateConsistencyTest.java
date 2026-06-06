@@ -24,10 +24,10 @@ class PromptTemplateConsistencyTest {
     private static final Set<String> KNOWN_VARIABLES = Set.of(
             "workstream_id", "node_id", "prompt_template",
             "ledger_path", "requirement", "context_package",
-            "contract_review_principles"
+            "contract_review_principles", "allowed_decisions",
+            "required_control_keys", "decision_example"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
-    private static final Pattern CONTROL_DECISION_PATTERN = Pattern.compile("(?m)^decision:\\s*([A-Z_|]+)\\s*$");
     private static final Map<String, String> TEMPLATE_NODE_IDS = Map.of(
             "intake-claude-brainstorm", "intake.claude_brainstorm",
             "intake-codex-product-review", "intake.codex_product_review",
@@ -81,20 +81,18 @@ class PromptTemplateConsistencyTest {
 
     @ParameterizedTest
     @MethodSource("allTemplates")
-    void templateDecisionValuesMatchRuntimeContract(String templateName) {
+    void templatesUseInjectedDecisionContract(String templateName) {
         var content = loadTemplate(templateName);
-        var matcher = CONTROL_DECISION_PATTERN.matcher(content);
-        var declared = new java.util.LinkedHashSet<String>();
-        while (matcher.find()) {
-            declared.clear();
-            declared.addAll(List.of(matcher.group(1).split("\\|")));
-        }
-        assertFalse(declared.isEmpty(), templateName + " missing terminal decision value list");
-
-        var nodeId = TEMPLATE_NODE_IDS.get(templateName);
-        var contract = ContractRegistry.forNode(nodeId);
-        assertEquals(contract.allowedDecisions(), declared,
-                templateName + " decision values do not match " + nodeId + " runtime contract");
+        assertTrue(content.contains("{{allowed_decisions}}"),
+                templateName + " must render allowed decisions from ContractRegistry");
+        assertTrue(content.contains("{{required_control_keys}}"),
+                templateName + " must render required control keys from ContractRegistry");
+        assertTrue(content.contains("{{decision_example}}"),
+                templateName + " must render its decision example from ContractRegistry");
+        assertFalse(content.contains("|NEEDS_REVISION|"),
+                templateName + " must not hardcode pipe-delimited decision values");
+        assertFalse(content.contains("ACCEPT|ACCEPT_WITH_NOTES|REJECT"),
+                templateName + " must not hardcode acceptance decision values");
     }
 
     @ParameterizedTest

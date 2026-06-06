@@ -37,9 +37,17 @@ Write a Markdown design artifact with these sections:
 8. Rollout / Migration Notes
 9. Risks And Tradeoffs
 
+Allowed decisions:
+
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
+
 End with this control block:
 
 ```dual-control
-decision: READY_FOR_ARCH_REVIEW
+decision: {{decision_example}}
 summary: one short sentence
 ```

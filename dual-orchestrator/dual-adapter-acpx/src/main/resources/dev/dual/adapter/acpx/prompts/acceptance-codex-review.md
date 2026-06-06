@@ -51,15 +51,17 @@ missing runtime, build, typecheck, or manual evidence as `Missing Evidence` if i
 matters to acceptance. Use `Acceptance Notes` for non-blocking follow-up. Do not
 mark a blocking gap as a note.
 
-Decision must be one of:
+Allowed decisions:
 
-- ACCEPT
-- ACCEPT_WITH_NOTES
-- REJECT
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
 
 End with this control block:
 
 ```dual-control
-decision: ACCEPT|ACCEPT_WITH_NOTES|REJECT
+decision: {{decision_example}}
 summary: one short sentence
 ```

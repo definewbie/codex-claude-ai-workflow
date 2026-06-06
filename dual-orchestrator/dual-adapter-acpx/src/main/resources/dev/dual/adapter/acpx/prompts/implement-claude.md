@@ -41,9 +41,17 @@ After implementation, write a Markdown artifact with these sections:
 6. Repository Hygiene
 7. Next Verification Needed
 
+Allowed decisions:
+
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
+
 End with this control block:
 
 ```dual-control
-decision: IMPLEMENTED|BLOCKED
+decision: {{decision_example}}
 summary: one short sentence
 ```

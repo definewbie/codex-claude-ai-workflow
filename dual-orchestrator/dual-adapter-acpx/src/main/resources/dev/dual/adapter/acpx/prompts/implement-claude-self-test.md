@@ -43,9 +43,17 @@ state what was not verified and why. Do not invent test results. It is acceptabl
 to skip checks when the repository, toolchain, or task scope makes them
 unavailable, but the reason must be explicit.
 
+Allowed decisions:
+
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
+
 End with this control block:
 
 ```dual-control
-decision: SELF_TEST_COMPLETE|SELF_TEST_INCOMPLETE|BLOCKED
+decision: {{decision_example}}
 summary: one short sentence
 ```

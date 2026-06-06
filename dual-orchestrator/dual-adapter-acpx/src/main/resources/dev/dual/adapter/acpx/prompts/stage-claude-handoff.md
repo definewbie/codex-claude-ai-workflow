@@ -35,9 +35,17 @@ Write a Markdown handoff with these sections:
 6. Recommended Next Stage
 7. Suggested Next Prompt
 
+Allowed decisions:
+
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
+
 End with this control block:
 
 ```dual-control
-decision: HANDOFF_READY
+decision: {{decision_example}}
 summary: one short sentence
 ```

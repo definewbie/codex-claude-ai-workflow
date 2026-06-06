@@ -43,15 +43,17 @@ Write a concise Markdown artifact with these sections:
 6. User Acceptance Notes
 7. Suggested Human Gate Decision
 
-Decision must be one of:
+Allowed decisions:
 
-- READY_FOR_PRODUCT_REVIEW
-- NEEDS_REVISION
-- BLOCKED
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
 
 End with this control block:
 
 ```dual-control
-decision: READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED
+decision: {{decision_example}}
 summary: one short sentence
 ```

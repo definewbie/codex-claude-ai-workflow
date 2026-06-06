@@ -34,9 +34,17 @@ Write a Markdown plan with these sections:
 5. Known Risks
 6. Human Review Checklist
 
+Allowed decisions:
+
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
+
 End with this control block:
 
 ```dual-control
-decision: READY_FOR_PLAN_REVIEW
+decision: {{decision_example}}
 summary: one short sentence
 ```

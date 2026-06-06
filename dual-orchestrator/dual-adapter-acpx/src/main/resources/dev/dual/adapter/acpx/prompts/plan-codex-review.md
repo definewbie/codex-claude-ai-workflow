@@ -34,15 +34,17 @@ Write a Markdown review with these sections:
 5. Missing Dependencies
 6. Suggested Human Gate Decision
 
-Decision must be one of:
+Allowed decisions:
 
-- READY_TO_IMPLEMENT
-- NEEDS_REVISION
-- BLOCKED
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
 
 End with this control block:
 
 ```dual-control
-decision: READY_TO_IMPLEMENT|NEEDS_REVISION|BLOCKED
+decision: {{decision_example}}
 summary: one short sentence
 ```

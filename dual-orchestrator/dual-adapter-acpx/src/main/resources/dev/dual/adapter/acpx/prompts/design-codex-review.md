@@ -35,15 +35,17 @@ Write a Markdown review with these sections:
 6. Missing Evidence
 7. Recommended Next Step
 
-Decision must be one of:
+Allowed decisions:
 
-- READY_FOR_ARCH_REVIEW
-- NEEDS_REVISION
-- BLOCKED
+{{allowed_decisions}}
+
+Required control keys:
+
+{{required_control_keys}}
 
 End with this control block:
 
 ```dual-control
-decision: READY_FOR_ARCH_REVIEW|NEEDS_REVISION|BLOCKED
+decision: {{decision_example}}
 summary: one short sentence
 ```
