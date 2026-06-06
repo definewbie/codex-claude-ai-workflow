@@ -59,7 +59,7 @@ public final class ContractRegistry {
             "acceptance.codex_verifier_review",
             Set.of("decision", "summary"),
             Set.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT"),
-            Set.of("contract_gaps", "out_of_scope_files", "missing_tests")
+            Set.of("contract_gaps", "out_of_scope_files", "missing_tests", "context_gaps")
     );
     private static final NodeOutputContract STAGE_HANDOFF = new NodeOutputContract(
             "stage.claude_handoff",

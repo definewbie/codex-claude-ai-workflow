@@ -130,6 +130,39 @@ class FailureClassifyHandlerTest {
     }
 
     @Test
+    void classifyReadsContextGapsFromInputContractSidecar() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "decision": "REJECT",
+                  "summary": "Verifier cannot finish acceptance.",
+                  "failure": {
+                    "category_hint": "CONTEXT_INSUFFICIENT",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": ["Missing API usage artifact for treatment event status updates"],
+                    "reason": "Required context artifact was absent"
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of(),
+                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("REJECT_CONTEXT_INSUFFICIENT", result.outcome());
+        assertEquals("CONTEXT_INSUFFICIENT", result.result().get("category"));
+    }
+
+    @Test
     void artifactWritten() throws Exception {
         writeMinimalContract();
         writeGitEvidence("M src/A.java\n", null, null);

@@ -73,6 +73,7 @@ Before the final `dual-control` block, include this exact structured artifact en
     "contract_gaps": [],
     "out_of_scope_files": [],
     "missing_tests": [],
+    "context_gaps": [],
     "reason": ""
   }
 }

@@ -29,6 +29,7 @@ class FailureArbiterTest {
         var result = arbiter.classify(
                 List.of("missing acceptance criteria"),
                 null, null,
+                null,
                 "some summary", null,
                 3, "REJECT"
         );
@@ -49,6 +50,7 @@ class FailureArbiterTest {
         );
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "summary", contract,
                 3, "REJECT"
         );
@@ -65,6 +67,7 @@ class FailureArbiterTest {
         );
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "summary", contract,
                 3, "REJECT"
         );
@@ -81,6 +84,7 @@ class FailureArbiterTest {
         );
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "summary", contract,
                 3, "REJECT"
         );
@@ -101,6 +105,7 @@ class FailureArbiterTest {
                 null,
                 List.of("UnexpectedFile.java"),
                 null,
+                null,
                 "summary", contract,
                 3, "REJECT"
         );
@@ -119,6 +124,7 @@ class FailureArbiterTest {
         );
         var result = arbiter.classify(
                 null, null, null,
+                List.of("missing treatment event API usage doc"),
                 "The requirement is unclear and hard to follow", contract,
                 3, "REJECT"
         );
@@ -127,7 +133,7 @@ class FailureArbiterTest {
     }
 
     @Test
-    void rule4_contextInsufficient_insufficientKeyword() {
+    void summaryKeywordDoesNotClassifyContextInsufficientWithoutStructuredField() {
         var contract = minimalContract(
                 List.of(),
                 List.of("file1.java"),
@@ -135,11 +141,12 @@ class FailureArbiterTest {
         );
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "Insufficient detail in the spec", contract,
                 3, "REJECT"
         );
-        assertEquals(FailureCategory.CONTEXT_INSUFFICIENT, result.category());
-        assertEquals(4, result.matchedRule());
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(7, result.matchedRule());
     }
 
     // --- Rule 5: TOOL_LIMITATION ---
@@ -153,6 +160,7 @@ class FailureArbiterTest {
         );
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "summary", contract,
                 0, "REJECT"  // changedFileCount == 0
         );
@@ -166,6 +174,7 @@ class FailureArbiterTest {
     void rule6_reviewNoise() {
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "minor stylistic issue", null,
                 5, "REJECT"
         );
@@ -177,6 +186,7 @@ class FailureArbiterTest {
     void rejectWithoutStructuredFieldsDefaultsToImplementationBug() {
         var result = arbiter.classify(
                 null, null, null,
+                null,
                 "Acceptance remains blocked because README.md still says 16 pages while the project has 17 pages.",
                 null,
                 1,
@@ -199,6 +209,7 @@ class FailureArbiterTest {
                 null,  // no contract gaps
                 null,  // no out of scope files
                 List.of("some test is missing"),  // missingTests present -> noOptionalFields is false
+                null,
                 "doesn't pass", contract,
                 3, "REJECT"
         );
@@ -213,6 +224,7 @@ class FailureArbiterTest {
         var result = arbiter.classify(
                 List.of("gap in contract"),
                 null, null,
+                null,
                 "summary", null,
                 3, "ACCEPT_WITH_NOTES"
         );
@@ -227,6 +239,7 @@ class FailureArbiterTest {
         var result = arbiter.classify(
                 List.of("missing constraint"),
                 List.of("OutOfScope.java"),
+                null,
                 null,
                 "summary", null,
                 3, "REJECT"

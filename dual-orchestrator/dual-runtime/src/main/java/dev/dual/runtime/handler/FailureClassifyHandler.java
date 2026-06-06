@@ -58,19 +58,21 @@ public final class FailureClassifyHandler implements TaskHandler {
         String reviewSummary = extractString(instanceResult, "summary",
                 extractString(reviewMetadata, "summary", ""));
 
-        @SuppressWarnings("unchecked")
-        List<String> contractGaps = (List<String>) instanceResult.getOrDefault("contract_gaps", List.of());
-        @SuppressWarnings("unchecked")
-        List<String> outOfScopeFiles = (List<String>) instanceResult.getOrDefault("out_of_scope_files", List.of());
-        @SuppressWarnings("unchecked")
-        List<String> missingTests = (List<String>) instanceResult.getOrDefault("missing_tests", List.of());
+        List<String> contractGaps = extractStringList(instanceResult, "contract_gaps",
+                extractStringList(reviewMetadata, "contract_gaps", List.of()));
+        List<String> outOfScopeFiles = extractStringList(instanceResult, "out_of_scope_files",
+                extractStringList(reviewMetadata, "out_of_scope_files", List.of()));
+        List<String> missingTests = extractStringList(instanceResult, "missing_tests",
+                extractStringList(reviewMetadata, "missing_tests", List.of()));
+        List<String> contextGaps = extractStringList(instanceResult, "context_gaps",
+                extractStringList(reviewMetadata, "context_gaps", List.of()));
 
         // Read git evidence for changed file count
         int changedFileCount = readChangedFileCount(workstreamDir);
 
         // Classify
         var classification = arbiter.classify(
-                contractGaps, outOfScopeFiles, missingTests,
+                contractGaps, outOfScopeFiles, missingTests, contextGaps,
                 reviewSummary, taskContract, changedFileCount, reviewDecision
         );
 
@@ -130,14 +132,41 @@ public final class FailureClassifyHandler implements TaskHandler {
             if (json.hasNonNull("summary")) {
                 metadata.put("summary", json.get("summary").asText());
             }
+            if (json.has("failure") && json.get("failure").isObject()) {
+                var failure = json.get("failure");
+                copyArray(metadata, failure, "contract_gaps");
+                copyArray(metadata, failure, "out_of_scope_files");
+                copyArray(metadata, failure, "missing_tests");
+                copyArray(metadata, failure, "context_gaps");
+            }
             return metadata;
         }
         return Map.of();
     }
 
+    private void copyArray(Map<String, Object> metadata, com.fasterxml.jackson.databind.JsonNode source, String key) {
+        if (!source.has(key) || !source.get(key).isArray()) {
+            return;
+        }
+        var values = new ArrayList<String>();
+        source.get(key).forEach(value -> values.add(value.asText()));
+        metadata.put(key, values);
+    }
+
     private String extractString(Map<String, Object> map, String key, String defaultValue) {
         var value = map.get(key);
         return value == null ? defaultValue : String.valueOf(value);
+    }
+
+    private List<String> extractStringList(Map<String, Object> map, String key, List<String> defaultValue) {
+        var value = map.get(key);
+        if (!(value instanceof List<?> list)) {
+            return defaultValue;
+        }
+        return list.stream()
+                .filter(item -> item != null && !String.valueOf(item).isBlank())
+                .map(item -> String.valueOf(item).trim())
+                .toList();
     }
 
     private int readChangedFileCount(Path workstreamDir) throws IOException {

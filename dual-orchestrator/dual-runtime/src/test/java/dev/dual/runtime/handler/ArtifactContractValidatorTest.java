@@ -115,6 +115,7 @@ class ArtifactContractValidatorTest {
                     "contract_gaps": [],
                     "out_of_scope_files": [],
                     "missing_tests": [],
+                    "context_gaps": [],
                     "reason": ""
                   }
                 }
@@ -160,6 +161,7 @@ class ArtifactContractValidatorTest {
                     "contract_gaps": [],
                     "out_of_scope_files": [],
                     "missing_tests": [],
+                    "context_gaps": [],
                     "reason": ""
                   }
                 }

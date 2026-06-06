@@ -13,11 +13,6 @@ import java.util.List;
  */
 public final class FailureArbiter {
 
-    private static final List<String> CONTEXT_LACK_KEYWORDS = List.of(
-            "unclear", "insufficient", "missing context", "could not determine",
-            "not enough information", "ambiguous", "vague"
-    );
-
     public FailureArbiter() {}
 
     /**
@@ -26,6 +21,7 @@ public final class FailureArbiter {
      * @param contractGaps      optional contract_gaps from Codex review (may be null/empty)
      * @param outOfScopeFiles   optional out_of_scope_files from Codex review (may be null/empty)
      * @param missingTests      optional missing_tests from Codex review (may be null/empty)
+     * @param contextGaps       optional context_gaps from Codex review (may be null/empty)
      * @param reviewSummary     the review summary text
      * @param taskContract      the TaskContract (may be null)
      * @param changedFileCount  number of files changed (from git evidence), -1 if unknown
@@ -36,6 +32,7 @@ public final class FailureArbiter {
             List<String> contractGaps,
             List<String> outOfScopeFiles,
             List<String> missingTests,
+            List<String> contextGaps,
             String reviewSummary,
             TaskContract taskContract,
             int changedFileCount,
@@ -73,16 +70,11 @@ public final class FailureArbiter {
         }
 
         // Rule 4: CONTEXT_INSUFFICIENT
-        if (reviewSummary != null) {
-            String lower = reviewSummary.toLowerCase();
-            for (String keyword : CONTEXT_LACK_KEYWORDS) {
-                if (lower.contains(keyword)) {
-                    return build(FailureCategory.CONTEXT_INSUFFICIENT, 4,
-                            "Review indicates insufficient context: keyword '" + keyword + "' found",
-                            "Enrich context package and re-submit",
-                            List.of(keyword), reviewDecision);
-                }
-            }
+        if (contextGaps != null && !contextGaps.isEmpty()) {
+            return build(FailureCategory.CONTEXT_INSUFFICIENT, 4,
+                    "Review identified context gaps: " + String.join(", ", contextGaps),
+                    "Enrich context package and re-submit",
+                    contextGaps, reviewDecision);
         }
 
         // Rule 5: TOOL_LIMITATION
@@ -99,7 +91,8 @@ public final class FailureArbiter {
         boolean hasGaps = contractGaps != null && !contractGaps.isEmpty();
         boolean hasOOS = outOfScopeFiles != null && !outOfScopeFiles.isEmpty();
         boolean hasMissing = missingTests != null && !missingTests.isEmpty();
-        boolean noOptionalFields = !hasGaps && !hasOOS && !hasMissing;
+        boolean hasContextGaps = contextGaps != null && !contextGaps.isEmpty();
+        boolean noOptionalFields = !hasGaps && !hasOOS && !hasMissing && !hasContextGaps;
         boolean noAmbiguity = taskContract == null ||
                 (taskContract.ambiguityNotes() == null || taskContract.ambiguityNotes().isEmpty());
         if (noOptionalFields && noAmbiguity && isLikelyReviewNoise(reviewDecision, reviewSummary)) {
