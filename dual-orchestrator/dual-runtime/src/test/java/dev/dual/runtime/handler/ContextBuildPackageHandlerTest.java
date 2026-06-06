@@ -174,6 +174,31 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Token expiry"));
     }
 
+    @Test
+    void malformedHandoffJsonDoesNotBreakContextBuild() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Malformed handoff test.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var nextStageDir = wsDir.resolve("artifacts/next-stage");
+        Files.createDirectories(nextStageDir);
+        Files.writeString(nextStageDir.resolve("handoff.json"), "{not-json", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Malformed handoff test."));
+        assertFalse(markdown.contains("Completed Work"));
+        assertFalse(markdown.contains("Open Risks"));
+    }
+
     // --- Degraded path tests ---
 
     @Test

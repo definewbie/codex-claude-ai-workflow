@@ -104,9 +104,9 @@ class BuiltinHandlerTest {
                   "risk_areas": ["WeChat runtime"],
                   "ambiguity_notes": [],
                   "human_questions": [],
-                  "status": "READY",
+                  "status": "READY_FOR_REVIEW",
                   "compilation_pass": 1,
-                  "source": {"rawRequestRef": "requirement.md", "createdBy": "dual"}
+                  "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
                 }
                 """, StandardCharsets.UTF_8);
         Files.writeString(evidenceDir.resolve("changed-files.txt"), "miniprogram/src/pages/record/index.vue\n", StandardCharsets.UTF_8);

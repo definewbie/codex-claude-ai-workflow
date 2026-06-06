@@ -391,7 +391,7 @@ class ContractCompileHandlerTest {
         assertTrue(json.contains("\"included\" : [ \"miniprogram/src/pages/treatment-event/index.vue\" ]"));
         assertFalse(json.contains("README.md"), "Historical prose references must not pollute proposal-based contract");
         assertFalse(json.contains("Workstream:"), "Ledger metadata must not pollute proposal-based contract");
-        assertTrue(json.contains("\"createdBy\" : \"task_contract_proposal\""));
+        assertTrue(json.contains("\"created_by\" : \"task_contract_proposal\""));
     }
 
     @Test

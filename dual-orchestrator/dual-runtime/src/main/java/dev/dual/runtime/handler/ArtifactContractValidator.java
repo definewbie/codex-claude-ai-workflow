@@ -126,7 +126,7 @@ public final class ArtifactContractValidator {
         }
         try {
             var rawDocument = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
-            var artifact = toStructuredArtifact(expectedType, rawDocument);
+            var artifact = toStructuredArtifact(expectedType, AgentStructuredArtifactDocument.from(rawDocument));
             if (!expectedType.equals(artifact.artifactType())) {
                 return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                         "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
@@ -177,45 +177,45 @@ public final class ArtifactContractValidator {
         };
     }
 
-    private static StructuredAgentArtifact toStructuredArtifact(String expectedType, Map<String, Object> document) {
+    private static StructuredAgentArtifact toStructuredArtifact(String expectedType, AgentStructuredArtifactDocument document) {
         return switch (expectedType) {
             case "self_test_report" -> new SelfTestReportArtifact(
-                    text(document.get("artifact_type")),
-                    text(document.get("decision")),
-                    text(document.get("summary")),
-                    stringList(document.get("checks_run")),
-                    stringList(document.get("checks_skipped")),
-                    stringList(document.get("evidence")),
-                    stringList(document.get("missing_evidence")),
-                    stringList(document.get("acceptance_notes")),
-                    text(document.get("verification_summary"))
+                    document.artifactType(),
+                    document.decision(),
+                    document.summary(),
+                    document.checksRun(),
+                    document.checksSkipped(),
+                    document.evidence(),
+                    document.missingEvidence(),
+                    document.acceptanceNotes(),
+                    document.verificationSummary()
             );
             case "acceptance_review" -> new AcceptanceReviewArtifact(
-                    text(document.get("artifact_type")),
-                    text(document.get("decision")),
-                    text(document.get("summary")),
-                    booleanValue(document.get("blocking")),
-                    stringList(document.get("checks")),
-                    stringList(document.get("evidence")),
-                    stringList(document.get("missing_evidence")),
-                    stringList(document.get("must_fix")),
-                    stringList(document.get("acceptance_notes")),
-                    stringList(document.get("open_risks")),
-                    stringList(document.get("changed_files")),
-                    text(document.get("verification_summary")),
-                    AgentOutputContractDocument.FailureFields.from(objectMap(document.get("failure")))
+                    document.artifactType(),
+                    document.decision(),
+                    document.summary(),
+                    document.blocking(),
+                    document.checks(),
+                    document.evidence(),
+                    document.missingEvidence(),
+                    document.mustFix(),
+                    document.acceptanceNotes(),
+                    document.openRisks(),
+                    document.changedFiles(),
+                    document.verificationSummary(),
+                    document.failure()
             );
             case "stage_handoff" -> new StageHandoffArtifact(
-                    text(document.get("artifact_type")),
-                    text(document.get("decision")),
-                    text(document.get("summary")),
-                    stringList(document.get("completed_work")),
-                    stringList(document.get("important_decisions")),
-                    stringList(document.get("changed_files")),
-                    text(document.get("verification_state")),
-                    stringList(document.get("open_risks")),
-                    text(document.get("recommended_next_stage")),
-                    text(document.get("suggested_next_prompt"))
+                    document.artifactType(),
+                    document.decision(),
+                    document.summary(),
+                    document.completedWork(),
+                    document.importantDecisions(),
+                    document.changedFiles(),
+                    document.verificationState(),
+                    document.openRisks(),
+                    document.recommendedNextStage(),
+                    document.suggestedNextPrompt()
             );
             default -> throw new IllegalArgumentException("unsupported structured artifact type: " + expectedType);
         };
@@ -290,40 +290,6 @@ public final class ArtifactContractValidator {
                 "Verification Adequacy",
                 "Self-Test Performed"
         ));
-    }
-
-    private static String text(Object value) {
-        return value == null ? "" : String.valueOf(value).trim();
-    }
-
-    private static List<String> stringList(Object value) {
-        if (!(value instanceof List<?> items)) {
-            return List.of();
-        }
-        return items.stream()
-                .filter(item -> item != null && !String.valueOf(item).isBlank())
-                .map(item -> String.valueOf(item).trim())
-                .toList();
-    }
-
-    private static boolean booleanValue(Object value) {
-        if (value instanceof Boolean bool) {
-            return bool;
-        }
-        return Boolean.parseBoolean(text(value));
-    }
-
-    private static Map<String, Object> objectMap(Object value) {
-        if (!(value instanceof Map<?, ?> source)) {
-            return Map.of();
-        }
-        var copy = new LinkedHashMap<String, Object>();
-        for (var entry : source.entrySet()) {
-            if (entry.getKey() instanceof String key) {
-                copy.put(key, entry.getValue());
-            }
-        }
-        return copy;
     }
 
     private static NodeResult contractViolation(

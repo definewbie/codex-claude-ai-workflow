@@ -2,6 +2,8 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeResult;
 
 import java.nio.charset.StandardCharsets;
@@ -13,6 +15,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class HumanReviewGateHandler implements GateHandler {
@@ -28,6 +31,7 @@ public final class HumanReviewGateHandler implements GateHandler {
             "SELF_TEST_INCOMPLETE"
     );
     private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
@@ -84,7 +88,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("reviewPacketPath", packetRef);
         packet.put("taskContract", taskContractSummary(context));
-        packet.put("latestAgentDecision", latestAgentDecision(context));
+        packet.put("latestAgentDecision", latestAgentDecision(context).toReviewPacketMap());
         packet.put("gitEvidence", gitEvidenceSummary(context));
         packet.put("delivery", deliverySummary(context));
         packet.put("operatorGuidance", operatorGuidance(context, allowedActions));
@@ -148,12 +152,12 @@ public final class HumanReviewGateHandler implements GateHandler {
         var contract = taskContractSummary(context);
         var decision = latestAgentDecision(context);
         appendField(builder, "Objective", text(contract.get("objective")));
-        appendField(builder, "Latest Decision", text(decision.get("decision")));
-        appendField(builder, "Latest Summary", text(decision.get("summary")));
-        appendField(builder, "Blocking", text(decision.get("blocking")));
-        appendList(builder, "Must Fix", decision.get("mustFix"));
-        appendList(builder, "Missing Evidence", decision.get("missingEvidence"));
-        appendList(builder, "Open Risks", decision.get("openRisks"));
+        appendField(builder, "Latest Decision", decision.decision());
+        appendField(builder, "Latest Summary", decision.summary());
+        appendField(builder, "Blocking", Boolean.toString(decision.blocking()));
+        appendList(builder, "Must Fix", decision.mustFix());
+        appendList(builder, "Missing Evidence", decision.missingEvidence());
+        appendList(builder, "Open Risks", decision.openRisks());
         builder.append("\n");
     }
 
@@ -179,16 +183,16 @@ public final class HumanReviewGateHandler implements GateHandler {
             return;
         }
         builder.append("## Latest Agent Decision\n\n");
-        appendField(builder, "Node", text(decision.get("nodeId")));
-        appendField(builder, "Decision", text(decision.get("decision")));
-        appendField(builder, "Summary", text(decision.get("summary")));
-        appendField(builder, "Blocking", text(decision.get("blocking")));
-        appendList(builder, "Must Fix", decision.get("mustFix"));
-        appendList(builder, "Missing Evidence", decision.get("missingEvidence"));
-        appendList(builder, "Open Risks", decision.get("openRisks"));
-        appendList(builder, "Changed Files", decision.get("changedFiles"));
-        appendField(builder, "Verification", text(decision.get("verificationSummary")));
-        appendField(builder, "Contract Sidecar", text(decision.get("sidecarPath")));
+        appendField(builder, "Node", decision.nodeId());
+        appendField(builder, "Decision", decision.decision());
+        appendField(builder, "Summary", decision.summary());
+        appendField(builder, "Blocking", Boolean.toString(decision.blocking()));
+        appendList(builder, "Must Fix", decision.mustFix());
+        appendList(builder, "Missing Evidence", decision.missingEvidence());
+        appendList(builder, "Open Risks", decision.openRisks());
+        appendList(builder, "Changed Files", decision.changedFiles());
+        appendField(builder, "Verification", decision.verificationSummary());
+        appendField(builder, "Contract Sidecar", decision.sidecarPath());
         builder.append("\n");
     }
 
@@ -217,24 +221,35 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     private Map<String, Object> taskContractSummary(GateContext context) {
         var path = workstreamDir(context).resolve("artifacts/task-contract.json");
-        var json = readJson(path);
-        if (json.isEmpty()) {
+        var contract = readTaskContract(path);
+        if (contract.isEmpty()) {
             return Map.of();
         }
         var summary = new LinkedHashMap<String, Object>();
-        summary.put("objective", text(json.get("objective")));
-        summary.put("status", text(json.get("status")));
-        var scope = objectMap(json.get("scope"));
-        summary.put("includedScope", stringList(scope.get("included")));
-        summary.put("excludedScope", stringList(scope.get("excluded")));
-        summary.put("acceptanceCriteria", stringList(json.get("acceptance_criteria")));
-        summary.put("testRequirements", stringList(json.get("test_requirements")));
-        summary.put("constraints", stringList(json.get("constraints")));
+        var document = contract.get();
+        summary.put("objective", document.objective());
+        summary.put("status", text(document.status()));
+        summary.put("includedScope", document.scope() == null ? List.of() : document.scope().included());
+        summary.put("excludedScope", document.scope() == null ? List.of() : document.scope().excluded());
+        summary.put("acceptanceCriteria", document.acceptanceCriteria());
+        summary.put("testRequirements", document.testRequirements());
+        summary.put("constraints", document.constraints());
         summary.put("path", displayRef(context.workspaceRoot(), path));
         return summary;
     }
 
-    private Map<String, Object> latestAgentDecision(GateContext context) {
+    private Optional<TaskContract> readTaskContract(Path path) {
+        if (!Files.isRegularFile(path)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(objectMapper.readValue(path.toFile(), TaskContract.class));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    private AgentDecisionSummary latestAgentDecision(GateContext context) {
         for (int i = context.instance().inputRefs().size() - 1; i >= 0; i--) {
             var ref = context.instance().inputRefs().get(i);
             var sidecar = resolveInsideWorkspace(context.workspaceRoot(), ref.replaceFirst("\\.md$", ".contract.json"));
@@ -246,10 +261,10 @@ public final class HumanReviewGateHandler implements GateHandler {
         return latestRunAgentDecision(context);
     }
 
-    private Map<String, Object> latestRunAgentDecision(GateContext context) {
+    private AgentDecisionSummary latestRunAgentDecision(GateContext context) {
         var runsDir = workstreamDir(context).resolve("runs");
         if (!Files.isDirectory(runsDir)) {
-            return Map.of();
+            return AgentDecisionSummary.empty();
         }
         try (var paths = Files.walk(runsDir)) {
             var sidecars = paths
@@ -264,20 +279,20 @@ public final class HumanReviewGateHandler implements GateHandler {
                 }
             }
         } catch (Exception ignored) {
-            return Map.of();
+            return AgentDecisionSummary.empty();
         }
-        return Map.of();
+        return AgentDecisionSummary.empty();
     }
 
-    private Map<String, Object> agentDecisionFromSidecar(GateContext context, Path sidecar) {
+    private AgentDecisionSummary agentDecisionFromSidecar(GateContext context, Path sidecar) {
         if (sidecar == null || !Files.isRegularFile(sidecar)) {
-            return Map.of();
+            return AgentDecisionSummary.empty();
         }
         var document = AgentOutputContractDocument.read(sidecar, objectMapper);
         if (document.isEmpty() || !document.get().hasDecision()) {
-            return Map.of();
+            return AgentDecisionSummary.empty();
         }
-        return document.get().toReviewPacketMap(displayRef(context.workspaceRoot(), sidecar));
+        return AgentDecisionSummary.from(document.get(), displayRef(context.workspaceRoot(), sidecar));
     }
 
     private Map<String, Object> gitEvidenceSummary(GateContext context) {
@@ -311,11 +326,11 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions) {
         var decision = latestAgentDecision(context);
-        var decisionText = text(decision.get("decision"));
-        var blocking = Boolean.TRUE.equals(decision.get("blocking"));
-        var mustFix = stringList(decision.get("mustFix"));
-        var missingEvidence = stringList(decision.get("missingEvidence"));
-        var openRisks = stringList(decision.get("openRisks"));
+        var decisionText = decision.decision();
+        var blocking = decision.blocking();
+        var mustFix = decision.mustFix();
+        var missingEvidence = decision.missingEvidence();
+        var openRisks = decision.openRisks();
         var gateId = context.instance().nodeDefinitionId();
 
         var guidance = new LinkedHashMap<String, Object>();
@@ -410,31 +425,6 @@ public final class HumanReviewGateHandler implements GateHandler {
             return null;
         }
         return path;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> readJson(Path path) {
-        try {
-            if (!Files.isRegularFile(path)) {
-                return Map.of();
-            }
-            return objectMapper.readValue(path.toFile(), Map.class);
-        } catch (Exception ignored) {
-            return Map.of();
-        }
-    }
-
-    private Map<String, Object> objectMap(Object value) {
-        if (!(value instanceof Map<?, ?> source)) {
-            return Map.of();
-        }
-        var copy = new LinkedHashMap<String, Object>();
-        for (var entry : source.entrySet()) {
-            if (entry.getKey() instanceof String key) {
-                copy.put(key, entry.getValue());
-            }
-        }
-        return copy;
     }
 
     private List<String> readLines(Path path) {

@@ -1,5 +1,6 @@
 package dev.dual.core.contract;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
@@ -59,7 +60,11 @@ public record TaskContract(
     }
 
     public record Source(
+            @JsonProperty("raw_request_ref")
+            @JsonAlias("rawRequestRef")
             String rawRequestRef,
+            @JsonProperty("created_by")
+            @JsonAlias("createdBy")
             String createdBy
     ) {}
 }

@@ -2,6 +2,8 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
@@ -22,7 +24,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
     private static final int MAX_RECENT_AGENT_OUTPUTS = 8;
     private static final TokenEstimator TOKEN_ESTIMATOR = TokenEstimator.defaultEstimator();
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private static final List<String> FULL_SECTIONS = List.of(
@@ -82,7 +84,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static NodeResult executeGoverned(TaskContext context, Path workstreamDir, Path packagePath, String profileName) throws IOException {
         var budget = ContextProfiles.budgetFor(profileName);
-        var handoffJson = loadHandoffJson(workstreamDir);
+        var handoff = loadHandoff(workstreamDir);
 
         // Phase 2: Resolve section availability
         var resolved = new ArrayList<ResolvedSection>();
@@ -125,7 +127,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 continue;
             }
             var before = builder.length();
-            appendGovernedSection(builder, rs, context, workstreamDir, handoffJson, budget);
+            appendGovernedSection(builder, rs, context, workstreamDir, handoff, budget);
             rs.renderedChars = builder.length() - before;
         }
 
@@ -148,7 +150,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     }
                     continue;
                 }
-                appendGovernedSection(builder, rs, context, workstreamDir, handoffJson, budget);
+                appendGovernedSection(builder, rs, context, workstreamDir, handoff, budget);
             }
             if (tokenCount(builder.toString()) > budget.totalBudget()) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(),
@@ -241,7 +243,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static void appendGovernedSection(StringBuilder builder, ResolvedSection rs,
                                                TaskContext context, Path workstreamDir,
-                                               Map<String, Object> handoffJson,
+                                               StageHandoffDocument handoff,
                                                ContextBudget budget) throws IOException {
         builder.append("## ").append(sectionTitle(rs.req.section())).append("\n\n");
         var strategy = rs.degraded ? rs.req.degradeTo().strategy() : Degradation.FULL;
@@ -272,18 +274,18 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 } else {
                     appendIterationHistory(builder, workstreamDir);
                 }
-                appendCompletedWork(builder, handoffJson);
+                appendCompletedWork(builder, handoff);
             }
             case "human_feedback" -> {
                 appendHumanFeedbackLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 3);
-                appendOpenRisks(builder, handoffJson);
+                appendOpenRisks(builder, handoff);
             }
             case "recent_agent_outputs" -> {
                 appendRecentAgentOutputsLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 2);
             }
             case "git_evidence" -> {
                 if (strategy == Degradation.DIFF_STAT) {
-                    appendGitEvidenceDiffStat(builder, workstreamDir, handoffJson);
+                    appendGitEvidenceDiffStat(builder, workstreamDir, handoff);
                 } else {
                     appendGitEvidence(builder, workstreamDir, maxSnippetChars(context, budget));
                 }
@@ -297,46 +299,45 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "task_contract" -> {
                 var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
                 if (Files.exists(contractPath)) {
-                    var contractJson = readJsonUnchecked(contractPath);
-                    builder.append("**Objective:** ").append(text(contractJson.get("objective"))).append("\n\n");
-                    builder.append("**Status:** ").append(text(contractJson.get("status"))).append("\n\n");
-                    if (contractJson.get("scope") instanceof Map<?,?> scope) {
-                        builder.append("**Scope Included:**\n");
-                        if (scope.get("included") instanceof List<?> included) {
-                            for (var item : included) builder.append("- ").append(item).append("\n");
-                        }
-                        builder.append("\n**Scope Excluded:**\n");
-                        if (scope.get("excluded") instanceof List<?> excluded) {
-                            for (var item : excluded) builder.append("- ").append(item).append("\n");
-                        }
-                        builder.append("\n");
-                    }
-                    if (contractJson.get("acceptance_criteria") instanceof List<?> ac && !ac.isEmpty()) {
-                        builder.append("**Acceptance Criteria:**\n");
-                        for (var item : ac) builder.append("- ").append(item).append("\n");
-                        builder.append("\n");
-                    }
-                    if (contractJson.get("non_goals") instanceof List<?> ng && !ng.isEmpty()) {
-                        builder.append("**Non-Goals:**\n");
-                        for (var item : ng) builder.append("- ").append(item).append("\n");
-                        builder.append("\n");
-                    }
-                    if (contractJson.get("constraints") instanceof List<?> c && !c.isEmpty()) {
-                        builder.append("**Constraints:**\n");
-                        for (var item : c) builder.append("- ").append(item).append("\n");
-                        builder.append("\n");
-                    }
-                    if (contractJson.get("risk_areas") instanceof List<?> ra && !ra.isEmpty()) {
-                        builder.append("**Risk Areas:**\n");
-                        for (var item : ra) builder.append("- ").append(item).append("\n");
-                        builder.append("\n");
-                    }
+                    appendTaskContract(builder, contractPath);
                 } else {
                     builder.append("(task-contract.json not found)\n\n");
                 }
             }
             default -> builder.append("(unknown section)\n\n");
         }
+    }
+
+    private static void appendTaskContract(StringBuilder builder, Path contractPath) throws IOException {
+        var contract = OBJECT_MAPPER.readValue(contractPath.toFile(), TaskContract.class);
+        builder.append("**Objective:** ").append(contract.objective()).append("\n\n");
+        builder.append("**Status:** ").append(contract.status()).append("\n\n");
+        if (contract.scope() != null) {
+            builder.append("**Scope Included:**\n");
+            for (var item : contract.scope().included()) {
+                builder.append("- ").append(item).append("\n");
+            }
+            builder.append("\n**Scope Excluded:**\n");
+            for (var item : contract.scope().excluded()) {
+                builder.append("- ").append(item).append("\n");
+            }
+            builder.append("\n");
+        }
+        appendListSection(builder, "Acceptance Criteria", contract.acceptanceCriteria());
+        appendListSection(builder, "Non-Goals", contract.nonGoals());
+        appendListSection(builder, "Constraints", contract.constraints());
+        appendListSection(builder, "Risk Areas", contract.riskAreas());
+    }
+
+    private static void appendListSection(StringBuilder builder, String title, List<String> items) {
+        if (items.isEmpty()) {
+            return;
+        }
+        builder.append("**").append(title).append(":**\n");
+        for (var item : items) {
+            builder.append("- ").append(item).append("\n");
+        }
+        builder.append("\n");
     }
 
     private static void appendInputArtifactsSummary(StringBuilder builder, TaskContext context) throws IOException {
@@ -447,7 +448,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     private static void appendGitEvidenceDiffStat(StringBuilder builder, Path workstreamDir,
-                                                   Map<String, Object> handoffJson) throws IOException {
+                                                   StageHandoffDocument handoff) throws IOException {
         var evidenceDir = workstreamDir.resolve("artifacts/git-evidence");
         var changedFilesPath = evidenceDir.resolve("changed-files.txt");
 
@@ -456,8 +457,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             builder.append("```text\n");
             builder.append(snippet(changedFilesPath, 2_000));
             builder.append("\n```\n\n");
-        } else if (handoffJson.get("changedFiles") instanceof List<?> files && !files.isEmpty()) {
-            for (var file : files) {
+        } else if (handoff.hasChangedFiles()) {
+            for (var file : handoff.changedFiles()) {
                 builder.append("- ").append(file).append("\n");
             }
             builder.append("\n");
@@ -475,20 +476,20 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
-    private static void appendCompletedWork(StringBuilder builder, Map<String, Object> handoffJson) {
-        if (handoffJson.get("completedWork") instanceof List<?> items && !items.isEmpty()) {
+    private static void appendCompletedWork(StringBuilder builder, StageHandoffDocument handoff) {
+        if (handoff.hasCompletedWork()) {
             builder.append("### Completed Work\n\n");
-            for (var item : items) {
+            for (var item : handoff.completedWork()) {
                 builder.append("- ").append(item).append("\n");
             }
             builder.append("\n");
         }
     }
 
-    private static void appendOpenRisks(StringBuilder builder, Map<String, Object> handoffJson) {
-        if (handoffJson.get("openRisks") instanceof List<?> items && !items.isEmpty()) {
+    private static void appendOpenRisks(StringBuilder builder, StageHandoffDocument handoff) {
+        if (handoff.hasOpenRisks()) {
             builder.append("### Open Risks\n\n");
-            for (var item : items) {
+            for (var item : handoff.openRisks()) {
                 builder.append("- ").append(item).append("\n");
             }
             builder.append("\n");
@@ -984,9 +985,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         return value == null || value.isBlank() ? "(none)" : value;
     }
 
-    private static Map<String, Object> loadHandoffJson(Path workstreamDir) {
+    private static StageHandoffDocument loadHandoff(Path workstreamDir) {
         var path = workstreamDir.resolve("artifacts/next-stage/handoff.json");
-        if (!Files.exists(path)) return Map.of();
-        return readJsonUnchecked(path);
+        if (!Files.exists(path)) return emptyHandoff();
+        return StageHandoffDocument.read(path, OBJECT_MAPPER).orElseGet(ContextBuildPackageHandler::emptyHandoff);
+    }
+
+    private static StageHandoffDocument emptyHandoff() {
+        return new StageHandoffDocument(1, "", "", "", "", List.of(), List.of(), List.of(), "", "");
     }
 }

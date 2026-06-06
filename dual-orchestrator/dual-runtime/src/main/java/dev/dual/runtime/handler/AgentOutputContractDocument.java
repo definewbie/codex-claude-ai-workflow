@@ -62,21 +62,6 @@ record AgentOutputContractDocument(
         return !decision.isBlank();
     }
 
-    Map<String, Object> toReviewPacketMap(String sidecarPath) {
-        var summary = new LinkedHashMap<String, Object>();
-        summary.put("nodeId", nodeId);
-        summary.put("decision", decision);
-        summary.put("summary", this.summary);
-        summary.put("blocking", blocking);
-        summary.put("mustFix", mustFix);
-        summary.put("missingEvidence", missingEvidence);
-        summary.put("openRisks", openRisks);
-        summary.put("changedFiles", changedFiles);
-        summary.put("verificationSummary", verificationSummary);
-        summary.put("sidecarPath", sidecarPath);
-        return summary;
-    }
-
     record FailureFields(
             String categoryHint,
             List<String> contractGaps,
