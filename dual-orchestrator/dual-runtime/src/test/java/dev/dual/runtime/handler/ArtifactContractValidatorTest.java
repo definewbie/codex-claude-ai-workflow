@@ -87,6 +87,39 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void writesContractFailureDiagnosticWhenRuntimeContextIsPresent() throws Exception {
+        Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-test"));
+        var outputRef = writeOutput("acceptance.md", """
+                # Acceptance
+
+                ```dual-control
+                decision: ACCEPT
+                summary: Accepted without structured artifact.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+
+        var validated = validator.validate(
+                tempDir,
+                "ws-test",
+                "node-acceptance-001",
+                agentNode("acceptance.codex_verifier_review"),
+                result
+        );
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        var diagnosticRef = String.valueOf(validated.result().get("contract_failure_diagnostic_ref"));
+        assertEquals(".agent/workstreams/ws-test/artifacts/contract-failures/node-acceptance-001.json", diagnosticRef);
+        assertTrue(validated.outputRefs().contains(diagnosticRef));
+        var diagnostic = Files.readString(tempDir.resolve(diagnosticRef));
+        assertTrue(diagnostic.contains("\"artifact_type\" : \"contract_failure_diagnostic\""));
+        assertTrue(diagnostic.contains("\"category\" : \"missing_structured_artifact\""));
+        assertTrue(diagnostic.contains("\"recommended_owner\" : \"agent_or_prompt\""));
+        assertTrue(diagnostic.contains("typed <dual-artifact>"));
+        assertTrue(Files.exists(tempDir.resolve(".agent/workstreams/ws-test/artifacts/contract-failures/node-acceptance-001.md")));
+    }
+
+    @Test
     void sidecarUsesStructuredAcceptanceArtifactInsteadOfMarkdownSections() throws Exception {
         var outputRef = writeOutput("acceptance.md", """
                 # Acceptance

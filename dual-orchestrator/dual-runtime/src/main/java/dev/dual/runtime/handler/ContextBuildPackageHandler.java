@@ -117,6 +117,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         // Phase 4: Render sections with degradation
         var builder = new StringBuilder();
         appendGovernedHeader(builder, context, budget, sorted);
+        ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
 
         for (var rs : sorted) {
             if (rs.dropped || !rs.available) {
@@ -142,6 +143,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
             builder.setLength(0);
             appendGovernedHeader(builder, context, budget, sorted);
+            ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
             for (var rs : sorted) {
                 if (rs.dropped || !rs.available) {
                     if (rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER) {
@@ -622,6 +624,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.append("- Included Sections: ").append(String.join(", ", sections)).append("\n");
         builder.append("- Max Snippet Chars: ").append(maxSnippetChars).append("\n");
         builder.append("- Max Recent Agent Outputs: ").append(maxRecentAgentOutputs).append("\n\n");
+        ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
 
         if (sections.contains("requirement")) {
             builder.append("## User Requirement\n\n");

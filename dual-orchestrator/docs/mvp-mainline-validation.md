@@ -138,6 +138,12 @@ mainline closure items have first-pass implementations:
   emits a reviewable `templateProposal` without applying it automatically.
 - Handoff/context continuity: `handoff.json` and context packages preserve
   important decisions and recommended next-stage state for long-run resume.
+- Contract failure diagnostics: strict artifact failures now produce
+  `artifacts/contract-failures/<node_instance>.json` / `.md`, including
+  category, source output, recommended owner, and recovery hint.
+- Context state/evidence boundary: context packages now separate trusted
+  harness facts, human decisions, agent proposed states, and pending
+  contract/evidence gaps.
 
 Release-quality MVP still needs:
 
@@ -150,6 +156,10 @@ Release-quality MVP still needs:
      present, original repo clean. The same run verified that
      `contract-resolution` is visible in acceptance context, human review
      packets, PR body, and the final report.
+   - 2026-06-06: follow-up real `acpx` run completed with `PASS` after adding
+     contract failure diagnostics and context `State & Evidence Boundary`.
+     The healthy-path run produced no contract failure diagnostics and showed
+     the boundary section in generated context packages and downstream prompts.
 2. A short install-to-first-run path that does not reference private benchmark
    cases.
 3. Continued regression fixtures for real structured artifacts whenever a

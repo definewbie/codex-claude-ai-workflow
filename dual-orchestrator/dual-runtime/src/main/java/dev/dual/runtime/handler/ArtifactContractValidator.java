@@ -23,6 +23,16 @@ public final class ArtifactContractValidator {
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
 
     public NodeResult validate(Path workspaceRoot, NodeDefinition nodeDefinition, NodeResult result) throws Exception {
+        return validate(workspaceRoot, "", "", nodeDefinition, result);
+    }
+
+    public NodeResult validate(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeInstanceId,
+            NodeDefinition nodeDefinition,
+            NodeResult result
+    ) throws Exception {
         if (result.status() != NodeStatus.COMPLETED) {
             return result;
         }
@@ -35,13 +45,20 @@ public final class ArtifactContractValidator {
         if (Boolean.TRUE.equals(result.result().get("prepared"))) {
             return result;
         }
-        return validateAgentOutput(workspaceRoot, nodeDefinition, result);
+        return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result);
     }
 
-    private NodeResult validateAgentOutput(Path workspaceRoot, NodeDefinition nodeDefinition, NodeResult result) throws Exception {
+    private NodeResult validateAgentOutput(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeInstanceId,
+            NodeDefinition nodeDefinition,
+            NodeResult result
+    ) throws Exception {
         var root = workspaceRoot.toAbsolutePath().normalize();
         var contract = ContractRegistry.forNode(nodeDefinition.id());
         DualControlParseResult lastInvalid = null;
+        String lastSourceRef = "";
         for (int i = result.outputRefs().size() - 1; i >= 0; i--) {
             var ref = result.outputRefs().get(i);
             if (ref.startsWith("artifact://")) {
@@ -56,14 +73,15 @@ public final class ArtifactContractValidator {
             if (parsed.valid()) {
                 var structured = structuredArtifact(nodeDefinition.id(), markdown, parsed);
                 if (structured.failure() != null) {
-                    return contractViolation(nodeDefinition, result, contract, structured.failure());
+                    return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, structured.failure());
                 }
                 return withContractSidecar(root, nodeDefinition, result, contract, parsed, structured, ref, path, markdown);
             }
             lastInvalid = parsed;
+            lastSourceRef = ref;
             break;
         }
-        return contractViolation(nodeDefinition, result, contract, lastInvalid);
+        return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, lastSourceRef, lastInvalid);
     }
 
     private static NodeResult withContractSidecar(
@@ -299,11 +317,15 @@ public final class ArtifactContractValidator {
     }
 
     private static NodeResult contractViolation(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeInstanceId,
             NodeDefinition nodeDefinition,
             NodeResult result,
             NodeOutputContract contract,
+            String sourceOutputRef,
             DualControlParseResult lastInvalid
-    ) {
+    ) throws Exception {
         var reason = lastInvalid == null || lastInvalid.isMissing()
                 ? "MISSING_DUAL_CONTROL"
                 : lastInvalid.errorCode();
@@ -311,6 +333,17 @@ public final class ArtifactContractValidator {
                 ? "No readable agent output artifact found for contract validation."
                 : lastInvalid.message();
         var details = lastInvalid == null ? Map.<String, Object>of() : lastInvalid.details();
+        var diagnostic = ContractFailureDiagnosticWriter.write(
+                workspaceRoot,
+                workstreamId,
+                nodeInstanceId,
+                nodeDefinition,
+                contract,
+                sourceOutputRef,
+                reason,
+                message,
+                details
+        );
         var failed = new LinkedHashMap<String, Object>();
         failed.putAll(result.result());
         failed.put("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION");
@@ -322,11 +355,22 @@ public final class ArtifactContractValidator {
                 "message", message,
                 "details", details
         ));
+        if (diagnostic.present()) {
+            failed.put("contract_failure_diagnostic_ref", diagnostic.jsonRef());
+            failed.put("contract_failure_diagnostic_markdown_ref", diagnostic.markdownRef());
+        }
         failed.put("message", message);
+        var outputRefs = new ArrayList<>(result.outputRefs());
+        if (diagnostic.present() && !outputRefs.contains(diagnostic.jsonRef())) {
+            outputRefs.add(diagnostic.jsonRef());
+        }
+        if (diagnostic.present() && !outputRefs.contains(diagnostic.markdownRef())) {
+            outputRefs.add(diagnostic.markdownRef());
+        }
         return new NodeResult(
                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
                 NodeStatus.FAILED,
-                result.outputRefs(),
+                outputRefs,
                 failed,
                 message
         );

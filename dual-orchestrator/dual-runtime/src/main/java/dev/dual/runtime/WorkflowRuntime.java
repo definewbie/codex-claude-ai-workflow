@@ -105,7 +105,13 @@ public final class WorkflowRuntime {
                 case GATE -> throw new IllegalStateException("gate nodes are handled before routing");
             };
 
-            result = artifactContractValidator.validate(command.workspaceRoot(), nodeDefinition, result);
+            result = artifactContractValidator.validate(
+                    command.workspaceRoot(),
+                    command.workstreamId(),
+                    node.nodeInstanceId(),
+                    nodeDefinition,
+                    result
+            );
             emitDomainEvents(paths, nodeDefinition.id(), nodeDefinition.handlerType(), node.nodeInstanceId(), result);
             ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
             var next = ledger.loadCurrent(paths);

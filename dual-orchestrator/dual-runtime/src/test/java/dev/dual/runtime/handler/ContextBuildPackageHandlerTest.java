@@ -518,6 +518,55 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Yes, mandatory review was approved."));
     }
 
+    @Test
+    void contextIncludesStateEvidenceBoundaryAndContractFailures() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts/contract-failures"));
+        Files.createDirectories(wsDir.resolve("runs/run-001/outputs"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Boundary context test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-001/outputs/acceptance.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Accepted with notes.",
+                  "lifecycle_status": "ACCEPTED_WITH_NOTES",
+                  "must_fix": [],
+                  "missing_evidence": [],
+                  "open_risks": ["Manual smoke still useful"],
+                  "changed_files": ["src/example.js"],
+                  "verification_summary": "Sufficient evidence.",
+                  "evidence_state": {
+                    "blocking": false,
+                    "must_fix_count": 0,
+                    "missing_evidence_count": 0,
+                    "open_risk_count": 1
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/contract-failures/node-001.json"), """
+                {
+                  "schema_version": 1,
+                  "artifact_type": "contract_failure_diagnostic",
+                  "node_id": "implement.claude_self_test_report",
+                  "category": "missing_structured_artifact",
+                  "reason": "STRUCTURED_ARTIFACT_MISSING",
+                  "recovery_hint": "Ask the agent to emit typed artifact."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("architecture_review", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("State & Evidence Boundary"));
+        assertTrue(markdown.contains("Trusted Harness Facts"));
+        assertTrue(markdown.contains("Agent Proposed States"));
+        assertTrue(markdown.contains("acceptance.codex_verifier_review: decision=ACCEPT_WITH_NOTES"));
+        assertTrue(markdown.contains("Pending Contract/Evidence Gaps"));
+        assertTrue(markdown.contains("implement.claude_self_test_report: missing_structured_artifact / STRUCTURED_ARTIFACT_MISSING"));
+        assertTrue(markdown.contains("Ask the agent to emit typed artifact."));
+    }
+
     // --- Helper ---
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
