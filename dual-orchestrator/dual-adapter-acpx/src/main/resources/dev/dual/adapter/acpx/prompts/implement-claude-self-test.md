@@ -43,6 +43,23 @@ state what was not verified and why. Do not invent test results. It is acceptabl
 to skip checks when the repository, toolchain, or task scope makes them
 unavailable, but the reason must be explicit.
 
+Before the final `dual-control` block, include this exact structured artifact envelope. Fill it with the checks and evidence you actually used. Use empty arrays when a list has no items. Keep `decision` consistent with the final control block.
+
+<dual-artifact type="self_test_report" version="1">
+{
+  "artifact_type": "self_test_report",
+  "schema_version": 1,
+  "decision": "{{decision_example}}",
+  "summary": "one short sentence",
+  "checks_run": ["command, manual check, inspection, or reasoning-based validation"],
+  "checks_skipped": [],
+  "evidence": ["specific evidence from the check"],
+  "missing_evidence": [],
+  "acceptance_notes": [],
+  "verification_summary": "short self-test adequacy summary"
+}
+</dual-artifact>
+
 Allowed decisions:
 
 {{allowed_decisions}}

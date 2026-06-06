@@ -51,6 +51,33 @@ missing runtime, build, typecheck, or manual evidence as `Missing Evidence` if i
 matters to acceptance. Use `Acceptance Notes` for non-blocking follow-up. Do not
 mark a blocking gap as a note.
 
+Before the final `dual-control` block, include this exact structured artifact envelope. Fill it with facts from your review. Use empty arrays when a list has no items. Keep `decision` consistent with the final control block.
+
+<dual-artifact type="acceptance_review" version="1">
+{
+  "artifact_type": "acceptance_review",
+  "schema_version": 1,
+  "decision": "{{decision_example}}",
+  "summary": "one short sentence",
+  "blocking": false,
+  "checks": ["review or inspection performed"],
+  "evidence": ["specific evidence used for acceptance"],
+  "missing_evidence": [],
+  "must_fix": [],
+  "acceptance_notes": [],
+  "open_risks": [],
+  "changed_files": [],
+  "verification_summary": "short verification adequacy summary",
+  "failure": {
+    "category_hint": "",
+    "contract_gaps": [],
+    "out_of_scope_files": [],
+    "missing_tests": [],
+    "reason": ""
+  }
+}
+</dual-artifact>
+
 Allowed decisions:
 
 {{allowed_decisions}}

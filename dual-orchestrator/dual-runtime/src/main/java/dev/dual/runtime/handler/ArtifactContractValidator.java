@@ -1,6 +1,7 @@
 package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
@@ -16,7 +17,10 @@ import java.util.Map;
 
 public final class ArtifactContractValidator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
     private final DualControlBlockParser parser = new DualControlBlockParser();
+    private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
 
     public NodeResult validate(Path workspaceRoot, NodeDefinition nodeDefinition, NodeResult result) throws Exception {
         if (result.status() != NodeStatus.COMPLETED) {
@@ -50,7 +54,11 @@ public final class ArtifactContractValidator {
             var markdown = Files.readString(path, StandardCharsets.UTF_8);
             var parsed = parser.parse(markdown, contract);
             if (parsed.valid()) {
-                return withContractSidecar(root, nodeDefinition, result, contract, parsed, ref, path, markdown);
+                var structured = structuredArtifact(nodeDefinition.id(), markdown, parsed);
+                if (structured.failure() != null) {
+                    return contractViolation(nodeDefinition, result, contract, structured.failure());
+                }
+                return withContractSidecar(root, nodeDefinition, result, contract, parsed, structured, ref, path, markdown);
             }
             lastInvalid = parsed;
             break;
@@ -64,6 +72,7 @@ public final class ArtifactContractValidator {
             NodeResult result,
             NodeOutputContract contract,
             DualControlParseResult parsed,
+            StructuredArtifactResult structured,
             String outputRef,
             Path outputPath,
             String markdown
@@ -83,6 +92,111 @@ public final class ArtifactContractValidator {
         document.put("generated_at", Instant.now().toString());
         document.put("control", block.values());
         document.put("control_source", parsed.details().getOrDefault("control_source", Map.of()));
+        addEvidenceFields(document, structured, markdown);
+        Files.writeString(
+                sidecarPath,
+                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
+                StandardCharsets.UTF_8
+        );
+
+        var outputRefs = new ArrayList<>(result.outputRefs());
+        if (!outputRefs.contains(sidecarRef)) {
+            outputRefs.add(sidecarRef);
+        }
+        var augmented = new LinkedHashMap<String, Object>();
+        augmented.putAll(result.result());
+        augmented.put("decision", block.required("decision"));
+        augmented.put("summary", block.required("summary"));
+        augmented.put("contract_sidecar_ref", sidecarRef);
+        return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
+    }
+
+    private StructuredArtifactResult structuredArtifact(String nodeId, String markdown, DualControlParseResult parsed) {
+        var expectedType = requiredArtifactType(nodeId);
+        if (expectedType == null) {
+            return StructuredArtifactResult.none();
+        }
+        var envelope = artifactParser.latest(markdown, expectedType);
+        if (envelope.isEmpty()) {
+            return StructuredArtifactResult.failed(DualControlParseResult.invalid(
+                    "STRUCTURED_ARTIFACT_MISSING",
+                    "Required structured artifact missing: " + expectedType,
+                    Map.of("required_artifact_type", expectedType)
+            ));
+        }
+        try {
+            var document = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
+            var artifactType = text(document.get("artifact_type"));
+            if (!expectedType.equals(artifactType)) {
+                return StructuredArtifactResult.failed(DualControlParseResult.invalid(
+                        "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
+                        "structured artifact has wrong artifact_type: " + artifactType,
+                        Map.of("required_artifact_type", expectedType, "actual_artifact_type", artifactType)
+                ));
+            }
+            var decision = text(document.get("decision"));
+            var controlDecision = parsed.block().required("decision");
+            if (decision.isBlank()) {
+                return StructuredArtifactResult.failed(DualControlParseResult.invalid(
+                        "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
+                        "structured artifact missing required field: decision",
+                        Map.of("required_artifact_type", expectedType)
+                ));
+            }
+            if (!controlDecision.equals(decision)) {
+                return StructuredArtifactResult.failed(DualControlParseResult.invalid(
+                        "CONTROL_ARTIFACT_DECISION_MISMATCH",
+                        "CONTROL_ARTIFACT_DECISION_MISMATCH: dual-control decision " + controlDecision
+                                + " differs from " + expectedType + " decision " + decision,
+                        Map.of("control_decision", controlDecision, "artifact_decision", decision)
+                ));
+            }
+            if (text(document.get("summary")).isBlank()) {
+                return StructuredArtifactResult.failed(DualControlParseResult.invalid(
+                        "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
+                        "structured artifact missing required field: summary",
+                        Map.of("required_artifact_type", expectedType)
+                ));
+            }
+            return StructuredArtifactResult.valid(expectedType, document);
+        } catch (Exception e) {
+            return StructuredArtifactResult.failed(DualControlParseResult.invalid(
+                    "STRUCTURED_ARTIFACT_PARSE_FAILED",
+                    "structured artifact JSON could not be parsed: " + e.getMessage(),
+                    Map.of("required_artifact_type", expectedType)
+            ));
+        }
+    }
+
+    private static String requiredArtifactType(String nodeId) {
+        return switch (nodeId) {
+            case "implement.claude_self_test_report" -> "self_test_report";
+            case "acceptance.codex_verifier_review" -> "acceptance_review";
+            case "stage.claude_handoff" -> "stage_handoff";
+            default -> null;
+        };
+    }
+
+    private static void addEvidenceFields(
+            Map<String, Object> document,
+            StructuredArtifactResult structured,
+            String markdown
+    ) {
+        if (structured.document() != null) {
+            document.put("source_artifact_type", structured.type());
+            putStructured(document, structured.document(), "must_fix");
+            putStructured(document, structured.document(), "open_risks");
+            putStructured(document, structured.document(), "changed_files");
+            putStructured(document, structured.document(), "checks_run", "checks_run", "checks");
+            putStructured(document, structured.document(), "checks_skipped");
+            putStructured(document, structured.document(), "evidence");
+            putStructured(document, structured.document(), "missing_evidence");
+            putStructured(document, structured.document(), "acceptance_notes");
+            putStructured(document, structured.document(), "verification_summary");
+            putStructured(document, structured.document(), "blocking");
+            putStructured(document, structured.document(), "failure");
+            return;
+        }
         document.put("must_fix", MarkdownArtifactFields.listSection(
                 markdown,
                 "Must Fix",
@@ -142,22 +256,24 @@ public final class ArtifactContractValidator {
                 "Verification Adequacy",
                 "Self-Test Performed"
         ));
-        Files.writeString(
-                sidecarPath,
-                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
-                StandardCharsets.UTF_8
-        );
+    }
 
-        var outputRefs = new ArrayList<>(result.outputRefs());
-        if (!outputRefs.contains(sidecarRef)) {
-            outputRefs.add(sidecarRef);
+    private static void putStructured(Map<String, Object> target, Map<String, Object> source, String key) {
+        putStructured(target, source, key, key);
+    }
+
+    private static void putStructured(Map<String, Object> target, Map<String, Object> source, String targetKey, String... sourceKeys) {
+        for (var sourceKey : sourceKeys) {
+            if (source.containsKey(sourceKey)) {
+                target.put(targetKey, source.get(sourceKey));
+                return;
+            }
         }
-        var augmented = new LinkedHashMap<String, Object>();
-        augmented.putAll(result.result());
-        augmented.put("decision", block.required("decision"));
-        augmented.put("summary", block.required("summary"));
-        augmented.put("contract_sidecar_ref", sidecarRef);
-        return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
+        target.put(targetKey, List.of());
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
     }
 
     private static NodeResult contractViolation(
@@ -192,5 +308,19 @@ public final class ArtifactContractValidator {
                 failed,
                 message
         );
+    }
+
+    private record StructuredArtifactResult(String type, Map<String, Object> document, DualControlParseResult failure) {
+        static StructuredArtifactResult none() {
+            return new StructuredArtifactResult("", null, null);
+        }
+
+        static StructuredArtifactResult valid(String type, Map<String, Object> document) {
+            return new StructuredArtifactResult(type, document, null);
+        }
+
+        static StructuredArtifactResult failed(DualControlParseResult failure) {
+            return new StructuredArtifactResult("", null, failure);
+        }
     }
 }

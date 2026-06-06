@@ -65,27 +65,60 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void sidecarIncludesPipelineFieldsFromKnownMarkdownSections() throws Exception {
+    void failsWhenRequiredStructuredArtifactIsMissing() throws Exception {
         var outputRef = writeOutput("acceptance.md", """
                 # Acceptance
 
                 ## Gaps / Must Fix
 
-                - Add missing empty-state assertion.
-                - Confirm no out-of-scope files changed.
+                - Markdown-only machine facts must not be trusted.
 
-                ## Changed Files
+                ```dual-control
+                decision: ACCEPT_WITH_NOTES
+                summary: Accepted with verification notes.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
 
-                - src/main/App.java
-                - README.md
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", validated.outcome());
+        assertTrue(String.valueOf(validated.result().get("message")).contains("acceptance_review"));
+    }
 
-                ## Verification Adequacy
+    @Test
+    void sidecarUsesStructuredAcceptanceArtifactInsteadOfMarkdownSections() throws Exception {
+        var outputRef = writeOutput("acceptance.md", """
+                # Acceptance
 
-                Developer self-test is acceptable, but no regression smoke was run.
+                ## Gaps / Must Fix
 
-                ## Residual Risks
+                - Markdown-only must fix must be ignored.
 
-                - Manual QA still needed for mobile layout.
+                <dual-artifact type="acceptance_review" version="1">
+                {
+                  "artifact_type": "acceptance_review",
+                  "schema_version": 1,
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Accepted with structured verification notes.",
+                  "blocking": false,
+                  "checks": ["inspected git diff"],
+                  "evidence": ["JSON evidence item"],
+                  "missing_evidence": ["JSON missing evidence"],
+                  "must_fix": ["JSON must fix item"],
+                  "acceptance_notes": ["JSON acceptance note"],
+                  "open_risks": ["JSON open risk"],
+                  "changed_files": ["src/main/App.java"],
+                  "verification_summary": "JSON verification summary",
+                  "failure": {
+                    "category_hint": "",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "reason": ""
+                  }
+                }
+                </dual-artifact>
 
                 ```dual-control
                 decision: ACCEPT_WITH_NOTES
@@ -97,12 +130,52 @@ class ArtifactContractValidatorTest {
 
         var sidecar = Files.readString(tempDir.resolve("acceptance.contract.json"));
         assertTrue(sidecar.contains("\"must_fix\""));
-        assertTrue(sidecar.contains("Add missing empty-state assertion."));
+        assertTrue(sidecar.contains("JSON must fix item"));
+        assertTrue(!sidecar.contains("Markdown-only must fix must be ignored."));
         assertTrue(sidecar.contains("\"changed_files\""));
         assertTrue(sidecar.contains("src/main/App.java"));
-        assertTrue(sidecar.contains("\"verification_summary\" : \"Developer self-test is acceptable, but no regression smoke was run.\""));
+        assertTrue(sidecar.contains("\"verification_summary\" : \"JSON verification summary\""));
         assertTrue(sidecar.contains("\"open_risks\""));
-        assertTrue(sidecar.contains("Manual QA still needed for mobile layout."));
+        assertTrue(sidecar.contains("JSON open risk"));
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"acceptance_review\""));
+    }
+
+    @Test
+    void failsWhenControlDecisionDiffersFromStructuredArtifactDecision() throws Exception {
+        var outputRef = writeOutput("acceptance.md", """
+                <dual-artifact type="acceptance_review" version="1">
+                {
+                  "artifact_type": "acceptance_review",
+                  "schema_version": 1,
+                  "decision": "ACCEPT",
+                  "summary": "Accepted.",
+                  "blocking": false,
+                  "checks": [],
+                  "evidence": [],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "failure": {
+                    "category_hint": "",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "reason": ""
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: REJECT
+                summary: Rejected.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", validated.outcome());
+        assertTrue(String.valueOf(validated.result().get("message")).contains("CONTROL_ARTIFACT_DECISION_MISMATCH"));
     }
 
     @Test
@@ -112,24 +185,22 @@ class ArtifactContractValidatorTest {
 
                 ## Checks Run
 
-                - npm test
-                - inspected changed route manually
+                - Markdown checks must be ignored.
 
-                ## Checks Skipped
-
-                - device smoke: simulator unavailable
-
-                ## Evidence
-
-                - Test output showed 24 passing tests.
-
-                ## Missing Evidence
-
-                - No physical device validation.
-
-                ## Acceptance Notes
-
-                - Runtime visual check should happen before release.
+                <dual-artifact type="self_test_report" version="1">
+                {
+                  "artifact_type": "self_test_report",
+                  "schema_version": 1,
+                  "decision": "SELF_TEST_COMPLETE",
+                  "summary": "Self-test completed with one runtime gap.",
+                  "checks_run": ["npm test", "inspected changed route manually"],
+                  "checks_skipped": ["device smoke: simulator unavailable"],
+                  "evidence": ["Test output showed 24 passing tests."],
+                  "missing_evidence": ["No physical device validation."],
+                  "acceptance_notes": ["Runtime visual check should happen before release."],
+                  "verification_summary": "Structured self-test summary"
+                }
+                </dual-artifact>
 
                 ```dual-control
                 decision: SELF_TEST_COMPLETE
@@ -142,6 +213,7 @@ class ArtifactContractValidatorTest {
         var sidecar = Files.readString(tempDir.resolve("self-test.contract.json"));
         assertTrue(sidecar.contains("\"checks_run\""));
         assertTrue(sidecar.contains("npm test"));
+        assertTrue(!sidecar.contains("Markdown checks must be ignored."));
         assertTrue(sidecar.contains("\"checks_skipped\""));
         assertTrue(sidecar.contains("simulator unavailable"));
         assertTrue(sidecar.contains("\"evidence\""));
@@ -150,6 +222,7 @@ class ArtifactContractValidatorTest {
         assertTrue(sidecar.contains("No physical device validation."));
         assertTrue(sidecar.contains("\"acceptance_notes\""));
         assertTrue(sidecar.contains("Runtime visual check should happen before release."));
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"self_test_report\""));
     }
 
     @Test

@@ -35,6 +35,24 @@ Write a Markdown handoff with these sections:
 6. Recommended Next Stage
 7. Suggested Next Prompt
 
+Before the final `dual-control` block, include this exact structured artifact envelope. Fill it with enough state for a fresh session to continue safely. Use empty arrays when a list has no items. Keep `decision` consistent with the final control block.
+
+<dual-artifact type="stage_handoff" version="1">
+{
+  "artifact_type": "stage_handoff",
+  "schema_version": 1,
+  "decision": "{{decision_example}}",
+  "summary": "one short sentence",
+  "completed_work": [],
+  "important_decisions": [],
+  "changed_files": [],
+  "verification_state": "short verification state",
+  "open_risks": [],
+  "recommended_next_stage": "short next-stage recommendation",
+  "suggested_next_prompt": "prompt text for the next stage"
+}
+</dual-artifact>
+
 Allowed decisions:
 
 {{allowed_decisions}}
