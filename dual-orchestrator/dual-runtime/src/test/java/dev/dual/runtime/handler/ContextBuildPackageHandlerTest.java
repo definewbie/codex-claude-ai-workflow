@@ -161,7 +161,12 @@ class ContextBuildPackageHandlerTest {
         var nextStageDir = wsDir.resolve("artifacts/next-stage");
         Files.createDirectories(nextStageDir);
         Files.writeString(nextStageDir.resolve("handoff.json"), """
-                {"completedWork": ["Implemented auth module", "Wrote tests"], "openRisks": ["Token expiry", "Rate limit"]}
+                {
+                  "completedWork": ["Implemented auth module", "Wrote tests"],
+                  "importantDecisions": ["Use existing session model"],
+                  "openRisks": ["Token expiry", "Rate limit"],
+                  "recommendedNextStage": "Continue with implementation verification."
+                }
                 """, StandardCharsets.UTF_8);
 
         var result = handler.execute(ctx("implementation", List.of()));
@@ -170,8 +175,12 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Completed Work"));
         assertTrue(markdown.contains("Implemented auth module"));
+        assertTrue(markdown.contains("Important Decisions"));
+        assertTrue(markdown.contains("Use existing session model"));
         assertTrue(markdown.contains("Open Risks"));
         assertTrue(markdown.contains("Token expiry"));
+        assertTrue(markdown.contains("Recommended Next Stage"));
+        assertTrue(markdown.contains("Continue with implementation verification."));
     }
 
     @Test

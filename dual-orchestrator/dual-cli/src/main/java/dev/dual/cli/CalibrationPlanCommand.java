@@ -49,11 +49,13 @@ public final class CalibrationPlanCommand implements Callable<Integer> {
         var targetArea = targetArea(candidate.path("proposedUpdateType").asText(""));
         var action = recommendedAction(candidate.path("proposedUpdateType").asText(""));
         var evidenceRefs = evidenceRefs(candidate.path("evidenceRefs"));
+        var templateProposal = templateProposal(candidate, targetArea, action, evidenceRefs);
 
         mapper.writerWithDefaultPrettyPrinter().writeValue(planJsonPath.toFile(),
-                planJson(candidate, normalizedCandidateId, targetArea, action, evidenceRefs, candidatePath));
+                planJson(candidate, normalizedCandidateId, targetArea, action, evidenceRefs, candidatePath, templateProposal));
         Files.writeString(planMdPath,
-                planMarkdown(candidate, normalizedCandidateId, targetArea, action, evidenceRefs, candidatePath, planJsonPath),
+                planMarkdown(candidate, normalizedCandidateId, targetArea, action, evidenceRefs,
+                        candidatePath, planJsonPath, templateProposal),
                 StandardCharsets.UTF_8);
 
         System.out.println("Calibration apply plan created");
@@ -71,7 +73,8 @@ public final class CalibrationPlanCommand implements Callable<Integer> {
             String targetArea,
             String action,
             List<String> evidenceRefs,
-            Path candidatePath
+            Path candidatePath,
+            ObjectNode templateProposal
     ) {
         var plan = mapper.createObjectNode();
         plan.put("schemaVersion", 1);
@@ -89,6 +92,7 @@ public final class CalibrationPlanCommand implements Callable<Integer> {
         plan.put("createdAt", Instant.now().toString());
         var refs = plan.putArray("evidenceRefs");
         evidenceRefs.forEach(refs::add);
+        plan.set("templateProposal", templateProposal);
         return plan;
     }
 
@@ -99,7 +103,8 @@ public final class CalibrationPlanCommand implements Callable<Integer> {
             String action,
             List<String> evidenceRefs,
             Path candidatePath,
-            Path planJsonPath
+            Path planJsonPath,
+            ObjectNode templateProposal
     ) {
         var lines = new ArrayList<String>();
         lines.add("# Calibration Apply Plan");
@@ -126,6 +131,24 @@ public final class CalibrationPlanCommand implements Callable<Integer> {
         lines.add("");
         lines.add(nonBlank(candidate.path("suggestedAction").asText(""), "N/A"));
         lines.add("");
+        lines.add("## Template Proposal");
+        lines.add("");
+        lines.add("- Target Area: " + templateProposal.path("targetArea").asText(""));
+        lines.add("- Proposal Type: " + templateProposal.path("proposalType").asText(""));
+        lines.add("- Status: " + templateProposal.path("status").asText(""));
+        lines.add("");
+        lines.add("### Proposed Change");
+        lines.add("");
+        lines.add(templateProposal.path("proposedChange").asText(""));
+        lines.add("");
+        lines.add("### Checklist Items");
+        lines.add("");
+        appendArrayLines(lines, templateProposal.path("checklistItems"));
+        lines.add("");
+        lines.add("### Regression Suggestion");
+        lines.add("");
+        lines.add(templateProposal.path("regressionSuggestion").asText(""));
+        lines.add("");
         lines.add("## Evidence Refs");
         lines.add("");
         if (evidenceRefs.isEmpty()) {
@@ -140,6 +163,82 @@ public final class CalibrationPlanCommand implements Callable<Integer> {
         lines.add("Review this plan first, then apply the smallest durable change only if the failure pattern is worth keeping.");
         lines.add("");
         return String.join("\n", lines);
+    }
+
+    private ObjectNode templateProposal(
+            JsonNode candidate,
+            String targetArea,
+            String action,
+            List<String> evidenceRefs
+    ) {
+        var proposal = mapper.createObjectNode();
+        var updateType = candidate.path("proposedUpdateType").asText("");
+        proposal.put("status", "REVIEW_REQUIRED");
+        proposal.put("targetArea", targetArea);
+        proposal.put("proposalType", updateType.isBlank() ? "HUMAN_TRIAGE" : updateType);
+        proposal.put("sourceFailureCategory", candidate.path("failureCategory").asText(""));
+        proposal.put("proposedChange", proposedTemplateChange(candidate, action));
+        proposal.put("regressionSuggestion", regressionSuggestion(updateType, evidenceRefs));
+        var checklist = proposal.putArray("checklistItems");
+        checklistItems(updateType, candidate).forEach(checklist::add);
+        return proposal;
+    }
+
+    private String proposedTemplateChange(JsonNode candidate, String action) {
+        var reasoning = nonBlank(candidate.path("reasoning").asText(""), "No reasoning supplied.");
+        var suggestedAction = nonBlank(candidate.path("suggestedAction").asText(""), action);
+        return "Turn this accepted learning into a principle-level template/checklist update. "
+                + "Reasoning: " + reasoning + " Suggested action: " + suggestedAction;
+    }
+
+    private List<String> checklistItems(String updateType, JsonNode candidate) {
+        var category = candidate.path("failureCategory").asText("");
+        return switch (updateType) {
+            case "CONTRACT_TEMPLATE" -> List.of(
+                    "Add one reusable contract principle for " + nonBlank(category, "the observed failure category"),
+                    "Keep the template domain-neutral; do not copy private project details",
+                    "Add or update a contract/artifact regression fixture before promoting"
+            );
+            case "CONTEXT_RULE" -> List.of(
+                    "Identify the smallest context section/profile that would have supplied the missing evidence",
+                    "Prefer profile or section selection changes over broad context expansion",
+                    "Add a context package regression proving the evidence is available"
+            );
+            case "REGRESSION_TEST" -> List.of(
+                    "Create a focused regression sample that reproduces the failure shape",
+                    "Keep the sample public or sanitize private details",
+                    "Verify the regression fails before the fix and passes after"
+            );
+            default -> List.of(
+                    "Decide whether the pattern is repeated or high-cost enough to keep",
+                    "Avoid promoting one-off tool/runtime noise",
+                    "Record the human decision before changing templates"
+            );
+        };
+    }
+
+    private String regressionSuggestion(String updateType, List<String> evidenceRefs) {
+        var evidence = evidenceRefs.isEmpty() ? "the source candidate evidence" : String.join(", ", evidenceRefs);
+        return switch (updateType) {
+            case "CONTRACT_TEMPLATE" ->
+                    "Add a contract compiler or artifact fixture regression using " + evidence + " as the source pattern.";
+            case "CONTEXT_RULE" ->
+                    "Add a context package regression showing the missing evidence appears in the target profile.";
+            case "REGRESSION_TEST" ->
+                    "Add this as a real-case benchmark or focused fixture before changing orchestration behavior.";
+            default ->
+                    "No automatic regression target. Keep this as a human-reviewed note unless the pattern repeats.";
+        };
+    }
+
+    private void appendArrayLines(List<String> lines, JsonNode node) {
+        if (node == null || !node.isArray() || node.isEmpty()) {
+            lines.add("- N/A");
+            return;
+        }
+        for (var item : node) {
+            lines.add("- " + item.asText(""));
+        }
     }
 
     private List<String> evidenceRefs(JsonNode node) {

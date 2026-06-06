@@ -18,6 +18,9 @@ final class StageHandoffMarkdownParser {
     private static final Set<String> CHANGED_FILES_HEADINGS = Set.of(
             "changed files", "changed file", "变更文件", "变更的文件", "修改文件", "改动文件"
     );
+    private static final Set<String> IMPORTANT_DECISIONS_HEADINGS = Set.of(
+            "important decisions", "key decisions", "重要决策", "关键决策"
+    );
     private static final Set<String> OPEN_RISKS_HEADINGS = Set.of(
             "open risks", "residual risks", "开放风险", "残余风险", "剩余风险", "风险点"
     );
@@ -26,6 +29,9 @@ final class StageHandoffMarkdownParser {
     );
     private static final Set<String> SUGGESTED_PROMPT_HEADINGS = Set.of(
             "suggested next prompt", "建议的下一步提示", "下一步提示"
+    );
+    private static final Set<String> RECOMMENDED_NEXT_STAGE_HEADINGS = Set.of(
+            "recommended next stage", "next stage", "推荐下一阶段", "建议下一阶段", "下一阶段"
     );
 
     private final String markdown;
@@ -48,6 +54,10 @@ final class StageHandoffMarkdownParser {
         return extractListSection(CHANGED_FILES_HEADINGS);
     }
 
+    List<String> importantDecisions() {
+        return extractListSection(IMPORTANT_DECISIONS_HEADINGS);
+    }
+
     List<String> openRisks() {
         return extractListSection(OPEN_RISKS_HEADINGS);
     }
@@ -66,6 +76,10 @@ final class StageHandoffMarkdownParser {
             builder.append(rawLine).append("\n");
         }
         return builder.toString().strip();
+    }
+
+    String recommendedNextStage() {
+        return sectionContent(RECOMMENDED_NEXT_STAGE_HEADINGS).strip();
     }
 
     private List<String> extractListSection(Set<String> headings) {

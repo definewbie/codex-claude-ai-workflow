@@ -87,10 +87,16 @@ class CalibrationCommandTest {
         assertTrue(json.contains("\"candidateStatus\" : \"ACCEPTED\""));
         assertTrue(json.contains("\"proposedTargetArea\" : \"Task contract template or contract compiler checklist\""));
         assertTrue(json.contains("\"status\" : \"PROPOSED\""));
+        assertTrue(json.contains("\"templateProposal\""));
+        assertTrue(json.contains("\"proposalType\" : \"CONTRACT_TEMPLATE\""));
+        assertTrue(json.contains("\"status\" : \"REVIEW_REQUIRED\""));
 
         var markdown = Files.readString(planMd, StandardCharsets.UTF_8);
         assertTrue(markdown.contains("# Calibration Apply Plan"));
         assertTrue(markdown.contains("## Recommended Human Action"));
+        assertTrue(markdown.contains("## Template Proposal"));
+        assertTrue(markdown.contains("### Checklist Items"));
+        assertTrue(markdown.contains("Add one reusable contract principle"));
         assertTrue(markdown.contains("## Not Applied Automatically"));
         assertTrue(markdown.contains("This command does not modify prompts"));
 

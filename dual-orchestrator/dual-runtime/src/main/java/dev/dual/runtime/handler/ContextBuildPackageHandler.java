@@ -275,10 +275,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     appendIterationHistory(builder, workstreamDir);
                 }
                 appendCompletedWork(builder, handoff);
+                appendImportantDecisions(builder, handoff);
             }
             case "human_feedback" -> {
                 appendHumanFeedbackLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 3);
                 appendOpenRisks(builder, handoff);
+                appendRecommendedNextStage(builder, handoff);
             }
             case "recent_agent_outputs" -> {
                 appendRecentAgentOutputsLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 2);
@@ -486,6 +488,16 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
+    private static void appendImportantDecisions(StringBuilder builder, StageHandoffDocument handoff) {
+        if (handoff.hasImportantDecisions()) {
+            builder.append("### Important Decisions\n\n");
+            for (var item : handoff.importantDecisions()) {
+                builder.append("- ").append(item).append("\n");
+            }
+            builder.append("\n");
+        }
+    }
+
     private static void appendOpenRisks(StringBuilder builder, StageHandoffDocument handoff) {
         if (handoff.hasOpenRisks()) {
             builder.append("### Open Risks\n\n");
@@ -493,6 +505,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 builder.append("- ").append(item).append("\n");
             }
             builder.append("\n");
+        }
+    }
+
+    private static void appendRecommendedNextStage(StringBuilder builder, StageHandoffDocument handoff) {
+        if (handoff.hasRecommendedNextStage()) {
+            builder.append("### Recommended Next Stage\n\n");
+            builder.append(handoff.recommendedNextStage()).append("\n\n");
         }
     }
 
@@ -992,6 +1011,6 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     private static StageHandoffDocument emptyHandoff() {
-        return new StageHandoffDocument(1, "", "", "", "", List.of(), List.of(), List.of(), "", "");
+        return new StageHandoffDocument(1, "", "", "", "", List.of(), List.of(), List.of(), List.of(), "", "", "", "");
     }
 }

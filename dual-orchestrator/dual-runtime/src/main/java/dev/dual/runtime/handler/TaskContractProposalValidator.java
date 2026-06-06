@@ -3,6 +3,7 @@ package dev.dual.runtime.handler;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -30,12 +31,19 @@ final class TaskContractProposalValidator {
                     validateFileRef(ref, workspaceRoot, errors);
                 }
             }
+            validateScopeOverlap(proposal.scope(), errors);
         }
         validateList("acceptance_criteria", proposal.acceptanceCriteria(), true, errors);
+        if (proposal.acceptanceCriteria() != null && nonBlankCount(proposal.acceptanceCriteria()) < 2) {
+            errors.add("acceptance_criteria requires at least two observable items");
+        }
         validateList("constraints", proposal.constraints(), false, errors);
         validateList("non_goals", proposal.nonGoals(), false, errors);
+        if (nonBlankCount(proposal.constraints()) == 0 && nonBlankCount(proposal.nonGoals()) == 0) {
+            errors.add("constraints or non_goals must define task boundaries");
+        }
         validateList("risk_areas", proposal.riskAreas(), false, errors);
-        validateList("test_requirements", proposal.testRequirements(), false, errors);
+        validateList("test_requirements", proposal.testRequirements(), true, errors);
         validateList("evidence_refs", proposal.evidenceRefs(), false, errors);
         if (proposal.openQuestions() != null && !proposal.openQuestions().isEmpty()) {
             errors.add("open_questions must be empty before canonical contract generation");
@@ -53,11 +61,39 @@ final class TaskContractProposalValidator {
         if (required && values.stream().allMatch(TaskContractProposalValidator::isBlank)) {
             errors.add(name + " must not be empty");
         }
+        var seen = new HashSet<String>();
         for (var value : values) {
             if (containsMetadataNoise(value)) {
                 errors.add(name + " contains ledger/context metadata: " + value);
             }
+            if (!isBlank(value) && !seen.add(value.trim().toLowerCase())) {
+                errors.add(name + " contains duplicate item: " + value);
+            }
         }
+    }
+
+    private static void validateScopeOverlap(TaskContractProposal.Scope scope, List<String> errors) {
+        if (scope.included() == null || scope.excluded() == null) {
+            return;
+        }
+        var excluded = new HashSet<String>();
+        for (var value : scope.excluded()) {
+            if (!isBlank(value)) {
+                excluded.add(value.trim().toLowerCase());
+            }
+        }
+        for (var included : scope.included()) {
+            if (!isBlank(included) && excluded.contains(included.trim().toLowerCase())) {
+                errors.add("scope.included overlaps scope.excluded: " + included);
+            }
+        }
+    }
+
+    private static int nonBlankCount(List<String> values) {
+        if (values == null) {
+            return 0;
+        }
+        return (int) values.stream().filter(value -> !isBlank(value)).count();
     }
 
     private static void validateFileRef(String ref, Path workspaceRoot, List<String> errors) {

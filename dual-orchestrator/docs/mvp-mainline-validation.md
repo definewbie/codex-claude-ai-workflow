@@ -126,7 +126,17 @@ The first public, non-domain fixture regression set now covers:
 
 ## Updated MVP Gap
 
-The main lifecycle is functionally closed, but release-quality MVP still needs:
+The main lifecycle is functionally closed. As of 2026-06-06, the remaining P1
+mainline closure items have first-pass implementations:
+
+- Contract compiler quality closure: READY contracts now require executable
+  scope, acceptance criteria, test requirements, and explicit boundaries.
+- Calibration candidate to template proposal: `dualctl calibration plan` now
+  emits a reviewable `templateProposal` without applying it automatically.
+- Handoff/context continuity: `handoff.json` and context packages preserve
+  important decisions and recommended next-stage state for long-run resume.
+
+Release-quality MVP still needs:
 
 1. A public, repeatable real-case benchmark that does not depend on the private
    `cancer-clinic` project.

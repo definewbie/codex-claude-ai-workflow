@@ -54,6 +54,15 @@
   - 2026-06-06：Human review packet / operator guidance 读取 sidecar 中的 `blocking`、`must_fix`、`missing_evidence`、`open_risks`，减少自然语言漂移对流程推荐的影响。
   - 2026-06-06：Agent structured artifact 增加 canonical `lifecycle_status`，runtime 会派生并校验状态一致性；sidecar 增加 `evidence_state`，用于 CLI/UI 判断 blocking、must fix、missing evidence 和 acceptance notes。
   - 2026-06-06：新增公开、去业务化 artifact fixture regression，覆盖 `ACCEPT_WITH_NOTES`、`REJECT` 和 `SELF_TEST_INCOMPLETE` 三类关键样本，避免 contract 继续漂回自然语言解析。
+- [x] Contract compiler quality closure：TaskContract 不只校验 JSON 形状，也校验可执行边界。
+  - 2026-06-06：READY_FOR_REVIEW contract 必须有可执行 `scope.included`、至少两个 acceptance criteria、非空 test requirements，以及 constraints 或 non-goals 边界。
+  - 2026-06-06：proposal 和 canonical TaskContract 都会拒绝 ledger/context metadata、重复项和 included/excluded 冲突；NEEDS_CLARIFICATION 仍允许不完整 scope，以便回到人审澄清。
+- [x] Calibration template proposal MVP：accepted candidate 可以生成可审阅 template proposal。
+  - 2026-06-06：`dualctl calibration plan` 生成 `templateProposal`，包含 target area、proposal type、proposed change、checklist items 和 regression suggestion。
+  - 2026-06-06：plan 仍不自动修改 prompt、contract template、context rule、workflow 或测试，保持人工 review gate。
+- [x] Handoff / context continuity closure：next-stage handoff 能携带更完整续跑状态。
+  - 2026-06-06：`handoff.json` 增加 `importantDecisions`、`recommendedNextStage`、`suggestedNextPrompt`。
+  - 2026-06-06：context package 会优先消费 handoff 中的 completed work、important decisions、open risks 和 recommended next stage，帮助新 session 接住长任务。
 
 ## P2 — 技术债
 

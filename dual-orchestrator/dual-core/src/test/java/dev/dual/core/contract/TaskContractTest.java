@@ -24,8 +24,8 @@ class TaskContractTest {
                 Instant.parse("2026-05-30T12:00:00Z"),
                 "Implement the foo feature",
                 new TaskContract.Scope(
-                        List.of("foo-api", "foo-service"),
-                        List.of("bar-module")
+                        List.of("src/main/java/FooApi.java", "src/main/java/FooService.java"),
+                        List.of("src/main/java/BarModule.java")
                 ),
                 acceptanceCriteria,
                 List.of("Unit tests with 80% coverage"),
@@ -121,7 +121,7 @@ class TaskContractTest {
     }
 
     @Test
-    void validateScopeIncludedExcludedMustExist() {
+    void validateNeedsClarificationAllowsEmptyScopeIncluded() {
         // Scope with null included/excluded gets normalized to empty lists — that's OK
         TaskContract.Scope scope = new TaskContract.Scope(null, null);
         TaskContract contract = new TaskContract(
@@ -143,7 +143,48 @@ class TaskContractTest {
         );
 
         List<String> errors = TaskContractValidator.validate(contract);
-        // scope is non-null so no scope error; included/excluded default to empty
-        assertTrue(errors.stream().noneMatch(e -> e.contains("scope")));
+        assertTrue(errors.isEmpty(), "NEEDS_CLARIFICATION can carry incomplete scope while waiting for answers: " + errors);
+    }
+
+    @Test
+    void validateReadyForReviewRequiresExecutableBoundariesAndTests() {
+        var contract = new TaskContract(
+                "tc-003",
+                1,
+                Instant.now(),
+                "Implement feature",
+                new TaskContract.Scope(List.of("not-a-file-ref"), List.of("not-a-file-ref")),
+                List.of("Only one criterion"),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("req-1", "agent-1")
+        );
+
+        var errors = TaskContractValidator.validate(contract);
+
+        assertTrue(errors.stream().anyMatch(error -> error.contains("at least two acceptance criteria")));
+        assertTrue(errors.stream().anyMatch(error -> error.contains("testRequirements")));
+        assertTrue(errors.stream().anyMatch(error -> error.contains("constraints or nonGoals")));
+        assertTrue(errors.stream().anyMatch(error -> error.contains("not a supported file path")));
+        assertTrue(errors.stream().anyMatch(error -> error.contains("overlaps")));
+    }
+
+    @Test
+    void validateRejectsLedgerMetadataInContractFields() {
+        var contract = sampleContract(
+                ContractStatus.READY_FOR_REVIEW,
+                List.of("Feature works", "Workstream: ws-noise"),
+                List.of()
+        );
+
+        var errors = TaskContractValidator.validate(contract);
+
+        assertTrue(errors.stream().anyMatch(error -> error.contains("ledger/context metadata")));
     }
 }

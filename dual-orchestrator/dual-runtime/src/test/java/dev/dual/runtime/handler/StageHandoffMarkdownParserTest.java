@@ -25,6 +25,10 @@ class StageHandoffMarkdownParserTest {
 
                 - Runtime UI not exercised
 
+                ## Important Decisions
+
+                - Keep this as documentation-only
+
                 ## Suggested Next Prompt
 
                 Continue with focused UI verification.
@@ -36,6 +40,7 @@ class StageHandoffMarkdownParserTest {
 
         assertEquals("Implemented the flow", parser.completedWork().getFirst());
         assertEquals("Runtime UI not exercised", parser.openRisks().getFirst());
+        assertEquals("Keep this as documentation-only", parser.importantDecisions().getFirst());
         assertEquals("Continue with focused UI verification.", parser.suggestedPrompt());
     }
 
@@ -59,5 +64,18 @@ class StageHandoffMarkdownParserTest {
 
         assertEquals("miniprogram/src/pages/record/index.vue", parser.changedFiles().getFirst());
         assertTrue(parser.verificationState().contains("npm run build"));
+    }
+
+    @Test
+    void extractsRecommendedNextStage() {
+        var parser = StageHandoffMarkdownParser.parse("""
+                # Handoff
+
+                ## Recommended Next Stage
+
+                Start implementation after human approval.
+                """);
+
+        assertEquals("Start implementation after human approval.", parser.recommendedNextStage());
     }
 }

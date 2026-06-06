@@ -110,9 +110,12 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
                 context.instance().iterationId(),
                 sourceRefs.isEmpty() ? "" : sourceRefs.get(0),
                 completedWork,
+                handoff.importantDecisions(),
                 changedFiles,
                 handoff.openRisks(),
                 handoff.verificationState(),
+                handoff.recommendedNextStage(),
+                handoff.suggestedPrompt(),
                 Instant.now().toString()
         );
         return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document.toMap());

@@ -24,9 +24,12 @@ record StageHandoffDocument(
         String iterationId,
         String sourceHandoffPath,
         List<String> completedWork,
+        List<String> importantDecisions,
         List<String> changedFiles,
         List<String> openRisks,
         String verificationState,
+        String recommendedNextStage,
+        String suggestedNextPrompt,
         String generatedAt
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
@@ -48,9 +51,12 @@ record StageHandoffDocument(
                 text(document.get("iterationId")),
                 text(document.get("sourceHandoffPath")),
                 stringList(document.get("completedWork")),
+                stringList(document.get("importantDecisions")),
                 stringList(document.get("changedFiles")),
                 stringList(document.get("openRisks")),
                 text(document.get("verificationState")),
+                text(document.get("recommendedNextStage")),
+                text(document.get("suggestedNextPrompt")),
                 text(document.get("generatedAt"))
         );
     }
@@ -63,9 +69,12 @@ record StageHandoffDocument(
         document.put("iterationId", iterationId);
         document.put("sourceHandoffPath", sourceHandoffPath);
         document.put("completedWork", completedWork);
+        document.put("importantDecisions", importantDecisions);
         document.put("changedFiles", changedFiles);
         document.put("openRisks", openRisks);
         document.put("verificationState", verificationState);
+        document.put("recommendedNextStage", recommendedNextStage);
+        document.put("suggestedNextPrompt", suggestedNextPrompt);
         document.put("generatedAt", generatedAt);
         return document;
     }
@@ -78,8 +87,16 @@ record StageHandoffDocument(
         return !changedFiles.isEmpty();
     }
 
+    boolean hasImportantDecisions() {
+        return !importantDecisions.isEmpty();
+    }
+
     boolean hasOpenRisks() {
         return !openRisks.isEmpty();
+    }
+
+    boolean hasRecommendedNextStage() {
+        return !recommendedNextStage.isBlank();
     }
 
     private static List<String> stringList(Object value) {
