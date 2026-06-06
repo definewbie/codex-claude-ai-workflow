@@ -463,6 +463,61 @@ class ContextBuildPackageHandlerTest {
                 "Large requirement should be compressed, not rendered in full");
     }
 
+    @Test
+    void taskContractSectionIncludesContractResolution() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Resolution context test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id": "task-ws",
+                  "version": 1,
+                  "created_at": "2026-06-03T00:00:00Z",
+                  "objective": "Add review status",
+                  "scope": {
+                    "included": ["src/issueWorkflow.js"],
+                    "excluded": ["No external dependencies"]
+                  },
+                  "acceptance_criteria": ["Criterion one", "Criterion two"],
+                  "test_requirements": ["Run tests"],
+                  "constraints": ["Keep scope narrow"],
+                  "non_goals": ["Do not add UI"],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "status": "READY_FOR_REVIEW",
+                  "compilation_pass": 1,
+                  "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/contract-resolution.json"), """
+                {
+                  "schema_version": 1,
+                  "decision": "APPROVE",
+                  "resolved_questions": [
+                    {
+                      "question": "Should review be mandatory?",
+                      "resolution": "Yes, mandatory review was approved.",
+                      "source": "human"
+                    }
+                  ],
+                  "assumptions": ["Human approved the requirement gate."],
+                  "accepted_risks": [],
+                  "gate_ref": ".agent/workstreams/ws-ctx/gates/gate-node-001.json",
+                  "approved_by": "human_gate",
+                  "created_at": "2026-06-06T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("acceptance", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("TaskContract"));
+        assertTrue(markdown.contains("Contract Resolution"));
+        assertTrue(markdown.contains("Should review be mandatory?"));
+        assertTrue(markdown.contains("Yes, mandatory review was approved."));
+    }
+
     // --- Helper ---
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {

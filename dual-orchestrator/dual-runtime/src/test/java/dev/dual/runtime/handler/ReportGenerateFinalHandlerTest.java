@@ -198,6 +198,47 @@ class ReportGenerateFinalHandlerTest {
     }
 
     @Test
+    void contractResolutionIsRendered() throws Exception {
+        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-resolution");
+        var artifactsDir = wsDir.resolve("artifacts");
+        Files.createDirectories(artifactsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Resolution report.", StandardCharsets.UTF_8);
+        Files.writeString(artifactsDir.resolve("task-contract.json"), taskContractJson("Resolution objective"), StandardCharsets.UTF_8);
+        Files.writeString(artifactsDir.resolve("contract-resolution.json"), """
+                {
+                  "schema_version": 1,
+                  "decision": "APPROVE",
+                  "resolved_questions": [
+                    {
+                      "question": "Should review be mandatory?",
+                      "resolution": "Yes, mandatory review was approved.",
+                      "source": "human"
+                    }
+                  ],
+                  "assumptions": ["Human approved the requirement gate."],
+                  "accepted_risks": ["Existing shortcut is intentionally removed."],
+                  "gate_ref": ".agent/workstreams/ws-rpt-resolution/gates/gate-node-001.json",
+                  "approved_by": "human_gate",
+                  "created_at": "2026-06-06T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new ReportGenerateFinalHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-resolution",
+                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
+                new NodeInstance("node-resolution", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+        ));
+
+        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
+        assertTrue(report.contains("## Contract Resolution"));
+        assertTrue(report.contains("Should review be mandatory?"));
+        assertTrue(report.contains("Yes, mandatory review was approved."));
+        assertTrue(report.contains("Existing shortcut is intentionally removed."));
+    }
+
+    @Test
     void filenamesIncludeIterationId() throws Exception {
         var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-filename");
         Files.createDirectories(wsDir);
@@ -217,5 +258,30 @@ class ReportGenerateFinalHandlerTest {
         assertTrue(latestRef.contains("latest-final-report.md"));
         assertTrue(Files.exists(tempDir.resolve(reportRef)));
         assertTrue(Files.exists(tempDir.resolve(latestRef)));
+    }
+
+    private static String taskContractJson(String objective) {
+        return """
+                {
+                  "id": "task-ws",
+                  "version": 1,
+                  "created_at": "2026-06-03T00:00:00Z",
+                  "objective": "%s",
+                  "scope": {
+                    "included": ["src/issueWorkflow.js"],
+                    "excluded": ["No external dependencies"]
+                  },
+                  "acceptance_criteria": ["Criterion one", "Criterion two"],
+                  "test_requirements": ["Run tests"],
+                  "constraints": ["Keep scope narrow"],
+                  "non_goals": ["Do not add UI"],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "status": "READY_FOR_REVIEW",
+                  "compilation_pass": 1,
+                  "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
+                }
+                """.formatted(objective);
     }
 }

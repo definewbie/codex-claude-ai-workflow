@@ -302,6 +302,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
                 if (Files.exists(contractPath)) {
                     appendTaskContract(builder, contractPath);
+                    appendContractResolution(builder, workstreamDir.resolve("artifacts/contract-resolution.json"));
                 } else {
                     builder.append("(task-contract.json not found)\n\n");
                 }
@@ -329,6 +330,48 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         appendListSection(builder, "Non-Goals", contract.nonGoals());
         appendListSection(builder, "Constraints", contract.constraints());
         appendListSection(builder, "Risk Areas", contract.riskAreas());
+    }
+
+    private static void appendContractResolution(StringBuilder builder, Path resolutionPath) throws IOException {
+        if (!Files.exists(resolutionPath)) {
+            return;
+        }
+        var json = OBJECT_MAPPER.readValue(resolutionPath.toFile(), MAP_TYPE);
+        builder.append("**Contract Resolution:**\n");
+        builder.append("- Decision: ").append(text(json.get("decision"))).append("\n");
+        builder.append("- Approved By: ").append(text(json.get("approved_by"))).append("\n");
+        builder.append("- Gate Ref: ").append(text(json.get("gate_ref"))).append("\n");
+        appendListSection(builder, "Resolution Assumptions", listOfText(json.get("assumptions")));
+        appendListSection(builder, "Accepted Risks", listOfText(json.get("accepted_risks")));
+        var resolvedQuestions = resolvedQuestionTexts(json.get("resolved_questions"));
+        appendListSection(builder, "Resolved Questions", resolvedQuestions);
+    }
+
+    private static List<String> resolvedQuestionTexts(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var result = new ArrayList<String>();
+        for (var item : items) {
+            if (item instanceof Map<?, ?> map) {
+                var question = text(map.get("question"));
+                var resolution = text(map.get("resolution"));
+                if (!question.isBlank()) {
+                    result.add(resolution.isBlank() ? question : question + " -> " + resolution);
+                }
+            }
+        }
+        return List.copyOf(result);
+    }
+
+    private static List<String> listOfText(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        return items.stream()
+                .map(ContextBuildPackageHandler::text)
+                .filter(item -> !item.isBlank())
+                .toList();
     }
 
     private static void appendListSection(StringBuilder builder, String title, List<String> items) {

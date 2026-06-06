@@ -65,6 +65,7 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
 
         builder.append("## TaskContract\n\n");
         appendTaskContractSection(builder, workstreamDir);
+        appendContractResolutionSection(builder, workstreamDir);
 
         appendFailureClassificationSection(builder, workstreamDir);
 
@@ -114,6 +115,49 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
             builder.append("\n");
         } catch (Exception e) {
             builder.append("(error reading TaskContract: ").append(e.getMessage()).append(")\n\n");
+        }
+    }
+
+    private static void appendContractResolutionSection(StringBuilder builder, Path workstreamDir) throws IOException {
+        var resolutionPath = workstreamDir.resolve("artifacts/contract-resolution.json");
+        if (!Files.exists(resolutionPath)) {
+            return;
+        }
+        builder.append("## Contract Resolution\n\n");
+        builder.append("- Source: ").append(toDisplayRef(resolutionPath)).append("\n");
+        try {
+            var json = OBJECT_MAPPER.readTree(resolutionPath.toFile());
+            appendJsonField(builder, "Decision", json.path("decision").asText(""));
+            appendJsonField(builder, "Approved By", json.path("approved_by").asText(""));
+            appendJsonField(builder, "Gate Ref", json.path("gate_ref").asText(""));
+            appendResolvedQuestions(builder, json.path("resolved_questions"));
+            appendJsonList(builder, "Assumptions", json.path("assumptions"));
+            appendJsonList(builder, "Accepted Risks", json.path("accepted_risks"));
+        } catch (Exception e) {
+            builder.append("- Error reading contract resolution: ").append(e.getMessage()).append("\n");
+        }
+        builder.append("\n");
+    }
+
+    private static void appendResolvedQuestions(StringBuilder builder, JsonNode node) {
+        if (node == null || !node.isArray() || node.isEmpty()) {
+            return;
+        }
+        builder.append("- **Resolved Questions:**\n");
+        for (var item : node) {
+            var question = item.path("question").asText("");
+            var resolution = item.path("resolution").asText("");
+            var source = item.path("source").asText("");
+            if (!question.isBlank()) {
+                builder.append("  - ").append(question);
+                if (!resolution.isBlank()) {
+                    builder.append(" -> ").append(resolution);
+                }
+                if (!source.isBlank()) {
+                    builder.append(" (").append(source).append(")");
+                }
+                builder.append("\n");
+            }
         }
     }
 

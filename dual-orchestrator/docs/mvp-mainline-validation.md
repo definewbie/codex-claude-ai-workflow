@@ -145,9 +145,11 @@ Release-quality MVP still needs:
    private `cancer-clinic` project.
    - First sample/case now exists: `examples/issue-flow-app/` plus
      `cases/public-issue-flow-review-state.md`.
-   - 2026-06-06: first real `acpx` run completed with `PASS-WARN`: 6 human
-     gates, 10 Agent runs, 31 timeline nodes, final `ACCEPT_WITH_NOTES`, all
-     key artifacts present, original repo clean.
+   - 2026-06-06: latest real `acpx` run completed with `PASS`: 6 human gates,
+     10 Agent runs, 30 timeline nodes, final `ACCEPT`, all key artifacts
+     present, original repo clean. The same run verified that
+     `contract-resolution` is visible in acceptance context, human review
+     packets, PR body, and the final report.
 2. A short install-to-first-run path that does not reference private benchmark
    cases.
 3. Continued regression fixtures for real structured artifacts whenever a

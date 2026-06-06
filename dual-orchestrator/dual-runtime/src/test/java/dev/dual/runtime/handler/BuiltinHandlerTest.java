@@ -109,6 +109,24 @@ class BuiltinHandlerTest {
                   "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
                 }
                 """, StandardCharsets.UTF_8);
+        Files.writeString(artifactsDir.resolve("contract-resolution.json"), """
+                {
+                  "schema_version": 1,
+                  "decision": "APPROVE",
+                  "resolved_questions": [
+                    {
+                      "question": "Should review be mandatory?",
+                      "resolution": "Yes, mandatory review was approved.",
+                      "source": "human"
+                    }
+                  ],
+                  "assumptions": ["Human approved the requirement gate."],
+                  "accepted_risks": [],
+                  "gate_ref": ".agent/workstreams/ws/gates/gate-node-001.json",
+                  "approved_by": "human_gate",
+                  "created_at": "2026-06-06T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
         Files.writeString(evidenceDir.resolve("changed-files.txt"), "miniprogram/src/pages/record/index.vue\n", StandardCharsets.UTF_8);
         Files.writeString(evidenceDir.resolve("diff.stat"), "1 file changed, 12 insertions(+)\n", StandardCharsets.UTF_8);
         Files.writeString(deliveryDir.resolve("pr-body.md"), "# PR Body\n\nVerification complete.\n", StandardCharsets.UTF_8);
@@ -146,6 +164,9 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("## Operator Guidance"));
         assertTrue(markdown.contains("Recommended Action: approve"));
         assertTrue(markdown.contains("Improve treatment record empty state"));
+        assertTrue(markdown.contains("## Contract Resolution"));
+        assertTrue(markdown.contains("Should review be mandatory?"));
+        assertTrue(markdown.contains("Yes, mandatory review was approved."));
         assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
         assertTrue(markdown.contains("Implementation satisfies the contract"));
         assertTrue(markdown.contains("WeChat UI was not manually exercised"));
@@ -156,6 +177,7 @@ class BuiltinHandlerTest {
         var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
         var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
         assertTrue(json.contains("\"taskContract\""));
+        assertTrue(json.contains("\"contractResolution\""));
         assertTrue(json.contains("\"latestAgentDecision\""));
         assertTrue(json.contains("\"gitEvidence\""));
         assertTrue(json.contains("\"delivery\""));

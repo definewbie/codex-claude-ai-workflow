@@ -88,6 +88,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("reviewPacketPath", packetRef);
         packet.put("taskContract", taskContractSummary(context));
+        packet.put("contractResolution", contractResolutionSummary(context));
         packet.put("latestAgentDecision", latestAgentDecision(context).toReviewPacketMap());
         packet.put("gitEvidence", gitEvidenceSummary(context));
         packet.put("delivery", deliverySummary(context));
@@ -117,6 +118,7 @@ public final class HumanReviewGateHandler implements GateHandler {
 
         appendReviewSummary(builder, context);
         appendTaskContract(builder, context);
+        appendContractResolution(builder, context);
         appendLatestAgentDecision(builder, context);
         appendGitEvidence(builder, context);
         appendDelivery(builder, context);
@@ -175,6 +177,21 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendList(builder, "Acceptance Criteria", contract.get("acceptanceCriteria"));
         appendList(builder, "Test Requirements", contract.get("testRequirements"));
         appendList(builder, "Constraints", contract.get("constraints"));
+        builder.append("\n");
+    }
+
+    private void appendContractResolution(StringBuilder builder, GateContext context) {
+        var resolution = contractResolutionSummary(context);
+        if (resolution.isEmpty()) {
+            return;
+        }
+        builder.append("## Contract Resolution\n\n");
+        appendField(builder, "Decision", text(resolution.get("decision")));
+        appendField(builder, "Approved By", text(resolution.get("approvedBy")));
+        appendField(builder, "Gate Ref", text(resolution.get("gateRef")));
+        appendList(builder, "Resolved Questions", resolution.get("resolvedQuestions"));
+        appendList(builder, "Assumptions", resolution.get("assumptions"));
+        appendList(builder, "Accepted Risks", resolution.get("acceptedRisks"));
         builder.append("\n");
     }
 
@@ -250,6 +267,45 @@ public final class HumanReviewGateHandler implements GateHandler {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> contractResolutionSummary(GateContext context) {
+        var path = workstreamDir(context).resolve("artifacts/contract-resolution.json");
+        if (!Files.isRegularFile(path)) {
+            return Map.of();
+        }
+        try {
+            var tree = objectMapper.readValue(path.toFile(), Map.class);
+            var summary = new LinkedHashMap<String, Object>();
+            summary.put("decision", text(tree.get("decision")));
+            summary.put("approvedBy", text(tree.get("approved_by")));
+            summary.put("gateRef", text(tree.get("gate_ref")));
+            summary.put("resolvedQuestions", resolvedQuestionTexts(tree.get("resolved_questions")));
+            summary.put("assumptions", stringList(tree.get("assumptions")));
+            summary.put("acceptedRisks", stringList(tree.get("accepted_risks")));
+            summary.put("path", displayRef(context.workspaceRoot(), path));
+            return summary;
+        } catch (Exception ignored) {
+            return Map.of();
+        }
+    }
+
+    private List<String> resolvedQuestionTexts(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var result = new ArrayList<String>();
+        for (var item : items) {
+            if (item instanceof Map<?, ?> map) {
+                var question = text(map.get("question"));
+                var resolution = text(map.get("resolution"));
+                if (!question.isBlank()) {
+                    result.add(resolution.isBlank() ? question : question + " -> " + resolution);
+                }
+            }
+        }
+        return List.copyOf(result);
     }
 
     private AgentDecisionSummary latestAgentDecision(GateContext context) {

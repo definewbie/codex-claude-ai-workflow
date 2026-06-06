@@ -58,6 +58,7 @@
   - 2026-06-06：READY_FOR_REVIEW contract 必须有可执行 `scope.included`、至少两个 acceptance criteria、非空 test requirements，以及 constraints 或 non-goals 边界。
   - 2026-06-06：proposal 和 canonical TaskContract 都会拒绝 ledger/context metadata、重复项和 included/excluded 冲突；NEEDS_CLARIFICATION 仍允许不完整 scope，以便回到人审澄清。
   - 2026-06-06：canonical contract 前新增 `contract-resolution` artifact。`open_questions` 不再被当作机械 validation 错误；它们必须由 requirement human gate 的 resolution 承接，并沉淀到 `artifacts/contract-resolution.json` / `.md`，避免用局部 if-else 掩盖需求协商状态。
+  - 2026-06-06：`contract-resolution` 已进入 context package、human review packet、PR body 和 final report。机器事实仍来自 artifact，Markdown 只负责给人读，避免后续阶段忘记 requirement gate 的协商结论。
 - [x] Calibration template proposal MVP：accepted candidate 可以生成可审阅 template proposal。
   - 2026-06-06：`dualctl calibration plan` 生成 `templateProposal`，包含 target area、proposal type、proposed change、checklist items 和 regression suggestion。
   - 2026-06-06：plan 仍不自动修改 prompt、contract template、context rule、workflow 或测试，保持人工 review gate。
