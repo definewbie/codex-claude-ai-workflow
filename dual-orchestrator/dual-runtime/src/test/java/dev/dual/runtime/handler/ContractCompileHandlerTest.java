@@ -32,11 +32,8 @@ class ContractCompileHandlerTest {
     }
 
     @Test
-    void compileProducesReadyForReviewContract(@TempDir Path tempDir) throws Exception {
+    void compileHelperProducesReadyForReviewContract(@TempDir Path tempDir) throws Exception {
         var handler = new ContractCompileHandler();
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
-        Files.createDirectories(workstreamDir);
-
         var requirementText = """
                 # Feature Request
 
@@ -46,7 +43,24 @@ class ContractCompileHandlerTest {
 
                 Constraints: Max 200 lines per file, no external dependencies
                 """;
-        Files.writeString(workstreamDir.resolve("requirement.md"), requirementText, StandardCharsets.UTF_8);
+
+        var contract = handler.compile(requirementText, WORKSTREAM_ID);
+        assertFalse(contract.objective().isBlank(), "Objective should not be blank");
+        assertFalse(contract.acceptanceCriteria().isEmpty(), "AC should not be empty");
+        assertEquals(ContractStatus.READY_FOR_REVIEW, contract.status());
+    }
+
+    @Test
+    void executeFailsWhenTaskContractProposalIsMissing(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        Files.createDirectories(workstreamDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                # Feature Request
+
+                Add user authentication with JWT tokens.
+                """, StandardCharsets.UTF_8);
 
         var context = new TaskHandler.TaskContext(
                 tempDir,
@@ -62,45 +76,14 @@ class ContractCompileHandlerTest {
 
         var result = handler.execute(context);
 
-        // Verify result structure
-        assertEquals("completed", result.outcome());
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertNotNull(result.result());
-
-        // Verify result fields
-        assertEquals("tc-ws-test-001-v1", result.result().get("contract_id"));
-        assertEquals(ContractStatus.READY_FOR_REVIEW.name(), result.result().get("contract_status"));
-        assertEquals(1, result.result().get("contract_version"));
-        assertEquals(1, result.result().get("compilation_pass"));
-        assertNotNull(result.result().get("generated_at"));
-
-        // Verify artifacts exist
-        var artifactsDir = workstreamDir.resolve("artifacts");
-        assertTrue(Files.exists(artifactsDir.resolve("task-contract.json")),
-                "task-contract.json should exist");
-        assertTrue(Files.exists(artifactsDir.resolve("task-contract.md")),
-                "task-contract.md should exist");
-
-        // Verify contract content via JSON
-        var json = Files.readString(artifactsDir.resolve("task-contract.json"), StandardCharsets.UTF_8);
-        assertTrue(json.contains("READY_FOR_REVIEW"), "Contract should be READY_FOR_REVIEW");
-        assertTrue(json.contains("Add user authentication with JWT tokens"),
-                "Contract should contain the objective");
-
-        // Verify markdown has sections
-        var md = Files.readString(artifactsDir.resolve("task-contract.md"), StandardCharsets.UTF_8);
-        assertTrue(md.contains("## Acceptance Criteria"), "Markdown should have AC section");
-        assertTrue(md.contains("Implementation achieves:"), "Should have default AC");
-
-        // Verify compile method directly
-        var contract = handler.compile(requirementText, WORKSTREAM_ID);
-        assertFalse(contract.objective().isBlank(), "Objective should not be blank");
-        assertFalse(contract.acceptanceCriteria().isEmpty(), "AC should not be empty");
-        assertEquals(ContractStatus.READY_FOR_REVIEW, contract.status());
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROPOSAL_MISSING", result.outcome());
+        assertFalse(Files.exists(workstreamDir.resolve("artifacts/task-contract.json")),
+                "Strict mode must not write a canonical TaskContract without a proposal");
     }
 
     @Test
-    void executeCompilesContractFromReviewedIntakeArtifact(@TempDir Path tempDir) throws Exception {
+    void executeDoesNotCompileContractFromReviewMarkdownWithoutClaudeProposal(@TempDir Path tempDir) throws Exception {
         var handler = new ContractCompileHandler();
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
         var outputDir = workstreamDir.resolve("runs/run-001/outputs");
@@ -141,12 +124,10 @@ class ContractCompileHandlerTest {
 
         NodeResult result = handler.execute(context);
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
-        assertTrue(json.contains("README.md"), "Contract should use reviewed intake artifact details");
-        assertTrue(json.contains("root-level"), "Contract should include acceptance criteria from review");
-        assertTrue(json.contains("\"included\" : [ \"README.md\" ]"), "Contract scope should include README.md");
-        assertFalse(json.contains("\"objective\" : \"目标：\""), "Contract objective should not be the raw heading");
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROPOSAL_MISSING", result.outcome());
+        assertFalse(Files.exists(workstreamDir.resolve("artifacts/task-contract.json")),
+                "Review prose must not become the canonical TaskContract");
     }
 
     @Test
@@ -171,11 +152,34 @@ class ContractCompileHandlerTest {
 
                 **变更清单：** 新增 1 文件 `README.md`，约 60 行。
 
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "为项目根目录创建 README.md",
+                  "scope": {
+                    "included": ["README.md"],
+                    "excluded": ["不改业务代码"]
+                  },
+                  "acceptance_criteria": [
+                    "根目录存在 README.md",
+                    "README 说明项目用途和本地开发方式"
+                  ],
+                  "constraints": ["只新增 README.md"],
+                  "non_goals": ["不修改后端 API"],
+                  "risk_areas": ["不要覆盖已有文档"],
+                  "test_requirements": ["检查 git diff"],
+                  "evidence_refs": ["README.md"],
+                  "open_questions": []
+                }
+                </dual-artifact>
+
                 ```dual-control
                 decision: READY_FOR_PRODUCT_REVIEW
                 summary: README task ready
                 ```
                 """, StandardCharsets.UTF_8);
+        Files.writeString(tempDir.resolve("README.md"), "# Fixture\n", StandardCharsets.UTF_8);
         Files.writeString(artifactsDir.resolve("task-contract.md"), """
                 # Task Contract
 

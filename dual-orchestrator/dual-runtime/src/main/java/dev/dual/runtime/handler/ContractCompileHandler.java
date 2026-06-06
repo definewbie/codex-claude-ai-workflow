@@ -47,15 +47,18 @@ public final class ContractCompileHandler implements TaskHandler {
             );
         }
 
-        var requirementText = Files.readString(requirementPath, StandardCharsets.UTF_8);
-        var sourceText = buildSourceText(context, requirementText);
         var proposalResult = compileFromProposal(buildTrustedProposalSourceText(context), context);
         if (proposalResult.failed() != null) {
             return proposalResult.failed();
         }
-        var contract = proposalResult.contract() == null
-                ? compile(sourceText, context.workstreamId())
-                : proposalResult.contract();
+        if (proposalResult.contract() == null) {
+            return proposalFailure(
+                    "TASK_CONTRACT_PROPOSAL_MISSING",
+                    "task_contract_proposal is required; strict mode does not compile canonical TaskContract from Markdown",
+                    List.of("No trusted <dual-artifact type=\"task_contract_proposal\" version=\"1\"> found in Claude intake output")
+            );
+        }
+        var contract = proposalResult.contract();
 
         // Validate and potentially patch
         var errors = TaskContractValidator.validate(contract);
