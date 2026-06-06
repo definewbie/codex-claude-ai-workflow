@@ -37,6 +37,28 @@ class ContractLifecycleLedgerTest {
                 Constraints: Max 200 lines per file
                 """;
         Files.writeString(workstreamDir.resolve("requirement.md"), requirementText, StandardCharsets.UTF_8);
+        Files.writeString(tempDir.resolve("README.md"), "# Fixture\n", StandardCharsets.UTF_8);
+        writeTaskContractProposal(workstreamDir, """
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Add user authentication with JWT tokens",
+                  "scope": {
+                    "included": ["README.md"],
+                    "excluded": ["No external dependencies"]
+                  },
+                  "acceptance_criteria": [
+                    "Authentication behavior is described",
+                    "Scope remains narrow"
+                  ],
+                  "constraints": ["Max 200 lines per file"],
+                  "non_goals": ["No external dependencies"],
+                  "risk_areas": ["Authentication flow correctness"],
+                  "test_requirements": ["Run relevant tests"],
+                  "evidence_refs": ["README.md"],
+                  "open_questions": []
+                }
+                """);
 
         var context = new TaskHandler.TaskContext(
                 tempDir,
@@ -73,5 +95,15 @@ class ContractLifecycleLedgerTest {
         assertEquals("contract_requires_clarification", ContractEventTypes.REQUIRES_CLARIFICATION);
         assertEquals("contract_scope_reduction_requested", ContractEventTypes.SCOPE_REDUCTION_REQUESTED);
         assertEquals("contract_rejected", ContractEventTypes.REJECTED);
+    }
+
+    private static void writeTaskContractProposal(Path workstreamDir, String json) throws Exception {
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("intake-claude-brainstorm.md"), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                %s
+                </dual-artifact>
+                """.formatted(json), StandardCharsets.UTF_8);
     }
 }

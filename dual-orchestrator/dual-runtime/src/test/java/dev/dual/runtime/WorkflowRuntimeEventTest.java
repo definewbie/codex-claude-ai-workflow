@@ -39,6 +39,28 @@ class WorkflowRuntimeEventTest {
         Files.createDirectories(paths.workstreamDir());
         Files.writeString(paths.workstreamDir().resolve("requirement.md"),
                 "Add user authentication\n", StandardCharsets.UTF_8);
+        Files.writeString(tempDir.resolve("README.md"), "# Fixture\n", StandardCharsets.UTF_8);
+        writeTaskContractProposal(paths.workstreamDir(), """
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Add user authentication",
+                  "scope": {
+                    "included": ["README.md"],
+                    "excluded": ["No external dependencies"]
+                  },
+                  "acceptance_criteria": [
+                    "Authentication behavior is described",
+                    "Scope remains narrow"
+                  ],
+                  "constraints": ["Keep implementation focused"],
+                  "non_goals": ["No external dependencies"],
+                  "risk_areas": ["Authentication flow correctness"],
+                  "test_requirements": ["Run relevant tests"],
+                  "evidence_refs": ["README.md"],
+                  "open_questions": []
+                }
+                """);
 
         var definition = new WorkflowDefinition(
                 "test-events", 1, "contract.compile",
@@ -191,6 +213,16 @@ class WorkflowRuntimeEventTest {
                     "review_decision", "REJECT"
             ));
         }
+    }
+
+    private static void writeTaskContractProposal(Path workstreamDir, String json) throws Exception {
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("intake-claude-brainstorm.md"), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                %s
+                </dual-artifact>
+                """.formatted(json), StandardCharsets.UTF_8);
     }
 
     private static final class FailingContractCompile implements TaskHandler {
