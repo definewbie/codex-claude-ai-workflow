@@ -105,6 +105,7 @@
    - 2026-06-04：`run-real-case.sh` 的单次 `summary.json` 和 `report.md` 也写入同一套 benchmark grade，单次报告和聚合 index 口径一致。
    - 2026-06-04：`run-real-case.sh --update-benchmark-index` 可在真实 case 结束后自动刷新 benchmark index；默认关闭，避免临时调试 run 改动文档。
    - 2026-06-06：新增公开可复用样例 `examples/issue-flow-app/`、case `public-issue-flow-review-state.md` 和 `prepare-public-benchmark-repo.sh`，用于后续替代私有项目做开源 benchmark 验证；真实 acpx 报告仍待单独运行后沉淀。
+   - 2026-06-06：公开样例首次真实 acpx run 跑到 `COMPLETED` / `PASS-WARN`，6 个 human gates、10 次 Agent run、31 个 timeline nodes，最终 Codex `ACCEPT_WITH_NOTES`；所有关键 artifact 齐全，原始 repo 干净。
 2. **Operator-grade review UX**：围绕 `review packet`、`timeline.json`、artifact sidecar、failure summary 做人审页面，让人能看清“该不该 approve”，而不是只多几个按钮。
    - 2026-06-04：review packet 和 operator panel 已显示推荐动作、原因和建议检查项；stopped/recovery 状态已显示当前失败摘要。
    - 2026-06-05：operator panel 首屏增加 trace-style overview，和 `dualctl trace` 一样先回答“现在跑到哪、为什么停、下一步做什么”。

@@ -130,4 +130,8 @@ The next public benchmark step is to run this case with real `acpx`, inspect the
 report, and only then commit a sanitized benchmark report if it does not contain
 private machine paths or tokens.
 
+2026-06-06 status: the first real `acpx` run completed as `PASS-WARN` with all
+key artifacts present. The raw run report contains local machine paths and is
+kept out of the public-facing benchmark report set for now.
+
 Keep private benchmark reports out of the public release branch.
