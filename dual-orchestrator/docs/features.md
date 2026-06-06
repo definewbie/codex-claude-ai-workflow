@@ -67,6 +67,7 @@
 - [x] Handoff / context continuity closure：next-stage handoff 能携带更完整续跑状态。
   - 2026-06-06：`handoff.json` 增加 `importantDecisions`、`recommendedNextStage`、`suggestedNextPrompt`。
   - 2026-06-06：context package 会优先消费 handoff 中的 completed work、important decisions、open risks 和 recommended next stage，帮助新 session 接住长任务。
+  - 2026-06-06：`prompt.generate_next_stage` 优先从 `stage_handoff` contract sidecar 生成 `handoff.json` 和下一阶段 prompt；Markdown handoff 仅作为兼容 fallback，避免下游重新吃到被自然语言污染的交接状态。
 
 ## P2 — 技术债
 

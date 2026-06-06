@@ -23,12 +23,17 @@ record AgentOutputContractDocument(
         String lifecycleStatus,
         String decision,
         String summary,
+        String sourceArtifactType,
         boolean blocking,
         List<String> mustFix,
         List<String> missingEvidence,
         List<String> openRisks,
         List<String> changedFiles,
         String verificationSummary,
+        List<String> completedWork,
+        List<String> importantDecisions,
+        String recommendedNextStage,
+        String suggestedNextPrompt,
         Map<String, String> control,
         FailureFields failure
 ) {
@@ -49,12 +54,17 @@ record AgentOutputContractDocument(
                 text(document.get("lifecycle_status")),
                 text(document.get("decision")),
                 text(document.get("summary")),
+                text(document.get("source_artifact_type")),
                 booleanValue(document.get("blocking")),
                 meaningfulList(document.get("must_fix")),
                 meaningfulList(document.get("missing_evidence")),
                 meaningfulList(document.get("open_risks")),
                 stringList(document.get("changed_files")),
                 text(document.get("verification_summary")),
+                stringList(document.get("completed_work")),
+                stringList(document.get("important_decisions")),
+                text(document.get("recommended_next_stage")),
+                text(document.get("suggested_next_prompt")),
                 stringMap(document.get("control")),
                 FailureFields.from(objectMap(document.get("failure")))
         );
@@ -62,6 +72,10 @@ record AgentOutputContractDocument(
 
     boolean hasDecision() {
         return !decision.isBlank();
+    }
+
+    boolean isStageHandoffArtifact() {
+        return "stage_handoff".equals(sourceArtifactType);
     }
 
     record FailureFields(

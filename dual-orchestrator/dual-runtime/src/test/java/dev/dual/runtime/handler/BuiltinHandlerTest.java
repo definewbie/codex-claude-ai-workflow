@@ -1309,6 +1309,72 @@ class BuiltinHandlerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void nextStagePromptHandlerPrefersStructuredHandoffSidecar() throws Exception {
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md");
+        Files.createDirectories(handoff.getParent());
+        Files.writeString(handoff, """
+                # Handoff
+
+                ## Suggested Next Prompt
+
+                This Markdown fallback prompt should not be used.
+
+                ```dual-control
+                decision: HANDOFF_READY
+                summary: ready
+                ```
+                """);
+        Files.writeString(handoff.resolveSibling("stage-claude-handoff.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "stage.claude_handoff",
+                  "source_artifact_type": "stage_handoff",
+                  "decision": "HANDOFF_READY",
+                  "summary": "structured handoff ready",
+                  "completed_work": ["Structured completed work"],
+                  "important_decisions": ["Structured decision"],
+                  "changed_files": ["src/main.py"],
+                  "open_risks": ["Structured risk"],
+                  "verification_summary": "Structured verification",
+                  "recommended_next_stage": "Structured recommendation",
+                  "suggested_next_prompt": "Use the structured sidecar prompt."
+                }
+                """);
+
+        var handler = new PromptGenerateNextStageHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
+                node(
+                        "stage.generate_next_prompt",
+                        NodeKind.TASK,
+                        "prompt.generate_next_stage",
+                        List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md")
+                )
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("structured-handoff", result.result().get("mode"));
+        assertEquals(true, result.result().get("used_suggested_prompt_section"));
+
+        var promptMarkdown = Files.readString(tempDir.resolve(".agent/workstreams/ws/artifacts/next-stage/next-stage-prompt.md"));
+        assertTrue(promptMarkdown.contains("Use the structured sidecar prompt."));
+        assertFalse(promptMarkdown.contains("This Markdown fallback prompt should not be used."));
+
+        var handoffJson = new ObjectMapper().readValue(
+                tempDir.resolve(".agent/workstreams/ws/artifacts/next-stage/handoff.json").toFile(),
+                Map.class
+        );
+        assertEquals(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.contract.json", handoffJson.get("sourceHandoffPath"));
+        assertEquals(List.of("Structured completed work"), (List<String>) handoffJson.get("completedWork"));
+        assertEquals(List.of("src/main.py"), (List<String>) handoffJson.get("changedFiles"));
+        assertEquals("Structured verification", handoffJson.get("verificationState"));
+        assertEquals("Use the structured sidecar prompt.", handoffJson.get("suggestedNextPrompt"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void nextStagePromptHandlerExtractsNumberedHandoffSections() throws Exception {
         var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.md");
         Files.createDirectories(handoff.getParent());
