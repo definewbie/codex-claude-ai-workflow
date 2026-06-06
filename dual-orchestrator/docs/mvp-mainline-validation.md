@@ -131,6 +131,9 @@ mainline closure items have first-pass implementations:
 
 - Contract compiler quality closure: READY contracts now require executable
   scope, acceptance criteria, test requirements, and explicit boundaries.
+  Open proposal questions are no longer a raw validator failure; they must be
+  resolved through the requirement human gate and are recorded as a
+  `contract-resolution` artifact before canonical TaskContract generation.
 - Calibration candidate to template proposal: `dualctl calibration plan` now
   emits a reviewable `templateProposal` without applying it automatically.
 - Handoff/context continuity: `handoff.json` and context packages preserve

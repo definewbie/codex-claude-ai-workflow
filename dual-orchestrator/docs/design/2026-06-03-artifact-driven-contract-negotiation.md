@@ -9,6 +9,8 @@
 
 > 2026-06-03 实现进度：已落地 P0 最小修复。`ContractCompileHandler` 现在优先读取可信 Claude intake 输出中的 `<dual-artifact type="task_contract_proposal" version="1">`，通过机械校验后生成 canonical TaskContract；invalid proposal 会失败而不是 fallback 到 Markdown。Claude intake prompt 已要求输出 proposal，Codex intake prompt 已注入 contract review principles，原则模板支持内置资源和项目 `.agent/templates/` 补充。
 
+> 2026-06-06 更新：canonical contract 前新增 `contract-resolution` artifact。`TaskContractProposal.open_questions` 是需求协商输入，不是机械 validation 错误；requirement human gate 的 resolution 会被记录到 `artifacts/contract-resolution.json` / `.md`，再进入 canonical TaskContract 生成。
+
 ---
 
 ## 1. 背景

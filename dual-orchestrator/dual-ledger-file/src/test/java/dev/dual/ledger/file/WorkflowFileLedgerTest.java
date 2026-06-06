@@ -101,6 +101,44 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void resolvingGatePersistsGateResolutionDocument() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-resolution"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_requirement_review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approved", "revise")
+                        )),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("first", "completed", "gate.human_requirement_review"),
+                        new EdgeDefinition("gate.human_requirement_review", "approved", "contract.compile")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-gate-resolution", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("first-output.md"), Map.of());
+
+        var waiting = ledger.loadCurrent(paths);
+        var gateId = waiting.openGateIds().get(0);
+        ledger.resolveOpenGate(paths, definition, "approved", "mandatory review confirmed");
+
+        var gateJson = Files.readString(paths.gateJson(gateId));
+        assertTrue(gateJson.contains("\"status\" : \"resolved\""));
+        assertTrue(gateJson.contains("\"human_action\" : \"approved\""));
+        assertTrue(gateJson.contains("\"note\" : \"mandatory review confirmed\""));
+        assertTrue(gateJson.contains("\"resolvedAt\""));
+    }
+
+    @Test
     void writesTimelineProjectionFromWorkflowAndNodes() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-timeline"));
         Files.createDirectories(paths.workstreamDir());

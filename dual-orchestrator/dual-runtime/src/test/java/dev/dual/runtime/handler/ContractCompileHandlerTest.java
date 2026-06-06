@@ -469,6 +469,155 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void executeMaterializesContractResolutionForProposalOpenQuestionsAfterHumanGate(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+        Files.createDirectories(workstreamDir.resolve("nodes"));
+        Files.createDirectories(workstreamDir.resolve("gates"));
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add mandatory review state.\n", StandardCharsets.UTF_8);
+        var intakeRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-claude-brainstorm.md";
+        Files.writeString(tempDir.resolve(intakeRef), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Add mandatory READY_FOR_REVIEW status",
+                  "scope": {
+                    "included": ["src/issueWorkflow.js"],
+                    "excluded": ["No external dependencies"]
+                  },
+                  "acceptance_criteria": [
+                    "READY_FOR_REVIEW status exists",
+                    "IN_PROGRESS to DONE is rejected"
+                  ],
+                  "constraints": ["Keep transition map explicit"],
+                  "non_goals": ["Do not add UI"],
+                  "risk_areas": ["Breaking existing direct done behavior"],
+                  "test_requirements": ["Run node --test"],
+                  "evidence_refs": ["src/issueWorkflow.js"],
+                  "open_questions": ["Should review be mandatory?"]
+                }
+                </dual-artifact>
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(tempDir.resolve("src"));
+        Files.writeString(tempDir.resolve("src/issueWorkflow.js"), "export {}\n");
+        Files.writeString(workstreamDir.resolve("nodes/node-gate-human_requirement_review-005.json"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-gate-human_requirement_review-005",
+                  "nodeDefinitionId": "gate.human_requirement_review",
+                  "kind": "GATE",
+                  "handlerType": "human.review",
+                  "status": "COMPLETED",
+                  "stageId": "stage-gate",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "outputRefs": [],
+                  "result": {},
+                  "runRef": null,
+                  "startedAt": null,
+                  "finishedAt": null
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(workstreamDir.resolve("gates/gate-node-gate-human_requirement_review-005.json"), """
+                {
+                  "schemaVersion": 1,
+                  "gateId": "gate-node-gate-human_requirement_review-005",
+                  "nodeInstanceId": "node-gate-human_requirement_review-005",
+                  "gateType": "human.review",
+                  "status": "resolved",
+                  "allowedActions": ["approved", "revise"],
+                  "openedAt": "2026-06-06T00:00:00Z",
+                  "resolvedAt": "2026-06-06T00:01:00Z",
+                  "result": {
+                    "human_action": "approved",
+                    "note": "Review is mandatory; remove direct IN_PROGRESS to DONE."
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(intakeRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var resolutionJson = Files.readString(workstreamDir.resolve("artifacts/contract-resolution.json"));
+        assertTrue(resolutionJson.contains("\"decision\" : \"APPROVE\""));
+        assertTrue(resolutionJson.contains("Should review be mandatory?"));
+        assertTrue(resolutionJson.contains("Review is mandatory; remove direct IN_PROGRESS to DONE."));
+        assertTrue(resolutionJson.contains("\"approved_by\" : \"human_gate\""));
+        assertTrue(Files.readString(workstreamDir.resolve("artifacts/task-contract.json"))
+                .contains("Add mandatory READY_FOR_REVIEW status"));
+    }
+
+    @Test
+    void executeRequiresContractResolutionWhenProposalHasOpenQuestionsWithoutHumanGate(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add mandatory review state.\n", StandardCharsets.UTF_8);
+        var intakeRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-claude-brainstorm.md";
+        Files.writeString(tempDir.resolve(intakeRef), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Add mandatory READY_FOR_REVIEW status",
+                  "scope": {
+                    "included": ["src/issueWorkflow.js"],
+                    "excluded": ["No external dependencies"]
+                  },
+                  "acceptance_criteria": [
+                    "READY_FOR_REVIEW status exists",
+                    "IN_PROGRESS to DONE is rejected"
+                  ],
+                  "constraints": ["Keep transition map explicit"],
+                  "non_goals": ["Do not add UI"],
+                  "risk_areas": ["Breaking existing direct done behavior"],
+                  "test_requirements": ["Run node --test"],
+                  "evidence_refs": ["src/issueWorkflow.js"],
+                  "open_questions": ["Should review be mandatory?"]
+                }
+                </dual-artifact>
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(tempDir.resolve("src"));
+        Files.writeString(tempDir.resolve("src/issueWorkflow.js"), "export {}\n");
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(intakeRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CONTRACT_RESOLUTION_REQUIRED", result.outcome());
+        assertFalse(Files.exists(workstreamDir.resolve("artifacts/task-contract.json")));
+    }
+
+    @Test
     void executeFailsInvalidTaskContractProposalInsteadOfFallingBackToMarkdown(@TempDir Path tempDir) throws Exception {
         var handler = new ContractCompileHandler();
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);

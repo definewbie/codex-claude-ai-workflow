@@ -211,10 +211,31 @@ final class RoutingEngine {
         if (!hasEdge && !actionAllowed) {
             throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
         }
+        resolveGateDocument(paths, current, node, action, note);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, action, node.inputRefs(), Map.of(
                 "human_action", action,
                 "note", note == null ? "" : note
         ));
+    }
+
+    private void resolveGateDocument(
+            WorkstreamPaths paths,
+            WorkflowCurrentDocument current,
+            NodeInstanceDocument node,
+            String action,
+            String note
+    ) throws IOException {
+        for (var gateId : current.openGateIds()) {
+            var gatePath = paths.gateJson(gateId);
+            if (!Files.isRegularFile(gatePath)) {
+                continue;
+            }
+            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            if (gate.nodeInstanceId().equals(node.nodeInstanceId())) {
+                jsonWriter.write(gatePath, gate.resolved(action, note));
+                return;
+            }
+        }
     }
 
     private void completeWorkflow(

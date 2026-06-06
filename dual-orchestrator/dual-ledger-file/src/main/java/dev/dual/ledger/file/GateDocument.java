@@ -33,6 +33,23 @@ public record GateDocument(
         result = copyMapAllowingNullValues(result);
     }
 
+    GateDocument resolved(String action, String note) {
+        var resolvedResult = new LinkedHashMap<String, Object>(result);
+        resolvedResult.put("human_action", action == null ? "" : action);
+        resolvedResult.put("note", note == null ? "" : note);
+        return new GateDocument(
+                schemaVersion,
+                gateId,
+                nodeInstanceId,
+                gateType,
+                "resolved",
+                allowedActions,
+                openedAt,
+                Instant.now(),
+                resolvedResult
+        );
+    }
+
     private static Map<String, Object> copyMapAllowingNullValues(Map<String, Object> source) {
         if (source == null) {
             return Map.of();

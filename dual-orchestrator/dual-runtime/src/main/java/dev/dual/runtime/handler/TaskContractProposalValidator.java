@@ -45,9 +45,7 @@ final class TaskContractProposalValidator {
         validateList("risk_areas", proposal.riskAreas(), false, errors);
         validateList("test_requirements", proposal.testRequirements(), true, errors);
         validateList("evidence_refs", proposal.evidenceRefs(), false, errors);
-        if (proposal.openQuestions() != null && !proposal.openQuestions().isEmpty()) {
-            errors.add("open_questions must be empty before canonical contract generation");
-        }
+        validateList("open_questions", proposal.openQuestions(), false, errors);
         return errors;
     }
 
