@@ -62,6 +62,40 @@ class RecoveryShowCommandTest {
         assertTrue(printed.contains("dualctl recovery abort --workdir " + tempDir.toAbsolutePath().normalize() + " " + workstreamId));
     }
 
+    @Test
+    void showPrintsContractDiagnosticRefsWhenAvailable() throws Exception {
+        var workstreamId = "ws-contract-diagnostic";
+        var diagnosticJson = ".agent/workstreams/" + workstreamId + "/artifacts/contract-failures/node-design.json";
+        writeDiagnostic(diagnosticJson);
+        writeFailure(workstreamId, NodeStatus.FAILED, "AGENT_OUTPUT_CONTRACT_VIOLATION", Map.of(
+                "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                "contract_failure_diagnostic_ref", diagnosticJson,
+                "contract_failure_diagnostic_markdown_ref",
+                ".agent/workstreams/" + workstreamId + "/artifacts/contract-failures/node-design.md"
+        ));
+
+        var printed = runShow(workstreamId);
+
+        assertTrue(printed.contains("- Classification: artifact_contract_failure"));
+        assertTrue(printed.contains("- Retry Readiness: RETRY_AFTER_OUTPUT_CONTRACT_FIX"));
+        assertTrue(printed.contains("- Reason: Ask the agent to emit the typed artifact."));
+        assertTrue(printed.contains("- Diagnostic JSON: " + diagnosticJson));
+        assertTrue(printed.contains("- Diagnostic Markdown: .agent/workstreams/" + workstreamId
+                + "/artifacts/contract-failures/node-design.md"));
+    }
+
+    private void writeDiagnostic(String diagnosticRef) throws Exception {
+        var path = tempDir.resolve(diagnosticRef);
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, """
+                {
+                  "artifact_type": "contract_failure_diagnostic",
+                  "category": "missing_structured_artifact",
+                  "recovery_hint": "Ask the agent to emit the typed artifact."
+                }
+                """, StandardCharsets.UTF_8);
+    }
+
     private void writeFailure(String workstreamId, NodeStatus nodeStatus, String outcome, Map<String, Object> result) throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
         Files.createDirectories(paths.workstreamDir());

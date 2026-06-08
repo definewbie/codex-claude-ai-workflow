@@ -156,6 +156,10 @@ mainline closure items have first-pass implementations:
   `AGENT_OUTPUT_CONTRACT_VIOLATION`, `recovery/current-failure.md` now
   highlights the contract diagnostic JSON/Markdown refs and parse error details
   instead of burying them in generic output refs.
+- Recovery assessment read model: CLI `dualctl recovery show`, API
+  `/recovery/current`, and operator overview now consume the same structured
+  `RecoveryAssessment`. Contract failures surface classification, retry
+  readiness, diagnostic refs, and the harness recovery hint consistently.
 
 Release-quality MVP still needs:
 

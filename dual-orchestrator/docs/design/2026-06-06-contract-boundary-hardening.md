@@ -19,6 +19,7 @@
 - human review packet / operator guidance 优先读取 structured sidecar 中的 `blocking`、`must_fix`、`missing_evidence`、`open_risks`。
 - `AgentEvidenceIndex` 统一读取 validated sidecar，负责发现、排序、解析和 `evidence_state` 暴露；context boundary、human gate、failure classify 不再各自 walk `runs/**/.contract.json`。
 - 公开 issue-flow 真实运行中的 self-test、acceptance、handoff 输出已经沉淀为 sanitized fixture regression，用来约束真实 Agent artifact 形态，不依赖 fake `acpx`。
+- `RecoveryAssessment` 统一解释恢复状态；CLI、API 和 operator overview 共享 contract failure classification、diagnostic refs、retry readiness 和 recovery hint。
 
 已通过 `mvn -pl dual-cli,dual-server -am test`。真实 case 仍需要继续作为 prompt/schema 兼容性验证，不应通过恢复 Markdown fallback 来绕过 strict failure。
 

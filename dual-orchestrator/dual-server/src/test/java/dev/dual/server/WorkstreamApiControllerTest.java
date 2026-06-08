@@ -294,6 +294,67 @@ class WorkstreamApiControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void currentRecoveryReturnsStructuredAssessmentForContractFailures() throws Exception {
+        var fixture = createFailedWorkstream("ws-api-contract-recovery");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var diagnosticRef = ".agent/workstreams/" + fixture.workstreamId()
+                + "/artifacts/contract-failures/node-agent.json";
+        var diagnosticPath = tempDir.resolve(diagnosticRef);
+        Files.createDirectories(diagnosticPath.getParent());
+        Files.writeString(diagnosticPath, """
+                {
+                  "artifact_type": "contract_failure_diagnostic",
+                  "category": "missing_structured_artifact",
+                  "recovery_hint": "Ask the agent to emit the typed artifact."
+                }
+                """, StandardCharsets.UTF_8);
+        var ledger = new WorkflowFileLedger();
+        var current = ledger.loadCurrent(paths);
+        var activeNodeId = current.activeNodeInstanceIds().get(0);
+        var node = ledger.loadNode(paths, activeNodeId);
+        Files.writeString(paths.nodeJson(activeNodeId), new ObjectMapper().findAndRegisterModules()
+                .writerWithDefaultPrettyPrinter().writeValueAsString(
+                new dev.dual.ledger.file.NodeInstanceDocument(
+                        node.schemaVersion(),
+                        node.nodeInstanceId(),
+                        node.nodeDefinitionId(),
+                        node.kind(),
+                        node.handlerType(),
+                        node.status(),
+                        node.stageId(),
+                        node.iterationId(),
+                        node.inputRefs(),
+                        node.outputRefs(),
+                        Map.of(
+                                "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                                "contract_failure_diagnostic_ref", diagnosticRef
+                        ),
+                        node.runRef(),
+                        node.startedAt(),
+                        node.finishedAt()
+                )
+        ), StandardCharsets.UTF_8);
+        Files.createDirectories(paths.recoveryDir());
+        Files.writeString(paths.currentFailureMarkdown(), "# Current Failure\n\nAGENT_OUTPUT_CONTRACT_VIOLATION\n",
+                StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.currentRecovery(fixture.workstreamId(), tempDir.toString());
+
+        var assessment = (Map<String, Object>) response.get("assessment");
+        assertEquals("artifact_contract_failure", assessment.get("classification"));
+        assertEquals("Ask the agent to emit the typed artifact.", assessment.get("reason"));
+        assertEquals(diagnosticRef, assessment.get("diagnosticJsonRef"));
+
+        var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
+        var attention = (List<Map<String, Object>>) overview.get("attention");
+        assertEquals(true, attention.stream().anyMatch(item ->
+                "Recovery: artifact_contract_failure".equals(item.get("title"))
+                        && item.get("detail").toString().contains("typed artifact")));
+    }
+
+    @Test
     void currentRecoveryReturnsUnavailableWhenMissing() throws Exception {
         var fixture = createWorkstream("ws-api-no-recovery");
         var controller = controller();
@@ -353,6 +414,48 @@ class WorkstreamApiControllerTest {
         var first = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("first-output.md"), Map.of("ok", true));
+        return new Fixture(workstreamIdValue);
+    }
+
+    private Fixture createFailedWorkstream(String workstreamIdValue) throws Exception {
+        var workstreamId = new DualId(workstreamIdValue);
+        var workspaceId = new DualId("wsp-" + workstreamIdValue);
+        var paths = new WorkstreamPaths(tempDir, workstreamId);
+        new FileLedgerStore().initializeWorkstream(
+                paths,
+                Workstream.created(
+                        workstreamId,
+                        "api failed test",
+                        new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
+                        workspaceId,
+                        Instant.parse("2026-06-01T00:00:00Z")
+                ),
+                Workspace.primaryGitWorktree(
+                        workspaceId,
+                        workstreamId,
+                        tempDir.resolve("repo"),
+                        tempDir.resolve("repo-agent-runs").resolve(workstreamIdValue),
+                        "ai/" + workstreamIdValue,
+                        "main",
+                        "abc123"
+                ),
+                "# Requirement\n"
+        );
+        var definition = new WorkflowDefinition(
+                "api-recovery-workflow",
+                1,
+                "agent.step",
+                List.of(new NodeDefinition("agent.step", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-" + workstreamIdValue, definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                List.of(".agent/workstreams/" + workstreamIdValue + "/runs/run-001/outputs/agent.md"),
+                Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION"));
         return new Fixture(workstreamIdValue);
     }
 

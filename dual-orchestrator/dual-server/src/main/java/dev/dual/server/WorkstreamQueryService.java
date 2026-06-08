@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.ledger.file.FileLedgerStore;
+import dev.dual.ledger.file.RecoveryAssessment;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Service;
@@ -126,6 +127,7 @@ public class WorkstreamQueryService {
         var currentNode = currentNode(nodes, activeNodeIds);
         var latestAgentRuns = latestAgentRuns(root, paths, 6);
         var staleRunningReason = staleRunningReason(status, currentNode, latestAgentRuns, artifacts);
+        var recoveryAssessment = recoveryAssessment(root, paths, workstreamId);
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
@@ -149,11 +151,12 @@ public class WorkstreamQueryService {
         response.put("whyStopped", whyStopped(status, currentNode, openGateIds, staleRunningReason));
         response.put("nextAction", nextAction(root, workstreamId, status, openGateIds, staleRunningReason));
         response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
-                artifacts, staleRunningReason));
+                artifacts, staleRunningReason, recoveryAssessment));
         response.put("metrics", metrics);
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
         response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
+        response.put("recoveryAssessment", recoveryAssessment);
         return response;
     }
 
@@ -212,6 +215,7 @@ public class WorkstreamQueryService {
         response.put("available", true);
         response.put("message", "Current failure summary is available.");
         response.put("markdown", Files.readString(failurePath, StandardCharsets.UTF_8));
+        response.put("assessment", recoveryAssessment(root, paths, workstreamId));
         return response;
     }
 
@@ -317,6 +321,19 @@ public class WorkstreamQueryService {
         return actions;
     }
 
+    private Map<String, Object> recoveryAssessment(Path root, WorkstreamPaths paths, String workstreamId) {
+        try {
+            var current = workflowLedger.loadCurrent(paths);
+            if (current.activeNodeInstanceIds().isEmpty()) {
+                return Map.of();
+            }
+            var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+            return RecoveryAssessment.from(node, root, workstreamId).toMap();
+        } catch (Exception ignored) {
+            return Map.of();
+        }
+    }
+
     private String finalAcceptance(WorkstreamPaths paths, Map<String, Object> summary) throws IOException {
         var fromSummary = text(summary.get("final_acceptance_decision"));
         if (!fromSummary.isBlank()) {
@@ -398,7 +415,8 @@ public class WorkstreamQueryService {
 
     private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
                                                 String verificationConfidence, int repairLoopCount,
-                                                Map<String, Object> artifacts, String staleRunningReason) {
+                                                Map<String, Object> artifacts, String staleRunningReason,
+                                                Map<String, Object> recoveryAssessment) {
         var items = new ArrayList<Map<String, Object>>();
         var base = "--workdir \"" + root + "\" " + workstreamId;
         if (!staleRunningReason.isBlank()) {
@@ -418,10 +436,14 @@ public class WorkstreamQueryService {
             ));
         }
         if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
+            var classification = text(recoveryAssessment.get("classification"));
+            var reason = text(recoveryAssessment.get("reason"));
             items.add(attentionItem(
                     "critical",
-                    "Workflow needs recovery",
-                    "Inspect the current failure summary and only retry after the external cause or ledger issue is understood.",
+                    classification.isBlank() ? "Workflow needs recovery" : "Recovery: " + classification,
+                    reason.isBlank()
+                            ? "Inspect the current failure summary and only retry after the external cause or ledger issue is understood."
+                            : reason,
                     "dualctl recovery show " + base
             ));
         }
