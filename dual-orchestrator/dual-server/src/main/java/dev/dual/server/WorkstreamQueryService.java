@@ -123,6 +123,9 @@ public class WorkstreamQueryService {
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
         var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
         var artifacts = artifacts(root, paths);
+        var currentNode = currentNode(nodes, activeNodeIds);
+        var latestAgentRuns = latestAgentRuns(root, paths, 6);
+        var staleRunningReason = staleRunningReason(status, currentNode, latestAgentRuns, artifacts);
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
@@ -132,7 +135,7 @@ public class WorkstreamQueryService {
                 "workflowId", text(timeline.get("workflowId")),
                 "definitionVersion", text(timeline.get("definitionVersion")),
                 "status", status,
-                "currentNode", currentNode(nodes, activeNodeIds),
+                "currentNode", currentNode,
                 "activeNodeInstanceIds", activeNodeIds,
                 "openGateIds", openGateIds,
                 "updatedAt", text(timeline.get("updatedAt"))
@@ -143,12 +146,13 @@ public class WorkstreamQueryService {
                 "repairLoopCount", repairLoopCount,
                 "repairActions", repairActions
         ));
-        response.put("whyStopped", whyStopped(status, currentNode(nodes, activeNodeIds), openGateIds));
-        response.put("nextAction", nextAction(root, workstreamId, status, openGateIds));
-        response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount, artifacts));
+        response.put("whyStopped", whyStopped(status, currentNode, openGateIds, staleRunningReason));
+        response.put("nextAction", nextAction(root, workstreamId, status, openGateIds, staleRunningReason));
+        response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
+                artifacts, staleRunningReason));
         response.put("metrics", metrics);
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
-        response.put("latestAgentRuns", latestAgentRuns(root, paths, 6));
+        response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
         return response;
     }
@@ -344,7 +348,10 @@ public class WorkstreamQueryService {
         return activeNodeId;
     }
 
-    private String whyStopped(String status, String currentNode, List<String> openGateIds) {
+    private String whyStopped(String status, String currentNode, List<String> openGateIds, String staleRunningReason) {
+        if (!staleRunningReason.isBlank()) {
+            return staleRunningReason;
+        }
         if ("WAITING_FOR_HUMAN".equals(status)) {
             return "Waiting for human review" + (openGateIds.isEmpty() ? "." : ": " + String.join(", ", openGateIds));
         }
@@ -363,8 +370,11 @@ public class WorkstreamQueryService {
         return status.isBlank() ? "Workflow state is not available." : "Workflow status is " + status + ".";
     }
 
-    private String nextAction(Path root, String workstreamId, String status, List<String> openGateIds) {
+    private String nextAction(Path root, String workstreamId, String status, List<String> openGateIds, String staleRunningReason) {
         var base = "--workdir \"" + root + "\" " + workstreamId;
+        if (!staleRunningReason.isBlank()) {
+            return "Inspect recovery before continuing: dualctl recovery show " + base;
+        }
         if ("WAITING_FOR_HUMAN".equals(status)) {
             return "Read the review packet, then run: dualctl review show " + base;
         }
@@ -382,9 +392,17 @@ public class WorkstreamQueryService {
 
     private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
                                                 String verificationConfidence, int repairLoopCount,
-                                                Map<String, Object> artifacts) {
+                                                Map<String, Object> artifacts, String staleRunningReason) {
         var items = new ArrayList<Map<String, Object>>();
         var base = "--workdir \"" + root + "\" " + workstreamId;
+        if (!staleRunningReason.isBlank()) {
+            items.add(attentionItem(
+                    "critical",
+                    "Running state looks stale",
+                    staleRunningReason,
+                    "dualctl recovery show " + base
+            ));
+        }
         if ("WAITING_FOR_HUMAN".equals(status)) {
             items.add(attentionItem(
                     "info",
@@ -455,6 +473,25 @@ public class WorkstreamQueryService {
             ));
         }
         return items;
+    }
+
+    private String staleRunningReason(String status, String currentNode, List<Map<String, Object>> latestAgentRuns,
+                                      Map<String, Object> artifacts) {
+        if (!"RUNNING".equals(status)) {
+            return "";
+        }
+        var latest = latestAgentRuns.isEmpty() ? Map.<String, Object>of() : latestAgentRuns.get(0);
+        var latestStatus = text(latest.get("status"));
+        var latestNode = text(latest.get("nodeId"));
+        if ("failed".equals(latestStatus) && (currentNode.isBlank() || currentNode.equals(latestNode))) {
+            return "Workflow is marked RUNNING at " + (currentNode.isBlank() ? "the current node" : currentNode)
+                    + ", but the latest agent run failed. Inspect recovery before continuing.";
+        }
+        var currentFailure = mapValue(artifacts.get("currentFailure"));
+        if (Boolean.TRUE.equals(currentFailure.get("available"))) {
+            return "Workflow is marked RUNNING, but a current failure summary exists. Inspect recovery before continuing.";
+        }
+        return "";
     }
 
     private Map<String, Object> attentionItem(String severity, String title, String detail, String command) {

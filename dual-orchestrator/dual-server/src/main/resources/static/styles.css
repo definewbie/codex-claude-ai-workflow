@@ -332,6 +332,14 @@ textarea {
   align-items: start;
 }
 
+.gate-grid-single {
+  grid-template-columns: 1fr;
+}
+
+.gate-grid-single .current-node {
+  grid-column: 1 / -1;
+}
+
 .current-node {
   display: grid;
   gap: 12px;

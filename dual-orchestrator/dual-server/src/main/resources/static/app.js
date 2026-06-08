@@ -20,7 +20,9 @@ const els = {
   selectedStatus: $("selectedStatus"),
   lifecycleBadge: $("lifecycleBadge"),
   lifecycleProgress: $("lifecycleProgress"),
+  gateGrid: $("gateGrid"),
   gateBadge: $("gateBadge"),
+  decisionPanel: $("decisionPanel"),
   runHint: $("runHint"),
   actionHint: $("actionHint"),
   overviewCards: $("overviewCards"),
@@ -187,6 +189,9 @@ async function loadOverview() {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/overview?workdir=${workdirParam()}`);
     state.overview = data;
     renderOverview(data);
+    if (state.status) {
+      updateActions(state.status);
+    }
   } catch (error) {
     renderOverviewError(error);
   }
@@ -207,7 +212,7 @@ function renderOverview(data) {
   ]);
   els.overviewWhy.textContent = data.whyStopped || "-";
   els.overviewNext.textContent = data.nextAction || "-";
-  renderOverviewAttention(data.attention || []);
+  renderOverviewAttention(derivedAttention(data));
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
 }
@@ -321,6 +326,41 @@ function renderOverviewCards(items) {
   }
 }
 
+function derivedAttention(data) {
+  const items = [...(data.attention || [])];
+  const stale = staleRunningSignal(data);
+  if (stale) {
+    items.unshift({
+      severity: "critical",
+      title: "Running state looks stale",
+      detail: stale,
+      command: `dualctl recovery show --workdir "${data.workspace || ""}" ${data.workstreamId || state.selectedId}`,
+    });
+  }
+  return items;
+}
+
+function staleRunningSignal(data) {
+  const workflow = data.workflow || {};
+  if (workflow.status !== "RUNNING") {
+    return "";
+  }
+  const currentNode = workflow.currentNode || "";
+  const latest = (data.latestAgentRuns || [])[0] || {};
+  const failureAvailable = Boolean(data.artifacts?.currentFailure?.available);
+  if (latest.status === "failed" && (!currentNode || latest.nodeId === currentNode)) {
+    return `The active node is ${currentNode || "unknown"}, but the latest agent run failed. Inspect recovery before continuing.`;
+  }
+  if (failureAvailable) {
+    return `The workflow is marked RUNNING, but a current failure summary exists. Inspect recovery before continuing.`;
+  }
+  return "";
+}
+
+function isStaleRunningOverview() {
+  return state.overview ? Boolean(staleRunningSignal(state.overview)) : false;
+}
+
 function durationLabel(value) {
   if (value === null || value === undefined || value === "") {
     return "-";
@@ -400,6 +440,8 @@ async function loadReviewPacket() {
   const status = state.status?.workflow?.status || "";
   if (status !== "WAITING_FOR_HUMAN") {
     els.reviewPanel.classList.add("hidden");
+    els.gateGrid.classList.add("gate-grid-single");
+    els.decisionPanel.classList.add("hidden");
     els.reviewStructured.innerHTML = "";
     els.gateEvidence.innerHTML = "";
     els.reviewPacket.textContent = "";
@@ -409,11 +451,15 @@ async function loadReviewPacket() {
   try {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/current?workdir=${workdirParam()}`);
     els.reviewPanel.classList.remove("hidden");
+    els.gateGrid.classList.remove("gate-grid-single");
+    els.decisionPanel.classList.remove("hidden");
     els.reviewGate.textContent = data.gateNodeDefinitionId || "";
     renderReviewStructured(data.packet || {});
     els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
   } catch (error) {
     els.reviewPanel.classList.remove("hidden");
+    els.gateGrid.classList.remove("gate-grid-single");
+    els.decisionPanel.classList.remove("hidden");
     els.reviewGate.textContent = "not available";
     els.reviewStructured.innerHTML = "";
     els.gateEvidence.innerHTML = "";
@@ -423,7 +469,7 @@ async function loadReviewPacket() {
 
 async function loadRecoverySummary() {
   const status = state.status?.workflow?.status || "";
-  const stopped = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY"].includes(status);
+  const stopped = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY", "RUNNING"].includes(status);
   if (!stopped) {
     els.recoveryPanel.classList.add("hidden");
     els.recoveryMarkdown.textContent = "";
@@ -672,7 +718,7 @@ function updateActions(data) {
   const activeDefinition = activeNode.nodeDefinitionId || "";
 
   setActionVisibility({
-    resume: status === "RUNNING",
+    resume: status === "RUNNING" && !isStaleRunningOverview(),
     approve: status === "WAITING_FOR_HUMAN",
     complete: status === "WAITING_FOR_HUMAN" && activeDefinition.includes("next_stage"),
     retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
@@ -696,6 +742,11 @@ function updateActions(data) {
     return;
   }
   if (status === "RUNNING") {
+    if (isStaleRunningOverview()) {
+      els.actionHint.textContent = `Workflow is marked running at ${activeDefinition || activeKind}, but recovery evidence suggests it is stale. Inspect recovery before continuing.`;
+      els.runHint.textContent = "Inspect recovery";
+      return;
+    }
     els.actionHint.textContent = `Workflow is running at ${activeDefinition || activeKind}. Run advances up to Max steps; Scheduler Tick advances running workstreams in this workdir.`;
     els.runHint.textContent = "Ready";
     return;

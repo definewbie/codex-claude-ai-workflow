@@ -167,6 +167,52 @@ class WorkstreamApiControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void overviewFlagsStaleRunningWhenCurrentAgentRunFailed() throws Exception {
+        var fixture = createWorkstream("ws-api-stale-running");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.writeString(paths.timelineJson(), """
+                {
+                  "workflowId": "api-workflow",
+                  "definitionVersion": "1",
+                  "workflowStatus": "RUNNING",
+                  "activeNodeInstanceIds": ["node-self-test"],
+                  "openGateIds": [],
+                  "updatedAt": "2026-06-01T00:01:00Z",
+                  "nodes": [
+                    {
+                      "nodeInstanceId": "node-self-test",
+                      "nodeDefinitionId": "implement.claude_self_test_report",
+                      "status": "RUNNING",
+                      "kind": "TASK",
+                      "iterationId": "iter-001"
+                    }
+                  ]
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(paths.runsDir().resolve("run-002"));
+        Files.writeString(paths.runsDir().resolve("run-002").resolve("run.json"), """
+                {
+                  "runId": "run-002",
+                  "agent": "claude",
+                  "nodeId": "implement.claude_self_test_report",
+                  "status": "failed",
+                  "durationMs": 117719
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(paths.recoveryDir());
+        Files.writeString(paths.currentFailureMarkdown(), "# Current Failure\n", StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        assertEquals(true, response.get("whyStopped").toString().contains("latest agent run failed"));
+        assertEquals(true, response.get("nextAction").toString().contains("dualctl recovery show"));
+        var attention = (List<Map<String, Object>>) response.get("attention");
+        assertEquals(true, attention.stream().anyMatch(item -> "Running state looks stale".equals(item.get("title"))));
+    }
+
+    @Test
     void currentReviewReturnsActiveGatePacket() throws Exception {
         var fixture = createWorkstream("ws-api-review");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
