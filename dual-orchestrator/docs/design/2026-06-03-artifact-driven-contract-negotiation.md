@@ -483,18 +483,24 @@ dualctl calibration plan <candidate-id>
 
 目标：开始接入模板提取能力，但不做完整模板系统。
 
-改造项：
+当前已按低成本路径落地：
 
-1. 新增 `TemplateProvider`
-   - 读取内置 templates。
-   - 读取项目 `.agent/templates/*.md`。
-   - 合并注入 review prompt。
+1. `AgentPromptRenderer` 承担第一版 `TemplateProvider` 职责。
+   - 读取内置 principle templates。
+   - 读取项目 `.agent/templates/<template>.md`。
+   - 额外合并 `.agent/templates/domain-principles.md`。
+   - 只把原则注入 prompt，Java 不逐条执行这些自然语言原则。
 
-2. 扩展 CalibrationCandidate
-   - 支持 `PRINCIPLE_TEMPLATE` / `TEMPLATE_UPDATE`。
-   - 写入 `.agent/calibration/template-candidates/`。
+2. Calibration candidate 已支持 template proposal seed。
+   - 真实失败分类后写入 `.agent/workstreams/<id>/calibration/candidates/`。
+   - `dualctl calibration plan` 生成 reviewable `templateProposal`。
+   - 第一版使用 `CONTRACT_TEMPLATE` / `CONTEXT_RULE` / `REGRESSION_TEST`
+     作为 proposed update type，避免为了命名再引入一层 candidate taxonomy。
 
-3. final report / recovery summary 引用 template candidate。
+3. Recovery / final artifacts 已能引用 calibration candidate。
+   - failure classification 输出包含 candidate refs。
+   - recovery summary 和 operator trace 能引导人查看候选。
+   - apply plan 明确“不自动修改 prompt、template、context rule、workflow 或测试”。
 
 ### 7.4 P2：Promotion 与知识库
 

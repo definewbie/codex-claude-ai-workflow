@@ -129,8 +129,8 @@ The first public, non-domain fixture regression set now covers:
 
 ## Updated MVP Gap
 
-The main lifecycle is functionally closed. As of 2026-06-06, the remaining P1
-mainline closure items have first-pass implementations:
+The main lifecycle is functionally closed. As of 2026-06-08, the P1 mainline
+closure items have first-pass implementations:
 
 - Contract compiler quality closure: READY contracts now require executable
   scope, acceptance criteria, test requirements, and explicit boundaries.
@@ -160,6 +160,10 @@ mainline closure items have first-pass implementations:
   `/recovery/current`, and operator overview now consume the same structured
   `RecoveryAssessment`. Contract failures surface classification, retry
   readiness, diagnostic refs, and the harness recovery hint consistently.
+- Principle template seed: prompt rendering reads built-in and project
+  `.agent/templates/*.md` principles; real failure classification can generate
+  calibration candidates; `dualctl calibration plan` turns accepted candidates
+  into a human-reviewable `templateProposal` without auto-mutating templates.
 
 Release-quality MVP still needs:
 
