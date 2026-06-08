@@ -160,7 +160,16 @@ Release-quality MVP still needs:
      contract failure diagnostics and context `State & Evidence Boundary`.
      The healthy-path run produced no contract failure diagnostics and showed
      the boundary section in generated context packages and downstream prompts.
+   - 2026-06-08: the public benchmark path now has a single command:
+     `./scripts/run-public-benchmark.sh`. It prepares the disposable sample repo
+     and runs the public issue-flow case through `run-real-case.sh`.
 2. A short install-to-first-run path that does not reference private benchmark
    cases.
+   - 2026-06-08: `README.md` and `docs/quickstart.md` now lead with the public
+     benchmark command for the first real lifecycle validation path.
 3. Continued regression fixtures for real structured artifacts whenever a
    real-case run exposes a new stable artifact shape.
+4. Operator timeline consistency across CLI/API/UI.
+   - 2026-06-08: new timeline projections are written in chronological order,
+     and the server normalizes existing `timeline.json` files before serving
+     `/timeline` and `/overview`.

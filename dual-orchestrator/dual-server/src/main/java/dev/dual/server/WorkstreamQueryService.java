@@ -102,7 +102,7 @@ public class WorkstreamQueryService {
         if (!Files.exists(paths.timelineJson())) {
             throw new IOException("timeline projection not found: " + paths.timelineJson());
         }
-        return objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE);
+        return normalizedTimeline(paths);
     }
 
     public Map<String, Object> overview(Path workspaceRoot, String workstreamId) throws IOException {
@@ -111,7 +111,7 @@ public class WorkstreamQueryService {
         if (!Files.exists(paths.timelineJson())) {
             throw new IOException("timeline projection not found: " + paths.timelineJson());
         }
-        var timeline = objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE);
+        var timeline = normalizedTimeline(paths);
         var metrics = readJson(paths.workstreamMetricsJson());
         var summary = readJson(paths.workstreamDir().resolve("reports").resolve("real-case-summary.json"));
         var nodes = mapList(timeline.get("nodes"));
@@ -155,6 +155,12 @@ public class WorkstreamQueryService {
         response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
         return response;
+    }
+
+    private Map<String, Object> normalizedTimeline(WorkstreamPaths paths) throws IOException {
+        var timeline = new LinkedHashMap<>(objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE));
+        timeline.put("nodes", sortedTimelineNodes(mapList(timeline.get("nodes"))));
+        return timeline;
     }
 
     public Map<String, Object> currentReview(Path workspaceRoot, String workstreamId) throws IOException {
@@ -605,6 +611,43 @@ public class WorkstreamQueryService {
         return nodes.stream()
                 .skip(Math.max(0, nodes.size() - limit))
                 .toList();
+    }
+
+    private static List<Map<String, Object>> sortedTimelineNodes(List<Map<String, Object>> nodes) {
+        return nodes.stream()
+                .sorted(WorkstreamQueryService::compareTimelineNodes)
+                .toList();
+    }
+
+    private static int compareTimelineNodes(Map<String, Object> left, Map<String, Object> right) {
+        var byTime = timelineInstant(left).compareTo(timelineInstant(right));
+        if (byTime != 0) {
+            return byTime;
+        }
+        return text(left.get("nodeInstanceId")).compareTo(text(right.get("nodeInstanceId")));
+    }
+
+    private static Instant timelineInstant(Map<String, Object> node) {
+        var startedAt = parseInstant(text(node.get("startedAt")));
+        if (startedAt != null) {
+            return startedAt;
+        }
+        var finishedAt = parseInstant(text(node.get("finishedAt")));
+        if (finishedAt != null) {
+            return finishedAt;
+        }
+        return Instant.MAX;
+    }
+
+    private static Instant parseInstant(String value) {
+        if (value.isBlank() || "null".equals(value)) {
+            return null;
+        }
+        try {
+            return Instant.parse(value);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private static List<String> textList(Object value) {

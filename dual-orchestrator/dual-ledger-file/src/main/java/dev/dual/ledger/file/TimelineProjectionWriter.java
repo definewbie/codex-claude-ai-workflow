@@ -26,6 +26,7 @@ final class TimelineProjectionWriter {
         }
         var current = objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
         var nodes = readNodes(paths).stream()
+                .sorted(TimelineProjectionWriter::compareNodes)
                 .map(this::nodeView)
                 .toList();
 
@@ -89,6 +90,26 @@ final class TimelineProjectionWriter {
             return null;
         }
         return Duration.between(startedAt, finishedAt).toMillis();
+    }
+
+    private static int compareNodes(NodeInstanceDocument left, NodeInstanceDocument right) {
+        var leftInstant = timelineInstant(left);
+        var rightInstant = timelineInstant(right);
+        var byTime = leftInstant.compareTo(rightInstant);
+        if (byTime != 0) {
+            return byTime;
+        }
+        return left.nodeInstanceId().compareTo(right.nodeInstanceId());
+    }
+
+    private static Instant timelineInstant(NodeInstanceDocument node) {
+        if (node.startedAt() != null) {
+            return node.startedAt();
+        }
+        if (node.finishedAt() != null) {
+            return node.finishedAt();
+        }
+        return Instant.MAX;
     }
 
     private static final class TimelineProjectionException extends RuntimeException {

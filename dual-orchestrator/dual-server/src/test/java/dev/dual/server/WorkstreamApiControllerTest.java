@@ -115,6 +115,44 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void timelineReturnsNodesInChronologicalOrder() throws Exception {
+        var fixture = createWorkstream("ws-api-timeline-order");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.writeString(paths.timelineJson(), """
+                {
+                  "workstreamId": "ws-api-timeline-order",
+                  "workflowStatus": "COMPLETED",
+                  "activeNodeInstanceIds": [],
+                  "openGateIds": [],
+                  "nodes": [
+                    {
+                      "nodeInstanceId": "node-late",
+                      "nodeDefinitionId": "late",
+                      "status": "COMPLETED",
+                      "kind": "TASK",
+                      "startedAt": "2026-06-01T00:02:00Z"
+                    },
+                    {
+                      "nodeInstanceId": "node-early",
+                      "nodeDefinitionId": "early",
+                      "status": "COMPLETED",
+                      "kind": "TASK",
+                      "startedAt": "2026-06-01T00:01:00Z"
+                    }
+                  ]
+                }
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var timeline = controller.timeline(fixture.workstreamId(), tempDir.toString());
+
+        var nodes = (List<Map<String, Object>>) timeline.get("nodes");
+        assertEquals("early", nodes.get(0).get("nodeDefinitionId"));
+        assertEquals("late", nodes.get(1).get("nodeDefinitionId"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void overviewReturnsTraceSummary() throws Exception {
         var fixture = createWorkstream("ws-api-overview");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));

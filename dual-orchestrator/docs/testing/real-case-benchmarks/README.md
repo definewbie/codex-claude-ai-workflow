@@ -102,6 +102,17 @@ Benchmark index 的 `Grade` 是轻量体检结果，不替代人工读详细报�
 Public reusable case:
 
 ```bash
+./scripts/run-public-benchmark.sh
+```
+
+This is the preferred open-source validation command. It prepares a disposable
+`examples/issue-flow-app` git repo, runs `run-real-case.sh` with the public task,
+and writes the same `summary.json` / `report.md` evidence as any other real
+case.
+
+To prepare the repo without immediately running real Agents:
+
+```bash
 ./scripts/prepare-public-benchmark-repo.sh
 ```
 

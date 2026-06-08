@@ -85,13 +85,21 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 
 ## Public Benchmark
 
-项目内置了一个公开、可复用的小型 benchmark app，适合验证真实生命周期而不依赖私有仓库：
+项目内置了一个公开、可复用的小型 benchmark app，适合验证真实生命周期而不依赖私有仓库。
+最短路径：
+
+```bash
+./scripts/run-public-benchmark.sh
+```
+
+如果只想准备样例仓库、不立即运行 Agent：
 
 ```bash
 ./scripts/prepare-public-benchmark-repo.sh
 ```
 
-脚本会把 `examples/issue-flow-app` 复制到 `/tmp` 下的临时 git repo，并打印可直接运行的 `run-real-case.sh` 命令。
+这两个脚本都会使用 `examples/issue-flow-app`。`run-public-benchmark.sh` 会调用真实
+`acpx` Claude / Codex，并自动 approve benchmark 中间 gate；它用于验证主流程，不替代最终人工验收。
 
 ## 人工 Review
 

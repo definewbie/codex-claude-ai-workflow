@@ -61,6 +61,24 @@ This is the quickest sanity check for the CLI/workflow path.
 
 ## 5. Run A Real Lifecycle Case
 
+The easiest reusable real run is the public benchmark:
+
+```bash
+./scripts/run-public-benchmark.sh
+```
+
+It creates a disposable issue-flow sample repo under `/tmp`, runs the full
+lifecycle with real `acpx` Claude/Codex, auto-approves intermediate benchmark
+gates, and writes a report under `docs/testing/real-case-reports/`.
+
+To choose the sample repo location:
+
+```bash
+./scripts/run-public-benchmark.sh --dest /tmp/dual-issue-flow-benchmark
+```
+
+For your own repository, use `run-real-case.sh` directly.
+
 Use a real Git repo and a bounded task file:
 
 ```bash
