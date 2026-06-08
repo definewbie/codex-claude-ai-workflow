@@ -69,6 +69,7 @@ Runtime 只认识三类节点：
 - Timeline projection：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
 - Trace CLI：`dualctl trace` 一屏展示当前 status、active node、open gate、acceptance、repair loops、timeline、关键 artifacts 和下一步命令。
 - Workstream summary：`dualctl summary` 会聚合 timeline、recovery、delivery、calibration 和 final report，方便真实 case 复盘。
+- Provider metrics MVP：`metrics/workstream-metrics.json` 按 Claude / Codex 聚合 run count、完成/失败数量、可恢复失败、总耗时和平均耗时。
 - review decision handler。
 - context package handler，会在关键 Agent step 前装配可读上下文。
 - artifact validation handler，会落盘 Git status / diff / changed files。
@@ -915,7 +916,16 @@ dualctl calibration plan \
 .agent/workstreams/<workstream_id>/calibration/apply-plans/<candidate_id>.md
 ```
 
-`decide` 只会更新 candidate JSON 的 `status`、`decidedAt` 和 `decisionNotes`。`plan` 只会生成下一步建议，不会修改 prompt、contract template、context rule、workflow definition 或测试。真正把候选提升到模板或测试，仍然需要单独的人审改动。
+显式提升已接受的 contract template candidate：
+
+```bash
+dualctl calibration promote \
+  --workdir <effective_worktree> \
+  <workstream_id> \
+  <candidate_id>
+```
+
+`decide` 只会更新 candidate JSON 的 `status`、`decidedAt` 和 `decisionNotes`。`plan` 只会生成下一步建议。`promote` 只接受已 `ACCEPTED` 且已有 apply plan 的 `CONTRACT_TEMPLATE` candidate，并只追加到项目级 `.agent/templates/contract-review-principles.md`。它不会修改内置 prompt、workflow definition、context rule 或测试；`CONTEXT_RULE` / `REGRESSION_TEST` 仍只生成计划，需要人工实现。
 
 ### Human Review
 
@@ -969,6 +979,8 @@ dualctl watch --workdir <effective_worktree> --interval-ms 1000 <workstream_id>
 ```
 
 `timeline.json` 聚合 workflow current 和 nodes 快照，包含 workflow 状态、active nodes、open gates、每个 node 的状态、iteration、artifact refs 和 duration。`watch` / Web UI 会优先消费这个读模型，而不是直接解析 ledger 原始文件。
+
+`metrics/workstream-metrics.json` 还包含 `providerMetrics`。当前指标来自本地 `runs/*/run.json`，覆盖 agent/provider 成功率、失败数和耗时；token / cost 需要 acpx adapter 暴露原始 usage 后再补。
 
 ### Workstream Summary
 

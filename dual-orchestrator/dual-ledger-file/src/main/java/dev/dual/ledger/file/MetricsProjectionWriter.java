@@ -1,6 +1,7 @@
 package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
@@ -17,6 +18,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 final class MetricsProjectionWriter {
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
     private final AtomicJsonWriter jsonWriter;
     private final ObjectMapper objectMapper;
 
@@ -56,6 +59,7 @@ final class MetricsProjectionWriter {
         metrics.put("runningCount", nodes.stream().filter(node -> node.status() == NodeStatus.RUNNING).count());
         metrics.put("totalNodeDurationMs", totalDurationMs(nodes));
         metrics.put("longestNodes", longestNodes(nodes, 5));
+        metrics.put("providerMetrics", providerMetrics(paths));
 
         Files.createDirectories(paths.metricsDir());
         jsonWriter.write(paths.workstreamMetricsJson(), metrics);
@@ -102,6 +106,33 @@ final class MetricsProjectionWriter {
         } catch (MetricsProjectionException e) {
             throw e.unwrap();
         }
+    }
+
+    private Map<String, Object> providerMetrics(WorkstreamPaths paths) throws IOException {
+        if (!Files.isDirectory(paths.runsDir())) {
+            return Map.of();
+        }
+        var byAgent = new LinkedHashMap<String, ProviderMetric>();
+        try (var stream = Files.list(paths.runsDir())) {
+            for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
+                var agent = text(run.get("agent"));
+                if (agent.isBlank()) {
+                    agent = "unknown";
+                }
+                var metric = byAgent.computeIfAbsent(agent, ignored -> new ProviderMetric());
+                metric.accept(text(run.get("status")), longValue(run.get("durationMs")), Boolean.TRUE.equals(run.get("recoverable")));
+            }
+        }
+        var result = new LinkedHashMap<String, Object>();
+        for (var entry : byAgent.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().toMap());
+        }
+        return result;
     }
 
     private Map<String, Long> counts(List<NodeInstanceDocument> nodes, Function<NodeInstanceDocument, String> classifier) {
@@ -161,6 +192,7 @@ final class MetricsProjectionWriter {
     @SuppressWarnings("unchecked")
     private String renderMarkdown(WorkstreamPaths paths, Map<String, Object> metrics) {
         var longestNodes = (List<Map<String, Object>>) metrics.get("longestNodes");
+        var providerMetrics = (Map<String, Object>) metrics.get("providerMetrics");
         var builder = new StringBuilder();
         builder.append("# Workstream Metrics\n\n");
         builder.append("- Workstream: ").append(paths.workstreamId().value()).append("\n");
@@ -189,7 +221,88 @@ final class MetricsProjectionWriter {
                         .append(" |\n");
             }
         }
+        builder.append("\n## Provider Metrics\n\n");
+        builder.append("| Provider | Runs | Completed | Failed | Recoverable | Total Duration(ms) | Average Duration(ms) |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- |\n");
+        if (providerMetrics == null || providerMetrics.isEmpty()) {
+            builder.append("| N/A | 0 | 0 | 0 | 0 | 0 | 0 |\n");
+        } else {
+            for (var entry : providerMetrics.entrySet()) {
+                var value = (Map<String, Object>) entry.getValue();
+                builder.append("| ").append(entry.getKey())
+                        .append(" | ").append(value.get("runCount"))
+                        .append(" | ").append(value.get("completedCount"))
+                        .append(" | ").append(value.get("failedCount"))
+                        .append(" | ").append(value.get("recoverableFailureCount"))
+                        .append(" | ").append(value.get("totalDurationMs"))
+                        .append(" | ").append(value.get("averageDurationMs"))
+                        .append(" |\n");
+            }
+        }
         return builder.toString();
+    }
+
+    private static long longValue(Object value) {
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value != null) {
+            try {
+                return Long.parseLong(String.valueOf(value));
+            } catch (NumberFormatException ignored) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private static final class ProviderMetric {
+        private long runCount;
+        private long completedCount;
+        private long failedCount;
+        private long preparedCount;
+        private long recoverableFailureCount;
+        private long totalDurationMs;
+
+        void accept(String status, long durationMs, boolean recoverable) {
+            runCount++;
+            totalDurationMs += Math.max(0, durationMs);
+            switch (status) {
+                case "completed" -> completedCount++;
+                case "failed" -> {
+                    failedCount++;
+                    if (recoverable) {
+                        recoverableFailureCount++;
+                    }
+                }
+                case "prepared" -> preparedCount++;
+                case "recoverable_failed" -> {
+                    failedCount++;
+                    recoverableFailureCount++;
+                }
+                default -> {
+                    if (status.contains("recoverable")) {
+                        recoverableFailureCount++;
+                    }
+                }
+            }
+        }
+
+        Map<String, Object> toMap() {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("runCount", runCount);
+            map.put("completedCount", completedCount);
+            map.put("failedCount", failedCount);
+            map.put("preparedCount", preparedCount);
+            map.put("recoverableFailureCount", recoverableFailureCount);
+            map.put("totalDurationMs", totalDurationMs);
+            map.put("averageDurationMs", runCount == 0 ? 0 : totalDurationMs / runCount);
+            return map;
+        }
     }
 
     private static final class MetricsProjectionException extends RuntimeException {

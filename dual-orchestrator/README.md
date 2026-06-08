@@ -127,6 +127,20 @@ dualctl review revise --feedback-file feedback.md --run --workdir <effective_wor
 dualctl review complete --workdir <effective_workdir> <workstream_id>
 ```
 
+## Calibration
+
+真实失败被分类后，系统可能生成 calibration candidate。第一版只做人审闭环，不自动修改内置 prompt 或 workflow。
+
+```bash
+dualctl calibration list --workdir <effective_workdir> <workstream_id>
+dualctl calibration show --workdir <effective_workdir> <workstream_id> <candidate_id>
+dualctl calibration decide --status accepted --workdir <effective_workdir> <workstream_id> <candidate_id>
+dualctl calibration plan --workdir <effective_workdir> <workstream_id> <candidate_id>
+dualctl calibration promote --workdir <effective_workdir> <workstream_id> <candidate_id>
+```
+
+`promote` 只支持已 `ACCEPTED` 且已有 apply plan 的 `CONTRACT_TEMPLATE` candidate，并只追加到项目级 `.agent/templates/contract-review-principles.md`。它不会修改内置模板、workflow 定义或测试。
+
 ## Operator Panel
 
 启动本地 API / dashboard：

@@ -105,6 +105,71 @@ class CalibrationCommandTest {
         assertTrue(printed.contains("candidate-4"));
     }
 
+    @Test
+    void promoteRequiresAcceptedCandidate() throws Exception {
+        writeCandidate("candidate-5", "DRAFT");
+        writePlan("candidate-5");
+
+        var command = new CalibrationPromoteCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-cal";
+        command.candidateId = "candidate-5";
+
+        var printed = captureStderr(command::call, 1);
+        assertTrue(printed.contains("must be ACCEPTED"));
+    }
+
+    @Test
+    void promoteAppendsAcceptedPlanToProjectTemplateAndMarksArtifactsPromoted() throws Exception {
+        writeCandidate("candidate-6", "ACCEPTED");
+        writePlan("candidate-6");
+
+        var command = new CalibrationPromoteCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-cal";
+        command.candidateId = "candidate-6";
+
+        var printed = captureStdout(command::call);
+
+        var template = tempDir.resolve(".agent/templates/contract-review-principles.md");
+        assertTrue(Files.isRegularFile(template));
+        var templateText = Files.readString(template, StandardCharsets.UTF_8);
+        assertTrue(templateText.contains("Calibration Candidate: candidate-6"));
+        assertTrue(templateText.contains("<!-- calibration-candidate: candidate-6 -->"));
+        assertTrue(templateText.contains("Prefer contract principles that name observable acceptance evidence."));
+        assertTrue(templateText.contains(".agent/workstreams/ws-cal/artifacts/failure-classification.json"));
+
+        var candidateJson = Files.readString(candidateJson("candidate-6"), StandardCharsets.UTF_8);
+        assertTrue(candidateJson.contains("\"status\" : \"PROMOTED\""));
+        assertTrue(candidateJson.contains("\"promotedTarget\" : \".agent/templates/contract-review-principles.md\""));
+
+        var planJson = Files.readString(planJson("candidate-6"), StandardCharsets.UTF_8);
+        assertTrue(planJson.contains("\"status\" : \"PROMOTED\""));
+        assertTrue(planJson.contains("\"promotedTarget\" : \".agent/templates/contract-review-principles.md\""));
+        assertTrue(printed.contains("Calibration candidate promoted"));
+    }
+
+    @Test
+    void promoteDoesNotAppendSameCandidateTwice() throws Exception {
+        writeCandidate("candidate-7", "ACCEPTED");
+        writePlan("candidate-7");
+        var command = new CalibrationPromoteCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-cal";
+        command.candidateId = "candidate-7";
+
+        captureStdout(command::call);
+        writeCandidate("candidate-7", "ACCEPTED");
+        writePlan("candidate-7");
+        captureStdout(command::call);
+
+        var templateText = Files.readString(
+                tempDir.resolve(".agent/templates/contract-review-principles.md"),
+                StandardCharsets.UTF_8
+        );
+        assertEquals(1, templateText.split("calibration-candidate: candidate-7", -1).length - 1);
+    }
+
     private String captureStdout(ThrowingCallable callable) throws Exception {
         var originalOut = System.out;
         var out = new ByteArrayOutputStream();
@@ -115,6 +180,18 @@ class CalibrationCommandTest {
             System.setOut(originalOut);
         }
         return out.toString(StandardCharsets.UTF_8);
+    }
+
+    private String captureStderr(ThrowingCallable callable, int expectedExitCode) throws Exception {
+        var originalErr = System.err;
+        var err = new ByteArrayOutputStream();
+        try {
+            System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
+            assertEquals(expectedExitCode, callable.call());
+        } finally {
+            System.setErr(originalErr);
+        }
+        return err.toString(StandardCharsets.UTF_8);
     }
 
     private void writeCandidate(String candidateId, String status) throws Exception {
@@ -139,8 +216,38 @@ class CalibrationCommandTest {
                 "# Candidate " + candidateId + "\n", StandardCharsets.UTF_8);
     }
 
+    private void writePlan(String candidateId) throws Exception {
+        Files.createDirectories(planJson(candidateId).getParent());
+        Files.writeString(planJson(candidateId), """
+                {
+                  "schemaVersion": 1,
+                  "candidateId": "%s",
+                  "sourceWorkstreamId": "ws-cal",
+                  "candidateStatus": "ACCEPTED",
+                  "proposedUpdateType": "CONTRACT_TEMPLATE",
+                  "status": "PROPOSED",
+                  "templateProposal": {
+                    "status": "REVIEW_REQUIRED",
+                    "proposalType": "CONTRACT_TEMPLATE",
+                    "targetArea": "Task contract template or contract compiler checklist",
+                    "proposedChange": "Prefer contract principles that name observable acceptance evidence.",
+                    "checklistItems": [
+                      "Keep the principle domain-neutral",
+                      "Add a regression fixture"
+                    ],
+                    "regressionSuggestion": "Add a fixture for this evidence pattern."
+                  }
+                }
+                """.formatted(candidateId), StandardCharsets.UTF_8);
+    }
+
     private Path candidateJson(String candidateId) {
         return tempDir.resolve(".agent/workstreams/ws-cal/calibration/candidates")
+                .resolve(candidateId + ".json");
+    }
+
+    private Path planJson(String candidateId) {
+        return tempDir.resolve(".agent/workstreams/ws-cal/calibration/apply-plans")
                 .resolve(candidateId + ".json");
     }
 

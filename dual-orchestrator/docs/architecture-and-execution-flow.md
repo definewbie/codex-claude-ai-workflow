@@ -141,7 +141,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Context governance：profile、budget、degradation、placeholder/skip/fail。
 - TaskContract / ContractCompiler / ContractReviewGate。
 - FailureArbiter MVP。
-- CalibrationCandidate MVP：可校准的 failure classification 会生成 `calibration/candidates/<id>.json` 和 `.md`；`dualctl calibration list/show/decide/plan` 可把候选变成人工可评估、可采纳/拒绝/延后，并能生成 apply plan 的账本资产。当前不会自动提升模板、规则或测试。
+- CalibrationCandidate MVP：可校准的 failure classification 会生成 `calibration/candidates/<id>.json` 和 `.md`；`dualctl calibration list/show/decide/plan` 可把候选变成人工可评估、可采纳/拒绝/延后，并能生成 apply plan 的账本资产；`dualctl calibration promote` 可把已接受的 `CONTRACT_TEMPLATE` plan 显式追加到项目 `.agent/templates/contract-review-principles.md`，但不会修改内置模板、workflow、context rule 或测试。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Review packet MVP：human gate 会生成 `reviews/<gate_node_instance_id>.md` / `.json`，`dualctl review show` 可展示当前卡点所需材料。
 - Timeline projection MVP：ledger 自动生成 `timeline.json`，`dualctl timeline` 可展示 workflow / node 进度。
@@ -185,7 +185,7 @@ real-case benchmark
 | Done | Metrics projection MVP | ledger 自动生成节点、gate、iteration、duration 指标，CLI summary 和 API overview 复用同一读模型 |
 | P1 | Real-case benchmark loop | 用 2-3 个真实任务持续验证 p6，而不是只靠低复杂度 fixture |
 | P1 | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |
-| P2 | Provider metrics | 在 adapter 层补 token、成本、provider 成功率等更细指标 |
+| Done | Provider metrics MVP | 从 `runs/*/run.json` 聚合 agent/provider 成功率、失败数和耗时；token / cost 等待 adapter 暴露原始字段 |
 
 ### 4.2 长期路线
 

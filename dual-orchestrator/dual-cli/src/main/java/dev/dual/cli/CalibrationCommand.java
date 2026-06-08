@@ -12,12 +12,13 @@ import picocli.CommandLine.Command;
                 CalibrationListCommand.class,
                 CalibrationShowCommand.class,
                 CalibrationDecideCommand.class,
-                CalibrationPlanCommand.class
+                CalibrationPlanCommand.class,
+                CalibrationPromoteCommand.class
         }
 )
 public final class CalibrationCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use calibration list, calibration show, calibration decide, or calibration plan.");
+        System.out.println("Use calibration list, calibration show, calibration decide, calibration plan, or calibration promote.");
     }
 }

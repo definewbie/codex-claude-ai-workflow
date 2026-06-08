@@ -504,13 +504,20 @@ dualctl calibration plan <candidate-id>
 
 ### 7.4 P2：Promotion 与知识库
 
-等真实 case 产生 2-3 个候选后再做：
+当前已完成最小受控 promotion：
 
-- `dualctl calibration list/show/decide/plan` 先把候选变成可审阅 apply plan
-- 是否增加 `promote` 命令需要重新评估，避免在规则还不稳定时自动改模板
-- append 到 `.agent/templates/*`
-- template version metadata
-- replay 验证新模板是否改善历史 run
+- `dualctl calibration list/show/decide/plan` 把候选变成可审阅 apply plan。
+- `dualctl calibration promote` 只接受已 `ACCEPTED` 且已有 apply plan 的
+  `CONTRACT_TEMPLATE` candidate。
+- promotion 只追加到项目 `.agent/templates/contract-review-principles.md`，
+  不修改内置 prompts、workflow、context rules 或 tests。
+- 同一 candidate 重复 promote 不会重复追加。
+
+仍然后置：
+
+- template version metadata。
+- replay 验证新模板是否改善历史 run。
+- 支持 CONTEXT_RULE / REGRESSION_TEST 的自动应用；当前只生成计划，不自动改。
 
 ---
 

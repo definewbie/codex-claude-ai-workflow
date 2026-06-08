@@ -26,7 +26,7 @@
 
 - [x] CalibrationCandidate MVP：从 FailureArbiter 输出生成 contract template / context rule / regression test 候选。
   - 2026-06-01：`FailureClassifyHandler` 会为可校准分类写入 `calibration/candidates/<id>.json` 和 `.md`。`TOOL_LIMITATION` / `REVIEW_NOISE` 暂不生成候选，避免把一次性运行噪声沉淀为规则。
-  - 2026-06-03：`dualctl calibration list/show/decide` 可查看候选并记录人工采纳/拒绝/延后判断；暂不自动提升到模板，避免过早规则引擎化。
+  - 2026-06-03：`dualctl calibration list/show/decide` 可查看候选并记录人工采纳/拒绝/延后判断；系统不会自动提升候选，避免过早规则引擎化。
   - 2026-06-04：`dualctl calibration plan` 可把候选转成 `calibration/apply-plans/<id>.json` 和 `.md`，沉淀建议目标、证据和人工处理动作；仍不自动修改模板、规则或测试。
 - [x] Review packet artifact：为 human gate 生成稳定 review 包，后续 CLI/UI 共用。
   - 2026-06-01：`HumanReviewGateHandler` 会写入 `reviews/<gate_node_instance_id>.md` 和 `.json`，`dualctl review show` 可直接展示当前 gate packet。
@@ -37,6 +37,7 @@
   - 2026-06-04：`dualctl summary` 会聚合 timeline、推荐下一步动作、final report、recovery summary、delivery、calibration candidates 和 apply plans；`--write` 可写入 `reports/workstream-summary.md`。
 - [x] Workstream metrics projection：从 workflow current、nodes 和 iterations 生成轻量指标读模型。
   - 2026-06-06：`WorkflowFileLedger` 自动更新 `metrics/workstream-metrics.json` 和 `.md`，记录节点数、agent run 数、gate/decision 数、iteration/revision 数、状态计数、总节点耗时和最长节点；`dualctl summary` 和 `dual-server overview` 复用该投影。token 用量等 provider 级指标后续在 adapter 层补充。
+  - 2026-06-08：metrics 增加 `providerMetrics`，从 `runs/*/run.json` 聚合 Claude / Codex run count、completed/failed/prepared count、recoverable failure count、总耗时和平均耗时。token / cost 仍以后续 adapter 原始数据为准，不伪造。
 - [x] Status workflow-first：`dualctl status` 默认以 workflow current 为准，旧 checkpoint/stage 快照仅在 `--show-legacy` 时显示。
 - [x] Failure summary：失败时生成 `recovery/current-failure.md`，聚合失败原因、证据和建议动作。
   - 2026-06-01：普通 `FAILED` / `BLOCKED` 节点会由 ledger 写入当前失败摘要，包含 node、handler、原因、exit code、output refs 和 retry 提示。
@@ -66,6 +67,9 @@
 - [x] Calibration template proposal MVP：accepted candidate 可以生成可审阅 template proposal。
   - 2026-06-06：`dualctl calibration plan` 生成 `templateProposal`，包含 target area、proposal type、proposed change、checklist items 和 regression suggestion。
   - 2026-06-06：plan 仍不自动修改 prompt、contract template、context rule、workflow 或测试，保持人工 review gate。
+- [x] Calibration promotion MVP：accepted candidate 可以显式提升为项目原则。
+  - 2026-06-08：`dualctl calibration promote` 只接受已 `ACCEPTED` 且已有 apply plan 的 `CONTRACT_TEMPLATE` candidate。
+  - promotion 只追加到项目级 `.agent/templates/contract-review-principles.md`，不修改内置 prompt、workflow 定义、context rule 或测试；重复执行同一 candidate 不会重复追加。
 - [x] Handoff / context continuity closure：next-stage handoff 能携带更完整续跑状态。
   - 2026-06-06：`handoff.json` 增加 `importantDecisions`、`recommendedNextStage`、`suggestedNextPrompt`。
   - 2026-06-06：context package 会优先消费 handoff 中的 completed work、important decisions、open risks 和 recommended next stage，帮助新 session 接住长任务。
@@ -92,7 +96,7 @@
 - [x] Local API Server MVP：`dual-server` 提供 HTTP API，暴露 workstream list、workflow overview / status / timeline，并支持最小 action：resume、retry、review approve/revise。
 - [ ] T3.1 实时进度：SSE 或 file watch 推送 workflow 状态变更。
 - [x] T3.2 Metrics projection MVP：节点 / gate / iteration / duration 指标进入 ledger、CLI summary 和 API overview。
-- [ ] Provider metrics：token 用量、模型成本、agent/provider 成功率等 adapter 层指标采集。
+- [x] Provider metrics MVP：从 run metadata 聚合 agent/provider 成功率、失败数和耗时；token 用量、模型成本等需要 acpx/adapter 暴露原始字段后再补。
 - [ ] T3.3 跨 workstream 协调：多 workstream 共享状态/依赖
 - [x] Scheduler tick MVP：`POST /api/scheduler/tick` 手动触发一次调度，只推进 `RUNNING` workstreams，遇到 human gate / recovery / failure / completed 会跳过。
 - [x] T4.1 Background Scheduler MVP：默认关闭；配置 `dual.scheduler.enabled=true` 和 `dual.scheduler.workdirs` 后周期调用 tick，支持间隔、max workstreams、max steps 配置，并用运行中保护避免重入。
@@ -120,7 +124,7 @@
    - 2026-06-05：overview 增加 attention items，对 `ACCEPT_WITH_NOTES`、低置信度、repair loop、missing artifacts、recovery 等状态给出人工关注点和建议命令。
    - 2026-06-04：CLI 在 `run` / `resume` 停住时统一打印 `Next actions`，覆盖 human gate、recovery、completed 和 max-steps，降低真实操作时翻 ledger 的成本。
 3. **Failure / calibration follow-through**：把真实 run 中的 failure classification、calibration candidate、handoff 做成可读、可评估、可提升的闭环。
-   - 当前已支持 candidate CLI 审阅和状态决策；下一步才考虑从 accepted candidate 生成模板更新建议。
+   - 当前已支持 candidate CLI 审阅、状态决策、apply plan，以及显式 promotion 到项目级 contract review principles。
    - 2026-06-04：`dualctl recovery show` 在原始 failure summary 前增加 `Recovery Assessment`，提示分类、retry readiness、原因和建议命令，帮助真实运行中快速判断能否 retry。
 
 当前 benchmark 入口：

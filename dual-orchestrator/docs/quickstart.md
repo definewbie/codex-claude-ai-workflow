@@ -148,6 +148,24 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 `dualctl approve`, `dualctl revise`, and `dualctl complete` are shortcuts for
 the longer `dualctl review ...` commands.
 
+## 8. Promote Reusable Learnings
+
+When a real failure is classified as a reusable calibration candidate, review it
+before changing any project principles:
+
+```bash
+dualctl calibration list --workdir <effective_workdir> <workstream_id>
+dualctl calibration show --workdir <effective_workdir> <workstream_id> <candidate_id>
+dualctl calibration decide --status accepted --workdir <effective_workdir> <workstream_id> <candidate_id>
+dualctl calibration plan --workdir <effective_workdir> <workstream_id> <candidate_id>
+dualctl calibration promote --workdir <effective_workdir> <workstream_id> <candidate_id>
+```
+
+Promotion is intentionally narrow in the MVP: it only appends an accepted
+`CONTRACT_TEMPLATE` plan to `.agent/templates/contract-review-principles.md`.
+It does not mutate built-in prompts, workflow definitions, context rules, or
+tests.
+
 For deeper inspection:
 
 ```bash

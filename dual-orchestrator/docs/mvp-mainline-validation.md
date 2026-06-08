@@ -164,6 +164,16 @@ closure items have first-pass implementations:
   `.agent/templates/*.md` principles; real failure classification can generate
   calibration candidates; `dualctl calibration plan` turns accepted candidates
   into a human-reviewable `templateProposal` without auto-mutating templates.
+- Controlled promotion loop: `dualctl calibration promote` can explicitly
+  promote an accepted `CONTRACT_TEMPLATE` apply plan into project-level
+  `.agent/templates/contract-review-principles.md`. This closes the first
+  knowledge loop while keeping built-in prompts, workflow definitions, context
+  rules, and tests untouched.
+- Provider metrics MVP: `metrics/workstream-metrics.json` now includes
+  `providerMetrics` aggregated from `runs/*/run.json`, covering run count,
+  completed/failed/prepared count, recoverable failures, total duration, and
+  average duration per Claude/Codex provider. Token and cost metrics remain
+  deferred until the adapter exposes raw usage data.
 
 Release-quality MVP still needs:
 

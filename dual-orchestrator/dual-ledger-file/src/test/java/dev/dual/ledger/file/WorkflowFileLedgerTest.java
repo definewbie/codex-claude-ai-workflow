@@ -155,6 +155,8 @@ class WorkflowFileLedgerTest {
 
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-timeline", definition);
+        writeRun(paths, "run-claude", "claude", "completed", 100, false);
+        writeRun(paths, "run-codex", "codex", "failed", 300, true);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("first-output.md"), Map.of("ok", true));
@@ -182,7 +184,33 @@ class WorkflowFileLedgerTest {
         assertTrue(metrics.contains("\"waitingCount\" : 1"));
         assertTrue(metrics.contains("\"totalNodeDurationMs\""));
         assertTrue(metrics.contains("\"longestNodes\""));
-        assertTrue(Files.readString(paths.workstreamMetricsMarkdown()).contains("# Workstream Metrics"));
+        assertTrue(metrics.contains("\"providerMetrics\""));
+        assertTrue(metrics.contains("\"claude\""));
+        assertTrue(metrics.contains("\"codex\""));
+        assertTrue(metrics.contains("\"recoverableFailureCount\" : 1"));
+        var metricsMarkdown = Files.readString(paths.workstreamMetricsMarkdown());
+        assertTrue(metricsMarkdown.contains("# Workstream Metrics"));
+        assertTrue(metricsMarkdown.contains("## Provider Metrics"));
+        assertTrue(metricsMarkdown.contains("| claude | 1 | 1 | 0 | 0 | 100 | 100 |"));
+        assertTrue(metricsMarkdown.contains("| codex | 1 | 0 | 1 | 1 | 300 | 300 |"));
+    }
+
+    private void writeRun(WorkstreamPaths paths, String runId, String agent, String status, long durationMs,
+                          boolean recoverable) throws Exception {
+        var runDir = paths.runsDir().resolve(runId);
+        Files.createDirectories(runDir);
+        Files.writeString(runDir.resolve("run.json"), """
+                {
+                  "schemaVersion": 1,
+                  "runId": "%s",
+                  "workstreamId": "%s",
+                  "nodeId": "agent.node",
+                  "agent": "%s",
+                  "durationMs": %d,
+                  "status": "%s",
+                  "recoverable": %s
+                }
+                """.formatted(runId, paths.workstreamId().value(), agent, durationMs, status, recoverable));
     }
 
     @Test
