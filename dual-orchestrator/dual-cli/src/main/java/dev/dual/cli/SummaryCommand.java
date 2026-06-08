@@ -114,7 +114,7 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("## Artifacts");
         lines.add("");
         lines.add("- Final Report: " + presence(paths.workstreamDir().resolve("reports").resolve("latest-final-report.md")));
-        lines.add("- Current Failure Summary: " + presence(paths.currentFailureMarkdown()));
+        lines.add("- Current Failure Summary: " + currentFailurePresence(paths, text(timeline.get("workflowStatus"))));
         lines.add("- Delivery: " + deliverySummary(delivery));
         lines.add("- Calibration Candidates: " + calibrationSummary(paths.workstreamDir().resolve("calibration").resolve("candidates")));
         lines.add("- Calibration Apply Plans: " + countJson(paths.workstreamDir().resolve("calibration").resolve("apply-plans")));
@@ -158,6 +158,16 @@ public final class SummaryCommand implements Callable<Integer> {
                     + "```";
         }
         return "Run status/timeline to inspect the current workflow state.";
+    }
+
+    private String currentFailurePresence(WorkstreamPaths paths, String status) {
+        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
+            return presence(paths.currentFailureMarkdown());
+        }
+        if (Files.isRegularFile(paths.currentFailureMarkdown())) {
+            return "not current (historical recovery artifact retained)";
+        }
+        return "missing";
     }
 
     private Map<String, Object> readMap(Path path) throws Exception {

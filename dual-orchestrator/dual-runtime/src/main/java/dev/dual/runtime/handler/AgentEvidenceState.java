@@ -45,6 +45,14 @@ record AgentEvidenceState(
         );
     }
 
+    boolean hasBlockingDecisionIssues() {
+        return blocking || mustFixCount > 0;
+    }
+
+    boolean hasMaterialEvidenceGaps() {
+        return missingEvidenceCount > 0;
+    }
+
     boolean hasBlockingIssues() {
         return blocking || mustFixCount > 0 || missingEvidenceCount > 0;
     }

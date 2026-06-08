@@ -48,13 +48,22 @@ final class AgentContractSemantics {
             AgentLifecycleStatus status
     ) {
         var evidenceState = AgentEvidenceState.from(document);
-        if ((status == AgentLifecycleStatus.ACCEPTED || status == AgentLifecycleStatus.ACCEPTED_WITH_NOTES)
-                && evidenceState.hasBlockingIssues()) {
+        if (status == AgentLifecycleStatus.ACCEPTED
+                && (evidenceState.hasBlockingDecisionIssues() || evidenceState.hasMaterialEvidenceGaps())) {
             return violation(
                     expectedType,
                     "ACCEPTANCE_STATUS_EVIDENCE_CONFLICT",
                     "acceptance decision " + document.decision()
                             + " cannot include blocking=true, must_fix, or missing_evidence"
+            );
+        }
+        if (status == AgentLifecycleStatus.ACCEPTED_WITH_NOTES
+                && evidenceState.hasBlockingDecisionIssues()) {
+            return violation(
+                    expectedType,
+                    "ACCEPTANCE_STATUS_EVIDENCE_CONFLICT",
+                    "acceptance decision " + document.decision()
+                            + " cannot include blocking=true or must_fix; use REJECT for blocking issues"
             );
         }
         if (status == AgentLifecycleStatus.REJECTED && !evidenceState.hasBlockingIssues()

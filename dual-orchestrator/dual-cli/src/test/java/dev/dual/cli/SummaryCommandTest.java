@@ -37,6 +37,7 @@ class SummaryCommandTest {
         assertTrue(printed.contains("candidate-1=ACCEPTED"));
         assertTrue(printed.contains("- Calibration Apply Plans: 1"));
         assertTrue(printed.contains("- Delivery: prepared, commit=abc123"));
+        assertTrue(printed.contains("- Current Failure Summary: not current (historical recovery artifact retained)"));
 
         var summary = tempDir.resolve(".agent/workstreams/ws-summary/reports/workstream-summary.md");
         assertTrue(Files.isRegularFile(summary));
@@ -57,7 +58,24 @@ class SummaryCommandTest {
         var summary = tempDir.resolve(".agent/workstreams/ws-summary/reports/workstream-summary.md");
         assertTrue(Files.isRegularFile(summary));
         assertTrue(Files.readString(summary, StandardCharsets.UTF_8).contains("- Status: COMPLETED"));
+        assertTrue(Files.readString(summary, StandardCharsets.UTF_8)
+                .contains("- Current Failure Summary: not current (historical recovery artifact retained)"));
         assertTrue(printed.contains("# Workstream Summary"));
+    }
+
+    @Test
+    void showsCurrentFailureOnlyForRecoveryStates() throws Exception {
+        writeLedger("WAITING_FOR_RECOVERY");
+
+        var command = new SummaryCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-summary";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("- Status: WAITING_FOR_RECOVERY"));
+        assertTrue(printed.contains("- Current Failure Summary: "));
+        assertTrue(!printed.contains("not current (historical recovery artifact retained)"));
     }
 
     private void writeLedger(String status) throws Exception {

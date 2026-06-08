@@ -178,7 +178,7 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void failsAcceptedWithNotesWhenMissingEvidenceIsMaterial() throws Exception {
+    void acceptsAcceptedWithNotesWhenMissingEvidenceIsNonBlocking() throws Exception {
         var outputRef = writeOutput("acceptance.md", """
                 <dual-artifact type="acceptance_review" version="1">
                 {
@@ -210,6 +210,51 @@ class ArtifactContractValidatorTest {
                 ```dual-control
                 decision: ACCEPT_WITH_NOTES
                 summary: Accepted with notes.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var sidecar = Files.readString(tempDir.resolve("acceptance.contract.json"));
+        assertTrue(sidecar.contains("\"lifecycle_status\" : \"ACCEPTED_WITH_NOTES\""));
+        assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
+        assertTrue(sidecar.contains("No build/typecheck evidence for a code change."));
+    }
+
+    @Test
+    void failsAcceptedWhenMissingEvidenceIsMaterial() throws Exception {
+        var outputRef = writeOutput("acceptance.md", """
+                <dual-artifact type="acceptance_review" version="1">
+                {
+                  "artifact_type": "acceptance_review",
+                  "schema_version": 1,
+                  "lifecycle_status": "ACCEPTED",
+                  "decision": "ACCEPT",
+                  "summary": "Accepted despite missing evidence.",
+                  "blocking": false,
+                  "checks": ["inspected diff"],
+                  "evidence": ["diff contains requested doc update"],
+                  "missing_evidence": ["No build/typecheck evidence for a code change."],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": ["docs/example.md"],
+                  "verification_summary": "Verification is incomplete.",
+                  "failure": {
+                    "category_hint": "",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": ""
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: ACCEPT
+                summary: Accepted.
                 ```
                 """);
         var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
