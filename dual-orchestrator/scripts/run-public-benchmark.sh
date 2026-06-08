@@ -89,13 +89,13 @@ parse_args() {
 }
 
 prepare_repo() {
-  local -a args=()
+  local output
   if [[ -n "$DEST_DIR" ]]; then
-    args+=(--dest "$DEST_DIR")
+    output="$("$PROJECT_ROOT/scripts/prepare-public-benchmark-repo.sh" --dest "$DEST_DIR")"
+  else
+    output="$("$PROJECT_ROOT/scripts/prepare-public-benchmark-repo.sh")"
   fi
 
-  local output
-  output="$("$PROJECT_ROOT/scripts/prepare-public-benchmark-repo.sh" "${args[@]}")"
   printf '%s\n' "$output"
   DEST_DIR="$(printf '%s\n' "$output" | awk '/^  \/.*$/ { value = $1 } END { print value }')"
   [[ -n "$DEST_DIR" ]] || {
