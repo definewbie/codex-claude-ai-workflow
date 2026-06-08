@@ -123,6 +123,9 @@ The first public, non-domain fixture regression set now covers:
 - `ACCEPT_WITH_NOTES` with non-blocking notes.
 - `REJECT` with blocking missing evidence.
 - `SELF_TEST_INCOMPLETE` with insufficient developer evidence.
+- Real public benchmark artifact shapes for `SELF_TEST_COMPLETE`,
+  `ACCEPT_WITH_NOTES`, and `HANDOFF_READY`, sanitized from the public
+  issue-flow sample run without private paths or bulky logs.
 
 ## Updated MVP Gap
 
@@ -181,6 +184,10 @@ Release-quality MVP still needs:
      benchmark command for the first real lifecycle validation path.
 3. Continued regression fixtures for real structured artifacts whenever a
    real-case run exposes a new stable artifact shape.
+   - 2026-06-08: added sanitized public issue-flow fixtures for developer
+     self-test, Codex acceptance, and Claude stage handoff. These validate the
+     same strict artifact contract path used by live runs without introducing
+     fake `acpx`.
 4. Operator timeline consistency across CLI/API/UI.
    - 2026-06-08: new timeline projections are written in chronological order,
      and the server normalizes existing `timeline.json` files before serving

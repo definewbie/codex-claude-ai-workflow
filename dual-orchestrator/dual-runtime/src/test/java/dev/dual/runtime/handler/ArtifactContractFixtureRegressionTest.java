@@ -69,6 +69,56 @@ class ArtifactContractFixtureRegressionTest {
         assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
     }
 
+    @Test
+    void acceptsRealPublicSelfTestCompleteFixture() throws Exception {
+        var sidecar = validateFixture(
+                "public-real-self-test-complete.md",
+                "implement.claude_self_test_report",
+                "public-real-self-test-complete.contract.json"
+        );
+
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"self_test_report\""));
+        assertTrue(sidecar.contains("\"decision\" : \"SELF_TEST_COMPLETE\""));
+        assertTrue(sidecar.contains("\"lifecycle_status\" : \"READY\""));
+        assertTrue(sidecar.contains("\"missing_evidence_count\" : 0"));
+        assertTrue(sidecar.contains("\"acceptance_note_count\" : 1"));
+        assertTrue(sidecar.contains("node --test"));
+    }
+
+    @Test
+    void acceptsRealPublicAcceptanceWithNotesFixture() throws Exception {
+        var sidecar = validateFixture(
+                "public-real-acceptance-with-notes.md",
+                "acceptance.codex_verifier_review",
+                "public-real-acceptance-with-notes.contract.json"
+        );
+
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"acceptance_review\""));
+        assertTrue(sidecar.contains("\"decision\" : \"ACCEPT_WITH_NOTES\""));
+        assertTrue(sidecar.contains("\"lifecycle_status\" : \"ACCEPTED_WITH_NOTES\""));
+        assertTrue(sidecar.contains("\"missing_evidence_count\" : 0"));
+        assertTrue(sidecar.contains("\"must_fix_count\" : 0"));
+        assertTrue(sidecar.contains("\"acceptance_note_count\" : 2"));
+        assertTrue(sidecar.contains("src/issueWorkflow.js"));
+        assertTrue(sidecar.contains("test/issueWorkflow.test.js"));
+    }
+
+    @Test
+    void acceptsRealPublicStageHandoffFixture() throws Exception {
+        var sidecar = validateFixture(
+                "public-real-stage-handoff-ready.md",
+                "stage.claude_handoff",
+                "public-real-stage-handoff-ready.contract.json"
+        );
+
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"stage_handoff\""));
+        assertTrue(sidecar.contains("\"decision\" : \"HANDOFF_READY\""));
+        assertTrue(sidecar.contains("\"lifecycle_status\" : \"READY\""));
+        assertTrue(sidecar.contains("\"completed_work\""));
+        assertTrue(sidecar.contains("\"recommended_next_stage\" : \"Merge/close"));
+        assertTrue(sidecar.contains("README.md"));
+    }
+
     private String validateFixture(String fixtureName, String nodeId, String sidecarName) throws Exception {
         var outputRef = fixtureName;
         Files.writeString(tempDir.resolve(outputRef), loadFixture(fixtureName), StandardCharsets.UTF_8);
