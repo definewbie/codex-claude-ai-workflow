@@ -14,6 +14,7 @@ const els = {
   switchWorkspace: $("switchWorkspace"),
   workspaceChooser: $("workspaceChooser"),
   browseWorkspace: $("browseWorkspace"),
+  refreshWorkspaceDirectories: $("refreshWorkspaceDirectories"),
   useWorkspace: $("useWorkspace"),
   closeWorkspaceChooser: $("closeWorkspaceChooser"),
   workspaceBrowser: $("workspaceBrowser"),
@@ -120,6 +121,7 @@ async function applyWorkspacePath() {
   state.selectedId = "";
   localStorage.removeItem("dual.selectedId");
   renderWorkspaceSource();
+  els.workspaceChooser.classList.add("hidden");
   await refreshList();
 }
 
@@ -704,7 +706,7 @@ function artifactLine(label, value) {
 }
 
 function renderTimeline(data) {
-  const nodes = data.nodes || [];
+  const nodes = [...(data.nodes || [])].sort(compareTimelineNodes);
   els.timelineView.innerHTML = "";
   if (!nodes.length) {
     els.timelineView.textContent = JSON.stringify(data, null, 2);
@@ -746,6 +748,29 @@ function groupByIteration(nodes) {
     groups.get(key).push(node);
   }
   return groups;
+}
+
+function compareTimelineNodes(left, right) {
+  const leftTime = timelineTimestamp(left);
+  const rightTime = timelineTimestamp(right);
+  if (leftTime !== rightTime) {
+    return leftTime - rightTime;
+  }
+  return String(left.nodeInstanceId || left.nodeDefinitionId || "")
+    .localeCompare(String(right.nodeInstanceId || right.nodeDefinitionId || ""));
+}
+
+function timelineTimestamp(node) {
+  for (const value of [node.startedAt, node.finishedAt, node.updatedAt, node.createdAt]) {
+    if (!value) {
+      continue;
+    }
+    const time = new Date(value).getTime();
+    if (!Number.isNaN(time)) {
+      return time;
+    }
+  }
+  return Number.MAX_SAFE_INTEGER;
 }
 
 function timeRangeLabel(node) {
@@ -907,8 +932,14 @@ els.workdir.addEventListener("change", () => {
   browseWorkspace();
 });
 els.browseWorkspace.addEventListener("click", () => browseWorkspace());
+els.refreshWorkspaceDirectories.addEventListener("click", () => browseWorkspace());
 els.useWorkspace.addEventListener("click", applyWorkspacePath);
 els.closeWorkspaceChooser.addEventListener("click", () => els.workspaceChooser.classList.add("hidden"));
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    els.workspaceChooser.classList.add("hidden");
+  }
+});
 $("tick").addEventListener("click", async () => {
   try {
     const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}`, {

@@ -30,6 +30,13 @@
           <button id="switchWorkspace" class="secondary">Choose</button>
         </div>
         <div id="workspaceChooser" class="workspace-chooser hidden">
+          <div class="workspace-chooser-head">
+            <div>
+              <strong>Choose workspace path</strong>
+              <span>Browse local directories or paste an absolute path.</span>
+            </div>
+            <button id="closeWorkspaceChooser" class="secondary" type="button">Close</button>
+          </div>
           <label class="field">
             <span>Workspace path</span>
             <div class="path-row">
@@ -39,7 +46,7 @@
           </label>
           <div class="path-actions">
             <button id="useWorkspace" type="button">Use this path</button>
-            <button id="closeWorkspaceChooser" class="secondary" type="button">Close</button>
+            <button id="refreshWorkspaceDirectories" class="secondary" type="button">Refresh directories</button>
           </div>
           <div id="workspaceBrowser" class="workspace-browser"></div>
         </div>
