@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operator Panel Observability Prototype</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --text: #182230;
+      --muted: #667085;
+      --line: #d8dee8;
+      --blue: #1769aa;
+      --green: #137a4a;
+      --amber: #a15c00;
+      --red: #b42318;
+      --violet: #6d3fc8;
+      --cyan: #087c8f;
+      --soft-blue: #eef6fc;
+      --soft-green: #edf8f2;
+      --soft-amber: #fff6e8;
+      --soft-red: #fff1f0;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      min-height: 36px;
+      border: 1px solid var(--blue);
+      border-radius: 6px;
+      background: var(--blue);
+      color: #fff;
+      padding: 0 12px;
+      cursor: default;
+      white-space: nowrap;
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--blue);
+    }
+
+    button.danger {
+      border-color: var(--red);
+      background: var(--red);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .shell {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar,
+    .toolbar,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 18px;
+    }
+
+    .topbar p,
+    .muted,
+    .meta,
+    .eyebrow {
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) 140px 190px 120px;
+      gap: 12px;
+      align-items: end;
+      margin: 14px 0;
+      padding: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field span,
+    .eyebrow,
+    .label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 14px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .workstream-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .workstream {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .workstream.active {
+      border-color: var(--blue);
+      background: var(--soft-blue);
+    }
+
+    .workstream strong,
+    .workstream span {
+      display: block;
+    }
+
+    .workstream strong {
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .workstream span {
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 0 9px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .badge.green {
+      background: var(--soft-green);
+      color: var(--green);
+    }
+
+    .badge.amber {
+      background: var(--soft-amber);
+      color: var(--amber);
+    }
+
+    .badge.red {
+      background: var(--soft-red);
+      color: var(--red);
+    }
+
+    .badge.blue {
+      background: var(--soft-blue);
+      color: var(--blue);
+    }
+
+    .main {
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .progress-panel {
+      padding: 18px;
+      border-color: #c9d9ea;
+    }
+
+    .progress-panel .panel-title h2 {
+      font-size: 18px;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.78fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .current-node {
+      display: grid;
+      gap: 12px;
+    }
+
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .node-title {
+      font-size: 24px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .callout {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--amber);
+      border-radius: 7px;
+      background: #fffdf8;
+      padding: 12px;
+    }
+
+    .callout p {
+      margin-top: 5px;
+      line-height: 1.45;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .command-box {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #f8fafc;
+      padding: 10px;
+    }
+
+    .workspace-picker {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .workspace-card {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .workspace-card strong,
+    .workspace-card span {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .workspace-card strong {
+      font-size: 13px;
+    }
+
+    .workspace-card span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    code {
+      display: block;
+      overflow-wrap: anywhere;
+      color: #344054;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .decision-panel {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .decision-actions {
+      display: grid;
+      grid-template-columns: minmax(180px, auto) minmax(180px, auto) 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .operation-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid #eef1f5;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px;
+      background: #fff;
+      min-height: 74px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .health-list,
+    .decision-summary,
+    .packet-list,
+    .artifact-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .health-item,
+    .decision-summary,
+    .packet-item,
+    .artifact-item {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .health-item strong,
+    .decision-summary strong,
+    .packet-item strong,
+    .artifact-item strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .health-item p,
+    .decision-summary p,
+    .packet-item p,
+    .artifact-item p {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .health-item.warn {
+      border-left: 4px solid var(--amber);
+    }
+
+    .health-item.ok {
+      border-left: 4px solid var(--green);
+    }
+
+    .progress {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .stage {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 13px 10px;
+      min-height: 104px;
+    }
+
+    .stage:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 34px;
+      right: -9px;
+      width: 9px;
+      border-top: 2px solid #b8c0cc;
+      z-index: 1;
+    }
+
+    .stage.done {
+      border-color: #a9dec2;
+      background: var(--soft-green);
+    }
+
+    .stage.current {
+      border-color: #e3aa4d;
+      background: var(--soft-amber);
+    }
+
+    .stage.pending {
+      background: #fbfcfd;
+    }
+
+    .stage strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .stage span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.75fr);
+      gap: 14px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .iteration {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .iteration-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .node-row {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr) 90px 90px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #eef1f5;
+      font-size: 12px;
+    }
+
+    .node-row:last-child {
+      border-bottom: 0;
+    }
+
+    .node-row strong,
+    .node-row span {
+      overflow-wrap: anywhere;
+    }
+
+    .node-row span {
+      color: var(--muted);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tab.active {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--soft-blue);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 1180px) {
+      .layout,
+      .hero-grid,
+      .gate-grid,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .progress {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        padding: 12px;
+      }
+
+      .topbar,
+      .toolbar,
+      .top-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar,
+      .metrics-grid,
+      .progress,
+      .workspace-picker,
+      .decision-actions,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .node-row {
+        grid-template-columns: 1fr;
+      }
+
+      .node-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>Dual Operator Panel</h1>
+        <p>ws-20260606T181500Z-R8K2 · cancer-clinic-agent-runs · ai/ws-20260606T181500Z-R8K2</p>
+      </div>
+      <div class="top-actions">
+        <span class="badge amber">WAITING_FOR_HUMAN</span>
+        <button class="secondary">Refresh</button>
+        <button class="secondary">Scheduler Tick</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="field">
+        <span>Workspace source</span>
+        <div class="workspace-picker">
+          <div class="workspace-card">
+            <strong>Auto selected from recent workstreams</strong>
+            <span>/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260606T181500Z-R8K2</span>
+          </div>
+          <button class="secondary">Switch</button>
+        </div>
+      </div>
+      <label class="field">
+        <span>Max steps</span>
+        <input value="80">
+      </label>
+      <div class="field">
+        <span>Workflow action</span>
+        <button disabled>Run to next gate</button>
+        <span class="muted">Blocked by human gate</span>
+      </div>
+      <button class="secondary">Open report</button>
+    </section>
+
+    <section class="layout">
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Workstreams</h2>
+            <span class="muted">3</span>
+          </div>
+          <div class="workstream-list">
+            <article class="workstream active">
+              <strong>ws-20260606T181500Z-R8K2</strong>
+              <span>WAITING_FOR_HUMAN · human_plan_approval</span>
+              <span>A6 添加检查/检验项</span>
+            </article>
+            <article class="workstream">
+              <strong>ws-20260605T105539Z-AFA8</strong>
+              <span>COMPLETED · ACCEPT_WITH_NOTES</span>
+              <span>治疗事件链详情页验收</span>
+            </article>
+            <article class="workstream">
+              <strong>ws-public-issue-flow</strong>
+              <span>COMPLETED · ACCEPT</span>
+              <span>公开样例 benchmark</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Run Health</h2>
+            <span class="badge amber">Needs review</span>
+          </div>
+          <div class="health-list">
+            <article class="health-item ok">
+              <strong>Ledger complete</strong>
+              <p>timeline、metrics、review packet、contract sidecar 都已生成。</p>
+            </article>
+            <article class="health-item warn">
+              <strong>Human gate open</strong>
+              <p>当前需要确认 plan 是否足够具体，尤其是 source/status 保留策略。</p>
+            </article>
+            <article class="health-item ok">
+              <strong>Original repo clean</strong>
+              <p>业务改动仍限制在 worktree，原始仓库没有未提交修改。</p>
+            </article>
+          </div>
+        </section>
+      </aside>
+
+      <section class="main">
+        <section class="panel progress-panel">
+          <div class="panel-title">
+            <h2>Lifecycle Progress</h2>
+            <span class="badge amber">Plan gate waiting</span>
+          </div>
+          <div class="progress">
+            <article class="stage done"><strong>Intake</strong><span>Claude brainstorm<br>Codex product review</span></article>
+            <article class="stage done"><strong>Contract</strong><span>canonical contract<br>human resolution</span></article>
+            <article class="stage done"><strong>Design</strong><span>architecture review<br>PASS</span></article>
+            <article class="stage current"><strong>Plan</strong><span>plan review PASS<br>waiting approval</span></article>
+            <article class="stage pending"><strong>Implement</strong><span>Claude only<br>code changes</span></article>
+            <article class="stage pending"><strong>Self-test</strong><span>developer evidence<br>structured report</span></article>
+            <article class="stage pending"><strong>Acceptance</strong><span>Codex verifier<br>final decision</span></article>
+            <article class="stage pending"><strong>Delivery</strong><span>report<br>commit / PR</span></article>
+          </div>
+        </section>
+
+        <section class="gate-grid">
+          <section class="panel current-node">
+            <div class="status-line">
+              <span class="badge amber">Human Gate</span>
+              <span class="badge blue">iter-001</span>
+              <span class="meta">updated 18:17:42</span>
+            </div>
+            <h2 class="node-title">gate.human_plan_approval</h2>
+            <div class="callout">
+              <h3>为什么停在这里</h3>
+              <p>Codex plan review 已通过，但实现前需要人确认计划边界。当前任务涉及 exam_requirements 合并，错误实现会覆盖已有 source/status。</p>
+            </div>
+            <div class="decision-panel">
+              <div class="panel-title">
+                <h2>Human decision</h2>
+                <span class="muted">Plan gate</span>
+              </div>
+              <div class="decision-summary">
+                <strong>Review packet summary</strong>
+                <p>推荐动作是 Approve。需要确认 A6 只新增 exam_requirements item，不创建报告、不改事件状态，并且 PATCH 时保留已有 source/status/其他字段。</p>
+              </div>
+              <div class="packet-list">
+                <article class="packet-item">
+                  <strong>必须人工确认</strong>
+                  <p>不允许重建最小 dict；不能覆盖 uploaded、pending_confirm、abnormal_flagged、cleared、waived。</p>
+                </article>
+                <article class="packet-item">
+                  <strong>建议检查</strong>
+                  <p>实现前确认 treatmentEvents API PATCH 是否保留 unknown fields。</p>
+                </article>
+              </div>
+              <label class="field">
+                <span>Revision feedback</span>
+                <textarea placeholder="只有选择 Request revision 时才需要填写。写清楚需要 Claude 修改的边界、证据或计划。"></textarea>
+              </label>
+              <div class="decision-actions">
+                <button>Approve and continue</button>
+                <button class="secondary">Request revision</button>
+              </div>
+              <div class="operation-strip">
+                <button class="secondary">Open raw packet</button>
+                <button class="secondary">Open ledger folder</button>
+                <button class="danger">Stop workstream</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Gate Evidence</h2>
+              <span class="badge amber">Open packet</span>
+            </div>
+            <div class="tabs">
+              <span class="tab active">Checklist</span>
+              <span class="tab">Evidence</span>
+              <span class="tab">Raw</span>
+            </div>
+            <div class="packet-list">
+              <article class="packet-item">
+                <strong>Codex plan review</strong>
+                <p>Decision: PASS。计划已覆盖 source/status 保留、PATCH 合并策略和禁止事项。</p>
+              </article>
+              <article class="packet-item">
+                <strong>Task contract</strong>
+                <p>A6 只添加检查/检验项，不创建报告、不自动上传、不自动修改 TreatmentEvent.status。</p>
+              </article>
+              <article class="packet-item">
+                <strong>Open risk</strong>
+                <p>实现阶段最容易出错的是 exam_requirements 合并时覆盖已有 item 字段。</p>
+              </article>
+            </div>
+            <div class="command-box" style="margin-top: 10px;">
+              <span class="label">CLI equivalent</span>
+              <code>dualctl review show --workdir "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260606T181500Z-R8K2" ws-20260606T181500Z-R8K2</code>
+            </div>
+          </section>
+        </section>
+
+        <section class="hero-grid">
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Metrics</h2>
+              <span class="muted">ledger projection</span>
+            </div>
+            <div class="metrics-grid">
+              <article class="metric"><span>Agent runs</span><strong>7</strong></article>
+              <article class="metric"><span>Nodes</span><strong>18</strong></article>
+              <article class="metric"><span>Gates</span><strong>3</strong></article>
+              <article class="metric"><span>Repairs</span><strong>0</strong></article>
+              <article class="metric"><span>Duration</span><strong>23m</strong></article>
+              <article class="metric"><span>Confidence</span><strong>MED</strong></article>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Grouped Timeline</h2>
+              <span class="muted">by iteration</span>
+            </div>
+            <div class="timeline">
+              <article class="iteration">
+                <div class="iteration-header">
+                  <strong>iter-001 · mainline</strong>
+                  <span class="badge amber">waiting</span>
+                </div>
+                <div class="node-row">
+                  <strong>intake.claude_brainstorm</strong>
+                  <span>完成需求澄清和任务边界</span>
+                  <span>COMPLETED</span>
+                  <span>4m 12s</span>
+                </div>
+                <div class="node-row">
+                  <strong>contract.compile</strong>
+                  <span>生成 canonical task contract</span>
+                  <span>COMPLETED</span>
+                  <span>12s</span>
+                </div>
+                <div class="node-row">
+                  <strong>design.codex_arch_review</strong>
+                  <span>外部架构视角审查</span>
+                  <span>COMPLETED</span>
+                  <span>5m 08s</span>
+                </div>
+                <div class="node-row">
+                  <strong>gate.human_plan_approval</strong>
+                  <span>确认实现计划和验收边界</span>
+                  <span>WAITING</span>
+                  <span>-</span>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="content-grid">
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Debug / Ledger Diagnostics</h2>
+              <span class="muted">advanced</span>
+            </div>
+            <div class="two-col">
+              <div class="artifact-list">
+                <article class="artifact-item">
+                  <strong>Harness facts boundary</strong>
+                  <p>TaskContract、contract-resolution、git evidence、workflow current、metrics projection。</p>
+                </article>
+                <article class="artifact-item">
+                  <strong>Agent proposal boundary</strong>
+                  <p>Claude plan、Codex review、self-test report、handoff sidecar。</p>
+                </article>
+              </div>
+              <div class="artifact-list">
+                <article class="artifact-item">
+                  <strong>Blocking gaps</strong>
+                  <p>当前没有 contract failure，也没有 missing required artifact。</p>
+                </article>
+                <article class="artifact-item">
+                  <strong>Open risks</strong>
+                  <p>实现阶段可能错误覆盖 exam_requirements item 原有状态。</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-title">
+              <h2>Artifacts</h2>
+              <span class="muted">latest</span>
+            </div>
+            <div class="artifact-list">
+              <article class="artifact-item">
+                <strong>review packet</strong>
+                <p>.agent/workstreams/.../reviews/node-gate-human_plan_approval-017.md</p>
+              </article>
+              <article class="artifact-item">
+                <strong>metrics</strong>
+                <p>.agent/workstreams/.../metrics/workstream-metrics.json</p>
+              </article>
+              <article class="artifact-item">
+                <strong>timeline</strong>
+                <p>.agent/workstreams/.../timeline.json</p>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

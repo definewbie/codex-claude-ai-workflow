@@ -9,12 +9,19 @@ const $ = (id) => document.getElementById(id);
 
 const els = {
   workdir: $("workdir"),
+  workspaceSummary: $("workspaceSummary"),
+  workspacePath: $("workspacePath"),
+  switchWorkspace: $("switchWorkspace"),
   maxSteps: $("maxSteps"),
   connection: $("connection"),
   count: $("count"),
   workstreams: $("workstreams"),
   selectedTitle: $("selectedTitle"),
   selectedStatus: $("selectedStatus"),
+  lifecycleBadge: $("lifecycleBadge"),
+  lifecycleProgress: $("lifecycleProgress"),
+  gateBadge: $("gateBadge"),
+  runHint: $("runHint"),
   actionHint: $("actionHint"),
   overviewCards: $("overviewCards"),
   overviewWhy: $("overviewWhy"),
@@ -28,6 +35,7 @@ const els = {
   responseView: $("responseView"),
   reviewPanel: $("reviewPanel"),
   reviewStructured: $("reviewStructured"),
+  gateEvidence: $("gateEvidence"),
   reviewPacket: $("reviewPacket"),
   reviewGate: $("reviewGate"),
   recoveryPanel: $("recoveryPanel"),
@@ -43,6 +51,9 @@ const els = {
 };
 
 els.workdir.value = state.workdir;
+renderWorkspaceSource();
+setActionVisibility({ resume: false, approve: false, complete: false, retry: false, revise: false, tick: true });
+els.runHint.textContent = "Select a workstream";
 
 function setConnection(text, kind = "muted") {
   els.connection.textContent = text;
@@ -53,9 +64,17 @@ function setResponse(value) {
   els.responseView.textContent = JSON.stringify(value, null, 2);
 }
 
+function renderWorkspaceSource() {
+  const workdir = els.workdir.value.trim();
+  els.workspaceSummary.textContent = workdir ? "Selected workspace" : "Server current directory";
+  els.workspacePath.textContent = workdir || "Leave empty to use the server process workdir.";
+}
+
 function workdirParam() {
   const workdir = els.workdir.value.trim();
   localStorage.setItem("dual.workdir", workdir);
+  state.workdir = workdir;
+  renderWorkspaceSource();
   return encodeURIComponent(workdir);
 }
 
@@ -85,6 +104,10 @@ async function refreshList() {
     const data = await request(`/api/workstreams?workdir=${workdirParam()}`);
     const items = data.workstreams || [];
     els.count.textContent = String(items.length);
+    if (!state.selectedId && items.length) {
+      state.selectedId = items[0].workstreamId;
+      localStorage.setItem("dual.selectedId", state.selectedId);
+    }
     renderWorkstreams(items);
     setResponse(data);
     if (state.selectedId && items.some((item) => item.workstreamId === state.selectedId)) {
@@ -151,6 +174,9 @@ async function loadTimeline() {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/timeline?workdir=${workdirParam()}`);
     state.timeline = data;
     renderTimeline(data);
+    if (state.overview) {
+      renderLifecycleProgress(state.overview);
+    }
   } catch (error) {
     els.timelineView.textContent = JSON.stringify(error, null, 2);
   }
@@ -170,15 +196,14 @@ function renderOverview(data) {
   const workflow = data.workflow || {};
   const acceptance = data.acceptance || {};
   const metrics = data.metrics || {};
+  renderLifecycleProgress(data);
   renderOverviewCards([
-    ["Current", workflow.currentNode || workflow.status || "-"],
-    ["Acceptance", acceptance.finalDecision || "none"],
-    ["Repair loops", acceptance.repairLoopCount ?? 0],
-    ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
     ["Agent runs", metrics.agentRunCount ?? "-"],
     ["Nodes", metrics.nodeCount ?? "-"],
     ["Gates", metrics.gateCount ?? "-"],
+    ["Repairs", acceptance.repairLoopCount ?? 0],
     ["Duration", durationLabel(metrics.totalNodeDurationMs)],
+    ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
   ]);
   els.overviewWhy.textContent = data.whyStopped || "-";
   els.overviewNext.textContent = data.nextAction || "-";
@@ -189,11 +214,98 @@ function renderOverview(data) {
 
 function renderOverviewError(error) {
   els.overviewCards.innerHTML = "";
+  els.lifecycleProgress.innerHTML = "";
+  els.lifecycleBadge.textContent = "Unavailable";
   els.overviewWhy.textContent = "Overview is not available.";
   els.overviewNext.textContent = JSON.stringify(error);
   els.overviewAttention.innerHTML = "";
   els.overviewTimeline.innerHTML = "";
   els.overviewArtifacts.innerHTML = "";
+}
+
+function renderLifecycleProgress(data) {
+  const workflow = data.workflow || {};
+  const nodes = state.timeline?.nodes || data.recentTimeline || [];
+  const currentNode = workflow.currentNode || "";
+  const status = workflow.status || "";
+  els.lifecycleBadge.textContent = lifecycleBadgeText(status, currentNode);
+  els.lifecycleBadge.className = `badge ${statusBadgeKind(status)}`;
+
+  const stageDefs = [
+    ["Intake", "intake", "Requirement intake"],
+    ["Contract", "contract", "Task contract"],
+    ["Design", "design", "Architecture review"],
+    ["Plan", "plan", "Implementation plan"],
+    ["Implement", "implement", "Claude code changes"],
+    ["Self-test", "self_test", "Developer evidence"],
+    ["Acceptance", "acceptance", "Codex verifier"],
+    ["Delivery", "delivery", "Report / commit / PR"],
+  ];
+  const completedStages = new Set();
+  for (const node of nodes) {
+    if (node.status === "COMPLETED") {
+      completedStages.add(stageIdFromNode(node.nodeDefinitionId || ""));
+    }
+  }
+  const currentStage = stageIdFromNode(currentNode);
+
+  els.lifecycleProgress.innerHTML = "";
+  for (const [label, stageId, detail] of stageDefs) {
+    const item = document.createElement("article");
+    const state = stageId === currentStage
+      ? "current"
+      : completedStages.has(stageId)
+        ? "done"
+        : "pending";
+    item.className = `stage ${state}`;
+    item.innerHTML = `
+      <strong>${escapeHtml(label)}</strong>
+      <span>${escapeHtml(stageDetail(stageId, detail, state, status))}</span>
+    `;
+    els.lifecycleProgress.appendChild(item);
+  }
+}
+
+function stageIdFromNode(nodeId) {
+  if (!nodeId) return "";
+  if (nodeId.includes("requirement") || nodeId.includes("intake")) return "intake";
+  if (nodeId.includes("contract")) return "contract";
+  if (nodeId.includes("design") || nodeId.includes("arch")) return "design";
+  if (nodeId.includes("plan")) return "plan";
+  if (nodeId.includes("self_test") || nodeId.includes("self-test")) return "self_test";
+  if (nodeId.includes("acceptance")) return "acceptance";
+  if (nodeId.includes("implement")) return "implement";
+  if (nodeId.includes("delivery") || nodeId.includes("report") || nodeId.includes("next_stage")) return "delivery";
+  const prefix = nodeId.split(".")[0].replace("gate-", "");
+  if (["intake", "contract", "design", "plan"].includes(prefix)) return prefix;
+  return prefix;
+}
+
+function stageDetail(stageId, fallback, state, workflowStatus) {
+  if (state === "current" && workflowStatus === "WAITING_FOR_HUMAN") return "Waiting for approval";
+  if (state === "current" && workflowStatus === "WAITING_FOR_RECOVERY") return "Needs recovery";
+  if (state === "current" && workflowStatus === "RUNNING") return "Running";
+  if (state === "done") return "Completed";
+  return fallback;
+}
+
+function lifecycleBadgeText(status, currentNode) {
+  if (!status) return "No workstream";
+  if (status === "WAITING_FOR_HUMAN") return `${stageLabel(stageIdFromNode(currentNode))} gate waiting`;
+  return status;
+}
+
+function stageLabel(stageId) {
+  return {
+    intake: "Intake",
+    contract: "Contract",
+    design: "Design",
+    plan: "Plan",
+    implement: "Implement",
+    self_test: "Self-test",
+    acceptance: "Acceptance",
+    delivery: "Delivery",
+  }[stageId] || "Workflow";
 }
 
 function renderOverviewCards(items) {
@@ -289,6 +401,7 @@ async function loadReviewPacket() {
   if (status !== "WAITING_FOR_HUMAN") {
     els.reviewPanel.classList.add("hidden");
     els.reviewStructured.innerHTML = "";
+    els.gateEvidence.innerHTML = "";
     els.reviewPacket.textContent = "";
     els.reviewGate.textContent = "";
     return;
@@ -303,6 +416,7 @@ async function loadReviewPacket() {
     els.reviewPanel.classList.remove("hidden");
     els.reviewGate.textContent = "not available";
     els.reviewStructured.innerHTML = "";
+    els.gateEvidence.innerHTML = "";
     els.reviewPacket.textContent = JSON.stringify(error, null, 2);
   }
 }
@@ -336,6 +450,7 @@ async function loadRecoverySummary() {
 
 function renderReviewStructured(packet) {
   els.reviewStructured.innerHTML = "";
+  els.gateEvidence.innerHTML = "";
   if (!packet || !Object.keys(packet).length) {
     const empty = document.createElement("p");
     empty.className = "subtle";
@@ -361,11 +476,10 @@ function renderReviewStructured(packet) {
     ${decision.summary ? `<p>${escapeHtml(decision.summary)}</p>` : ""}
     ${reviewList("Suggested Checks", guidance.suggestedChecks)}
     ${reviewList("Must Fix", decision.mustFix)}
-    ${reviewList("Open Risks", decision.openRisks)}
   `;
   els.reviewStructured.appendChild(header);
 
-  appendReviewSection("Task Contract", [
+  appendGateEvidenceSection("Task Contract", [
     reviewKeyValue("Status", contract.status),
     reviewList("Included Scope", contract.includedScope),
     reviewList("Excluded Scope", contract.excludedScope),
@@ -374,15 +488,23 @@ function renderReviewStructured(packet) {
     reviewList("Constraints", contract.constraints),
   ]);
 
+  appendGateEvidenceSection("Agent Review Evidence", [
+    reviewKeyValue("Decision", decision.decision),
+    reviewKeyValue("Summary", decision.summary),
+    reviewList("Must Fix", decision.mustFix),
+    reviewList("Open Risks", decision.openRisks),
+    reviewList("Missing Evidence", decision.missingEvidence),
+  ]);
+
   const evidence = packet.gitEvidence || {};
-  appendReviewSection("Git Evidence", [
+  appendGateEvidenceSection("Git Evidence", [
     reviewList("Changed Files", evidence.changedFiles),
     reviewPre("Diff Stat", evidence.diffStat),
     reviewPre("Status", evidence.statusShort),
   ]);
 
   const delivery = packet.delivery || {};
-  appendReviewSection("Delivery Artifacts", [
+  appendGateEvidenceSection("Delivery Artifacts", [
     reviewKeyValue("PR Body", delivery.prBodyPath),
     reviewKeyValue("Commit Message", delivery.commitMessagePath),
   ]);
@@ -395,6 +517,15 @@ function appendReviewSection(title, rows) {
   section.className = "review-card";
   section.innerHTML = `<h3>${escapeHtml(title)}</h3>${content}`;
   els.reviewStructured.appendChild(section);
+}
+
+function appendGateEvidenceSection(title, rows) {
+  const content = rows.filter(Boolean).join("");
+  if (!content) return;
+  const section = document.createElement("section");
+  section.className = "review-card";
+  section.innerHTML = `<h3>${escapeHtml(title)}</h3>${content}`;
+  els.gateEvidence.appendChild(section);
 }
 
 function reviewKeyValue(label, value) {
@@ -482,25 +613,55 @@ function renderTimeline(data) {
     els.timelineView.textContent = JSON.stringify(data, null, 2);
     return;
   }
-  for (const node of nodes) {
-    const item = document.createElement("div");
-    item.className = "timeline-item";
-    item.innerHTML = `
-      <strong>${escapeHtml(node.nodeDefinitionId || node.id || "(node)")}</strong>
-      <span>${escapeHtml(node.status || "")} ${escapeHtml(node.kind || "")}</span>
-      <span>${escapeHtml(node.iterationId || "")}</span>
+  const groups = groupByIteration(nodes);
+  for (const [iterationId, items] of groups) {
+    const group = document.createElement("article");
+    group.className = "iteration";
+    group.innerHTML = `
+      <div class="iteration-header">
+        <strong>${escapeHtml(iterationId || "iteration")}</strong>
+        <span class="badge muted">${escapeHtml(items.length)} nodes</span>
+      </div>
     `;
-    els.timelineView.appendChild(item);
+    for (const node of items) {
+      const item = document.createElement("div");
+      item.className = "timeline-item";
+      item.innerHTML = `
+        <strong>${escapeHtml(node.nodeDefinitionId || node.id || "(node)")}</strong>
+        <span>${escapeHtml(node.kind || "")}</span>
+        <span>${escapeHtml(node.status || "")}</span>
+        <span>${escapeHtml(durationLabel(node.durationMs))}</span>
+      `;
+      group.appendChild(item);
+    }
+    els.timelineView.appendChild(group);
   }
+}
+
+function groupByIteration(nodes) {
+  const groups = new Map();
+  for (const node of nodes) {
+    const key = node.iterationId || "iteration";
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key).push(node);
+  }
+  return groups;
 }
 
 function setStatusBadge(status) {
   els.selectedStatus.textContent = status;
-  let kind = "muted";
-  if (status === "COMPLETED") kind = "ok";
-  if (status === "WAITING_FOR_HUMAN" || status === "RUNNING") kind = "warn";
-  if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") kind = "bad";
-  els.selectedStatus.className = `badge ${kind}`;
+  els.selectedStatus.className = `badge ${statusBadgeKind(status)}`;
+  els.gateBadge.textContent = status || "-";
+  els.gateBadge.className = `badge ${statusBadgeKind(status)}`;
+}
+
+function statusBadgeKind(status) {
+  if (status === "COMPLETED") return "ok";
+  if (status === "WAITING_FOR_HUMAN" || status === "RUNNING") return "warn";
+  if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") return "bad";
+  return "muted";
 }
 
 function updateActions(data) {
@@ -524,29 +685,34 @@ function updateActions(data) {
 
   if (status === "COMPLETED") {
     els.actionHint.textContent = "Workflow is completed. There are no remaining actions.";
+    els.runHint.textContent = "Completed";
     return;
   }
   if (status === "WAITING_FOR_HUMAN") {
     els.actionHint.textContent = activeDefinition.includes("next_stage")
-      ? "Read the review packet below. Complete finishes this workstream; Approve + Run starts another iteration."
-      : "Read the review packet below. Approve + Run continues; Revise + Run sends concrete feedback back into the loop.";
+      ? "Review the current packet. Complete finishes this workstream; approve starts another iteration."
+      : "Review the gate evidence, then approve to continue or request a revision.";
+    els.runHint.textContent = "Blocked by human gate";
     return;
   }
   if (status === "RUNNING") {
-    els.actionHint.textContent = `Workflow is running at ${activeDefinition || activeKind}. Resume advances up to Max steps; Scheduler Tick advances running workstreams in this workdir.`;
+    els.actionHint.textContent = `Workflow is running at ${activeDefinition || activeKind}. Run advances up to Max steps; Scheduler Tick advances running workstreams in this workdir.`;
+    els.runHint.textContent = "Ready";
     return;
   }
   if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") {
     els.actionHint.textContent = "Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.";
+    els.runHint.textContent = "Needs recovery";
     return;
   }
+  els.runHint.textContent = state.selectedId ? "Not runnable" : "Select a workstream";
   els.actionHint.textContent = state.selectedId
     ? "No direct action is available for the current workflow state."
     : "Select a workstream to see available actions.";
 }
 
 function setActionVisibility(visible) {
-  els.resume.classList.toggle("hidden", !visible.resume);
+  els.resume.disabled = !visible.resume;
   els.approve.classList.toggle("hidden", !visible.approve);
   els.complete.classList.toggle("hidden", !visible.complete);
   els.retry.classList.toggle("hidden", !visible.retry);
@@ -602,6 +768,18 @@ function escapeHtml(value) {
 }
 
 $("refresh").addEventListener("click", refreshList);
+els.switchWorkspace.addEventListener("click", () => {
+  els.workdir.classList.toggle("hidden");
+  if (!els.workdir.classList.contains("hidden")) {
+    els.workdir.focus();
+  }
+});
+els.workdir.addEventListener("change", () => {
+  state.selectedId = "";
+  localStorage.removeItem("dual.selectedId");
+  renderWorkspaceSource();
+  refreshList();
+});
 $("tick").addEventListener("click", async () => {
   try {
     const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}`, {
