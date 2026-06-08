@@ -17,6 +17,7 @@
 - `contract.compile` 默认不再从 Markdown 猜 canonical TaskContract，缺少 `task_contract_proposal` 时失败。
 - failure classification 改为读取结构化 failure fields，不再用 review summary keyword 做主分类。
 - human review packet / operator guidance 优先读取 structured sidecar 中的 `blocking`、`must_fix`、`missing_evidence`、`open_risks`。
+- `AgentEvidenceIndex` 统一读取 validated sidecar，负责发现、排序、解析和 `evidence_state` 暴露；context boundary、human gate、failure classify 不再各自 walk `runs/**/.contract.json`。
 
 已通过 `mvn -pl dual-cli,dual-server -am test`。真实 case 仍需要继续作为 prompt/schema 兼容性验证，不应通过恢复 Markdown fallback 来绕过 strict failure。
 

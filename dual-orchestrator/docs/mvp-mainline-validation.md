@@ -144,6 +144,11 @@ mainline closure items have first-pass implementations:
 - Context state/evidence boundary: context packages now separate trusted
   harness facts, human decisions, agent proposed states, and pending
   contract/evidence gaps.
+- Agent evidence read model: `AgentEvidenceIndex` centralizes validated
+  sidecar discovery, chronological ordering, structured document parsing, and
+  `evidence_state` access. Context packages, human review guidance, and failure
+  classification now consume this shared read model instead of walking
+  `runs/**/.contract.json` independently.
 
 Release-quality MVP still needs:
 

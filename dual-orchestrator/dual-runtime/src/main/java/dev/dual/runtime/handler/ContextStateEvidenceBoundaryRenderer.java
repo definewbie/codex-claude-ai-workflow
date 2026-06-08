@@ -79,27 +79,23 @@ final class ContextStateEvidenceBoundaryRenderer {
 
     private static void appendAgentProposedStates(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
         builder.append("\n### Agent Proposed States\n\n");
-        var sidecars = recentContractSidecars(workstreamDir, 5);
-        if (sidecars.isEmpty()) {
+        var entries = AgentEvidenceIndex.load(workstreamDir, objectMapper).recent(5);
+        if (entries.isEmpty()) {
             builder.append("- No validated agent sidecars yet\n");
             return;
         }
-        for (var sidecarPath : sidecars) {
-            var document = AgentOutputContractDocument.read(sidecarPath, objectMapper);
-            if (document.isEmpty()) {
-                continue;
-            }
-            var contract = document.get();
+        for (var entry : entries) {
+            var contract = entry.document();
             builder.append("- ").append(blankAsNone(contract.nodeId()))
                     .append(": decision=").append(blankAsNone(contract.decision()));
             if (!contract.lifecycleStatus().isBlank()) {
                 builder.append(", lifecycle=").append(contract.lifecycleStatus());
             }
-            var evidenceState = readJsonUnchecked(sidecarPath, objectMapper).get("evidence_state");
-            if (evidenceState != null) {
+            var evidenceState = entry.evidenceState();
+            if (!evidenceState.isEmpty()) {
                 builder.append(", evidenceState=").append(evidenceState);
             }
-            builder.append(" (").append(toDisplayRef(sidecarPath)).append(")\n");
+            builder.append(" (").append(toDisplayRef(entry.path())).append(")\n");
         }
     }
 
@@ -122,21 +118,6 @@ final class ContextStateEvidenceBoundaryRenderer {
             }
         }
         builder.append("\n");
-    }
-
-    private static List<Path> recentContractSidecars(Path workstreamDir, int maxItems) throws IOException {
-        var runsDir = workstreamDir.resolve("runs");
-        if (!Files.exists(runsDir)) {
-            return List.of();
-        }
-        try (Stream<Path> paths = Files.walk(runsDir)) {
-            return paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".contract.json"))
-                    .sorted(Comparator.comparing(ContextStateEvidenceBoundaryRenderer::lastModified).reversed())
-                    .limit(maxItems)
-                    .toList();
-        }
     }
 
     private static List<Path> recentContractFailures(Path workstreamDir, int maxItems) throws IOException {

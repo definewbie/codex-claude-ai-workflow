@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -309,49 +308,31 @@ public final class HumanReviewGateHandler implements GateHandler {
     }
 
     private AgentDecisionSummary latestAgentDecision(GateContext context) {
-        for (int i = context.instance().inputRefs().size() - 1; i >= 0; i--) {
-            var ref = context.instance().inputRefs().get(i);
-            var sidecar = resolveInsideWorkspace(context.workspaceRoot(), ref.replaceFirst("\\.md$", ".contract.json"));
-            var summary = agentDecisionFromSidecar(context, sidecar);
-            if (!summary.isEmpty()) {
-                return summary;
-            }
+        var fromRefs = AgentEvidenceIndex.latestFromRefs(context.workspaceRoot(), context.instance().inputRefs(), objectMapper)
+                .map(entry -> agentDecisionFromSidecar(context, entry));
+        if (fromRefs.isPresent() && !fromRefs.get().isEmpty()) {
+            return fromRefs.get();
         }
         return latestRunAgentDecision(context);
     }
 
     private AgentDecisionSummary latestRunAgentDecision(GateContext context) {
-        var runsDir = workstreamDir(context).resolve("runs");
-        if (!Files.isDirectory(runsDir)) {
-            return AgentDecisionSummary.empty();
-        }
-        try (var paths = Files.walk(runsDir)) {
-            var sidecars = paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".contract.json"))
-                    .sorted(Comparator.comparing(path -> path.toAbsolutePath().normalize().toString()))
-                    .toList();
-            for (int i = sidecars.size() - 1; i >= 0; i--) {
-                var summary = agentDecisionFromSidecar(context, sidecars.get(i));
-                if (!summary.isEmpty()) {
-                    return summary;
-                }
-            }
+        try {
+            return AgentEvidenceIndex.load(workstreamDir(context), objectMapper)
+                    .latest()
+                    .map(entry -> agentDecisionFromSidecar(context, entry))
+                    .filter(summary -> !summary.isEmpty())
+                    .orElse(AgentDecisionSummary.empty());
         } catch (Exception ignored) {
             return AgentDecisionSummary.empty();
         }
-        return AgentDecisionSummary.empty();
     }
 
-    private AgentDecisionSummary agentDecisionFromSidecar(GateContext context, Path sidecar) {
-        if (sidecar == null || !Files.isRegularFile(sidecar)) {
+    private AgentDecisionSummary agentDecisionFromSidecar(GateContext context, AgentEvidenceIndex.Entry entry) {
+        if (entry == null || !entry.document().hasDecision()) {
             return AgentDecisionSummary.empty();
         }
-        var document = AgentOutputContractDocument.read(sidecar, objectMapper);
-        if (document.isEmpty() || !document.get().hasDecision()) {
-            return AgentDecisionSummary.empty();
-        }
-        return AgentDecisionSummary.from(document.get(), displayRef(context.workspaceRoot(), sidecar));
+        return AgentDecisionSummary.from(entry.document(), displayRef(context.workspaceRoot(), entry.path()));
     }
 
     private Map<String, Object> gitEvidenceSummary(GateContext context) {

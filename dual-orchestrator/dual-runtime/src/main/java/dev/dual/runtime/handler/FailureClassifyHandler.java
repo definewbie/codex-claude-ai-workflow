@@ -116,17 +116,8 @@ public final class FailureClassifyHandler implements TaskHandler {
     }
 
     private java.util.Optional<AgentOutputContractDocument> readReviewMetadata(TaskContext context) throws IOException {
-        for (var inputRef : context.instance().inputRefs()) {
-            if (!inputRef.endsWith(".contract.json")) {
-                continue;
-            }
-            var path = context.workspaceRoot().resolve(inputRef).normalize();
-            if (!Files.isRegularFile(path)) {
-                continue;
-            }
-            return AgentOutputContractDocument.read(path, objectMapper);
-        }
-        return java.util.Optional.empty();
+        return AgentEvidenceIndex.latestFromRefs(context.workspaceRoot(), context.instance().inputRefs(), objectMapper)
+                .map(AgentEvidenceIndex.Entry::document);
     }
 
     private String extractString(Map<String, Object> map, String key, String defaultValue) {
