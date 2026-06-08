@@ -52,6 +52,7 @@ final class FailureSummaryWriter {
         line(content, "Run ID", runId);
         line(content, "Agent", agent);
         line(content, "Session", session);
+        appendContractFailureDiagnostic(content, result);
         content.append("\n## Evidence\n\n");
         if (outputRefs.isEmpty()) {
             content.append("- Output refs: N/A\n");
@@ -69,6 +70,30 @@ final class FailureSummaryWriter {
                 .append(paths.workstreamId().value())
                 .append("`.\n");
         return content.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void appendContractFailureDiagnostic(StringBuilder content, Map<String, Object> result) {
+        var diagnosticJson = text(result.get("contract_failure_diagnostic_ref"));
+        var diagnosticMarkdown = text(result.get("contract_failure_diagnostic_markdown_ref"));
+        if (diagnosticJson.isBlank() && diagnosticMarkdown.isBlank() && !result.containsKey("parse_error")) {
+            return;
+        }
+        content.append("\n## Contract Failure Diagnostic\n\n");
+        line(content, "Diagnostic JSON", diagnosticJson);
+        line(content, "Diagnostic Markdown", diagnosticMarkdown);
+        if (result.get("parse_error") instanceof Map<?, ?> parseError) {
+            line(content, "Error Code", text(parseError.get("code")));
+            line(content, "Error Message", text(parseError.get("message")));
+            var details = parseError.get("details");
+            if (details instanceof Map<?, ?> detailsMap && !detailsMap.isEmpty()) {
+                content.append("- Details:\n");
+                for (var entry : detailsMap.entrySet()) {
+                    content.append("  - ").append(text(entry.getKey())).append(": ")
+                            .append(text(entry.getValue())).append('\n');
+                }
+            }
+        }
     }
 
     private static void line(StringBuilder content, String label, String value) {

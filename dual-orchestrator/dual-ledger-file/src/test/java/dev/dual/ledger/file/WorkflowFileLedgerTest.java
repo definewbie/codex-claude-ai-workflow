@@ -544,6 +544,53 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void failedNodeCurrentFailureSummaryHighlightsContractDiagnostic() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-contract-failure-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "acceptance.codex",
+                List.of(new NodeDefinition("acceptance.codex", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-contract-failure-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                List.of(
+                        ".agent/workstreams/ws-contract-failure-summary/artifacts/contract-failures/"
+                                + node.nodeInstanceId() + ".md"
+                ),
+                Map.of(
+                        "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                        "contract_failure_diagnostic_ref",
+                        ".agent/workstreams/ws-contract-failure-summary/artifacts/contract-failures/"
+                                + node.nodeInstanceId() + ".json",
+                        "contract_failure_diagnostic_markdown_ref",
+                        ".agent/workstreams/ws-contract-failure-summary/artifacts/contract-failures/"
+                                + node.nodeInstanceId() + ".md",
+                        "parse_error", Map.of(
+                                "code", "STRUCTURED_ARTIFACT_MISSING",
+                                "message", "Required structured artifact missing: acceptance_review",
+                                "details", Map.of("required_artifact_type", "acceptance_review")
+                        )
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("## Contract Failure Diagnostic"));
+        assertTrue(summary.contains("STRUCTURED_ARTIFACT_MISSING"));
+        assertTrue(summary.contains("Required structured artifact missing: acceptance_review"));
+        assertTrue(summary.contains("required_artifact_type: acceptance_review"));
+        assertTrue(summary.contains(node.nodeInstanceId() + ".json"));
+        assertTrue(summary.contains(node.nodeInstanceId() + ".md"));
+    }
+
+    @Test
     void invalidControlOutputOpensControlRepairGate() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-control-repair"));
         Files.createDirectories(paths.workstreamDir());

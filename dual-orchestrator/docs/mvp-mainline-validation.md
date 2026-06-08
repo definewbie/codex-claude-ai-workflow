@@ -149,6 +149,10 @@ mainline closure items have first-pass implementations:
   `evidence_state` access. Context packages, human review guidance, and failure
   classification now consume this shared read model instead of walking
   `runs/**/.contract.json` independently.
+- Contract recovery visibility: when a node fails because of
+  `AGENT_OUTPUT_CONTRACT_VIOLATION`, `recovery/current-failure.md` now
+  highlights the contract diagnostic JSON/Markdown refs and parse error details
+  instead of burying them in generic output refs.
 
 Release-quality MVP still needs:
 
