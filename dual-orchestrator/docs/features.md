@@ -10,9 +10,9 @@
   - 2026-06-01：`p5-contract-happy-path` 在最新分支复跑通过，最终 `COMPLETED`，30 nodes / 11 agent runs / 6 gate rounds，TaskContract artifact 和 `contract_compilation_completed` event 均通过。
   - 2026-06-01：`p6-reject-classify-path` 在最新分支复跑为 `PASS-WARN`，最终 `COMPLETED`，30 nodes / 11 agent runs / 6 gate rounds；Codex acceptance 为 `ACCEPT`，所以 failure classification 分支未触发。
 - [x] T0.2 p6 semantic repair real case：真实复杂仓库中触发 Codex `REJECT` 后能进入分类和修复闭环。
-  - 2026-06-02：`cancer-clinic` p6 长 case 跑通，workstream `ws-20260602T121712Z-V7WM`，最终 `COMPLETED`。
+  - 2026-06-02：一个私有生产型仓库的 p6 长 case 跑通，最终 `COMPLETED`。
   - 这次真实 run 触发了两轮 Codex acceptance `REJECT`，系统路由到 `acceptance.classify_failure`，再回到 Claude repair，第三次 acceptance 通过。
-  - 原始仓库保持干净，改动发生在 worktree：`miniprogram/src/pages/treatment-event/index.vue | 4 ++++`。
+  - 原始仓库保持干净，业务改动只发生在 worktree。
 - [ ] T0.3 deterministic p6 reject fixture：技术债。真实 case 已证明 repair 主线可工作；暂不为了一个边界分支引入 fake acpx / controlled fixture。只有当 CI 需要稳定、可重复覆盖 reject 分支时再实现。
 - [ ] T0.4 验证 auto-retry 端到端：Thread.sleep + 指数退避在真实 acpx failure 下验证。
 
@@ -110,9 +110,9 @@
 
 1. **Real-case benchmark loop**：沉淀 3-5 个真实仓库任务，定期跑 p6，记录完成率、rejection repair 次数、耗时、失败类型和人工介入点。
    - 2026-06-03：`run-real-case.sh` 开始生成 `summary.json`，把 final status、gate 轮数、Agent run 次数、revision 次数、acceptance decision、artifact presence 和原始 repo clean 状态沉淀为机器可读数据。
-   - 2026-06-03：`cancer-clinic-rejection-prone` 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
+   - 2026-06-03：私有 rejection-prone benchmark 跑到 `COMPLETED` / `PASS-WARN`。本轮未触发 Codex `REJECT`，但暴露并修复 `contract.compile` 错读 Codex review 中引用 artifact 的可信来源 bug；同一 workstream retry 后完成全生命周期。
    - 2026-06-04：`real-case-benchmark-summary.sh` 聚合所有 `summary.json`，生成 `testing/real-case-benchmarks/benchmark-index.md`，让真实 run 从零散报告变成可比较的 benchmark set。
-   - 2026-06-04：`cancer-clinic-doc-constraints-smoke` 跑到 `COMPLETED`，验证 acpx reconnect 完整 stdout 修复后真实生命周期仍可完成；前一个 `START_FAILED` 诊断 run 保留在 benchmark index 中作为失败样本。
+   - 2026-06-04：私有文档约束 smoke 跑到 `COMPLETED`，验证 acpx reconnect 完整 stdout 修复后真实生命周期仍可完成；前一个 `START_FAILED` 诊断 run 保留为内部失败样本。
    - 2026-06-04：benchmark index 增加 `PASS` / `PASS-WARN` / `FAIL` 轻量分级和 reason，帮助快速判断真实 run 健康度。
    - 2026-06-04：`run-real-case.sh` 的单次 `summary.json` 和 `report.md` 也写入同一套 benchmark grade，单次报告和聚合 index 口径一致。
    - 2026-06-04：`run-real-case.sh --update-benchmark-index` 可在真实 case 结束后自动刷新 benchmark index；默认关闭，避免临时调试 run 改动文档。

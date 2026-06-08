@@ -1,11 +1,11 @@
 # Public Cleanup TODO
 
-> Status: pre-release cleanup checklist
+> Status: public cleanup branch checklist
 > Last updated: 2026-06-08
 
-This checklist tracks what should be cleaned or archived before preparing a
-public release branch. It intentionally does not delete active development
-evidence on the main development branch.
+This checklist tracks what was cleaned on the public release branch and what
+still needs a final pass before publishing. It intentionally avoids forcing the
+main development branch to lose internal evidence.
 
 ## Goal
 
@@ -37,17 +37,25 @@ These files are safe and useful as public entry points:
 | `scripts/run-public-benchmark.sh` | One-command public real-case runner. |
 | `scripts/smoke-test.sh` | Local smoke validation. |
 
-## Archive Or Move Before Public Release
+## Cleaned In This Branch
 
-These files are useful internally but should not be part of the public
-onboarding path:
+These tracked files were removed from the public cleanup branch:
 
 | Path | Suggested action |
 |---|---|
-| `docs/handoff-*.md` | Move to an internal archive branch or `docs/archive/handoffs/`. |
-| `docs/testing/real-case-reports/` | Exclude from public release or replace with sanitized summaries. |
-| `docs/testing/real-case-benchmarks/cases/cancer-clinic-*.md` | Move to internal benchmark storage. |
-| `docs/testing/real-case-benchmarks/reports/*cancer-clinic*.md` | Move to internal benchmark storage or sanitize heavily. |
+| `docs/handoff-*.md` | Removed from public branch; keep in internal history/branches if needed. |
+| `docs/testing/real-case-benchmarks/cases/*private*.md` | Removed private benchmark cases; public benchmark uses `public-*.md`. |
+| `docs/testing/real-case-benchmarks/reports/*private*.md` | Removed private benchmark reports; public evidence is summarized generically. |
+
+`docs/testing/real-case-reports/` is ignored generated output. Local runs may
+create reports there, but they should not be committed.
+
+## Review Before Public Release
+
+These files are useful internally but should be reviewed before publishing:
+
+| Path | Suggested action |
+|---|---|
 | `docs/superpowers/plans/*.md` | Keep only if still useful as design history; otherwise archive. |
 | `docs/superpowers/specs/*.md` | Keep current specs only; archive superseded ones. |
 
@@ -80,7 +88,7 @@ These are tempting but not worth doing before the public MVP shape is stable:
 
 Before cutting a public release branch:
 
-1. Run `rtk grep "cancer-clinic|/Users/|kriswang" dual-orchestrator/README.md dual-orchestrator/docs`.
+1. Run `rtk git grep "private-repo-name|/Users/|local-user-name" -- dual-orchestrator/README.md dual-orchestrator/docs`.
 2. Move or sanitize the matches that are not explicitly marked as internal.
 3. Run `./scripts/smoke-test.sh --case thin-basic --cleanup`.
 4. Run `./scripts/run-public-benchmark.sh` if real `acpx` quota is available.

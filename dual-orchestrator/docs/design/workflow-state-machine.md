@@ -268,7 +268,7 @@ Key routing:
 
 ## 10. Real Case Example
 
-`cancer-clinic-rejection-prone` on 2026-06-03 exposed a contract source bug:
+A private rejection-prone benchmark on 2026-06-03 exposed a contract source bug:
 
 ```text
 contract.compile
@@ -288,7 +288,7 @@ The important state-machine point:
 - events recorded `node_failed`, `node_retry_requested`, then `contract_compilation_completed`;
 - final workflow status became `COMPLETED`.
 
-`cancer-clinic-state-model-complex` on 2026-06-03 validated the ordinary linear P6 path:
+A private state-model benchmark on 2026-06-03 validated the ordinary linear P6 path:
 
 ```text
 start --run

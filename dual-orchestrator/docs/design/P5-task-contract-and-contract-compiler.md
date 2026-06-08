@@ -5,7 +5,7 @@
 > 依赖：现有 workflow runtime / ledger / context governance
 > 非目标：FailureArbiter / CalibrationCandidate / Multi-role Review / Adversarial Test Agent
 
-> 2026-06-03 更新：这份文档记录的是 P5 TaskContract MVP 的初始设计。真实 `cancer-clinic-feature-slice` benchmark 暴露出 Markdown heuristic 抽取会污染 canonical TaskContract。后续事实来源修正以 `docs/design/2026-06-03-artifact-driven-contract-negotiation.md` 为准：Claude 输出结构化 `task_contract_proposal`，系统做机械校验，Codex 按原则审议，最终再生成 canonical TaskContract。
+> 2026-06-03 更新：这份文档记录的是 P5 TaskContract MVP 的初始设计。真实私有 feature-slice benchmark 暴露出 Markdown heuristic 抽取会污染 canonical TaskContract。后续事实来源修正以 `docs/design/2026-06-03-artifact-driven-contract-negotiation.md` 为准：Claude 输出结构化 `task_contract_proposal`，系统做机械校验，Codex 按原则审议，最终再生成 canonical TaskContract。
 
 ---
 

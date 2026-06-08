@@ -433,7 +433,7 @@ Allowed decisions:
   - retry after corrected artifact can continue。
 
 - Real-case validation：
-  - 用 `cancer-clinic` 小任务跑 full variant。
+  - 用公开 sample benchmark 或一个私有小任务跑 full variant。
   - 关注是否还有因为 structured artifact 缺失导致的 prompt 问题。
   - 如果失败，优先修 prompt / artifact schema，而不是加 Markdown fallback。
 

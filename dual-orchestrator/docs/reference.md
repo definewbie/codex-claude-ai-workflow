@@ -8,7 +8,7 @@ Bash 版 `dual-agent-runner` 证明了 `acpx`、worktree、run ledger、报告�
 需求澄清 -> 设计审视 -> 人工卡点 -> 计划 -> 实现 -> 自测 -> 验收 -> 下一阶段提示词
 ```
 
-当前仍是 MVP，但核心目标已经从“能不能调用两个 Agent”推进到“能不能在真实仓库里跑完整生命周期”。2026-06-04 的 `cancer-clinic-feature-slice` 真实 P6 case 已经跑到 `COMPLETED`：Codex acceptance 先 `REJECT`，系统完成 failure classification、路由回 Claude 修复，第二次验收 `ACCEPT_WITH_NOTES`，并生成 delivery / handoff / next-stage artifacts。
+当前仍是 MVP，但核心目标已经从“能不能调用两个 Agent”推进到“能不能在真实仓库里跑完整生命周期”。公开分支保留了可复用 sample app benchmark；内部真实长 case 也验证过 Codex acceptance `REJECT` 后进入 failure classification、路由回 Claude 修复、再次验收并生成 delivery / handoff / next-stage artifacts 的主修复闭环。
 
 这说明 MVP 主生命周期已经功能性闭环。它还不是完整产品；当前最重要的缺口不是再加 UI 或边角命令，而是把研发自测、上下文证据和 Codex acceptance 的可信度继续做实，让 `PASS-WARN` 更少依赖人工复读报告。
 
@@ -97,7 +97,7 @@ Runtime 只认识三类节点：
 
 仍未完成：
 
-- deterministic p6 reject fixture：真实 `cancer-clinic` p6 长 case 已覆盖 Codex `REJECT` → failure classification → Claude repair → final acceptance 的主修复闭环。为了一个边界分支引入 fake acpx 的收益暂时不高；只有当 CI 需要稳定、可重复覆盖这条分支时再补 controlled fixture。
+- deterministic reject fixture：内部真实长 case 已覆盖 Codex `REJECT` → failure classification → Claude repair → final acceptance 的主修复闭环。为了一个边界分支引入 fake acpx 的收益暂时不高；只有当 CI 需要稳定、可重复覆盖这条分支时再补 controlled fixture。
 - 实时推送：还没有 SSE / file watch / WebSocket，当前 `dualctl watch` 是轮询式 CLI。
 - Scheduler：已有默认关闭的后台周期调度；仍不会自动通过 human gate、recovery 或 failure。
 - Web UI / dashboard。
@@ -243,16 +243,12 @@ dualctl timeline --help
 
 ## Recommended MVP Flow
 
-当前推荐的 MVP 主线验证方式是：用真实仓库、真实 `acpx`、真实 worktree 跑一条受控需求，并让系统自动跨过中间 human gates。这个流程用于验证编排闭环，不等于最终业务验收。
+当前推荐的 MVP 主线验证方式是：先用公开 sample benchmark 验证一条可复用真实 run，再在自己的仓库里用真实 `acpx`、真实 worktree 跑一条受控需求。这个流程用于验证编排闭环，不等于最终业务验收。
 
 ```bash
 cd dual-orchestrator
 
-./scripts/run-real-case.sh \
-  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
-  --task-file docs/testing/real-case-benchmarks/cases/cancer-clinic-feature-slice.md \
-  --variant p6 \
-  --update-benchmark-index
+./scripts/run-public-benchmark.sh
 ```
 
 跑完后先看三类证据：
@@ -287,7 +283,7 @@ dualctl trace --workdir <effective_worktree> <workstream_id>
 - `original_repo_clean`
 - `artifacts`
 
-2026-06-04 的 `cancer-clinic-feature-slice` P6 run 已验证：系统能从 intake 跑到 delivery，经历一次 Codex `REJECT` 后自动进入 repair loop，最终以 `ACCEPT_WITH_NOTES` 完成，并保持原始仓库干净。详见 `docs/mvp-mainline-validation.md`。
+内部真实长 case 已验证：系统能从 intake 跑到 delivery，经历 Codex `REJECT` 后自动进入 repair loop，最终完成，并保持原始仓库干净。公开可复现路径见 `./scripts/run-public-benchmark.sh` 和 `docs/mvp-mainline-validation.md`。
 
 ## Local API Server
 
@@ -1362,9 +1358,9 @@ cd dual-orchestrator
 cd dual-orchestrator
 
 ./scripts/run-real-case.sh \
-  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
-  --task-file /tmp/dual-real-cases/cancer-clinic-case-001.md \
-  --variant p6
+  --repo /path/to/your/repo \
+  --task-file /tmp/dual-task.md \
+  --variant full
 ```
 
 跑完后查看：

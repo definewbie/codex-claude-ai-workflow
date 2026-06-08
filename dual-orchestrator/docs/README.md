@@ -3,10 +3,10 @@
 > Status: current docs index
 > Last updated: 2026-06-08
 
-This directory contains current product docs, implementation design notes, and
-historical development records. For open-source readers, start with the current
-reading path. Historical handoffs and private benchmark notes are retained for
-project traceability, but they are not the public onboarding path.
+This directory contains the current product docs and selected implementation
+design notes. For open-source readers, start with the current reading path.
+Historical handoffs and private benchmark notes were removed from this public
+cleanup branch; reusable evidence now starts from the public benchmark sample.
 
 ## Current Reading Path
 
@@ -20,7 +20,7 @@ project traceability, but they are not the public onboarding path.
 | Contract boundary hardening | `design/2026-06-06-contract-boundary-hardening.md` |
 | Current roadmap / feature status | `features.md` |
 | Public benchmark direction | `testing/public-benchmark-plan.md` |
-| Public and private benchmark entry | `testing/real-case-benchmarks/README.md` |
+| Public benchmark entry | `testing/real-case-benchmarks/README.md` |
 | Smoke / E2E usage | `testing/smoke-test-e2e.md` |
 | Full CLI / runtime reference | `reference.md` |
 
@@ -55,18 +55,12 @@ the artifact/context boundary, and the remaining MVP gaps.
 `reference.md` is intentionally long. Treat it as a detailed manual, not the
 first document to read. Prefer `quickstart.md` and `trace` for day-to-day use.
 
-## Internal / Private Evidence
+## Private Evidence Policy
 
-Some documents mention private real-case runs that were used to harden the
-runtime. They are useful engineering evidence, but should not be copied into
-public release material without sanitization.
-
-| Private evidence | Public policy |
-|---|---|
-| Private benchmark case files under `testing/real-case-benchmarks/cases/` | Internal benchmark cases. Keep for development, exclude from public narrative. |
-| Private benchmark reports under `testing/real-case-benchmarks/reports/` | Internal benchmark reports. Summarize lessons generically when needed. |
-| `testing/real-case-reports/` | Raw local run reports. These often contain absolute paths and should not be treated as public docs. |
-| `handoff-*.md` | Historical session handoffs. Keep as archive only. |
+Private real-case runs are valuable engineering evidence, but they are not part
+of the public onboarding path. This branch keeps only sanitized summaries and
+public benchmark material. Raw local reports remain ignored under
+`testing/real-case-reports/` when generated locally.
 
 ## Historical / Reference Documents
 
@@ -75,7 +69,6 @@ should not be treated as current implementation truth:
 
 | Document group | Status |
 |---|---|
-| `handoff-*.md` | Historical session handoffs. Many branch/test counts are old. |
 | `superpowers/plans/*.md` | Implementation plans from earlier phases. Useful as background. |
 | `superpowers/specs/*.md` | Earlier design specs. Some have been superseded by current runtime docs. |
 | `design/P5-task-contract-and-contract-compiler.md` | Initial P5 design. Superseded for contract source-of-truth by artifact-driven negotiation. |
@@ -83,14 +76,8 @@ should not be treated as current implementation truth:
 
 ## Cleanup Notes
 
-As of 2026-06-08, the docs that are most likely to confuse new readers are:
-
-- `design/P5-task-contract-and-contract-compiler.md`: still valuable, but its Markdown heuristic compiler design is superseded by structured artifact contracts.
-- `testing/real-case-reports/`: useful raw evidence, but not public narrative material.
-- Private benchmark case files under `testing/real-case-benchmarks/cases/`: internal hardening cases, not reusable open-source fixtures.
-- `handoff-*.md`: historical handoff chain; do not use for current status.
-
-The cleanup strategy is conservative: keep historical records until the public
-release branch is prepared, but route readers through this index and the current
-architecture/state-machine docs first. See `public-cleanup-todo.md` for the
-release cleanup checklist.
+As of 2026-06-08, tracked historical handoffs and private benchmark case/report
+files have been removed from the public cleanup branch. Remaining historical
+design docs may still describe why the system changed, but current behavior is
+documented by the reading path above. See `public-cleanup-todo.md` for the
+release checklist.

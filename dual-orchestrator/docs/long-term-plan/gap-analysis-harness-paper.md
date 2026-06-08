@@ -13,7 +13,7 @@
 已经从 gap 变成 MVP 的能力：
 
 - **TaskContract / ContractCompiler**：已进入 p5 / p6 workflow，作为任务目标、范围、约束和验收标准的结构化锚点。
-- **Semantic FailureArbiter**：已实现 MVP，并在 `cancer-clinic` 真实 p6 长 case 中验证。Codex acceptance 两次 `REJECT` 后，系统进入 failure classification，再回到 Claude repair，最后通过验收。
+- **Semantic FailureArbiter**：已实现 MVP，并在私有真实 p6 长 case 中验证。Codex acceptance 两次 `REJECT` 后，系统进入 failure classification，再回到 Claude repair，最后通过验收。
 - **CalibrationCandidate**：已能从可校准失败生成候选 artifact，但还没有进入跨 run 统计、人工提升和版本化知识库。
 - **Review packet / timeline / failure summary**：已形成 CLI / API / UI 可消费的读模型。
 

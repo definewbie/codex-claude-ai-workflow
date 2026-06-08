@@ -69,7 +69,8 @@ The easiest reusable real run is the public benchmark:
 
 It creates a disposable issue-flow sample repo under `/tmp`, runs the full
 lifecycle with real `acpx` Claude/Codex, auto-approves intermediate benchmark
-gates, and writes a report under `docs/testing/real-case-reports/`.
+gates, and writes a local ignored report under
+`docs/testing/real-case-reports/<timestamp>/`.
 
 To choose the sample repo location:
 
@@ -93,9 +94,8 @@ EOF
   --variant full
 ```
 
-Use a small task first. Public reusable cases are named `public-*.md`. Private
-development cases in the same directory are internal hardening evidence for this
-repository, not public quickstart fixtures.
+Use a small task first. Public reusable benchmark cases are named `public-*.md`.
+Internal/private benchmark cases are not part of this public cleanup branch.
 
 The script creates a safe worktree, starts the lifecycle, auto-approves
 intermediate gates for benchmark purposes, and writes a report.
@@ -122,7 +122,9 @@ Important fields:
 Interpretation:
 
 - `PASS`: lifecycle completed with strong evidence.
-- `PASS-WARN`: lifecycle completed, but evidence still needs attention.
+- `PASS-WARN`: lifecycle completed, but evidence still needs attention, often
+  because Codex returned `ACCEPT_WITH_NOTES` or verification confidence is not
+  high enough yet.
 - `FAIL`: workflow stopped, original repo was polluted, or key artifacts are missing.
 
 ## 7. Trace A Running Workstream

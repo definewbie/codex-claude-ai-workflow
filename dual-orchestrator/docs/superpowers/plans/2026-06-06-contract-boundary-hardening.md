@@ -241,7 +241,7 @@ Expected: PASS.
 
 - [ ] **Step 2: Run one short real case**
 
-Run `scripts/run-real-case.sh` with a small `cancer-clinic` task and `--variant full`.
+Run `scripts/run-real-case.sh` with the public sample benchmark or a small private task and `--variant full`.
 
 Expected:
 

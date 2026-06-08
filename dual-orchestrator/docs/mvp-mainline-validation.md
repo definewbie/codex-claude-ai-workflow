@@ -4,13 +4,13 @@ This note records the current evidence for the dual-orchestrator MVP path: a rea
 requirement should move from intake to delivery artifacts with Claude, Codex,
 human gates, recovery, and benchmark evidence connected.
 
-## 2026-06-04 Real Case
+## 2026-06-04 Private Real Case
 
-- Case: `cancer-clinic-feature-slice`
+- Case: private medium feature slice
 - Variant: `p6`
-- Target repo: `/Users/kriswang/work/projects/ai/cancer-clinic`
-- Workstream: `ws-20260604T102338Z-X9E4`
-- Effective workdir: `/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260604T102338Z-X9E4`
+- Target repo: private production-like Git repository
+- Workstream: internal evidence retained outside this public cleanup branch
+- Effective workdir: generated Git worktree outside the original repository
 - Final status: `COMPLETED`
 - Benchmark grade: `PASS-WARN`
 - Gate rounds: 6
@@ -178,7 +178,7 @@ closure items have first-pass implementations:
 Release-quality MVP still needs:
 
 1. A public, repeatable real-case benchmark run that does not depend on the
-   private `cancer-clinic` project.
+   private project.
    - First sample/case now exists: `examples/issue-flow-app/` plus
      `cases/public-issue-flow-review-state.md`.
    - 2026-06-06: latest real `acpx` run completed with `PASS`: 6 human gates,

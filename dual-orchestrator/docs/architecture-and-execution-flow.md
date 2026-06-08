@@ -60,7 +60,7 @@ TaskContract 的意义是给后续所有人一个共同锚点：目标是什么�
 
 2026-06-03 的真实 benchmark 暴露出一个重要修正：TaskContract 不应该靠 Java 从 Agent 的自然语言 Markdown 里猜出来。新的方向是 artifact-driven contract negotiation：Claude 输出结构化 `task_contract_proposal`，系统只做 JSON/schema/path/metadata 等机械校验，Codex 按原则审议 proposal，通过后才生成 canonical TaskContract。Markdown 继续给人看，但不再作为状态机事实来源。
 
-同一天的 `cancer-clinic-rejection-prone` benchmark 又补了一条边界：canonical contract 不只要来自结构化 artifact，还要来自可信角色的可信输出。`contract.compile` 只信任 Claude intake 输出中的 `task_contract_proposal`；Codex review 里引用、摘录或复述的 artifact 只作为审阅内容，不再被当成 proposal 来源。
+同一天的私有 rejection-prone benchmark 又补了一条边界：canonical contract 不只要来自结构化 artifact，还要来自可信角色的可信输出。`contract.compile` 只信任 Claude intake 输出中的 `task_contract_proposal`；Codex review 里引用、摘录或复述的 artifact 只作为审阅内容，不再被当成 proposal 来源。
 
 2026-06-06 之后，这条边界进一步收紧：Agent 输出被拆成 Markdown report 和 typed `<dual-artifact>` 两层。Markdown 继续服务人类阅读；orchestrator 只把 `task_contract_proposal`、`self_test_report`、`acceptance_review`、`stage_handoff` 等结构化 artifact 作为机器事实来源。缺失或非法 artifact 会让节点失败，系统不会回退到 Markdown 标题、段落或 summary keyword 里继续猜。
 
@@ -154,8 +154,8 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：thin / p5 / p6。
 - 真实 acpx smoke：thin / p5 已通过；fixture p6 仍保留 `PASS-WARN` 语义，因为 Codex 是否拒绝不可控。
-- 真实复杂仓库 p6 长 case：2026-06-02 在 `cancer-clinic` 跑通，workstream `ws-20260602T121712Z-V7WM`，最终 `COMPLETED`。这次 run 中 Codex acceptance 连续两次 `REJECT`，系统进入 failure classification，再路由回 Claude repair，第三次验收通过。
-- 真实 benchmark set：2026-06-03 `cancer-clinic-feature-slice` 和 `cancer-clinic-rejection-prone` 均跑到 `COMPLETED` / `PASS-WARN`。后者未触发 acceptance `REJECT`，但暴露并修复了 `contract.compile` 可信来源问题，证明 real-case benchmark 比低复杂度 smoke 更容易发现主链路问题。
+- 真实复杂仓库 p6 长 case：2026-06-02 在一个私有生产型仓库中跑通，最终 `COMPLETED`。这次 run 中 Codex acceptance 连续两次 `REJECT`，系统进入 failure classification，再路由回 Claude repair，第三次验收通过。
+- 真实 benchmark set：2026-06-03 多个私有 benchmark 均跑到 `COMPLETED` / `PASS-WARN`。其中一个 rejection-prone case 未触发 acceptance `REJECT`，但暴露并修复了 `contract.compile` 可信来源问题，证明 real-case benchmark 比低复杂度 smoke 更容易发现主链路问题。
 
 这个结果说明：主生命周期的基本目标已经达到。系统已经能在真实仓库里跑完“需求 → contract → review → gate → 实现 → 自测 → 验收 → reject repair → delivery → handoff”的闭环。
 
@@ -176,7 +176,7 @@ real-case benchmark
 
 | 优先级 | 工作 | 原因 |
 |--------|------|------|
-| Done | p6 real repair loop | `cancer-clinic` 真实长 case 已触发两轮 REJECT → classify → repair → ACCEPT |
+| Done | p6 real repair loop | 私有真实长 case 已触发两轮 REJECT → classify → repair → ACCEPT |
 | Tech Debt | deterministic p6 reject fixture | 只有 CI 需要可重复覆盖 reject 边界时再做 |
 | Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |

@@ -80,28 +80,27 @@ p6-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 accept
 
 当改动触及 workflow 主链路、failure classification、context package、artifact contract 或 acpx adapter 时，建议至少跑一次真实复杂仓库 case。fixture smoke 可以证明 routing 便宜、可重复；真实 repo case 才能暴露上下文装配、Agent 工具调用、项目复杂度和 semantic repair 的问题。
 
-当前保留的真实长 case：
+公开可复用真实 case：
 
 ```bash
-./scripts/run-real-case.sh \
-  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
-  --task-file dual-orchestrator/docs/testing/real-case-benchmarks/cases/cancer-clinic-small-ui.md \
-  --variant p6
+./scripts/run-public-benchmark.sh
 ```
 
-最近一次通过记录：
+这条路径会准备 `examples/issue-flow-app` 的一次性 Git repo，并用真实
+`acpx` 跑 full lifecycle。最近一次公开路径通过记录：
 
 | 字段 | 值 |
 |------|----|
-| Time | 2026-06-02T12:17:11Z → 2026-06-02T12:34:26Z |
-| Workstream | `ws-20260602T121712Z-V7WM` |
-| Variant | `p6` / `agent-lifecycle-p6@3` |
+| Time | 2026-06-08 |
+| Case | `public-issue-flow-review-state` |
+| Variant | `full` |
 | Final status | `COMPLETED` |
-| Report | `dual-orchestrator/docs/testing/real-case-reports/20260602T121711Z/report.md` |
-| Benchmark report | `dual-orchestrator/docs/testing/real-case-benchmarks/reports/2026-06-02-cancer-clinic-small-ui.md` |
-| Repair loop | Codex acceptance `REJECT` 触发两次，均路由到 failure classification + Claude repair，第三次验收通过 |
+| Grade | `PASS-WARN` |
+| Final acceptance | `ACCEPT_WITH_NOTES` |
+| Report | `dual-orchestrator/docs/testing/real-case-reports/<timestamp>/report.md` |
+| Repair loop | 本公开样例未强制触发 repair loop；内部长 case 已验证过 `REJECT -> classify -> repair` |
 | Original repo | 保持干净 |
-| Worktree diff | `miniprogram/src/pages/treatment-event/index.vue | 4 ++++` |
+| Worktree diff | 只发生在 disposable benchmark repo |
 
 不要把这个 case 当成每次小改都必须跑的快速测试。它消耗时间和 Agent quota，适合主功能变更、长链路变更、或者准备宣布“主线已验证”之前运行。
 

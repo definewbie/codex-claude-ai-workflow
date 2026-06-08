@@ -33,7 +33,7 @@ dual-orchestrator 的目标已经从早期的“双 Agent 自动化脚本”演�
 
 当前 dual-orchestrator 已经具备 workflow runtime、ledger、context governance、TaskContract MVP、FailureArbiter MVP、CalibrationCandidate seed、review packet、timeline 和 real-case benchmark。它已经不是裸 Agent 调用工具。
 
-但真实 `cancer-clinic-feature-slice` benchmark 暴露了一个关键问题：
+但真实私有 feature-slice benchmark 暴露了一个关键问题：
 
 > 当前 TaskContract 的来源仍然不可靠。它主要由 `ContractCompileHandler` 从 LLM Markdown 和 context package 中用 heuristic / regex 抽取，结果可能把历史 README 示例、context metadata、旧页面描述混入 canonical `task-contract.json`。
 
@@ -454,7 +454,7 @@ dualctl calibration plan <candidate-id>
    - PASS 后写 canonical `task-contract.json/md`。
 
 7. 回归真实 case
-   - `cancer-clinic-feature-slice`。
+   - 私有 feature-slice benchmark 或公开 sample benchmark。
    - 验证 contract 不污染，设计阶段不再因 canonical contract 错误而 revision-limit。
 
 ### 7.2 P1：Artifact-first 后续阶段
@@ -643,9 +643,9 @@ P0 + P1 完成后，预计匹配度提升到 **85%** 左右。
 
 ```bash
 ./scripts/run-real-case.sh \
-  --repo /Users/kriswang/work/projects/ai/cancer-clinic \
-  --task-file docs/testing/real-case-benchmarks/cases/cancer-clinic-feature-slice.md \
-  --variant p6
+  --repo /path/to/your/repo \
+  --task-file /tmp/dual-task.md \
+  --variant full
 ```
 
 预期：

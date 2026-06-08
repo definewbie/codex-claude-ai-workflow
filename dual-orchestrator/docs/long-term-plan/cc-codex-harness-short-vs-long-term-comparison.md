@@ -30,7 +30,7 @@ Dual-Agent Workflow 当前实现版
 - FailureArbiter MVP 已实现。
 - CalibrationCandidate MVP 已实现。
 - Review packet、timeline、failure summary、artifact sidecar 已作为读模型落地。
-- `cancer-clinic` 真实 p6 长 case 已跑通，并实际触发两轮 Codex `REJECT` → failure classification → Claude repair → final acceptance。
+- 私有真实 p6 长 case 已跑通，并实际触发两轮 Codex `REJECT` → failure classification → Claude repair → final acceptance。
 
 因此下一步不再是“是否要做 contract-driven harness”，而是把它从可运行 MVP 推向可交付 MVP：
 
