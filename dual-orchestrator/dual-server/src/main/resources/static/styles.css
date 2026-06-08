@@ -174,6 +174,61 @@ p,
   line-height: 1.4;
 }
 
+.workspace-chooser {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fbfcfe;
+  padding: 10px;
+}
+
+.path-row,
+.path-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.workspace-browser {
+  display: grid;
+  gap: 6px;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  padding: 8px;
+}
+
+.workspace-browser-header {
+  display: grid;
+  gap: 4px;
+  border-bottom: 1px solid #edf0f4;
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+
+.workspace-browser-header strong,
+.workspace-browser-header span {
+  overflow-wrap: anywhere;
+}
+
+.workspace-browser button {
+  justify-content: flex-start;
+  min-height: 32px;
+  border-color: var(--line);
+  background: #fff;
+  color: var(--text);
+  text-align: left;
+}
+
+.workspace-browser button:hover {
+  border-color: var(--accent);
+  background: #f2f8fd;
+}
+
 .action-field .subtle {
   font-size: 11px;
 }
@@ -662,7 +717,7 @@ textarea {
 
 .timeline-item {
   display: grid;
-  grid-template-columns: minmax(160px, 1.1fr) minmax(0, 1.6fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr);
+  grid-template-columns: minmax(160px, 1.1fr) minmax(0, 1.2fr) minmax(90px, 0.6fr) minmax(180px, 1fr) minmax(80px, 0.5fr);
   gap: 10px;
   align-items: center;
   padding: 10px 12px;
@@ -919,7 +974,9 @@ textarea {
   .review-card-head,
   .review-row,
   .timeline-item,
-  .decision-actions {
+  .decision-actions,
+  .path-row,
+  .path-actions {
     display: grid;
     grid-template-columns: 1fr;
   }

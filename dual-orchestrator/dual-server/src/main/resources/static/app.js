@@ -12,6 +12,11 @@ const els = {
   workspaceSummary: $("workspaceSummary"),
   workspacePath: $("workspacePath"),
   switchWorkspace: $("switchWorkspace"),
+  workspaceChooser: $("workspaceChooser"),
+  browseWorkspace: $("browseWorkspace"),
+  useWorkspace: $("useWorkspace"),
+  closeWorkspaceChooser: $("closeWorkspaceChooser"),
+  workspaceBrowser: $("workspaceBrowser"),
   maxSteps: $("maxSteps"),
   connection: $("connection"),
   count: $("count"),
@@ -70,6 +75,52 @@ function renderWorkspaceSource() {
   const workdir = els.workdir.value.trim();
   els.workspaceSummary.textContent = workdir ? "Selected workspace" : "Server current directory";
   els.workspacePath.textContent = workdir || "Leave empty to use the server process workdir.";
+}
+
+async function browseWorkspace(path = els.workdir.value.trim()) {
+  els.workspaceBrowser.textContent = "Loading directories...";
+  try {
+    const data = await request(`/api/workspaces/browse?path=${encodeURIComponent(path || "")}`);
+    renderWorkspaceBrowser(data);
+  } catch (error) {
+    els.workspaceBrowser.textContent = error.message || JSON.stringify(error, null, 2);
+  }
+}
+
+function renderWorkspaceBrowser(data) {
+  const directories = data.directories || [];
+  els.workdir.value = data.path || els.workdir.value;
+  els.workspaceBrowser.innerHTML = `
+    <div class="workspace-browser-header">
+      <strong>${escapeHtml(data.path || "(current directory)")}</strong>
+      <span>${escapeHtml(directories.length ? `${directories.length} directories` : "No child directories")}</span>
+    </div>
+  `;
+  if (data.parent) {
+    els.workspaceBrowser.appendChild(workspaceDirectoryButton("..", data.parent));
+  }
+  for (const directory of directories) {
+    els.workspaceBrowser.appendChild(workspaceDirectoryButton(directory.name, directory.path));
+  }
+}
+
+function workspaceDirectoryButton(label, path) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "workspace-directory";
+  button.textContent = label;
+  button.title = path;
+  button.addEventListener("click", () => browseWorkspace(path));
+  return button;
+}
+
+async function applyWorkspacePath() {
+  state.workdir = els.workdir.value.trim();
+  localStorage.setItem("dual.workdir", state.workdir);
+  state.selectedId = "";
+  localStorage.removeItem("dual.selectedId");
+  renderWorkspaceSource();
+  await refreshList();
 }
 
 function workdirParam() {
@@ -412,7 +463,7 @@ function renderOverviewTimeline(nodes) {
     item.className = "mini-item";
     item.innerHTML = `
       <strong>${escapeHtml(node.nodeDefinitionId || "(node)")}</strong>
-      <span>${escapeHtml([node.status, node.iterationId].filter(Boolean).join(" · "))}</span>
+      <span>${escapeHtml([node.status, node.iterationId, timeRangeLabel(node)].filter(Boolean).join(" · "))}</span>
     `;
     els.overviewTimeline.appendChild(item);
   }
@@ -676,6 +727,7 @@ function renderTimeline(data) {
         <strong>${escapeHtml(node.nodeDefinitionId || node.id || "(node)")}</strong>
         <span>${escapeHtml(node.kind || "")}</span>
         <span>${escapeHtml(node.status || "")}</span>
+        <span>${escapeHtml(timeRangeLabel(node) || "-")}</span>
         <span>${escapeHtml(durationLabel(node.durationMs))}</span>
       `;
       group.appendChild(item);
@@ -694,6 +746,31 @@ function groupByIteration(nodes) {
     groups.get(key).push(node);
   }
   return groups;
+}
+
+function timeRangeLabel(node) {
+  const started = formatTime(node.startedAt || node.createdAt);
+  const finished = formatTime(node.finishedAt || node.updatedAt);
+  if (started && finished && started !== finished) {
+    return `${started} - ${finished}`;
+  }
+  return started || finished || "";
+}
+
+function formatTime(value) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+  return date.toLocaleString([], {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function setStatusBadge(status) {
@@ -820,17 +897,18 @@ function escapeHtml(value) {
 
 $("refresh").addEventListener("click", refreshList);
 els.switchWorkspace.addEventListener("click", () => {
-  els.workdir.classList.toggle("hidden");
-  if (!els.workdir.classList.contains("hidden")) {
+  els.workspaceChooser.classList.toggle("hidden");
+  if (!els.workspaceChooser.classList.contains("hidden")) {
     els.workdir.focus();
+    browseWorkspace();
   }
 });
 els.workdir.addEventListener("change", () => {
-  state.selectedId = "";
-  localStorage.removeItem("dual.selectedId");
-  renderWorkspaceSource();
-  refreshList();
+  browseWorkspace();
 });
+els.browseWorkspace.addEventListener("click", () => browseWorkspace());
+els.useWorkspace.addEventListener("click", applyWorkspacePath);
+els.closeWorkspaceChooser.addEventListener("click", () => els.workspaceChooser.classList.add("hidden"));
 $("tick").addEventListener("click", async () => {
   try {
     const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}`, {

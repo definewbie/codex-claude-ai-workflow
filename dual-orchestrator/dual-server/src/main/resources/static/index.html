@@ -27,9 +27,22 @@
             <strong id="workspaceSummary">Server current directory</strong>
             <span id="workspacePath">Leave empty to use the server process workdir.</span>
           </div>
-          <button id="switchWorkspace" class="secondary">Switch</button>
+          <button id="switchWorkspace" class="secondary">Choose</button>
         </div>
-        <input id="workdir" class="hidden" type="text" placeholder="/path/to/effective/worktree">
+        <div id="workspaceChooser" class="workspace-chooser hidden">
+          <label class="field">
+            <span>Workspace path</span>
+            <div class="path-row">
+              <input id="workdir" type="text" placeholder="/path/to/effective/worktree">
+              <button id="browseWorkspace" class="secondary" type="button">Browse</button>
+            </div>
+          </label>
+          <div class="path-actions">
+            <button id="useWorkspace" type="button">Use this path</button>
+            <button id="closeWorkspaceChooser" class="secondary" type="button">Close</button>
+          </div>
+          <div id="workspaceBrowser" class="workspace-browser"></div>
+        </div>
       </div>
       <label class="field compact">
         <span>Max steps</span>
