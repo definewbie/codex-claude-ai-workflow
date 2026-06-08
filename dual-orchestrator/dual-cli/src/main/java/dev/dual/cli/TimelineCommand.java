@@ -11,6 +11,8 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -71,9 +73,42 @@ public final class TimelineCommand implements Callable<Integer> {
             return list.stream()
                     .filter(Map.class::isInstance)
                     .map(item -> (Map<String, Object>) item)
+                    .sorted(this::compareTimelineNodes)
                     .toList();
         }
         return List.of();
+    }
+
+    private int compareTimelineNodes(Map<String, Object> left, Map<String, Object> right) {
+        var byTime = timelineInstant(left).compareTo(timelineInstant(right));
+        if (byTime != 0) {
+            return byTime;
+        }
+        return Comparator.comparing((Map<String, Object> node) -> text(node.get("nodeInstanceId")))
+                .compare(left, right);
+    }
+
+    private Instant timelineInstant(Map<String, Object> node) {
+        var startedAt = parseInstant(text(node.get("startedAt")));
+        if (startedAt != null) {
+            return startedAt;
+        }
+        var finishedAt = parseInstant(text(node.get("finishedAt")));
+        if (finishedAt != null) {
+            return finishedAt;
+        }
+        return Instant.MAX;
+    }
+
+    private Instant parseInstant(String value) {
+        if (value.isBlank() || "null".equals(value)) {
+            return null;
+        }
+        try {
+            return Instant.parse(value);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private static String text(Object value) {

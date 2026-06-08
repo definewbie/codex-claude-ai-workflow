@@ -163,6 +163,9 @@ Release-quality MVP still needs:
    - 2026-06-08: the public benchmark path now has a single command:
      `./scripts/run-public-benchmark.sh`. It prepares the disposable sample repo
      and runs the public issue-flow case through `run-real-case.sh`.
+   - 2026-06-08: the one-command public benchmark was rerun with real `acpx` and
+     completed as `PASS-WARN`: 6 human gates, 10 Agent runs, 31 timeline nodes,
+     final `ACCEPT_WITH_NOTES`, all key artifacts present, original repo clean.
 2. A short install-to-first-run path that does not reference private benchmark
    cases.
    - 2026-06-08: `README.md` and `docs/quickstart.md` now lead with the public
@@ -173,3 +176,5 @@ Release-quality MVP still needs:
    - 2026-06-08: new timeline projections are written in chronological order,
      and the server normalizes existing `timeline.json` files before serving
      `/timeline` and `/overview`.
+   - 2026-06-08: `dualctl trace` and `dualctl timeline` now apply the same
+     chronological normalization when reading existing ledger files directly.
