@@ -127,32 +127,31 @@
           <div id="timelineView" class="timeline"></div>
         </section>
 
-        <section class="debug-grid">
-          <section class="panel">
-            <div class="panel-title">
-              <h2>Debug / Ledger Diagnostics</h2>
-              <span class="subtle">advanced</span>
-            </div>
-            <div class="overview-split">
-              <section>
-                <div class="mini-title">Next action</div>
-                <p id="overviewNext" class="debug-text">-</p>
-              </section>
-              <section>
-                <div class="mini-title">Key artifacts</div>
-                <div id="overviewArtifacts" class="mini-list"></div>
-              </section>
-            </div>
-            <pre id="statusView" class="json">{}</pre>
-          </section>
-          <section class="panel">
-            <div class="panel-title">
-              <h2>Artifact Summary</h2>
-              <span class="subtle">latest contract sidecars</span>
-            </div>
-            <div id="artifactSummary" class="artifact-list"></div>
-          </section>
-        </section>
+        <details class="panel debug-panel">
+          <summary>
+            <span>Debug / Ledger Diagnostics</span>
+            <em>advanced</em>
+          </summary>
+          <div class="debug-grid">
+            <section>
+              <div class="mini-title">Next action</div>
+              <p id="overviewNext" class="debug-text">-</p>
+            </section>
+            <section>
+              <div class="mini-title">Key artifacts</div>
+              <div id="overviewArtifacts" class="mini-list"></div>
+            </section>
+          </div>
+          <pre id="statusView" class="json">{}</pre>
+        </details>
+
+        <details class="panel debug-panel">
+          <summary>
+            <span>Artifact Summary</span>
+            <em>latest contract sidecars</em>
+          </summary>
+          <div id="artifactSummary" class="artifact-list"></div>
+        </details>
 
         <section class="panel hidden" id="legacyTimelinePanel">
           <div class="panel-title">
@@ -169,12 +168,13 @@
           <pre id="recoveryMarkdown" class="markdown"></pre>
         </section>
 
-        <section class="panel">
-          <div class="panel-title">
-            <h2>Last Response</h2>
-          </div>
+        <details class="panel debug-panel">
+          <summary>
+            <span>Last Response</span>
+            <em>raw API payload</em>
+          </summary>
           <pre id="responseView" class="json">{}</pre>
-        </section>
+        </details>
       </section>
     </section>
   </main>

@@ -68,9 +68,9 @@ button:disabled {
 }
 
 .shell {
-  max-width: 1440px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px;
 }
 
 .topbar,
@@ -118,8 +118,8 @@ p,
 }
 
 .toolbar {
-  display: grid;
-  grid-template-columns: minmax(280px, 1fr) 100px 180px 100px 140px;
+  display: flex;
+  flex-wrap: wrap;
   align-items: end;
   gap: 12px;
   margin: 16px 0;
@@ -139,7 +139,8 @@ p,
 }
 
 .field-grow {
-  flex: 1;
+  flex: 1 1 420px;
+  min-width: 260px;
 }
 
 .workspace-picker {
@@ -177,6 +178,11 @@ p,
   font-size: 11px;
 }
 
+.action-field {
+  flex: 0 1 190px;
+  min-width: 170px;
+}
+
 .compact {
   width: 100px;
 }
@@ -197,7 +203,7 @@ textarea {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(280px, 340px) 1fr;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -271,17 +277,17 @@ textarea {
 
 .progress {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   gap: 8px;
 }
 
 .stage {
   position: relative;
-  min-height: 104px;
+  min-height: 96px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: #fff;
-  padding: 13px 10px;
+  padding: 12px 9px;
 }
 
 .stage:not(:last-child)::after {
@@ -327,7 +333,7 @@ textarea {
 
 .gate-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.78fr);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.7fr);
   gap: 16px;
   align-items: start;
 }
@@ -376,7 +382,7 @@ textarea {
 
 .decision-actions {
   display: grid;
-  grid-template-columns: minmax(180px, auto) minmax(180px, auto) 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
   align-items: start;
 }
@@ -408,7 +414,7 @@ textarea {
 
 .overview-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -557,8 +563,9 @@ textarea {
 
 .debug-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.75fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .grid {
@@ -581,6 +588,46 @@ textarea {
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.debug-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.debug-panel summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.debug-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.debug-panel summary span {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.debug-panel summary em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.debug-panel[open] {
+  padding: 0 14px 14px;
+}
+
+.debug-panel[open] summary {
+  margin: 0 -14px 12px;
+  border-bottom: 1px solid var(--line);
 }
 
 .markdown {
@@ -615,7 +662,7 @@ textarea {
 
 .timeline-item {
   display: grid;
-  grid-template-columns: 190px minmax(0, 1fr) 110px 100px;
+  grid-template-columns: minmax(160px, 1.1fr) minmax(0, 1.6fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr);
   gap: 10px;
   align-items: center;
   padding: 10px 12px;
@@ -836,13 +883,11 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .toolbar,
   .layout,
   .grid,
   .gate-grid,
   .debug-grid,
   .overview-grid,
-  .progress,
   .overview-row,
   .overview-split {
     grid-template-columns: 1fr;
@@ -850,6 +895,17 @@ textarea {
 
   .toolbar {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .toolbar .field-grow,
+  .toolbar .action-field {
+    grid-column: 1 / -1;
+  }
+
+  .toolbar > button {
+    min-width: 0;
+    width: 100%;
   }
 
   .compact {
@@ -863,13 +919,52 @@ textarea {
   .review-card-head,
   .review-row,
   .timeline-item,
-  .decision-actions,
-  .workspace-picker {
+  .decision-actions {
     display: grid;
     grid-template-columns: 1fr;
   }
 
   .stage:not(:last-child)::after {
     display: none;
+  }
+
+  .progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stage {
+    min-height: 88px;
+    padding: 10px 8px;
+  }
+
+  .stage strong {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .list-panel {
+    position: static;
+  }
+
+  .workstreams {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .shell {
+    padding: 12px;
+  }
+
+  .toolbar,
+  .topbar,
+  .panel {
+    border-radius: 7px;
   }
 }
