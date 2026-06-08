@@ -1,7 +1,7 @@
 # 白皮书对应说明
 
 > Status: current narrative doc
-> Last updated: 2026-06-04
+> Last updated: 2026-06-08
 
 这份文档说明 `dual-orchestrator` 如何对应“AI 时代研发效能”这条主线。
 
@@ -34,16 +34,21 @@
 
 ## 当前 MVP 证据
 
-Java 版 MVP 已经在真实项目里跑通过主生命周期：
+Java 版 MVP 已经跑通过两类证据路径：
 
-- Case：`cancer-clinic-feature-slice`
-- Variant：`p6`
-- 结果：`COMPLETED`
-- Codex acceptance 路径：`REJECT -> failure classification -> Claude repair -> ACCEPT_WITH_NOTES`
-- 安全结果：原始仓库保持干净，改动发生在自动生成的 worktree 中。
-- 产物：final report、delivery package、handoff JSON、next-stage prompt、timeline、run metadata、benchmark summary。
+1. **公开可复用 benchmark**：`examples/issue-flow-app` + `public-issue-flow-review-state`，用于验证 fresh clone 后的公开运行路径。
+2. **内部真实项目 hardening**：用私有生产型仓库持续暴露长上下文、模糊需求、验收证据不足、recovery、repair loop 等问题。
 
-这说明 MVP 主生命周期已经功能性闭环。它还不是生产级产品。
+最近一次中等复杂真实 case 验证到的主链路能力：
+
+- workflow 最终到达 `COMPLETED`。
+- Codex 可以在 intake 阶段触发 `NEEDS_REVISION`，系统创建 revision iteration 并继续收敛。
+- Artifact contract 能拦截结构化输出语义冲突，并通过 retry 从同一 active node 恢复。
+- 最终验收可以表达 `ACCEPT_WITH_NOTES`，把非阻塞证据缺口留给 human gate 判断。
+- `final-report.md`、`handoff.json`、`next-stage-prompt.md`、delivery PR body、timeline、metrics、trace 都能生成。
+- 原始仓库保持干净，业务改动发生在自动生成的 worktree 中。
+
+这说明 MVP 主生命周期已经功能性闭环。它还不是生产级产品，也还不能宣称适配所有仓库和所有团队流程。
 
 ## 产品形态
 
@@ -68,9 +73,10 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 - UI 还是 operator panel，不是完整 dashboard。
 - 实时进度仍是轮询式，尚未做 SSE / WebSocket。
 - 一些 runtime failure 仍需要人工判断，自动恢复还不完整。
-- 真实 case benchmark 数量还少，不能宣称广泛可靠。
+- 公开 benchmark 数量还少，内部 benchmark 不能直接作为公开材料。
 - 分发方式还是本地 install script，Homebrew / Docker / native image 还没做。
 - 权限、角色、多用户安全还不是生产级。
+- 开源发布前还需要清理历史 handoff、私有 case 和 raw local run reports。
 
 ## 后续方向
 
@@ -80,5 +86,6 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 2. 让 review packet 和 artifact 变成更清楚的 operator experience。
 3. 扩充 real-case benchmark，让项目有可比较的运行证据。
 4. calibration 继续保持人审，不要过早把一次失败沉淀成硬规则。
+5. 准备公开 release branch，把私有证据归档或脱敏。
 
 暂时不应该把主要精力花在边界 fixture、装饰性 UI 或泛集成上。只有当这些工作能直接提高完整生命周期的可运行性、可追踪性或可信度时，才值得进入主线。

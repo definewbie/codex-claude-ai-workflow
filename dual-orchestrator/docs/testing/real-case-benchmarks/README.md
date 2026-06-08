@@ -19,10 +19,11 @@ Public reusable benchmark:
 |------|------|------|------|
 | `cases/public-issue-flow-review-state.md` | Public sample app feature | 验证公开样例仓库上的 contract / context / self-test / acceptance / handoff 主生命周期 | Ready to run |
 
-Current cases are private development benchmarks. They are useful for internal
-hardening, but they are not the public onboarding path and should not be copied
-into open-source release material without sanitization. See
-`../public-benchmark-plan.md` for the public benchmark direction.
+The following cases are private development benchmarks. They are useful for
+internal hardening, but they are not the public onboarding path and should not
+be copied into open-source release material without sanitization. See
+`../public-benchmark-plan.md` and `../../public-cleanup-todo.md` before using
+them in public docs.
 
 | Case | 类型 | 目的 | 状态 |
 |------|------|------|------|
@@ -130,7 +131,7 @@ Equivalent manual flow:
   --variant full
 ```
 
-Private internal case example:
+Private internal case example. Do not use this in public onboarding docs:
 
 ```bash
 ./scripts/run-real-case.sh \

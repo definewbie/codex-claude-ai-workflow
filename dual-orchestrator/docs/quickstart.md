@@ -93,8 +93,8 @@ EOF
   --variant full
 ```
 
-Use a small task first. The private benchmark cases under
-`docs/testing/real-case-benchmarks/cases/` are development evidence for this
+Use a small task first. Public reusable cases are named `public-*.md`. Private
+development cases in the same directory are internal hardening evidence for this
 repository, not public quickstart fixtures.
 
 The script creates a safe worktree, starts the lifecycle, auto-approves
