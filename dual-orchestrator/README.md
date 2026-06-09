@@ -1,5 +1,7 @@
 # dual-orchestrator
 
+English version: [README.en.md](README.en.md)
+
 `dual-orchestrator` 是一个本地 Agent 生命周期编排器，用 `acpx` 驱动 Claude
 和 Codex，把长周期研发任务拆成需求澄清、设计审视、计划、实现、自测、验收、修复和交付。
 
@@ -160,9 +162,14 @@ Operator Panel 的 overview 和 `dualctl trace` 使用同一套表达：当前�
 ## 文档入口
 
 - [Quickstart](docs/quickstart.md)
-- [文档索引](docs/README.md)
+- [中文 Quickstart](docs/quickstart.zh-CN.md)
+- [文档索引](docs/README.md) / [中文](docs/README.zh-CN.md)
 - [总体架构与执行流程](docs/architecture-and-execution-flow.md)
 - [Workflow 状态机](docs/design/workflow-state-machine.md)
+- [Artifact Contract 与上下文](docs/design/artifact-contracts-and-context.md) / [中文](docs/design/artifact-contracts-and-context.zh-CN.md)
+- [Failure Recovery 与 Calibration](docs/design/failure-recovery-and-calibration.md) / [中文](docs/design/failure-recovery-and-calibration.zh-CN.md)
+- [Operator Observability](docs/design/operator-observability.md) / [中文](docs/design/operator-observability.zh-CN.md)
+- [设计演进笔记](docs/design/design-evolution-notes.md) / [中文](docs/design/design-evolution-notes.zh-CN.md)
 - [当前功能状态](docs/features.md)
 - [Real-case benchmark](docs/testing/real-case-benchmarks/README.md)
 - [完整参考手册](docs/reference.md)

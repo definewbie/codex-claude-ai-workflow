@@ -59,7 +59,7 @@ Runtime 只认识三类节点：
 - `workflow/current.json` 快照。
 - node / gate 文件化状态。
 - handler SPI 和 registry。
-- thin lifecycle workflow definition。
+- baseline lifecycle workflow definition。
 - `acpx.agent_run` TaskHandler。
 - resources-based Agent prompt templates。
 - human review gate。
@@ -75,7 +75,7 @@ Runtime 只认识三类节点：
 - artifact validation handler，会落盘 Git status / diff / changed files。
 - next-stage prompt handler。
 - `dualctl start/status/resume/review approve/review revise` 接入 workflow ledger。
-- 节点级幂等保护（T0.2），`resume` 会拒绝正在执行中的节点。
+- 节点级幂等保护，`resume` 会拒绝正在执行中的节点。
 - Prompt 注入防护：`dual-control` block 解析锚定行首，只认 terminal block，不回退旧文件。
 - Revision loop 上限 + recovery gate。
 - 单元测试覆盖 handler、ledger、control block 解析、contract registry、prompt 一致性、context governance 和 workflow 集成。
@@ -421,13 +421,13 @@ acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
 
 含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。
 
-较小的 `thin` / `p5` lifecycle 仍然尽量保守，只在实现和自测相关 Claude 节点启用写权限。完整真实生命周期 `p6` 会让所有 acpx Agent 节点使用：
+较小的 `baseline` / `contract` lifecycle 仍然尽量保守，只在实现和自测相关 Claude 节点启用写权限。完整真实生命周期 `full` 会让所有 acpx Agent 节点使用：
 
 ```bash
 acpx --timeout 600 --approve-all ...
 ```
 
-原因是 p6 的 intake / design / plan / acceptance 都可能需要通过 Agent 工具读取项目、执行 `git diff`、运行测试或生成证据；在非交互模式下使用 `--approve-reads --non-interactive-permissions fail` 会让这类工具调用直接失败。安全边界主要由默认 worktree、`Execution Workspace Guard` 和 prompt contract 共同承担：Claude 是主控开发者；Codex 仍然只做外部审视和验收，不应修改业务代码。
+原因是 full 的 intake / design / plan / acceptance 都可能需要通过 Agent 工具读取项目、执行 `git diff`、运行测试或生成证据；在非交互模式下使用 `--approve-reads --non-interactive-permissions fail` 会让这类工具调用直接失败。安全边界主要由默认 worktree、`Execution Workspace Guard` 和 prompt contract 共同承担：Claude 是主控开发者；Codex 仍然只做外部审视和验收，不应修改业务代码。
 
 如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr。若 stdout 已经包含完整 terminal `dual-control` block，并以 `[done] end_turn` 结束，adapter 会接受该产物，同时在 result 中记录 `acpx_recoverable_stderr_ignored=true` 和原始 `exit_code`。如果 stdout 不完整，节点仍会停到 recovery；dual 不会替你修复 agent runtime。
 
@@ -1297,7 +1297,7 @@ cd dual-orchestrator
 
 - workflow 从 `start --run` 跑到第一个 human gate。
 - 脚本自动 approve 中间 gate，并在最后 next-stage gate 执行 `review complete`。
-- 28 个 thin mainline 节点完成。
+- 28 个 baseline mainline 节点完成。
 - final report、delivery prepare artifact、next-stage prompt、handoff.json 都存在。
 - Git evidence 能看到 controlled implementation 对 `main.py` / `README.md` 的改动。
 
@@ -1317,22 +1317,22 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 
 ```bash
 cd dual-orchestrator
-./scripts/smoke-test.sh --case p5-contract-happy-path --manual-gates
+./scripts/smoke-test.sh --case contract-happy-path --manual-gates
 ```
 
 脚本到达 gate 后会打印 Operator Panel 地址、effective workdir、workstream id 和 review packet 路径。你在页面里读完 `Human Review Packet`，点击 `Approve + Run`、`Revise + Run` 或最后一个 gate 的 `Complete`，再回到终端按 Enter。这个模式不会自动 approve gate。
 
 ### Real acpx Smoke
 
-完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 thin、p5、p6 三个真实 acpx case。
+完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 baseline、contract、full 三个真实 acpx case。
 
 真实 acpx case：
 
 ```bash
 cd dual-orchestrator
-./scripts/smoke-test.sh --case thin-basic --cleanup
-./scripts/smoke-test.sh --case p5-contract-happy-path --cleanup
-./scripts/smoke-test.sh --case p6-reject-classify-path --cleanup
+./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case contract-happy-path --cleanup
+./scripts/smoke-test.sh --case full-reject-classify-path --cleanup
 ```
 
 ### Real Repository Lifecycle Case

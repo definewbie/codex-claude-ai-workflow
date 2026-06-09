@@ -68,7 +68,7 @@ class ContextTaskContractSectionTest {
         assertTrue(taskContractSection.isPresent(),
                 "task_contract section should exist in acceptance profile");
         assertEquals(MissingPolicy.PLACEHOLDER, taskContractSection.get().missingPolicy(),
-                "thin workflow has no task contract, so acceptance context must render a placeholder instead of failing");
+                "baseline workflow has no task contract, so acceptance context must render a placeholder instead of failing");
     }
 
     @Test
@@ -157,7 +157,7 @@ class ContextTaskContractSectionTest {
 
         var result = handler.execute(context);
 
-        assertEquals(NodeStatus.COMPLETED, result.status(), "Thin workflow acceptance context should not require task-contract.json");
+        assertEquals(NodeStatus.COMPLETED, result.status(), "Baseline workflow acceptance context should not require task-contract.json");
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")), StandardCharsets.UTF_8);
         assertTrue(markdown.contains("TaskContract"),
                 "Context package should keep a stable TaskContract section");

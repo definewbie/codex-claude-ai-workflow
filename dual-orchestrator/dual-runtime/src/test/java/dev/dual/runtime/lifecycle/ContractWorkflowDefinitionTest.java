@@ -11,18 +11,18 @@ class ContractWorkflowDefinitionTest {
     private final LifecycleWorkflowDefinitionFactory factory = new LifecycleWorkflowDefinitionFactory();
 
     @Test
-    void p5MainlineContainsContractNodes() {
-        WorkflowDefinition wf = factory.p5Mainline();
+    void contractMainlineContainsContractNodes() {
+        WorkflowDefinition wf = factory.contractMainline();
 
         assertDoesNotThrow(() -> wf.node("contract.compile"),
-                "p5Mainline should contain node contract.compile");
+                "contractMainline should contain node contract.compile");
         assertDoesNotThrow(() -> wf.node("gate.contract_review"),
-                "p5Mainline should contain node gate.contract_review");
+                "contractMainline should contain node gate.contract_review");
     }
 
     @Test
-    void p5MainlineRoutesContractReviewToDesign() {
-        WorkflowDefinition wf = factory.p5Mainline();
+    void contractMainlineRoutesContractReviewToDesign() {
+        WorkflowDefinition wf = factory.contractMainline();
 
         var approvedEdges = wf.edgesFrom("gate.contract_review").stream()
                 .filter(e -> "approved".equals(e.on()))
@@ -34,8 +34,8 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
-    void p5MainlineRoutesClarifyBackToCompile() {
-        WorkflowDefinition wf = factory.p5Mainline();
+    void contractMainlineRoutesClarifyBackToCompile() {
+        WorkflowDefinition wf = factory.contractMainline();
 
         var clarifyEdges = wf.edgesFrom("gate.contract_review").stream()
                 .filter(e -> "clarify".equals(e.on()))
@@ -55,12 +55,12 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
-    void thinMainlineDoesNotContainContractNodes() {
-        WorkflowDefinition wf = factory.thinMainline();
+    void baselineMainlineDoesNotContainContractNodes() {
+        WorkflowDefinition wf = factory.baselineMainline();
 
         assertThrows(IllegalArgumentException.class, () -> wf.node("contract.compile"),
-                "thinMainline should NOT contain node contract.compile");
+                "baselineMainline should NOT contain node contract.compile");
         assertThrows(IllegalArgumentException.class, () -> wf.node("gate.contract_review"),
-                "thinMainline should NOT contain node gate.contract_review");
+                "baselineMainline should NOT contain node gate.contract_review");
     }
 }

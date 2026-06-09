@@ -1,7 +1,7 @@
 # Workflow State Machine
 
 > Status: current implementation guide
-> Last updated: 2026-06-03
+> Last updated: public release cleanup
 
 This document explains the runtime state model used by `dual-orchestrator`. It is intentionally implementation-oriented: if a real workstream stops, this should help an operator understand what happened and which command is safe next.
 
@@ -225,9 +225,9 @@ Simple linear progress does not create a new iteration.
 
 Retrying a failed node also does not create a new iteration. It is the same node instance being attempted again.
 
-## 9. P6 Mainline
+## 9. Full Lifecycle
 
-Current p6 lifecycle:
+Current full lifecycle:
 
 ```mermaid
 flowchart TD
@@ -268,7 +268,7 @@ Key routing:
 
 ## 10. Real Case Example
 
-A private rejection-prone benchmark on 2026-06-03 exposed a contract source bug:
+An internal rejection-prone benchmark exposed a contract source bug:
 
 ```text
 contract.compile
@@ -288,7 +288,7 @@ The important state-machine point:
 - events recorded `node_failed`, `node_retry_requested`, then `contract_compilation_completed`;
 - final workflow status became `COMPLETED`.
 
-A private state-model benchmark on 2026-06-03 validated the ordinary linear P6 path:
+An internal state-model benchmark validated the ordinary linear full-lifecycle path:
 
 ```text
 start --run

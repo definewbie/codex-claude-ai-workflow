@@ -22,7 +22,7 @@ public final class WorkflowPrintDefaultCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        var definition = new LifecycleWorkflowDefinitionFactory().thinMainline();
+        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
         var json = objectMapper.writeValueAsString(definition) + System.lineSeparator();
         if (outputPath == null) {
             System.out.print(json);

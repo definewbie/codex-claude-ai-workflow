@@ -1,7 +1,9 @@
 # dual-orchestrator Docs
 
+中文版本：[README.zh-CN.md](README.zh-CN.md)
+
 > Status: current docs index
-> Last updated: 2026-06-08
+> Last updated: 2026-06-09
 
 This directory contains the current product docs and selected implementation
 design notes. For open-source readers, start with the current reading path.
@@ -10,19 +12,20 @@ cleanup branch; reusable evidence now starts from the public benchmark sample.
 
 ## Current Reading Path
 
-| Purpose | Document |
-|---|---|
-| Install and first runnable workflow | `quickstart.md` |
-| Why this project exists | `whitepaper-mapping.md` |
-| Overall product and architecture narrative | `architecture-and-execution-flow.md` |
-| Runtime state model and operator commands | `design/workflow-state-machine.md` |
-| Artifact/context contract design | `design/2026-06-03-artifact-driven-contract-negotiation.md` |
-| Contract boundary hardening | `design/2026-06-06-contract-boundary-hardening.md` |
-| Current roadmap / feature status | `features.md` |
-| Public benchmark direction | `testing/public-benchmark-plan.md` |
-| Public benchmark entry | `testing/real-case-benchmarks/README.md` |
-| Smoke / E2E usage | `testing/smoke-test-e2e.md` |
-| Full CLI / runtime reference | `reference.md` |
+| Purpose | English | Chinese |
+|---|---|---|
+| Install and first runnable workflow | [quickstart.md](quickstart.md) | [quickstart.zh-CN.md](quickstart.zh-CN.md) |
+| Why this project exists | [whitepaper-mapping.md](whitepaper-mapping.md) | Not split yet |
+| Overall product and architecture narrative | [architecture-and-execution-flow.en.md](architecture-and-execution-flow.en.md) | [architecture-and-execution-flow.md](architecture-and-execution-flow.md) |
+| Runtime state model and operator commands | [workflow-state-machine.md](design/workflow-state-machine.md) | [workflow-state-machine.zh-CN.md](design/workflow-state-machine.zh-CN.md) |
+| Artifact contracts and context packages | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
+| Failure recovery and calibration | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
+| Operator observability | [operator-observability.md](design/operator-observability.md) | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
+| Design evolution article notes | [design-evolution-notes.md](design/design-evolution-notes.md) | [design-evolution-notes.zh-CN.md](design/design-evolution-notes.zh-CN.md) |
+| Current feature status | [features.md](features.md) | Not split yet |
+| Public benchmark entry | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) | Not split yet |
+| Smoke / E2E usage | [testing/smoke-test-e2e.md](testing/smoke-test-e2e.md) | Not split yet |
+| Full CLI / runtime reference | [reference.md](reference.md) | Detailed reference is not split yet |
 
 ## Public Onboarding Path
 
@@ -30,7 +33,7 @@ Use this path when evaluating the project from a fresh clone:
 
 1. Read the root `README.md`.
 2. Follow `quickstart.md`.
-3. Run `./scripts/smoke-test.sh --case thin-basic --cleanup`.
+3. Run `./scripts/smoke-test.sh --case baseline-basic --cleanup`.
 4. Run `./scripts/run-public-benchmark.sh` when real `acpx` Claude/Codex are available.
 5. Use `dualctl trace --workdir <effective_workdir> <workstream_id>` to inspect the result.
 
@@ -41,11 +44,12 @@ This path avoids private project details and uses the reusable sample app under
 
 Use this path when changing the orchestrator itself:
 
-1. `architecture-and-execution-flow.md`
-2. `design/workflow-state-machine.md`
-3. `design/2026-06-03-artifact-driven-contract-negotiation.md`
-4. `design/2026-06-06-contract-boundary-hardening.md`
-5. `features.md`
+1. `architecture-and-execution-flow.en.md` / `architecture-and-execution-flow.md`
+2. `design/workflow-state-machine.md` / `design/workflow-state-machine.zh-CN.md`
+3. `design/artifact-contracts-and-context.md`
+4. `design/failure-recovery-and-calibration.md`
+5. `design/operator-observability.md`
+6. `features.md`
 
 These documents describe the current shape of the lifecycle, the state model,
 the artifact/context boundary, and the remaining MVP gaps.
@@ -62,17 +66,11 @@ of the public onboarding path. This branch keeps only sanitized summaries and
 public benchmark material. Raw local reports remain ignored under
 `testing/real-case-reports/` when generated locally.
 
-## Historical / Reference Documents
+## Design Evolution Notes
 
-These documents are useful for understanding why the system evolved, but they
-should not be treated as current implementation truth:
-
-| Document group | Status |
-|---|---|
-| `superpowers/plans/*.md` | Implementation plans from earlier phases. Useful as background. |
-| `superpowers/specs/*.md` | Earlier design specs. Some have been superseded by current runtime docs. |
-| `design/P5-task-contract-and-contract-compiler.md` | Initial P5 design. Superseded for contract source-of-truth by artifact-driven negotiation. |
-| `designs/T1.1-T2.2-contract-and-prompt-regression.md` | Historical test/contract design; much of it has already been implemented. |
+`design/design-evolution-notes.md` preserves the useful story behind the
+architecture: how the project moved from a dual-agent script to an engineering
+harness. It is article material, not runtime reference.
 
 ## Cleanup Notes
 

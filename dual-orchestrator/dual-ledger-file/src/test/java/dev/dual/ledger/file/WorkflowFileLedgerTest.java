@@ -302,7 +302,7 @@ class WorkflowFileLedgerTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-reject"));
         Files.createDirectories(paths.workstreamDir());
         var definition = new WorkflowDefinition(
-                "agent-lifecycle-p6",
+                "agent-lifecycle-full",
                 3,
                 "acceptance.decision",
                 List.of(

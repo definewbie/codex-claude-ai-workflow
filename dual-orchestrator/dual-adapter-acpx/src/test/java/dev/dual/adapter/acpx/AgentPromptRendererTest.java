@@ -66,8 +66,8 @@ class AgentPromptRendererTest {
                 # Context Package
 
                 Previous output suggested:
-                git -C /Users/kriswang/work/projects/ai/cancer-clinic status --short
-                Edit /Users/kriswang/work/projects/ai/cancer-clinic/miniprogram/src/pages/record/index.vue
+                git -C /private/projects/internal-product status --short
+                Edit /private/projects/internal-product/src/main.py
                 """);
 
         var prompt = new AgentPromptRenderer()
@@ -82,7 +82,7 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Execution Workspace Guard"));
         assertTrue(prompt.contains(tempDir.toAbsolutePath().normalize().toString()));
         assertTrue(prompt.contains("[outside-workspace path removed]"));
-        assertTrue(!prompt.contains("/Users/kriswang/work/projects/ai/cancer-clinic"));
+        assertTrue(!prompt.contains("/private/projects/internal-product"));
     }
 
     @Test

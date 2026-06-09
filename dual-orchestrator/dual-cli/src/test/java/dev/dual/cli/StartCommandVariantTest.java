@@ -15,60 +15,38 @@ class StartCommandVariantTest {
     private final WorkflowDefinitionLoader loader = new WorkflowDefinitionLoader();
 
     @Test
-    void defaultVariant_usesThinMainline() throws Exception {
+    void defaultVariant_usesBaselineMainline() throws Exception {
         // Simulates: dualctl start (no --workflow-variant flag → null)
         var wf = loader.loadOrDefault(null, null);
         assertEquals("agent-lifecycle", wf.workflowId(),
-                "Default (no variant) should use thinMainline");
+                "Default (no variant) should use baselineMainline");
         assertEquals(1, wf.version());
     }
 
     @Test
-    void p6Variant_usesP6Mainline() throws Exception {
-        // Simulates: dualctl start --workflow-variant=p6
-        var wf = loader.loadOrDefault(null, "p6");
-        assertEquals("agent-lifecycle-p6", wf.workflowId(),
-                "--workflow-variant=p6 should use p6Mainline");
-        assertEquals(3, wf.version());
-        // Verify the classify_failure node exists (P6 feature)
-        assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
-                "p6Mainline should contain classify_failure node");
-    }
-
-    @Test
-    void fullVariantAlias_usesP6Mainline() throws Exception {
+    void fullVariant_usesFullMainline() throws Exception {
         // Simulates: dualctl start --workflow-variant=full
         var wf = loader.loadOrDefault(null, "full");
-        assertEquals("agent-lifecycle-p6", wf.workflowId(),
-                "--workflow-variant=full should use the complete lifecycle");
+        assertEquals("agent-lifecycle-full", wf.workflowId(),
+                "--workflow-variant=full should use fullMainline");
         assertEquals(3, wf.version());
+        // Verify the classify_failure node exists (full lifecycle feature)
         assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
-                "full lifecycle should contain classify_failure node");
+                "fullMainline should contain classify_failure node");
     }
 
     @Test
-    void p5Variant_usesP5Mainline() throws Exception {
-        // Simulates: dualctl start --workflow-variant=p5
-        var wf = loader.loadOrDefault(null, "p5");
-        assertEquals("agent-lifecycle-p5", wf.workflowId(),
-                "--workflow-variant=p5 should use p5Mainline");
-        assertEquals(2, wf.version());
-        // Verify contract node exists (P5 feature)
-        assertDoesNotThrow(() -> wf.node("contract.compile"),
-                "p5Mainline should contain contract.compile node");
-        assertThrows(IllegalArgumentException.class, () -> wf.node("acceptance.classify_failure"),
-                "p5Mainline should NOT contain classify_failure node");
-    }
-
-    @Test
-    void contractVariantAlias_usesP5Mainline() throws Exception {
+    void contractVariant_usesContractMainline() throws Exception {
         // Simulates: dualctl start --workflow-variant=contract
         var wf = loader.loadOrDefault(null, "contract");
-        assertEquals("agent-lifecycle-p5", wf.workflowId(),
-                "--workflow-variant=contract should use the contract lifecycle");
+        assertEquals("agent-lifecycle-contract", wf.workflowId(),
+                "--workflow-variant=contract should use contractMainline");
         assertEquals(2, wf.version());
+        // Verify contract node exists (contract feature)
         assertDoesNotThrow(() -> wf.node("contract.compile"),
-                "contract lifecycle should contain contract.compile node");
+                "contractMainline should contain contract.compile node");
+        assertThrows(IllegalArgumentException.class, () -> wf.node("acceptance.classify_failure"),
+                "contractMainline should NOT contain classify_failure node");
     }
 
     @Test
@@ -76,7 +54,7 @@ class StartCommandVariantTest {
         // When both --workflow and --workflow-variant are provided,
         // the file takes precedence. This is tested via the loader directly.
         // If path is null, variant is used:
-        var wf = loader.loadOrDefault(null, "p6");
-        assertEquals("agent-lifecycle-p6", wf.workflowId());
+        var wf = loader.loadOrDefault(null, "full");
+        assertEquals("agent-lifecycle-full", wf.workflowId());
     }
 }

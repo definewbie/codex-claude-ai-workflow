@@ -112,7 +112,7 @@ class SummaryCommandTest {
                 {
                   "schemaVersion": 1,
                   "workstreamId": "ws-summary",
-                  "workflowId": "agent-lifecycle-p5",
+                  "workflowId": "agent-lifecycle-contract",
                   "definitionVersion": 2,
                   "workflowStatus": "%s",
                   "activeNodeInstanceIds": ["node-gate-1"],

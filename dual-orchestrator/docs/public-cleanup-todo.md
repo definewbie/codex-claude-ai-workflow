@@ -90,7 +90,7 @@ Before cutting a public release branch:
 
 1. Run `rtk git grep "private-repo-name|/Users/|local-user-name" -- dual-orchestrator/README.md dual-orchestrator/docs`.
 2. Move or sanitize the matches that are not explicitly marked as internal.
-3. Run `./scripts/smoke-test.sh --case thin-basic --cleanup`.
+3. Run `./scripts/smoke-test.sh --case baseline-basic --cleanup`.
 4. Run `./scripts/run-public-benchmark.sh` if real `acpx` quota is available.
 5. Verify `dualctl trace` can explain the final public benchmark workstream.
 6. Re-read `README.md`, `docs/README.md`, and `docs/quickstart.md` as a new user.

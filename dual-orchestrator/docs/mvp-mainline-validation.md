@@ -7,7 +7,7 @@ human gates, recovery, and benchmark evidence connected.
 ## 2026-06-04 Private Real Case
 
 - Case: private medium feature slice
-- Variant: `p6`
+- Variant: `full`
 - Target repo: private production-like Git repository
 - Workstream: internal evidence retained outside this public cleanup branch
 - Effective workdir: generated Git worktree outside the original repository
@@ -101,7 +101,7 @@ The next useful implementation step is to rerun a bounded internal real case and
 verify that the new structured evidence improves the final report and human
 review packet without making the Agent behavior brittle.
 
-## 2026-06-06 Semantic Artifact Boundary
+## Semantic Artifact Boundary
 
 The artifact boundary now has a first semantic consistency layer:
 
@@ -129,8 +129,8 @@ The first public, non-domain fixture regression set now covers:
 
 ## Updated MVP Gap
 
-The main lifecycle is functionally closed. As of 2026-06-08, the P1 mainline
-closure items have first-pass implementations:
+The main lifecycle is functionally closed. The mainline closure items have
+first-pass implementations:
 
 - Contract compiler quality closure: READY contracts now require executable
   scope, acceptance criteria, test requirements, and explicit boundaries.
@@ -181,16 +181,16 @@ Release-quality MVP still needs:
    private project.
    - First sample/case now exists: `examples/issue-flow-app/` plus
      `cases/public-issue-flow-review-state.md`.
-   - 2026-06-06: latest real `acpx` run completed with `PASS`: 6 human gates,
+   - A recent real `acpx` run completed with `PASS`: 6 human gates,
      10 Agent runs, 30 timeline nodes, final `ACCEPT`, all key artifacts
      present, original repo clean. The same run verified that
      `contract-resolution` is visible in acceptance context, human review
      packets, PR body, and the final report.
-   - 2026-06-06: follow-up real `acpx` run completed with `PASS` after adding
+   - A follow-up real `acpx` run completed with `PASS` after adding
      contract failure diagnostics and context `State & Evidence Boundary`.
      The healthy-path run produced no contract failure diagnostics and showed
      the boundary section in generated context packages and downstream prompts.
-   - 2026-06-08: the public benchmark path now has a single command:
+   - The public benchmark path now has a single command:
      `./scripts/run-public-benchmark.sh`. It prepares the disposable sample repo
      and runs the public issue-flow case through `run-real-case.sh`.
    - 2026-06-08: the one-command public benchmark was rerun with real `acpx` and

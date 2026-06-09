@@ -49,7 +49,6 @@ Options:
   --task-file <path>        Requirement markdown file.
   --variant <baseline|contract|full>
                             Workflow variant. Default: full.
-                            Legacy aliases are also accepted: thin, p5, p6.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Do not run Maven package before starting.
@@ -155,7 +154,7 @@ validate_inputs() {
     exit 1
   }
   case "$VARIANT" in
-    baseline|contract|full|thin|p5|p6) ;;
+    baseline|contract|full) ;;
     *) fail "--variant must be baseline, contract, or full"; exit 1 ;;
   esac
 }
@@ -187,7 +186,7 @@ init_case_dir() {
 start_workstream() {
   log "Starting workstream in repo: $REPO"
   local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS")
-  if [[ "$VARIANT" != "thin" && "$VARIANT" != "baseline" ]]; then
+  if [[ "$VARIANT" != "baseline" ]]; then
     args+=(--workflow-variant "$VARIANT")
   fi
   args+=(--task-file "$TASK_FILE")

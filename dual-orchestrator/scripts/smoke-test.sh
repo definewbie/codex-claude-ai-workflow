@@ -4,10 +4,10 @@
 #
 # Usage:
 #   ./scripts/smoke-test.sh lifecycle                     # Controlled full lifecycle smoke, no real acpx calls
-#   ./scripts/smoke-test.sh                              # Default: thin-basic case
+#   ./scripts/smoke-test.sh                              # Default: baseline-basic case
 #   ./scripts/smoke-test.sh --case lifecycle
-#   ./scripts/smoke-test.sh --case p5-contract-happy-path
-#   ./scripts/smoke-test.sh --case p6-reject-classify-path
+#   ./scripts/smoke-test.sh --case contract-happy-path
+#   ./scripts/smoke-test.sh --case full-reject-classify-path
 #   ./scripts/smoke-test.sh --case all                   # Run all cases sequentially
 #   ./scripts/smoke-test.sh --list                       # List available cases
 #   ./scripts/smoke-test.sh --interactive                # Pause at each gate for review
@@ -42,7 +42,7 @@ MANUAL_GATES=false
 SKIP_BUILD=false
 CLEANUP=false
 WITH_GITHUB=false
-CASE_NAME="thin-basic"
+CASE_NAME="baseline-basic"
 OPERATOR_URL="${DUAL_OPERATOR_URL:-http://localhost:8080}"
 
 # ─── Parse args ──────────────────────────────────────────────────────────────
@@ -56,16 +56,16 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       ;;
-    lifecycle|thin-basic|p5-contract-happy-path|p6-reject-classify-path|all)
+    lifecycle|baseline-basic|contract-happy-path|full-reject-classify-path|all)
       CASE_NAME="$1"
       ;;
     --list)
       echo "Available E2E cases:"
-      echo "  lifecycle              Controlled thin lifecycle happy path with fake acpx"
-      echo "  thin-basic             Thin mainline, full lifecycle happy path"
-      echo "  p5-contract-happy-path P5 variant with contract compilation and review"
-      echo "  p6-reject-classify-path P6 variant, best-effort classify_failure coverage"
-      echo "  all                    Run all cases sequentially"
+      echo "  lifecycle              Controlled baseline lifecycle happy path with fake acpx"
+      echo "  baseline-basic           Baseline mainline, full lifecycle happy path"
+      echo "  contract-happy-path      Contract variant with contract compilation and review"
+      echo "  full-reject-classify-path Full variant, best-effort classify_failure coverage"
+      echo "  all                      Run all cases sequentially"
       exit 0
       ;;
     --interactive) INTERACTIVE=true ;;
@@ -119,35 +119,35 @@ configure_case() {
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "Acceptance Summary" "Developer Self-Test Summary" "Git Evidence" "Run Artifacts")
       CASE_VARIANT_ASSERT_FN="assert_lifecycle_controlled"
       ;;
-    thin-basic)
+    baseline-basic)
       CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出，不要让 python main.py 打印 goodbye。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
       CASE_EXPECTED_ARTIFACTS=("reports/latest-final-report.md" "delivery/commit-message.txt" "delivery/pr-body.md" "artifacts/next-stage/next-stage-prompt.md")
       CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "workflow_completed")
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "Acceptance Summary" "Git Evidence")
       ;;
-    p5-contract-happy-path)
-      CASE_VARIANT="p5"
+    contract-happy-path)
+      CASE_VARIANT="contract"
       CASE_TASK="给 main.py 添加一个 calculate 函数，接受两个数字参数并返回它们的和，并在 README 中说明。不要修改 __main__ 运行输出。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
-      CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "p5")
+      CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "contract")
       CASE_EXPECTED_ARTIFACTS=("artifacts/task-contract.json" "artifacts/task-contract.md" "reports/latest-final-report.md")
       CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "contract_compilation_completed" "workflow_completed")
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "TaskContract" "Acceptance Summary")
-      CASE_VARIANT_ASSERT_FN="assert_p5_contract"
+      CASE_VARIANT_ASSERT_FN="assert_contract_lifecycle"
       ;;
-    p6-reject-classify-path)
-      CASE_VARIANT="p6"
+    full-reject-classify-path)
+      CASE_VARIANT="full"
       CASE_TASK="给 main.py 添加一个 format_output 函数，接受 text 和 format_type 两个字符串参数。format_type 只支持 json、markdown、table，大小写敏感；json 必须返回紧凑 JSON 字符串 {\"text\":\"<text>\"}，实现建议使用 json.dumps({\"text\": text}, separators=(\",\", \":\"))；markdown 必须返回 '- <text>'；table 必须返回精确三行字符串 '| Text |\\n| --- |\\n| <text> |'；未知格式抛出 ValueError。README 要写完整 API 文档，包括参数、返回值、异常和三个精确返回值示例。不要修改 __main__ 运行输出。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
-      CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "p6")
+      CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "full")
       CASE_EXPECTED_ARTIFACTS=("artifacts/task-contract.json")
       CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "contract_compilation_completed")
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "TaskContract")
-      CASE_VARIANT_ASSERT_FN="assert_p6_classify"
+      CASE_VARIANT_ASSERT_FN="assert_full_classify"
       ;;
     *)
-      echo "Unknown case: $CASE_NAME. Supported: lifecycle, thin-basic, p5-contract-happy-path, p6-reject-classify-path, all"
+      echo "Unknown case: $CASE_NAME. Supported: lifecycle, baseline-basic, contract-happy-path, full-reject-classify-path, all"
       exit 1
       ;;
   esac
@@ -400,8 +400,8 @@ assert_lifecycle_controlled() {
   fi
 }
 
-assert_p5_contract() {
-  step "P5 Contract Assertions"
+assert_contract_lifecycle() {
+  step "Contract Lifecycle Assertions"
 
   # task-contract.json exists and is valid JSON with required fields
   local contract_json="$WS_DIR/artifacts/task-contract.json"
@@ -411,7 +411,7 @@ assert_p5_contract() {
     contract_status=$(python3 -c "import json; d=json.load(open('$contract_json')); print(d.get('status','?'))" 2>/dev/null || echo "?")
     ok "TaskContract status: $contract_status"
   else
-    fail "task-contract.json missing (p5 contract review should produce it)"
+    fail "task-contract.json missing (contract review should produce it)"
   fi
 
   # task-contract.md exists and has content
@@ -423,15 +423,15 @@ assert_p5_contract() {
   fi
 }
 
-assert_p6_classify() {
-  step "P6 Classification Assertions"
+assert_full_classify() {
+  step "Full Lifecycle Classification Assertions"
 
-  # Contract must always exist in p6
+  # Contract must always exist in the full lifecycle
   local contract_json="$WS_DIR/artifacts/task-contract.json"
   if [[ -f "$contract_json" ]]; then
     ok "task-contract.json exists"
   else
-    fail "task-contract.json missing (p6 includes contract.compile)"
+    fail "task-contract.json missing (full lifecycle includes contract.compile)"
     return
   fi
 
@@ -475,8 +475,8 @@ assert_p6_classify() {
     # classify path not exercised — this is PASS-WARN, not FAIL
     warn "failure-classification.json not found (classify path not exercised this run)"
     warn "Acceptance produced ACCEPT — classify_failure did not fire"
-    warn "This is PASS-WARN: p6 variant ran correctly, but classification path was not exercised"
-    P6_CLASSIFY_NOT_EXERCISED=true
+    warn "This is PASS-WARN: full lifecycle ran correctly, but classification path was not exercised"
+    FULL_CLASSIFY_NOT_EXERCISED=true
   fi
 }
 
@@ -495,7 +495,7 @@ run_smoke_case() {
   RUN_COUNT=0
   CURRENT_ROUND=0
   FINAL_STATUS=""
-  P6_CLASSIFY_NOT_EXERCISED=""
+  FULL_CLASSIFY_NOT_EXERCISED=""
   CLEANED_UP=false
   PATH_BEFORE_CONTROLLED_ACPX=""
 
@@ -1126,7 +1126,7 @@ GITIGNORE
 print_case_report() {
   echo ""
   echo "  Case:         $CASE_NAME"
-  echo "  Variant:      ${CASE_VARIANT:-thin (default)}"
+  echo "  Variant:      ${CASE_VARIANT:-baseline (default)}"
   echo "  Fixture:      $FIXTURE_DIR"
   echo "  Workspace:    $WORKSPACE_DIR"
   echo "  Ledger:       $WS_DIR"
@@ -1141,7 +1141,7 @@ print_case_report() {
 
 # ─── --case all mode ─────────────────────────────────────────────────────────
 if [[ "$CASE_NAME" == "all" ]]; then
-  ALL_CASES=("lifecycle" "thin-basic" "p5-contract-happy-path" "p6-reject-classify-path")
+  ALL_CASES=("lifecycle" "baseline-basic" "contract-happy-path" "full-reject-classify-path")
   ALL_RESULTS=()
   ALL_PASS=true
 
@@ -1173,7 +1173,7 @@ if [[ "$CASE_NAME" == "all" ]]; then
     if [[ "$FAILED" == true ]]; then
       ALL_RESULTS+=("$case_name: FAIL ($FINAL_STATUS)")
       ALL_PASS=false
-    elif [[ "${P6_CLASSIFY_NOT_EXERCISED:-}" == true ]]; then
+    elif [[ "${FULL_CLASSIFY_NOT_EXERCISED:-}" == true ]]; then
       ALL_RESULTS+=("$case_name: PASS-WARN (classify path not exercised)")
     elif [[ "$FINAL_STATUS" == "COMPLETED" ]]; then
       ALL_RESULTS+=("$case_name: PASS")
@@ -1214,7 +1214,7 @@ print_case_report
 if [[ "$FAILED" == true ]]; then
   echo -e "  ${RED}${BOLD}RESULT: FAIL${RESET} (final status: $FINAL_STATUS)"
   EXIT_CODE=1
-elif [[ "${P6_CLASSIFY_NOT_EXERCISED:-}" == true ]]; then
+elif [[ "${FULL_CLASSIFY_NOT_EXERCISED:-}" == true ]]; then
   echo -e "  ${YELLOW}${BOLD}RESULT: PASS-WARN${RESET} (classify path not exercised this run)"
   EXIT_CODE=0
 elif [[ "$FINAL_STATUS" == "COMPLETED" ]]; then

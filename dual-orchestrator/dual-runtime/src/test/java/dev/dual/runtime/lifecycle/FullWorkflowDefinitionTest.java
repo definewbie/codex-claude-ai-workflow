@@ -7,36 +7,36 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class P6WorkflowDefinitionTest {
+class FullWorkflowDefinitionTest {
 
     private final LifecycleWorkflowDefinitionFactory factory = new LifecycleWorkflowDefinitionFactory();
 
     @Test
-    void p6MainlineContainsClassifyFailureNode() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineContainsClassifyFailureNode() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
-                "p6Mainline should contain node acceptance.classify_failure");
+                "fullMainline should contain node acceptance.classify_failure");
     }
 
     @Test
-    void p6AgentNodesCanRunNonInteractiveToolsInsideWorktree() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullAgentNodesCanRunNonInteractiveToolsInsideWorktree() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         var agentNodes = wf.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .toList();
 
-        assertFalse(agentNodes.isEmpty(), "p6 should contain acpx agent nodes");
+        assertFalse(agentNodes.isEmpty(), "full should contain acpx agent nodes");
         for (var node : agentNodes) {
             assertEquals(true, node.config().get("approve_all"),
-                    "p6 agent node should be able to run tools non-interactively: " + node.id());
+                    "full agent node should be able to run tools non-interactively: " + node.id());
         }
     }
 
     @Test
-    void p6MainlineAcceptRoutesToReport() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineAcceptRoutesToReport() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
                 .filter(e -> "ACCEPT".equals(e.on()))
@@ -48,8 +48,8 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void p6MainlineAcceptWithNotesRoutesToClassify() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineAcceptWithNotesRoutesToClassify() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
                 .filter(e -> "ACCEPT_WITH_NOTES".equals(e.on()))
@@ -61,8 +61,8 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void p6MainlineRejectRoutesToClassify() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineRejectRoutesToClassify() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
                 .filter(e -> "REJECT".equals(e.on()))
@@ -74,8 +74,8 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void p6MainlineRejectContractGapRoutesToContractCompile() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineRejectContractGapRoutesToContractCompile() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         var edges = wf.edgesFrom("acceptance.classify_failure").stream()
                 .filter(e -> "REJECT_CONTRACT_GAP".equals(e.on()))
@@ -87,8 +87,8 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void p6MainlineRejectReviewNoiseRoutesToReReview() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineRejectReviewNoiseRoutesToReReview() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         var edges = wf.edgesFrom("acceptance.classify_failure").stream()
                 .filter(e -> "REJECT_REVIEW_NOISE".equals(e.on()))
@@ -100,8 +100,8 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void p6MainlineNotedEdgesRouteToReport() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineNotedEdgesRouteToReport() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         List<String> notedOutcomes = List.of(
                 "NOTED_CONTRACT_GAP",
@@ -125,8 +125,8 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void p6MainlineRejectImplementationBugRoutesToImplement() {
-        WorkflowDefinition wf = factory.p6Mainline();
+    void fullMainlineRejectImplementationBugRoutesToImplement() {
+        WorkflowDefinition wf = factory.fullMainline();
 
         List<String> rejectOutcomes = List.of(
                 "REJECT_IMPLEMENTATION_BUG",
@@ -147,10 +147,10 @@ class P6WorkflowDefinitionTest {
     }
 
     @Test
-    void thinMainlineDoesNotContainClassifyFailureNode() {
-        WorkflowDefinition wf = factory.thinMainline();
+    void baselineMainlineDoesNotContainClassifyFailureNode() {
+        WorkflowDefinition wf = factory.baselineMainline();
 
         assertThrows(IllegalArgumentException.class, () -> wf.node("acceptance.classify_failure"),
-                "thinMainline should NOT contain node acceptance.classify_failure");
+                "baselineMainline should NOT contain node acceptance.classify_failure");
     }
 }

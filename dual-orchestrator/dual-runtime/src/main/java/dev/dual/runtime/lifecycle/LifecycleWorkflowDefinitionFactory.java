@@ -12,7 +12,7 @@ import java.util.Map;
 public final class LifecycleWorkflowDefinitionFactory {
     private static final int DEFAULT_MAX_REVISIONS = 1;
 
-    public WorkflowDefinition thinMainline() {
+    public WorkflowDefinition baselineMainline() {
         return new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
@@ -103,9 +103,9 @@ public final class LifecycleWorkflowDefinitionFactory {
         );
     }
 
-    public WorkflowDefinition p5Mainline() {
+    public WorkflowDefinition contractMainline() {
         return new WorkflowDefinition(
-                "agent-lifecycle-p5",
+                "agent-lifecycle-contract",
                 2,
                 "intake.claude_brainstorm",
                 List.of(
@@ -199,9 +199,9 @@ public final class LifecycleWorkflowDefinitionFactory {
         );
     }
 
-    public WorkflowDefinition p6Mainline() {
+    public WorkflowDefinition fullMainline() {
         return new WorkflowDefinition(
-                "agent-lifecycle-p6",
+                "agent-lifecycle-full",
                 3,
                 "intake.claude_brainstorm",
                 List.of(
@@ -290,7 +290,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         edge("acceptance.classify_failure", "REJECT_CONTEXT_INSUFFICIENT", "context.implement_claude"),
                         edge("acceptance.classify_failure", "REJECT_TOOL_LIMITATION", "context.implement_claude"),
                         edge("acceptance.classify_failure", "REJECT_REVIEW_NOISE", "context.acceptance_codex_verifier_review"),
-                        // NOTED edges → report (classification recorded for P7 calibration)
+                        // NOTED edges route to report while preserving classification data for calibration.
                         edge("acceptance.classify_failure", "NOTED_CONTRACT_GAP", "acceptance.generate_final_report"),
                         edge("acceptance.classify_failure", "NOTED_CONTRACT_AMBIGUITY", "acceptance.generate_final_report"),
                         edge("acceptance.classify_failure", "NOTED_IMPLEMENTATION_BUG", "acceptance.generate_final_report"),
@@ -315,13 +315,12 @@ public final class LifecycleWorkflowDefinitionFactory {
     public WorkflowDefinition forVariant(String variant) {
         String normalized = variant == null ? "" : variant.trim().toLowerCase();
         return switch (normalized) {
-            case "p5", "contract" -> p5Mainline();
-            case "p6", "full" -> p6Mainline();
-            case "", "thin", "baseline" -> thinMainline();
+            case "contract" -> contractMainline();
+            case "full" -> fullMainline();
+            case "", "baseline" -> baselineMainline();
             default -> throw new IllegalArgumentException(
                     "unknown workflow variant: " + variant
-                            + ". Supported: baseline, contract, full"
-                            + " (legacy aliases: thin, p5, p6)");
+                            + ". Supported: baseline, contract, full");
         };
     }
 

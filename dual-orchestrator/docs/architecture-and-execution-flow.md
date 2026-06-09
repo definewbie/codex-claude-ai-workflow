@@ -58,11 +58,11 @@ Claude / Codex / acpx 都是其中的可替换部件。真正的核心是外层 
 
 TaskContract 的意义是给后续所有人一个共同锚点：目标是什么、范围是什么、非目标是什么、验收标准是什么、风险在哪里。
 
-2026-06-03 的真实 benchmark 暴露出一个重要修正：TaskContract 不应该靠 Java 从 Agent 的自然语言 Markdown 里猜出来。新的方向是 artifact-driven contract negotiation：Claude 输出结构化 `task_contract_proposal`，系统只做 JSON/schema/path/metadata 等机械校验，Codex 按原则审议 proposal，通过后才生成 canonical TaskContract。Markdown 继续给人看，但不再作为状态机事实来源。
+早期真实任务验证暴露出一个重要修正：TaskContract 不应该靠 Java 从 Agent 的自然语言 Markdown 里猜出来。新的方向是 artifact-driven contract negotiation：Claude 输出结构化 `task_contract_proposal`，系统只做 JSON/schema/path/metadata 等机械校验，Codex 按原则审议 proposal，通过后才生成 canonical TaskContract。Markdown 继续给人看，但不再作为状态机事实来源。
 
-同一天的私有 rejection-prone benchmark 又补了一条边界：canonical contract 不只要来自结构化 artifact，还要来自可信角色的可信输出。`contract.compile` 只信任 Claude intake 输出中的 `task_contract_proposal`；Codex review 里引用、摘录或复述的 artifact 只作为审阅内容，不再被当成 proposal 来源。
+后续的拒绝路径验证又补了一条边界：canonical contract 不只要来自结构化 artifact，还要来自可信角色的可信输出。`contract.compile` 只信任 Claude intake 输出中的 `task_contract_proposal`；Codex review 里引用、摘录或复述的 artifact 只作为审阅内容，不再被当成 proposal 来源。
 
-2026-06-06 之后，这条边界进一步收紧：Agent 输出被拆成 Markdown report 和 typed `<dual-artifact>` 两层。Markdown 继续服务人类阅读；orchestrator 只把 `task_contract_proposal`、`self_test_report`、`acceptance_review`、`stage_handoff` 等结构化 artifact 作为机器事实来源。缺失或非法 artifact 会让节点失败，系统不会回退到 Markdown 标题、段落或 summary keyword 里继续猜。
+随着 artifact contract 收敛，这条边界进一步收紧：Agent 输出被拆成 Markdown report 和 typed `<dual-artifact>` 两层。Markdown 继续服务人类阅读；orchestrator 只把 `task_contract_proposal`、`self_test_report`、`acceptance_review`、`stage_handoff` 等结构化 artifact 作为机器事实来源。缺失或非法 artifact 会让节点失败，系统不会回退到 Markdown 标题、段落或 summary keyword 里继续猜。
 
 没有契约，review 很容易变成“各说各话”。有契约，失败才有可能被分类：到底是 Claude 没实现，还是契约没写清楚，还是 Codex 误判。
 
@@ -152,10 +152,10 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
 - Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow overview / status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；两者都只推进 `RUNNING` workstreams，不绕过 human gate / recovery / failure。
 - Delivery prepare / commit / create-pr 基础管线。
-- 多 workflow variant：thin / p5 / p6。
-- 真实 acpx smoke：thin / p5 已通过；fixture p6 仍保留 `PASS-WARN` 语义，因为 Codex 是否拒绝不可控。
-- 真实复杂仓库 p6 长 case：2026-06-02 在一个私有生产型仓库中跑通，最终 `COMPLETED`。这次 run 中 Codex acceptance 连续两次 `REJECT`，系统进入 failure classification，再路由回 Claude repair，第三次验收通过。
-- 真实 benchmark set：2026-06-03 多个私有 benchmark 均跑到 `COMPLETED` / `PASS-WARN`。其中一个 rejection-prone case 未触发 acceptance `REJECT`，但暴露并修复了 `contract.compile` 可信来源问题，证明 real-case benchmark 比低复杂度 smoke 更容易发现主链路问题。
+- 多 workflow variant：baseline / contract / full。
+- 真实 acpx smoke：baseline / contract 已通过；fixture full 仍保留 `PASS-WARN` 语义，因为 Codex 是否拒绝不可控。
+- 真实复杂仓库 full 长 case：已在私有生产型仓库中跑通到 `COMPLETED`。其中 Codex acceptance 曾连续 `REJECT`，系统进入 failure classification，再路由回 Claude repair，后续验收通过。
+- 真实 benchmark set：多个内部 benchmark 跑到 `COMPLETED` / `PASS-WARN`。其中一个 rejection-prone case 未触发 acceptance `REJECT`，但暴露并修复了 `contract.compile` 可信来源问题，证明 real-case benchmark 比低复杂度 smoke 更容易发现主链路问题。
 
 这个结果说明：主生命周期的基本目标已经达到。系统已经能在真实仓库里跑完“需求 → contract → review → gate → 实现 → 自测 → 验收 → reject repair → delivery → handoff”的闭环。
 
@@ -176,15 +176,15 @@ real-case benchmark
 
 | 优先级 | 工作 | 原因 |
 |--------|------|------|
-| Done | p6 real repair loop | 私有真实长 case 已触发两轮 REJECT → classify → repair → ACCEPT |
-| Tech Debt | deterministic p6 reject fixture | 只有 CI 需要可重复覆盖 reject 边界时再做 |
+| Done | full real repair loop | 私有真实长 case 已触发两轮 REJECT → classify → repair → ACCEPT |
+| Tech Debt | deterministic full reject fixture | 只有 CI 需要可重复覆盖 reject 边界时再做 |
 | Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
 | Done | Local API Server MVP | overview / status / timeline + 最小 action API，先给 UI 和外部观察器一个稳定入口 |
 | Done | Scheduler tick + background MVP | 手动或后台周期调度，只推进 RUNNING workstreams，不绕过 human gate / recovery |
 | Done | Metrics projection MVP | ledger 自动生成节点、gate、iteration、duration 指标，CLI summary 和 API overview 复用同一读模型 |
-| P1 | Real-case benchmark loop | 用 2-3 个真实任务持续验证 p6，而不是只靠低复杂度 fixture |
-| P1 | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |
+| Next | Real-case benchmark loop | 用 2-3 个真实任务持续验证 full，而不是只靠低复杂度 fixture |
+| Next | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |
 | Done | Provider metrics MVP | 从 `runs/*/run.json` 聚合 agent/provider 成功率、失败数和耗时；token / cost 等待 adapter 暴露原始字段 |
 
 ### 4.2 长期路线
@@ -231,7 +231,7 @@ real-case benchmark
 │  └───────────────────────────────────────────────────────────┘  │
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │LifecycleWorkflowDefinitionFactory (thin mainline def)    │   │
+│  │LifecycleWorkflowDefinitionFactory (baseline mainline def)    │   │
 │  └──────────────────────────────────────────────────────────┘   │
 └──────────────┬──────────────────────┬───────────────────────────┘
                │                      │
@@ -286,7 +286,7 @@ Runtime 只认识三种节点：
 | **Decision** | 读取结果，选择下一条 edge | `DecisionHandler.evaluate()` | `review.decision` |
 | **Gate** | 暂停等待人审批 | `GateHandler.openOrInspect()` | `human.review` |
 
-## 7. 生命周期 Workflow（thin mainline）
+## 7. 生命周期 Workflow（baseline mainline）
 
 ```
 intake.claude_brainstorm
@@ -580,7 +580,7 @@ Budget 基于 token 计算（通过 `TokenEstimator` 接口，默认 ~4 chars/to
 | `LATEST` | 只显示最近 N 条 |
 | `POINTER_ONLY` | 只显示文件路径 |
 
-## 12. P4: 条件表达式 / 并行节点
+## 12. Workflow Engine Extensions
 
 ### 12.1 条件 Edge Routing
 

@@ -1,5 +1,7 @@
 # Quickstart
 
+中文版本：[quickstart.zh-CN.md](quickstart.zh-CN.md)
+
 This guide gets `dual-orchestrator` from a fresh checkout to a runnable local
 CLI. It focuses on the smallest open-source path, not full production setup.
 
@@ -54,7 +56,7 @@ Claude/Codex sessions; missing sessions are usually created by acpx on demand.
 From `dual-orchestrator`:
 
 ```bash
-./scripts/smoke-test.sh --case thin-basic --cleanup
+./scripts/smoke-test.sh --case baseline-basic --cleanup
 ```
 
 This is the quickest sanity check for the CLI/workflow path.

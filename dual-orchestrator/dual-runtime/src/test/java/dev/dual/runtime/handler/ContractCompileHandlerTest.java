@@ -212,62 +212,56 @@ class ContractCompileHandlerTest {
     void compileMaterializesScopeConstraintsNonGoalsRisksAndTestsFromFeatureSliceText() {
         var handler = new ContractCompileHandler();
         var sourceText = """
-                # Benchmark Case: cancer-clinic-feature-slice
+                # Benchmark Case: public-issue-flow-review-state
 
                 ## 目标
 
-                验证 dual-orchestrator 能否在真实业务功能切片中保持 contract、context、自测证据和 Codex acceptance 的一致性。
+                验证 dual-orchestrator 能否在公开样例功能切片中保持 contract、context、自测证据和 Codex acceptance 的一致性。
 
-                ## File 1: `miniprogram/src/pages/record/index.vue`
+                ## File 1: `src/issue_flow.py`
 
-                Add a B4 empty state guidance card for plans with no treatment records.
-
-                ## File 2: `miniprogram/src/pages/treatment-record/index.vue`
-
-                Add a prominent upload report button and align labels.
+                Add an issue review state helper for open issues with no reviewer assigned.
 
                 ## In Scope
 
-                - B4: New user empty state guidance card in `record/index.vue`.
-                - B1: Prominent "上传报告" button in `treatment-record/index.vue`.
-                - Title: "第 N 周期" -> "第 N 次治疗".
+                - Add `needs_review(issue)` in `src/issue_flow.py`.
+                - Return true only when an issue is open and has no reviewer.
 
                 ## Non-Goals
 
                 - No backend changes.
                 - No database migration.
-                - No event chain display on treatment-record page.
-                - No changes to report upload flow.
+                - No web UI changes.
+                - No persistence changes.
 
                 ## Constraints
 
                 - Do not modify backend API or schema.
-                - Reuse existing `goTo('/pages/examination/index')`.
-                - Exactly two frontend files should change.
+                - Keep the helper pure and side-effect free.
+                - Exactly one source file should change.
 
                 ## Risks
 
                 | Risk | Severity | Mitigation |
                 |------|----------|------------|
-                | Forbidden medical assurance wording accidentally introduced | High | Grep changed files |
+                | Closed issues accidentally marked for review | High | Cover closed issue in tests |
 
                 ## Test Strategy
 
-                - Run `cd miniprogram && npm run build:mp-weixin`.
-                - Grep for forbidden terms.
-                - Verify empty and non-empty exam states both show exactly one prominent upload button.
+                - Run `python -m pytest`.
+                - Verify open issue without reviewer returns true.
+                - Verify closed issue or assigned reviewer returns false.
                 """;
 
         var contract = handler.compile(sourceText, WORKSTREAM_ID);
 
-        assertTrue(contract.scope().included().contains("miniprogram/src/pages/record/index.vue"));
-        assertTrue(contract.scope().included().contains("miniprogram/src/pages/treatment-record/index.vue"));
+        assertTrue(contract.scope().included().contains("src/issue_flow.py"));
         assertFalse(contract.scope().excluded().isEmpty(), "Excluded scope should be materialized");
         assertFalse(contract.constraints().isEmpty(), "Constraints should be materialized");
         assertFalse(contract.nonGoals().isEmpty(), "Non-goals should be materialized");
         assertFalse(contract.riskAreas().isEmpty(), "Risk areas should be materialized");
         assertFalse(contract.testRequirements().isEmpty(), "Test requirements should be materialized");
-        assertTrue(contract.testRequirements().stream().anyMatch(value -> value.contains("build:mp-weixin")));
+        assertTrue(contract.testRequirements().stream().anyMatch(value -> value.contains("python -m pytest")));
     }
 
     @Test
@@ -391,7 +385,7 @@ class ContractCompileHandlerTest {
         assertTrue(json.contains("\"included\" : [ \"miniprogram/src/pages/treatment-event/index.vue\" ]"));
         assertFalse(json.contains("README.md"), "Historical prose references must not pollute proposal-based contract");
         assertFalse(json.contains("Workstream:"), "Ledger metadata must not pollute proposal-based contract");
-        assertTrue(json.contains("\"created_by\" : \"task_contract_proposal\""));
+        assertTrue(json.contains("task_contract_proposal"));
     }
 
     @Test

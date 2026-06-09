@@ -156,7 +156,7 @@ class TraceCommandTest {
                 {
                   "schemaVersion": 1,
                   "workstreamId": "ws-trace",
-                  "workflowId": "agent-lifecycle-p6",
+                  "workflowId": "agent-lifecycle-full",
                   "definitionVersion": 3,
                   "workflowStatus": "%s",
                   %s

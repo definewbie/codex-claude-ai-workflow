@@ -161,7 +161,7 @@ class WorkflowDefinitionLoaderTest {
 
     @Test
     void repositoryWorkflowExampleMatchesBuiltInLifecycleShape() throws Exception {
-        var expected = new LifecycleWorkflowDefinitionFactory().thinMainline();
+        var expected = new LifecycleWorkflowDefinitionFactory().baselineMainline();
         var actual = new WorkflowDefinitionLoader().load(Path.of("../workflows/agent-lifecycle.v1.json"));
 
         assertEquals(expected.workflowId(), actual.workflowId());

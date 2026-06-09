@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LifecycleWorkflowDefinitionFactoryTest {
     @Test
-    void includesThinMainlineAcrossLifecycleStages() {
-        var definition = new LifecycleWorkflowDefinitionFactory().thinMainline();
+    void includesBaselineMainlineAcrossLifecycleStages() {
+        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
 
         assertEquals("agent-lifecycle", definition.workflowId());
         assertEquals(1, definition.version());
@@ -43,7 +43,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
 
     @Test
     void allEdgesPointToDeclaredNodes() {
-        var definition = new LifecycleWorkflowDefinitionFactory().thinMainline();
+        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
 
         for (var edge : definition.edges()) {
             assertEquals(edge.from(), definition.node(edge.from()).id());
@@ -55,15 +55,15 @@ class LifecycleWorkflowDefinitionFactoryTest {
     void selfTestAgentCanRunVerificationCommands() {
         var factory = new LifecycleWorkflowDefinitionFactory();
 
-        assertEquals(true, factory.thinMainline()
+        assertEquals(true, factory.baselineMainline()
                 .node("implement.claude_self_test_report")
                 .config()
                 .get("approve_all"));
-        assertEquals(true, factory.p5Mainline()
+        assertEquals(true, factory.contractMainline()
                 .node("implement.claude_self_test_report")
                 .config()
                 .get("approve_all"));
-        assertEquals(true, factory.p6Mainline()
+        assertEquals(true, factory.fullMainline()
                 .node("implement.claude_self_test_report")
                 .config()
                 .get("approve_all"));
@@ -71,7 +71,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
 
     @Test
     void conditionalEdge_onNextStageApproval() {
-        var definition = new LifecycleWorkflowDefinitionFactory().thinMainline();
+        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
 
         // The "complete" edge from human_next_stage_approval has a configEquals condition
         var completeEdges = definition.edgesFrom("gate.human_next_stage_approval").stream()
