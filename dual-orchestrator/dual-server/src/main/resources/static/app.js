@@ -414,7 +414,7 @@ function friendlyNextAction(data) {
   const currentNode = workflow.currentNode || "";
   if (status === "WAITING_FOR_HUMAN") {
     if (isNextStageGate(currentNode)) {
-      return "建议：如果本阶段已满足目标，点击“完成 workstream”；只有明确要继续下一阶段时，才点击“开始下一轮”。";
+      return "建议：如果本阶段已满足目标，点击“完成 workstream”。后续阶段应通过新的明确入口启动。";
     }
     return "建议：阅读证据后点击“批准并继续”，或填写反馈并点击“请求修改”。";
   }
@@ -873,7 +873,7 @@ function updateActions(data) {
 
   setActionVisibility({
     resume: status === "RUNNING" && !isStaleRunningOverview(),
-    approve: status === "WAITING_FOR_HUMAN",
+    approve: status === "WAITING_FOR_HUMAN" && !nextStageGate,
     complete: status === "WAITING_FOR_HUMAN" && nextStageGate,
     retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
     revise: status === "WAITING_FOR_HUMAN",
@@ -891,7 +891,7 @@ function updateActions(data) {
   }
   if (status === "WAITING_FOR_HUMAN") {
     els.actionHint.textContent = nextStageGate
-      ? "本阶段已完成。默认应完成 workstream；只有明确要继续下一阶段时，才开始下一轮。"
+      ? "本阶段已完成。请完成 workstream；后续阶段应通过新的明确入口启动。"
       : "请先阅读 Gate Evidence，再批准继续或请求修改。";
     els.runHint.textContent = nextStageGate ? "本阶段已完成" : "等待人工审查";
     return;
@@ -918,14 +918,11 @@ function updateActions(data) {
 }
 
 function applyDecisionLabels(status, nextStageGate) {
-  els.approve.textContent = nextStageGate ? "开始下一轮" : "批准并继续";
+  els.approve.textContent = "批准并继续";
   els.complete.textContent = nextStageGate ? "完成 workstream" : "结束 workstream";
   els.complete.classList.toggle("danger", !nextStageGate);
   els.complete.classList.remove("secondary");
-  els.approve.classList.toggle("secondary", nextStageGate);
-  if (status !== "WAITING_FOR_HUMAN") {
-    els.approve.classList.remove("secondary");
-  }
+  els.approve.classList.remove("secondary");
 }
 
 function isNextStageGate(nodeId) {

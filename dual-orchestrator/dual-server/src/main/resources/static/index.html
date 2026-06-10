@@ -93,6 +93,13 @@
               <span class="eyebrow">Why stopped / running</span>
               <p id="overviewWhy">Select a workstream to inspect the current workflow state.</p>
             </div>
+            <section id="recoveryPanel" class="panel recovery-panel hidden">
+              <div class="panel-title">
+                <h2>Recovery Summary</h2>
+                <span id="recoveryPath" class="subtle"></span>
+              </div>
+              <pre id="recoveryMarkdown" class="markdown"></pre>
+            </section>
             <div id="decisionPanel" class="decision-panel hidden">
               <div class="panel-title">
                 <h2>Human decision</h2>
@@ -178,14 +185,6 @@
             <h2>Recent timeline</h2>
           </div>
           <div id="overviewTimeline" class="mini-list"></div>
-        </section>
-
-        <section id="recoveryPanel" class="panel hidden">
-          <div class="panel-title">
-            <h2>Recovery Summary</h2>
-            <span id="recoveryPath" class="subtle"></span>
-          </div>
-          <pre id="recoveryMarkdown" class="markdown"></pre>
         </section>
 
         <details class="panel debug-panel">
