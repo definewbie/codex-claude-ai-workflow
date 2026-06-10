@@ -119,3 +119,18 @@ Workflow is stopped. Fix the cause if needed, then Retry marks the active node r
 - Failure / recovery summary 保持结构化。
 - Review packet layout 围绕真实人工决策继续改进。
 - 等 read models 稳定后，再通过 SSE 或 file watching 增加实时推送。
+
+## TODO：流程交互顺滑度
+
+真实运行暴露了另一个更大的体验问题：当前 workflow 过于频繁地停在人审点，operator 需要不断点击 approve / retry / run，流程像“人工驱动的分段脚本”，还没有达到“系统自动跑，人在关键点把关”的形态。
+
+后续需要专门反思和优化：
+
+- 哪些 gate 是必须人工确认的产品 / 架构 / 交付卡点；
+- 哪些 gate 只是流程校验或格式校验，应该由系统自动处理；
+- 哪些 verifier 反馈可以进入有限自动 loop，而不是每次都让人手工接管；
+- 自动 loop 的退出条件是什么，例如最大轮次、语义冲突、证据不足、外部工具失败；
+- operator panel 应该把“为什么停”和“下一步建议”讲清楚，而不是只暴露按钮；
+- CLI 和 UI 都应该支持一键 run-to-next-human-decision，而不是让用户理解每个内部节点。
+
+目标不是取消人工 review，而是把人工 review 放在真正需要判断的位置：需求边界、设计取舍、验收争议和交付确认。

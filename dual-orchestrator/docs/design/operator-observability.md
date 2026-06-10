@@ -146,3 +146,29 @@ The next useful step is not a heavier UI framework. It is stronger consistency:
 - Review packet layout should keep improving around real human decisions.
 - Real-time push can be added later through SSE or file watching once the read
   models are stable.
+
+## TODO: Interaction Smoothness
+
+Real runs exposed a larger operator-experience issue: the workflow currently
+stops too often at human checkpoints. The operator has to keep clicking approve,
+retry, or run, so the lifecycle still feels like a manually driven sequence of
+segments instead of a system that runs autonomously and asks for human judgment
+only at meaningful gates.
+
+Future design work should revisit:
+
+- which gates truly require human product, architecture, or delivery judgment;
+- which gates are only process or format checks and should be handled by the
+  system automatically;
+- which verifier feedback can enter a bounded automatic loop instead of forcing
+  manual handoff every time;
+- what should terminate an automatic loop, such as max rounds, semantic
+  conflict, insufficient evidence, or external tool failure;
+- how the operator panel explains why the workflow stopped and what the
+  recommended next action is, rather than only exposing buttons;
+- how both CLI and UI can support run-to-next-human-decision without requiring
+  users to understand every internal node.
+
+The goal is not to remove human review. It is to reserve human review for
+places where judgment is actually needed: requirement boundaries, design trade
+offs, acceptance disputes, and delivery confirmation.
