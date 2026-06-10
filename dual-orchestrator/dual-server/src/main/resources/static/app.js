@@ -263,8 +263,8 @@ function renderOverview(data) {
     ["Duration", durationLabel(metrics.totalNodeDurationMs)],
     ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
   ]);
-  els.overviewWhy.textContent = data.whyStopped || "-";
-  els.overviewNext.textContent = data.nextAction || "-";
+  els.overviewWhy.textContent = friendlyWhyStopped(data);
+  els.overviewNext.textContent = friendlyNextAction(data);
   renderOverviewAttention(derivedAttention(data));
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
@@ -340,9 +340,9 @@ function stageIdFromNode(nodeId) {
 }
 
 function stageDetail(stageId, fallback, state, workflowStatus) {
-  if (state === "current" && workflowStatus === "WAITING_FOR_HUMAN") return "Waiting for approval";
-  if (state === "current" && workflowStatus === "WAITING_FOR_RECOVERY") return "Needs recovery";
-  if (state === "current" && workflowStatus === "RUNNING") return "Running";
+  if (state === "current" && workflowStatus === "WAITING_FOR_HUMAN") return "等待人工确认";
+  if (state === "current" && workflowStatus === "WAITING_FOR_RECOVERY") return "需要恢复";
+  if (state === "current" && workflowStatus === "RUNNING") return "运行中";
   if (state === "done") return "Completed";
   return fallback;
 }
@@ -377,6 +377,57 @@ function renderOverviewCards(items) {
     `;
     els.overviewCards.appendChild(card);
   }
+}
+
+function friendlyWhyStopped(data) {
+  const workflow = data.workflow || {};
+  const status = workflow.status || "";
+  const currentNode = workflow.currentNode || "";
+  if (status === "WAITING_FOR_HUMAN") {
+    if (isNextStageGate(currentNode)) {
+      return "本阶段已经完成，正在等待你决定：结束这个 workstream，还是进入下一轮。";
+    }
+    return "等待人工审查：请先阅读 Gate Evidence / Review Packet，再批准继续或要求修改。";
+  }
+  if (status === "WAITING_FOR_RECOVERY") {
+    return `需要恢复：${currentNode || "当前节点"} 失败或需要人工处理。请先查看失败摘要，再决定是否 Retry。`;
+  }
+  if (status === "FAILED" || status === "BLOCKED") {
+    return `流程已停止：${currentNode || "当前节点"} 无法继续。请查看 recovery 信息。`;
+  }
+  if (status === "RUNNING") {
+    const stale = staleRunningSignal(data);
+    if (stale) {
+      return `状态可能不一致：${stale}`;
+    }
+    return currentNode ? `正在执行：${currentNode}` : "正在执行 workflow。";
+  }
+  if (status === "COMPLETED") {
+    return "workflow 已完成。";
+  }
+  return data.whyStopped || "-";
+}
+
+function friendlyNextAction(data) {
+  const workflow = data.workflow || {};
+  const status = workflow.status || "";
+  const currentNode = workflow.currentNode || "";
+  if (status === "WAITING_FOR_HUMAN") {
+    if (isNextStageGate(currentNode)) {
+      return "建议：如果本阶段已满足目标，点击“完成 workstream”；只有明确要继续下一阶段时，才点击“开始下一轮”。";
+    }
+    return "建议：阅读证据后点击“批准并继续”，或填写反馈并点击“请求修改”。";
+  }
+  if (status === "WAITING_FOR_RECOVERY" || status === "FAILED" || status === "BLOCKED") {
+    return "建议：先查看 Recovery Summary，理解失败原因；确认外部问题已解决后再重试。";
+  }
+  if (status === "RUNNING") {
+    return "建议：等待当前节点结束，或刷新查看最新状态。";
+  }
+  if (status === "COMPLETED") {
+    return "建议：查看最终报告、handoff 和交付产物。";
+  }
+  return data.nextAction || "-";
 }
 
 function derivedAttention(data) {
@@ -818,50 +869,67 @@ function updateActions(data) {
   const activeNode = (workflow.activeNodes || [])[0] || {};
   const activeKind = activeNode.kind || "";
   const activeDefinition = activeNode.nodeDefinitionId || "";
+  const nextStageGate = activeDefinition.includes("next_stage");
 
   setActionVisibility({
     resume: status === "RUNNING" && !isStaleRunningOverview(),
     approve: status === "WAITING_FOR_HUMAN",
-    complete: status === "WAITING_FOR_HUMAN" && activeDefinition.includes("next_stage"),
+    complete: status === "WAITING_FOR_HUMAN" && nextStageGate,
     retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
     revise: status === "WAITING_FOR_HUMAN",
     tick: status === "RUNNING" || !state.selectedId,
   });
+  applyDecisionLabels(status, nextStageGate);
 
   els.feedback.parentElement.classList.toggle("hidden", status !== "WAITING_FOR_HUMAN");
   els.revise.parentElement.classList.toggle("hidden", status !== "WAITING_FOR_HUMAN");
 
   if (status === "COMPLETED") {
-    els.actionHint.textContent = "Workflow is completed. There are no remaining actions.";
-    els.runHint.textContent = "Completed";
+    els.actionHint.textContent = "Workflow 已完成，没有后续动作。";
+    els.runHint.textContent = "已完成";
     return;
   }
   if (status === "WAITING_FOR_HUMAN") {
-    els.actionHint.textContent = activeDefinition.includes("next_stage")
-      ? "Review the current packet. Complete finishes this workstream; approve starts another iteration."
-      : "Review the gate evidence, then approve to continue or request a revision.";
-    els.runHint.textContent = "Blocked by human gate";
+    els.actionHint.textContent = nextStageGate
+      ? "本阶段已完成。默认应完成 workstream；只有明确要继续下一阶段时，才开始下一轮。"
+      : "请先阅读 Gate Evidence，再批准继续或请求修改。";
+    els.runHint.textContent = nextStageGate ? "本阶段已完成" : "等待人工审查";
     return;
   }
   if (status === "RUNNING") {
     if (isStaleRunningOverview()) {
-      els.actionHint.textContent = `Workflow is marked running at ${activeDefinition || activeKind}, but recovery evidence suggests it is stale. Inspect recovery before continuing.`;
-      els.runHint.textContent = "Inspect recovery";
+      els.actionHint.textContent = `状态显示正在运行 ${activeDefinition || activeKind}，但 recovery 证据显示可能已卡住。请先查看失败摘要。`;
+      els.runHint.textContent = "检查 recovery";
       return;
     }
-    els.actionHint.textContent = `Workflow is running at ${activeDefinition || activeKind}. Run advances up to Max steps; Scheduler Tick advances running workstreams in this workdir.`;
-    els.runHint.textContent = "Ready";
+    els.actionHint.textContent = `正在执行 ${activeDefinition || activeKind}。等待节点结束后刷新状态。`;
+    els.runHint.textContent = "运行中";
     return;
   }
   if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") {
-    els.actionHint.textContent = "Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.";
-    els.runHint.textContent = "Needs recovery";
+    els.actionHint.textContent = "Workflow 需要恢复。先查看失败摘要，确认原因和外部条件后，再重试当前节点。";
+    els.runHint.textContent = "需要恢复";
     return;
   }
-  els.runHint.textContent = state.selectedId ? "Not runnable" : "Select a workstream";
+  els.runHint.textContent = state.selectedId ? "不可直接运行" : "选择 workstream";
   els.actionHint.textContent = state.selectedId
-    ? "No direct action is available for the current workflow state."
-    : "Select a workstream to see available actions.";
+    ? "当前 workflow 状态没有可直接执行的动作。"
+    : "选择一个 workstream 后查看可用动作。";
+}
+
+function applyDecisionLabels(status, nextStageGate) {
+  els.approve.textContent = nextStageGate ? "开始下一轮" : "批准并继续";
+  els.complete.textContent = nextStageGate ? "完成 workstream" : "结束 workstream";
+  els.complete.classList.toggle("danger", !nextStageGate);
+  els.complete.classList.remove("secondary");
+  els.approve.classList.toggle("secondary", nextStageGate);
+  if (status !== "WAITING_FOR_HUMAN") {
+    els.approve.classList.remove("secondary");
+  }
+}
+
+function isNextStageGate(nodeId) {
+  return String(nodeId || "").includes("next_stage");
 }
 
 function setActionVisibility(visible) {

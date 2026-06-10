@@ -206,9 +206,64 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void overviewUsesWorkflowCurrentWhenTimelineProjectionIsStale() throws Exception {
+        var fixture = createWorkstream("ws-api-stale-timeline");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.writeString(paths.timelineJson(), """
+                {
+                  "workflowId": "api-workflow",
+                  "definitionVersion": "1",
+                  "workflowStatus": "RUNNING",
+                  "activeNodeInstanceIds": ["node-first"],
+                  "openGateIds": [],
+                  "updatedAt": "2026-06-01T00:00:01Z",
+                  "nodes": [
+                    {
+                      "nodeInstanceId": "node-first",
+                      "nodeDefinitionId": "first",
+                      "status": "RUNNING",
+                      "kind": "TASK",
+                      "iterationId": "iter-001"
+                    },
+                    {
+                      "nodeInstanceId": "node-review-gate-002",
+                      "nodeDefinitionId": "review.gate",
+                      "status": "WAITING",
+                      "kind": "GATE",
+                      "iterationId": "iter-001"
+                    }
+                  ]
+                }
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var workflow = (Map<String, Object>) response.get("workflow");
+        assertEquals("WAITING_FOR_HUMAN", workflow.get("status"));
+        assertEquals("review.gate", workflow.get("currentNode"));
+        assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void overviewFlagsStaleRunningWhenCurrentAgentRunFailed() throws Exception {
         var fixture = createWorkstream("ws-api-stale-running");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.writeString(paths.workflowCurrentJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-api-stale-running",
+                  "workflowInstanceId": "wf-ws-api-stale-running",
+                  "workflowId": "api-workflow",
+                  "definitionVersion": 1,
+                  "status": "RUNNING",
+                  "activeNodeInstanceIds": ["node-self-test"],
+                  "openGateIds": [],
+                  "lastEventId": "event-running",
+                  "updatedAt": "2026-06-01T00:01:00Z"
+                }
+                """, StandardCharsets.UTF_8);
         Files.writeString(paths.timelineJson(), """
                 {
                   "workflowId": "api-workflow",

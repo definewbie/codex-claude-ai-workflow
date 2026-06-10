@@ -116,9 +116,13 @@ public class WorkstreamQueryService {
         var metrics = readJson(paths.workstreamMetricsJson());
         var summary = readJson(paths.workstreamDir().resolve("reports").resolve("real-case-summary.json"));
         var nodes = mapList(timeline.get("nodes"));
-        var activeNodeIds = textList(timeline.get("activeNodeInstanceIds"));
-        var openGateIds = textList(timeline.get("openGateIds"));
-        var status = text(timeline.get("workflowStatus"));
+        var current = Files.exists(paths.workflowCurrentJson()) ? workflowLedger.loadCurrent(paths) : null;
+        var activeNodeIds = current == null ? textList(timeline.get("activeNodeInstanceIds")) : current.activeNodeInstanceIds();
+        var openGateIds = current == null ? textList(timeline.get("openGateIds")) : current.openGateIds();
+        var status = current == null ? text(timeline.get("workflowStatus")) : current.status().name();
+        var workflowUpdatedAt = current == null ? text(timeline.get("updatedAt")) : current.updatedAt().toString();
+        var workflowId = current == null ? text(timeline.get("workflowId")) : current.workflowId();
+        var definitionVersion = current == null ? text(timeline.get("definitionVersion")) : current.definitionVersion();
         var repairActions = repairActions(paths, summary);
         var finalAcceptance = finalAcceptance(paths, summary);
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
@@ -134,13 +138,13 @@ public class WorkstreamQueryService {
         response.put("workspace", root.toString());
         response.put("ledger", root.relativize(paths.workstreamDir()).toString());
         response.put("workflow", Map.of(
-                "workflowId", text(timeline.get("workflowId")),
-                "definitionVersion", text(timeline.get("definitionVersion")),
+                "workflowId", workflowId,
+                "definitionVersion", definitionVersion,
                 "status", status,
                 "currentNode", currentNode,
                 "activeNodeInstanceIds", activeNodeIds,
                 "openGateIds", openGateIds,
-                "updatedAt", text(timeline.get("updatedAt"))
+                "updatedAt", workflowUpdatedAt
         ));
         response.put("acceptance", Map.of(
                 "finalDecision", finalAcceptance,
