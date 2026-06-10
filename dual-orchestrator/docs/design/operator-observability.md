@@ -110,6 +110,32 @@ Metrics are currently lightweight:
 Token and cost metrics are intentionally deferred until the adapter exposes
 trusted usage data. The system should not guess cost.
 
+## Observed Usability Gap
+
+A real `cancer-clinic` run exposed a usability issue: the operator panel can
+still show generic English stopped/retry copy, for example:
+
+```text
+Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.
+```
+
+That wording is not friendly for the expected operator, and it can collapse
+different states into the same mental model: an aborted old workstream, a new
+workstream waiting for human review, and a real recovery failure should not all
+look like the same “stopped” state.
+
+Future UI/CLI copy should follow these rules:
+
+- operator-facing prompts should have Chinese-first wording where appropriate;
+- `WAITING_FOR_HUMAN` should read as waiting for human review, with the review
+  packet and approve/revise actions foregrounded;
+- `WAITING_FOR_RECOVERY` should read as needing recovery, with the failed node,
+  reason, and recommended action visible;
+- `FAILED` / `ABORTED` should read as failed / aborted and should not
+  automatically suggest Retry;
+- when a newer workstream exists for the same task, the operator should be
+  guided to open the latest workstream.
+
 ## Future Direction
 
 The next useful step is not a heavier UI framework. It is stronger consistency:

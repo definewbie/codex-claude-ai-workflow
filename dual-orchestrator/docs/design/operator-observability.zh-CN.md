@@ -93,6 +93,24 @@ intake -> contract -> design -> plan -> implementation -> self-test -> acceptanc
 
 Token 和 cost metrics 延后，直到 adapter 能提供可信 usage data。系统不猜成本。
 
+## 已暴露的易用性问题
+
+真实 `cancer-clinic` run 暴露了一个问题：operator panel 仍会展示英文且过于笼统的 stopped/retry 文案，例如：
+
+```text
+Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.
+```
+
+这对普通使用者不友好，也容易把不同状态混在一起：已中止的旧 workstream、等待人审的新 workstream、真正需要 recovery 的失败，都不应该用同一类提示表达。
+
+后续改 UI/CLI 文案时应遵守：
+
+- 所有 operator-facing 提示优先提供中文表达；
+- `WAITING_FOR_HUMAN` 显示“等待人工审查”，突出 review packet 和 approve/revise；
+- `WAITING_FOR_RECOVERY` 显示“需要恢复”，给出失败节点、原因和建议动作；
+- `FAILED` / `ABORTED` 显示“已失败” / “已中止”，不要默认引导 Retry；
+- 如果同一任务已经启动了新的 workstream，提示用户打开最新 workstream。
+
 ## 未来方向
 
 下一步有价值的不是更重的 UI 框架，而是更强的一致性：
