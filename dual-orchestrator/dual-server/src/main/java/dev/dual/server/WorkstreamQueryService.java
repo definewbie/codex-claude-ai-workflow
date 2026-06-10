@@ -7,6 +7,7 @@ import dev.dual.core.workflow.NodeKind;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.RecoveryAssessment;
 import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkflowIterationDocument;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Service;
 
@@ -332,9 +333,27 @@ public class WorkstreamQueryService {
                 return Map.of();
             }
             var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));
-            return RecoveryAssessment.from(node, root, workstreamId).toMap();
+            var assessment = new LinkedHashMap<>(RecoveryAssessment.from(node, root, workstreamId).toMap());
+            assessment.put("mistakenIterationCloseable", mistakenIterationCloseable(paths, node.iterationId()));
+            return assessment;
         } catch (Exception ignored) {
             return Map.of();
+        }
+    }
+
+    private boolean mistakenIterationCloseable(WorkstreamPaths paths, String iterationId) {
+        try {
+            if (iterationId == null || iterationId.isBlank()) {
+                return false;
+            }
+            var iteration = objectMapper.readValue(paths.iterationJson(iterationId).toFile(), WorkflowIterationDocument.class);
+            if (!"approved".equals(iteration.triggerAction()) || iteration.triggerNodeInstanceId().isBlank()) {
+                return false;
+            }
+            var trigger = workflowLedger.loadNode(paths, iteration.triggerNodeInstanceId());
+            return "gate.human_next_stage_approval".equals(trigger.nodeDefinitionId());
+        } catch (Exception ignored) {
+            return false;
         }
     }
 

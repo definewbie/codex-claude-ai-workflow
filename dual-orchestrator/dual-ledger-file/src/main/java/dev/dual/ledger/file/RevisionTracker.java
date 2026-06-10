@@ -175,8 +175,7 @@ final class RevisionTracker {
         return "revise".equals(outcome)
                 || "NEEDS_REVISION".equals(outcome)
                 || "REJECT".equals(outcome)
-                || outcome.startsWith("REJECT_")
-                || ("gate.human_next_stage_approval".equals(nodeDefinitionId) && "approved".equals(outcome));
+                || outcome.startsWith("REJECT_");
     }
 
     static boolean isRevisionAction(String outcome) {

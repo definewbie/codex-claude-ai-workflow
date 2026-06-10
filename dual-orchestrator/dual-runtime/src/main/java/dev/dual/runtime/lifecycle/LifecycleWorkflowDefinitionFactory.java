@@ -55,7 +55,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         gate("gate.human_acceptance"),
                         agentTask("stage.claude_handoff", "claude", "claude-main", "stage-claude-handoff"),
                         task("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                        gate("gate.human_next_stage_approval", List.of("approve", "revise", "complete"))
+                        gate("gate.human_next_stage_approval", List.of("revise", "complete"))
                 ),
                 List.of(
                         edge("intake.claude_brainstorm", "completed", "context.intake_codex_product_review"),
@@ -94,11 +94,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         edge("gate.human_acceptance", "revise", "context.implement_claude"),
                         edge("stage.claude_handoff", "completed", "stage.generate_next_prompt"),
                         edge("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
-                        edge("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm"),
-                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff"),
-                        // Example conditional edge: "complete" routes via condition
-                        edge("gate.human_next_stage_approval", "complete", "acceptance.generate_final_report",
-                                EdgeCondition.configEquals("completion_mode", "final_report"))
+                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff")
                 )
         );
     }
@@ -148,7 +144,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         gate("gate.human_acceptance"),
                         agentTask("stage.claude_handoff", "claude", "claude-main", "stage-claude-handoff"),
                         task("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                        gate("gate.human_next_stage_approval", List.of("approve", "revise", "complete"))
+                        gate("gate.human_next_stage_approval", List.of("revise", "complete"))
                 ),
                 List.of(
                         edge("intake.claude_brainstorm", "completed", "context.intake_codex_product_review"),
@@ -191,10 +187,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         edge("gate.human_acceptance", "revise", "context.implement_claude"),
                         edge("stage.claude_handoff", "completed", "stage.generate_next_prompt"),
                         edge("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
-                        edge("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm"),
-                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff"),
-                        edge("gate.human_next_stage_approval", "complete", "acceptance.generate_final_report",
-                                EdgeCondition.configEquals("completion_mode", "final_report"))
+                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff")
                 )
         );
     }
@@ -245,7 +238,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         gate("gate.human_acceptance"),
                         writableAgentTask("stage.claude_handoff", "claude", "claude-main", "stage-claude-handoff"),
                         task("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                        gate("gate.human_next_stage_approval", List.of("approve", "revise", "complete"))
+                        gate("gate.human_next_stage_approval", List.of("revise", "complete"))
                 ),
                 List.of(
                         edge("intake.claude_brainstorm", "completed", "context.intake_codex_product_review"),
@@ -304,10 +297,7 @@ public final class LifecycleWorkflowDefinitionFactory {
                         edge("gate.human_acceptance", "revise", "context.implement_claude"),
                         edge("stage.claude_handoff", "completed", "stage.generate_next_prompt"),
                         edge("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
-                        edge("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm"),
-                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff"),
-                        edge("gate.human_next_stage_approval", "complete", "acceptance.generate_final_report",
-                                EdgeCondition.configEquals("completion_mode", "final_report"))
+                        edge("gate.human_next_stage_approval", "revise", "stage.claude_handoff")
                 )
         );
     }

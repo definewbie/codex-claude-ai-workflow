@@ -431,6 +431,7 @@ public final class TraceCommand implements Callable<Integer> {
             case "RUNNING" -> "[run]";
             case "WAITING" -> "[wait]";
             case "FAILED", "BLOCKED" -> "[fail]";
+            case "SKIPPED" -> "[skip]";
             default -> "[ ]";
         };
     }

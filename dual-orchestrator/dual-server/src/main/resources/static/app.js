@@ -47,6 +47,7 @@ const els = {
   reviewPacket: $("reviewPacket"),
   reviewGate: $("reviewGate"),
   recoveryPanel: $("recoveryPanel"),
+  recoveryActions: $("recoveryActions"),
   recoveryMarkdown: $("recoveryMarkdown"),
   recoveryPath: $("recoveryPath"),
   feedback: $("feedback"),
@@ -54,13 +55,14 @@ const els = {
   approve: $("approve"),
   complete: $("complete"),
   retry: $("retry"),
+  closeMistakenIteration: $("closeMistakenIteration"),
   revise: $("revise"),
   tick: $("tick"),
 };
 
 els.workdir.value = state.workdir;
 renderWorkspaceSource();
-setActionVisibility({ resume: false, approve: false, complete: false, retry: false, revise: false, tick: true });
+setActionVisibility({ resume: false, approve: false, complete: false, retry: false, closeMistakenIteration: false, revise: false, tick: true });
 els.runHint.textContent = "Select a workstream";
 
 function setConnection(text, kind = "muted") {
@@ -876,6 +878,7 @@ function updateActions(data) {
     approve: status === "WAITING_FOR_HUMAN" && !nextStageGate,
     complete: status === "WAITING_FOR_HUMAN" && nextStageGate,
     retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
+    closeMistakenIteration: canCloseMistakenIteration(),
     revise: status === "WAITING_FOR_HUMAN",
     tick: status === "RUNNING" || !state.selectedId,
   });
@@ -907,7 +910,9 @@ function updateActions(data) {
     return;
   }
   if (status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY") {
-    els.actionHint.textContent = "Workflow 需要恢复。先查看失败摘要，确认原因和外部条件后，再重试当前节点。";
+    els.actionHint.textContent = canCloseMistakenIteration()
+      ? "检测到终态后误开的下一轮。确认上一轮已完成后，可以关闭误开的下一轮。"
+      : "Workflow 需要恢复。先查看失败摘要，确认原因和外部条件后，再重试当前节点。";
     els.runHint.textContent = "需要恢复";
     return;
   }
@@ -929,11 +934,17 @@ function isNextStageGate(nodeId) {
   return String(nodeId || "").includes("next_stage");
 }
 
+function canCloseMistakenIteration() {
+  return state.overview?.recoveryAssessment?.mistakenIterationCloseable === true;
+}
+
 function setActionVisibility(visible) {
   els.resume.disabled = !visible.resume;
   els.approve.classList.toggle("hidden", !visible.approve);
   els.complete.classList.toggle("hidden", !visible.complete);
   els.retry.classList.toggle("hidden", !visible.retry);
+  els.closeMistakenIteration.classList.toggle("hidden", !visible.closeMistakenIteration);
+  els.recoveryActions.classList.toggle("hidden", !visible.closeMistakenIteration);
   els.revise.classList.toggle("hidden", !visible.revise);
   els.tick.disabled = !visible.tick;
 }
@@ -1021,6 +1032,10 @@ $("resume").addEventListener("click", () => postAction(`${selectedBase()}/resume
 $("approve").addEventListener("click", () => postAction(`${selectedBase()}/review/approve?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`));
 $("complete").addEventListener("click", () => postAction(`${selectedBase()}/review/complete?workdir=${workdirParam()}`, { note: "completed from operator panel" }));
 $("retry").addEventListener("click", () => postAction(`${selectedBase()}/retry?workdir=${workdirParam()}`, { note: "retry from operator panel" }));
+$("closeMistakenIteration").addEventListener("click", () => postAction(
+  `${selectedBase()}/recovery/close-mistaken-iteration?workdir=${workdirParam()}`,
+  { note: "closed mistaken iteration from operator panel" }
+));
 $("revise").addEventListener("click", () => {
   const feedback = els.feedback.value.trim();
   postAction(`${selectedBase()}/review/revise?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`, { feedback });

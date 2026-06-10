@@ -316,8 +316,7 @@ acceptance.generate_final_report
     → gate.human_acceptance ──(approved)──→
 stage.claude_handoff
   → stage.generate_next_prompt
-    → gate.human_next_stage_approval ──(approved)──→
-                                                      ↻ loop back to intake
+    → gate.human_next_stage_approval ──(complete)──→ workflow completed
 ```
 
 每个 Decision 节点都有 `NEEDS_REVISION` / `REJECT` 分支，回到上游重新迭代。

@@ -1036,7 +1036,7 @@ dualctl review complete --workdir <effective_worktree> <workstream_id>
 
 如果希望一次性跨过所有中间 gate，用 `dualctl autorun`，不要反复手工执行 `review approve --run`。
 
-`revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`gate.human_next_stage_approval` 的 `approve` 会开启新的 workflow iteration，并把 `next-stage-prompt.md` 传回 `intake.claude_brainstorm`，让同一个 workstream 继续下一阶段生命周期；`complete` 则表示当前 workstream 已经收口，不再进入下一轮。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
+`revise` 表示“上一轮产出需要按反馈修改”，因此会开启新的 workflow iteration。`gate.human_next_stage_approval` 只允许 `revise` 或 `complete`：`complete` 表示当前 workstream 已经收口，不再进入下一轮；如果要启动后续阶段，应基于 `next-stage-prompt.md` 明确创建新的 workstream。`retry` 不会开启新 iteration，因为它只是恢复同一个节点的执行尝试。
 
 ## Ledger
 
@@ -1160,7 +1160,7 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 
 `handoff.json` 是从 agent handoff markdown 解析生成的结构化 sidecar，包含 `completedWork`、`changedFiles`、`openRisks`、`verificationState` 等字段。解析器会容忍 `## 1. Completed Work` 这类编号标题，以及没有列表符号的段落式 handoff，避免 Agent 文风轻微漂移时丢失结构化上下文。下游 `context.build_package` handler 在渲染 git_evidence DIFF_STAT 时会优先使用 `changedFiles` 数组作为数据源，避免重新解析 markdown。如果 handoff.json 不存在，handler 回退到文件读取。
 
-当 `gate.human_next_stage_approval` 被批准后，workflow 会回到 `intake.claude_brainstorm` 开启下一轮 iteration，并把这个文件作为 direct input artifact 展开到 Claude prompt 中。
+`gate.human_next_stage_approval` 不再通过 `approve` 自动回到 intake。当前 workstream 应通过 `complete` 收口；需要继续下一阶段时，把 `next-stage-prompt.md` 作为新的明确入口启动下一个 workstream。
 
 `implement.artifact_validation` 会在 Claude self-test 之后采集 Git evidence。它不会替 Agent 做测试，也不会判定业务验收是否通过；它只把可追溯证据固定到账本里，让 Codex final acceptance 能基于同一组事实材料判断。采集时会排除 `.agent` 运行账本，避免把账本文件误当成业务改动：
 

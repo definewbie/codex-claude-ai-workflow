@@ -243,7 +243,7 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
-        "allowed_actions": ["approve", "revise", "complete"]
+        "allowed_actions": ["revise", "complete"]
       }
     }
   ],
@@ -284,8 +284,6 @@
     { "from": "gate.human_acceptance", "on": "revise", "to": "context.implement_claude" },
     { "from": "stage.claude_handoff", "on": "completed", "to": "stage.generate_next_prompt" },
     { "from": "stage.generate_next_prompt", "on": "completed", "to": "gate.human_next_stage_approval" },
-    { "from": "gate.human_next_stage_approval", "on": "approved", "to": "intake.claude_brainstorm" },
-    { "from": "gate.human_next_stage_approval", "on": "revise", "to": "stage.claude_handoff" },
-    { "from": "gate.human_next_stage_approval", "on": "complete", "to": "acceptance.generate_final_report", "condition": { "type": "config_equals", "params": { "key": "completion_mode", "value": "final_report" } } }
+    { "from": "gate.human_next_stage_approval", "on": "revise", "to": "stage.claude_handoff" }
   ]
 }

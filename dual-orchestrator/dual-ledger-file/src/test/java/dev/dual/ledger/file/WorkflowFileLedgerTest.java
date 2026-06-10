@@ -10,8 +10,10 @@ import dev.dual.core.workflow.WorkflowStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -345,7 +347,7 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
-    void nextStageApprovalStartsNextWorkflowIterationAndCarriesPrompt() throws Exception {
+    void finalNextStageGateRejectsApproveAndCompleteEndsWorkflow() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage"));
         Files.createDirectories(paths.workstreamDir());
         var definition = new WorkflowDefinition(
@@ -354,12 +356,14 @@ class WorkflowFileLedgerTest {
                 "stage.generate_next_prompt",
                 List.of(
                         new NodeDefinition("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage", Map.of()),
-                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of("max_revisions", 0)),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise", "complete"),
+                                "max_revisions", 1
+                        )),
                         new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of())
                 ),
                 List.of(
-                        new EdgeDefinition("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"),
-                        new EdgeDefinition("gate.human_next_stage_approval", "approved", "intake.claude_brainstorm")
+                        new EdgeDefinition("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval")
                 )
         );
 
@@ -372,15 +376,73 @@ class WorkflowFileLedgerTest {
                 "prompt_path", nextPrompt
         ));
 
-        ledger.resolveOpenGate(paths, definition, "approved", "continue to next stage");
+        var error = assertThrows(IOException.class,
+                () -> ledger.resolveOpenGate(paths, definition, "approved", "continue to next stage"));
+        assertTrue(error.getMessage().contains("final next-stage gate cannot be approved"));
+
+        ledger.resolveOpenGate(paths, definition, "complete", "finish workstream");
 
         var routed = ledger.loadCurrent(paths);
-        var next = ledger.loadNode(paths, routed.activeNodeInstanceIds().get(0));
-        assertEquals("intake.claude_brainstorm", next.nodeDefinitionId());
-        assertEquals("iter-002", next.iterationId());
-        assertEquals(List.of(nextPrompt), next.inputRefs());
-        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"triggerAction\" : \"approved\""));
-        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"targetNodeDefinitionId\" : \"intake.claude_brainstorm\""));
+        assertEquals(WorkflowStatus.COMPLETED, routed.status());
+        assertTrue(routed.activeNodeInstanceIds().isEmpty());
+        assertTrue(routed.openGateIds().isEmpty());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void closesMistakenIterationStartedByHistoricalFinalGateApproval() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-close-mistaken"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "gate.human_next_stage_approval",
+                List.of(
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of("max_revisions", 1)),
+                        new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("intake.decision", NodeKind.DECISION, "review.decision", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("gate.human_next_stage_approval", "revise", "intake.claude_brainstorm"),
+                        new EdgeDefinition("intake.claude_brainstorm", "completed", "intake.decision")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-close-mistaken", definition);
+        var gate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.resolveOpenGate(paths, definition, "revise", "historical bad route");
+        new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
+                "iter-002",
+                2,
+                "iter-001",
+                gate.nodeInstanceId(),
+                "approved",
+                "intake.claude_brainstorm",
+                "Historical final gate approval opened this iteration.",
+                Instant.now()
+        ));
+
+        var intake = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, intake.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.BLOCKED, "revision_limit_reached", List.of(), Map.of(
+                "reason", "Accidental next iteration should be closed."
+        ));
+
+        ledger.closeMistakenIteration(paths, "iter-003 already completed");
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, current.status());
+        assertTrue(current.activeNodeInstanceIds().isEmpty());
+        assertTrue(current.openGateIds().isEmpty());
+        var skipped = ledger.loadNode(paths, decision.nodeInstanceId());
+        assertEquals(NodeStatus.SKIPPED, skipped.status());
+        assertEquals(true, skipped.result().get("closed_as_mistaken_iteration"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("mistaken_iteration_closed"));
+        assertTrue(events.contains("workflow_completed"));
+        assertTrue(events.contains("close_mistaken_iteration"));
     }
 
     @Test
@@ -452,7 +514,7 @@ class WorkflowFileLedgerTest {
                 1,
                 "gate.human_next_stage_approval",
                 List.of(new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
-                        "allowed_actions", List.of("approve", "revise", "complete")
+                        "allowed_actions", List.of("revise", "complete")
                 ))),
                 List.of()
         );
@@ -481,7 +543,7 @@ class WorkflowFileLedgerTest {
                 List.of(
                         new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
                         new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
-                                "allowed_actions", List.of("approve", "revise", "complete")
+                                "allowed_actions", List.of("revise", "complete")
                         ))
                 ),
                 List.of(new EdgeDefinition("first", "completed", "gate.human_next_stage_approval"))

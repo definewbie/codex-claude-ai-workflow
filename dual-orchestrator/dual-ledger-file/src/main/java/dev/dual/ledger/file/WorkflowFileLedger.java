@@ -216,6 +216,11 @@ public final class WorkflowFileLedger {
         refreshProjections(paths);
     }
 
+    public void closeMistakenIteration(WorkstreamPaths paths, String note) throws IOException {
+        nodeStateWriter.closeMistakenIteration(paths, note);
+        refreshProjections(paths);
+    }
+
     private void refreshProjections(WorkstreamPaths paths) throws IOException {
         timelineProjectionWriter.write(paths);
         metricsProjectionWriter.write(paths);

@@ -144,7 +144,7 @@ Examples:
 | `gate.human_design_approval` | `approve`, `revise` | Approve design or ask Claude to revise. |
 | `gate.human_plan_approval` | `approve`, `revise` | Approve plan or ask Claude to revise. |
 | `gate.human_acceptance` | `approve`, `revise` | Accept delivery or return to implementation context. |
-| `gate.human_next_stage_approval` | `approve`, `revise`, `complete` | Start next stage, revise handoff, or finish workflow. |
+| `gate.human_next_stage_approval` | `revise`, `complete` | Revise handoff or finish the current workstream. |
 
 `autorun` uses a benchmark-oriented policy:
 

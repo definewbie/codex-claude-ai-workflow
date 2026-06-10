@@ -59,6 +59,15 @@ public class WorkstreamActionService {
         return actionResponse("retry", workstreamId, "active node marked ready for retry");
     }
 
+    public Map<String, Object> closeMistakenIteration(Path workspaceRoot, String workstreamId, String note) throws Exception {
+        var root = normalize(workspaceRoot);
+        var paths = paths(root, workstreamId);
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery close mistaken iteration"))) {
+            ledger.closeMistakenIteration(paths, note);
+        }
+        return actionResponse("recovery.close_mistaken_iteration", workstreamId, "mistaken iteration closed");
+    }
+
     public Map<String, Object> approve(Path workspaceRoot, String workstreamId, boolean runImmediately, int maxSteps) throws Exception {
         var root = normalize(workspaceRoot);
         resolveGate(root, workstreamId, "approved", "approved from API");

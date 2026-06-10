@@ -202,4 +202,86 @@ final class NodeStateWriter {
         jsonWriter.write(paths.workflowCurrentJson(), aborted);
         eventLog.writeInstanceFromCurrent(paths, aborted, now);
     }
+
+    void closeMistakenIteration(WorkstreamPaths paths, String note) throws IOException {
+        var current = loadCurrent(paths);
+        if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY) {
+            throw new IOException("workflow is not waiting for recovery: " + current.status());
+        }
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            throw new IOException("no active recovery node to close");
+        }
+        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var iteration = objectMapper.readValue(paths.iterationJson(node.iterationId()).toFile(), WorkflowIterationDocument.class);
+        if (!"approved".equals(iteration.triggerAction())) {
+            throw new IOException("active iteration was not started by a final gate approval: " + iteration.iterationId());
+        }
+        if (iteration.triggerNodeInstanceId().isBlank()) {
+            throw new IOException("active iteration does not record a trigger node");
+        }
+        var trigger = loadNode(paths, iteration.triggerNodeInstanceId());
+        if (!"gate.human_next_stage_approval".equals(trigger.nodeDefinitionId())) {
+            throw new IOException("active iteration was not started from final next-stage gate: " + trigger.nodeDefinitionId());
+        }
+
+        var now = Instant.now();
+        var skipped = new NodeInstanceDocument(
+                node.schemaVersion(),
+                node.nodeInstanceId(),
+                node.nodeDefinitionId(),
+                node.kind(),
+                node.handlerType(),
+                NodeStatus.SKIPPED,
+                node.stageId(),
+                node.iterationId(),
+                node.inputRefs(),
+                node.outputRefs(),
+                LedgerUtils.mergedResult(node.result(), Map.of(
+                        "closed_as_mistaken_iteration", true,
+                        "close_note", note == null ? "" : note
+                )),
+                node.runRef(),
+                node.startedAt(),
+                now
+        );
+        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), skipped);
+
+        for (var gateId : current.openGateIds()) {
+            var gatePath = paths.gateJson(gateId);
+            if (!java.nio.file.Files.isRegularFile(gatePath)) {
+                continue;
+            }
+            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            jsonWriter.write(gatePath, gate.resolved("close_mistaken_iteration", note));
+        }
+
+        var closeEventId = LedgerUtils.nextEventId(current.lastEventId());
+        eventLog.appendEvent(paths, closeEventId, "mistaken_iteration_closed", Map.of(
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId(),
+                "iteration_id", node.iterationId(),
+                "trigger_node_instance_id", iteration.triggerNodeInstanceId(),
+                "trigger_action", iteration.triggerAction(),
+                "note", note == null ? "" : note
+        ));
+        var completedEventId = LedgerUtils.nextEventId(closeEventId);
+        eventLog.appendEvent(paths, completedEventId, "workflow_completed", Map.of(
+                "last_node", trigger.nodeDefinitionId(),
+                "outcome", "close_mistaken_iteration"
+        ));
+        var completed = new WorkflowCurrentDocument(
+                1,
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.COMPLETED,
+                List.of(),
+                List.of(),
+                completedEventId,
+                now
+        );
+        jsonWriter.write(paths.workflowCurrentJson(), completed);
+        eventLog.writeInstanceFromCurrent(paths, completed, now);
+    }
 }

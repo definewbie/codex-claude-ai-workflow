@@ -730,8 +730,8 @@ GITIGNORE
     step "Phase 2: Gate approval loop [$CASE_NAME]"
   fi
 
-  # gate.human_next_stage_approval has edge: approved → intake.claude_brainstorm (loops!)
-  # To actually finish the workflow, we must use "review complete" on that gate.
+  # gate.human_next_stage_approval is terminal for the current workstream.
+  # Use "review complete" there; starting another stage should be an explicit new workstream.
   FINAL_STATUS=""
 
   while [[ $CURRENT_ROUND -lt $MAX_APPROVE_ROUNDS ]]; do

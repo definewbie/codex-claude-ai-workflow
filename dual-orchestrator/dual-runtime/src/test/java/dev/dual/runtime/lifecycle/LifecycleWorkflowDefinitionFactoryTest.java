@@ -1,13 +1,11 @@
 package dev.dual.runtime.lifecycle;
 
-import dev.dual.core.workflow.EdgeCondition;
 import dev.dual.core.workflow.NodeKind;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LifecycleWorkflowDefinitionFactoryTest {
@@ -70,28 +68,16 @@ class LifecycleWorkflowDefinitionFactoryTest {
     }
 
     @Test
-    void conditionalEdge_onNextStageApproval() {
+    void finalNextStageGateCompletesWithoutStartingAnotherIteration() {
         var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
 
-        // The "complete" edge from human_next_stage_approval has a configEquals condition
-        var completeEdges = definition.edgesFrom("gate.human_next_stage_approval").stream()
-                .filter(e -> e.on().equals("complete"))
-                .toList();
-        assertEquals(1, completeEdges.size());
-        var conditionalEdge = completeEdges.get(0);
-        assertEquals("acceptance.generate_final_report", conditionalEdge.to());
-
-        // Condition matches when completion_mode=final_report
-        assertTrue(conditionalEdge.condition().evaluate(Map.of("completion_mode", "final_report")));
-        // Condition does not match otherwise
-        assertTrue(!conditionalEdge.condition().evaluate(Map.of("completion_mode", "something_else")));
-        assertTrue(!conditionalEdge.condition().evaluate(Map.of()));
-
-        // Unconditional edges still work (e.g., "approved" has no condition)
-        var approvedEdges = definition.edgesFrom("gate.human_next_stage_approval").stream()
-                .filter(e -> e.on().equals("approved"))
-                .toList();
-        assertEquals(1, approvedEdges.size());
-        assertEquals(EdgeCondition.unconditional().type(), approvedEdges.get(0).condition().type());
+        assertEquals(java.util.List.of("revise", "complete"),
+                definition.node("gate.human_next_stage_approval").config().get("allowed_actions"));
+        assertFalse(definition.edgesFrom("gate.human_next_stage_approval").stream()
+                .anyMatch(edge -> "approved".equals(edge.on())));
+        assertFalse(definition.edgesFrom("gate.human_next_stage_approval").stream()
+                .anyMatch(edge -> "complete".equals(edge.on())));
+        assertTrue(definition.edgesFrom("gate.human_next_stage_approval").stream()
+                .anyMatch(edge -> "revise".equals(edge.on()) && "stage.claude_handoff".equals(edge.to())));
     }
 }

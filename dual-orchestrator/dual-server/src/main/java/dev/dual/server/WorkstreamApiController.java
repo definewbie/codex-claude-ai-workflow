@@ -96,6 +96,15 @@ public class WorkstreamApiController {
         return actionService.retry(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
+    @PostMapping("/{workstreamId}/recovery/close-mistaken-iteration")
+    public Map<String, Object> closeMistakenIteration(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody(required = false) RecoveryCloseRequest request
+    ) throws Exception {
+        return actionService.closeMistakenIteration(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
+    }
+
     @PostMapping("/{workstreamId}/review/approve")
     public Map<String, Object> approve(
             @PathVariable String workstreamId,
@@ -142,6 +151,9 @@ public class WorkstreamApiController {
     }
 
     public record RetryRequest(String note) {
+    }
+
+    public record RecoveryCloseRequest(String note) {
     }
 
     public record ReviewReviseRequest(String feedback) {

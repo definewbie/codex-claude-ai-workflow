@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 final class RoutingEngine {
+    private static final String FINAL_NEXT_STAGE_GATE = "gate.human_next_stage_approval";
+
     private final AtomicJsonWriter jsonWriter;
     private final ObjectMapper objectMapper;
     private final LedgerEventLog eventLog;
@@ -205,6 +207,10 @@ final class RoutingEngine {
         var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
+        }
+        if (FINAL_NEXT_STAGE_GATE.equals(node.nodeDefinitionId())
+                && ("approve".equals(action) || "approved".equals(action))) {
+            throw new IOException("final next-stage gate cannot be approved; use complete to finish the workstream");
         }
         var hasEdge = definition.edgesFrom(node.nodeDefinitionId()).stream().anyMatch(edge -> edge.on().equals(action));
         var actionAllowed = LedgerUtils.allowedActions(definition.node(node.nodeDefinitionId())).contains(action);
