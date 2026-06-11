@@ -5,21 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class AgentOutputCompletionDetector {
+    private final AgentTerminalContract terminalContract = new AgentTerminalContract();
+
     boolean isComplete(Path stdoutPath) {
-        var stdout = read(stdoutPath);
-        if (!stdout.contains("[done] end_turn")) {
-            return false;
-        }
-        var fenceStart = stdout.lastIndexOf("```dual-control");
-        if (fenceStart < 0) {
-            return false;
-        }
-        var fenceEnd = stdout.indexOf("```", fenceStart + "```dual-control".length());
-        if (fenceEnd < 0) {
-            return false;
-        }
-        var body = stdout.substring(fenceStart, fenceEnd);
-        return body.contains("\ndecision:") && body.contains("\nsummary:");
+        return terminalContract.isComplete(read(stdoutPath));
     }
 
     private String read(Path path) {

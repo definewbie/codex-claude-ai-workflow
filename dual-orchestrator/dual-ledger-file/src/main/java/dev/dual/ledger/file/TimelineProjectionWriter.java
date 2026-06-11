@@ -70,6 +70,7 @@ final class TimelineProjectionWriter {
         var view = new LinkedHashMap<String, Object>();
         view.put("nodeInstanceId", node.nodeInstanceId());
         view.put("nodeDefinitionId", node.nodeDefinitionId());
+        view.put("displayName", TimelineDisplaySemantics.displayName(node));
         view.put("kind", node.kind());
         view.put("handlerType", node.handlerType());
         view.put("status", node.status());

@@ -43,7 +43,7 @@ public final class RecoveryShowCommand implements Callable<Integer> {
 
     private void printAssessment(Path workspaceRoot, WorkstreamPaths paths, String workstreamId) {
         try {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var current = ledger.loadCurrent(paths);
             if (current.activeNodeInstanceIds().isEmpty()) {
                 return;

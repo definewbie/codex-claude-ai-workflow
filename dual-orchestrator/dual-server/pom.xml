@@ -25,6 +25,11 @@
         </dependency>
         <dependency>
             <groupId>dev.dual</groupId>
+            <artifactId>dual-flow-liteflow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.dual</groupId>
             <artifactId>dual-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>

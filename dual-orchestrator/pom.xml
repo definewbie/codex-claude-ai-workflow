@@ -22,6 +22,7 @@
     <modules>
         <module>dual-core</module>
         <module>dual-ledger-file</module>
+        <module>dual-flow-liteflow</module>
         <module>dual-runtime</module>
         <module>dual-adapter-acpx</module>
         <module>dual-adapter-git</module>
@@ -32,6 +33,7 @@
     <properties>
         <java.version>21</java.version>
         <picocli.version>4.7.6</picocli.version>
+        <liteflow.version>2.16.0</liteflow.version>
     </properties>
 
     <dependencyManagement>
@@ -40,6 +42,11 @@
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>${picocli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yomahub</groupId>
+                <artifactId>liteflow-core</artifactId>
+                <version>${liteflow.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

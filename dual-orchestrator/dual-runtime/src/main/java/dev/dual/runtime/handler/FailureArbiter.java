@@ -95,7 +95,7 @@ public final class FailureArbiter {
         boolean noOptionalFields = !hasGaps && !hasOOS && !hasMissing && !hasContextGaps;
         boolean noAmbiguity = taskContract == null ||
                 (taskContract.ambiguityNotes() == null || taskContract.ambiguityNotes().isEmpty());
-        if (noOptionalFields && noAmbiguity && isLikelyReviewNoise(reviewDecision, reviewSummary)) {
+        if (noOptionalFields && noAmbiguity && ReviewNoiseSemantics.isLikelyReviewNoise(reviewDecision, reviewSummary)) {
             var suggestedAction = "REJECT".equals(reviewDecision)
                     ? "Re-run acceptance review automatically"
                     : "Record non-blocking acceptance notes and continue";
@@ -110,21 +110,6 @@ public final class FailureArbiter {
                 "Default classification — assume implementation needs fixing",
                 "Re-implement addressing review feedback",
                 List.of(), reviewDecision);
-    }
-
-    private boolean isLikelyReviewNoise(String reviewDecision, String reviewSummary) {
-        if (!"REJECT".equals(reviewDecision)) {
-            return true;
-        }
-        if (reviewSummary == null || reviewSummary.isBlank()) {
-            return false;
-        }
-        var lower = reviewSummary.toLowerCase();
-        return lower.contains("review noise")
-                || lower.contains("non-blocking")
-                || lower.contains("non blocking")
-                || lower.contains("minor stylistic")
-                || lower.contains("preference only");
     }
 
     private FailureClassification build(FailureCategory category, int rule,

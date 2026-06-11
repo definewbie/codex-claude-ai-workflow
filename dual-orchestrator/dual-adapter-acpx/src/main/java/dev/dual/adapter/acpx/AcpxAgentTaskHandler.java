@@ -95,7 +95,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var result = "claude".equals(agent)
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
-        var failure = failureClassifier.classify(stderrPath, result.exitCode());
+        var failure = failureClassifier.classify(stdoutPath, stderrPath, result.exitCode());
         var outputComplete = completionDetector.isComplete(stdoutPath);
         if (result.exitCode() == 0 && outputComplete) {
             metadataWriter.writeCompleted(
@@ -175,7 +175,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     result,
                     failure
             );
-            return failedResult(context, runDir, stderrPath, result, agent, session, runId, failure);
+            return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, failure);
         }
         if (result.exitCode() != 0) {
             if (outputComplete) {
@@ -218,7 +218,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     result,
                     failure
             );
-            return failedResult(context, runDir, stderrPath, result, agent, session, runId, failure);
+            return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, failure);
         }
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
@@ -260,6 +260,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private static NodeResult failedResult(
             TaskContext context,
             java.nio.file.Path runDir,
+            java.nio.file.Path stdoutPath,
             java.nio.file.Path stderrPath,
             AcpxRunResult result,
             String agent,
@@ -270,7 +271,10 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return new NodeResult(
                 failure.reason(),
                 NodeStatus.FAILED,
-                List.of(context.workspaceRoot().relativize(stderrPath).toString()),
+                List.of(
+                        context.workspaceRoot().relativize(stdoutPath).toString(),
+                        context.workspaceRoot().relativize(stderrPath).toString()
+                ),
                 Map.of(
                         "run_id", runId,
                         "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),

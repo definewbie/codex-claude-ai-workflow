@@ -39,7 +39,7 @@ class ServerWorkflowRuntimeFactory {
                 List.of(new ReviewDecisionHandler()),
                 List.of(new HumanReviewGateHandler())
         );
-        var runtime = new WorkflowRuntime(new WorkflowFileLedger(), registry);
+        var runtime = new WorkflowRuntime(ServerLedgerFactory.create(), registry);
         return runtime::resume;
     }
 }

@@ -88,7 +88,7 @@ public final class DeliveryCreatePrCommand implements Callable<Integer> {
 
     private static String currentIteration(WorkstreamPaths paths) {
         try {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var current = ledger.loadCurrent(paths);
             if (!current.activeNodeInstanceIds().isEmpty()) {
                 var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));

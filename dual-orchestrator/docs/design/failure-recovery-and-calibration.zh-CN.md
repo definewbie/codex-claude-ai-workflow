@@ -34,6 +34,16 @@ recovery/current-failure.json
 
 `dualctl recovery show`、`dualctl trace`、API 和 operator panel 都读取同一个 recovery model。
 
+Runtime 分类会同时读取 Agent stdout 和 stderr。原因是不同 ACP adapter 和模型供应商不一定把运行时诊断写到同一个流里：quota 或 HTTP 429 可能出现在 stdout，而 acpx 连接信息仍在 stderr。因此一次 Agent run 失败时，recovery evidence 应保留两个流。
+
+Adapter 会把 runtime failure matching 收敛在一个很小的 signal catalog 后面：
+
+- `AcpxFailureEvidence` 负责执行证据边界：stdout、stderr、exit code。
+- `AcpxFailureSignalCatalog` 负责 provider / adapter 的信号模式，例如 reconnect、session missing、rate limit、context window。
+- `AcpxFailureClassifier` 只负责把 evidence 映射到 signal；如果没有匹配，才退回原始 `ACPX_EXIT_<code>`。
+
+以后新增 provider 特定文案时，应添加到 catalog 的 signal matcher，不应散落到 workflow routing、ledger projection 或 UI 代码里。
+
 ## Semantic Failure
 
 Semantic failure 发生在 verifier 检查实现和证据之后。Codex 输出结构化 acceptance review。Orchestrator 读取已校验字段，并把失败归类为稳定类别：
@@ -47,7 +57,7 @@ Semantic failure 发生在 verifier 检查实现和证据之后。Codex 输出�
 | `TOOL_LIMITATION` | 保留证据并展示恢复建议。 |
 | `REVIEW_NOISE` | 重建 verifier context，或让 human 检查。 |
 
-`REJECT` 会创建 repair route。`ACCEPT_WITH_NOTES` 会记录 classification data；如果 notes 非阻塞，仍可以进入报告阶段。
+`REJECT` 会创建 repair route，并在观测层显示为 failure classification。`ACCEPT_WITH_NOTES` 会记录 notes classification data；如果 notes 非阻塞，仍可以进入报告阶段。
 
 ## Repair Loop
 

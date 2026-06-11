@@ -73,9 +73,9 @@ public final class DeliveryCommitCommand implements Callable<Integer> {
 
     private static String currentIteration(WorkstreamPaths paths) {
         try {
-            var current = new WorkflowFileLedger().loadCurrent(paths);
+            var current = CliLedgerFactory.create().loadCurrent(paths);
             if (!current.activeNodeInstanceIds().isEmpty()) {
-                var node = new WorkflowFileLedger().loadNode(paths, current.activeNodeInstanceIds().get(0));
+                var node = CliLedgerFactory.create().loadNode(paths, current.activeNodeInstanceIds().get(0));
                 return node.iterationId();
             }
         } catch (Exception ignored) {

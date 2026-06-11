@@ -30,7 +30,7 @@ public class ReviewCompleteCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review complete"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "complete", note);
         }
         System.out.println("Human gate completed");

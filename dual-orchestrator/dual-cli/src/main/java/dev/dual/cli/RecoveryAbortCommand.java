@@ -29,7 +29,7 @@ public final class RecoveryAbortCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "recovery abort"))) {
-            new WorkflowFileLedger().abortRecovery(paths, note);
+            CliLedgerFactory.create().abortRecovery(paths, note);
         }
         System.out.println("Recovery aborted");
         System.out.println("Workstream: " + workstreamId);

@@ -159,6 +159,27 @@ http://localhost:8080/
 
 Operator Panel 的 overview 和 `dualctl trace` 使用同一套表达：当前节点、停止原因、下一步动作、attention items、最近 timeline、Agent runs 和关键 artifacts。
 
+## Workflow Kernel
+
+默认使用 LiteFlow 作为 workflow routing kernel。LiteFlow 只负责根据 `WorkflowDefinition` 和当前 ledger snapshot 计算下一步候选；ledger、human gate、artifact contract、completion contract 仍由 dual 自己管理。
+
+```bash
+dualctl trace --workdir <effective_workdir> <workstream_id>
+./scripts/run-real-case.sh \
+  --repo /path/to/repo \
+  --task-file /path/to/task.md \
+  --variant full
+```
+
+如果需要诊断或回退，可以显式切回内置 kernel：
+
+```bash
+DUAL_FLOW_KERNEL=builtin dualctl trace --workdir <effective_workdir> <workstream_id>
+java -Ddual.flow.kernel=builtin -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar ...
+```
+
+支持的 kernel 值：`liteflow`、`builtin`。未知值会直接失败，避免误用错误内核。
+
 ## 文档入口
 
 - [Quickstart](docs/quickstart.md)
@@ -166,6 +187,7 @@ Operator Panel 的 overview 和 `dualctl trace` 使用同一套表达：当前�
 - [文档索引](docs/README.md) / [中文](docs/README.zh-CN.md)
 - [总体架构与执行流程](docs/architecture-and-execution-flow.md)
 - [Workflow 状态机](docs/design/workflow-state-machine.md)
+- [Workflow Execution Model](docs/design/workflow-execution-model.zh-CN.md)
 - [Artifact Contract 与上下文](docs/design/artifact-contracts-and-context.md) / [中文](docs/design/artifact-contracts-and-context.zh-CN.md)
 - [Failure Recovery 与 Calibration](docs/design/failure-recovery-and-calibration.md) / [中文](docs/design/failure-recovery-and-calibration.zh-CN.md)
 - [Operator Observability](docs/design/operator-observability.md) / [中文](docs/design/operator-observability.zh-CN.md)

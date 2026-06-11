@@ -44,7 +44,7 @@ public final class StatusCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         var hasWorkflowCurrent = Files.exists(paths.workflowCurrentJson());
         if (hasWorkflowCurrent) {
-            var workflowLedger = new WorkflowFileLedger();
+            var workflowLedger = CliLedgerFactory.create();
             var current = workflowLedger.loadCurrent(paths);
             System.out.println();
             System.out.println("Workflow:");

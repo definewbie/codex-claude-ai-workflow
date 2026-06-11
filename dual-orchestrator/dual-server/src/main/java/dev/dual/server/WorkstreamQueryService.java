@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.ledger.file.FileLedgerStore;
+import dev.dual.ledger.file.IterationSemantics;
 import dev.dual.ledger.file.RecoveryAssessment;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkflowIterationDocument;
@@ -36,7 +37,7 @@ public class WorkstreamQueryService {
     public WorkstreamQueryService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.legacyStore = new FileLedgerStore();
-        this.workflowLedger = new WorkflowFileLedger();
+        this.workflowLedger = ServerLedgerFactory.create();
     }
 
     public Map<String, Object> status(Path workspaceRoot, String workstreamId) throws IOException {
@@ -316,7 +317,7 @@ public class WorkstreamQueryService {
             }
             var payload = mapValue(event.get("payload"));
             var action = text(payload.get("trigger_action"));
-            if (action.startsWith("REJECT_")) {
+            if (IterationSemantics.isRepairLoopTrigger(action)) {
                 actions.add(Map.of("action", action));
             }
         }
@@ -575,6 +576,7 @@ public class WorkstreamQueryService {
     private Map<String, Object> timelineItem(Map<String, Object> node) {
         var item = new LinkedHashMap<String, Object>();
         item.put("nodeDefinitionId", text(node.get("nodeDefinitionId")));
+        item.put("displayName", text(node.get("displayName"), text(node.get("nodeDefinitionId"))));
         item.put("status", text(node.get("status")));
         item.put("kind", text(node.get("kind")));
         item.put("iterationId", text(node.get("iterationId")));

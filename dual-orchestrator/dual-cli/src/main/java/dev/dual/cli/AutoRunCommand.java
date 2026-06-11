@@ -91,7 +91,7 @@ public final class AutoRunCommand implements Callable<Integer> {
 
     private Snapshot loadSnapshot(WorkstreamPaths paths) throws Exception {
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun inspect"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var current = ledger.loadCurrent(paths);
             NodeInstanceDocument node = null;
             if (!current.activeNodeInstanceIds().isEmpty()) {
@@ -108,7 +108,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         var action = gateActionFor(node.nodeDefinitionId());
         System.out.println("Gate " + gateCount + ": " + node.nodeDefinitionId() + " -> " + action);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun gate"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, "auto-resolved from autorun");
         }
     }

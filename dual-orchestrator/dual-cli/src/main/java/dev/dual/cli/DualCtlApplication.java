@@ -32,6 +32,9 @@ public class DualCtlApplication {
             this.commandLine = commandLine;
             this.commandLine.setExecutionExceptionHandler((ex, cmd, parseResult) -> {
                 cmd.getErr().println("dualctl: " + ex.getMessage());
+                if ("true".equalsIgnoreCase(System.getenv("DUAL_DEBUG_STACK"))) {
+                    ex.printStackTrace(cmd.getErr());
+                }
                 return cmd.getCommandSpec().exitCodeOnExecutionException();
             });
             this.command = command;

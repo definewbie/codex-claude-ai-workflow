@@ -1,6 +1,9 @@
 package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.flow.FlowExecutionSnapshot;
+import dev.dual.core.flow.FlowOrchestrationKernel;
+import dev.dual.core.flow.FlowSignal;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
@@ -20,12 +23,20 @@ final class RoutingEngine {
     private final ObjectMapper objectMapper;
     private final LedgerEventLog eventLog;
     private final RevisionTracker revisionTracker;
+    private final FlowOrchestrationKernel flowKernel;
 
-    RoutingEngine(AtomicJsonWriter jsonWriter, ObjectMapper objectMapper, LedgerEventLog eventLog, RevisionTracker revisionTracker) {
+    RoutingEngine(
+            AtomicJsonWriter jsonWriter,
+            ObjectMapper objectMapper,
+            LedgerEventLog eventLog,
+            RevisionTracker revisionTracker,
+            FlowOrchestrationKernel flowKernel
+    ) {
         this.jsonWriter = jsonWriter;
         this.objectMapper = objectMapper;
         this.eventLog = eventLog;
         this.revisionTracker = revisionTracker;
+        this.flowKernel = flowKernel;
     }
 
     WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
@@ -80,7 +91,12 @@ final class RoutingEngine {
         routingContext.put("outcome", outcome);
         if (result != null) routingContext.putAll(result);
 
-        var matchingEdges = definition.edgesFrom(node.nodeDefinitionId(), outcome, routingContext);
+        var routeResult = flowKernel.advance(
+                definition,
+                new FlowExecutionSnapshot(current.workflowInstanceId(), activeNodeDefinitionIds(paths, current.activeNodeInstanceIds())),
+                FlowSignal.completed(node.nodeDefinitionId(), outcome, routingContext)
+        );
+        var matchingTransitions = routeResult.transitions();
 
         // Fan-out: create successor nodes for all matching edges
         var successorNodeIds = new java.util.ArrayList<String>();
@@ -88,8 +104,8 @@ final class RoutingEngine {
         var lastEventId = current.lastEventId();
         var workflowStatus = WorkflowStatus.RUNNING;
 
-        for (var edge : matchingEdges) {
-            var nextDefinition = definition.node(edge.to());
+        for (var transition : matchingTransitions) {
+            var nextDefinition = definition.node(transition.toNodeDefinitionId());
             var eventNum = LedgerUtils.currentEventNumber(lastEventId) + 1;
             var nextNodeInstanceId = LedgerUtils.nodeInstanceId(nextDefinition.id(), eventNum);
             var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
@@ -193,6 +209,14 @@ final class RoutingEngine {
         );
         jsonWriter.write(paths.workflowCurrentJson(), next);
         eventLog.writeInstanceFromCurrent(paths, next, now);
+    }
+
+    private List<String> activeNodeDefinitionIds(WorkstreamPaths paths, List<String> activeNodeInstanceIds) throws IOException {
+        var nodeDefinitionIds = new java.util.ArrayList<String>();
+        for (var activeNodeInstanceId : activeNodeInstanceIds) {
+            nodeDefinitionIds.add(loadNode(paths, activeNodeInstanceId).nodeDefinitionId());
+        }
+        return List.copyOf(nodeDefinitionIds);
     }
 
     void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)

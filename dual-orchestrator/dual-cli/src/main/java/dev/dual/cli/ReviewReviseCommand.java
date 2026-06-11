@@ -36,7 +36,7 @@ public class ReviewReviseCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review revise"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var feedback = Files.readString(feedbackFile.toAbsolutePath().normalize());
             ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "revise", feedback);
         }

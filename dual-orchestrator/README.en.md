@@ -86,12 +86,38 @@ For a reusable public benchmark:
 ./scripts/run-public-benchmark.sh
 ```
 
+## Workflow Kernel
+
+LiteFlow is the default workflow routing kernel. It only computes transition
+candidates from the `WorkflowDefinition` and the current ledger snapshot; the
+ledger, human gates, artifact contracts, and completion contract remain owned by
+dual.
+
+```bash
+dualctl trace --workdir <effective_workdir> <workstream_id>
+./scripts/run-real-case.sh \
+  --repo /path/to/repo \
+  --task-file /path/to/task.md \
+  --variant full
+```
+
+For diagnostics or emergency fallback, explicitly select the built-in kernel:
+
+```bash
+DUAL_FLOW_KERNEL=builtin dualctl trace --workdir <effective_workdir> <workstream_id>
+java -Ddual.flow.kernel=builtin -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar ...
+```
+
+Supported kernel values are `liteflow` and `builtin`. Unknown values fail fast
+instead of silently falling back to the wrong kernel.
+
 ## Documentation
 
 - [Quickstart](docs/quickstart.md) / [中文](docs/quickstart.zh-CN.md)
 - [Docs index](docs/README.md) / [中文](docs/README.zh-CN.md)
 - [Architecture and execution flow](docs/architecture-and-execution-flow.md)
 - [Workflow state machine](docs/design/workflow-state-machine.md)
+- [Workflow execution model](docs/design/workflow-execution-model.zh-CN.md)
 - [Artifact contracts and context](docs/design/artifact-contracts-and-context.md) / [中文](docs/design/artifact-contracts-and-context.zh-CN.md)
 - [Failure recovery and calibration](docs/design/failure-recovery-and-calibration.md) / [中文](docs/design/failure-recovery-and-calibration.zh-CN.md)
 - [Operator observability](docs/design/operator-observability.md) / [中文](docs/design/operator-observability.zh-CN.md)

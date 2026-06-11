@@ -516,8 +516,9 @@ function renderOverviewTimeline(nodes) {
   for (const node of nodes.slice(-6)) {
     const item = document.createElement("div");
     item.className = "mini-item";
+    const label = node.displayName || node.nodeDefinitionId || "(node)";
     item.innerHTML = `
-      <strong>${escapeHtml(node.nodeDefinitionId || "(node)")}</strong>
+      <strong>${escapeHtml(label)}</strong>
       <span>${escapeHtml([node.status, node.iterationId, timeRangeLabel(node)].filter(Boolean).join(" · "))}</span>
     `;
     els.overviewTimeline.appendChild(item);
@@ -778,8 +779,9 @@ function renderTimeline(data) {
     for (const node of items) {
       const item = document.createElement("div");
       item.className = "timeline-item";
+      const label = node.displayName || node.nodeDefinitionId || node.id || "(node)";
       item.innerHTML = `
-        <strong>${escapeHtml(node.nodeDefinitionId || node.id || "(node)")}</strong>
+        <strong>${escapeHtml(label)}</strong>
         <span>${escapeHtml(node.kind || "")}</span>
         <span>${escapeHtml(node.status || "")}</span>
         <span>${escapeHtml(timeRangeLabel(node) || "-")}</span>

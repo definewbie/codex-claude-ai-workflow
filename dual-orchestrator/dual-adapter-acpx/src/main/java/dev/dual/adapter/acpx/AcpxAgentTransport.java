@@ -12,6 +12,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class AcpxAgentTransport {
+    private final AcpxFailureClassifier failureClassifier = new AcpxFailureClassifier();
+
     public boolean isAvailable(Path workdir) {
         try {
             var process = new ProcessBuilder("acpx", "--help")
@@ -26,7 +28,7 @@ public class AcpxAgentTransport {
 
     public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws IOException, InterruptedException {
         var result = run("claude", request);
-        if (result.exitCode() == 4 && stderrContainsMissingSession(request.stderrPath())) {
+        if (isMissingSession(request, result)) {
             createSession("claude", request.workdir(), request.sessionName());
             result = run("claude", request);
         }
@@ -35,7 +37,7 @@ public class AcpxAgentTransport {
 
     public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws IOException, InterruptedException {
         var result = run("codex", request);
-        if (result.exitCode() == 4 && stderrContainsMissingSession(request.stderrPath())) {
+        if (isMissingSession(request, result)) {
             createSession("codex", request.workdir(), request.sessionName());
             result = run("codex", request);
         }
@@ -90,26 +92,34 @@ public class AcpxAgentTransport {
         }
     }
 
-    private boolean stderrContainsMissingSession(Path stderrPath) {
-        try {
-            return java.nio.file.Files.readString(stderrPath).contains("No acpx session found");
-        } catch (IOException ignored) {
+    private boolean isMissingSession(AcpxRunRequest request, AcpxRunResult result) {
+        if (result.exitCode() != 4) {
             return false;
         }
+        var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
+        return "RECOVERABLE_SESSION_MISSING".equals(failure.reason());
     }
 
     private Set<Long> managedToolPids() {
-        return ProcessHandle.allProcesses()
-                .map(this::processInfo)
-                .filter(process -> AcpxProcessCleanupPolicy.shouldCleanup(process, Set.of()))
-                .map(AcpxProcessCleanupPolicy.ProcessInfo::pid)
-                .collect(Collectors.toSet());
+        try {
+            return ProcessHandle.allProcesses()
+                    .map(this::processInfo)
+                    .filter(process -> AcpxProcessCleanupPolicy.shouldCleanup(process, Set.of()))
+                    .map(AcpxProcessCleanupPolicy.ProcessInfo::pid)
+                    .collect(Collectors.toSet());
+        } catch (RuntimeException ignored) {
+            return Set.of();
+        }
     }
 
     private void cleanupManagedToolsStartedByRun(Set<Long> knownBefore) {
-        ProcessHandle.allProcesses()
-                .filter(handle -> AcpxProcessCleanupPolicy.shouldCleanup(processInfo(handle), knownBefore))
-                .forEach(this::terminateProcessTree);
+        try {
+            ProcessHandle.allProcesses()
+                    .filter(handle -> AcpxProcessCleanupPolicy.shouldCleanup(processInfo(handle), knownBefore))
+                    .forEach(this::terminateProcessTree);
+        } catch (RuntimeException ignored) {
+            // Process enumeration can be blocked in sandboxed runtimes. Cleanup is best-effort.
+        }
     }
 
     private AcpxProcessCleanupPolicy.ProcessInfo processInfo(ProcessHandle handle) {

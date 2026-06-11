@@ -147,8 +147,7 @@ final class MetricsProjectionWriter {
     }
 
     private boolean isRevisionIteration(WorkflowIterationDocument iteration) {
-        var action = iteration.triggerAction().toLowerCase();
-        return action.contains("revise") || action.contains("revision") || action.contains("needs_revision");
+        return IterationSemantics.isRevisionTrigger(iteration.triggerAction());
     }
 
     private long totalDurationMs(List<NodeInstanceDocument> nodes) {

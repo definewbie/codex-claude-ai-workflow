@@ -169,20 +169,11 @@ final class RevisionTracker {
     }
 
     static boolean startsNewIteration(String nodeDefinitionId, String outcome, String targetNodeDefinitionId) {
-        if ("REJECT".equals(outcome) && "acceptance.classify_failure".equals(targetNodeDefinitionId)) {
-            return false;
-        }
-        return "revise".equals(outcome)
-                || "NEEDS_REVISION".equals(outcome)
-                || "REJECT".equals(outcome)
-                || outcome.startsWith("REJECT_");
+        return IterationSemantics.startsNewIteration(outcome, targetNodeDefinitionId);
     }
 
     static boolean isRevisionAction(String outcome) {
-        return "revise".equals(outcome)
-                || "NEEDS_REVISION".equals(outcome)
-                || "REJECT".equals(outcome)
-                || outcome.startsWith("REJECT_");
+        return IterationSemantics.isRevisionTrigger(outcome);
     }
 
     static int maxRevisions(NodeDefinition definition) {

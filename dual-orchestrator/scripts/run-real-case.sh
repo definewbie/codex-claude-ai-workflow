@@ -302,6 +302,16 @@ collect_evidence() {
   dualctl runs --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/runs.log" 2>&1 || true
   dualctl recovery show --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" >"$CASE_DIR/logs/recovery.log" 2>&1 || true
   dualctl summary --workdir "$WORKSPACE_DIR" --write "$WORKSTREAM_ID" >"$CASE_DIR/logs/workstream-summary.log" 2>&1 || true
+  sync_runtime_git_evidence
+}
+
+sync_runtime_git_evidence() {
+  [[ -n "$WS_DIR" && -d "$WS_DIR/artifacts/git-evidence" ]] || return 0
+  local evidence_dir="$WS_DIR/artifacts/git-evidence"
+  [[ -f "$evidence_dir/git-status-short.txt" ]] && cp "$evidence_dir/git-status-short.txt" "$CASE_DIR/logs/git-status-short.log"
+  [[ -f "$evidence_dir/diff.stat" ]] && cp "$evidence_dir/diff.stat" "$CASE_DIR/logs/git-diff-stat.log"
+  [[ -f "$evidence_dir/diff.patch" ]] && cp "$evidence_dir/diff.patch" "$CASE_DIR/logs/git-diff.patch"
+  [[ -f "$evidence_dir/changed-files.txt" ]] && cp "$evidence_dir/changed-files.txt" "$CASE_DIR/logs/changed-files.log"
 }
 
 json_escape() {

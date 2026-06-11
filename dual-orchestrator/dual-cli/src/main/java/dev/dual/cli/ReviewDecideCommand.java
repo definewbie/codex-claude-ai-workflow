@@ -41,7 +41,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
         var resolvedAction = "";
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review decide"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var definition = ledger.loadDefinition(paths);
             resolvedAction = normalizeAction(paths, ledger, definition, action);
             ledger.resolveOpenGate(paths, definition, resolvedAction, note);

@@ -27,7 +27,7 @@ final class ReviewPacketCliHints {
     static java.util.Optional<Path> packetPath(Path workspaceRoot, String workstreamId) {
         try {
             var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var current = ledger.loadCurrent(paths);
             if (current.activeNodeInstanceIds().isEmpty()) {
                 return java.util.Optional.empty();

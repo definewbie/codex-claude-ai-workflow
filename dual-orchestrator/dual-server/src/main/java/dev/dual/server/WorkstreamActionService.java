@@ -33,7 +33,7 @@ public class WorkstreamActionService {
 
     @Autowired
     public WorkstreamActionService(ServerWorkflowRuntimeFactory runtimeFactory) {
-        this(new WorkflowFileLedger(), runtimeFactory::create);
+        this(ServerLedgerFactory.create(), runtimeFactory::create);
     }
 
     WorkstreamActionService(WorkflowFileLedger ledger, Supplier<WorkflowResumer> resumerFactory) {

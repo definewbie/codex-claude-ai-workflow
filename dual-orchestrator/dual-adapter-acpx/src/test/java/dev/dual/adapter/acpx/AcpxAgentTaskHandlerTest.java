@@ -234,6 +234,9 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("RECOVERABLE_AGENT_RECONNECT", result.outcome());
         assertEquals(0, result.result().get("exit_code"));
+        assertEquals(2, result.outputRefs().size());
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.md")));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.stderr.log")));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
         assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_RECONNECT\""));
@@ -316,6 +319,20 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
         assertEquals(true, failure.recoverable());
         assertTrue(failure.message().contains("dualctl retry"));
+    }
+
+    @Test
+    void classifiesRateLimitFromStdoutAsRecoverable() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(stdout, "[error] RUNTIME: API Error: Request rejected (429) 已达到 5 小时的使用上限\n");
+        Files.writeString(stderr, "[acpx] session claude-main · agent connected\n");
+
+        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 1);
+
+        assertEquals("RECOVERABLE_RATE_LIMIT", failure.reason());
+        assertEquals(true, failure.recoverable());
+        assertTrue(failure.message().contains("quota"));
     }
 
     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {

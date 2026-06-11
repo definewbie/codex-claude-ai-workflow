@@ -21,6 +21,10 @@ dual-orchestrator 最早从一个很朴素的问题开始：人夹在 Claude Cod
 
 Claude / Codex / acpx 都是其中的可替换部件。真正的核心是外层 harness：workflow、ledger、contract、context、review、failure arbiter、calibration。
 
+领域边界见 `docs/design/workstream-domain-model.md`。这份文档明确了
+`Workstream` 的完成契约、artifact ownership、execution state 与 domain state
+的区别，以及防止实现漂移的检查机制。
+
 ## 2. 核心思想
 
 ### 2.1 Agent 分工
