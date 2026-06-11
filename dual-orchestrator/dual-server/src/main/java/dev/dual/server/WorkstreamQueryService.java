@@ -130,6 +130,7 @@ public class WorkstreamQueryService {
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
         var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
         var artifacts = artifacts(root, paths);
+        var completionAudit = completionAudit(paths, artifacts);
         var currentNode = currentNode(nodes, activeNodeIds);
         var latestAgentRuns = latestAgentRuns(root, paths, 6);
         var staleRunningReason = staleRunningReason(status, currentNode, latestAgentRuns, artifacts);
@@ -157,11 +158,12 @@ public class WorkstreamQueryService {
         response.put("whyStopped", whyStopped(status, currentNode, openGateIds, staleRunningReason));
         response.put("nextAction", nextAction(root, workstreamId, status, openGateIds, staleRunningReason));
         response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
-                artifacts, staleRunningReason, recoveryAssessment));
+                artifacts, staleRunningReason, recoveryAssessment, completionAudit));
         response.put("metrics", metrics);
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
         response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
+        response.put("completionAudit", completionAudit);
         response.put("recoveryAssessment", recoveryAssessment);
         return response;
     }
@@ -440,7 +442,8 @@ public class WorkstreamQueryService {
     private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
                                                 String verificationConfidence, int repairLoopCount,
                                                 Map<String, Object> artifacts, String staleRunningReason,
-                                                Map<String, Object> recoveryAssessment) {
+                                                Map<String, Object> recoveryAssessment,
+                                                Map<String, Object> completionAudit) {
         var items = new ArrayList<Map<String, Object>>();
         var base = "--workdir \"" + root + "\" " + workstreamId;
         if (!staleRunningReason.isBlank()) {
@@ -514,6 +517,15 @@ public class WorkstreamQueryService {
                             "dualctl summary " + base
                     ));
                 }
+            }
+            var gaps = textList(completionAudit.get("gaps"));
+            if (!gaps.isEmpty()) {
+                items.add(attentionItem(
+                        "warning",
+                        "Completion artifacts need review",
+                        String.join("; ", gaps),
+                        "dualctl summary " + base
+                ));
             }
         }
         if (items.isEmpty() && "COMPLETED".equals(status) && "ACCEPT".equals(finalAcceptance)) {
@@ -620,6 +632,74 @@ public class WorkstreamQueryService {
         artifact(artifacts, root, "deliveryPrBody", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"));
         artifact(artifacts, root, "currentFailure", paths.currentFailureMarkdown());
         return artifacts;
+    }
+
+    private Map<String, Object> completionAudit(WorkstreamPaths paths, Map<String, Object> artifacts) {
+        var gaps = new ArrayList<String>();
+        auditFinalReport(paths, artifacts, gaps);
+        auditHandoff(paths, artifacts, gaps);
+        auditNextStagePrompt(paths, artifacts, gaps);
+        return Map.of(
+                "status", gaps.isEmpty() ? "ready" : "needs_review",
+                "gaps", List.copyOf(gaps)
+        );
+    }
+
+    private void auditFinalReport(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
+        if (!artifactAvailable(artifacts, "finalReport")) {
+            gaps.add("final report is missing");
+            return;
+        }
+        var report = readText(paths.workstreamDir().resolve("reports").resolve("latest-final-report.md"));
+        for (var heading : List.of("## User Request", "## Verification Evidence", "## Acceptance Summary", "## Git Evidence")) {
+            if (!report.contains(heading)) {
+                gaps.add("final report missing " + heading);
+            }
+        }
+    }
+
+    private void auditHandoff(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
+        if (!artifactAvailable(artifacts, "handoffJson")) {
+            gaps.add("handoff.json is missing");
+            return;
+        }
+        var handoff = readJson(paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"));
+        if (text(handoff.get("workstreamId")).isBlank()) {
+            gaps.add("handoff.json missing workstreamId");
+        }
+        if (textList(handoff.get("completedWork")).isEmpty() && textList(handoff.get("changedFiles")).isEmpty()) {
+            gaps.add("handoff.json has no completedWork or changedFiles");
+        }
+        if (text(handoff.get("recommendedNextStage")).isBlank()
+                && text(handoff.get("suggestedNextPrompt")).isBlank()) {
+            gaps.add("handoff.json has no recommendedNextStage or suggestedNextPrompt");
+        }
+    }
+
+    private void auditNextStagePrompt(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
+        if (!artifactAvailable(artifacts, "nextStagePrompt")) {
+            gaps.add("next-stage prompt is missing");
+            return;
+        }
+        var prompt = readText(paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"));
+        if (!prompt.contains("## Prompt")) {
+            gaps.add("next-stage prompt missing ## Prompt section");
+        }
+        if (!prompt.contains("## Handoff Context")) {
+            gaps.add("next-stage prompt missing ## Handoff Context section");
+        }
+    }
+
+    private static boolean artifactAvailable(Map<String, Object> artifacts, String key) {
+        return Boolean.TRUE.equals(mapValue(artifacts.get(key)).get("available"));
+    }
+
+    private static String readText(Path path) {
+        try {
+            return Files.readString(path, StandardCharsets.UTF_8);
+        } catch (IOException ignored) {
+            return "";
+        }
     }
 
     private void artifact(Map<String, Object> artifacts, Path root, String key, Path path) {

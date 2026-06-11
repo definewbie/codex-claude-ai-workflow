@@ -116,6 +116,8 @@ Workflow is stopped. Fix the cause if needed, then Retry marks the active node r
 下一步有价值的不是更重的 UI 框架，而是更强的一致性：
 
 - CLI trace、API overview 和 operator panel 渲染同一组 attention items。
+- 已完成的 workstream 要展示 completion audit，并拒绝误触发 resume / retry / approve。
+- Stale running 应该是显式 recovery action，不能藏在按钮里，也不能静默重跑。
 - Failure / recovery summary 保持结构化。
 - Review packet layout 围绕真实人工决策继续改进。
 - 等 read models 稳定后，再通过 SSE 或 file watching 增加实时推送。

@@ -54,6 +54,7 @@ const els = {
   resume: $("resume"),
   approve: $("approve"),
   complete: $("complete"),
+  recoverStaleRunning: $("recoverStaleRunning"),
   retry: $("retry"),
   closeMistakenIteration: $("closeMistakenIteration"),
   revise: $("revise"),
@@ -62,7 +63,16 @@ const els = {
 
 els.workdir.value = state.workdir;
 renderWorkspaceSource();
-setActionVisibility({ resume: false, approve: false, complete: false, retry: false, closeMistakenIteration: false, revise: false, tick: true });
+setActionVisibility({
+  resume: false,
+  approve: false,
+  complete: false,
+  recoverStaleRunning: false,
+  retry: false,
+  closeMistakenIteration: false,
+  revise: false,
+  tick: true,
+});
 els.runHint.textContent = "Select a workstream";
 
 function setConnection(text, kind = "muted") {
@@ -256,6 +266,7 @@ function renderOverview(data) {
   const workflow = data.workflow || {};
   const acceptance = data.acceptance || {};
   const metrics = data.metrics || {};
+  const completionAudit = data.completionAudit || {};
   renderLifecycleProgress(data);
   renderOverviewCards([
     ["Agent runs", metrics.agentRunCount ?? "-"],
@@ -264,6 +275,7 @@ function renderOverview(data) {
     ["Repairs", acceptance.repairLoopCount ?? 0],
     ["Duration", durationLabel(metrics.totalNodeDurationMs)],
     ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
+    ["Completion", completionAudit.status || "-"],
   ]);
   els.overviewWhy.textContent = friendlyWhyStopped(data);
   els.overviewNext.textContent = friendlyNextAction(data);
@@ -617,6 +629,7 @@ function renderReviewStructured(packet) {
   const decision = packet.latestAgentDecision || {};
   const contract = packet.taskContract || {};
   const guidance = packet.operatorGuidance || {};
+  const allowedActions = packet.allowedActions || [];
   header.innerHTML = `
     <div class="review-card-head">
       <div>
@@ -625,6 +638,7 @@ function renderReviewStructured(packet) {
       </div>
       ${guidance.recommendedAction ? `<span class="badge ${actionBadgeKind(guidance.recommendedAction)}">${escapeHtml(guidance.recommendedAction)}</span>` : ""}
     </div>
+    ${allowedActions.length ? `<p><strong>Allowed actions:</strong> ${escapeHtml(allowedActions.join(", "))}</p>` : ""}
     ${guidance.reason ? `<p><strong>Recommended:</strong> ${escapeHtml(guidance.reason)}</p>` : ""}
     ${decision.summary ? `<p>${escapeHtml(decision.summary)}</p>` : ""}
     ${reviewList("Suggested Checks", guidance.suggestedChecks)}
@@ -874,12 +888,15 @@ function updateActions(data) {
   const activeKind = activeNode.kind || "";
   const activeDefinition = activeNode.nodeDefinitionId || "";
   const nextStageGate = activeDefinition.includes("next_stage");
+  const staleRunning = isStaleRunningOverview();
+  const recoveryActionVisible = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY"].includes(status);
 
   setActionVisibility({
-    resume: status === "RUNNING" && !isStaleRunningOverview(),
+    resume: status === "RUNNING" && !staleRunning,
     approve: status === "WAITING_FOR_HUMAN" && !nextStageGate,
     complete: status === "WAITING_FOR_HUMAN" && nextStageGate,
-    retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
+    recoverStaleRunning: status === "RUNNING" && staleRunning,
+    retry: recoveryActionVisible,
     closeMistakenIteration: canCloseMistakenIteration(),
     revise: status === "WAITING_FOR_HUMAN",
     tick: status === "RUNNING" || !state.selectedId,
@@ -902,9 +919,9 @@ function updateActions(data) {
     return;
   }
   if (status === "RUNNING") {
-    if (isStaleRunningOverview()) {
-      els.actionHint.textContent = `状态显示正在运行 ${activeDefinition || activeKind}，但 recovery 证据显示可能已卡住。请先查看失败摘要。`;
-      els.runHint.textContent = "检查 recovery";
+    if (staleRunning) {
+      els.actionHint.textContent = `状态显示正在运行 ${activeDefinition || activeKind}，但 evidence 显示它可能已经 stale。请先收束到 recovery，再决定是否重试。`;
+      els.runHint.textContent = "需要收束";
       return;
     }
     els.actionHint.textContent = `正在执行 ${activeDefinition || activeKind}。等待节点结束后刷新状态。`;
@@ -944,9 +961,11 @@ function setActionVisibility(visible) {
   els.resume.disabled = !visible.resume;
   els.approve.classList.toggle("hidden", !visible.approve);
   els.complete.classList.toggle("hidden", !visible.complete);
+  els.recoverStaleRunning.classList.toggle("hidden", !visible.recoverStaleRunning);
   els.retry.classList.toggle("hidden", !visible.retry);
   els.closeMistakenIteration.classList.toggle("hidden", !visible.closeMistakenIteration);
-  els.recoveryActions.classList.toggle("hidden", !visible.closeMistakenIteration);
+  els.recoveryActions.classList.toggle("hidden",
+    !visible.recoverStaleRunning && !visible.retry && !visible.closeMistakenIteration);
   els.revise.classList.toggle("hidden", !visible.revise);
   els.tick.disabled = !visible.tick;
 }
@@ -1033,6 +1052,10 @@ $("tick").addEventListener("click", async () => {
 $("resume").addEventListener("click", () => postAction(`${selectedBase()}/resume?workdir=${workdirParam()}&maxSteps=${maxSteps()}`));
 $("approve").addEventListener("click", () => postAction(`${selectedBase()}/review/approve?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`));
 $("complete").addEventListener("click", () => postAction(`${selectedBase()}/review/complete?workdir=${workdirParam()}`, { note: "completed from operator panel" }));
+$("recoverStaleRunning").addEventListener("click", () => postAction(
+  `${selectedBase()}/recovery/stale?workdir=${workdirParam()}`,
+  { note: "stale running recovered from operator panel" }
+));
 $("retry").addEventListener("click", () => postAction(`${selectedBase()}/retry?workdir=${workdirParam()}`, { note: "retry from operator panel" }));
 $("closeMistakenIteration").addEventListener("click", () => postAction(
   `${selectedBase()}/recovery/close-mistaken-iteration?workdir=${workdirParam()}`,

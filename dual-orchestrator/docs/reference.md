@@ -316,8 +316,10 @@ http://localhost:8080/
 - 查看最近的 Agent artifact contract sidecars 摘要，包括 decision、summary、must fix、风险、变更文件和验证摘要。
 - 当 workflow 停在 human review gate 时，展示当前 review packet；页面会先渲染推荐动作、TaskContract / Decision / Must Fix / Git Evidence 等结构化审查卡片，原始 Markdown packet 保留在折叠区。
 - 当 workflow 停在 failed / blocked / waiting for recovery 状态时，展示 `recovery/current-failure.md`。
+- 当 workflow 看起来是 stale running 时，展示收束入口：先把死掉的 RUNNING node 转入 recovery，再按正常 retry 继续。
+- 当 workflow 已完成时，首屏展示 completion audit，检查 final report、handoff JSON 和 next-stage prompt 是否齐全。
 - 手动执行 scheduler tick。
-- 对选中的 workstream 执行 resume、retry、approve + run、revise + run、complete。
+- 对选中的 workstream 执行 resume、stale recovery、retry、approve + run、revise + run、complete。已完成的 workstream 会拒绝继续推进。
 
 这些按钮不是自动验收。`Approve + Run`、`Revise + Run`、`Complete` 只应该在人读完页面里的 `Human Review Packet` 后使用。Smoke 脚本为了自动化 E2E 会自动 approve gate；真实使用时，human review gate 的语义是“暂停，让人基于 packet 做决定”。
 
@@ -347,6 +349,9 @@ curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/resume?workd
 curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/retry?workdir=<effective_worktree>" \
   -H "Content-Type: application/json" \
   -d '{"note":"fixed external cause"}'
+curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/recovery/stale?workdir=<effective_worktree>" \
+  -H "Content-Type: application/json" \
+  -d '{"note":"agent process disappeared"}'
 curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/approve?workdir=<effective_worktree>&run=false"
 curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/complete?workdir=<effective_worktree>" \
   -H "Content-Type: application/json" \
@@ -356,7 +361,7 @@ curl -X POST "http://localhost:8080/api/workstreams/<workstream_id>/review/revis
   -d '{"feedback":"Please address the Must Fix items before implementation."}'
 ```
 
-`run=true&maxSteps=20` 可以在 approve / revise 后继续跑到下一个 gate、recovery、failure 或 completed。所有 action API 都复用 workflow ledger 和 workstream lock，和 CLI 使用同一套账本。CLI 仍然是主要操作入口；HTTP API 目前服务于后续 UI 和外部自动化。
+`run=true&maxSteps=20` 可以在 approve / revise 后继续跑到下一个 gate、recovery、failure 或 completed。所有 action API 都复用 workflow ledger 和 workstream lock，和 CLI 使用同一套账本。`COMPLETED` workstream 不允许再 `resume` / `retry` / `approve`，避免完成态之后误开下一轮。CLI 仍然是主要操作入口；HTTP API 目前服务于后续 UI 和外部自动化。
 
 手动触发一次 scheduler tick：
 

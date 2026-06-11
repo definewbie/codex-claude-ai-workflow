@@ -142,6 +142,10 @@ The next useful step is not a heavier UI framework. It is stronger consistency:
 
 - CLI trace, API overview, and operator panel should render the same attention
   items.
+- Completed workstreams should expose a completion audit and reject accidental
+  resume/retry/approve actions.
+- Stale running should be an explicit recovery action, not a hidden button or a
+  silent rerun.
 - Failure/recovery summaries should remain structured.
 - Review packet layout should keep improving around real human decisions.
 - Real-time push can be added later through SSE or file watching once the read

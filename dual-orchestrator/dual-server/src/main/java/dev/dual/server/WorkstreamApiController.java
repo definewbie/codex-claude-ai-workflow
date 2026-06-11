@@ -105,6 +105,15 @@ public class WorkstreamApiController {
         return actionService.closeMistakenIteration(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
+    @PostMapping("/{workstreamId}/recovery/stale")
+    public Map<String, Object> recoverStaleRunning(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody(required = false) RecoveryStaleRequest request
+    ) throws Exception {
+        return actionService.recoverStaleRunning(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
+    }
+
     @PostMapping("/{workstreamId}/review/approve")
     public Map<String, Object> approve(
             @PathVariable String workstreamId,
@@ -154,6 +163,9 @@ public class WorkstreamApiController {
     }
 
     public record RecoveryCloseRequest(String note) {
+    }
+
+    public record RecoveryStaleRequest(String note) {
     }
 
     public record ReviewReviseRequest(String feedback) {
