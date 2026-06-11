@@ -170,6 +170,108 @@ final class NodeStateWriter {
         eventLog.writeInstanceFromCurrent(paths, resumed, now);
     }
 
+    void recoverStaleRunningNode(WorkstreamPaths paths, String note) throws IOException {
+        var current = loadCurrent(paths);
+        if (current.status() != WorkflowStatus.RUNNING) {
+            throw new IOException("workflow is not running: " + current.status());
+        }
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            throw new IOException("no active running node to recover");
+        }
+        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
+        if (node.status() != NodeStatus.RUNNING) {
+            throw new IOException("active node is not running: " + node.nodeDefinitionId() + " (" + node.status() + ")");
+        }
+        var pid = runningPid(node);
+        if (pid > 0 && ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)) {
+            throw new IOException("running process is still alive: " + pid);
+        }
+
+        var now = Instant.now();
+        var failed = new NodeInstanceDocument(
+                node.schemaVersion(),
+                node.nodeInstanceId(),
+                node.nodeDefinitionId(),
+                node.kind(),
+                node.handlerType(),
+                NodeStatus.FAILED,
+                node.stageId(),
+                node.iterationId(),
+                node.inputRefs(),
+                node.outputRefs(),
+                LedgerUtils.mergedResult(node.result(), Map.of(
+                        "reason", "STALE_RUNNING_PROCESS",
+                        "message", "Running node had no live process and was moved to recovery.",
+                        "recoverable", true,
+                        "stale_running_pid", pid <= 0 ? "" : pid,
+                        "recovery_note", note == null ? "" : note
+                )),
+                node.runRef(),
+                node.startedAt(),
+                now
+        );
+        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), failed);
+
+        var recoveryGateId = "recovery-" + node.nodeInstanceId();
+        jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument(
+                1,
+                recoveryGateId,
+                node.nodeInstanceId(),
+                "recovery.review",
+                "open",
+                List.of("retry", "abort"),
+                now,
+                null,
+                Map.of(
+                        "node", node.nodeDefinitionId(),
+                        "node_status", NodeStatus.FAILED.name(),
+                        "outcome", "STALE_RUNNING_PROCESS",
+                        "reason", "STALE_RUNNING_PROCESS",
+                        "stale_running_pid", pid <= 0 ? "" : pid,
+                        "note", note == null ? "" : note
+                )
+        ));
+
+        var eventId = LedgerUtils.nextEventId(current.lastEventId());
+        eventLog.appendEvent(paths, eventId, "node_stale_running_recovered", Map.of(
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId(),
+                "previous_status", node.status().name(),
+                "stale_running_pid", pid <= 0 ? "" : pid,
+                "recovery_gate_id", recoveryGateId,
+                "note", note == null ? "" : note
+        ));
+        var recovered = new WorkflowCurrentDocument(
+                1,
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.WAITING_FOR_RECOVERY,
+                List.of(node.nodeInstanceId()),
+                List.of(recoveryGateId),
+                eventId,
+                now
+        );
+        jsonWriter.write(paths.workflowCurrentJson(), recovered);
+        eventLog.writeInstanceFromCurrent(paths, recovered, now);
+    }
+
+    private static long runningPid(NodeInstanceDocument node) {
+        var value = node.result() == null ? null : node.result().get("running_pid");
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value == null) {
+            return 0;
+        }
+        try {
+            return Long.parseLong(String.valueOf(value));
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
     void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
         var current = loadCurrent(paths);
         if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY) {

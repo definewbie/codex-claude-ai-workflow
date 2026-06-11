@@ -855,6 +855,20 @@ dualctl resume --workdir <effective_worktree> <workstream_id>
 
 在 `WAITING_FOR_RECOVERY` 状态下直接执行 `dualctl resume` 不会重新跑 Agent；它只会提示先执行 `dualctl retry`。这避免了 rate limit、context window、输出契约错误还没处理时被重复触发。
 
+如果终端、operator 或外部 quota 中断导致 workflow 仍显示 `RUNNING`，但 status 中的 `Running PID` 已标记为 stale，可以先把同一个 active node 收束到 recovery，再按正常 retry 继续：
+
+```bash
+dualctl recovery stale \
+  --workdir <effective_worktree> \
+  --note "agent process disappeared after quota pause" \
+  <workstream_id>
+
+dualctl retry --workdir <effective_worktree> <workstream_id>
+dualctl resume --workdir <effective_worktree> <workstream_id>
+```
+
+`recovery stale` 会校验记录的 PID 已经不存活；如果进程还活着，它会拒绝执行，避免把正常运行中的 Agent 误判为失败。
+
 如果确认这个 workstream 不再继续，可以终止 recovery：
 
 ```bash

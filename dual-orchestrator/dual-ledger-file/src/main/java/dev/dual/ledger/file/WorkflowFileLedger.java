@@ -224,6 +224,15 @@ public final class WorkflowFileLedger {
         refreshProjections(paths);
     }
 
+    public void recoverStaleRunningNode(WorkstreamPaths paths, String note) throws IOException {
+        nodeStateWriter.recoverStaleRunningNode(paths, note);
+        var current = loadCurrent(paths);
+        if (!current.activeNodeInstanceIds().isEmpty()) {
+            failureSummaryWriter.write(paths, current.activeNodeInstanceIds().get(0));
+        }
+        refreshProjections(paths);
+    }
+
     public void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.abortRecovery(paths, note);
         refreshProjections(paths);
