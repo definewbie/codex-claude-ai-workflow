@@ -10,6 +10,12 @@
 
 必须优先从鲁棒性、完整性、职责边界和状态模型角度重新审视设计；只有确认是局部实现缺陷时，才做小范围修复。
 
+## Technical Debt Principle
+
+原则上不保留技术债务。只有在非常有必要时才允许记录技术债，例如未来方向存在真实不确定性、当前修复会明显干扰主流程、或修复成本和当前收益严重不匹配。
+
+如果技术债已经影响主流程稳定性、职责边界、状态一致性、artifact contract、测试可信度或后续开发速度，必须优先修复，而不是写入 TODO 后继续叠功能。
+
 ## Mandatory Checklist
 
 修改 workflow、orchestrator、agent lifecycle、artifact contract、human gate、recovery、delivery lifecycle、UI/CLI/ledger projection 相关代码前，必须先阅读并遵守：
@@ -23,3 +29,4 @@
 - LLM 输出必须进入结构化 artifact contract，orchestrator 不直接猜自然语言正文。
 - 新规则优先放入语义类、catalog 或 contract validator，不散落在 handler、CLI、UI 中。
 - completion/recovery/human gate 这类边界状态必须有测试覆盖。
+- 技术债默认要修复；只有说明必要性、边界、风险和重新评估条件后，才允许保留。

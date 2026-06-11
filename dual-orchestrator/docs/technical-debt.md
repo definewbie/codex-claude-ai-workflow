@@ -70,7 +70,7 @@ Future direction:
 
 ## Contract Compiler Heuristics
 
-Status: mitigated, still MVP debt
+Status: removed from runtime
 
 Current state:
 
@@ -79,23 +79,22 @@ Current state:
 - The canonical path requires a trusted
   `<dual-artifact type="task_contract_proposal" version="1">` from the Claude
   intake output, followed by deterministic validation.
-- The old Markdown extraction logic is isolated in
-  `LegacyMarkdownContractCompiler` and is only kept for compatibility tests and
-  possible future fallback profiles.
+- The old Markdown extraction logic and compatibility entry point have been
+  removed from runtime code and tests.
 
 Why it is debt:
 
-- `LegacyMarkdownContractCompiler` still contains language-specific extraction
-  hints such as English and Chinese constraint/test headings.
-- The extraction hints are code, not profile/template data.
+- This is no longer an active runtime debt.
+- Future natural-language-to-contract support would be a new feature, not a
+  hidden fallback path.
 
 Future direction:
 
-- Move extraction hints into contract compiler profiles or templates.
 - Keep structured contract proposals emitted by the intake Agent as the default
   canonical path.
-- Keep deterministic validation in code; move wording/profile hints out of
-  legacy fallback logic.
+- If profile/template-based extraction is ever reintroduced, implement it as an
+  explicit feature with a separate contract, strict validation, and tests that
+  prove it cannot silently replace the canonical proposal path.
 
 ## Review Noise Fallback
 

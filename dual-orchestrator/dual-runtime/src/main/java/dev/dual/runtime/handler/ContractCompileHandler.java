@@ -25,7 +25,6 @@ public final class ContractCompileHandler implements TaskHandler {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
     private final TaskContractProposalValidator proposalValidator = new TaskContractProposalValidator();
-    private final LegacyMarkdownContractCompiler legacyMarkdownCompiler = new LegacyMarkdownContractCompiler();
 
     @Override
     public String type() {
@@ -351,10 +350,6 @@ public final class ContractCompileHandler implements TaskHandler {
     private record ContractResolutionResult(ContractResolutionDocument resolution, NodeResult failed) {}
 
     private record ResolvedGate(String gateRef, String action, String note) {}
-
-    TaskContract compile(String requirementText, String workstreamId) {
-        return legacyMarkdownCompiler.compile(requirementText, workstreamId);
-    }
 
     private String buildTrustedProposalSourceText(TaskContext context) throws IOException {
         var builder = new StringBuilder();

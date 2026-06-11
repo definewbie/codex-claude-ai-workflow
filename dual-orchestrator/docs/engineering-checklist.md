@@ -63,6 +63,23 @@ gate, delivery, or observability code.
 - If display semantics differ from raw node IDs, keep both raw ID and display
   name.
 
+## Technical Debt
+
+- Default to fixing technical debt when it affects the main lifecycle,
+  correctness, stability, domain boundaries, artifact contracts, tests, or future
+  development speed.
+- Keep debt only when there is a clear reason:
+  - future direction is genuinely uncertain;
+  - fixing now would distract from the main lifecycle;
+  - current cost is clearly disproportionate to near-term value;
+  - the debt is isolated behind a named boundary.
+- Every accepted debt item must document:
+  - why it is being kept;
+  - why it does not block the main workflow;
+  - what signal should trigger revisiting it.
+- Do not keep compatibility code that preserves an unsafe or deprecated path
+  unless it is required for real users and guarded by explicit tests.
+
 ## Tests
 
 - Add a focused regression test for every new boundary rule.

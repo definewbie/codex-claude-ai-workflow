@@ -1,6 +1,5 @@
 package dev.dual.runtime.handler;
 
-import dev.dual.core.contract.ContractStatus;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
@@ -29,25 +28,6 @@ class ContractCompileHandlerTest {
     void handlerTypeIsContractCompile() {
         var handler = new ContractCompileHandler();
         assertEquals("contract.compile", handler.type());
-    }
-
-    @Test
-    void compileHelperProducesReadyForReviewContract(@TempDir Path tempDir) throws Exception {
-        var handler = new ContractCompileHandler();
-        var requirementText = """
-                # Feature Request
-
-                Add user authentication with JWT tokens
-
-                Files to modify: `src/auth/Login.java`, `src/auth/AuthService.java`
-
-                Constraints: Max 200 lines per file, no external dependencies
-                """;
-
-        var contract = handler.compile(requirementText, WORKSTREAM_ID);
-        assertFalse(contract.objective().isBlank(), "Objective should not be blank");
-        assertFalse(contract.acceptanceCriteria().isEmpty(), "AC should not be empty");
-        assertEquals(ContractStatus.READY_FOR_REVIEW, contract.status());
     }
 
     @Test
@@ -206,112 +186,6 @@ class ContractCompileHandlerTest {
         var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
         assertTrue(json.contains("为项目根目录创建 README.md"), "Recompile should recover objective from intake artifacts");
         assertTrue(json.contains("\"included\" : [ \"README.md\" ]"), "Recompile should recover README.md scope");
-    }
-
-    @Test
-    void compileMaterializesScopeConstraintsNonGoalsRisksAndTestsFromFeatureSliceText() {
-        var handler = new ContractCompileHandler();
-        var sourceText = """
-                # Benchmark Case: public-issue-flow-review-state
-
-                ## 目标
-
-                验证 dual-orchestrator 能否在公开样例功能切片中保持 contract、context、自测证据和 Codex acceptance 的一致性。
-
-                ## File 1: `src/issue_flow.py`
-
-                Add an issue review state helper for open issues with no reviewer assigned.
-
-                ## In Scope
-
-                - Add `needs_review(issue)` in `src/issue_flow.py`.
-                - Return true only when an issue is open and has no reviewer.
-
-                ## Non-Goals
-
-                - No backend changes.
-                - No database migration.
-                - No web UI changes.
-                - No persistence changes.
-
-                ## Constraints
-
-                - Do not modify backend API or schema.
-                - Keep the helper pure and side-effect free.
-                - Exactly one source file should change.
-
-                ## Risks
-
-                | Risk | Severity | Mitigation |
-                |------|----------|------------|
-                | Closed issues accidentally marked for review | High | Cover closed issue in tests |
-
-                ## Test Strategy
-
-                - Run `python -m pytest`.
-                - Verify open issue without reviewer returns true.
-                - Verify closed issue or assigned reviewer returns false.
-                """;
-
-        var contract = handler.compile(sourceText, WORKSTREAM_ID);
-
-        assertTrue(contract.scope().included().contains("src/issue_flow.py"));
-        assertFalse(contract.scope().excluded().isEmpty(), "Excluded scope should be materialized");
-        assertFalse(contract.constraints().isEmpty(), "Constraints should be materialized");
-        assertFalse(contract.nonGoals().isEmpty(), "Non-goals should be materialized");
-        assertFalse(contract.riskAreas().isEmpty(), "Risk areas should be materialized");
-        assertFalse(contract.testRequirements().isEmpty(), "Test requirements should be materialized");
-        assertTrue(contract.testRequirements().stream().anyMatch(value -> value.contains("python -m pytest")));
-    }
-
-    @Test
-    void compileDoesNotLetHistoricalReadmeOrContextMetadataPolluteContract() {
-        var handler = new ContractCompileHandler();
-        var sourceText = """
-                # Benchmark Case
-
-                The old example task mentioned `README.md`, but the selected task changed later.
-
-                ## Scope
-
-                **Included:**
-                - Implement status actions in `miniprogram/src/pages/treatment-event/index.vue`.
-
-                **Excluded:**
-                - No backend/schema change is needed.
-
-                ## User Acceptance Notes
-
-                Acceptance should require:
-
-                - 用户可以在治疗安排详情页点击“标记完成”。
-                - 用户可以选择延期日期并提交延期。
-                - 不修改后端 API 或数据库 schema。
-
-                - Workstream: ws-should-not-enter-contract
-                - Builder Node: context.intake_codex_product_review
-                - Generated At: 2026-06-02T22:04:54Z
-
-                ## Context Package
-
-                - Total: 9.8k / 4.0k tokens
-                """;
-
-        var contract = handler.compile(sourceText, WORKSTREAM_ID);
-
-        assertEquals(
-                List.of("miniprogram/src/pages/treatment-event/index.vue"),
-                contract.scope().included(),
-                "Historical README references should not override the concrete feature file");
-        assertFalse(
-                contract.acceptanceCriteria().stream().anyMatch(value -> value.contains("Workstream")),
-                "Ledger metadata should not become acceptance criteria");
-        assertFalse(
-                contract.acceptanceCriteria().stream().anyMatch(value -> value.contains("Builder Node")),
-                "Context package metadata should not become acceptance criteria");
-        assertTrue(
-                contract.acceptanceCriteria().stream().anyMatch(value -> value.contains("标记完成")),
-                "Real acceptance criteria should be preserved");
     }
 
     @Test
