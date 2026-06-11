@@ -70,28 +70,32 @@ Future direction:
 
 ## Contract Compiler Heuristics
 
-Status: accepted MVP debt
+Status: mitigated, still MVP debt
 
 Current state:
 
-- `ContractCompileHandler` still derives initial TaskContract fields from
-  requirement text using focused heuristics for scope, constraints, risks,
-  tests, and acceptance criteria.
-- This is useful for the MVP because it lets the system bootstrap a contract
-  from ordinary task text.
+- `ContractCompileHandler` no longer derives canonical TaskContract fields from
+  ordinary Markdown prose during normal execution.
+- The canonical path requires a trusted
+  `<dual-artifact type="task_contract_proposal" version="1">` from the Claude
+  intake output, followed by deterministic validation.
+- The old Markdown extraction logic is isolated in
+  `LegacyMarkdownContractCompiler` and is only kept for compatibility tests and
+  possible future fallback profiles.
 
 Why it is debt:
 
-- Natural-language extraction is inherently unstable.
-- The handler still contains language-specific markers such as English and
-  Chinese constraint/test headings.
+- `LegacyMarkdownContractCompiler` still contains language-specific extraction
+  hints such as English and Chinese constraint/test headings.
+- The extraction hints are code, not profile/template data.
 
 Future direction:
 
 - Move extraction hints into contract compiler profiles or templates.
-- Prefer structured contract proposals emitted by the intake Agent.
+- Keep structured contract proposals emitted by the intake Agent as the default
+  canonical path.
 - Keep deterministic validation in code; move wording/profile hints out of
-  core handler logic.
+  legacy fallback logic.
 
 ## Review Noise Fallback
 
