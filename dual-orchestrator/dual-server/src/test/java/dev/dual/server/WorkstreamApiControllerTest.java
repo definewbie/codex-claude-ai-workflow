@@ -467,6 +467,30 @@ class WorkstreamApiControllerTest {
         assertEquals(0, streamService.activeStreamCount());
     }
 
+    @Test
+    void streamExceptionBoundaryRecognizesSseRequests() {
+        assertEquals(true, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/stream",
+                null,
+                null
+        ));
+        assertEquals(true, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/status",
+                "text/event-stream",
+                null
+        ));
+        assertEquals(true, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/status",
+                null,
+                "text/event-stream;charset=UTF-8"
+        ));
+        assertEquals(false, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/status",
+                "application/json",
+                "application/json"
+        ));
+    }
+
     private WorkstreamApiController controller() {
         var objectMapper = new ObjectMapper();
         var queryService = new WorkstreamQueryService(objectMapper);

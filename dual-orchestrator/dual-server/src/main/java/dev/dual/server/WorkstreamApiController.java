@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -186,11 +188,36 @@ public class WorkstreamApiController {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handle(Exception error) {
+    public ResponseEntity<?> handle(
+            Exception error,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        if (isStreamRequest(request, response)) {
+            return ResponseEntity.noContent().build();
+        }
         return ResponseEntity.badRequest().body(Map.of(
                 "error", error.getClass().getSimpleName(),
                 "message", error.getMessage() == null ? "" : error.getMessage()
         ));
+    }
+
+    private static boolean isStreamRequest(HttpServletRequest request, HttpServletResponse response) {
+        return isStreamRequest(
+                request.getRequestURI(),
+                request.getHeader("Accept"),
+                response.getContentType()
+        );
+    }
+
+    static boolean isStreamRequest(String requestUri, String accept, String responseContentType) {
+        if (responseContentType != null && responseContentType.startsWith(MediaType.TEXT_EVENT_STREAM_VALUE)) {
+            return true;
+        }
+        if (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) {
+            return true;
+        }
+        return requestUri != null && requestUri.endsWith("/stream");
     }
 
     public record RetryRequest(String note) {
