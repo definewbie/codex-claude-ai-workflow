@@ -8,7 +8,7 @@ cosmetic cleanup.
 
 ## Required Before Public Release
 
-- [ ] Choose and add a `LICENSE`.
+- [x] Add the MIT `LICENSE`.
 - [ ] Decide whether to add `CONTRIBUTING.md`, `SECURITY.md`, and a code of
   conduct for the first public release.
 - [ ] Re-read `README.md`, `README.en.md`, `docs/quickstart.md`, and

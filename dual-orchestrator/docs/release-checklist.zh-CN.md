@@ -6,7 +6,7 @@ English version: [release-checklist.md](release-checklist.md)
 
 ## 正式公开前必须确认
 
-- [ ] 选择并添加 `LICENSE`。
+- [x] 添加 MIT `LICENSE`。
 - [ ] 决定第一版是否添加 `CONTRIBUTING.md`、`SECURITY.md` 和 code of conduct。
 - [ ] 以新用户视角重读 `README.md`、`README.en.md`、`docs/quickstart.md`、`docs/quickstart.zh-CN.md`。
 - [ ] 确认公开文档没有私有仓库名、本地绝对路径、原始 Agent prompt 或私有产品细节。

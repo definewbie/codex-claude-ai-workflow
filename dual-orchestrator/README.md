@@ -158,4 +158,4 @@ overview 更新。它是本地单用户 operator 工具，不是托管式多用�
 - 真实运行依赖本地 `acpx`、Claude、Codex 可用性和额度。
 - Public benchmark 会消耗真实 Agent quota。
 - Delivery 自动化保持保守：准备证据和 PR 材料，但不会自动 merge。
-- 正式公开发布前需要选择并添加 LICENSE。
+- 项目使用 MIT License；贡献流程和安全报告入口仍需在公开协作前补齐。

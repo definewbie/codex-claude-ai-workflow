@@ -167,4 +167,5 @@ tool, not a hosted multi-user web product.
 - Public benchmark runs consume real Agent quota.
 - Delivery automation is conservative: it prepares evidence and PR materials,
   but never auto-merges.
-- A LICENSE must be selected and added before a formal public release.
+- The project uses the MIT License; contribution and security-reporting docs
+  should be added before broader public collaboration.
