@@ -44,6 +44,27 @@ Adapter 会把 runtime failure matching 收敛在一个很小的 signal catalog 
 
 以后新增 provider 特定文案时，应添加到 catalog 的 signal matcher，不应散落到 workflow routing、ledger projection 或 UI 代码里。
 
+## 自动恢复调度
+
+自动恢复的范围必须很窄。
+
+Scheduler 读取 `RecoveryAssessment`。只有当前失败被明确分类为下面这种情况时，才允许自动执行 `retry + resume`：
+
+```text
+classification = recoverable_agent_runtime
+retryReadiness = RETRY_AFTER_EXTERNAL_FIX
+```
+
+这类情况对应外部运行时问题，例如 quota 窗口、reconnect、session 状态恢复。Scheduler 不会自动 retry：
+
+- artifact contract failure；
+- 语义修订上限；
+- manual recovery；
+- human gate；
+- 已完成或已失败的 workstream。
+
+这样边界会比较清楚：failure classifier 解释失败，scheduler 只推进安全的 runtime case，产品判断和 contract 判断仍然由 human / verifier 负责。
+
 ## Semantic Failure
 
 Semantic failure 发生在 verifier 检查实现和证据之后。Codex 输出结构化 acceptance review。Orchestrator 读取已校验字段，并把失败归类为稳定类别：

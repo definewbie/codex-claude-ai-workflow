@@ -98,6 +98,29 @@ Semantic failures include implementation bugs, contract gaps, ambiguity, review
 noise, insufficient context, and tool limitations. These should route to repair,
 contract revision, human review, or calibration.
 
+### Scheduler Is Not a Second State Machine
+
+The scheduler periodically reads the authoritative ledger and invokes existing
+workflow actions. It does not decide whether the product work is complete, parse
+agent prose, or replace human review.
+
+Current policy:
+
+- `RUNNING`: may be resumed until the next gate, recovery boundary, or completion.
+- `WAITING_FOR_HUMAN`: must stop for a person to read the review packet and
+  approve, revise, or complete.
+- `WAITING_FOR_RECOVERY`: stops by default. When `autoRecover` is explicitly
+  enabled, the scheduler only retries failures whose `RecoveryAssessment` says
+  `recoverable_agent_runtime + RETRY_AFTER_EXTERNAL_FIX`.
+- `artifact_contract_failure`, `semantic_revision_limit`, and
+  `manual_recovery_required`: never auto-retried, because these are not simply
+  “run it again” problems.
+- `COMPLETED`, `FAILED`, and `BLOCKED`: terminal or boundary states; no automatic
+  next action is allowed.
+
+The boundary is: runtime owns transitions, `RecoveryAssessment` explains
+recovery, scheduler advances safe cases, and CLI/UI only project the read model.
+
 ## 3. Implemented Modules
 
 | Module | Purpose |

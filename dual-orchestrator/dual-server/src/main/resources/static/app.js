@@ -1,8 +1,11 @@
 const state = {
   workdir: localStorage.getItem("dual.workdir") || "",
   selectedId: localStorage.getItem("dual.selectedId") || "",
+  selectedStageId: localStorage.getItem("dual.selectedStageId") || "",
   status: null,
   timeline: null,
+  stream: null,
+  streamUrl: "",
 };
 
 const $ = (id) => document.getElementById(id);
@@ -19,6 +22,7 @@ const els = {
   closeWorkspaceChooser: $("closeWorkspaceChooser"),
   workspaceBrowser: $("workspaceBrowser"),
   maxSteps: $("maxSteps"),
+  autoRecover: $("autoRecover"),
   connection: $("connection"),
   count: $("count"),
   workstreams: $("workstreams"),
@@ -26,6 +30,10 @@ const els = {
   selectedStatus: $("selectedStatus"),
   lifecycleBadge: $("lifecycleBadge"),
   lifecycleProgress: $("lifecycleProgress"),
+  nodeInspector: $("nodeInspector"),
+  nodeInspectorTitle: $("nodeInspectorTitle"),
+  nodeInspectorBody: $("nodeInspectorBody"),
+  clearNodeSelection: $("clearNodeSelection"),
   gateGrid: $("gateGrid"),
   gateBadge: $("gateBadge"),
   decisionPanel: $("decisionPanel"),
@@ -42,6 +50,7 @@ const els = {
   artifactSummary: $("artifactSummary"),
   responseView: $("responseView"),
   reviewPanel: $("reviewPanel"),
+  reviewPanelBadge: $("reviewPanelBadge"),
   reviewStructured: $("reviewStructured"),
   gateEvidence: $("gateEvidence"),
   reviewPacket: $("reviewPacket"),
@@ -128,6 +137,7 @@ function workspaceDirectoryButton(label, path) {
 }
 
 async function applyWorkspacePath() {
+  disconnectProgressStream();
   state.workdir = els.workdir.value.trim();
   localStorage.setItem("dual.workdir", state.workdir);
   state.selectedId = "";
@@ -203,8 +213,10 @@ function renderWorkstreams(items) {
       <span>${escapeHtml(item.title || "")}</span>
     `;
     button.addEventListener("click", async () => {
+      disconnectProgressStream();
       state.selectedId = item.workstreamId;
       localStorage.setItem("dual.selectedId", state.selectedId);
+      clearStageSelection();
       renderWorkstreams(items);
       await loadSelected();
     });
@@ -218,6 +230,7 @@ async function loadSelected() {
   }
   await loadStatus();
   await Promise.all([loadOverview(), loadTimeline(), loadReviewPacket(), loadRecoverySummary()]);
+  connectProgressStream();
 }
 
 async function loadStatus() {
@@ -284,6 +297,52 @@ function renderOverview(data) {
   renderOverviewArtifacts(data.artifacts || {});
 }
 
+function applyOverviewSnapshot(data) {
+  if (!data || data.workstreamId !== state.selectedId) {
+    return;
+  }
+  state.overview = data;
+  renderOverview(data);
+  const workflow = data.workflow || {};
+  if (workflow.status) {
+    setStatusBadge(workflow.status);
+    updateActions(data);
+  }
+}
+
+function connectProgressStream() {
+  if (!state.selectedId || !window.EventSource) {
+    return;
+  }
+  const url = `/api/workstreams/${encodeURIComponent(state.selectedId)}/stream?workdir=${workdirParam()}&intervalMs=2000`;
+  if (state.stream && state.streamUrl === url) {
+    return;
+  }
+  disconnectProgressStream();
+  const source = new EventSource(url);
+  source.addEventListener("open", () => setConnection("Live", "ok"));
+  source.addEventListener("overview", (event) => {
+    try {
+      applyOverviewSnapshot(JSON.parse(event.data));
+      setConnection("Live", "ok");
+    } catch (error) {
+      setResponse({ error: "Invalid stream overview", message: error.message || String(error) });
+    }
+  });
+  source.addEventListener("heartbeat", () => setConnection("Live", "ok"));
+  source.addEventListener("error", () => setConnection("Live reconnecting", "warn"));
+  state.stream = source;
+  state.streamUrl = url;
+}
+
+function disconnectProgressStream() {
+  if (state.stream) {
+    state.stream.close();
+    state.stream = null;
+    state.streamUrl = "";
+  }
+}
+
 function renderOverviewError(error) {
   els.overviewCards.innerHTML = "";
   els.lifecycleProgress.innerHTML = "";
@@ -293,6 +352,7 @@ function renderOverviewError(error) {
   els.overviewAttention.innerHTML = "";
   els.overviewTimeline.innerHTML = "";
   els.overviewArtifacts.innerHTML = "";
+  clearStageSelection();
 }
 
 function renderLifecycleProgress(data) {
@@ -324,18 +384,128 @@ function renderLifecycleProgress(data) {
   els.lifecycleProgress.innerHTML = "";
   for (const [label, stageId, detail] of stageDefs) {
     const item = document.createElement("article");
-    const state = stageId === currentStage
+    const stageNodes = nodesForStage(stageId);
+    const stageState = stageId === currentStage
       ? "current"
       : completedStages.has(stageId)
         ? "done"
         : "pending";
-    item.className = `stage ${state}`;
+    const selected = stageId === state.selectedStageId ? "selected" : "";
+    item.className = `stage ${stageState} ${selected}`;
+    item.tabIndex = 0;
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-pressed", String(stageId === state.selectedStageId));
+    item.title = `查看 ${label} 阶段节点状态`;
     item.innerHTML = `
       <strong>${escapeHtml(label)}</strong>
-      <span>${escapeHtml(stageDetail(stageId, detail, state, status))}</span>
+      <span>${escapeHtml(stageDetail(stageId, detail, stageState, status))}</span>
+      <small>${escapeHtml(stageNodeSummary(stageNodes))}</small>
     `;
+    item.addEventListener("click", () => selectStage(stageId));
+    item.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectStage(stageId);
+      }
+    });
     els.lifecycleProgress.appendChild(item);
   }
+  renderNodeInspector();
+}
+
+function selectStage(stageId) {
+  state.selectedStageId = stageId;
+  localStorage.setItem("dual.selectedStageId", stageId);
+  renderLifecycleProgress(state.overview || {});
+}
+
+function clearStageSelection() {
+  state.selectedStageId = "";
+  localStorage.removeItem("dual.selectedStageId");
+  renderNodeInspector();
+}
+
+function renderNodeInspector() {
+  const selectedStageId = state.selectedStageId;
+  if (!selectedStageId) {
+    els.nodeInspector.classList.add("hidden");
+    els.nodeInspectorTitle.textContent = "-";
+    els.nodeInspectorBody.innerHTML = "";
+    return;
+  }
+
+  const nodes = nodesForStage(selectedStageId);
+  els.nodeInspector.classList.remove("hidden");
+  els.nodeInspectorTitle.textContent = `${stageLabel(selectedStageId)} nodes`;
+  els.nodeInspectorBody.innerHTML = "";
+  if (!nodes.length) {
+    const empty = document.createElement("p");
+    empty.className = "subtle";
+    empty.textContent = "这个阶段还没有执行节点。";
+    els.nodeInspectorBody.appendChild(empty);
+    return;
+  }
+
+  for (const node of nodes.sort(compareTimelineNodes)) {
+    const card = document.createElement("article");
+    card.className = "node-card";
+    const label = node.displayName || node.nodeDefinitionId || node.nodeInstanceId || "(node)";
+    const gateAction = node.kind === "GATE"
+      ? `<button class="secondary node-gate-action" type="button" data-node-instance-id="${escapeHtml(node.nodeInstanceId || "")}">查看 Human Gate 内容</button>`
+      : "";
+    card.innerHTML = `
+      <div class="node-card-head">
+        <strong>${escapeHtml(label)}</strong>
+        <span class="badge ${statusBadgeKind(node.status)}">${escapeHtml(node.status || "-")}</span>
+      </div>
+      <div class="node-detail-grid">
+        ${nodeDetail("Kind", node.kind)}
+        ${nodeDetail("Iteration", node.iterationId)}
+        ${nodeDetail("Node ID", node.nodeDefinitionId)}
+        ${nodeDetail("Instance", node.nodeInstanceId)}
+        ${nodeDetail("Time", timeRangeLabel(node) || "-")}
+        ${nodeDetail("Duration", durationLabel(node.durationMs))}
+      </div>
+      ${gateAction}
+    `;
+    const gateButton = card.querySelector(".node-gate-action");
+    if (gateButton) {
+      gateButton.addEventListener("click", () => showGateReviewPacket(node));
+    }
+    els.nodeInspectorBody.appendChild(card);
+  }
+}
+
+function nodesForStage(stageId) {
+  const nodes = state.timeline?.nodes || state.overview?.recentTimeline || [];
+  return nodes.filter((node) => stageIdFromNode(node.nodeDefinitionId || node.displayName || "") === stageId);
+}
+
+function stageNodeSummary(nodes) {
+  if (!nodes.length) {
+    return "No nodes";
+  }
+  const counts = new Map();
+  for (const node of nodes) {
+    const status = node.status || "UNKNOWN";
+    counts.set(status, (counts.get(status) || 0) + 1);
+  }
+  const parts = [...counts.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([status, count]) => `${count} ${status.toLowerCase()}`);
+  return `${nodes.length} nodes · ${parts.join(", ")}`;
+}
+
+function nodeDetail(label, value) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+  return `
+    <div>
+      <span>${escapeHtml(label)}</span>
+      <p>${escapeHtml(value)}</p>
+    </div>
+  `;
 }
 
 function stageIdFromNode(nodeId) {
@@ -560,6 +730,7 @@ async function loadReviewPacket() {
   if (status !== "WAITING_FOR_HUMAN") {
     els.reviewPanel.classList.add("hidden");
     els.gateGrid.classList.add("gate-grid-single");
+    els.gateGrid.classList.remove("gate-grid-history");
     els.decisionPanel.classList.add("hidden");
     els.reviewStructured.innerHTML = "";
     els.gateEvidence.innerHTML = "";
@@ -571,19 +742,67 @@ async function loadReviewPacket() {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/current?workdir=${workdirParam()}`);
     els.reviewPanel.classList.remove("hidden");
     els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.remove("gate-grid-history");
     els.decisionPanel.classList.remove("hidden");
+    els.reviewPanelBadge.textContent = "Open packet";
+    els.reviewPanelBadge.className = "badge warn";
     els.reviewGate.textContent = data.gateNodeDefinitionId || "";
     renderReviewStructured(data.packet || {});
     els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
   } catch (error) {
     els.reviewPanel.classList.remove("hidden");
     els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.remove("gate-grid-history");
     els.decisionPanel.classList.remove("hidden");
+    els.reviewPanelBadge.textContent = "Unavailable";
+    els.reviewPanelBadge.className = "badge bad";
     els.reviewGate.textContent = "not available";
     els.reviewStructured.innerHTML = "";
     els.gateEvidence.innerHTML = "";
     els.reviewPacket.textContent = JSON.stringify(error, null, 2);
   }
+}
+
+async function showGateReviewPacket(node) {
+  if (!node.nodeInstanceId) {
+    setResponse({ error: "Gate node has no nodeInstanceId" });
+    return;
+  }
+  try {
+    const data = await request(
+      `/api/workstreams/${encodeURIComponent(state.selectedId)}/review/${encodeURIComponent(node.nodeInstanceId)}?workdir=${workdirParam()}`
+    );
+    const isCurrentOpenGate = isCurrentActiveGate(node);
+    els.reviewPanel.classList.remove("hidden");
+    els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.toggle("gate-grid-history", !isCurrentOpenGate);
+    els.decisionPanel.classList.toggle("hidden", !isCurrentOpenGate);
+    els.reviewPanelBadge.textContent = isCurrentOpenGate ? "Open packet" : "Historical packet";
+    els.reviewPanelBadge.className = `badge ${isCurrentOpenGate ? "warn" : "muted"}`;
+    els.reviewGate.textContent = data.gateNodeDefinitionId || node.nodeDefinitionId || "";
+    renderReviewStructured(data.packet || {});
+    els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
+    els.reviewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    els.reviewPanel.classList.remove("hidden");
+    els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.add("gate-grid-history");
+    els.decisionPanel.classList.add("hidden");
+    els.reviewPanelBadge.textContent = "Unavailable";
+    els.reviewPanelBadge.className = "badge bad";
+    els.reviewGate.textContent = node.nodeDefinitionId || "not available";
+    els.reviewStructured.innerHTML = "";
+    els.gateEvidence.innerHTML = "";
+    els.reviewPacket.textContent = JSON.stringify(error, null, 2);
+  }
+}
+
+function isCurrentActiveGate(node) {
+  const workflow = state.status?.workflow || {};
+  if (workflow.status !== "WAITING_FOR_HUMAN") {
+    return false;
+  }
+  return (workflow.activeNodes || []).some((activeNode) => activeNode.nodeInstanceId === node.nodeInstanceId);
 }
 
 async function loadRecoverySummary() {
@@ -645,6 +864,18 @@ function renderReviewStructured(packet) {
     ${reviewList("Must Fix", decision.mustFix)}
   `;
   els.reviewStructured.appendChild(header);
+
+  appendGateEvidenceSection("Gate Decision", [
+    reviewKeyValue("Gate", packet.gateNodeDefinitionId),
+    reviewKeyValue("Recommended Action", guidance.recommendedAction),
+    reviewKeyValue("Reason", guidance.reason),
+    reviewList("Allowed Actions", allowedActions),
+    reviewKeyValue("Agent Decision", decision.decision),
+    reviewKeyValue("Agent Summary", decision.summary),
+    reviewList("Must Fix", decision.mustFix),
+    reviewList("Missing Evidence", decision.missingEvidence),
+    reviewList("Suggested Checks", guidance.suggestedChecks),
+  ]);
 
   appendGateEvidenceSection("Task Contract", [
     reviewKeyValue("Status", contract.status),
@@ -1018,6 +1249,7 @@ function escapeHtml(value) {
 }
 
 $("refresh").addEventListener("click", refreshList);
+els.clearNodeSelection.addEventListener("click", clearStageSelection);
 els.switchWorkspace.addEventListener("click", () => {
   els.workspaceChooser.classList.toggle("hidden");
   if (!els.workspaceChooser.classList.contains("hidden")) {
@@ -1039,7 +1271,7 @@ document.addEventListener("keydown", (event) => {
 });
 $("tick").addEventListener("click", async () => {
   try {
-    const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}`, {
+    const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}&autoRecover=${els.autoRecover.checked}`, {
       method: "POST",
     });
     setResponse(data);

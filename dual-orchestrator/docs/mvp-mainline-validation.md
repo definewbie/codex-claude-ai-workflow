@@ -196,6 +196,15 @@ Release-quality MVP still needs:
    - 2026-06-08: the one-command public benchmark was rerun with real `acpx` and
      completed as `PASS-WARN`: 6 human gates, 10 Agent runs, 31 timeline nodes,
      final `ACCEPT_WITH_NOTES`, all key artifacts present, original repo clean.
+   - 2026-06-13: the public benchmark was rerun with real `acpx` after scheduler,
+     notification, SSE, and autorun repair-loop fixes. It completed as `PASS`:
+     6 human gates, 10 Agent runs, 30 timeline nodes, final `ACCEPT`, all key
+     artifacts present, original repo clean.
+   - The same date exposed and fixed an `autorun` boundary bug: a repeated
+     `gate.contract_review` in a new repair iteration is valid progress, not an
+     immediate dead-loop signal. `autorun` now keys repeated-gate detection by
+     `gate definition + iteration`, while `--max-gates` remains the runaway loop
+     guard.
 2. A short install-to-first-run path that does not reference private benchmark
    cases.
    - 2026-06-08: `README.md` and `docs/quickstart.md` now lead with the public
@@ -212,3 +221,7 @@ Release-quality MVP still needs:
      `/timeline` and `/overview`.
    - 2026-06-08: `dualctl trace` and `dualctl timeline` now apply the same
      chronological normalization when reading existing ledger files directly.
+   - 2026-06-13: operator overview can be pushed through SSE, background
+     scheduler decisions are centralized in `SchedulerPolicy`, and optional
+     local notification hooks can report gate/failure/completion boundaries
+     without changing workflow state.

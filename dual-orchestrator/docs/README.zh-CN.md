@@ -50,6 +50,8 @@ English version: [README.md](README.md)
 5. [operator-observability.md](design/operator-observability.md) / [中文](design/operator-observability.zh-CN.md)
 6. [features.md](features.md)
 
+这几份文档共同说明当前 lifecycle、状态模型、artifact/context 边界、自动恢复调度、operator 投影，以及剩余 MVP 缺口。
+
 ## 私有证据策略
 
 私有真实 case 对工程判断很有价值，但不是公开 onboarding 路径。本公开分支只保留脱敏总结和 public benchmark。`testing/real-case-reports/` 是本地 ignored 输出，生成后不应提交。

@@ -1,6 +1,6 @@
 # Feature Status
 
-> Last updated: 2026-06-09
+> Last updated: 2026-06-13
 
 This document summarizes the current public feature shape. It intentionally uses
 product-oriented categories instead of internal implementation phase numbers.
@@ -40,7 +40,9 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Contract failure diagnostics under `artifacts/contract-failures/`.
 - [x] Context package state/evidence boundary.
 - [x] Token-aware context budgeting and adaptive compression.
-- [ ] Adapter-provided token and cost metrics.
+- [x] Provider run metrics aggregated from local `runs/*/run.json`.
+- [ ] Adapter-provided token and cost metrics. Deferred until `acpx` exposes
+  stable raw usage data.
 
 ## Failure And Recovery
 
@@ -52,7 +54,8 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Human decision flow for calibration candidates.
 - [x] Explicit promotion of accepted contract-template candidates to
   project-level principles.
-- [ ] Fully automated recovery scheduler for rate-limit windows.
+- [x] Explicit automatic recovery scheduling for retry-ready runtime failures.
+- [ ] Fully autonomous long-window recovery policy with provider quota calendar awareness.
 
 ## Operator Experience
 
@@ -65,8 +68,9 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Operator panel MVP with overview, attention items, lifecycle progress,
   review packet, recovery summary, metrics, and grouped timeline.
 - [x] Polling watch mode.
-- [ ] Real-time progress push through SSE or file-watch streaming.
-- [ ] Notification hooks for gate/failure/completion events.
+- [x] Real-time workstream overview push through Server-Sent Events.
+- [x] Optional local notification command hooks for gate/failure/completion
+  boundaries observed by the background scheduler.
 
 ## Delivery
 

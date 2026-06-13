@@ -159,6 +159,31 @@ http://localhost:8080/
 
 Operator Panel 的 overview 和 `dualctl trace` 使用同一套表达：当前节点、停止原因、下一步动作、attention items、最近 timeline、Agent runs 和关键 artifacts。
 
+在 Lifecycle Progress 中点击任意阶段卡片，可以查看该阶段的具体 workflow node 状态、iteration、开始/结束时间和耗时。阶段里如果包含 Human Gate 节点，可以直接打开对应的 review packet；历史 gate 会以只读方式显示，当前 open gate 才显示人工决策按钮。
+
+选中 workstream 后，Operator Panel 会通过 Server-Sent Events 订阅 overview 进度流。长任务运行时无需反复手动刷新，首屏状态、生命周期进度和下一步动作会随 ledger read model 更新。
+
+`Scheduler Tick` 默认只推进 `RUNNING` workstreams。如果勾选 `Auto retry runtime failures`，它会额外检查 `WAITING_FOR_RECOVERY` workstreams，但只自动恢复 `RecoveryAssessment` 明确标记为 retry-ready 的运行时故障。artifact contract failure、语义争议和 human gate 不会被自动跳过。
+
+手工调用同一能力：
+
+```bash
+curl -X POST \
+  'http://localhost:8080/api/scheduler/tick?workdir=<effective_workdir>&maxWorkstreams=10&maxStepsPerWorkstream=20&autoRecover=true'
+```
+
+后台 scheduler 可选本地通知命令，默认关闭：
+
+```bash
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar \
+  --dual.scheduler.enabled=true \
+  --dual.scheduler.workdirs=<effective_workdir> \
+  --dual.notification.enabled=true \
+  --dual.notification.command='echo "$DUAL_EVENT $DUAL_STATUS $DUAL_WORKSTREAM_ID"'
+```
+
+通知命令可读取 `DUAL_WORKDIR`、`DUAL_WORKSTREAM_ID`、`DUAL_STATUS`、`DUAL_EVENT`、`DUAL_ACTIVE_NODE`、`DUAL_MESSAGE`。通知失败不会改变 workflow 状态。
+
 ## Workflow Kernel
 
 默认使用 LiteFlow 作为 workflow routing kernel。LiteFlow 只负责根据 `WorkflowDefinition` 和当前 ledger snapshot 计算下一步候选；ledger、human gate、artifact contract、completion contract 仍由 dual 自己管理。

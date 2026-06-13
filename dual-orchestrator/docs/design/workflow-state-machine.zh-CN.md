@@ -93,6 +93,13 @@ flowchart LR
 
 Gate 的 action 本质上是路由 outcome。真实使用时应该先读 review packet，再做决定。
 
+`dualctl autorun` 是 benchmark 辅助命令，不是替代真实人审的产品决策：
+
+- 大多数 gate 自动 `approved`；
+- 最后的 next-stage gate 自动 `complete`；
+- 同一个 gate definition 如果在同一个 iteration 再次出现，会停止，避免同一轮内死循环；
+- 同一个 gate definition 如果出现在新的 iteration，可以继续，因为 Codex `REJECT` 或人审 `revise` 可能合法地进入 repair loop。
+
 ## 6. Recovery
 
 当 task 或 decision 返回 `FAILED` / `BLOCKED` 时，workflow 会停在 `WAITING_FOR_RECOVERY`。
@@ -109,6 +116,39 @@ flowchart LR
 
 Recovery 不创建新节点，而是把同一个活跃节点重置回 `READY`。这样失败、重试和最终结果都能在同一条链路里追踪。
 
+恢复有两条路径：
+
+| 路径 | 触发方式 | 边界 |
+|---|---|---|
+| Runtime auto-retry | `resume` 进入 `WAITING_FOR_RECOVERY`，且失败节点标记为 recoverable | 受节点 retry policy 限制 |
+| Scheduler auto-recovery | `scheduler.tick(..., autoRecover=true)` 看到 `WAITING_FOR_RECOVERY` workstream | 只允许 `RecoveryAssessment = recoverable_agent_runtime + RETRY_AFTER_EXTERNAL_FIX` |
+
+Scheduler 不会自动恢复 artifact contract failure、语义修订上限、manual recovery，也不会绕过 human gate。
+
+它做的动作很明确：
+
+```text
+读取 RecoveryAssessment
+  -> 判断是否 retry-ready runtime failure
+  -> retry 同一个 active node
+  -> resume 到下一个边界
+```
+
+手动调用：
+
+```bash
+curl -X POST \
+  'http://localhost:8080/api/scheduler/tick?workdir=<effective_workdir>&maxWorkstreams=10&maxStepsPerWorkstream=20&autoRecover=true'
+```
+
+后台调度配置：
+
+```properties
+dual.scheduler.enabled=true
+dual.scheduler.workdirs=/path/to/workdir-a,/path/to/workdir-b
+dual.scheduler.auto-recover=true
+```
+
 ## 7. Iteration
 
 Iteration 表示一次修订线程，不等于每个节点 run。
@@ -120,6 +160,11 @@ iter-001
 ```
 
 当 Codex 要求设计修订、验收拒绝后进入修复、或人审要求 revise 时，才会创建新的 iteration。这样可以区分“同一阶段的重试”和“语义上的修订”。
+
+2026-06-13 的 public benchmark 验证了这一点：第一次 Codex acceptance
+`REJECT` 后，workflow 进入 `iter-002`，再次经过 `contract_review`，随后重新
+设计、计划、实现、自测和验收，最终 `ACCEPT` 并 `COMPLETED`。因此 repeated
+gate 的判断必须以 `gate definition + iteration` 为 key，而不能只看 gate 名称。
 
 ## 8. Operator 命令
 

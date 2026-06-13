@@ -62,6 +62,26 @@ gate, delivery, or observability code.
 - Timeline, trace, operator panel, and API should consume the same ledger facts.
 - If display semantics differ from raw node IDs, keep both raw ID and display
   name.
+- Before changing UI / CLI projection, write down the user question first:
+  "Where is it?", "Why did it stop?", "What evidence supports the decision?",
+  "What should I do next?", or "What happened in this historical node?"
+- Do not render a projection by simply dumping the largest available object.
+  Put object-specific evidence before shared context:
+  - Gate evidence: gate decision, recommendation, reason, latest agent decision,
+    missing evidence, must-fix items first; task contract second.
+  - Node details: node status, kind, iteration, timestamps, outputs first;
+    workflow-wide summary second.
+  - Completion views: completion audit and final artifacts first; historical
+    timeline second.
+- Current-state panels and historical read-only panels must be separate modes.
+  Current human gates may expose actions; historical gates must show evidence
+  without approval/revise controls.
+- If a list contains multiple similar objects, each item must show its
+  differentiating fields in the first screen. If every card looks identical,
+  the projection is wrong even when the backing data is correct.
+- Validate at least two distinct instances of the same projection type before
+  calling UI observability work done. For example, inspect two different human
+  gates and confirm their first-screen evidence differs.
 
 ## Technical Debt
 

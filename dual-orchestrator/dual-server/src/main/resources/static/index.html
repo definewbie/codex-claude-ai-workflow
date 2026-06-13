@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dual Operator Panel</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=release-consistency-20260613">
 </head>
 <body>
   <main class="shell">
@@ -60,6 +60,13 @@
         <button id="resume">Run to next gate</button>
         <span id="runHint" class="subtle">Select a workstream.</span>
       </div>
+      <label class="field recovery-toggle">
+        <span>Scheduler recovery</span>
+        <span class="checkbox-row">
+          <input id="autoRecover" type="checkbox">
+          <span>Auto retry runtime failures</span>
+        </span>
+      </label>
       <button id="refresh">Refresh</button>
       <button id="tick">Scheduler Tick</button>
     </section>
@@ -80,6 +87,16 @@
             <span id="lifecycleBadge" class="badge muted">No workstream</span>
           </div>
           <div id="lifecycleProgress" class="progress"></div>
+          <section id="nodeInspector" class="node-inspector hidden" aria-live="polite">
+            <div class="node-inspector-head">
+              <div>
+                <span class="eyebrow">Selected stage</span>
+                <h3 id="nodeInspectorTitle">-</h3>
+              </div>
+              <button id="clearNodeSelection" class="secondary" type="button">Clear</button>
+            </div>
+            <div id="nodeInspectorBody" class="node-list"></div>
+          </section>
         </section>
 
         <section id="gateGrid" class="gate-grid gate-grid-single">
@@ -128,7 +145,7 @@
           <section id="reviewPanel" class="panel hidden">
             <div class="panel-title">
               <h2>Gate Evidence</h2>
-              <span class="badge warn">Open packet</span>
+              <span id="reviewPanelBadge" class="badge warn">Open packet</span>
             </div>
             <div id="gateEvidence" class="packet-list"></div>
             <details class="raw-packet">
@@ -202,6 +219,6 @@
     </section>
   </main>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=release-consistency-20260613"></script>
 </body>
 </html>

@@ -75,6 +75,10 @@ Rules:
   workstream is deliverable.
 - Projection files are read models. They can be regenerated and must not be the
   only owner of lifecycle truth.
+- The scheduler belongs to execution orchestration. It may resume `RUNNING`
+  workstreams and, when explicitly enabled, retry a recoverable runtime failure.
+  It must not mark domain completion, reinterpret acceptance, or bypass human
+  gates.
 
 ## 5. Completion Contract
 

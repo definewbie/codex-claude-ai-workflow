@@ -185,8 +185,28 @@ public class WorkstreamQueryService {
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a human gate: " + node.nodeDefinitionId());
         }
-        var packetRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".md";
-        var packetJsonRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".json";
+        return reviewPacket(root, paths, workstreamId, node.nodeInstanceId(), node.nodeDefinitionId());
+    }
+
+    public Map<String, Object> review(Path workspaceRoot, String workstreamId, String nodeInstanceId) throws IOException {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        var node = workflowLedger.loadNode(paths, nodeInstanceId);
+        if (node.kind() != NodeKind.GATE) {
+            throw new IOException("node is not a human gate: " + node.nodeDefinitionId());
+        }
+        return reviewPacket(root, paths, workstreamId, node.nodeInstanceId(), node.nodeDefinitionId());
+    }
+
+    private Map<String, Object> reviewPacket(
+            Path root,
+            WorkstreamPaths paths,
+            String workstreamId,
+            String nodeInstanceId,
+            String nodeDefinitionId
+    ) throws IOException {
+        var packetRef = ".agent/workstreams/" + workstreamId + "/reviews/" + nodeInstanceId + ".md";
+        var packetJsonRef = ".agent/workstreams/" + workstreamId + "/reviews/" + nodeInstanceId + ".json";
         var packetPath = root.resolve(packetRef).normalize();
         var packetJsonPath = root.resolve(packetJsonRef).normalize();
         if (!packetPath.startsWith(root) || !Files.exists(packetPath)) {
@@ -195,8 +215,8 @@ public class WorkstreamQueryService {
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
-        response.put("gateNodeInstanceId", node.nodeInstanceId());
-        response.put("gateNodeDefinitionId", node.nodeDefinitionId());
+        response.put("gateNodeInstanceId", nodeInstanceId);
+        response.put("gateNodeDefinitionId", nodeDefinitionId);
         response.put("packetPath", packetRef);
         response.put("packetMarkdown", Files.readString(packetPath, StandardCharsets.UTF_8));
         if (packetJsonPath.startsWith(root) && Files.exists(packetJsonPath)) {
@@ -225,6 +245,12 @@ public class WorkstreamQueryService {
         response.put("markdown", Files.readString(failurePath, StandardCharsets.UTF_8));
         response.put("assessment", recoveryAssessment(root, paths, workstreamId));
         return response;
+    }
+
+    public Map<String, Object> recoveryAssessment(Path workspaceRoot, String workstreamId) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        return recoveryAssessment(root, paths, workstreamId);
     }
 
     private Map<String, Object> workstreamSummary(Path root, Path dir, Path workstreamJson) throws IOException {

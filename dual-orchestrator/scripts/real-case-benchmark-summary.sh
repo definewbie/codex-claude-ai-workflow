@@ -16,6 +16,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPORTS_DIR="$PROJECT_ROOT/docs/testing/real-case-reports"
 OUTPUT="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-index.md"
+INCLUDE_PRIVATE=false
 
 # shellcheck source=scripts/lib/real-case-grade.sh
 source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
@@ -28,6 +29,7 @@ Usage:
 Options:
   --reports-dir <path>  Directory containing */summary.json files.
   --output <path>       Markdown file to write. Default: docs/testing/real-case-benchmarks/benchmark-index.md
+  --include-private     Include non-public local/private real-case summaries.
   --stdout              Print to stdout instead of writing a file.
   -h, --help            Show this help.
 EOF
@@ -69,6 +71,9 @@ parse_args() {
       --stdout)
         stdout=true
         ;;
+      --include-private)
+        INCLUDE_PRIVATE=true
+        ;;
       -h|--help)
         usage
         exit 0
@@ -87,7 +92,18 @@ parse_args() {
 }
 
 json_files() {
-  find "$REPORTS_DIR" -mindepth 2 -maxdepth 2 -name summary.json -type f | sort
+  while IFS= read -r file; do
+    if [[ "$INCLUDE_PRIVATE" == true ]] || is_public_summary "$file"; then
+      printf '%s\n' "$file"
+    fi
+  done < <(find "$REPORTS_DIR" -mindepth 2 -maxdepth 2 -name summary.json -type f | sort)
+}
+
+is_public_summary() {
+  local file="$1"
+  local task_file
+  task_file="$(jq -r '.task_file // ""' "$file")"
+  [[ "$(basename "$task_file")" == public-* ]]
 }
 
 json_value() {

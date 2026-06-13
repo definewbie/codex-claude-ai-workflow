@@ -1,6 +1,7 @@
 package dev.dual.server;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -18,10 +20,16 @@ import java.util.Map;
 public class WorkstreamApiController {
     private final WorkstreamQueryService queryService;
     private final WorkstreamActionService actionService;
+    private final WorkstreamStreamService streamService;
 
-    public WorkstreamApiController(WorkstreamQueryService queryService, WorkstreamActionService actionService) {
+    public WorkstreamApiController(
+            WorkstreamQueryService queryService,
+            WorkstreamActionService actionService,
+            WorkstreamStreamService streamService
+    ) {
         this.queryService = queryService;
         this.actionService = actionService;
+        this.streamService = streamService;
     }
 
     @GetMapping
@@ -62,12 +70,30 @@ public class WorkstreamApiController {
         return queryService.overview(workdirPath(workdir), workstreamId);
     }
 
+    @GetMapping(path = "/{workstreamId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestParam(defaultValue = "2000") long intervalMs
+    ) {
+        return streamService.overviewStream(workdirPath(workdir), workstreamId, intervalMs);
+    }
+
     @GetMapping("/{workstreamId}/review/current")
     public Map<String, Object> currentReview(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = "") String workdir
     ) throws Exception {
         return queryService.currentReview(workdirPath(workdir), workstreamId);
+    }
+
+    @GetMapping("/{workstreamId}/review/{nodeInstanceId}")
+    public Map<String, Object> review(
+            @PathVariable String workstreamId,
+            @PathVariable String nodeInstanceId,
+            @RequestParam(defaultValue = "") String workdir
+    ) throws Exception {
+        return queryService.review(workdirPath(workdir), workstreamId, nodeInstanceId);
     }
 
     @GetMapping("/{workstreamId}/recovery/current")

@@ -22,6 +22,10 @@
 
 - `dual-orchestrator/docs/engineering-checklist.md`
 
+如果问题表现为状态边界不清、多个同类 evidence 看起来一样、current/history 语义混在一起、UI/CLI/API/ledger 不一致、recovery/resume 行为异常、或又想通过局部 if-else 修补，必须使用本地 skill：
+
+- `boundary-first-engineering`
+
 核心要求：
 
 - 先定义领域语义，再改代码路径。

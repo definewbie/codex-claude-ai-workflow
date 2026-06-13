@@ -108,7 +108,14 @@ It aggregates ignored local reports into:
 docs/testing/real-case-benchmarks/benchmark-index.md
 ```
 
-For the public branch, keep this index sanitized. Do not commit private
+By default the index includes only public cases whose task file starts with
+`public-`. Internal reports can still be inspected locally with:
+
+```bash
+./scripts/real-case-benchmark-summary.sh --include-private --stdout
+```
+
+For the public branch, keep the committed index sanitized. Do not commit private
 repository names, absolute local paths, raw prompts, or private product details.
 
 ## When To Run

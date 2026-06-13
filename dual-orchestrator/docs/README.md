@@ -3,7 +3,7 @@
 中文版本：[README.zh-CN.md](README.zh-CN.md)
 
 > Status: current docs index
-> Last updated: 2026-06-09
+> Last updated: 2026-06-13
 
 This directory contains the current product docs and selected implementation
 design notes. For open-source readers, start with the current reading path.
@@ -52,7 +52,8 @@ Use this path when changing the orchestrator itself:
 6. `features.md`
 
 These documents describe the current shape of the lifecycle, the state model,
-the artifact/context boundary, and the remaining MVP gaps.
+the artifact/context boundary, recovery scheduling, operator projection, and
+the remaining MVP gaps.
 
 ## Reference Path
 

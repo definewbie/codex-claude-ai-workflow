@@ -15,10 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class BackgroundSchedulerService {
     private final SchedulerService schedulerService;
+    private final NotificationService notificationService;
     private final boolean enabled;
     private final List<Path> workdirs;
     private final int maxWorkstreams;
     private final int maxStepsPerWorkstream;
+    private final boolean autoRecover;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private volatile Map<String, Object> lastRun = Map.of(
             "status", "never_run",
@@ -30,13 +32,17 @@ public class BackgroundSchedulerService {
             @Value("${dual.scheduler.enabled:false}") boolean enabled,
             @Value("${dual.scheduler.workdirs:}") String workdirs,
             @Value("${dual.scheduler.max-workstreams:10}") int maxWorkstreams,
-            @Value("${dual.scheduler.max-steps-per-workstream:1}") int maxStepsPerWorkstream
+            @Value("${dual.scheduler.max-steps-per-workstream:1}") int maxStepsPerWorkstream,
+            @Value("${dual.scheduler.auto-recover:false}") boolean autoRecover,
+            NotificationService notificationService
     ) {
         this.schedulerService = schedulerService;
+        this.notificationService = notificationService;
         this.enabled = enabled;
         this.workdirs = parseWorkdirs(workdirs);
         this.maxWorkstreams = maxWorkstreams;
         this.maxStepsPerWorkstream = maxStepsPerWorkstream;
+        this.autoRecover = autoRecover;
     }
 
     @Scheduled(
@@ -55,6 +61,8 @@ public class BackgroundSchedulerService {
         response.put("workdirs", workdirs.stream().map(path -> path.toAbsolutePath().normalize().toString()).toList());
         response.put("maxWorkstreams", maxWorkstreams);
         response.put("maxStepsPerWorkstream", maxStepsPerWorkstream);
+        response.put("autoRecover", autoRecover);
+        response.put("notification", notificationService.status());
         response.put("lastRun", lastRun);
         return response;
     }
@@ -76,17 +84,25 @@ public class BackgroundSchedulerService {
         response.put("enabled", true);
         response.put("maxWorkstreams", maxWorkstreams);
         response.put("maxStepsPerWorkstream", maxStepsPerWorkstream);
+        response.put("autoRecover", autoRecover);
         var results = new ArrayList<Map<String, Object>>();
         var resumed = 0;
+        var autoRecovered = 0;
         var skipped = 0;
         var errors = 0;
+        var notificationsSent = 0;
+        var notificationsFailed = 0;
         try {
             for (Path workdir : workdirs) {
                 try {
-                    var result = schedulerService.tick(workdir, maxWorkstreams, maxStepsPerWorkstream);
+                    var result = schedulerService.tick(workdir, maxWorkstreams, maxStepsPerWorkstream, autoRecover);
                     results.add(result);
                     resumed += intValue(result.get("resumed"));
+                    autoRecovered += intValue(result.get("autoRecovered"));
                     skipped += intValue(result.get("skipped"));
+                    var notification = notificationService.notifySchedulerResult(workdir, result);
+                    notificationsSent += intValue(notification.get("sent"));
+                    notificationsFailed += intValue(notification.get("failed"));
                 } catch (Exception e) {
                     errors++;
                     results.add(error(workdir, e));
@@ -95,8 +111,11 @@ public class BackgroundSchedulerService {
             response.put("status", errors == 0 ? "completed" : "completed_with_errors");
             response.put("finishedAt", Instant.now().toString());
             response.put("resumed", resumed);
+            response.put("autoRecovered", autoRecovered);
             response.put("skipped", skipped);
             response.put("errors", errors);
+            response.put("notificationsSent", notificationsSent);
+            response.put("notificationsFailed", notificationsFailed);
             response.put("workdirs", results);
             return remember(response);
         } finally {
