@@ -1,15 +1,18 @@
 package dev.dual.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,6 +24,7 @@ public class WorkstreamStreamService {
 
     private final WorkstreamQueryService queryService;
     private final ObjectMapper objectMapper;
+    private final Map<SseEmitter, ScheduledExecutorService> activeStreams = new ConcurrentHashMap<>();
 
     public WorkstreamStreamService(WorkstreamQueryService queryService, ObjectMapper objectMapper) {
         this.queryService = queryService;
@@ -34,14 +38,15 @@ public class WorkstreamStreamService {
             thread.setDaemon(true);
             return thread;
         });
+        activeStreams.put(emitter, executor);
         var lastPayload = new AtomicReference<>("");
-        Runnable shutdown = () -> shutdown(executor);
-        emitter.onCompletion(shutdown);
-        emitter.onTimeout(shutdown);
-        emitter.onError(error -> shutdown.run());
+        Runnable cleanup = () -> cleanup(emitter);
+        emitter.onCompletion(cleanup);
+        emitter.onTimeout(cleanup);
+        emitter.onError(error -> cleanup.run());
 
         executor.scheduleWithFixedDelay(
-                () -> sendSnapshot(emitter, executor, workspaceRoot, workstreamId, lastPayload),
+                () -> sendSnapshot(emitter, workspaceRoot, workstreamId, lastPayload),
                 0,
                 safeInterval(intervalMs),
                 TimeUnit.MILLISECONDS
@@ -49,9 +54,26 @@ public class WorkstreamStreamService {
         return emitter;
     }
 
+    @PreDestroy
+    void closeActiveStreams() {
+        for (var entry : new ArrayList<>(activeStreams.entrySet())) {
+            shutdown(entry.getValue());
+            try {
+                entry.getKey().complete();
+            } catch (IllegalStateException ignored) {
+                // The client or container already closed the async response.
+            } finally {
+                activeStreams.remove(entry.getKey());
+            }
+        }
+    }
+
+    int activeStreamCount() {
+        return activeStreams.size();
+    }
+
     private void sendSnapshot(
             SseEmitter emitter,
-            ScheduledExecutorService executor,
             Path workspaceRoot,
             String workstreamId,
             AtomicReference<String> lastPayload
@@ -77,7 +99,7 @@ public class WorkstreamStreamService {
                 // Connection is already broken; shutdown below is enough.
             }
             emitter.complete();
-            shutdown(executor);
+            cleanup(emitter);
         }
     }
 
@@ -105,5 +127,12 @@ public class WorkstreamStreamService {
 
     private static void shutdown(ScheduledExecutorService executor) {
         executor.shutdownNow();
+    }
+
+    private void cleanup(SseEmitter emitter) {
+        var executor = activeStreams.remove(emitter);
+        if (executor != null) {
+            shutdown(executor);
+        }
     }
 }

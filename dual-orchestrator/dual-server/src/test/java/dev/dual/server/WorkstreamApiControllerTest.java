@@ -454,6 +454,19 @@ class WorkstreamApiControllerTest {
         emitter.complete();
     }
 
+    @Test
+    void streamServiceClosesActiveStreamsOnShutdown() throws Exception {
+        var fixture = createWorkstream("ws-api-stream-shutdown");
+        var objectMapper = new ObjectMapper();
+        var streamService = new WorkstreamStreamService(new WorkstreamQueryService(objectMapper), objectMapper);
+
+        streamService.overviewStream(tempDir, fixture.workstreamId(), 60_000);
+
+        assertEquals(1, streamService.activeStreamCount());
+        streamService.closeActiveStreams();
+        assertEquals(0, streamService.activeStreamCount());
+    }
+
     private WorkstreamApiController controller() {
         var objectMapper = new ObjectMapper();
         var queryService = new WorkstreamQueryService(objectMapper);

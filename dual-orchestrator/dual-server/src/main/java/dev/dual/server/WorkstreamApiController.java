@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.nio.file.Path;
@@ -175,6 +176,13 @@ public class WorkstreamApiController {
             return Path.of(System.getProperty("user.dir"));
         }
         return Path.of(workdir);
+    }
+
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public void handleAsyncTimeout() {
+        // SSE clients can disappear during browser refresh or application shutdown.
+        // The response is already text/event-stream, so returning a JSON error would
+        // cause a secondary HttpMessageNotWritableException.
     }
 
     @ExceptionHandler(Exception.class)
