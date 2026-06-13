@@ -112,7 +112,7 @@ Token 和 cost metrics 延后，直到 adapter 能提供可信 usage data。系�
 
 ## 已暴露的易用性问题
 
-真实 `cancer-clinic` run 暴露了一个问题：operator panel 仍会展示英文且过于笼统的 stopped/retry 文案，例如：
+一次私有生产型仓库 real-case run 暴露了一个问题：operator panel 仍会展示英文且过于笼统的 stopped/retry 文案，例如：
 
 ```text
 Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.

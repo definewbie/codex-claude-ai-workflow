@@ -138,7 +138,7 @@ trusted usage data. The system should not guess cost.
 
 ## Observed Usability Gap
 
-A real `cancer-clinic` run exposed a usability issue: the operator panel can
+A private production-like run exposed a usability issue: the operator panel can
 still show generic English stopped/retry copy, for example:
 
 ```text

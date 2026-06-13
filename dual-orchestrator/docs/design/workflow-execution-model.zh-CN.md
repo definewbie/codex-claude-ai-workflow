@@ -203,7 +203,7 @@ Node handler completed
   -> runtime stops or continues
 ```
 
-这个模型已经用中等复杂度 cancer-clinic real-case 验证过：
+这个模型已经用中等复杂度的私有生产型 real-case 验证过：
 
 - kernel：`DUAL_FLOW_KERNEL=liteflow`
 - workflow variant：`full`
@@ -240,7 +240,7 @@ Node handler completed
 | `contract-happy-path` | real acpx smoke | PASS | `agent-lifecycle-contract@2` 完成，30 nodes、6 gates、32 events、0 warnings，TaskContract 生成并通过人工 gate。 |
 | `full-reject-classify-path` | real acpx smoke | PARTIAL / EXPECTED RECOVERY | 真实 Codex 两次返回 `NEEDS_REVISION`，达到 revision limit 后进入 `WAITING_FOR_RECOVERY`。这验证了 revision/recovery 边界能停住，但没有完成 full reject/classify happy path。 |
 | `reject-repair-reaccept` | controlled smoke | PASS | `agent-lifecycle-full@3` 完成，先由 acceptance 输出 `REJECT`，再进入 failure classification，创建 repair iteration，第二次 acceptance 输出 `ACCEPT` 后完成。38 nodes、6 gates、42 events、14 agent runs、0 warnings。 |
-| cancer-clinic medium case | real acpx + real repo | PASS-WARN | `agent-lifecycle-full@3` 完成，31 timeline nodes、6 gates、10 agent runs，最终 `ACCEPT_WITH_NOTES`，verification confidence `MEDIUM`，原仓库干净。 |
+| private medium case | real acpx + real repo | PASS-WARN | `agent-lifecycle-full@3` 完成，31 timeline nodes、6 gates、10 agent runs，最终 `ACCEPT_WITH_NOTES`，verification confidence `MEDIUM`，原仓库干净。 |
 
 这些场景说明 LiteFlow route-chain adapter 已经能承接主干、contract variant、真实 worktree、terminal boundary、revision-limit recovery 边界，以及“REJECT -> classify -> repair loop -> re-accept”的闭环。真实 `full-reject-classify-path` 仍会受 LLM 输出影响，但这个不再是 LiteFlow 提升的阻塞项：不可控模型输出用真实 case 暴露，关键路由闭环用 controlled scenario 固化。
 
