@@ -25,6 +25,7 @@ cleanup branch; reusable evidence now starts from the public benchmark sample.
 | Current feature status | [features.md](features.md) | Not split yet |
 | Public benchmark entry | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) | Not split yet |
 | Smoke / E2E usage | [testing/smoke-test-e2e.md](testing/smoke-test-e2e.md) | Not split yet |
+| Release checklist | [release-checklist.md](release-checklist.md) | [release-checklist.zh-CN.md](release-checklist.zh-CN.md) |
 | Full CLI / runtime reference | [reference.md](reference.md) | Detailed reference is not split yet |
 
 ## Public Onboarding Path

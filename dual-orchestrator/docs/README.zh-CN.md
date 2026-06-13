@@ -19,6 +19,7 @@ English version: [README.md](README.md)
 | 当前功能状态 | [features.md](features.md) | 暂未拆分中文对照 |
 | Public benchmark | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) | 暂未拆分中文对照 |
 | Smoke / E2E | [testing/smoke-test-e2e.md](testing/smoke-test-e2e.md) | 暂未拆分中文对照 |
+| 发布检查清单 | [release-checklist.md](release-checklist.md) | [release-checklist.zh-CN.md](release-checklist.zh-CN.md) |
 | 完整参考手册 | [reference.md](reference.md) | 详细参考暂不做双语拆分 |
 
 ## 新用户路径

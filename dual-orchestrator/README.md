@@ -2,35 +2,33 @@
 
 English version: [README.en.md](README.en.md)
 
-`dual-orchestrator` 是一个本地 Agent 生命周期编排器，用 `acpx` 驱动 Claude
-和 Codex，把长周期研发任务拆成需求澄清、设计审视、计划、实现、自测、验收、修复和交付。
+`dual-orchestrator` 是一个本地 Agent 生命周期编排器。它用 `acpx` 驱动
+Claude 和 Codex，把一个研发任务放进可追踪、可暂停、可恢复的流程里：需求澄清、
+设计审视、计划、实现、自测、验收、修复、交付和 handoff。
 
-它的目标不是再做一个聊天入口，而是减少人在 Claude Code 和 Codex 之间反复复制粘贴产物的负担，让一个真实功能可以在可追踪、可暂停、可恢复的流程里跑完。
+它不是聊天入口，也不是 CI 替代品。它解决的是另一个更日常的问题：人在 Claude
+Code 和 Codex 之间反复复制产物、追问状态、整理证据，最后还要靠记忆判断“现在跑到哪了”。
 
-## 它解决什么问题
+## 核心思想
 
-- Claude 负责主控：需求澄清、设计、实现、自测、变更说明。
-- Codex 负责外部审视：产品、架构、最终用户视角的验收。
-- `acpx` 负责统一调用 Agent，后续可以替换具体工具。
-- 每个 workstream 默认在独立 Git worktree 中执行，避免污染原仓库。
-- 所有状态、事件、Agent 输出、review packet、报告都写入本地 ledger。
-- 人只在关键 gate 上做 approve / revise / complete。
-- CLI 和 Operator Panel 都能回答：“现在跑到哪、为什么停、下一步做什么”。
+- Claude 是主控 developer / architect，负责设计、实现、自测和交接。
+- Codex 是外部 reviewer / verifier，负责产品、架构和最终验收视角。
+- `acpx` 是 Agent 通讯边界，具体工具未来可以替换。
+- 默认使用 Git worktree 隔离每个 workstream，避免污染原仓库。
+- 所有状态、事件、Agent 输出、review packet、报告和交付材料写入本地 ledger。
+- 人只在明确的 human gate 上 approve / revise / complete。
+- CLI 和 Operator Panel 都回答同一个问题：现在跑到哪，为什么停，下一步做什么。
 
 ## 当前能力
 
-- Java / Maven 多模块工程。
-- `dualctl` CLI。
-- 默认 Git worktree 隔离。
-- 文件账本：`.agent/workstreams/<workstream_id>/`。
-- Workflow runtime：Task / Decision / Gate。
+- `dualctl` CLI 和本地 Operator Panel。
+- Task / Decision / Gate workflow runtime。
+- LiteFlow 默认 routing kernel，内置 kernel 可回退。
 - Claude / Codex `acpx` Agent task。
-- Human review gate 和 review packet。
-- Failure classification、recovery、retry、repair loop。
-- TaskContract / artifact contract。
-- Context package 和 handoff / next-stage prompt。
-- Real-case benchmark 和 smoke test。
-- Operator Panel：首屏 overview、attention items、timeline、review packet。
+- TaskContract、artifact contract、context package、handoff / next-stage prompt。
+- Failure classification、recovery、retry、bounded repair loop。
+- Final report、delivery PR body、commit message。
+- Public smoke test 和 real-case benchmark。
 
 ## 安装
 
@@ -43,7 +41,7 @@ git --version
 acpx --version
 ```
 
-安装 CLI：
+安装：
 
 ```bash
 cd dual-orchestrator
@@ -52,100 +50,80 @@ export PATH="$HOME/.local/bin:$PATH"
 dualctl --help
 ```
 
-## 快速开始
+## 5 分钟验证
 
-检查目标仓库：
-
-```bash
-dualctl doctor --workdir /path/to/repo
-```
-
-运行一个有边界的真实任务：
+先跑 controlled smoke：
 
 ```bash
-./scripts/run-real-case.sh \
-  --repo /path/to/repo \
-  --task-file /path/to/task.md \
-  --variant full
+./scripts/smoke-test.sh --case baseline-basic --cleanup
 ```
 
-查看当前跑到哪里：
-
-```bash
-dualctl trace --workdir <effective_workdir> <workstream_id>
-```
-
-`trace` 是排查和接手 workstream 的第一入口。它会显示：
-
-- 当前状态和当前节点
-- 为什么停下或完成
-- 需要关注的 attention items
-- 最近 timeline
-- final acceptance 和 repair loops
-- 关键 artifacts
-- 下一步建议命令
-
-## Public Benchmark
-
-项目内置了一个公开、可复用的小型 benchmark app，适合验证真实生命周期而不依赖私有仓库。
-最短路径：
+再跑公开 real-case benchmark：
 
 ```bash
 ./scripts/run-public-benchmark.sh
 ```
 
-如果只想准备样例仓库、不立即运行 Agent：
+这个命令会复制 `examples/issue-flow-app` 到 `/tmp`，用真实 `acpx` Claude/Codex
+跑完整 lifecycle，并把本地报告写到 ignored 目录：
 
-```bash
-./scripts/prepare-public-benchmark-repo.sh
+```text
+docs/testing/real-case-reports/<timestamp>/
 ```
 
-这两个脚本都会使用 `examples/issue-flow-app`。`run-public-benchmark.sh` 会调用真实
-`acpx` Claude / Codex，并自动 approve benchmark 中间 gate；它用于验证主流程，不替代最终人工验收。
+公开 benchmark index 只保留可提交的聚合结果：
 
-## 人工 Review
+```text
+docs/testing/real-case-benchmarks/benchmark-index.md
+```
 
-当 workflow 停在 human gate：
+## 在自己的仓库运行
+
+先检查目标仓库：
+
+```bash
+dualctl doctor --workdir /path/to/repo
+```
+
+准备一个边界清晰的小任务：
+
+```bash
+cat > /tmp/dual-task.md <<'EOF'
+Update the README with a short "Local Development" section.
+Keep the change documentation-only. Do not modify source code.
+EOF
+
+./scripts/run-real-case.sh \
+  --repo /path/to/repo \
+  --task-file /tmp/dual-task.md \
+  --variant full
+```
+
+脚本默认创建安全 worktree，并自动通过 benchmark 用途的中间 gate。真实交付前仍应阅读 review packet 和 final report。
+
+## 查看状态
+
+优先使用：
 
 ```bash
 dualctl trace --workdir <effective_workdir> <workstream_id>
-dualctl review show --workdir <effective_workdir> <workstream_id>
-dualctl approve --run --workdir <effective_workdir> <workstream_id>
 ```
 
-常用短命令：
+`trace` 会显示当前状态、active node、停止原因、attention items、最近 timeline、
+final acceptance、repair loops、关键 artifacts 和下一步命令。
+
+如果停在 human gate：
 
 ```bash
+dualctl review show --workdir <effective_workdir> <workstream_id>
 dualctl approve --run --workdir <effective_workdir> <workstream_id>
 dualctl revise --feedback-file feedback.md --run --workdir <effective_workdir> <workstream_id>
 dualctl complete --workdir <effective_workdir> <workstream_id>
 ```
 
-完整命令仍然保留：
-
-```bash
-dualctl review approve --run --workdir <effective_workdir> <workstream_id>
-dualctl review revise --feedback-file feedback.md --run --workdir <effective_workdir> <workstream_id>
-dualctl review complete --workdir <effective_workdir> <workstream_id>
-```
-
-## Calibration
-
-真实失败被分类后，系统可能生成 calibration candidate。第一版只做人审闭环，不自动修改内置 prompt 或 workflow。
-
-```bash
-dualctl calibration list --workdir <effective_workdir> <workstream_id>
-dualctl calibration show --workdir <effective_workdir> <workstream_id> <candidate_id>
-dualctl calibration decide --status accepted --workdir <effective_workdir> <workstream_id> <candidate_id>
-dualctl calibration plan --workdir <effective_workdir> <workstream_id> <candidate_id>
-dualctl calibration promote --workdir <effective_workdir> <workstream_id> <candidate_id>
-```
-
-`promote` 只支持已 `ACCEPTED` 且已有 apply plan 的 `CONTRACT_TEMPLATE` candidate，并只追加到项目级 `.agent/templates/contract-review-principles.md`。它不会修改内置模板、workflow 定义或测试。
-
 ## Operator Panel
 
-启动本地 API / dashboard：
+启动本地 dashboard：
 
 ```bash
 java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
@@ -157,73 +135,27 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 http://localhost:8080/
 ```
 
-Operator Panel 的 overview 和 `dualctl trace` 使用同一套表达：当前节点、停止原因、下一步动作、attention items、最近 timeline、Agent runs 和关键 artifacts。
-
-在 Lifecycle Progress 中点击任意阶段卡片，可以查看该阶段的具体 workflow node 状态、iteration、开始/结束时间和耗时。阶段里如果包含 Human Gate 节点，可以直接打开对应的 review packet；历史 gate 会以只读方式显示，当前 open gate 才显示人工决策按钮。
-
-选中 workstream 后，Operator Panel 会通过 Server-Sent Events 订阅 overview 进度流。长任务运行时无需反复手动刷新，首屏状态、生命周期进度和下一步动作会随 ledger read model 更新。
-
-`Scheduler Tick` 默认只推进 `RUNNING` workstreams。如果勾选 `Auto retry runtime failures`，它会额外检查 `WAITING_FOR_RECOVERY` workstreams，但只自动恢复 `RecoveryAssessment` 明确标记为 retry-ready 的运行时故障。artifact contract failure、语义争议和 human gate 不会被自动跳过。
-
-手工调用同一能力：
-
-```bash
-curl -X POST \
-  'http://localhost:8080/api/scheduler/tick?workdir=<effective_workdir>&maxWorkstreams=10&maxStepsPerWorkstream=20&autoRecover=true'
-```
-
-后台 scheduler 可选本地通知命令，默认关闭：
-
-```bash
-java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar \
-  --dual.scheduler.enabled=true \
-  --dual.scheduler.workdirs=<effective_workdir> \
-  --dual.notification.enabled=true \
-  --dual.notification.command='echo "$DUAL_EVENT $DUAL_STATUS $DUAL_WORKSTREAM_ID"'
-```
-
-通知命令可读取 `DUAL_WORKDIR`、`DUAL_WORKSTREAM_ID`、`DUAL_STATUS`、`DUAL_EVENT`、`DUAL_ACTIVE_NODE`、`DUAL_MESSAGE`。通知失败不会改变 workflow 状态。
-
-## Workflow Kernel
-
-默认使用 LiteFlow 作为 workflow routing kernel。LiteFlow 只负责根据 `WorkflowDefinition` 和当前 ledger snapshot 计算下一步候选；ledger、human gate、artifact contract、completion contract 仍由 dual 自己管理。
-
-```bash
-dualctl trace --workdir <effective_workdir> <workstream_id>
-./scripts/run-real-case.sh \
-  --repo /path/to/repo \
-  --task-file /path/to/task.md \
-  --variant full
-```
-
-如果需要诊断或回退，可以显式切回内置 kernel：
-
-```bash
-DUAL_FLOW_KERNEL=builtin dualctl trace --workdir <effective_workdir> <workstream_id>
-java -Ddual.flow.kernel=builtin -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar ...
-```
-
-支持的 kernel 值：`liteflow`、`builtin`。未知值会直接失败，避免误用错误内核。
+Operator Panel 使用和 `dualctl trace` 相同的 ledger read model，并通过 SSE 订阅
+overview 更新。它是本地单用户 operator 工具，不是托管式多用户 Web 产品。
 
 ## 文档入口
 
-- [Quickstart](docs/quickstart.md)
-- [中文 Quickstart](docs/quickstart.zh-CN.md)
+- [Quickstart](docs/quickstart.md) / [中文](docs/quickstart.zh-CN.md)
 - [文档索引](docs/README.md) / [中文](docs/README.zh-CN.md)
 - [总体架构与执行流程](docs/architecture-and-execution-flow.md)
 - [Workflow 状态机](docs/design/workflow-state-machine.md)
-- [Workflow Execution Model](docs/design/workflow-execution-model.zh-CN.md)
-- [Artifact Contract 与上下文](docs/design/artifact-contracts-and-context.md) / [中文](docs/design/artifact-contracts-and-context.zh-CN.md)
-- [Failure Recovery 与 Calibration](docs/design/failure-recovery-and-calibration.md) / [中文](docs/design/failure-recovery-and-calibration.zh-CN.md)
-- [Operator Observability](docs/design/operator-observability.md) / [中文](docs/design/operator-observability.zh-CN.md)
-- [设计演进笔记](docs/design/design-evolution-notes.md) / [中文](docs/design/design-evolution-notes.zh-CN.md)
+- [Artifact Contract 与上下文](docs/design/artifact-contracts-and-context.md)
+- [Failure Recovery 与 Calibration](docs/design/failure-recovery-and-calibration.md)
+- [Operator Observability](docs/design/operator-observability.md)
 - [当前功能状态](docs/features.md)
 - [Real-case benchmark](docs/testing/real-case-benchmarks/README.md)
+- [发布检查清单](docs/release-checklist.md)
 - [完整参考手册](docs/reference.md)
 
 ## 当前限制
 
 - 项目仍是 pre-1.0，workflow schema 和 prompt 还会演进。
-- 真实运行依赖本地 `acpx`、Claude、Codex 可用性。
-- Operator Panel 是单机 operator 工具，不是多用户 Web 产品。
+- 真实运行依赖本地 `acpx`、Claude、Codex 可用性和额度。
+- Public benchmark 会消耗真实 Agent quota。
 - Delivery 自动化保持保守：准备证据和 PR 材料，但不会自动 merge。
+- 正式公开发布前需要选择并添加 LICENSE。

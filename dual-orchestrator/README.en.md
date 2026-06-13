@@ -1,41 +1,40 @@
 # dual-orchestrator
 
+中文版本: [README.md](README.md)
+
 `dual-orchestrator` is a local Agent lifecycle orchestrator. It uses `acpx` to
-drive Claude and Codex through a traceable software delivery workflow:
-requirement clarification, design review, planning, implementation, self-test,
-verification, repair, delivery, and handoff.
+drive Claude and Codex through a traceable, pausable, recoverable software
+delivery workflow: requirement clarification, design review, planning,
+implementation, self-test, verification, repair, delivery, and handoff.
 
-Chinese version: [README.md](README.md)
+It is not another chat UI and it is not a CI replacement. It targets a common
+operator problem: copying artifacts between Claude Code and Codex, tracking
+state by memory, and manually assembling evidence after a long Agent run.
 
-## What It Solves
+## Core Idea
 
-- Claude acts as the developer/architect: requirement clarification, design,
-  implementation, self-test, and change summary.
-- Codex acts as the external reviewer/verifier: product, architecture, and final
-  acceptance review.
-- `acpx` is the Agent transport boundary, so the concrete Agent tool can evolve.
+- Claude acts as the developer / architect for design, implementation,
+  self-test, and handoff.
+- Codex acts as the external reviewer / verifier for product, architecture, and
+  final acceptance.
+- `acpx` is the Agent transport boundary, so concrete Agent tools can evolve.
 - Each workstream runs in an isolated Git worktree by default.
-- Every state transition, prompt, Agent output, review packet, and report is
-  written to a local ledger.
-- Humans approve, revise, or complete work at explicit gates.
-- CLI and the Operator Panel both answer: where is the workflow, why did it
-  stop, and what should happen next?
+- State transitions, events, Agent outputs, review packets, reports, and
+  delivery materials are written to a local ledger.
+- Humans only approve, revise, or complete explicit human gates.
+- CLI and Operator Panel answer the same question: where is it, why did it stop,
+  and what should happen next?
 
 ## Current Capabilities
 
-- Java / Maven multi-module project.
-- `dualctl` CLI.
-- Default Git worktree isolation.
-- File ledger under `.agent/workstreams/<workstream_id>/`.
+- `dualctl` CLI and local Operator Panel.
 - Task / Decision / Gate workflow runtime.
+- LiteFlow as the default routing kernel, with built-in kernel fallback.
 - Claude / Codex `acpx` Agent tasks.
-- Human review gates and review packets.
+- TaskContract, artifact contracts, context packages, handoff / next-stage prompt.
 - Failure classification, recovery, retry, and bounded repair loops.
-- TaskContract and structured Agent artifact contracts.
-- Context packages and next-stage handoff.
-- Public real-case benchmark and smoke tests.
-- Operator Panel with overview, attention items, timeline, review packet, and
-  recovery summary.
+- Final report, delivery PR body, and commit message preparation.
+- Public smoke test and real-case benchmark.
 
 ## Install
 
@@ -48,7 +47,7 @@ git --version
 acpx --version
 ```
 
-Install locally:
+Install:
 
 ```bash
 cd dual-orchestrator
@@ -57,76 +56,115 @@ export PATH="$HOME/.local/bin:$PATH"
 dualctl --help
 ```
 
-## Quickstart
+## 5-Minute Validation
 
-Check a target repository:
-
-```bash
-dualctl doctor --workdir /path/to/repo
-```
-
-Run a bounded real task:
+Run the controlled smoke first:
 
 ```bash
-./scripts/run-real-case.sh \
-  --repo /path/to/repo \
-  --task-file /path/to/task.md \
-  --variant full
+./scripts/smoke-test.sh --case baseline-basic --cleanup
 ```
 
-Inspect a workstream:
-
-```bash
-dualctl trace --workdir <effective_workdir> <workstream_id>
-```
-
-For a reusable public benchmark:
+Then run the public real-case benchmark:
 
 ```bash
 ./scripts/run-public-benchmark.sh
 ```
 
-## Workflow Kernel
+This copies `examples/issue-flow-app` to `/tmp`, runs the full lifecycle with
+real `acpx` Claude/Codex, and writes a local ignored report under:
 
-LiteFlow is the default workflow routing kernel. It only computes transition
-candidates from the `WorkflowDefinition` and the current ledger snapshot; the
-ledger, human gates, artifact contracts, and completion contract remain owned by
-dual.
+```text
+docs/testing/real-case-reports/<timestamp>/
+```
+
+The committed public benchmark index keeps only sanitized aggregate results:
+
+```text
+docs/testing/real-case-benchmarks/benchmark-index.md
+```
+
+## Run On Your Own Repo
+
+Check the target repo first:
 
 ```bash
-dualctl trace --workdir <effective_workdir> <workstream_id>
+dualctl doctor --workdir /path/to/repo
+```
+
+Start with a small bounded task:
+
+```bash
+cat > /tmp/dual-task.md <<'EOF'
+Update the README with a short "Local Development" section.
+Keep the change documentation-only. Do not modify source code.
+EOF
+
 ./scripts/run-real-case.sh \
   --repo /path/to/repo \
-  --task-file /path/to/task.md \
+  --task-file /tmp/dual-task.md \
   --variant full
 ```
 
-For diagnostics or emergency fallback, explicitly select the built-in kernel:
+The script creates a safe worktree and auto-approves intermediate benchmark
+gates. For real delivery, still read the review packet and final report.
+
+## Inspect State
+
+Start with:
 
 ```bash
-DUAL_FLOW_KERNEL=builtin dualctl trace --workdir <effective_workdir> <workstream_id>
-java -Ddual.flow.kernel=builtin -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar ...
+dualctl trace --workdir <effective_workdir> <workstream_id>
 ```
 
-Supported kernel values are `liteflow` and `builtin`. Unknown values fail fast
-instead of silently falling back to the wrong kernel.
+`trace` shows current status, active node, stop reason, attention items, recent
+timeline, final acceptance, repair loops, key artifacts, and the next command.
+
+If the workflow is waiting at a human gate:
+
+```bash
+dualctl review show --workdir <effective_workdir> <workstream_id>
+dualctl approve --run --workdir <effective_workdir> <workstream_id>
+dualctl revise --feedback-file feedback.md --run --workdir <effective_workdir> <workstream_id>
+dualctl complete --workdir <effective_workdir> <workstream_id>
+```
+
+## Operator Panel
+
+Start the local dashboard:
+
+```bash
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+Open:
+
+```text
+http://localhost:8080/
+```
+
+The Operator Panel uses the same ledger read model as `dualctl trace` and
+subscribes to overview updates through SSE. It is a local single-user operator
+tool, not a hosted multi-user web product.
 
 ## Documentation
 
 - [Quickstart](docs/quickstart.md) / [中文](docs/quickstart.zh-CN.md)
 - [Docs index](docs/README.md) / [中文](docs/README.zh-CN.md)
-- [Architecture and execution flow](docs/architecture-and-execution-flow.md)
+- [Architecture and execution flow](docs/architecture-and-execution-flow.en.md) / [中文](docs/architecture-and-execution-flow.md)
 - [Workflow state machine](docs/design/workflow-state-machine.md)
-- [Workflow execution model](docs/design/workflow-execution-model.zh-CN.md)
-- [Artifact contracts and context](docs/design/artifact-contracts-and-context.md) / [中文](docs/design/artifact-contracts-and-context.zh-CN.md)
-- [Failure recovery and calibration](docs/design/failure-recovery-and-calibration.md) / [中文](docs/design/failure-recovery-and-calibration.zh-CN.md)
-- [Operator observability](docs/design/operator-observability.md) / [中文](docs/design/operator-observability.zh-CN.md)
-- [Design evolution notes](docs/design/design-evolution-notes.md) / [中文](docs/design/design-evolution-notes.zh-CN.md)
+- [Artifact contracts and context](docs/design/artifact-contracts-and-context.md)
+- [Failure recovery and calibration](docs/design/failure-recovery-and-calibration.md)
+- [Operator observability](docs/design/operator-observability.md)
+- [Current feature status](docs/features.md)
+- [Real-case benchmark](docs/testing/real-case-benchmarks/README.md)
+- [Release checklist](docs/release-checklist.md)
+- [Full reference](docs/reference.md)
 
 ## Current Limits
 
-- The project is pre-1.0; workflow schema and prompts will continue to evolve.
-- Real runs depend on local `acpx`, Claude, and Codex availability.
-- Operator Panel is a local single-user tool, not a hosted multi-user product.
+- The project is pre-1.0; workflow schemas and prompts will continue to evolve.
+- Real runs depend on local `acpx`, Claude, Codex availability, and quota.
+- Public benchmark runs consume real Agent quota.
 - Delivery automation is conservative: it prepares evidence and PR materials,
   but never auto-merges.
+- A LICENSE must be selected and added before a formal public release.
