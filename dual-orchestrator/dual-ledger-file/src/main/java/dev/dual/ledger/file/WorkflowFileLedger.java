@@ -2,6 +2,8 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.dual.core.flow.BuiltInFlowOrchestrationKernel;
+import dev.dual.core.flow.FlowOrchestrationKernel;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
@@ -25,17 +27,28 @@ public final class WorkflowFileLedger {
     private final FailureSummaryWriter failureSummaryWriter;
 
     public WorkflowFileLedger() {
-        this(new AtomicJsonWriter());
+        this(new BuiltInFlowOrchestrationKernel());
+    }
+
+    public WorkflowFileLedger(FlowOrchestrationKernel flowKernel) {
+        this(new AtomicJsonWriter(), flowKernel);
     }
 
     WorkflowFileLedger(AtomicJsonWriter jsonWriter) {
+        this(jsonWriter, new BuiltInFlowOrchestrationKernel());
+    }
+
+    WorkflowFileLedger(AtomicJsonWriter jsonWriter, FlowOrchestrationKernel flowKernel) {
+        if (flowKernel == null) {
+            throw new IllegalArgumentException("flow orchestration kernel is required");
+        }
         this.jsonWriter = jsonWriter;
         this.objectMapper = jsonWriter.objectMapper();
         var jsonlMapper = jsonWriter.objectMapper().copy()
                 .disable(SerializationFeature.INDENT_OUTPUT);
         this.eventLog = new LedgerEventLog(jsonWriter, jsonlMapper);
         var revisionTracker = new RevisionTracker(jsonWriter, this.objectMapper, eventLog);
-        this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker);
+        this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker, flowKernel);
         this.nodeStateWriter = new NodeStateWriter(jsonWriter, this.objectMapper, eventLog);
         this.timelineProjectionWriter = new TimelineProjectionWriter(jsonWriter, this.objectMapper);
         this.metricsProjectionWriter = new MetricsProjectionWriter(jsonWriter, this.objectMapper);
@@ -208,6 +221,15 @@ public final class WorkflowFileLedger {
 
     public void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.retryActiveNode(paths, note);
+        refreshProjections(paths);
+    }
+
+    public void recoverStaleRunningNode(WorkstreamPaths paths, String note) throws IOException {
+        nodeStateWriter.recoverStaleRunningNode(paths, note);
+        var current = loadCurrent(paths);
+        if (!current.activeNodeInstanceIds().isEmpty()) {
+            failureSummaryWriter.write(paths, current.activeNodeInstanceIds().get(0));
+        }
         refreshProjections(paths);
     }
 

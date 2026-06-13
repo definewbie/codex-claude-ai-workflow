@@ -29,7 +29,7 @@ public final class RetryCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "retry"))) {
-            new WorkflowFileLedger().retryActiveNode(paths, note);
+            CliLedgerFactory.create().retryActiveNode(paths, note);
         }
         System.out.println("Active node marked ready for retry");
         System.out.println("Workstream: " + workstreamId);

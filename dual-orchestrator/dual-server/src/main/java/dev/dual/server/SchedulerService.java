@@ -1,76 +1,102 @@
 package dev.dual.server;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
 public class SchedulerService {
-    private static final String RUNNING = "RUNNING";
-
     private final WorkstreamQueryService queryService;
     private final WorkstreamActionService actionService;
+    private final SchedulerPolicy schedulerPolicy;
 
+    @Autowired
     public SchedulerService(WorkstreamQueryService queryService, WorkstreamActionService actionService) {
+        this(queryService, actionService, new SchedulerPolicy());
+    }
+
+    SchedulerService(WorkstreamQueryService queryService, WorkstreamActionService actionService, SchedulerPolicy schedulerPolicy) {
         this.queryService = queryService;
         this.actionService = actionService;
+        this.schedulerPolicy = schedulerPolicy;
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> tick(Path workspaceRoot, int maxWorkstreams, int maxStepsPerWorkstream) throws Exception {
+        return tick(workspaceRoot, maxWorkstreams, maxStepsPerWorkstream, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> tick(
+            Path workspaceRoot,
+            int maxWorkstreams,
+            int maxStepsPerWorkstream,
+            boolean autoRecover
+    ) throws Exception {
         validatePositive(maxWorkstreams, "maxWorkstreams");
         validatePositive(maxStepsPerWorkstream, "maxStepsPerWorkstream");
 
-        var response = new LinkedHashMap<String, Object>();
-        response.put("action", "scheduler.tick");
-        response.put("workdir", workspaceRoot.toAbsolutePath().normalize().toString());
-        response.put("maxWorkstreams", maxWorkstreams);
-        response.put("maxStepsPerWorkstream", maxStepsPerWorkstream);
-
         var summaries = (java.util.List<Map<String, Object>>) queryService.list(workspaceRoot).get("workstreams");
-        var items = new ArrayList<Map<String, Object>>();
-        var resumed = 0;
-        var skipped = 0;
+        var items = new ArrayList<SchedulerWorkstreamResult>();
         for (var summary : summaries) {
             if (items.size() >= maxWorkstreams) {
                 break;
             }
-            var workstreamId = text(summary.get("workstreamId"));
-            var status = text(summary.get("workflowStatus"));
-            if (!RUNNING.equals(status)) {
-                items.add(skipped(workstreamId, status));
-                skipped++;
-                continue;
-            }
-            var runResult = actionService.resume(workspaceRoot, workstreamId, maxStepsPerWorkstream);
-            items.add(resumed(workstreamId, runResult));
-            resumed++;
+            items.add(tickWorkstream(workspaceRoot, summary, maxStepsPerWorkstream, autoRecover));
         }
-        response.put("resumed", resumed);
-        response.put("skipped", skipped);
-        response.put("workstreams", items);
-        return response;
+        return new SchedulerTickResult(workspaceRoot, maxWorkstreams, maxStepsPerWorkstream, autoRecover, items).toMap();
     }
 
-    private static Map<String, Object> resumed(String workstreamId, Map<String, Object> runResult) {
-        var item = new LinkedHashMap<String, Object>();
-        item.put("workstreamId", workstreamId);
-        item.put("result", "resumed");
-        item.put("status", runResult.getOrDefault("status", ""));
-        item.put("activeNode", runResult.getOrDefault("activeNode", ""));
-        item.put("message", runResult.getOrDefault("message", ""));
-        return item;
+    private SchedulerWorkstreamResult tickWorkstream(
+            Path workspaceRoot,
+            Map<String, Object> summary,
+            int maxStepsPerWorkstream,
+            boolean autoRecover
+    ) throws Exception {
+        var workstreamId = text(summary.get("workstreamId"));
+        var status = text(summary.get("workflowStatus"));
+        var assessment = recoveryAssessment(workspaceRoot, workstreamId, status, autoRecover);
+        var decision = schedulerPolicy.decide(status, autoRecover, assessment);
+        return switch (decision.action()) {
+            case RESUME -> resume(workspaceRoot, workstreamId, maxStepsPerWorkstream);
+            case AUTO_RECOVER -> autoRecover(workspaceRoot, workstreamId, maxStepsPerWorkstream, decision);
+            case SKIP -> SchedulerWorkstreamResult.skipped(workstreamId, decision.reason());
+        };
     }
 
-    private static Map<String, Object> skipped(String workstreamId, String reason) {
-        var item = new LinkedHashMap<String, Object>();
-        item.put("workstreamId", workstreamId);
-        item.put("result", "skipped");
-        item.put("reason", reason);
-        return item;
+    private Map<String, Object> recoveryAssessment(
+            Path workspaceRoot,
+            String workstreamId,
+            String status,
+            boolean autoRecover
+    ) {
+        if (!autoRecover || !"WAITING_FOR_RECOVERY".equals(status)) {
+            return Map.of();
+        }
+        return queryService.recoveryAssessment(workspaceRoot, workstreamId);
+    }
+
+    private SchedulerWorkstreamResult resume(Path workspaceRoot, String workstreamId, int maxStepsPerWorkstream) throws Exception {
+        var runResult = actionService.resume(workspaceRoot, workstreamId, maxStepsPerWorkstream);
+        return SchedulerWorkstreamResult.resumed(workstreamId, runResult);
+    }
+
+    private SchedulerWorkstreamResult autoRecover(
+            Path workspaceRoot,
+            String workstreamId,
+            int maxStepsPerWorkstream,
+            SchedulerDecision decision
+    ) throws Exception {
+        var retryResult = actionService.retry(
+                workspaceRoot,
+                workstreamId,
+                "auto recovery retry from scheduler"
+        );
+        var runResult = actionService.resume(workspaceRoot, workstreamId, maxStepsPerWorkstream);
+        return SchedulerWorkstreamResult.autoRecovered(workstreamId, decision, retryResult, runResult);
     }
 
     private static void validatePositive(int value, String name) {

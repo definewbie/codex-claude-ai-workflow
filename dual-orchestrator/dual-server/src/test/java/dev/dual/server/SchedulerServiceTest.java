@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SchedulerServiceTest {
     @TempDir
@@ -55,6 +56,80 @@ class SchedulerServiceTest {
         assertEquals("resumed", workstreams.get(1).get("result"));
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void tickSkipsRecoveryByDefault() throws Exception {
+        createWaitingForRecoveryWorkstream("ws-recovery", Map.of(
+                "acpx_failure.recoverable", true,
+                "acpx_failure.reason", "quota"
+        ));
+        var calls = new AtomicInteger();
+        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            calls.incrementAndGet();
+            return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
+        });
+        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+
+        var response = scheduler.tick(tempDir, 10, 1);
+
+        assertEquals(0, response.get("autoRecovered"));
+        assertEquals(1, response.get("skipped"));
+        assertEquals(0, calls.get());
+        var workstreams = (List<Map<String, Object>>) response.get("workstreams");
+        assertEquals("skipped", workstreams.get(0).get("result"));
+        assertEquals("WAITING_FOR_RECOVERY", workstreams.get(0).get("reason"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void tickAutoRecoversRetryReadyRuntimeFailureWhenEnabled() throws Exception {
+        createWaitingForRecoveryWorkstream("ws-recovery", Map.of(
+                "acpx_failure.recoverable", true,
+                "acpx_failure.reason", "quota"
+        ));
+        var calls = new AtomicInteger();
+        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            calls.incrementAndGet();
+            return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
+        });
+        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+
+        var response = scheduler.tick(tempDir, 10, 1, true);
+
+        assertEquals(1, response.get("autoRecovered"));
+        assertEquals(0, response.get("skipped"));
+        assertEquals(1, calls.get());
+        var workstreams = (List<Map<String, Object>>) response.get("workstreams");
+        assertEquals("auto_recovered", workstreams.get(0).get("result"));
+        assertEquals("recoverable_agent_runtime", workstreams.get(0).get("recoveryClassification"));
+        assertEquals("RETRY_AFTER_EXTERNAL_FIX", workstreams.get(0).get("retryReadiness"));
+        var recoveryPaths = new WorkstreamPaths(tempDir, new DualId("ws-recovery"));
+        assertTrue(Files.readString(recoveryPaths.eventsJsonl()).contains("node_retry_requested"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void tickDoesNotAutoRecoverArtifactContractFailure() throws Exception {
+        createWaitingForRecoveryWorkstream("ws-contract", Map.of(
+                "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION"
+        ));
+        var calls = new AtomicInteger();
+        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            calls.incrementAndGet();
+            return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
+        });
+        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+
+        var response = scheduler.tick(tempDir, 10, 1, true);
+
+        assertEquals(0, response.get("autoRecovered"));
+        assertEquals(1, response.get("skipped"));
+        assertEquals(0, calls.get());
+        var workstreams = (List<Map<String, Object>>) response.get("workstreams");
+        assertEquals("skipped", workstreams.get(0).get("result"));
+        assertEquals("recovery:artifact_contract_failure/RETRY_AFTER_OUTPUT_CONTRACT_FIX", workstreams.get(0).get("reason"));
+    }
+
     private void createRunningWorkstream(String workstreamId) throws Exception {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());
@@ -69,6 +144,16 @@ class SchedulerServiceTest {
         ledger.initialize(paths, "wf-" + workstreamId, definition);
         var first = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, first, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+    }
+
+    private void createWaitingForRecoveryWorkstream(String workstreamId, Map<String, Object> result) throws Exception {
+        var paths = paths(workstreamId);
+        Files.createDirectories(paths.workstreamDir());
+        var definition = simpleDefinition();
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-" + workstreamId, definition);
+        var first = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, first, NodeStatus.FAILED, "failed", List.of("stderr.log"), result);
     }
 
     private WorkstreamPaths paths(String workstreamId) throws Exception {

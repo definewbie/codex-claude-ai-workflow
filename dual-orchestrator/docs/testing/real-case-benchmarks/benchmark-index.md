@@ -1,27 +1,35 @@
 # Real-case Benchmark Index
 
-> Public cleanup baseline: 2026-06-08
-> Source: local ignored `docs/testing/real-case-reports/<timestamp>/summary.json`
+> Generated: 2026-06-13T04:16:32Z
+> Source: docs/testing/real-case-reports
 
-This file is intentionally sanitized for the public branch. It should only list
-public or otherwise shareable benchmark runs.
+## Aggregate
 
-## Latest Public Runs
+| Metric | Value |
+| --- | --- |
+| Runs | 1 |
+| PASS | 1 |
+| PASS-WARN | 0 |
+| FAIL | 0 |
+| Completed | 1 |
+| Original repo clean | 1 |
+| Acceptance rejects | 0 |
+| Repair loops | 0 |
+| Gate rounds | 6 |
+| Agent runs | 10 |
 
-| Date | Case | Grade | Reason | Variant | Status | Final acceptance | Confidence | Artifacts |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 20260608T033049Z | `public-issue-flow-review-state` | PASS-WARN | accepted_with_notes | full | COMPLETED | ACCEPT_WITH_NOTES | MEDIUM | ok |
+## Runs
+
+| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Final acceptance | Repair loops | Confidence | Repo clean | Artifacts | Local report |
+| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
+| 20260613T040013Z | `public-issue-flow-review-state` | PASS | ok | full | COMPLETED | `ws-20260613T040014Z-EXN7` | 6 | 10 | ACCEPT | 0 | HIGH | true | ok | ignored local file |
 
 ## How To Update
 
-After running a public real case:
+After running a real case:
 
 ```bash
 ./scripts/real-case-benchmark-summary.sh
 ```
 
-Before committing the generated index, check it does not include private repo
-names, absolute local paths, raw prompts, or internal project details.
-
-`PASS-WARN` means the lifecycle completed but there are attention items to read,
-usually from Codex `ACCEPT_WITH_NOTES` or medium/low verification confidence.
+Use this index to compare lifecycle health over time. It is not a replacement for reading the detailed report when a case fails or returns `PASS-WARN`.

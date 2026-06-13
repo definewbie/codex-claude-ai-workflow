@@ -37,6 +37,6 @@ final class CliWorkflowRuntimeFactory {
                 List.of(new ReviewDecisionHandler()),
                 List.of(new HumanReviewGateHandler())
         );
-        return new WorkflowRuntime(new WorkflowFileLedger(), registry);
+        return new WorkflowRuntime(CliLedgerFactory.create(), registry);
     }
 }

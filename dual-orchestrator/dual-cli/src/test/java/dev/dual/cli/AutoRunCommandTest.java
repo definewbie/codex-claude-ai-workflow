@@ -29,13 +29,25 @@ class AutoRunCommandTest {
     @Test
     void autorunStopsWhenAGateRepeatsInTheSameRun() {
         var seen = new LinkedHashSet<String>();
-        seen.add("gate.contract_review");
+        seen.add("gate.contract_review@iter-001");
 
-        assertTrue(AutoRunCommand.isRepeatedGate(gate("gate.contract_review"), seen));
-        assertFalse(AutoRunCommand.isRepeatedGate(gate("gate.human_design_approval"), seen));
+        assertTrue(AutoRunCommand.isRepeatedGate(gate("gate.contract_review", "iter-001"), seen));
+        assertFalse(AutoRunCommand.isRepeatedGate(gate("gate.human_design_approval", "iter-001"), seen));
+    }
+
+    @Test
+    void autorunAllowsSameGateDefinitionInANewRepairIteration() {
+        var seen = new LinkedHashSet<String>();
+        seen.add("gate.contract_review@iter-001");
+
+        assertFalse(AutoRunCommand.isRepeatedGate(gate("gate.contract_review", "iter-002"), seen));
     }
 
     private static NodeInstanceDocument gate(String nodeDefinitionId) {
+        return gate(nodeDefinitionId, "iter-001");
+    }
+
+    private static NodeInstanceDocument gate(String nodeDefinitionId, String iterationId) {
         return new NodeInstanceDocument(
                 1,
                 "node-" + nodeDefinitionId.replace('.', '-'),
@@ -44,7 +56,7 @@ class AutoRunCommandTest {
                 "human.review",
                 NodeStatus.WAITING,
                 "gate",
-                "iter-001",
+                iterationId,
                 List.of(),
                 List.of(),
                 Map.of(),

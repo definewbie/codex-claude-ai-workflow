@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class WorkstreamApiControllerTest {
     @TempDir
@@ -328,6 +329,28 @@ class WorkstreamApiControllerTest {
     }
 
     @Test
+    void reviewReturnsGatePacketByNodeInstanceId() throws Exception {
+        var fixture = createWorkstream("ws-api-review-by-node");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var ledger = new WorkflowFileLedger();
+        var activeNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        var packetPath = paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".md");
+        Files.createDirectories(packetPath.getParent());
+        Files.writeString(packetPath, "# Historical Human Review Packet\n\nVisible from timeline.\n",
+                StandardCharsets.UTF_8);
+        Files.writeString(paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".json"),
+                "{\"operatorGuidance\":{\"recommendedAction\":\"approve\"}}", StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.review(fixture.workstreamId(), activeNodeId, tempDir.toString());
+
+        assertEquals(fixture.workstreamId(), response.get("workstreamId"));
+        assertEquals(activeNodeId, response.get("gateNodeInstanceId"));
+        assertEquals("review.gate", response.get("gateNodeDefinitionId"));
+        assertEquals(true, response.get("packetMarkdown").toString().contains("Visible from timeline."));
+    }
+
+    @Test
     void currentRecoveryReturnsFailureSummaryWhenPresent() throws Exception {
         var fixture = createWorkstream("ws-api-recovery");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
@@ -420,12 +443,63 @@ class WorkstreamApiControllerTest {
         assertEquals("", response.get("markdown"));
     }
 
+    @Test
+    void streamReturnsSseEmitter() throws Exception {
+        var fixture = createWorkstream("ws-api-stream");
+        var controller = controller();
+
+        var emitter = controller.stream(fixture.workstreamId(), tempDir.toString(), 1000);
+
+        assertNotNull(emitter);
+        emitter.complete();
+    }
+
+    @Test
+    void streamServiceClosesActiveStreamsOnShutdown() throws Exception {
+        var fixture = createWorkstream("ws-api-stream-shutdown");
+        var objectMapper = new ObjectMapper();
+        var streamService = new WorkstreamStreamService(new WorkstreamQueryService(objectMapper), objectMapper);
+
+        streamService.overviewStream(tempDir, fixture.workstreamId(), 60_000);
+
+        assertEquals(1, streamService.activeStreamCount());
+        streamService.closeActiveStreams();
+        assertEquals(0, streamService.activeStreamCount());
+    }
+
+    @Test
+    void streamExceptionBoundaryRecognizesSseRequests() {
+        assertEquals(true, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/stream",
+                null,
+                null
+        ));
+        assertEquals(true, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/status",
+                "text/event-stream",
+                null
+        ));
+        assertEquals(true, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/status",
+                null,
+                "text/event-stream;charset=UTF-8"
+        ));
+        assertEquals(false, WorkstreamApiController.isStreamRequest(
+                "/api/workstreams/ws-1/status",
+                "application/json",
+                "application/json"
+        ));
+    }
+
     private WorkstreamApiController controller() {
+        var objectMapper = new ObjectMapper();
+        var queryService = new WorkstreamQueryService(objectMapper);
         return new WorkstreamApiController(
-                new WorkstreamQueryService(new ObjectMapper()),
+                queryService,
                 new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
                         new dev.dual.runtime.WorkflowRuntimeResult(command.workstreamId(),
-                                dev.dual.core.workflow.WorkflowStatus.COMPLETED, "", "unused"))
+                                dev.dual.core.workflow.WorkflowStatus.COMPLETED, "", "unused")),
+                new WorkstreamStreamService(queryService, objectMapper)
         );
     }
 

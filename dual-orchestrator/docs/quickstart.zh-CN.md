@@ -142,3 +142,25 @@ dualctl calibration promote --workdir <effective_workdir> <workstream_id> <candi
 ```
 
 MVP 的 promotion 很窄：只会把 accepted 的 `CONTRACT_TEMPLATE` plan 追加到项目级 `.agent/templates/contract-review-principles.md`。它不会自动修改内置 prompt、workflow、context rule 或测试。
+
+更深入的排查命令：
+
+```bash
+dualctl status --workdir <effective_workdir> <workstream_id>
+dualctl timeline --workdir <effective_workdir> <workstream_id>
+dualctl runs --workdir <effective_workdir> <workstream_id>
+dualctl events --workdir <effective_workdir> --limit 50 <workstream_id>
+dualctl summary --workdir <effective_workdir> <workstream_id>
+```
+
+如果 workflow 进入 recovery：
+
+```bash
+dualctl recovery show --workdir <effective_workdir> <workstream_id>
+```
+
+ledger 位于：
+
+```text
+<effective_workdir>/.agent/workstreams/<workstream_id>/
+```

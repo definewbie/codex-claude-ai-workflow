@@ -24,9 +24,10 @@ public class SchedulerApiController {
     public Map<String, Object> tick(
             @RequestParam(defaultValue = ".") Path workdir,
             @RequestParam(defaultValue = "10") int maxWorkstreams,
-            @RequestParam(defaultValue = "1") int maxStepsPerWorkstream
+            @RequestParam(defaultValue = "1") int maxStepsPerWorkstream,
+            @RequestParam(defaultValue = "false") boolean autoRecover
     ) throws Exception {
-        return schedulerService.tick(workdir, maxWorkstreams, maxStepsPerWorkstream);
+        return schedulerService.tick(workdir, maxWorkstreams, maxStepsPerWorkstream, autoRecover);
     }
 
     @GetMapping("/background/status")

@@ -1,8 +1,11 @@
 const state = {
   workdir: localStorage.getItem("dual.workdir") || "",
   selectedId: localStorage.getItem("dual.selectedId") || "",
+  selectedStageId: localStorage.getItem("dual.selectedStageId") || "",
   status: null,
   timeline: null,
+  stream: null,
+  streamUrl: "",
 };
 
 const $ = (id) => document.getElementById(id);
@@ -19,6 +22,7 @@ const els = {
   closeWorkspaceChooser: $("closeWorkspaceChooser"),
   workspaceBrowser: $("workspaceBrowser"),
   maxSteps: $("maxSteps"),
+  autoRecover: $("autoRecover"),
   connection: $("connection"),
   count: $("count"),
   workstreams: $("workstreams"),
@@ -26,6 +30,10 @@ const els = {
   selectedStatus: $("selectedStatus"),
   lifecycleBadge: $("lifecycleBadge"),
   lifecycleProgress: $("lifecycleProgress"),
+  nodeInspector: $("nodeInspector"),
+  nodeInspectorTitle: $("nodeInspectorTitle"),
+  nodeInspectorBody: $("nodeInspectorBody"),
+  clearNodeSelection: $("clearNodeSelection"),
   gateGrid: $("gateGrid"),
   gateBadge: $("gateBadge"),
   decisionPanel: $("decisionPanel"),
@@ -42,6 +50,7 @@ const els = {
   artifactSummary: $("artifactSummary"),
   responseView: $("responseView"),
   reviewPanel: $("reviewPanel"),
+  reviewPanelBadge: $("reviewPanelBadge"),
   reviewStructured: $("reviewStructured"),
   gateEvidence: $("gateEvidence"),
   reviewPacket: $("reviewPacket"),
@@ -54,6 +63,7 @@ const els = {
   resume: $("resume"),
   approve: $("approve"),
   complete: $("complete"),
+  recoverStaleRunning: $("recoverStaleRunning"),
   retry: $("retry"),
   closeMistakenIteration: $("closeMistakenIteration"),
   revise: $("revise"),
@@ -62,7 +72,16 @@ const els = {
 
 els.workdir.value = state.workdir;
 renderWorkspaceSource();
-setActionVisibility({ resume: false, approve: false, complete: false, retry: false, closeMistakenIteration: false, revise: false, tick: true });
+setActionVisibility({
+  resume: false,
+  approve: false,
+  complete: false,
+  recoverStaleRunning: false,
+  retry: false,
+  closeMistakenIteration: false,
+  revise: false,
+  tick: true,
+});
 els.runHint.textContent = "Select a workstream";
 
 function setConnection(text, kind = "muted") {
@@ -118,6 +137,7 @@ function workspaceDirectoryButton(label, path) {
 }
 
 async function applyWorkspacePath() {
+  disconnectProgressStream();
   state.workdir = els.workdir.value.trim();
   localStorage.setItem("dual.workdir", state.workdir);
   state.selectedId = "";
@@ -193,8 +213,10 @@ function renderWorkstreams(items) {
       <span>${escapeHtml(item.title || "")}</span>
     `;
     button.addEventListener("click", async () => {
+      disconnectProgressStream();
       state.selectedId = item.workstreamId;
       localStorage.setItem("dual.selectedId", state.selectedId);
+      clearStageSelection();
       renderWorkstreams(items);
       await loadSelected();
     });
@@ -208,6 +230,7 @@ async function loadSelected() {
   }
   await loadStatus();
   await Promise.all([loadOverview(), loadTimeline(), loadReviewPacket(), loadRecoverySummary()]);
+  connectProgressStream();
 }
 
 async function loadStatus() {
@@ -256,6 +279,7 @@ function renderOverview(data) {
   const workflow = data.workflow || {};
   const acceptance = data.acceptance || {};
   const metrics = data.metrics || {};
+  const completionAudit = data.completionAudit || {};
   renderLifecycleProgress(data);
   renderOverviewCards([
     ["Agent runs", metrics.agentRunCount ?? "-"],
@@ -264,12 +288,59 @@ function renderOverview(data) {
     ["Repairs", acceptance.repairLoopCount ?? 0],
     ["Duration", durationLabel(metrics.totalNodeDurationMs)],
     ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
+    ["Completion", completionAudit.status || "-"],
   ]);
   els.overviewWhy.textContent = friendlyWhyStopped(data);
   els.overviewNext.textContent = friendlyNextAction(data);
   renderOverviewAttention(derivedAttention(data));
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
+}
+
+function applyOverviewSnapshot(data) {
+  if (!data || data.workstreamId !== state.selectedId) {
+    return;
+  }
+  state.overview = data;
+  renderOverview(data);
+  const workflow = data.workflow || {};
+  if (workflow.status) {
+    setStatusBadge(workflow.status);
+    updateActions(data);
+  }
+}
+
+function connectProgressStream() {
+  if (!state.selectedId || !window.EventSource) {
+    return;
+  }
+  const url = `/api/workstreams/${encodeURIComponent(state.selectedId)}/stream?workdir=${workdirParam()}&intervalMs=2000`;
+  if (state.stream && state.streamUrl === url) {
+    return;
+  }
+  disconnectProgressStream();
+  const source = new EventSource(url);
+  source.addEventListener("open", () => setConnection("Live", "ok"));
+  source.addEventListener("overview", (event) => {
+    try {
+      applyOverviewSnapshot(JSON.parse(event.data));
+      setConnection("Live", "ok");
+    } catch (error) {
+      setResponse({ error: "Invalid stream overview", message: error.message || String(error) });
+    }
+  });
+  source.addEventListener("heartbeat", () => setConnection("Live", "ok"));
+  source.addEventListener("error", () => setConnection("Live reconnecting", "warn"));
+  state.stream = source;
+  state.streamUrl = url;
+}
+
+function disconnectProgressStream() {
+  if (state.stream) {
+    state.stream.close();
+    state.stream = null;
+    state.streamUrl = "";
+  }
 }
 
 function renderOverviewError(error) {
@@ -281,6 +352,7 @@ function renderOverviewError(error) {
   els.overviewAttention.innerHTML = "";
   els.overviewTimeline.innerHTML = "";
   els.overviewArtifacts.innerHTML = "";
+  clearStageSelection();
 }
 
 function renderLifecycleProgress(data) {
@@ -312,18 +384,128 @@ function renderLifecycleProgress(data) {
   els.lifecycleProgress.innerHTML = "";
   for (const [label, stageId, detail] of stageDefs) {
     const item = document.createElement("article");
-    const state = stageId === currentStage
+    const stageNodes = nodesForStage(stageId);
+    const stageState = stageId === currentStage
       ? "current"
       : completedStages.has(stageId)
         ? "done"
         : "pending";
-    item.className = `stage ${state}`;
+    const selected = stageId === state.selectedStageId ? "selected" : "";
+    item.className = `stage ${stageState} ${selected}`;
+    item.tabIndex = 0;
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-pressed", String(stageId === state.selectedStageId));
+    item.title = `查看 ${label} 阶段节点状态`;
     item.innerHTML = `
       <strong>${escapeHtml(label)}</strong>
-      <span>${escapeHtml(stageDetail(stageId, detail, state, status))}</span>
+      <span>${escapeHtml(stageDetail(stageId, detail, stageState, status))}</span>
+      <small>${escapeHtml(stageNodeSummary(stageNodes))}</small>
     `;
+    item.addEventListener("click", () => selectStage(stageId));
+    item.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectStage(stageId);
+      }
+    });
     els.lifecycleProgress.appendChild(item);
   }
+  renderNodeInspector();
+}
+
+function selectStage(stageId) {
+  state.selectedStageId = stageId;
+  localStorage.setItem("dual.selectedStageId", stageId);
+  renderLifecycleProgress(state.overview || {});
+}
+
+function clearStageSelection() {
+  state.selectedStageId = "";
+  localStorage.removeItem("dual.selectedStageId");
+  renderNodeInspector();
+}
+
+function renderNodeInspector() {
+  const selectedStageId = state.selectedStageId;
+  if (!selectedStageId) {
+    els.nodeInspector.classList.add("hidden");
+    els.nodeInspectorTitle.textContent = "-";
+    els.nodeInspectorBody.innerHTML = "";
+    return;
+  }
+
+  const nodes = nodesForStage(selectedStageId);
+  els.nodeInspector.classList.remove("hidden");
+  els.nodeInspectorTitle.textContent = `${stageLabel(selectedStageId)} nodes`;
+  els.nodeInspectorBody.innerHTML = "";
+  if (!nodes.length) {
+    const empty = document.createElement("p");
+    empty.className = "subtle";
+    empty.textContent = "这个阶段还没有执行节点。";
+    els.nodeInspectorBody.appendChild(empty);
+    return;
+  }
+
+  for (const node of nodes.sort(compareTimelineNodes)) {
+    const card = document.createElement("article");
+    card.className = "node-card";
+    const label = node.displayName || node.nodeDefinitionId || node.nodeInstanceId || "(node)";
+    const gateAction = node.kind === "GATE"
+      ? `<button class="secondary node-gate-action" type="button" data-node-instance-id="${escapeHtml(node.nodeInstanceId || "")}">查看 Human Gate 内容</button>`
+      : "";
+    card.innerHTML = `
+      <div class="node-card-head">
+        <strong>${escapeHtml(label)}</strong>
+        <span class="badge ${statusBadgeKind(node.status)}">${escapeHtml(node.status || "-")}</span>
+      </div>
+      <div class="node-detail-grid">
+        ${nodeDetail("Kind", node.kind)}
+        ${nodeDetail("Iteration", node.iterationId)}
+        ${nodeDetail("Node ID", node.nodeDefinitionId)}
+        ${nodeDetail("Instance", node.nodeInstanceId)}
+        ${nodeDetail("Time", timeRangeLabel(node) || "-")}
+        ${nodeDetail("Duration", durationLabel(node.durationMs))}
+      </div>
+      ${gateAction}
+    `;
+    const gateButton = card.querySelector(".node-gate-action");
+    if (gateButton) {
+      gateButton.addEventListener("click", () => showGateReviewPacket(node));
+    }
+    els.nodeInspectorBody.appendChild(card);
+  }
+}
+
+function nodesForStage(stageId) {
+  const nodes = state.timeline?.nodes || state.overview?.recentTimeline || [];
+  return nodes.filter((node) => stageIdFromNode(node.nodeDefinitionId || node.displayName || "") === stageId);
+}
+
+function stageNodeSummary(nodes) {
+  if (!nodes.length) {
+    return "No nodes";
+  }
+  const counts = new Map();
+  for (const node of nodes) {
+    const status = node.status || "UNKNOWN";
+    counts.set(status, (counts.get(status) || 0) + 1);
+  }
+  const parts = [...counts.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([status, count]) => `${count} ${status.toLowerCase()}`);
+  return `${nodes.length} nodes · ${parts.join(", ")}`;
+}
+
+function nodeDetail(label, value) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+  return `
+    <div>
+      <span>${escapeHtml(label)}</span>
+      <p>${escapeHtml(value)}</p>
+    </div>
+  `;
 }
 
 function stageIdFromNode(nodeId) {
@@ -516,8 +698,9 @@ function renderOverviewTimeline(nodes) {
   for (const node of nodes.slice(-6)) {
     const item = document.createElement("div");
     item.className = "mini-item";
+    const label = node.displayName || node.nodeDefinitionId || "(node)";
     item.innerHTML = `
-      <strong>${escapeHtml(node.nodeDefinitionId || "(node)")}</strong>
+      <strong>${escapeHtml(label)}</strong>
       <span>${escapeHtml([node.status, node.iterationId, timeRangeLabel(node)].filter(Boolean).join(" · "))}</span>
     `;
     els.overviewTimeline.appendChild(item);
@@ -547,6 +730,7 @@ async function loadReviewPacket() {
   if (status !== "WAITING_FOR_HUMAN") {
     els.reviewPanel.classList.add("hidden");
     els.gateGrid.classList.add("gate-grid-single");
+    els.gateGrid.classList.remove("gate-grid-history");
     els.decisionPanel.classList.add("hidden");
     els.reviewStructured.innerHTML = "";
     els.gateEvidence.innerHTML = "";
@@ -558,19 +742,67 @@ async function loadReviewPacket() {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/current?workdir=${workdirParam()}`);
     els.reviewPanel.classList.remove("hidden");
     els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.remove("gate-grid-history");
     els.decisionPanel.classList.remove("hidden");
+    els.reviewPanelBadge.textContent = "Open packet";
+    els.reviewPanelBadge.className = "badge warn";
     els.reviewGate.textContent = data.gateNodeDefinitionId || "";
     renderReviewStructured(data.packet || {});
     els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
   } catch (error) {
     els.reviewPanel.classList.remove("hidden");
     els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.remove("gate-grid-history");
     els.decisionPanel.classList.remove("hidden");
+    els.reviewPanelBadge.textContent = "Unavailable";
+    els.reviewPanelBadge.className = "badge bad";
     els.reviewGate.textContent = "not available";
     els.reviewStructured.innerHTML = "";
     els.gateEvidence.innerHTML = "";
     els.reviewPacket.textContent = JSON.stringify(error, null, 2);
   }
+}
+
+async function showGateReviewPacket(node) {
+  if (!node.nodeInstanceId) {
+    setResponse({ error: "Gate node has no nodeInstanceId" });
+    return;
+  }
+  try {
+    const data = await request(
+      `/api/workstreams/${encodeURIComponent(state.selectedId)}/review/${encodeURIComponent(node.nodeInstanceId)}?workdir=${workdirParam()}`
+    );
+    const isCurrentOpenGate = isCurrentActiveGate(node);
+    els.reviewPanel.classList.remove("hidden");
+    els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.toggle("gate-grid-history", !isCurrentOpenGate);
+    els.decisionPanel.classList.toggle("hidden", !isCurrentOpenGate);
+    els.reviewPanelBadge.textContent = isCurrentOpenGate ? "Open packet" : "Historical packet";
+    els.reviewPanelBadge.className = `badge ${isCurrentOpenGate ? "warn" : "muted"}`;
+    els.reviewGate.textContent = data.gateNodeDefinitionId || node.nodeDefinitionId || "";
+    renderReviewStructured(data.packet || {});
+    els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
+    els.reviewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    els.reviewPanel.classList.remove("hidden");
+    els.gateGrid.classList.remove("gate-grid-single");
+    els.gateGrid.classList.add("gate-grid-history");
+    els.decisionPanel.classList.add("hidden");
+    els.reviewPanelBadge.textContent = "Unavailable";
+    els.reviewPanelBadge.className = "badge bad";
+    els.reviewGate.textContent = node.nodeDefinitionId || "not available";
+    els.reviewStructured.innerHTML = "";
+    els.gateEvidence.innerHTML = "";
+    els.reviewPacket.textContent = JSON.stringify(error, null, 2);
+  }
+}
+
+function isCurrentActiveGate(node) {
+  const workflow = state.status?.workflow || {};
+  if (workflow.status !== "WAITING_FOR_HUMAN") {
+    return false;
+  }
+  return (workflow.activeNodes || []).some((activeNode) => activeNode.nodeInstanceId === node.nodeInstanceId);
 }
 
 async function loadRecoverySummary() {
@@ -616,6 +848,7 @@ function renderReviewStructured(packet) {
   const decision = packet.latestAgentDecision || {};
   const contract = packet.taskContract || {};
   const guidance = packet.operatorGuidance || {};
+  const allowedActions = packet.allowedActions || [];
   header.innerHTML = `
     <div class="review-card-head">
       <div>
@@ -624,12 +857,25 @@ function renderReviewStructured(packet) {
       </div>
       ${guidance.recommendedAction ? `<span class="badge ${actionBadgeKind(guidance.recommendedAction)}">${escapeHtml(guidance.recommendedAction)}</span>` : ""}
     </div>
+    ${allowedActions.length ? `<p><strong>Allowed actions:</strong> ${escapeHtml(allowedActions.join(", "))}</p>` : ""}
     ${guidance.reason ? `<p><strong>Recommended:</strong> ${escapeHtml(guidance.reason)}</p>` : ""}
     ${decision.summary ? `<p>${escapeHtml(decision.summary)}</p>` : ""}
     ${reviewList("Suggested Checks", guidance.suggestedChecks)}
     ${reviewList("Must Fix", decision.mustFix)}
   `;
   els.reviewStructured.appendChild(header);
+
+  appendGateEvidenceSection("Gate Decision", [
+    reviewKeyValue("Gate", packet.gateNodeDefinitionId),
+    reviewKeyValue("Recommended Action", guidance.recommendedAction),
+    reviewKeyValue("Reason", guidance.reason),
+    reviewList("Allowed Actions", allowedActions),
+    reviewKeyValue("Agent Decision", decision.decision),
+    reviewKeyValue("Agent Summary", decision.summary),
+    reviewList("Must Fix", decision.mustFix),
+    reviewList("Missing Evidence", decision.missingEvidence),
+    reviewList("Suggested Checks", guidance.suggestedChecks),
+  ]);
 
   appendGateEvidenceSection("Task Contract", [
     reviewKeyValue("Status", contract.status),
@@ -778,8 +1024,9 @@ function renderTimeline(data) {
     for (const node of items) {
       const item = document.createElement("div");
       item.className = "timeline-item";
+      const label = node.displayName || node.nodeDefinitionId || node.id || "(node)";
       item.innerHTML = `
-        <strong>${escapeHtml(node.nodeDefinitionId || node.id || "(node)")}</strong>
+        <strong>${escapeHtml(label)}</strong>
         <span>${escapeHtml(node.kind || "")}</span>
         <span>${escapeHtml(node.status || "")}</span>
         <span>${escapeHtml(timeRangeLabel(node) || "-")}</span>
@@ -872,12 +1119,15 @@ function updateActions(data) {
   const activeKind = activeNode.kind || "";
   const activeDefinition = activeNode.nodeDefinitionId || "";
   const nextStageGate = activeDefinition.includes("next_stage");
+  const staleRunning = isStaleRunningOverview();
+  const recoveryActionVisible = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY"].includes(status);
 
   setActionVisibility({
-    resume: status === "RUNNING" && !isStaleRunningOverview(),
+    resume: status === "RUNNING" && !staleRunning,
     approve: status === "WAITING_FOR_HUMAN" && !nextStageGate,
     complete: status === "WAITING_FOR_HUMAN" && nextStageGate,
-    retry: status === "FAILED" || status === "BLOCKED" || status === "WAITING_FOR_RECOVERY",
+    recoverStaleRunning: status === "RUNNING" && staleRunning,
+    retry: recoveryActionVisible,
     closeMistakenIteration: canCloseMistakenIteration(),
     revise: status === "WAITING_FOR_HUMAN",
     tick: status === "RUNNING" || !state.selectedId,
@@ -900,9 +1150,9 @@ function updateActions(data) {
     return;
   }
   if (status === "RUNNING") {
-    if (isStaleRunningOverview()) {
-      els.actionHint.textContent = `状态显示正在运行 ${activeDefinition || activeKind}，但 recovery 证据显示可能已卡住。请先查看失败摘要。`;
-      els.runHint.textContent = "检查 recovery";
+    if (staleRunning) {
+      els.actionHint.textContent = `状态显示正在运行 ${activeDefinition || activeKind}，但 evidence 显示它可能已经 stale。请先收束到 recovery，再决定是否重试。`;
+      els.runHint.textContent = "需要收束";
       return;
     }
     els.actionHint.textContent = `正在执行 ${activeDefinition || activeKind}。等待节点结束后刷新状态。`;
@@ -942,9 +1192,11 @@ function setActionVisibility(visible) {
   els.resume.disabled = !visible.resume;
   els.approve.classList.toggle("hidden", !visible.approve);
   els.complete.classList.toggle("hidden", !visible.complete);
+  els.recoverStaleRunning.classList.toggle("hidden", !visible.recoverStaleRunning);
   els.retry.classList.toggle("hidden", !visible.retry);
   els.closeMistakenIteration.classList.toggle("hidden", !visible.closeMistakenIteration);
-  els.recoveryActions.classList.toggle("hidden", !visible.closeMistakenIteration);
+  els.recoveryActions.classList.toggle("hidden",
+    !visible.recoverStaleRunning && !visible.retry && !visible.closeMistakenIteration);
   els.revise.classList.toggle("hidden", !visible.revise);
   els.tick.disabled = !visible.tick;
 }
@@ -997,6 +1249,7 @@ function escapeHtml(value) {
 }
 
 $("refresh").addEventListener("click", refreshList);
+els.clearNodeSelection.addEventListener("click", clearStageSelection);
 els.switchWorkspace.addEventListener("click", () => {
   els.workspaceChooser.classList.toggle("hidden");
   if (!els.workspaceChooser.classList.contains("hidden")) {
@@ -1018,7 +1271,7 @@ document.addEventListener("keydown", (event) => {
 });
 $("tick").addEventListener("click", async () => {
   try {
-    const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}`, {
+    const data = await request(`/api/scheduler/tick?workdir=${workdirParam()}&maxWorkstreams=10&maxStepsPerWorkstream=${maxSteps()}&autoRecover=${els.autoRecover.checked}`, {
       method: "POST",
     });
     setResponse(data);
@@ -1031,6 +1284,10 @@ $("tick").addEventListener("click", async () => {
 $("resume").addEventListener("click", () => postAction(`${selectedBase()}/resume?workdir=${workdirParam()}&maxSteps=${maxSteps()}`));
 $("approve").addEventListener("click", () => postAction(`${selectedBase()}/review/approve?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`));
 $("complete").addEventListener("click", () => postAction(`${selectedBase()}/review/complete?workdir=${workdirParam()}`, { note: "completed from operator panel" }));
+$("recoverStaleRunning").addEventListener("click", () => postAction(
+  `${selectedBase()}/recovery/stale?workdir=${workdirParam()}`,
+  { note: "stale running recovered from operator panel" }
+));
 $("retry").addEventListener("click", () => postAction(`${selectedBase()}/retry?workdir=${workdirParam()}`, { note: "retry from operator panel" }));
 $("closeMistakenIteration").addEventListener("click", () => postAction(
   `${selectedBase()}/recovery/close-mistaken-iteration?workdir=${workdirParam()}`,

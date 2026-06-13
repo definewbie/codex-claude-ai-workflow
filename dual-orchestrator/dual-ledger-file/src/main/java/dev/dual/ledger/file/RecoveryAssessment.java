@@ -62,7 +62,7 @@ public record RecoveryAssessment(
                     diagnostic
             );
         }
-        if (!diagnosticCategory.isBlank() || "AGENT_OUTPUT_CONTRACT_VIOLATION".equals(failureReason)) {
+        if (!diagnosticCategory.isBlank() || FailureReasonSemantics.isArtifactContractFailure(failureReason)) {
             return new RecoveryAssessment(
                     "artifact_contract_failure",
                     "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
@@ -86,7 +86,7 @@ public record RecoveryAssessment(
                     diagnostic
             );
         }
-        if (failureReason.contains("DUAL_CONTROL") || failureReason.contains("CONTRACT")) {
+        if (FailureReasonSemantics.isArtifactContractFailure(failureReason)) {
             return new RecoveryAssessment(
                     "artifact_contract_failure",
                     "RETRY_AFTER_OUTPUT_CONTRACT_FIX",

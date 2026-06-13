@@ -26,6 +26,14 @@ UI 不直接解析原始 Agent logs。它消费稳定的 ledger read models：
 
 这些 read models 由 runtime 和 ledger 生成。Operator panel 故意保持很薄。
 
+本地 server 还提供一个轻量 Server-Sent Events 进度流：
+
+```text
+GET /api/workstreams/<workstream_id>/stream?workdir=<effective_workdir>
+```
+
+这个流发送 `overview` 事件，数据来自同一套 API overview read model；没有变化时发送 heartbeat。它只是投影通道，不拥有 workflow 状态，也不从原始 log 猜进度。
+
 ## CLI First
 
 `dualctl trace` 是主要 operator 命令。它把 status、timeline、attention items、final acceptance、repair loops、key artifacts 和 next actions 折到一屏。
@@ -57,6 +65,15 @@ Operator panel 是本地单用户工具，不是多用户 Web 产品或托管 da
 7. grouped timeline 和 metrics。
 
 Action 应该有上下文。Human gate 应把 review evidence 和 decision buttons 放在一起。Debug details、raw packet 和 raw ledger path 应该是次级信息。
+
+Scheduler Tick 有一个显式 recovery 选项：
+
+- 未勾选：只推进 `RUNNING` workstreams；
+- 勾选：会检查 `WAITING_FOR_RECOVERY` workstreams，但只自动 retry/resume retry-ready 的运行时故障。
+
+这个选项消费 `RecoveryAssessment`。它不会自动修 artifact contract、不会解决语义争议，也不会替人做 human gate 决策。
+
+后台 scheduler 开启时，还可以配置一个可选的本地通知命令，在 gate、failure、completion 边界触发。默认关闭。命令会收到 `DUAL_WORKSTREAM_ID`、`DUAL_STATUS`、`DUAL_EVENT`、`DUAL_WORKDIR`、`DUAL_ACTIVE_NODE` 等环境变量。通知失败只记录到 scheduler status，不改变 workflow 状态。
 
 ## Human Gate 语义
 
@@ -95,7 +112,7 @@ Token 和 cost metrics 延后，直到 adapter 能提供可信 usage data。系�
 
 ## 已暴露的易用性问题
 
-真实 `cancer-clinic` run 暴露了一个问题：operator panel 仍会展示英文且过于笼统的 stopped/retry 文案，例如：
+一次私有生产型仓库 real-case run 暴露了一个问题：operator panel 仍会展示英文且过于笼统的 stopped/retry 文案，例如：
 
 ```text
 Workflow is stopped. Fix the cause if needed, then Retry marks the active node ready to run again.
@@ -107,7 +124,7 @@ Workflow is stopped. Fix the cause if needed, then Retry marks the active node r
 
 - 所有 operator-facing 提示优先提供中文表达；
 - `WAITING_FOR_HUMAN` 显示“等待人工审查”，突出 review packet 和 approve/revise；
-- `WAITING_FOR_RECOVERY` 显示“需要恢复”，给出失败节点、原因和建议动作；
+- `WAITING_FOR_RECOVERY` 显示“需要恢复”，给出失败节点、原因、建议动作和是否符合自动恢复条件；
 - `FAILED` / `ABORTED` 显示“已失败” / “已中止”，不要默认引导 Retry；
 - 如果同一任务已经启动了新的 workstream，提示用户打开最新 workstream。
 
@@ -116,9 +133,11 @@ Workflow is stopped. Fix the cause if needed, then Retry marks the active node r
 下一步有价值的不是更重的 UI 框架，而是更强的一致性：
 
 - CLI trace、API overview 和 operator panel 渲染同一组 attention items。
+- 已完成的 workstream 要展示 completion audit，并拒绝误触发 resume / retry / approve。
+- Stale running 应该是显式 recovery action，不能藏在按钮里，也不能静默重跑。
 - Failure / recovery summary 保持结构化。
 - Review packet layout 围绕真实人工决策继续改进。
-- 等 read models 稳定后，再通过 SSE 或 file watching 增加实时推送。
+- 实时推送已经通过 overview SSE stream 接入。只有当这个 read-model stream 不够用时，再考虑 file watching。
 
 ## TODO：流程交互顺滑度
 

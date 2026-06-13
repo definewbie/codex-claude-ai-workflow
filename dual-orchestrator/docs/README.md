@@ -3,7 +3,7 @@
 中文版本：[README.zh-CN.md](README.zh-CN.md)
 
 > Status: current docs index
-> Last updated: 2026-06-09
+> Last updated: 2026-06-13
 
 This directory contains the current product docs and selected implementation
 design notes. For open-source readers, start with the current reading path.
@@ -25,6 +25,7 @@ cleanup branch; reusable evidence now starts from the public benchmark sample.
 | Current feature status | [features.md](features.md) | Not split yet |
 | Public benchmark entry | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) | Not split yet |
 | Smoke / E2E usage | [testing/smoke-test-e2e.md](testing/smoke-test-e2e.md) | Not split yet |
+| Release checklist | [release-checklist.md](release-checklist.md) | [release-checklist.zh-CN.md](release-checklist.zh-CN.md) |
 | Full CLI / runtime reference | [reference.md](reference.md) | Detailed reference is not split yet |
 
 ## Public Onboarding Path
@@ -52,7 +53,8 @@ Use this path when changing the orchestrator itself:
 6. `features.md`
 
 These documents describe the current shape of the lifecycle, the state model,
-the artifact/context boundary, and the remaining MVP gaps.
+the artifact/context boundary, recovery scheduling, operator projection, and
+the remaining MVP gaps.
 
 ## Reference Path
 

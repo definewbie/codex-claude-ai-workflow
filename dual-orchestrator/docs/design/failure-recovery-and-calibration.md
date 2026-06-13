@@ -38,6 +38,50 @@ recovery/current-failure.json
 `dualctl recovery show`, `dualctl trace`, the API, and the operator panel all
 read this same recovery model.
 
+Runtime classification reads both Agent stdout and stderr. This matters because
+different ACP adapters and model providers do not agree on where runtime
+diagnostics are written: a quota or HTTP 429 error may appear in stdout while
+the acpx connection message remains in stderr. The recovery evidence should
+therefore preserve both streams when a run fails.
+
+The adapter keeps runtime failure matching behind a small signal catalog:
+
+- `AcpxFailureEvidence` owns the execution evidence boundary: stdout, stderr,
+  and exit code.
+- `AcpxFailureSignalCatalog` owns provider / adapter signal patterns such as
+  reconnect, missing session, rate limit, and context window.
+- `AcpxFailureClassifier` only maps evidence to a signal, or falls back to the
+  raw `ACPX_EXIT_<code>` result.
+
+New provider-specific wording should be added to the catalog as another signal
+matcher, not scattered through workflow routing, ledger projection, or UI code.
+
+## Automatic Recovery Scheduling
+
+Automatic recovery is deliberately narrow.
+
+The scheduler reads `RecoveryAssessment`. It may run `retry + resume` only when
+the active failure is classified as:
+
+```text
+classification = recoverable_agent_runtime
+retryReadiness = RETRY_AFTER_EXTERNAL_FIX
+```
+
+That covers external runtime failures such as quota windows, reconnects, or
+session state after the external cause has been fixed. The scheduler does not
+retry:
+
+- artifact contract failures;
+- semantic revision limits;
+- manual recovery cases;
+- human gates;
+- completed or failed workstreams.
+
+This keeps the domain boundary clean: failure classifiers explain the failure,
+the scheduler advances only safe runtime cases, and humans still own product or
+contract judgment.
+
 ## Semantic Failure
 
 Semantic failure happens after the verifier inspects the implementation and
@@ -53,8 +97,9 @@ validated fields and classifies the failure into stable categories:
 | `TOOL_LIMITATION` | Preserve evidence and surface recovery guidance. |
 | `REVIEW_NOISE` | Rebuild verifier context or ask a human to inspect. |
 
-`REJECT` creates a repair route. `ACCEPT_WITH_NOTES` records classification data
-but can still proceed to reporting when the notes are non-blocking.
+`REJECT` creates a repair route and is displayed as failure classification.
+`ACCEPT_WITH_NOTES` records notes classification data and can still proceed to
+reporting when the notes are non-blocking.
 
 ## Repair Loop
 

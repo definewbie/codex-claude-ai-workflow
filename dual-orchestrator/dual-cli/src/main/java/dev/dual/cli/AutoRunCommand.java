@@ -46,7 +46,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
         var gateCount = 0;
-        var resolvedGateDefinitions = new LinkedHashSet<String>();
+        var resolvedGateKeys = new LinkedHashSet<String>();
 
         System.out.println("Autorun started");
         System.out.println("Workstream: " + workstreamId);
@@ -71,14 +71,15 @@ public final class AutoRunCommand implements Callable<Integer> {
                     System.out.println("Stopped after --max-gates=" + maxGates + ". Review the workflow before continuing.");
                     return 1;
                 }
-                if (isRepeatedGate(snapshot.node(), resolvedGateDefinitions)) {
-                    System.out.println("Autorun stopped: repeated gate detected: " + snapshot.node().nodeDefinitionId());
-                    System.out.println("This usually means acceptance or review routed the workstream into a repair loop.");
+                if (isRepeatedGate(snapshot.node(), resolvedGateKeys)) {
+                    System.out.println("Autorun stopped: repeated gate detected in the same iteration: "
+                            + snapshot.node().nodeDefinitionId() + " / " + snapshot.node().iterationId());
+                    System.out.println("This usually means workflow routing returned to the same gate without opening a new repair iteration.");
                     System.out.println("Review the latest reports, then approve/revise/retry manually.");
                     return 1;
                 }
                 resolveGate(paths, snapshot.node(), gateCount);
-                resolvedGateDefinitions.add(snapshot.node().nodeDefinitionId());
+                resolvedGateKeys.add(gateKey(snapshot.node()));
                 continue;
             }
 
@@ -91,7 +92,7 @@ public final class AutoRunCommand implements Callable<Integer> {
 
     private Snapshot loadSnapshot(WorkstreamPaths paths) throws Exception {
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun inspect"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             var current = ledger.loadCurrent(paths);
             NodeInstanceDocument node = null;
             if (!current.activeNodeInstanceIds().isEmpty()) {
@@ -108,7 +109,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         var action = gateActionFor(node.nodeDefinitionId());
         System.out.println("Gate " + gateCount + ": " + node.nodeDefinitionId() + " -> " + action);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun gate"))) {
-            var ledger = new WorkflowFileLedger();
+            var ledger = CliLedgerFactory.create();
             ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, "auto-resolved from autorun");
         }
     }
@@ -147,8 +148,12 @@ public final class AutoRunCommand implements Callable<Integer> {
         return "approved";
     }
 
-    static boolean isRepeatedGate(NodeInstanceDocument node, LinkedHashSet<String> resolvedGateDefinitions) {
-        return node != null && resolvedGateDefinitions.contains(node.nodeDefinitionId());
+    static boolean isRepeatedGate(NodeInstanceDocument node, LinkedHashSet<String> resolvedGateKeys) {
+        return node != null && resolvedGateKeys.contains(gateKey(node));
+    }
+
+    static String gateKey(NodeInstanceDocument node) {
+        return node.nodeDefinitionId() + "@" + node.iterationId();
     }
 
     private record Snapshot(WorkflowCurrentDocument current, NodeInstanceDocument node) {

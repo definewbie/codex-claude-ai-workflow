@@ -21,6 +21,10 @@ dual-orchestrator 最早从一个很朴素的问题开始：人夹在 Claude Cod
 
 Claude / Codex / acpx 都是其中的可替换部件。真正的核心是外层 harness：workflow、ledger、contract、context、review、failure arbiter、calibration。
 
+领域边界见 `docs/design/workstream-domain-model.md`。这份文档明确了
+`Workstream` 的完成契约、artifact ownership、execution state 与 domain state
+的区别，以及防止实现漂移的检查机制。
+
 ## 2. 核心思想
 
 ### 2.1 Agent 分工
@@ -127,6 +131,22 @@ dual-orchestrator 的 context governance 做了几件事：
 
 CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harness 能力的外显。
 
+### 2.7 Scheduler 不是第二套状态机
+
+调度器的职责很窄：定期看 ledger 里的权威状态，然后调用已经存在的 workflow action。
+
+它不重新判断需求是否完成，也不解析 Agent 正文，更不替人做产品决策。
+
+当前规则是：
+
+- `RUNNING`：可以继续 `resume`，直到下一个 gate、recovery 或 completion。
+- `WAITING_FOR_HUMAN`：必须停住，等待人读 review packet 后 approve / revise / complete。
+- `WAITING_FOR_RECOVERY`：默认停住；只有显式开启 `autoRecover`，且 `RecoveryAssessment` 明确给出 `recoverable_agent_runtime + RETRY_AFTER_EXTERNAL_FIX`，才由 scheduler 执行 `retry + resume`。
+- `artifact_contract_failure`、`semantic_revision_limit`、`manual_recovery_required`：不自动恢复，因为这些不是“再跑一次就好”的问题。
+- `COMPLETED` / `FAILED` / `BLOCKED`：终态或边界态，不允许继续推进。
+
+这条边界很重要：workflow runtime 管状态迁移，RecoveryAssessment 管恢复解释，scheduler 只做安全推进，Operator Panel 只做投影。
+
 ## 3. 当前实现状态
 
 当前 dual-orchestrator 已经实现：
@@ -150,7 +170,7 @@ CLI 和 UI 都消费这些读模型。这样 UI 不是临时页面，而是 harn
 - Agent status protocol：Agent 输出里的 `dual-control` 块只表达“提议状态”；runtime 读取最后一个顶层状态块，忽略后续运行 epilogue，再由 node output contract 校验状态是否允许，最后才更新 ledger 和路由。
 - Strict structured artifact boundary：prompt contract 由 `ContractRegistry` 注入；self-test / acceptance / handoff 必须输出 typed `<dual-artifact>`；`contract.compile` 只从可信 Claude `task_contract_proposal` 生成 canonical TaskContract；FailureArbiter 和 human review guidance 读取结构化字段，而不是 Markdown section 或 summary keyword。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示当前进度。
-- Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow overview / status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；两者都只推进 `RUNNING` workstreams，不绕过 human gate / recovery / failure。
+- Local API Server MVP：`dual-server` 提供 HTTP API，可查询 workstream list、workflow overview / status / timeline，并执行最小 action：resume、retry、review approve/revise。Scheduler 支持手动 tick，也支持默认关闭的后台周期调度；默认只推进 `RUNNING` workstreams。显式开启 `autoRecover` 后，scheduler 只会自动恢复 `RecoveryAssessment` 判定为 retry-ready 的运行时故障，不绕过 human gate、artifact contract failure 或语义争议。
 - Delivery prepare / commit / create-pr 基础管线。
 - 多 workflow variant：baseline / contract / full。
 - 真实 acpx smoke：baseline / contract 已通过；fixture full 仍保留 `PASS-WARN` 语义，因为 Codex 是否拒绝不可控。
@@ -181,7 +201,8 @@ real-case benchmark
 | Done | Status workflow-first | `dualctl status` 默认以 workflow current 为准，避免旧 checkpoint/stage 误导当前进度 |
 | Done | Failure summary 扩展 | 普通 `FAILED` / `BLOCKED` 节点也会生成 `recovery/current-failure.md` |
 | Done | Local API Server MVP | overview / status / timeline + 最小 action API，先给 UI 和外部观察器一个稳定入口 |
-| Done | Scheduler tick + background MVP | 手动或后台周期调度，只推进 RUNNING workstreams，不绕过 human gate / recovery |
+| Done | Scheduler tick + background MVP | 手动或后台周期调度默认只推进 RUNNING workstreams |
+| Done | Automatic recovery scheduling | 显式 `autoRecover` 时，只自动 retry/resume retry-ready 的 runtime failure；contract / semantic / human gate 仍停住 |
 | Done | Metrics projection MVP | ledger 自动生成节点、gate、iteration、duration 指标，CLI summary 和 API overview 复用同一读模型 |
 | Next | Real-case benchmark loop | 用 2-3 个真实任务持续验证 full，而不是只靠低复杂度 fixture |
 | Next | Operator-grade review UX | 围绕 review packet、artifact sidecar、failure summary 展示“为什么能 approve / 为什么要 revise” |

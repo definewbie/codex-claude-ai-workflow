@@ -6,6 +6,7 @@
 #   ./scripts/smoke-test.sh lifecycle                     # Controlled full lifecycle smoke, no real acpx calls
 #   ./scripts/smoke-test.sh                              # Default: baseline-basic case
 #   ./scripts/smoke-test.sh --case lifecycle
+#   ./scripts/smoke-test.sh --case reject-repair-reaccept
 #   ./scripts/smoke-test.sh --case contract-happy-path
 #   ./scripts/smoke-test.sh --case full-reject-classify-path
 #   ./scripts/smoke-test.sh --case all                   # Run all cases sequentially
@@ -56,12 +57,13 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       ;;
-    lifecycle|baseline-basic|contract-happy-path|full-reject-classify-path|all)
+    lifecycle|reject-repair-reaccept|baseline-basic|contract-happy-path|full-reject-classify-path|all)
       CASE_NAME="$1"
       ;;
     --list)
       echo "Available E2E cases:"
       echo "  lifecycle              Controlled baseline lifecycle happy path with fake acpx"
+      echo "  reject-repair-reaccept Controlled full variant: REJECT -> classify -> repair -> ACCEPT"
       echo "  baseline-basic           Baseline mainline, full lifecycle happy path"
       echo "  contract-happy-path      Contract variant with contract compilation and review"
       echo "  full-reject-classify-path Full variant, best-effort classify_failure coverage"
@@ -119,6 +121,17 @@ configure_case() {
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "Acceptance Summary" "Developer Self-Test Summary" "Git Evidence" "Run Artifacts")
       CASE_VARIANT_ASSERT_FN="assert_lifecycle_controlled"
       ;;
+    reject-repair-reaccept)
+      CASE_VARIANT="full"
+      CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出。"
+      CASE_FINAL_GATE="gate.human_next_stage_approval"
+      CASE_USE_CONTROLLED_ACPX=true
+      CASE_DUALCTL_EXTRA_ARGS=("--workflow-variant" "full")
+      CASE_EXPECTED_ARTIFACTS=("artifacts/task-contract.json" "artifacts/failure-classification.json" "reports/latest-final-report.md" "delivery/commit-message.txt" "delivery/pr-body.md" "artifacts/next-stage/next-stage-prompt.md")
+      CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "contract_compilation_completed" "failure_classified" "iteration_started" "workflow_completed")
+      CASE_EXPECTED_REPORT_SECTIONS=("User Request" "TaskContract" "Failure Classification" "Acceptance Summary" "Run Artifacts")
+      CASE_VARIANT_ASSERT_FN="assert_reject_repair_reaccept"
+      ;;
     baseline-basic)
       CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出，不要让 python main.py 打印 goodbye。"
       CASE_FINAL_GATE="gate.human_next_stage_approval"
@@ -147,7 +160,7 @@ configure_case() {
       CASE_VARIANT_ASSERT_FN="assert_full_classify"
       ;;
     *)
-      echo "Unknown case: $CASE_NAME. Supported: lifecycle, baseline-basic, contract-happy-path, full-reject-classify-path, all"
+      echo "Unknown case: $CASE_NAME. Supported: lifecycle, reject-repair-reaccept, baseline-basic, contract-happy-path, full-reject-classify-path, all"
       exit 1
       ;;
   esac
@@ -274,6 +287,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 template="$(basename "${prompt:-unknown.md}")"
+smoke_case="${DUAL_SMOKE_CASE:-}"
 
 write_control() {
   local decision="$1"
@@ -295,7 +309,40 @@ EOF
 
 case "$template" in
   intake-claude-brainstorm.md)
-    write_control "READY_FOR_PRODUCT_REVIEW" "Requirement is clear enough for product review."
+    cat <<'EOF'
+## Controlled Intake
+
+The requirement is clear enough for product review.
+
+<dual-artifact type="task_contract_proposal" version="1">
+{
+  "artifact_type": "task_contract_proposal",
+  "schema_version": 1,
+  "objective": "Add a goodbye function and document it without changing command-line output.",
+  "scope": {
+    "included": ["main.py", "README.md"],
+    "excluded": ["Do not change __main__ output", "Do not add dependencies", "Do not modify unrelated files"]
+  },
+  "acceptance_criteria": [
+    "main.py defines goodbye() returning the exact string goodbye",
+    "README.md documents goodbye()",
+    "Running python main.py still prints only the existing hello output"
+  ],
+  "constraints": ["Keep the change scoped to the fixture files"],
+  "non_goals": ["No package manager changes", "No unrelated refactor"],
+  "risk_areas": ["Accidentally changing __main__ output", "Missing documentation"],
+  "test_requirements": ["Import main and assert goodbye() returns goodbye", "Run or inspect __main__ behavior"],
+  "evidence_refs": ["main.py", "README.md"],
+  "open_questions": []
+}
+</dual-artifact>
+
+```dual-control
+decision: READY_FOR_PRODUCT_REVIEW
+needs_human_input: false
+summary: Requirement is clear enough for product review.
+```
+EOF
     ;;
   intake-codex-product-review.md)
     write_control "READY_FOR_PRODUCT_REVIEW" "Product review passed for controlled smoke."
@@ -336,28 +383,206 @@ import main
 assert main.hello() == "world"
 assert main.goodbye() == "goodbye"
 PY
-    write_control "SELF_TEST_COMPLETE" "Self-test passed: hello() and goodbye() behave as expected."
+    cat <<'EOF'
+## Verification Summary
+
+Self-test passed for the controlled smoke fixture.
+
+## Checks Run
+
+- Imported `main` in Python.
+- Verified `main.hello() == "world"`.
+- Verified `main.goodbye() == "goodbye"`.
+
+## Checks Skipped
+
+- No repository-specific test suite exists in the controlled fixture.
+
+## Evidence
+
+- Python assertions completed without error.
+
+## Repository Hygiene
+
+- No generated byproducts were intentionally left behind.
+
+## Missing Evidence
+
+- No broader integration tests are available in this fixture.
+
+## Residual Risk
+
+- Controlled smoke validates lifecycle wiring, not production business behavior.
+
+<dual-artifact type="self_test_report" version="1">
+{
+  "artifact_type": "self_test_report",
+  "schema_version": 1,
+  "lifecycle_status": "READY",
+  "decision": "SELF_TEST_COMPLETE",
+  "summary": "Self-test passed: hello() and goodbye() behave as expected.",
+  "checks_run": ["Imported main in Python", "Verified main.hello() == world", "Verified main.goodbye() == goodbye"],
+  "checks_skipped": ["No repository-specific test suite exists in the controlled fixture"],
+  "evidence": ["Python assertions completed without error"],
+  "missing_evidence": [],
+  "acceptance_notes": [],
+  "verification_summary": "Controlled smoke self-test is sufficient for lifecycle validation."
+}
+</dual-artifact>
+
+```dual-control
+decision: SELF_TEST_COMPLETE
+summary: Self-test passed: hello() and goodbye() behave as expected.
+```
+EOF
     ;;
   acceptance-codex-review.md)
-    write_control "ACCEPT" "Controlled verifier accepted the implementation evidence."
+    if [[ "$smoke_case" == "reject-repair-reaccept" ]]; then
+      mkdir -p .agent
+      count_file=".agent/controlled-acceptance-count"
+      count=0
+      if [[ -f "$count_file" ]]; then
+        count="$(cat "$count_file" 2>/dev/null || echo 0)"
+      fi
+      count=$((count + 1))
+      printf '%s\n' "$count" > "$count_file"
+      if [[ "$count" -eq 1 ]]; then
+        cat <<'EOF'
+# Acceptance Review
+
+## Decision
+
+Rejected. The controlled verifier requires one repair pass to validate repair-loop routing.
+
+<dual-artifact type="acceptance_review" version="1">
+{
+  "artifact_type": "acceptance_review",
+  "schema_version": 1,
+  "lifecycle_status": "REJECTED",
+  "decision": "REJECT",
+  "summary": "Controlled verifier rejected the first implementation pass to exercise repair routing.",
+  "blocking": true,
+  "checks": ["Inspected controlled implementation evidence", "Checked repair-loop routing precondition"],
+  "evidence": ["The first acceptance pass is intentionally rejected by the controlled smoke fixture"],
+  "missing_evidence": ["Repair pass evidence has not been generated yet"],
+  "must_fix": ["Run one repair implementation pass and provide updated self-test evidence"],
+  "acceptance_notes": [],
+  "open_risks": ["This is a controlled rejection used only for kernel verification"],
+  "changed_files": ["main.py", "README.md"],
+  "verification_summary": "First pass intentionally rejected to exercise classify_failure and repair routing.",
+  "failure": {
+    "category_hint": "implementation_bug",
+    "contract_gaps": [],
+    "out_of_scope_files": [],
+    "missing_tests": ["Updated repair evidence missing on first pass"],
+    "context_gaps": [],
+    "reason": "Controlled first-pass rejection for repair-loop verification."
+  }
+}
+</dual-artifact>
+
+```dual-control
+decision: REJECT
+summary: Controlled verifier rejected the first implementation pass to exercise repair routing.
+```
+EOF
+        exit 0
+      fi
+    fi
+    cat <<'EOF'
+# Acceptance Review
+
+## Decision
+
+Accepted. The controlled verifier found enough evidence for the smoke fixture.
+
+<dual-artifact type="acceptance_review" version="1">
+{
+  "artifact_type": "acceptance_review",
+  "schema_version": 1,
+  "lifecycle_status": "ACCEPTED",
+  "decision": "ACCEPT",
+  "summary": "Controlled verifier accepted the implementation evidence.",
+  "blocking": false,
+  "checks": ["Inspected controlled self-test report", "Checked changed file summary"],
+  "evidence": ["Self-test report completed successfully", "Controlled fixture includes the requested goodbye() change"],
+  "missing_evidence": [],
+  "must_fix": [],
+  "acceptance_notes": [],
+  "open_risks": [],
+  "changed_files": ["main.py", "README.md"],
+  "verification_summary": "Controlled smoke evidence is sufficient for lifecycle validation.",
+  "failure": {
+    "category_hint": "",
+    "contract_gaps": [],
+    "out_of_scope_files": [],
+    "missing_tests": [],
+    "context_gaps": [],
+    "reason": ""
+  }
+}
+</dual-artifact>
+
+```dual-control
+decision: ACCEPT
+summary: Controlled verifier accepted the implementation evidence.
+```
+EOF
     ;;
   stage-claude-handoff.md)
     cat <<'EOF'
 ## Handoff
 
-Completed work:
+## Completed Work
+
 - Added goodbye() to main.py.
 - Documented goodbye() in README.md.
 
-Open risks:
+## Important Decisions
+
+- Kept the fixture change scoped to main.py and README.md.
+
+## Changed Files
+
+- main.py
+- README.md
+
+## Verification State
+
+- Controlled self-test and acceptance review completed.
+
+## Open Risks
+
 - None for controlled smoke.
 
-Recommended next step:
+## Recommended Next Stage
+
 - Use the generated report and next-stage prompt as handoff artifacts.
+
+## Suggested Next Prompt
+
+Continue from the generated report and preserve the completed goodbye() fixture change.
+
+<dual-artifact type="stage_handoff" version="1">
+{
+  "artifact_type": "stage_handoff",
+  "schema_version": 1,
+  "lifecycle_status": "READY",
+  "decision": "HANDOFF_READY",
+  "summary": "Controlled handoff is ready for the next stage.",
+  "completed_work": ["Added goodbye() to main.py", "Documented goodbye() in README.md"],
+  "important_decisions": ["Kept the fixture change scoped to main.py and README.md"],
+  "changed_files": ["main.py", "README.md"],
+  "verification_state": "Controlled self-test and acceptance review completed.",
+  "open_risks": [],
+  "recommended_next_stage": "Use the generated report and next-stage prompt as handoff artifacts.",
+  "suggested_next_prompt": "Continue from the generated report and preserve the completed goodbye() fixture change."
+}
+</dual-artifact>
 
 ```dual-control
 decision: HANDOFF_READY
-summary: Handoff is ready for the next stage.
+summary: Controlled handoff is ready for the next stage.
 ```
 EOF
     ;;
@@ -397,6 +622,50 @@ assert_lifecycle_controlled() {
     ok "handoff.json exists"
   else
     fail "handoff.json missing"
+  fi
+}
+
+assert_reject_repair_reaccept() {
+  step "Reject Repair Re-Accept Assertions"
+
+  local classification_json="$WS_DIR/artifacts/failure-classification.json"
+  if [[ -f "$classification_json" ]]; then
+    ok "failure-classification.json exists"
+    local category
+    category=$(python3 -c "import json; print(json.load(open('$classification_json')).get('category','?'))" 2>/dev/null || echo "?")
+    ok "Failure category: $category"
+  else
+    fail "failure-classification.json missing"
+  fi
+
+  local iteration_count
+  iteration_count=$(grep -c '"iteration_started"' "$WS_DIR/events.jsonl" 2>/dev/null || true)
+  iteration_count=${iteration_count:-0}
+  if [[ "$iteration_count" -gt 0 ]]; then
+    ok "Repair/revision iteration started: $iteration_count"
+  else
+    fail "No iteration_started event found; repair loop was not exercised"
+  fi
+
+  local acceptance_runs
+  acceptance_runs=$(find "$WS_DIR/runs" -path "*/outputs/acceptance-codex-review.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+  if [[ "$acceptance_runs" -ge 2 ]]; then
+    ok "Acceptance review ran at least twice: $acceptance_runs"
+  else
+    fail "Expected at least two acceptance reviews, found $acceptance_runs"
+  fi
+
+  if grep -q '"outcome":"REJECT_IMPLEMENTATION_BUG"\|"outcome":"REJECT_CONTEXT_INSUFFICIENT"\|"outcome":"REJECT_TOOL_LIMITATION"' "$WS_DIR/events.jsonl" 2>/dev/null; then
+    ok "Events contain REJECT repair routing outcome"
+  else
+    fail "Events missing REJECT repair routing outcome"
+  fi
+
+  if grep -R '"decision" *: *"REJECT"' "$WS_DIR/runs" >/dev/null 2>&1 \
+    && grep -R '"decision" *: *"ACCEPT"' "$WS_DIR/runs" >/dev/null 2>&1; then
+    ok "Acceptance artifacts contain both REJECT and ACCEPT"
+  else
+    fail "Expected both REJECT and ACCEPT acceptance artifacts"
   fi
 }
 
@@ -562,6 +831,7 @@ run_smoke_case() {
     install_controlled_acpx "$CONTROLLED_ACPX_DIR"
     PATH_BEFORE_CONTROLLED_ACPX="$PATH"
     export PATH="$CONTROLLED_ACPX_DIR:$PATH"
+    export DUAL_SMOKE_CASE="$CASE_NAME"
     ok "controlled acpx installed for lifecycle smoke"
   fi
 
@@ -1141,7 +1411,7 @@ print_case_report() {
 
 # ─── --case all mode ─────────────────────────────────────────────────────────
 if [[ "$CASE_NAME" == "all" ]]; then
-  ALL_CASES=("lifecycle" "baseline-basic" "contract-happy-path" "full-reject-classify-path")
+  ALL_CASES=("lifecycle" "reject-repair-reaccept" "baseline-basic" "contract-happy-path" "full-reject-classify-path")
   ALL_RESULTS=()
   ALL_PASS=true
 

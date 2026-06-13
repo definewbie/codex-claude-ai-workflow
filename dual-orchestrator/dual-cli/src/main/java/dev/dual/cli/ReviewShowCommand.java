@@ -27,7 +27,7 @@ public final class ReviewShowCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        var ledger = new WorkflowFileLedger();
+        var ledger = CliLedgerFactory.create();
         var current = ledger.loadCurrent(paths);
         if (current.activeNodeInstanceIds().isEmpty()) {
             System.err.println("No active node for workstream: " + workstreamId);

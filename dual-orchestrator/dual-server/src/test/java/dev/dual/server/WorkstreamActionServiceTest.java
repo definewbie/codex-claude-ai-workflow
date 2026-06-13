@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WorkstreamActionServiceTest {
     @TempDir
@@ -78,6 +79,43 @@ class WorkstreamActionServiceTest {
         var current = ledger.loadCurrent(paths);
         assertEquals(WorkflowStatus.COMPLETED, current.status());
         assertEquals(List.of(), current.activeNodeInstanceIds());
+    }
+
+    @Test
+    void resumeRejectsCompletedWorkflow() throws Exception {
+        var paths = createWorkstream("ws-completed-boundary", simpleDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.RUNNING, "should-not-run", "unused"));
+
+        var error = assertThrows(IllegalStateException.class,
+                () -> service.resume(tempDir, "ws-completed-boundary", 1));
+
+        assertEquals(true, error.getMessage().contains("already completed"));
+    }
+
+    @Test
+    void recoverStaleRunningMovesActiveNodeToRecovery() throws Exception {
+        var paths = createWorkstream("ws-stale-api", simpleDefinition());
+        var ledger = new WorkflowFileLedger();
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.markRunning(paths, entry, Long.MAX_VALUE);
+
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
+        var response = service.recoverStaleRunning(tempDir, "ws-stale-api", "process disappeared");
+
+        assertEquals("recovery.stale", response.get("action"));
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
+        assertEquals(List.of("recovery-" + entry), current.openGateIds());
+        var node = ledger.loadNode(paths, entry);
+        assertEquals(NodeStatus.FAILED, node.status());
+        assertEquals("STALE_RUNNING_PROCESS", node.result().get("reason"));
     }
 
 

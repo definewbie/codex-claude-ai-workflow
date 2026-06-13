@@ -336,14 +336,59 @@ class WorkflowFileLedgerTest {
 
         ledger.completeAndRoute(paths, definition, classifier.nodeInstanceId(), NodeStatus.COMPLETED,
                 "REJECT_IMPLEMENTATION_BUG", List.of("failure-classification.json"), Map.of(
+                        "review_decision", "REJECT",
                         "category", "IMPLEMENTATION_BUG"
                 ));
+
+        var timeline = Files.readString(paths.timelineJson());
+        assertTrue(timeline.contains("\"displayName\" : \"acceptance.classify_failure\""));
 
         current = ledger.loadCurrent(paths);
         var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         assertEquals("context.implement_claude", repair.nodeDefinitionId());
         assertEquals("iter-002", repair.iterationId());
         assertTrue(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void acceptanceWithNotesDisplaysClassifierAsNotesClassification() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-notes"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle-full",
+                3,
+                "acceptance.decision",
+                List.of(
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("acceptance.decision", "ACCEPT_WITH_NOTES", "acceptance.classify_failure"),
+                        new EdgeDefinition("acceptance.classify_failure", "NOTED_REVIEW_NOISE", "acceptance.generate_final_report")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-acceptance-notes", definition);
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "ACCEPT_WITH_NOTES", List.of("review.md"), Map.of(
+                        "decision", "ACCEPT_WITH_NOTES",
+                        "summary", "Accepted with non-blocking notes."
+                ));
+
+        var classifier = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, classifier.nodeInstanceId(), NodeStatus.COMPLETED,
+                "NOTED_REVIEW_NOISE", List.of("failure-classification.json"), Map.of(
+                        "review_decision", "ACCEPT_WITH_NOTES",
+                        "category", "REVIEW_NOISE"
+                ));
+
+        var timeline = Files.readString(paths.timelineJson());
+        assertTrue(timeline.contains("\"nodeDefinitionId\" : \"acceptance.classify_failure\""));
+        assertTrue(timeline.contains("\"displayName\" : \"acceptance.classify_notes\""));
     }
 
     @Test
@@ -744,6 +789,61 @@ class WorkflowFileLedgerTest {
         assertTrue(retryNode.outputRefs().isEmpty());
         assertEquals("FAILED", retryNode.result().get("retry_of_status"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_retry_requested"));
+    }
+
+    @Test
+    void staleRunningNodeMovesToRecoveryWhenPidIsGone() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-stale-running"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-stale-running", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.markRunning(paths, node.nodeInstanceId(), Long.MAX_VALUE);
+
+        ledger.recoverStaleRunningNode(paths, "agent process disappeared");
+
+        var recovered = ledger.loadCurrent(paths);
+        var failedNode = ledger.loadNode(paths, node.nodeInstanceId());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, recovered.status());
+        assertEquals(List.of(node.nodeInstanceId()), recovered.activeNodeInstanceIds());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), recovered.openGateIds());
+        assertEquals(NodeStatus.FAILED, failedNode.status());
+        assertEquals("STALE_RUNNING_PROCESS", failedNode.result().get("reason"));
+        assertEquals(true, failedNode.result().get("recoverable"));
+        assertTrue(Files.exists(paths.currentFailureMarkdown()));
+        assertTrue(Files.readString(paths.currentFailureMarkdown()).contains("STALE_RUNNING_PROCESS"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_recovered"));
+    }
+
+    @Test
+    void staleRunningRecoveryRejectsLivePid() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-live-running"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-live-running", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.markRunning(paths, node.nodeInstanceId(), ProcessHandle.current().pid());
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.recoverStaleRunningNode(paths, "should reject live process"));
+
+        assertTrue(error.getMessage().contains("still alive"));
     }
 
     @Test

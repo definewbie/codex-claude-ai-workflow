@@ -5,6 +5,7 @@ import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.runtime.handler.HumanGateSemantics;
 
 import java.util.List;
 import java.util.Map;
@@ -356,7 +357,9 @@ public final class LifecycleWorkflowDefinitionFactory {
     private static NodeDefinition gate(String id, List<String> allowedActions) {
         return new NodeDefinition(id, NodeKind.GATE, "human.review", Map.of(
                 "allowed_actions", allowedActions,
-                "max_revisions", DEFAULT_MAX_REVISIONS
+                "max_revisions", DEFAULT_MAX_REVISIONS,
+                "gate_purpose", HumanGateSemantics.purposeForDefinitionId(id),
+                "terminal_gate", HumanGateSemantics.terminalGate(id)
         ));
     }
 

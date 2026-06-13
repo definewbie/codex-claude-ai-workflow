@@ -18,7 +18,9 @@ class BackgroundSchedulerServiceTest {
                 false,
                 "/tmp/ws-a",
                 10,
-                1
+                1,
+                false,
+                NotificationService.disabled()
         );
 
         var result = service.runOnce();
@@ -36,7 +38,9 @@ class BackgroundSchedulerServiceTest {
                 true,
                 "/tmp/ws-a,/tmp/ws-b",
                 3,
-                2
+                2,
+                true,
+                NotificationService.disabled()
         );
 
         var result = service.runOnce();
@@ -44,6 +48,7 @@ class BackgroundSchedulerServiceTest {
         assertEquals("completed", result.get("status"));
         assertEquals(2, tickCalls.get());
         assertEquals(2, result.get("resumed"));
+        assertEquals(2, result.get("autoRecovered"));
         assertEquals(4, result.get("skipped"));
     }
 
@@ -54,7 +59,9 @@ class BackgroundSchedulerServiceTest {
                 false,
                 "",
                 10,
-                1
+                1,
+                false,
+                NotificationService.disabled()
         );
 
         service.runOnce();
@@ -74,12 +81,13 @@ class BackgroundSchedulerServiceTest {
         }
 
         @Override
-        public Map<String, Object> tick(Path workspaceRoot, int maxWorkstreams, int maxStepsPerWorkstream) {
+        public Map<String, Object> tick(Path workspaceRoot, int maxWorkstreams, int maxStepsPerWorkstream, boolean autoRecover) {
             calls.incrementAndGet();
             var response = new LinkedHashMap<String, Object>();
             response.put("action", "scheduler.tick");
             response.put("workdir", workspaceRoot.toString());
             response.put("resumed", 1);
+            response.put("autoRecovered", autoRecover ? 1 : 0);
             response.put("skipped", 2);
             response.put("limits", maxWorkstreams + ":" + maxStepsPerWorkstream);
             return response;

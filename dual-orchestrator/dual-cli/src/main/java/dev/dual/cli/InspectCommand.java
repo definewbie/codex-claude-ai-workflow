@@ -45,7 +45,7 @@ public final class InspectCommand implements Callable<Integer> {
     }
 
     private void inspectNode(WorkstreamPaths paths) throws Exception {
-        var ledger = new WorkflowFileLedger();
+        var ledger = CliLedgerFactory.create();
         var id = nodeInstanceId;
         if (id == null || id.isBlank()) {
             var current = ledger.loadCurrent(paths);

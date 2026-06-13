@@ -16,6 +16,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPORTS_DIR="$PROJECT_ROOT/docs/testing/real-case-reports"
 OUTPUT="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-index.md"
+INCLUDE_PRIVATE=false
 
 # shellcheck source=scripts/lib/real-case-grade.sh
 source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
@@ -28,6 +29,7 @@ Usage:
 Options:
   --reports-dir <path>  Directory containing */summary.json files.
   --output <path>       Markdown file to write. Default: docs/testing/real-case-benchmarks/benchmark-index.md
+  --include-private     Include non-public local/private real-case summaries.
   --stdout              Print to stdout instead of writing a file.
   -h, --help            Show this help.
 EOF
@@ -69,6 +71,9 @@ parse_args() {
       --stdout)
         stdout=true
         ;;
+      --include-private)
+        INCLUDE_PRIVATE=true
+        ;;
       -h|--help)
         usage
         exit 0
@@ -87,7 +92,18 @@ parse_args() {
 }
 
 json_files() {
-  find "$REPORTS_DIR" -mindepth 2 -maxdepth 2 -name summary.json -type f | sort
+  while IFS= read -r file; do
+    if [[ "$INCLUDE_PRIVATE" == true ]] || is_public_summary "$file"; then
+      printf '%s\n' "$file"
+    fi
+  done < <(find "$REPORTS_DIR" -mindepth 2 -maxdepth 2 -name summary.json -type f | sort)
+}
+
+is_public_summary() {
+  local file="$1"
+  local task_file
+  task_file="$(jq -r '.task_file // ""' "$file")"
+  [[ "$(basename "$task_file")" == public-* ]]
 }
 
 json_value() {
@@ -248,14 +264,13 @@ write_markdown() {
 
 ## Runs
 
-| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Final acceptance | Repair loops | Confidence | Repo clean | Artifacts | Report |
+| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Final acceptance | Repair loops | Confidence | Repo clean | Artifacts | Local report |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
 EOF
 
   for file in "${files[@]}"; do
-    local run_dir report_ref date case variant status workstream gates agent_runs final_decision repair_loops confidence repo_clean artifacts grade reason
+    local run_dir date case variant status workstream gates agent_runs final_decision repair_loops confidence repo_clean artifacts grade reason
     run_dir="$(dirname "$file")"
-    report_ref="$(relative_ref "$run_dir/report.md")"
     date="$(basename "$run_dir")"
     case="$(case_name "$file")"
     grade="$(benchmark_grade "$file")"
@@ -274,9 +289,9 @@ EOF
     [[ -n "$confidence" ]] || confidence="$(confidence_from_decision "$final_decision")"
     repo_clean="$(json_value "$file" '.original_repo_clean')"
     artifacts="$(artifact_health "$file")"
-    printf '| %s | `%s` | %s | %s | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | %s | [%s](../real-case-reports/%s/report.md) |\n' \
+    printf '| %s | `%s` | %s | %s | %s | %s | `%s` | %s | %s | %s | %s | %s | %s | %s | ignored local file |\n' \
       "$date" "$case" "$grade" "$reason" "$variant" "$status" "$workstream" "$gates" "$agent_runs" \
-      "${final_decision:-none}" "$repair_loops" "$confidence" "$repo_clean" "$artifacts" "$report_ref" "$date"
+      "${final_decision:-none}" "$repair_loops" "$confidence" "$repo_clean" "$artifacts"
   done
 
   cat <<'EOF'

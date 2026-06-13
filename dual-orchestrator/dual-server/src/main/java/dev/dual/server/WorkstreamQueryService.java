@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.ledger.file.FileLedgerStore;
+import dev.dual.ledger.file.IterationSemantics;
 import dev.dual.ledger.file.RecoveryAssessment;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkflowIterationDocument;
@@ -36,7 +37,7 @@ public class WorkstreamQueryService {
     public WorkstreamQueryService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.legacyStore = new FileLedgerStore();
-        this.workflowLedger = new WorkflowFileLedger();
+        this.workflowLedger = ServerLedgerFactory.create();
     }
 
     public Map<String, Object> status(Path workspaceRoot, String workstreamId) throws IOException {
@@ -129,6 +130,7 @@ public class WorkstreamQueryService {
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
         var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
         var artifacts = artifacts(root, paths);
+        var completionAudit = completionAudit(paths, artifacts);
         var currentNode = currentNode(nodes, activeNodeIds);
         var latestAgentRuns = latestAgentRuns(root, paths, 6);
         var staleRunningReason = staleRunningReason(status, currentNode, latestAgentRuns, artifacts);
@@ -156,11 +158,12 @@ public class WorkstreamQueryService {
         response.put("whyStopped", whyStopped(status, currentNode, openGateIds, staleRunningReason));
         response.put("nextAction", nextAction(root, workstreamId, status, openGateIds, staleRunningReason));
         response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
-                artifacts, staleRunningReason, recoveryAssessment));
+                artifacts, staleRunningReason, recoveryAssessment, completionAudit));
         response.put("metrics", metrics);
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
         response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
+        response.put("completionAudit", completionAudit);
         response.put("recoveryAssessment", recoveryAssessment);
         return response;
     }
@@ -182,8 +185,28 @@ public class WorkstreamQueryService {
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a human gate: " + node.nodeDefinitionId());
         }
-        var packetRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".md";
-        var packetJsonRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".json";
+        return reviewPacket(root, paths, workstreamId, node.nodeInstanceId(), node.nodeDefinitionId());
+    }
+
+    public Map<String, Object> review(Path workspaceRoot, String workstreamId, String nodeInstanceId) throws IOException {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        var node = workflowLedger.loadNode(paths, nodeInstanceId);
+        if (node.kind() != NodeKind.GATE) {
+            throw new IOException("node is not a human gate: " + node.nodeDefinitionId());
+        }
+        return reviewPacket(root, paths, workstreamId, node.nodeInstanceId(), node.nodeDefinitionId());
+    }
+
+    private Map<String, Object> reviewPacket(
+            Path root,
+            WorkstreamPaths paths,
+            String workstreamId,
+            String nodeInstanceId,
+            String nodeDefinitionId
+    ) throws IOException {
+        var packetRef = ".agent/workstreams/" + workstreamId + "/reviews/" + nodeInstanceId + ".md";
+        var packetJsonRef = ".agent/workstreams/" + workstreamId + "/reviews/" + nodeInstanceId + ".json";
         var packetPath = root.resolve(packetRef).normalize();
         var packetJsonPath = root.resolve(packetJsonRef).normalize();
         if (!packetPath.startsWith(root) || !Files.exists(packetPath)) {
@@ -192,8 +215,8 @@ public class WorkstreamQueryService {
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
-        response.put("gateNodeInstanceId", node.nodeInstanceId());
-        response.put("gateNodeDefinitionId", node.nodeDefinitionId());
+        response.put("gateNodeInstanceId", nodeInstanceId);
+        response.put("gateNodeDefinitionId", nodeDefinitionId);
         response.put("packetPath", packetRef);
         response.put("packetMarkdown", Files.readString(packetPath, StandardCharsets.UTF_8));
         if (packetJsonPath.startsWith(root) && Files.exists(packetJsonPath)) {
@@ -222,6 +245,12 @@ public class WorkstreamQueryService {
         response.put("markdown", Files.readString(failurePath, StandardCharsets.UTF_8));
         response.put("assessment", recoveryAssessment(root, paths, workstreamId));
         return response;
+    }
+
+    public Map<String, Object> recoveryAssessment(Path workspaceRoot, String workstreamId) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        return recoveryAssessment(root, paths, workstreamId);
     }
 
     private Map<String, Object> workstreamSummary(Path root, Path dir, Path workstreamJson) throws IOException {
@@ -316,7 +345,7 @@ public class WorkstreamQueryService {
             }
             var payload = mapValue(event.get("payload"));
             var action = text(payload.get("trigger_action"));
-            if (action.startsWith("REJECT_")) {
+            if (IterationSemantics.isRepairLoopTrigger(action)) {
                 actions.add(Map.of("action", action));
             }
         }
@@ -439,7 +468,8 @@ public class WorkstreamQueryService {
     private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
                                                 String verificationConfidence, int repairLoopCount,
                                                 Map<String, Object> artifacts, String staleRunningReason,
-                                                Map<String, Object> recoveryAssessment) {
+                                                Map<String, Object> recoveryAssessment,
+                                                Map<String, Object> completionAudit) {
         var items = new ArrayList<Map<String, Object>>();
         var base = "--workdir \"" + root + "\" " + workstreamId;
         if (!staleRunningReason.isBlank()) {
@@ -514,6 +544,15 @@ public class WorkstreamQueryService {
                     ));
                 }
             }
+            var gaps = textList(completionAudit.get("gaps"));
+            if (!gaps.isEmpty()) {
+                items.add(attentionItem(
+                        "warning",
+                        "Completion artifacts need review",
+                        String.join("; ", gaps),
+                        "dualctl summary " + base
+                ));
+            }
         }
         if (items.isEmpty() && "COMPLETED".equals(status) && "ACCEPT".equals(finalAcceptance)) {
             items.add(attentionItem(
@@ -575,6 +614,7 @@ public class WorkstreamQueryService {
     private Map<String, Object> timelineItem(Map<String, Object> node) {
         var item = new LinkedHashMap<String, Object>();
         item.put("nodeDefinitionId", text(node.get("nodeDefinitionId")));
+        item.put("displayName", text(node.get("displayName"), text(node.get("nodeDefinitionId"))));
         item.put("status", text(node.get("status")));
         item.put("kind", text(node.get("kind")));
         item.put("iterationId", text(node.get("iterationId")));
@@ -618,6 +658,74 @@ public class WorkstreamQueryService {
         artifact(artifacts, root, "deliveryPrBody", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"));
         artifact(artifacts, root, "currentFailure", paths.currentFailureMarkdown());
         return artifacts;
+    }
+
+    private Map<String, Object> completionAudit(WorkstreamPaths paths, Map<String, Object> artifacts) {
+        var gaps = new ArrayList<String>();
+        auditFinalReport(paths, artifacts, gaps);
+        auditHandoff(paths, artifacts, gaps);
+        auditNextStagePrompt(paths, artifacts, gaps);
+        return Map.of(
+                "status", gaps.isEmpty() ? "ready" : "needs_review",
+                "gaps", List.copyOf(gaps)
+        );
+    }
+
+    private void auditFinalReport(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
+        if (!artifactAvailable(artifacts, "finalReport")) {
+            gaps.add("final report is missing");
+            return;
+        }
+        var report = readText(paths.workstreamDir().resolve("reports").resolve("latest-final-report.md"));
+        for (var heading : List.of("## User Request", "## Verification Evidence", "## Acceptance Summary", "## Git Evidence")) {
+            if (!report.contains(heading)) {
+                gaps.add("final report missing " + heading);
+            }
+        }
+    }
+
+    private void auditHandoff(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
+        if (!artifactAvailable(artifacts, "handoffJson")) {
+            gaps.add("handoff.json is missing");
+            return;
+        }
+        var handoff = readJson(paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"));
+        if (text(handoff.get("workstreamId")).isBlank()) {
+            gaps.add("handoff.json missing workstreamId");
+        }
+        if (textList(handoff.get("completedWork")).isEmpty() && textList(handoff.get("changedFiles")).isEmpty()) {
+            gaps.add("handoff.json has no completedWork or changedFiles");
+        }
+        if (text(handoff.get("recommendedNextStage")).isBlank()
+                && text(handoff.get("suggestedNextPrompt")).isBlank()) {
+            gaps.add("handoff.json has no recommendedNextStage or suggestedNextPrompt");
+        }
+    }
+
+    private void auditNextStagePrompt(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
+        if (!artifactAvailable(artifacts, "nextStagePrompt")) {
+            gaps.add("next-stage prompt is missing");
+            return;
+        }
+        var prompt = readText(paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"));
+        if (!prompt.contains("## Prompt")) {
+            gaps.add("next-stage prompt missing ## Prompt section");
+        }
+        if (!prompt.contains("## Handoff Context")) {
+            gaps.add("next-stage prompt missing ## Handoff Context section");
+        }
+    }
+
+    private static boolean artifactAvailable(Map<String, Object> artifacts, String key) {
+        return Boolean.TRUE.equals(mapValue(artifacts.get(key)).get("available"));
+    }
+
+    private static String readText(Path path) {
+        try {
+            return Files.readString(path, StandardCharsets.UTF_8);
+        } catch (IOException ignored) {
+            return "";
+        }
     }
 
     private void artifact(Map<String, Object> artifacts, Path root, String key, Path path) {

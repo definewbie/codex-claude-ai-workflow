@@ -371,10 +371,11 @@ public final class HumanReviewGateHandler implements GateHandler {
         var mustFix = decision.mustFix();
         var missingEvidence = decision.missingEvidence();
         var openRisks = decision.openRisks();
-        var gateId = context.instance().nodeDefinitionId();
+        var gatePurpose = gatePurpose(context);
+        var terminalGate = terminalGate(context);
 
         var guidance = new LinkedHashMap<String, Object>();
-        if (allowedActions.contains("complete") && gateId.contains("next_stage")) {
+        if (allowedActions.contains("complete") && terminalGate) {
             guidance.put("recommendedAction", "complete");
             guidance.put("reason", "This is a next-stage gate. Complete the current workstream when the handoff and next-stage prompt are acceptable.");
         } else if (blocking && allowedActions.contains("revise")) {
@@ -383,7 +384,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         } else if (!mustFix.isEmpty() && allowedActions.contains("revise")) {
             guidance.put("recommendedAction", "revise");
             guidance.put("reason", "The latest agent decision still contains Must Fix items.");
-        } else if (gateId.contains("acceptance") && !missingEvidence.isEmpty() && allowedActions.contains("revise")) {
+        } else if ("acceptance".equals(gatePurpose) && !missingEvidence.isEmpty() && allowedActions.contains("revise")) {
             guidance.put("recommendedAction", "revise");
             guidance.put("reason", "The latest acceptance review reports missing evidence.");
         } else if (isNegativeDecision(decisionText) && allowedActions.contains("revise")) {
@@ -396,12 +397,12 @@ public final class HumanReviewGateHandler implements GateHandler {
             guidance.put("recommendedAction", allowedActions.isEmpty() ? "inspect" : allowedActions.get(0));
             guidance.put("reason", "No decisive recommendation is available. Read the packet and choose an allowed action.");
         }
-        guidance.put("suggestedChecks", suggestedChecks(gateId, mustFix, missingEvidence, openRisks));
+        guidance.put("suggestedChecks", suggestedChecks(gatePurpose, mustFix, missingEvidence, openRisks));
         return guidance;
     }
 
     private List<String> suggestedChecks(
-            String gateId,
+            String gatePurpose,
             List<String> mustFix,
             List<String> missingEvidence,
             List<String> openRisks
@@ -417,14 +418,22 @@ public final class HumanReviewGateHandler implements GateHandler {
         if (!openRisks.isEmpty()) {
             checks.add("Review open risks and decide whether they are acceptable for this stage.");
         }
-        if (gateId.contains("acceptance")) {
+        if ("acceptance".equals(gatePurpose)) {
             checks.add("Compare Codex acceptance, developer self-test evidence, Git evidence, and changed files before approval.");
-        } else if (gateId.contains("design") || gateId.contains("plan")) {
+        } else if ("design".equals(gatePurpose) || "plan".equals(gatePurpose)) {
             checks.add("Check whether the design or plan stays inside scope and avoids unnecessary implementation detail.");
-        } else if (gateId.contains("next_stage")) {
+        } else if ("next_stage".equals(gatePurpose)) {
             checks.add("Check the handoff and next-stage prompt before completing the current workstream.");
         }
         return List.copyOf(checks);
+    }
+
+    private static String gatePurpose(GateContext context) {
+        return HumanGateSemantics.purpose(context.definition().config(), context.instance().nodeDefinitionId());
+    }
+
+    private static boolean terminalGate(GateContext context) {
+        return HumanGateSemantics.terminal(context.definition().config(), context.instance().nodeDefinitionId());
     }
 
     private boolean isPositiveDecision(String decision) {

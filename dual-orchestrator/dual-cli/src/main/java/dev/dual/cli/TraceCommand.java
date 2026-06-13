@@ -3,6 +3,7 @@ package dev.dual.cli;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
+import dev.dual.ledger.file.IterationSemantics;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -96,7 +97,7 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println("Timeline:");
         for (var node : recent(nodes, Math.max(1, maxNodes))) {
             System.out.println("  " + marker(node) + " "
-                    + text(node.get("nodeDefinitionId")) + suffix(node));
+                    + displayName(node) + suffix(node));
         }
         for (var action : repairActions) {
             System.out.println("  [loop] repair: " + action);
@@ -200,7 +201,7 @@ public final class TraceCommand implements Callable<Integer> {
             }
             var payload = asMap(event.get("payload"));
             var action = text(payload.get("trigger_action"));
-            if (action.startsWith("REJECT_")) {
+            if (IterationSemantics.isRepairLoopTrigger(action)) {
                 actions.add(action);
             }
         }
@@ -434,6 +435,11 @@ public final class TraceCommand implements Callable<Integer> {
             case "SKIPPED" -> "[skip]";
             default -> "[ ]";
         };
+    }
+
+    private String displayName(Map<String, Object> node) {
+        var displayName = text(node.get("displayName"));
+        return displayName.isBlank() ? text(node.get("nodeDefinitionId")) : displayName;
     }
 
     private String suffix(Map<String, Object> node) {

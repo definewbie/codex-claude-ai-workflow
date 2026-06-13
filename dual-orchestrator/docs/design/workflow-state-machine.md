@@ -150,7 +150,11 @@ Examples:
 
 - most gates -> `approved`
 - final next-stage gate -> `complete`
-- repeated gate definition -> stop, because a repair loop probably needs a human look
+- same gate definition in the same iteration -> stop, because routing likely
+  returned to the same human gate without opening a real repair iteration
+- same gate definition in a new iteration -> continue, because Codex rejection
+  or human revision can legitimately route back through contract/design/plan
+  review in a bounded repair loop
 
 Real usage should read the review packet before resolving a gate.
 
@@ -204,6 +208,33 @@ the runtime may:
 4. execute the same node again.
 
 If retry limit is reached, the workflow stays in `WAITING_FOR_RECOVERY` and asks for manual `dualctl retry`.
+
+There are two execution paths:
+
+| Path | Trigger | Boundary |
+|---|---|---|
+| Runtime auto-retry | A `resume` call reaches `WAITING_FOR_RECOVERY` and the active failed node is marked recoverable. | Bounded by the retry policy attached to the failed node. |
+| Scheduler auto-recovery | `scheduler.tick(..., autoRecover=true)` sees a `WAITING_FOR_RECOVERY` workstream. | Only allowed when `RecoveryAssessment` says `recoverable_agent_runtime + RETRY_AFTER_EXTERNAL_FIX`. |
+
+The scheduler does **not** auto-retry artifact contract failures, semantic
+revision limits, manual recovery cases, or human gates. It first marks the same
+active node ready with `retry`, then calls `resume`; it does not create a new
+workstream, new worktree, or replacement node.
+
+Manual scheduler tick:
+
+```bash
+curl -X POST \
+  'http://localhost:8080/api/scheduler/tick?workdir=<effective_workdir>&maxWorkstreams=10&maxStepsPerWorkstream=20&autoRecover=true'
+```
+
+Background scheduler config:
+
+```properties
+dual.scheduler.enabled=true
+dual.scheduler.workdirs=/path/to/workdir-a,/path/to/workdir-b
+dual.scheduler.auto-recover=true
+```
 
 ## 8. Iterations
 
@@ -310,6 +341,28 @@ The important state-machine point:
 
 This case did not validate recovery or revision loops. It should be read as evidence for the normal gate-driven path, not as proof that every edge path is covered.
 
+A public benchmark run on 2026-06-13 validated the repair-loop gate semantics:
+
+```text
+acceptance REJECT
+  -> failure classify
+  -> iter-002 contract review gate
+  -> autorun approved the repeated gate definition because iteration changed
+  -> design / plan / implementation / self-test reran
+  -> acceptance ACCEPT
+  -> final report + delivery artifacts
+  -> workflow COMPLETED
+```
+
+The important state-machine point:
+
+- gate repeat detection must be keyed by `gate definition + iteration`, not by
+  gate definition alone;
+- a repeated gate in a new repair iteration is normal workflow progress;
+- a repeated gate in the same iteration is still treated as suspicious and stops
+  `autorun`;
+- `--max-gates` remains the bounded guard against runaway benchmark loops.
+
 ## 11. Command Semantics
 
 | Command | What it does |
@@ -318,7 +371,7 @@ This case did not validate recovery or revision loops. It should be read as evid
 | `dualctl start --run` | Starts, then runs until first pause. |
 | `dualctl resume` | Executes active node once when possible. |
 | `dualctl run --max-steps N` | Runs repeated resume steps until pause or max steps. |
-| `dualctl autorun` | Benchmark helper: runs, auto-approves gates, stops on recovery/repeated gates/completion. |
+| `dualctl autorun` | Benchmark helper: runs, auto-approves gates, stops on recovery, same-iteration repeated gates, max-gates, or completion. |
 | `dualctl status` | Reads `workflow/current.json` and active node. |
 | `dualctl timeline` | Reads stable `timeline.json` projection. |
 | `dualctl review show` | Shows the current human review packet. |

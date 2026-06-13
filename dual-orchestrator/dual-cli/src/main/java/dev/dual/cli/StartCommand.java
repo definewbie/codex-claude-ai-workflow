@@ -95,7 +95,7 @@ public final class StartCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(selectedWorktree, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), "start"))) {
             new FileLedgerStore().initializeWorkstream(paths, workstream, workspace, requirement);
-            new dev.dual.ledger.file.WorkflowFileLedger().initialize(paths, "wf-" + workstreamId.value(), workflowDefinition);
+            CliLedgerFactory.create().initialize(paths, "wf-" + workstreamId.value(), workflowDefinition);
         }
 
         System.out.println("Dual workstream started");

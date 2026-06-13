@@ -33,7 +33,7 @@ public class WorkstreamActionService {
 
     @Autowired
     public WorkstreamActionService(ServerWorkflowRuntimeFactory runtimeFactory) {
-        this(new WorkflowFileLedger(), runtimeFactory::create);
+        this(ServerLedgerFactory.create(), runtimeFactory::create);
     }
 
     WorkstreamActionService(WorkflowFileLedger ledger, Supplier<WorkflowResumer> resumerFactory) {
@@ -46,6 +46,7 @@ public class WorkstreamActionService {
         validateMaxSteps(maxSteps);
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api resume"))) {
+            assertResumable(paths, "resume");
             return runLoop(root, workstreamId, maxSteps);
         }
     }
@@ -54,9 +55,19 @@ public class WorkstreamActionService {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api retry"))) {
+            assertNotCompleted(paths, "retry");
             ledger.retryActiveNode(paths, note);
         }
         return actionResponse("retry", workstreamId, "active node marked ready for retry");
+    }
+
+    public Map<String, Object> recoverStaleRunning(Path workspaceRoot, String workstreamId, String note) throws Exception {
+        var root = normalize(workspaceRoot);
+        var paths = paths(root, workstreamId);
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery stale"))) {
+            ledger.recoverStaleRunningNode(paths, note);
+        }
+        return actionResponse("recovery.stale", workstreamId, "stale running node moved to recovery");
     }
 
     public Map<String, Object> closeMistakenIteration(Path workspaceRoot, String workstreamId, String note) throws Exception {
@@ -103,6 +114,7 @@ public class WorkstreamActionService {
     private void resolveGate(Path root, String workstreamId, String action, String note) throws Exception {
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api review " + action))) {
+            assertNotCompleted(paths, "review " + action);
             ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, note);
         }
     }
@@ -156,6 +168,29 @@ public class WorkstreamActionService {
     private static void validateMaxSteps(int maxSteps) {
         if (maxSteps <= 0) {
             throw new IllegalArgumentException("maxSteps must be positive");
+        }
+    }
+
+    private void assertResumable(WorkstreamPaths paths, String action) throws Exception {
+        var status = ledger.loadCurrent(paths).status();
+        if (status == WorkflowStatus.COMPLETED) {
+            throw new IllegalStateException("workflow is already completed; " + action + " is not allowed");
+        }
+        if (status == WorkflowStatus.FAILED || status == WorkflowStatus.BLOCKED) {
+            throw new IllegalStateException("workflow is " + status + "; inspect recovery before " + action);
+        }
+        if (status == WorkflowStatus.WAITING_FOR_RECOVERY) {
+            throw new IllegalStateException("workflow is waiting for recovery; run retry only after the cause is fixed");
+        }
+        if (status == WorkflowStatus.WAITING_FOR_HUMAN) {
+            throw new IllegalStateException("workflow is waiting for human review; approve, revise, or complete the gate first");
+        }
+    }
+
+    private void assertNotCompleted(WorkstreamPaths paths, String action) throws Exception {
+        var status = ledger.loadCurrent(paths).status();
+        if (status == WorkflowStatus.COMPLETED) {
+            throw new IllegalStateException("workflow is already completed; " + action + " is not allowed");
         }
     }
 
