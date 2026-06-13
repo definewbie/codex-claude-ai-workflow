@@ -108,6 +108,10 @@ It aggregates ignored local reports into:
 docs/testing/real-case-benchmarks/benchmark-index.md
 ```
 
+The committed index stores aggregate metrics only. Detailed `report.md` files
+remain ignored local evidence, so public readers do not get broken links to
+machine-local paths.
+
 By default the index includes only public cases whose task file starts with
 `public-`. Internal reports can still be inspected locally with:
 

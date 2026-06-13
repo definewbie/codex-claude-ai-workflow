@@ -1,6 +1,6 @@
 # Real-case Benchmark Index
 
-> Generated: 2026-06-13T04:11:50Z
+> Generated: 2026-06-13T04:16:32Z
 > Source: docs/testing/real-case-reports
 
 ## Aggregate
@@ -20,9 +20,9 @@
 
 ## Runs
 
-| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Final acceptance | Repair loops | Confidence | Repo clean | Artifacts | Report |
+| Date | Case | Grade | Reason | Variant | Status | Workstream | Gates | Agent runs | Final acceptance | Repair loops | Confidence | Repo clean | Artifacts | Local report |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- | --- | --- |
-| 20260613T040013Z | `public-issue-flow-review-state` | PASS | ok | full | COMPLETED | `ws-20260613T040014Z-EXN7` | 6 | 10 | ACCEPT | 0 | HIGH | true | ok | [docs/testing/real-case-reports/20260613T040013Z/report.md](../real-case-reports/20260613T040013Z/report.md) |
+| 20260613T040013Z | `public-issue-flow-review-state` | PASS | ok | full | COMPLETED | `ws-20260613T040014Z-EXN7` | 6 | 10 | ACCEPT | 0 | HIGH | true | ok | ignored local file |
 
 ## How To Update
 
