@@ -78,6 +78,37 @@ class SummaryCommandTest {
         assertTrue(!printed.contains("not current (historical recovery artifact retained)"));
     }
 
+    @Test
+    void completedSummaryWithAppliedDeliveryMergeSuggestsTargetCommitInsteadOfMergeAgain() throws Exception {
+        writeLedger("COMPLETED");
+        var deliveryDir = tempDir.resolve(".agent/workstreams/ws-summary/delivery");
+        Files.writeString(deliveryDir.resolve("merge-plan.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-summary",
+                  "sourceWorktree": "/tmp/source",
+                  "targetRepo": "/tmp/target",
+                  "acceptanceDecision": "ACCEPT",
+                  "changedFiles": ["README.md", "main.py"],
+                  "excludedFiles": [],
+                  "status": "APPLIED",
+                  "commit": "",
+                  "failureReason": ""
+                }
+                """, StandardCharsets.UTF_8);
+
+        var command = new SummaryCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-summary";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Review the staged target diff"));
+        assertTrue(printed.contains("git -C '/tmp/target' diff --cached"));
+        assertTrue(printed.contains("- Delivery Merge: APPLIED, changedFiles=2, target=/tmp/target"));
+        assertTrue(!printed.contains("dualctl delivery merge --workdir"));
+    }
+
     private void writeLedger(String status) throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-summary");
         Files.createDirectories(root.resolve("reports"));

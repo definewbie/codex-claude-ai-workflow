@@ -57,10 +57,12 @@ public final class AutoRunCommand implements Callable<Integer> {
             printSnapshot(snapshot);
 
             if (snapshot.current().status() == WorkflowStatus.COMPLETED) {
+                refreshSummary(paths);
                 System.out.println("Autorun completed.");
                 return 0;
             }
             if (isStopped(snapshot.current().status())) {
+                refreshSummary(paths);
                 printStopped(snapshot.current().status(), workspaceRoot);
                 return 1;
             }
@@ -68,10 +70,12 @@ public final class AutoRunCommand implements Callable<Integer> {
             if (snapshot.current().status() == WorkflowStatus.WAITING_FOR_HUMAN) {
                 gateCount++;
                 if (gateCount > maxGates) {
+                    refreshSummary(paths);
                     System.out.println("Stopped after --max-gates=" + maxGates + ". Review the workflow before continuing.");
                     return 1;
                 }
                 if (isRepeatedGate(snapshot.node(), resolvedGateKeys)) {
+                    refreshSummary(paths);
                     System.out.println("Autorun stopped: repeated gate detected in the same iteration: "
                             + snapshot.node().nodeDefinitionId() + " / " + snapshot.node().iterationId());
                     System.out.println("This usually means workflow routing returned to the same gate without opening a new repair iteration.");
@@ -135,6 +139,14 @@ public final class AutoRunCommand implements Callable<Integer> {
         }
     }
 
+    private void refreshSummary(WorkstreamPaths paths) {
+        try {
+            SummaryCommand.writeDefaultSummary(paths);
+        } catch (Exception e) {
+            System.err.println("Warning: failed to refresh workstream summary: " + e.getMessage());
+        }
+    }
+
     private static boolean isStopped(WorkflowStatus status) {
         return status == WorkflowStatus.WAITING_FOR_RECOVERY
                 || status == WorkflowStatus.BLOCKED
@@ -145,7 +157,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         if (FINAL_NEXT_STAGE_GATE.equals(nodeDefinitionId)) {
             return "complete";
         }
-        return "approved";
+        return "approve";
     }
 
     static boolean isRepeatedGate(NodeInstanceDocument node, LinkedHashSet<String> resolvedGateKeys) {

@@ -1,6 +1,8 @@
 package dev.dual.cli;
 
+import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.WorkflowStatus;
+import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.WorkflowCommand;
 
 import java.nio.file.Path;
@@ -25,13 +27,23 @@ final class CliWorkflowLoop {
             var result = runtime.resume(command);
             System.out.println("Step " + step + ": " + result.activeNode() + " -> " + result.status() + " (" + result.message() + ")");
             if (TERMINAL_OR_PAUSED.contains(result.status())) {
+                refreshSummary(workspaceRoot, workstreamId);
                 printNextAction(result.status(), workspaceRoot, workstreamId);
                 return exitCode(result.status());
             }
         }
         System.out.println("Stopped after --max-steps=" + maxSteps + ". Run again to continue.");
+        refreshSummary(workspaceRoot, workstreamId);
         CliNextActionHints.print(System.out, WorkflowStatus.RUNNING, workspaceRoot, workstreamId);
         return 1;
+    }
+
+    private void refreshSummary(Path workspaceRoot, String workstreamId) {
+        try {
+            SummaryCommand.writeDefaultSummary(new WorkstreamPaths(workspaceRoot, new DualId(workstreamId)));
+        } catch (Exception e) {
+            System.err.println("Warning: failed to refresh workstream summary: " + e.getMessage());
+        }
     }
 
     private void printNextAction(WorkflowStatus status, Path workspaceRoot, String workstreamId) {

@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AutoRunCommandTest {
     @Test
     void autorunApprovesIntermediateHumanGates() {
-        assertEquals("approved", AutoRunCommand.gateActionFor("gate.human_requirement_review"));
-        assertEquals("approved", AutoRunCommand.gateActionFor("gate.contract_review"));
-        assertEquals("approved", AutoRunCommand.gateActionFor("gate.human_acceptance"));
+        assertEquals("approve", AutoRunCommand.gateActionFor("gate.human_requirement_review"));
+        assertEquals("approve", AutoRunCommand.gateActionFor("gate.contract_review"));
+        assertEquals("approve", AutoRunCommand.gateActionFor("gate.human_acceptance"));
     }
 
     @Test
@@ -58,9 +58,11 @@ class AutoRunCommandTest {
                 "gate",
                 iterationId,
                 List.of(),
+                Map.of(),
                 List.of(),
                 Map.of(),
-                null,
+                "",
+                "",
                 null,
                 null
         );

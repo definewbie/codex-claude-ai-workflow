@@ -3,6 +3,7 @@ package dev.dual.cli;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -57,10 +58,18 @@ public final class SummaryCommand implements Callable<Integer> {
         return 0;
     }
 
-    private String render(WorkstreamPaths paths) throws Exception {
+    static Path writeDefaultSummary(WorkstreamPaths paths) throws Exception {
+        var target = paths.workstreamDir().resolve("reports").resolve("workstream-summary.md");
+        Files.createDirectories(target.getParent());
+        Files.writeString(target, render(paths), StandardCharsets.UTF_8);
+        return target;
+    }
+
+    static String render(WorkstreamPaths paths) throws Exception {
         var timeline = readMap(paths.timelineJson());
         var metrics = readMap(paths.workstreamMetricsJson());
         var delivery = readMap(paths.workstreamDir().resolve("delivery").resolve("delivery.json"));
+        var deliveryMerge = readMap(paths.deliveryMergePlanJson());
         var activeNodes = listOfText(timeline.get("activeNodeInstanceIds"));
         var openGates = listOfText(timeline.get("openGateIds"));
         var nodes = nodes(timeline);
@@ -94,7 +103,7 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("");
         lines.add("## Recommended Next Action");
         lines.add("");
-        lines.add(recommendedAction(paths, timeline, activeNodes, openGates));
+        lines.add(recommendedAction(paths, timeline, deliveryMerge, activeNodes, openGates));
         lines.add("");
         lines.add("## Recent Timeline");
         lines.add("");
@@ -116,6 +125,7 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("- Final Report: " + presence(paths.workstreamDir().resolve("reports").resolve("latest-final-report.md")));
         lines.add("- Current Failure Summary: " + currentFailurePresence(paths, text(timeline.get("workflowStatus"))));
         lines.add("- Delivery: " + deliverySummary(delivery));
+        lines.add("- Delivery Merge: " + deliveryMergeSummary(deliveryMerge));
         lines.add("- Calibration Candidates: " + calibrationSummary(paths.workstreamDir().resolve("calibration").resolve("candidates")));
         lines.add("- Calibration Apply Plans: " + countJson(paths.workstreamDir().resolve("calibration").resolve("apply-plans")));
         lines.add("");
@@ -131,8 +141,8 @@ public final class SummaryCommand implements Callable<Integer> {
         return String.join("\n", lines);
     }
 
-    private String recommendedAction(WorkstreamPaths paths, Map<String, Object> timeline, List<String> activeNodes,
-                                     List<String> openGates) {
+    private static String recommendedAction(WorkstreamPaths paths, Map<String, Object> timeline, Map<String, Object> deliveryMerge,
+                                     List<String> activeNodes, List<String> openGates) {
         var status = text(timeline.get("workflowStatus"));
         if ("WAITING_FOR_HUMAN".equals(status)) {
             return "Review the current packet, then approve or revise:\n\n```bash\n"
@@ -141,13 +151,33 @@ public final class SummaryCommand implements Callable<Integer> {
                     + "```";
         }
         if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
-            return "Inspect the failure summary, fix the external cause or ledger issue, then retry when appropriate:\n\n```bash\n"
+            var attention = WorkstreamAttentionEvaluator.evaluate(paths);
+            var command = attention.command().isBlank()
+                    ? "dualctl recovery show --workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value()
+                    : attention.command();
+            return attention.title() + "\n\n"
+                    + attention.detail() + "\n\n"
+                    + attention.nextAction() + "\n\n```bash\n"
                     + "dualctl recovery show --workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value() + "\n"
-                    + "dualctl retry --workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value() + "\n"
+                    + command + "\n"
                     + "```";
         }
         if ("COMPLETED".equals(status)) {
-            return "Review final report and delivery artifacts. If needed, prepare commit or PR from delivery commands.";
+            var mergeStatus = text(deliveryMerge.get("status"));
+            if ("APPLIED".equals(mergeStatus)) {
+                var targetRepo = text(deliveryMerge.get("targetRepo"));
+                var command = targetRepo.isBlank() ? "" : "git -C " + quoteString(targetRepo) + " diff --cached";
+                return "Review the staged target diff, then commit from the target repo when ready."
+                        + commandBlock(command);
+            }
+            if ("FAILED".equals(mergeStatus)) {
+                var failure = text(deliveryMerge.get("failureReason"), "Delivery merge failed.");
+                return "Inspect merge-plan.json and apply stderr before retrying delivery merge.\n\n"
+                        + failure;
+            }
+            return "Review final report and delivery artifacts. If ready, merge accepted worktree changes back to the original repo:\n\n```bash\n"
+                    + "dualctl delivery merge --workdir " + quote(paths.workspaceRoot()) + " --target <original_repo> " + paths.workstreamId().value() + "\n"
+                    + "```";
         }
         if ("RUNNING".equals(status) && activeNodes.isEmpty() && openGates.isEmpty()) {
             return "Workflow is marked RUNNING but no active node is visible. Run status and inspect ledger consistency.";
@@ -160,7 +190,14 @@ public final class SummaryCommand implements Callable<Integer> {
         return "Run status/timeline to inspect the current workflow state.";
     }
 
-    private String currentFailurePresence(WorkstreamPaths paths, String status) {
+    private static String commandBlock(String command) {
+        if (command == null || command.isBlank()) {
+            return "";
+        }
+        return "\n\n```bash\n" + command + "\n```";
+    }
+
+    private static String currentFailurePresence(WorkstreamPaths paths, String status) {
         if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
             return presence(paths.currentFailureMarkdown());
         }
@@ -170,7 +207,7 @@ public final class SummaryCommand implements Callable<Integer> {
         return "missing";
     }
 
-    private Map<String, Object> readMap(Path path) throws Exception {
+    private static Map<String, Object> readMap(Path path) throws Exception {
         if (!Files.isRegularFile(path)) {
             return Map.of();
         }
@@ -178,7 +215,7 @@ public final class SummaryCommand implements Callable<Integer> {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> nodes(Map<String, Object> timeline) {
+    private static List<Map<String, Object>> nodes(Map<String, Object> timeline) {
         var value = timeline.get("nodes");
         if (value instanceof List<?> list) {
             return list.stream()
@@ -189,13 +226,13 @@ public final class SummaryCommand implements Callable<Integer> {
         return List.of();
     }
 
-    private List<Map<String, Object>> recent(List<Map<String, Object>> nodes, int limit) {
+    private static List<Map<String, Object>> recent(List<Map<String, Object>> nodes, int limit) {
         return nodes.stream()
                 .skip(Math.max(0, nodes.size() - limit))
                 .toList();
     }
 
-    private String calibrationSummary(Path dir) throws Exception {
+    private static String calibrationSummary(Path dir) throws Exception {
         var paths = jsonFiles(dir);
         if (paths.isEmpty()) {
             return "0";
@@ -208,11 +245,11 @@ public final class SummaryCommand implements Callable<Integer> {
         return paths.size() + " (" + String.join(", ", parts) + ")";
     }
 
-    private String countJson(Path dir) throws Exception {
+    private static String countJson(Path dir) throws Exception {
         return String.valueOf(jsonFiles(dir).size());
     }
 
-    private List<Path> jsonFiles(Path dir) throws Exception {
+    private static List<Path> jsonFiles(Path dir) throws Exception {
         if (!Files.isDirectory(dir)) {
             return List.of();
         }
@@ -224,7 +261,7 @@ public final class SummaryCommand implements Callable<Integer> {
         }
     }
 
-    private String deliverySummary(Map<String, Object> delivery) {
+    private static String deliverySummary(Map<String, Object> delivery) {
         if (delivery.isEmpty()) {
             return "unavailable";
         }
@@ -239,43 +276,69 @@ public final class SummaryCommand implements Callable<Integer> {
         return String.join(", ", parts);
     }
 
-    private String presence(Path path) {
+    private static String deliveryMergeSummary(Map<String, Object> deliveryMerge) {
+        if (deliveryMerge.isEmpty()) {
+            return "not applied";
+        }
+        var parts = new ArrayList<String>();
+        parts.add(text(deliveryMerge.get("status"), "unknown"));
+        parts.add("changedFiles=" + listSize(deliveryMerge.get("changedFiles")));
+        var targetRepo = text(deliveryMerge.get("targetRepo"));
+        if (!targetRepo.isBlank()) {
+            parts.add("target=" + targetRepo);
+        }
+        var failure = text(deliveryMerge.get("failureReason"));
+        if (!failure.isBlank()) {
+            parts.add("failure=" + failure);
+        }
+        return String.join(", ", parts);
+    }
+
+    private static int listSize(Object value) {
+        return value instanceof List<?> list ? list.size() : 0;
+    }
+
+    private static String presence(Path path) {
         return Files.isRegularFile(path) ? path.toString() : "missing";
     }
 
     @SuppressWarnings("unchecked")
-    private List<String> listOfText(Object value) {
+    private static List<String> listOfText(Object value) {
         if (value instanceof List<?> list) {
             return list.stream().map(String::valueOf).toList();
         }
         return List.of();
     }
 
-    private String emptyDash(List<String> values) {
+    private static String emptyDash(List<String> values) {
         return values.isEmpty() ? "-" : String.join(", ", values);
     }
 
-    private String stripJsonSuffix(Path path) {
+    private static String stripJsonSuffix(Path path) {
         var name = path.getFileName().toString();
         return name.substring(0, name.length() - ".json".length());
     }
 
-    private String text(Object value) {
+    private static String text(Object value) {
         return text(value, "");
     }
 
-    private String text(Object value, String fallback) {
+    private static String text(Object value, String fallback) {
         if (value == null) {
             return fallback;
         }
         return String.valueOf(value);
     }
 
-    private String md(String value) {
+    private static String md(String value) {
         return value == null || value.isBlank() ? "" : value.replace("|", "\\|");
     }
 
-    private String quote(Path path) {
+    private static String quote(Path path) {
         return "'" + path.toString().replace("'", "'\\''") + "'";
+    }
+
+    private static String quoteString(String value) {
+        return "'" + value.replace("'", "'\\''") + "'";
     }
 }
