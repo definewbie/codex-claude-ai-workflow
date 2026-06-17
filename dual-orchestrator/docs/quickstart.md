@@ -19,6 +19,14 @@ acpx --version
 `acpx` must be able to call your Claude and Codex runtimes for real lifecycle
 runs. The fixture/smoke path can verify the CLI without touching your own repo.
 
+Use pinned adapter versions for real runs. `acpx` may otherwise resolve a
+floating Codex ACP adapter and change behavior between runs:
+
+```bash
+npm install -g acpx@0.8.0
+./scripts/configure-acpx.sh
+```
+
 ## 2. Install
 
 ```bash
@@ -27,6 +35,12 @@ cd dual-orchestrator
 ```
 
 The default prefix is `$HOME/.local`.
+
+To install wrappers and write the pinned acpx Codex adapter config in one step:
+
+```bash
+./scripts/install.sh --configure-acpx
+```
 
 Add it to `PATH` if needed:
 
@@ -49,14 +63,15 @@ dualctl doctor --workdir /path/to/git/repo
 ```
 
 `doctor` checks basic prerequisites. Real agent runs also need usable acpx
-Claude/Codex sessions; missing sessions are usually created by acpx on demand.
+Claude/Codex sessions. It also checks that `acpx` is the expected version and
+that the Codex ACP adapter is pinned instead of using a floating npm range.
 
 ## 4. Run A Small Smoke
 
 From `dual-orchestrator`:
 
 ```bash
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ```
 
 This is the quickest sanity check for the CLI/workflow path.
@@ -92,9 +107,11 @@ EOF
 
 ./scripts/run-real-case.sh \
   --repo /path/to/your/repo \
-  --task-file /tmp/dual-task.md \
-  --variant full
+  --task-file /tmp/dual-task.md
 ```
+
+`full` lifecycle is the default. Use `--variant contract` only when you
+intentionally want the smaller contract-only workflow.
 
 Use a small task first. Public reusable benchmark cases are named `public-*.md`.
 Internal/private benchmark cases are not part of this public cleanup branch.
@@ -142,6 +159,12 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 why the workflow stopped, attention items, recent timeline, final acceptance
 decision, repair loops, important artifacts, and the next command to run.
 
+If a historical Agent run has a missing or unreadable `run.json`, `trace`
+prints `Run Metadata Warnings`. That means observation data is incomplete; it
+does not turn the workflow terminal state into a failure. Use
+`dualctl inspect --run <run_id>` when you intentionally want strict inspection
+of a specific run.
+
 If the workflow is waiting for human review:
 
 ```bash
@@ -152,7 +175,33 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 `dualctl approve`, `dualctl revise`, and `dualctl complete` are shortcuts for
 the longer `dualctl review ...` commands.
 
-## 8. Promote Reusable Learnings
+## 8. Merge Accepted Worktree Changes
+
+When a workstream is completed and accepted, merge the reviewed worktree diff
+back to the original repository explicitly:
+
+```bash
+dualctl delivery merge \
+  --workdir <source_worktree> \
+  --target <original_repo> \
+  <workstream_id>
+```
+
+The command requires a completed workstream, final `ACCEPT` or
+`ACCEPT_WITH_NOTES`, and a clean target repo. It writes
+`delivery/merge-plan.json`, `delivery/merge.patch`, changed file lists, and
+apply logs under the workstream ledger. It applies the patch to the target repo
+index but does not auto-commit.
+
+After reviewing the staged diff:
+
+```bash
+cd <original_repo>
+git diff --cached
+git commit -m "feat: dual delivery <workstream_id>"
+```
+
+## 9. Promote Reusable Learnings
 
 When a real failure is classified as a reusable calibration candidate, review it
 before changing any project principles:
@@ -179,6 +228,10 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 dualctl events --workdir <effective_workdir> --limit 50 <workstream_id>
 dualctl summary --workdir <effective_workdir> <workstream_id>
 ```
+
+`dualctl runs` is also a read-only observation command. It lists readable Agent
+runs and reports missing or damaged run metadata as warnings, so one historical
+file problem does not hide the current workflow state.
 
 For failures:
 

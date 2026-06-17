@@ -14,13 +14,19 @@ final class MarkdownArtifactFields {
             return List.of();
         }
         var items = new ArrayList<String>();
+        var sawListItem = false;
         for (var line : section.lines().toList()) {
             var trimmed = line.strip();
             if (trimmed.matches("^[-*]\\s+.+")) {
-                items.add(trimmed.substring(2).strip());
+                sawListItem = true;
+                addItem(items, trimmed.substring(2).strip());
             } else if (trimmed.matches("^\\d+[.)]\\s+.+")) {
-                items.add(trimmed.replaceFirst("^\\d+[.)]\\s+", "").strip());
+                sawListItem = true;
+                addItem(items, trimmed.replaceFirst("^\\d+[.)]\\s+", "").strip());
             }
+        }
+        if (sawListItem && items.isEmpty()) {
+            return List.of();
         }
         if (!items.isEmpty()) {
             return List.copyOf(items);
@@ -90,5 +96,11 @@ final class MarkdownArtifactFields {
                 .map(String::strip)
                 .filter(line -> !line.isBlank())
                 .toList());
+    }
+
+    private static void addItem(List<String> items, String item) {
+        if (item != null && !item.isBlank()) {
+            items.add(item);
+        }
     }
 }

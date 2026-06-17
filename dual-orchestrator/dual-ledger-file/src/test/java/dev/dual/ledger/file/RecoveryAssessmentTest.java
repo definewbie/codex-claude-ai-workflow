@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RecoveryAssessmentTest {
@@ -42,6 +43,7 @@ class RecoveryAssessmentTest {
                 "implement",
                 "iter-001",
                 List.of(),
+                Map.of(),
                 List.of(),
                 Map.of(
                         "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION",
@@ -49,6 +51,7 @@ class RecoveryAssessmentTest {
                         "contract_failure_diagnostic_markdown_ref",
                         ".agent/workstreams/ws-recovery/artifacts/contract-failures/node-001.md"
                 ),
+                "",
                 "",
                 Instant.parse("2026-06-01T00:00:00Z"),
                 Instant.parse("2026-06-01T00:01:00Z")
@@ -63,5 +66,77 @@ class RecoveryAssessmentTest {
         assertEquals("missing_structured_artifact", assessment.contractDiagnostic().get("category"));
         assertTrue(assessment.suggestedCommand().contains("dualctl retry --workdir " + tempDir.toAbsolutePath().normalize()));
         assertEquals("artifact_contract_failure", assessment.toMap().get("classification"));
+    }
+
+    @Test
+    void revisionLimitIsSemanticRecoveryNotRuntimeRetry() {
+        var node = new NodeInstanceDocument(
+                1,
+                "node-002",
+                "design.decision",
+                NodeKind.DECISION,
+                "review.decision",
+                NodeStatus.BLOCKED,
+                "design",
+                "iter-002",
+                List.of(),
+                Map.of(),
+                List.of("runs/design-review.md"),
+                Map.of(
+                        "reason", "revision_limit_reached",
+                        "outcome", "NEEDS_REVISION"
+                ),
+                "",
+                "",
+                Instant.parse("2026-06-01T00:00:00Z"),
+                Instant.parse("2026-06-01T00:01:00Z")
+        );
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("semantic_revision_limit", assessment.classification());
+        assertEquals("NEEDS_HUMAN_DECISION", assessment.retryReadiness());
+        assertTrue(assessment.reason().contains("revision budget"));
+        assertFalse(assessment.reason().contains("quota"));
+        assertTrue(assessment.suggestedCommand().contains("recovery abort"));
+    }
+
+    @Test
+    void interruptedAgentOutputHasTypedRecoveryAction() {
+        var node = failedAcpxNode(Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "acpx_failure.reason", "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED",
+                "acpx_failure.recoverable", true
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("agent_output_interrupted", assessment.classification());
+        assertEquals("REBUILD_ACPX_SESSION_THEN_RETRY", assessment.retryReadiness());
+        assertTrue(assessment.reason().contains("terminal contract"));
+        assertTrue(assessment.suggestedCommand().contains("acpx claude sessions close claude-main"));
+        assertFalse(assessment.reason().contains("quota, reconnect, or session state"));
+    }
+
+    private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {
+        return new NodeInstanceDocument(
+                1,
+                "node-acpx-failed",
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.FAILED,
+                "intake",
+                "iter-001",
+                List.of(),
+                Map.of(),
+                List.of(),
+                result,
+                "",
+                "",
+                Instant.parse("2026-06-01T00:00:00Z"),
+                Instant.parse("2026-06-01T00:01:00Z")
+        );
     }
 }

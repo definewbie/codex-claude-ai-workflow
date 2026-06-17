@@ -45,6 +45,8 @@ const els = {
   overviewAttention: $("overviewAttention"),
   overviewTimeline: $("overviewTimeline"),
   overviewArtifacts: $("overviewArtifacts"),
+  overviewDeliveryMerge: $("overviewDeliveryMerge"),
+  overviewAgentTasks: $("overviewAgentTasks"),
   statusView: $("statusView"),
   timelineView: $("timelineView"),
   artifactSummary: $("artifactSummary"),
@@ -278,6 +280,7 @@ async function loadOverview() {
 function renderOverview(data) {
   const workflow = data.workflow || {};
   const acceptance = data.acceptance || {};
+  const goal = data.goalSatisfaction || {};
   const metrics = data.metrics || {};
   const completionAudit = data.completionAudit || {};
   renderLifecycleProgress(data);
@@ -288,13 +291,17 @@ function renderOverview(data) {
     ["Repairs", acceptance.repairLoopCount ?? 0],
     ["Duration", durationLabel(metrics.totalNodeDurationMs)],
     ["Confidence", acceptance.verificationConfidence || "UNKNOWN"],
-    ["Completion", completionAudit.status || "-"],
+    ["Goal", goal.domainOutcome || "-"],
+    ["End state", completionAudit.lifecycleState || (workflow.status === "COMPLETED" ? "ENDED" : "-")],
+    ["Completion audit", completionAudit.status || "-"],
   ]);
   els.overviewWhy.textContent = friendlyWhyStopped(data);
   els.overviewNext.textContent = friendlyNextAction(data);
   renderOverviewAttention(derivedAttention(data));
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
+  renderOverviewDeliveryMerge(data.deliveryMerge || {}, data);
+  renderOverviewAgentTasks(data.latestAgentTasks || []);
 }
 
 function applyOverviewSnapshot(data) {
@@ -352,6 +359,7 @@ function renderOverviewError(error) {
   els.overviewAttention.innerHTML = "";
   els.overviewTimeline.innerHTML = "";
   els.overviewArtifacts.innerHTML = "";
+  els.overviewAgentTasks.innerHTML = "";
   clearStageSelection();
 }
 
@@ -567,6 +575,13 @@ function friendlyWhyStopped(data) {
   const workflow = data.workflow || {};
   const status = workflow.status || "";
   const currentNode = workflow.currentNode || "";
+  const goal = data.goalSatisfaction || {};
+  if (goal.domainOutcome === "NEEDS_REPAIR") {
+    return "目标尚未满足：验收或审查证据要求进入修复循环。";
+  }
+  if (goal.domainOutcome === "NEEDS_REDESIGN") {
+    return "目标尚未满足：审查证据要求回到设计或计划阶段。";
+  }
   if (status === "WAITING_FOR_HUMAN") {
     if (isNextStageGate(currentNode)) {
       return "本阶段已经完成，正在等待你决定：结束这个 workstream，还是进入下一轮。";
@@ -587,7 +602,10 @@ function friendlyWhyStopped(data) {
     return currentNode ? `正在执行：${currentNode}` : "正在执行 workflow。";
   }
   if (status === "COMPLETED") {
-    return "workflow 已完成。";
+    const lifecycle = completionAuditState(data);
+    return lifecycle === "ENDED"
+      ? "workflow 已结束，后续只能做观测、总结或交付检查，不会继续推进节点。"
+      : "workflow 已完成。";
   }
   return data.whyStopped || "-";
 }
@@ -596,6 +614,10 @@ function friendlyNextAction(data) {
   const workflow = data.workflow || {};
   const status = workflow.status || "";
   const currentNode = workflow.currentNode || "";
+  const goal = data.goalSatisfaction || {};
+  if (goal.domainOutcome === "NEEDS_REPAIR" || goal.domainOutcome === "NEEDS_REDESIGN") {
+    return "建议：继续运行 goal loop，让系统带着证据进入下一轮修复或修订。";
+  }
   if (status === "WAITING_FOR_HUMAN") {
     if (isNextStageGate(currentNode)) {
       return "建议：如果本阶段已满足目标，点击“完成 workstream”。后续阶段应通过新的明确入口启动。";
@@ -609,9 +631,18 @@ function friendlyNextAction(data) {
     return "建议：等待当前节点结束，或刷新查看最新状态。";
   }
   if (status === "COMPLETED") {
+    const completion = data.completionAudit || {};
+    if (completion.status === "needs_review") {
+      return "建议：先查看 completion audit 的缺口，再决定是否补齐交付产物。";
+    }
     return "建议：查看最终报告、handoff 和交付产物。";
   }
   return data.nextAction || "-";
+}
+
+function completionAuditState(data) {
+  const completion = data.completionAudit || {};
+  return completion.lifecycleState || "";
 }
 
 function derivedAttention(data) {
@@ -623,6 +654,15 @@ function derivedAttention(data) {
       title: "Running state looks stale",
       detail: stale,
       command: `dualctl recovery show --workdir "${data.workspace || ""}" ${data.workstreamId || state.selectedId}`,
+    });
+  }
+  const goal = data.goalSatisfaction || {};
+  if (goal.domainOutcome === "NEEDS_REPAIR" || goal.domainOutcome === "NEEDS_REDESIGN") {
+    items.unshift({
+      severity: "warning",
+      title: "Goal loop needs another iteration",
+      detail: goal.reason || "Verifier or human evidence indicates the goal is not satisfied yet.",
+      command: `dualctl run --workdir "${data.workspace || ""}" ${data.workstreamId || state.selectedId}`,
     });
   }
   return items;
@@ -722,6 +762,61 @@ function renderOverviewArtifacts(artifacts) {
       <span>${escapeHtml(artifact.available ? artifact.path : "missing")}</span>
     `;
     els.overviewArtifacts.appendChild(item);
+  }
+}
+
+function renderOverviewDeliveryMerge(deliveryMerge, data) {
+  els.overviewDeliveryMerge.innerHTML = "";
+  const workflow = data.workflow || {};
+  if (!deliveryMerge || !Object.keys(deliveryMerge).length) {
+    const item = document.createElement("div");
+    item.className = "mini-item muted-item";
+    const command = workflow.status === "COMPLETED"
+      ? `dualctl delivery merge --workdir ${state.workdir || "<source_worktree>"} --target <original_repo> ${state.selectedId || "<workstream_id>"}`
+      : "available after completion";
+    item.innerHTML = `
+      <strong>Not applied</strong>
+      <span>${escapeHtml(command)}</span>
+    `;
+    els.overviewDeliveryMerge.appendChild(item);
+    return;
+  }
+  const status = deliveryMerge.status || "UNKNOWN";
+  const changedFiles = Array.isArray(deliveryMerge.changedFiles) ? deliveryMerge.changedFiles.length : 0;
+  const item = document.createElement("div");
+  item.className = `mini-item ${status === "FAILED" ? "danger-item" : ""}`;
+  item.innerHTML = `
+    <strong>${escapeHtml(status)}</strong>
+    <span>${escapeHtml(`${changedFiles} changed file(s) -> ${deliveryMerge.targetRepo || ""}`)}</span>
+  `;
+  els.overviewDeliveryMerge.appendChild(item);
+  if (deliveryMerge.failureReason) {
+    const failure = document.createElement("div");
+    failure.className = "mini-item danger-item";
+    failure.innerHTML = `
+      <strong>Failure</strong>
+      <span>${escapeHtml(deliveryMerge.failureReason)}</span>
+    `;
+    els.overviewDeliveryMerge.appendChild(failure);
+  }
+}
+
+function renderOverviewAgentTasks(tasks) {
+  els.overviewAgentTasks.innerHTML = "";
+  if (!tasks.length) {
+    els.overviewAgentTasks.textContent = "No agent tasks yet.";
+    return;
+  }
+  for (const task of tasks.slice(0, 6)) {
+    const item = document.createElement("div");
+    item.className = "mini-item";
+    const title = [task.status, task.agent || task.handlerType].filter(Boolean).join(" · ");
+    const detail = [task.nodeDefinitionId, task.nodeExecutionId].filter(Boolean).join(" · ");
+    item.innerHTML = `
+      <strong>${escapeHtml(title || task.agentTaskId || "Agent task")}</strong>
+      <span>${escapeHtml(detail || task.agentTaskId || "")}</span>
+    `;
+    els.overviewAgentTasks.appendChild(item);
   }
 }
 

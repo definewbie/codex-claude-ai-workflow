@@ -66,6 +66,10 @@ public final class DualControlBlockParser {
                     }
                     body.append(candidate).append("\n");
                     if (j == lines.size() - 1) {
+                        var terminalBody = terminalUnclosedBody(body.toString());
+                        if (!terminalBody.isBlank()) {
+                            blocks.add(new MatchedBlock(terminalBody));
+                        }
                         i = j;
                     }
                 }
@@ -77,6 +81,19 @@ public final class DualControlBlockParser {
             }
         }
         return List.copyOf(blocks);
+    }
+
+    private static String terminalUnclosedBody(String body) {
+        var done = "[done] end_turn";
+        var doneIndex = body.indexOf(done);
+        if (doneIndex < 0) {
+            return "";
+        }
+        var afterDone = body.substring(doneIndex + done.length()).strip();
+        if (!afterDone.isBlank()) {
+            return "";
+        }
+        return body.substring(0, doneIndex).stripTrailing();
     }
 
     private static boolean isTopLevelControlFence(String line) {

@@ -108,17 +108,134 @@ class AcpxAgentTaskHandlerTest {
                 outputPath,
                 stderrPath,
                 new AcpxRunResult(0, startedAt, finishedAt, List.of("acpx", "claude")),
-                null
+                null,
+                new AcpxUsage(100, 5, 1000, 2, 1107, new java.math.BigDecimal("0.25"), "USD")
         );
 
         var runMetadata = Files.readString(runDir.resolve("run.json"));
         assertTrue(runMetadata.contains("\"outputMetadataPath\" :"));
         assertTrue(runMetadata.contains("\"durationMs\" : 3000"));
+        assertTrue(runMetadata.contains("\"usage\" :"));
+        assertTrue(runMetadata.contains("\"inputTokens\" : 100"));
+        assertTrue(runMetadata.contains("\"cachedReadTokens\" : 1000"));
+        assertTrue(runMetadata.contains("\"totalTokens\" : 1107"));
+        assertTrue(runMetadata.contains("\"costAmount\" : 0.25"));
+        assertTrue(runMetadata.contains("\"costCurrency\" : \"USD\""));
         var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.md.meta.json"));
         assertTrue(outputMetadata.contains("\"artifactType\" : \"output\""));
         assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.md\""));
         assertTrue(outputMetadata.contains("\"lineCount\" : 2"));
         assertTrue(outputMetadata.contains("\"sha256\" :"));
+    }
+
+    @Test
+    void completedAgentRunRecordsAcpxUsageFromSessionStream() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var sessionsDir = tempDir.resolve("sessions");
+        Files.createDirectories(workstreamDir);
+        Files.createDirectories(sessionsDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(
+                new CompletingUsageStreamTransport(sessionsDir),
+                false,
+                new AcpxUsageReader(sessionsDir)
+        );
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+        var instance = new NodeInstance(
+                "node-intake",
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-intake",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"usage\" :"));
+        assertTrue(runMetadata.contains("\"inputTokens\" : 100"));
+        assertTrue(runMetadata.contains("\"cachedReadTokens\" : 1000"));
+        assertTrue(runMetadata.contains("\"costAmount\" : 0.25"));
+    }
+
+    @Test
+    void nonImplementationAgentNodeRunsWithoutApproveAll() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var transport = new CapturingApprovalTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("intake.claude_brainstorm")));
+
+        assertEquals(false, transport.lastApproveAll);
+        assertEquals("observe", transport.lastPermissionProfile.name());
+        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Bash(git *)"));
+        assertTrue(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
+    }
+
+    @Test
+    void nodePermissionProfileIsPassedToAcpxTransport() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review the request first.\n");
+
+        var transport = new CapturingApprovalTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "prompt_template", "design-codex-review",
+                "permission_profile", "review"
+        ));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("design.codex_arch_review")));
+
+        assertEquals(false, transport.lastApproveAll);
+        assertEquals("review", transport.lastPermissionProfile.name());
+        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Bash(rg *)"));
+        assertTrue(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
+    }
+
+    @Test
+    void implementationAgentNodeRunsWithApproveAllWhenConfigured() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved plan.\n");
+
+        var transport = new CapturingApprovalTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implement-claude",
+                "approve_all", true
+        ));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("implement.claude_implement")));
+
+        assertEquals(true, transport.lastApproveAll);
+        assertEquals("implement", transport.lastPermissionProfile.name());
     }
 
     @Test
@@ -243,6 +360,46 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void treatsTimeoutShapedIncompleteOutputAsRecoverableFailure() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved plan.\n");
+
+        var handler = new AcpxAgentTaskHandler(new TimeoutInterruptedExitZeroTransport(), false);
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implement-claude"
+        ));
+        var instance = new NodeInstance(
+                "node-implement",
+                "implement.claude_implement",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-implement",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", result.outcome());
+        assertEquals(0, result.result().get("exit_code"));
+        assertEquals(true, result.result().get("acpx_failure.recoverable"));
+        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", result.result().get("acpx_failure.reason"));
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"exitCode\" : 0"));
+        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_OUTPUT_INTERRUPTED\""));
+    }
+
+    @Test
     void completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -335,6 +492,58 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(failure.message().contains("quota"));
     }
 
+    @Test
+    void classifiesProviderOverloadFromAcpxSessionStreamBeforeReconnectWrapper() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        var sessionsDir = tempDir.resolve("sessions");
+        var sessionId = "ff545b54-96a8-4bf0-84e4-96f8789700c8";
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stdout, "");
+        Files.writeString(stderr, "[acpx] session claude-main (" + sessionId + ") · agent needs reconnect\n");
+        Files.writeString(
+                sessionsDir.resolve(sessionId + ".stream.ndjson"),
+                """
+                {"type":"session/prompt/failed","error":"Internal error: API Error: 529 [1305][该模型当前访问量过大，请您稍后再试]"}
+                """
+        );
+
+        var failure = new AcpxFailureClassifier(
+                new AcpxFailureSignalCatalog(),
+                new AcpxSessionStreamFailureEvidenceReader(sessionsDir)
+        ).classify(stdout, stderr, 1);
+
+        assertEquals("RECOVERABLE_AGENT_OVERLOADED", failure.reason());
+        assertEquals(true, failure.recoverable());
+        assertTrue(failure.message().contains("529"));
+    }
+
+    @Test
+    void classifiesModelMismatchFromAcpxSessionStreamBeforeReconnectWrapper() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        var sessionsDir = tempDir.resolve("sessions");
+        var sessionId = "cd0caac4-0c68-423a-a448-60a58353ad7c";
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stdout, "");
+        Files.writeString(stderr, "[acpx] session claude-main (" + sessionId + ") · agent needs reconnect\n");
+        Files.writeString(
+                sessionsDir.resolve(sessionId + ".stream.ndjson"),
+                """
+                {"type":"session/prompt/failed","error":"Internal error: API Error: 400 {\\"error\\":{\\"message\\":\\"The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed glm-5.2.\\",\\"type\\":\\"invalid_request_error\\"}}"}
+                """
+        );
+
+        var failure = new AcpxFailureClassifier(
+                new AcpxFailureSignalCatalog(),
+                new AcpxSessionStreamFailureEvidenceReader(sessionsDir)
+        ).classify(stdout, stderr, 1);
+
+        assertEquals("RECOVERABLE_AGENT_MODEL_MISMATCH", failure.reason());
+        assertEquals(true, failure.recoverable());
+        assertTrue(failure.message().contains("rebuild"));
+    }
+
     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
@@ -355,6 +564,75 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static NodeInstance readyInstance(String definitionId) {
+        return new NodeInstance(
+                "node-" + definitionId.replace('.', '-'),
+                definitionId,
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-test",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+    }
+
+    private static final class CapturingApprovalTransport extends AcpxAgentTransport {
+        Boolean lastApproveAll;
+        AcpxPermissionProfile lastPermissionProfile;
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            lastApproveAll = request.approveAll();
+            lastPermissionProfile = request.permissionProfile();
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Requirement Restatement
+
+                    Ready.
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+
+        @Override
+        public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws java.io.IOException {
+            lastApproveAll = request.approveAll();
+            lastPermissionProfile = request.permissionProfile();
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Product Review
+
+                    Ready.
+
+                    ```dual-control
+                    decision: PASS
+                    needs_human_input: false
+                    summary: pass
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "codex"));
         }
     }
 
@@ -398,6 +676,21 @@ class AcpxAgentTaskHandlerTest {
         }
     }
 
+    private static final class TimeoutInterruptedExitZeroTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    # Implementation Report
+
+                    The agent produced a long report but stopped before writing the terminal
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(605), List.of("acpx", "--timeout", "600", "claude"));
+        }
+    }
+
     private static final class CompletingReconnectExitZeroTransport extends AcpxAgentTransport {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
@@ -416,6 +709,46 @@ class AcpxAgentTaskHandlerTest {
                     [done] end_turn
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class CompletingUsageStreamTransport extends AcpxAgentTransport {
+        private final Path sessionsDir;
+
+        private CompletingUsageStreamTransport(Path sessionsDir) {
+            this.sessionsDir = sessionsDir;
+        }
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            var sessionId = "cd0caac4-0c68-423a-a448-60a58353ad7c";
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.createDirectories(sessionsDir);
+            Files.writeString(request.stdoutPath(), """
+                    ## Requirement Restatement
+
+                    Add a small function.
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "[acpx] session claude-main (" + sessionId + ") · agent connected\n");
+            var promptText = Files.readString(request.promptPath())
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n");
+            Files.writeString(sessionsDir.resolve(sessionId + ".stream.ndjson"), """
+                    {"jsonrpc":"2.0","id":7,"method":"session/prompt","params":{"prompt":[{"type":"text","text":"%s"}]}}
+                    {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"usage_update","used":110,"size":200000,"cost":{"amount":0.25,"currency":"USD"}}}}
+                    {"jsonrpc":"2.0","id":7,"result":{"usage":{"inputTokens":100,"outputTokens":5,"cachedReadTokens":1000,"cachedWriteTokens":2,"totalTokens":1107}}}
+                    """.formatted(promptText));
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
         }

@@ -75,7 +75,19 @@ public final class ArtifactContractValidator {
                 if (structured.failure() != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, structured.failure());
                 }
-                return withContractSidecar(root, nodeDefinition, result, contract, parsed, structured, ref, path, markdown);
+                return withContractSidecar(
+                        root,
+                        workstreamId,
+                        nodeInstanceId,
+                        nodeDefinition,
+                        result,
+                        contract,
+                        parsed,
+                        structured,
+                        ref,
+                        path,
+                        markdown
+                );
             }
             lastInvalid = parsed;
             lastSourceRef = ref;
@@ -86,6 +98,8 @@ public final class ArtifactContractValidator {
 
     private static NodeResult withContractSidecar(
             Path root,
+            String workstreamId,
+            String nodeInstanceId,
             NodeDefinition nodeDefinition,
             NodeResult result,
             NodeOutputContract contract,
@@ -112,6 +126,10 @@ public final class ArtifactContractValidator {
         document.put("control_source", parsed.details().getOrDefault("control_source", Map.of()));
         addEvidenceFields(document, structured, markdown);
         AgentContractSemantics.addSidecarFields(document);
+        var semanticFailure = AgentContractSemantics.validateOutputContract(AgentOutputContractDocument.from(document));
+        if (semanticFailure.isPresent()) {
+            return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef, semanticFailure.get());
+        }
         Files.writeString(
                 sidecarPath,
                 OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",

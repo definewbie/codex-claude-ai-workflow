@@ -26,7 +26,7 @@ Run from `dual-orchestrator` unless noted otherwise:
 mvn -pl dual-cli,dual-server -am test
 node --check dual-server/src/main/resources/static/app.js
 bash -n scripts/*.sh scripts/lib/*.sh
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ./scripts/run-public-benchmark.sh
 ./scripts/real-case-benchmark-summary.sh
 ```
@@ -65,7 +65,7 @@ These are useful, but not required for the first open-source MVP:
 - multi-user hosted dashboard
 - automatic merge
 - cross-workstream dependency coordination
-- adapter-provided token and cost metrics before `acpx` exposes stable usage data
+- exact provider billing reconciliation beyond best-effort acpx stream usage
 
 ## Release Notes Template
 

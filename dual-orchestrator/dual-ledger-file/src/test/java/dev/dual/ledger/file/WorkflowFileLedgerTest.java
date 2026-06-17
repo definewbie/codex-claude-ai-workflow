@@ -2,9 +2,11 @@ package dev.dual.ledger.file;
 
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.EdgeDefinition;
+import dev.dual.core.workflow.EdgeCondition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.TransitionMetadata;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
 import org.junit.jupiter.api.Test;
@@ -141,6 +143,44 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void resolveOpenGateNormalizesApproveToApprovedWhenWorkflowUsesApprovedOutcome() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-approve-normalized"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_requirement_review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "revise")
+                        )),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("first", "completed", "gate.human_requirement_review"),
+                        new EdgeDefinition("gate.human_requirement_review", "approved", "contract.compile")
+                )
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-gate-approve-normalized", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("first-output.md"), Map.of());
+
+        ledger.resolveOpenGate(paths, definition, "approve", "human clicked approve");
+
+        var current = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("contract.compile", next.nodeDefinitionId());
+
+        var completedGate = Files.readString(paths.nodeJson("node-gate-human_requirement_review-002"));
+        assertTrue(completedGate.contains("\"human_action\" : \"approved\""));
+        assertTrue(completedGate.contains("\"requested_action\" : \"approve\""));
+    }
+
+    @Test
     void writesTimelineProjectionFromWorkflowAndNodes() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-timeline"));
         Files.createDirectories(paths.workstreamDir());
@@ -249,6 +289,164 @@ class WorkflowFileLedgerTest {
         assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"targetNodeDefinitionId\" : \"design.claude_design\""));
         assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("Narrow the design before implementation."));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("iteration_started"));
+    }
+
+    @Test
+    void loopTransitionMetadataStartsNextWorkflowIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-loop-metadata"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "review.decision",
+                List.of(
+                        new NodeDefinition("review.decision", NodeKind.DECISION, "noop.decision", Map.of()),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("review.decision", "BACK_TO_DESIGN", "design.claude_design",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("review requested design changes")))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-loop-metadata", definition);
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "BACK_TO_DESIGN", List.of("review.md"), Map.of("reason", "missing architecture constraints"));
+
+        var next = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        assertEquals("iter-002", next.iterationId());
+        assertTrue(next.inputTransition().toString().contains("transition_type=loop"));
+        var iteration = Files.readString(paths.iterationJson("iter-002"));
+        assertTrue(iteration.contains("\"triggerAction\" : \"BACK_TO_DESIGN\""));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("review requested design changes"));
+    }
+
+    @Test
+    void acceptanceRejectClassificationRoutesToRepairIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-repair-loop"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle-full",
+                3,
+                "acceptance.classify_failure",
+                List.of(
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK,
+                                "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK,
+                                "context.build_package", Map.of())
+                ),
+                List.of(new EdgeDefinition(
+                        "acceptance.classify_failure",
+                        "REJECT_IMPLEMENTATION_BUG",
+                        "context.implement_claude",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("Acceptance rejected because implementation repair is required")
+                ))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-acceptance-repair-loop", definition);
+        var classify = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, classify.nodeInstanceId(), NodeStatus.COMPLETED,
+                "REJECT_IMPLEMENTATION_BUG",
+                List.of(".agent/workstreams/ws-acceptance-repair-loop/artifacts/failure-classification.json"),
+                Map.of(
+                        "review_decision", "REJECT",
+                        "category", "IMPLEMENTATION_BUG",
+                        "reasoning", "Verifier found a concrete acceptance failure."
+                ));
+
+        var current = ledger.loadCurrent(paths);
+        var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var goal = Files.readString(paths.goalSatisfactionJson());
+        var events = Files.readString(paths.eventsJsonl());
+
+        assertEquals(WorkflowStatus.RUNNING, current.status());
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertEquals("loop", repair.inputTransition().get("transition_type"));
+        assertTrue(repair.inputTransition().get("loop_reason").toString().contains("implementation repair"));
+        assertTrue(goal.contains("\"domainOutcome\" : \"NEEDS_REPAIR\""));
+        assertTrue(events.contains("iteration_started"));
+        assertTrue(events.contains("REJECT_IMPLEMENTATION_BUG"));
+        assertFalse(current.activeNodeInstanceIds().isEmpty(), "semantic repair must not complete the workflow");
+    }
+
+    @Test
+    void loopTransitionMetadataRespectsRevisionLimit() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-loop-limit"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "review.decision",
+                List.of(
+                        new NodeDefinition("review.decision", NodeKind.DECISION, "noop.decision", Map.of(
+                                "max_revisions", 1
+                        )),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("review.decision", "BACK_TO_DESIGN", "design.claude_design",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("review requested design changes")))
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-loop-limit", definition);
+        var firstDecision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, firstDecision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "BACK_TO_DESIGN", List.of("review-1.md"), Map.of());
+        assertEquals("iter-002", ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0)).iterationId());
+
+        var secondDecision = new NodeInstanceDocument(
+                1,
+                "node-review-decision-999",
+                "review.decision",
+                NodeKind.DECISION,
+                "noop.decision",
+                NodeStatus.READY,
+                "stage-review",
+                "iter-002",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(),
+                "",
+                "",
+                null,
+                null
+        );
+        Files.write(paths.nodeJson(secondDecision.nodeInstanceId()), new com.fasterxml.jackson.databind.ObjectMapper()
+                .findAndRegisterModules()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsBytes(secondDecision));
+        var current = ledger.loadCurrent(paths);
+        var injectedCurrent = new WorkflowCurrentDocument(
+                current.schemaVersion(),
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.RUNNING,
+                List.of(secondDecision.nodeInstanceId()),
+                List.of(),
+                current.lastEventId(),
+                current.updatedAt()
+        );
+        Files.write(paths.workflowCurrentJson(), new com.fasterxml.jackson.databind.ObjectMapper()
+                .findAndRegisterModules()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsBytes(injectedCurrent));
+
+        ledger.completeAndRoute(paths, definition, secondDecision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "BACK_TO_DESIGN", List.of("review-2.md"), Map.of());
+
+        var stopped = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("revision_limit_reached"));
     }
 
     @Test
@@ -548,6 +746,11 @@ class WorkflowFileLedgerTest {
         assertTrue(completed.openGateIds().isEmpty());
         assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_completed"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains(completed.lastEventId()));
+        assertTrue(Files.isRegularFile(paths.completionAuditJson()));
+        var audit = Files.readString(paths.completionAuditJson());
+        assertTrue(audit.contains("\"lifecycleState\" : \"ENDED\""));
+        assertTrue(audit.contains("\"workflowStatus\" : \"COMPLETED\""));
+        assertTrue(audit.contains("\"finalNodeDefinitionId\" : \"only\""));
     }
 
     @Test
@@ -573,6 +776,7 @@ class WorkflowFileLedgerTest {
         assertEquals(WorkflowStatus.COMPLETED, completed.status());
         assertTrue(completed.activeNodeInstanceIds().isEmpty());
         assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_completed"));
+        assertTrue(Files.readString(paths.completionAuditJson()).contains("\"finalOutcome\" : \"complete\""));
         var node = ledger.loadNode(paths, "node-gate-human_next_stage_approval-001");
         assertEquals("complete", node.result().get("human_action"));
     }
@@ -637,6 +841,7 @@ class WorkflowFileLedgerTest {
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_failed"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("recovery_gate_id"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains(stopped.lastEventId()));
+        assertFalse(Files.exists(paths.goalSatisfactionJson()));
     }
 
     @Test
@@ -676,6 +881,79 @@ class WorkflowFileLedgerTest {
         assertTrue(summary.contains("design.stderr.log"));
         assertTrue(summary.contains("dualctl retry --workdir " + tempDir.toAbsolutePath().normalize()));
         assertFalse(summary.contains("--workstream-id"));
+    }
+
+    @Test
+    void modelMismatchFailureSummarySuggestsRebuildingAcpxSession() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-model-mismatch-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "intake.claude",
+                List.of(new NodeDefinition("intake.claude", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-model-mismatch-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_AGENT_MODEL_MISMATCH",
+                List.of(".agent/workstreams/ws-model-mismatch-summary/runs/run-001/outputs/intake.stderr.log"),
+                Map.of(
+                        "run_id", "run-001",
+                        "exit_code", 1,
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_MODEL_MISMATCH",
+                        "acpx_failure.recoverable", true
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("RECOVERABLE_AGENT_MODEL_MISMATCH"));
+        assertTrue(summary.contains("acpx claude sessions close claude-main"));
+        assertTrue(summary.contains("acpx claude sessions new --name claude-main"));
+        assertFalse(summary.contains("quota, reconnect, or session state"));
+    }
+
+    @Test
+    void reconnectFailureSummarySuggestsRebuildingAcpxSession() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reconnect-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "intake.claude",
+                List.of(new NodeDefinition("intake.claude", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-reconnect-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_AGENT_RECONNECT",
+                List.of(".agent/workstreams/ws-reconnect-summary/runs/run-001/outputs/intake.stderr.log"),
+                Map.of(
+                        "run_id", "run-001",
+                        "exit_code", 0,
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT",
+                        "acpx_failure.recoverable", true
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("RECOVERABLE_AGENT_RECONNECT"));
+        assertTrue(summary.contains("The acpx agent session needs reconnect"));
+        assertTrue(summary.contains("acpx claude sessions close claude-main"));
+        assertTrue(summary.contains("acpx claude sessions new --name claude-main"));
+        assertFalse(summary.contains("quota, reconnect, or session state"));
     }
 
     @Test
@@ -999,9 +1277,11 @@ class WorkflowFileLedgerTest {
                 "",
                 "iter-001",
                 List.of(),
+                Map.of(),
                 List.of(),
                 Map.of(),
                 null,
+                "",
                 null,
                 null
         ));

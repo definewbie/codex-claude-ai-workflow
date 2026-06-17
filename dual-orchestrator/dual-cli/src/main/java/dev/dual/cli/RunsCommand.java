@@ -36,13 +36,15 @@ public final class RunsCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         var paths = new WorkstreamPaths(workdir.toAbsolutePath().normalize(), new DualId(workstreamId));
-        var runs = filter(new RunMetadataReader().list(paths).stream()).toList();
+        var listing = new RunMetadataReader().listWithWarnings(paths);
+        var runs = filter(listing.runs().stream()).toList();
         if (latest && !runs.isEmpty()) {
             runs = runs.subList(runs.size() - 1, runs.size());
         }
         if (runs.isEmpty()) {
             System.out.println("No matching agent runs found.");
             System.out.println("Runs dir: " + paths.runsDir());
+            printWarnings(listing.warnings());
             return 0;
         }
         System.out.println("Run ID\tStatus\tAgent\tNode\tExit\tDuration(ms)\tFailure");
@@ -57,7 +59,21 @@ public final class RunsCommand implements Callable<Integer> {
                     text(run.failureReason())
             ));
         }
+        printWarnings(listing.warnings());
         return 0;
+    }
+
+    private void printWarnings(java.util.List<RunMetadataReader.RunMetadataWarning> warnings) {
+        if (warnings.isEmpty()) {
+            return;
+        }
+        System.out.println();
+        System.out.println("Run metadata warnings:");
+        for (var warning : warnings) {
+            System.out.println("- " + warning.runId()
+                    + ": metadata unavailable: " + text(warning.reason())
+                    + " (" + warning.path() + ")");
+        }
     }
 
     private Stream<RunMetadata> filter(Stream<RunMetadata> runs) {

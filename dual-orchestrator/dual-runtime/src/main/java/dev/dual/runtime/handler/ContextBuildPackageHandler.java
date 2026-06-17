@@ -55,18 +55,38 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         var markdown = renderPackage(context, workstreamDir);
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
+        var metadataPath = writeContextPackageMetadata(
+                context,
+                packagePath,
+                profileName,
+                null,
+                tokenCount(markdown),
+                List.of()
+        );
 
-        return buildLegacyResult(context, packagePath);
+        return buildLegacyResult(context, packagePath, metadataPath);
     }
 
     private static NodeResult buildLegacyResult(TaskContext context, Path packagePath) {
-        return buildLegacyResult(context, packagePath, sections(context));
+        return buildLegacyResult(context, packagePath, null, sections(context));
     }
 
-    private static NodeResult buildLegacyResult(TaskContext context, Path packagePath, List<String> includedSections) {
+    private static NodeResult buildLegacyResult(TaskContext context, Path packagePath, Path metadataPath) {
+        return buildLegacyResult(context, packagePath, metadataPath, sections(context));
+    }
+
+    private static NodeResult buildLegacyResult(
+            TaskContext context,
+            Path packagePath,
+            Path metadataPath,
+            List<String> includedSections
+    ) {
         var packageRef = toWorkspaceRef(context.workspaceRoot(), packagePath);
         var result = new LinkedHashMap<String, Object>();
         result.put("context_package", packageRef);
+        if (metadataPath != null) {
+            result.put("context_package_metadata", toWorkspaceRef(context.workspaceRoot(), metadataPath));
+        }
         result.put("target_node", configText(context, "target_node", ""));
         result.put("profile", profile(context));
         result.put("sections", includedSections);
@@ -120,9 +140,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 }
                 continue;
             }
-            var before = builder.length();
-            appendGovernedSection(builder, rs, context, workstreamDir, handoff, budget);
-            rs.renderedChars = builder.length() - before;
+            var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, budget);
+            if (section.failure() != null) {
+                return section.failure();
+            }
+            builder.append(section.content());
         }
 
         // Phase 5: Validate total budget (token-based)
@@ -145,7 +167,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     }
                     continue;
                 }
-                appendGovernedSection(builder, rs, context, workstreamDir, handoff, budget);
+                var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, budget);
+                if (section.failure() != null) {
+                    return section.failure();
+                }
+                builder.append(section.content());
             }
             if (tokenCount(builder.toString()) > budget.totalBudget()) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(),
@@ -156,11 +182,74 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         // Rebuild header with actual sizes
         builder.replace(0, builder.indexOf("\n## Context Governance"), rebuildGovernedHeader(context, budget, sorted));
 
-        Files.writeString(packagePath, builder.toString(), StandardCharsets.UTF_8);
+        var markdown = builder.toString();
+        Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
         var declaredSections = budget.sections().stream()
                 .map(SectionRequirement::section)
                 .toList();
-        return buildLegacyResult(context, packagePath, declaredSections);
+        var metadataPath = writeContextPackageMetadata(
+                context,
+                packagePath,
+                profileName,
+                budget,
+                tokenCount(markdown),
+                sorted
+        );
+        return buildLegacyResult(context, packagePath, metadataPath, declaredSections);
+    }
+
+    /**
+     * Writes the structured context governance sidecar.
+     *
+     * The markdown package remains the agent-facing artifact. The sidecar is
+     * the machine-facing evidence boundary used by trace, metrics, and later
+     * budget audits; callers should not parse the markdown table for lifecycle
+     * decisions.
+     */
+    private static Path writeContextPackageMetadata(
+            TaskContext context,
+            Path packagePath,
+            String profileName,
+            ContextBudget budget,
+            int estimatedTokens,
+            List<ResolvedSection> sections
+    ) throws IOException {
+        var metadataPath = packagePath.resolveSibling(stripMarkdownExtension(packagePath.getFileName().toString()) + ".json");
+        var metadata = new LinkedHashMap<String, Object>();
+        metadata.put("schemaVersion", 1);
+        metadata.put("workstreamId", context.workstreamId());
+        metadata.put("builderNode", context.definition().id());
+        metadata.put("targetNode", configText(context, "target_node", ""));
+        metadata.put("profile", profileName);
+        metadata.put("contextPackage", toWorkspaceRef(context.workspaceRoot(), packagePath));
+        metadata.put("estimatedTokens", estimatedTokens);
+        metadata.put("tokenBudget", budget == null ? 0 : budget.totalBudget());
+        metadata.put("withinBudget", budget == null || estimatedTokens <= budget.totalBudget());
+        metadata.put("generatedAt", Instant.now().toString());
+        metadata.put("sections", sections.stream()
+                .map(ContextBuildPackageHandler::sectionMetadata)
+                .toList());
+        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(metadataPath.toFile(), metadata);
+        return metadataPath;
+    }
+
+    private static Map<String, Object> sectionMetadata(ResolvedSection rs) {
+        var section = new LinkedHashMap<String, Object>();
+        section.put("name", rs.req.section());
+        section.put("available", rs.available);
+        section.put("degraded", rs.degraded);
+        section.put("dropped", rs.dropped);
+        section.put("priority", rs.req.priority().name());
+        section.put("overflowPolicy", rs.req.overflowPolicy().name());
+        section.put("softBudgetTokens", rs.req.softBudget());
+        section.put("originalTokens", rs.originalChars);
+        section.put("renderedTokens", rs.renderedChars);
+        section.put("degradation", rs.degraded ? rs.req.degradeTo().strategy().name() : "FULL");
+        return section;
+    }
+
+    private static String stripMarkdownExtension(String filename) {
+        return filename.endsWith(".md") ? filename.substring(0, filename.length() - 3) : filename;
     }
 
     private static boolean checkAvailability(SectionRequirement req, TaskContext context, Path workstreamDir) {
@@ -197,7 +286,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 if (rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER) degraded = "-";
                 else degraded = "skip";
             }
-            var original = rs.available ? formatTokens(rs.renderedChars) : "-";
+            var original = rs.available ? formatTokens(rs.originalChars) : "-";
             var current = rs.available ? formatTokens(rs.renderedChars) : "-";
             builder.append("| ").append(rs.req.section()).append(" | ").append(level)
                    .append(" | ").append(degraded).append(" | ").append(original)
@@ -234,6 +323,40 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
         sb.append("\nDegraded sections have full data at their original paths listed below.\n\n");
         return sb.toString();
+    }
+
+    private static RenderedSection renderGovernedSectionOrFailure(
+            ResolvedSection rs,
+            TaskContext context,
+            Path workstreamDir,
+            StageHandoffDocument handoff,
+            ContextBudget budget
+    ) throws IOException {
+        var section = new StringBuilder();
+        appendGovernedSection(section, rs, context, workstreamDir, handoff, budget);
+        var full = section.toString();
+        rs.originalChars = tokenCount(full);
+
+        if (rs.originalChars <= rs.req.softBudget()) {
+            rs.renderedChars = rs.originalChars;
+            return RenderedSection.content(full);
+        }
+        if (rs.req.degradeTo().strategy() == Degradation.ADAPTIVE) {
+            rs.degraded = true;
+            var capped = capSectionToBudget(rs.req.section(), full, rs.req.softBudget(), workstreamDir);
+            rs.renderedChars = tokenCount(capped);
+            return RenderedSection.content(capped);
+        }
+        if (rs.req.overflowPolicy() == OverflowPolicy.FAIL) {
+            var error = "section '" + rs.req.section() + "' exceeded soft budget: "
+                    + rs.originalChars + " > " + rs.req.softBudget() + " tokens";
+            return RenderedSection.failure(new NodeResult("failed", NodeStatus.FAILED, List.of(), Map.of("error", error), null));
+        }
+
+        rs.degraded = true;
+        var capped = capSectionToBudget(rs.req.section(), full, rs.req.softBudget(), workstreamDir);
+        rs.renderedChars = tokenCount(capped);
+        return RenderedSection.content(capped);
     }
 
     private static void appendGovernedSection(StringBuilder builder, ResolvedSection rs,
@@ -414,6 +537,29 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var estimatedChars = Math.min(content.length(), maxTokens * 4);
         var truncated = content.substring(0, estimatedChars).stripTrailing();
         return truncated + "\n\n[adaptively compressed to ~" + maxTokens + " tokens; full data at " + toDisplayRef(path) + "]";
+    }
+
+    private static String capSectionToBudget(String section, String content, int maxTokens, Path workstreamDir) {
+        var heading = "## " + sectionTitle(section) + "\n\n";
+        var marker = "\n\n[adaptively compressed; section degraded to stay within ~" + maxTokens
+                + " tokens; full source remains in ledger under " + toDisplayRef(workstreamDir) + "]\n\n";
+        var bodyBudget = Math.max(100, maxTokens - tokenCount(heading) - tokenCount(marker));
+        var maxChars = Math.min(content.length(), bodyBudget * 4);
+        var body = content.substring(0, maxChars).stripTrailing();
+        if (body.startsWith(heading)) {
+            return body + marker;
+        }
+        return heading + body + marker;
+    }
+
+    private record RenderedSection(String content, NodeResult failure) {
+        static RenderedSection content(String content) {
+            return new RenderedSection(content, null);
+        }
+
+        static RenderedSection failure(NodeResult failure) {
+            return new RenderedSection("", failure);
+        }
     }
 
     private static String readOrDefault(Path path, String fallback) throws IOException {

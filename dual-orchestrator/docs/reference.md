@@ -59,7 +59,7 @@ Runtime 只认识三类节点：
 - `workflow/current.json` 快照。
 - node / gate 文件化状态。
 - handler SPI 和 registry。
-- baseline lifecycle workflow definition。
+- full lifecycle workflow definition。
 - `acpx.agent_run` TaskHandler。
 - resources-based Agent prompt templates。
 - human review gate。
@@ -149,7 +149,7 @@ dual-server
 - JDK 21+
 - Maven 3.9+
 - Git
-- acpx
+- acpx 0.8.0
 - Claude Code / Codex 对应的 acpx agent runtime 可用
 
 检查：
@@ -158,7 +158,8 @@ dual-server
 java -version
 mvn -version
 git --version
-acpx --help
+acpx --version
+./scripts/configure-acpx.sh
 ```
 
 ## Build
@@ -206,6 +207,12 @@ cd dual-orchestrator
 
 ```bash
 ./scripts/install.sh --no-server
+```
+
+安装时同时写入固定的 acpx Codex adapter 配置：
+
+```bash
+./scripts/install.sh --configure-acpx
 ```
 
 安装后确认：
@@ -405,6 +412,18 @@ acpx claude -s claude-main -f <prompt_file>
 acpx codex -s codex-reviewer -f <prompt_file>
 ```
 
+真实运行前必须固定 acpx 和 Codex ACP adapter：
+
+```bash
+npm install -g acpx@0.8.0
+./scripts/configure-acpx.sh
+dualctl doctor --workdir /path/to/git/repo
+```
+
+`configure-acpx.sh` 会把 `agents.codex.command` 写成固定版本，例如
+`npx -y @zed-industries/codex-acp@0.12.0`。不要依赖 acpx 内部的浮动 npm
+range，否则同一个 workflow 可能因为 adapter 最新版本变化而失败。
+
 这里的 `<prompt_file>` 不是你手写的需求文件，而是 `dualctl resume` 在 run ledger 里生成的 Agent 指令文件，例如：
 
 ```text
@@ -426,13 +445,13 @@ acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
 
 含义是：读操作可以自动批准；如果 agent 需要无法自动处理的权限，直接失败并把 stderr 留在 ledger 里，避免 CLI 无限挂住。
 
-较小的 `baseline` / `contract` lifecycle 仍然尽量保守，只在实现和自测相关 Claude 节点启用写权限。完整真实生命周期 `full` 会让所有 acpx Agent 节点使用：
+`full` 和 `contract` lifecycle 都只在实现和自测相关 Claude 节点启用写权限。intake、design、plan、review、acceptance 和 handoff 阶段保持只读：
 
 ```bash
-acpx --timeout 600 --approve-all ...
+acpx --timeout 600 --approve-reads --non-interactive-permissions fail ...
 ```
 
-原因是 full 的 intake / design / plan / acceptance 都可能需要通过 Agent 工具读取项目、执行 `git diff`、运行测试或生成证据；在非交互模式下使用 `--approve-reads --non-interactive-permissions fail` 会让这类工具调用直接失败。安全边界主要由默认 worktree、`Execution Workspace Guard` 和 prompt contract 共同承担：Claude 是主控开发者；Codex 仍然只做外部审视和验收，不应修改业务代码。
+实现和自测节点需要写代码、运行命令和生成证据，因此只在这些节点使用写权限。安全边界由默认 worktree、Agent step 权限、`Execution Workspace Guard` 和 prompt contract 共同承担：Claude 是主控开发者；Codex 仍然只做外部审视和验收，不应修改业务代码。
 
 如果 acpx runtime 返回 reconnect、额度不足、登录失效等可恢复错误，ledger 会保留 stdout/stderr。若 stdout 已经包含完整 terminal `dual-control` block，并以 `[done] end_turn` 结束，adapter 会接受该产物，同时在 result 中记录 `acpx_recoverable_stderr_ignored=true` 和原始 `exit_code`。如果 stdout 不完整，节点仍会停到 recovery；dual 不会替你修复 agent runtime。
 
@@ -563,18 +582,6 @@ dualctl start --branch ai/my-task --worktree-dir ../repo-my-task "任务描述"
 dualctl start --workflow ./workflow.json "任务描述"
 ```
 
-使用仓库内置示例 workflow：
-
-```bash
-dualctl start --workflow dual-orchestrator/workflows/agent-lifecycle.v1.json "任务描述"
-```
-
-启动前校验 workflow 文件：
-
-```bash
-dualctl workflow validate dual-orchestrator/workflows/agent-lifecycle.v1.json
-```
-
 查看当前 CLI 内置支持的 handler：
 
 ```bash
@@ -599,7 +606,7 @@ dualctl start --workflow ./workflow.json --allow-unknown-handlers "任务描述"
 dualctl workflow print-default --output ./workflow.json
 ```
 
-如果不传 `--workflow`，默认使用内置的 `agent-lifecycle@1`。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
+如果不传 `--workflow`，默认使用 classpath 资源中的 `agent-lifecycle-full@4`。`WorkflowDefinitionLoader` 是内置定义的唯一入口；`full` 和 `contract` variant 都从 classpath JSON resource 加载，Java 不再手写 lifecycle DAG。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
 
 最小 workflow 示例：
 
@@ -665,7 +672,7 @@ Workstream: ws-...
 Workspace: <effective worktree>
 Branch: ai/ws-...
 Ledger: <worktree>/.agent/workstreams/<workstream_id>
-Workflow: agent-lifecycle@1
+Workflow: agent-lifecycle-full@4
 Next: dualctl resume --workdir <effective worktree> <workstream_id>
 ```
 
@@ -995,7 +1002,7 @@ dualctl watch --workdir <effective_worktree> --interval-ms 1000 <workstream_id>
 
 `timeline.json` 聚合 workflow current 和 nodes 快照，包含 workflow 状态、active nodes、open gates、每个 node 的状态、iteration、artifact refs 和 duration。`watch` / Web UI 会优先消费这个读模型，而不是直接解析 ledger 原始文件。
 
-`metrics/workstream-metrics.json` 还包含 `providerMetrics`。当前指标来自本地 `runs/*/run.json`，覆盖 agent/provider 成功率、失败数和耗时；token / cost 需要 acpx adapter 暴露原始 usage 后再补。
+`metrics/workstream-metrics.json` 还包含 `providerMetrics`。当前指标来自本地 `runs/*/run.json`，覆盖 agent/provider 成功率、失败数、耗时，以及 acpx stream usage 中能关联到本次 prompt 的 token / cost。usage 读取失败不会影响 workflow 路由，只作为观测事实写入 run metadata。
 
 ### Workstream Summary
 
@@ -1209,6 +1216,38 @@ Agent prompt 会出现 `## Context Package`，包含上下文包路径和一个�
 
 `commit-message.txt` 用于提交 worktree 中的业务改动，`pr-body.md` 汇总 user request、verification、Codex final acceptance、changed files 和 run artifacts。默认 workflow 只准备材料，不自动提交、不自动 push。
 
+如果默认 worktree 模式执行完成，并且要把已验收改动合回原始仓库，先执行显式 delivery merge：
+
+```bash
+dualctl delivery merge \
+  --workdir <effective_worktree> \
+  --target <original_repo> \
+  <workstream_id>
+```
+
+`delivery merge` 会校验：
+
+- workflow status 是 `COMPLETED`；
+- completion audit 是 `ready`；
+- final acceptance 是 `ACCEPT` 或 `ACCEPT_WITH_NOTES`；
+- target repo 是干净的 Git repo；
+- source worktree 有非空 tracked 业务 diff。
+
+它会从 source worktree 生成 patch，排除 `.agent/`、`.serena/`、`node_modules/`、`dist/`、`build/`、`target/` 和 `*.log`，然后 apply 到 target repo index。它不会自动 commit，也不会自动删除 worktree。
+
+交付合并证据写入：
+
+```text
+.agent/workstreams/<workstream_id>/delivery/merge-plan.json
+.agent/workstreams/<workstream_id>/delivery/merge.patch
+.agent/workstreams/<workstream_id>/delivery/changed-files.txt
+.agent/workstreams/<workstream_id>/delivery/excluded-files.txt
+.agent/workstreams/<workstream_id>/delivery/apply.stdout.log
+.agent/workstreams/<workstream_id>/delivery/apply.stderr.log
+```
+
+第一版只支持 tracked 业务文件改动。未跟踪的业务文件会让命令失败并给出原因，避免 delivery merge 静默修改 source worktree index。
+
 需要提交业务改动时执行：
 
 ```bash
@@ -1234,7 +1273,7 @@ dualctl delivery create-pr --workdir <effective_worktree> --title "feat: my task
 .agent/workstreams/<workstream_id>/delivery/pr-url.txt
 ```
 
-`dualctl status` 会读取 `delivery.json` 并显示 delivery status、commit hash 和 PR URL。
+`dualctl status` 会读取 `delivery.json` 并显示 delivery status、commit hash 和 PR URL；如果存在 `merge-plan.json`，也会显示 Delivery Merge status、target repo 和 changed file 数量。
 
 过渡期仍会看到旧 design-loop ledger：
 
@@ -1301,7 +1340,7 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 - worktree 已创建。
 - `.agent/workstreams/<workstream_id>/workflow/current.json` 存在。
 - `.agent/workstreams/<workstream_id>/events.jsonl` 包含 `workflow_started`。
-- `status` 能看到 `Workflow: agent-lifecycle@1`。
+- `status` 能看到 `Workflow: agent-lifecycle-full@4`。
 
 ### Controlled Lifecycle Smoke
 
@@ -1316,7 +1355,7 @@ cd dual-orchestrator
 
 - workflow 从 `start --run` 跑到第一个 human gate。
 - 脚本自动 approve 中间 gate，并在最后 next-stage gate 执行 `review complete`。
-- 28 个 baseline mainline 节点完成。
+- full lifecycle 节点完成。
 - final report、delivery prepare artifact、next-stage prompt、handoff.json 都存在。
 - Git evidence 能看到 controlled implementation 对 `main.py` / `README.md` 的改动。
 
@@ -1343,13 +1382,12 @@ cd dual-orchestrator
 
 ### Real acpx Smoke
 
-完整生命周期和多 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 baseline、contract、full 三个真实 acpx case。
+完整生命周期和 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 contract、full 两个真实 acpx case。
 
 真实 acpx case：
 
 ```bash
 cd dual-orchestrator
-./scripts/smoke-test.sh --case baseline-basic --cleanup
 ./scripts/smoke-test.sh --case contract-happy-path --cleanup
 ./scripts/smoke-test.sh --case full-reject-classify-path --cleanup
 ```
@@ -1378,9 +1416,11 @@ cd dual-orchestrator
 
 ./scripts/run-real-case.sh \
   --repo /path/to/your/repo \
-  --task-file /tmp/dual-task.md \
-  --variant full
+  --task-file /tmp/dual-task.md
 ```
+
+`full` lifecycle 是默认流程。只有在明确要跑更小的 contract-only 流程时，才使用
+`--variant contract`。
 
 跑完后查看：
 
@@ -1505,10 +1545,15 @@ git -C /path/to/original/repo branch -D <branch>
 
 ```bash
 which acpx
-acpx --help
+acpx --version
 ```
 
-如果没有输出，需要先安装或修正 PATH。
+如果没有输出，需要先安装或修正 PATH。当前推荐固定版本：
+
+```bash
+npm install -g acpx@0.8.0
+./scripts/configure-acpx.sh
+```
 
 ### `No acpx session found`
 

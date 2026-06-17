@@ -42,9 +42,11 @@ final class NodeStateWriter {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 node.outputRefs(),
                 LedgerUtils.mergedResult(node.result(), Map.of("running_pid", pid)),
                 node.runRef(),
+                node.latestExecutionId(),
                 now,
                 null
         );
@@ -73,6 +75,7 @@ final class NodeStateWriter {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 List.of(),
                 Map.of(
                         "retry_of_status", node.status().name(),
@@ -81,6 +84,7 @@ final class NodeStateWriter {
                         "previous_running_pid", LedgerUtils.resultValueOrDefault(node.result(), "running_pid", "")
                 ),
                 node.runRef(),
+                node.latestExecutionId(),
                 null,
                 null
         );
@@ -134,12 +138,14 @@ final class NodeStateWriter {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 List.of(),
                 Map.of(
                         "retry_of_status", node.status().name(),
                         "retry_note", note == null ? "" : note
                 ),
                 node.runRef(),
+                node.latestExecutionId(),
                 null,
                 null
         );
@@ -198,6 +204,7 @@ final class NodeStateWriter {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 node.outputRefs(),
                 LedgerUtils.mergedResult(node.result(), Map.of(
                         "reason", "STALE_RUNNING_PROCESS",
@@ -207,6 +214,7 @@ final class NodeStateWriter {
                         "recovery_note", note == null ? "" : note
                 )),
                 node.runRef(),
+                node.latestExecutionId(),
                 node.startedAt(),
                 now
         );
@@ -337,12 +345,14 @@ final class NodeStateWriter {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 node.outputRefs(),
                 LedgerUtils.mergedResult(node.result(), Map.of(
                         "closed_as_mistaken_iteration", true,
                         "close_note", note == null ? "" : note
                 )),
                 node.runRef(),
+                node.latestExecutionId(),
                 node.startedAt(),
                 now
         );
@@ -385,5 +395,29 @@ final class NodeStateWriter {
         );
         jsonWriter.write(paths.workflowCurrentJson(), completed);
         eventLog.writeInstanceFromCurrent(paths, completed, now);
+    }
+
+    NodeInstanceDocument setLatestExecution(WorkstreamPaths paths, String nodeInstanceId, String nodeExecutionId) throws IOException {
+        var node = loadNode(paths, nodeInstanceId);
+        var updated = new NodeInstanceDocument(
+                node.schemaVersion(),
+                node.nodeInstanceId(),
+                node.nodeDefinitionId(),
+                node.kind(),
+                node.handlerType(),
+                node.status(),
+                node.stageId(),
+                node.iterationId(),
+                node.inputRefs(),
+                node.inputTransition(),
+                node.outputRefs(),
+                node.result(),
+                node.runRef(),
+                nodeExecutionId,
+                node.startedAt(),
+                node.finishedAt()
+        );
+        jsonWriter.write(paths.nodeJson(nodeInstanceId), updated);
+        return updated;
     }
 }

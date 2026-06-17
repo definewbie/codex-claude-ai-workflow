@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public final class AgentArtifactEnvelopeParser {
     private static final Pattern ENVELOPE = Pattern.compile(
-            "(?s)<dual-artifact\\s+type=\"(?<type>[^\"]+)\"\\s+version=\"(?<version>\\d+)\"\\s*>\\s*(?<json>.*?)\\s*</dual-artifact>"
+            "(?ms)^<dual-artifact\\s+type=\"(?<type>[^\"]+)\"\\s+version=\"(?<version>\\d+)\"\\s*>\\s*(?<json>.*?)\\s*^</dual-artifact>"
     );
 
     public Optional<AgentArtifactEnvelope> latest(String markdown, String type) {

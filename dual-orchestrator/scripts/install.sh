@@ -20,6 +20,7 @@ PREFIX="${DUAL_PREFIX:-$HOME/.local}"
 SKIP_BUILD=false
 INSTALL_SERVER=true
 DRY_RUN=false
+CONFIGURE_ACPX=false
 
 CLI_JAR="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
 SERVER_JAR="$PROJECT_ROOT/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar"
@@ -33,6 +34,7 @@ Options:
   --prefix <path>   Install prefix. Default: $DUAL_PREFIX or $HOME/.local
   --skip-build      Reuse existing target jars instead of running Maven.
   --no-server       Install only dualctl, not dual-server.
+  --configure-acpx  Write a pinned acpx Codex adapter command into ~/.acpx/config.json.
   --dry-run         Print planned actions without writing files.
   -h, --help        Show this help.
 
@@ -92,6 +94,9 @@ parse_args() {
       --no-server)
         INSTALL_SERVER=false
         ;;
+      --configure-acpx)
+        CONFIGURE_ACPX=true
+        ;;
       --dry-run)
         DRY_RUN=true
         ;;
@@ -122,6 +127,14 @@ check_dependencies() {
   if ! command -v acpx >/dev/null 2>&1; then
     warn "acpx was not found. dualctl can be installed, but real agent runs will fail until acpx is installed and initialized."
   fi
+}
+
+configure_acpx() {
+  if [[ "$CONFIGURE_ACPX" != true ]]; then
+    return
+  fi
+  log "Configuring pinned acpx adapter"
+  run "$PROJECT_ROOT/scripts/configure-acpx.sh"
 }
 
 build_jars() {
@@ -195,6 +208,7 @@ Before real agent runs, verify:
   java -version
   mvn -version
   acpx --version
+  $PROJECT_ROOT/scripts/configure-acpx.sh
   $PREFIX/bin/dualctl doctor --workdir /path/to/git/repo
 EOF
 }
@@ -204,6 +218,7 @@ main() {
   check_dependencies
   build_jars
   install_files
+  configure_acpx
   print_next_steps
 }
 

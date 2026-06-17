@@ -38,6 +38,11 @@ GET /api/workstreams/<workstream_id>/stream?workdir=<effective_workdir>
 
 `dualctl trace` 是主要 operator 命令。它把 status、timeline、attention items、final acceptance、repair loops、key artifacts 和 next actions 折到一屏。
 
+Trace 和 runs 是观测投影，不是状态机执行器。如果历史 `runs/<run_id>/run.json`
+缺失或损坏，它们必须把问题显示为 metadata warning，而不是让命令失败、也不是把
+已经完成的 workstream 重新解释成失败。只有显式 `inspect --run <run_id>` 才严格读取
+单次 run metadata。
+
 更深入的命令包括：
 
 ```bash
@@ -86,6 +91,10 @@ Human gate 是真实暂停点。Smoke script 可以为了 benchmark 自动 appro
 
 Packet 应展示足以支持决策的最小证据：TaskContract、verifier decision、must-fix、相关 Git evidence、已知风险和推荐检查项。
 
+Packet 不是 raw Agent log dump。`reviews/*.md` / `.json` 应优先展示结构化
+sidecar 的决策摘要、风险、缺失证据、Must Fix 和相关 artifact 路径。完整 stdout /
+stderr 只作为调试入口引用，默认不嵌入到人审首屏，避免 operator 在工具日志里找结论。
+
 ## Timeline 语义
 
 Timeline 是按时间排序、按 lifecycle stage 分组的进度视图，不是 log dump。它应该让进度一眼可见：
@@ -108,7 +117,7 @@ intake -> contract -> design -> plan -> implementation -> self-test -> acceptanc
 - gate and iteration counts；
 - longest node duration。
 
-Token 和 cost metrics 延后，直到 adapter 能提供可信 usage data。系统不猜成本。
+当 acpx adapter 能把当前 prompt 匹配到 session stream usage event 时，会记录 token 和 cost。它们是最佳努力的观测数据，不参与 workflow 路由，也不等同于精确 provider 账单对账。
 
 ## 已暴露的易用性问题
 

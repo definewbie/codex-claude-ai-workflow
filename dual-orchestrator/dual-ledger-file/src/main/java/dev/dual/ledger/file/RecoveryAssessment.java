@@ -75,11 +75,62 @@ public record RecoveryAssessment(
                     diagnostic
             );
         }
+        if ("RECOVERABLE_AGENT_MODEL_MISMATCH".equals(failureReason)) {
+            var agent = blankDefault(text(result.get("agent")), "claude");
+            var session = blankDefault(text(result.get("session")), agent + "-main");
+            return new RecoveryAssessment(
+                    "agent_model_mismatch",
+                    "REBUILD_ACPX_SESSION_THEN_RETRY",
+                    "The acpx session model state is stale or incompatible with the current Claude Code/provider configuration. Rebuild the acpx session before retrying.",
+                    "acpx " + agent + " sessions close " + session
+                            + " && acpx " + agent + " sessions new --name " + session
+                            + " && " + retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("RECOVERABLE_AGENT_RECONNECT".equals(failureReason)
+                || "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(failureReason)
+                || "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)
+                || "RECOVERABLE_SESSION_MISSING".equals(failureReason)
+                || "RECOVERABLE_CONTEXT_WINDOW".equals(failureReason)) {
+            var agent = blankDefault(text(result.get("agent")), "claude");
+            var session = blankDefault(text(result.get("session")), agent + "-main");
+            var classification = "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(failureReason)
+                    ? "agent_output_interrupted"
+                    : "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)
+                    ? "agent_permission_blocked"
+                    : "agent_session_recovery";
+            return new RecoveryAssessment(
+                    classification,
+                    "REBUILD_ACPX_SESSION_THEN_RETRY",
+                    sessionRecoveryReason(failureReason),
+                    "acpx " + agent + " sessions close " + session
+                            + " && acpx " + agent + " sessions new --name " + session
+                            + " && " + retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("RECOVERABLE_RATE_LIMIT".equals(failureReason)
+                || "RECOVERABLE_AGENT_OVERLOADED".equals(failureReason)) {
+            return new RecoveryAssessment(
+                    "agent_capacity_recovery",
+                    "WAIT_THEN_RETRY",
+                    capacityRecoveryReason(failureReason),
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
         if (recoverable) {
             return new RecoveryAssessment(
                     "recoverable_agent_runtime",
                     "RETRY_AFTER_EXTERNAL_FIX",
-                    "The failed node is marked recoverable. Fix the external cause first, such as quota, reconnect, or session state.",
+                    "The failed node is marked recoverable, but its typed reason is not mapped to a specific operator action yet. Inspect adapter evidence before retrying.",
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
@@ -146,5 +197,31 @@ public record RecoveryAssessment(
 
     private static String text(Object value) {
         return value == null ? "" : value.toString().trim();
+    }
+
+    private static String blankDefault(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private static String sessionRecoveryReason(String failureReason) {
+        return switch (failureReason) {
+            case "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED" ->
+                    "The agent output stopped before the terminal contract after the acpx timeout. Rebuild the acpx session to avoid continuing a partial context, then retry the same active node.";
+            case "RECOVERABLE_AGENT_PERMISSION_BLOCKED" ->
+                    "The agent attempted a tool action that was blocked by non-interactive permissions. Inspect the agent output and either adjust the task/session permission policy or retry after confirming the node is allowed to use those tools.";
+            case "RECOVERABLE_SESSION_MISSING" ->
+                    "The acpx session is missing. Create the session again, then retry the same active node.";
+            case "RECOVERABLE_CONTEXT_WINDOW" ->
+                    "The agent context window appears exhausted. Rebuild the acpx session to get a fresh context, then retry the same active node.";
+            default ->
+                    "The acpx agent session needs reconnect. Rebuild the acpx session, then retry the same active node.";
+        };
+    }
+
+    private static String capacityRecoveryReason(String failureReason) {
+        if ("RECOVERABLE_AGENT_OVERLOADED".equals(failureReason)) {
+            return "The agent provider is overloaded. Wait for provider capacity to recover, then retry the same active node.";
+        }
+        return "The agent quota or rate limit was hit. Wait for quota recovery, then retry the same active node.";
     }
 }

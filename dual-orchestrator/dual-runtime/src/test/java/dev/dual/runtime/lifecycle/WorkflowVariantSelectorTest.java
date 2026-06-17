@@ -15,41 +15,40 @@ class WorkflowVariantSelectorTest {
     private final LifecycleWorkflowDefinitionFactory factory = new LifecycleWorkflowDefinitionFactory();
 
     @Test
-    void forVariant_null_returnsBaselineMainline() {
+    void forVariant_null_returnsFullVariant() {
         WorkflowDefinition wf = factory.forVariant(null);
-        assertEquals("agent-lifecycle", wf.workflowId());
-        assertEquals(1, wf.version());
+        assertEquals("agent-lifecycle-full", wf.workflowId());
+        assertEquals(4, wf.version());
     }
 
     @Test
-    void forVariant_blank_returnsBaselineMainline() {
-        assertEquals("agent-lifecycle", factory.forVariant("").workflowId());
-        assertEquals("agent-lifecycle", factory.forVariant("   ").workflowId());
+    void forVariant_blank_returnsFullVariant() {
+        assertEquals("agent-lifecycle-full", factory.forVariant("").workflowId());
+        assertEquals("agent-lifecycle-full", factory.forVariant("   ").workflowId());
     }
 
     @Test
-    void forVariant_thin_returnsBaselineMainline() {
-        WorkflowDefinition wf = factory.forVariant("baseline");
-        assertEquals("agent-lifecycle", wf.workflowId());
+    void forVariant_baseline_throws() {
+        var error = assertThrows(IllegalArgumentException.class, () -> factory.forVariant("baseline"));
+        assertTrue(error.getMessage().contains("baseline"));
     }
 
     @Test
-    void forVariant_contract_returnsContractMainline() {
+    void forVariant_contract_returnsContractVariant() {
         WorkflowDefinition wf = factory.forVariant("contract");
         assertEquals("agent-lifecycle-contract", wf.workflowId());
-        assertEquals(2, wf.version());
-    }
-
-    @Test
-    void forVariant_full_returnsFullMainline() {
-        WorkflowDefinition wf = factory.forVariant("full");
-        assertEquals("agent-lifecycle-full", wf.workflowId());
         assertEquals(3, wf.version());
     }
 
     @Test
-    void forVariant_professionalAliases_returnExpectedMainlines() {
-        assertEquals("agent-lifecycle", factory.forVariant("baseline").workflowId());
+    void forVariant_full_returnsFullVariant() {
+        WorkflowDefinition wf = factory.forVariant("full");
+        assertEquals("agent-lifecycle-full", wf.workflowId());
+        assertEquals(4, wf.version());
+    }
+
+    @Test
+    void forVariant_professionalAliases_returnExpectedVariants() {
         assertEquals("agent-lifecycle-contract", factory.forVariant("contract").workflowId());
         assertEquals("agent-lifecycle-full", factory.forVariant("full").workflowId());
     }
@@ -59,7 +58,6 @@ class WorkflowVariantSelectorTest {
         assertEquals("agent-lifecycle-full", factory.forVariant("  Full  ").workflowId());
         assertEquals("agent-lifecycle-full", factory.forVariant("  FULL  ").workflowId());
         assertEquals("agent-lifecycle-contract", factory.forVariant("Contract").workflowId());
-        assertEquals("agent-lifecycle", factory.forVariant(" BASELINE ").workflowId());
     }
 
     @Test
@@ -74,15 +72,15 @@ class WorkflowVariantSelectorTest {
     private final WorkflowDefinitionLoader loader = new WorkflowDefinitionLoader();
 
     @Test
-    void loadOrDefault_nullPathFullVariant_returnsFullMainline() throws Exception {
+    void loadOrDefault_nullPathFullVariant_returnsFullVariant() throws Exception {
         WorkflowDefinition wf = loader.loadOrDefault(null, "full");
         assertEquals("agent-lifecycle-full", wf.workflowId());
     }
 
     @Test
-    void loadOrDefault_nullPathNullVariant_returnsBaselineMainline() throws Exception {
+    void loadOrDefault_nullPathNullVariant_returnsFullVariant() throws Exception {
         WorkflowDefinition wf = loader.loadOrDefault(null, null);
-        assertEquals("agent-lifecycle", wf.workflowId());
+        assertEquals("agent-lifecycle-full", wf.workflowId());
     }
 
     @Test
@@ -117,7 +115,7 @@ class WorkflowVariantSelectorTest {
     @Test
     void loadOrDefault_oldOverload_stillWorks() throws Exception {
         WorkflowDefinition wf = loader.loadOrDefault(null);
-        assertEquals("agent-lifecycle", wf.workflowId(),
-                "Old loadOrDefault(Path) should still return baselineMainline");
+        assertEquals("agent-lifecycle-full", wf.workflowId(),
+                "Old loadOrDefault(Path) should return the full default lifecycle");
     }
 }

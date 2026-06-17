@@ -20,7 +20,7 @@ English version: [release-checklist.md](release-checklist.md)
 mvn -pl dual-cli,dual-server -am test
 node --check dual-server/src/main/resources/static/app.js
 bash -n scripts/*.sh scripts/lib/*.sh
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ./scripts/run-public-benchmark.sh
 ./scripts/real-case-benchmark-summary.sh
 ```
@@ -57,7 +57,7 @@ git grep -n "cancer-clinic\\|/Users/.*work/projects\\|private-repo-name" -- dual
 - 多用户托管 dashboard
 - 自动 merge
 - 跨 workstream 依赖编排
-- 在 `acpx` 暴露稳定 usage data 前实现 adapter token / cost 指标
+- 超出 acpx stream usage 最佳努力采集范围的精确 provider 计费对账
 
 ## Release Notes 模板
 

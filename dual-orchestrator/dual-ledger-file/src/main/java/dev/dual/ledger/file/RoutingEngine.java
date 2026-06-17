@@ -24,6 +24,8 @@ final class RoutingEngine {
     private final LedgerEventLog eventLog;
     private final RevisionTracker revisionTracker;
     private final FlowOrchestrationKernel flowKernel;
+    private final GoalSatisfactionWriter goalSatisfactionWriter;
+    private final CompletionAuditWriter completionAuditWriter;
 
     RoutingEngine(
             AtomicJsonWriter jsonWriter,
@@ -37,6 +39,8 @@ final class RoutingEngine {
         this.eventLog = eventLog;
         this.revisionTracker = revisionTracker;
         this.flowKernel = flowKernel;
+        this.goalSatisfactionWriter = new GoalSatisfactionWriter(jsonWriter);
+        this.completionAuditWriter = new CompletionAuditWriter(jsonWriter);
     }
 
     WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
@@ -73,13 +77,16 @@ final class RoutingEngine {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 outputRefs,
                 result,
                 node.runRef(),
+                node.latestExecutionId(),
                 node.startedAt(),
                 finishedAt
         );
         jsonWriter.write(paths.nodeJson(nodeInstanceId), finished);
+        goalSatisfactionWriter.evaluateAndWrite(paths, current, finished, completedStatus, outcome, outputRefs, result);
 
         if (completedStatus != NodeStatus.COMPLETED) {
             stopOnNonCompletedNode(paths, current, node, completedStatus, outcome, result);
@@ -106,19 +113,29 @@ final class RoutingEngine {
 
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
+            var transitionAttributes = effectiveTransitionAttributes(node, transition.attributes());
+            if (!joinReady(paths, current, nodeInstanceId, transitionAttributes)) {
+                lastEventId = LedgerUtils.nextEventId(lastEventId);
+                eventLog.appendEvent(paths, lastEventId, "join_deferred", Map.of(
+                        "from", node.nodeDefinitionId(),
+                        "outcome", outcome,
+                        "to", nextDefinition.id(),
+                        "transition", transitionAttributes,
+                        "reason", "waiting_for_branch_group"
+                ));
+                continue;
+            }
             var eventNum = LedgerUtils.currentEventNumber(lastEventId) + 1;
             var nextNodeInstanceId = LedgerUtils.nodeInstanceId(nextDefinition.id(), eventNum);
             var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
             var nextIterationId = node.iterationId();
             var iterationStartedPayload = Map.<String, Object>of();
-            if (RevisionTracker.startsNewIteration(node.nodeDefinitionId(), outcome, nextDefinition.id())) {
-                if (RevisionTracker.isRevisionAction(outcome)) {
-                    var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
-                    var currentRevisionCount = revisionTracker.revisionCount(paths, nextDefinition.id());
-                    if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
-                        revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
-                        return;
-                    }
+            if (startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
+                var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
+                var currentRevisionCount = revisionTracker.revisionCount(paths, nextDefinition.id());
+                if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
+                    revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
+                    return;
                 }
                 var nextIteration = revisionTracker.nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
                 Files.createDirectories(paths.iterationsDir());
@@ -130,7 +147,10 @@ final class RoutingEngine {
                         "trigger_node_instance_id", nextIteration.triggerNodeInstanceId(),
                         "trigger_action", nextIteration.triggerAction(),
                         "target_node_definition_id", nextIteration.targetNodeDefinitionId(),
-                        "reason", nextIteration.reason()
+                        "reason", nextIteration.reason(),
+                        "transition_type", text(transitionAttributes.get("transition_type")),
+                        "loop_reason", text(transitionAttributes.get("loop_reason")),
+                        "branch_group_id", text(transitionAttributes.get("branch_group_id"))
                 );
             }
             var nextNode = new NodeInstanceDocument(
@@ -143,9 +163,11 @@ final class RoutingEngine {
                     LedgerUtils.stageId(nextDefinition.id()),
                     nextIterationId,
                     outputRefs,
+                    transitionAttributes,
                     List.of(),
                     Map.of(),
                     null,
+                    "",
                     null,
                     null
             );
@@ -175,7 +197,8 @@ final class RoutingEngine {
                     "outcome", outcome,
                     "to", nextDefinition.id(),
                     "node_instance_id", nextNodeInstanceId,
-                    "gate_id", gateId
+                    "gate_id", gateId,
+                    "transition", transitionAttributes
             ));
             if (!iterationStartedPayload.isEmpty()) {
                 lastEventId = LedgerUtils.nextEventId(lastEventId);
@@ -211,6 +234,77 @@ final class RoutingEngine {
         eventLog.writeInstanceFromCurrent(paths, next, now);
     }
 
+    private boolean joinReady(
+            WorkstreamPaths paths,
+            WorkflowCurrentDocument current,
+            String completedNodeInstanceId,
+            Map<String, Object> transitionAttributes
+    ) throws IOException {
+        if (!"join".equals(text(transitionAttributes.get("transition_type")))) {
+            return true;
+        }
+        var joinStrategy = text(transitionAttributes.get("join_strategy"));
+        if (joinStrategy.isBlank()) {
+            joinStrategy = "all_terminal";
+        }
+        if (!"all_terminal".equals(joinStrategy)) {
+            throw new IOException("unsupported join strategy: " + joinStrategy);
+        }
+        var branchGroupId = text(transitionAttributes.get("branch_group_id"));
+        if (branchGroupId.isBlank()) {
+            throw new IOException("join transition requires branch_group_id");
+        }
+        for (var activeNodeId : current.activeNodeInstanceIds()) {
+            if (activeNodeId.equals(completedNodeInstanceId)) {
+                continue;
+            }
+            var activeNode = loadNode(paths, activeNodeId);
+            var activeTransition = activeNode.inputTransition();
+            if (branchGroupId.equals(text(activeTransition.get("branch_group_id")))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Map<String, Object> effectiveTransitionAttributes(
+            NodeInstanceDocument sourceNode,
+            Map<String, Object> transitionAttributes
+    ) {
+        var effective = new LinkedHashMap<String, Object>();
+        if (transitionAttributes != null) {
+            effective.putAll(transitionAttributes);
+        }
+        var inherited = sourceNode.inputTransition();
+        inheritIfMissing(effective, inherited, "branch_group_id");
+        inheritIfMissing(effective, inherited, "required");
+        inheritIfMissing(effective, inherited, "purpose");
+        return Map.copyOf(effective);
+    }
+
+    private static void inheritIfMissing(Map<String, Object> target, Map<String, Object> source, String key) {
+        if (target.containsKey(key) || !source.containsKey(key)) {
+            return;
+        }
+        target.put(key, source.get(key));
+    }
+
+    private static boolean startsNewIteration(
+            Map<String, Object> transitionAttributes,
+            String sourceNodeDefinitionId,
+            String outcome,
+            String targetNodeDefinitionId
+    ) {
+        if ("loop".equals(text(transitionAttributes.get("transition_type")))) {
+            return true;
+        }
+        return RevisionTracker.startsNewIteration(sourceNodeDefinitionId, outcome, targetNodeDefinitionId);
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
     private List<String> activeNodeDefinitionIds(WorkstreamPaths paths, List<String> activeNodeInstanceIds) throws IOException {
         var nodeDefinitionIds = new java.util.ArrayList<String>();
         for (var activeNodeInstanceId : activeNodeInstanceIds) {
@@ -232,20 +326,36 @@ final class RoutingEngine {
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
         }
+        var canonicalAction = canonicalGateAction(definition, node.nodeDefinitionId(), action.trim());
         if (FINAL_NEXT_STAGE_GATE.equals(node.nodeDefinitionId())
-                && ("approve".equals(action) || "approved".equals(action))) {
+                && ("approve".equals(canonicalAction) || "approved".equals(canonicalAction))) {
             throw new IOException("final next-stage gate cannot be approved; use complete to finish the workstream");
         }
-        var hasEdge = definition.edgesFrom(node.nodeDefinitionId()).stream().anyMatch(edge -> edge.on().equals(action));
-        var actionAllowed = LedgerUtils.allowedActions(definition.node(node.nodeDefinitionId())).contains(action);
+        var hasEdge = definition.edgesFrom(node.nodeDefinitionId()).stream().anyMatch(edge -> edge.on().equals(canonicalAction));
+        var actionAllowed = LedgerUtils.allowedActions(definition.node(node.nodeDefinitionId())).contains(canonicalAction);
         if (!hasEdge && !actionAllowed) {
             throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
         }
-        resolveGateDocument(paths, current, node, action, note);
-        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, action, node.inputRefs(), Map.of(
-                "human_action", action,
+        resolveGateDocument(paths, current, node, canonicalAction, note);
+        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction, node.inputRefs(), Map.of(
+                "human_action", canonicalAction,
+                "requested_action", action,
                 "note", note == null ? "" : note
         ));
+    }
+
+    private static String canonicalGateAction(WorkflowDefinition definition, String nodeDefinitionId, String action) {
+        if (!"approve".equals(action)) {
+            return action;
+        }
+        var hasApproveEdge = definition.edgesFrom(nodeDefinitionId).stream()
+                .anyMatch(edge -> "approve".equals(edge.on()));
+        var hasApprovedEdge = definition.edgesFrom(nodeDefinitionId).stream()
+                .anyMatch(edge -> "approved".equals(edge.on()));
+        if (!hasApproveEdge && hasApprovedEdge) {
+            return "approved";
+        }
+        return action;
     }
 
     private void resolveGateDocument(
@@ -280,6 +390,7 @@ final class RoutingEngine {
                 "outcome", outcome
         ));
         var now = Instant.now();
+        completionAuditWriter.write(paths, node, outcome, now);
         var completed = new WorkflowCurrentDocument(
                 1,
                 current.workstreamId(),

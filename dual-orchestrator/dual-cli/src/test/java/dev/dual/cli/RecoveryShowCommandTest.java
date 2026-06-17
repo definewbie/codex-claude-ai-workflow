@@ -37,13 +37,32 @@ class RecoveryShowCommandTest {
         var printed = runShow(workstreamId);
 
         assertTrue(printed.contains("Recovery Assessment"));
-        assertTrue(printed.contains("- Classification: recoverable_agent_runtime"));
-        assertTrue(printed.contains("- Retry Readiness: RETRY_AFTER_EXTERNAL_FIX"));
+        assertTrue(printed.contains("- Classification: agent_capacity_recovery"));
+        assertTrue(printed.contains("- Retry Readiness: WAIT_THEN_RETRY"));
         assertTrue(printed.contains("dualctl retry --workdir " + tempDir.toAbsolutePath().normalize() + " " + workstreamId));
         assertTrue(printed.contains("Current Failure"));
         assertTrue(printed.contains("RECOVERABLE_RATE_LIMIT"));
         assertTrue(printed.contains("design.stderr.log"));
         assertTrue(printed.contains(".agent/workstreams/" + workstreamId + "/recovery/current-failure.md"));
+    }
+
+    @Test
+    void showPrintsSessionRebuildActionForReconnect() throws Exception {
+        var workstreamId = "ws-reconnect-show";
+        writeFailure(workstreamId, NodeStatus.FAILED, "RECOVERABLE_AGENT_RECONNECT", Map.of(
+                "exit_code", 0,
+                "agent", "claude",
+                "session", "claude-main",
+                "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT",
+                "acpx_failure.recoverable", true
+        ));
+
+        var printed = runShow(workstreamId);
+
+        assertTrue(printed.contains("- Classification: agent_session_recovery"));
+        assertTrue(printed.contains("- Retry Readiness: REBUILD_ACPX_SESSION_THEN_RETRY"));
+        assertTrue(printed.contains("acpx claude sessions close claude-main"));
+        assertTrue(printed.contains("acpx claude sessions new --name claude-main"));
     }
 
     @Test

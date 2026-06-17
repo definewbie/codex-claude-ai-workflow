@@ -10,12 +10,13 @@ import picocli.CommandLine.Command;
         description = "Prepare or create delivery artifacts.",
         subcommands = {
                 DeliveryCommitCommand.class,
-                DeliveryCreatePrCommand.class
+                DeliveryCreatePrCommand.class,
+                DeliveryMergeCommand.class
         }
 )
 public final class DeliveryCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use delivery commit or delivery create-pr.");
+        System.out.println("Use delivery merge, commit, or create-pr.");
     }
 }

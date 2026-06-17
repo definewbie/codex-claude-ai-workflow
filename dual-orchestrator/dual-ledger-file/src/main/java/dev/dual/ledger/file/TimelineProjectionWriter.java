@@ -79,6 +79,7 @@ final class TimelineProjectionWriter {
         view.put("inputRefs", node.inputRefs());
         view.put("outputRefs", node.outputRefs());
         view.put("runRef", node.runRef());
+        view.put("latestExecutionId", node.latestExecutionId());
         view.put("startedAt", node.startedAt());
         view.put("finishedAt", node.finishedAt());
         view.put("durationMs", durationMs(node.startedAt(), node.finishedAt()));

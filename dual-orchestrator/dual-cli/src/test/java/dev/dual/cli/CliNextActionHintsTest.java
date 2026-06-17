@@ -50,7 +50,46 @@ class CliNextActionHintsTest {
         var workstreamId = "ws-recovery-hints";
         var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
         Files.createDirectories(paths.currentFailureMarkdown().getParent());
+        Files.createDirectories(paths.workflowCurrentJson().getParent());
+        Files.createDirectories(paths.nodesDir());
         Files.writeString(paths.currentFailureMarkdown(), "# Failure\n", StandardCharsets.UTF_8);
+        Files.writeString(paths.workflowCurrentJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "%s",
+                  "workflowInstanceId": "wf-%s",
+                  "workflowId": "agent-lifecycle-full",
+                  "definitionVersion": 3,
+                  "status": "WAITING_FOR_RECOVERY",
+                  "activeNodeInstanceIds": ["node-rate-limit"],
+                  "openGateIds": [],
+                  "lastEventId": "evt-1",
+                  "updatedAt": "2026-06-04T00:00:00Z"
+                }
+                """.formatted(workstreamId, workstreamId), StandardCharsets.UTF_8);
+        Files.writeString(paths.nodeJson("node-rate-limit"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-rate-limit",
+                  "nodeDefinitionId": "acceptance.classify_failure",
+                  "kind": "TASK",
+                  "handlerType": "acceptance.failure_classify",
+                  "status": "FAILED",
+                  "stageId": "stage-test",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "result": {
+                    "acpx_failure.reason": "RECOVERABLE_RATE_LIMIT",
+                    "acpx_failure.recoverable": true
+                  },
+                  "runRef": null,
+                  "latestExecutionId": "",
+                  "startedAt": null,
+                  "finishedAt": null
+                }
+                """, StandardCharsets.UTF_8);
 
         var printed = capture(out -> CliNextActionHints.print(
                 out,
@@ -61,6 +100,7 @@ class CliNextActionHintsTest {
 
         assertTrue(printed.contains("dualctl recovery show --workdir " + tempDir + " " + workstreamId));
         assertTrue(printed.contains("summary: " + paths.currentFailureMarkdown()));
+        assertTrue(printed.contains("Wait for quota or provider capacity to recover, then retry the same active node."));
         assertTrue(printed.contains("dualctl retry --workdir " + tempDir + " " + workstreamId));
     }
 

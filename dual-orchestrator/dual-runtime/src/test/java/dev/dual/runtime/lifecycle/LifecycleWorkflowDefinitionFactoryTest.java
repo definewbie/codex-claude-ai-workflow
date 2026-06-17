@@ -10,13 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LifecycleWorkflowDefinitionFactoryTest {
     @Test
-    void includesBaselineMainlineAcrossLifecycleStages() {
-        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
+    void includesFullVariantAcrossLifecycleStages() {
+        var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
-        assertEquals("agent-lifecycle", definition.workflowId());
-        assertEquals(1, definition.version());
+        assertEquals("agent-lifecycle-full", definition.workflowId());
+        assertEquals(4, definition.version());
         assertEquals("intake.claude_brainstorm", definition.entryNodeId());
         assertEquals(NodeKind.TASK, definition.node("intake.claude_brainstorm").kind());
+        assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
         assertEquals(NodeKind.TASK, definition.node("design.codex_arch_review").kind());
         assertEquals(NodeKind.TASK, definition.node("plan.claude_plan").kind());
         assertEquals(NodeKind.TASK, definition.node("context.implement_claude").kind());
@@ -41,7 +42,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
 
     @Test
     void allEdgesPointToDeclaredNodes() {
-        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
+        var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
         for (var edge : definition.edges()) {
             assertEquals(edge.from(), definition.node(edge.from()).id());
@@ -53,23 +54,40 @@ class LifecycleWorkflowDefinitionFactoryTest {
     void selfTestAgentCanRunVerificationCommands() {
         var factory = new LifecycleWorkflowDefinitionFactory();
 
-        assertEquals(true, factory.baselineMainline()
+        assertEquals(true, factory.forVariant("contract")
                 .node("implement.claude_self_test_report")
                 .config()
                 .get("approve_all"));
-        assertEquals(true, factory.contractMainline()
-                .node("implement.claude_self_test_report")
-                .config()
-                .get("approve_all"));
-        assertEquals(true, factory.fullMainline()
+        assertEquals(true, factory.forVariant("full")
                 .node("implement.claude_self_test_report")
                 .config()
                 .get("approve_all"));
     }
 
     @Test
+    void builtInVariantsOnlyGrantWriteAccessToImplementationOwnedAgentNodes() {
+        var factory = new LifecycleWorkflowDefinitionFactory();
+
+        for (var definition : java.util.List.of(
+                factory.forVariant("contract"),
+                factory.forVariant("full")
+        )) {
+            var writableNodes = definition.nodes().stream()
+                    .filter(node -> "acpx.agent_run".equals(node.handlerType()))
+                    .filter(node -> Boolean.TRUE.equals(node.config().get("approve_all")))
+                    .map(node -> node.id())
+                    .toList();
+
+            assertEquals(java.util.List.of(
+                    "implement.claude_implement",
+                    "implement.claude_self_test_report"
+            ), writableNodes, definition.workflowId() + " must not grant write access outside implementation");
+        }
+    }
+
+    @Test
     void finalNextStageGateCompletesWithoutStartingAnotherIteration() {
-        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
+        var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
         assertEquals(java.util.List.of("revise", "complete"),
                 definition.node("gate.human_next_stage_approval").config().get("allowed_actions"));

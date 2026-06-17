@@ -12,31 +12,53 @@ class FullWorkflowDefinitionTest {
     private final LifecycleWorkflowDefinitionFactory factory = new LifecycleWorkflowDefinitionFactory();
 
     @Test
-    void fullMainlineContainsClassifyFailureNode() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantContainsClassifyFailureNode() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
-                "fullMainline should contain node acceptance.classify_failure");
+                "full variant should contain node acceptance.classify_failure");
     }
 
     @Test
-    void fullAgentNodesCanRunNonInteractiveToolsInsideWorktree() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantLimitsWriteAccessToImplementationOwnedAgentNodes() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
-        var agentNodes = wf.nodes().stream()
+        var writableNodes = wf.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
+                .filter(node -> Boolean.TRUE.equals(node.config().get("approve_all")))
+                .map(node -> node.id())
                 .toList();
 
-        assertFalse(agentNodes.isEmpty(), "full should contain acpx agent nodes");
-        for (var node : agentNodes) {
-            assertEquals(true, node.config().get("approve_all"),
-                    "full agent node should be able to run tools non-interactively: " + node.id());
+        assertEquals(List.of(
+                "implement.claude_implement",
+                "implement.claude_self_test_report"
+        ), writableNodes);
+    }
+
+    @Test
+    void fullVariantKeepsReviewAndPlanningAgentNodesReadOnly() {
+        WorkflowDefinition wf = factory.forVariant("full");
+
+        var readOnlyNodes = List.of(
+                "intake.claude_brainstorm",
+                "intake.codex_product_review",
+                "design.claude_design",
+                "design.codex_arch_review",
+                "plan.claude_plan",
+                "plan.codex_plan_review",
+                "acceptance.codex_verifier_review",
+                "stage.claude_handoff"
+        );
+
+        for (var nodeId : readOnlyNodes) {
+            assertNotEquals(true, wf.node(nodeId).config().get("approve_all"),
+                    nodeId + " must not have write permissions");
         }
     }
 
     @Test
-    void fullMainlineAcceptRoutesToReport() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantAcceptRoutesToReport() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
                 .filter(e -> "ACCEPT".equals(e.on()))
@@ -48,8 +70,8 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullMainlineAcceptWithNotesRoutesToClassify() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantAcceptWithNotesRoutesToClassify() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
                 .filter(e -> "ACCEPT_WITH_NOTES".equals(e.on()))
@@ -61,8 +83,8 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullMainlineRejectRoutesToClassify() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantRejectRoutesToClassify() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
                 .filter(e -> "REJECT".equals(e.on()))
@@ -74,8 +96,8 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullMainlineRejectContractGapRoutesToContractCompile() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantRejectContractGapRoutesToContractCompile() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.classify_failure").stream()
                 .filter(e -> "REJECT_CONTRACT_GAP".equals(e.on()))
@@ -87,8 +109,8 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullMainlineRejectReviewNoiseRoutesToReReview() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantRejectReviewNoiseRoutesToReReview() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.classify_failure").stream()
                 .filter(e -> "REJECT_REVIEW_NOISE".equals(e.on()))
@@ -100,8 +122,8 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullMainlineNotedEdgesRouteToReport() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantNotedEdgesRouteToReport() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         List<String> notedOutcomes = List.of(
                 "NOTED_CONTRACT_GAP",
@@ -125,8 +147,8 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullMainlineRejectImplementationBugRoutesToImplement() {
-        WorkflowDefinition wf = factory.fullMainline();
+    void fullVariantRejectImplementationBugRoutesToImplement() {
+        WorkflowDefinition wf = factory.forVariant("full");
 
         List<String> rejectOutcomes = List.of(
                 "REJECT_IMPLEMENTATION_BUG",
@@ -143,14 +165,11 @@ class FullWorkflowDefinitionTest {
                     "Expected exactly one edge from acceptance.classify_failure on '" + outcome + "'");
             assertEquals("context.implement_claude", edges.get(0).to(),
                     "REJECT edge '" + outcome + "' should route to context.implement_claude");
+            assertEquals("loop", edges.get(0).metadata().transitionType(),
+                    "REJECT edge '" + outcome + "' should be an explicit semantic repair loop");
+            assertFalse(edges.get(0).metadata().loopReason().isBlank(),
+                    "REJECT edge '" + outcome + "' should explain why a new iteration starts");
         }
     }
 
-    @Test
-    void baselineMainlineDoesNotContainClassifyFailureNode() {
-        WorkflowDefinition wf = factory.baselineMainline();
-
-        assertThrows(IllegalArgumentException.class, () -> wf.node("acceptance.classify_failure"),
-                "baselineMainline should NOT contain node acceptance.classify_failure");
-    }
 }

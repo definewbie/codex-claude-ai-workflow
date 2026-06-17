@@ -1,8 +1,8 @@
 package dev.dual.core.workflow;
 
-public record EdgeDefinition(String from, String on, String to, EdgeCondition condition) {
+public record EdgeDefinition(String from, String on, String to, EdgeCondition condition, TransitionMetadata metadata) {
     public EdgeDefinition(String from, String on, String to) {
-        this(from, on, to, EdgeCondition.unconditional());
+        this(from, on, to, EdgeCondition.unconditional(), TransitionMetadata.normal());
     }
 
     public EdgeDefinition {
@@ -18,5 +18,13 @@ public record EdgeDefinition(String from, String on, String to, EdgeCondition co
         if (condition == null) {
             condition = EdgeCondition.unconditional();
         }
+        if (metadata == null) {
+            metadata = TransitionMetadata.normal();
+        }
     }
+
+    public EdgeDefinition(String from, String on, String to, EdgeCondition condition) {
+        this(from, on, to, condition, TransitionMetadata.normal());
+    }
+
 }

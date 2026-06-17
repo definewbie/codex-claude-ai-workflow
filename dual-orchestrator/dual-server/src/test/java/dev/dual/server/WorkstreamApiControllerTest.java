@@ -207,6 +207,140 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void statusAndOverviewExposeAgentTaskDispatchReadModel() throws Exception {
+        var fixture = createRunningWorkstream("ws-api-agent-task");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var ledger = new WorkflowFileLedger();
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var definition = new NodeDefinition(node.nodeDefinitionId(), NodeKind.TASK, node.handlerType(), Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implementation-claude",
+                "expected_contract", "implementation_handoff"
+        ));
+        var task = ledger.createAgentTask(paths, "wfe-api-agent-task", definition, node);
+        ledger.markAgentTaskRunning(paths, task, "nxe-api-agent-task");
+        var controller = controller();
+
+        var status = controller.status(fixture.workstreamId(), tempDir);
+
+        var tasks = (List<Map<String, Object>>) status.get("agentTasks");
+        assertEquals(1, tasks.size());
+        assertEquals("RUNNING", tasks.get(0).get("status"));
+        assertEquals("claude", tasks.get(0).get("agent"));
+        var workflow = (Map<String, Object>) status.get("workflow");
+        var activeNodes = (List<Map<String, Object>>) workflow.get("activeNodes");
+        var latestTask = (Map<String, Object>) activeNodes.get(0).get("latestAgentTask");
+        assertEquals("implementation-claude", latestTask.get("promptTemplate"));
+
+        var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var latestAgentTasks = (List<Map<String, Object>>) overview.get("latestAgentTasks");
+        assertEquals(1, latestAgentTasks.size());
+        assertEquals("nxe-api-agent-task", latestAgentTasks.get(0).get("nodeExecutionId"));
+        assertEquals("implementation_handoff", latestAgentTasks.get(0).get("expectedContract"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void overviewUsesGoalSatisfactionReadModel() throws Exception {
+        var fixture = createWorkstream("ws-api-goal-satisfaction");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.createDirectories(paths.domainDir());
+        Files.writeString(paths.goalSatisfactionJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-api-goal-satisfaction",
+                  "workflowInstanceId": "wf-ws-api-goal-satisfaction",
+                  "nodeInstanceId": "node-acceptance-decision-001",
+                  "nodeDefinitionId": "acceptance.decision",
+                  "iterationId": "iter-001",
+                  "outcome": "REJECT",
+                  "domainOutcome": "NEEDS_REPAIR",
+                  "reason": "implementation gap",
+                  "evidenceRefs": ["runs/reject.md"],
+                  "sourceResult": {"review_decision": "REJECT"},
+                  "generatedAt": "2026-06-15T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(paths.workflowCurrentJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-api-goal-satisfaction",
+                  "workflowInstanceId": "wf-ws-api-goal-satisfaction",
+                  "workflowId": "api-workflow",
+                  "definitionVersion": 1,
+                  "status": "COMPLETED",
+                  "activeNodeInstanceIds": [],
+                  "openGateIds": [],
+                  "lastEventId": "evt-000099",
+                  "updatedAt": "2026-06-15T00:00:01Z"
+                }
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var goal = (Map<String, Object>) response.get("goalSatisfaction");
+        assertEquals("NEEDS_REPAIR", goal.get("domainOutcome"));
+        assertEquals(true, response.get("whyStopped").toString().contains("implementation gap"));
+        assertEquals(true, response.get("nextAction").toString().contains("summary"));
+        var attention = (List<Map<String, Object>>) response.get("attention");
+        assertEquals(true, attention.stream().anyMatch(item ->
+                "Workflow completed with goal warning".equals(item.get("title"))
+                        && item.get("detail").toString().contains("implementation gap")));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void overviewUsesPersistedCompletionAuditReadModel() throws Exception {
+        var fixture = createWorkstream("ws-api-completion-audit");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.createDirectories(paths.domainDir());
+        Files.writeString(paths.completionAuditJson(), """
+                {
+                  "schemaVersion": 1,
+                  "lifecycleState": "ENDED",
+                  "status": "needs_review",
+                  "workflowStatus": "COMPLETED",
+                  "finalNodeDefinitionId": "gate.human_next_stage_approval",
+                  "finalOutcome": "complete",
+                  "gaps": ["handoff.json is missing"],
+                  "completedAt": "2026-06-15T00:00:00Z",
+                  "generatedAt": "2026-06-15T00:00:01Z"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(paths.workflowCurrentJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-api-completion-audit",
+                  "workflowInstanceId": "wf-ws-api-completion-audit",
+                  "workflowId": "api-workflow",
+                  "definitionVersion": 1,
+                  "status": "COMPLETED",
+                  "activeNodeInstanceIds": [],
+                  "openGateIds": [],
+                  "lastEventId": "event-completed",
+                  "updatedAt": "2026-06-15T00:00:01Z"
+                }
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var completion = (Map<String, Object>) response.get("completionAudit");
+        assertEquals("ENDED", completion.get("lifecycleState"));
+        assertEquals("needs_review", completion.get("status"));
+        assertEquals(List.of("handoff.json is missing"), completion.get("gaps"));
+        var attention = (List<Map<String, Object>>) response.get("attention");
+        assertEquals(true, attention.stream().anyMatch(item ->
+                "Completion artifacts need review".equals(item.get("title"))
+                        && item.get("detail").toString().contains("handoff.json is missing")));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void overviewUsesWorkflowCurrentWhenTimelineProjectionIsStale() throws Exception {
         var fixture = createWorkstream("ws-api-stale-timeline");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
@@ -284,6 +418,27 @@ class WorkstreamApiControllerTest {
                   ]
                 }
                 """, StandardCharsets.UTF_8);
+        Files.createDirectories(paths.nodesDir());
+        Files.writeString(paths.nodeJson("node-self-test"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-self-test",
+                  "nodeDefinitionId": "implement.claude_self_test_report",
+                  "kind": "TASK",
+                  "handlerType": "acpx.agent_run",
+                  "status": "RUNNING",
+                  "stageId": "stage-implement",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "result": {},
+                  "runRef": null,
+                  "latestExecutionId": "",
+                  "startedAt": "2026-06-01T00:01:00Z",
+                  "finishedAt": null
+                }
+                """, StandardCharsets.UTF_8);
         Files.createDirectories(paths.runsDir().resolve("run-002"));
         Files.writeString(paths.runsDir().resolve("run-002").resolve("run.json"), """
                 {
@@ -300,8 +455,27 @@ class WorkstreamApiControllerTest {
 
         var response = controller.overview(fixture.workstreamId(), tempDir.toString());
 
-        assertEquals(true, response.get("whyStopped").toString().contains("latest agent run failed"));
-        assertEquals(true, response.get("nextAction").toString().contains("dualctl recovery show"));
+        assertEquals(true, response.get("whyStopped").toString().contains("current failure summary exists"));
+        assertEquals(true, response.get("nextAction").toString().contains("dualctl resume"));
+        var attention = (List<Map<String, Object>>) response.get("attention");
+        assertEquals(true, attention.stream().anyMatch(item -> "Running state looks stale".equals(item.get("title"))));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void overviewFlagsStaleRunningWhenRecordedPidIsGone() throws Exception {
+        var fixture = createRunningWorkstream("ws-api-dead-pid");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var ledger = new WorkflowFileLedger();
+        var activeNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.markRunning(paths, activeNodeId, Long.MAX_VALUE);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        assertEquals(true, response.get("whyStopped").toString().contains("recorded process is no longer alive"));
+        assertEquals(true, response.get("whyStopped").toString().contains("PID=" + Long.MAX_VALUE));
+        assertEquals(true, response.get("nextAction").toString().contains("dualctl resume"));
         var attention = (List<Map<String, Object>>) response.get("attention");
         assertEquals(true, attention.stream().anyMatch(item -> "Running state looks stale".equals(item.get("title"))));
     }
@@ -403,12 +577,14 @@ class WorkstreamApiControllerTest {
                         node.stageId(),
                         node.iterationId(),
                         node.inputRefs(),
+                        node.inputTransition(),
                         node.outputRefs(),
                         Map.of(
                                 "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION",
                                 "contract_failure_diagnostic_ref", diagnosticRef
                         ),
                         node.runRef(),
+                        node.latestExecutionId(),
                         node.startedAt(),
                         node.finishedAt()
                 )
@@ -428,7 +604,7 @@ class WorkstreamApiControllerTest {
         var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
         var attention = (List<Map<String, Object>>) overview.get("attention");
         assertEquals(true, attention.stream().anyMatch(item ->
-                "Recovery: artifact_contract_failure".equals(item.get("title"))
+                "Artifact contract failed".equals(item.get("title"))
                         && item.get("detail").toString().contains("typed artifact")));
     }
 
@@ -543,6 +719,41 @@ class WorkstreamApiControllerTest {
         var first = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("first-output.md"), Map.of("ok", true));
+        return new Fixture(workstreamIdValue);
+    }
+
+    private Fixture createRunningWorkstream(String workstreamIdValue) throws Exception {
+        var workstreamId = new DualId(workstreamIdValue);
+        var workspaceId = new DualId("wsp-" + workstreamIdValue);
+        var paths = new WorkstreamPaths(tempDir, workstreamId);
+        new FileLedgerStore().initializeWorkstream(
+                paths,
+                Workstream.created(
+                        workstreamId,
+                        "api running test",
+                        new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
+                        workspaceId,
+                        Instant.parse("2026-06-01T00:00:00Z")
+                ),
+                Workspace.primaryGitWorktree(
+                        workspaceId,
+                        workstreamId,
+                        tempDir.resolve("repo"),
+                        tempDir.resolve("repo-agent-runs").resolve(workstreamIdValue),
+                        "ai/" + workstreamIdValue,
+                        "main",
+                        "abc123"
+                ),
+                "# Requirement\n"
+        );
+        var definition = new WorkflowDefinition(
+                "api-workflow",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamIdValue, definition);
         return new Fixture(workstreamIdValue);
     }
 

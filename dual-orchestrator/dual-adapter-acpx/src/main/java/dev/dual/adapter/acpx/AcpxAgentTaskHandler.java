@@ -6,6 +6,7 @@ import dev.dual.runtime.handler.TaskHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,10 +19,18 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AcpxFailureClassifier failureClassifier;
     private final AgentRunMetadataWriter metadataWriter;
     private final AgentOutputCompletionDetector completionDetector;
+    private final AcpxUsageReader usageReader;
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
+        this(transport, prepareOnly, new AcpxUsageReader());
+    }
+
+    AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly, AcpxUsageReader usageReader) {
         if (transport == null) {
             throw new IllegalArgumentException("transport is required");
+        }
+        if (usageReader == null) {
+            throw new IllegalArgumentException("usageReader is required");
         }
         this.transport = transport;
         this.prepareOnly = prepareOnly;
@@ -29,6 +38,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.failureClassifier = new AcpxFailureClassifier();
         this.metadataWriter = new AgentRunMetadataWriter();
         this.completionDetector = new AgentOutputCompletionDetector();
+        this.usageReader = usageReader;
     }
 
     @Override
@@ -91,12 +101,40 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             ));
         }
 
-        var request = new AcpxRunRequest(context.workspaceRoot(), session, promptPath, stdoutPath, stderrPath, approveAll(context));
+        var request = new AcpxRunRequest(
+                context.workspaceRoot(),
+                session,
+                promptPath,
+                stdoutPath,
+                stderrPath,
+                permissionProfile(context)
+        );
         var result = "claude".equals(agent)
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
+        var usage = usageReader.read(promptPath, stderrPath).orElse(null);
         var failure = failureClassifier.classify(stdoutPath, stderrPath, result.exitCode());
         var outputComplete = completionDetector.isComplete(stdoutPath);
+        var interrupted = interruptedOutputFailure(result, outputComplete);
+        if (interrupted != null && !failure.recoverable()) {
+            metadataWriter.writeCompleted(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    context.definition().id(),
+                    agent,
+                    session,
+                    promptTemplate,
+                    runId,
+                    runDir,
+                    promptPath,
+                    stdoutPath,
+                    stderrPath,
+                    result,
+                    interrupted,
+                    usage
+            );
+            return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, interrupted);
+        }
         if (result.exitCode() == 0 && outputComplete) {
             metadataWriter.writeCompleted(
                     context.workspaceRoot(),
@@ -111,7 +149,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     stdoutPath,
                     stderrPath,
                     result,
-                    null
+                    null,
+                    usage
             );
             var completedResult = new LinkedHashMap<String, Object>();
             completedResult.put("run_id", runId);
@@ -143,7 +182,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     stdoutPath,
                     stderrPath,
                     result,
-                    null
+                    null,
+                    usage
             );
             var completedResult = new LinkedHashMap<String, Object>();
             completedResult.put("run_id", runId);
@@ -173,7 +213,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     stdoutPath,
                     stderrPath,
                     result,
-                    failure
+                    failure,
+                    usage
             );
             return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, failure);
         }
@@ -192,7 +233,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         stdoutPath,
                         stderrPath,
                         result,
-                        null
+                        null,
+                        usage
                 );
                 return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(
                         "run_id", runId,
@@ -216,7 +258,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     stdoutPath,
                     stderrPath,
                     result,
-                    failure
+                    failure,
+                    usage
             );
             return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, failure);
         }
@@ -233,7 +276,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 stdoutPath,
                 stderrPath,
                 result,
-                null
+                null,
+                usage
         );
         return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(
                 "run_id", runId,
@@ -255,6 +299,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private static boolean approveAll(TaskContext context) {
         var value = context.definition().config().get("approve_all");
         return Boolean.TRUE.equals(value);
+    }
+
+    private static AcpxPermissionProfile permissionProfile(TaskContext context) {
+        var value = context.definition().config().get("permission_profile");
+        var profile = value instanceof String text ? text : "";
+        return AcpxPermissionProfile.fromName(profile, approveAll(context));
     }
 
     private static NodeResult failedResult(
@@ -285,6 +335,20 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         "acpx_failure.recoverable", failure.recoverable()
                 ),
                 failure.message()
+        );
+    }
+
+    private static AcpxFailureClassifier.AcpxFailure interruptedOutputFailure(
+            AcpxRunResult result,
+            boolean outputComplete
+    ) {
+        if (outputComplete || !result.reachedDeclaredTimeout(Duration.ofSeconds(5))) {
+            return null;
+        }
+        return new AcpxFailureClassifier.AcpxFailure(
+                AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code(),
+                "agent output ended before the terminal contract after reaching the acpx timeout",
+                true
         );
     }
 }

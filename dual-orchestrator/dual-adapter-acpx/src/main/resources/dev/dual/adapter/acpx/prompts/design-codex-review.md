@@ -35,6 +35,12 @@ Write a Markdown review with these sections:
 6. Missing Evidence
 7. Recommended Next Step
 
+Strict evidence rule:
+
+- If the decision allows the workflow to continue, leave `Must Fix` and `Missing Evidence` empty.
+- Do not write placeholder list items such as "none", "no blocking issue", or "N/A" under blocking sections.
+- If `Must Fix` or `Missing Evidence` contains any item, choose a blocking/revision decision.
+
 Allowed decisions:
 
 {{allowed_decisions}}

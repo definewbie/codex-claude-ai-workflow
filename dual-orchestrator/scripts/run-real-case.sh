@@ -47,7 +47,7 @@ Usage:
 Options:
   --repo <path>             Target git repository.
   --task-file <path>        Requirement markdown file.
-  --variant <baseline|contract|full>
+  --variant <contract|full>
                             Workflow variant. Default: full.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
@@ -154,8 +154,8 @@ validate_inputs() {
     exit 1
   }
   case "$VARIANT" in
-    baseline|contract|full) ;;
-    *) fail "--variant must be baseline, contract, or full"; exit 1 ;;
+    contract|full) ;;
+    *) fail "--variant must be contract or full"; exit 1 ;;
   esac
 }
 
@@ -186,7 +186,7 @@ init_case_dir() {
 start_workstream() {
   log "Starting workstream in repo: $REPO"
   local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS")
-  if [[ "$VARIANT" != "baseline" ]]; then
+  if [[ "$VARIANT" != "full" ]]; then
     args+=(--workflow-variant "$VARIANT")
   fi
   args+=(--task-file "$TASK_FILE")

@@ -7,7 +7,7 @@ product-oriented categories instead of internal implementation phase numbers.
 
 ## Lifecycle Engine
 
-- [x] Built-in lifecycle variants: `baseline`, `contract`, and `full`.
+- [x] Built-in lifecycle variants: `full` and `contract`.
 - [x] Task / Decision / Gate workflow model.
 - [x] Default Git worktree isolation.
 - [x] File ledger under `.agent/workstreams/<workstream_id>/`.
@@ -41,8 +41,8 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Context package state/evidence boundary.
 - [x] Token-aware context budgeting and adaptive compression.
 - [x] Provider run metrics aggregated from local `runs/*/run.json`.
-- [ ] Adapter-provided token and cost metrics. Deferred until `acpx` exposes
-  stable raw usage data.
+- [x] Adapter-observed token and cost metrics from acpx session stream usage,
+  recorded as best-effort run metadata.
 
 ## Failure And Recovery
 
@@ -77,16 +77,17 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Final report generation.
 - [x] Workstream summary report.
 - [x] Delivery PR body and commit-message preparation.
+- [x] Explicit `delivery merge` from accepted worktree back to a clean original repo.
 - [x] Conservative `delivery commit` and `delivery create-pr` commands.
 - [x] Original repo cleanliness checks in benchmark reports.
-- [ ] Automatic merge is intentionally out of scope.
+- [ ] Automatic merge without an explicit operator command is intentionally out of scope.
 
 ## Validation
 
 - [x] Unit tests for workflow routing, ledger behavior, contract registry,
   context governance, control-block parsing, and CLI commands.
 - [x] Controlled lifecycle smoke with fake Agent outputs.
-- [x] Real `acpx` smoke cases for baseline, contract, and full lifecycles.
+- [x] Real `acpx` smoke cases for contract and full lifecycles.
 - [x] Public reusable benchmark based on `examples/issue-flow-app`.
 - [x] Public benchmark report and summary generation.
 - [x] Public benchmark index.

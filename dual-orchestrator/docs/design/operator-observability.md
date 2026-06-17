@@ -46,6 +46,12 @@ does not own workflow state and does not infer progress from raw logs.
 attention items, final acceptance, repair loops, key artifacts, and next actions
 into one screen.
 
+Trace and runs are observation projections, not workflow executors. If a
+historical `runs/<run_id>/run.json` file is missing or damaged, they should show
+a metadata warning instead of failing the command or reinterpreting a completed
+workstream as failed. Only explicit `inspect --run <run_id>` performs strict
+inspection of one run metadata file.
+
 Other commands are deeper tools:
 
 ```bash
@@ -109,6 +115,12 @@ The packet should show the minimum evidence needed to make that decision:
 TaskContract, verifier decision, must-fix items, relevant Git evidence, known
 risks, and recommended checks.
 
+The packet is not a raw Agent log dump. `reviews/*.md` / `.json` should
+foreground structured sidecar summaries, risks, missing evidence, must-fix
+items, and artifact paths. Full stdout/stderr remain available as debugging
+references, but they should not be embedded into the first human-review screen by
+default.
+
 ## Timeline Semantics
 
 Timeline order is chronological and grouped by lifecycle stage. The timeline is
@@ -133,8 +145,9 @@ Metrics are currently lightweight:
 - gate and iteration counts;
 - longest node duration.
 
-Token and cost metrics are intentionally deferred until the adapter exposes
-trusted usage data. The system should not guess cost.
+Token and cost metrics are recorded when the acpx adapter can match the current
+prompt to a session stream usage event. They are best-effort observation data,
+not workflow routing facts or exact provider billing reconciliation.
 
 ## Observed Usability Gap
 

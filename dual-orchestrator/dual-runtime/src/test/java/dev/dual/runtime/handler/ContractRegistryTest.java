@@ -3,10 +3,15 @@ package dev.dual.runtime.handler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.runtime.lifecycle.WorkflowDefinitionLoader;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -38,11 +43,6 @@ class ContractRegistryTest {
         for (var nodeId : taskNodes) {
             assertTrue(ContractRegistry.hasContract(nodeId), nodeId + " missing from ContractRegistry");
         }
-    }
-
-    @Test
-    void registryHas15Contracts() {
-        assertEquals(16, ContractRegistry.allNodeIds().size());
     }
 
     @Test
@@ -180,10 +180,97 @@ class ContractRegistryTest {
     }
 
     @Test
+    void registryEntriesPointToBundledWorkflowNodes() throws Exception {
+        var bundledNodeIds = new HashSet<String>();
+        for (var definition : bundledDefinitions()) {
+            definition.nodes().stream().map(NodeDefinition::id).forEach(bundledNodeIds::add);
+        }
+
+        for (var nodeId : ContractRegistry.allNodeIds()) {
+            assertTrue(bundledNodeIds.contains(nodeId),
+                    nodeId + " exists in ContractRegistry but no bundled workflow defines it");
+        }
+    }
+
+    @Test
+    void bundledWorkflowNodesThatNeedContractsHaveContracts() throws Exception {
+        for (var definition : bundledDefinitions()) {
+            for (var node : definition.nodes()) {
+                if (requiresContract(node)) {
+                    assertTrue(ContractRegistry.hasContract(node.id()),
+                            definition.workflowId() + " node " + node.id()
+                                    + " uses " + node.handlerType()
+                                    + " but has no output contract");
+                }
+            }
+        }
+    }
+
+    @Test
+    void decisionNodeRoutingOutcomesMatchAllowedContractDecisions() throws Exception {
+        for (var definition : bundledDefinitions()) {
+            for (var node : definition.nodes()) {
+                if (node.kind() != NodeKind.DECISION || !ContractRegistry.hasContract(node.id())) {
+                    continue;
+                }
+                var contract = ContractRegistry.forNode(node.id());
+                var edgeOutcomes = definition.edgesFrom(node.id()).stream()
+                        .map(edge -> edge.on())
+                        .collect(java.util.stream.Collectors.toSet());
+
+                assertTrue(contract.allowedDecisions().containsAll(edgeOutcomes),
+                        definition.workflowId() + " decision node " + node.id()
+                                + " has edge outcomes not allowed by contract: " + edgeOutcomes
+                                + " vs " + contract.allowedDecisions());
+                assertTrue(edgeOutcomes.containsAll(
+                                contract.allowedDecisions().stream()
+                                        .filter(decision -> !"BLOCKED".equals(decision))
+                                        .collect(java.util.stream.Collectors.toSet())),
+                        definition.workflowId() + " decision node " + node.id()
+                                + " has contract decisions with no edge. Only BLOCKED may stop without routing.");
+            }
+        }
+    }
+
+    @Test
+    void failureClassifierRoutingOutcomesMatchAllowedContractDecisions() throws Exception {
+        for (var definition : bundledDefinitions()) {
+            for (var node : definition.nodes()) {
+                if (!"acceptance.failure_classify".equals(node.handlerType())) {
+                    continue;
+                }
+                var contract = ContractRegistry.forNode(node.id());
+                var edgeOutcomes = definition.edgesFrom(node.id()).stream()
+                        .map(edge -> edge.on())
+                        .collect(java.util.stream.Collectors.toSet());
+
+                assertEquals(contract.allowedDecisions(), edgeOutcomes,
+                        definition.workflowId() + " classifier node " + node.id()
+                                + " must keep its contract decisions exactly aligned with routing edges");
+            }
+        }
+    }
+
+    @Test
     void allKnownKeysIncludesOptional() {
         var contract = ContractRegistry.forNode("intake.claude_brainstorm");
         assertTrue(contract.allKnownKeys().contains("needs_human_input"));
         assertTrue(contract.allKnownKeys().contains("decision"));
         assertTrue(contract.allKnownKeys().contains("summary"));
+    }
+
+    private static List<WorkflowDefinition> bundledDefinitions() throws Exception {
+        var loader = new WorkflowDefinitionLoader();
+        return List.of(
+                loader.loadOrDefault(null, "full"),
+                loader.loadOrDefault(null, "contract")
+        );
+    }
+
+    private static boolean requiresContract(NodeDefinition node) {
+        return "acpx.agent_run".equals(node.handlerType())
+                || "review.decision".equals(node.handlerType())
+                || "contract.compile".equals(node.handlerType())
+                || "acceptance.failure_classify".equals(node.handlerType());
     }
 }

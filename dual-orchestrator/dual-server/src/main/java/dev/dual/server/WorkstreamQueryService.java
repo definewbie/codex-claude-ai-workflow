@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.ledger.file.AgentTaskDocument;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.IterationSemantics;
 import dev.dual.ledger.file.RecoveryAssessment;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkflowIterationDocument;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Service;
 
@@ -57,8 +59,9 @@ public class WorkstreamQueryService {
 
         if (Files.exists(paths.workflowCurrentJson())) {
             var current = workflowLedger.loadCurrent(paths);
+            var agentTasks = agentTaskSummaries(paths, 20);
             var activeNodes = current.activeNodeInstanceIds().stream()
-                    .map(nodeId -> activeNode(paths, nodeId))
+                    .map(nodeId -> activeNode(paths, nodeId, agentTasks))
                     .toList();
             response.put("workflow", Map.of(
                     "workflowId", current.workflowId(),
@@ -69,12 +72,16 @@ public class WorkstreamQueryService {
                     "activeNodes", activeNodes,
                     "updatedAt", current.updatedAt()
             ));
+            response.put("agentTasks", agentTasks);
         }
         response.put("artifactContracts", artifactContracts(root, paths));
 
         var deliveryJson = paths.workstreamDir().resolve("delivery").resolve("delivery.json");
         if (Files.exists(deliveryJson)) {
             response.put("delivery", objectMapper.readValue(deliveryJson.toFile(), MAP_TYPE));
+        }
+        if (Files.exists(paths.deliveryMergePlanJson())) {
+            response.put("deliveryMerge", objectMapper.readValue(paths.deliveryMergePlanJson().toFile(), MAP_TYPE));
         }
         return response;
     }
@@ -108,6 +115,13 @@ public class WorkstreamQueryService {
         return normalizedTimeline(paths);
     }
 
+    /**
+     * Builds the operator overview API projection.
+     *
+     * The service keeps projection concerns here: enum/domain values are exposed
+     * as stable API strings, while lifecycle meaning comes from ledger read
+     * models such as WorkstreamAttention. It should not invent workflow state.
+     */
     public Map<String, Object> overview(Path workspaceRoot, String workstreamId) throws IOException {
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
@@ -131,10 +145,17 @@ public class WorkstreamQueryService {
         var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
         var artifacts = artifacts(root, paths);
         var completionAudit = completionAudit(paths, artifacts);
+        var deliveryMerge = readJson(paths.deliveryMergePlanJson());
+        var goalSatisfaction = readJson(paths.goalSatisfactionJson());
         var currentNode = currentNode(nodes, activeNodeIds);
         var latestAgentRuns = latestAgentRuns(root, paths, 6);
-        var staleRunningReason = staleRunningReason(status, currentNode, latestAgentRuns, artifacts);
+        var latestAgentTasks = agentTaskSummaries(paths, 12);
         var recoveryAssessment = recoveryAssessment(root, paths, workstreamId);
+        var workstreamAttention = WorkstreamAttentionEvaluator.evaluate(paths);
+        var attentionItems = new ArrayList<Map<String, Object>>();
+        attentionItems.add(workstreamAttention.toMap());
+        attentionItems.addAll(attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
+                artifacts, completionAudit));
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
@@ -155,15 +176,17 @@ public class WorkstreamQueryService {
                 "repairLoopCount", repairLoopCount,
                 "repairActions", repairActions
         ));
-        response.put("whyStopped", whyStopped(status, currentNode, openGateIds, staleRunningReason));
-        response.put("nextAction", nextAction(root, workstreamId, status, openGateIds, staleRunningReason));
-        response.put("attention", attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
-                artifacts, staleRunningReason, recoveryAssessment, completionAudit));
+        response.put("goalSatisfaction", goalSatisfaction);
+        response.put("whyStopped", workstreamAttention.detail());
+        response.put("nextAction", nextAction(workstreamAttention));
+        response.put("attention", attentionItems);
         response.put("metrics", metrics);
         response.put("recentTimeline", recent(nodes, 8).stream().map(this::timelineItem).toList());
+        response.put("latestAgentTasks", latestAgentTasks);
         response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
         response.put("completionAudit", completionAudit);
+        response.put("deliveryMerge", deliveryMerge);
         response.put("recoveryAssessment", recoveryAssessment);
         return response;
     }
@@ -273,21 +296,63 @@ public class WorkstreamQueryService {
         return item;
     }
 
-    private Map<String, Object> activeNode(WorkstreamPaths paths, String nodeId) {
+    private Map<String, Object> activeNode(WorkstreamPaths paths, String nodeId, List<Map<String, Object>> agentTasks) {
         try {
             var node = workflowLedger.loadNode(paths, nodeId);
-            return Map.of(
-                    "nodeInstanceId", node.nodeInstanceId(),
-                    "nodeDefinitionId", node.nodeDefinitionId(),
-                    "kind", node.kind().name(),
-                    "handlerType", node.handlerType(),
-                    "status", node.status().name(),
-                    "iterationId", node.iterationId(),
-                    "outputRefs", node.outputRefs() == null ? List.of() : node.outputRefs()
-            );
+            var item = new LinkedHashMap<String, Object>();
+            item.put("nodeInstanceId", node.nodeInstanceId());
+            item.put("nodeDefinitionId", node.nodeDefinitionId());
+            item.put("kind", node.kind().name());
+            item.put("handlerType", node.handlerType());
+            item.put("status", node.status().name());
+            item.put("iterationId", node.iterationId());
+            item.put("outputRefs", node.outputRefs() == null ? List.of() : node.outputRefs());
+            item.put("latestExecutionId", node.latestExecutionId());
+            latestTaskForNode(agentTasks, node.nodeInstanceId()).ifPresent(task -> item.put("latestAgentTask", task));
+            return item;
         } catch (IOException e) {
             throw new WorkstreamQueryException(e);
         }
+    }
+
+    private List<Map<String, Object>> agentTaskSummaries(WorkstreamPaths paths, int limit) {
+        try {
+            return workflowLedger.readAgentTasks(paths).stream()
+                    .sorted(Comparator.comparing(AgentTaskDocument::createdAt).reversed())
+                    .limit(limit)
+                    .map(this::agentTaskSummary)
+                    .toList();
+        } catch (IOException ignored) {
+            return List.of();
+        }
+    }
+
+    private Map<String, Object> agentTaskSummary(AgentTaskDocument task) {
+        var item = new LinkedHashMap<String, Object>();
+        item.put("agentTaskId", task.agentTaskId());
+        item.put("workflowExecutionId", task.workflowExecutionId());
+        item.put("nodeExecutionId", task.nodeExecutionId());
+        item.put("nodeInstanceId", task.nodeInstanceId());
+        item.put("nodeDefinitionId", task.nodeDefinitionId());
+        item.put("kind", task.nodeKind().name());
+        item.put("handlerType", task.handlerType());
+        item.put("status", task.status().name());
+        item.put("agent", task.agent());
+        item.put("session", task.session());
+        item.put("promptTemplate", task.promptTemplate());
+        item.put("contextPackageRef", task.contextPackageRef());
+        item.put("expectedContract", task.expectedContract());
+        item.put("createdAt", task.createdAt());
+        item.put("claimedAt", task.claimedAt());
+        item.put("completedAt", task.completedAt());
+        item.put("errorMessage", task.errorMessage());
+        return item;
+    }
+
+    private java.util.Optional<Map<String, Object>> latestTaskForNode(List<Map<String, Object>> agentTasks, String nodeInstanceId) {
+        return agentTasks.stream()
+                .filter(task -> nodeInstanceId.equals(text(task.get("nodeInstanceId"))))
+                .findFirst();
     }
 
     private List<Map<String, Object>> artifactContracts(Path root, WorkstreamPaths paths) throws IOException {
@@ -411,95 +476,42 @@ public class WorkstreamQueryService {
     }
 
     private String currentNode(List<Map<String, Object>> nodes, List<String> activeNodeIds) {
+        var node = currentNodeView(nodes, activeNodeIds);
+        if (!node.isEmpty()) {
+            return text(node.get("nodeDefinitionId"), text(node.get("nodeInstanceId")));
+        }
         if (activeNodeIds.isEmpty()) {
             return "";
+        }
+        return activeNodeIds.get(0);
+    }
+
+    private Map<String, Object> currentNodeView(List<Map<String, Object>> nodes, List<String> activeNodeIds) {
+        if (activeNodeIds.isEmpty()) {
+            return Map.of();
         }
         var activeNodeId = activeNodeIds.get(0);
         for (var node : nodes) {
             if (activeNodeId.equals(text(node.get("nodeInstanceId")))) {
-                return text(node.get("nodeDefinitionId"), activeNodeId);
+                return node;
             }
         }
-        return activeNodeId;
+        return Map.of();
     }
 
-    private String whyStopped(String status, String currentNode, List<String> openGateIds, String staleRunningReason) {
-        if (!staleRunningReason.isBlank()) {
-            return staleRunningReason;
+    private String nextAction(dev.dual.ledger.file.WorkstreamAttention attention) {
+        if (attention.command().isBlank()) {
+            return attention.nextAction();
         }
-        if ("WAITING_FOR_HUMAN".equals(status)) {
-            return "Waiting for human review" + (openGateIds.isEmpty() ? "." : ": " + String.join(", ", openGateIds));
-        }
-        if ("WAITING_FOR_RECOVERY".equals(status)) {
-            return "Waiting for recovery. Inspect the failure summary before retrying.";
-        }
-        if ("FAILED".equals(status) || "BLOCKED".equals(status)) {
-            return "Stopped at " + (currentNode.isBlank() ? "the current node" : currentNode) + ".";
-        }
-        if ("COMPLETED".equals(status)) {
-            return "Workflow completed.";
-        }
-        if ("RUNNING".equals(status)) {
-            return currentNode.isBlank() ? "Workflow is running." : "Running at " + currentNode + ".";
-        }
-        return status.isBlank() ? "Workflow state is not available." : "Workflow status is " + status + ".";
-    }
-
-    private String nextAction(Path root, String workstreamId, String status, List<String> openGateIds, String staleRunningReason) {
-        var base = "--workdir \"" + root + "\" " + workstreamId;
-        if (!staleRunningReason.isBlank()) {
-            return "Inspect recovery before continuing: dualctl recovery show " + base;
-        }
-        if ("WAITING_FOR_HUMAN".equals(status)) {
-            return "Read the review packet, then run: dualctl review show " + base;
-        }
-        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
-            return "Inspect recovery, then retry when ready: dualctl recovery show " + base;
-        }
-        if ("COMPLETED".equals(status)) {
-            return "Review final artifacts: dualctl summary " + base;
-        }
-        if (!openGateIds.isEmpty()) {
-            return "Review the open gate: dualctl review show " + base;
-        }
-        return "Continue workflow: dualctl run " + base;
+        return attention.nextAction() + " Command: " + attention.command();
     }
 
     private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
                                                 String verificationConfidence, int repairLoopCount,
-                                                Map<String, Object> artifacts, String staleRunningReason,
-                                                Map<String, Object> recoveryAssessment,
+                                                Map<String, Object> artifacts,
                                                 Map<String, Object> completionAudit) {
         var items = new ArrayList<Map<String, Object>>();
         var base = "--workdir \"" + root + "\" " + workstreamId;
-        if (!staleRunningReason.isBlank()) {
-            items.add(attentionItem(
-                    "critical",
-                    "Running state looks stale",
-                    staleRunningReason,
-                    "dualctl recovery show " + base
-            ));
-        }
-        if ("WAITING_FOR_HUMAN".equals(status)) {
-            items.add(attentionItem(
-                    "info",
-                    "Human gate is open",
-                    "Read the current review packet before approving, revising, or completing the workstream.",
-                    "dualctl review show " + base
-            ));
-        }
-        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
-            var classification = text(recoveryAssessment.get("classification"));
-            var reason = text(recoveryAssessment.get("reason"));
-            items.add(attentionItem(
-                    "critical",
-                    classification.isBlank() ? "Workflow needs recovery" : "Recovery: " + classification,
-                    reason.isBlank()
-                            ? "Inspect the current failure summary and only retry after the external cause or ledger issue is understood."
-                            : reason,
-                    "dualctl recovery show " + base
-            ));
-        }
         if ("ACCEPT_WITH_NOTES".equals(finalAcceptance)) {
             items.add(attentionItem(
                     "warning",
@@ -565,25 +577,6 @@ public class WorkstreamQueryService {
         return items;
     }
 
-    private String staleRunningReason(String status, String currentNode, List<Map<String, Object>> latestAgentRuns,
-                                      Map<String, Object> artifacts) {
-        if (!"RUNNING".equals(status)) {
-            return "";
-        }
-        var latest = latestAgentRuns.isEmpty() ? Map.<String, Object>of() : latestAgentRuns.get(0);
-        var latestStatus = text(latest.get("status"));
-        var latestNode = text(latest.get("nodeId"));
-        if ("failed".equals(latestStatus) && (currentNode.isBlank() || currentNode.equals(latestNode))) {
-            return "Workflow is marked RUNNING at " + (currentNode.isBlank() ? "the current node" : currentNode)
-                    + ", but the latest agent run failed. Inspect recovery before continuing.";
-        }
-        var currentFailure = mapValue(artifacts.get("currentFailure"));
-        if (Boolean.TRUE.equals(currentFailure.get("available"))) {
-            return "Workflow is marked RUNNING, but a current failure summary exists. Inspect recovery before continuing.";
-        }
-        return "";
-    }
-
     private Map<String, Object> attentionItem(String severity, String title, String detail, String command) {
         var item = new LinkedHashMap<String, Object>();
         item.put("severity", severity);
@@ -607,6 +600,7 @@ public class WorkstreamQueryService {
             case "handoffJson" -> "handoff JSON";
             case "nextStagePrompt" -> "next-stage prompt";
             case "deliveryPrBody" -> "delivery PR body";
+            case "contextPackageMetadata" -> "context package metadata";
             default -> key;
         };
     }
@@ -619,6 +613,7 @@ public class WorkstreamQueryService {
         item.put("kind", text(node.get("kind")));
         item.put("iterationId", text(node.get("iterationId")));
         item.put("durationMs", text(node.get("durationMs")));
+        item.put("latestExecutionId", text(node.get("latestExecutionId")));
         return item;
     }
 
@@ -657,10 +652,37 @@ public class WorkstreamQueryService {
         artifact(artifacts, root, "nextStagePrompt", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"));
         artifact(artifacts, root, "deliveryPrBody", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"));
         artifact(artifacts, root, "currentFailure", paths.currentFailureMarkdown());
+        latestContextPackageMetadata(paths).ifPresent(path ->
+                artifact(artifacts, root, "contextPackageMetadata", path));
         return artifacts;
     }
 
+    private java.util.Optional<Path> latestContextPackageMetadata(WorkstreamPaths paths) {
+        var contextDir = paths.workstreamDir().resolve("context");
+        if (!Files.isDirectory(contextDir)) {
+            return java.util.Optional.empty();
+        }
+        try (var stream = Files.list(contextDir)) {
+            return stream
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .max(Comparator.comparingLong(this::lastModifiedMillis));
+        } catch (IOException ignored) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    private long lastModifiedMillis(Path path) {
+        try {
+            return Files.getLastModifiedTime(path).toMillis();
+        } catch (IOException ignored) {
+            return 0L;
+        }
+    }
+
     private Map<String, Object> completionAudit(WorkstreamPaths paths, Map<String, Object> artifacts) {
+        if (Files.isRegularFile(paths.completionAuditJson())) {
+            return readJson(paths.completionAuditJson());
+        }
         var gaps = new ArrayList<String>();
         auditFinalReport(paths, artifacts, gaps);
         auditHandoff(paths, artifacts, gaps);

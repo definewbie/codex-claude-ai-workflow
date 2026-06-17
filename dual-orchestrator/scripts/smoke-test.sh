@@ -4,7 +4,7 @@
 #
 # Usage:
 #   ./scripts/smoke-test.sh lifecycle                     # Controlled full lifecycle smoke, no real acpx calls
-#   ./scripts/smoke-test.sh                              # Default: baseline-basic case
+#   ./scripts/smoke-test.sh                              # Default: lifecycle case
 #   ./scripts/smoke-test.sh --case lifecycle
 #   ./scripts/smoke-test.sh --case reject-repair-reaccept
 #   ./scripts/smoke-test.sh --case contract-happy-path
@@ -43,7 +43,7 @@ MANUAL_GATES=false
 SKIP_BUILD=false
 CLEANUP=false
 WITH_GITHUB=false
-CASE_NAME="baseline-basic"
+CASE_NAME="lifecycle"
 OPERATOR_URL="${DUAL_OPERATOR_URL:-http://localhost:8080}"
 
 # ─── Parse args ──────────────────────────────────────────────────────────────
@@ -57,14 +57,13 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       ;;
-    lifecycle|reject-repair-reaccept|baseline-basic|contract-happy-path|full-reject-classify-path|all)
+    lifecycle|reject-repair-reaccept|contract-happy-path|full-reject-classify-path|all)
       CASE_NAME="$1"
       ;;
     --list)
       echo "Available E2E cases:"
-      echo "  lifecycle              Controlled baseline lifecycle happy path with fake acpx"
+      echo "  lifecycle              Controlled full lifecycle happy path with fake acpx"
       echo "  reject-repair-reaccept Controlled full variant: REJECT -> classify -> repair -> ACCEPT"
-      echo "  baseline-basic           Baseline mainline, full lifecycle happy path"
       echo "  contract-happy-path      Contract variant with contract compilation and review"
       echo "  full-reject-classify-path Full variant, best-effort classify_failure coverage"
       echo "  all                      Run all cases sequentially"
@@ -132,13 +131,6 @@ configure_case() {
       CASE_EXPECTED_REPORT_SECTIONS=("User Request" "TaskContract" "Failure Classification" "Acceptance Summary" "Run Artifacts")
       CASE_VARIANT_ASSERT_FN="assert_reject_repair_reaccept"
       ;;
-    baseline-basic)
-      CASE_TASK="给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出，不要让 python main.py 打印 goodbye。"
-      CASE_FINAL_GATE="gate.human_next_stage_approval"
-      CASE_EXPECTED_ARTIFACTS=("reports/latest-final-report.md" "delivery/commit-message.txt" "delivery/pr-body.md" "artifacts/next-stage/next-stage-prompt.md")
-      CASE_EXPECTED_EVENTS=("workflow_started" "node_routed" "workflow_completed")
-      CASE_EXPECTED_REPORT_SECTIONS=("User Request" "Acceptance Summary" "Git Evidence")
-      ;;
     contract-happy-path)
       CASE_VARIANT="contract"
       CASE_TASK="给 main.py 添加一个 calculate 函数，接受两个数字参数并返回它们的和，并在 README 中说明。不要修改 __main__ 运行输出。"
@@ -160,7 +152,7 @@ configure_case() {
       CASE_VARIANT_ASSERT_FN="assert_full_classify"
       ;;
     *)
-      echo "Unknown case: $CASE_NAME. Supported: lifecycle, reject-repair-reaccept, baseline-basic, contract-happy-path, full-reject-classify-path, all"
+      echo "Unknown case: $CASE_NAME. Supported: lifecycle, reject-repair-reaccept, contract-happy-path, full-reject-classify-path, all"
       exit 1
       ;;
   esac
@@ -1396,7 +1388,7 @@ GITIGNORE
 print_case_report() {
   echo ""
   echo "  Case:         $CASE_NAME"
-  echo "  Variant:      ${CASE_VARIANT:-baseline (default)}"
+  echo "  Variant:      ${CASE_VARIANT:-full (default)}"
   echo "  Fixture:      $FIXTURE_DIR"
   echo "  Workspace:    $WORKSPACE_DIR"
   echo "  Ledger:       $WS_DIR"
@@ -1411,7 +1403,7 @@ print_case_report() {
 
 # ─── --case all mode ─────────────────────────────────────────────────────────
 if [[ "$CASE_NAME" == "all" ]]; then
-  ALL_CASES=("lifecycle" "reject-repair-reaccept" "baseline-basic" "contract-happy-path" "full-reject-classify-path")
+  ALL_CASES=("lifecycle" "reject-repair-reaccept" "contract-happy-path" "full-reject-classify-path")
   ALL_RESULTS=()
   ALL_PASS=true
 

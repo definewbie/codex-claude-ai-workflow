@@ -71,7 +71,7 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("approve"));
         assertTrue(markdown.contains("revise"));
         assertTrue(markdown.contains(inputRef));
-        assertTrue(markdown.contains("Keep the implementation scope narrow."));
+        assertTrue(markdown.contains("Raw agent logs are not embedded here by default."));
 
         var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
         assertTrue(json.contains("\"schemaVersion\""));
@@ -308,7 +308,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void humanGateReviewPacketIgnoresNonePlaceholderMustFix() throws Exception {
+    void humanGateReviewPacketTreatsAnyMustFixAsBlockingReviewEvidence() throws Exception {
         var inputRef = writeOutput("intake-codex-product-review.md", """
                 # Codex Review
 
@@ -338,9 +338,9 @@ class BuiltinHandlerTest {
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
-        assertTrue(markdown.contains("Recommended Action: approve"));
-        assertFalse(markdown.contains("The latest agent decision still contains Must Fix items."));
-        assertFalse(markdown.contains("Do not approve until every Must Fix item is addressed"));
+        assertTrue(markdown.contains("Recommended Action: revise"));
+        assertTrue(markdown.contains("The latest agent decision still contains Must Fix items."));
+        assertTrue(markdown.contains("Do not approve until every Must Fix item is addressed"));
     }
 
     @Test
@@ -400,8 +400,50 @@ class BuiltinHandlerTest {
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
-        assertTrue(markdown.contains("(artifact outside workspace)"));
+        assertTrue(markdown.contains("outside_workspace"));
         assertFalse(markdown.contains("secret outside workspace"));
+    }
+
+    @Test
+    void humanGateReviewPacketUsesSidecarSummaryInsteadOfRawToolLog() throws Exception {
+        var inputRef = writeOutput("intake-codex-product-review.md", """
+                [tool] rtk read huge-file.md
+                This is raw tool log that should not be embedded in the review packet.
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "intake.codex_product_review",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "The contract is ready for human review.",
+                  "must_fix": [],
+                  "open_risks": ["Copy needs final human judgment."]
+                }
+                """, StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("## Input Artifacts"));
+        assertTrue(markdown.contains(inputRef));
+        assertTrue(markdown.contains("intake-codex-product-review.contract.json"));
+        assertTrue(markdown.contains("READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(markdown.contains("The contract is ready for human review."));
+        assertTrue(markdown.contains("Copy needs final human judgment."));
+        assertFalse(markdown.contains("This is raw tool log that should not be embedded"));
+
+        var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
+        var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"inputArtifacts\""));
+        assertTrue(json.contains("\"decision\" : \"READY_FOR_PRODUCT_REVIEW\""));
     }
 
     @Test

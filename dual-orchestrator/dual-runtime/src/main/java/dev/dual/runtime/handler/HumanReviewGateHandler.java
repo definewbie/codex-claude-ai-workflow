@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public final class HumanReviewGateHandler implements GateHandler {
-    private static final int MAX_INPUT_SNIPPET_CHARS = 4000;
     private static final Set<String> POSITIVE_DECISIONS = Set.of(
             "ACCEPT", "ACCEPT_WITH_NOTES", "PASS",
             "READY_FOR_PRODUCT_REVIEW", "READY_FOR_ARCH_REVIEW",
@@ -85,6 +84,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("iterationId", context.instance().iterationId());
         packet.put("allowedActions", allowedActions);
         packet.put("inputRefs", context.instance().inputRefs());
+        packet.put("inputArtifacts", inputArtifactSummaries(context));
         packet.put("reviewPacketPath", packetRef);
         packet.put("taskContract", taskContractSummary(context));
         packet.put("contractResolution", contractResolutionSummary(context));
@@ -122,18 +122,30 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendGitEvidence(builder, context);
         appendDelivery(builder, context);
 
-        builder.append("## Input Artifacts\n\n");
-        if (context.instance().inputRefs().isEmpty()) {
-            builder.append("No input artifacts were attached to this gate.\n");
-        } else {
-            for (var inputRef : context.instance().inputRefs()) {
-                builder.append("### ").append(inputRef).append("\n\n");
-                builder.append("```markdown\n");
-                builder.append(readSnippet(context.workspaceRoot(), inputRef));
-                builder.append("\n```\n\n");
-            }
-        }
+        appendInputArtifacts(builder, context);
         return builder.toString();
+    }
+
+    private void appendInputArtifacts(StringBuilder builder, GateContext context) {
+        builder.append("## Input Artifacts\n\n");
+        var artifacts = inputArtifactSummaries(context);
+        if (artifacts.isEmpty()) {
+            builder.append("No input artifacts were attached to this gate.\n");
+            return;
+        }
+        builder.append("Raw agent logs are not embedded here by default. Use the paths below when deeper debugging is needed.\n\n");
+        for (var artifact : artifacts) {
+            builder.append("### ").append(text(artifact.get("ref"))).append("\n\n");
+            appendField(builder, "Status", text(artifact.get("status")));
+            appendField(builder, "Kind", text(artifact.get("kind")));
+            appendField(builder, "Sidecar", text(artifact.get("sidecar")));
+            appendField(builder, "Decision", text(artifact.get("decision")));
+            appendField(builder, "Summary", text(artifact.get("summary")));
+            appendList(builder, "Must Fix", artifact.get("mustFix"));
+            appendList(builder, "Open Risks", artifact.get("openRisks"));
+            appendField(builder, "Raw Artifact", text(artifact.get("ref")));
+            builder.append("\n");
+        }
     }
 
     private void appendOperatorGuidance(StringBuilder builder, GateContext context, List<String> allowedActions) {
@@ -364,6 +376,77 @@ public final class HumanReviewGateHandler implements GateHandler {
         return summary;
     }
 
+    private List<Map<String, Object>> inputArtifactSummaries(GateContext context) {
+        var result = new ArrayList<Map<String, Object>>();
+        for (var inputRef : context.instance().inputRefs()) {
+            result.add(inputArtifactSummary(context, inputRef));
+        }
+        return List.copyOf(result);
+    }
+
+    private Map<String, Object> inputArtifactSummary(GateContext context, String inputRef) {
+        var summary = new LinkedHashMap<String, Object>();
+        summary.put("ref", inputRef);
+        var path = resolveInsideWorkspace(context.workspaceRoot(), inputRef);
+        if (path == null) {
+            summary.put("status", "outside_workspace");
+            summary.put("kind", "unavailable");
+            return summary;
+        }
+        if (!Files.isRegularFile(path)) {
+            summary.put("status", "not_found");
+            summary.put("kind", "unavailable");
+            return summary;
+        }
+        summary.put("status", "available");
+        summary.put("kind", artifactKind(path));
+
+        var sidecar = sidecarPath(path);
+        if (Files.isRegularFile(sidecar)) {
+            summary.put("sidecar", displayRef(context.workspaceRoot(), sidecar));
+            appendSidecarSummary(summary, sidecar);
+        }
+        return summary;
+    }
+
+    private String artifactKind(Path path) {
+        var name = path.getFileName().toString();
+        if (name.endsWith(".contract.json")) {
+            return "contract_sidecar";
+        }
+        if (name.endsWith(".stderr.log")) {
+            return "stderr_log";
+        }
+        if (name.endsWith(".md")) {
+            return "markdown_output";
+        }
+        if (name.endsWith(".json")) {
+            return "json";
+        }
+        return "file";
+    }
+
+    private Path sidecarPath(Path artifactPath) {
+        var name = artifactPath.getFileName().toString();
+        if (name.endsWith(".md")) {
+            return artifactPath.resolveSibling(name.substring(0, name.length() - ".md".length()) + ".contract.json");
+        }
+        return artifactPath.resolveSibling(name + ".contract.json");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void appendSidecarSummary(Map<String, Object> summary, Path sidecar) {
+        try {
+            var tree = objectMapper.readValue(sidecar.toFile(), Map.class);
+            summary.put("decision", text(tree.get("decision")));
+            summary.put("summary", text(tree.get("summary")));
+            summary.put("mustFix", stringList(tree.get("must_fix")));
+            summary.put("openRisks", stringList(tree.get("open_risks")));
+        } catch (Exception ignored) {
+            summary.put("sidecarStatus", "unreadable");
+        }
+    }
+
     private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions) {
         var decision = latestAgentDecision(context);
         var decisionText = decision.decision();
@@ -442,22 +525,6 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     private boolean isNegativeDecision(String decision) {
         return NEGATIVE_DECISIONS.contains(decision);
-    }
-
-    private String readSnippet(Path workspaceRoot, String ref) throws Exception {
-        var path = resolveInsideWorkspace(workspaceRoot, ref);
-        if (path == null) {
-            return "(artifact outside workspace)";
-        }
-        if (!Files.exists(path) || !Files.isRegularFile(path)) {
-            return "(artifact not found)";
-        }
-        var content = Files.readString(path, StandardCharsets.UTF_8);
-        if (content.length() <= MAX_INPUT_SNIPPET_CHARS) {
-            return content;
-        }
-        return content.substring(0, MAX_INPUT_SNIPPET_CHARS)
-                + "\n\n... truncated for review packet ...";
     }
 
     private Path workstreamDir(GateContext context) {

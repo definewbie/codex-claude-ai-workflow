@@ -49,4 +49,15 @@ class SchedulerPolicyTest {
         assertEquals(SchedulerDecision.Action.SKIP, decision.action());
         assertEquals("recovery:artifact_contract_failure/RETRY_AFTER_OUTPUT_CONTRACT_FIX", decision.reason());
     }
+
+    @Test
+    void semanticRevisionLimitCannotAutoRecover() {
+        var decision = policy.decide("WAITING_FOR_RECOVERY", true, Map.of(
+                "classification", "semantic_revision_limit",
+                "retryReadiness", "NEEDS_HUMAN_DECISION"
+        ));
+
+        assertEquals(SchedulerDecision.Action.SKIP, decision.action());
+        assertEquals("recovery:semantic_revision_limit/NEEDS_HUMAN_DECISION", decision.reason());
+    }
 }

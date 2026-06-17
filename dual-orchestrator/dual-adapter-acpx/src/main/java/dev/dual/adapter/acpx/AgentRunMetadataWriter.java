@@ -73,6 +73,7 @@ final class AgentRunMetadataWriter {
                 null,
                 "prepared",
                 null,
+                null,
                 null
         ));
     }
@@ -91,6 +92,40 @@ final class AgentRunMetadataWriter {
             Path stderrPath,
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure
+    ) throws IOException {
+        writeCompleted(
+                workspaceRoot,
+                workstreamId,
+                nodeId,
+                agent,
+                session,
+                promptTemplate,
+                runId,
+                runDir,
+                promptPath,
+                stdoutPath,
+                stderrPath,
+                result,
+                failure,
+                null
+        );
+    }
+
+    void writeCompleted(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            Path runDir,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxUsage usage
     ) throws IOException {
         var promptMetadataPath = metadataPath(promptPath);
         var outputMetadataPath = metadataPath(stdoutPath);
@@ -165,7 +200,8 @@ final class AgentRunMetadataWriter {
                 result.exitCode(),
                 failure == null ? "completed" : "failed",
                 failure == null ? null : failure.reason(),
-                failure == null ? null : failure.recoverable()
+                failure == null ? null : failure.recoverable(),
+                usage
         ));
     }
 

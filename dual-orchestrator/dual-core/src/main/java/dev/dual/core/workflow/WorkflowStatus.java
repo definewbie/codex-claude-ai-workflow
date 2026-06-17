@@ -7,5 +7,9 @@ public enum WorkflowStatus {
     WAITING_FOR_RECOVERY,
     BLOCKED,
     COMPLETED,
-    FAILED
+    FAILED;
+
+    public boolean isTerminal() {
+        return this == COMPLETED;
+    }
 }

@@ -10,8 +10,10 @@ English version: [README.md](README.md)
 |---|---|---|
 | 安装和第一次运行 | [quickstart.md](quickstart.md) | [quickstart.zh-CN.md](quickstart.zh-CN.md) |
 | 项目为什么存在 | [whitepaper-mapping.md](whitepaper-mapping.md) | 暂未拆分中文对照 |
+| 主线功能路线图 | [mainline-roadmap.md](mainline-roadmap.md) | [mainline-roadmap.zh-CN.md](mainline-roadmap.zh-CN.md) |
 | 总体架构和执行流程 | [architecture-and-execution-flow.en.md](architecture-and-execution-flow.en.md) | [architecture-and-execution-flow.md](architecture-and-execution-flow.md) |
 | Workflow 状态模型 | [workflow-state-machine.md](design/workflow-state-machine.md) | [workflow-state-machine.zh-CN.md](design/workflow-state-machine.zh-CN.md) |
+| Delivery merge | [delivery-merge.md](design/delivery-merge.md) | [delivery-merge.zh-CN.md](design/delivery-merge.zh-CN.md) |
 | Artifact contract 与上下文 | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
 | Failure recovery 与 calibration | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
 | Operator observability | [operator-observability.md](design/operator-observability.md) | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
@@ -29,7 +31,7 @@ English version: [README.md](README.md)
 3. 运行：
 
 ```bash
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ```
 
 4. 有真实 `acpx` Claude/Codex 可用时，运行：
@@ -45,13 +47,17 @@ English version: [README.md](README.md)
 如果你要理解或修改 orchestrator 本身，建议按这个顺序读：
 
 1. [architecture-and-execution-flow.md](architecture-and-execution-flow.md) / [English](architecture-and-execution-flow.en.md)
-2. [workflow-state-machine.zh-CN.md](design/workflow-state-machine.zh-CN.md) / [English](design/workflow-state-machine.md)
-3. [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) / [中文](design/artifact-contracts-and-context.zh-CN.md)
-4. [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) / [中文](design/failure-recovery-and-calibration.zh-CN.md)
-5. [operator-observability.md](design/operator-observability.md) / [中文](design/operator-observability.zh-CN.md)
-6. [features.md](features.md)
+2. [mainline-roadmap.zh-CN.md](mainline-roadmap.zh-CN.md) / [English](mainline-roadmap.md)
+3. [goal-driven-workstream-loop.zh-CN.md](design/goal-driven-workstream-loop.zh-CN.md) / [English](design/goal-driven-workstream-loop.md)
+4. [execution-instance-model.zh-CN.md](design/execution-instance-model.zh-CN.md) / [English](design/execution-instance-model.md)
+5. [workflow-state-machine.zh-CN.md](design/workflow-state-machine.zh-CN.md) / [English](design/workflow-state-machine.md)
+6. [delivery-merge.zh-CN.md](design/delivery-merge.zh-CN.md) / [English](design/delivery-merge.md)
+7. [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) / [中文](design/artifact-contracts-and-context.zh-CN.md)
+8. [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) / [中文](design/failure-recovery-and-calibration.zh-CN.md)
+9. [operator-observability.md](design/operator-observability.md) / [中文](design/operator-observability.zh-CN.md)
+10. [features.md](features.md)
 
-这几份文档共同说明当前 lifecycle、状态模型、artifact/context 边界、自动恢复调度、operator 投影，以及剩余 MVP 缺口。
+这几份文档共同说明当前 lifecycle、Definition / Instance / Execution 模型、状态模型、delivery merge、artifact/context 边界、自动恢复调度、operator 投影，以及剩余 MVP 缺口。
 
 ## 私有证据策略
 

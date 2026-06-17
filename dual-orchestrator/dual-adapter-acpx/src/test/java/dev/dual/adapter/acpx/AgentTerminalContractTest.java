@@ -33,6 +33,19 @@ class AgentTerminalContractTest {
     }
 
     @Test
+    void acceptsTerminalControlBlockClosedByDoneMarkerWhenFenceIsMissing() {
+        assertTrue(contract.isComplete("""
+                Body.
+
+                ```dual-control
+                decision: READY
+                summary: done
+
+                [done] end_turn
+                """));
+    }
+
+    @Test
     void rejectsControlBlockWithoutRequiredFields() {
         assertFalse(contract.isComplete("""
                 ```dual-control

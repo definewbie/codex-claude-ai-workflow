@@ -16,11 +16,21 @@
 
 如果技术债已经影响主流程稳定性、职责边界、状态一致性、artifact contract、测试可信度或后续开发速度，必须优先修复，而不是写入 TODO 后继续叠功能。
 
+## Sibling Boundary Sweep
+
+当一次修改迁移、删除或集中某个 source of truth 时，必须同步检查同一边界下的兄弟概念，不能只修用户点名的一个方法、一个 variant、一个 UI 面板或一个测试。
+
+例如：清理一个 workflow variant 的 Java factory 生成路径时，必须同时检查所有内置 variant、loader、CLI 参数、smoke case、文档和测试是否还存在旧定义来源。若兼容路径没有明确长期价值，就删除；不要因为“还能用”而保留，避免后续开发漂移。
+
 ## Mandatory Checklist
 
 修改 workflow、orchestrator、agent lifecycle、artifact contract、human gate、recovery、delivery lifecycle、UI/CLI/ledger projection 相关代码前，必须先阅读并遵守：
 
 - `dual-orchestrator/docs/engineering-checklist.md`
+
+如果改动涉及 workflow definition、handler registry、contract registry、failure signal catalog、gate action、recovery action 或 projection read model，还必须对照：
+
+- `dual-orchestrator/docs/design/boundary-drift-review.zh-CN.md`
 
 如果问题表现为状态边界不清、多个同类 evidence 看起来一样、current/history 语义混在一起、UI/CLI/API/ledger 不一致、recovery/resume 行为异常、或又想通过局部 if-else 修补，必须使用本地 skill：
 

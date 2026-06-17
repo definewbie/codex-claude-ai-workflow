@@ -32,6 +32,32 @@ class EdgeDefinitionTest {
     }
 
     @Test
+    void transitionMetadataDefaultsToNormal() {
+        var edge = new EdgeDefinition("a", "PASS", "b");
+        assertEquals("normal", edge.metadata().transitionType());
+        assertTrue(edge.metadata().required());
+    }
+
+    @Test
+    void transitionMetadataCanDescribeLoopForkAndJoin() {
+        var loop = new EdgeDefinition("a", "revise", "b",
+                EdgeCondition.unconditional(), TransitionMetadata.loop("human revision"));
+        assertEquals("loop", loop.metadata().transitionType());
+        assertEquals("human revision", loop.metadata().toAttributes().get("loop_reason"));
+
+        var fork = new EdgeDefinition("a", "PASS", "b",
+                EdgeCondition.unconditional(), TransitionMetadata.fork("reviews", false, "architecture review"));
+        assertEquals("fork", fork.metadata().transitionType());
+        assertEquals("reviews", fork.metadata().toAttributes().get("branch_group_id"));
+        assertEquals(false, fork.metadata().toAttributes().get("required"));
+
+        var join = new EdgeDefinition("b", "DONE", "c",
+                EdgeCondition.unconditional(), TransitionMetadata.join("reviews", "", "join review evidence"));
+        assertEquals("join", join.metadata().transitionType());
+        assertEquals("all_terminal", join.metadata().joinStrategy());
+    }
+
+    @Test
     void rejectsBlankFrom() {
         assertThrows(IllegalArgumentException.class, () -> new EdgeDefinition("", "PASS", "b"));
     }

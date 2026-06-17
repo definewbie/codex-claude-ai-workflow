@@ -17,6 +17,34 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("runs");
     }
 
+    public Path executionsDir() {
+        return workstreamDir().resolve("executions");
+    }
+
+    public Path workflowExecutionsDir() {
+        return executionsDir().resolve("workflow");
+    }
+
+    public Path nodeExecutionsDir() {
+        return executionsDir().resolve("nodes");
+    }
+
+    public Path agentTasksDir() {
+        return workstreamDir().resolve("queue").resolve("agent-tasks");
+    }
+
+    public Path workflowExecutionJson(String workflowExecutionId) {
+        return workflowExecutionsDir().resolve(workflowExecutionId + ".json");
+    }
+
+    public Path nodeExecutionJson(String nodeExecutionId) {
+        return nodeExecutionsDir().resolve(nodeExecutionId + ".json");
+    }
+
+    public Path agentTaskJson(String agentTaskId) {
+        return agentTasksDir().resolve(agentTaskId + ".json");
+    }
+
     public Path runDir(dev.dual.core.id.DualId runId) {
         return runsDir().resolve(runId.value());
     }
@@ -129,6 +157,18 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("metrics");
     }
 
+    public Path domainDir() {
+        return workstreamDir().resolve("domain");
+    }
+
+    public Path goalSatisfactionJson() {
+        return domainDir().resolve("goal-satisfaction.json");
+    }
+
+    public Path completionAuditJson() {
+        return domainDir().resolve("completion-audit.json");
+    }
+
     public Path workstreamMetricsJson() {
         return metricsDir().resolve("workstream-metrics.json");
     }
@@ -143,5 +183,33 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
 
     public Path currentFailureMarkdown() {
         return recoveryDir().resolve("current-failure.md");
+    }
+
+    public Path deliveryDir() {
+        return workstreamDir().resolve("delivery");
+    }
+
+    public Path deliveryMergePlanJson() {
+        return deliveryDir().resolve("merge-plan.json");
+    }
+
+    public Path deliveryMergePatch() {
+        return deliveryDir().resolve("merge.patch");
+    }
+
+    public Path deliveryChangedFilesTxt() {
+        return deliveryDir().resolve("changed-files.txt");
+    }
+
+    public Path deliveryExcludedFilesTxt() {
+        return deliveryDir().resolve("excluded-files.txt");
+    }
+
+    public Path deliveryApplyStdoutLog() {
+        return deliveryDir().resolve("apply.stdout.log");
+    }
+
+    public Path deliveryApplyStderrLog() {
+        return deliveryDir().resolve("apply.stderr.log");
     }
 }

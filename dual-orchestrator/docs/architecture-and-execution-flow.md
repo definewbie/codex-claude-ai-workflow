@@ -78,6 +78,24 @@ metrics/workstream-metrics.json
 
 CLI、API、Operator Panel 和报告都只能读取或投影 ledger，不应各自发明状态。
 
+### Workflow Definition Source
+
+默认 full lifecycle 的定义来源是 classpath JSON：
+
+```text
+dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+```
+
+`WorkflowDefinitionLoader` 是内置定义入口。启动 workstream 时，loader 会把当前 definition 固化到 ledger 的 `workflow/definition.json`，后续恢复、追踪和复盘都以 ledger 中的副本为准。内置 `full` 和 `contract` variant 都从 classpath JSON resource 加载，Java 不再手写 lifecycle DAG。
+
+### Agent Permission Boundary
+
+不是所有 Agent step 都允许改代码。默认 full workflow 中：
+
+- intake / design / plan / review / acceptance / handoff 阶段是只读 agent run；
+- 只有 `implement.claude_implement` 和 `implement.claude_self_test_report` 会启用写权限；
+- token / cost 作为 acpx adapter 的观测事实写入 `runs/*/run.json`，不参与业务路由。
+
 ### Typed Artifacts
 
 Agent 输出分成两层：
@@ -346,6 +364,8 @@ final report
 ## 10. 相关文档
 
 - `docs/design/workstream-domain-model.md`
+- `docs/design/goal-driven-workstream-loop.zh-CN.md`
+- `docs/design/execution-instance-model.zh-CN.md`
 - `docs/design/workflow-state-machine.md`
 - `docs/design/artifact-contracts-and-context.md`
 - `docs/design/failure-recovery-and-calibration.md`

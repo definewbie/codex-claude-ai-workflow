@@ -16,8 +16,12 @@ cleanup branch; reusable evidence now starts from the public benchmark sample.
 |---|---|---|
 | Install and first runnable workflow | [quickstart.md](quickstart.md) | [quickstart.zh-CN.md](quickstart.zh-CN.md) |
 | Why this project exists | [whitepaper-mapping.md](whitepaper-mapping.md) | Not split yet |
+| Mainline roadmap | [mainline-roadmap.md](mainline-roadmap.md) | [mainline-roadmap.zh-CN.md](mainline-roadmap.zh-CN.md) |
 | Overall product and architecture narrative | [architecture-and-execution-flow.en.md](architecture-and-execution-flow.en.md) | [architecture-and-execution-flow.md](architecture-and-execution-flow.md) |
+| Goal-driven unattended lifecycle | [goal-driven-workstream-loop.md](design/goal-driven-workstream-loop.md) | [goal-driven-workstream-loop.zh-CN.md](design/goal-driven-workstream-loop.zh-CN.md) |
+| Definition / Instance / Execution model | [execution-instance-model.md](design/execution-instance-model.md) | [execution-instance-model.zh-CN.md](design/execution-instance-model.zh-CN.md) |
 | Runtime state model and operator commands | [workflow-state-machine.md](design/workflow-state-machine.md) | [workflow-state-machine.zh-CN.md](design/workflow-state-machine.zh-CN.md) |
+| Delivery merge | [delivery-merge.md](design/delivery-merge.md) | [delivery-merge.zh-CN.md](design/delivery-merge.zh-CN.md) |
 | Artifact contracts and context packages | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
 | Failure recovery and calibration | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
 | Operator observability | [operator-observability.md](design/operator-observability.md) | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
@@ -34,7 +38,7 @@ Use this path when evaluating the project from a fresh clone:
 
 1. Read the root `README.md`.
 2. Follow `quickstart.md`.
-3. Run `./scripts/smoke-test.sh --case baseline-basic --cleanup`.
+3. Run `./scripts/smoke-test.sh --case lifecycle --cleanup`.
 4. Run `./scripts/run-public-benchmark.sh` when real `acpx` Claude/Codex are available.
 5. Use `dualctl trace --workdir <effective_workdir> <workstream_id>` to inspect the result.
 
@@ -46,15 +50,19 @@ This path avoids private project details and uses the reusable sample app under
 Use this path when changing the orchestrator itself:
 
 1. `architecture-and-execution-flow.en.md` / `architecture-and-execution-flow.md`
-2. `design/workflow-state-machine.md` / `design/workflow-state-machine.zh-CN.md`
-3. `design/artifact-contracts-and-context.md`
-4. `design/failure-recovery-and-calibration.md`
-5. `design/operator-observability.md`
-6. `features.md`
+2. `mainline-roadmap.md` / `mainline-roadmap.zh-CN.md`
+3. `design/goal-driven-workstream-loop.md` / `design/goal-driven-workstream-loop.zh-CN.md`
+4. `design/execution-instance-model.md` / `design/execution-instance-model.zh-CN.md`
+5. `design/workflow-state-machine.md` / `design/workflow-state-machine.zh-CN.md`
+6. `design/delivery-merge.md` / `design/delivery-merge.zh-CN.md`
+7. `design/artifact-contracts-and-context.md`
+8. `design/failure-recovery-and-calibration.md`
+9. `design/operator-observability.md`
+10. `features.md`
 
-These documents describe the current shape of the lifecycle, the state model,
-the artifact/context boundary, recovery scheduling, operator projection, and
-the remaining MVP gaps.
+These documents describe the goal-driven lifecycle, the Definition / Instance /
+Execution model, the state model, delivery merge, the artifact/context boundary,
+recovery scheduling, operator projection, and the remaining MVP gaps.
 
 ## Reference Path
 

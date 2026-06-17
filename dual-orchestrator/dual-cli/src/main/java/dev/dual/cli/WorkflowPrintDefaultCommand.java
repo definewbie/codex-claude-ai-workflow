@@ -2,7 +2,8 @@ package dev.dual.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactory;
+import dev.dual.ledger.file.EdgeConditionModule;
+import dev.dual.runtime.lifecycle.WorkflowDefinitionLoader;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -15,6 +16,7 @@ import java.util.concurrent.Callable;
 @Command(name = "print-default", description = "Print or write the built-in default workflow definition.", mixinStandardHelpOptions = true)
 public final class WorkflowPrintDefaultCommand implements Callable<Integer> {
     private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new EdgeConditionModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Option(names = "--output", description = "Output file. Defaults to stdout.")
@@ -22,7 +24,7 @@ public final class WorkflowPrintDefaultCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        var definition = new LifecycleWorkflowDefinitionFactory().baselineMainline();
+        var definition = new WorkflowDefinitionLoader().loadOrDefault(null, null);
         var json = objectMapper.writeValueAsString(definition) + System.lineSeparator();
         if (outputPath == null) {
             System.out.print(json);

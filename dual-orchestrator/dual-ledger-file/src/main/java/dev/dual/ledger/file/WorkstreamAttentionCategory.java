@@ -1,0 +1,14 @@
+package dev.dual.ledger.file;
+
+public enum WorkstreamAttentionCategory {
+    RUNNING,
+    WAITING_FOR_HUMAN,
+    RUNTIME_RECOVERY,
+    ARTIFACT_CONTRACT_FAILURE,
+    SEMANTIC_REVISION_LIMIT,
+    GOAL_REPAIR_REQUIRED,
+    GOAL_REDESIGN_REQUIRED,
+    COMPLETED,
+    FAILED,
+    UNKNOWN
+}

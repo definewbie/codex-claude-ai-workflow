@@ -77,6 +77,32 @@ Each workstream owns a file ledger:
 This ledger makes recovery, audit, replay, metrics, and later calibration
 possible.
 
+### Workflow Definition Source
+
+The default full lifecycle is loaded from a classpath JSON resource:
+
+```text
+dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+```
+
+`WorkflowDefinitionLoader` is the single default-definition entry point. When a
+workstream starts, the resolved definition is copied into
+`workflow/definition.json`; resume, trace, and replay use that ledger copy.
+Both bundled variants are loaded from classpath JSON resources through `WorkflowDefinitionLoader`.
+
+### Agent Permission Boundary
+
+Default agent runs are read-only. Only implementation-owned Claude nodes enable
+write permissions:
+
+- `implement.claude_implement`
+- `implement.claude_self_test_report`
+
+Intake, design, plan, review, acceptance, and handoff nodes must produce
+structured evidence, not mutate the target repository. acpx token and cost
+usage is recorded as run metadata for observation only; it does not route the
+workflow.
+
 ### Context by Purpose
 
 The system does not dump all history into every prompt. Context packages are

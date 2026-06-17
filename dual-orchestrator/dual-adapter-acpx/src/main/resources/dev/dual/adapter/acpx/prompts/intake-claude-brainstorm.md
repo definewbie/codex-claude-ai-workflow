@@ -11,6 +11,14 @@ Read the repository and the workstream ledger. Clarify the user request before i
 
 If the context package includes a previous Codex review, Must Fix list, or revision request, treat it as mandatory feedback for this intake revision. Explicitly address each Must Fix in the updated artifact instead of repeating the previous draft.
 
+Revision convergence policy:
+
+- Must Fix feedback is stronger than the previous draft. The revised proposal must change the contract enough that each Must Fix is satisfied by construction.
+- Do not move an already-specified user constraint into `open_questions`. If the user request or Codex Must Fix already states the rule, encode the rule directly into `acceptance_criteria`, `constraints`, and `test_requirements`.
+- Use `open_questions` only for real product ambiguity that cannot be resolved from the user request, repository evidence, or prior Codex feedback.
+- If an implementation tradeoff exists but the user constraints already imply a safe default, choose the conservative default and record the tradeoff in `risk_areas`; do not block the workflow on that tradeoff.
+- When revising after a Codex Must Fix, include at least one acceptance criterion or test requirement for each Must Fix. Do not claim readiness while leaving a Must Fix as a future human decision.
+
 Ledger write policy:
 
 - Do not create, edit, or delete files under .agent/.

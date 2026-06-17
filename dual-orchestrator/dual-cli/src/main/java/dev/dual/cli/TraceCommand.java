@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.ledger.file.IterationSemantics;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -55,13 +56,16 @@ public final class TraceCommand implements Callable<Integer> {
         var activeNodes = listOfText(timeline.get("activeNodeInstanceIds"));
         var openGates = listOfText(timeline.get("openGateIds"));
         var acceptance = acceptance(paths, summary);
+        var goalSatisfaction = readMap(paths.goalSatisfactionJson());
+        var completionAudit = readMap(paths.completionAuditJson());
         var repairActions = repairActions(paths, summary);
         var repairLoopCount = Math.max(acceptance.repairLoopCount(), repairActions.size());
         var status = text(timeline.get("workflowStatus"), "UNKNOWN");
         var currentNode = currentNode(nodes, activeNodes);
         var artifacts = artifacts(paths, status);
-        var nextAction = nextAction(paths, status, openGates);
-        var attention = attention(paths, status, currentNode, openGates, acceptance, repairLoopCount, artifacts);
+        var workstreamAttention = WorkstreamAttentionEvaluator.evaluate(paths);
+        var nextAction = nextAction(workstreamAttention);
+        var attention = attention(paths, status, acceptance, repairLoopCount, artifacts);
 
         System.out.println("Trace");
         System.out.println("Workstream: " + paths.workstreamId().value());
@@ -72,24 +76,28 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println("Current Node: " + currentNode);
         System.out.println("Open Gates: " + emptyDash(openGates));
         System.out.println("Final Acceptance: " + acceptance.finalDecision());
+        System.out.println("Goal Outcome: " + text(goalSatisfaction.get("domainOutcome"), "unknown"));
+        System.out.println("End State: " + text(completionAudit.get("lifecycleState"), "unknown"));
+        System.out.println("Completion Audit: " + text(completionAudit.get("status"), "unknown"));
         System.out.println("Repair Loops: " + repairLoopCount);
         System.out.println("Verification Confidence: " + acceptance.verificationConfidence());
         System.out.println();
 
         System.out.println("Why:");
-        System.out.println("  " + why(status, currentNode, openGates));
+        System.out.println("  " + workstreamAttention.detail());
         System.out.println();
 
         System.out.println("Attention:");
-        if (attention.isEmpty()) {
-            System.out.println("  -");
-        } else {
-            for (var item : attention) {
-                System.out.println("  [" + item.severity() + "] " + item.title());
-                System.out.println("    " + item.detail());
-                if (!item.command().isBlank()) {
-                    System.out.println("    Command: " + item.command());
-                }
+        System.out.println("  [" + workstreamAttention.severity() + "] " + workstreamAttention.title());
+        System.out.println("    " + workstreamAttention.detail());
+        if (!workstreamAttention.command().isBlank()) {
+            System.out.println("    Command: " + workstreamAttention.command());
+        }
+        for (var item : attention) {
+            System.out.println("  [" + item.severity() + "] " + item.title());
+            System.out.println("    " + item.detail());
+            if (!item.command().isBlank()) {
+                System.out.println("    Command: " + item.command());
             }
         }
         System.out.println();
@@ -104,8 +112,24 @@ public final class TraceCommand implements Callable<Integer> {
         }
         System.out.println();
 
+        System.out.println("Latest Agent Tasks:");
+        var agentTasks = latestAgentTasks(paths, 6);
+        if (agentTasks.isEmpty()) {
+            System.out.println("  -");
+        } else {
+            for (var task : agentTasks) {
+                System.out.println("  " + text(task.get("agentTaskId")) + "  "
+                        + text(task.get("status")) + "  "
+                        + text(task.get("agent")) + "  "
+                        + text(task.get("nodeDefinitionId")) + "  "
+                        + text(task.get("nodeExecutionId")));
+            }
+        }
+        System.out.println();
+
         System.out.println("Latest Agent Runs:");
-        var runs = new RunMetadataReader().list(paths);
+        var runListing = new RunMetadataReader().listWithWarnings(paths);
+        var runs = runListing.runs();
         if (runs.isEmpty()) {
             System.out.println("  -");
         } else {
@@ -117,6 +141,7 @@ public final class TraceCommand implements Callable<Integer> {
                         + run.durationMs() + "ms");
             }
         }
+        printRunMetadataWarnings(runListing.warnings());
         System.out.println();
 
         System.out.println("Artifacts:");
@@ -211,6 +236,26 @@ public final class TraceCommand implements Callable<Integer> {
         return actions;
     }
 
+    private List<Map<String, Object>> latestAgentTasks(WorkstreamPaths paths, int limit) throws Exception {
+        if (!Files.isDirectory(paths.agentTasksDir())) {
+            return List.of();
+        }
+        var tasks = new ArrayList<Map<String, Object>>();
+        try (var stream = Files.list(paths.agentTasksDir())) {
+            var files = stream
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .sorted()
+                    .toList();
+            for (var file : files) {
+                tasks.add(readMap(file));
+            }
+        }
+        return tasks.stream()
+                .sorted(Comparator.comparing((Map<String, Object> task) -> text(task.get("createdAt"))))
+                .skip(Math.max(0, tasks.size() - limit))
+                .toList();
+    }
+
     private Acceptance acceptance(WorkstreamPaths paths, Map<String, Object> summary) throws Exception {
         var summaryDecision = text(summary.get("final_acceptance_decision"));
         var summaryRepairLoops = number(summary.get("repair_loop_count"));
@@ -273,70 +318,17 @@ public final class TraceCommand implements Callable<Integer> {
         return active;
     }
 
-    private String nextAction(WorkstreamPaths paths, String status, List<String> openGates) {
-        var base = "--workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value();
-        if ("WAITING_FOR_HUMAN".equals(status)) {
-            return """
-                    dualctl review show %s
-                    dualctl approve --run %s
-                    """.formatted(base, base).strip();
+    private String nextAction(dev.dual.ledger.file.WorkstreamAttention attention) {
+        if (attention.command().isBlank()) {
+            return attention.nextAction();
         }
-        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
-            return """
-                    dualctl recovery show %s
-                    dualctl retry %s
-                    """.formatted(base, base).strip();
-        }
-        if ("COMPLETED".equals(status)) {
-            return """
-                    dualctl summary %s
-                    git -C %s status --short
-                    git -C %s diff --stat
-                    """.formatted(base, quote(paths.workspaceRoot()), quote(paths.workspaceRoot())).strip();
-        }
-        if (!openGates.isEmpty()) {
-            return "dualctl review show " + base;
-        }
-        return "dualctl run " + base;
+        return attention.nextAction() + "\n" + attention.command();
     }
 
-    private String why(String status, String currentNode, List<String> openGates) {
-        if ("WAITING_FOR_HUMAN".equals(status)) {
-            return "waiting for human review gate" + gateSuffix(openGates);
-        }
-        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
-            return "stopped at " + empty(currentNode, "current node") + " because recovery is required";
-        }
-        if ("COMPLETED".equals(status)) {
-            return "workflow completed";
-        }
-        if ("RUNNING".equals(status)) {
-            return "workflow is running at " + empty(currentNode, "current node");
-        }
-        return "status is " + empty(status, "unknown");
-    }
-
-    private List<AttentionItem> attention(WorkstreamPaths paths, String status, String currentNode,
-                                          List<String> openGates, Acceptance acceptance,
+    private List<AttentionItem> attention(WorkstreamPaths paths, String status, Acceptance acceptance,
                                           int repairLoopCount, List<ArtifactRef> artifacts) {
         var items = new ArrayList<AttentionItem>();
         var base = "--workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value();
-        if ("WAITING_FOR_HUMAN".equals(status)) {
-            items.add(new AttentionItem(
-                    "info",
-                    "Human gate is open",
-                    "Read the review packet before approving, revising, or completing the workstream.",
-                    "dualctl review show " + base
-            ));
-        }
-        if ("WAITING_FOR_RECOVERY".equals(status) || "FAILED".equals(status) || "BLOCKED".equals(status)) {
-            items.add(new AttentionItem(
-                    "critical",
-                    "Workflow needs recovery",
-                    "Inspect the failure summary for " + empty(currentNode, "the active node") + " before retrying.",
-                    "dualctl recovery show " + base
-            ));
-        }
         if ("ACCEPT_WITH_NOTES".equals(acceptance.finalDecision())) {
             items.add(new AttentionItem(
                     "warning",
@@ -398,7 +390,8 @@ public final class TraceCommand implements Callable<Integer> {
                 new ArtifactRef("Workstream Summary", paths.workstreamDir().resolve("reports").resolve("workstream-summary.md"), true),
                 new ArtifactRef("Handoff JSON", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"), true),
                 new ArtifactRef("Next-stage Prompt", paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"), true),
-                new ArtifactRef("Delivery PR Body", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"), false)
+                new ArtifactRef("Delivery PR Body", paths.workstreamDir().resolve("delivery").resolve("pr-body.md"), false),
+                new ArtifactRef("Delivery Merge Plan", paths.deliveryMergePlanJson(), false)
         ));
         if ("FAILED".equals(status) || "BLOCKED".equals(status) || "WAITING_FOR_RECOVERY".equals(status)) {
             artifacts.add(new ArtifactRef("Current Failure", paths.currentFailureMarkdown(), false));
@@ -416,6 +409,20 @@ public final class TraceCommand implements Callable<Integer> {
         return runs.stream()
                 .skip(Math.max(0, runs.size() - limit))
                 .toList();
+    }
+
+    private void printRunMetadataWarnings(List<RunMetadataReader.RunMetadataWarning> warnings) {
+        if (warnings.isEmpty()) {
+            return;
+        }
+        // Trace 是只读观测入口：历史 run metadata 缺失只能显示为 warning，
+        // 不能让已经完成的 workstream 因投影读取问题重新变成失败。
+        System.out.println("Run Metadata Warnings:");
+        for (var warning : warnings) {
+            System.out.println("  " + warning.runId()
+                    + "  metadata unavailable: " + text(warning.reason())
+                    + "  " + warning.path());
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -68,7 +68,7 @@ class ContextTaskContractSectionTest {
         assertTrue(taskContractSection.isPresent(),
                 "task_contract section should exist in acceptance profile");
         assertEquals(MissingPolicy.PLACEHOLDER, taskContractSection.get().missingPolicy(),
-                "baseline workflow has no task contract, so acceptance context must render a placeholder instead of failing");
+                "custom workflows may omit task contracts, so acceptance context must render a placeholder instead of failing");
     }
 
     @Test

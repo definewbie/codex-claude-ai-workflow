@@ -25,6 +25,7 @@ record AgentRunDocument(
         Integer exitCode,
         String status,
         String failureReason,
-        Boolean recoverable
+        Boolean recoverable,
+        AcpxUsage usage
 ) {
 }

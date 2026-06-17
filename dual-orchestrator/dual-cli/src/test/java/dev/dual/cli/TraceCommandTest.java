@@ -34,7 +34,7 @@ class TraceCommandTest {
         assertTrue(printed.contains("Repair Loops: 1"));
         assertTrue(printed.contains("Verification Confidence: MEDIUM"));
         assertTrue(printed.contains("Why:"));
-        assertTrue(printed.contains("workflow completed"));
+        assertTrue(printed.contains("Workflow completed"));
         assertTrue(printed.contains("Attention:"));
         assertTrue(printed.contains("[warning] Accepted with notes"));
         assertTrue(printed.contains("[info] Repair loop occurred"));
@@ -59,7 +59,7 @@ class TraceCommandTest {
 
         assertTrue(printed.contains("Status: WAITING_FOR_RECOVERY"));
         assertTrue(printed.contains("Current Node: acceptance.classify_failure"));
-        assertTrue(printed.contains("[critical] Workflow needs recovery"));
+        assertTrue(printed.contains("[critical] Agent capacity recovery required"));
         assertTrue(printed.contains("[critical] Final acceptance rejected"));
         assertTrue(printed.contains("[warning] Verification confidence is LOW"));
         assertTrue(printed.contains("dualctl recovery show --workdir"));
@@ -79,8 +79,28 @@ class TraceCommandTest {
 
         assertTrue(printed.contains("Status: WAITING_FOR_HUMAN"));
         assertTrue(printed.contains("[info] Human gate is open"));
-        assertTrue(printed.contains("dualctl approve --run --workdir"));
+        assertTrue(printed.contains("dualctl review show --workdir"));
         assertFalse(printed.contains("[warning] Verification confidence is UNKNOWN"));
+    }
+
+    @Test
+    void treatsInvalidRunMetadataAsProjectionWarning() throws Exception {
+        writeCompletedLedger();
+        var runsDir = tempDir.resolve(".agent/workstreams/ws-trace/runs");
+        Files.createDirectories(runsDir.resolve("run-bad"));
+        Files.writeString(runsDir.resolve("run-bad/run.json"), "{not-json", StandardCharsets.UTF_8);
+        Files.createDirectories(runsDir.resolve("run-missing"));
+
+        var command = new TraceCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-trace";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Status: COMPLETED"));
+        assertTrue(printed.contains("Run Metadata Warnings:"));
+        assertTrue(printed.contains("run-bad  metadata unavailable:"));
+        assertTrue(printed.contains("run-missing  metadata unavailable: missing run.json"));
     }
 
     private void writeCompletedLedger() throws Exception {
@@ -130,6 +150,8 @@ class TraceCommandTest {
         Files.createDirectories(root.resolve("delivery"));
         Files.createDirectories(root.resolve("recovery"));
         Files.createDirectories(root.resolve("runs/run-1"));
+        Files.createDirectories(root.resolve("workflow"));
+        Files.createDirectories(root.resolve("nodes"));
         Files.writeString(root.resolve("reports/latest-final-report.md"), "# Final\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("artifacts/next-stage/handoff.json"), "{}", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("artifacts/next-stage/next-stage-prompt.md"), "# Next\n", StandardCharsets.UTF_8);
@@ -145,13 +167,42 @@ class TraceCommandTest {
                   "session": "codex-reviewer",
                   "durationMs": 123,
                   "exitCode": 0,
-                  "status": "completed"
+                  "status": "completed",
+                  "usage": {
+                    "inputTokens": 10,
+                    "outputTokens": 2,
+                    "cachedReadTokens": 0,
+                    "cachedWriteTokens": 0,
+                    "totalTokens": 12,
+                    "costAmount": 0.01,
+                    "costCurrency": "USD"
+                  }
                 }
                 """, StandardCharsets.UTF_8);
         Files.writeString(root.resolve("events.jsonl"), """
                 {"event_type":"node_routed","payload":{"outcome":"REJECT_IMPLEMENTATION_BUG"}}
                 {"event_type":"iteration_started","payload":{"trigger_action":"REJECT_IMPLEMENTATION_BUG"}}
                 """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("workflow/current.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-trace",
+                  "workflowInstanceId": "wf-ws-trace",
+                  "workflowId": "agent-lifecycle-full",
+                  "definitionVersion": 3,
+                  "status": "%s",
+                  %s
+                  "lastEventId": "evt-000001",
+                  "updatedAt": "2026-06-04T00:00:00Z"
+                }
+                """.formatted(status, activeBlock), StandardCharsets.UTF_8);
+        writeNode(root, "node-human-gate", "gate.human_requirement_review", "GATE", "human.review", "WAITING", "iter-001", "{}");
+        writeNode(root, "node-failed", "acceptance.classify_failure", "TASK", "acceptance.failure_classify", "FAILED", "iter-003", """
+                {
+                  "acpx_failure.reason": "RECOVERABLE_RATE_LIMIT",
+                  "acpx_failure.recoverable": true
+                }
+                """);
         Files.writeString(root.resolve("timeline.json"), """
                 {
                   "schemaVersion": 1,
@@ -202,6 +253,35 @@ class TraceCommandTest {
                   ]
                 }
                 """.formatted(status, activeBlock), StandardCharsets.UTF_8);
+    }
+
+    private void writeNode(String root, String nodeInstanceId, String nodeDefinitionId, String kind,
+                           String handlerType, String status, String iterationId, String result) throws Exception {
+        writeNode(Path.of(root), nodeInstanceId, nodeDefinitionId, kind, handlerType, status, iterationId, result);
+    }
+
+    private void writeNode(Path root, String nodeInstanceId, String nodeDefinitionId, String kind,
+                           String handlerType, String status, String iterationId, String result) throws Exception {
+        Files.writeString(root.resolve("nodes").resolve(nodeInstanceId + ".json"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "%s",
+                  "nodeDefinitionId": "%s",
+                  "kind": "%s",
+                  "handlerType": "%s",
+                  "status": "%s",
+                  "stageId": "stage-test",
+                  "iterationId": "%s",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "result": %s,
+                  "runRef": null,
+                  "latestExecutionId": "",
+                  "startedAt": null,
+                  "finishedAt": null
+                }
+                """.formatted(nodeInstanceId, nodeDefinitionId, kind, handlerType, status, iterationId, result), StandardCharsets.UTF_8);
     }
 
     private void writeSummary(String json) throws Exception {

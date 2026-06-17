@@ -1,5 +1,6 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -24,6 +25,7 @@ class ContextBuildPackageHandlerTest {
     Path tempDir;
 
     private Path wsDir;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final ContextBuildPackageHandler handler = new ContextBuildPackageHandler();
 
     @BeforeEach
@@ -59,6 +61,35 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Git Evidence"));
         assertTrue(markdown.contains("Context Governance"));
         assertTrue(markdown.contains("implementation"));
+    }
+
+    @Test
+    void governedPackageWritesStructuredBudgetMetadataSidecar() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
+        var input = wsDir.resolve("runs/run-001/outputs/design.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "Design output.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertTrue(result.result().containsKey("context_package_metadata"),
+                "context package metadata sidecar should be exposed as a structured artifact");
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+
+        assertEquals(1, metadata.get("schemaVersion"));
+        assertEquals("implementation", metadata.get("profile"));
+        assertEquals(6_000, metadata.get("tokenBudget"));
+        assertEquals(true, metadata.get("withinBudget"));
+        assertTrue(((Number) metadata.get("estimatedTokens")).intValue() > 0);
+        assertTrue(metadata.get("sections") instanceof List<?> sections && !sections.isEmpty(),
+                "metadata must expose per-section budget facts");
     }
 
     @Test
@@ -101,6 +132,33 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("adaptively compressed"),
                 "Large requirement should be adaptively compressed");
+    }
+
+    @Test
+    void governedProductReviewCapsRenderedPackageToTotalBudget() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Product review budget test.", StandardCharsets.UTF_8);
+
+        var input = wsDir.resolve("runs/run-001/outputs/intake-claude-brainstorm.md");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, "I".repeat(18_000), StandardCharsets.UTF_8);
+
+        var recent = wsDir.resolve("runs/run-002/outputs/design-review.md");
+        Files.createDirectories(recent.getParent());
+        Files.writeString(recent, "R".repeat(18_000), StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("product_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/intake-claude-brainstorm.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(TokenEstimator.defaultEstimator().estimate(markdown) <= 4_000,
+                "product_review package must stay within its 4k token budget");
+        assertTrue(markdown.contains("section degraded to stay within"),
+                "oversized sections should be explicitly degraded");
+        assertFalse(markdown.contains("11.0k / 4.0k"),
+                "governance must not report an over-budget package as successful");
     }
 
     @Test

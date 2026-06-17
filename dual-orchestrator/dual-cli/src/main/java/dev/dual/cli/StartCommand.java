@@ -38,7 +38,7 @@ public final class StartCommand implements Callable<Integer> {
     @Option(names = "--workflow", description = "Workflow definition JSON file. Defaults to built-in agent lifecycle.")
     Path workflowPath;
 
-    @Option(names = "--workflow-variant", description = "Built-in workflow variant: baseline (default), contract, full.")
+    @Option(names = "--workflow-variant", description = "Built-in workflow variant: full (default), contract.")
     String workflowVariant;
 
     @Option(names = "--allow-unknown-handlers", description = "Allow workflow handler types not built into this CLI.")

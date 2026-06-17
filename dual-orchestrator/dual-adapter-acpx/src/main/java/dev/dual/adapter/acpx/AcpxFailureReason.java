@@ -1,0 +1,29 @@
+package dev.dual.adapter.acpx;
+
+/**
+ * acpx adapter 输出的稳定失败语义。
+ *
+ * Provider 或 ACP wrapper 的原始错误文案可以变化，但进入 runtime/ledger
+ * 之前必须先归一化成这里的 reason。这样 workflow 和 recovery 只消费
+ * typed failure fact，不依赖供应商自然语言。
+ */
+enum AcpxFailureReason {
+    AGENT_MODEL_MISMATCH("RECOVERABLE_AGENT_MODEL_MISMATCH"),
+    AGENT_OVERLOADED("RECOVERABLE_AGENT_OVERLOADED"),
+    AGENT_RECONNECT("RECOVERABLE_AGENT_RECONNECT"),
+    AGENT_OUTPUT_INTERRUPTED("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED"),
+    AGENT_PERMISSION_BLOCKED("RECOVERABLE_AGENT_PERMISSION_BLOCKED"),
+    SESSION_MISSING("RECOVERABLE_SESSION_MISSING"),
+    RATE_LIMIT("RECOVERABLE_RATE_LIMIT"),
+    CONTEXT_WINDOW("RECOVERABLE_CONTEXT_WINDOW");
+
+    private final String code;
+
+    AcpxFailureReason(String code) {
+        this.code = code;
+    }
+
+    String code() {
+        return code;
+    }
+}

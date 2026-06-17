@@ -37,6 +37,7 @@ final class FailureSummaryWriter {
         var runId = text(firstNonBlank(result.get("run_id"), ""));
         var agent = text(firstNonBlank(result.get("agent"), ""));
         var session = text(firstNonBlank(result.get("session"), ""));
+        var attention = WorkstreamAttentionEvaluator.evaluate(paths);
 
         var content = new StringBuilder();
         content.append("# Current Failure\n\n");
@@ -52,6 +53,8 @@ final class FailureSummaryWriter {
         line(content, "Run ID", runId);
         line(content, "Agent", agent);
         line(content, "Session", session);
+        line(content, "Attention Category", attention.category().name());
+        line(content, "Retry Safe", String.valueOf(attention.retrySafe()));
         appendContractFailureDiagnostic(content, result);
         content.append("\n## Evidence\n\n");
         if (outputRefs.isEmpty()) {
@@ -62,13 +65,11 @@ final class FailureSummaryWriter {
             }
         }
         content.append("\n## Suggested Action\n\n");
-        content.append("- Inspect the evidence files listed above.\n");
-        content.append("- Fix the external issue, agent session, prompt contract, or workspace state.\n");
-        content.append("- Resume with `dualctl retry --workdir ")
-                .append(paths.workspaceRoot().toAbsolutePath().normalize())
-                .append(' ')
-                .append(paths.workstreamId().value())
-                .append("`.\n");
+        content.append("- ").append(blankDefault(attention.detail(), "Inspect the evidence files listed above.")).append('\n');
+        content.append("- ").append(blankDefault(attention.nextAction(), "Inspect the workstream ledger before choosing the next action.")).append('\n');
+        if (!attention.command().isBlank()) {
+            content.append("- Command: `").append(attention.command()).append("`.\n");
+        }
         return content.toString();
     }
 
@@ -113,5 +114,9 @@ final class FailureSummaryWriter {
 
     private static String text(Object value) {
         return value == null ? "" : value.toString();
+    }
+
+    private static String blankDefault(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
     }
 }

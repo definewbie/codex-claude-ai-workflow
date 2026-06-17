@@ -155,23 +155,53 @@ class WorkflowDefinitionLoaderTest {
     void fallsBackToBuiltInWorkflowWhenPathIsNull() throws Exception {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null);
 
-        assertEquals("agent-lifecycle", definition.workflowId());
+        assertEquals("agent-lifecycle-full", definition.workflowId());
+        assertEquals(4, definition.version(), "default full workflow should be loaded from the bundled JSON resource");
         assertEquals("intake.claude_brainstorm", definition.entryNodeId());
     }
 
     @Test
-    void repositoryWorkflowExampleMatchesBuiltInLifecycleShape() throws Exception {
-        var expected = new LifecycleWorkflowDefinitionFactory().baselineMainline();
-        var actual = new WorkflowDefinitionLoader().load(Path.of("../workflows/agent-lifecycle.v1.json"));
+    void bundledFullWorkflowLimitsWriteAccessToImplementationOwnedAgentNodes() throws Exception {
+        var definition = new WorkflowDefinitionLoader().loadOrDefault(null);
 
-        assertEquals(expected.workflowId(), actual.workflowId());
-        assertEquals(expected.version(), actual.version());
-        assertEquals(expected.entryNodeId(), actual.entryNodeId());
-        assertEquals(expected.nodes().size(), actual.nodes().size());
-        assertEquals(expected.edges().size(), actual.edges().size());
-        assertEquals(expected.node("context.implement_claude").handlerType(), actual.node("context.implement_claude").handlerType());
-        assertEquals(expected.node("acceptance.codex_verifier_review").config().get("prompt_template"),
-                actual.node("acceptance.codex_verifier_review").config().get("prompt_template"));
+        var writableNodes = definition.nodes().stream()
+                .filter(node -> "acpx.agent_run".equals(node.handlerType()))
+                .filter(node -> Boolean.TRUE.equals(node.config().get("approve_all")))
+                .map(node -> node.id())
+                .toList();
+
+        assertEquals(java.util.List.of(
+                "implement.claude_implement",
+                "implement.claude_self_test_report"
+        ), writableNodes);
+    }
+
+    @Test
+    void bundledAgentNodesDeclarePermissionProfiles() throws Exception {
+        var loader = new WorkflowDefinitionLoader();
+        var allowedProfiles = java.util.Set.of("observe", "review", "implement");
+
+        for (var variant : java.util.List.of("full", "contract")) {
+            var definition = loader.loadOrDefault(null, variant);
+            var missingOrInvalid = definition.nodes().stream()
+                    .filter(node -> "acpx.agent_run".equals(node.handlerType()))
+                    .filter(node -> !allowedProfiles.contains(String.valueOf(node.config().get("permission_profile"))))
+                    .map(node -> variant + ":" + node.id())
+                    .toList();
+
+            assertEquals(java.util.List.of(), missingOrInvalid);
+        }
+    }
+
+    @Test
+    void bundledContractWorkflowIsLoadedFromClasspathResource() throws Exception {
+        var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "contract");
+
+        assertEquals("agent-lifecycle-contract", definition.workflowId());
+        assertEquals(3, definition.version());
+        assertEquals("intake.claude_brainstorm", definition.entryNodeId());
+        assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
+        assertEquals(NodeKind.TASK, definition.node("acceptance.classify_failure").kind());
     }
 
     @Test

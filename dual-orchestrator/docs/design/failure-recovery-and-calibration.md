@@ -23,6 +23,7 @@ Runtime failures are external or mechanical:
 - `acpx` session missing;
 - rate limit or quota;
 - Agent reconnect;
+- Agent tool permission blocked by a non-interactive permission policy;
 - context window overflow;
 - invalid structured output;
 - command exit failure.
@@ -55,6 +56,32 @@ The adapter keeps runtime failure matching behind a small signal catalog:
 
 New provider-specific wording should be added to the catalog as another signal
 matcher, not scattered through workflow routing, ledger projection, or UI code.
+
+Some ACP adapters can write a clear recoverable signal to stderr without
+exiting the outer process promptly. For example, `agent needs reconnect` can
+otherwise leave an Agent run stuck in `RUNNING`. This is an adapter execution
+boundary, not a UI or human-review concern. `AcpxAgentTransport` polls stderr
+for catalog signals during the run; when it sees a recoverable runtime failure,
+it terminates the current acpx process and returns a classifiable exit result so
+the workflow can move to `WAITING_FOR_RECOVERY`.
+
+Tool permission failure belongs to the same adapter execution boundary. dual
+does not use `approve-all` for non-implementation phases. Workflow nodes declare
+a `permission_profile`, and the acpx adapter translates it to concrete tool
+arguments:
+
+| Profile | Used by | Permission semantics |
+|---|---|---|
+| `observe` | Claude intake / design / plan / handoff | Allows Read/Grep/Glob and safe repository observation commands such as `git`, `ls`, `find`, and `rg`. |
+| `review` | Codex review / acceptance | Similar to `observe`; used for external review and acceptance. |
+| `implement` | Claude implementation / self-test | Explicitly allows implementation and test execution; currently maps to acpx `approve-all`. |
+
+If an agent asks for a tool outside the profile in non-interactive mode, the
+adapter normalizes `Tool permission request failed` / `Tool use aborted` into
+`RECOVERABLE_AGENT_PERMISSION_BLOCKED`. That is not a business rejection and
+must not trigger a semantic repair loop. The operator should inspect whether
+the node profile is too narrow or whether the agent attempted to cross the
+phase boundary.
 
 ## Automatic Recovery Scheduling
 

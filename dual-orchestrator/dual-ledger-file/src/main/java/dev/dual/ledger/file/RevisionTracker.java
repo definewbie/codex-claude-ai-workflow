@@ -76,9 +76,11 @@ final class RevisionTracker {
                 node.stageId(),
                 node.iterationId(),
                 node.inputRefs(),
+                node.inputTransition(),
                 outputRefs,
                 blockedResult,
                 node.runRef(),
+                node.latestExecutionId(),
                 node.startedAt(),
                 now
         ));
@@ -155,7 +157,7 @@ final class RevisionTracker {
                     .map(path -> readIterationOrNull(path))
                     .filter(iteration -> iteration != null)
                     .filter(iteration -> targetStage.equals(iteration.stageId()))
-                    .filter(iteration -> isRevisionAction(iteration.triggerAction()))
+                    .filter(iteration -> !"workflow_started".equals(iteration.triggerAction()))
                     .count();
         }
     }

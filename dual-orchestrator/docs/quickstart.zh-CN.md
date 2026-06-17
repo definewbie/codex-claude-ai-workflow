@@ -17,6 +17,13 @@ acpx --version
 
 真实 lifecycle run 需要 `acpx` 能调用 Claude 和 Codex。Fixture/smoke 路径可以先验证 CLI，不必碰自己的仓库。
 
+真实运行前要固定 adapter 版本。否则 `acpx` 可能解析到浮动的 Codex ACP adapter，导致同一个流程在不同时间表现不同：
+
+```bash
+npm install -g acpx@0.8.0
+./scripts/configure-acpx.sh
+```
+
 ## 2. 安装
 
 ```bash
@@ -24,7 +31,15 @@ cd dual-orchestrator
 ./scripts/install.sh
 ```
 
-默认安装到 `$HOME/.local`。如有需要，把它加入 `PATH`：
+默认安装到 `$HOME/.local`。
+
+如果希望安装 wrapper 的同时写入固定的 acpx Codex adapter 配置：
+
+```bash
+./scripts/install.sh --configure-acpx
+```
+
+如有需要，把安装目录加入 `PATH`：
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -45,13 +60,14 @@ dualctl doctor --workdir /path/to/git/repo
 ```
 
 `doctor` 会检查基础依赖。真实 Agent run 还需要可用的 acpx Claude/Codex session；缺失 session 通常由 acpx 按需创建。
+它也会检查 `acpx` 版本和 Codex ACP adapter 是否固定，避免使用浮动 npm range。
 
 ## 4. 运行最小 Smoke
 
 在 `dual-orchestrator` 目录下运行：
 
 ```bash
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ```
 
 这是最快的 CLI/workflow sanity check。
@@ -88,9 +104,11 @@ EOF
 
 ./scripts/run-real-case.sh \
   --repo /path/to/your/repo \
-  --task-file /tmp/dual-task.md \
-  --variant full
+  --task-file /tmp/dual-task.md
 ```
+
+`full` lifecycle 是默认流程。只有在明确要跑更小的 contract-only 流程时，才使用
+`--variant contract`。
 
 建议先用小任务。公开可复用 benchmark case 使用 `public-*.md` 命名。
 
@@ -120,6 +138,10 @@ dualctl trace --workdir <effective_workdir> <workstream_id>
 
 `trace` 是最推荐的第一入口。它会显示当前状态、active node、为什么停止、attention items、最近 timeline、final acceptance、repair loops、关键 artifacts 和下一步命令。
 
+如果某个历史 Agent run 的 `run.json` 缺失或损坏，`trace` 会显示
+`Run Metadata Warnings`。这表示观测数据不完整，不代表 workflow 终态被改成失败；
+需要排查单次 run 时，再使用 `dualctl inspect --run <run_id>`。
+
 如果 workflow 等待人工 review：
 
 ```bash
@@ -129,7 +151,31 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 
 `dualctl approve`、`dualctl revise`、`dualctl complete` 是较长 `dualctl review ...` 命令的快捷方式。
 
-## 8. Calibration
+## 8. 合并已验收的 Worktree 改动
+
+workstream 完成并验收通过后，显式把已审查的 worktree diff 合回原始仓库：
+
+```bash
+dualctl delivery merge \
+  --workdir <source_worktree> \
+  --target <original_repo> \
+  <workstream_id>
+```
+
+命令要求 workstream 已完成、final acceptance 是 `ACCEPT` 或
+`ACCEPT_WITH_NOTES`，并且 target repo 工作区干净。它会在 workstream ledger 下写入
+`delivery/merge-plan.json`、`delivery/merge.patch`、changed file list 和 apply log。
+它只把 patch apply 到 target repo index，不会自动 commit。
+
+人工确认 staged diff 后：
+
+```bash
+cd <original_repo>
+git diff --cached
+git commit -m "feat: dual delivery <workstream_id>"
+```
+
+## 9. Calibration
 
 真实失败如果被分类为可复用校准候选，可以先人工审阅：
 
@@ -152,6 +198,9 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 dualctl events --workdir <effective_workdir> --limit 50 <workstream_id>
 dualctl summary --workdir <effective_workdir> <workstream_id>
 ```
+
+`dualctl runs` 也是只读观测命令。它会列出可读取的 Agent run，并把损坏或缺失的
+run metadata 显示为 warning，避免一个历史文件问题遮蔽当前 workflow 状态。
 
 如果 workflow 进入 recovery：
 

@@ -56,6 +56,7 @@ Set `lifecycle_status` from your judgment, not from wording style:
 `ACCEPTED`, `ACCEPTED_WITH_NOTES`, `REJECTED`, `BLOCKED`, or `INSUFFICIENT_EVIDENCE`.
 Do not put blocking issues or material missing evidence under `acceptance_notes`;
 use `must_fix` or `missing_evidence` and choose a rejecting/blocking status instead.
+Do not put placeholder values such as "none", "no blocking issue", or "N/A" in `must_fix` or `missing_evidence`; use an empty array when there are no items.
 
 <dual-artifact type="acceptance_review" version="1">
 {

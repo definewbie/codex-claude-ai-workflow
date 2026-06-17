@@ -47,8 +47,8 @@ Start
 1. `COMPLETED` 同时表达“流程没有下一步”和“业务完成”，语义过重。
 2. final gate 曾经能误入下一轮，说明结束边界没有被流程模型守住。
 3. revision / repair loop 依赖具体 edge 拼接，没有成为一等能力。
-4. `runs/` 更像 Agent 运行记录，而不是通用 execution attempt。
-5. workflow instance、node instance、execution attempt、iteration 的边界不够清楚。
+4. `runs/` 更像 Agent 运行记录，而不是通用 `NodeExecution`。
+5. workflow instance、workflow execution、node instance、node execution、iteration 的边界不够清楚。
 6. fork/join 还没有明确模型，导致未来多视角 review / 并行验证会继续被顺序流绑住。
 7. post-completion audit / metrics / cleanup / benchmark grading 这类动作没有合适的生命周期位置。
 
@@ -61,8 +61,9 @@ Start
 ```text
 WorkflowDefinition
   -> WorkflowInstance
-    -> FlowNodeInstance
-      -> ExecutionAttempt
+    -> WorkflowExecution
+      -> FlowNodeInstance
+        -> NodeExecution
     -> Iteration
     -> Transition
     -> CompletionAudit
@@ -221,7 +222,7 @@ Node handler completed
 
 - kernel：`DUAL_FLOW_KERNEL=liteflow`
 - smoke case：`lifecycle`
-- workflow：`agent-lifecycle@1`
+- workflow：`agent-lifecycle-full@4`
 - final status：`COMPLETED`
 - nodes：28
 - human gates：5
@@ -239,8 +240,8 @@ Node handler completed
 | completed boundary | controlled CLI | PASS | 已完成 workstream 上再次执行 `run` / `resume` 不创建新节点，`review approve --run` 被拒绝为无 active gate。 |
 | `contract-happy-path` | real acpx smoke | PASS | `agent-lifecycle-contract@2` 完成，30 nodes、6 gates、32 events、0 warnings，TaskContract 生成并通过人工 gate。 |
 | `full-reject-classify-path` | real acpx smoke | PARTIAL / EXPECTED RECOVERY | 真实 Codex 两次返回 `NEEDS_REVISION`，达到 revision limit 后进入 `WAITING_FOR_RECOVERY`。这验证了 revision/recovery 边界能停住，但没有完成 full reject/classify happy path。 |
-| `reject-repair-reaccept` | controlled smoke | PASS | `agent-lifecycle-full@3` 完成，先由 acceptance 输出 `REJECT`，再进入 failure classification，创建 repair iteration，第二次 acceptance 输出 `ACCEPT` 后完成。38 nodes、6 gates、42 events、14 agent runs、0 warnings。 |
-| private medium case | real acpx + real repo | PASS-WARN | `agent-lifecycle-full@3` 完成，31 timeline nodes、6 gates、10 agent runs，最终 `ACCEPT_WITH_NOTES`，verification confidence `MEDIUM`，原仓库干净。 |
+| `reject-repair-reaccept` | controlled smoke | PASS | `agent-lifecycle-full@4` 完成，先由 acceptance 输出 `REJECT`，再进入 failure classification，创建 repair iteration，第二次 acceptance 输出 `ACCEPT` 后完成。38 nodes、6 gates、42 events、14 agent runs、0 warnings。 |
+| private medium case | real acpx + real repo | PASS-WARN | `agent-lifecycle-full@4` 完成，31 timeline nodes、6 gates、10 agent runs，最终 `ACCEPT_WITH_NOTES`，verification confidence `MEDIUM`，原仓库干净。 |
 
 这些场景说明 LiteFlow route-chain adapter 已经能承接主干、contract variant、真实 worktree、terminal boundary、revision-limit recovery 边界，以及“REJECT -> classify -> repair loop -> re-accept”的闭环。真实 `full-reject-classify-path` 仍会受 LLM 输出影响，但这个不再是 LiteFlow 提升的阻塞项：不可控模型输出用真实 case 暴露，关键路由闭环用 controlled scenario 固化。
 
@@ -266,6 +267,8 @@ LiteFlow 已具备提升为默认 routing kernel 的验证基础。
 4. 不把 Workstream lifecycle、ledger、human gate、artifact contract、completion contract 下放给 LiteFlow。
 5. 提升默认后持续保留最小回归：controlled lifecycle、controlled reject-repair-reaccept、real acpx contract smoke、terminal completed boundary。
 
+默认内置 workflow 的定义来源是 classpath JSON 资源，由 `WorkflowDefinitionLoader` 统一加载：`agent-lifecycle.full.json` 对应默认 full workflow，`agent-lifecycle.contract.json` 对应 contract workflow。Java 不再手写 lifecycle DAG，这样可以避免“LiteFlow 是执行内核，但默认流程仍藏在 Java factory 里”的双重心智模型。
+
 ## 2.3 编排内核边界
 
 建议新增一个内部端口，而不是让业务代码直接依赖 LiteFlow：
@@ -284,7 +287,7 @@ interface FlowOrchestrationKernel {
 - `FlowExecutionSnapshot` 是 dual 从 ledger 投影出来的当前执行状态。
 - `FlowSignal` 是 approve、revise、retry、complete、agent result 等外部输入。
 - `FlowAdvanceResult` 只描述“应该执行哪些节点 / 产生哪些 transition 候选”。
-- `WorkflowRuntime` 仍负责写 ledger、创建 gate、生成 attempt、校验 completion contract。
+- `WorkflowRuntime` 仍负责写 ledger、创建 gate、生成 `NodeExecution`、校验 completion contract。
 
 短期可以保留当前 runtime 作为 `BuiltInFlowKernel`。LiteFlow 作为第二个 adapter 做 spike，不要一上来重写主线。
 
@@ -296,10 +299,12 @@ interface FlowOrchestrationKernel {
 | `WorkflowInstance` | 某个 workstream 启动一次 workflow 后形成的实例。 | 有 `workflow/instance.json`，语义偏弱。 | 成为流程执行的实例边界。 |
 | `FlowNodeDefinition` | 流程节点定义。 | 当前是 `NodeDefinition`。 | 增加 node type / control type 区分。 |
 | `FlowNodeInstance` | 某个 workflow instance 中的节点实例。 | 当前是 `nodes/*.json`。 | 保持稳定，不因 retry 重建。 |
-| `ExecutionAttempt` | 某个节点实例的一次执行尝试。 | 当前 `runs/` 主要是 Agent run。 | 独立记录 attempt，Agent run 是其中一种 attempt。 |
-| `Transition` | 从一个节点到另一个节点的可追溯跳转。 | 当前是 edge + event。 | 显式记录 reason、trigger、carried artifacts。 |
+| `WorkflowExecution` | 一次 `run` / `resume` / scheduler tick 推进会话。 | 当前主要隐含在命令和事件中。 | 独立记录一次推进会话的边界、触发者、stop reason。 |
+| `NodeExecution` | 某个节点实例的一次具体执行。 | 当前 `runs/` 主要是 Agent run，`nodes/*.json` 混有进程细节。 | 独立记录 PID、stdout/stderr、exit code、stale/recovery evidence；Agent run 是其中一种工具细节。 |
+| `AgentTask` | 把某个节点实例派给具体 agent / tool / session 的本地派工单。 | 已落地为 `queue/agent-tasks/*.json`。 | 后续可接本地 queue / worker，但不负责 Agent 内部 ReAct 或 MCP/function call 调度。 |
+| `Transition` | 从一个节点到另一个节点的可追溯跳转。 | `EdgeDefinition` + `TransitionMetadata` + `node_routed` event。 | 后续可继续加强 task queue / join artifact。 |
 | `Iteration` | 业务修订/修复轮次。 | 已有 `iterations/*.json`。 | 只表示语义 revision/repair，不表示技术 retry。 |
-| `CompletionAudit` | 判断是否满足 Workstream Completion Contract。 | 未完整实现。 | End 前或 End 后立即生成。 |
+| `CompletionAudit` | 判断是否满足 Workstream Completion Contract。 | `domain/completion-audit.json`。 | 后续可扩展为更完整的 artifact registry。 |
 
 ## 4. Start / End 语义
 
@@ -403,7 +408,7 @@ business lifecycle complete
 
 短期实现可以不立刻改 enum，但设计和新代码必须使用这两个概念，避免继续把 `COMPLETED` 当成万能状态。
 
-## 6. Instance / Execution / Attempt
+## 6. Definition / Instance / Execution
 
 当前容易混淆：
 
@@ -426,20 +431,23 @@ Workstream
 WorkflowInstance
   Workstream 上某一次 workflow definition 的执行实例。
 
+WorkflowExecution
+  一次 run/resume/scheduler tick 推进会话。
+
 FlowNodeInstance
   WorkflowInstance 中某个节点的一次逻辑出现。
 
-ExecutionAttempt
-  FlowNodeInstance 的一次执行尝试。
+NodeExecution
+  FlowNodeInstance 的一次具体执行。
 
 AgentRun
-  ExecutionAttempt 的一种实现细节，专门对应 acpx/Claude/Codex 调用。
+  NodeExecution 的一种工具细节，专门对应 acpx/Claude/Codex 调用。
 
 Iteration
-  业务修订或修复轮次，不等于 retry attempt。
+  业务修订或修复轮次，不等于 runtime retry。
 ```
 
-### 6.1 为什么需要 ExecutionAttempt
+### 6.1 为什么需要 NodeExecution
 
 失败后不应该总是新建 worktree 或新建节点。很多情况只是同一节点再次执行：
 
@@ -455,7 +463,8 @@ Iteration
 same Workstream
 same WorkflowInstance
 same FlowNodeInstance
-new ExecutionAttempt
+new WorkflowExecution
+new NodeExecution
 ```
 
 只有当业务语义进入修订/修复，才创建：
@@ -482,7 +491,13 @@ new Workstream or new WorkflowInstance
   nodes/
     <node_instance_id>.json
   executions/
-    <execution_attempt_id>.json
+    workflow/
+      <workflow_execution_id>.json
+    nodes/
+      <node_execution_id>.json
+  queue/
+    agent-tasks/
+      <agent_task_id>.json
   runs/
     <agent_run_id>/
       run.json
@@ -670,13 +685,7 @@ acceptance.generate_final_report
 新增：
 
 ```text
-.agent/workstreams/<id>/domain/completion.json
-```
-
-或先落在：
-
-```text
-.agent/workstreams/<id>/reports/completion-audit.json
+.agent/workstreams/<id>/domain/completion-audit.json
 ```
 
 字段：
@@ -757,7 +766,7 @@ ReviewPacket
 - loop / retry / repair；
 - completion artifact；
 - trace / overview 主文案；
-- run / execution / attempt 账本结构。
+- run / workflow execution / node execution 账本结构。
 
 ### 11.6 编排内核适配器检查
 
@@ -842,15 +851,16 @@ START -> intake -> contract_review_gate -> design -> design_gate
 - controlled reject / classify / repair / re-accept 场景已验证 LiteFlow kernel 能承接关键负向分支。
 - 当前建议：LiteFlow 作为默认 routing kernel；built-in kernel 保留为诊断和紧急 fallback。这个选择不改变核心模型抽象，LiteFlow 仍只返回 transition candidate，不拥有 Workstream lifecycle、ledger、human gate、artifact contract 或 completion contract。
 
-### Step 4：引入 ExecutionAttempt 读模型
+### Step 4：引入 WorkflowExecution / NodeExecution 读模型
 
-先不移动 `runs/`，新增 attempt projection：
+先不移动 `runs/`，新增 execution projection：
 
 ```text
-executions/<attempt_id>.json
+executions/workflow/<workflow_execution_id>.json
+executions/nodes/<node_execution_id>.json
 ```
 
-Agent run 继续存在，但 attempt 成为上层抽象。
+Agent run 继续存在，但 `NodeExecution` 成为上层抽象。
 
 ### Step 5：显式 End / Post-completion
 

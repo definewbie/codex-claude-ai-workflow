@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class WorkflowFileLedger {
     private final AtomicJsonWriter jsonWriter;
@@ -25,6 +26,8 @@ public final class WorkflowFileLedger {
     private final TimelineProjectionWriter timelineProjectionWriter;
     private final MetricsProjectionWriter metricsProjectionWriter;
     private final FailureSummaryWriter failureSummaryWriter;
+    private final ExecutionLedgerWriter executionLedgerWriter;
+    private final AgentTaskLedgerWriter agentTaskLedgerWriter;
 
     public WorkflowFileLedger() {
         this(new BuiltInFlowOrchestrationKernel());
@@ -53,6 +56,8 @@ public final class WorkflowFileLedger {
         this.timelineProjectionWriter = new TimelineProjectionWriter(jsonWriter, this.objectMapper);
         this.metricsProjectionWriter = new MetricsProjectionWriter(jsonWriter, this.objectMapper);
         this.failureSummaryWriter = new FailureSummaryWriter(this.objectMapper);
+        this.executionLedgerWriter = new ExecutionLedgerWriter(jsonWriter);
+        this.agentTaskLedgerWriter = new AgentTaskLedgerWriter(jsonWriter);
     }
 
     public void initialize(WorkstreamPaths paths, String workflowInstanceId, WorkflowDefinition definition)
@@ -61,6 +66,9 @@ public final class WorkflowFileLedger {
             throw new IOException("workflow ledger already initialized: " + paths.workstreamDir());
         }
         Files.createDirectories(paths.workflowDir());
+        Files.createDirectories(paths.workflowExecutionsDir());
+        Files.createDirectories(paths.nodeExecutionsDir());
+        Files.createDirectories(paths.agentTasksDir());
         Files.createDirectories(paths.nodesDir());
         Files.createDirectories(paths.gatesDir());
         Files.createDirectories(paths.iterationsDir());
@@ -116,9 +124,11 @@ public final class WorkflowFileLedger {
                 LedgerUtils.stageId(entry.id()),
                 "iter-001",
                 List.of(),
+                Map.of(),
                 List.of(),
                 Map.of(),
                 null,
+                "",
                 null,
                 null
         ));
@@ -193,6 +203,149 @@ public final class WorkflowFileLedger {
     public void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)
             throws IOException {
         eventLog.appendEvent(paths, eventId, eventType, payload);
+    }
+
+    public WorkflowExecutionDocument startWorkflowExecution(
+            WorkstreamPaths paths,
+            WorkflowCurrentDocument current,
+            String trigger
+    ) throws IOException {
+        return executionLedgerWriter.startWorkflowExecution(paths, current, trigger);
+    }
+
+    public WorkflowExecutionDocument finishWorkflowExecution(
+            WorkstreamPaths paths,
+            WorkflowExecutionDocument workflowExecution,
+            List<String> nodeExecutionIds,
+            WorkflowExecutionStatus status,
+            String stopReason
+    ) throws IOException {
+        return executionLedgerWriter.finishWorkflowExecution(paths, workflowExecution, nodeExecutionIds, status, stopReason);
+    }
+
+    public AgentTaskDocument createAgentTask(
+            WorkstreamPaths paths,
+            String workflowExecutionId,
+            dev.dual.core.workflow.NodeDefinition definition,
+            NodeInstanceDocument node
+    ) throws IOException {
+        var task = agentTaskLedgerWriter.create(paths, workflowExecutionId, definition, node);
+        appendEvent(paths, "agent-task-" + task.agentTaskId(), "agent_task_queued", Map.of(
+                "agent_task_id", task.agentTaskId(),
+                "workflow_execution_id", workflowExecutionId,
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId(),
+                "handler_type", node.handlerType(),
+                "agent", task.agent(),
+                "session", task.session()
+        ));
+        refreshProjections(paths);
+        return task;
+    }
+
+    public AgentTaskDocument markAgentTaskRunning(
+            WorkstreamPaths paths,
+            AgentTaskDocument task,
+            String nodeExecutionId
+    ) throws IOException {
+        var updated = agentTaskLedgerWriter.markRunning(paths, task, nodeExecutionId);
+        appendEvent(paths, "agent-task-running-" + updated.agentTaskId(), "agent_task_started", Map.of(
+                "agent_task_id", updated.agentTaskId(),
+                "node_execution_id", nodeExecutionId,
+                "node", updated.nodeDefinitionId(),
+                "node_instance_id", updated.nodeInstanceId()
+        ));
+        refreshProjections(paths);
+        return updated;
+    }
+
+    public AgentTaskDocument markAgentTaskSucceeded(
+            WorkstreamPaths paths,
+            AgentTaskDocument task,
+            dev.dual.core.workflow.NodeResult result
+    ) throws IOException {
+        var updated = agentTaskLedgerWriter.markSucceeded(paths, task, result);
+        appendEvent(paths, "agent-task-succeeded-" + updated.agentTaskId(), "agent_task_completed", Map.of(
+                "agent_task_id", updated.agentTaskId(),
+                "node_execution_id", updated.nodeExecutionId(),
+                "node", updated.nodeDefinitionId(),
+                "node_instance_id", updated.nodeInstanceId(),
+                "status", updated.status()
+        ));
+        refreshProjections(paths);
+        return updated;
+    }
+
+    public AgentTaskDocument markAgentTaskFailed(
+            WorkstreamPaths paths,
+            AgentTaskDocument task,
+            Exception failure
+    ) throws IOException {
+        var updated = agentTaskLedgerWriter.markFailed(paths, task, failure);
+        appendEvent(paths, "agent-task-failed-" + updated.agentTaskId(), "agent_task_failed", Map.of(
+                "agent_task_id", updated.agentTaskId(),
+                "node_execution_id", updated.nodeExecutionId(),
+                "node", updated.nodeDefinitionId(),
+                "node_instance_id", updated.nodeInstanceId(),
+                "error", failure == null ? "" : String.valueOf(failure.getMessage())
+        ));
+        refreshProjections(paths);
+        return updated;
+    }
+
+    public List<AgentTaskDocument> readAgentTasks(WorkstreamPaths paths) throws IOException {
+        return agentTaskLedgerWriter.readAgentTasks(paths);
+    }
+
+    public NodeExecutionDocument startNodeExecution(
+            WorkstreamPaths paths,
+            String workflowExecutionId,
+            NodeInstanceDocument node,
+            AgentTaskDocument agentTask,
+            long pid
+    ) throws IOException {
+        var execution = executionLedgerWriter.startNodeExecution(paths, workflowExecutionId, node, agentTask, pid);
+        nodeStateWriter.setLatestExecution(paths, node.nodeInstanceId(), execution.nodeExecutionId());
+        refreshProjections(paths);
+        return execution;
+    }
+
+    public NodeExecutionDocument finishNodeExecution(
+            WorkstreamPaths paths,
+            NodeExecutionDocument nodeExecution,
+            dev.dual.core.workflow.NodeResult result
+    ) throws IOException {
+        var execution = executionLedgerWriter.finishNodeExecution(paths, nodeExecution, result);
+        refreshProjections(paths);
+        return execution;
+    }
+
+    public NodeExecutionDocument failNodeExecution(
+            WorkstreamPaths paths,
+            NodeExecutionDocument nodeExecution,
+            Exception failure
+    ) throws IOException {
+        var execution = executionLedgerWriter.failNodeExecution(paths, nodeExecution, failure);
+        refreshProjections(paths);
+        return execution;
+    }
+
+    public List<NodeExecutionDocument> readNodeExecutions(WorkstreamPaths paths) throws IOException {
+        return executionLedgerWriter.readNodeExecutions(paths);
+    }
+
+    public Optional<NodeExecutionDocument> latestNodeExecution(WorkstreamPaths paths, NodeInstanceDocument node) throws IOException {
+        return executionLedgerWriter.latestNodeExecution(paths, node);
+    }
+
+    public NodeExecutionDocument markNodeExecutionStale(
+            WorkstreamPaths paths,
+            NodeExecutionDocument nodeExecution,
+            String note
+    ) throws IOException {
+        var execution = executionLedgerWriter.markNodeExecutionStale(paths, nodeExecution, note);
+        refreshProjections(paths);
+        return execution;
     }
 
     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)

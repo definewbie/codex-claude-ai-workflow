@@ -43,6 +43,12 @@ Write a concise Markdown artifact with these sections:
 6. User Acceptance Notes
 7. Suggested Human Gate Decision
 
+Strict evidence rule:
+
+- If the decision allows the workflow to continue, leave `Must Fix` empty.
+- Do not write placeholder list items such as "none", "no blocking issue", or "N/A" under blocking sections.
+- If `Must Fix` contains any item, choose a blocking/revision decision.
+
 Allowed decisions:
 
 {{allowed_decisions}}

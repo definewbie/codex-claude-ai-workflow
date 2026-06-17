@@ -55,7 +55,7 @@ dualctl --help
 先跑 controlled smoke：
 
 ```bash
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ```
 
 再跑公开 real-case benchmark：
@@ -95,9 +95,11 @@ EOF
 
 ./scripts/run-real-case.sh \
   --repo /path/to/repo \
-  --task-file /tmp/dual-task.md \
-  --variant full
+  --task-file /tmp/dual-task.md
 ```
+
+`full` lifecycle is the default. Use `--variant contract` only when intentionally
+running the smaller contract-only workflow.
 
 脚本默认创建安全 worktree，并自动通过 benchmark 用途的中间 gate。真实交付前仍应阅读 review packet 和 final report。
 

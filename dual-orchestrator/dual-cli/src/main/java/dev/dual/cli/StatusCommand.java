@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -61,7 +62,13 @@ public final class StatusCommand implements Callable<Integer> {
                     System.out.println("  Running PID: " + runningPidStatus(node.result().get("running_pid")));
                 }
                 if (current.status() == dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY) {
-                    System.out.println("  Recovery: fix the external cause, then run dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
+                    var attention = WorkstreamAttentionEvaluator.evaluate(paths);
+                    System.out.println("  Recovery: " + attention.title());
+                    System.out.println("  Recovery detail: " + attention.detail());
+                    System.out.println("  Next action: " + attention.nextAction());
+                    if (!attention.command().isBlank()) {
+                        System.out.println("  Command: " + attention.command());
+                    }
                 }
             }
         }
@@ -82,6 +89,20 @@ public final class StatusCommand implements Callable<Integer> {
                 System.out.println("  Updated at: " + text(delivery.get("updatedAt")));
             }
         }
+        if (Files.exists(paths.deliveryMergePlanJson())) {
+            var merge = OBJECT_MAPPER.readValue(paths.deliveryMergePlanJson().toFile(), MAP_TYPE);
+            System.out.println();
+            System.out.println("Delivery Merge:");
+            System.out.println("  Status: " + text(merge.get("status")));
+            System.out.println("  Target repo: " + text(merge.get("targetRepo")));
+            System.out.println("  Changed files: " + sizeOf(merge.get("changedFiles")));
+            if (!text(merge.get("failureReason")).isBlank()) {
+                System.out.println("  Failure: " + text(merge.get("failureReason")));
+            }
+            if (merge.containsKey("updatedAt")) {
+                System.out.println("  Updated at: " + text(merge.get("updatedAt")));
+            }
+        }
 
         if (showLegacy || !hasWorkflowCurrent) {
             System.out.println();
@@ -98,6 +119,10 @@ public final class StatusCommand implements Callable<Integer> {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private static int sizeOf(Object value) {
+        return value instanceof java.util.List<?> list ? list.size() : 0;
     }
 
     private static String runningPidStatus(Object value) {

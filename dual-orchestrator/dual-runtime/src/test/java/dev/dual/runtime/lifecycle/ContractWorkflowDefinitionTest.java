@@ -1,6 +1,5 @@
 package dev.dual.runtime.lifecycle;
 
-import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.WorkflowDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -11,18 +10,18 @@ class ContractWorkflowDefinitionTest {
     private final LifecycleWorkflowDefinitionFactory factory = new LifecycleWorkflowDefinitionFactory();
 
     @Test
-    void contractMainlineContainsContractNodes() {
-        WorkflowDefinition wf = factory.contractMainline();
+    void contractVariantContainsContractNodes() {
+        WorkflowDefinition wf = factory.forVariant("contract");
 
         assertDoesNotThrow(() -> wf.node("contract.compile"),
-                "contractMainline should contain node contract.compile");
+                "contract variant should contain node contract.compile");
         assertDoesNotThrow(() -> wf.node("gate.contract_review"),
-                "contractMainline should contain node gate.contract_review");
+                "contract variant should contain node gate.contract_review");
     }
 
     @Test
-    void contractMainlineRoutesContractReviewToDesign() {
-        WorkflowDefinition wf = factory.contractMainline();
+    void contractVariantRoutesContractReviewToDesign() {
+        WorkflowDefinition wf = factory.forVariant("contract");
 
         var approvedEdges = wf.edgesFrom("gate.contract_review").stream()
                 .filter(e -> "approved".equals(e.on()))
@@ -34,8 +33,8 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
-    void contractMainlineRoutesClarifyBackToCompile() {
-        WorkflowDefinition wf = factory.contractMainline();
+    void contractVariantRoutesClarifyBackToCompile() {
+        WorkflowDefinition wf = factory.forVariant("contract");
 
         var clarifyEdges = wf.edgesFrom("gate.contract_review").stream()
                 .filter(e -> "clarify".equals(e.on()))
@@ -55,12 +54,30 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
-    void baselineMainlineDoesNotContainContractNodes() {
-        WorkflowDefinition wf = factory.baselineMainline();
+    void contractVariantRoutesAcceptanceRejectThroughFailureClassifier() {
+        WorkflowDefinition wf = factory.forVariant("contract");
 
-        assertThrows(IllegalArgumentException.class, () -> wf.node("contract.compile"),
-                "baselineMainline should NOT contain node contract.compile");
-        assertThrows(IllegalArgumentException.class, () -> wf.node("gate.contract_review"),
-                "baselineMainline should NOT contain node gate.contract_review");
+        assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
+                "contract variant should share the same typed acceptance failure classifier boundary");
+
+        var rejectEdges = wf.edgesFrom("acceptance.decision").stream()
+                .filter(e -> "REJECT".equals(e.on()))
+                .toList();
+
+        assertEquals(1, rejectEdges.size(),
+                "Expected exactly one edge from acceptance.decision on 'REJECT'");
+        assertEquals("acceptance.classify_failure", rejectEdges.get(0).to(),
+                "Acceptance rejection must be classified before starting semantic repair");
+
+        var implementationRepairEdges = wf.edgesFrom("acceptance.classify_failure").stream()
+                .filter(e -> "REJECT_IMPLEMENTATION_BUG".equals(e.on()))
+                .toList();
+
+        assertEquals(1, implementationRepairEdges.size(),
+                "Expected implementation repair classification to be routed");
+        assertEquals("context.implement_claude", implementationRepairEdges.get(0).to());
+        assertEquals("loop", implementationRepairEdges.get(0).metadata().transitionType(),
+                "classified repair should start a semantic iteration");
     }
+
 }

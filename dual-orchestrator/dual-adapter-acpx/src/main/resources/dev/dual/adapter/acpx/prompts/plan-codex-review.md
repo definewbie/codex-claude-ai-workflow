@@ -34,6 +34,12 @@ Write a Markdown review with these sections:
 5. Missing Dependencies
 6. Suggested Human Gate Decision
 
+Strict evidence rule:
+
+- If the decision allows the workflow to continue, leave `Must Fix Before Implementation`, `Test Coverage Risks`, and `Missing Dependencies` empty unless they are material blockers.
+- Do not write placeholder list items such as "none", "no blocking issue", or "N/A" under blocking sections.
+- If a blocking section contains any item, choose a blocking/revision decision.
+
 Allowed decisions:
 
 {{allowed_decisions}}

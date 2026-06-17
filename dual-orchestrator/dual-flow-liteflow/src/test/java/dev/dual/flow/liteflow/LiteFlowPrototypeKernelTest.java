@@ -7,6 +7,7 @@ import dev.dual.core.workflow.EdgeCondition;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.TransitionMetadata;
 import dev.dual.core.workflow.WorkflowDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +56,30 @@ class LiteFlowPrototypeKernelTest {
             assertEquals(1, result.transitions().size());
             assertEquals("gate.human_design_approval", result.transitions().get(0).toNodeDefinitionId());
             assertTrue(result.executedStepIds().contains("edge_0001"));
+        }
+    }
+
+    @Test
+    void preservesTransitionMetadataInCandidates() {
+        var definition = new WorkflowDefinition("liteflow-metadata", 1, "fork",
+                List.of(
+                        new NodeDefinition("fork", NodeKind.TASK, "test", Map.of()),
+                        new NodeDefinition("review.arch", NodeKind.TASK, "test", Map.of())
+                ),
+                List.of(new EdgeDefinition("fork", "DONE", "review.arch",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.fork("review-branches", true, "architecture review")))
+        );
+        var snapshot = FlowExecutionSnapshot.singleActiveNode("wf-003", "fork");
+        var signal = FlowSignal.completed("fork", "DONE", Map.of());
+
+        try (var liteFlow = new LiteFlowPrototypeKernel()) {
+            var result = liteFlow.advance(definition, snapshot, signal);
+
+            var attributes = result.transitions().get(0).attributes();
+            assertEquals("fork", attributes.get("transition_type"));
+            assertEquals("review-branches", attributes.get("branch_group_id"));
+            assertEquals("architecture review", attributes.get("purpose"));
         }
     }
 

@@ -2,6 +2,7 @@ package dev.dual.cli;
 
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.WorkflowStatus;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 
 import java.io.PrintStream;
@@ -38,8 +39,16 @@ final class CliNextActionHints {
         out.println("     dualctl recovery show --workdir " + workspaceRoot + " " + workstreamId);
         currentFailurePath(workspaceRoot, workstreamId).ifPresent(path ->
                 out.println("     summary: " + path));
-        out.println("  2. Fix the external cause, then retry:");
-        out.println("     dualctl retry --workdir " + workspaceRoot + " " + workstreamId);
+        try {
+            var attention = WorkstreamAttentionEvaluator.evaluate(new WorkstreamPaths(workspaceRoot, new DualId(workstreamId)));
+            out.println("  2. " + attention.nextAction());
+            if (!attention.command().isBlank()) {
+                out.println("     " + attention.command());
+            }
+        } catch (Exception ignored) {
+            out.println("  2. Follow the recovery summary before retrying:");
+            out.println("     dualctl recovery show --workdir " + workspaceRoot + " " + workstreamId);
+        }
     }
 
     private static void printCompleted(PrintStream out, Path workspaceRoot, String workstreamId) {

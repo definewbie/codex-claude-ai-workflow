@@ -30,6 +30,10 @@ WorkflowDefinition
   workflow/current.json
   workflow/instance.json
   nodes/*.json
+  executions/workflow/*.json
+  executions/nodes/*.json
+  domain/goal-satisfaction.json
+  domain/completion-audit.json
   gates/*.json
   iterations/*.json
   events.jsonl
@@ -76,7 +80,7 @@ flowchart LR
 
 - runtime 只执行 `READY` 节点；
 - `RUNNING` 节点受 PID guard 保护，避免重复启动同一个 Agent 进程；
-- 如果 PID 已消失，runtime 会记录 stale running 并允许重新执行；
+- 如果 PID 已消失，runtime 会记录 stale running，把同一个 active node 转为 `FAILED`，打开 recovery，并将 workflow 置为 `WAITING_FOR_RECOVERY`；不能静默重新执行；
 - `outputRefs` 会成为后续节点的 `inputRefs`。
 
 ## 5. 人审 Gate

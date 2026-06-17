@@ -7,7 +7,7 @@
 脚本现在分两类 case：
 
 - `lifecycle`：controlled smoke。脚本临时注入一个 fake `acpx`，只模拟 happy path 的 Claude/Codex 输出，用来确定性验证完整生命周期主链路。
-- `baseline-basic` / `contract-happy-path` / `full-reject-classify-path`：真实 acpx E2E。依赖真实 Claude/Codex cowork，验证真实 agent 调用能否跑通。
+- `contract-happy-path` / `full-reject-classify-path`：真实 acpx E2E。依赖真实 Claude/Codex cowork，验证真实 agent 调用能否跑通。
 
 真实 acpx case 不是确定性 fixture test framework。agent 输出和 decision 结果是非确定性的；脚本验证的是"流程能跑通 + 关键产物存在"，而非"输出与预期完全一致"。
 
@@ -32,22 +32,13 @@ dual-orchestrator/docs/testing/real-case-benchmarks/
 
 | 项 | 值 |
 |----|----|
-| Workflow variant | baseline（默认，无 `--workflow-variant`） |
+| Workflow variant | full（默认，无 `--workflow-variant`） |
 | Agent transport | controlled fake acpx（脚本临时注入，只作用于本次 smoke） |
 | 任务 | 给 main.py 添加 goodbye 函数 |
-| 关键断言 | workflow 完成、28 个节点完成、5 个 gate 被处理、final report / delivery / next-stage prompt / handoff.json 存在、Git evidence 捕获 goodbye diff |
+| 关键断言 | workflow 完成、节点完成、gate 被处理、final report / delivery / next-stage prompt / handoff.json 存在、Git evidence 捕获 goodbye diff |
 | 预期结果 | PASS（COMPLETED） |
 
 这个 case 的目的不是评估 Claude/Codex 输出质量，而是快速验证 orchestration 主链路是否完整：start --run、gate loop、implementation evidence、acceptance report、delivery prepare、stage handoff、next-stage prompt、workflow complete。
-
-### baseline-basic
-
-| 项 | 值 |
-|----|----|
-| Workflow variant | baseline（默认，无 `--workflow-variant`） |
-| 任务 | 给 main.py 添加 goodbye 函数 |
-| 关键断言 | `reports/latest-final-report.md` 存在、delivery artifact 存在、next-stage prompt 存在 |
-| 预期结果 | PASS（COMPLETED） |
 
 ### contract-happy-path
 
@@ -106,7 +97,7 @@ full-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 acce
 
 ### all
 
-顺序运行 `lifecycle`、`baseline-basic`、`contract-happy-path`、`full-reject-classify-path`，每个 case 使用独立的 fixture 目录。共享一次 build。最终输出 per-case 结果汇总。
+顺序运行 `lifecycle`、`contract-happy-path`、`full-reject-classify-path`，每个 case 使用独立的 fixture 目录。共享一次 build。最终输出 per-case 结果汇总。
 
 ## 结果语义
 
@@ -124,19 +115,18 @@ full-reject-classify-path 的 classify_failure 路径依赖 Codex agent 在 acce
 # controlled full lifecycle smoke：不调用真实 acpx，适合改 runtime / ledger / CLI 后快速验证主链路
 ./scripts/smoke-test.sh lifecycle --cleanup
 
-# 默认 case（baseline-basic，真实 acpx）
+# 默认 case（lifecycle，controlled fake acpx）
 ./scripts/smoke-test.sh --cleanup
 
 # 指定真实 acpx case
-./scripts/smoke-test.sh --case baseline-basic --cleanup
 ./scripts/smoke-test.sh --case contract-happy-path --cleanup
 ./scripts/smoke-test.sh --case full-reject-classify-path --cleanup
 
-# 运行全部 case：先 controlled lifecycle，再真实 baseline/contract/full
+# 运行全部 case：先 controlled lifecycle，再真实 contract/full
 ./scripts/smoke-test.sh --case all --cleanup
 
 # 跳过 build（开发中反复跑时）
-./scripts/smoke-test.sh --case baseline-basic --skip-build --cleanup
+./scripts/smoke-test.sh --case lifecycle --skip-build --cleanup
 
 # 终端交互模式（脚本在每个 gate 询问是否 approve）
 ./scripts/smoke-test.sh --interactive --cleanup
@@ -162,7 +152,7 @@ cd dual-orchestrator
 ./scripts/smoke-test.sh lifecycle --skip-build
 
 # 或者真实 acpx E2E
-./scripts/smoke-test.sh --case baseline-basic --skip-build
+./scripts/smoke-test.sh --case contract-happy-path --skip-build
 ```
 
 脚本会输出：
@@ -272,27 +262,6 @@ Review packet: ...
 ### 记录模板
 
 ```
-case:               baseline-basic
-variant:            baseline
-result:             PASS
-final_status:       COMPLETED
-duration:           __
-workstream_id:      __
-gate_rounds:        __
-
-task-contract.json: absent (baseline has no contract)
-failure-classification.json: absent
-final_report:       present
-delivery_prepare:   present
-
-compilation_event:  absent
-failure_event:      absent
-event_count:        __
-
-classify_triggered: n/a (baseline variant)
-```
-
-```
 case:               full-reject-classify-path
 variant:            full
 result:             PASS / PASS-WARN
@@ -322,5 +291,5 @@ recovery_path:      no / yes
 
 - `--cleanup` 会在脚本结束时删除 fixture 目录和 worktree。不加则保留，便于事后检查
 - 脚本运行时间取决于 agent 执行速度，通常每个 case 5-15 分钟
-- contract/full lifecycle 会经过更多 gate（gate.contract_review），gate loop 轮次比 baseline 多
+- contract/full lifecycle 会经过 contract review gate，gate loop 轮次取决于 Agent 决策和 human gate 操作
 - 环境变量和 acpx 配置影响 agent 行为，结果可能因配置不同

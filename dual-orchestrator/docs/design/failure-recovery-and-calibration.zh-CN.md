@@ -21,6 +21,7 @@ Runtime failure 是外部或机械问题：
 - `acpx` session 缺失；
 - rate limit 或 quota；
 - Agent reconnect；
+- Agent tool permission 被非交互权限策略阻塞；
 - context window 溢出；
 - structured output 非法；
 - 命令退出失败。
@@ -43,6 +44,23 @@ Adapter 会把 runtime failure matching 收敛在一个很小的 signal catalog 
 - `AcpxFailureClassifier` 只负责把 evidence 映射到 signal；如果没有匹配，才退回原始 `ACPX_EXIT_<code>`。
 
 以后新增 provider 特定文案时，应添加到 catalog 的 signal matcher，不应散落到 workflow routing、ledger projection 或 UI 代码里。
+
+有些 ACP adapter 会在 stderr 中写出明确的可恢复信号，但外层进程不会立即退出。例如 `agent needs reconnect` 可能导致 Agent run 长时间停在 `RUNNING`。这是 adapter 执行边界的问题，不应交给 UI 或人工判断。`AcpxAgentTransport` 会轮询 stderr 中的 catalog 信号；一旦匹配到可恢复 runtime failure，就主动终止本次 acpx 进程并返回可分类的 exit result，让 workflow 进入 `WAITING_FOR_RECOVERY`。
+
+工具权限失败同样属于 adapter execution 边界。dual 在非实现阶段不会使用
+`approve-all`，而是通过 workflow node 的 `permission_profile` 声明可用工具：
+
+| Profile | 用途 | 权限语义 |
+| --- | --- | --- |
+| `observe` | Claude intake / design / plan / handoff | 允许 Read/Grep/Glob 以及安全仓库观察命令，例如 `git`、`ls`、`find`、`rg`。 |
+| `review` | Codex review / acceptance | 与 `observe` 类似，只用于审视和验收。 |
+| `implement` | Claude implementation / self-test | 显式允许实现阶段写代码和运行测试，当前映射到 acpx `approve-all`。 |
+
+如果 Agent 在非交互模式下请求了 profile 之外的工具，adapter 会把输出中的
+`Tool permission request failed` / `Tool use aborted` 归一化为
+`RECOVERABLE_AGENT_PERMISSION_BLOCKED`。这不是业务失败，也不应该触发语义
+repair loop；operator 需要检查该节点的 permission profile 是否过窄，或者
+Agent 是否试图越过当前阶段边界。
 
 ## 自动恢复调度
 

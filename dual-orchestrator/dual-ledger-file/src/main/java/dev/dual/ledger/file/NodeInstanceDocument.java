@@ -19,9 +19,11 @@ public record NodeInstanceDocument(
         String stageId,
         String iterationId,
         List<String> inputRefs,
+        Map<String, Object> inputTransition,
         List<String> outputRefs,
         Map<String, Object> result,
         String runRef,
+        String latestExecutionId,
         Instant startedAt,
         Instant finishedAt
 ) {
@@ -42,19 +44,21 @@ public record NodeInstanceDocument(
         requireText(iterationId, "iterationId");
         inputRefs = List.copyOf(inputRefs == null ? List.of() : inputRefs);
         inputRefs.forEach(value -> requireText(value, "inputRefs"));
+        inputTransition = copyMapAllowingNullValues(inputTransition, "inputTransition");
         outputRefs = List.copyOf(outputRefs == null ? List.of() : outputRefs);
         outputRefs.forEach(value -> requireText(value, "outputRefs"));
-        result = copyMapAllowingNullValues(result);
+        result = copyMapAllowingNullValues(result, "result");
+        latestExecutionId = latestExecutionId == null ? "" : latestExecutionId;
     }
 
-    private static Map<String, Object> copyMapAllowingNullValues(Map<String, Object> source) {
+    private static Map<String, Object> copyMapAllowingNullValues(Map<String, Object> source, String field) {
         if (source == null) {
             return Map.of();
         }
         var copy = new LinkedHashMap<String, Object>();
         for (Map.Entry<?, ?> entry : source.entrySet()) {
             if (!(entry.getKey() instanceof String key) || key.isBlank()) {
-                throw new IllegalArgumentException("result key is required");
+                throw new IllegalArgumentException(field + " key is required");
             }
             copy.put(key, entry.getValue());
         }

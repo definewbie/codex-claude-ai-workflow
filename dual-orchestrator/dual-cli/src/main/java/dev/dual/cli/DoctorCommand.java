@@ -1,5 +1,7 @@
 package dev.dual.cli;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +22,9 @@ import java.util.concurrent.TimeUnit;
 @Command(name = "doctor", description = "Check local prerequisites and optional workstream ledger.", mixinStandardHelpOptions = true)
 public final class DoctorCommand implements Callable<Integer> {
     private static final Duration COMMAND_TIMEOUT = Duration.ofSeconds(10);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    static final String EXPECTED_ACPX_VERSION = "0.8.0";
+    static final String EXPECTED_CODEX_ACP_PACKAGE = "@zed-industries/codex-acp@0.12.0";
 
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
@@ -74,12 +80,75 @@ public final class DoctorCommand implements Callable<Integer> {
     }
 
     private void checkAcpxCommand() throws IOException, InterruptedException {
-        var result = run("acpx", "--help");
-        if (result.exitCode() == 0) {
-            ok("acpx command", "available");
-        } else {
+        var result = run("acpx", "--version");
+        if (result.exitCode() != 0) {
             fail("acpx command", firstLine(result.output()));
+            return;
         }
+        var actualVersion = result.output().trim();
+        if (!EXPECTED_ACPX_VERSION.equals(actualVersion)) {
+            fail("acpx version", "expected " + EXPECTED_ACPX_VERSION + ", found " + actualVersion
+                    + ". Install with: npm install -g acpx@" + EXPECTED_ACPX_VERSION);
+            return;
+        }
+        ok("acpx version", actualVersion);
+        checkAcpxCodexAdapterPinned();
+    }
+
+    private void checkAcpxCodexAdapterPinned() throws IOException, InterruptedException {
+        var result = run("acpx", "config", "show");
+        if (result.exitCode() != 0) {
+            fail("acpx config", firstLine(result.output()));
+            return;
+        }
+        var pin = evaluateCodexAdapterPin(result.output());
+        switch (pin.level()) {
+            case OK -> ok("acpx codex adapter", pin.message());
+            case WARN -> warn("acpx codex adapter", pin.message());
+            case FAIL -> fail("acpx codex adapter", pin.message());
+        }
+    }
+
+    static PinCheck evaluateCodexAdapterPin(String configJson) {
+        try {
+            Map<String, Object> root = MAPPER.readValue(configJson, new TypeReference<>() {
+            });
+            var agents = objectMap(root.get("agents"));
+            var codex = objectMap(agents.get("codex"));
+            var command = stringValue(codex.get("command"));
+            if (command.isBlank()) {
+                return PinCheck.fail("missing agents.codex.command. Run ./scripts/configure-acpx.sh");
+            }
+            if (command.contains(EXPECTED_CODEX_ACP_PACKAGE)) {
+                return PinCheck.ok(command);
+            }
+            if (looksLikeLocalCodexAcp(command)) {
+                return PinCheck.warn("local codex-acp command is configured; reproducibility depends on that local binary: "
+                        + command);
+            }
+            return PinCheck.fail("expected agents.codex.command to use " + EXPECTED_CODEX_ACP_PACKAGE
+                    + ". Run ./scripts/configure-acpx.sh");
+        } catch (Exception e) {
+            return PinCheck.fail("unable to parse `acpx config show`: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> objectMap(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            return (Map<String, Object>) map;
+        }
+        return Map.of();
+    }
+
+    private static String stringValue(Object value) {
+        return value instanceof String text ? text.trim() : "";
+    }
+
+    private static boolean looksLikeLocalCodexAcp(String command) {
+        return command.contains("codex-acp")
+                && !command.contains("@latest")
+                && !command.matches(".*@[\\^~].*");
     }
 
     private void checkWorkstreamLedger(Path workspaceRoot, String id) {
@@ -144,5 +213,25 @@ public final class DoctorCommand implements Callable<Integer> {
     }
 
     private record CommandResult(int exitCode, String output) {
+    }
+
+    enum PinLevel {
+        OK,
+        WARN,
+        FAIL
+    }
+
+    record PinCheck(PinLevel level, String message) {
+        static PinCheck ok(String message) {
+            return new PinCheck(PinLevel.OK, message);
+        }
+
+        static PinCheck warn(String message) {
+            return new PinCheck(PinLevel.WARN, message);
+        }
+
+        static PinCheck fail(String message) {
+            return new PinCheck(PinLevel.FAIL, message);
+        }
     }
 }

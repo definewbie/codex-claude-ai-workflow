@@ -1,0 +1,41 @@
+package dev.dual.runtime.handler;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class DualControlBlockParserTest {
+    private final DualControlBlockParser parser = new DualControlBlockParser();
+
+    @Test
+    void acceptsTerminalUnclosedControlBlockWhenDoneMarkerClosesAgentTurn() {
+        var result = parser.parse("""
+                Design body.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Design is ready.
+
+                [done] end_turn
+                """);
+
+        assertTrue(result.valid());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.block().required("decision"));
+        assertEquals("Design is ready.", result.block().required("summary"));
+    }
+
+    @Test
+    void rejectsUnclosedControlBlockWhenTextFollowsDoneMarker() {
+        var result = parser.parse("""
+                ```dual-control
+                decision: READY
+                summary: done
+
+                [done] end_turn
+                trailing text
+                """);
+
+        assertEquals("MISSING_DUAL_CONTROL", result.errorCode());
+    }
+}

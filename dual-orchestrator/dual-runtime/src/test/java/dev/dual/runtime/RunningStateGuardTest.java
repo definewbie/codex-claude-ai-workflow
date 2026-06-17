@@ -7,9 +7,14 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
+import dev.dual.ledger.file.GoalDomainOutcome;
+import dev.dual.ledger.file.GoalSatisfactionDocument;
+import dev.dual.ledger.file.AgentTaskStatus;
+import dev.dual.ledger.file.NodeExecutionStatus;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
@@ -35,6 +40,12 @@ class RunningStateGuardTest {
             List.of()
     );
 
+    private static final WorkflowDefinition ACCEPTANCE_DECISION = new WorkflowDefinition(
+            "test-lifecycle", 1, "acceptance.decision",
+            List.of(new NodeDefinition("acceptance.decision", NodeKind.DECISION, "test.decision", Map.of())),
+            List.of()
+    );
+
     @Test
     void readyNodeMarksRunningAndExecutes() throws Exception {
         var paths = setup("ws-ready");
@@ -48,7 +59,138 @@ class RunningStateGuardTest {
     }
 
     @Test
-    void runningNodeWithDeadPidAutoRecovers() throws Exception {
+    void executedNodeWritesWorkflowAndNodeExecutionLedger() throws Exception {
+        var paths = setup("ws-execution-ledger");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-execution-ledger", SINGLE_TASK);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-execution-ledger"));
+
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
+        try (var workflowExecutions = Files.list(paths.workflowExecutionsDir())) {
+            assertEquals(1, workflowExecutions.filter(path -> path.getFileName().toString().endsWith(".json")).count());
+        }
+        var nodeExecutions = ledger.readNodeExecutions(paths);
+        assertEquals(1, nodeExecutions.size());
+        var nodeExecution = nodeExecutions.get(0);
+        assertEquals("node-task-under_test-001", nodeExecution.nodeInstanceId());
+        assertTrue(nodeExecution.workflowExecutionId().startsWith("wfe-"));
+        assertEquals(NodeExecutionStatus.SUCCEEDED, nodeExecution.status());
+        assertEquals(NodeStatus.COMPLETED, nodeExecution.nodeStatus());
+        assertEquals(true, nodeExecution.result().get("ok"));
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        assertEquals(nodeExecution.nodeExecutionId(), node.latestExecutionId());
+    }
+
+    @Test
+    void executedNodeWritesAgentTaskDispatchLedger() throws Exception {
+        var definition = new WorkflowDefinition(
+                "test-lifecycle", 1, "task.under_test",
+                List.of(new NodeDefinition("task.under_test", NodeKind.TASK, "test.handler", Map.of(
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "prompt_template", "test-template",
+                        "expected_contract", "test_contract"
+                ))),
+                List.of()
+        );
+        var paths = setup("ws-agent-task");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-agent-task", definition);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-agent-task"));
+
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
+        var tasks = ledger.readAgentTasks(paths);
+        assertEquals(1, tasks.size());
+        var task = tasks.get(0);
+        assertEquals(AgentTaskStatus.SUCCEEDED, task.status());
+        assertEquals("task.under_test", task.nodeDefinitionId());
+        assertEquals("test.handler", task.handlerType());
+        assertEquals("claude", task.agent());
+        assertEquals("claude-main", task.session());
+        assertEquals("test-template", task.promptTemplate());
+        assertEquals("test_contract", task.expectedContract());
+        assertTrue(task.nodeExecutionId().startsWith("nxe-"));
+
+        var nodeExecution = ledger.readNodeExecutions(paths).get(0);
+        assertEquals(task.agentTaskId(), nodeExecution.agentTaskId());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_queued"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_started"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_completed"));
+    }
+
+    @Test
+    void failedNodeMarksAgentTaskFailedAndKeepsExecutionLink() throws Exception {
+        var paths = setup("ws-agent-task-failed");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-agent-task-failed", SINGLE_TASK);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new FailingTask()));
+        try {
+            runtime.resume(new WorkflowCommand(tempDir, "ws-agent-task-failed"));
+        } catch (IllegalStateException expected) {
+            // expected
+        }
+
+        var tasks = ledger.readAgentTasks(paths);
+        assertEquals(1, tasks.size());
+        var task = tasks.get(0);
+        assertEquals(AgentTaskStatus.FAILED, task.status());
+        assertTrue(task.errorMessage().contains("boom"));
+        assertTrue(task.nodeExecutionId().startsWith("nxe-"));
+
+        var nodeExecution = ledger.readNodeExecutions(paths).get(0);
+        assertEquals(NodeExecutionStatus.FAILED, nodeExecution.status());
+        assertEquals(task.agentTaskId(), nodeExecution.agentTaskId());
+        assertEquals(task.nodeExecutionId(), nodeExecution.nodeExecutionId());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_failed"));
+    }
+
+    @Test
+    void completedWorkflowResumeIsRejectedBeforeCreatingNewExecution() throws Exception {
+        var paths = setup("ws-terminal-refusal");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-terminal-refusal", SINGLE_TASK);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        assertEquals(WorkflowStatus.COMPLETED,
+                runtime.resume(new WorkflowCommand(tempDir, "ws-terminal-refusal")).status());
+        assertEquals(1, ledger.readNodeExecutions(paths).size());
+
+        var terminalResult = runtime.resume(new WorkflowCommand(tempDir, "ws-terminal-refusal"));
+
+        assertEquals(WorkflowStatus.COMPLETED, terminalResult.status());
+        assertTrue(terminalResult.message().contains("workflow is terminal"));
+        assertEquals(1, ledger.readNodeExecutions(paths).size());
+        try (var workflowExecutions = Files.list(paths.workflowExecutionsDir())) {
+            assertEquals(1, workflowExecutions.filter(path -> path.getFileName().toString().endsWith(".json")).count());
+        }
+    }
+
+    @Test
+    void acceptanceRejectWritesGoalSatisfactionNeedsRepair() throws Exception {
+        var paths = setup("ws-goal-repair");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-goal-repair", ACCEPTANCE_DECISION);
+
+        var runtime = new WorkflowRuntime(ledger, decisionRegistry(new RejectDecision()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-goal-repair"));
+
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
+        var document = new com.fasterxml.jackson.databind.ObjectMapper()
+                .findAndRegisterModules()
+                .readValue(paths.goalSatisfactionJson().toFile(), GoalSatisfactionDocument.class);
+        assertEquals(GoalDomainOutcome.NEEDS_REPAIR, document.domainOutcome());
+        assertEquals("acceptance.decision", document.nodeDefinitionId());
+        assertEquals("REJECT", document.outcome());
+        assertEquals("iter-001", document.iterationId());
+    }
+
+    @Test
+    void runningNodeWithDeadPidMovesToRecoveryWithoutReexecuting() throws Exception {
         var paths = setup("ws-dead-pid");
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-dead-pid", SINGLE_TASK);
@@ -59,8 +201,38 @@ class RunningStateGuardTest {
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-dead-pid"));
 
-        assertEquals(WorkflowStatus.COMPLETED, result.status());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+        var current = ledger.loadCurrent(paths);
+        var recoveredNode = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals(NodeStatus.FAILED, recoveredNode.status());
+        assertEquals("STALE_RUNNING_PROCESS", recoveredNode.result().get("reason"));
+        assertEquals(true, recoveredNode.result().get("recoverable"));
+        assertEquals(List.of("recovery-" + recoveredNode.nodeInstanceId()), current.openGateIds());
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_detected"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_recovered"));
+    }
+
+    @Test
+    void deadPidMarksLatestNodeExecutionStale() throws Exception {
+        var paths = setup("ws-dead-pid-execution");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-dead-pid-execution", SINGLE_TASK);
+
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        var nodeExecution = ledger.startNodeExecution(paths, "wfe-test", node, null, 999999L);
+        ledger.markRunning(paths, node.nodeInstanceId(), 999999L);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-dead-pid-execution"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+        var executions = ledger.readNodeExecutions(paths);
+        var staleExecution = executions.stream()
+                .filter(execution -> execution.nodeExecutionId().equals(nodeExecution.nodeExecutionId()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(NodeExecutionStatus.STALE, staleExecution.status());
+        assertEquals("STALE_RUNNING_PROCESS", staleExecution.result().get("reason"));
     }
 
     @Test
@@ -89,6 +261,9 @@ class RunningStateGuardTest {
         // Simulate a FAILED node that was routed through stopOnNonCompletedNode
         // (workflow is WAITING_FOR_RECOVERY, node is FAILED with recoverable=true)
         var node = ledger.loadNode(paths, "node-task-under_test-001");
+        var previousExecution = ledger.startNodeExecution(paths, "wfe-original", node, null, 123L);
+        ledger.failNodeExecution(paths, previousExecution, new RuntimeException("rate limit"));
+        node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
                 Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT", "auto_retry_count", 0));
         setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
@@ -98,6 +273,14 @@ class RunningStateGuardTest {
 
         assertEquals(WorkflowStatus.COMPLETED, result.status());
         assertTrue(result.message().contains("resumed"));
+        var executions = ledger.readNodeExecutions(paths);
+        assertEquals(2, executions.size());
+        var latestNode = ledger.loadNode(paths, "node-task-under_test-001");
+        assertTrue(executions.stream().anyMatch(execution -> execution.nodeExecutionId().equals(previousExecution.nodeExecutionId())
+                && execution.status() == NodeExecutionStatus.FAILED));
+        assertTrue(executions.stream().anyMatch(execution -> execution.nodeExecutionId().equals(latestNode.latestExecutionId())
+                && execution.status() == NodeExecutionStatus.SUCCEEDED));
+        assertEquals("iter-001", latestNode.iterationId());
     }
 
     @Test
@@ -191,6 +374,27 @@ class RunningStateGuardTest {
     }
 
     @Test
+    void interruptedAgentOutputAllowsTwoRetries() throws Exception {
+        var paths = setup("ws-interrupted-output");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-interrupted-output", SINGLE_TASK);
+
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
+                Map.of("acpx_failure.recoverable", true,
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED",
+                        "auto_retry_count", 2));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-interrupted-output"));
+
+        assertTrue(result.message().contains("auto-retry limit reached"));
+        assertTrue(result.message().contains("2/2"));
+        assertTrue(result.message().contains("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED"));
+    }
+
+    @Test
     void unknownRecoverableFailureUsesDefaultPolicy() throws Exception {
         var paths = setup("ws-unknown");
         var ledger = new WorkflowFileLedger();
@@ -275,6 +479,10 @@ class RunningStateGuardTest {
         return new HandlerRegistry(List.of(task), List.of(), List.of());
     }
 
+    private HandlerRegistry decisionRegistry(DecisionHandler decision) {
+        return new HandlerRegistry(List.of(), List.of(decision), List.of());
+    }
+
     private void writeNodeStatus(WorkflowFileLedger ledger, WorkstreamPaths paths,
                                   NodeInstanceDocument node, NodeStatus status,
                                   Map<String, Object> extraResult) throws Exception {
@@ -284,8 +492,8 @@ class RunningStateGuardTest {
         var updated = new NodeInstanceDocument(
                 node.schemaVersion(), node.nodeInstanceId(), node.nodeDefinitionId(),
                 node.kind(), node.handlerType(), status,
-                node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(),
-                merged, node.runRef(), node.startedAt(), null
+                node.stageId(), node.iterationId(), node.inputRefs(), node.inputTransition(), node.outputRefs(),
+                merged, node.runRef(), node.latestExecutionId(), node.startedAt(), null
         );
         var field = WorkflowFileLedger.class.getDeclaredField("jsonWriter");
         field.setAccessible(true);
@@ -314,6 +522,29 @@ class RunningStateGuardTest {
         @Override
         public NodeResult execute(TaskContext context) {
             return NodeResult.completed("completed", List.of(), Map.of("ok", true));
+        }
+    }
+
+    private static final class FailingTask implements TaskHandler {
+        @Override
+        public String type() { return "test.handler"; }
+
+        @Override
+        public NodeResult execute(TaskContext context) {
+            throw new IllegalStateException("boom");
+        }
+    }
+
+    private static final class RejectDecision implements DecisionHandler {
+        @Override
+        public String type() { return "test.decision"; }
+
+        @Override
+        public NodeResult evaluate(DecisionContext context) {
+            return NodeResult.completed("REJECT", List.of("runs/reject.md"), Map.of(
+                    "review_decision", "REJECT",
+                    "reason", "implementation gap"
+            ));
         }
     }
 }

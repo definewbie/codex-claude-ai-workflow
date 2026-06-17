@@ -26,6 +26,10 @@ The runtime does not keep hidden in-memory state. The source of truth is the wor
   workflow/current.json
   workflow/instance.json
   nodes/*.json
+  executions/workflow/*.json
+  executions/nodes/*.json
+  domain/goal-satisfaction.json
+  domain/completion-audit.json
   gates/*.json
   iterations/*.json
   events.jsonl
@@ -118,7 +122,7 @@ Important details:
 
 - Runtime executes only `READY` nodes.
 - `RUNNING` nodes are protected by a PID guard. If the PID is still alive, a second `resume` refuses to duplicate the agent process.
-- If the PID is gone, runtime emits `node_stale_running_detected` and re-executes the active node.
+- If the PID is gone, runtime emits `node_stale_running_detected`, moves the same active node to `FAILED`, opens recovery, and sets workflow status to `WAITING_FOR_RECOVERY`. It must not silently re-execute the node.
 - `outputRefs` from a completed node become `inputRefs` for successor nodes.
 
 ## 5. Gate Flow
@@ -254,7 +258,8 @@ A new iteration starts when routing represents a revision/repair action, for exa
 
 Simple linear progress does not create a new iteration.
 
-Retrying a failed node also does not create a new iteration. It is the same node instance being attempted again.
+Retrying a failed node also does not create a new iteration. It is the same node
+instance receiving a new `NodeExecution`.
 
 ## 9. Full Lifecycle
 

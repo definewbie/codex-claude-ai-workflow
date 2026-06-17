@@ -61,7 +61,7 @@ dualctl --help
 Run the controlled smoke first:
 
 ```bash
-./scripts/smoke-test.sh --case baseline-basic --cleanup
+./scripts/smoke-test.sh --case lifecycle --cleanup
 ```
 
 Then run the public real-case benchmark:

@@ -1,7 +1,6 @@
 package dev.dual.cli;
 
 import dev.dual.core.id.DualId;
-import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamLock;
@@ -43,7 +42,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review decide"))) {
             var ledger = CliLedgerFactory.create();
             var definition = ledger.loadDefinition(paths);
-            resolvedAction = normalizeAction(paths, ledger, definition, action);
+            resolvedAction = requireAction(action);
             ledger.resolveOpenGate(paths, definition, resolvedAction, note);
         }
         System.out.println("Human gate decided");
@@ -59,31 +58,10 @@ public final class ReviewDecideCommand implements Callable<Integer> {
         }
     }
 
-    private static String normalizeAction(
-            WorkstreamPaths paths,
-            WorkflowFileLedger ledger,
-            WorkflowDefinition definition,
-            String requestedAction
-    ) throws Exception {
+    private static String requireAction(String requestedAction) {
         if (requestedAction == null || requestedAction.isBlank()) {
             throw new IllegalArgumentException("--action is required");
         }
-        var action = requestedAction.trim();
-        if (!"approve".equals(action)) {
-            return action;
-        }
-        var current = ledger.loadCurrent(paths);
-        if (current.activeNodeInstanceIds().isEmpty()) {
-            return action;
-        }
-        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
-        var hasApproveEdge = definition.edgesFrom(node.nodeDefinitionId()).stream()
-                .anyMatch(edge -> edge.on().equals("approve"));
-        var hasApprovedEdge = definition.edgesFrom(node.nodeDefinitionId()).stream()
-                .anyMatch(edge -> edge.on().equals("approved"));
-        if (!hasApproveEdge && hasApprovedEdge) {
-            return "approved";
-        }
-        return action;
+        return requestedAction.trim();
     }
 }

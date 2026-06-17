@@ -4,9 +4,11 @@ import java.util.List;
 
 record AcpxFailureSignal(
         String id,
-        String reason,
+        AcpxFailureReason reason,
+        int priority,
         String message,
         boolean recoverable,
+        boolean interruptRunningProcess,
         List<Matcher> matchers
 ) {
     boolean matches(AcpxFailureEvidence evidence) {
@@ -15,7 +17,7 @@ record AcpxFailureSignal(
     }
 
     AcpxFailureClassifier.AcpxFailure toFailure() {
-        return new AcpxFailureClassifier.AcpxFailure(reason, message, recoverable);
+        return new AcpxFailureClassifier.AcpxFailure(reason.code(), message, recoverable, interruptRunningProcess);
     }
 
     static Matcher contains(String text) {

@@ -50,7 +50,7 @@ It must mean the workstream completed according to its completion contract.
 |---|---|---|
 | `Workstream` | The aggregate root for one AI-assisted engineering lifecycle. | Low-level process execution. |
 | `Phase` | A domain stage such as intake, contract, design, plan, implement, self-test, acceptance, delivery, handoff. | Runtime edge routing. |
-| `Iteration` | A revision or repair thread with a trigger and reason. | A generic retry attempt. |
+| `Iteration` | A revision or repair thread with a trigger and reason. | A generic runtime retry. |
 | `GateDecision` | A human decision with allowed actions, note, evidence, and actor. | Running the next task. |
 | `Evidence` | A durable fact used for review or acceptance. | Human-readable narrative only. |
 | `Artifact` | A file or sidecar with an owner, purpose, requiredness, and validation rule. | Temporary stdout/stderr logs unless explicitly promoted. |
@@ -274,7 +274,7 @@ The summary remains generated from ledger facts, not by an Agent.
 Persist:
 
 ```text
-.agent/workstreams/<workstream_id>/reports/completion-audit.json
+.agent/workstreams/<workstream_id>/domain/completion-audit.json
 ```
 
 This should record required artifact status, domain completion status, and safe

@@ -65,42 +65,20 @@ public final class ContractCompileHandler implements TaskHandler {
             return resolutionResult.failed();
         }
 
-        // Validate and potentially patch
         var errors = TaskContractValidator.validate(contract);
         if (!errors.isEmpty()) {
-            // If AC is empty and READY_FOR_REVIEW, add default AC
-            if (contract.status() == ContractStatus.READY_FOR_REVIEW
-                    && contract.acceptanceCriteria().isEmpty()) {
-                var patchedAc = new ArrayList<>(contract.acceptanceCriteria());
-                patchedAc.add("Implementation achieves: " + contract.objective());
-                patchedAc.add("No files changed outside scope");
-                patchedAc.add("Tests pass");
-                contract = new TaskContract(
-                        contract.id(), contract.version(), contract.createdAt(),
-                        contract.objective(), contract.scope(), patchedAc,
-                        contract.testRequirements(), contract.constraints(),
-                        contract.nonGoals(), contract.riskAreas(),
-                        contract.ambiguityNotes(), contract.humanQuestions(),
-                        contract.status(), contract.compilationPass(), contract.source()
-                );
-                errors = TaskContractValidator.validate(contract);
-            }
-
-            // If still failing, set to NEEDS_CLARIFICATION
-            if (!errors.isEmpty()) {
-                var ambiguityNotes = new ArrayList<>(contract.ambiguityNotes());
-                ambiguityNotes.addAll(errors);
-                var humanQuestions = new ArrayList<>(contract.humanQuestions());
-                humanQuestions.add("Contract compilation produced validation errors — please clarify the requirement");
-                contract = new TaskContract(
-                        contract.id(), contract.version(), contract.createdAt(),
-                        contract.objective(), contract.scope(), contract.acceptanceCriteria(),
-                        contract.testRequirements(), contract.constraints(),
-                        contract.nonGoals(), contract.riskAreas(),
-                        ambiguityNotes, humanQuestions,
-                        ContractStatus.NEEDS_CLARIFICATION, contract.compilationPass(), contract.source()
-                );
-            }
+            var ambiguityNotes = new ArrayList<>(contract.ambiguityNotes());
+            ambiguityNotes.addAll(errors);
+            var humanQuestions = new ArrayList<>(contract.humanQuestions());
+            humanQuestions.add("Contract compilation produced validation errors — please clarify the requirement");
+            contract = new TaskContract(
+                    contract.id(), contract.version(), contract.createdAt(),
+                    contract.objective(), contract.scope(), contract.acceptanceCriteria(),
+                    contract.testRequirements(), contract.constraints(),
+                    contract.nonGoals(), contract.riskAreas(),
+                    ambiguityNotes, humanQuestions,
+                    ContractStatus.NEEDS_CLARIFICATION, contract.compilationPass(), contract.source()
+            );
         }
 
         // Write artifacts

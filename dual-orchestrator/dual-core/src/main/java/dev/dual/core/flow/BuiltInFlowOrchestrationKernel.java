@@ -39,10 +39,14 @@ public final class BuiltInFlowOrchestrationKernel implements FlowOrchestrationKe
 
         var transitions = new ArrayList<FlowTransitionCandidate>();
         for (var edge : definition.edgesFrom(signal.nodeDefinitionId(), signal.outcome(), routingContext)) {
-            transitions.add(new FlowTransitionCandidate(edge.from(), edge.on(), edge.to(), java.util.Map.of(
-                    "condition", edge.condition().type()
-            )));
+            transitions.add(new FlowTransitionCandidate(edge.from(), edge.on(), edge.to(), edgeAttributes(edge)));
         }
         return FlowAdvanceResult.routed(transitions, java.util.List.of("builtin.route"));
+    }
+
+    private static java.util.Map<String, Object> edgeAttributes(dev.dual.core.workflow.EdgeDefinition edge) {
+        var attributes = new LinkedHashMap<String, Object>(edge.metadata().toAttributes());
+        attributes.put("condition", edge.condition().type());
+        return java.util.Map.copyOf(attributes);
     }
 }
