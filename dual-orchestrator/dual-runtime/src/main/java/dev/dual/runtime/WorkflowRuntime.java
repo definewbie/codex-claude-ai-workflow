@@ -38,8 +38,13 @@ public final class WorkflowRuntime {
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
     private final ArtifactContractValidator artifactContractValidator;
+    private final AgentTaskDispatchMode dispatchMode;
 
     public WorkflowRuntime(WorkflowFileLedger ledger, HandlerRegistry handlers) {
+        this(ledger, handlers, AgentTaskDispatchMode.INLINE);
+    }
+
+    public WorkflowRuntime(WorkflowFileLedger ledger, HandlerRegistry handlers, AgentTaskDispatchMode dispatchMode) {
         if (ledger == null) {
             throw new IllegalArgumentException("ledger is required");
         }
@@ -48,6 +53,7 @@ public final class WorkflowRuntime {
         }
         this.ledger = ledger;
         this.handlers = handlers;
+        this.dispatchMode = dispatchMode == null ? AgentTaskDispatchMode.INLINE : dispatchMode;
         this.artifactContractValidator = new ArtifactContractValidator();
     }
 
@@ -181,6 +187,10 @@ public final class WorkflowRuntime {
             return rejectionResult(command, refreshedCurrent, refreshedNode, refreshedDefinition);
         }
 
+        if (dispatchMode == AgentTaskDispatchMode.WORKER) {
+            return enqueueAgentTask(command, paths, workflowExecution, nodeDoc, nodeDefinition);
+        }
+
         var result = executeAndRecordNode(command, paths, workflowExecution, nodeExecutionIds, nodeDoc, nodeDefinition);
         emitDomainEvents(paths, nodeDefinition.id(), nodeDefinition.handlerType(), nodeDoc.nodeInstanceId(), result);
         ledger.completeAndRoute(paths, definition, nodeDoc.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
@@ -189,6 +199,18 @@ public final class WorkflowRuntime {
         var active = activeNodeDefinitionId(paths, next);
         var message = result.status() == NodeStatus.COMPLETED ? "resumed workflow" : "workflow stopped at " + result.status();
         return new WorkflowRuntimeResult(command.workstreamId(), next.status(), active, message);
+    }
+
+    private WorkflowRuntimeResult enqueueAgentTask(
+            WorkflowCommand command,
+            WorkstreamPaths paths,
+            WorkflowExecutionDocument workflowExecution,
+            NodeInstanceDocument nodeDoc,
+            NodeDefinition nodeDefinition
+    ) throws Exception {
+        var agentTask = ledger.createAgentTask(paths, workflowExecution.workflowExecutionId(), nodeDefinition, nodeDoc);
+        ledger.markQueuedForAgentTask(paths, nodeDoc.nodeInstanceId(), agentTask.agentTaskId());
+        return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.RUNNING, nodeDefinition.id(), "agent task queued");
     }
 
     private WorkflowRuntimeResult rejectionResult(
@@ -366,6 +388,9 @@ public final class WorkflowRuntime {
     }
 
     private Boolean resolveRunningNode(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+        if (hasActiveQueuedAgentTask(paths, node)) {
+            return null;
+        }
         var latestExecution = ledger.latestNodeExecution(paths, node);
         if (latestExecution.isPresent()) {
             var execution = latestExecution.get();
@@ -392,6 +417,17 @@ public final class WorkflowRuntime {
         }
         recoverStaleRunningNode(paths, node, "");
         return null;
+    }
+
+    private boolean hasActiveQueuedAgentTask(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {
+        var taskId = node.result().get("queued_agent_task_id");
+        if (taskId == null || String.valueOf(taskId).isBlank()) {
+            return false;
+        }
+        return ledger.readAgentTask(paths, String.valueOf(taskId))
+                .map(task -> task.status() == dev.dual.ledger.file.AgentTaskStatus.QUEUED
+                        || task.status() == dev.dual.ledger.file.AgentTaskStatus.RUNNING)
+                .orElse(false);
     }
 
     private void recoverStaleRunningNode(WorkstreamPaths paths, NodeInstanceDocument node, Object pid) throws Exception {

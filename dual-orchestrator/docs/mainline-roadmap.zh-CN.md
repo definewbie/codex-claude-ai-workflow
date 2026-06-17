@@ -93,7 +93,7 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 
 | 项目 | 状态 | 目的 | 设计 |
 |---|---|---|---|
-| Execution / AgentTask 边界 | Partial | 区分 node instance、具体 execution、agent dispatch facts。 | [execution-instance-model.zh-CN.md](design/execution-instance-model.zh-CN.md) |
+| Execution / AgentTask 边界 | Partial, worker MVP added | 区分 node instance、具体 execution、agent dispatch facts。 | [execution-instance-model.zh-CN.md](design/execution-instance-model.zh-CN.md) |
 | Recovery 分类 | Partial | 区分 runtime retry、semantic repair、验收拒绝、quota/session 外部失败。 | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
 | Context budget 治理 | Partial | 防止 context package 膨胀到系统不可用。 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
 | Artifact contract 稳定 | Partial | 基于结构化 artifact 和状态路由，而不是猜自然语言正文。 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
@@ -109,6 +109,17 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | Projection | Partial | API overview 已暴露 latest context package metadata artifact；更丰富的 CLI/UI budget summary 后续再补。 |
 | 测试 | Done | `ContextBuildPackageHandlerTest` 覆盖 budget enforcement、degradation 和 metadata sidecar。 |
 | 真实 case 验证 | Pending | 需要重跑一个中等复杂度真实 case，确认生成 prompt 不再异常膨胀。 |
+
+### P1 AgentTask / Worker Checklist
+
+| 维度 | 状态 | 证据 |
+|---|---|---|
+| AgentTask 派工账本 | Done | `queue/agent-tasks/<id>.json` 记录 `QUEUED`、`RUNNING`、`SUCCEEDED`、`FAILED`。 |
+| Inline 兼容 | Done | 默认 `dualctl run` 仍然内联执行节点，现有 lifecycle 行为不变。 |
+| Worker dispatch mode | MVP done | `dualctl run --dispatch-mode WORKER` enqueue 一个 AgentTask，并让节点保持 `RUNNING`。 |
+| 本机 worker | MVP done | `dualctl worker run-once --workdir <effective_workdir> <workstream_id>` claim 一个 queued task，创建一个 `NodeExecution`，执行 handler，并通过 ledger routing 推进流程。 |
+| 多 worker 平台 | MVP 不做 | 暂不做 lease、heartbeat、分布式 scheduler 或多 task fan-out；只有真实无人值守运行需要时再补。 |
+| 测试 | Done | `WorkflowRuntimeTest` 覆盖 queue-only dispatch 和 worker run-once routing。 |
 
 ## P2：Operator 易用性
 

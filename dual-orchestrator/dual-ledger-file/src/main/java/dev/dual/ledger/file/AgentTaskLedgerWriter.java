@@ -138,6 +138,23 @@ final class AgentTaskLedgerWriter {
         return documents;
     }
 
+    Optional<AgentTaskDocument> readAgentTask(WorkstreamPaths paths, String agentTaskId) throws IOException {
+        if (agentTaskId == null || agentTaskId.isBlank()) {
+            return Optional.empty();
+        }
+        var path = paths.agentTaskJson(agentTaskId);
+        if (!java.nio.file.Files.isRegularFile(path)) {
+            return Optional.empty();
+        }
+        return Optional.of(jsonWriter.objectMapper().readValue(path.toFile(), AgentTaskDocument.class));
+    }
+
+    Optional<AgentTaskDocument> firstQueued(WorkstreamPaths paths) throws IOException {
+        return readAgentTasks(paths).stream()
+                .filter(task -> task.status() == AgentTaskStatus.QUEUED)
+                .findFirst();
+    }
+
     private AgentTaskDocument complete(
             AgentTaskDocument task,
             AgentTaskStatus status,

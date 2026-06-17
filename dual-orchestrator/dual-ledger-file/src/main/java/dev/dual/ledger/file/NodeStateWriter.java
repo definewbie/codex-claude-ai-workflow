@@ -54,6 +54,35 @@ final class NodeStateWriter {
         return updated;
     }
 
+    NodeInstanceDocument markQueuedForAgentTask(WorkstreamPaths paths, String nodeInstanceId, String agentTaskId)
+            throws IOException {
+        var node = loadNode(paths, nodeInstanceId);
+        var now = Instant.now();
+        var updated = new NodeInstanceDocument(
+                node.schemaVersion(),
+                node.nodeInstanceId(),
+                node.nodeDefinitionId(),
+                node.kind(),
+                node.handlerType(),
+                NodeStatus.RUNNING,
+                node.stageId(),
+                node.iterationId(),
+                node.inputRefs(),
+                node.inputTransition(),
+                node.outputRefs(),
+                LedgerUtils.mergedResult(node.result(), Map.of(
+                        "queued_agent_task_id", agentTaskId,
+                        "dispatch_state", "QUEUED"
+                )),
+                node.runRef(),
+                node.latestExecutionId(),
+                now,
+                null
+        );
+        jsonWriter.write(paths.nodeJson(nodeInstanceId), updated);
+        return updated;
+    }
+
     NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
         return autoRetryNode(paths, nodeInstanceId, 0);
     }

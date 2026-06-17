@@ -151,7 +151,25 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 
 `dualctl approve`、`dualctl revise`、`dualctl complete` 是较长 `dualctl review ...` 命令的快捷方式。
 
-## 8. 合并已验收的 Worktree 改动
+## 8. 可选本机 Worker 模式
+
+默认情况下，`run` 会内联执行当前 active node：
+
+```bash
+dualctl run --workdir <effective_workdir> <workstream_id>
+```
+
+AgentTask/worker MVP 可以先把一个 active Agent task 放入队列，再由本机 worker
+执行一个 queued task：
+
+```bash
+dualctl run --dispatch-mode WORKER --workdir <effective_workdir> <workstream_id>
+dualctl worker run-once --workdir <effective_workdir> <workstream_id>
+```
+
+这个模式仍然由 runtime ledger 负责 workflow definition 和 routing。worker 只是一个本机执行器，一次只处理一个 queued AgentTask；它还不是多 worker 平台。
+
+## 9. 合并已验收的 Worktree 改动
 
 workstream 完成并验收通过后，显式把已审查的 worktree diff 合回原始仓库：
 
@@ -175,7 +193,7 @@ git diff --cached
 git commit -m "feat: dual delivery <workstream_id>"
 ```
 
-## 9. Calibration
+## 10. Calibration
 
 真实失败如果被分类为可复用校准候选，可以先人工审阅：
 

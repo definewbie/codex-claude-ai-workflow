@@ -109,7 +109,7 @@ state and it is not a UI concern. The workflow definition declares a stable
 as acpx `--allowed-tools` or `--approve-all`. This lets intake/design/review
 observe the repository safely while only implementation phases can mutate code.
 
-The first implementation keeps the relation simple:
+The MVP implementation keeps the relation simple:
 
 ```text
 one NodeInstance
@@ -117,12 +117,25 @@ one NodeInstance
   -> one NodeExecution
 ```
 
-A later local queue / worker implementation may allow one node instance to
-produce multiple agent tasks and multiple node executions. That is not the
-default meaning. A workflow node should still represent one clear lifecycle
-stage. If Claude and Codex need to collaborate over multiple rounds, model that
-with workflow graph edges, loops, and gates rather than hiding multiple agents
-inside one node.
+The first worker implementation is local and single-task:
+
+```text
+dualctl run --dispatch-mode WORKER
+  -> enqueue one AgentTask and leave the NodeInstance RUNNING
+
+dualctl worker run-once
+  -> claim one QUEUED AgentTask
+  -> create one NodeExecution
+  -> execute the handler
+  -> return the NodeResult to workflow routing
+```
+
+This is deliberately not a multi-worker platform. A later queue expansion may
+add leases, heartbeats, multiple workers, fork/join branches, or multiple agent
+tasks per node instance, but that is not the default meaning. A workflow node
+should still represent one clear lifecycle stage. If Claude and Codex need to
+collaborate over multiple rounds, model that with workflow graph edges, loops,
+and gates rather than hiding multiple agents inside one node.
 
 `AgentTask` explicitly does not:
 

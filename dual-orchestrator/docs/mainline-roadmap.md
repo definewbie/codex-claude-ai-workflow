@@ -103,7 +103,7 @@ P1 work keeps long agent runs recoverable and affordable.
 
 | Item | Status | Purpose | Design |
 |---|---|---|---|
-| Execution / AgentTask boundary | Partial | Separate node instance, concrete execution, and agent dispatch facts. | [execution-instance-model.md](design/execution-instance-model.md) |
+| Execution / AgentTask boundary | Partial, worker MVP added | Separate node instance, concrete execution, and agent dispatch facts. | [execution-instance-model.md](design/execution-instance-model.md) |
 | Recovery classification | Partial | Distinguish runtime retry, semantic repair, rejected acceptance, and external quota/session failures. | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) |
 | Context budget governance | Partial | Prevent context packages from growing until the system becomes unusable. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
 | Artifact contract stability | Partial | Route on typed artifacts and states, not natural-language guesses. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
@@ -119,6 +119,17 @@ P1 work keeps long agent runs recoverable and affordable.
 | Projection | Partial | API overview exposes the latest context package metadata artifact; richer CLI/UI budget summaries can follow. |
 | Tests | Done | `ContextBuildPackageHandlerTest` covers budget enforcement, degradation, and metadata sidecar creation. |
 | Real-case validation | Pending | Re-run a medium real case and confirm generated prompts no longer grow unexpectedly beyond the governed package preview. |
+
+### P1 AgentTask / Worker Checklist
+
+| Area | Status | Evidence |
+|---|---|---|
+| AgentTask dispatch ledger | Done | `queue/agent-tasks/<id>.json` records `QUEUED`, `RUNNING`, `SUCCEEDED`, and `FAILED`. |
+| Inline compatibility | Done | Default `dualctl run` still executes nodes inline. Existing lifecycle behavior is unchanged. |
+| Worker dispatch mode | MVP done | `dualctl run --dispatch-mode WORKER` queues one AgentTask and pauses with the node `RUNNING`. |
+| Local worker | MVP done | `dualctl worker run-once --workdir <effective_workdir> <workstream_id>` claims one queued task, creates one `NodeExecution`, executes the handler, and routes through the ledger. |
+| Multi-worker platform | Not planned for MVP | No leases, heartbeats, distributed scheduler, or multi-task fan-out yet. Add only if real unattended runs need it. |
+| Tests | Done | `WorkflowRuntimeTest` covers queue-only dispatch and worker run-once routing. |
 
 ## P2: Operator Usability
 

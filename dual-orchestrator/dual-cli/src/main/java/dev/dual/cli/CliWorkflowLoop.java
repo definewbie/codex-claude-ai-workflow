@@ -3,6 +3,7 @@ package dev.dual.cli;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.AgentTaskDispatchMode;
 import dev.dual.runtime.WorkflowCommand;
 
 import java.nio.file.Path;
@@ -18,10 +19,14 @@ final class CliWorkflowLoop {
     );
 
     int run(Path workspaceRoot, String workstreamId, int maxSteps) throws Exception {
+        return run(workspaceRoot, workstreamId, maxSteps, AgentTaskDispatchMode.INLINE);
+    }
+
+    int run(Path workspaceRoot, String workstreamId, int maxSteps, AgentTaskDispatchMode dispatchMode) throws Exception {
         if (maxSteps <= 0) {
             throw new IllegalArgumentException("--max-steps must be positive");
         }
-        var runtime = new CliWorkflowRuntimeFactory().create();
+        var runtime = new CliWorkflowRuntimeFactory().create(dispatchMode);
         var command = new WorkflowCommand(workspaceRoot, workstreamId);
         for (int step = 1; step <= maxSteps; step++) {
             var result = runtime.resume(command);

@@ -297,6 +297,14 @@ public final class WorkflowFileLedger {
         return agentTaskLedgerWriter.readAgentTasks(paths);
     }
 
+    public Optional<AgentTaskDocument> readAgentTask(WorkstreamPaths paths, String agentTaskId) throws IOException {
+        return agentTaskLedgerWriter.readAgentTask(paths, agentTaskId);
+    }
+
+    public Optional<AgentTaskDocument> firstQueuedAgentTask(WorkstreamPaths paths) throws IOException {
+        return agentTaskLedgerWriter.firstQueued(paths);
+    }
+
     public NodeExecutionDocument startNodeExecution(
             WorkstreamPaths paths,
             String workflowExecutionId,
@@ -356,6 +364,18 @@ public final class WorkflowFileLedger {
 
     public NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
         var node = nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
+        refreshProjections(paths);
+        return node;
+    }
+
+    public NodeInstanceDocument markQueuedForAgentTask(WorkstreamPaths paths, String nodeInstanceId, String agentTaskId)
+            throws IOException {
+        var node = nodeStateWriter.markQueuedForAgentTask(paths, nodeInstanceId, agentTaskId);
+        appendEvent(paths, "agent-task-queued-node-" + agentTaskId, "node_agent_task_queued", Map.of(
+                "agent_task_id", agentTaskId,
+                "node", node.nodeDefinitionId(),
+                "node_instance_id", node.nodeInstanceId()
+        ));
         refreshProjections(paths);
         return node;
     }

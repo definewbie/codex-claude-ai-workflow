@@ -175,7 +175,27 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 `dualctl approve`, `dualctl revise`, and `dualctl complete` are shortcuts for
 the longer `dualctl review ...` commands.
 
-## 8. Merge Accepted Worktree Changes
+## 8. Optional Local Worker Mode
+
+Default runs execute the active node inline:
+
+```bash
+dualctl run --workdir <effective_workdir> <workstream_id>
+```
+
+For the AgentTask/worker MVP, queue one active Agent task and let a local worker
+execute exactly one queued task:
+
+```bash
+dualctl run --dispatch-mode WORKER --workdir <effective_workdir> <workstream_id>
+dualctl worker run-once --workdir <effective_workdir> <workstream_id>
+```
+
+This mode keeps the workflow definition and routing in the runtime ledger. The
+worker is only the local executor for one queued AgentTask; it is not a
+multi-worker platform yet.
+
+## 9. Merge Accepted Worktree Changes
 
 When a workstream is completed and accepted, merge the reviewed worktree diff
 back to the original repository explicitly:
@@ -201,7 +221,7 @@ git diff --cached
 git commit -m "feat: dual delivery <workstream_id>"
 ```
 
-## 9. Promote Reusable Learnings
+## 10. Promote Reusable Learnings
 
 When a real failure is classified as a reusable calibration candidate, review it
 before changing any project principles:

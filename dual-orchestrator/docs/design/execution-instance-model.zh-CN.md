@@ -120,7 +120,7 @@ NodeInstance
 `--allowed-tools` 或 `--approve-all`。这样 intake/design/review 可以安全地观察
 仓库，implementation 才能修改代码。
 
-第一版实现保持一对一：
+MVP 实现保持一对一：
 
 ```text
 one NodeInstance
@@ -128,15 +128,23 @@ one NodeInstance
   -> one NodeExecution
 ```
 
-后续如果引入本地 task queue / worker，可以扩展为：
+当前最小 worker 是本机单任务形态：
 
 ```text
-one NodeInstance
-  -> one or more AgentTasks
-     -> one or more NodeExecutions
+dualctl run --dispatch-mode WORKER
+  -> enqueue 一个 AgentTask，并让 NodeInstance 保持 RUNNING
+
+dualctl worker run-once
+  -> claim 一个 QUEUED AgentTask
+  -> 创建一个 NodeExecution
+  -> 执行 handler
+  -> 把 NodeResult 交还 workflow routing
 ```
 
-但这不是默认语义。默认情况下，一个 workflow node 仍然只代表一个清晰阶段。如果需要 Claude 和 Codex 多轮协作，应通过 workflow graph、loop 和 gate 表达，而不是把多个 agent 塞进同一个 node 里。
+这不是多 worker 平台。后续可以扩展 lease、heartbeat、多 worker、fork/join
+分支，或一个 node instance 对多个 agent tasks，但这不是默认语义。默认情况下，
+一个 workflow node 仍然只代表一个清晰阶段。如果需要 Claude 和 Codex 多轮协作，
+应通过 workflow graph、loop 和 gate 表达，而不是把多个 agent 塞进同一个 node 里。
 
 `AgentTask` 明确不负责：
 

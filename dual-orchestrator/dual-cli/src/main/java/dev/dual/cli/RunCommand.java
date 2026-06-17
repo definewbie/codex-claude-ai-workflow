@@ -4,6 +4,7 @@ import dev.dual.core.id.DualId;
 import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.AgentTaskDispatchMode;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -21,6 +22,9 @@ public final class RunCommand implements Callable<Integer> {
     @Option(names = "--max-steps", description = "Maximum workflow nodes to execute. Defaults to ${DEFAULT-VALUE}.")
     int maxSteps = 20;
 
+    @Option(names = "--dispatch-mode", description = "Agent task dispatch mode: ${COMPLETION-CANDIDATES}. Defaults to ${DEFAULT-VALUE}.")
+    AgentTaskDispatchMode dispatchMode = AgentTaskDispatchMode.INLINE;
+
     @Parameters(index = "0")
     String workstreamId;
 
@@ -29,7 +33,7 @@ public final class RunCommand implements Callable<Integer> {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
-            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps, dispatchMode);
         }
     }
 }

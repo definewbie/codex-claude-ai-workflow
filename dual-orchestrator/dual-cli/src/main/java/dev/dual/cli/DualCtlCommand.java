@@ -23,6 +23,7 @@ import picocli.CommandLine.Command;
                 ResumeCommand.class,
                 RunCommand.class,
                 AutoRunCommand.class,
+                WorkerCommand.class,
                 ApproveCommand.class,
                 ReviseCommand.class,
                 CompleteCommand.class,

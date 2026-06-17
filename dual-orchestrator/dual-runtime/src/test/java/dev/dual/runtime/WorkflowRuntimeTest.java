@@ -8,6 +8,8 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
+import dev.dual.ledger.file.AgentTaskStatus;
+import dev.dual.ledger.file.NodeExecutionStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.handler.DecisionHandler;
@@ -29,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class WorkflowRuntimeTest {
     @TempDir
     Path tempDir;
+    private int fakeTaskExecutions;
 
     @Test
     void executesActiveTaskAndRoutesToHumanGate() throws Exception {
@@ -58,6 +61,79 @@ class WorkflowRuntimeTest {
         assertEquals("gate.review", result.activeNode());
         assertTrue(result.message().contains("resumed"));
         assertEquals(1, gate.openCount());
+    }
+
+    @Test
+    void workerDispatchModeQueuesAgentTaskWithoutExecutingHandler() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-worker-queue"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "task.one",
+                List.of(
+                        new NodeDefinition("task.one", NodeKind.TASK, "fake.task", Map.of()),
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(new EdgeDefinition("task.one", "completed", "gate.review"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-worker-queue", definition);
+
+        var runtime = new WorkflowRuntime(
+                ledger,
+                new HandlerRegistry(List.of(new FakeTask()), List.of(), List.of(new FakeGate())),
+                AgentTaskDispatchMode.WORKER
+        );
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-worker-queue"));
+
+        assertEquals(WorkflowStatus.RUNNING, result.status());
+        assertEquals("task.one", result.activeNode());
+        assertEquals(0, fakeTaskExecutions);
+        var tasks = ledger.readAgentTasks(paths);
+        assertEquals(1, tasks.size());
+        assertEquals(AgentTaskStatus.QUEUED, tasks.get(0).status());
+        assertEquals(0, ledger.readNodeExecutions(paths).size());
+        var node = ledger.loadNode(paths, "node-task-one-001");
+        assertEquals(NodeStatus.RUNNING, node.status());
+        assertEquals(tasks.get(0).agentTaskId(), node.result().get("queued_agent_task_id"));
+    }
+
+    @Test
+    void workerRunOneExecutesQueuedAgentTaskAndRoutesWorkflow() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-worker-run-once"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "task.one",
+                List.of(
+                        new NodeDefinition("task.one", NodeKind.TASK, "fake.task", Map.of()),
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(new EdgeDefinition("task.one", "completed", "gate.review"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-worker-run-once", definition);
+        var gate = new FakeGate();
+        var handlers = new HandlerRegistry(List.of(new FakeTask()), List.of(), List.of(gate));
+
+        var runtime = new WorkflowRuntime(ledger, handlers, AgentTaskDispatchMode.WORKER);
+        runtime.resume(new WorkflowCommand(tempDir, "ws-worker-run-once"));
+
+        var worker = new AgentWorker(ledger, handlers);
+        var workerResult = worker.runOne(new WorkflowCommand(tempDir, "ws-worker-run-once"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, workerResult.status());
+        assertEquals("gate.review", workerResult.nodeDefinitionId());
+        assertEquals(1, fakeTaskExecutions);
+        assertEquals(1, gate.openCount());
+        var task = ledger.readAgentTasks(paths).get(0);
+        assertEquals(AgentTaskStatus.SUCCEEDED, task.status());
+        assertTrue(task.nodeExecutionId().startsWith("nxe-"));
+        var nodeExecution = ledger.readNodeExecutions(paths).get(0);
+        assertEquals(NodeExecutionStatus.SUCCEEDED, nodeExecution.status());
+        assertEquals(task.agentTaskId(), nodeExecution.agentTaskId());
     }
 
     @Test
@@ -193,7 +269,7 @@ class WorkflowRuntimeTest {
         assertTrue(String.valueOf(node.result().get("message")).contains("summary"));
     }
 
-    private static final class FakeTask implements TaskHandler {
+    private final class FakeTask implements TaskHandler {
         @Override
         public String type() {
             return "fake.task";
@@ -201,6 +277,7 @@ class WorkflowRuntimeTest {
 
         @Override
         public NodeResult execute(TaskContext context) {
+            fakeTaskExecutions++;
             return NodeResult.completed("completed", List.of("artifact://fake"), Map.of("ok", true));
         }
     }
