@@ -32,7 +32,18 @@ final class AgentContractSemantics {
         if ("acceptance_review".equals(expectedType)) {
             return validateAcceptanceReview(expectedType, document, derivedStatus);
         }
-        return Optional.empty();
+        return validateEvidenceContract(expectedType, document.decision(), derivedStatus, AgentEvidenceState.from(document), document.failure());
+    }
+
+    static Optional<DualControlParseResult> validateOutputContract(AgentOutputContractDocument document) {
+        var status = AgentLifecycleStatus.fromDecision(document.decision());
+        return validateEvidenceContract(
+                "agent_output_contract",
+                document.decision(),
+                status,
+                AgentEvidenceState.from(document),
+                document.failure()
+        );
     }
 
     static void addSidecarFields(Map<String, Object> sidecar) {
@@ -42,37 +53,66 @@ final class AgentContractSemantics {
         sidecar.put("evidence_state", evidenceState.toMap());
     }
 
-    private static Optional<DualControlParseResult> validateAcceptanceReview(
+    private static Optional<DualControlParseResult> validateEvidenceContract(
             String expectedType,
-            AgentStructuredArtifactDocument document,
-            AgentLifecycleStatus status
+            String decision,
+            AgentLifecycleStatus status,
+            AgentEvidenceState evidenceState,
+            AgentOutputContractDocument.FailureFields failure
     ) {
-        var evidenceState = AgentEvidenceState.from(document);
-        if (status == AgentLifecycleStatus.ACCEPTED
-                && (evidenceState.hasBlockingDecisionIssues() || evidenceState.hasMaterialEvidenceGaps())) {
+        if (status == AgentLifecycleStatus.READY
+                && evidenceState.hasBlockingDecisionIssues()) {
             return violation(
                     expectedType,
-                    "ACCEPTANCE_STATUS_EVIDENCE_CONFLICT",
-                    "acceptance decision " + document.decision()
-                            + " cannot include blocking=true, must_fix, or missing_evidence"
+                    "POSITIVE_STATUS_EVIDENCE_CONFLICT",
+                    "decision " + decision + " cannot include blocking=true or must_fix"
+            );
+        }
+        if (status == AgentLifecycleStatus.ACCEPTED
+                && evidenceState.hasFinalAcceptanceConflicts()) {
+            return violation(
+                    expectedType,
+                    "FINAL_ACCEPTANCE_EVIDENCE_CONFLICT",
+                    "decision " + decision + " cannot include blocking=true, must_fix, or missing_evidence"
             );
         }
         if (status == AgentLifecycleStatus.ACCEPTED_WITH_NOTES
                 && evidenceState.hasBlockingDecisionIssues()) {
             return violation(
                     expectedType,
-                    "ACCEPTANCE_STATUS_EVIDENCE_CONFLICT",
-                    "acceptance decision " + document.decision()
-                            + " cannot include blocking=true or must_fix; use REJECT for blocking issues"
+                    "NOTES_STATUS_BLOCKING_CONFLICT",
+                    "decision " + decision + " cannot include blocking=true or must_fix; use REJECT for blocking issues"
             );
         }
-        if (status == AgentLifecycleStatus.REJECTED && !evidenceState.hasBlockingIssues()
-                && document.failure().isEmpty()) {
+        if ((status == AgentLifecycleStatus.NEEDS_REVISION
+                || status == AgentLifecycleStatus.BLOCKED
+                || status == AgentLifecycleStatus.REJECTED)
+                && !evidenceState.hasBlockingIssues()
+                && failure.isEmpty()) {
             return violation(
                     expectedType,
-                    "REJECTION_MISSING_BLOCKING_EVIDENCE",
-                    "rejected acceptance artifact must include blocking evidence, must_fix, missing_evidence, or failure reason"
+                    "NEGATIVE_STATUS_MISSING_EVIDENCE",
+                    "decision " + decision + " must include blocking=true, must_fix, missing_evidence, or failure reason"
             );
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<DualControlParseResult> validateAcceptanceReview(
+            String expectedType,
+            AgentStructuredArtifactDocument document,
+            AgentLifecycleStatus status
+    ) {
+        var evidenceState = AgentEvidenceState.from(document);
+        var commonViolation = validateEvidenceContract(
+                expectedType,
+                document.decision(),
+                status,
+                evidenceState,
+                document.failure()
+        );
+        if (commonViolation.isPresent()) {
+            return commonViolation;
         }
         return Optional.empty();
     }

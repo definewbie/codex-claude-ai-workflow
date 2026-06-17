@@ -54,8 +54,18 @@ Contract validation 故意保持机械化：
 - test requirements 存在；
 - ledger 或 context metadata 不会被误认为任务范围；
 - status 和 decision 字段内部一致。
+- `READY` 表示 artifact 可以安全交给下一个 workflow 角色继续判断。它不能携带 `blocking=true` 或 `must_fix` 这类明确阻塞决策证据，但可以携带 `missing_evidence`，由下游 verifier 判断这个缺口是否可接受；
+- 最终 `ACCEPTED` 表示 verifier 没有发现实质性证据缺口，因此不能携带 `blocking=true`、`must_fix` 或实质性 `missing_evidence`；
+- `ACCEPTED_WITH_NOTES` 可以携带非阻塞的缺失证据或残余说明，但不能携带 `blocking=true` 或 `must_fix`；
+- `NEEDS_REVISION`、`BLOCKED`、`REJECTED` 这类负向状态必须携带至少一条明确的阻塞原因、缺失证据、must-fix 或 failure reason。
 
 Validator 不判断产品质量。产品质量由 Codex 和 human 判断。Orchestrator 只判断 artifact 是否安全到足以驱动路由。
+
+空证据必须用空字段或空数组表达。`must_fix` 或 `missing_evidence` 里出现
+“none”、“no blocking issue”、“N/A” 这类占位文案，不会被系统归一化为空；
+它们会被当成真实条目。`must_fix` 会与正向路由状态冲突；`missing_evidence`
+则作为面向 verifier 的证据限制继续传递，除非该 artifact 正在声明最终
+`ACCEPTED`。
 
 ## Context Package
 
@@ -78,6 +88,22 @@ Validator 不判断产品质量。产品质量由 Codex 和 human 判断。Orche
 - pending gaps，例如 contract diagnostics 或 missing evidence。
 
 这样长上下文仍然可用，但旧 Markdown、复制示例、被引用的 Agent 文本不会变成 workflow truth。
+
+每次生成 context package 都有两层：
+
+```text
+.agent/workstreams/<workstream_id>/context/<node_instance_id>.md
+.agent/workstreams/<workstream_id>/context/<node_instance_id>.json
+```
+
+Markdown package 面向 Agent。JSON sidecar 面向 harness 和投影层，记录：
+
+- profile 和 target node；
+- 估算 token 数和 token budget；
+- 渲染后的 package 是否仍在 budget 内；
+- 每个 section 是否可用、是否降级、是否被丢弃、soft budget 和渲染后 token 数。
+
+Trace、API overview 和 Operator Panel 如果要展示 budget evidence，应该读 JSON sidecar，不能把 Markdown governance table 当成 source of truth。
 
 ## 失败模式
 

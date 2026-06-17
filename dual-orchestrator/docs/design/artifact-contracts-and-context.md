@@ -63,10 +63,28 @@ Contract validation is intentionally mechanical:
 - test requirements are present;
 - ledger or context metadata is not mistaken for user task scope;
 - status and decision fields are internally consistent.
+- `READY` means the artifact is safe to hand to the next workflow role. It must
+  not carry explicit blocking decision evidence such as `blocking=true` or
+  `must_fix`, but it may carry `missing_evidence` so the downstream verifier can
+  judge whether the gap is acceptable;
+- final `ACCEPTED` means the verifier found no material evidence gaps, so it
+  must not carry `blocking=true`, `must_fix`, or material `missing_evidence`;
+- `ACCEPTED_WITH_NOTES` may carry non-blocking missing evidence or residual
+  notes, but not `blocking=true` or `must_fix`;
+- negative states such as `NEEDS_REVISION`, `BLOCKED`, or `REJECTED` carry at
+  least one concrete blocking reason, missing evidence item, must-fix item, or
+  failure reason.
 
 The validator does not judge product quality. That remains Codex and human
 work. The orchestrator only decides whether the artifact is safe enough to route
 the workflow.
+
+Empty evidence must be represented as an empty field or empty array. Placeholder
+phrases such as "none", "no blocking issue", or "N/A" inside `must_fix` or
+`missing_evidence` are not normalized away; they are treated as actual items.
+`must_fix` conflicts with positive routing states, while `missing_evidence` is
+carried forward as a verifier-facing evidence limitation unless the artifact is
+claiming final `ACCEPTED`.
 
 ## Context Package
 
@@ -91,6 +109,26 @@ Each package separates:
 
 This keeps long context useful without letting old Markdown, copied examples, or
 quoted Agent text become workflow truth.
+
+Each generated context package has two layers:
+
+```text
+.agent/workstreams/<workstream_id>/context/<node_instance_id>.md
+.agent/workstreams/<workstream_id>/context/<node_instance_id>.json
+```
+
+The Markdown package is the Agent-facing context. The JSON sidecar is the
+harness-facing governance record. It records:
+
+- profile and target node;
+- estimated token count and token budget;
+- whether the rendered package stayed within budget;
+- per-section availability, degradation, drop status, soft budget, and rendered
+  token count.
+
+Trace, API overview, and Operator Panel projections should read the JSON sidecar
+when they need budget evidence. They must not parse the Markdown governance
+table as source of truth.
 
 ## Failure Mode
 

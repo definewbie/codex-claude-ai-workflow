@@ -65,6 +65,33 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void positiveDecisionWithMustFixFailsContractEvenWhenTextClaimsNoBlockingIssue() throws Exception {
+        var outputRef = writeOutput("review.md", """
+                # Review
+
+                ## Must Fix
+
+                - None. The proposal preserves the user intent.
+
+                ## Product Risks
+
+                - Modal wording must stay non-medical.
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Intake is ready.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("intake.codex_product_review"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", validated.outcome());
+        assertTrue(String.valueOf(validated.result().get("message"))
+                .contains("READY_FOR_PRODUCT_REVIEW cannot include blocking=true or must_fix"));
+    }
+
+    @Test
     void failsWhenRequiredStructuredArtifactIsMissing() throws Exception {
         var outputRef = writeOutput("acceptance.md", """
                 # Acceptance
@@ -262,7 +289,54 @@ class ArtifactContractValidatorTest {
 
         assertEquals(NodeStatus.FAILED, validated.status());
         assertTrue(String.valueOf(validated.result().get("message"))
-                .contains("ACCEPTANCE_STATUS_EVIDENCE_CONFLICT"));
+                .contains("FINAL_ACCEPTANCE_EVIDENCE_CONFLICT"));
+    }
+
+    @Test
+    void acceptsReadySelfTestWithMissingEvidenceForDownstreamVerifier() throws Exception {
+        var outputRef = writeOutput("self-test.md", """
+                # Self-Test
+
+                <dual-artifact type="self_test_report" version="1">
+                {
+                  "artifact_type": "self_test_report",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "SELF_TEST_COMPLETE",
+                  "summary": "Build passed; runtime device verification is deferred to verifier.",
+                  "blocking": false,
+                  "checks_run": ["npm run build:mp-weixin"],
+                  "checks_skipped": ["WeChat device smoke: simulator unavailable"],
+                  "evidence": ["Build completed successfully."],
+                  "missing_evidence": ["Runtime screenshot requires WeChat devtools."],
+                  "must_fix": [],
+                  "acceptance_notes": ["Codex verifier should decide whether deferred runtime evidence is acceptable."],
+                  "open_risks": [],
+                  "verification_summary": "Self-test evidence is ready for verifier review.",
+                  "failure": {
+                    "category_hint": "",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": ""
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: SELF_TEST_COMPLETE
+                summary: Self-test completed with deferred runtime evidence.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+        var validated = validator.validate(tempDir, agentNode("implement.claude_self_test_report"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var sidecar = Files.readString(tempDir.resolve("self-test.contract.json"));
+        assertTrue(sidecar.contains("\"lifecycle_status\" : \"READY\""));
+        assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
+        assertTrue(sidecar.contains("Runtime screenshot requires WeChat devtools."));
     }
 
     @Test
@@ -404,11 +478,11 @@ class ArtifactContractValidatorTest {
                   "artifact_type": "self_test_report",
                   "schema_version": 1,
                   "decision": "SELF_TEST_COMPLETE",
-                  "summary": "Self-test completed with one runtime gap.",
+                  "summary": "Self-test completed with device validation noted as a release risk.",
                   "checks_run": ["npm test", "inspected changed route manually"],
                   "checks_skipped": ["device smoke: simulator unavailable"],
                   "evidence": ["Test output showed 24 passing tests."],
-                  "missing_evidence": ["No physical device validation."],
+                  "missing_evidence": [],
                   "acceptance_notes": ["Runtime visual check should happen before release."],
                   "verification_summary": "Structured self-test summary"
                 }
@@ -416,7 +490,7 @@ class ArtifactContractValidatorTest {
 
                 ```dual-control
                 decision: SELF_TEST_COMPLETE
-                summary: Self-test completed with one runtime gap.
+                summary: Self-test completed with device validation noted as a release risk.
                 ```
                 """);
         var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
@@ -430,8 +504,7 @@ class ArtifactContractValidatorTest {
         assertTrue(sidecar.contains("simulator unavailable"));
         assertTrue(sidecar.contains("\"evidence\""));
         assertTrue(sidecar.contains("24 passing tests"));
-        assertTrue(sidecar.contains("\"missing_evidence\""));
-        assertTrue(sidecar.contains("No physical device validation."));
+        assertTrue(sidecar.contains("\"missing_evidence\" : [ ]"));
         assertTrue(sidecar.contains("\"acceptance_notes\""));
         assertTrue(sidecar.contains("Runtime visual check should happen before release."));
         assertTrue(sidecar.contains("\"source_artifact_type\" : \"self_test_report\""));

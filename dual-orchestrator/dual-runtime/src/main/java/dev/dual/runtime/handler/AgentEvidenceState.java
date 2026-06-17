@@ -53,8 +53,12 @@ record AgentEvidenceState(
         return missingEvidenceCount > 0;
     }
 
+    boolean hasFinalAcceptanceConflicts() {
+        return hasBlockingDecisionIssues() || hasMaterialEvidenceGaps();
+    }
+
     boolean hasBlockingIssues() {
-        return blocking || mustFixCount > 0 || missingEvidenceCount > 0;
+        return hasBlockingDecisionIssues() || hasMaterialEvidenceGaps();
     }
 
     Map<String, Object> toMap() {
