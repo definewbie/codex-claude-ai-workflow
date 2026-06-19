@@ -174,7 +174,7 @@ evaluation.
 
 | Item | Status | Purpose | Design |
 |---|---|---|---|
-| Operator Panel consistency | Partial | UI, API, and CLI answer the same question: where is it, why stopped, next action. | [operator-observability.md](design/operator-observability.md) |
+| Operator Console / Management Diagnostics | Planned | The default task view answers where it is, why it stopped, and what to do next; diagnostics preserve RCA, CLI commands, raw facts, and token/cost. | [operator-observability.md](design/operator-observability.md), [operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
 | Delivery view | Partial | Show delivery merge readiness and result in the completed workstream view. | [delivery-merge.md](design/delivery-merge.md) |
 | Public benchmark | Partial | Provide repeatable public evidence without private project files. | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
 | Open-source docs cleanup | Partial | Keep docs readable, current, and not tied to internal run history. | [release-checklist.md](release-checklist.md) |
@@ -189,8 +189,10 @@ Recommended order:
 
 1. Make public benchmark runs repeatable through a tracked case registry,
    stable default case, and sanitized aggregate index.
-2. Reduce operator-panel complexity: one primary action, advanced controls
-   collapsed, current gate evidence foregrounded, historical evidence read-only.
+2. Implement the Operator Console / Management Diagnostics split: the default
+   task view is for end users, while diagnostics preserve the old panel's
+   debugging power and organize evidence, commands, verification, and prevention
+   like an RCA surface.
 3. Keep strengthening context/token governance and provider metrics using
    benchmark evidence.
 4. Use private real cases only as regression checks for specific suspected

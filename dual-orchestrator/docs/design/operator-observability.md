@@ -70,6 +70,16 @@ a second workflow vocabulary.
 The operator panel is a local single-user tool. It is not a multi-user product
 or hosted dashboard.
 
+Starting with the P2 operator work, the panel has two views:
+
+| View | User | Purpose |
+|---|---|---|
+| Operator Console / Task View | end user, reviewer, operator | Follow task progress, approve human gates, handle recovery, and confirm delivery. |
+| Management Diagnostics | dual users, developers, debuggers | Inspect ledger facts, raw node ids, RCA, CLI commands, token/cost, and recovery evidence. |
+
+Prototype: [operator-console-prototype.html](operator-console-prototype.html).
+Implementation plan: [operator-console-implementation-plan.zh-CN.md](operator-console-implementation-plan.zh-CN.md).
+
 The first screen prioritizes:
 
 1. lifecycle progress;
@@ -83,6 +93,24 @@ The first screen prioritizes:
 Actions are contextual. A human gate should show review evidence and decision
 buttons together. Debug details, raw packet content, and raw ledger paths should
 be secondary.
+
+The task view should not foreground raw JSON, internal node ids, scheduler
+vocabulary, or full ledger paths. Those belong in Management Diagnostics.
+Diagnostics must not be a stripped-down view; it should be organized like an RCA
+surface:
+
+- symptom;
+- impact;
+- timeline;
+- current hypothesis;
+- evidence chain;
+- immediate mitigation command;
+- verification after repair;
+- prevention notes;
+- raw facts.
+
+This keeps the end-user path understandable while preserving enough information
+for dual users to diagnose and fix issues.
 
 As of P1/P2 closure work, the panel intentionally keeps only one primary
 workflow action visible by default. Max-step tuning, manual refresh, scheduler
@@ -154,6 +182,35 @@ Metrics are currently lightweight:
 Token and cost metrics are recorded when the acpx adapter can match the current
 prompt to a session stream usage event. They are best-effort observation data,
 not workflow routing facts or exact provider billing reconciliation.
+
+The task view should show a lightweight token/cost card so the operator can see
+whether a task is becoming expensive or context-heavy. Management Diagnostics
+can show more detail: prompt tokens, completion tokens, budget ratio, estimated
+cost, and source of the data.
+
+These metrics are for observation and tuning only. They do not participate in
+workflow routing and do not replace artifact contracts or recovery decisions.
+
+## Loop Semantics
+
+The dual lifecycle is not a one-shot linear pipeline. A goal may go through
+bounded semantic repair loops:
+
+```text
+goal -> design/implement/acceptance -> verifier reject -> bounded repair -> acceptance
+```
+
+The UI should keep the linear lifecycle progress bar because it is easier to
+understand, but it must also expose lightweight loop context:
+
+- current round, such as `implementation repair round 2/3`;
+- loop history, showing who triggered each loop, why the workflow returned to an
+  earlier phase, and what the current result is;
+- semantic repair, runtime retry, and human revision must remain separate.
+
+Management Diagnostics may show full iteration ids, trigger artifacts, previous
+decisions, loop reasons, and max rounds. The task view should show only the
+summary needed for human judgment.
 
 ## Observed Usability Gap
 

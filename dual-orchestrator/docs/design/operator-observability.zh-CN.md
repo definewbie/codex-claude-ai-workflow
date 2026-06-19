@@ -59,6 +59,16 @@ CLI 和 UI 应使用同一套概念和标签。UI 不应该发明第二套 workf
 
 Operator panel 是本地单用户工具，不是多用户 Web 产品或托管 dashboard。
 
+P2 起，Operator Panel 分成两个视图：
+
+| 视图 | 用户 | 目的 |
+|---|---|---|
+| 任务视图 / Operator Console | 最终用户、reviewer、operator | 看任务进度、在人闸审批、处理恢复、确认交付。 |
+| 管理诊断 / Management Diagnostics | dual 使用者、开发者、排障者 | 查看 ledger、raw facts、node id、RCA、CLI 命令、token/cost 和恢复证据。 |
+
+设计原型：[operator-console-prototype.html](operator-console-prototype.html)。
+实现计划：[operator-console-implementation-plan.zh-CN.md](operator-console-implementation-plan.zh-CN.md)。
+
 首屏优先展示：
 
 1. lifecycle progress；
@@ -70,6 +80,20 @@ Operator panel 是本地单用户工具，不是多用户 Web 产品或托管 da
 7. grouped timeline 和 metrics。
 
 Action 应该有上下文。Human gate 应把 review evidence 和 decision buttons 放在一起。Debug details、raw packet 和 raw ledger path 应该是次级信息。
+
+任务视图默认不展示 raw JSON、内部 node id、调度器术语和完整 ledger path。这些信息进入管理诊断视图。管理诊断不是阉割版 UI，而是按 RCA 方式组织：
+
+- 症状；
+- 影响范围；
+- 时间线；
+- 当前判断；
+- 证据链；
+- 立即处置命令；
+- 修复后的验证步骤；
+- 预防复发提示；
+- raw facts。
+
+这样最终用户不用理解内部实现，dual 使用者仍然能定位问题并着手修复。
 
 Scheduler Tick 有一个显式 recovery 选项：
 
@@ -118,6 +142,26 @@ intake -> contract -> design -> plan -> implementation -> self-test -> acceptanc
 - longest node duration。
 
 当 acpx adapter 能把当前 prompt 匹配到 session stream usage event 时，会记录 token 和 cost。它们是最佳努力的观测数据，不参与 workflow 路由，也不等同于精确 provider 账单对账。
+
+任务视图应展示轻量 token / cost 卡片，让用户知道当前任务是否存在上下文膨胀或成本异常。管理诊断视图可以展示更细粒度的 prompt tokens、completion tokens、预算比例、估算成本和数据来源。
+
+这些指标只用于观测和调优，不参与 workflow 路由，也不能替代 artifact contract 或 recovery decision。
+
+## Loop 语义
+
+dual 的生命周期不是一次性线性流水线。一个 goal 可能经历多轮语义修复：
+
+```text
+goal -> design/implement/acceptance -> verifier reject -> bounded repair -> acceptance
+```
+
+UI 需要保留线性生命周期进度条，因为它最容易理解；同时必须补充轻量 loop 表达：
+
+- 当前轮次，例如 `实现修复轮 2/3`；
+- loop history，说明每一轮由谁触发、为什么回到前面阶段、当前结果是什么；
+- semantic repair、runtime retry、human revision 必须分开。
+
+管理诊断视图可以展示完整 iteration id、trigger artifact、previous decision、loop reason 和 max rounds。任务视图只展示用户判断所需摘要。
 
 ## 已暴露的易用性问题
 

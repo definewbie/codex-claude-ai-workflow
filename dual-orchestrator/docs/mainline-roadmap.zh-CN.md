@@ -157,7 +157,7 @@ P2 让系统足够容易理解，能支撑真实使用和开源评估。
 
 | 项目 | 状态 | 目的 | 设计 |
 |---|---|---|---|
-| Operator Panel 一致性 | Partial | UI、API、CLI 回答同一个问题：跑到哪、为什么停、下一步做什么。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
+| Operator Console / Management Diagnostics | Planned | 默认任务视图回答“跑到哪、为什么停、下一步做什么”；管理诊断保留 RCA、CLI、raw facts 和 token/cost。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md)、[operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
 | Delivery view | Partial | 在 completed workstream 上展示 delivery merge 的准备状态和结果。 | [delivery-merge.md](design/delivery-merge.md) |
 | Public benchmark | Partial | 提供不依赖私有项目的可重复证据。 | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
 | 开源文档清理 | Partial | 文档要当前、可读、不绑定内部运行历史。 | [release-checklist.zh-CN.md](release-checklist.zh-CN.md) |
@@ -170,6 +170,6 @@ P0 lifecycle closure 在 MVP 边界内已经完成。不要继续开放式私有
 建议顺序：
 
 1. 用 tracked case registry、稳定默认 case 和脱敏 aggregate index，让 public benchmark 可重复。
-2. 降低 Operator Panel 复杂度：首屏只保留一个主动作，高级控制折叠，current gate evidence 前置，historical evidence 只读。
+2. 实现 Operator Console / Management Diagnostics 双视图：默认任务视图面向最终用户，管理诊断保留旧 UI 的排障能力，并按 RCA 组织证据、命令、验证和预防。
 3. 基于 benchmark evidence 继续强化 context/token governance 和 provider metrics。
 4. 私有 real case 只作为特定缺陷的 regression check，不再作为 P0 discovery loop。
