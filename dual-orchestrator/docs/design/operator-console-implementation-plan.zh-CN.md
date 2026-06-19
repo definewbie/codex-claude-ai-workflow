@@ -187,3 +187,35 @@ CLI 命令不应只是静态提示，要带上当前 workdir 和 workstream id�
 - Loop history 能区分 semantic repair、runtime retry、human revision。
 - RCA 诊断页能给出前因后果、证据、命令、验证和预防。
 - README / quickstart 增加新 UI 说明。
+
+## 实现状态
+
+2026-06-19 第一版已落地为独立入口：
+
+- `/console.html`：新的任务视图和管理诊断双视图。
+- `/console.css`：桌面 operator 控制台样式，沿用原型的轻量卡片和操作台风格。
+- `/console.js`：消费现有 workstream list / status / overview / timeline / review / recovery / SSE API。
+- `/index.html`、`app.js`、`styles.css`：旧管理面板保留，不删除、不降能力。
+
+本轮完成：
+
+1. 任务视图和管理诊断分离。
+2. 任务列表用任务标题优先展示，内部 id 降为次级语义。
+3. 生命周期进度、停止原因、下一步动作、人审证据、token 摘要进入任务首屏。
+4. 人审打回反馈改为页面内输入，不再使用浏览器 `prompt`。
+5. 新建任务弹窗先生成 CLI 命令，不新增 start API 边界。
+6. 管理诊断按 RCA 展示症状、影响、判断、时间线、证据链、处置命令、验证和预防。
+
+已验证：
+
+- `node --check dual-orchestrator/dual-server/src/main/resources/static/console.js`
+- `git diff --check`
+- `mvn -pl dual-server -am test`
+- `mvn -pl dual-server -am package -DskipTests`
+- 临时启动 `dual-server` 后，`/console.html`、`/console.js`、`/index.html` 均返回 `200`。
+
+仍需后续用真实 workstream 样本校准：
+
+- token/cost 字段目前是 best-effort 汇总，依赖 ledger 中已有 metrics / usage 字段。
+- 新建任务第一版只生成 CLI，不直接调用 start API。
+- 默认欢迎页仍是旧 `/index.html`；任务控制台通过 `/console.html` 显式进入，待真实使用稳定后再决定是否切换默认入口。

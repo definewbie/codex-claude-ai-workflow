@@ -157,7 +157,7 @@ P2 让系统足够容易理解，能支撑真实使用和开源评估。
 
 | 项目 | 状态 | 目的 | 设计 |
 |---|---|---|---|
-| Operator Console / Management Diagnostics | Planned | 默认任务视图回答“跑到哪、为什么停、下一步做什么”；管理诊断保留 RCA、CLI、raw facts 和 token/cost。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md)、[operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
+| Operator Console / Management Diagnostics | MVP implemented | 默认任务视图回答“跑到哪、为什么停、下一步做什么”；管理诊断保留 RCA、CLI、raw facts 和 token/cost。第一版入口为 `/console.html`，旧 `/index.html` 作为管理面板保留。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md)、[operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
 | Delivery view | Partial | 在 completed workstream 上展示 delivery merge 的准备状态和结果。 | [delivery-merge.md](design/delivery-merge.md) |
 | Public benchmark | Partial | 提供不依赖私有项目的可重复证据。 | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
 | 开源文档清理 | Partial | 文档要当前、可读、不绑定内部运行历史。 | [release-checklist.zh-CN.md](release-checklist.zh-CN.md) |

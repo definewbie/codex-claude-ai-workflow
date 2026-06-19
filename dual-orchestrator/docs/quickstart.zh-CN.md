@@ -179,7 +179,32 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 
 `dualctl approve`、`dualctl revise`、`dualctl complete` 是较长 `dualctl review ...` 命令的快捷方式。
 
-## 8. 可选本机 Worker 模式
+## 8. 打开本地控制台
+
+启动 operator server：
+
+```bash
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+默认任务控制台：
+
+```text
+http://localhost:8080/console.html
+```
+
+任务控制台面向最终用户和 reviewer，显示生命周期进度、当前停止原因、下一步动作、人审证据、
+token 摘要和恢复建议。
+
+管理诊断入口：
+
+```text
+http://localhost:8080/index.html
+```
+
+管理诊断面向 dual 使用者和开发者，用于查看 raw ledger、node id、RCA、CLI 命令和恢复证据。
+
+## 9. 可选本机 Worker 模式
 
 默认情况下，`run` 会内联执行当前 active node：
 
@@ -197,7 +222,7 @@ dualctl worker run-once --workdir <effective_workdir> <workstream_id>
 
 这个模式仍然由 runtime ledger 负责 workflow definition 和 routing。worker 只是一个本机执行器，一次只处理一个 queued AgentTask；它还不是多 worker 平台。
 
-## 9. 合并已验收的 Worktree 改动
+## 10. 合并已验收的 Worktree 改动
 
 workstream 完成并验收通过后，显式把已审查的 worktree diff 合回原始仓库：
 

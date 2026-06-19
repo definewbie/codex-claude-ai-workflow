@@ -134,22 +134,32 @@ dualctl revise --feedback-file feedback.md --run --workdir <effective_workdir> <
 dualctl complete --workdir <effective_workdir> <workstream_id>
 ```
 
-## Operator Panel
+## Operator Console
 
-启动本地 dashboard：
+启动本地 operator server：
 
 ```bash
 java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 ```
 
-打开：
+默认打开任务控制台：
 
 ```text
-http://localhost:8080/
+http://localhost:8080/console.html
 ```
 
-Operator Panel 使用和 `dualctl trace` 相同的 ledger read model，并通过 SSE 订阅
-overview 更新。它是本地单用户 operator 工具，不是托管式多用户 Web 产品。
+Operator Console 面向最终用户和 reviewer，优先回答“跑到哪、为什么停、下一步做什么”，
+并把 human gate 证据、token 摘要和恢复建议放在同一屏。
+
+旧入口仍保留为管理诊断页面：
+
+```text
+http://localhost:8080/index.html
+```
+
+管理诊断面向 dual 使用者和开发者，用于查看 ledger、raw facts、node id、RCA、CLI 命令和恢复证据。
+两套页面读取同一组 ledger read model，并通过 SSE 订阅 overview 更新。它们都是本地单用户工具，
+不是托管式多用户 Web 产品。
 
 ## 文档入口
 
@@ -174,5 +184,5 @@ overview 更新。它是本地单用户 operator 工具，不是托管式多用�
 - 真实运行依赖本地 `acpx`、Claude、Codex 可用性和额度。
 - Public benchmark 会消耗真实 Agent quota。
 - Delivery 自动化保持保守：准备证据和 PR 材料，但不会自动 merge。
-- Operator Panel 仍是本地 operator 工具，human gate 体验和 gate 数量还会继续优化。
+- Operator Console / Management Diagnostics 仍是本地 operator 工具，human gate 体验和 gate 数量还会继续优化。
 - 项目使用 MIT License；贡献流程和安全报告入口仍需在公开协作前补齐。

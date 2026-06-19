@@ -141,23 +141,34 @@ dualctl revise --feedback-file feedback.md --run --workdir <effective_workdir> <
 dualctl complete --workdir <effective_workdir> <workstream_id>
 ```
 
-## Operator Panel
+## Operator Console
 
-Start the local dashboard:
+Start the local operator server:
 
 ```bash
 java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 ```
 
-Open:
+Open the task console by default:
 
 ```text
-http://localhost:8080/
+http://localhost:8080/console.html
 ```
 
-The Operator Panel uses the same ledger read model as `dualctl trace` and
-subscribes to overview updates through SSE. It is a local single-user operator
-tool, not a hosted multi-user web product.
+The Operator Console is for end users and reviewers. It answers “where is the
+task, why did it stop, and what should I do next,” and keeps human-gate
+evidence, token summaries, and recovery guidance on the same screen.
+
+The old entry remains available as the management diagnostics page:
+
+```text
+http://localhost:8080/index.html
+```
+
+Management Diagnostics is for dual users and developers who need ledger facts,
+raw node ids, RCA, CLI commands, and recovery evidence. Both pages consume the
+same ledger read model and subscribe to overview updates through SSE. They are
+local single-user tools, not hosted multi-user web products.
 
 ## Documentation
 
@@ -183,7 +194,7 @@ tool, not a hosted multi-user web product.
 - Public benchmark runs consume real Agent quota.
 - Delivery automation is conservative: it prepares evidence and PR materials,
   but never auto-merges.
-- The Operator Panel is still a local operator tool; human-gate UX and gate
+- The Operator Console / Management Diagnostics remain local operator tools; human-gate UX and gate
   reduction remain active product work.
 - The project uses the MIT License; contribution and security-reporting docs
   should be added before broader public collaboration.

@@ -205,7 +205,34 @@ dualctl approve --run --workdir <effective_workdir> <workstream_id>
 `dualctl approve`, `dualctl revise`, and `dualctl complete` are shortcuts for
 the longer `dualctl review ...` commands.
 
-## 8. Optional Local Worker Mode
+## 8. Open The Local Console
+
+Start the operator server:
+
+```bash
+java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+```
+
+Default task console:
+
+```text
+http://localhost:8080/console.html
+```
+
+The task console is for end users and reviewers. It shows lifecycle progress,
+the current stop reason, the next action, human-review evidence, token
+summaries, and recovery guidance.
+
+Management diagnostics:
+
+```text
+http://localhost:8080/index.html
+```
+
+Management diagnostics is for dual users and developers who need raw ledger
+facts, node ids, RCA, CLI commands, and recovery evidence.
+
+## 9. Optional Local Worker Mode
 
 Default runs execute the active node inline:
 
@@ -225,7 +252,7 @@ This mode keeps the workflow definition and routing in the runtime ledger. The
 worker is only the local executor for one queued AgentTask; it is not a
 multi-worker platform yet.
 
-## 9. Merge Accepted Worktree Changes
+## 10. Merge Accepted Worktree Changes
 
 When a workstream is completed and accepted, merge the reviewed worktree diff
 back to the original repository explicitly:

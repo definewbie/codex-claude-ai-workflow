@@ -174,7 +174,7 @@ evaluation.
 
 | Item | Status | Purpose | Design |
 |---|---|---|---|
-| Operator Console / Management Diagnostics | Planned | The default task view answers where it is, why it stopped, and what to do next; diagnostics preserve RCA, CLI commands, raw facts, and token/cost. | [operator-observability.md](design/operator-observability.md), [operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
+| Operator Console / Management Diagnostics | MVP implemented | The default task view answers where it is, why it stopped, and what to do next; diagnostics preserve RCA, CLI commands, raw facts, and token/cost. The first entry is `/console.html`; the old `/index.html` remains the management panel. | [operator-observability.md](design/operator-observability.md), [operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
 | Delivery view | Partial | Show delivery merge readiness and result in the completed workstream view. | [delivery-merge.md](design/delivery-merge.md) |
 | Public benchmark | Partial | Provide repeatable public evidence without private project files. | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
 | Open-source docs cleanup | Partial | Keep docs readable, current, and not tied to internal run history. | [release-checklist.md](release-checklist.md) |
