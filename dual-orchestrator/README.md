@@ -143,6 +143,7 @@ overview 更新。它是本地单用户 operator 工具，不是托管式多用�
 ## 文档入口
 
 - [Quickstart](docs/quickstart.md) / [中文](docs/quickstart.zh-CN.md)
+- [Troubleshooting](docs/troubleshooting.md) / [中文](docs/troubleshooting.zh-CN.md)
 - [文档索引](docs/README.md) / [中文](docs/README.zh-CN.md)
 - [总体架构与执行流程](docs/architecture-and-execution-flow.md)
 - [Workflow 状态机](docs/design/workflow-state-machine.md)
@@ -156,8 +157,11 @@ overview 更新。它是本地单用户 operator 工具，不是托管式多用�
 
 ## 当前限制
 
+- P0 主生命周期已闭环，但状态是 `Done with known limits`，详见
+  [P0 Closure Report](docs/testing/p0-closure-report.md)。
 - 项目仍是 pre-1.0，workflow schema 和 prompt 还会演进。
 - 真实运行依赖本地 `acpx`、Claude、Codex 可用性和额度。
 - Public benchmark 会消耗真实 Agent quota。
 - Delivery 自动化保持保守：准备证据和 PR 材料，但不会自动 merge。
+- Operator Panel 仍是本地 operator 工具，human gate 体验和 gate 数量还会继续优化。
 - 项目使用 MIT License；贡献流程和安全报告入口仍需在公开协作前补齐。

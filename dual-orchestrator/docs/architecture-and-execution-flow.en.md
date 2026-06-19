@@ -169,6 +169,27 @@ the artifact contract: the orchestrator no longer treats free-form Markdown as
 the machine source of truth. Agents may write rich human-readable reports, but
 routing depends on typed structured artifacts and explicit lifecycle state.
 
+P0 status is `Done with known limits`; see
+[testing/p0-closure-report.md](testing/p0-closure-report.md). Current validated
+capabilities:
+
+- safe worktree execution with the original repository kept clean;
+- typed artifacts before routing;
+- semantic repair loops after Codex rejection;
+- runtime recovery separated from product/domain rejection;
+- shared ledger read models for trace, summary, and Operator Panel;
+- terminal workflows guarded against accidental resume or approval.
+
+Known limits accepted after P0:
+
+- final acceptance may be `ACCEPT_WITH_NOTES` when live app smoke evidence is
+  unavailable;
+- the `full` lifecycle still has many human gates;
+- context/token governance is observable but still needs continued tightening;
+- delivery merge is explicit and conservative, with no auto-commit or auto-merge;
+- the public benchmark is reusable, while complex private business cases remain
+  maintainer-local evidence.
+
 ## 5. Roadmap
 
 Near-term work should stay on the mainline:

@@ -74,6 +74,9 @@ that both ACP adapters are pinned instead of using floating npm ranges. When
 Claude settings define `ANTHROPIC_BASE_URL` plus a token, it also checks that
 the Claude ACP command can receive those variables.
 
+If `doctor`, acpx, or a later Agent run fails, use
+[troubleshooting.md](troubleshooting.md) before changing workflow code.
+
 ## 4. Run A Small Smoke
 
 From `dual-orchestrator`:
@@ -272,3 +275,18 @@ The ledger lives under:
 ```text
 <effective_workdir>/.agent/workstreams/<workstream_id>/
 ```
+
+## 11. Known P0 Limits
+
+The MVP main lifecycle is closed as `Done with known limits`; see
+[testing/p0-closure-report.md](testing/p0-closure-report.md).
+
+Accepted limits after P0:
+
+- final acceptance may be `ACCEPT_WITH_NOTES` when runtime evidence is enough
+  but live app smoke is not available;
+- full lifecycle runs still contain several human gates;
+- context and provider metrics are usable, but token/cost governance continues
+  under P1;
+- delivery merge is explicit and conservative; the tool applies a reviewed
+  patch to the target index but does not commit or merge automatically.

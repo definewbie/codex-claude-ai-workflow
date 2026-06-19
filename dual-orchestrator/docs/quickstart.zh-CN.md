@@ -70,6 +70,9 @@ dualctl doctor --workdir /path/to/git/repo
 如果 Claude settings 中配置了 `ANTHROPIC_BASE_URL` 和 token，它还会检查
 Claude ACP command 是否能拿到这些变量。
 
+如果 `doctor`、acpx 或后续 Agent run 失败，先看
+[troubleshooting.zh-CN.md](troubleshooting.zh-CN.md)，不要直接修改 workflow 逻辑。
+
 ## 4. 运行最小 Smoke
 
 在 `dual-orchestrator` 目录下运行：
@@ -239,3 +242,17 @@ ledger 位于：
 ```text
 <effective_workdir>/.agent/workstreams/<workstream_id>/
 ```
+
+## 11. P0 已知限制
+
+MVP 主生命周期已经以 `Done with known limits` 收口；详见
+[testing/p0-closure-report.md](testing/p0-closure-report.md)。
+
+P0 后接受的限制：
+
+- 如果运行时证据足够但没有 live app smoke，final acceptance 可能是
+  `ACCEPT_WITH_NOTES`，不一定是干净的 `ACCEPT`；
+- `full` lifecycle 仍然有较多 human gates；
+- context/provider metrics 已能支持 MVP，但 token/cost 治理还会在 P1 继续强化；
+- delivery merge 是显式保守动作：工具把已审查 patch apply 到目标 repo index，
+  不自动 commit，也不自动 merge。

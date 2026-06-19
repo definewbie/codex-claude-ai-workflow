@@ -194,3 +194,16 @@ dualctl retry --workdir <effective_workdir> <workstream_id>
 - 不绕过 human gate。
 
 系统只接受明确的结构化 artifact、节点 outcome 和 gate action。LLM 可以判断，但状态变更必须通过 harness 记录和校验。
+
+## 10. 当前 P0 结论
+
+P0 主生命周期已经以 `Done with known limits` 收口。状态机当前需要守住的边界是：
+
+- `COMPLETED` 是终态；只能观察、summary、delivery merge、cleanup，不能继续 run/resume/retry/approve；
+- runtime recovery 只处理外部执行问题，例如 session、quota、reconnect、context window；
+- Codex `REJECT` 或人审 `revise` 是语义修复，不是 runtime retry；
+- UI、CLI、API 必须通过同一套 overview / attention / timeline 投影解释状态；
+- 如果状态显示不一致，先以 `dualctl trace` 和 ledger 为准，再修 projection，不能在 UI 里单独猜状态。
+
+排查入口见 [../troubleshooting.zh-CN.md](../troubleshooting.zh-CN.md)，P0 证据见
+[../testing/p0-closure-report.md](../testing/p0-closure-report.md)。

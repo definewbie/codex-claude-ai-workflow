@@ -9,6 +9,7 @@ English version: [README.md](README.md)
 | 目的 | 英文 | 中文 |
 |---|---|---|
 | 安装和第一次运行 | [quickstart.md](quickstart.md) | [quickstart.zh-CN.md](quickstart.zh-CN.md) |
+| 停住或状态不一致时排查 | [troubleshooting.md](troubleshooting.md) | [troubleshooting.zh-CN.md](troubleshooting.zh-CN.md) |
 | 项目为什么存在 | [whitepaper-mapping.md](whitepaper-mapping.md) | 暂未拆分中文对照 |
 | 主线功能路线图 | [mainline-roadmap.md](mainline-roadmap.md) | [mainline-roadmap.zh-CN.md](mainline-roadmap.zh-CN.md) |
 | 总体架构和执行流程 | [architecture-and-execution-flow.en.md](architecture-and-execution-flow.en.md) | [architecture-and-execution-flow.md](architecture-and-execution-flow.md) |
@@ -64,6 +65,7 @@ English version: [README.md](README.md)
 私有真实 case 对工程判断很有价值，但不是公开 onboarding 路径。本公开分支只保留脱敏总结、public benchmark 和短版 P0 closure report。`testing/real-case-reports/` 是本地 ignored 输出，生成后不应提交。
 
 对维护者仍有价值、但不适合放在主阅读路径里的过程文档，放在 `archive/`。
+公开发布时 `archive/` 是可选维护者材料；当前文档不应依赖 archive 才能读懂。
 
 ## 设计演进笔记
 

@@ -15,6 +15,7 @@ cleanup branch; reusable evidence now starts from the public benchmark sample.
 | Purpose | English | Chinese |
 |---|---|---|
 | Install and first runnable workflow | [quickstart.md](quickstart.md) | [quickstart.zh-CN.md](quickstart.zh-CN.md) |
+| Troubleshooting stopped or inconsistent runs | [troubleshooting.md](troubleshooting.md) | [troubleshooting.zh-CN.md](troubleshooting.zh-CN.md) |
 | Why this project exists | [whitepaper-mapping.md](whitepaper-mapping.md) | Not split yet |
 | Mainline roadmap | [mainline-roadmap.md](mainline-roadmap.md) | [mainline-roadmap.zh-CN.md](mainline-roadmap.zh-CN.md) |
 | Overall product and architecture narrative | [architecture-and-execution-flow.en.md](architecture-and-execution-flow.en.md) | [architecture-and-execution-flow.md](architecture-and-execution-flow.md) |
@@ -77,7 +78,8 @@ benchmark material, and a short P0 closure report. Raw local reports remain
 ignored under `testing/real-case-reports/` when generated locally.
 
 Historical process notes that are useful for maintainers but too noisy for the
-main reading path live under `archive/`.
+main reading path live under `archive/`. The archive is optional maintainer
+material for public release; current docs must not depend on it.
 
 ## Design Evolution Notes
 
@@ -90,5 +92,5 @@ harness. It is article material, not runtime reference.
 As of 2026-06-08, tracked historical handoffs and private benchmark case/report
 files have been removed from the public cleanup branch. Remaining historical
 design docs may still describe why the system changed, but current behavior is
-documented by the reading path above. See `public-cleanup-todo.md` for the
-release checklist.
+documented by the reading path above. See
+`archive/public-cleanup-todo.md` for maintainer-only cleanup notes.

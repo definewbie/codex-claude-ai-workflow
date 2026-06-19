@@ -1,7 +1,7 @@
 # Definition / Instance / Execution 模型
 
 > 状态：P0 领域模型基线
-> 更新时间：2026-06-15
+> 更新时间：2026-06-19
 
 这份文档定义 `dual-orchestrator` 的执行实例模型。它的目的不是引入更复杂的工作流框架，而是把已经反复出问题的状态边界说清楚：什么是流程定义，什么是流程实例，什么是一次具体执行。
 
@@ -362,6 +362,18 @@ new NodeExecution for each concrete run
 - 现有 `runs/` 不删除，只降级为 tool-specific ledger；
 - 现有 `nodes/*.json` 不立刻迁移，只逐步把 PID/进程细节迁到 `NodeExecution`；
 - `workflow/current.json` 短期继续存在，但应逐渐只表达 current pointer，不承载全部解释逻辑。
+
+## 7.1 当前 P0 实现状态
+
+P0 是 `Done with known limits`，不是宣称模型已经永远完成。当前实现已经具备主生命周期所需的结构化状态：
+
+- `WorkflowDefinition` 会固化到每个 workstream ledger；
+- `WorkflowInstance` 和 `WorkflowCurrent` 承载 durable workflow state；
+- `NodeInstance` 承载逻辑节点状态；
+- Agent run 目录仍是 tool-specific evidence；
+- completion、goal satisfaction、review packet、metrics、timeline 都从 ledger facts 投影。
+
+完全分离的 `WorkflowExecution` / `NodeExecution` 账本仍是后续方向。在它完成之前，新代码不能再引入 attempt/run/job 这类同义词。runtime 事实要么进入现有 node/run metadata，要么进入规划中的 execution documents。
 
 ## 8. Projection 规则
 

@@ -149,6 +149,7 @@ tool, not a hosted multi-user web product.
 ## Documentation
 
 - [Quickstart](docs/quickstart.md) / [中文](docs/quickstart.zh-CN.md)
+- [Troubleshooting](docs/troubleshooting.md) / [中文](docs/troubleshooting.zh-CN.md)
 - [Docs index](docs/README.md) / [中文](docs/README.zh-CN.md)
 - [Architecture and execution flow](docs/architecture-and-execution-flow.en.md) / [中文](docs/architecture-and-execution-flow.md)
 - [Workflow state machine](docs/design/workflow-state-machine.md)
@@ -162,10 +163,14 @@ tool, not a hosted multi-user web product.
 
 ## Current Limits
 
+- The P0 main lifecycle is closed as `Done with known limits`; see
+  [P0 Closure Report](docs/testing/p0-closure-report.md).
 - The project is pre-1.0; workflow schemas and prompts will continue to evolve.
 - Real runs depend on local `acpx`, Claude, Codex availability, and quota.
 - Public benchmark runs consume real Agent quota.
 - Delivery automation is conservative: it prepares evidence and PR materials,
   but never auto-merges.
+- The Operator Panel is still a local operator tool; human-gate UX and gate
+  reduction remain active product work.
 - The project uses the MIT License; contribution and security-reporting docs
   should be added before broader public collaboration.

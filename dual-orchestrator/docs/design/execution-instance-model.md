@@ -1,7 +1,7 @@
 # Definition / Instance / Execution Model
 
 > Status: P0 domain-model foundation
-> Updated: 2026-06-15
+> Updated: 2026-06-19
 
 This document defines the execution-instance model for `dual-orchestrator`.
 The goal is not to introduce a heavier workflow framework. The goal is to make
@@ -267,6 +267,24 @@ Compatibility:
   `NodeExecution`;
 - keep `workflow/current.json` for current pointers, but reduce projection logic
   that interprets it alone.
+
+## 6.1 Current P0 Implementation Status
+
+P0 is closed with known limits, not declared finished forever. The current
+implementation already writes and reads enough structured state for the main
+lifecycle:
+
+- `WorkflowDefinition` is copied into each workstream ledger.
+- `WorkflowInstance` and `WorkflowCurrent` own the durable workflow state.
+- `NodeInstance` owns logical node status.
+- Agent run directories remain tool-specific evidence.
+- Completion, goal satisfaction, review packets, metrics, and timeline are
+  projected from ledger facts.
+
+The fully separated `WorkflowExecution` / `NodeExecution` ledger remains the
+direction for deeper execution history. Until it is complete, new code must not
+invent another synonym such as attempt/run/job. Runtime facts should either go
+into the existing node/run metadata or into the planned execution documents.
 
 ## 7. Complete Implementation Plan
 

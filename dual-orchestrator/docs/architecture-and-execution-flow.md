@@ -1,7 +1,7 @@
 # dual-orchestrator 架构与执行流程
 
 > Status: current architecture guide
-> Last updated: 2026-06-13
+> Last updated: 2026-06-19
 
 `dual-orchestrator` 是一个本地 AI engineering harness。它通过 `acpx`
 驱动 Claude 和 Codex，把一个研发任务放进可追踪、可暂停、可恢复的
@@ -343,7 +343,26 @@ final report
 - scheduler 不通过 human gate，不绕过 artifact contract failure。
 - 长生命周期资源必须有 owner：agent process、SSE stream、scheduler、lock、worktree。
 
-## 9. 改动入口
+## 9. P0 收口状态
+
+P0 主生命周期状态是 `Done with known limits`。当前已经验证：
+
+- workstream 默认在安全 worktree 中运行，原始仓库保持干净；
+- Claude/Codex 输出先进入 typed artifact，再由 orchestrator 路由；
+- Codex `REJECT` 能进入 semantic repair loop，而不是要求人工重开 workstream；
+- runtime reconnect、session、quota 等问题通过 recovery 边界处理，不伪装成业务拒绝；
+- `trace`、summary、Operator Panel 使用同一类 ledger read model 回答状态问题；
+- completed workflow 只能做观察、summary、delivery merge 和 cleanup，不应继续推进主线节点。
+
+P0 接受的已知限制：
+
+- final acceptance 可以是 `ACCEPT_WITH_NOTES`，尤其是在缺少 live app smoke 证据时；
+- `full` lifecycle 的 human gates 仍偏多，体验优化属于后续产品工作；
+- context/token 成本已可观测，但治理还要继续收敛；
+- delivery merge 是显式命令，不自动 commit、push、merge；
+- public benchmark 是可复用验证入口，复杂私有业务 case 仍是维护者本地证据。
+
+## 10. 改动入口
 
 常见改动应该从这些文件开始读：
 
@@ -361,7 +380,7 @@ final report
 修改 workflow、artifact、human gate、recovery、delivery 或 projection 前，先阅读
 `docs/engineering-checklist.md`。
 
-## 10. 相关文档
+## 11. 相关文档
 
 - `docs/design/workstream-domain-model.md`
 - `docs/design/goal-driven-workstream-loop.zh-CN.md`
@@ -370,5 +389,7 @@ final report
 - `docs/design/artifact-contracts-and-context.md`
 - `docs/design/failure-recovery-and-calibration.md`
 - `docs/design/operator-observability.md`
+- `docs/troubleshooting.zh-CN.md`
+- `docs/testing/p0-closure-report.md`
 - `docs/design/design-evolution-notes.zh-CN.md`
 - `docs/engineering-checklist.md`

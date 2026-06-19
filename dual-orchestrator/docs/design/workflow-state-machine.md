@@ -414,3 +414,21 @@ dualctl recovery show --workdir <effective_workdir> <workstream_id>
 dualctl timeline --workdir <effective_workdir> <workstream_id>
 cat <effective_workdir>/.agent/workstreams/<workstream_id>/reports/latest-final-report.md
 ```
+
+## 13. Current P0 Conclusion
+
+The P0 main lifecycle is closed as `Done with known limits`. The state machine
+must keep these boundaries:
+
+- `COMPLETED` is terminal; only observation, summary, delivery merge, and
+  cleanup remain valid;
+- runtime recovery handles external execution issues such as session, quota,
+  reconnect, and context-window failures;
+- Codex `REJECT` or human `revise` is semantic repair, not runtime retry;
+- UI, CLI, and API must explain state through the same overview / attention /
+  timeline projections;
+- when status surfaces disagree, trust `dualctl trace` and the ledger first,
+  then fix projection instead of guessing state in the UI.
+
+Troubleshooting starts at [../troubleshooting.md](../troubleshooting.md). P0
+evidence is recorded in [../testing/p0-closure-report.md](../testing/p0-closure-report.md).
