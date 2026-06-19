@@ -152,7 +152,7 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 Open the task console by default:
 
 ```text
-http://localhost:8080/console.html
+http://localhost:8080/
 ```
 
 The Operator Console is for end users and reviewers. It answers “where is the
@@ -162,7 +162,7 @@ evidence, token summaries, and recovery guidance on the same screen.
 The old entry remains available as the management diagnostics page:
 
 ```text
-http://localhost:8080/index.html
+http://localhost:8080/mgt/index.html
 ```
 
 Management Diagnostics is for dual users and developers who need ledger facts,

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dual Management Panel</title>
+  <link rel="stylesheet" href="/mgt/styles.css?v=p1p2-operator-simplify-20260619">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>Dual Management Panel</h1>
+        <p>Diagnostics, raw ledger facts, timeline, and human-gate actions.</p>
+      </div>
+      <div class="top-actions">
+        <span id="selectedStatus" class="badge muted">-</span>
+        <span id="connection" class="badge muted">Idle</span>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="field field-grow">
+        <span>Workspace source</span>
+        <div class="workspace-picker">
+          <div class="workspace-card">
+            <strong id="workspaceSummary">Server current directory</strong>
+            <span id="workspacePath">Leave empty to use the server process workdir.</span>
+          </div>
+          <button id="switchWorkspace" class="secondary">Choose</button>
+        </div>
+        <div id="workspaceChooser" class="workspace-chooser hidden">
+          <div class="workspace-chooser-head">
+            <div>
+              <strong>Choose workspace path</strong>
+              <span>Browse local directories or paste an absolute path.</span>
+            </div>
+            <button id="closeWorkspaceChooser" class="secondary" type="button">Close</button>
+          </div>
+          <label class="field">
+            <span>Workspace path</span>
+            <div class="path-row">
+              <input id="workdir" type="text" placeholder="/path/to/effective/worktree">
+              <button id="browseWorkspace" class="secondary" type="button">Browse</button>
+            </div>
+          </label>
+          <div class="path-actions">
+            <button id="useWorkspace" type="button">Use this path</button>
+            <button id="refreshWorkspaceDirectories" class="secondary" type="button">Refresh directories</button>
+          </div>
+          <div id="workspaceBrowser" class="workspace-browser"></div>
+        </div>
+      </div>
+      <div class="field action-field">
+        <span>Workflow action</span>
+        <button id="resume">Run to next gate</button>
+        <span id="runHint" class="subtle">Select a workstream.</span>
+      </div>
+      <details class="advanced-controls">
+        <summary>Advanced controls</summary>
+        <div class="advanced-control-grid">
+          <label class="field compact">
+            <span>Max steps</span>
+            <input id="maxSteps" type="number" min="1" value="20">
+          </label>
+          <label class="field recovery-toggle">
+            <span>Scheduler recovery</span>
+            <span class="checkbox-row">
+              <input id="autoRecover" type="checkbox">
+              <span>Auto retry runtime failures</span>
+            </span>
+          </label>
+          <button id="refresh" class="secondary">Refresh</button>
+          <button id="tick" class="secondary">Scheduler Tick</button>
+        </div>
+      </details>
+    </section>
+
+    <section class="layout">
+      <aside class="panel list-panel">
+        <div class="panel-title">
+          <h2>Workstreams</h2>
+          <span id="count" class="subtle">0</span>
+        </div>
+        <div id="workstreams" class="workstreams"></div>
+      </aside>
+
+      <section class="main-panel">
+        <section class="panel progress-panel">
+          <div class="panel-title">
+            <h2>Lifecycle Progress</h2>
+            <span id="lifecycleBadge" class="badge muted">No workstream</span>
+          </div>
+          <div id="lifecycleProgress" class="progress"></div>
+          <section id="nodeInspector" class="node-inspector hidden" aria-live="polite">
+            <div class="node-inspector-head">
+              <div>
+                <span class="eyebrow">Selected stage</span>
+                <h3 id="nodeInspectorTitle">-</h3>
+              </div>
+              <button id="clearNodeSelection" class="secondary" type="button">Clear</button>
+            </div>
+            <div id="nodeInspectorBody" class="node-list"></div>
+          </section>
+        </section>
+
+        <section id="gateGrid" class="gate-grid gate-grid-single">
+          <div class="panel current-node">
+            <div class="panel-title">
+              <h2 id="selectedTitle">No workstream selected</h2>
+              <span id="gateBadge" class="badge muted">-</span>
+            </div>
+            <p id="actionHint" class="hint">Select a workstream to see available actions.</p>
+            <div class="callout">
+              <span class="eyebrow">Why stopped / running</span>
+              <p id="overviewWhy">Select a workstream to inspect the current workflow state.</p>
+            </div>
+            <section id="recoveryPanel" class="panel recovery-panel hidden">
+              <div class="panel-title">
+                <h2>Recovery Summary</h2>
+                <span id="recoveryPath" class="subtle"></span>
+              </div>
+              <pre id="recoveryMarkdown" class="markdown"></pre>
+            </section>
+            <div id="recoveryActions" class="operation-strip hidden">
+              <button id="recoverStaleRunning" class="secondary">收束 stale running</button>
+              <button id="retry" class="secondary">重试当前节点</button>
+              <button id="closeMistakenIteration" class="secondary">关闭误开的下一轮</button>
+            </div>
+            <div id="decisionPanel" class="decision-panel hidden">
+              <div class="panel-title">
+                <h2>Human decision</h2>
+                <span id="reviewGate" class="subtle"></span>
+              </div>
+              <div id="reviewStructured" class="review-structured"></div>
+              <label class="field">
+                <span>Revision feedback</span>
+                <textarea id="feedback" rows="3" placeholder="Only needed when requesting a revision."></textarea>
+              </label>
+              <div class="decision-actions">
+                <button id="approve">批准并继续</button>
+                <button id="revise" class="secondary">请求修改</button>
+              </div>
+              <div class="operation-strip">
+                <button id="complete" class="danger">结束 workstream</button>
+              </div>
+            </div>
+          </div>
+
+          <section id="reviewPanel" class="panel hidden">
+            <div class="panel-title">
+              <h2>Gate Evidence</h2>
+              <span id="reviewPanelBadge" class="badge warn">Open packet</span>
+            </div>
+            <div id="gateEvidence" class="packet-list"></div>
+            <details class="raw-packet">
+              <summary>Raw packet markdown</summary>
+              <pre id="reviewPacket" class="markdown"></pre>
+            </details>
+          </section>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Metrics</h2>
+            <span class="subtle">ledger projection</span>
+          </div>
+          <div id="overviewCards" class="overview-grid metrics-grid"></div>
+          <section class="overview-attention">
+            <div class="mini-title">Attention</div>
+            <div id="overviewAttention" class="attention-list"></div>
+          </section>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Grouped Timeline</h2>
+            <span class="subtle">by iteration</span>
+          </div>
+          <div id="timelineView" class="timeline"></div>
+        </section>
+
+        <details class="panel debug-panel">
+          <summary>
+            <span>Debug / Ledger Diagnostics</span>
+            <em>advanced</em>
+          </summary>
+          <div class="debug-grid">
+            <section>
+              <div class="mini-title">Next action</div>
+              <p id="overviewNext" class="debug-text">-</p>
+            </section>
+            <section>
+              <div class="mini-title">Key artifacts</div>
+              <div id="overviewArtifacts" class="mini-list"></div>
+            </section>
+            <section>
+              <div class="mini-title">Delivery Merge</div>
+              <div id="overviewDeliveryMerge" class="mini-list"></div>
+            </section>
+            <section>
+              <div class="mini-title">Latest Agent Tasks</div>
+              <div id="overviewAgentTasks" class="mini-list"></div>
+            </section>
+          </div>
+          <pre id="statusView" class="json">{}</pre>
+        </details>
+
+        <details class="panel debug-panel">
+          <summary>
+            <span>Artifact Summary</span>
+            <em>latest contract sidecars</em>
+          </summary>
+          <div id="artifactSummary" class="artifact-list"></div>
+        </details>
+
+        <section class="panel hidden" id="legacyTimelinePanel">
+          <div class="panel-title">
+            <h2>Recent timeline</h2>
+          </div>
+          <div id="overviewTimeline" class="mini-list"></div>
+        </section>
+
+        <details class="panel debug-panel">
+          <summary>
+            <span>Last Response</span>
+            <em>raw API payload</em>
+          </summary>
+          <pre id="responseView" class="json">{}</pre>
+        </details>
+      </section>
+    </section>
+  </main>
+
+    <script src="/mgt/app.js?v=p1p2-operator-simplify-20260619"></script>
+</body>
+</html>

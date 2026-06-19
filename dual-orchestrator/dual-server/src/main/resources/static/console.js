@@ -656,7 +656,7 @@ function switchView(view) {
 }
 
 function openOldPanel() {
-  window.location.href = "/index.html";
+  window.location.href = "/mgt/index.html";
 }
 
 function openModal() {
@@ -672,7 +672,7 @@ function closeModal() {
 }
 
 function updateNewTaskCommand() {
-  const repo = els.newTaskRepo.value.trim() || "<repo>";
+  const repo = els.newTaskRepo.value.trim() || "<local_git_repo_path>";
   const language = els.newTaskLanguage.value;
   const lifecycle = els.newTaskLifecycle.value;
   const maxSteps = Number.parseInt(els.newTaskMaxSteps.value, 10) || 80;

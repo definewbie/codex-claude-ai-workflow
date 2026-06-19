@@ -50,7 +50,7 @@ P2 的目标不是删除现有 UI，而是把它拆成两个清晰视图：
 
 ### Step 1：保留旧 UI，新增视图壳
 
-- 保留现有 `dual-server/src/main/resources/static/index.html`、`app.js`、`styles.css` 的功能。
+- 保留旧 `index.html`、`app.js`、`styles.css` 的功能，但迁移到 `static/mgt/`，避免根路径继续暴露调试面板。
 - 在同一页面或新入口中增加两个顶层视图：
   - `任务视图`
   - `管理诊断`
@@ -79,7 +79,7 @@ P2 的目标不是删除现有 UI，而是把它拆成两个清晰视图：
 弹窗字段：
 
 - 任务名称
-- 目标仓库
+- 本地 Git 仓库路径，即用户要让 dual 接管的本机 repo 根目录，不是 GitHub remote URL。
 - 任务描述 / task file
 - 提示词语言：自动识别 / 中文 / English
 - 运行模式：默认安全 worktree / 原地运行
@@ -190,12 +190,13 @@ CLI 命令不应只是静态提示，要带上当前 workdir 和 workstream id�
 
 ## 实现状态
 
-2026-06-19 第一版已落地为独立入口：
+2026-06-19 第一版已落地；随后根据入口语义调整为根路径默认控制台：
 
-- `/console.html`：新的任务视图和管理诊断双视图。
+- `/` / `/index.html`：新的任务视图和管理诊断双视图默认入口。
+- `/console.html`：兼容跳转入口，跳转到根任务控制台，避免维护两份页面。
 - `/console.css`：桌面 operator 控制台样式，沿用原型的轻量卡片和操作台风格。
 - `/console.js`：消费现有 workstream list / status / overview / timeline / review / recovery / SSE API。
-- `/index.html`、`app.js`、`styles.css`：旧管理面板保留，不删除、不降能力。
+- `/mgt/index.html`、`/mgt/app.js`、`/mgt/styles.css`：旧管理面板保留，不删除、不降能力。
 
 本轮完成：
 
@@ -212,10 +213,10 @@ CLI 命令不应只是静态提示，要带上当前 workdir 和 workstream id�
 - `git diff --check`
 - `mvn -pl dual-server -am test`
 - `mvn -pl dual-server -am package -DskipTests`
-- 临时启动 `dual-server` 后，`/console.html`、`/console.js`、`/index.html` 均返回 `200`。
+- 临时启动 `dual-server` 后，`/`、`/index.html`、`/console.html`、`/console.js`、`/mgt/index.html` 均应返回 `200`。
 
 仍需后续用真实 workstream 样本校准：
 
 - token/cost 字段目前是 best-effort 汇总，依赖 ledger 中已有 metrics / usage 字段。
 - 新建任务第一版只生成 CLI，不直接调用 start API。
-- 默认欢迎页仍是旧 `/index.html`；任务控制台通过 `/console.html` 显式进入，待真实使用稳定后再决定是否切换默认入口。
+- 根路径已切换到任务控制台；旧管理面板位于 `/mgt/index.html`。

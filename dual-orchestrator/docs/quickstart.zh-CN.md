@@ -190,7 +190,7 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 默认任务控制台：
 
 ```text
-http://localhost:8080/console.html
+http://localhost:8080/
 ```
 
 任务控制台面向最终用户和 reviewer，显示生命周期进度、当前停止原因、下一步动作、人审证据、
@@ -199,7 +199,7 @@ token 摘要和恢复建议。
 管理诊断入口：
 
 ```text
-http://localhost:8080/index.html
+http://localhost:8080/mgt/index.html
 ```
 
 管理诊断面向 dual 使用者和开发者，用于查看 raw ledger、node id、RCA、CLI 命令和恢复证据。

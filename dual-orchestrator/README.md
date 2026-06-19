@@ -145,7 +145,7 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 默认打开任务控制台：
 
 ```text
-http://localhost:8080/console.html
+http://localhost:8080/
 ```
 
 Operator Console 面向最终用户和 reviewer，优先回答“跑到哪、为什么停、下一步做什么”，
@@ -154,7 +154,7 @@ Operator Console 面向最终用户和 reviewer，优先回答“跑到哪、为
 旧入口仍保留为管理诊断页面：
 
 ```text
-http://localhost:8080/index.html
+http://localhost:8080/mgt/index.html
 ```
 
 管理诊断面向 dual 使用者和开发者，用于查看 ledger、raw facts、node id、RCA、CLI 命令和恢复证据。

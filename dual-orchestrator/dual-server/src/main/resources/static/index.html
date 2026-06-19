@@ -1,237 +1,225 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dual Operator Panel</title>
-  <link rel="stylesheet" href="/styles.css?v=p1p2-operator-simplify-20260619">
+  <title>Dual 操作台</title>
+  <link rel="stylesheet" href="/console.css?v=operator-console-20260619">
 </head>
 <body>
-  <main class="shell">
+  <div class="app">
     <header class="topbar">
-      <div>
-        <h1>Dual Operator Panel</h1>
-        <p>Local workflow status, timeline, and human-gate actions.</p>
+      <div class="brand">
+        <div class="logo">D</div>
+        <div>
+          <div class="brand-name">Dual 操作台</div>
+          <div class="brand-sub">任务执行 · Loop 收敛 · RCA 诊断</div>
+        </div>
       </div>
-      <div class="top-actions">
-        <span id="selectedStatus" class="badge muted">-</span>
-        <span id="connection" class="badge muted">Idle</span>
+      <div class="top-right">
+        <span id="connection" class="conn"><i></i>待同步</span>
+        <div class="seg" role="tablist" aria-label="视图">
+          <button id="operatorTab" class="active" type="button">任务视图</button>
+          <button id="managementTab" type="button">管理诊断</button>
+        </div>
       </div>
     </header>
 
-    <section class="toolbar">
-      <div class="field field-grow">
-        <span>Workspace source</span>
-        <div class="workspace-picker">
-          <div class="workspace-card">
-            <strong id="workspaceSummary">Server current directory</strong>
-            <span id="workspacePath">Leave empty to use the server process workdir.</span>
-          </div>
-          <button id="switchWorkspace" class="secondary">Choose</button>
+    <div class="cols">
+      <aside class="sidebar">
+        <div class="side-head">
+          <span>任务</span>
+          <span id="taskCount" class="count">0</span>
         </div>
-        <div id="workspaceChooser" class="workspace-chooser hidden">
-          <div class="workspace-chooser-head">
-            <div>
-              <strong>Choose workspace path</strong>
-              <span>Browse local directories or paste an absolute path.</span>
-            </div>
-            <button id="closeWorkspaceChooser" class="secondary" type="button">Close</button>
-          </div>
-          <label class="field">
-            <span>Workspace path</span>
-            <div class="path-row">
-              <input id="workdir" type="text" placeholder="/path/to/effective/worktree">
-              <button id="browseWorkspace" class="secondary" type="button">Browse</button>
-            </div>
-          </label>
-          <div class="path-actions">
-            <button id="useWorkspace" type="button">Use this path</button>
-            <button id="refreshWorkspaceDirectories" class="secondary" type="button">Refresh directories</button>
-          </div>
-          <div id="workspaceBrowser" class="workspace-browser"></div>
-        </div>
-      </div>
-      <div class="field action-field">
-        <span>Workflow action</span>
-        <button id="resume">Run to next gate</button>
-        <span id="runHint" class="subtle">Select a workstream.</span>
-      </div>
-      <details class="advanced-controls">
-        <summary>Advanced controls</summary>
-        <div class="advanced-control-grid">
-          <label class="field compact">
-            <span>Max steps</span>
-            <input id="maxSteps" type="number" min="1" value="20">
-          </label>
-          <label class="field recovery-toggle">
-            <span>Scheduler recovery</span>
-            <span class="checkbox-row">
-              <input id="autoRecover" type="checkbox">
-              <span>Auto retry runtime failures</span>
-            </span>
-          </label>
-          <button id="refresh" class="secondary">Refresh</button>
-          <button id="tick" class="secondary">Scheduler Tick</button>
-        </div>
-      </details>
-    </section>
-
-    <section class="layout">
-      <aside class="panel list-panel">
-        <div class="panel-title">
-          <h2>Workstreams</h2>
-          <span id="count" class="subtle">0</span>
-        </div>
-        <div id="workstreams" class="workstreams"></div>
+        <div id="taskList" class="task-list"></div>
+        <button id="newTaskBtn" class="btn subtle sm new-task" type="button">＋ 新建任务</button>
       </aside>
 
-      <section class="main-panel">
-        <section class="panel progress-panel">
-          <div class="panel-title">
-            <h2>Lifecycle Progress</h2>
-            <span id="lifecycleBadge" class="badge muted">No workstream</span>
-          </div>
-          <div id="lifecycleProgress" class="progress"></div>
-          <section id="nodeInspector" class="node-inspector hidden" aria-live="polite">
-            <div class="node-inspector-head">
-              <div>
-                <span class="eyebrow">Selected stage</span>
-                <h3 id="nodeInspectorTitle">-</h3>
-              </div>
-              <button id="clearNodeSelection" class="secondary" type="button">Clear</button>
+      <main class="main">
+        <section id="operatorView" class="operator">
+          <div class="task-head">
+            <div>
+              <div class="eyebrow">当前任务</div>
+              <h1 id="taskTitle">请选择任务</h1>
+              <div id="taskSub" class="task-sub">从左侧选择一个任务，或新建任务。</div>
             </div>
-            <div id="nodeInspectorBody" class="node-list"></div>
+            <span id="taskPill" class="pill muted">未选择</span>
+          </div>
+
+          <section class="lifecycle">
+            <div class="lc-head">
+              <h2>生命周期进度</h2>
+              <span id="loopBadge" class="small-pill muted">Loop 未知</span>
+            </div>
+            <div id="stages" class="stages"></div>
+          </section>
+
+          <section id="primaryCard" class="primary-card">
+            <span id="primaryEyebrow" class="eb">等待选择</span>
+            <h2 id="primaryTitle">选择任务后查看当前状态</h2>
+            <p id="primaryWhy" class="why">任务视图只展示完成判断所需的信息；完整 ledger 和排障入口在管理诊断。</p>
+            <div class="next">
+              <span class="k">建议下一步</span>
+              <span id="primaryNext">选择左侧任务。</span>
+            </div>
+            <div id="revisionBox" class="revision-box" hidden>
+              <label for="revisionFeedback">打回说明</label>
+              <textarea id="revisionFeedback" rows="4" placeholder="说明需要 Claude 重新处理的问题，例如：边界不清、证据不足、实现超范围。"></textarea>
+            </div>
+            <div id="primaryActions" class="primary-actions"></div>
+          </section>
+
+          <section id="evidence" class="grid2"></section>
+
+          <section class="card">
+            <h3>Loop / 修复历史</h3>
+            <div class="cap">说明为什么流程会回到前面阶段；语义修复、运行时恢复和人工打回分开展示。</div>
+            <div id="loopHistory" class="loop-line"></div>
           </section>
         </section>
 
-        <section id="gateGrid" class="gate-grid gate-grid-single">
-          <div class="panel current-node">
-            <div class="panel-title">
-              <h2 id="selectedTitle">No workstream selected</h2>
-              <span id="gateBadge" class="badge muted">-</span>
+        <section id="managementView" class="management">
+          <div class="task-head">
+            <div>
+              <div class="eyebrow">管理诊断页面</div>
+              <h1>RCA：定位问题、恢复运行、预防复发</h1>
+              <div class="task-sub">给 dual 使用者和开发者使用。管理面板保留在 <a href="/mgt/index.html">Management Panel</a>。</div>
             </div>
-            <p id="actionHint" class="hint">Select a workstream to see available actions.</p>
-            <div class="callout">
-              <span class="eyebrow">Why stopped / running</span>
-              <p id="overviewWhy">Select a workstream to inspect the current workflow state.</p>
-            </div>
-            <section id="recoveryPanel" class="panel recovery-panel hidden">
-              <div class="panel-title">
-                <h2>Recovery Summary</h2>
-                <span id="recoveryPath" class="subtle"></span>
-              </div>
-              <pre id="recoveryMarkdown" class="markdown"></pre>
-            </section>
-            <div id="recoveryActions" class="operation-strip hidden">
-              <button id="recoverStaleRunning" class="secondary">收束 stale running</button>
-              <button id="retry" class="secondary">重试当前节点</button>
-              <button id="closeMistakenIteration" class="secondary">关闭误开的下一轮</button>
-            </div>
-            <div id="decisionPanel" class="decision-panel hidden">
-              <div class="panel-title">
-                <h2>Human decision</h2>
-                <span id="reviewGate" class="subtle"></span>
-              </div>
-              <div id="reviewStructured" class="review-structured"></div>
-              <label class="field">
-                <span>Revision feedback</span>
-                <textarea id="feedback" rows="3" placeholder="Only needed when requesting a revision."></textarea>
-              </label>
-              <div class="decision-actions">
-                <button id="approve">批准并继续</button>
-                <button id="revise" class="secondary">请求修改</button>
-              </div>
-              <div class="operation-strip">
-                <button id="complete" class="danger">结束 workstream</button>
-              </div>
-            </div>
+            <span id="diagnosticPill" class="pill info">Diagnostics</span>
           </div>
 
-          <section id="reviewPanel" class="panel hidden">
-            <div class="panel-title">
-              <h2>Gate Evidence</h2>
-              <span id="reviewPanelBadge" class="badge warn">Open packet</span>
+          <section class="grid3">
+            <div class="rca-step bad">
+              <strong>1. 症状</strong>
+              <p id="rcaSymptom">请选择任务。</p>
             </div>
-            <div id="gateEvidence" class="packet-list"></div>
-            <details class="raw-packet">
-              <summary>Raw packet markdown</summary>
-              <pre id="reviewPacket" class="markdown"></pre>
-            </details>
+            <div class="rca-step warn">
+              <strong>2. 影响范围</strong>
+              <p id="rcaImpact">-</p>
+            </div>
+            <div class="rca-step">
+              <strong>3. 当前判断</strong>
+              <p id="rcaHypothesis">-</p>
+            </div>
+          </section>
+
+          <section class="grid2">
+            <div class="card">
+              <h3>时间线</h3>
+              <div class="cap">来自 timeline projection，按时间排序。</div>
+              <div id="rcaTimeline" class="loop-line"></div>
+            </div>
+            <div class="card">
+              <h3>证据链</h3>
+              <div class="cap">为什么系统得出当前判断。</div>
+              <ul id="rcaEvidence" class="clean"></ul>
+            </div>
+          </section>
+
+          <section class="grid2">
+            <div class="card">
+              <h3>立即处置命令</h3>
+              <div class="cap">命令由当前状态、workdir 和 workstream id 生成，执行前请确认路径。</div>
+              <pre id="diagnosticCommand" class="cmd">请选择任务。</pre>
+              <div class="cmd-row">
+                <button id="copyCommand" class="btn primary sm" type="button">复制命令</button>
+                <button id="openOldPanel" class="btn ghost sm" type="button">打开旧管理面板</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3>验证与预防</h3>
+              <div class="cap">修复后如何确认恢复生效，以及如何避免复发。</div>
+              <ul id="rcaVerify" class="clean"></ul>
+            </div>
+          </section>
+
+          <section class="grid2">
+            <div class="card">
+              <h3>Token / Cost Diagnostics</h3>
+              <div class="cap">最佳努力观测数据，用于发现 context 膨胀；不参与路由。</div>
+              <div id="tokenGrid" class="token-grid"></div>
+              <div class="budget"><i id="tokenBudgetBar"></i></div>
+            </div>
+            <div class="diag-dark">
+              <h3>raw facts</h3>
+              <pre id="rawFacts">请选择任务。</pre>
+            </div>
           </section>
         </section>
 
-        <section class="panel">
-          <div class="panel-title">
-            <h2>Metrics</h2>
-            <span class="subtle">ledger projection</span>
-          </div>
-          <div id="overviewCards" class="overview-grid metrics-grid"></div>
-          <section class="overview-attention">
-            <div class="mini-title">Attention</div>
-            <div id="overviewAttention" class="attention-list"></div>
-          </section>
+        <div class="foot-note">任务视图解决“我现在要干什么”；管理诊断解决“为什么出问题、怎么恢复、怎么确认、怎么避免再发生”。</div>
+      </main>
+    </div>
+  </div>
+
+  <div id="newTaskModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="newTaskTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="newTaskTitle">新建任务</h2>
+          <p>把用户目标转成一个可追踪 workstream。默认创建安全 worktree，不直接修改原仓库。</p>
+        </div>
+        <button id="closeModal" class="btn ghost sm" type="button">关闭</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <label class="field">
+            <span>任务名称</span>
+            <input id="newTaskName" value="治疗记录上传引导和历史资料补全">
+          </label>
+          <label class="field">
+            <span>本地 Git 仓库路径</span>
+            <input id="newTaskRepo" placeholder="/path/to/git/repo">
+            <em>本机 repo 根目录，例如 /Users/me/work/my-project。</em>
+          </label>
+          <label class="field full">
+            <span>任务描述</span>
+            <textarea id="newTaskDescription" placeholder="写清目标、约束、验收标准。"></textarea>
+          </label>
+          <label class="field">
+            <span>提示词语言</span>
+            <select id="newTaskLanguage">
+              <option value="auto">自动识别</option>
+              <option value="zh-CN">中文</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>运行模式</span>
+            <select id="newTaskMode">
+              <option value="worktree">默认安全 worktree</option>
+              <option value="in-place">原地运行（需要显式确认）</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>生命周期模式</span>
+            <select id="newTaskLifecycle">
+              <option value="full">完整生命周期</option>
+              <option value="design-only">只做设计审查</option>
+              <option value="attach">接管已有任务</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Max steps</span>
+            <input id="newTaskMaxSteps" type="number" min="1" value="80">
+          </label>
+        </div>
+        <section class="card command-preview">
+          <h3>将生成的命令</h3>
+          <div class="cap">第一版先生成 CLI，避免引入新的 start API 和额外状态边界。</div>
+          <pre id="newTaskCommand" class="cmd"></pre>
         </section>
+      </div>
+      <div class="modal-foot">
+        <span>创建后进入任务视图；完整路径和 ledger 可在管理诊断查看。</span>
+        <div class="cmd-row">
+          <button id="copyNewTaskCommand" class="btn ghost" type="button">复制命令</button>
+          <button id="closeModalBottom" class="btn primary" type="button">完成</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <section class="panel">
-          <div class="panel-title">
-            <h2>Grouped Timeline</h2>
-            <span class="subtle">by iteration</span>
-          </div>
-          <div id="timelineView" class="timeline"></div>
-        </section>
-
-        <details class="panel debug-panel">
-          <summary>
-            <span>Debug / Ledger Diagnostics</span>
-            <em>advanced</em>
-          </summary>
-          <div class="debug-grid">
-            <section>
-              <div class="mini-title">Next action</div>
-              <p id="overviewNext" class="debug-text">-</p>
-            </section>
-            <section>
-              <div class="mini-title">Key artifacts</div>
-              <div id="overviewArtifacts" class="mini-list"></div>
-            </section>
-            <section>
-              <div class="mini-title">Delivery Merge</div>
-              <div id="overviewDeliveryMerge" class="mini-list"></div>
-            </section>
-            <section>
-              <div class="mini-title">Latest Agent Tasks</div>
-              <div id="overviewAgentTasks" class="mini-list"></div>
-            </section>
-          </div>
-          <pre id="statusView" class="json">{}</pre>
-        </details>
-
-        <details class="panel debug-panel">
-          <summary>
-            <span>Artifact Summary</span>
-            <em>latest contract sidecars</em>
-          </summary>
-          <div id="artifactSummary" class="artifact-list"></div>
-        </details>
-
-        <section class="panel hidden" id="legacyTimelinePanel">
-          <div class="panel-title">
-            <h2>Recent timeline</h2>
-          </div>
-          <div id="overviewTimeline" class="mini-list"></div>
-        </section>
-
-        <details class="panel debug-panel">
-          <summary>
-            <span>Last Response</span>
-            <em>raw API payload</em>
-          </summary>
-          <pre id="responseView" class="json">{}</pre>
-        </details>
-      </section>
-    </section>
-  </main>
-
-    <script src="/app.js?v=p1p2-operator-simplify-20260619"></script>
+  <script src="/console.js?v=operator-console-20260619"></script>
 </body>
 </html>

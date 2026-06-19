@@ -216,7 +216,7 @@ java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
 Default task console:
 
 ```text
-http://localhost:8080/console.html
+http://localhost:8080/
 ```
 
 The task console is for end users and reviewers. It shows lifecycle progress,
@@ -226,7 +226,7 @@ summaries, and recovery guidance.
 Management diagnostics:
 
 ```text
-http://localhost:8080/index.html
+http://localhost:8080/mgt/index.html
 ```
 
 Management diagnostics is for dual users and developers who need raw ledger

@@ -912,6 +912,12 @@ a {
   font-weight: 700;
 }
 
+.field em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
 .field input,
 .field textarea,
 .field select {
