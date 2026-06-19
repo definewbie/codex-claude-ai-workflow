@@ -33,8 +33,8 @@ class AgentTerminalContractTest {
     }
 
     @Test
-    void acceptsTerminalControlBlockClosedByDoneMarkerWhenFenceIsMissing() {
-        assertTrue(contract.isComplete("""
+    void rejectsPartialControlBlockWhenFenceIsMissing() {
+        assertFalse(contract.isComplete("""
                 Body.
 
                 ```dual-control
@@ -42,6 +42,18 @@ class AgentTerminalContractTest {
                 summary: done
 
                 [done] end_turn
+                """));
+    }
+
+    @Test
+    void rejectsDoneMarkerBeforeTerminalControlBlock() {
+        assertFalse(contract.isComplete("""
+                [done] end_turn
+
+                ```dual-control
+                decision: READY
+                summary: done
+                ```
                 """));
     }
 

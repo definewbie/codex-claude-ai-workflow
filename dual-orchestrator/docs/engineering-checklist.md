@@ -3,6 +3,11 @@
 Use this checklist before changing workflow, recovery, artifact contract, human
 gate, delivery, or observability code.
 
+For boundary-sensitive changes, first apply the stricter engineering discipline
+in `docs/design/boundary-first-engineering-discipline.zh-CN.md`. The checklist
+below is not enough by itself when the issue involves lifecycle semantics,
+external Agent adapters, recovery, human gates, or projection disagreement.
+
 ## Boundary First
 
 - Identify which boundary owns the problem before editing code:

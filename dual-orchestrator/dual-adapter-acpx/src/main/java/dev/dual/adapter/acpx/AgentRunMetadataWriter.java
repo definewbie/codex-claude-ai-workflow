@@ -62,8 +62,10 @@ final class AgentRunMetadataWriter {
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),
                 relative(workspaceRoot, stdoutPath),
+                null,
                 relative(workspaceRoot, stderrPath),
                 relative(workspaceRoot, promptMetadataPath),
+                null,
                 null,
                 null,
                 List.of(),
@@ -105,6 +107,7 @@ final class AgentRunMetadataWriter {
                 promptPath,
                 stdoutPath,
                 stderrPath,
+                null,
                 result,
                 failure,
                 null
@@ -127,9 +130,46 @@ final class AgentRunMetadataWriter {
             AcpxFailureClassifier.AcpxFailure failure,
             AcpxUsage usage
     ) throws IOException {
+        writeCompleted(
+                workspaceRoot,
+                workstreamId,
+                nodeId,
+                agent,
+                session,
+                promptTemplate,
+                runId,
+                runDir,
+                promptPath,
+                stdoutPath,
+                stderrPath,
+                null,
+                result,
+                failure,
+                usage
+        );
+    }
+
+    void writeCompleted(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            Path runDir,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            Path transcriptPath,
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxUsage usage
+    ) throws IOException {
         var promptMetadataPath = metadataPath(promptPath);
         var outputMetadataPath = metadataPath(stdoutPath);
         var stderrMetadataPath = metadataPath(stderrPath);
+        var transcriptMetadataPath = transcriptPath == null ? null : metadataPath(transcriptPath);
         writeArtifactMetadata(
                 workspaceRoot,
                 promptMetadataPath,
@@ -162,6 +202,24 @@ final class AgentRunMetadataWriter {
                         stdoutPath
                 )
         );
+        if (transcriptPath != null) {
+            writeArtifactMetadata(
+                    workspaceRoot,
+                    transcriptMetadataPath,
+                    artifactDocument(
+                            workspaceRoot,
+                            workstreamId,
+                            nodeId,
+                            agent,
+                            session,
+                            promptTemplate,
+                            runId,
+                            "transcript",
+                            "text/plain",
+                            transcriptPath
+                    )
+            );
+        }
         writeArtifactMetadata(
                 workspaceRoot,
                 stderrMetadataPath,
@@ -189,9 +247,11 @@ final class AgentRunMetadataWriter {
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),
                 relative(workspaceRoot, stdoutPath),
+                relativeOrNull(workspaceRoot, transcriptPath),
                 relative(workspaceRoot, stderrPath),
                 relative(workspaceRoot, promptMetadataPath),
                 relative(workspaceRoot, outputMetadataPath),
+                relativeOrNull(workspaceRoot, transcriptMetadataPath),
                 relative(workspaceRoot, stderrMetadataPath),
                 result.command(),
                 result.startedAt(),
@@ -241,6 +301,7 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, artifactPath),
                 contentType,
                 bytes.length,
+                estimatedTokens(bytes.length),
                 lineCount(bytes),
                 sha256(bytes),
                 Instant.now()
@@ -267,7 +328,15 @@ final class AgentRunMetadataWriter {
         }
     }
 
+    private long estimatedTokens(long byteSize) {
+        return (byteSize + 3) / 4;
+    }
+
     private String relative(Path workspaceRoot, Path path) {
         return workspaceRoot.relativize(path).toString();
+    }
+
+    private String relativeOrNull(Path workspaceRoot, Path path) {
+        return path == null ? null : relative(workspaceRoot, path);
     }
 }

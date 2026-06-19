@@ -262,7 +262,7 @@ public final class WorkflowRuntime {
                     nodeDefinition,
                     result
             );
-            ledger.markAgentTaskSucceeded(paths, agentTask, result);
+            ledger.markAgentTaskFinished(paths, agentTask, result);
             ledger.finishNodeExecution(paths, nodeExecution, result);
             return result;
         } catch (Exception nodeFailure) {

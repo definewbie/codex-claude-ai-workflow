@@ -20,13 +20,17 @@ import java.util.Optional;
  */
 record AgentOutputContractDocument(
         String nodeId,
+        String stageOutcome,
         String lifecycleStatus,
         String decision,
         String summary,
         String sourceArtifactType,
         boolean blocking,
+        List<String> checks,
+        List<String> evidence,
         List<String> mustFix,
         List<String> missingEvidence,
+        List<String> acceptanceNotes,
         List<String> openRisks,
         List<String> changedFiles,
         String verificationSummary,
@@ -51,13 +55,17 @@ record AgentOutputContractDocument(
     static AgentOutputContractDocument from(Map<String, Object> document) {
         return new AgentOutputContractDocument(
                 text(document.get("node_id")),
+                firstNonBlank(document.get("stage_outcome"), document.get("lifecycle_status")),
                 text(document.get("lifecycle_status")),
                 text(document.get("decision")),
                 text(document.get("summary")),
                 text(document.get("source_artifact_type")),
                 booleanValue(document.get("blocking")),
+                firstNonEmptyList(document.get("checks"), document.get("checks_run")),
+                stringList(document.get("evidence")),
                 stringList(document.get("must_fix")),
                 stringList(document.get("missing_evidence")),
+                stringList(document.get("acceptance_notes")),
                 stringList(document.get("open_risks")),
                 stringList(document.get("changed_files")),
                 text(document.get("verification_summary")),
@@ -72,6 +80,10 @@ record AgentOutputContractDocument(
 
     boolean hasDecision() {
         return !decision.isBlank();
+    }
+
+    String canonicalStageOutcome() {
+        return stageOutcome.isBlank() ? lifecycleStatus : stageOutcome;
     }
 
     boolean isStageHandoffArtifact() {
@@ -136,6 +148,11 @@ record AgentOutputContractDocument(
         return List.copyOf(result);
     }
 
+    private static List<String> firstNonEmptyList(Object first, Object second) {
+        var firstList = stringList(first);
+        return firstList.isEmpty() ? stringList(second) : firstList;
+    }
+
     private static Map<String, String> stringMap(Object value) {
         if (!(value instanceof Map<?, ?> source)) {
             return Map.of();
@@ -171,5 +188,10 @@ record AgentOutputContractDocument(
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private static String firstNonBlank(Object first, Object second) {
+        var firstText = text(first);
+        return firstText.isBlank() ? text(second) : firstText;
     }
 }

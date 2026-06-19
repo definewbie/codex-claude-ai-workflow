@@ -45,12 +45,23 @@ final class AcpxFailureSignalCatalog {
                         "访问量过大"
                 ),
                 signal(
+                        "agent_auth_failed",
+                        AcpxFailureReason.AGENT_AUTH_FAILED,
+                        88,
+                        "agent authentication failed (API 401 / invalid credentials); fix the underlying agent credentials, then run dualctl retry and dualctl resume",
+                        true,
+                        false,
+                        "failed to authenticate",
+                        "invalid authentication credentials",
+                        "api error: 401"
+                ),
+                signal(
                         "agent_reconnect",
                         AcpxFailureReason.AGENT_RECONNECT,
                         10,
                         "acpx agent session needs reconnect; fix the session and run dualctl retry, then dualctl resume",
                         true,
-                        false,
+                        true,
                         "agent needs reconnect"
                 ),
                 signal(

@@ -37,13 +37,39 @@ delivery merge -> 可追踪完成
 
 P0 是阻塞真实使用的能力。
 
+### P0 Closure Protocol
+
+P0 必须一次性收尾，退出标准固定。Real-case 是验收门，不是无限探索循环。
+
+退出标准：
+
+| 边界 | 必须提供的证据 |
+|---|---|
+| Terminal guard | completed workstream 拒绝误触发 resume、retry、approve-run，同时允许 trace、summary 和 delivery inspection。 |
+| Goal loop | acceptance reject 或 evidence 不足进入有边界的 semantic repair，而不是靠手工重跑。 |
+| Runtime recovery | 外部 Agent/acpx 失败进入 typed recovery evidence 和 next action，不被误判为业务 rejection。 |
+| Artifact contract | 路由优先消费结构化 artifact 和 sidecar，不猜自然语言正文。 |
+| Delivery merge | accepted worktree changes 可以显式 merge 到干净 original repo，且不自动 commit。 |
+| Projection | CLI trace/status/summary 和 API/operator overview 对同三个问题回答一致：跑到哪、为什么停、下一步做什么。 |
+
+收尾方式：
+
+1. 跑确定性检查：targeted Maven tests、workflow/contract consistency tests、lifecycle smoke。
+2. 跑一次中等复杂度 real case，必须触达业务逻辑，不能只停留在 UI 文案或单页面小改。
+3. 所有失败只分两类：
+   - `P0 blocker`：收尾前必须修，修完只重跑相关检查和 closure real case。
+   - `Post-P0`：记录到 P1/P2，不再重新打开 P0。
+4. 写 closure report，包含命令证据、workstream id、final status、artifact 状态、delivery merge 状态和已接受的 Post-P0 项。
+
+当前 closure report 记录在 [p0-closure-report.md](testing/p0-closure-report.md)。P0 现在是 `Done with known limits`：私有业务逻辑 real-case 已到达 `COMPLETED`，最终验收为 `ACCEPT_WITH_NOTES`，过程中完成两次语义 repair loop，original repo 保持干净。之后的 real-case 是回归检查或 P1/P2 验证，不再作为 P0 探索循环。
+
 | 项目 | 状态 | 目的 | 设计 |
 |---|---|---|---|
 | Delivery merge | Done for MVP | 把验收通过的 worktree diff 安全合回 original repo。 | [delivery-merge.md](design/delivery-merge.md) |
-| Goal-driven repair loop | Partial | Codex reject 或 evidence 不足时进入有限 repair，而不是随手重跑。 | [goal-driven-workstream-loop.zh-CN.md](design/goal-driven-workstream-loop.zh-CN.md) |
-| Human gate 降噪 | Partial | 只在需求、设计、验收、交付这类真正需要判断的位置停。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
+| Goal-driven repair loop | MVP 已完成，继续回归 | Codex reject 或 evidence 不足时进入有限 repair，而不是随手重跑。 | [goal-driven-workstream-loop.zh-CN.md](design/goal-driven-workstream-loop.zh-CN.md) |
+| Human gate 降噪 | MVP 可接受，P2 继续优化 | 只在需求、设计、验收、交付这类真正需要判断的位置停。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
 | Terminal-state guards | Implemented, keep testing | completed workstream 只能观测和显式交付，不能误触发 resume/retry。 | [workflow-state-machine.zh-CN.md](design/workflow-state-machine.zh-CN.md) |
-| Harness enforcement | Partial | 不依赖 LLM 自觉遵守纪律；由 contract、runtime guard、consistency tests 强制边界。 | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
+| Harness enforcement | MVP 已完成，继续加固 | 不依赖 LLM 自觉遵守纪律；由 contract、runtime guard、consistency tests 强制边界。 | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
 
 ### P0 Delivery Merge Checklist
 
@@ -71,7 +97,7 @@ Delivery Merge 已经实现为 completed workstream 之后的显式交付动作�
 | Human gate action semantics | Done | Ledger 会在需要时把人类动作 `approve` 归一化成 workflow outcome `approved`，CLI/API/UI 不需要各自翻译。 |
 | Gate reduction policy | Partial | 真实产品运行仍停在有意义的 gates；benchmark `autorun` 可以自动处理 gates，但 scheduler 不绕过 human decisions。 |
 | 测试 | Done | Ledger 和 workflow definition tests 覆盖 classified repair loop、revision limit、final gate completion、terminal guard 和 gate action normalization。 |
-| 真实 case 验证 | Pending | 需要跑一个中等复杂度真实 case，确认 rejection 或 evidence 不足会进入 repair，而不是靠手工重跑。 |
+| 真实 case 验证 | Done | `ws-20260619T051122Z-P837` 已完成；过程中一次 contract/design repair、一次 implementation/evidence repair，均未靠手工重跑。 |
 
 ### P0 Harness Enforcement Checklist
 
@@ -84,8 +110,8 @@ LLM 可以建议、生成和解释，但主流程不能依赖 LLM “自觉遵�
 | Recovery typed action | Done, keep testing | `RecoveryAssessment` 按 typed runtime reason 输出明确 operator action；`StatusCommand`、`SummaryCommand` 和 next-action hints 复用 shared attention/recovery read model。 |
 | Definition/Contract consistency | Done, keep testing | `ContractRegistryTest` 加载 bundled workflow JSON，校验节点/contract 存在性以及 decision/classifier routing outcomes。 |
 | Definition/Handler consistency | Done, keep testing | `AcpxWorkflowHandlerRegistryFactoryTest` 通过集中的 handler capability catalog 解析每个 bundled workflow 节点。 |
-| Projection read model | Partial | “跑到哪、为什么停、下一步做什么” 必须来自 shared read model；trace/status/API/UI 不再各自推导。 |
-| Real-case boundary loop | Pending | real-case 暴露边界问题后必须进入 Analyze -> Modify -> Review -> Reflect，不允许只补一条字符串规则继续跑。 |
+| Projection read model | CLI/API MVP 已完成，P2 继续优化 UI | `trace`、`status` 和 overview read model 已基于 ledger facts 回答“跑到哪、为什么停、下一步做什么”。 |
+| Real-case boundary loop | P0 closure 已验证，继续作为纪律 | closure real-case 产生两次 verifier rejection，workflow 均通过 semantic repair 自动收敛。 |
 
 ## P1：长任务可靠性
 
@@ -94,9 +120,9 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | 项目 | 状态 | 目的 | 设计 |
 |---|---|---|---|
 | Execution / AgentTask 边界 | Partial, worker MVP added | 区分 node instance、具体 execution、agent dispatch facts。 | [execution-instance-model.zh-CN.md](design/execution-instance-model.zh-CN.md) |
-| Recovery 分类 | Partial | 区分 runtime retry、semantic repair、验收拒绝、quota/session 外部失败。 | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
-| Context budget 治理 | Partial | 防止 context package 膨胀到系统不可用。 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
-| Artifact contract 稳定 | Partial | 基于结构化 artifact 和状态路由，而不是猜自然语言正文。 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
+| Recovery 分类 | MVP 已完成，继续补 provider evidence | 区分 runtime retry、semantic repair、验收拒绝、quota/session 外部失败。 | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
+| Context budget 治理 | MVP 已完成，继续度量 | 防止 context package 膨胀到系统不可用。 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
+| Artifact contract 稳定 | 当前 MVP 边界 Done, keep testing | 基于 typed sidecar 和编译后的 stage outcome 路由，而不是猜自然语言正文。 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
 | Boundary drift prevention | Partial | 防止 workflow definition、contract registry、handler registry、projection 互相漂移。 | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
 
 ### P1 Artifact / Context Checklist
@@ -104,11 +130,14 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | 维度 | 状态 | 证据 |
 |---|---|---|
 | Typed artifact contracts | Done, keep testing | `ArtifactContractValidator`、`ContractRegistry` 和 node output contracts 会在路由前校验 Agent sidecar。 |
+| 中间阶段 contracts | Done, keep testing | Design、plan、implementation 和 Codex review 节点都在 workflow JSON 和 prompt 中声明 `agent_output_contract`。 |
+| 决策路由 | Done, keep testing | `ReviewDecisionHandler` 只消费最新 `*.contract.json` sidecar；Markdown 和 `dual-control` 不再作为路由 fallback。 |
+| Report 投影 | Done, keep testing | Final report summary 消费 self-test 和 acceptance sidecar，不嵌入原始 Agent Markdown 或 transcript。 |
 | Context budgets | Done, keep testing | `ContextProfiles` 定义 profile budgets；`ContextBuildPackageHandler` 执行 token 估算上限，并对 section 降级或丢弃。 |
 | Context package metadata | Done | 每个 context package 现在都会写 JSON sidecar，记录 profile、token budget、估算 tokens 和每个 section 的降级事实。 |
 | Projection | Partial | API overview 已暴露 latest context package metadata artifact；更丰富的 CLI/UI budget summary 后续再补。 |
 | 测试 | Done | `ContextBuildPackageHandlerTest` 覆盖 budget enforcement、degradation 和 metadata sidecar。 |
-| 真实 case 验证 | Pending | 需要重跑一个中等复杂度真实 case，确认生成 prompt 不再异常膨胀。 |
+| 真实 case 验证 | closure case 已完成 | 2026-06-19 私有业务逻辑 real-case 已完成，未出现 context-window recovery 或 prompt 异常膨胀。 |
 
 ### P1 AgentTask / Worker Checklist
 
@@ -134,24 +163,11 @@ P2 让系统足够容易理解，能支撑真实使用和开源评估。
 
 ## 当前下一步
 
-当前先不要继续盲跑真实 case。下一步先把 P0 harness enforcement 的缺口补上，避免每次 real-case 都撞出同类边界问题。
+P0 lifecycle closure 在 MVP 边界内已经完成。下一步是 P1 加固，而不是继续开放式 closure real-case。
 
-2026-06-17 的中等复杂度 cancer-clinic real-case 验证结果：
+建议顺序：
 
-- intake prompt 约 6.3KB，未复现 context budget 膨胀。
-- `acpx`/Claude stderr 出现 `agent needs reconnect` 后，workflow 已能从 `RUNNING` 收敛到 `WAITING_FOR_RECOVERY`，不再无限挂起。
-- 当前真实业务推进阻塞在外部 Claude/acpx session reconnect，系统侧 recovery 分类、CLI next action 和 ledger evidence 已可复盘。
-
-P0-1 Delivery Merge 在当前 MVP 边界内已闭环。它仍然是 completed workstream 之后的显式交付命令，不会重新打开或 resume 已完成 workflow。
-
-恢复外部 Agent 通道后，继续执行：
-
-1. 再重跑中等复杂度 cancer-clinic real-case，观察 context budget、recovery、artifact contract、goal loop 是否协同。
-2. 如果这个私有 case 被验收，并且 original repo 明确准备好接收 staged changes，再执行显式 delivery merge 作为私有生产型证据：
-
-```bash
-dualctl delivery merge --workdir <source_worktree> --target <original_repo> <workstream_id>
-dualctl trace --workdir <source_worktree> <workstream_id>
-```
-
-Delivery Merge 仍然是 completed workstream 之后的显式动作，不进入自动 scheduler。
+1. 基于这次 completed real-case 数据继续加强 context/token 治理和 provider metrics。
+2. 优化 P2 operator experience：压缩历史 gates，突出当前 evidence，并保持 CLI/UI 文案一致。
+3. 准备一个公开可重复 benchmark，至少覆盖一次 semantic repair loop，且不依赖私有项目文件。
+4. 只有当 `cancer-clinic` original repo 明确准备接收变更时，再对这个 completed worktree 执行显式 delivery merge。

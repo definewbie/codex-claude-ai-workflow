@@ -90,6 +90,17 @@ public record RecoveryAssessment(
                     diagnostic
             );
         }
+        if ("RECOVERABLE_AGENT_AUTH_FAILED".equals(failureReason)) {
+            return new RecoveryAssessment(
+                    "agent_auth_failed",
+                    "FIX_AGENT_AUTH_THEN_RETRY",
+                    "The agent adapter failed authentication. Fix the underlying Claude/Codex runtime credentials or adapter configuration, then retry the same active node.",
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
         if ("RECOVERABLE_AGENT_RECONNECT".equals(failureReason)
                 || "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(failureReason)
                 || "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)

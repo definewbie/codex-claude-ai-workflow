@@ -9,6 +9,7 @@ public final class RetryStrategies {
             "RECOVERABLE_RATE_LIMIT", new RetryPolicy(5, 3000, 2.0),
             "RECOVERABLE_SESSION_MISSING", new RetryPolicy(3, 2000, 1.5),
             "RECOVERABLE_AGENT_RECONNECT", new RetryPolicy(3, 2000, 1.5),
+            "RECOVERABLE_AGENT_AUTH_FAILED", new RetryPolicy(0, 0, 1.0),
             "RECOVERABLE_CONTEXT_WINDOW", new RetryPolicy(2, 1000, 1.0),
             "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", new RetryPolicy(2, 2000, 1.5)
     );

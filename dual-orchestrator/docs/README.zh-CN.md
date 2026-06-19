@@ -2,7 +2,7 @@
 
 English version: [README.md](README.md)
 
-这里是当前产品文档和主题化设计文档入口。公开读者建议从“公开阅读路径”开始。历史 handoff、内部 benchmark 和按日期/阶段编号的过程文档已经从公开分支移除；可复用证据从 public benchmark sample 开始。
+这里是当前产品文档和主题化设计文档入口。公开读者建议从“公开阅读路径”开始。历史 handoff、内部 benchmark 和按日期/阶段编号的过程文档已经从公开分支移除；可复用证据从 public benchmark sample 和短版 P0 closure report 开始。
 
 ## 公开阅读路径
 
@@ -61,7 +61,9 @@ English version: [README.md](README.md)
 
 ## 私有证据策略
 
-私有真实 case 对工程判断很有价值，但不是公开 onboarding 路径。本公开分支只保留脱敏总结和 public benchmark。`testing/real-case-reports/` 是本地 ignored 输出，生成后不应提交。
+私有真实 case 对工程判断很有价值，但不是公开 onboarding 路径。本公开分支只保留脱敏总结、public benchmark 和短版 P0 closure report。`testing/real-case-reports/` 是本地 ignored 输出，生成后不应提交。
+
+对维护者仍有价值、但不适合放在主阅读路径里的过程文档，放在 `archive/`。
 
 ## 设计演进笔记
 

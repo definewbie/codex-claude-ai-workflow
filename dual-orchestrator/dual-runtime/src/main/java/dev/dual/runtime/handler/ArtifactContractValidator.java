@@ -71,7 +71,7 @@ public final class ArtifactContractValidator {
             var markdown = Files.readString(path, StandardCharsets.UTF_8);
             var parsed = parser.parse(markdown, contract);
             if (parsed.valid()) {
-                var structured = structuredArtifact(nodeDefinition.id(), markdown, parsed);
+                var structured = structuredArtifact(nodeDefinition, markdown, parsed);
                 if (structured.failure() != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, structured.failure());
                 }
@@ -148,8 +148,8 @@ public final class ArtifactContractValidator {
         return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
     }
 
-    private StructuredArtifactResult structuredArtifact(String nodeId, String markdown, DualControlParseResult parsed) {
-        var expectedType = requiredArtifactType(nodeId);
+    private StructuredArtifactResult structuredArtifact(NodeDefinition nodeDefinition, String markdown, DualControlParseResult parsed) {
+        var expectedType = requiredArtifactType(nodeDefinition);
         if (expectedType == null) {
             return StructuredArtifactResult.none();
         }
@@ -200,7 +200,7 @@ public final class ArtifactContractValidator {
             if (semanticFailure.isPresent()) {
                 return StructuredArtifactResult.failed(semanticFailure.get());
             }
-            return StructuredArtifactResult.valid(expectedType, artifact);
+            return StructuredArtifactResult.valid(expectedType, artifact, structuredDocument.lifecycleStatus());
         } catch (Exception e) {
             return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                     "STRUCTURED_ARTIFACT_PARSE_FAILED",
@@ -210,8 +210,12 @@ public final class ArtifactContractValidator {
         }
     }
 
-    private static String requiredArtifactType(String nodeId) {
-        return switch (nodeId) {
+    private static String requiredArtifactType(NodeDefinition nodeDefinition) {
+        var configured = text(nodeDefinition.config().get("expected_artifact"));
+        if (!configured.isBlank()) {
+            return configured;
+        }
+        return switch (nodeDefinition.id()) {
             case "implement.claude_self_test_report" -> "self_test_report";
             case "acceptance.codex_verifier_review" -> "acceptance_review";
             case "stage.claude_handoff" -> "stage_handoff";
@@ -219,8 +223,27 @@ public final class ArtifactContractValidator {
         };
     }
 
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
+    }
+
     private static StructuredAgentArtifact toStructuredArtifact(String expectedType, AgentStructuredArtifactDocument document) {
         return switch (expectedType) {
+            case "agent_output_contract" -> new AgentOutputArtifact(
+                    document.artifactType(),
+                    document.decision(),
+                    document.summary(),
+                    document.blocking(),
+                    document.checks(),
+                    document.evidence(),
+                    document.missingEvidence(),
+                    document.mustFix(),
+                    document.acceptanceNotes(),
+                    document.openRisks(),
+                    document.changedFiles(),
+                    document.verificationSummary(),
+                    document.failure()
+            );
             case "self_test_report" -> new SelfTestReportArtifact(
                     document.artifactType(),
                     document.decision(),
@@ -271,6 +294,9 @@ public final class ArtifactContractValidator {
         if (structured.artifact() != null) {
             document.put("source_artifact_type", structured.type());
             structured.artifact().writeSidecarFields(document);
+            if (!structured.declaredLifecycleStatus().isBlank()) {
+                document.put("lifecycle_status", structured.declaredLifecycleStatus());
+            }
             return;
         }
         document.put("must_fix", MarkdownArtifactFields.listSection(
@@ -395,6 +421,7 @@ public final class ArtifactContractValidator {
     }
 
     private sealed interface StructuredAgentArtifact permits
+            AgentOutputArtifact,
             SelfTestReportArtifact,
             AcceptanceReviewArtifact,
             StageHandoffArtifact {
@@ -431,6 +458,37 @@ public final class ArtifactContractValidator {
             document.put("verification_summary", verificationSummary);
             document.put("blocking", false);
             document.put("failure", AgentOutputContractDocument.FailureFields.empty().toMap());
+        }
+    }
+
+    private record AgentOutputArtifact(
+            String artifactType,
+            String decision,
+            String summary,
+            boolean blocking,
+            List<String> checks,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> mustFix,
+            List<String> acceptanceNotes,
+            List<String> openRisks,
+            List<String> changedFiles,
+            String verificationSummary,
+            AgentOutputContractDocument.FailureFields failure
+    ) implements StructuredAgentArtifact {
+        @Override
+        public void writeSidecarFields(Map<String, Object> document) {
+            document.put("must_fix", mustFix);
+            document.put("open_risks", openRisks);
+            document.put("changed_files", changedFiles);
+            document.put("checks_run", checks);
+            document.put("checks_skipped", List.of());
+            document.put("evidence", evidence);
+            document.put("missing_evidence", missingEvidence);
+            document.put("acceptance_notes", acceptanceNotes);
+            document.put("verification_summary", verificationSummary);
+            document.put("blocking", blocking);
+            document.put("failure", failure.toMap());
         }
     }
 
@@ -497,17 +555,22 @@ public final class ArtifactContractValidator {
         }
     }
 
-    private record StructuredArtifactResult(String type, StructuredAgentArtifact artifact, DualControlParseResult failure) {
+    private record StructuredArtifactResult(
+            String type,
+            StructuredAgentArtifact artifact,
+            String declaredLifecycleStatus,
+            DualControlParseResult failure
+    ) {
         static StructuredArtifactResult none() {
-            return new StructuredArtifactResult("", null, null);
+            return new StructuredArtifactResult("", null, "", null);
         }
 
-        static StructuredArtifactResult valid(String type, StructuredAgentArtifact artifact) {
-            return new StructuredArtifactResult(type, artifact, null);
+        static StructuredArtifactResult valid(String type, StructuredAgentArtifact artifact, String declaredLifecycleStatus) {
+            return new StructuredArtifactResult(type, artifact, declaredLifecycleStatus == null ? "" : declaredLifecycleStatus, null);
         }
 
         static StructuredArtifactResult failed(DualControlParseResult failure) {
-            return new StructuredArtifactResult("", null, failure);
+            return new StructuredArtifactResult("", null, "", failure);
         }
     }
 }

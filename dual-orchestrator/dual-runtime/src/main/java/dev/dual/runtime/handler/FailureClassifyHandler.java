@@ -57,6 +57,10 @@ public final class FailureClassifyHandler implements TaskHandler {
                 reviewMetadata.map(AgentOutputContractDocument::decision).filter(value -> !value.isBlank()).orElse("REJECT"));
         String reviewSummary = extractString(instanceResult, "summary",
                 reviewMetadata.map(AgentOutputContractDocument::summary).orElse(""));
+        String stageOutcome = reviewMetadata
+                .map(AgentOutputContractDocument::canonicalStageOutcome)
+                .filter(value -> !value.isBlank())
+                .orElse(StageOutcome.fromDecision(reviewDecision).name());
 
         List<String> contractGaps = extractStringList(instanceResult, "contract_gaps",
                 reviewMetadata.map(metadata -> metadata.failure().contractGaps()).orElse(List.of()));
@@ -96,10 +100,11 @@ public final class FailureClassifyHandler implements TaskHandler {
         result.put("suggested_action", classification.suggestedAction());
         result.put("matched_rule", classification.matchedRule());
         result.put("review_decision", reviewDecision);
+        result.put("stage_outcome", stageOutcome);
         result.put("classification_ref", classificationRef);
 
         var candidateRef = writeCalibrationCandidateIfNeeded(
-                context, workstreamDir, classification, classificationRef);
+                context, workstreamDir, classification, classificationRef, stageOutcome);
         if (candidateRef != null) {
             outputRefs.add(candidateRef);
             result.put("calibration_candidate_ref", candidateRef);
@@ -107,7 +112,7 @@ public final class FailureClassifyHandler implements TaskHandler {
 
         if ("REJECT".equals(reviewDecision)) {
             var summaryRef = writeCurrentFailureSummary(
-                    context, workstreamDir, classification, classificationRef, candidateRef);
+                    context, workstreamDir, classification, classificationRef, candidateRef, stageOutcome);
             outputRefs.add(summaryRef);
             result.put("failure_summary_ref", summaryRef);
         }
@@ -165,7 +170,8 @@ public final class FailureClassifyHandler implements TaskHandler {
             TaskContext context,
             Path workstreamDir,
             FailureClassification classification,
-            String classificationRef
+            String classificationRef,
+            String stageOutcome
     ) throws IOException {
         var updateType = proposedUpdateType(classification.category());
         if (updateType == null) {
@@ -189,6 +195,7 @@ public final class FailureClassifyHandler implements TaskHandler {
         candidate.put("sourceNodeId", context.instance().nodeDefinitionId());
         candidate.put("failureCategory", classification.category().name());
         candidate.put("reviewDecision", classification.reviewDecision());
+        candidate.put("stageOutcome", stageOutcome);
         candidate.put("matchedRule", classification.matchedRule());
         candidate.put("proposedUpdateType", updateType);
         candidate.put("reasoning", classification.reasoning());
@@ -221,6 +228,7 @@ public final class FailureClassifyHandler implements TaskHandler {
                 - Failure Category: %s
                 - Proposed Update Type: %s
                 - Review Decision: %s
+                - Stage Outcome: %s
                 - Source Node: %s
 
                 ## Reasoning
@@ -240,6 +248,7 @@ public final class FailureClassifyHandler implements TaskHandler {
                 candidate.get("failureCategory"),
                 candidate.get("proposedUpdateType"),
                 candidate.get("reviewDecision"),
+                candidate.get("stageOutcome"),
                 candidate.get("sourceNodeId"),
                 candidate.get("reasoning"),
                 candidate.get("suggestedAction"),
@@ -252,7 +261,8 @@ public final class FailureClassifyHandler implements TaskHandler {
             Path workstreamDir,
             FailureClassification classification,
             String classificationRef,
-            String candidateRef
+            String candidateRef,
+            String stageOutcome
     ) throws IOException {
         var recoveryDir = workstreamDir.resolve("recovery");
         Files.createDirectories(recoveryDir);
@@ -265,6 +275,7 @@ public final class FailureClassifyHandler implements TaskHandler {
 
                 - Node: %s
                 - Decision: %s
+                - Stage Outcome: %s
                 - Category: %s
                 - Matched Rule: %d
                 - Classification: %s
@@ -279,6 +290,7 @@ public final class FailureClassifyHandler implements TaskHandler {
                 """.formatted(
                 context.instance().nodeDefinitionId(),
                 classification.reviewDecision(),
+                stageOutcome,
                 classification.category().name(),
                 classification.matchedRule(),
                 classificationRef,

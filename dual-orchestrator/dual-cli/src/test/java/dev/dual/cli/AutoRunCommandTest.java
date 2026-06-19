@@ -43,6 +43,52 @@ class AutoRunCommandTest {
         assertFalse(AutoRunCommand.isRepeatedGate(gate("gate.contract_review", "iter-002"), seen));
     }
 
+    @Test
+    void autorunLetsRuntimeHandleWaitingForRecoveryBeforeStopping() {
+        assertTrue(AutoRunCommand.shouldRunBeforeStop(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY));
+        assertFalse(AutoRunCommand.shouldRunBeforeStop(dev.dual.core.workflow.WorkflowStatus.BLOCKED));
+        assertFalse(AutoRunCommand.shouldRunBeforeStop(dev.dual.core.workflow.WorkflowStatus.FAILED));
+    }
+
+    @Test
+    void autorunDoesNotRepeatTheSameRecoveryNode() {
+        var seen = new LinkedHashSet<String>();
+        var failed = failedRecoveryNode("nxe-001", 0);
+
+        assertFalse(AutoRunCommand.isRepeatedRecovery(failed, seen));
+        assertTrue(AutoRunCommand.isRepeatedRecovery(failed, seen));
+        assertTrue(AutoRunCommand.isRepeatedRecovery(failedRecoveryNode("nxe-002", 1), seen));
+        assertFalse(AutoRunCommand.isRepeatedRecovery(
+                failedRecoveryNode("node-design-codex_arch_review-021", "nxe-003", 0),
+                seen
+        ));
+    }
+
+    @Test
+    void autorunContinuesWhenRunSegmentEntersANewRecoverableSnapshot() {
+        var seen = new LinkedHashSet<String>();
+        var failed = failedRecoveryNode("nxe-001", 0);
+
+        assertTrue(AutoRunCommand.shouldContinueAfterRunFailure(
+                dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY,
+                failed,
+                seen
+        ));
+        assertFalse(seen.contains(AutoRunCommand.recoveryKey(failed)),
+                "post-run recovery check must not mark the snapshot as attempted before the next loop executes it");
+        assertFalse(AutoRunCommand.isRepeatedRecovery(failed, seen));
+        assertFalse(AutoRunCommand.shouldContinueAfterRunFailure(
+                dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY,
+                failed,
+                seen
+        ));
+        assertFalse(AutoRunCommand.shouldContinueAfterRunFailure(
+                dev.dual.core.workflow.WorkflowStatus.FAILED,
+                failedRecoveryNode("nxe-002", 1),
+                seen
+        ));
+    }
+
     private static NodeInstanceDocument gate(String nodeDefinitionId) {
         return gate(nodeDefinitionId, "iter-001");
     }
@@ -63,6 +109,35 @@ class AutoRunCommandTest {
                 Map.of(),
                 "",
                 "",
+                null,
+                null
+        );
+    }
+
+    private static NodeInstanceDocument failedRecoveryNode(String latestExecutionId, int autoRetryCount) {
+        return failedRecoveryNode("node-intake-codex_product_review-003", latestExecutionId, autoRetryCount);
+    }
+
+    private static NodeInstanceDocument failedRecoveryNode(String nodeInstanceId, String latestExecutionId, int autoRetryCount) {
+        return new NodeInstanceDocument(
+                1,
+                nodeInstanceId,
+                "intake.codex_product_review",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.FAILED,
+                "intake",
+                "iter-001",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(
+                        "acpx_failure.recoverable", true,
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT",
+                        "auto_retry_count", autoRetryCount
+                ),
+                "",
+                latestExecutionId,
                 null,
                 null
         );

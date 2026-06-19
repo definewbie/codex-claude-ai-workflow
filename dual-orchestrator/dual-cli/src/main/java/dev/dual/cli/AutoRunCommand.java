@@ -47,6 +47,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
         var gateCount = 0;
         var resolvedGateKeys = new LinkedHashSet<String>();
+        var attemptedRecoveryKeys = new LinkedHashSet<String>();
 
         System.out.println("Autorun started");
         System.out.println("Workstream: " + workstreamId);
@@ -60,6 +61,18 @@ public final class AutoRunCommand implements Callable<Integer> {
                 refreshSummary(paths);
                 System.out.println("Autorun completed.");
                 return 0;
+            }
+            if (shouldRunBeforeStop(snapshot.current().status())) {
+                if (isRepeatedRecovery(snapshot.node(), attemptedRecoveryKeys)) {
+                    refreshSummary(paths);
+                    printStopped(snapshot.current().status(), workspaceRoot);
+                    return 1;
+                }
+                var exitCode = runUntilPause(workspaceRoot, paths);
+                if (shouldStopAfterRun(exitCode, paths, attemptedRecoveryKeys)) {
+                    return exitCode;
+                }
+                continue;
             }
             if (isStopped(snapshot.current().status())) {
                 refreshSummary(paths);
@@ -88,10 +101,22 @@ public final class AutoRunCommand implements Callable<Integer> {
             }
 
             var exitCode = runUntilPause(workspaceRoot, paths);
-            if (exitCode != 0) {
+            if (shouldStopAfterRun(exitCode, paths, attemptedRecoveryKeys)) {
                 return exitCode;
             }
         }
+    }
+
+    private boolean shouldStopAfterRun(
+            int exitCode,
+            WorkstreamPaths paths,
+            LinkedHashSet<String> attemptedRecoveryKeys
+    ) throws Exception {
+        if (exitCode == 0) {
+            return false;
+        }
+        var after = loadSnapshot(paths);
+        return !shouldContinueAfterRunFailure(after.current().status(), after.node(), attemptedRecoveryKeys);
     }
 
     private Snapshot loadSnapshot(WorkstreamPaths paths) throws Exception {
@@ -151,6 +176,33 @@ public final class AutoRunCommand implements Callable<Integer> {
         return status == WorkflowStatus.WAITING_FOR_RECOVERY
                 || status == WorkflowStatus.BLOCKED
                 || status == WorkflowStatus.FAILED;
+    }
+
+    static boolean shouldRunBeforeStop(WorkflowStatus status) {
+        return status == WorkflowStatus.WAITING_FOR_RECOVERY;
+    }
+
+    static boolean isRepeatedRecovery(NodeInstanceDocument node, LinkedHashSet<String> attemptedRecoveryKeys) {
+        if (node == null) {
+            return true;
+        }
+        return !attemptedRecoveryKeys.add(recoveryKey(node));
+    }
+
+    static boolean shouldContinueAfterRunFailure(
+            WorkflowStatus status,
+            NodeInstanceDocument node,
+            LinkedHashSet<String> attemptedRecoveryKeys
+    ) {
+        return shouldRunBeforeStop(status) && !hasAttemptedRecovery(node, attemptedRecoveryKeys);
+    }
+
+    static String recoveryKey(NodeInstanceDocument node) {
+        return node.nodeInstanceId();
+    }
+
+    static boolean hasAttemptedRecovery(NodeInstanceDocument node, LinkedHashSet<String> attemptedRecoveryKeys) {
+        return node == null || attemptedRecoveryKeys.contains(recoveryKey(node));
     }
 
     static String gateActionFor(String nodeDefinitionId) {

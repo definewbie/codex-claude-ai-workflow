@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,8 +13,6 @@ import java.util.Set;
 public final class ReviewDecisionHandler implements DecisionHandler {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final DualControlBlockParser parser = new DualControlBlockParser();
-
     @Override
     public String type() {
         return "review.decision";
@@ -23,19 +20,19 @@ public final class ReviewDecisionHandler implements DecisionHandler {
 
     @Override
     public NodeResult evaluate(DecisionContext context) throws Exception {
-        var parseResult = readLatestControlBlock(context);
+        var parseResult = readLatestDecisionContract(context);
         if (parseResult.isMissing()) {
-            return failed("MISSING_DUAL_CONTROL", "No dual-control block found in decision input refs.", context);
+            return failed("MISSING_CONTRACT_SIDECAR", "No agent output contract sidecar found in decision input refs.", context);
         }
         if (!parseResult.valid()) {
             var allowed = allowedDecisions(context.definition().id());
-            return failed("INVALID_DUAL_CONTROL", parseResult.message(), context, allowed, null, parseResult);
+            return failed("INVALID_CONTRACT_SIDECAR", parseResult.message(), context, allowed, null, parseResult);
         }
         var control = parseResult.block();
         var allowed = allowedDecisions(context.definition().id());
         var decision = control.values().getOrDefault("decision", "").trim();
         if (decision.isBlank()) {
-            return failed("INVALID_DUAL_CONTROL", "dual-control missing required key: decision", context, allowed, control);
+            return failed("INVALID_CONTRACT_SIDECAR", "contract sidecar missing required decision", context, allowed, control);
         }
         if (!allowed.contains(decision)) {
             return failed("INVALID_DECISION", "Unsupported decision for " + context.definition().id() + ": " + decision, context, allowed, control);
@@ -43,21 +40,19 @@ public final class ReviewDecisionHandler implements DecisionHandler {
         if ("BLOCKED".equals(decision)) {
             return new NodeResult(decision, NodeStatus.BLOCKED, context.instance().inputRefs(), Map.of(
                     "decision", decision,
-                    "source", "dual-control",
+                    "source", "contract-sidecar",
                     "summary", control.values().getOrDefault("summary", "")
-            ), "dual-control decision is BLOCKED");
+            ), "contract sidecar decision is BLOCKED");
         }
         return NodeResult.completed(decision, context.instance().inputRefs(), Map.of(
                 "decision", decision,
-                "source", "dual-control",
+                "source", "contract-sidecar",
                 "summary", control.values().getOrDefault("summary", "")
         ));
     }
 
-    private DualControlParseResult readLatestControlBlock(DecisionContext context) throws Exception {
+    private DualControlParseResult readLatestDecisionContract(DecisionContext context) throws Exception {
         var refs = context.instance().inputRefs();
-        var nodeId = context.definition().id();
-        var hasContract = ContractRegistry.hasContract(nodeId);
         for (int i = refs.size() - 1; i >= 0; i--) {
             var ref = refs.get(i);
             if (ref.startsWith("artifact://")) {
@@ -68,20 +63,8 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                 continue;
             }
             if (path.getFileName().toString().endsWith(".contract.json")) {
-                var parsed = parseContractSidecar(path);
-                if (parsed.valid()) {
-                    return parsed;
-                }
-                continue;
+                return parseContractSidecar(path);
             }
-            var content = Files.readString(path, StandardCharsets.UTF_8);
-            DualControlParseResult parsed;
-            if (hasContract) {
-                parsed = parser.parse(content, ContractRegistry.forNode(nodeId));
-            } else {
-                parsed = parser.parse(content);
-            }
-            return parsed;
         }
         return DualControlParseResult.missing();
     }
@@ -89,7 +72,11 @@ public final class ReviewDecisionHandler implements DecisionHandler {
     private DualControlParseResult parseContractSidecar(java.nio.file.Path path) {
         var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
         if (document.isEmpty()) {
-            return DualControlParseResult.missing();
+            return DualControlParseResult.invalid(
+                    "CONTRACT_SIDECAR_PARSE_FAILED",
+                    "Could not read agent output contract sidecar: " + path.getFileName(),
+                    Map.of("path", path.toString())
+            );
         }
         var values = new java.util.LinkedHashMap<>(document.get().control());
         if (!values.containsKey("decision") && document.get().hasDecision()) {
@@ -101,7 +88,11 @@ public final class ReviewDecisionHandler implements DecisionHandler {
         if (values.containsKey("decision")) {
             return DualControlParseResult.valid(new DualControlBlock(values));
         }
-        return DualControlParseResult.missing();
+        return DualControlParseResult.invalid(
+                "CONTRACT_SIDECAR_MISSING_DECISION",
+                "Agent output contract sidecar is missing decision.",
+                Map.of("path", path.toString())
+        );
     }
 
     private NodeResult failed(String reason, String message, DecisionContext context) {

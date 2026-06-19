@@ -119,6 +119,24 @@ class RecoveryAssessmentTest {
         assertFalse(assessment.reason().contains("quota, reconnect, or session state"));
     }
 
+    @Test
+    void authFailureAsksForCredentialsInsteadOfSessionRebuild() {
+        var node = failedAcpxNode(Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "acpx_failure.reason", "RECOVERABLE_AGENT_AUTH_FAILED",
+                "acpx_failure.recoverable", true
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("agent_auth_failed", assessment.classification());
+        assertEquals("FIX_AGENT_AUTH_THEN_RETRY", assessment.retryReadiness());
+        assertTrue(assessment.reason().contains("credentials"));
+        assertFalse(assessment.suggestedCommand().contains("sessions close"));
+        assertTrue(assessment.suggestedCommand().contains("dualctl retry"));
+    }
+
     private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {
         return new NodeInstanceDocument(
                 1,

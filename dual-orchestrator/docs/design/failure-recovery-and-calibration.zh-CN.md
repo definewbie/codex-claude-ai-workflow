@@ -45,16 +45,117 @@ Adapter 会把 runtime failure matching 收敛在一个很小的 signal catalog 
 
 以后新增 provider 特定文案时，应添加到 catalog 的 signal matcher，不应散落到 workflow routing、ledger projection 或 UI 代码里。
 
-有些 ACP adapter 会在 stderr 中写出明确的可恢复信号，但外层进程不会立即退出。例如 `agent needs reconnect` 可能导致 Agent run 长时间停在 `RUNNING`。这是 adapter 执行边界的问题，不应交给 UI 或人工判断。`AcpxAgentTransport` 会轮询 stderr 中的 catalog 信号；一旦匹配到可恢复 runtime failure，就主动终止本次 acpx 进程并返回可分类的 exit result，让 workflow 进入 `WAITING_FOR_RECOVERY`。
+有些 ACP adapter 会在 stderr 中写出明确的可恢复信号，但外层进程不会立即退出。例如 `agent needs reconnect` 可能导致 Agent run 长时间停在 `RUNNING`。这是 adapter 执行边界的问题，不应交给 UI 或人工判断。
+
+`AcpxAgentTransport` 会轮询 stderr 中的 catalog 信号。这里的运行边界必须很窄：进程退出、完整 terminal contract、或 typed recoverable failure。普通 stdout 进度不是 lifecycle state，因为挂住的 ACP 进程仍然可能继续吐 client frame、心跳或半截 tool output。
+
+当 recoverable signal 持续超过有界 grace period 后，adapter 会终止本次 acpx 进程树，并返回可分类的 exit result，让 workflow 进入 `WAITING_FOR_RECOVERY`。默认 grace 是 30 秒，可通过 `DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS` 配置。如果 Java 进程环境里有 `API_TIMEOUT_MS`，默认 grace 会按该 timeout 加一个小 buffer 推导。如果 timeout 只在 Claude ACP 子进程里注入，就需要显式设置 dual 的 grace，避免两个 timeout 互相打架。
+
+terminal contract 优先于 reconnect 诊断，但必须是完整契约：闭合的 `dual-control` fence、必需字段，以及后续 `[done] end_turn`。半截或看起来像历史残留的 contract fragment 不能被当成完成。
+
+### acpx 生命周期信号模型
+
+`agent needs reconnect`、`Resource not found`、HTTP 401/429/529、tool
+permission blocked 这类文本都只是外部 adapter 观察到的运行时信号。它们不是
+workflow 状态，也不是业务失败。尤其是 `Resource not found`：它只能说明某次
+`session/resume` 失败，不能直接说明当前 Agent execution 已失败；如果后续
+`session/new` 成功并继续出现 prompt、tool result 或 Agent output，前面的
+reconnect 只能作为已恢复的历史事件保留。
+
+因此 adapter 层需要把原始日志转换为更明确的模型：
+
+```text
+stdout / stderr / acpx stream
+  -> AgentRuntimeSignal
+  -> AgentLifecycleEvent
+  -> AgentExecutionHealth
+  -> NodeExecution result
+```
+
+建议语义：
+
+| 模型 | 含义 | 不负责 |
+|---|---|---|
+| `AgentRuntimeSignal` | 从 stdout、stderr 或 acpx stream 中观察到的原始运行时信号，例如 reconnect、auth failed、rate limit。 | 直接推进 workflow。 |
+| `AgentLifecycleEvent` | acpx / Agent 生命周期事件，例如 process started、session resume failed、session new created、prompt accepted、tool result、terminal contract seen。 | 判断业务是否完成。 |
+| `AgentExecutionHealth` | 当前 execution 的健康判断，例如 healthy、recovering、stalled、recoverable failure、terminal success。 | 保存原始完整日志或替代 NodeExecution。 |
+
+这个模型的收益：
+
+- 避免每轮轮询都全量扫描 stderr，把历史 reconnect warning 当成当前失败。
+- 允许慢模型继续运行，只要仍有当前生命周期活动或最终 terminal contract。
+- 允许真正无恢复迹象的 reconnect / permission blocked / auth failed 快速进入
+  recovery，不再无限挂住。
+- 保留 provider 真实错误，例如 401、429、529、context window，而不是只暴露
+  acpx 包装层的 reconnect。
+- 让 `interruptRunningProcess` 成为真实语义：只对“当前且未恢复”的 runtime
+  signal 生效，而不是日志标签。
+
+边界：
+
+- Adapter 只判断 execution health，不判断 workstream goal 是否满足。
+- Adapter 不做 semantic repair，不创建新的业务 iteration。
+- Adapter 不自动重放 `implement` profile 的 prompt，因为进程可能已经半写文件。
+- Recovery model 可以引用 runtime signal 和 lifecycle event，但 UI / CLI 不能直接
+  从 stderr 推断状态。
+
+风险：
+
+- 如果 lifecycle event 抽取过窄，可能漏掉真实恢复证据，导致仍然误杀慢 Agent。
+- 如果抽取过宽，可能把无意义心跳当成进展，延迟 recovery。
+- 如果只从 acpx stderr 建模，会继续看不到 provider stream 中更深层的 401/529。
+- 如果没有 offset / timestamp，历史 signal 仍会被重复消费。
+
+为降低风险，第一版应保持模型小而可测：
+
+- 每条 signal / event 必须有 source、offset 或 observedAt。
+- 同一条历史 signal 只能消费一次。
+- `session/new success`、prompt accepted、tool result、完整 terminal contract 可以
+  supersede 较早的 reconnect signal。
+- provider stream 中的明确失败信号可以提升为当前 failure。
+- 完整 terminal contract 始终优先于 recoverable diagnostics。
+
+这套模型能 cover 的问题：
+
+| 问题 | 是否覆盖 | 说明 |
+|---|---|---|
+| `session/resume -> Resource not found -> session/new success` 被误判失败 | 是 | resume 失败会被后续 session new / agent activity 标记为 recovered。 |
+| GLM / DeepSeek 慢但仍在工作 | 部分覆盖 | 只要有可识别生命周期活动或 terminal contract，不会因旧 stderr 被误杀；但真正长时间无活动仍会进入 recovery。 |
+| acpx 外层进程挂住且无恢复事件 | 是 | 当前且未恢复的 recoverable signal 超过 grace 后进入 recovery。 |
+| provider 401 / quota / overload | 是 | 通过 stdout/stderr + acpx stream signal 分类为明确 runtime failure。 |
+| implementation 阶段半写文件后 reconnect | 部分覆盖 | 不自动重放；会进入可见 recovery，需要 operator 或后续 semantic repair 判断。 |
+| OS 进程树杀不干净 | 不完全覆盖 | 这是 process isolation 问题，需要后续进程组/cleanup 策略。 |
+
+验收标准：
+
+- replay 测试证明历史 reconnect 不会重复触发当前失败。
+- replay 测试证明 `Resource not found` 后 `session/new success` 不进入 recovery。
+- replay 测试证明无恢复事件的 reconnect 最终进入 `RECOVERABLE_AGENT_RECONNECT`。
+- terminal contract 完整出现时优先成功。
+- provider stream 中的 401/529 能覆盖包装层 reconnect。
+- real-case 中慢模型不会因为旧 stderr 被误杀。
+
+对于 read-only 的 `observe` / `review` profile，adapter 可以重建命名 acpx session 一次，并用同一个 prompt 重试。`implement` profile 不会在 reconnect 后自动重放，因为上一轮进程可能已经半写文件；写代码阶段的恢复必须保持可见，要么作为 execution recovery，要么进入后续有边界的 semantic repair route。
+
+在 session rebuild 之前，还有一层更低级的短重试：`observe` / `review`
+profile 会给 acpx 传 `--prompt-retries 1`。这只用于只读观察或外部审视类
+Agent 调用，因为重放同一个 prompt 不应该产生重复业务写入。`implement`
+profile 不使用 prompt-level retry；写代码阶段的恢复必须保持可见，要么作为
+execution failure 暴露出来，要么进入有边界的 semantic repair route。
 
 工具权限失败同样属于 adapter execution 边界。dual 在非实现阶段不会使用
 `approve-all`，而是通过 workflow node 的 `permission_profile` 声明可用工具：
 
 | Profile | 用途 | 权限语义 |
 | --- | --- | --- |
-| `observe` | Claude intake / design / plan / handoff | 允许 Read/Grep/Glob 以及安全仓库观察命令，例如 `git`、`ls`、`find`、`rg`。 |
-| `review` | Codex review / acceptance | 与 `observe` 类似，只用于审视和验收。 |
+| `observe` | Claude intake / design / plan / handoff | 只允许 Read/Grep/Glob。不会自动批准 ACP `execute`；计划和设计阶段不能运行验证命令。 |
+| `review` | Codex review / acceptance | 与 `observe` 类似，只用于审视和验收，不拥有 shell 执行权限。 |
 | `implement` | Claude implementation / self-test | 显式允许实现阶段写代码和运行测试，当前映射到 acpx `approve-all`。 |
+
+这个限制是有意的。ACP `execute` 是宽权限类别，不能只靠 Claude Code
+工具名里的 “安全 Bash 命令” 作为可靠边界。build、typecheck、pytest、npm、
+npx 等命令属于 implementation/self-test execution，不属于 intake、design、
+plan 或 review。
 
 如果 Agent 在非交互模式下请求了 profile 之外的工具，adapter 会把输出中的
 `Tool permission request failed` / `Tool use aborted` 归一化为

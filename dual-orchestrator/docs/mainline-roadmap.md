@@ -44,13 +44,45 @@ that is a planning gap, not an implementation shortcut.
 
 P0 work blocks reliable product use.
 
+### P0 Closure Protocol
+
+P0 must close once, with fixed exit criteria. Real-case validation is an
+acceptance gate, not an open-ended discovery loop.
+
+Exit criteria:
+
+| Boundary | Required evidence |
+|---|---|
+| Terminal guard | Completed workstreams reject accidental resume, retry, and approve-run while still allowing trace, summary, and delivery inspection. |
+| Goal loop | Acceptance rejection or insufficient evidence creates a bounded semantic repair path instead of a manual rerun. |
+| Runtime recovery | External Agent/acpx failures become typed recovery evidence and next actions, not business rejection. |
+| Artifact contract | Routing consumes structured artifacts and sidecars before natural-language text. |
+| Delivery merge | Accepted worktree changes can be explicitly merged into a clean original repo without automatic commits. |
+| Projection | CLI trace/status/summary and API/operator overview answer the same three questions: where is it, why did it stop, what should happen next. |
+
+Closure run:
+
+1. Run deterministic checks: targeted Maven tests, workflow/contract consistency tests, and lifecycle smoke.
+2. Run one medium-complexity real case that touches business logic, not only a UI text/page change.
+3. Classify any failure as either:
+   - `P0 blocker`: fix before closure and rerun only the related checks plus the closure real case.
+   - `Post-P0`: record under P1/P2 and do not reopen P0.
+4. Write a closure report with command evidence, workstream id, final status, artifact status, delivery merge status, and accepted Post-P0 items.
+
+The current closure report is tracked in
+[p0-closure-report.md](testing/p0-closure-report.md). P0 is now
+`Done with known limits`: the private business-logic real case reached
+`COMPLETED` with `ACCEPT_WITH_NOTES`, two semantic repair loops, and a clean
+original repo. Future real cases are regression checks or P1/P2 validation, not
+P0 exploration.
+
 | Item | Status | Purpose | Design |
 |---|---|---|---|
 | Delivery merge | Done for MVP | Apply an accepted worktree diff back to the original repo safely. | [delivery-merge.md](design/delivery-merge.md) |
-| Goal-driven repair loop | Partial | Let Codex rejection or insufficient evidence trigger bounded repair, not ad hoc reruns. | [goal-driven-workstream-loop.md](design/goal-driven-workstream-loop.md) |
-| Human gate reduction | Partial | Keep human review only at meaningful product, design, acceptance, and delivery boundaries. | [operator-observability.md](design/operator-observability.md) |
+| Goal-driven repair loop | Done for MVP, keep testing | Let Codex rejection or insufficient evidence trigger bounded repair, not ad hoc reruns. | [goal-driven-workstream-loop.md](design/goal-driven-workstream-loop.md) |
+| Human gate reduction | MVP acceptable, P2 polish | Keep human review only at meaningful product, design, acceptance, and delivery boundaries. | [operator-observability.md](design/operator-observability.md) |
 | Terminal-state guards | Implemented, keep testing | Completed workstreams allow observation and delivery actions, not accidental resume/retry. | [workflow-state-machine.md](design/workflow-state-machine.md) |
-| Harness enforcement | Partial | Do not rely on the LLM to obey discipline; enforce boundaries with contracts, runtime guards, and consistency tests. | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
+| Harness enforcement | Done for MVP, keep hardening | Do not rely on the LLM to obey discipline; enforce boundaries with contracts, runtime guards, and consistency tests. | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
 
 ### P0 Delivery Merge Checklist
 
@@ -79,7 +111,7 @@ action. It is not part of workflow `resume` or background scheduling.
 | Human gate action semantics | Done | Ledger normalizes human `approve` to the workflow outcome `approved` when needed, so CLI/API/UI do not each implement their own translation. |
 | Gate reduction policy | Partial | Real product runs still stop at meaningful gates. Benchmark `autorun` can auto-resolve gates, but scheduler does not bypass human decisions. |
 | Tests | Done | Ledger and workflow definition tests cover classified repair loops, revision limits, final gate completion, terminal guards, and gate action normalization. |
-| Real-case validation | Pending | Run a medium real case and verify that rejection or insufficient evidence enters repair instead of manual rerun. |
+| Real-case validation | Done | `ws-20260619T051122Z-P837` reached `COMPLETED` after two semantic repair loops: one contract/design repair and one implementation/evidence repair. |
 
 ### P0 Harness Enforcement Checklist
 
@@ -94,8 +126,8 @@ hard harness constraints.
 | Recovery typed action | Done, keep testing | `RecoveryAssessment` maps typed runtime reasons to explicit operator actions; `StatusCommand`, `SummaryCommand`, and next-action hints consume the shared attention/recovery read model. |
 | Definition/Contract consistency | Done, keep testing | `ContractRegistryTest` loads bundled workflow JSON and checks node/contract existence plus decision/classifier routing outcomes. |
 | Definition/Handler consistency | Done, keep testing | `AcpxWorkflowHandlerRegistryFactoryTest` resolves every bundled workflow node through the centralized handler capability catalog. |
-| Projection read model | Partial | "Where is it, why stopped, what next" must come from the shared read model; trace/status/API/UI must not infer separately. |
-| Real-case boundary loop | Pending | When real cases expose boundary drift, run Analyze -> Modify -> Review -> Reflect instead of adding one more string rule. |
+| Projection read model | Done for CLI/API MVP, P2 UI polish | `trace`, `status`, and overview read models answer "where is it, why stopped, what next" from ledger facts. |
+| Real-case boundary loop | Done for P0 closure, keep as discipline | The closure real case produced two verifier rejections and the workflow routed both through semantic repair without manual rerun. |
 
 ## P1: Long-Running Reliability
 
@@ -104,9 +136,9 @@ P1 work keeps long agent runs recoverable and affordable.
 | Item | Status | Purpose | Design |
 |---|---|---|---|
 | Execution / AgentTask boundary | Partial, worker MVP added | Separate node instance, concrete execution, and agent dispatch facts. | [execution-instance-model.md](design/execution-instance-model.md) |
-| Recovery classification | Partial | Distinguish runtime retry, semantic repair, rejected acceptance, and external quota/session failures. | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) |
-| Context budget governance | Partial | Prevent context packages from growing until the system becomes unusable. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
-| Artifact contract stability | Partial | Route on typed artifacts and states, not natural-language guesses. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
+| Recovery classification | MVP done, keep adding provider evidence | Distinguish runtime retry, semantic repair, rejected acceptance, and external quota/session failures. | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) |
+| Context budget governance | MVP done, keep measuring | Prevent context packages from growing until the system becomes unusable. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
+| Artifact contract stability | Done for current MVP boundary, keep testing | Route on typed sidecars and compiled stage outcomes, not natural-language guesses. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
 | Boundary drift prevention | Partial | Prevent workflow definitions, contract registries, handler registries, and projections from drifting apart. | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
 
 ### P1 Artifact / Context Checklist
@@ -114,11 +146,14 @@ P1 work keeps long agent runs recoverable and affordable.
 | Area | Status | Evidence |
 |---|---|---|
 | Typed artifact contracts | Done, keep testing | `ArtifactContractValidator`, `ContractRegistry`, and node output contracts validate Agent sidecars before routing. |
+| Intermediate stage contracts | Done, keep testing | Design, plan, implementation, and Codex review nodes declare `agent_output_contract` in workflow JSON and prompts. |
+| Decision routing | Done, keep testing | `ReviewDecisionHandler` consumes the latest `*.contract.json` sidecar only; Markdown and `dual-control` are not routing fallbacks. |
+| Report projection | Done, keep testing | Final report summaries consume self-test and acceptance sidecars, not raw Agent Markdown or transcripts. |
 | Context budgets | Done, keep testing | `ContextProfiles` defines profile budgets; `ContextBuildPackageHandler` enforces estimated token limits and degrades/drops sections. |
 | Context package metadata | Done | Every context package now writes a JSON sidecar with profile, token budget, estimated tokens, and per-section degradation facts. |
 | Projection | Partial | API overview exposes the latest context package metadata artifact; richer CLI/UI budget summaries can follow. |
 | Tests | Done | `ContextBuildPackageHandlerTest` covers budget enforcement, degradation, and metadata sidecar creation. |
-| Real-case validation | Pending | Re-run a medium real case and confirm generated prompts no longer grow unexpectedly beyond the governed package preview. |
+| Real-case validation | Done for closure case | The 2026-06-19 private business-logic run completed with bounded prompt/context behavior and no context-window recovery. |
 
 ### P1 AgentTask / Worker Checklist
 
@@ -145,36 +180,16 @@ evaluation.
 
 ## Current Next Step
 
-Do not keep blindly running real cases yet. First close the P0 harness
-enforcement gaps so each real case does not rediscover the same boundary
-problems.
+P0 lifecycle closure is complete for the MVP boundary. The next mainline work is
+P1 hardening, not another open-ended closure run.
 
-Medium-complexity cancer-clinic real-case result on 2026-06-17:
+Recommended order:
 
-- The intake prompt was about 6.3KB, so context budget growth was not reproduced.
-- After `acpx`/Claude wrote `agent needs reconnect` to stderr, the workflow now
-  converges from `RUNNING` to `WAITING_FOR_RECOVERY` instead of hanging
-  indefinitely.
-- Business progress is currently blocked by external Claude/acpx session
-  reconnect. The orchestrator-side recovery classification, CLI next action,
-  and ledger evidence are replayable.
-
-P0-1 Delivery Merge is closed for the current MVP boundary. It remains an
-explicit post-completion command; it does not reopen or resume a completed
-workflow.
-
-After the external Agent channel is healthy again:
-
-1. Re-run a medium cancer-clinic real case and observe context budget, recovery,
-   artifact contracts, and the goal loop together.
-2. If that private case is accepted and the original repo is intentionally ready
-   to receive staged changes, run explicit delivery merge again as private
-   production evidence:
-
-```bash
-dualctl delivery merge --workdir <source_worktree> --target <original_repo> <workstream_id>
-dualctl trace --workdir <source_worktree> <workstream_id>
-```
-
-Delivery Merge remains an explicit post-completion action. It is not part of
-automatic scheduling.
+1. Keep strengthening context/token governance and provider metrics using the
+   completed real-case data.
+2. Improve P2 operator experience around many-gate runs: collapse historical
+   gates, highlight current evidence, and keep CLI/UI wording in sync.
+3. Prepare a public repeatable benchmark that exercises at least one semantic
+   repair loop without private project files.
+4. Use delivery merge on the private completed worktree only if the original
+   `cancer-clinic` repo is intentionally ready to receive the staged changes.

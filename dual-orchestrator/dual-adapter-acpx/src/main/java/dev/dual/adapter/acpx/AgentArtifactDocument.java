@@ -15,6 +15,7 @@ record AgentArtifactDocument(
         String artifactPath,
         String contentType,
         long byteSize,
+        long estimatedTokens,
         long lineCount,
         String sha256,
         Instant generatedAt

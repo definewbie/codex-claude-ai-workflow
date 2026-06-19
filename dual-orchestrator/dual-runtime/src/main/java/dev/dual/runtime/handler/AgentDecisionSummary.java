@@ -6,7 +6,7 @@ import java.util.Map;
 
 record AgentDecisionSummary(
         String nodeId,
-        String lifecycleStatus,
+        String stageOutcome,
         String decision,
         String summary,
         boolean blocking,
@@ -28,7 +28,7 @@ record AgentDecisionSummary(
     static AgentDecisionSummary from(AgentOutputContractDocument document, String sidecarPath) {
         return new AgentDecisionSummary(
                 document.nodeId(),
-                resolvedLifecycleStatus(document),
+                document.canonicalStageOutcome(),
                 document.decision(),
                 document.summary(),
                 document.blocking(),
@@ -40,13 +40,6 @@ record AgentDecisionSummary(
                 AgentEvidenceState.from(document),
                 sidecarPath
         );
-    }
-
-    private static String resolvedLifecycleStatus(AgentOutputContractDocument document) {
-        if (!document.lifecycleStatus().isBlank()) {
-            return document.lifecycleStatus();
-        }
-        return AgentLifecycleStatus.fromDecision(document.decision()).name();
     }
 
     boolean isEmpty() {
@@ -63,7 +56,8 @@ record AgentDecisionSummary(
         }
         var summary = new LinkedHashMap<String, Object>();
         summary.put("nodeId", nodeId);
-        summary.put("lifecycleStatus", lifecycleStatus);
+        summary.put("stageOutcome", stageOutcome);
+        summary.put("lifecycleStatus", stageOutcome);
         summary.put("decision", decision);
         summary.put("summary", this.summary);
         summary.put("blocking", blocking);

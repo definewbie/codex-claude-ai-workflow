@@ -284,6 +284,7 @@ smoke_case="${DUAL_SMOKE_CASE:-}"
 write_control() {
   local decision="$1"
   local summary="$2"
+  local lifecycle_status="${3:-READY}"
   cat <<EOF
 ## Controlled Smoke Output
 
@@ -291,6 +292,31 @@ Agent: ${agent:-unknown}
 Template: ${template}
 
 ${summary}
+
+<dual-artifact type="agent_output_contract" version="1">
+{
+  "artifact_type": "agent_output_contract",
+  "schema_version": 1,
+  "lifecycle_status": "${lifecycle_status}",
+  "decision": "${decision}",
+  "summary": "${summary}",
+  "blocking": false,
+  "checks": ["Controlled smoke fixture emitted a typed artifact contract"],
+  "evidence": ["Template ${template} completed in the controlled acpx fixture"],
+  "missing_evidence": [],
+  "must_fix": [],
+  "open_risks": [],
+  "verification_summary": "Controlled smoke output satisfies the agent_output_contract boundary.",
+  "failure": {
+    "category_hint": "",
+    "contract_gaps": [],
+    "out_of_scope_files": [],
+    "missing_tests": [],
+    "context_gaps": [],
+    "reason": ""
+  }
+}
+</dual-artifact>
 
 \`\`\`dual-control
 decision: ${decision}

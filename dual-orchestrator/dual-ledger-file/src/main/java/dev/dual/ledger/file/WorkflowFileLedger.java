@@ -259,18 +259,21 @@ public final class WorkflowFileLedger {
         return updated;
     }
 
-    public AgentTaskDocument markAgentTaskSucceeded(
+    public AgentTaskDocument markAgentTaskFinished(
             WorkstreamPaths paths,
             AgentTaskDocument task,
             dev.dual.core.workflow.NodeResult result
     ) throws IOException {
-        var updated = agentTaskLedgerWriter.markSucceeded(paths, task, result);
-        appendEvent(paths, "agent-task-succeeded-" + updated.agentTaskId(), "agent_task_completed", Map.of(
+        var updated = agentTaskLedgerWriter.markFinished(paths, task, result);
+        var failed = updated.status() == AgentTaskStatus.FAILED;
+        appendEvent(paths, (failed ? "agent-task-failed-" : "agent-task-succeeded-") + updated.agentTaskId(),
+                failed ? "agent_task_failed" : "agent_task_completed", Map.of(
                 "agent_task_id", updated.agentTaskId(),
                 "node_execution_id", updated.nodeExecutionId(),
                 "node", updated.nodeDefinitionId(),
                 "node_instance_id", updated.nodeInstanceId(),
-                "status", updated.status()
+                "status", updated.status(),
+                "error", failed ? updated.errorMessage() : ""
         ));
         refreshProjections(paths);
         return updated;

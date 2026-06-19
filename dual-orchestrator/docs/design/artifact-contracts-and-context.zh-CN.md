@@ -22,6 +22,25 @@ Agent 输出分成两层：
 
 Orchestrator 不从 Markdown 标题、关键词或摘要里推断关键状态。某个节点需要结构化 artifact 时，缺失或非法 artifact 会让节点失败，并生成契约诊断。
 
+## 输出捕获边界
+
+acpx stdout 是执行证据，不是 workflow artifact。一个 acpx stream 里可能同时
+包含 client frame、tool call、tool input/output、provider 消息、skill 文本，
+以及最终 Agent 回答。因此 adapter 对完成的 Agent execution 写两类文件：
+
+| 文件 | 含义 | 是否可以进入后续 context |
+|---|---|---|
+| `outputs/<prompt>.transcript.log` | 原始 acpx 执行 transcript，用于调试和 failure classification。 | 不可以。 |
+| `outputs/<prompt>.md` | 抽取后的最终业务 artifact / terminal control block。 | 可以。 |
+
+完成节点的 `NodeResult.outputRefs` 指向最终 `outputs/<prompt>.md`，不指向
+transcript。失败节点可以把 transcript 和 stderr 作为 recovery evidence 暴露。
+Context renderer 即使遇到旧数据或手工 inputRefs 指向 `*.transcript.log`，也只
+显示指针，不展开内容。
+
+这是当前最重要的 token-control 边界：工具日志和文件读取仍然可追溯，但不会变成
+下一个 Agent 的 prompt。
+
 ## 核心 Artifact
 
 | Artifact | 生产者 | 作用 |
@@ -29,6 +48,7 @@ Orchestrator 不从 Markdown 标题、关键词或摘要里推断关键状态。
 | `task_contract_proposal` | Claude intake | 提出范围、非目标、约束、验收标准和测试要求。 |
 | `task-contract.json` | Orchestrator | 机械校验和人工 resolution 后的 canonical contract。 |
 | `contract-resolution.json` | Human gate / orchestrator | 记录开放问题或范围冲突如何被解决。 |
+| `agent_output_contract` | Claude / Codex 中间阶段 | 记录 design、plan、implementation、review 路由所需的阶段决策、摘要、证据、缺失证据、风险和 failure 字段。 |
 | `self_test_report` | Claude self-test | 记录执行了哪些检查、跳过哪些检查、证据、缺失证据和残余风险。 |
 | `acceptance_review` | Codex verifier | 记录最终决策、阻塞缺口、must-fix、acceptance notes 和置信度。 |
 | `stage_handoff` | Claude handoff | 记录已完成工作、关键决策、变更文件、开放风险和推荐下一阶段。 |
@@ -67,6 +87,63 @@ Validator 不判断产品质量。产品质量由 Codex 和 human 判断。Orche
 则作为面向 verifier 的证据限制继续传递，除非该 artifact 正在声明最终
 `ACCEPTED`。
 
+## Stage Outcome
+
+结构化 Agent artifact 可以包含 Agent 自己声明的 `lifecycle_status`，但这个
+字段本身不是运行时 source of truth。Validator 会把 artifact 交给 stage
+outcome compiler：
+
+```text
+Agent decision + declared lifecycle_status
+  -> StageOutcomeCompiler
+  -> canonical stage_outcome + stage_outcome_source
+```
+
+编译后的 `stage_outcome` 是 contract sidecar 里的 canonical 语义状态。后续
+failure classification、context package、review packet、report、CLI 和 UI
+projection 如果需要阶段语义，应消费 `stage_outcome`。它们不能重新从 Markdown
+正文或原始 `lifecycle_status` 推断生命周期含义。
+
+Workflow definition 会声明结构化节点期望哪种 artifact：
+
+```json
+{
+  "expected_artifact": "acceptance_review",
+  "artifact_compiler": "acceptance_review_compiler",
+  "allowed_stage_outcomes": [
+    "ACCEPTED",
+    "ACCEPTED_WITH_NOTES",
+    "REJECTED",
+    "INSUFFICIENT_EVIDENCE",
+    "BLOCKED"
+  ]
+}
+```
+
+这样 artifact 边界是明确的：workflow JSON 声明期望 artifact，validator
+校验形状和语义一致性，compiler 产出 canonical outcome。Handler 局部的字符串
+规则不能变成第二套 stage model。
+
+## 决策路由边界
+
+Decision node 只消费 inputRefs 里的最新 `*.contract.json` sidecar。它不解析
+Markdown，也不会回退到终端 `dual-control` block 来决定路由。`dual-control`
+仍然是 artifact validation 中的终端输出一致性检查，但不是 runtime decision
+source。
+
+如果 decision node 找不到 sidecar，会以 `MISSING_CONTRACT_SIDECAR` 失败。
+如果当前 sidecar 存在但格式错误或缺少 decision，会以
+`INVALID_CONTRACT_SIDECAR` 失败；runtime 不能继续向前搜索旧 artifact，找一个
+“能用”的答案。最新 sidecar 才是当前 typed fact。
+
+## Report 投影边界
+
+Final report 和 operator projection 应该总结结构化 sidecar，例如
+`implement-claude-self-test.contract.json` 和
+`acceptance-codex-review.contract.json`。原始 Agent Markdown 仍然作为 artifact
+指针可追溯，但 report generation 不应该把 tool transcript、raw stdout 或未经
+校验的自然语言片段嵌入成验收事实。
+
 ## Context Package
 
 每个 Agent step 前，运行时会为目标角色生成 context package。Context package 有 profile 和 token budget：
@@ -104,6 +181,11 @@ Markdown package 面向 Agent。JSON sidecar 面向 harness 和投影层，记�
 - 每个 section 是否可用、是否降级、是否被丢弃、soft budget 和渲染后 token 数。
 
 Trace、API overview 和 Operator Panel 如果要展示 budget evidence，应该读 JSON sidecar，不能把 Markdown governance table 当成 source of truth。
+
+Agent run 的 artifact metadata sidecar 也会记录 prompt、最终 output、
+transcript、stderr 的 byte size 和本地估算 token 数。Provider usage 如果可用，
+仍然单独记录；本地估算用于比较 transcript 和最终 artifact 的大小，及时发现
+上下文膨胀回归。
 
 ## 失败模式
 

@@ -55,12 +55,48 @@ used to regenerate the ignored local report and the tracked benchmark index.
 
 ## Current Conclusion
 
-The MVP mainline is now functionally closed for a real, bounded case: the system
-can drive a complete lifecycle, survive one verifier rejection, produce delivery
+The MVP mainline is now functionally closed for real bounded cases: the system
+can drive a complete lifecycle, survive verifier rejection, produce delivery
 artifacts, and leave the original repo clean.
 
 The result is still `PASS-WARN`, not a final product-quality `PASS`, because
 Codex accepted with notes about unavailable build/runtime verification.
+
+## 2026-06-19 P0 Closure Real Case
+
+- Case: private medium business-logic feature slice
+- Variant: `full`
+- Target repo: private production-like Git repository
+- Workstream: `ws-20260619T051122Z-P837`
+- Effective workdir: generated Git worktree outside the original repository
+- Final status: `COMPLETED`
+- Final acceptance decision: `ACCEPT_WITH_NOTES`
+- Goal outcome: `SATISFIED_WITH_NOTES`
+- Benchmark grade: `PASS-WARN`
+- Gate rounds: 9
+- Agent runs: 24
+- Timeline nodes: 67
+- Acceptance decisions: `REJECT`, `REJECT`, then `ACCEPT_WITH_NOTES`
+- Repair loop count: 2
+- Verification confidence: `MEDIUM`
+- Original repo clean: `true`
+
+What changed in this closure run:
+
+- The task touched backend API logic, backend tests, frontend API code, and
+  frontend pages. It was not a simple UI text change.
+- The first Codex rejection found a contract/design gap; the workflow routed
+  through a semantic design repair loop.
+- The second Codex rejection found an implementation/evidence gap; the workflow
+  routed through an implementation repair loop.
+- The third acceptance reached `ACCEPT_WITH_NOTES` with no blocking
+  `must_fix`.
+- `trace` reported terminal completion, final acceptance, goal outcome, repair
+  loop count, verification confidence, final artifacts, and next action from
+  ledger-backed read models.
+
+This closes P0 with known limits. Remaining work is P1/P2 hardening rather than
+another open-ended P0 closure loop.
 
 ## Remaining Mainline Gaps
 
@@ -105,10 +141,14 @@ review packet without making the Agent behavior brittle.
 
 The artifact boundary now has a first semantic consistency layer:
 
-- Structured agent artifacts may declare `lifecycle_status`.
-- Runtime derives canonical status from `decision` and rejects unknown or
-  conflicting declared status.
-- Contract sidecars include `lifecycle_status` and `evidence_state`.
+- Structured agent artifacts may declare `lifecycle_status`, but runtime treats
+  it as an Agent claim rather than the final source of truth.
+- Runtime compiles `decision` plus declared `lifecycle_status` into canonical
+  `stage_outcome`, and rejects unknown or conflicting declared status.
+- Contract sidecars include `stage_outcome`, `stage_outcome_source`,
+  normalized `lifecycle_status`, and `evidence_state`.
+- Failure classification and projections consume the compiled `stage_outcome`
+  instead of re-reading free-form Markdown or raw declared status.
 - Final acceptance `ACCEPT` / `ACCEPT_WITH_NOTES` cannot carry blocking
   evidence, `must_fix`, or material `missing_evidence`.
 - Final acceptance `REJECT` must include blocking evidence, missing evidence,

@@ -17,12 +17,18 @@ acpx --version
 
 真实 lifecycle run 需要 `acpx` 能调用 Claude 和 Codex。Fixture/smoke 路径可以先验证 CLI，不必碰自己的仓库。
 
-真实运行前要固定 adapter 版本。否则 `acpx` 可能解析到浮动的 Codex ACP adapter，导致同一个流程在不同时间表现不同：
+真实运行前要固定 adapter 版本。否则 `acpx` 可能解析到浮动的 Claude/Codex ACP adapter，导致同一个流程在不同时间表现不同：
 
 ```bash
-npm install -g acpx@0.8.0
+npm install -g acpx@0.11.0
 ./scripts/configure-acpx.sh
 ```
+
+如果 Claude Code 使用 GLM、DeepSeek、one-api、claude-code-router 等
+Anthropic-compatible 后端，把 provider 变量放在 `~/.claude/settings.json`
+的 `env` 字段里即可。`configure-acpx.sh` 会安装一个很薄的 Claude
+adapter wrapper，在运行时读取这些变量，不会把 token 写进
+`~/.acpx/config.json`。
 
 ## 2. 安装
 
@@ -33,7 +39,7 @@ cd dual-orchestrator
 
 默认安装到 `$HOME/.local`。
 
-如果希望安装 wrapper 的同时写入固定的 acpx Codex adapter 配置：
+如果希望安装 wrapper 的同时写入固定的 acpx Claude/Codex adapter 配置：
 
 ```bash
 ./scripts/install.sh --configure-acpx
@@ -60,7 +66,9 @@ dualctl doctor --workdir /path/to/git/repo
 ```
 
 `doctor` 会检查基础依赖。真实 Agent run 还需要可用的 acpx Claude/Codex session；缺失 session 通常由 acpx 按需创建。
-它也会检查 `acpx` 版本和 Codex ACP adapter 是否固定，避免使用浮动 npm range。
+它也会检查 `acpx` 版本和两个 ACP adapter 是否固定，避免使用浮动 npm range。
+如果 Claude settings 中配置了 `ANTHROPIC_BASE_URL` 和 token，它还会检查
+Claude ACP command 是否能拿到这些变量。
 
 ## 4. 运行最小 Smoke
 

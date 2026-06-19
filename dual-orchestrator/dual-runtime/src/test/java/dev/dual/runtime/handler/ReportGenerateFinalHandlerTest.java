@@ -29,11 +29,31 @@ class ReportGenerateFinalHandlerTest {
 
         var acceptance = wsDir.resolve("runs/run-003/outputs/acceptance-codex-review.md");
         Files.createDirectories(acceptance.getParent());
-        Files.writeString(acceptance, "PASS: all checks green", StandardCharsets.UTF_8);
+        Files.writeString(acceptance, "raw acceptance markdown should stay as an artifact pointer", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-003/outputs/acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_review",
+                  "decision": "ACCEPT",
+                  "stage_outcome": "ACCEPTED",
+                  "summary": "Codex accepts the implementation.",
+                  "verification_summary": "All checks green.",
+                  "evidence": ["diff matches contract"]
+                }
+                """, StandardCharsets.UTF_8);
 
         var selfTest = wsDir.resolve("runs/run-002/outputs/implement-claude-self-test.md");
         Files.createDirectories(selfTest.getParent());
-        Files.writeString(selfTest, "Tests: 42 passed", StandardCharsets.UTF_8);
+        Files.writeString(selfTest, "raw self-test markdown should stay as an artifact pointer", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-002/outputs/implement-claude-self-test.contract.json"), """
+                {
+                  "node_id": "implement.claude_self_test",
+                  "decision": "SELF_TEST_COMPLETE",
+                  "stage_outcome": "READY",
+                  "summary": "Developer self-test passed.",
+                  "verification_summary": "Tests: 42 passed",
+                  "evidence": ["unit tests passed"]
+                }
+                """, StandardCharsets.UTF_8);
 
         var evidenceDir = wsDir.resolve("artifacts/git-evidence");
         Files.createDirectories(evidenceDir);
@@ -50,8 +70,12 @@ class ReportGenerateFinalHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
         assertTrue(report.contains("Implement feature X."));
-        assertTrue(report.contains("PASS: all checks green"));
+        assertTrue(report.contains("Codex accepts the implementation."));
         assertTrue(report.contains("Tests: 42 passed"));
+        assertTrue(report.contains("diff matches contract"));
+        assertTrue(report.contains("unit tests passed"));
+        assertTrue(report.contains("acceptance-codex-review.contract.json"));
+        assertTrue(report.contains("implement-claude-self-test.contract.json"));
         assertTrue(report.contains("git-evidence.json"));
     }
 

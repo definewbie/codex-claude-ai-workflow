@@ -95,6 +95,23 @@ class PromptTemplateConsistencyTest {
                 templateName + " must not hardcode acceptance decision values");
     }
 
+    @Test
+    void reviewerTemplatesKeepLifecycleStatusCanonical() {
+        for (var templateName : List.of(
+                "intake-codex-product-review",
+                "design-codex-review",
+                "plan-codex-review"
+        )) {
+            var content = loadTemplate(templateName);
+            assertTrue(content.contains("Set `lifecycle_status` from the canonical stage outcome vocabulary"),
+                    templateName + " must explain that lifecycle_status is not a routing decision");
+            assertTrue(content.contains("\"lifecycle_status\": \"READY\""),
+                    templateName + " must show canonical READY lifecycle_status in the JSON example");
+            assertFalse(content.contains("\"lifecycle_status\": \"{{decision_example}}\""),
+                    templateName + " must not reuse routing decision examples as lifecycle_status");
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("allTemplates")
     void allTemplatesIncludeContextPackageSection(String templateName) {

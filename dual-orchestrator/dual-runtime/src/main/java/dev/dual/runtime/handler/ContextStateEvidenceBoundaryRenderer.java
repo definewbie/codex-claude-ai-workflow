@@ -31,6 +31,7 @@ final class ContextStateEvidenceBoundaryRenderer {
         builder.append("This package separates deterministic harness facts from agent proposals.\n\n");
 
         appendTrustedFacts(builder, workstreamDir, objectMapper);
+        appendCurrentRepairObjective(builder, workstreamDir, objectMapper);
         appendHumanDecisions(builder, workstreamDir, objectMapper);
         appendAgentProposedStates(builder, workstreamDir, objectMapper);
         appendPendingGaps(builder, workstreamDir, objectMapper);
@@ -61,6 +62,50 @@ final class ContextStateEvidenceBoundaryRenderer {
         }
     }
 
+    private static void appendCurrentRepairObjective(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+        var latestRejected = AgentEvidenceIndex.load(workstreamDir, objectMapper)
+                .recent(20)
+                .stream()
+                .filter(ContextStateEvidenceBoundaryRenderer::isRejectedAcceptance)
+                .findFirst();
+        if (latestRejected.isEmpty()) {
+            return;
+        }
+
+        var entry = latestRejected.get();
+        var contract = entry.document();
+        var classification = readJsonUnchecked(workstreamDir.resolve("artifacts/failure-classification.json"), objectMapper);
+
+        builder.append("\n### Current Repair Objective\n\n");
+        var category = firstNonBlank(
+                text(classification.get("category")),
+                contract.failure().categoryHint()
+        );
+        if (!category.isBlank()) {
+            builder.append("- Category: ").append(category).append("\n");
+        }
+        builder.append("- Source: ").append(toDisplayRef(entry.path())).append("\n");
+        if (!contract.summary().isBlank()) {
+            builder.append("- Summary: ").append(contract.summary()).append("\n");
+        }
+        appendList(builder, "Must Fix", contract.mustFix(), 8);
+        appendList(builder, "Contract Gaps", contract.failure().contractGaps(), 8);
+        if (!contract.failure().reason().isBlank()) {
+            builder.append("- Failure Reason: ").append(contract.failure().reason()).append("\n");
+        }
+        var suggestedAction = text(classification.get("suggestedAction"));
+        if (!suggestedAction.isBlank()) {
+            builder.append("- Suggested Action: ").append(suggestedAction).append("\n");
+        }
+        builder.append("\n");
+    }
+
+    private static boolean isRejectedAcceptance(AgentEvidenceIndex.Entry entry) {
+        var document = entry.document();
+        return "acceptance.codex_verifier_review".equals(document.nodeId())
+                && ("REJECT".equals(document.decision()) || "REJECTED".equals(document.canonicalStageOutcome()));
+    }
+
     private static void appendHumanDecisions(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) {
         builder.append("\n### Human Decisions\n\n");
         var resolutionPath = workstreamDir.resolve("artifacts/contract-resolution.json");
@@ -88,8 +133,8 @@ final class ContextStateEvidenceBoundaryRenderer {
             var contract = entry.document();
             builder.append("- ").append(blankAsNone(contract.nodeId()))
                     .append(": decision=").append(blankAsNone(contract.decision()));
-            if (!contract.lifecycleStatus().isBlank()) {
-                builder.append(", lifecycle=").append(contract.lifecycleStatus());
+            if (!contract.canonicalStageOutcome().isBlank()) {
+                builder.append(", stageOutcome=").append(contract.canonicalStageOutcome());
             }
             var evidenceState = entry.evidenceState();
             if (!evidenceState.isEmpty()) {
@@ -178,5 +223,19 @@ final class ContextStateEvidenceBoundaryRenderer {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private static void appendList(StringBuilder builder, String label, List<String> values, int maxItems) {
+        if (values.isEmpty()) {
+            return;
+        }
+        builder.append("- ").append(label).append(":\n");
+        for (var value : values.stream().limit(maxItems).toList()) {
+            builder.append("  - ").append(value).append("\n");
+        }
+    }
+
+    private static String firstNonBlank(String first, String second) {
+        return first == null || first.isBlank() ? (second == null ? "" : second) : first;
     }
 }

@@ -13,10 +13,14 @@ final class AgentTerminalContract {
             return false;
         }
         var fenceEnd = stdout.indexOf("```", fenceStart + CONTROL_FENCE.length());
-        var body = fenceEnd < 0
-                ? stdout.substring(fenceStart)
-                : stdout.substring(fenceStart, fenceEnd);
-        body = body.replace(DONE_MARKER, "");
+        if (fenceEnd < 0) {
+            return false;
+        }
+        var doneMarker = stdout.indexOf(DONE_MARKER, fenceEnd + 3);
+        if (doneMarker < 0) {
+            return false;
+        }
+        var body = stdout.substring(fenceStart, fenceEnd);
         return body.contains("\ndecision:") && body.contains("\nsummary:");
     }
 }

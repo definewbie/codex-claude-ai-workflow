@@ -45,7 +45,40 @@ Required control keys:
 
 {{required_control_keys}}
 
-End with this control block:
+Before the final control block, write this structured artifact. Keep it factual
+and consistent with the Markdown design. If your decision is `BLOCKED`, set
+`lifecycle_status` to `BLOCKED`, set `blocking` to `true`, and include a concrete
+`failure.reason` plus at least one `missing_evidence`, `must_fix`, or
+`open_risks` item.
+
+<dual-artifact type="agent_output_contract" version="1">
+{
+  "artifact_type": "agent_output_contract",
+  "schema_version": 1,
+  "lifecycle_status": "READY",
+  "decision": "{{decision_example}}",
+  "summary": "one short sentence",
+  "blocking": false,
+  "checks": ["read relevant project files and prior context"],
+  "evidence": ["design is scoped to the approved task contract"],
+  "missing_evidence": [],
+  "must_fix": [],
+  "acceptance_notes": [],
+  "open_risks": [],
+  "changed_files": [],
+  "verification_summary": "Design stage only; implementation and self-test happen later.",
+  "failure": {
+    "category_hint": "",
+    "contract_gaps": [],
+    "out_of_scope_files": [],
+    "missing_tests": [],
+    "context_gaps": [],
+    "reason": ""
+  }
+}
+</dual-artifact>
+
+End with this control block. The decision must match the structured artifact:
 
 ```dual-control
 decision: {{decision_example}}

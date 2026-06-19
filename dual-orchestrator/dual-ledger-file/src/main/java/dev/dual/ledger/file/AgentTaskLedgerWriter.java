@@ -96,7 +96,7 @@ final class AgentTaskLedgerWriter {
         return document;
     }
 
-    AgentTaskDocument markSucceeded(WorkstreamPaths paths, AgentTaskDocument task, NodeResult result)
+    AgentTaskDocument markFinished(WorkstreamPaths paths, AgentTaskDocument task, NodeResult result)
             throws IOException {
         var dispatch = new LinkedHashMap<String, Object>();
         dispatch.putAll(task.dispatch());
@@ -105,7 +105,13 @@ final class AgentTaskLedgerWriter {
             dispatch.put("node_status", result.status() == null ? "" : result.status().name());
             dispatch.put("output_ref_count", result.outputRefs() == null ? 0 : result.outputRefs().size());
         }
-        var document = complete(task, AgentTaskStatus.SUCCEEDED, "", dispatch);
+        var failed = result != null && result.status() == dev.dual.core.workflow.NodeStatus.FAILED;
+        var document = complete(
+                task,
+                failed ? AgentTaskStatus.FAILED : AgentTaskStatus.SUCCEEDED,
+                failed ? nullToEmpty(result.errorMessage()) : "",
+                dispatch
+        );
         jsonWriter.write(paths.agentTaskJson(document.agentTaskId()), document);
         return document;
     }

@@ -1,6 +1,15 @@
 package dev.dual.runtime.handler;
 
-enum AgentLifecycleStatus {
+/**
+ * Canonical stage outcome compiled by the orchestrator from Agent decisions,
+ * declared artifact status, evidence fields, and runtime facts.
+ *
+ * Agent output may propose a decision, but workflow routing should consume this
+ * normalized stage outcome plus the original routing decision. This keeps
+ * runtime failures, semantic review results, and evidence gaps from collapsing
+ * into one overloaded "decision" string.
+ */
+enum StageOutcome {
     READY,
     NEEDS_REVISION,
     BLOCKED,
@@ -10,7 +19,7 @@ enum AgentLifecycleStatus {
     INSUFFICIENT_EVIDENCE,
     UNKNOWN;
 
-    static AgentLifecycleStatus fromDecision(String decision) {
+    static StageOutcome fromDecision(String decision) {
         return switch (normalized(decision)) {
             case "READY_FOR_PRODUCT_REVIEW",
                  "READY_FOR_ARCH_REVIEW",
@@ -45,9 +54,9 @@ enum AgentLifecycleStatus {
         };
     }
 
-    static AgentLifecycleStatus fromText(String value) {
+    static StageOutcome fromText(String value) {
         try {
-            return AgentLifecycleStatus.valueOf(normalized(value));
+            return StageOutcome.valueOf(normalized(value));
         } catch (IllegalArgumentException e) {
             return UNKNOWN;
         }

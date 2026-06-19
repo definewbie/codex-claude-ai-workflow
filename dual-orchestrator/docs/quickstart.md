@@ -19,13 +19,19 @@ acpx --version
 `acpx` must be able to call your Claude and Codex runtimes for real lifecycle
 runs. The fixture/smoke path can verify the CLI without touching your own repo.
 
-Use pinned adapter versions for real runs. `acpx` may otherwise resolve a
-floating Codex ACP adapter and change behavior between runs:
+Use pinned adapter versions for real runs. `acpx` may otherwise resolve
+floating Claude/Codex ACP adapters and change behavior between runs:
 
 ```bash
-npm install -g acpx@0.8.0
+npm install -g acpx@0.11.0
 ./scripts/configure-acpx.sh
 ```
+
+If your Claude Code uses a third-party Anthropic-compatible backend such as
+GLM, DeepSeek, one-api, or claude-code-router, keep the provider variables in
+`~/.claude/settings.json` under `env`. `configure-acpx.sh` installs a small
+Claude adapter wrapper that reads those variables at runtime, so secrets are not
+written into `~/.acpx/config.json`.
 
 ## 2. Install
 
@@ -36,7 +42,7 @@ cd dual-orchestrator
 
 The default prefix is `$HOME/.local`.
 
-To install wrappers and write the pinned acpx Codex adapter config in one step:
+To install wrappers and write the pinned acpx Claude/Codex adapter config in one step:
 
 ```bash
 ./scripts/install.sh --configure-acpx
@@ -64,7 +70,9 @@ dualctl doctor --workdir /path/to/git/repo
 
 `doctor` checks basic prerequisites. Real agent runs also need usable acpx
 Claude/Codex sessions. It also checks that `acpx` is the expected version and
-that the Codex ACP adapter is pinned instead of using a floating npm range.
+that both ACP adapters are pinned instead of using floating npm ranges. When
+Claude settings define `ANTHROPIC_BASE_URL` plus a token, it also checks that
+the Claude ACP command can receive those variables.
 
 ## 4. Run A Small Smoke
 

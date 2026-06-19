@@ -165,7 +165,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         var contract = taskContractSummary(context);
         var decision = latestAgentDecision(context);
         appendField(builder, "Objective", text(contract.get("objective")));
-        appendField(builder, "Lifecycle Status", decision.lifecycleStatus());
+        appendField(builder, "Stage Outcome", decision.stageOutcome());
         appendField(builder, "Latest Decision", decision.decision());
         appendField(builder, "Latest Summary", decision.summary());
         appendField(builder, "Blocking", Boolean.toString(decision.blocking()));
@@ -213,7 +213,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         }
         builder.append("## Latest Agent Decision\n\n");
         appendField(builder, "Node", decision.nodeId());
-        appendField(builder, "Lifecycle Status", decision.lifecycleStatus());
+        appendField(builder, "Stage Outcome", decision.stageOutcome());
         appendField(builder, "Decision", decision.decision());
         appendField(builder, "Summary", decision.summary());
         appendField(builder, "Blocking", Boolean.toString(decision.blocking()));

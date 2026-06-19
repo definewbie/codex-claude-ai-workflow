@@ -74,6 +74,10 @@ final class ContextPackageSectionRenderer {
                 builder.append(" (unavailable)\n");
                 continue;
             }
+            if (isTranscriptArtifact(path)) {
+                builder.append(" (execution transcript; omitted from context)\n");
+                continue;
+            }
             var content = Files.readString(path, StandardCharsets.UTF_8);
             var firstLine = content.lines()
                     .findFirst()
@@ -240,6 +244,16 @@ final class ContextPackageSectionRenderer {
                 builder.append("(artifact unavailable or not a file)\n\n");
                 continue;
             }
+            if (isTranscriptArtifact(path)) {
+                builder.append("(execution transcript omitted from context; inspect raw file at ")
+                        .append(toDisplayRef(path))
+                        .append(")\n\n");
+                continue;
+            }
+            if (isAgentOutput(path) && appendAgentContractSummary(builder, path)) {
+                builder.append("- Raw Output: ").append(toDisplayRef(path)).append("\n\n");
+                continue;
+            }
             builder.append("```text\n");
             builder.append(snippet(path, maxSnippetChars));
             builder.append("\n```\n\n");
@@ -366,26 +380,29 @@ final class ContextPackageSectionRenderer {
 
     private static void appendAgentOutputSnippet(StringBuilder builder, Path output, int maxSnippetChars) throws IOException {
         builder.append("### ").append(toDisplayRef(output)).append("\n\n");
-        appendAgentContractSummary(builder, output);
+        if (appendAgentContractSummary(builder, output)) {
+            builder.append("- Raw Output: ").append(toDisplayRef(output)).append("\n\n");
+            return;
+        }
         builder.append("```text\n");
-        builder.append(snippet(output, maxSnippetChars));
+        builder.append(snippetWithoutToolLog(output, Math.min(maxSnippetChars, 1_000)));
         builder.append("\n```\n\n");
     }
 
-    private static void appendAgentContractSummary(StringBuilder builder, Path output) {
+    private static boolean appendAgentContractSummary(StringBuilder builder, Path output) {
         var sidecar = AgentOutputContractSidecar.pathFor(output);
         if (!Files.isRegularFile(sidecar)) {
-            return;
+            return false;
         }
         var contract = AgentOutputContractDocument.read(sidecar, OBJECT_MAPPER);
         if (contract.isEmpty()) {
-            return;
+            return false;
         }
         var nodeId = contract.get().nodeId();
         var decision = contract.get().decision();
         var summary = contract.get().summary();
         if (nodeId.isBlank() && decision.isBlank() && summary.isBlank()) {
-            return;
+            return false;
         }
         if (!nodeId.isBlank()) {
             builder.append("- Contract: ").append(nodeId).append("\n");
@@ -404,6 +421,7 @@ final class ContextPackageSectionRenderer {
             builder.append("- Verification: ").append(verification.replace("\n", " / ")).append("\n");
         }
         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n\n");
+        return true;
     }
 
     private static void appendListSummary(StringBuilder builder, String label, Object value) {
@@ -497,6 +515,10 @@ final class ContextPackageSectionRenderer {
         return parent != null && "outputs".equals(parent.getFileName().toString());
     }
 
+    private static boolean isTranscriptArtifact(Path path) {
+        return path.getFileName().toString().endsWith(".transcript.log");
+    }
+
     private static Instant lastModified(Path path) {
         try {
             return Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toInstant();
@@ -512,6 +534,26 @@ final class ContextPackageSectionRenderer {
         }
         return content.substring(0, maxSnippetChars).stripTrailing()
                 + "\n\n[truncated; read full artifact at " + toDisplayRef(path) + "]";
+    }
+
+    private static String snippetWithoutToolLog(Path path, int maxSnippetChars) throws IOException {
+        var content = Files.readString(path, StandardCharsets.UTF_8);
+        var sanitized = content.lines()
+                .filter(line -> !line.startsWith("[tool] "))
+                .filter(line -> !line.startsWith("[client] "))
+                .filter(line -> !line.startsWith("  input: "))
+                .filter(line -> !line.startsWith("  output:"))
+                .filter(line -> !line.startsWith("  kind: "))
+                .limit(80)
+                .collect(java.util.stream.Collectors.joining("\n"));
+        if (sanitized.isBlank()) {
+            sanitized = "(agent output contains only tool/client frames; read raw output at " + toDisplayRef(path) + ")";
+        }
+        if (sanitized.length() <= maxSnippetChars) {
+            return sanitized.stripTrailing();
+        }
+        return sanitized.substring(0, maxSnippetChars).stripTrailing()
+                + "\n\n[truncated sanitized fallback; read raw output at " + toDisplayRef(path) + "]";
     }
 
     private static String toDisplayRef(Path path) {

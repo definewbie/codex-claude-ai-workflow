@@ -205,6 +205,126 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void planReviewUsesStructuredAgentOutputContractInsteadOfMarkdownSections() throws Exception {
+        var outputRef = writeOutput("plan-review.md", """
+                **Must Fix Before Implementation**
+
+                - This bold markdown section is human-readable only.
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Plan commands must be corrected before implementation.",
+                  "blocking": true,
+                  "checks": ["reviewed plan"],
+                  "evidence": ["plan includes raw shell commands"],
+                  "missing_evidence": [],
+                  "must_fix": ["Rewrite shell commands with rtk prefixes."],
+                  "acceptance_notes": [],
+                  "open_risks": ["Executor may run unguarded commands."],
+                  "changed_files": [],
+                  "verification_summary": "Plan is not execution-ready.",
+                  "failure": {
+                    "category_hint": "PLAN_EXECUTION_DISCIPLINE",
+                    "contract_gaps": ["Raw command discipline is missing."],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": "Plan needs revision before implementation."
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Plan commands must be corrected before implementation.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var sidecar = Files.readString(tempDir.resolve("plan-review.contract.json"));
+        assertTrue(sidecar.contains("Rewrite shell commands with rtk prefixes."));
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"agent_output_contract\""));
+        assertTrue(sidecar.contains("\"evidence_count\" : 1"));
+        assertTrue(!sidecar.contains("This bold markdown section is human-readable only."));
+    }
+
+    @Test
+    void latestStructuredAgentOutputContractIsAuthoritativeAndDoesNotFallBack() throws Exception {
+        var outputRef = writeOutput("plan-review.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Earlier quoted artifact should not be trusted.",
+                  "blocking": true,
+                  "checks": [],
+                  "evidence": [],
+                  "missing_evidence": [],
+                  "must_fix": ["Earlier must-fix."],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "",
+                  "failure": {
+                    "category_hint": "",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": ""
+                  }
+                }
+                </dual-artifact>
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Latest artifact is malformed semantically.",
+                  "blocking": false,
+                  "checks": [],
+                  "evidence": [],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "",
+                  "failure": {
+                    "category_hint": "",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": ""
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Latest artifact is malformed semantically.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("message"))
+                .contains("NEGATIVE_STATUS_MISSING_EVIDENCE"));
+    }
+
+    @Test
     void acceptsAcceptedWithNotesWhenMissingEvidenceIsNonBlocking() throws Exception {
         var outputRef = writeOutput("acceptance.md", """
                 <dual-artifact type="acceptance_review" version="1">
@@ -290,6 +410,52 @@ class ArtifactContractValidatorTest {
         assertEquals(NodeStatus.FAILED, validated.status());
         assertTrue(String.valueOf(validated.result().get("message"))
                 .contains("FINAL_ACCEPTANCE_EVIDENCE_CONFLICT"));
+    }
+
+    @Test
+    void acceptsRejectedAcceptanceReviewWhenLifecycleStatusMeansInsufficientEvidence() throws Exception {
+        var outputRef = writeOutput("acceptance.md", """
+                <dual-artifact type="acceptance_review" version="1">
+                {
+                  "artifact_type": "acceptance_review",
+                  "schema_version": 1,
+                  "lifecycle_status": "INSUFFICIENT_EVIDENCE",
+                  "decision": "REJECT",
+                  "summary": "Rejected because the generated evidence does not prove the implementation.",
+                  "blocking": true,
+                  "checks": ["inspected generated git evidence"],
+                  "evidence": ["acceptance review found generated evidence files"],
+                  "missing_evidence": ["git evidence reports zero changed files while branch diff has implementation commits"],
+                  "must_fix": ["Regenerate git evidence from the workstream base commit."],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Evidence is insufficient for acceptance.",
+                  "failure": {
+                    "category_hint": "evidence_gap",
+                    "contract_gaps": [],
+                    "out_of_scope_files": [],
+                    "missing_tests": ["branch diff evidence"],
+                    "context_gaps": [],
+                    "reason": "Generated evidence is empty."
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: REJECT
+                summary: Rejected because generated evidence is insufficient.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
+        var validated = validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var sidecar = Files.readString(tempDir.resolve("acceptance.contract.json"));
+        assertTrue(sidecar.contains("\"decision\" : \"REJECT\""));
+        assertTrue(sidecar.contains("\"stage_outcome\" : \"INSUFFICIENT_EVIDENCE\""));
+        assertTrue(sidecar.contains("\"lifecycle_status\" : \"INSUFFICIENT_EVIDENCE\""));
+        assertTrue(sidecar.contains("git evidence reports zero changed files"));
     }
 
     @Test
@@ -552,5 +718,14 @@ class ArtifactContractValidatorTest {
 
     private static NodeDefinition agentNode(String nodeId) {
         return new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of());
+    }
+
+    private static NodeDefinition agentNode(String nodeId, String expectedArtifact) {
+        return new NodeDefinition(
+                nodeId,
+                NodeKind.TASK,
+                "acpx.agent_run",
+                Map.of("expected_artifact", expectedArtifact)
+        );
     }
 }

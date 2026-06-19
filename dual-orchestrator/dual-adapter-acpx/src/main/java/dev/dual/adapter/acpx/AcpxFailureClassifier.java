@@ -31,8 +31,12 @@ final class AcpxFailureClassifier {
     AcpxFailure classify(Path stdoutPath, Path stderrPath, int exitCode) {
         var stderr = read(stderrPath);
         var providerEvidence = sessionStreamReader.readFromStderr(stderr).orElse("");
-        var evidence = new AcpxFailureEvidence(read(stdoutPath), stderr + "\n" + providerEvidence, exitCode);
-        var signal = signalCatalog.match(evidence);
+        var runtimeStdoutEvidence = runtimeStdoutEvidence(read(stdoutPath));
+        var signal = signalCatalog.match(new AcpxFailureEvidence(
+                runtimeStdoutEvidence,
+                stderr + "\n" + providerEvidence,
+                exitCode
+        ));
         if (signal.isPresent()) {
             return signal.get().toFailure();
         }
@@ -53,6 +57,32 @@ final class AcpxFailureClassifier {
         } catch (IOException ignored) {
             return "";
         }
+    }
+
+    /**
+     * 只从 stdout 中提取明确的运行时错误行。
+     *
+     * Agent stdout 可能包含需求、上下文包、历史输出和业务风险描述；这些正文
+     * 不能作为 acpx/provider 故障证据。这里把 stdout 降级为辅助证据，只接收
+     * acpx runtime/error 形态的行，避免把业务文本里的 "rate limit"、"quota"
+     * 等词误判成外部适配器故障。
+     */
+    private static String runtimeStdoutEvidence(String stdout) {
+        if (stdout == null || stdout.isBlank()) {
+            return "";
+        }
+        var result = new StringBuilder();
+        for (var line : stdout.lines().toList()) {
+            var lower = line.toLowerCase();
+            if (lower.contains("[error]")
+                    || lower.contains("runtime:")
+                    || lower.contains("api error:")
+                    || lower.contains("tool_use_error")
+                    || lower.contains("tool permission request failed")) {
+                result.append(line).append('\n');
+            }
+        }
+        return result.toString();
     }
 
     record AcpxFailure(String reason, String message, boolean recoverable, boolean interruptRunningProcess) {

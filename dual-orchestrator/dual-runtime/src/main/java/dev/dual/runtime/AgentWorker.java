@@ -117,7 +117,7 @@ public final class AgentWorker {
                     nodeDefinition,
                     result
             );
-            ledger.markAgentTaskSucceeded(paths, task, result);
+            ledger.markAgentTaskFinished(paths, task, result);
             ledger.finishNodeExecution(paths, nodeExecution, result);
             return result;
         } catch (Exception nodeFailure) {

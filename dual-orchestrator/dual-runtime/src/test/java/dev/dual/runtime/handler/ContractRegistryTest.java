@@ -207,6 +207,35 @@ class ContractRegistryTest {
     }
 
     @Test
+    void structuredArtifactNodesDeclareExpectedArtifactAndCompilerInWorkflowDefinition() throws Exception {
+        var expected = Map.of(
+                "intake.codex_product_review", "agent_output_contract",
+                "design.claude_design", "agent_output_contract",
+                "design.codex_arch_review", "agent_output_contract",
+                "plan.claude_plan", "agent_output_contract",
+                "plan.codex_plan_review", "agent_output_contract",
+                "implement.claude_implement", "agent_output_contract",
+                "implement.claude_self_test_report", "self_test_report",
+                "acceptance.codex_verifier_review", "acceptance_review",
+                "stage.claude_handoff", "stage_handoff"
+        );
+        for (var definition : bundledDefinitions()) {
+            var nodesById = definition.nodes().stream()
+                    .collect(java.util.stream.Collectors.toMap(NodeDefinition::id, node -> node));
+            for (var entry : expected.entrySet()) {
+                var node = nodesById.get(entry.getKey());
+                assertNotNull(node, definition.workflowId() + " missing node " + entry.getKey());
+                assertEquals(entry.getValue(), String.valueOf(node.config().get("expected_artifact")),
+                        definition.workflowId() + " node " + entry.getKey() + " missing expected_artifact");
+                assertTrue(String.valueOf(node.config().get("artifact_compiler")).endsWith("_compiler"),
+                        definition.workflowId() + " node " + entry.getKey() + " missing artifact_compiler");
+                assertTrue(node.config().get("allowed_stage_outcomes") instanceof List<?>,
+                        definition.workflowId() + " node " + entry.getKey() + " missing allowed_stage_outcomes");
+            }
+        }
+    }
+
+    @Test
     void decisionNodeRoutingOutcomesMatchAllowedContractDecisions() throws Exception {
         for (var definition : bundledDefinitions()) {
             for (var node : definition.nodes()) {

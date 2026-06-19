@@ -298,6 +298,9 @@ class ContextBuildPackageHandlerTest {
         Files.createDirectories(output.getParent());
         Files.writeString(output, """
                 Long review body.
+                [tool] rtk read huge-file.md (completed)
+                  output:
+                    Full tool log that should not enter context.
 
                 ```dual-control
                 decision: READY_FOR_ARCH_REVIEW
@@ -330,6 +333,102 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("- Open Risks: Migration risk"));
         assertTrue(markdown.contains("- Changed Files: docs/design.md"));
         assertTrue(markdown.contains("- Verification: No runtime verification needed yet."));
+        assertTrue(markdown.contains("- Raw Output: "));
+        assertFalse(markdown.contains("Long review body."));
+        assertFalse(markdown.contains("[tool] rtk read huge-file.md"));
+        assertFalse(markdown.contains("Full tool log that should not enter context."));
+    }
+
+    @Test
+    void inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Input artifact sidecar test.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-002/outputs/self-test.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, """
+                Raw self-test body.
+                [tool] rtk read large-log.md (completed)
+                  output:
+                    tool log should not be included
+                """, StandardCharsets.UTF_8);
+        Files.writeString(output.getParent().resolve("self-test.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "implement.claude_self_test_report",
+                  "decision": "READY_FOR_ACCEPTANCE",
+                  "summary": "Self-test evidence is ready.",
+                  "must_fix": [],
+                  "missing_evidence": ["frontend typecheck unavailable"],
+                  "open_risks": [],
+                  "changed_files": ["miniprogram/src/pages/record/index.vue"],
+                  "verification_summary": "Backend test passed; frontend typecheck missing."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("artifacts/git-evidence"));
+        Files.writeString(wsDir.resolve("artifacts/git-evidence/git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id": "tc-1",
+                  "version": 1,
+                  "created_at": "2026-06-18T00:00:00Z",
+                  "objective": "Verify context package raw-output hygiene.",
+                  "status": "READY_FOR_REVIEW",
+                  "scope": {"included": [], "excluded": []},
+                  "acceptance_criteria": [],
+                  "test_requirements": [],
+                  "non_goals": [],
+                  "constraints": [],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "compilation_pass": 1,
+                  "source": {
+                    "raw_request_ref": ".agent/workstreams/ws-ctx/requirement.md",
+                    "created_by": "test"
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("acceptance", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-002/outputs/self-test.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("- Contract: implement.claude_self_test_report"));
+        assertTrue(markdown.contains("- Decision: READY_FOR_ACCEPTANCE"));
+        assertTrue(markdown.contains("- Raw Output: "));
+        assertFalse(markdown.contains("Raw self-test body."));
+        assertFalse(markdown.contains("[tool] rtk read large-log.md"));
+        assertFalse(markdown.contains("tool log should not be included"));
+    }
+
+    @Test
+    void transcriptInputRefIsNeverExpandedIntoContextPackage() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Transcript guard test.", StandardCharsets.UTF_8);
+        var transcript = wsDir.resolve("runs/run-003/outputs/intake-claude-brainstorm.transcript.log");
+        Files.createDirectories(transcript.getParent());
+        Files.writeString(transcript, """
+                [client] initialize
+                [tool] Read huge-file.md
+                  input: {"file":"huge-file.md"}
+                  output:
+                    massive tool output that must not enter context
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                ```
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-003/outputs/intake-claude-brainstorm.transcript.log")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("execution transcript omitted from context"));
+        assertFalse(markdown.contains("[tool] Read huge-file.md"));
+        assertFalse(markdown.contains("massive tool output that must not enter context"));
+        assertFalse(markdown.contains("decision: READY_FOR_PRODUCT_REVIEW"));
     }
 
     @Test
@@ -623,6 +722,57 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Pending Contract/Evidence Gaps"));
         assertTrue(markdown.contains("implement.claude_self_test_report: missing_structured_artifact / STRUCTURED_ARTIFACT_MISSING"));
         assertTrue(markdown.contains("Ask the agent to emit typed artifact."));
+    }
+
+    @Test
+    void contextHighlightsCurrentRepairObjectiveFromRejectedAcceptance() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.createDirectories(wsDir.resolve("runs/run-004/outputs"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Repair objective test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/failure-classification.json"), """
+                {
+                  "category": "CONTRACT_GAP",
+                  "reasoning": "The accepted implementation missed exact ledger wording.",
+                  "suggestedAction": "Repair the contract gap before continuing."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-004/outputs/acceptance-codex-review.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "README misses the exact ledger pointer.",
+                  "lifecycle_status": "REJECTED",
+                  "must_fix": [
+                    "Update README to point to .agent/workstreams/ exactly.",
+                    "Remove the misleading statement that implementation nodes only modify business code."
+                  ],
+                  "failure": {
+                    "category_hint": "CONTRACT_GAP",
+                    "contract_gaps": [
+                      "README usage tip points to .agent/ instead of .agent/workstreams/."
+                    ],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": "Implementation does not satisfy the accepted TaskContract."
+                  },
+                  "evidence_state": {
+                    "blocking": true,
+                    "must_fix_count": 2
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Current Repair Objective"));
+        assertTrue(markdown.contains("Category: CONTRACT_GAP"));
+        assertTrue(markdown.contains("Update README to point to .agent/workstreams/ exactly."));
+        assertTrue(markdown.contains("Remove the misleading statement"));
+        assertTrue(markdown.contains("Implementation does not satisfy the accepted TaskContract."));
     }
 
     // --- Helper ---

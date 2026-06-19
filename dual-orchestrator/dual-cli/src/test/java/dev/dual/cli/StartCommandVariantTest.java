@@ -20,7 +20,7 @@ class StartCommandVariantTest {
         var wf = loader.loadOrDefault(null, null);
         assertEquals("agent-lifecycle-full", wf.workflowId(),
                 "Default (no variant) should use full variant");
-        assertEquals(4, wf.version(), "Default full workflow should be loaded from the bundled JSON resource");
+        assertEquals(5, wf.version(), "Default full workflow should be loaded from the bundled JSON resource");
         assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
                 "default full variant should contain classify_failure node");
     }
@@ -31,7 +31,7 @@ class StartCommandVariantTest {
         var wf = loader.loadOrDefault(null, "full");
         assertEquals("agent-lifecycle-full", wf.workflowId(),
                 "--workflow-variant=full should use full variant");
-        assertEquals(4, wf.version(), "Full variant should be loaded from the bundled JSON resource");
+        assertEquals(5, wf.version(), "Full variant should be loaded from the bundled JSON resource");
         // Verify the classify_failure node exists (full lifecycle feature)
         assertDoesNotThrow(() -> wf.node("acceptance.classify_failure"),
                 "full variant should contain classify_failure node");
@@ -43,7 +43,7 @@ class StartCommandVariantTest {
         var wf = loader.loadOrDefault(null, "contract");
         assertEquals("agent-lifecycle-contract", wf.workflowId(),
                 "--workflow-variant=contract should use contract variant");
-        assertEquals(3, wf.version(), "Contract variant should be loaded from the bundled JSON resource");
+        assertEquals(4, wf.version(), "Contract variant should be loaded from the bundled JSON resource");
         // Verify contract node exists (contract feature)
         assertDoesNotThrow(() -> wf.node("contract.compile"),
                 "contract variant should contain contract.compile node");

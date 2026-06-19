@@ -86,6 +86,34 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void keepsArtifactEnvelopeClosingTagsWhenSanitizingContextPreview() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+        Files.writeString(contextPath, """
+                <dual-artifact type="agent_output_contract" version="1">
+                {"decision":"NEEDS_REVISION"}
+                </dual-artifact>
+
+                External file: /private/projects/internal-product/src/main.py
+                """);
+
+        var prompt = new AgentPromptRenderer()
+                .render(
+                        tempDir,
+                        "ws-test",
+                        "implement.claude_implement",
+                        "implement-claude",
+                        List.of(".agent/workstreams/ws-test/context/node-context.md")
+                );
+
+        assertTrue(prompt.contains("</dual-artifact>"));
+        assertTrue(prompt.contains("[outside-workspace path removed]"));
+        assertTrue(!prompt.contains("/private/projects/internal-product"));
+    }
+
+    @Test
     void keepsAbsolutePathsInsideWorkspaceForLedgerPointers() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var contextPath = workstreamDir.resolve("context").resolve("node-context.md");

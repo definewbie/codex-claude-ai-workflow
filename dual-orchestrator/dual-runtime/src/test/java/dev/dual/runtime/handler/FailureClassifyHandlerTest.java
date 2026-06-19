@@ -230,11 +230,43 @@ class FailureClassifyHandlerTest {
         assertNotNull(result.result().get("suggested_action"));
         assertNotNull(result.result().get("matched_rule"));
         assertNotNull(result.result().get("review_decision"));
+        assertNotNull(result.result().get("stage_outcome"));
         assertNotNull(result.result().get("classification_ref"));
 
         assertEquals("REJECT", result.result().get("review_decision"));
+        assertEquals("REJECTED", result.result().get("stage_outcome"));
         assertTrue(((String) result.result().get("classification_ref"))
                 .contains("failure-classification.json"));
+    }
+
+    @Test
+    void classifyPreservesInsufficientEvidenceStageOutcomeFromAcceptanceSidecar() throws Exception {
+        writeMinimalContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "decision": "REJECT",
+                  "stage_outcome": "INSUFFICIENT_EVIDENCE",
+                  "lifecycle_status": "INSUFFICIENT_EVIDENCE",
+                  "summary": "Generated evidence does not prove the implementation.",
+                  "failure": {
+                    "missing_tests": ["manual walkthrough evidence"],
+                    "reason": "Verification evidence is incomplete."
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of(),
+                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
+        ));
+
+        assertEquals("REJECT", result.result().get("review_decision"));
+        assertEquals("INSUFFICIENT_EVIDENCE", result.result().get("stage_outcome"));
     }
 
     @Test

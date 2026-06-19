@@ -43,7 +43,7 @@ final class AcpxSessionStreamFailureEvidenceReader {
             return Optional.empty();
         }
         try {
-            var tail = readTail(streamPath);
+            var tail = failureEventLines(readTail(streamPath));
             return tail.isBlank() ? Optional.empty() : Optional.of(tail);
         } catch (IOException ignored) {
             return Optional.empty();
@@ -74,5 +74,21 @@ final class AcpxSessionStreamFailureEvidenceReader {
         }
         buffer.flip();
         return StandardCharsets.UTF_8.decode(buffer).toString();
+    }
+
+    private static String failureEventLines(String streamTail) {
+        if (streamTail == null || streamTail.isBlank()) {
+            return "";
+        }
+        var result = new StringBuilder();
+        for (var line : streamTail.lines().toList()) {
+            var lower = line.toLowerCase();
+            if (lower.contains("\"error\"")
+                    || lower.contains("\"session/prompt/failed\"")
+                    || lower.contains("api error:")) {
+                result.append(line).append('\n');
+            }
+        }
+        return result.toString();
     }
 }

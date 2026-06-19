@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -124,8 +125,59 @@ class AcpxAgentTaskHandlerTest {
         var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.md.meta.json"));
         assertTrue(outputMetadata.contains("\"artifactType\" : \"output\""));
         assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.md\""));
+        assertTrue(outputMetadata.contains("\"estimatedTokens\" :"));
         assertTrue(outputMetadata.contains("\"lineCount\" : 2"));
         assertTrue(outputMetadata.contains("\"sha256\" :"));
+    }
+
+    @Test
+    void completedRunSplitsRawTranscriptFromFinalArtifactOutput() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(1, result.outputRefs().size());
+        assertTrue(result.outputRefs().get(0).endsWith("intake-claude-brainstorm.md"));
+        assertFalse(result.outputRefs().get(0).endsWith(".transcript.log"));
+
+        var outputPath = tempDir.resolve(result.outputRefs().get(0));
+        var finalArtifact = Files.readString(outputPath);
+        assertTrue(finalArtifact.contains("<dual-artifact type=\"agent_output_contract\">"));
+        assertTrue(finalArtifact.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+        assertFalse(finalArtifact.contains("[tool]"));
+        assertFalse(finalArtifact.contains("[client]"));
+        assertFalse(finalArtifact.contains("\n  input:"));
+        assertFalse(finalArtifact.contains("\n  output:"));
+
+        var transcriptRef = (String) result.result().get("transcript_ref");
+        assertTrue(transcriptRef.endsWith(".transcript.log"));
+        var transcript = Files.readString(tempDir.resolve(transcriptRef));
+        assertTrue(transcript.contains("[tool] Read huge-file.md"));
+        assertTrue(transcript.contains("input:"));
+        assertTrue(transcript.contains("output:"));
+
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"outputPath\" :"));
+        assertTrue(runMetadata.contains("\"transcriptPath\" :"));
+        assertTrue(runMetadata.contains("\"transcriptMetadataPath\" :"));
+        var transcriptMetadata = Files.readString(tempDir.resolve(transcriptRef + ".meta.json"));
+        assertTrue(transcriptMetadata.contains("\"artifactType\" : \"transcript\""));
+        assertTrue(transcriptMetadata.contains("\"estimatedTokens\" :"));
     }
 
     @Test
@@ -190,8 +242,9 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("observe", transport.lastPermissionProfile.name());
-        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Bash(git *)"));
-        assertTrue(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
+        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Read"));
+        assertFalse(transport.lastPermissionProfile.allowedTools().contains("Bash(git *)"));
+        assertFalse(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
     }
 
     @Test
@@ -213,8 +266,9 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("review", transport.lastPermissionProfile.name());
-        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Bash(rg *)"));
-        assertTrue(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
+        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Grep"));
+        assertFalse(transport.lastPermissionProfile.allowedTools().contains("Bash(rg *)"));
+        assertFalse(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
     }
 
     @Test
@@ -352,7 +406,7 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("RECOVERABLE_AGENT_RECONNECT", result.outcome());
         assertEquals(0, result.result().get("exit_code"));
         assertEquals(2, result.outputRefs().size());
-        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.md")));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.transcript.log")));
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.stderr.log")));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
@@ -493,6 +547,37 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void classifiesAuthFailureFromRuntimeStdoutBeforeReconnectWrapper() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(stdout, """
+                [client] session/new (running)
+                Failed to authenticate. API Error: 401 Invalid authentication credentials
+                [error] RUNTIME: Internal error: Failed to authenticate. API Error: 401 Invalid authentication credentials
+                """);
+        Files.writeString(stderr, "[acpx] session claude-main · agent needs reconnect\n");
+
+        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 1);
+
+        assertEquals("RECOVERABLE_AGENT_AUTH_FAILED", failure.reason());
+        assertEquals(true, failure.recoverable());
+        assertTrue(failure.message().contains("authentication"));
+    }
+
+    @Test
+    void ignoresBusinessTextRateLimitMentionsWhenReconnectWrapperIsPresent() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(stdout, "Product risk: bulk validation could hit rate limit for validators.\n");
+        Files.writeString(stderr, "[acpx] session codex-reviewer · agent needs reconnect\n");
+
+        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 4);
+
+        assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
+        assertEquals(true, failure.recoverable());
+    }
+
+    @Test
     void classifiesProviderOverloadFromAcpxSessionStreamBeforeReconnectWrapper() throws Exception {
         var stdout = tempDir.resolve("stdout.log");
         var stderr = tempDir.resolve("stderr.log");
@@ -544,6 +629,32 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(failure.message().contains("rebuild"));
     }
 
+    @Test
+    void ignoresPromptPayloadTextFromSessionStreamWhenClassifyingProviderFailure() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        var sessionsDir = tempDir.resolve("sessions");
+        var sessionId = "edab1e36-b5c5-42c6-a50d-cbb88d74651d";
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stdout, "[client] initialize (running)\n[error] RUNTIME: Interrupted\n");
+        Files.writeString(stderr, "[acpx] session codex-reviewer (" + sessionId + ") · agent needs reconnect\n");
+        Files.writeString(
+                sessionsDir.resolve(sessionId + ".stream.ndjson"),
+                """
+                {"jsonrpc":"2.0","id":3,"method":"session/prompt","params":{"prompt":[{"type":"text","text":"Product risk: could hit rate limit for validators."}]}}
+                {"jsonrpc":"2.0","result":{"stopReason":"cancelled"},"id":3}
+                """
+        );
+
+        var failure = new AcpxFailureClassifier(
+                new AcpxFailureSignalCatalog(),
+                new AcpxSessionStreamFailureEvidenceReader(sessionsDir)
+        ).classify(stdout, stderr, 4);
+
+        assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
+        assertEquals(true, failure.recoverable());
+    }
+
     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
@@ -564,6 +675,35 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class TranscriptCompletingTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    [client] initialize (running)
+                    [tool] Read huge-file.md (completed)
+                      input: {"file":"huge-file.md"}
+                      output:
+                        This tool transcript must stay out of workflow outputRefs.
+
+                    <dual-artifact type="agent_output_contract">
+                    {"artifact_type":"agent_output_contract","summary":"Ready"}
+                    </dual-artifact>
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
         }
     }
 

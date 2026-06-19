@@ -20,6 +20,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AgentRunMetadataWriter metadataWriter;
     private final AgentOutputCompletionDetector completionDetector;
     private final AcpxUsageReader usageReader;
+    private final AgentFinalArtifactExtractor finalArtifactExtractor;
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         this(transport, prepareOnly, new AcpxUsageReader());
@@ -39,6 +40,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.metadataWriter = new AgentRunMetadataWriter();
         this.completionDetector = new AgentOutputCompletionDetector();
         this.usageReader = usageReader;
+        this.finalArtifactExtractor = new AgentFinalArtifactExtractor();
     }
 
     @Override
@@ -62,10 +64,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 .resolve("runs")
                 .resolve(runId);
         var promptPath = runDir.resolve("prompts").resolve(promptTemplate + ".md");
-        var stdoutPath = runDir.resolve("outputs").resolve(promptTemplate + ".md");
+        var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".md");
+        var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
         var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
         Files.createDirectories(promptPath.getParent());
-        Files.createDirectories(stdoutPath.getParent());
+        Files.createDirectories(outputPath.getParent());
         Files.writeString(
                 promptPath,
                 promptRenderer.render(
@@ -89,7 +92,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     runDir,
                     promptPath,
-                    stdoutPath,
+                    outputPath,
                     stderrPath
             );
             return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(promptPath).toString()), Map.of(
@@ -105,7 +108,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 context.workspaceRoot(),
                 session,
                 promptPath,
-                stdoutPath,
+                transcriptPath,
                 stderrPath,
                 permissionProfile(context)
         );
@@ -113,8 +116,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
         var usage = usageReader.read(promptPath, stderrPath).orElse(null);
-        var failure = failureClassifier.classify(stdoutPath, stderrPath, result.exitCode());
-        var outputComplete = completionDetector.isComplete(stdoutPath);
+        var finalArtifact = finalArtifactExtractor.extract(readStringIfExists(transcriptPath));
+        if (finalArtifact.isPresent()) {
+            Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
+        }
+        var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
+        var outputComplete = completionDetector.isComplete(transcriptPath);
         var interrupted = interruptedOutputFailure(result, outputComplete);
         if (interrupted != null && !failure.recoverable()) {
             metadataWriter.writeCompleted(
@@ -127,13 +134,14 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     runDir,
                     promptPath,
-                    stdoutPath,
+                    outputPath,
                     stderrPath,
+                    transcriptPath,
                     result,
                     interrupted,
                     usage
             );
-            return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, interrupted);
+            return failedResult(context, runDir, outputPath, transcriptPath, stderrPath, result, agent, session, runId, interrupted);
         }
         if (result.exitCode() == 0 && outputComplete) {
             metadataWriter.writeCompleted(
@@ -146,8 +154,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     runDir,
                     promptPath,
-                    stdoutPath,
+                    outputPath,
                     stderrPath,
+                    transcriptPath,
                     result,
                     null,
                     usage
@@ -158,13 +167,14 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             completedResult.put("agent", agent);
             completedResult.put("session", session);
             completedResult.put("exit_code", result.exitCode());
+            completedResult.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
             if (failure.recoverable()) {
                 completedResult.put("acpx_recoverable_stderr_ignored", true);
                 completedResult.put("acpx_failure.reason", failure.reason());
             }
             return NodeResult.completed(
                     "completed",
-                    List.of(context.workspaceRoot().relativize(stdoutPath).toString()),
+                    List.of(context.workspaceRoot().relativize(outputPath).toString()),
                     completedResult
             );
         }
@@ -179,8 +189,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     runDir,
                     promptPath,
-                    stdoutPath,
+                    outputPath,
                     stderrPath,
+                    transcriptPath,
                     result,
                     null,
                     usage
@@ -191,11 +202,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             completedResult.put("agent", agent);
             completedResult.put("session", session);
             completedResult.put("exit_code", result.exitCode());
+            completedResult.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
             completedResult.put("acpx_recoverable_stderr_ignored", true);
             completedResult.put("acpx_failure.reason", failure.reason());
             return NodeResult.completed(
                     "completed",
-                    List.of(context.workspaceRoot().relativize(stdoutPath).toString()),
+                    List.of(context.workspaceRoot().relativize(outputPath).toString()),
                     completedResult
             );
         }
@@ -210,13 +222,14 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     runDir,
                     promptPath,
-                    stdoutPath,
+                    outputPath,
                     stderrPath,
+                    transcriptPath,
                     result,
                     failure,
                     usage
             );
-            return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, failure);
+            return failedResult(context, runDir, outputPath, transcriptPath, stderrPath, result, agent, session, runId, failure);
         }
         if (result.exitCode() != 0) {
             if (outputComplete) {
@@ -230,18 +243,20 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         runId,
                         runDir,
                         promptPath,
-                        stdoutPath,
+                        outputPath,
                         stderrPath,
+                        transcriptPath,
                         result,
                         null,
                         usage
                 );
-                return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(
+                return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(outputPath).toString()), Map.of(
                         "run_id", runId,
                         "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                         "agent", agent,
                         "session", session,
                         "exit_code", result.exitCode(),
+                        "transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString(),
                         "acpx_exit_tolerated", true
                 ));
             }
@@ -255,13 +270,14 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     runDir,
                     promptPath,
-                    stdoutPath,
+                    outputPath,
                     stderrPath,
+                    transcriptPath,
                     result,
                     failure,
                     usage
             );
-            return failedResult(context, runDir, stdoutPath, stderrPath, result, agent, session, runId, failure);
+            return failedResult(context, runDir, outputPath, transcriptPath, stderrPath, result, agent, session, runId, failure);
         }
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
@@ -273,18 +289,20 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 runId,
                 runDir,
                 promptPath,
-                stdoutPath,
+                outputPath,
                 stderrPath,
+                transcriptPath,
                 result,
                 null,
                 usage
         );
-        return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(stdoutPath).toString()), Map.of(
+        return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(outputPath).toString()), Map.of(
                 "run_id", runId,
                 "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                 "agent", agent,
                 "session", session,
-                "exit_code", result.exitCode()
+                "exit_code", result.exitCode(),
+                "transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString()
         ));
     }
 
@@ -310,7 +328,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private static NodeResult failedResult(
             TaskContext context,
             java.nio.file.Path runDir,
-            java.nio.file.Path stdoutPath,
+            java.nio.file.Path outputPath,
+            java.nio.file.Path transcriptPath,
             java.nio.file.Path stderrPath,
             AcpxRunResult result,
             String agent,
@@ -321,21 +340,41 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return new NodeResult(
                 failure.reason(),
                 NodeStatus.FAILED,
-                List.of(
-                        context.workspaceRoot().relativize(stdoutPath).toString(),
-                        context.workspaceRoot().relativize(stderrPath).toString()
-                ),
+                failedOutputRefs(context, outputPath, transcriptPath, stderrPath),
                 Map.of(
                         "run_id", runId,
                         "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                         "exit_code", result.exitCode(),
                         "agent", agent,
                         "session", session,
+                        "transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString(),
                         "acpx_failure.reason", failure.reason(),
                         "acpx_failure.recoverable", failure.recoverable()
                 ),
                 failure.message()
         );
+    }
+
+    private static List<String> failedOutputRefs(
+            TaskContext context,
+            java.nio.file.Path outputPath,
+            java.nio.file.Path transcriptPath,
+            java.nio.file.Path stderrPath
+    ) {
+        var refs = new java.util.ArrayList<String>();
+        if (Files.exists(outputPath)) {
+            refs.add(context.workspaceRoot().relativize(outputPath).toString());
+        }
+        refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
+        refs.add(context.workspaceRoot().relativize(stderrPath).toString());
+        return List.copyOf(refs);
+    }
+
+    private static String readStringIfExists(java.nio.file.Path path) throws java.io.IOException {
+        if (!Files.exists(path)) {
+            return "";
+        }
+        return Files.readString(path, StandardCharsets.UTF_8);
     }
 
     private static AcpxFailureClassifier.AcpxFailure interruptedOutputFailure(

@@ -3,7 +3,7 @@
 中文版本：[README.zh-CN.md](README.zh-CN.md)
 
 > Status: current docs index
-> Last updated: 2026-06-13
+> Last updated: 2026-06-19
 
 This directory contains the current product docs and selected implementation
 design notes. For open-source readers, start with the current reading path.
@@ -72,9 +72,12 @@ first document to read. Prefer `quickstart.md` and `trace` for day-to-day use.
 ## Private Evidence Policy
 
 Private real-case runs are valuable engineering evidence, but they are not part
-of the public onboarding path. This branch keeps only sanitized summaries and
-public benchmark material. Raw local reports remain ignored under
-`testing/real-case-reports/` when generated locally.
+of the public onboarding path. This branch keeps sanitized summaries, public
+benchmark material, and a short P0 closure report. Raw local reports remain
+ignored under `testing/real-case-reports/` when generated locally.
+
+Historical process notes that are useful for maintainers but too noisy for the
+main reading path live under `archive/`.
 
 ## Design Evolution Notes
 

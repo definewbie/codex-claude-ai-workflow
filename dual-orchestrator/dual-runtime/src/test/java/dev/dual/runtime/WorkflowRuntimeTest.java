@@ -194,14 +194,20 @@ class WorkflowRuntimeTest {
     }
 
     @Test
-    void decisionRoutesUsingDualControlOutcome() throws Exception {
+    void decisionRoutesUsingContractSidecarOutcome() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-decision-runtime"));
         Files.createDirectories(paths.workstreamDir());
-        var output = writeOutput("ws-decision-runtime", "review.md", """
-                ```dual-control
-                decision: REJECT
-                summary: acceptance failed
-                ```
+        var output = writeOutput("ws-decision-runtime", "review.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "acceptance failed",
+                  "control": {
+                    "decision": "REJECT",
+                    "summary": "acceptance failed"
+                  }
+                }
                 """);
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
@@ -267,6 +273,10 @@ class WorkflowRuntimeTest {
         assertEquals(NodeStatus.FAILED, node.status());
         assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", node.result().get("reason"));
         assertTrue(String.valueOf(node.result().get("message")).contains("summary"));
+        var agentTasks = ledger.readAgentTasks(paths);
+        assertEquals(1, agentTasks.size());
+        assertEquals(dev.dual.ledger.file.AgentTaskStatus.FAILED, agentTasks.get(0).status());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_failed"));
     }
 
     private final class FakeTask implements TaskHandler {

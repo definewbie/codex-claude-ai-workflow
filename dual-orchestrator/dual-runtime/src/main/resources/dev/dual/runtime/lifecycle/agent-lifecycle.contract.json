@@ -1,6 +1,6 @@
 {
   "workflowId": "agent-lifecycle-contract",
-  "version": 3,
+  "version": 4,
   "entryNodeId": "intake.claude_brainstorm",
   "nodes": [
     {
@@ -32,7 +32,14 @@
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
-        "prompt_template": "intake-codex-product-review"
+        "prompt_template": "intake-codex-product-review",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -40,7 +47,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
-        "max_revisions": 1
+        "max_revisions": 3
       }
     },
     {
@@ -53,7 +60,7 @@
           "approve",
           "revise"
         ],
-        "max_revisions": 1,
+        "max_revisions": 3,
         "gate_purpose": "requirement"
       }
     },
@@ -75,7 +82,7 @@
           "reduce_scope",
           "reject"
         ],
-        "max_revisions": 1,
+        "max_revisions": 3,
         "gate_purpose": "contract"
       }
     },
@@ -87,7 +94,13 @@
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
-        "prompt_template": "design-claude"
+        "prompt_template": "design-claude",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -108,7 +121,14 @@
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
-        "prompt_template": "design-codex-review"
+        "prompt_template": "design-codex-review",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -116,7 +136,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
-        "max_revisions": 1
+        "max_revisions": 3
       }
     },
     {
@@ -129,7 +149,7 @@
           "approve",
           "revise"
         ],
-        "max_revisions": 1,
+        "max_revisions": 3,
         "gate_purpose": "design"
       }
     },
@@ -141,7 +161,13 @@
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
-        "prompt_template": "plan-claude"
+        "prompt_template": "plan-claude",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -162,7 +188,14 @@
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
-        "prompt_template": "plan-codex-review"
+        "prompt_template": "plan-codex-review",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -170,7 +203,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
-        "max_revisions": 1
+        "max_revisions": 3
       }
     },
     {
@@ -183,7 +216,7 @@
           "approve",
           "revise"
         ],
-        "max_revisions": 1,
+        "max_revisions": 3,
         "gate_purpose": "plan"
       }
     },
@@ -206,7 +239,13 @@
         "permission_profile": "implement",
         "prompt_template": "implement-claude",
         "session": "claude-main",
-        "agent": "claude"
+        "agent": "claude",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -218,7 +257,14 @@
         "permission_profile": "implement",
         "prompt_template": "implement-claude-self-test",
         "session": "claude-main",
-        "agent": "claude"
+        "agent": "claude",
+        "expected_artifact": "self_test_report",
+        "artifact_compiler": "self_test_report_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "INSUFFICIENT_EVIDENCE",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -245,7 +291,16 @@
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
-        "prompt_template": "acceptance-codex-review"
+        "prompt_template": "acceptance-codex-review",
+        "expected_artifact": "acceptance_review",
+        "artifact_compiler": "acceptance_review_compiler",
+        "allowed_stage_outcomes": [
+          "ACCEPTED",
+          "ACCEPTED_WITH_NOTES",
+          "REJECTED",
+          "INSUFFICIENT_EVIDENCE",
+          "BLOCKED"
+        ]
       }
     },
     {
@@ -296,7 +351,13 @@
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
-        "prompt_template": "stage-claude-handoff"
+        "prompt_template": "stage-claude-handoff",
+        "expected_artifact": "stage_handoff",
+        "artifact_compiler": "stage_handoff_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ]
       }
     },
     {

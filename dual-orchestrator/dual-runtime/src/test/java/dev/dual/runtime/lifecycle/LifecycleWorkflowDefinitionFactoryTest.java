@@ -14,7 +14,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
         var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
-        assertEquals(4, definition.version());
+        assertEquals(5, definition.version());
         assertEquals("intake.claude_brainstorm", definition.entryNodeId());
         assertEquals(NodeKind.TASK, definition.node("intake.claude_brainstorm").kind());
         assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
@@ -27,8 +27,10 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertEquals(NodeKind.TASK, definition.node("delivery.prepare_pr").kind());
         assertEquals(NodeKind.TASK, definition.node("stage.generate_next_prompt").kind());
         assertEquals(NodeKind.GATE, definition.node("gate.human_design_approval").kind());
-        assertEquals(1, definition.node("design.decision").config().get("max_revisions"));
-        assertEquals(1, definition.node("gate.human_design_approval").config().get("max_revisions"));
+        assertEquals(3, definition.node("intake.decision").config().get("max_revisions"));
+        assertEquals(3, definition.node("design.decision").config().get("max_revisions"));
+        assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"));
+        assertEquals(3, definition.node("plan.decision").config().get("max_revisions"));
         assertEquals("context.build_package", definition.node("context.implement_claude").handlerType());
         assertTrue(definition.edgesFrom("intake.claude_brainstorm").stream()
                 .anyMatch(edge -> edge.to().equals("context.intake_codex_product_review")));

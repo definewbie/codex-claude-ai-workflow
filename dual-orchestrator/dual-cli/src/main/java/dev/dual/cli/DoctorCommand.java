@@ -23,8 +23,9 @@ import java.util.concurrent.TimeUnit;
 public final class DoctorCommand implements Callable<Integer> {
     private static final Duration COMMAND_TIMEOUT = Duration.ofSeconds(10);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    static final String EXPECTED_ACPX_VERSION = "0.8.0";
-    static final String EXPECTED_CODEX_ACP_PACKAGE = "@zed-industries/codex-acp@0.12.0";
+    static final String EXPECTED_ACPX_VERSION = "0.11.0";
+    static final String EXPECTED_CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp@0.46.0";
+    static final String EXPECTED_CODEX_ACP_VERSION = "0.16.0";
 
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
@@ -92,44 +93,152 @@ public final class DoctorCommand implements Callable<Integer> {
             return;
         }
         ok("acpx version", actualVersion);
-        checkAcpxCodexAdapterPinned();
+        checkAcpxAdaptersPinned();
     }
 
-    private void checkAcpxCodexAdapterPinned() throws IOException, InterruptedException {
+    private void checkAcpxAdaptersPinned() throws IOException, InterruptedException {
         var result = run("acpx", "config", "show");
         if (result.exitCode() != 0) {
             fail("acpx config", firstLine(result.output()));
             return;
         }
-        var pin = evaluateCodexAdapterPin(result.output());
-        switch (pin.level()) {
-            case OK -> ok("acpx codex adapter", pin.message());
-            case WARN -> warn("acpx codex adapter", pin.message());
-            case FAIL -> fail("acpx codex adapter", pin.message());
-        }
+        reportPin("acpx claude adapter", evaluateAdapterPin(
+                result.output(),
+                "claude",
+                "claude-agent-acp",
+                EXPECTED_CLAUDE_ACP_PACKAGE
+        ));
+        reportPin("acpx codex adapter", evaluateCodexAdapterPin(result.output()));
+        reportPin("Claude ACP environment bridge", evaluateClaudeEnvironmentBridge(
+                result.output(),
+                readUserClaudeSettings(),
+                System.getenv()
+        ));
     }
 
     static PinCheck evaluateCodexAdapterPin(String configJson) {
+        return evaluateAdapterPin(
+                configJson,
+                "codex",
+                "codex-acp",
+                expectedCodexAcpPackage()
+        );
+    }
+
+    static String expectedCodexAcpPackage() {
+        return "@zed-industries/codex-acp-" + codexPlatformSuffix() + "@" + EXPECTED_CODEX_ACP_VERSION;
+    }
+
+    private static String codexPlatformSuffix() {
+        var os = System.getProperty("os.name", "").toLowerCase();
+        var arch = System.getProperty("os.arch", "").toLowerCase();
+        if (os.contains("mac") || os.contains("darwin")) {
+            return arch.contains("aarch64") || arch.contains("arm64") ? "darwin-arm64" : "darwin-x64";
+        }
+        if (os.contains("linux")) {
+            return arch.contains("aarch64") || arch.contains("arm64") ? "linux-arm64" : "linux-x64";
+        }
+        if (os.contains("win")) {
+            return arch.contains("aarch64") || arch.contains("arm64") ? "win32-arm64" : "win32-x64";
+        }
+        return "unsupported-" + arch;
+    }
+
+    static PinCheck evaluateClaudeEnvironmentBridge(
+            String configJson,
+            String claudeSettingsJson,
+            Map<String, String> processEnv
+    ) {
+        var settingsEnv = readEnvObject(claudeSettingsJson);
+        if (!usesAnthropicCompatibleSettings(settingsEnv)) {
+            return PinCheck.ok("Claude settings do not define third-party Anthropic-compatible env");
+        }
+        if (processEnv.containsKey("ANTHROPIC_BASE_URL")
+                && (processEnv.containsKey("ANTHROPIC_AUTH_TOKEN") || processEnv.containsKey("ANTHROPIC_API_KEY"))) {
+            return PinCheck.ok("ANTHROPIC_* variables are present in the current process environment");
+        }
+        var command = agentCommand(configJson, "claude");
+        if (command.contains("acpx-claude-agent-env.sh")) {
+            return PinCheck.ok("Claude adapter command reads ~/.claude/settings.json env without writing secrets to acpx config");
+        }
+        return PinCheck.fail("~/.claude/settings.json contains ANTHROPIC_BASE_URL and token env, "
+                + "but agents.claude.command does not use scripts/acpx-claude-agent-env.sh and the current process "
+                + "does not export ANTHROPIC_* variables. Run ./scripts/configure-acpx.sh");
+    }
+
+    static PinCheck evaluateAdapterPin(
+            String configJson,
+            String agent,
+            String binaryName,
+            String expectedPackage
+    ) {
         try {
             Map<String, Object> root = MAPPER.readValue(configJson, new TypeReference<>() {
             });
             var agents = objectMap(root.get("agents"));
-            var codex = objectMap(agents.get("codex"));
-            var command = stringValue(codex.get("command"));
+            var agentConfig = objectMap(agents.get(agent));
+            var command = stringValue(agentConfig.get("command"));
             if (command.isBlank()) {
-                return PinCheck.fail("missing agents.codex.command. Run ./scripts/configure-acpx.sh");
+                return PinCheck.fail("missing agents." + agent + ".command. Run ./scripts/configure-acpx.sh");
             }
-            if (command.contains(EXPECTED_CODEX_ACP_PACKAGE)) {
+            if (command.contains(expectedPackage)) {
                 return PinCheck.ok(command);
             }
-            if (looksLikeLocalCodexAcp(command)) {
-                return PinCheck.warn("local codex-acp command is configured; reproducibility depends on that local binary: "
+            if (looksLikeLocalAcpAdapter(command, binaryName)) {
+                return PinCheck.warn("local " + binaryName + " command is configured; reproducibility depends on that local binary: "
                         + command);
             }
-            return PinCheck.fail("expected agents.codex.command to use " + EXPECTED_CODEX_ACP_PACKAGE
+            return PinCheck.fail("expected agents." + agent + ".command to use " + expectedPackage
                     + ". Run ./scripts/configure-acpx.sh");
         } catch (Exception e) {
             return PinCheck.fail("unable to parse `acpx config show`: " + e.getMessage());
+        }
+    }
+
+    private static String agentCommand(String configJson, String agent) {
+        try {
+            Map<String, Object> root = MAPPER.readValue(configJson, new TypeReference<>() {
+            });
+            var agents = objectMap(root.get("agents"));
+            var agentConfig = objectMap(agents.get(agent));
+            return stringValue(agentConfig.get("command"));
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private static Map<String, Object> readEnvObject(String claudeSettingsJson) {
+        if (claudeSettingsJson == null || claudeSettingsJson.isBlank()) {
+            return Map.of();
+        }
+        try {
+            Map<String, Object> root = MAPPER.readValue(claudeSettingsJson, new TypeReference<>() {
+            });
+            return objectMap(root.get("env"));
+        } catch (Exception ignored) {
+            return Map.of();
+        }
+    }
+
+    private static boolean usesAnthropicCompatibleSettings(Map<String, Object> settingsEnv) {
+        return settingsEnv.containsKey("ANTHROPIC_BASE_URL")
+                && (settingsEnv.containsKey("ANTHROPIC_AUTH_TOKEN") || settingsEnv.containsKey("ANTHROPIC_API_KEY"));
+    }
+
+    private static String readUserClaudeSettings() {
+        var path = Path.of(System.getProperty("user.home"), ".claude", "settings.json");
+        try {
+            return Files.exists(path) ? Files.readString(path, StandardCharsets.UTF_8) : "";
+        } catch (IOException ignored) {
+            return "";
+        }
+    }
+
+    private void reportPin(String label, PinCheck pin) {
+        switch (pin.level()) {
+            case OK -> ok(label, pin.message());
+            case WARN -> warn(label, pin.message());
+            case FAIL -> fail(label, pin.message());
         }
     }
 
@@ -145,8 +254,8 @@ public final class DoctorCommand implements Callable<Integer> {
         return value instanceof String text ? text.trim() : "";
     }
 
-    private static boolean looksLikeLocalCodexAcp(String command) {
-        return command.contains("codex-acp")
+    private static boolean looksLikeLocalAcpAdapter(String command, String binaryName) {
+        return command.contains(binaryName)
                 && !command.contains("@latest")
                 && !command.matches(".*@[\\^~].*");
     }

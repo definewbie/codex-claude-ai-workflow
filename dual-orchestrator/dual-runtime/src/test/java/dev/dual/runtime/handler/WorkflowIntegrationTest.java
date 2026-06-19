@@ -45,6 +45,14 @@ class WorkflowIntegrationTest {
                 summary: Auth module brainstorm complete
                 ```
                 """);
+        var decisionSidecar = fixture.writeAgentOutput("intake-claude-brainstorm.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.codex_product_review",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Auth module brainstorm complete"
+                }
+                """);
 
         var contextRef = agentOutput.toString()
                 .replace(tempDir.toString() + "/", "");
@@ -66,7 +74,7 @@ class WorkflowIntegrationTest {
         var decisionHandler = new ReviewDecisionHandler();
         var decisionResult = decisionHandler.evaluate(decisionContext(
                 "intake.decision",
-                List.of(contextRef)
+                List.of(contextRef, toWorkspaceRef(decisionSidecar))
         ));
         assertEquals(NodeStatus.COMPLETED, decisionResult.status());
         assertEquals("READY_FOR_PRODUCT_REVIEW", decisionResult.outcome());
@@ -333,8 +341,16 @@ class WorkflowIntegrationTest {
                 summary: Must address cache invalidation
                 ```
                 """);
+        fixture.writeAgentOutput("codex-arch-review-reject.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "design.codex_arch_review",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Must address cache invalidation"
+                }
+                """);
 
-        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-reject.md";
+        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-reject.contract.json";
         var decisionHandler = new ReviewDecisionHandler();
         var rejectResult = decisionHandler.evaluate(decisionContext(
                 "design.decision",
@@ -416,7 +432,15 @@ class WorkflowIntegrationTest {
                 summary: Invalidation strategy addresses concern
                 ```
                 """);
-        var approveReviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-approve.md";
+        fixture.writeAgentOutput("codex-arch-review-approve.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "design.codex_arch_review",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Invalidation strategy addresses concern"
+                }
+                """);
+        var approveReviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-approve.contract.json";
         var approveResult = decisionHandler.evaluate(decisionContext(
                 "design.decision",
                 List.of(approveReviewRef)
@@ -436,8 +460,16 @@ class WorkflowIntegrationTest {
                 summary: Hardcoded API key is a security violation
                 ```
                 """);
+        fixture.writeAgentOutput("codex-review-blocked.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "acceptance.codex_review",
+                  "decision": "BLOCKED",
+                  "summary": "Hardcoded API key is a security violation"
+                }
+                """);
 
-        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-review-blocked.md";
+        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-review-blocked.contract.json";
         var handler = new ReviewDecisionHandler();
 
         var result = handler.evaluate(decisionContext(
@@ -449,7 +481,7 @@ class WorkflowIntegrationTest {
         assertEquals("BLOCKED", result.outcome());
         assertEquals("BLOCKED", result.result().get("decision"));
         assertEquals("Hardcoded API key is a security violation", result.result().get("summary"));
-        assertEquals("dual-control", result.result().get("source"));
+        assertEquals("contract-sidecar", result.result().get("source"));
     }
 
     @Test
@@ -620,6 +652,10 @@ class WorkflowIntegrationTest {
                 new NodeDefinition(nodeId, NodeKind.DECISION, "review.decision", Map.of()),
                 node(nodeId, NodeKind.DECISION, "review.decision", inputRefs)
         );
+    }
+
+    private String toWorkspaceRef(Path path) {
+        return tempDir.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
     }
 
     private static NodeInstance node(String id, NodeKind kind, String handlerType, List<String> inputRefs) {

@@ -149,7 +149,7 @@ dual-server
 - JDK 21+
 - Maven 3.9+
 - Git
-- acpx 0.8.0
+- acpx 0.11.0
 - Claude Code / Codex 对应的 acpx agent runtime 可用
 
 检查：
@@ -412,17 +412,51 @@ acpx claude -s claude-main -f <prompt_file>
 acpx codex -s codex-reviewer -f <prompt_file>
 ```
 
-真实运行前必须固定 acpx 和 Codex ACP adapter：
+真实运行前必须固定 acpx 和 Claude/Codex ACP adapter：
 
 ```bash
-npm install -g acpx@0.8.0
+npm install -g acpx@0.11.0
 ./scripts/configure-acpx.sh
 dualctl doctor --workdir /path/to/git/repo
 ```
 
-`configure-acpx.sh` 会把 `agents.codex.command` 写成固定版本，例如
-`npx -y @zed-industries/codex-acp@0.12.0`。不要依赖 acpx 内部的浮动 npm
-range，否则同一个 workflow 可能因为 adapter 最新版本变化而失败。
+`configure-acpx.sh` 会把 adapter command 写成固定版本，例如：
+
+```text
+agents.claude.command = scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.46.0
+agents.codex.command = npx -y @zed-industries/codex-acp@0.16.0
+```
+
+不要依赖 acpx 内部的浮动 npm range，否则同一个 workflow 可能因为 adapter
+最新版本变化而失败。
+
+如果 Claude Code 使用 GLM、DeepSeek、one-api、claude-code-router 等
+Anthropic-compatible 后端，`ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`
+或 `ANTHROPIC_API_KEY` 通常写在 `~/.claude/settings.json` 的 `env` 字段。
+Claude Code CLI 会读取这些 settings；但 `claude-agent-acp` 的 ACP query
+路径只继承子进程环境。`acpx-claude-agent-env.sh` 的职责就是在启动 pinned
+Claude ACP adapter 前读取这些 env，避免 ACP 子进程打到错误 endpoint 或缺少
+token 后返回 `401 Invalid authentication credentials`。
+
+`agent needs reconnect` / `Resource not found` 是 acpx 尝试恢复 ACP session 时
+可能出现的诊断。dual 不把 ACP session 作为长期上下文的 source of truth：
+如果 stdout 已经包含完整 terminal contract，adapter 会接受结果并保留诊断；
+如果 stdout 不完整，节点会进入 recovery。长期上下文必须来自
+ledger、context package 和 artifact contract，而不是 agent 子进程内存。
+
+terminal contract 必须是完整闭合的 `dual-control` fence，并且后面有
+`[done] end_turn`。半截 contract 不会被当成成功。recoverable signal 的
+grace 默认是 30 秒，可用下面的环境变量调整：
+
+```bash
+export DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS=65
+export DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS=45
+```
+
+如果 Claude 后端使用 `API_TIMEOUT_MS`，建议让 recoverable grace 与它对齐。
+当 `API_TIMEOUT_MS` 出现在 Java 进程环境里，dual 会按它自动推导 grace；如果
+它只在 Claude ACP 子进程中注入，就显式设置
+`DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS`。
 
 这里的 `<prompt_file>` 不是你手写的需求文件，而是 `dualctl resume` 在 run ledger 里生成的 Agent 指令文件，例如：
 
@@ -1551,7 +1585,7 @@ acpx --version
 如果没有输出，需要先安装或修正 PATH。当前推荐固定版本：
 
 ```bash
-npm install -g acpx@0.8.0
+npm install -g acpx@0.11.0
 ./scripts/configure-acpx.sh
 ```
 
@@ -1587,6 +1621,11 @@ acpx adapter 会把这类错误标记为 recovery：
 failure_reason: RECOVERABLE_AGENT_RECONNECT
 recoverable: true
 ```
+
+对于 observe/review 这类只读 profile，adapter 可以重建 session 一次并重试。
+对于 implement profile，不会在 reconnect 后自动重放，以免上一轮 Agent 已经
+写了一半文件；这类失败会进入 typed recovery，由 retry/repair/compensation
+路径处理。
 
 如果 stdout 没有完整 terminal `dual-control` block 或没有 `[done] end_turn`，workflow 会停在 recovery。先恢复 agent session，再执行 `retry` / `resume`。如果 stdout 已经完整结束，adapter 会接受这次产物并记录 `acpx_recoverable_stderr_ignored=true`，让 workflow 继续路由。
 

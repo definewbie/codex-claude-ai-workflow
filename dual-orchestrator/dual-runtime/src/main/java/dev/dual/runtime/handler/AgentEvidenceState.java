@@ -26,10 +26,10 @@ record AgentEvidenceState(
     static AgentEvidenceState from(AgentOutputContractDocument document) {
         return new AgentEvidenceState(
                 document.blocking(),
-                0,
+                document.evidence().size(),
                 document.missingEvidence().size(),
                 document.mustFix().size(),
-                0,
+                document.acceptanceNotes().size(),
                 document.openRisks().size()
         );
     }

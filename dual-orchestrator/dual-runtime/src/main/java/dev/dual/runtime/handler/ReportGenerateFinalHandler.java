@@ -73,10 +73,10 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         appendVerificationEvidence(builder, workstreamDir);
 
         builder.append("## Acceptance Summary\n\n");
-        appendLatestOutputMatching(builder, workstreamDir, "acceptance-codex-review.md");
+        appendLatestContractSummary(builder, workstreamDir, "acceptance-codex-review.contract.json");
 
         builder.append("## Developer Self-Test Summary\n\n");
-        appendLatestOutputMatching(builder, workstreamDir, "implement-claude-self-test.md");
+        appendLatestContractSummary(builder, workstreamDir, "implement-claude-self-test.contract.json");
 
         builder.append("## Git Evidence\n\n");
         appendGitEvidence(builder, workstreamDir);
@@ -253,16 +253,29 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static void appendLatestOutputMatching(StringBuilder builder, Path workstreamDir, String fileName) throws IOException {
-        var output = latestFileMatching(workstreamDir.resolve("runs"), fileName);
-        if (output == null) {
+    private static void appendLatestContractSummary(StringBuilder builder, Path workstreamDir, String fileName) throws IOException {
+        var sidecar = latestFileMatching(workstreamDir.resolve("runs"), fileName);
+        if (sidecar == null) {
             builder.append("(not available)\n\n");
             return;
         }
-        builder.append("- Source: ").append(toDisplayRef(output)).append("\n\n");
-        builder.append("```text\n");
-        builder.append(snippet(output, MAX_SNIPPET_CHARS));
-        builder.append("\n```\n\n");
+        builder.append("- Source: ").append(toDisplayRef(sidecar)).append("\n");
+        try {
+            var json = OBJECT_MAPPER.readTree(sidecar.toFile());
+            appendJsonField(builder, "Node", json.path("node_id").asText(""));
+            appendJsonField(builder, "Decision", json.path("decision").asText(""));
+            appendJsonField(builder, "Stage Outcome", json.path("stage_outcome").asText(""));
+            appendJsonField(builder, "Summary", json.path("summary").asText(""));
+            appendJsonField(builder, "Verification Summary", json.path("verification_summary").asText(""));
+            appendJsonList(builder, "Evidence", json.path("evidence"));
+            appendJsonList(builder, "Missing Evidence", json.path("missing_evidence"));
+            appendJsonList(builder, "Must Fix", json.path("must_fix"));
+            appendJsonList(builder, "Open Risks", json.path("open_risks"));
+            appendJsonList(builder, "Acceptance Notes", json.path("acceptance_notes"));
+        } catch (Exception e) {
+            builder.append("- Error reading structured summary: ").append(e.getMessage()).append("\n");
+        }
+        builder.append("\n");
     }
 
     private static void appendGitEvidence(StringBuilder builder, Path workstreamDir) throws IOException {

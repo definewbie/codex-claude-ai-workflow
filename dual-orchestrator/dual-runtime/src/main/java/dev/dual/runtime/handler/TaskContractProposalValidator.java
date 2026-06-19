@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 final class TaskContractProposalValidator {
-    private static final Pattern FILE_REF = Pattern.compile("(?i).+\\.(md|txt|json|ya?ml|vue|ts|js|java|py|sh)$");
+    private static final Pattern SUPPORTED_FILE_REF = Pattern.compile("(?i).+\\.(md|txt|json|ya?ml|vue|ts|js|java|py|sh)$");
 
     List<String> validate(TaskContractProposal proposal, Path workspaceRoot) {
         var errors = new ArrayList<String>();
@@ -28,7 +28,7 @@ final class TaskContractProposalValidator {
             validateList("scope.excluded", proposal.scope().excluded(), false, errors);
             if (proposal.scope().included() != null) {
                 for (var ref : proposal.scope().included()) {
-                    validateFileRef(ref, workspaceRoot, errors);
+                    validateWorkspacePathRef(ref, workspaceRoot, errors);
                 }
             }
             validateScopeOverlap(proposal.scope(), errors);
@@ -94,7 +94,7 @@ final class TaskContractProposalValidator {
         return (int) values.stream().filter(value -> !isBlank(value)).count();
     }
 
-    private static void validateFileRef(String ref, Path workspaceRoot, List<String> errors) {
+    private static void validateWorkspacePathRef(String ref, Path workspaceRoot, List<String> errors) {
         if (isBlank(ref)) {
             errors.add("scope.included contains blank file ref");
             return;
@@ -103,18 +103,27 @@ final class TaskContractProposalValidator {
             errors.add("scope.included contains ledger/context metadata: " + ref);
             return;
         }
-        if (!FILE_REF.matcher(ref).matches()) {
-            errors.add("scope.included is not a supported file path: " + ref);
-            return;
-        }
-        var path = workspaceRoot.resolve(ref).normalize();
+        var normalizedRef = normalizeNewRef(ref);
+        var path = workspaceRoot.resolve(normalizedRef).normalize();
         if (!path.startsWith(workspaceRoot.toAbsolutePath().normalize()) && workspaceRoot.isAbsolute()) {
             errors.add("scope.included escapes workspace root: " + ref);
+            return;
+        }
+        if (Files.isDirectory(path)) {
+            return;
+        }
+        if (!SUPPORTED_FILE_REF.matcher(normalizedRef).matches()) {
+            errors.add("scope.included is not a supported workspace path: " + ref);
             return;
         }
         if (!Files.exists(path) && !ref.startsWith("new:")) {
             errors.add("scope.included file does not exist and is not marked as new: " + ref);
         }
+    }
+
+    private static String normalizeNewRef(String ref) {
+        var trimmed = ref.trim();
+        return trimmed.startsWith("new:") ? trimmed.substring("new:".length()).trim() : trimmed;
     }
 
     private static boolean isBlank(String value) {

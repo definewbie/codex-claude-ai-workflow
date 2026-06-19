@@ -1,6 +1,6 @@
 {
   "workflowId" : "agent-lifecycle-full",
-  "version" : 4,
+  "version" : 5,
   "entryNodeId" : "intake.claude_brainstorm",
   "nodes" : [ {
     "id" : "intake.claude_brainstorm",
@@ -29,14 +29,17 @@
       "agent" : "codex",
       "session" : "codex-reviewer",
       "permission_profile" : "review",
-      "prompt_template" : "intake-codex-product-review"
+      "prompt_template" : "intake-codex-product-review",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "NEEDS_REVISION", "BLOCKED" ]
     }
   }, {
     "id" : "intake.decision",
     "kind" : "DECISION",
     "handlerType" : "review.decision",
     "config" : {
-      "max_revisions" : 1
+      "max_revisions" : 3
     }
   }, {
     "id" : "gate.human_requirement_review",
@@ -45,7 +48,7 @@
     "config" : {
       "terminal_gate" : false,
       "allowed_actions" : [ "approve", "revise" ],
-      "max_revisions" : 1,
+      "max_revisions" : 3,
       "gate_purpose" : "requirement"
     }
   }, {
@@ -60,7 +63,7 @@
     "config" : {
       "terminal_gate" : false,
       "allowed_actions" : [ "approve", "clarify", "reduce_scope", "reject" ],
-      "max_revisions" : 1,
+      "max_revisions" : 3,
       "gate_purpose" : "contract"
     }
   }, {
@@ -71,7 +74,10 @@
       "agent" : "claude",
       "session" : "claude-main",
       "permission_profile" : "observe",
-      "prompt_template" : "design-claude"
+      "prompt_template" : "design-claude",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
     }
   }, {
     "id" : "context.design_codex_arch_review",
@@ -90,14 +96,17 @@
       "agent" : "codex",
       "session" : "codex-reviewer",
       "permission_profile" : "review",
-      "prompt_template" : "design-codex-review"
+      "prompt_template" : "design-codex-review",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "NEEDS_REVISION", "BLOCKED" ]
     }
   }, {
     "id" : "design.decision",
     "kind" : "DECISION",
     "handlerType" : "review.decision",
     "config" : {
-      "max_revisions" : 1
+      "max_revisions" : 3
     }
   }, {
     "id" : "gate.human_design_approval",
@@ -106,7 +115,7 @@
     "config" : {
       "terminal_gate" : false,
       "allowed_actions" : [ "approve", "revise" ],
-      "max_revisions" : 1,
+      "max_revisions" : 3,
       "gate_purpose" : "design"
     }
   }, {
@@ -117,7 +126,10 @@
       "agent" : "claude",
       "session" : "claude-main",
       "permission_profile" : "observe",
-      "prompt_template" : "plan-claude"
+      "prompt_template" : "plan-claude",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
     }
   }, {
     "id" : "context.plan_codex_plan_review",
@@ -136,14 +148,17 @@
       "agent" : "codex",
       "session" : "codex-reviewer",
       "permission_profile" : "review",
-      "prompt_template" : "plan-codex-review"
+      "prompt_template" : "plan-codex-review",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "NEEDS_REVISION", "BLOCKED" ]
     }
   }, {
     "id" : "plan.decision",
     "kind" : "DECISION",
     "handlerType" : "review.decision",
     "config" : {
-      "max_revisions" : 1
+      "max_revisions" : 3
     }
   }, {
     "id" : "gate.human_plan_approval",
@@ -152,7 +167,7 @@
     "config" : {
       "terminal_gate" : false,
       "allowed_actions" : [ "approve", "revise" ],
-      "max_revisions" : 1,
+      "max_revisions" : 3,
       "gate_purpose" : "plan"
     }
   }, {
@@ -173,19 +188,25 @@
       "permission_profile" : "implement",
       "prompt_template" : "implement-claude",
       "session" : "claude-main",
-      "agent" : "claude"
+      "agent" : "claude",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
     }
   }, {
     "id" : "implement.claude_self_test_report",
     "kind" : "TASK",
     "handlerType" : "acpx.agent_run",
-    "config" : {
-      "approve_all" : true,
-      "permission_profile" : "implement",
-      "prompt_template" : "implement-claude-self-test",
-      "session" : "claude-main",
-      "agent" : "claude"
-    }
+      "config" : {
+        "approve_all" : true,
+        "permission_profile" : "implement",
+        "prompt_template" : "implement-claude-self-test",
+        "session" : "claude-main",
+        "agent" : "claude",
+        "expected_artifact" : "self_test_report",
+        "artifact_compiler" : "self_test_report_compiler",
+        "allowed_stage_outcomes" : [ "READY", "INSUFFICIENT_EVIDENCE", "BLOCKED" ]
+      }
   }, {
     "id" : "implement.artifact_validation",
     "kind" : "TASK",
@@ -204,12 +225,15 @@
     "id" : "acceptance.codex_verifier_review",
     "kind" : "TASK",
     "handlerType" : "acpx.agent_run",
-    "config" : {
-      "agent" : "codex",
-      "session" : "codex-reviewer",
-      "permission_profile" : "review",
-      "prompt_template" : "acceptance-codex-review"
-    }
+      "config" : {
+        "agent" : "codex",
+        "session" : "codex-reviewer",
+        "permission_profile" : "review",
+        "prompt_template" : "acceptance-codex-review",
+        "expected_artifact" : "acceptance_review",
+        "artifact_compiler" : "acceptance_review_compiler",
+        "allowed_stage_outcomes" : [ "ACCEPTED", "ACCEPTED_WITH_NOTES", "REJECTED", "INSUFFICIENT_EVIDENCE", "BLOCKED" ]
+      }
   }, {
     "id" : "acceptance.decision",
     "kind" : "DECISION",
@@ -246,12 +270,15 @@
     "id" : "stage.claude_handoff",
     "kind" : "TASK",
     "handlerType" : "acpx.agent_run",
-    "config" : {
-      "agent" : "claude",
-      "session" : "claude-main",
-      "permission_profile" : "observe",
-      "prompt_template" : "stage-claude-handoff"
-    }
+      "config" : {
+        "agent" : "claude",
+        "session" : "claude-main",
+        "permission_profile" : "observe",
+        "prompt_template" : "stage-claude-handoff",
+        "expected_artifact" : "stage_handoff",
+        "artifact_compiler" : "stage_handoff_compiler",
+        "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
+      }
   }, {
     "id" : "stage.generate_next_prompt",
     "kind" : "TASK",

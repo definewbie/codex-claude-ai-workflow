@@ -486,6 +486,63 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void executeAcceptsExistingDirectoryScopeRefs(@TempDir Path tempDir) throws Exception {
+        var handler = new ContractCompileHandler();
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
+        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputDir);
+        Files.createDirectories(tempDir.resolve("backend/tests"));
+        Files.writeString(tempDir.resolve("backend/tests/test_contract.py"), "# fixture\n", StandardCharsets.UTF_8);
+
+        Files.writeString(workstreamDir.resolve("requirement.md"), """
+                目标：
+                修改业务逻辑并运行后端测试目录。
+                """, StandardCharsets.UTF_8);
+        var intakeRef = ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-001/outputs/intake-claude-brainstorm.md";
+        Files.writeString(tempDir.resolve(intakeRef), """
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "修改业务逻辑并验证后端测试",
+                  "scope": {
+                    "included": ["backend/tests/"],
+                    "excluded": ["不修改数据库 schema"]
+                  },
+                  "acceptance_criteria": [
+                    "业务逻辑变更有测试覆盖",
+                    "后端测试通过"
+                  ],
+                  "constraints": ["不修改数据库 schema"],
+                  "non_goals": ["不新增 API"],
+                  "risk_areas": ["测试目录较大，需要只运行相关测试时说明原因"],
+                  "test_requirements": ["运行 backend/tests 相关测试"],
+                  "evidence_refs": ["backend/tests/"],
+                  "open_questions": []
+                }
+                </dual-artifact>
+                """, StandardCharsets.UTF_8);
+
+        var context = new TaskHandler.TaskContext(
+                tempDir,
+                WORKSTREAM_ID,
+                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeInstance(
+                        "inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+                        NodeStatus.READY, "stage-contract", "iter-1",
+                        List.of(intakeRef), List.of(), Map.of(), null,
+                        Instant.now(), null
+                )
+        );
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var json = Files.readString(workstreamDir.resolve("artifacts/task-contract.json"), StandardCharsets.UTF_8);
+        assertTrue(json.contains("backend/tests/"));
+    }
+
+    @Test
     void executeFailsInvalidTaskContractProposalInsteadOfFallingBackToMarkdown(@TempDir Path tempDir) throws Exception {
         var handler = new ContractCompileHandler();
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve(WORKSTREAM_ID);
