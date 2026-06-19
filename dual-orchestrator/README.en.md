@@ -105,6 +105,19 @@ EOF
   --variant full
 ```
 
+Agent prompts choose the human-readable response language automatically from
+the task by default. To force one language:
+
+```bash
+./scripts/run-real-case.sh \
+  --repo /path/to/repo \
+  --task-file /tmp/dual-task.md \
+  --prompt-language en
+```
+
+This only affects human-readable Markdown/prose. JSON keys, decision enums,
+file paths, and contract markers stay machine-readable.
+
 The script creates a safe worktree and auto-approves intermediate benchmark
 gates. For real delivery, still read the review packet and final report.
 

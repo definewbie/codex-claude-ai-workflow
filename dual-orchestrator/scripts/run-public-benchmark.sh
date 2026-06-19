@@ -21,6 +21,7 @@ DEST_DIR=""
 CASE_ID="public-issue-flow-review-state"
 TASK_FILE=""
 VARIANT="full"
+PROMPT_LANGUAGE="auto"
 MAX_STEPS=80
 MAX_GATES=12
 SKIP_BUILD=false
@@ -38,6 +39,8 @@ Options:
   --case <id|path>          Public case id or task markdown path. Default: public-issue-flow-review-state.
   --list-cases              List public benchmark cases and exit.
   --variant <variant>       Workflow variant. Default: full.
+  --prompt-language <auto|en|zh-CN>
+                            Human-readable Agent output language. Default: auto.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Reuse the existing dualctl jar.
@@ -112,6 +115,10 @@ parse_args() {
         shift
         VARIANT="${1:-}"
         ;;
+      --prompt-language)
+        shift
+        PROMPT_LANGUAGE="${1:-}"
+        ;;
       --max-steps)
         shift
         MAX_STEPS="${1:-}"
@@ -170,6 +177,7 @@ run_case() {
     --repo "$DEST_DIR"
     --task-file "$TASK_FILE"
     --variant "$VARIANT"
+    --prompt-language "$PROMPT_LANGUAGE"
     --max-steps "$MAX_STEPS"
     --max-gates "$MAX_GATES"
   )
@@ -181,6 +189,7 @@ run_case() {
   log "Case: $CASE_ID"
   log "Task file: $TASK_FILE"
   log "Variant: $VARIANT, max steps: $MAX_STEPS, max gates: $MAX_GATES"
+  log "Prompt language: $PROMPT_LANGUAGE"
   "$PROJECT_ROOT/scripts/run-real-case.sh" "${args[@]}"
 }
 

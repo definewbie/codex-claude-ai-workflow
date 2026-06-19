@@ -9,6 +9,7 @@
 # Usage:
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --variant full
+#   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --prompt-language zh-CN
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --cleanup-worktree
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --update-benchmark-index
 #
@@ -25,6 +26,7 @@ source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
 REPO=""
 TASK_FILE=""
 VARIANT="full"
+PROMPT_LANGUAGE="auto"
 MAX_STEPS=80
 MAX_GATES=12
 SKIP_BUILD=false
@@ -49,6 +51,8 @@ Options:
   --task-file <path>        Requirement markdown file.
   --variant <contract|full>
                             Workflow variant. Default: full.
+  --prompt-language <auto|en|zh-CN>
+                            Human-readable Agent output language. Default: auto.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Do not run Maven package before starting.
@@ -105,6 +109,10 @@ parse_args() {
         shift
         VARIANT="${1:-}"
         ;;
+      --prompt-language)
+        shift
+        PROMPT_LANGUAGE="${1:-}"
+        ;;
       --max-steps)
         shift
         MAX_STEPS="${1:-}"
@@ -157,6 +165,10 @@ validate_inputs() {
     contract|full) ;;
     *) fail "--variant must be contract or full"; exit 1 ;;
   esac
+  case "$PROMPT_LANGUAGE" in
+    auto|en|zh-CN|zh|zh-cn) ;;
+    *) fail "--prompt-language must be auto, en, or zh-CN"; exit 1 ;;
+  esac
 }
 
 build_project() {
@@ -185,7 +197,7 @@ init_case_dir() {
 
 start_workstream() {
   log "Starting workstream in repo: $REPO"
-  local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS")
+  local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS" --prompt-language "$PROMPT_LANGUAGE")
   if [[ "$VARIANT" != "full" ]]; then
     args+=(--workflow-variant "$VARIANT")
   fi
@@ -520,6 +532,7 @@ write_summary_json() {
     echo "  \"finished_at\": \"$(json_escape "$FINISHED_AT")\","
     echo "  \"final_status\": \"$(json_escape "$FINAL_STATUS")\","
     echo "  \"variant\": \"$(json_escape "$VARIANT")\","
+    echo "  \"prompt_language\": \"$(json_escape "$PROMPT_LANGUAGE")\","
     echo "  \"repo\": \"$(json_escape "$REPO")\","
     echo "  \"task_file\": \"$(json_escape "$TASK_FILE")\","
     echo "  \"workstream\": \"$(json_escape "${WORKSTREAM_ID:-unknown}")\","
@@ -592,6 +605,7 @@ write_report() {
     echo "- Finished At: $FINISHED_AT"
     echo "- Final Status: $FINAL_STATUS"
     echo "- Variant: $VARIANT"
+    echo "- Prompt Language: $PROMPT_LANGUAGE"
     echo "- Repo: $REPO"
     echo "- Workstream: ${WORKSTREAM_ID:-unknown}"
     echo "- Effective Workdir: ${WORKSPACE_DIR:-unknown}"

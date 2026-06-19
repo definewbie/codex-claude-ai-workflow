@@ -98,6 +98,17 @@ EOF
   --task-file /tmp/dual-task.md
 ```
 
+Agent 提示词默认根据任务语言自动选择中文或英文。需要强制指定时：
+
+```bash
+./scripts/run-real-case.sh \
+  --repo /path/to/repo \
+  --task-file /tmp/dual-task.md \
+  --prompt-language zh-CN
+```
+
+该选项只影响 Agent 输出中的人类可读 Markdown/说明语言；JSON keys、decision enum、文件路径和 contract marker 仍保持机器可读格式。
+
 `full` lifecycle is the default. Use `--variant contract` only when intentionally
 running the smaller contract-only workflow.
 

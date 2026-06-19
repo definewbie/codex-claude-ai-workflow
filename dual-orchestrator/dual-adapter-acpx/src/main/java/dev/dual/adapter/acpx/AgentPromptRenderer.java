@@ -1,5 +1,7 @@
 package dev.dual.adapter.acpx;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.domain.PromptLanguage;
 import dev.dual.runtime.handler.ContractRegistry;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.regex.Pattern;
 final class AgentPromptRenderer {
     private static final String TEMPLATE_ROOT = "dev/dual/adapter/acpx/prompts/";
     private static final String PRINCIPLE_TEMPLATE_ROOT = "dev/dual/adapter/acpx/templates/";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Set<String> KNOWN_VARIABLES = Set.of(
             "workstream_id", "node_id", "prompt_template",
             "ledger_path", "requirement", "context_package",
@@ -29,10 +32,11 @@ final class AgentPromptRenderer {
         var workstreamDir = ".agent/workstreams/" + workstreamId;
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
+        var languagePolicy = languagePolicy(workspaceRoot.resolve(workstreamDir), requirement);
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
-        return workspaceGuard(workspaceRoot) + "\n\n" + template
+        return workspaceGuard(workspaceRoot) + "\n\n" + languagePolicy + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
                 .replace("{{node_id}}", nodeId)
                 .replace("{{prompt_template}}", promptTemplate)
@@ -106,6 +110,55 @@ final class AgentPromptRenderer {
         } catch (IOException e) {
             throw new UncheckedIOException("failed to read requirement: " + path, e);
         }
+    }
+
+    private String languagePolicy(Path workstreamDir, String requirement) {
+        var selected = resolvePromptLanguage(workstreamDir, requirement);
+        return switch (selected) {
+            case "zh-CN" -> """
+                    ## Response Language Policy
+
+                    - Write human-readable Markdown prose in Simplified Chinese.
+                    - Keep JSON keys, enum values, XML/Markdown contract markers, file paths, and code identifiers exactly as specified.
+                    - If quoted evidence is in another language, preserve the quote and explain it in Simplified Chinese.
+                    """.stripTrailing();
+            case "en" -> """
+                    ## Response Language Policy
+
+                    - Write human-readable Markdown prose in English.
+                    - Keep JSON keys, enum values, XML/Markdown contract markers, file paths, and code identifiers exactly as specified.
+                    - If quoted evidence is in another language, preserve the quote and explain it in English.
+                    """.stripTrailing();
+            default -> throw new IllegalStateException("unexpected prompt language: " + selected);
+        };
+    }
+
+    private String resolvePromptLanguage(Path workstreamDir, String requirement) {
+        var configured = readConfiguredPromptLanguage(workstreamDir.resolve("settings.json"));
+        if ("auto".equals(configured)) {
+            return containsCjk(requirement) ? "zh-CN" : "en";
+        }
+        return configured;
+    }
+
+    private String readConfiguredPromptLanguage(Path settingsPath) {
+        if (!Files.isRegularFile(settingsPath)) {
+            return "auto";
+        }
+        try {
+            var node = OBJECT_MAPPER.readTree(settingsPath.toFile());
+            return PromptLanguage.normalize(node.path("promptLanguage").asText("auto"));
+        } catch (IOException e) {
+            throw new UncheckedIOException("failed to read workstream settings: " + settingsPath, e);
+        }
+    }
+
+    private boolean containsCjk(String text) {
+        return text != null && text.codePoints().anyMatch(codePoint ->
+                (codePoint >= 0x4E00 && codePoint <= 0x9FFF)
+                        || (codePoint >= 0x3400 && codePoint <= 0x4DBF)
+                        || (codePoint >= 0x20000 && codePoint <= 0x2A6DF)
+        );
     }
 
     private String principleTemplate(Path workspaceRoot, String templateName) {

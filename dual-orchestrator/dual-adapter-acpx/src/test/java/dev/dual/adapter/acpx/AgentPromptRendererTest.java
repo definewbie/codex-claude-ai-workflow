@@ -35,6 +35,57 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void autoPromptLanguageUsesChineseForChineseRequirement() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("settings.json"), """
+                {
+                  "schemaVersion": 1,
+                  "promptLanguage": "auto"
+                }
+                """);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "给 README 增加一段项目说明。\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
+
+        assertTrue(prompt.contains("Write human-readable Markdown prose in Simplified Chinese."));
+        assertTrue(prompt.contains("Keep JSON keys, enum values"));
+        assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+    }
+
+    @Test
+    void explicitPromptLanguageOverridesRequirementLanguage() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("settings.json"), """
+                {
+                  "schemaVersion": 1,
+                  "promptLanguage": "en"
+                }
+                """);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "给 README 增加一段项目说明。\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
+
+        assertTrue(prompt.contains("Write human-readable Markdown prose in English."));
+        assertTrue(prompt.contains("Keep JSON keys, enum values"));
+    }
+
+    @Test
+    void missingSettingsDefaultsPromptLanguageFromRequirement() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
+
+        assertTrue(prompt.contains("Write human-readable Markdown prose in English."));
+    }
+
+    @Test
     void includesContextPackageWhenProvidedByInputRefs() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var contextPath = workstreamDir.resolve("context").resolve("node-context.md");

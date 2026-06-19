@@ -127,6 +127,19 @@ EOF
   --task-file /tmp/dual-task.md
 ```
 
+Agent prompts default to `--prompt-language auto`, which chooses the
+human-readable response language from the task text. To force one language:
+
+```bash
+./scripts/run-real-case.sh \
+  --repo /path/to/your/repo \
+  --task-file /tmp/dual-task.md \
+  --prompt-language en
+```
+
+The language option only affects human-readable Markdown/prose. JSON keys,
+decision values, file paths, and contract markers remain unchanged.
+
 `full` lifecycle is the default. Use `--variant contract` only when you
 intentionally want the smaller contract-only workflow.
 

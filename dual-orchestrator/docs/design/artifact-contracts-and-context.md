@@ -29,6 +29,26 @@ The orchestrator does not infer critical state from Markdown headings,
 keywords, or summaries. When a node requires a structured artifact, missing or
 invalid artifacts fail the node and produce contract diagnostics.
 
+## Prompt Language Policy
+
+Agent prompts include a workstream-level response-language policy. The source
+of truth is:
+
+```text
+.agent/workstreams/<workstream_id>/settings.json
+```
+
+`promptLanguage` may be `auto`, `en`, or `zh-CN`. In `auto` mode the prompt
+renderer chooses the human-readable prose language from the user requirement.
+This setting is intentionally a presentation policy, not a workflow state and
+not a contract schema variant.
+
+Only human-readable Markdown/prose follows this language. JSON keys, decision
+enums, file paths, XML/Markdown contract markers, and control blocks remain in
+the exact machine-readable format required by the contract. This lets users run
+Chinese tasks without making downstream routing depend on translated field names
+or localized enum values.
+
 ## Output Capture Boundary
 
 acpx stdout is execution evidence, not the workflow artifact. A single acpx

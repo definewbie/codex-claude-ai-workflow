@@ -22,6 +22,23 @@ Agent 输出分成两层：
 
 Orchestrator 不从 Markdown 标题、关键词或摘要里推断关键状态。某个节点需要结构化 artifact 时，缺失或非法 artifact 会让节点失败，并生成契约诊断。
 
+## Prompt 语言策略
+
+Agent prompt 会包含 workstream 级别的输出语言策略。source of truth 是：
+
+```text
+.agent/workstreams/<workstream_id>/settings.json
+```
+
+`promptLanguage` 可以是 `auto`、`en` 或 `zh-CN`。`auto` 模式下，prompt
+renderer 会根据用户需求文本选择人类可读说明语言。这个设置是 presentation
+policy，不是 workflow state，也不是 contract schema variant。
+
+只有 Markdown / prose 这类人类可读内容跟随该语言。JSON keys、decision enums、
+文件路径、XML/Markdown contract markers 和 control blocks 必须保持 contract
+要求的机器可读格式。这样中文任务可以得到中文说明，但下游路由不会依赖被翻译过的
+字段名或枚举值。
+
 ## 输出捕获边界
 
 acpx stdout 是执行证据，不是 workflow artifact。一个 acpx stream 里可能同时

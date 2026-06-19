@@ -151,6 +151,7 @@ P1 work keeps long agent runs recoverable and affordable.
 | Report projection | Done, keep testing | Final report summaries consume self-test and acceptance sidecars, not raw Agent Markdown or transcripts. |
 | Context budgets | Done, keep testing | `ContextProfiles` defines profile budgets; `ContextBuildPackageHandler` enforces estimated token limits and degrades/drops sections. |
 | Context package metadata | Done | Every context package now writes a JSON sidecar with profile, token budget, estimated tokens, and per-section degradation facts. |
+| Prompt language policy | Done | Workstream `settings.json` stores `promptLanguage`; Agent prompts localize human-readable prose while preserving machine-readable contract keys, enums, and markers. |
 | Projection | Partial | API overview exposes the latest context package metadata artifact; richer CLI/UI budget summaries can follow. |
 | Tests | Done | `ContextBuildPackageHandlerTest` covers budget enforcement, degradation, and metadata sidecar creation. |
 | Real-case validation | Done for closure case | The 2026-06-19 private business-logic run completed with bounded prompt/context behavior and no context-window recovery. |

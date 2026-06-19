@@ -31,6 +31,17 @@ public final class FileLedgerStore {
 
     public void initializeWorkstream(WorkstreamPaths paths, Workstream workstream, Workspace workspace, String requirement)
             throws IOException {
+        initializeWorkstream(paths, workstream, workspace, requirement, WorkstreamSettingsDocument.of("auto"));
+    }
+
+    public void initializeWorkstream(
+            WorkstreamPaths paths,
+            Workstream workstream,
+            Workspace workspace,
+            String requirement,
+            WorkstreamSettingsDocument settings
+    )
+            throws IOException {
         Files.createDirectories(paths.workstreamDir().resolve("current"));
         Files.createDirectories(paths.workstreamDir().resolve("stages").resolve("01-design").resolve("iterations").resolve("001"));
         Files.createDirectories(paths.workstreamDir().resolve("artifacts"));
@@ -39,6 +50,7 @@ public final class FileLedgerStore {
         Files.createDirectories(paths.runsDir());
 
         jsonWriter.write(paths.workstreamJson(), WorkstreamDocument.from(workstream));
+        jsonWriter.write(paths.settingsJson(), settings);
         var workspaceDocument = WorkspaceDocument.from(workspace);
         var stageDocument = StageDocument.initialDesign(workstream.workstreamId().value(), workspace.workspaceId().value());
         var iterationDocument = IterationDocument.initialDesign();

@@ -1,6 +1,7 @@
 package dev.dual.cli;
 
 import dev.dual.adapter.git.GitWorkspaceService;
+import dev.dual.core.domain.PromptLanguage;
 import dev.dual.core.domain.Workspace;
 import dev.dual.core.domain.Workstream;
 import dev.dual.core.id.DualIdGenerator;
@@ -8,6 +9,7 @@ import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.ledger.file.WorkstreamSettingsDocument;
 import dev.dual.runtime.lifecycle.WorkflowDefinitionLoader;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -40,6 +42,9 @@ public final class StartCommand implements Callable<Integer> {
 
     @Option(names = "--workflow-variant", description = "Built-in workflow variant: full (default), contract.")
     String workflowVariant;
+
+    @Option(names = "--prompt-language", description = "Agent human-readable output language: auto, en, zh-CN. Defaults to ${DEFAULT-VALUE}.")
+    String promptLanguage = "auto";
 
     @Option(names = "--allow-unknown-handlers", description = "Allow workflow handler types not built into this CLI.")
     boolean allowUnknownHandlers;
@@ -94,7 +99,13 @@ public final class StartCommand implements Callable<Integer> {
 
         var paths = new WorkstreamPaths(selectedWorktree, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), "start"))) {
-            new FileLedgerStore().initializeWorkstream(paths, workstream, workspace, requirement);
+            new FileLedgerStore().initializeWorkstream(
+                    paths,
+                    workstream,
+                    workspace,
+                    requirement,
+                    WorkstreamSettingsDocument.of(promptLanguage)
+            );
             CliLedgerFactory.create().initialize(paths, "wf-" + workstreamId.value(), workflowDefinition);
         }
 
@@ -108,6 +119,7 @@ public final class StartCommand implements Callable<Integer> {
         System.out.println();
         System.out.println("Ledger: " + paths.workstreamDir());
         System.out.println("Workflow: " + workflowDefinition.workflowId() + "@" + workflowDefinition.version());
+        System.out.println("Prompt language: " + PromptLanguage.normalize(promptLanguage));
         if (workflowVariant != null && !workflowVariant.isBlank()) {
             System.out.println("Variant: " + workflowVariant);
         }

@@ -44,8 +44,43 @@ class FileLedgerStoreTest {
 
         assertTrue(Files.exists(paths.workstreamJson()));
         assertTrue(Files.exists(paths.workspaceJson(workspaceId)));
+        assertTrue(Files.exists(paths.settingsJson()));
+        assertTrue(Files.readString(paths.settingsJson()).contains("\"promptLanguage\" : \"auto\""));
         assertTrue(Files.exists(paths.requirementMarkdown()));
         assertTrue(Files.readString(paths.timelineJsonl()).contains("workstream_created"));
+    }
+
+    @Test
+    void initializesWorkstreamSettingsWithPromptLanguage() throws Exception {
+        var workstreamId = new DualId("ws-20260522T101500Z-7K3M");
+        var workspaceId = new DualId("wsp-20260522T101500Z-4F8D");
+        var workstream = Workstream.created(
+                workstreamId,
+                "A6 design",
+                new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
+                workspaceId,
+                Instant.parse("2026-05-22T10:15:00Z")
+        );
+        var workspace = Workspace.primaryGitWorktree(
+                workspaceId,
+                workstreamId,
+                tempDir.resolve("repo"),
+                tempDir.resolve("repo-agent-runs/ws-20260522T101500Z-7K3M"),
+                "ai/ws-20260522T101500Z-7K3M",
+                "main",
+                "abc123"
+        );
+
+        var paths = new WorkstreamPaths(tempDir, workstreamId);
+        new FileLedgerStore().initializeWorkstream(
+                paths,
+                workstream,
+                workspace,
+                "# Requirement\n",
+                WorkstreamSettingsDocument.of("zh")
+        );
+
+        assertTrue(Files.readString(paths.settingsJson()).contains("\"promptLanguage\" : \"zh-CN\""));
     }
 
     @Test

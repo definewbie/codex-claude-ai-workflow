@@ -124,6 +124,17 @@ EOF
   --task-file /tmp/dual-task.md
 ```
 
+Agent 提示词默认使用 `--prompt-language auto`，会根据任务文本选择人类可读输出语言。需要强制指定时：
+
+```bash
+./scripts/run-real-case.sh \
+  --repo /path/to/your/repo \
+  --task-file /tmp/dual-task.md \
+  --prompt-language zh-CN
+```
+
+该选项只影响 Agent 输出中的 Markdown/说明语言；JSON keys、decision values、文件路径和 contract markers 保持不变。
+
 `full` lifecycle 是默认流程。只有在明确要跑更小的 contract-only 流程时，才使用
 `--variant contract`。
 

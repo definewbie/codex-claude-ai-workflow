@@ -69,6 +69,10 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("workstream.json");
     }
 
+    public Path settingsJson() {
+        return workstreamDir().resolve("settings.json");
+    }
+
     public Path currentStageJson() {
         return workstreamDir().resolve("current").resolve("stage.json");
     }

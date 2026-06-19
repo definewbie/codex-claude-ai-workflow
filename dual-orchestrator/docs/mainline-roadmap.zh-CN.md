@@ -135,6 +135,7 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | Report 投影 | Done, keep testing | Final report summary 消费 self-test 和 acceptance sidecar，不嵌入原始 Agent Markdown 或 transcript。 |
 | Context budgets | Done, keep testing | `ContextProfiles` 定义 profile budgets；`ContextBuildPackageHandler` 执行 token 估算上限，并对 section 降级或丢弃。 |
 | Context package metadata | Done | 每个 context package 现在都会写 JSON sidecar，记录 profile、token budget、估算 tokens 和每个 section 的降级事实。 |
+| Prompt 语言策略 | Done | Workstream `settings.json` 保存 `promptLanguage`；Agent prompt 会本地化人类可读说明，同时保持 contract keys、enums 和 markers 的机器可读格式。 |
 | Projection | Partial | API overview 已暴露 latest context package metadata artifact；更丰富的 CLI/UI budget summary 后续再补。 |
 | 测试 | Done | `ContextBuildPackageHandlerTest` 覆盖 budget enforcement、degradation 和 metadata sidecar。 |
 | 真实 case 验证 | closure case 已完成 | 2026-06-19 私有业务逻辑 real-case 已完成，未出现 context-window recovery 或 prompt 异常膨胀。 |
