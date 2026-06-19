@@ -47,6 +47,7 @@ const els = {
   openOldPanel: $("openOldPanel"),
   rcaVerify: $("rcaVerify"),
   tokenGrid: $("tokenGrid"),
+  tokenRunBreakdown: $("tokenRunBreakdown"),
   tokenBudgetBar: $("tokenBudgetBar"),
   rawFacts: $("rawFacts"),
   newTaskBtn: $("newTaskBtn"),
@@ -466,26 +467,38 @@ function renderTokens() {
     tokenMetric("预算", tokens.budgetLabel, "context budget"),
     tokenMetric("成本", tokens.cost, "estimate"),
   ].join("");
+  if (els.tokenRunBreakdown) {
+    els.tokenRunBreakdown.innerHTML = tokenRunBreakdown(tokens);
+  }
   els.tokenBudgetBar.style.width = tokens.budgetPercent + "%";
 }
 
 function tokenSummary() {
   const metrics = state.overview?.metrics || {};
+  const tokenMetrics = metrics.tokenMetrics || {};
+  const total = tokenMetrics.total || {};
   const runs = state.overview?.latestAgentRuns || [];
-  const prompt = firstNumber(metrics, ["promptTokens", "inputTokens", "totalPromptTokens", "agentPromptTokens"])
+  const prompt = numberValue(total.inputTokens)
+    || firstNumber(metrics, ["promptTokens", "inputTokens", "totalPromptTokens", "agentPromptTokens"])
     || sumByKeys(runs, ["promptTokens", "inputTokens", "prompt_tokens", "input_tokens"]);
-  const completion = firstNumber(metrics, ["completionTokens", "outputTokens", "totalCompletionTokens", "agentCompletionTokens"])
+  const completion = numberValue(total.outputTokens)
+    || firstNumber(metrics, ["completionTokens", "outputTokens", "totalCompletionTokens", "agentCompletionTokens"])
     || sumByKeys(runs, ["completionTokens", "outputTokens", "completion_tokens", "output_tokens"]);
   const budget = firstNumber(metrics, ["tokenBudget", "contextTokenBudget"]) || 0;
   const used = prompt + completion;
   const budgetPercent = budget > 0 ? Math.min(100, Math.round((used / budget) * 100)) : 0;
-  const cost = firstNumber(metrics, ["estimatedCost", "cost", "totalCost"]) || 0;
+  const costByCurrency = total.costByCurrency || {};
+  const cost = Object.entries(costByCurrency).map(([currency, amount]) => `${amount} ${currency}`).join(", ")
+    || firstNumber(metrics, ["estimatedCost", "cost", "totalCost"]) || 0;
   return {
     prompt: prompt ? formatNumber(prompt) : "-",
     completion: completion ? formatNumber(completion) : "-",
     budgetLabel: budget ? `${budgetPercent}%` : "-",
     budgetPercent,
     cost: cost ? String(cost) : "-",
+    measuredRunCount: numberValue(tokenMetrics.measuredRunCount),
+    runCount: numberValue(tokenMetrics.runCount),
+    runs: Array.isArray(tokenMetrics.runs) ? tokenMetrics.runs : runs,
   };
 }
 
@@ -514,6 +527,27 @@ function tokenCard(tokens) {
         ${tokenMetric("成本", tokens.cost, "estimate")}
       </div>
       <div class="budget"><i style="width:${tokens.budgetPercent}%"></i></div>
+      ${tokenRunBreakdown(tokens)}
+    </div>
+  `;
+}
+
+function tokenRunBreakdown(tokens) {
+  const rows = (tokens.runs || []).slice(-8).map((run) => {
+    const usage = run.usage || {};
+    const total = numberValue(usage.totalTokens);
+    return `
+      <div class="token-row">
+        <span>${escapeHtml(run.nodeId || run.nodeDefinitionId || "-")}</span>
+        <span>${escapeHtml(run.agent || "-")}</span>
+        <strong>${total ? formatNumber(total) : "-"}</strong>
+      </div>
+    `;
+  }).join("");
+  return `
+    <div class="token-runs">
+      <div class="cap">按步骤统计：${tokens.measuredRunCount || 0} / ${tokens.runCount || 0} 个 Agent run 有 usage。</div>
+      ${rows || `<div class="empty">暂无逐步 token usage。新 run 完成后会写入 run.json 并投影到 metrics。</div>`}
     </div>
   `;
 }

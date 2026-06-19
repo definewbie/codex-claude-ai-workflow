@@ -640,6 +640,7 @@ public class WorkstreamQueryService {
         item.put("nodeId", text(source.get("nodeId")));
         item.put("status", text(source.get("status")));
         item.put("durationMs", text(source.get("durationMs")));
+        item.put("usage", map(source.get("usage")));
         item.put("ref", root.relativize(runDir.toAbsolutePath().normalize()).toString());
         return item;
     }
@@ -830,6 +831,19 @@ public class WorkstreamQueryService {
             return list.stream().map(String::valueOf).toList();
         }
         return List.of();
+    }
+
+    private static Map<String, Object> map(Object value) {
+        if (value instanceof Map<?, ?> source) {
+            var result = new LinkedHashMap<String, Object>();
+            for (var entry : source.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    result.put(key, entry.getValue());
+                }
+            }
+            return result;
+        }
+        return Map.of();
     }
 
     private static int number(Object value) {

@@ -6,10 +6,12 @@ import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,6 +62,7 @@ final class MetricsProjectionWriter {
         metrics.put("totalNodeDurationMs", totalDurationMs(nodes));
         metrics.put("longestNodes", longestNodes(nodes, 5));
         metrics.put("providerMetrics", providerMetrics(paths));
+        metrics.put("tokenMetrics", tokenMetrics(paths));
 
         Files.createDirectories(paths.metricsDir());
         jsonWriter.write(paths.workstreamMetricsJson(), metrics);
@@ -135,6 +138,72 @@ final class MetricsProjectionWriter {
         return result;
     }
 
+    private Map<String, Object> tokenMetrics(WorkstreamPaths paths) throws IOException {
+        if (!Files.isDirectory(paths.runsDir())) {
+            return Map.of(
+                    "runCount", 0,
+                    "measuredRunCount", 0,
+                    "total", new UsageMetric().toMap(),
+                    "byAgent", Map.of(),
+                    "byNode", Map.of(),
+                    "runs", List.of()
+            );
+        }
+        var total = new UsageMetric();
+        var byAgent = new LinkedHashMap<String, UsageMetric>();
+        var byNode = new LinkedHashMap<String, UsageMetric>();
+        var runs = new ArrayList<Map<String, Object>>();
+        long runCount = 0;
+        long measuredRunCount = 0;
+        try (var stream = Files.list(paths.runsDir())) {
+            for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                runCount++;
+                var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
+                var usage = map(run.get("usage"));
+                var agent = nonBlank(text(run.get("agent")), "unknown");
+                var nodeId = nonBlank(text(run.get("nodeId")), "unknown");
+                var item = new LinkedHashMap<String, Object>();
+                item.put("runId", nonBlank(text(run.get("runId")), runDir.getFileName().toString()));
+                item.put("nodeId", nodeId);
+                item.put("agent", agent);
+                item.put("status", text(run.get("status")));
+                item.put("durationMs", longValue(run.get("durationMs")));
+                if (usage.isEmpty()) {
+                    item.put("measured", false);
+                } else {
+                    measuredRunCount++;
+                    var metric = UsageMetric.from(usage);
+                    total.add(metric);
+                    byAgent.computeIfAbsent(agent, ignored -> new UsageMetric()).add(metric);
+                    byNode.computeIfAbsent(nodeId, ignored -> new UsageMetric()).add(metric);
+                    item.put("measured", true);
+                    item.put("usage", metric.toMap());
+                }
+                runs.add(item);
+            }
+        }
+        var result = new LinkedHashMap<String, Object>();
+        result.put("runCount", runCount);
+        result.put("measuredRunCount", measuredRunCount);
+        result.put("total", total.toMap());
+        result.put("byAgent", usageMap(byAgent));
+        result.put("byNode", usageMap(byNode));
+        result.put("runs", runs);
+        return result;
+    }
+
+    private Map<String, Object> usageMap(Map<String, UsageMetric> source) {
+        var result = new LinkedHashMap<String, Object>();
+        for (var entry : source.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().toMap());
+        }
+        return result;
+    }
+
     private Map<String, Long> counts(List<NodeInstanceDocument> nodes, Function<NodeInstanceDocument, String> classifier) {
         var counts = nodes.stream()
                 .map(classifier)
@@ -192,6 +261,7 @@ final class MetricsProjectionWriter {
     private String renderMarkdown(WorkstreamPaths paths, Map<String, Object> metrics) {
         var longestNodes = (List<Map<String, Object>>) metrics.get("longestNodes");
         var providerMetrics = (Map<String, Object>) metrics.get("providerMetrics");
+        var tokenMetrics = (Map<String, Object>) metrics.get("tokenMetrics");
         var builder = new StringBuilder();
         builder.append("# Workstream Metrics\n\n");
         builder.append("- Workstream: ").append(paths.workstreamId().value()).append("\n");
@@ -238,7 +308,47 @@ final class MetricsProjectionWriter {
                         .append(" |\n");
             }
         }
+        builder.append("\n## Token Metrics\n\n");
+        var total = tokenMetrics == null ? Map.<String, Object>of() : map(tokenMetrics.get("total"));
+        builder.append("- Measured Runs: ").append(tokenMetrics == null ? 0 : tokenMetrics.get("measuredRunCount"))
+                .append(" / ").append(tokenMetrics == null ? 0 : tokenMetrics.get("runCount")).append("\n");
+        builder.append("- Input Tokens: ").append(longValue(total.get("inputTokens"))).append("\n");
+        builder.append("- Output Tokens: ").append(longValue(total.get("outputTokens"))).append("\n");
+        builder.append("- Cached Read Tokens: ").append(longValue(total.get("cachedReadTokens"))).append("\n");
+        builder.append("- Cached Write Tokens: ").append(longValue(total.get("cachedWriteTokens"))).append("\n");
+        builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n\n");
+        builder.append("### Token Usage By Step\n\n");
+        builder.append("| Node | Agent | Status | Input | Output | Cached Read | Cached Write | Total |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        var runs = tokenMetrics == null ? List.<Map<String, Object>>of() : mapList(tokenMetrics.get("runs"));
+        if (runs.isEmpty()) {
+            builder.append("| N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 |\n");
+        } else {
+            for (var run : runs) {
+                var usage = map(run.get("usage"));
+                builder.append("| ").append(run.get("nodeId"))
+                        .append(" | ").append(run.get("agent"))
+                        .append(" | ").append(run.get("status"))
+                        .append(" | ").append(longValue(usage.get("inputTokens")))
+                        .append(" | ").append(longValue(usage.get("outputTokens")))
+                        .append(" | ").append(longValue(usage.get("cachedReadTokens")))
+                        .append(" | ").append(longValue(usage.get("cachedWriteTokens")))
+                        .append(" | ").append(longValue(usage.get("totalTokens")))
+                        .append(" |\n");
+            }
+        }
         return builder.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> mapList(Object value) {
+        if (value instanceof List<?> list) {
+            return list.stream()
+                    .filter(Map.class::isInstance)
+                    .map(item -> (Map<String, Object>) item)
+                    .toList();
+        }
+        return List.of();
     }
 
     private static long longValue(Object value) {
@@ -257,6 +367,90 @@ final class MetricsProjectionWriter {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private static String nonBlank(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> map(Object value) {
+        if (value instanceof Map<?, ?> source) {
+            var result = new LinkedHashMap<String, Object>();
+            for (var entry : source.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    result.put(key, entry.getValue());
+                }
+            }
+            return result;
+        }
+        return Map.of();
+    }
+
+    private static BigDecimal decimalValue(Object value) {
+        if (value instanceof BigDecimal decimal) {
+            return decimal;
+        }
+        if (value instanceof Number number) {
+            return BigDecimal.valueOf(number.doubleValue());
+        }
+        if (value != null) {
+            try {
+                return new BigDecimal(String.valueOf(value));
+            } catch (NumberFormatException ignored) {
+                return BigDecimal.ZERO;
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
+    private static final class UsageMetric {
+        private long inputTokens;
+        private long outputTokens;
+        private long cachedReadTokens;
+        private long cachedWriteTokens;
+        private long totalTokens;
+        private final LinkedHashMap<String, BigDecimal> costByCurrency = new LinkedHashMap<>();
+
+        static UsageMetric from(Map<String, Object> usage) {
+            var metric = new UsageMetric();
+            metric.inputTokens = longValue(usage.get("inputTokens"));
+            metric.outputTokens = longValue(usage.get("outputTokens"));
+            metric.cachedReadTokens = longValue(usage.get("cachedReadTokens"));
+            metric.cachedWriteTokens = longValue(usage.get("cachedWriteTokens"));
+            metric.totalTokens = longValue(usage.get("totalTokens"));
+            if (metric.totalTokens == 0) {
+                metric.totalTokens = metric.inputTokens + metric.outputTokens + metric.cachedReadTokens + metric.cachedWriteTokens;
+            }
+            var currency = text(usage.get("costCurrency"));
+            var amount = decimalValue(usage.get("costAmount"));
+            if (!currency.isBlank() && amount.signum() != 0) {
+                metric.costByCurrency.put(currency, amount);
+            }
+            return metric;
+        }
+
+        void add(UsageMetric other) {
+            inputTokens += other.inputTokens;
+            outputTokens += other.outputTokens;
+            cachedReadTokens += other.cachedReadTokens;
+            cachedWriteTokens += other.cachedWriteTokens;
+            totalTokens += other.totalTokens;
+            for (var entry : other.costByCurrency.entrySet()) {
+                costByCurrency.merge(entry.getKey(), entry.getValue(), BigDecimal::add);
+            }
+        }
+
+        Map<String, Object> toMap() {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("inputTokens", inputTokens);
+            map.put("outputTokens", outputTokens);
+            map.put("cachedReadTokens", cachedReadTokens);
+            map.put("cachedWriteTokens", cachedWriteTokens);
+            map.put("totalTokens", totalTokens);
+            map.put("costByCurrency", new LinkedHashMap<>(costByCurrency));
+            return map;
+        }
     }
 
     private static final class ProviderMetric {

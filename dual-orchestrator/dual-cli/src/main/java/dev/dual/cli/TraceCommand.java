@@ -138,7 +138,8 @@ public final class TraceCommand implements Callable<Integer> {
                         + text(run.agent()) + "  "
                         + text(run.nodeId()) + "  "
                         + text(run.status()) + "  "
-                        + run.durationMs() + "ms");
+                        + run.durationMs() + "ms  "
+                        + tokenLabel(run));
             }
         }
         printRunMetadataWarnings(runListing.warnings());
@@ -409,6 +410,15 @@ public final class TraceCommand implements Callable<Integer> {
         return runs.stream()
                 .skip(Math.max(0, runs.size() - limit))
                 .toList();
+    }
+
+    private String tokenLabel(RunMetadata run) {
+        if (run.usage() == null) {
+            return "tokens=-";
+        }
+        return "tokens=" + run.usage().totalTokens()
+                + " in=" + run.usage().inputTokens()
+                + " out=" + run.usage().outputTokens();
     }
 
     private void printRunMetadataWarnings(List<RunMetadataReader.RunMetadataWarning> warnings) {

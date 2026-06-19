@@ -47,7 +47,7 @@ public final class RunsCommand implements Callable<Integer> {
             printWarnings(listing.warnings());
             return 0;
         }
-        System.out.println("Run ID\tStatus\tAgent\tNode\tExit\tDuration(ms)\tFailure");
+        System.out.println("Run ID\tStatus\tAgent\tNode\tExit\tDuration(ms)\tInputTok\tOutputTok\tTotalTok\tCost\tFailure");
         for (var run : runs) {
             System.out.println(String.join("\t",
                     text(run.runId()),
@@ -56,6 +56,10 @@ public final class RunsCommand implements Callable<Integer> {
                     text(run.nodeId()),
                     run.exitCode() == null ? "" : run.exitCode().toString(),
                     Long.toString(run.durationMs()),
+                    usageValue(run, UsageField.INPUT),
+                    usageValue(run, UsageField.OUTPUT),
+                    usageValue(run, UsageField.TOTAL),
+                    cost(run),
                     text(run.failureReason())
             ));
         }
@@ -101,5 +105,30 @@ public final class RunsCommand implements Callable<Integer> {
     private boolean equalsIgnoreCase(String left, String right) {
         return left != null && right != null
                 && left.toLowerCase(Locale.ROOT).equals(right.toLowerCase(Locale.ROOT));
+    }
+
+    private String usageValue(RunMetadata run, UsageField field) {
+        if (run.usage() == null) {
+            return "";
+        }
+        return switch (field) {
+            case INPUT -> Long.toString(run.usage().inputTokens());
+            case OUTPUT -> Long.toString(run.usage().outputTokens());
+            case TOTAL -> Long.toString(run.usage().totalTokens());
+        };
+    }
+
+    private String cost(RunMetadata run) {
+        if (run.usage() == null || run.usage().costAmount() == null) {
+            return "";
+        }
+        var currency = run.usage().costCurrency() == null ? "" : run.usage().costCurrency();
+        return currency.isBlank() ? run.usage().costAmount().toString() : run.usage().costAmount() + " " + currency;
+    }
+
+    private enum UsageField {
+        INPUT,
+        OUTPUT,
+        TOTAL
     }
 }

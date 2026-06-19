@@ -99,6 +99,15 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("- Iterations: " + text(metrics.get("iterationCount"), "unavailable"));
         lines.add("- Revisions: " + text(metrics.get("revisionCount"), "unavailable"));
         lines.add("- Total Node Duration(ms): " + text(metrics.get("totalNodeDurationMs"), "unavailable"));
+        var tokenMetrics = map(metrics.get("tokenMetrics"));
+        var tokenTotal = map(tokenMetrics.get("total"));
+        if (!tokenMetrics.isEmpty()) {
+            lines.add("- Token Runs: " + text(tokenMetrics.get("measuredRunCount"), "0")
+                    + " / " + text(tokenMetrics.get("runCount"), "0"));
+            lines.add("- Total Tokens: " + text(tokenTotal.get("totalTokens"), "0")
+                    + " (input " + text(tokenTotal.get("inputTokens"), "0")
+                    + ", output " + text(tokenTotal.get("outputTokens"), "0") + ")");
+        }
         lines.add("- Metrics: " + presence(paths.workstreamMetricsMarkdown()));
         lines.add("");
         lines.add("## Recommended Next Action");
@@ -224,6 +233,20 @@ public final class SummaryCommand implements Callable<Integer> {
                     .toList();
         }
         return List.of();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> map(Object value) {
+        if (value instanceof Map<?, ?> source) {
+            var result = new java.util.LinkedHashMap<String, Object>();
+            for (var entry : source.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    result.put(key, entry.getValue());
+                }
+            }
+            return result;
+        }
+        return Map.of();
     }
 
     private static List<Map<String, Object>> recent(List<Map<String, Object>> nodes, int limit) {

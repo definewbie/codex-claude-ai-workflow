@@ -136,7 +136,7 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | Context budgets | Done, keep testing | `ContextProfiles` 定义 profile budgets；`ContextBuildPackageHandler` 执行 token 估算上限，并对 section 降级或丢弃。 |
 | Context package metadata | Done | 每个 context package 现在都会写 JSON sidecar，记录 profile、token budget、估算 tokens 和每个 section 的降级事实。 |
 | Prompt 语言策略 | Done | Workstream `settings.json` 保存 `promptLanguage`；Agent prompt 会本地化人类可读说明，同时保持 contract keys、enums 和 markers 的机器可读格式。 |
-| Projection | Partial | API overview 已暴露 latest context package metadata artifact；更丰富的 CLI/UI budget summary 后续再补。 |
+| Projection | MVP done, keep testing | `workstream-metrics.json` 现在包含 tokenMetrics：按 run、node、agent 和 total 汇总 usage；`runs`、`trace`、`summary`、API overview 和 Operator Console 均消费同一 projection。 |
 | 测试 | Done | `ContextBuildPackageHandlerTest` 覆盖 budget enforcement、degradation 和 metadata sidecar。 |
 | 真实 case 验证 | closure case 已完成 | 2026-06-19 私有业务逻辑 real-case 已完成，未出现 context-window recovery 或 prompt 异常膨胀。 |
 
@@ -165,11 +165,11 @@ P2 让系统足够容易理解，能支撑真实使用和开源评估。
 ## 当前下一步
 
 P0 lifecycle closure 在 MVP 边界内已经完成。不要继续开放式私有 P0 real-case 探索。
-下一步是围绕公开可重复 benchmark 和 operator 易用性的 P1/P2 收口。
+当前必须先完成 P1 收口，再进入更多 P2 产品体验工作。
 
 建议顺序：
 
-1. 用 tracked case registry、稳定默认 case 和脱敏 aggregate index，让 public benchmark 可重复。
-2. 实现 Operator Console / Management Diagnostics 双视图：默认任务视图面向最终用户，管理诊断保留旧 UI 的排障能力，并按 RCA 组织证据、命令、验证和预防。
-3. 基于 benchmark evidence 继续强化 context/token governance 和 provider metrics。
+1. 完成 P1 边界复核：Execution / AgentTask、Recovery、Context budget、Artifact contract、Boundary drift prevention 逐项确认是否仍有 blocker。
+2. 用一次 bounded real-case 或 public benchmark 验证 tokenMetrics 是否能按步骤解释成本和 context 膨胀来源。
+3. 如果 P1 无 blocker，再进入 P2：delivery view、public benchmark 稳定化、开源文档清理。
 4. 私有 real case 只作为特定缺陷的 regression check，不再作为 P0 discovery loop。

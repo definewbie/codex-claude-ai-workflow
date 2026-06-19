@@ -152,7 +152,7 @@ P1 work keeps long agent runs recoverable and affordable.
 | Context budgets | Done, keep testing | `ContextProfiles` defines profile budgets; `ContextBuildPackageHandler` enforces estimated token limits and degrades/drops sections. |
 | Context package metadata | Done | Every context package now writes a JSON sidecar with profile, token budget, estimated tokens, and per-section degradation facts. |
 | Prompt language policy | Done | Workstream `settings.json` stores `promptLanguage`; Agent prompts localize human-readable prose while preserving machine-readable contract keys, enums, and markers. |
-| Projection | Partial | API overview exposes the latest context package metadata artifact; richer CLI/UI budget summaries can follow. |
+| Projection | MVP done, keep testing | `workstream-metrics.json` now includes tokenMetrics by run, node, agent, and total. `runs`, `trace`, `summary`, API overview, and Operator Console consume the same projection. |
 | Tests | Done | `ContextBuildPackageHandlerTest` covers budget enforcement, degradation, and metadata sidecar creation. |
 | Real-case validation | Done for closure case | The 2026-06-19 private business-logic run completed with bounded prompt/context behavior and no context-window recovery. |
 
@@ -182,18 +182,16 @@ evaluation.
 ## Current Next Step
 
 P0 lifecycle closure is complete for the MVP boundary. Do not continue
-open-ended private P0 real-case exploration. The next mainline work is P1/P2
-closure around public repeatability and operator usability.
+open-ended private P0 real-case exploration. P1 closure must finish before more
+P2 product-experience work.
 
 Recommended order:
 
-1. Make public benchmark runs repeatable through a tracked case registry,
-   stable default case, and sanitized aggregate index.
-2. Implement the Operator Console / Management Diagnostics split: the default
-   task view is for end users, while diagnostics preserve the old panel's
-   debugging power and organize evidence, commands, verification, and prevention
-   like an RCA surface.
-3. Keep strengthening context/token governance and provider metrics using
-   benchmark evidence.
-4. Use private real cases only as regression checks for specific suspected
-   defects, not as P0 discovery loops.
+1. Finish the P1 boundary review: Execution / AgentTask, Recovery, Context
+   budget, Artifact contract, and Boundary drift prevention.
+2. Run a bounded real-case or public benchmark to verify tokenMetrics can explain
+   per-step cost and context growth.
+3. If P1 has no blockers, continue P2: delivery view, public benchmark
+   hardening, and open-source docs cleanup.
+4. Use private real cases only as targeted regression checks, not as P0 discovery
+   loops.

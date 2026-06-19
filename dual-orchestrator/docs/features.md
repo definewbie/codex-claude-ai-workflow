@@ -41,6 +41,8 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Context package state/evidence boundary.
 - [x] Token-aware context budgeting and adaptive compression.
 - [x] Provider run metrics aggregated from local `runs/*/run.json`.
+- [x] Per-step token metrics projected by run, node, agent, and total into
+  `metrics/workstream-metrics.json` and `metrics/workstream-metrics.md`.
 - [x] Adapter-observed token and cost metrics from acpx session stream usage,
   recorded as best-effort run metadata.
 

@@ -716,6 +716,36 @@ a {
   font-size: 11px;
 }
 
+.token-runs {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.token-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 80px;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fff;
+  padding: 7px 9px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.token-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.token-row strong {
+  color: var(--text);
+  text-align: right;
+}
+
 .budget {
   height: 7px;
   margin-top: 10px;
