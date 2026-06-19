@@ -43,7 +43,7 @@ class AcpxAgentTransportTest {
                 prompt,
                 stdout,
                 stderr,
-                false
+                AcpxPermissionProfile.implement()
         ));
         var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
@@ -85,7 +85,7 @@ class AcpxAgentTransportTest {
                 prompt,
                 stdout,
                 stderr,
-                false
+                AcpxPermissionProfile.implement()
         ));
         var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
@@ -463,7 +463,7 @@ class AcpxAgentTransportTest {
                 echo "agent needs reconnect" >&2
                 sleep 1
                 echo "thinking"
-                sleep 4
+                sleep 20
                 echo "ACPX_DONE"
                 exit 0
                 """, StandardCharsets.UTF_8);
@@ -481,13 +481,13 @@ class AcpxAgentTransportTest {
                 prompt,
                 stdout,
                 stderr,
-                false
+                AcpxPermissionProfile.implement()
         ));
 
         assertEquals(4, result.exitCode());
         var output = Files.readString(stdout);
         assertTrue(output.contains("thinking"));
-        assertFalse(output.contains("ACPX_DONE"));
+        assertFalse(output.contains("ACPX_DONE"), output);
         assertTrue(Files.readString(stderr).contains("agent needs reconnect"));
     }
 

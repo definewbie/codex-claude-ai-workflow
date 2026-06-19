@@ -274,8 +274,34 @@ p,
 }
 
 .action-field {
-  flex: 0 1 190px;
-  min-width: 170px;
+  flex: 0 1 220px;
+  min-width: 200px;
+}
+
+.action-field button {
+  width: 100%;
+}
+
+.advanced-controls {
+  flex: 1 1 100%;
+  border-top: 1px solid #edf0f4;
+  padding-top: 10px;
+}
+
+.advanced-controls summary {
+  width: max-content;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.advanced-control-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-top: 10px;
 }
 
 .compact {
@@ -1132,7 +1158,8 @@ textarea {
   }
 
   .toolbar .field-grow,
-  .toolbar .action-field {
+  .toolbar .action-field,
+  .toolbar .advanced-controls {
     grid-column: 1 / -1;
   }
 

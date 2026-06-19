@@ -84,6 +84,12 @@ Actions are contextual. A human gate should show review evidence and decision
 buttons together. Debug details, raw packet content, and raw ledger paths should
 be secondary.
 
+As of P1/P2 closure work, the panel intentionally keeps only one primary
+workflow action visible by default. Max-step tuning, manual refresh, scheduler
+tick, and auto-recovery are advanced controls. This avoids making normal
+operators choose between internal mechanics before they understand the current
+state.
+
 The Scheduler Tick control has an explicit recovery option:
 
 - unchecked: only `RUNNING` workstreams are resumed;
@@ -215,3 +221,10 @@ Future design work should revisit:
 The goal is not to remove human review. It is to reserve human review for
 places where judgment is actually needed: requirement boundaries, design trade
 offs, acceptance disputes, and delivery confirmation.
+
+P1/P2 scope should now focus on:
+
+- public repeatable benchmark evidence instead of private exploratory P0 cases;
+- fewer first-screen controls;
+- stronger current-vs-historical review packet separation;
+- one shared answer across `trace`, API overview, and the panel.

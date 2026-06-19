@@ -95,6 +95,12 @@ The easiest reusable real run is the public benchmark:
 ./scripts/run-public-benchmark.sh
 ```
 
+To see the reusable public cases first:
+
+```bash
+./scripts/run-public-benchmark.sh --list-cases
+```
+
 It creates a disposable issue-flow sample repo under `/tmp`, runs the full
 lifecycle with real `acpx` Claude/Codex, auto-approves intermediate benchmark
 gates, and writes a local ignored report under

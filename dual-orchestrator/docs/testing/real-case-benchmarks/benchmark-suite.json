@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "default_case": "public-issue-flow-review-state",
+  "cases": [
+    {
+      "id": "public-issue-flow-review-state",
+      "task_file": "cases/public-issue-flow-review-state.md",
+      "sample_repo": "examples/issue-flow-app",
+      "variant": "full",
+      "max_steps": 80,
+      "max_gates": 12,
+      "purpose": "Reusable public sample app feature that exercises contract, context package, self-test evidence, Codex acceptance, final report, and handoff.",
+      "expected_grade": "PASS or PASS-WARN",
+      "known_limits": [
+        "Uses real acpx Claude/Codex sessions and may consume quota.",
+        "Codex can return ACCEPT_WITH_NOTES; that is graded PASS-WARN, not automatic failure."
+      ]
+    }
+  ]
+}

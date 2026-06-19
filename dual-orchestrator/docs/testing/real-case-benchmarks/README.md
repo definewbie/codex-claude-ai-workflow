@@ -19,6 +19,12 @@ It is not a replacement for unit tests. Its job is to answer:
 |------|------|---------|--------|
 | `cases/public-issue-flow-review-state.md` | Public sample app feature | Exercises contract, context package, self-test evidence, Codex acceptance, final report, and handoff on a reusable sample repo. | Ready |
 
+The public case registry is tracked in
+[benchmark-suite.json](benchmark-suite.json). It defines the default case,
+sample repo, task file, workflow variant, max steps, max gates, and known
+limits. This keeps benchmark commands repeatable without relying on private task
+files.
+
 Private/internal benchmark cases are not included in this public cleanup branch.
 Lessons from those runs are summarized in the architecture docs without private
 repository names, local paths, or raw reports.
@@ -29,6 +35,18 @@ Preferred public path:
 
 ```bash
 ./scripts/run-public-benchmark.sh
+```
+
+List available public cases:
+
+```bash
+./scripts/run-public-benchmark.sh --list-cases
+```
+
+Run a specific public case:
+
+```bash
+./scripts/run-public-benchmark.sh --case public-issue-flow-review-state
 ```
 
 This command prepares a disposable copy of `examples/issue-flow-app`, runs the

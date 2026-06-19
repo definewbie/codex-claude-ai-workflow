@@ -91,6 +91,12 @@ Claude ACP command 是否能拿到这些变量。
 ./scripts/run-public-benchmark.sh
 ```
 
+如果想先查看公开可复用 case：
+
+```bash
+./scripts/run-public-benchmark.sh --list-cases
+```
+
 它会在 `/tmp` 下创建一次性 issue-flow sample repo，用真实 `acpx` Claude/Codex 跑完整 lifecycle，自动 approve benchmark 中间 gate，并把报告写到：
 
 ```text

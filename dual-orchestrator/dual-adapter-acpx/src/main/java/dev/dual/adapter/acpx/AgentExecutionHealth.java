@@ -53,7 +53,11 @@ final class AgentExecutionHealth {
             }
             case AGENT_ACTIVITY -> {
                 markProgress(event, elapsed);
-                if (isReconnect(currentSignal)) {
+                // Plain stdout growth proves that bytes are still arriving, but it
+                // is not a trusted lifecycle signal. A reconnect diagnostic is
+                // superseded only by structured acpx stream progress or a
+                // complete terminal contract.
+                if (event.source() == AgentLifecycleEvent.Source.ACPX_STREAM && isReconnect(currentSignal)) {
                     currentSignal = null;
                 }
             }

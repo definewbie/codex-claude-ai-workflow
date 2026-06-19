@@ -340,14 +340,16 @@ public class AcpxAgentTransport {
     }
 
     private void terminateProcessTree(ProcessHandle handle) {
+        List<ProcessHandle> descendants = List.of();
         try {
-            handle.descendants().forEach(this::terminateProcess);
+            descendants = handle.descendants().toList();
         } catch (RuntimeException ignored) {
             // Some sandboxed runtimes forbid descendant enumeration. The direct
             // acpx process is still the adapter-owned boundary and must be
             // terminated so the workflow can enter recovery instead of hanging.
         }
         terminateProcess(handle);
+        descendants.forEach(this::terminateProcess);
     }
 
     private void terminateProcess(ProcessHandle handle) {

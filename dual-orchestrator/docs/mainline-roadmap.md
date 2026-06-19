@@ -180,16 +180,17 @@ evaluation.
 
 ## Current Next Step
 
-P0 lifecycle closure is complete for the MVP boundary. The next mainline work is
-P1 hardening, not another open-ended closure run.
+P0 lifecycle closure is complete for the MVP boundary. Do not continue
+open-ended private P0 real-case exploration. The next mainline work is P1/P2
+closure around public repeatability and operator usability.
 
 Recommended order:
 
-1. Keep strengthening context/token governance and provider metrics using the
-   completed real-case data.
-2. Improve P2 operator experience around many-gate runs: collapse historical
-   gates, highlight current evidence, and keep CLI/UI wording in sync.
-3. Prepare a public repeatable benchmark that exercises at least one semantic
-   repair loop without private project files.
-4. Use delivery merge on the private completed worktree only if the original
-   `cancer-clinic` repo is intentionally ready to receive the staged changes.
+1. Make public benchmark runs repeatable through a tracked case registry,
+   stable default case, and sanitized aggregate index.
+2. Reduce operator-panel complexity: one primary action, advanced controls
+   collapsed, current gate evidence foregrounded, historical evidence read-only.
+3. Keep strengthening context/token governance and provider metrics using
+   benchmark evidence.
+4. Use private real cases only as regression checks for specific suspected
+   defects, not as P0 discovery loops.

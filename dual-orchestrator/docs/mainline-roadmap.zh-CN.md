@@ -163,11 +163,12 @@ P2 让系统足够容易理解，能支撑真实使用和开源评估。
 
 ## 当前下一步
 
-P0 lifecycle closure 在 MVP 边界内已经完成。下一步是 P1 加固，而不是继续开放式 closure real-case。
+P0 lifecycle closure 在 MVP 边界内已经完成。不要继续开放式私有 P0 real-case 探索。
+下一步是围绕公开可重复 benchmark 和 operator 易用性的 P1/P2 收口。
 
 建议顺序：
 
-1. 基于这次 completed real-case 数据继续加强 context/token 治理和 provider metrics。
-2. 优化 P2 operator experience：压缩历史 gates，突出当前 evidence，并保持 CLI/UI 文案一致。
-3. 准备一个公开可重复 benchmark，至少覆盖一次 semantic repair loop，且不依赖私有项目文件。
-4. 只有当 `cancer-clinic` original repo 明确准备接收变更时，再对这个 completed worktree 执行显式 delivery merge。
+1. 用 tracked case registry、稳定默认 case 和脱敏 aggregate index，让 public benchmark 可重复。
+2. 降低 Operator Panel 复杂度：首屏只保留一个主动作，高级控制折叠，current gate evidence 前置，historical evidence 只读。
+3. 基于 benchmark evidence 继续强化 context/token governance 和 provider metrics。
+4. 私有 real case 只作为特定缺陷的 regression check，不再作为 P0 discovery loop。

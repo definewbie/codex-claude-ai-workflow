@@ -1228,6 +1228,7 @@ function updateActions(data) {
     tick: status === "RUNNING" || !state.selectedId,
   });
   applyDecisionLabels(status, nextStageGate);
+  applyPrimaryActionLabel(status, nextStageGate, staleRunning);
 
   els.feedback.parentElement.classList.toggle("hidden", status !== "WAITING_FOR_HUMAN");
   els.revise.parentElement.classList.toggle("hidden", status !== "WAITING_FOR_HUMAN");
@@ -1265,6 +1266,30 @@ function updateActions(data) {
   els.actionHint.textContent = state.selectedId
     ? "当前 workflow 状态没有可直接执行的动作。"
     : "选择一个 workstream 后查看可用动作。";
+}
+
+function applyPrimaryActionLabel(status, nextStageGate, staleRunning) {
+  if (!state.selectedId) {
+    els.resume.textContent = "Select workstream";
+    return;
+  }
+  if (status === "RUNNING" && !staleRunning) {
+    els.resume.textContent = "Run to next gate";
+    return;
+  }
+  if (status === "WAITING_FOR_HUMAN") {
+    els.resume.textContent = nextStageGate ? "Ready to complete" : "Review required";
+    return;
+  }
+  if (status === "WAITING_FOR_RECOVERY" || status === "FAILED" || status === "BLOCKED" || staleRunning) {
+    els.resume.textContent = "Recovery required";
+    return;
+  }
+  if (status === "COMPLETED") {
+    els.resume.textContent = "Completed";
+    return;
+  }
+  els.resume.textContent = "No direct action";
 }
 
 function applyDecisionLabels(status, nextStageGate) {

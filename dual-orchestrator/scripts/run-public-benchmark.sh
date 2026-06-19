@@ -8,6 +8,8 @@
 #
 # Usage:
 #   ./scripts/run-public-benchmark.sh
+#   ./scripts/run-public-benchmark.sh --list-cases
+#   ./scripts/run-public-benchmark.sh --case public-issue-flow-review-state
 #   ./scripts/run-public-benchmark.sh --dest /tmp/dual-issue-flow-benchmark
 #   ./scripts/run-public-benchmark.sh --skip-build --update-benchmark-index
 #
@@ -16,12 +18,15 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST_DIR=""
+CASE_ID="public-issue-flow-review-state"
+TASK_FILE=""
 VARIANT="full"
 MAX_STEPS=80
 MAX_GATES=12
 SKIP_BUILD=false
 CLEANUP_WORKTREE=false
 UPDATE_BENCHMARK_INDEX=false
+SUITE_FILE="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-suite.json"
 
 usage() {
   cat <<'EOF'
@@ -30,6 +35,8 @@ Usage:
 
 Options:
   --dest <path>             Destination sample repo. Defaults to /tmp.
+  --case <id|path>          Public case id or task markdown path. Default: public-issue-flow-review-state.
+  --list-cases              List public benchmark cases and exit.
   --variant <variant>       Workflow variant. Default: full.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
@@ -46,12 +53,60 @@ EOF
 log() { printf '[PUBLIC-BENCH] %s\n' "$*"; }
 fail() { printf '[PUBLIC-BENCH][FAIL] %s\n' "$*" >&2; }
 
+require_jq() {
+  command -v jq >/dev/null 2>&1 || {
+    fail "jq is required for benchmark case selection."
+    fail "Install jq, then rerun this script."
+    exit 1
+  }
+}
+
+list_cases() {
+  require_jq
+  jq -r '
+    .cases[]
+    | "- \(.id): \(.purpose) [\(.expected_grade)]"
+  ' "$SUITE_FILE"
+}
+
+resolve_case() {
+  require_jq
+  if [[ "$CASE_ID" = /* || "$CASE_ID" == ./* || "$CASE_ID" == ../* ]]; then
+    TASK_FILE="$CASE_ID"
+    return
+  fi
+
+  local task variant steps gates
+  task="$(jq -r --arg id "$CASE_ID" '.cases[] | select(.id == $id) | .task_file // ""' "$SUITE_FILE")"
+  [[ -n "$task" ]] || {
+    fail "unknown public benchmark case: $CASE_ID"
+    fail "Run ./scripts/run-public-benchmark.sh --list-cases"
+    exit 1
+  }
+
+  TASK_FILE="$PROJECT_ROOT/docs/testing/real-case-benchmarks/$task"
+  variant="$(jq -r --arg id "$CASE_ID" '.cases[] | select(.id == $id) | .variant // ""' "$SUITE_FILE")"
+  steps="$(jq -r --arg id "$CASE_ID" '.cases[] | select(.id == $id) | .max_steps // ""' "$SUITE_FILE")"
+  gates="$(jq -r --arg id "$CASE_ID" '.cases[] | select(.id == $id) | .max_gates // ""' "$SUITE_FILE")"
+  [[ -n "$variant" ]] && VARIANT="$variant"
+  [[ -n "$steps" ]] && MAX_STEPS="$steps"
+  [[ -n "$gates" ]] && MAX_GATES="$gates"
+}
+
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --dest)
         shift
         DEST_DIR="${1:-}"
+        ;;
+      --case)
+        shift
+        CASE_ID="${1:-}"
+        ;;
+      --list-cases)
+        list_cases
+        exit 0
         ;;
       --variant)
         shift
@@ -105,9 +160,15 @@ prepare_repo() {
 }
 
 run_case() {
+  resolve_case
+  [[ -f "$TASK_FILE" ]] || {
+    fail "task file not found: $TASK_FILE"
+    exit 1
+  }
+
   local -a args=(
     --repo "$DEST_DIR"
-    --task-file "$PROJECT_ROOT/docs/testing/real-case-benchmarks/cases/public-issue-flow-review-state.md"
+    --task-file "$TASK_FILE"
     --variant "$VARIANT"
     --max-steps "$MAX_STEPS"
     --max-gates "$MAX_GATES"
@@ -117,6 +178,9 @@ run_case() {
   [[ "$UPDATE_BENCHMARK_INDEX" == true ]] && args+=(--update-benchmark-index)
 
   log "Running public benchmark against: $DEST_DIR"
+  log "Case: $CASE_ID"
+  log "Task file: $TASK_FILE"
+  log "Variant: $VARIANT, max steps: $MAX_STEPS, max gates: $MAX_GATES"
   "$PROJECT_ROOT/scripts/run-real-case.sh" "${args[@]}"
 }
 
