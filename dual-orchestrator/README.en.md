@@ -30,7 +30,10 @@ state by memory, and manually assembling evidence after a long Agent run.
 - `dualctl` CLI and local Operator Panel.
 - Task / Decision / Gate workflow runtime.
 - LiteFlow as the default routing kernel, with built-in kernel fallback.
-- Claude / Codex `acpx` Agent tasks.
+- Claude / Codex `acpx` Agent tasks. Each Agent step uses a run-scoped session:
+  `acpx <agent> -s <base>-<run_id> -f <prompt>`. Context comes from the prompt,
+  context package, and ledger; the session belongs to the current NodeExecution,
+  not cross-node memory.
 - TaskContract, artifact contracts, context packages, handoff / next-stage prompt.
 - Failure classification, recovery, retry, and bounded repair loops.
 - Final report, delivery PR body, and commit message preparation.
@@ -189,9 +192,11 @@ raw node ids, RCA, CLI commands, and recovery evidence. Both pages consume the
 same ledger read model and subscribe to overview updates through SSE. They are
 local single-user tools, not hosted multi-user web products.
 
-Token usage has two sources: `acpx_stream` means measured usage from the acpx
-session stream; `artifact_estimate` means a fallback estimate from
-prompt/output/transcript metadata. Both are observation data only and do not
+Token usage has three sources: `acpx_stream` means measured usage with
+input/output splits from the acpx stream; `acpx_usage_update` means the adapter
+only received ACP total used/size, so the UI can show total usage but not a
+provider-level split; `artifact_estimate` means a fallback estimate from
+prompt/output/transcript metadata. They are observation data only and do not
 participate in workflow routing.
 
 To plan local worktree cleanup without deleting anything:

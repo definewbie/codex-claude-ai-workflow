@@ -220,9 +220,10 @@ http://localhost:8080/mgt/index.html
 
 管理诊断面向 dual 使用者和开发者，用于查看 raw ledger、node id、RCA、CLI 命令和恢复证据。
 
-Token 指标有两种来源：
+Token 指标有三种来源：
 
-- `acpx_stream`：从 acpx session stream 匹配到的真实 usage。
+- `acpx_stream`：真实 provider usage，包含 input/output 拆分。
+- `acpx_usage_update`：只读到 ACP total used/size，能展示总量，不能拆 provider input/output。
 - `artifact_estimate`：缺少 acpx usage 或旧 run 时，根据 prompt/output/transcript metadata
   估算的观察值。
 

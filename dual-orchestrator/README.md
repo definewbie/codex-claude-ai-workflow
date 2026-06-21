@@ -24,7 +24,9 @@ Code 和 Codex 之间反复复制产物、追问状态、整理证据，最后�
 - `dualctl` CLI 和本地 Operator Panel。
 - Task / Decision / Gate workflow runtime。
 - LiteFlow 默认 routing kernel，内置 kernel 可回退。
-- Claude / Codex `acpx` Agent task。
+- Claude / Codex `acpx` Agent task。默认每个 Agent step 使用 run-scoped session：
+  `acpx <agent> -s <base>-<run_id> -f <prompt>`。上下文来自 prompt、context
+  package 和 ledger；session 只属于当前 NodeExecution，不作为跨节点记忆。
 - TaskContract、artifact contract、context package、handoff / next-stage prompt。
 - Failure classification、recovery、retry、bounded repair loop。
 - Final report、delivery PR body、commit message。
@@ -177,9 +179,11 @@ http://localhost:8080/mgt/index.html
 两套页面读取同一组 ledger read model，并通过 SSE 订阅 overview 更新。它们都是本地单用户工具，
 不是托管式多用户 Web 产品。
 
-Token 用量有两种来源：`acpx_stream` 表示从 acpx session stream 读到的真实 usage；
-`artifact_estimate` 表示旧 run 或缺失 stream usage 时，根据 prompt/output/transcript metadata
-估算的观察值。它们都只用于成本和上下文观察，不参与 workflow 路由。
+Token 用量有三种来源：`acpx_stream` 表示从 acpx stream 中读到带 input/output
+拆分的真实 usage；`acpx_usage_update` 表示 adapter 只拿到了 ACP usage update
+里的 total used/size，因此只能展示总量；`artifact_estimate` 表示旧 run 或缺失
+stream usage 时，根据 prompt/output/transcript metadata 估算的观察值。它们都只用于
+成本和上下文观察，不参与 workflow 路由。
 
 如果需要清理本机历史 worktree，先生成只读计划：
 

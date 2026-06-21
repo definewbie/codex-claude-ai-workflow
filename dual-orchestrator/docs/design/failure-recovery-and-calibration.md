@@ -20,7 +20,7 @@ Blind retry wastes quota and can corrupt the task boundary.
 
 Runtime failures are external or mechanical:
 
-- `acpx` session missing;
+- acpx / ACP session bootstrap or resume failure;
 - rate limit or quota;
 - Agent reconnect;
 - Agent tool permission blocked by a non-interactive permission policy;
@@ -88,9 +88,15 @@ Text such as `agent needs reconnect`, `Resource not found`, HTTP 401/429/529,
 or tool permission blocked is only an external adapter signal. It is not a
 workflow state and it is not a business failure. `Resource not found` is the
 important example: it only means one `session/resume` attempt failed. It does
-not prove that the current Agent execution failed. If a later `session/new`
-succeeds and prompt, tool-result, or Agent output activity continues, the older
-reconnect signal must be kept as recovered history.
+not prove that the current Agent execution failed.
+
+The main lifecycle treats each Agent node as an isolated execution with a
+run-scoped session: `acpx <agent> -s <base>-<run_id> -f <prompt>`. The workflow
+context is the prompt, context package, and ledger, not a long-lived ACP
+session. Session resume remains part of the adapter signal model because older
+runs, custom acpx config, or provider wrappers may still surface those
+diagnostics, but dual should not require cross-node session memory for
+correctness.
 
 The adapter should therefore convert raw logs into a small lifecycle model:
 
@@ -177,18 +183,11 @@ Acceptance criteria:
 - Provider stream 401/529 can override wrapper reconnect.
 - A real case with a slow model is not killed by stale stderr.
 
-For reconnects in read-only observe/review profiles, the adapter may rebuild
-the named acpx session once and retry the same prompt. Implementation profiles
-do not auto-replay after reconnect because the previous process may have
-partially written files; write-phase recovery must stay visible as execution
-recovery or a later semantic repair route.
-
-There is one lower-level retry before session rebuild: observe/review profiles
-pass `--prompt-retries 1` to acpx. This is intentionally limited to read-only
-or reviewer-style Agent calls, where replaying the same prompt should not
-duplicate repository writes. Implementation profiles do not use prompt-level
-retries; write-phase recovery must stay visible as an execution failure or a
-bounded semantic repair route.
+Read-only observe/review profiles may pass `--prompt-retries 1` to acpx. This
+is intentionally limited to read-only or reviewer-style Agent calls, where
+replaying the same prompt should not duplicate repository writes.
+Implementation profiles do not use prompt-level retries; write-phase recovery
+must stay visible as an execution failure or a bounded semantic repair route.
 
 Tool permission failure belongs to the same adapter execution boundary. dual
 does not use `approve-all` for non-implementation phases. Workflow nodes declare

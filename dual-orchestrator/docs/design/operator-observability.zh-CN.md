@@ -170,9 +170,10 @@ UI 需要保留线性生命周期进度条，因为它最容易理解；同时�
 Token 和 cost 指标只属于观测层，不参与 workflow 路由，也不替代 artifact contract 或
 recovery decision。
 
-当前有两类来源：
+当前有三类来源：
 
-- `acpx_stream`：adapter 从 acpx session stream 中按当前 prompt 匹配到的真实 usage。
+- `acpx_stream`：adapter 从 ACP stream 中读到真实 provider usage，包含 input/output 拆分。
+- `acpx_usage_update`：adapter 只读到 ACP total used/size，能展示总量，不能拆 provider input/output。
 - `artifact_estimate`：缺少真实 usage 或历史 run 没写入 usage 时，根据 prompt/output/transcript
   metadata 估算的观察值。
 

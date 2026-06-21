@@ -18,7 +18,7 @@ Agent lifecycle 不应该把所有失败都处理成“让 Claude 再试一次�
 
 Runtime failure 是外部或机械问题：
 
-- `acpx` session 缺失；
+- acpx / ACP session 初始化或 resume 失败；
 - rate limit 或 quota；
 - Agent reconnect；
 - Agent tool permission 被非交互权限策略阻塞；
@@ -58,9 +58,13 @@ terminal contract 优先于 reconnect 诊断，但必须是完整契约：闭合
 `agent needs reconnect`、`Resource not found`、HTTP 401/429/529、tool
 permission blocked 这类文本都只是外部 adapter 观察到的运行时信号。它们不是
 workflow 状态，也不是业务失败。尤其是 `Resource not found`：它只能说明某次
-`session/resume` 失败，不能直接说明当前 Agent execution 已失败；如果后续
-`session/new` 成功并继续出现 prompt、tool result 或 Agent output，前面的
-reconnect 只能作为已恢复的历史事件保留。
+`session/resume` 失败，不能直接说明当前 Agent execution 已失败。
+
+主生命周期把每个 Agent 节点视为一次隔离 execution，并使用 run-scoped session：
+`acpx <agent> -s <base>-<run_id> -f <prompt>`。workflow 上下文来自 prompt、
+context package 和 ledger，而不是长生命周期 ACP session 记忆。session resume
+仍然属于 adapter 信号模型，因为旧 run、自定义 acpx 配置或 provider wrapper
+仍可能暴露这类诊断；但 dual 的正确性不应依赖跨节点 session memory。
 
 因此 adapter 层需要把原始日志转换为更明确的模型：
 
@@ -135,13 +139,10 @@ stdout / stderr / acpx stream
 - provider stream 中的 401/529 能覆盖包装层 reconnect。
 - real-case 中慢模型不会因为旧 stderr 被误杀。
 
-对于 read-only 的 `observe` / `review` profile，adapter 可以重建命名 acpx session 一次，并用同一个 prompt 重试。`implement` profile 不会在 reconnect 后自动重放，因为上一轮进程可能已经半写文件；写代码阶段的恢复必须保持可见，要么作为 execution recovery，要么进入后续有边界的 semantic repair route。
-
-在 session rebuild 之前，还有一层更低级的短重试：`observe` / `review`
-profile 会给 acpx 传 `--prompt-retries 1`。这只用于只读观察或外部审视类
-Agent 调用，因为重放同一个 prompt 不应该产生重复业务写入。`implement`
-profile 不使用 prompt-level retry；写代码阶段的恢复必须保持可见，要么作为
-execution failure 暴露出来，要么进入有边界的 semantic repair route。
+`observe` / `review` profile 可以给 acpx 传 `--prompt-retries 1`。这只用于只读
+观察或外部审视类 Agent 调用，因为重放同一个 prompt 不应该产生重复业务写入。
+`implement` profile 不使用 prompt-level retry；写代码阶段的恢复必须保持可见，
+要么作为 execution failure 暴露出来，要么进入有边界的 semantic repair route。
 
 工具权限失败同样属于 adapter execution 边界。dual 在非实现阶段不会使用
 `approve-all`，而是通过 workflow node 的 `permission_profile` 声明可用工具：

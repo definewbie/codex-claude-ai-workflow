@@ -293,7 +293,7 @@ class AcpxAgentTransportTest {
         var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
         var result = transport.runClaudeDesign(new AcpxRunRequest(
                 tempDir,
-                "claude-main",
+                "claude-main-run-001",
                 prompt,
                 stdout,
                 stderr,
@@ -362,7 +362,7 @@ class AcpxAgentTransportTest {
         var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
         var result = transport.runClaudeDesign(new AcpxRunRequest(
                 tempDir,
-                "claude-main",
+                "claude-main-run-001",
                 prompt,
                 stdout,
                 stderr,
@@ -371,6 +371,7 @@ class AcpxAgentTransportTest {
 
         assertEquals(0, result.exitCode());
         var args = Files.readString(argsLog);
+        assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt));
         assertTrue(args.contains("--approve-reads"));
         assertTrue(args.contains("--non-interactive-permissions"));
         assertTrue(args.contains("--permission-policy"));
@@ -404,7 +405,7 @@ class AcpxAgentTransportTest {
         var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
         var result = transport.runCodexDesignReview(new AcpxRunRequest(
                 tempDir,
-                "codex-reviewer",
+                "codex-reviewer-run-001",
                 prompt,
                 stdout,
                 stderr,
@@ -413,6 +414,7 @@ class AcpxAgentTransportTest {
 
         assertEquals(0, result.exitCode());
         var args = Files.readString(argsLog);
+        assertTrue(args.contains("codex\n-s\ncodex-reviewer-run-001\n-f\n" + prompt));
         assertTrue(args.contains("--prompt-retries\n1\n"));
     }
 
@@ -439,7 +441,7 @@ class AcpxAgentTransportTest {
         var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
         var result = transport.runClaudeDesign(new AcpxRunRequest(
                 tempDir,
-                "claude-main",
+                "claude-main-run-001",
                 prompt,
                 stdout,
                 stderr,
@@ -448,6 +450,7 @@ class AcpxAgentTransportTest {
 
         assertEquals(0, result.exitCode());
         var args = Files.readString(argsLog);
+        assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt));
         assertFalse(args.contains("--prompt-retries"));
         assertTrue(args.contains("--approve-all"));
     }

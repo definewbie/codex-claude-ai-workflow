@@ -250,9 +250,10 @@ http://localhost:8080/mgt/index.html
 Management diagnostics is for dual users and developers who need raw ledger
 facts, node ids, RCA, CLI commands, and recovery evidence.
 
-Token metrics may show one of two sources:
+Token metrics may show one of three sources:
 
-- `acpx_stream`: measured usage matched from the acpx session stream.
+- `acpx_stream`: measured provider usage with input/output splits.
+- `acpx_usage_update`: measured ACP total usage only; provider split is unavailable.
 - `artifact_estimate`: fallback estimate from prompt/output/transcript metadata,
   used for old runs or runs where acpx usage was unavailable.
 

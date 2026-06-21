@@ -48,12 +48,16 @@ wrapper 会在运行时读取这些变量，不会把 token 写入 `~/.acpx/conf
 
 - 日志出现 `agent needs reconnect`。
 - Agent 看起来很慢或像挂住，但后续又有输出。
+- run 长时间停在 `[client] session/resume (running)`，迟迟没有进入 prompt。
 
 runtime 的处理方式：
 
 - 把 acpx/Claude reconnect 当成 adapter lifecycle signal。
 - 不会因为旧的 reconnect 文案就杀掉仍在工作的 Agent。
 - 如果后续 stream activity 和完整 terminal contract 证明 Agent 仍在推进，会覆盖旧 reconnect 证据。
+- Agent step 默认使用 run-scoped session：
+  `acpx <agent> -s <base>-<run_id> -f <prompt>`。节点上下文来自 prompt、
+  context package 和 ledger，不应该依赖长生命周期 ACP session 记忆。
 
 检查：
 
@@ -62,7 +66,7 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 dualctl trace --workdir <effective_workdir> <workstream_id>
 ```
 
-如果 workflow 进入 recovery，先看恢复评估再 retry：
+如果旧 run 是在 run-scoped session 之前启动，并卡在 `session/resume`，先停止该 run，再用当前 CLI build 重试。如果 workflow 进入 recovery，先看恢复评估再 retry：
 
 ```bash
 dualctl recovery show --workdir <effective_workdir> <workstream_id>
@@ -141,6 +145,12 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 ```
 
 如果某个阶段反复消耗过多上下文，应把它当成 context package 边界问题，而不是 Agent 性格问题。正确方向是减少原始工具 transcript 传递，改用结构化 artifact、压缩 handoff 和聚焦 evidence refs。
+
+Token source 含义：
+
+- `acpx_stream`：真实 provider usage，包含 input/output 拆分。
+- `acpx_usage_update`：只拿到 ACP total used/size，能展示总量，不能拆 provider input/output。
+- `artifact_estimate`：根据 prompt/output/transcript metadata 做的本地估算。
 
 ## Public Benchmark 失败
 

@@ -179,12 +179,15 @@ Metrics are currently lightweight:
 - gate and iteration counts;
 - longest node duration.
 
-Token and cost metrics are recorded when the acpx adapter can match the current
-prompt to a session stream usage event. Those measured records use
-`source=acpx_stream`. When measured usage is unavailable, projections may show
-`source=artifact_estimate`, derived from prompt/output/transcript metadata.
-Estimated usage exists to explain relative cost and context growth for old or
-incomplete runs; it must not be presented as provider billing truth.
+Token and cost metrics are recorded when the acpx adapter can read usage from
+the ACP stream for the current prompt execution. `source=acpx_stream` means the
+adapter received provider usage with input/output splits. `source=acpx_usage_update`
+means the adapter only received ACP total used/size, so the UI can show total
+usage but not provider-level splits. When measured usage is unavailable,
+projections may show `source=artifact_estimate`, derived from
+prompt/output/transcript metadata. Estimated usage exists to explain relative
+cost and context growth for old or incomplete runs; it must not be presented as
+provider billing truth.
 
 The task view should show a lightweight token/cost card so the operator can see
 whether a task is becoming expensive or context-heavy. Management Diagnostics

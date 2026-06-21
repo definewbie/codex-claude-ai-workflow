@@ -51,6 +51,8 @@ Symptom:
 
 - Logs mention `agent needs reconnect`.
 - The Agent appears slow or stuck, but later output shows it was still working.
+- A run stays at `[client] session/resume (running)` for minutes before the
+  prompt is accepted.
 
 What the runtime does:
 
@@ -58,6 +60,10 @@ What the runtime does:
 - It does not kill an active run only because an old reconnect line exists.
 - Later stream activity and a complete terminal contract supersede stale
   reconnect evidence.
+- Agent steps use run-scoped sessions by default:
+  `acpx <agent> -s <base>-<run_id> -f <prompt>`. A node should not rely on
+  long-lived ACP session memory; the prompt, context package, and ledger are
+  the source of task context.
 
 Check:
 
@@ -66,7 +72,8 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 dualctl trace --workdir <effective_workdir> <workstream_id>
 ```
 
-If the workflow is in recovery, inspect the recovery assessment before retrying:
+If an old run was started before run-scoped sessions and is stuck in `session/resume`, stop that run and retry with the current CLI build. If the
+workflow is in recovery, inspect the recovery assessment before retrying:
 
 ```bash
 dualctl recovery show --workdir <effective_workdir> <workstream_id>
@@ -152,6 +159,13 @@ If one stage repeatedly consumes too much context, treat it as a context package
 boundary issue, not an Agent personality issue. The expected direction is to
 reduce raw tool transcript carry-over and rely on structured artifacts, compact
 handoff, and focused evidence refs.
+
+Token source meanings:
+
+- `acpx_stream`: measured provider usage with input/output split.
+- `acpx_usage_update`: measured ACP total usage only; provider split is
+  unavailable.
+- `artifact_estimate`: local estimate from prompt/output/transcript metadata.
 
 ## Public Benchmark Fails
 

@@ -54,9 +54,10 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         if (!"claude".equals(agent) && !"codex".equals(agent)) {
             throw new IllegalArgumentException("unsupported agent: " + agent);
         }
-        var session = configText(context, "session");
+        var configuredSession = configText(context, "session");
         var promptTemplate = configText(context, "prompt_template");
         var runId = "run-" + Instant.now().toEpochMilli();
+        var session = configuredSession + "-" + runId;
         var runDir = context.workspaceRoot()
                 .resolve(".agent")
                 .resolve("workstreams")

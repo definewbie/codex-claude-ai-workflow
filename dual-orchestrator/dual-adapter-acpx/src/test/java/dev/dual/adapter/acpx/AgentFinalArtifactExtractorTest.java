@@ -90,4 +90,59 @@ class AgentFinalArtifactExtractorTest {
         assertFalse(result.get().contains("\"old\""));
         assertFalse(result.get().contains("decision: OLD"));
     }
+
+    @Test
+    void canonicalizesTypedJsonFenceBeforeTerminalControl() {
+        var result = extractor.extract("""
+                Design notes.
+
+                ```json
+                {
+                  "artifact_type": "agent_output_contract",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "ready"
+                }
+                ```
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: ready
+                ```
+
+                [done] end_turn
+                """);
+
+        assertTrue(result.isPresent());
+        assertTrue(result.get().startsWith("<dual-artifact type=\"agent_output_contract\" version=\"1\">"));
+        assertTrue(result.get().contains("\"decision\": \"READY_FOR_ARCH_REVIEW\""));
+        assertTrue(result.get().contains("decision: READY_FOR_ARCH_REVIEW"));
+        assertFalse(result.get().contains("Design notes."));
+        assertFalse(result.get().contains("```json"));
+        assertFalse(result.get().contains("[done]"));
+    }
+
+    @Test
+    void ignoresEscapedArtifactExampleInsideCanonicalEnvelopeJson() {
+        var result = extractor.extract("""
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "missing_evidence": [
+                    "缺少 <dual-artifact type=\\"task_contract_proposal\\" version=\\"1\\"> 候选任务合同。"
+                  ],
+                  "decision": "NEEDS_REVISION"
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: revise
+                ```
+                """);
+
+        assertTrue(result.isPresent());
+        assertTrue(result.get().startsWith("<dual-artifact type=\"agent_output_contract\" version=\"1\">"));
+        assertTrue(result.get().contains("\"missing_evidence\""));
+        assertTrue(result.get().contains("decision: NEEDS_REVISION"));
+    }
 }
