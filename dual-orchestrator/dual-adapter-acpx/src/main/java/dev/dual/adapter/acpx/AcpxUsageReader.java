@@ -29,11 +29,15 @@ import java.util.regex.Pattern;
  * <p>这个类只产出外部 adapter 的结构化观测事实，不参与 workflow 路由。</p>
  */
 final class AcpxUsageReader {
+    private static final int DEFAULT_RETRY_ATTEMPTS = 8;
+    private static final long DEFAULT_RETRY_DELAY_MS = 150L;
     private static final Pattern SESSION_ID_PATTERN = Pattern.compile(
             "\\(([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\\)"
     );
 
     private final Path sessionsDir;
+    private final int retryAttempts;
+    private final long retryDelayMs;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     AcpxUsageReader() {
@@ -41,7 +45,13 @@ final class AcpxUsageReader {
     }
 
     AcpxUsageReader(Path sessionsDir) {
+        this(sessionsDir, DEFAULT_RETRY_ATTEMPTS, DEFAULT_RETRY_DELAY_MS);
+    }
+
+    AcpxUsageReader(Path sessionsDir, int retryAttempts, long retryDelayMs) {
         this.sessionsDir = sessionsDir;
+        this.retryAttempts = Math.max(1, retryAttempts);
+        this.retryDelayMs = Math.max(0, retryDelayMs);
     }
 
     Optional<AcpxUsage> read(Path promptPath, Path stderrPath) {
@@ -55,10 +65,22 @@ final class AcpxUsageReader {
             if (!Files.isRegularFile(streamPath)) {
                 return Optional.empty();
             }
-            return readMatchingUsage(streamPath, Files.readString(promptPath));
+            return readMatchingUsageWithRetry(streamPath, Files.readString(promptPath));
         } catch (IOException ignored) {
             return Optional.empty();
         }
+    }
+
+    private Optional<AcpxUsage> readMatchingUsageWithRetry(Path streamPath, String promptText) throws IOException {
+        Optional<AcpxUsage> usage = Optional.empty();
+        for (var attempt = 0; attempt < retryAttempts; attempt++) {
+            usage = readMatchingUsage(streamPath, promptText);
+            if (usage.isPresent() || attempt == retryAttempts - 1) {
+                return usage;
+            }
+            sleepBeforeRetry();
+        }
+        return usage;
     }
 
     private Optional<AcpxUsage> readMatchingUsage(Path streamPath, String promptText) throws IOException {
@@ -96,7 +118,8 @@ final class AcpxUsageReader {
                         number(usage.get("cachedWriteTokens")),
                         number(usage.get("totalTokens")),
                         costAmount,
-                        costCurrency
+                        costCurrency,
+                        "acpx_stream"
                 ));
             }
         }
@@ -143,5 +166,16 @@ final class AcpxUsageReader {
 
     private static BigDecimal decimal(JsonNode node) {
         return node == null || !node.isNumber() ? null : node.decimalValue();
+    }
+
+    private void sleepBeforeRetry() {
+        if (retryDelayMs == 0) {
+            return;
+        }
+        try {
+            Thread.sleep(retryDelayMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

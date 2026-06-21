@@ -152,7 +152,7 @@ P1 work keeps long agent runs recoverable and affordable.
 | Context budgets | Done, keep testing | `ContextProfiles` defines profile budgets; `ContextBuildPackageHandler` enforces estimated token limits and degrades/drops sections. |
 | Context package metadata | Done | Every context package now writes a JSON sidecar with profile, token budget, estimated tokens, and per-section degradation facts. |
 | Prompt language policy | Done | Workstream `settings.json` stores `promptLanguage`; Agent prompts localize human-readable prose while preserving machine-readable contract keys, enums, and markers. |
-| Projection | MVP done, keep testing | `workstream-metrics.json` now includes tokenMetrics by run, node, agent, and total. `runs`, `trace`, `summary`, API overview, and Operator Console consume the same projection. |
+| Projection | MVP done, keep testing | `workstream-metrics.json` includes tokenMetrics by run, node, agent, and total. `runs` and `trace` display per-step token source as `acpx_stream` or `artifact_estimate`; API overview and Operator Console consume the same ledger projection. |
 | Tests | Done | `ContextBuildPackageHandlerTest` covers budget enforcement, degradation, and metadata sidecar creation. |
 | Real-case validation | Done for closure case | The 2026-06-19 private business-logic run completed with bounded prompt/context behavior and no context-window recovery. |
 
@@ -174,7 +174,7 @@ evaluation.
 
 | Item | Status | Purpose | Design |
 |---|---|---|---|
-| Operator Console / Management Diagnostics | MVP implemented | The default task view answers where it is, why it stopped, and what to do next; diagnostics preserve RCA, CLI commands, raw facts, and token/cost. The default entry is `/`, `/console.html` remains compatible, and the old management panel moved to `/mgt/index.html`. | [operator-observability.md](design/operator-observability.md), [operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
+| Operator Console / Management Diagnostics | MVP implemented, keep polishing | The default task view answers where it is, why it stopped, and what to do next; diagnostics preserve RCA, CLI commands, raw facts, and token/cost. The default entry is `/`, `/console.html` remains compatible, and the old management panel moved to `/mgt/index.html`. The workstream list discovers the default `<repo-name>-agent-runs` pool so CLI/autorun-created tasks are visible from the repository root. | [operator-observability.md](design/operator-observability.md), [operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
 | Delivery view | Partial | Show delivery merge readiness and result in the completed workstream view. | [delivery-merge.md](design/delivery-merge.md) |
 | Public benchmark | Partial | Provide repeatable public evidence without private project files. | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
 | Open-source docs cleanup | Partial | Keep docs readable, current, and not tied to internal run history. | [release-checklist.md](release-checklist.md) |
@@ -187,11 +187,8 @@ P2 product-experience work.
 
 Recommended order:
 
-1. Finish the P1 boundary review: Execution / AgentTask, Recovery, Context
-   budget, Artifact contract, and Boundary drift prevention.
-2. Run a bounded real-case or public benchmark to verify tokenMetrics can explain
-   per-step cost and context growth.
-3. If P1 has no blockers, continue P2: delivery view, public benchmark
-   hardening, and open-source docs cleanup.
-4. Use private real cases only as targeted regression checks, not as P0 discovery
-   loops.
+1. Continue P2 with delivery view and public benchmark hardening.
+2. Keep open-source docs cleanup incremental and current; do not reintroduce
+   private run history into public-facing docs.
+3. Use private real cases only as targeted regression checks, not as P0
+   discovery loops.

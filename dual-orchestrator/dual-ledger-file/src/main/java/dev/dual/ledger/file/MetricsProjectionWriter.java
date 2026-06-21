@@ -155,6 +155,7 @@ final class MetricsProjectionWriter {
         var runs = new ArrayList<Map<String, Object>>();
         long runCount = 0;
         long measuredRunCount = 0;
+        long estimatedRunCount = 0;
         try (var stream = Files.list(paths.runsDir())) {
             for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
                 var runJson = runDir.resolve("run.json");
@@ -172,16 +173,29 @@ final class MetricsProjectionWriter {
                 item.put("agent", agent);
                 item.put("status", text(run.get("status")));
                 item.put("durationMs", longValue(run.get("durationMs")));
+                var estimated = false;
                 if (usage.isEmpty()) {
-                    item.put("measured", false);
+                    usage = estimatedUsage(paths, run);
+                    estimated = !usage.isEmpty();
                 } else {
                     measuredRunCount++;
+                }
+                if (usage.isEmpty()) {
+                    item.put("measured", false);
+                    item.put("estimated", false);
+                } else {
+                    if (estimated) {
+                        estimatedRunCount++;
+                    }
                     var metric = UsageMetric.from(usage);
                     total.add(metric);
                     byAgent.computeIfAbsent(agent, ignored -> new UsageMetric()).add(metric);
                     byNode.computeIfAbsent(nodeId, ignored -> new UsageMetric()).add(metric);
-                    item.put("measured", true);
-                    item.put("usage", metric.toMap());
+                    item.put("measured", !estimated);
+                    item.put("estimated", estimated);
+                    var usageMap = metric.toMap();
+                    usageMap.put("source", nonBlank(text(usage.get("source")), estimated ? "artifact_estimate" : "acpx_stream"));
+                    item.put("usage", usageMap);
                 }
                 runs.add(item);
             }
@@ -189,11 +203,41 @@ final class MetricsProjectionWriter {
         var result = new LinkedHashMap<String, Object>();
         result.put("runCount", runCount);
         result.put("measuredRunCount", measuredRunCount);
+        result.put("estimatedRunCount", estimatedRunCount);
         result.put("total", total.toMap());
         result.put("byAgent", usageMap(byAgent));
         result.put("byNode", usageMap(byNode));
         result.put("runs", runs);
         return result;
+    }
+
+    private Map<String, Object> estimatedUsage(WorkstreamPaths paths, Map<String, Object> run) throws IOException {
+        var promptTokens = estimatedTokens(paths, text(run.get("promptMetadataPath")));
+        var transcriptTokens = estimatedTokens(paths, text(run.get("transcriptMetadataPath")));
+        var outputTokens = estimatedTokens(paths, text(run.get("outputMetadataPath")));
+        var visibleOutputTokens = transcriptTokens > 0 ? transcriptTokens : outputTokens;
+        if (promptTokens == 0 && visibleOutputTokens == 0) {
+            return Map.of();
+        }
+        var usage = new LinkedHashMap<String, Object>();
+        usage.put("inputTokens", promptTokens);
+        usage.put("outputTokens", visibleOutputTokens);
+        usage.put("cachedReadTokens", 0L);
+        usage.put("cachedWriteTokens", 0L);
+        usage.put("totalTokens", promptTokens + visibleOutputTokens);
+        usage.put("source", "artifact_estimate");
+        return usage;
+    }
+
+    private long estimatedTokens(WorkstreamPaths paths, String relativeMetadataPath) throws IOException {
+        if (relativeMetadataPath.isBlank()) {
+            return 0;
+        }
+        var metadataPath = paths.workspaceRoot().resolve(relativeMetadataPath).normalize();
+        if (!metadataPath.startsWith(paths.workspaceRoot()) || !Files.isRegularFile(metadataPath)) {
+            return 0;
+        }
+        return longValue(objectMapper.readValue(metadataPath.toFile(), MAP_TYPE).get("estimatedTokens"));
     }
 
     private Map<String, Object> usageMap(Map<String, UsageMetric> source) {
@@ -312,23 +356,25 @@ final class MetricsProjectionWriter {
         var total = tokenMetrics == null ? Map.<String, Object>of() : map(tokenMetrics.get("total"));
         builder.append("- Measured Runs: ").append(tokenMetrics == null ? 0 : tokenMetrics.get("measuredRunCount"))
                 .append(" / ").append(tokenMetrics == null ? 0 : tokenMetrics.get("runCount")).append("\n");
+        builder.append("- Estimated Runs: ").append(tokenMetrics == null ? 0 : tokenMetrics.get("estimatedRunCount")).append("\n");
         builder.append("- Input Tokens: ").append(longValue(total.get("inputTokens"))).append("\n");
         builder.append("- Output Tokens: ").append(longValue(total.get("outputTokens"))).append("\n");
         builder.append("- Cached Read Tokens: ").append(longValue(total.get("cachedReadTokens"))).append("\n");
         builder.append("- Cached Write Tokens: ").append(longValue(total.get("cachedWriteTokens"))).append("\n");
         builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n\n");
         builder.append("### Token Usage By Step\n\n");
-        builder.append("| Node | Agent | Status | Input | Output | Cached Read | Cached Write | Total |\n");
-        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        builder.append("| Node | Agent | Status | Source | Input | Output | Cached Read | Cached Write | Total |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
         var runs = tokenMetrics == null ? List.<Map<String, Object>>of() : mapList(tokenMetrics.get("runs"));
         if (runs.isEmpty()) {
-            builder.append("| N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 |\n");
+            builder.append("| N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 |\n");
         } else {
             for (var run : runs) {
                 var usage = map(run.get("usage"));
                 builder.append("| ").append(run.get("nodeId"))
                         .append(" | ").append(run.get("agent"))
                         .append(" | ").append(run.get("status"))
+                        .append(" | ").append(nonBlank(text(usage.get("source")), Boolean.TRUE.equals(run.get("measured")) ? "acpx_stream" : "unknown"))
                         .append(" | ").append(longValue(usage.get("inputTokens")))
                         .append(" | ").append(longValue(usage.get("outputTokens")))
                         .append(" | ").append(longValue(usage.get("cachedReadTokens")))

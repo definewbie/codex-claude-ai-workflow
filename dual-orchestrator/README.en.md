@@ -159,6 +159,25 @@ The Operator Console is for end users and reviewers. It answers “where is the
 task, why did it stop, and what should I do next,” and keeps human-gate
 evidence, token summaries, and recovery guidance on the same screen.
 
+The console uses a local multi-project registry as its entry index. When you
+enter a local Git repository root on the homepage, the server validates it and
+writes it to:
+
+```text
+~/.dual/operator-workspaces.json
+```
+
+After that, the homepage opens the last project by default and discovers that
+project's default worktree pool:
+
+```text
+<repo-parent>/<repo-name>-agent-runs/
+```
+
+This lets the UI show workstreams started by CLI or autorun flows. Each task
+still uses its own effective workdir and ledger as the status source of truth.
+The registry is only an entry index for projects and tasks, not workflow state.
+
 The old entry remains available as the management diagnostics page:
 
 ```text
@@ -169,6 +188,17 @@ Management Diagnostics is for dual users and developers who need ledger facts,
 raw node ids, RCA, CLI commands, and recovery evidence. Both pages consume the
 same ledger read model and subscribe to overview updates through SSE. They are
 local single-user tools, not hosted multi-user web products.
+
+Token usage has two sources: `acpx_stream` means measured usage from the acpx
+session stream; `artifact_estimate` means a fallback estimate from
+prompt/output/transcript metadata. Both are observation data only and do not
+participate in workflow routing.
+
+To plan local worktree cleanup without deleting anything:
+
+```bash
+./scripts/agent-runs-cleanup-plan.sh --repo /path/to/repo
+```
 
 ## Documentation
 

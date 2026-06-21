@@ -165,6 +165,34 @@ UI 需要保留线性生命周期进度条，因为它最容易理解；同时�
 
 ## 已暴露的易用性问题
 
+## Token / Cost 观测来源
+
+Token 和 cost 指标只属于观测层，不参与 workflow 路由，也不替代 artifact contract 或
+recovery decision。
+
+当前有两类来源：
+
+- `acpx_stream`：adapter 从 acpx session stream 中按当前 prompt 匹配到的真实 usage。
+- `artifact_estimate`：缺少真实 usage 或历史 run 没写入 usage 时，根据 prompt/output/transcript
+  metadata 估算的观察值。
+
+CLI（`runs`、`trace`）和 operator views 必须展示同一套 source label。无法区分实测与估算时，
+宁可隐藏或标注为 estimated，不要把估算值伪装成 provider billing truth。
+
+## Project / Task 入口 Registry
+
+Operator UI 需要看到 CLI 或 autorun 已经启动的任务，不能要求用户每次粘贴 effective workdir。
+这里的 source of truth 要拆开：
+
+- `~/.dual/operator-workspaces.json` 是本机入口索引，记录已知项目和最近 workstream workdir。
+- 每个 workstream ledger 仍然是 lifecycle status、gate、recovery、artifact、metrics 和 delivery
+  state 的权威来源。
+- 浏览器 localStorage 只允许记住上次选中的项目或任务，不能作为任务 registry。
+
+registry 从第一版就支持多项目：一个 project 表示一个本地 Git repo 加它默认的
+`<repo-name>-agent-runs` 池。选择项目后，UI 再读取该项目和 worktree 中的 ledger projection。
+registry 可以重建或清理，不改变 workflow 历史。
+
 一次私有生产型仓库 real-case run 暴露了一个问题：operator panel 仍会展示英文且过于笼统的 stopped/retry 文案，例如：
 
 ```text

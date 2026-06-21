@@ -88,22 +88,52 @@ public class WorkstreamQueryService {
 
     public Map<String, Object> list(Path workspaceRoot) throws IOException {
         var root = workspaceRoot.toAbsolutePath().normalize();
-        var workstreamsDir = root.resolve(".agent").resolve("workstreams");
         var items = new ArrayList<Map<String, Object>>();
-        if (Files.exists(workstreamsDir)) {
-            try (var stream = Files.list(workstreamsDir)) {
-                for (var dir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(Path::toString)).toList()) {
-                    var workstreamJson = dir.resolve("workstream.json");
-                    if (Files.exists(workstreamJson)) {
-                        items.add(workstreamSummary(root, dir, workstreamJson));
-                    }
-                }
-            }
+        collectWorkstreams(root, root, items);
+        for (var workspace : siblingAgentRunWorkspaces(root)) {
+            collectWorkstreams(root, workspace, items);
         }
+        items.sort(Comparator
+                .comparing((Map<String, Object> item) -> text(item.get("updatedAt"))).reversed()
+                .thenComparing(item -> text(item.get("workstreamId"))));
         var response = new LinkedHashMap<String, Object>();
         response.put("workdir", root.toString());
         response.put("workstreams", items);
         return response;
+    }
+
+    private void collectWorkstreams(Path requestedRoot, Path effectiveRoot, List<Map<String, Object>> items) throws IOException {
+        var workstreamsDir = effectiveRoot.resolve(".agent").resolve("workstreams");
+        if (!Files.exists(workstreamsDir)) {
+            return;
+        }
+        try (var stream = Files.list(workstreamsDir)) {
+            for (var dir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(Path::toString)).toList()) {
+                var workstreamJson = dir.resolve("workstream.json");
+                if (Files.exists(workstreamJson)) {
+                    items.add(workstreamSummary(requestedRoot, effectiveRoot, dir, workstreamJson));
+                }
+            }
+        }
+    }
+
+    private List<Path> siblingAgentRunWorkspaces(Path root) throws IOException {
+        var parent = root.getParent();
+        var name = root.getFileName() == null ? "" : root.getFileName().toString();
+        if (parent == null || name.isBlank()) {
+            return List.of();
+        }
+        var agentRunsDir = parent.resolve(name + "-agent-runs");
+        if (!Files.isDirectory(agentRunsDir)) {
+            return List.of();
+        }
+        try (var stream = Files.list(agentRunsDir)) {
+            return stream
+                    .filter(Files::isDirectory)
+                    .filter(path -> Files.isDirectory(path.resolve(".agent").resolve("workstreams")))
+                    .sorted(Comparator.comparing(Path::toString))
+                    .toList();
+        }
     }
 
     public Map<String, Object> timeline(Path workspaceRoot, String workstreamId) throws IOException {
@@ -276,14 +306,15 @@ public class WorkstreamQueryService {
         return recoveryAssessment(root, paths, workstreamId);
     }
 
-    private Map<String, Object> workstreamSummary(Path root, Path dir, Path workstreamJson) throws IOException {
+    private Map<String, Object> workstreamSummary(Path requestedRoot, Path effectiveRoot, Path dir, Path workstreamJson) throws IOException {
         var workstream = objectMapper.readValue(workstreamJson.toFile(), MAP_TYPE);
         var item = new LinkedHashMap<String, Object>();
         item.put("workstreamId", text(workstream.get("workstreamId")));
         item.put("title", text(workstream.get("title")));
         item.put("status", text(workstream.get("status")));
         item.put("updatedAt", text(workstream.get("updatedAt")));
-        item.put("ledger", root.relativize(dir).toString());
+        item.put("effectiveWorkdir", effectiveRoot.toString());
+        item.put("ledger", safeRelative(requestedRoot, dir));
 
         var currentJson = dir.resolve("workflow").resolve("current.json");
         if (Files.exists(currentJson)) {
@@ -890,6 +921,15 @@ public class WorkstreamQueryService {
 
     private static String text(Object value, String fallback) {
         return value == null ? fallback : String.valueOf(value);
+    }
+
+    private static String safeRelative(Path root, Path path) {
+        var normalizedRoot = root.toAbsolutePath().normalize();
+        var normalizedPath = path.toAbsolutePath().normalize();
+        if (normalizedPath.startsWith(normalizedRoot)) {
+            return normalizedRoot.relativize(normalizedPath).toString();
+        }
+        return normalizedPath.toString();
     }
 
     private static int sizeOf(Object value) {

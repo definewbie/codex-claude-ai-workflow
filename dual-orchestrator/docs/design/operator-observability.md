@@ -180,8 +180,11 @@ Metrics are currently lightweight:
 - longest node duration.
 
 Token and cost metrics are recorded when the acpx adapter can match the current
-prompt to a session stream usage event. They are best-effort observation data,
-not workflow routing facts or exact provider billing reconciliation.
+prompt to a session stream usage event. Those measured records use
+`source=acpx_stream`. When measured usage is unavailable, projections may show
+`source=artifact_estimate`, derived from prompt/output/transcript metadata.
+Estimated usage exists to explain relative cost and context growth for old or
+incomplete runs; it must not be presented as provider billing truth.
 
 The task view should show a lightweight token/cost card so the operator can see
 whether a task is becoming expensive or context-heavy. Management Diagnostics
@@ -190,6 +193,30 @@ cost, and source of the data.
 
 These metrics are for observation and tuning only. They do not participate in
 workflow routing and do not replace artifact contracts or recovery decisions.
+
+The same source labels should appear in CLI (`runs`, `trace`) and the operator
+views. If a projection cannot distinguish measured from estimated usage, it
+should hide the number or label it as estimated instead of silently mixing the
+two.
+
+## Project And Task Entry Registry
+
+The operator UI needs to find tasks that were started by CLI or autorun without
+asking the user to paste an effective workdir each time. The source of truth is
+split deliberately:
+
+- `~/.dual/operator-workspaces.json` is a local entry index for known projects
+  and recent workstream workdirs.
+- Each workstream ledger remains the source of truth for lifecycle status,
+  gates, recovery, artifacts, metrics, and delivery state.
+- Browser localStorage may remember the last selected project or task, but it
+  must not be the task registry.
+
+The registry is multi-project from the beginning: a project is one local Git
+repository plus its default `<repo-name>-agent-runs` pool. Selecting a project
+causes the UI to query the ledger projections for that project and its
+worktrees. The registry can be rebuilt or pruned without changing workflow
+history.
 
 ## Loop Semantics
 

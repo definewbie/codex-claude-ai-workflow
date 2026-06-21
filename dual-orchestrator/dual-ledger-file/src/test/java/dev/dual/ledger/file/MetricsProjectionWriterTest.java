@@ -51,6 +51,7 @@ class MetricsProjectionWriterTest {
         var tokenMetrics = map(metrics.get("tokenMetrics"));
         assertEquals(3, number(tokenMetrics.get("runCount")));
         assertEquals(2, number(tokenMetrics.get("measuredRunCount")));
+        assertEquals(0, number(tokenMetrics.get("estimatedRunCount")));
 
         var total = map(tokenMetrics.get("total"));
         assertEquals(180, number(total.get("inputTokens")));
@@ -66,8 +67,9 @@ class MetricsProjectionWriterTest {
 
         var markdown = Files.readString(paths.workstreamMetricsMarkdown());
         assertTrue(markdown.contains("## Token Metrics"));
-        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | 100 | 20 | 10 | 0 | 130 |"));
-        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | 0 | 0 | 0 | 0 | 0 |"));
+        assertTrue(markdown.contains("- Estimated Runs: 0"));
+        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | acpx_stream | 100 | 20 | 10 | 0 | 130 |"));
+        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | unknown | 0 | 0 | 0 | 0 | 0 |"));
     }
 
     private NodeInstanceDocument node(String instanceId, String definitionId) {

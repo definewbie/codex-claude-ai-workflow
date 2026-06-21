@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dual 操作台</title>
-  <link rel="stylesheet" href="/console.css?v=operator-console-20260619">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/console.css?v=operator-console-20260621-flow-fit">
 </head>
 <body>
   <div class="app">
@@ -13,7 +14,7 @@
         <div class="logo">D</div>
         <div>
           <div class="brand-name">Dual 操作台</div>
-          <div class="brand-sub">任务执行 · Loop 收敛 · RCA 诊断</div>
+          <div class="brand-sub">任务执行 · 双 Agent 协作 · 人审关卡 · Loop 收敛</div>
         </div>
       </div>
       <div class="top-right">
@@ -27,12 +28,41 @@
 
     <div class="cols">
       <aside class="sidebar">
+        <section class="workspace-card" aria-label="本地仓库">
+          <div class="workspace-title">
+            <span>本地仓库</span>
+            <span id="workspaceState" class="small-pill muted">未设置</span>
+          </div>
+          <label class="workspace-field" for="projectSelect">
+            <span>最近项目</span>
+            <select id="projectSelect">
+              <option value="">暂无已注册项目</option>
+            </select>
+          </label>
+          <label class="workspace-field" for="workspacePath">
+            <span>Git 仓库根目录</span>
+            <input id="workspacePath" placeholder="/Users/me/work/my-project">
+          </label>
+          <div class="workspace-actions">
+            <button id="openWorkspaceBtn" class="btn primary sm" type="button">打开任务池</button>
+            <button id="refreshWorkspaceBtn" class="btn ghost sm" type="button">刷新</button>
+          </div>
+          <p id="workspaceHint" class="workspace-hint">输入本地 repo 根目录后，会自动发现旁边的 <code>&lt;repo-name&gt;-agent-runs</code>。</p>
+        </section>
+
         <div class="side-head">
           <span>任务</span>
           <span id="taskCount" class="count">0</span>
         </div>
+        <div class="task-tools">
+          <button id="newTaskBtn" class="btn primary sm new-task" type="button">＋ 新建任务</button>
+        </div>
         <div id="taskList" class="task-list"></div>
-        <button id="newTaskBtn" class="btn subtle sm new-task" type="button">＋ 新建任务</button>
+        <div class="task-pager">
+          <button id="prevTaskPage" class="btn ghost sm" type="button">上一页</button>
+          <span id="taskPageInfo">1 / 1 · 每页 10 个</span>
+          <button id="nextTaskPage" class="btn ghost sm" type="button">下一页</button>
+        </div>
       </aside>
 
       <main class="main">
@@ -46,35 +76,43 @@
             <span id="taskPill" class="pill muted">未选择</span>
           </div>
 
+          <section class="decision">
+            <section id="primaryCard" class="primary-card">
+              <span id="primaryEyebrow" class="eb">等待选择</span>
+              <h2 id="primaryTitle">选择任务后查看当前状态</h2>
+              <p id="primaryWhy" class="why">任务视图只展示完成判断所需的信息；完整 ledger 和排障入口在管理诊断。</p>
+              <div class="next">
+                <span class="k">建议下一步</span>
+                <span id="primaryNext">选择左侧任务。</span>
+              </div>
+              <div id="revisionBox" class="revision-box" hidden>
+                <label for="revisionFeedback">打回说明</label>
+                <textarea id="revisionFeedback" rows="4" placeholder="说明需要 Claude 重新处理的问题，例如：边界不清、证据不足、实现超范围。"></textarea>
+              </div>
+              <div id="primaryActions" class="primary-actions"></div>
+            </section>
+            <section id="tokenSummary" class="token-summary"></section>
+          </section>
+
           <section class="lifecycle">
             <div class="lc-head">
-              <h2>生命周期进度</h2>
+              <h2>流水线概览</h2>
               <span id="loopBadge" class="small-pill muted">Loop 未知</span>
             </div>
+            <div class="cap">绿色表示该阶段已有完成证据，不代表流程按直线只走过一次。点击阶段后，下方协作流只展示该阶段内的轮次、Agent 审查和人审关卡。</div>
             <div id="stages" class="stages"></div>
+            <div id="stageDetail" class="stage-detail"></div>
           </section>
 
-          <section id="primaryCard" class="primary-card">
-            <span id="primaryEyebrow" class="eb">等待选择</span>
-            <h2 id="primaryTitle">选择任务后查看当前状态</h2>
-            <p id="primaryWhy" class="why">任务视图只展示完成判断所需的信息；完整 ledger 和排障入口在管理诊断。</p>
-            <div class="next">
-              <span class="k">建议下一步</span>
-              <span id="primaryNext">选择左侧任务。</span>
-            </div>
-            <div id="revisionBox" class="revision-box" hidden>
-              <label for="revisionFeedback">打回说明</label>
-              <textarea id="revisionFeedback" rows="4" placeholder="说明需要 Claude 重新处理的问题，例如：边界不清、证据不足、实现超范围。"></textarea>
-            </div>
-            <div id="primaryActions" class="primary-actions"></div>
-          </section>
+          <section id="collaborationFlow" class="flow-shell"></section>
 
-          <section id="evidence" class="grid2"></section>
-
-          <section class="card">
-            <h3>Loop / 修复历史</h3>
-            <div class="cap">说明为什么流程会回到前面阶段；语义修复、运行时恢复和人工打回分开展示。</div>
-            <div id="loopHistory" class="loop-line"></div>
+          <section class="loop-grid">
+            <div id="evidence"></div>
+            <section class="card">
+              <h3>Loop / 修复历史</h3>
+              <div class="cap">说明为什么流程会回到前面阶段；语义修复、运行时恢复和人工打回分开展示。</div>
+              <div id="loopHistory" class="loop-line"></div>
+            </section>
           </section>
         </section>
 
@@ -221,6 +259,6 @@
     </div>
   </div>
 
-  <script src="/console.js?v=operator-console-20260619"></script>
+<script src="/console.js?v=operator-console-20260621-flow-fit"></script>
 </body>
 </html>

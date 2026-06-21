@@ -9,6 +9,7 @@ record AcpxUsage(
         long cachedWriteTokens,
         long totalTokens,
         BigDecimal costAmount,
-        String costCurrency
+        String costCurrency,
+        String source
 ) {
 }

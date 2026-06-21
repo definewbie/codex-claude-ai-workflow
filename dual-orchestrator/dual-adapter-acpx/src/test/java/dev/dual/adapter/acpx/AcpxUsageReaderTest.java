@@ -40,5 +40,6 @@ class AcpxUsageReaderTest {
         assertEquals(1107, usage.get().totalTokens());
         assertEquals("0.25", usage.get().costAmount().toPlainString());
         assertEquals("USD", usage.get().costCurrency());
+        assertEquals("acpx_stream", usage.get().source());
     }
 }

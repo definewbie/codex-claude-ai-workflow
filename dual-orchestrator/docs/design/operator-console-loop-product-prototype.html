@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dual 操作台 · Loop 产品语义原型</title>
+<style>
+:root{
+  --bg:#f4f6fa;
+  --panel:#ffffff;
+  --panel2:#f9fbff;
+  --ink:#172033;
+  --text:#556174;
+  --muted:#8a95a7;
+  --line:#dde5f0;
+  --line2:#c8d3e2;
+  --blue:#2563eb;
+  --blue2:#eaf2ff;
+  --purple:#7c3aed;
+  --purple2:#f3edff;
+  --amber:#d97706;
+  --amber2:#fff3df;
+  --green:#16a34a;
+  --green2:#e7f7ed;
+  --red:#dc2626;
+  --red2:#fff0ef;
+  --shadow:0 1px 2px rgba(15,23,42,.05),0 18px 45px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-width:1280px;
+  background:
+    radial-gradient(circle at 12% -10%,rgba(37,99,235,.11),transparent 28%),
+    radial-gradient(circle at 90% 0,rgba(124,58,237,.08),transparent 24%),
+    var(--bg);
+  color:var(--ink);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{width:100%;min-height:100vh;padding:20px 22px 48px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;color:#fff;font-weight:900;font-size:19px;box-shadow:0 10px 24px rgba(67,84,215,.28)}
+.brand h1{margin:0;font-size:21px;line-height:1.1}
+.brand p{margin:4px 0 0;color:var(--text);font-size:13px}
+.top-actions{display:flex;gap:10px;align-items:center}
+.sync{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;color:var(--text);font-size:12px;font-weight:760;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px;box-shadow:0 0 0 3px var(--green2)}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px}
+.seg button{border:0;background:transparent;color:var(--text);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:780}
+.seg button.active{background:var(--blue);color:#fff}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;align-items:start}
+.side{position:sticky;top:20px;height:calc(100vh - 40px);display:flex;flex-direction:column;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:15px}
+.side h2{margin:0 0 10px;font-size:15px}
+.repo{border:1px solid var(--line);background:var(--panel2);border-radius:15px;padding:13px;margin-bottom:14px}
+.repo label{display:block;color:var(--text);font-size:12px;font-weight:800;margin:10px 0 6px}
+.repo input,.repo select{width:100%;height:42px;border:1px solid var(--line2);border-radius:11px;padding:0 11px;background:#fff;color:var(--ink)}
+.repo .row{display:flex;gap:8px;margin-top:11px}
+.btn{border:1px solid var(--line2);background:#fff;border-radius:10px;min-height:38px;padding:0 13px;font-weight:800;color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.soft{background:var(--blue2);border-color:#c6dcff;color:var(--blue)}
+.task-tools{display:flex;gap:8px;margin-bottom:10px}.task-tools .btn{flex:1}
+.task-list{display:flex;flex-direction:column;gap:8px;overflow:auto;padding-right:2px;min-height:0}
+.task{width:100%;border:1px solid transparent;border-radius:14px;background:transparent;padding:11px;text-align:left}
+.task.active{border-color:#bcd4ff;background:var(--blue2)}
+.task strong{display:block;font-size:13.5px;line-height:1.35}
+.task span{display:block;margin-top:5px;color:var(--muted);font-size:12px}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #edf1f7;margin-top:12px;padding-top:12px;color:var(--muted);font-size:12px}.pager .btn{min-height:32px;padding:0 10px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+.dot.ok{background:var(--green)}.dot.warn{background:var(--amber)}.dot.bad{background:var(--red)}
+.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.task-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.task-head h2{font-size:24px;line-height:1.25;margin:5px 0}
+.sub{font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:850}
+.pill.ok{background:var(--green2);color:#0d7c35}.pill.warn{background:var(--amber2);color:#985300}.pill.bad{background:var(--red2);color:#b42318}
+.card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:17px}
+.card h3{margin:0 0 5px;font-size:16px}
+.caption{color:var(--text);font-size:12.5px}
+.decision{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px}
+.decision .primary-card{background:linear-gradient(180deg,#fffaf0,#fff);border-color:#f0d9aa}
+.primary-card h3{font-size:19px}
+.primary-card p{max-width:78ch;color:var(--text);margin:9px 0 14px}
+.next{border:1px solid #dce8ff;background:#f4f8ff;border-radius:12px;padding:10px 12px;color:var(--text);margin-bottom:12px}
+.next b{color:var(--blue);margin-right:8px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.metric{border:1px solid var(--line);background:var(--panel2);border-radius:13px;padding:10px}
+.metric .k{font-size:11px;color:var(--muted);font-weight:850}
+.metric .v{font-size:20px;font-weight:900;margin-top:3px}
+.meter{height:8px;border-radius:99px;background:#eef2f7;overflow:hidden;margin-top:12px}.meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--amber));width:86%}
+.stage-card{padding-bottom:22px}
+.stage-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:12px}
+.repair-badge{background:var(--amber2);color:#985300;border-radius:999px;padding:7px 12px;font-weight:850;font-size:12px}
+.stages{display:grid;grid-template-columns:repeat(8,1fr);gap:0;position:relative;margin-top:18px}
+.stages::before{content:"";position:absolute;left:5.5%;right:5.5%;top:21px;height:3px;background:#c9ead4;z-index:0}
+.stage{position:relative;z-index:1;border:0;background:transparent;text-align:center;padding:0 6px;color:var(--text)}
+.stage .mark{width:42px;height:42px;margin:0 auto 9px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-weight:900;box-shadow:0 0 0 6px #fff}
+.stage.active .mark{box-shadow:0 0 0 6px #dfeaff;background:var(--blue)}
+.stage strong{display:block;font-size:13px;color:var(--ink)}
+.stage small{display:block;color:var(--muted);font-size:11px;margin-top:4px;min-height:34px}
+.stage:hover strong{color:var(--blue)}
+.stage-note{margin-top:13px;color:var(--muted);font-size:12px}
+.stage-detail{display:grid;grid-template-columns:160px minmax(0,1fr) 240px;gap:12px;align-items:start;border:1px solid #dce8ff;background:#f4f8ff;border-radius:14px;margin-top:14px;padding:12px}
+.stage-detail b{display:block;color:var(--blue);font-size:12px;margin-bottom:3px}.stage-detail span{display:block;color:var(--ink);font-size:13px}.stage-detail small{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+.flow{padding:0;overflow:hidden}
+.flow-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:17px 17px 0}
+.flow-header h3{margin:0;font-size:17px}
+.round-tabs{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.round-tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;font-weight:850;font-size:12px;color:var(--text)}
+.round-tabs button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.round-tabs button.reject{background:var(--red2);border-color:#ffc9c5;color:var(--red)}
+.flow-body{display:block;padding:16px 17px 17px}
+.canvas-wrap{overflow-x:auto;padding-bottom:3px}
+.canvas{position:relative;width:1040px;max-width:100%;height:430px;border:1px solid var(--line);border-radius:16px;background-image:radial-gradient(circle,#dce3ee 1.25px,transparent 1.4px);background-size:24px 24px;overflow:hidden}
+.edge{fill:none;stroke:#bfc9d9;stroke-width:2.6}.edge.ok{stroke:#9fe0b6}.edge.active{stroke:var(--blue);stroke-width:3.3;stroke-dasharray:8 8;animation:flow .8s linear infinite}.edge.reject{stroke:#ef8f8f;stroke-width:3}
+@keyframes flow{to{stroke-dashoffset:-32}}
+.edge-label{font:850 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:var(--text)}.edge-label.bad{fill:var(--red)}.edge-label.ok{fill:var(--green)}
+.flow-node{position:absolute;width:180px;min-height:118px;border:1.5px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.05),0 10px 24px rgba(15,23,42,.07);padding:12px;text-align:left;transition:.18s}
+.flow-node:hover,.flow-node.selected{transform:translateY(-3px);box-shadow:0 18px 32px rgba(37,99,235,.16)}
+.flow-node.claude{border-color:#bcd4ff}.flow-node.codex{border-color:#dac9ff}.flow-node.human{border-color:#c4e8cf}.flow-node.router{border-color:#f2d19f}
+.flow-node header{display:flex;gap:9px;align-items:center;margin-bottom:8px}
+.avatar{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:900}
+.avatar.claude{background:linear-gradient(135deg,var(--blue),#6d8cff)}.avatar.codex{background:linear-gradient(135deg,var(--purple),#a78bfa)}.avatar.human{background:linear-gradient(135deg,var(--green),#66c684)}.avatar.router{background:linear-gradient(135deg,var(--amber),#f2a93b)}
+.flow-node b{display:block}.flow-node small{display:block;color:var(--muted);font-size:11px}.flow-node p{margin:0;color:var(--text);font-size:12px;line-height:1.42}
+.chip{display:inline-flex;align-self:flex-start;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:850;margin-top:8px;background:var(--blue2);color:var(--blue)}
+.chip.codex{background:var(--purple2);color:var(--purple)}.chip.router{background:var(--amber2);color:#985300}.chip.human{background:var(--green2);color:#0d7c35}.chip.bad{background:var(--red2);color:var(--red)}.chip.ok{background:var(--green2);color:var(--green)}
+.start{position:absolute;left:28px;top:188px;width:64px;text-align:center}.start .circle{width:52px;height:52px;border-radius:50%;border:2px solid var(--line2);background:#fff;display:grid;place-items:center;font-weight:900;color:var(--text);box-shadow:var(--shadow);margin:auto}.start span{display:block;margin-top:7px;color:var(--muted);font-weight:800}
+.gateway{position:absolute;left:744px;top:207px;width:64px;height:64px;transform:rotate(45deg);background:#fff;border:2px solid #d5deeb;box-shadow:var(--shadow);display:grid;place-items:center}.gateway span{transform:rotate(-45deg);font-size:12px;font-weight:900;color:var(--text)}
+.flag{position:absolute;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:900;box-shadow:var(--shadow)}.flag.bad{color:var(--red)}.flag.ok{color:var(--green)}
+.detail{border:1px solid var(--line);border-radius:15px;background:var(--panel2);padding:14px;min-height:0;margin-top:14px}
+.detail h4{margin:0 0 5px;font-size:15px}.detail p{margin:8px 0;color:var(--text)}
+.detail-list{display:grid;gap:9px;margin-top:12px}
+.detail-row{border-top:1px solid #e9eef6;padding-top:9px}.detail-row:first-child{border-top:0;padding-top:0}
+.detail-row b{display:block;font-size:12px;color:var(--text);margin-bottom:3px}.detail-row span{display:block;color:var(--ink);font-size:13px}
+.loop-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.loop-list{display:grid;gap:9px}.loop-item{display:grid;grid-template-columns:72px 1fr auto;gap:10px;border:1px solid var(--line);background:var(--panel2);border-radius:13px;padding:10px}.loop-item strong{font-size:13px}.loop-item span{display:block;color:var(--muted);font-size:12px}.tag{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:850;color:var(--text);align-self:start}.tag.bad{background:var(--red2);border-color:#ffc9c5;color:var(--red)}.tag.ok{background:var(--green2);border-color:#bce8ca;color:var(--green)}
+.gate-grid{display:grid;grid-template-columns:130px 1fr;gap:10px;border-top:1px solid #e9eef6;padding-top:10px}.gate-grid:first-of-type{border-top:0;padding-top:0}.gate-grid b{color:var(--text);font-size:12px}.gate-grid span{color:var(--ink)}
+.diagnostic{border-top:1px solid #edf1f7;margin-top:12px;padding-top:12px;color:var(--text);font-size:12px}.diagnostic b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">D</div>
+      <div>
+        <h1>Dual 操作台</h1>
+        <p>任务执行 · 双 Agent 协作 · 人审关卡 · Loop 收敛</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span class="sync">实时同步</span>
+      <div class="seg"><button class="active">任务视图</button><button>管理诊断</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="side">
+      <div class="repo">
+        <h2>本地仓库</h2>
+        <label>最近任务池</label>
+        <select>
+          <option>cancer-clinic · 66 个任务</option>
+        </select>
+        <label>Git 仓库根目录</label>
+        <input value="/Users/kriswang/work/projects/ai/cancer-clinic">
+        <div class="row"><button class="btn primary">打开任务池</button><button class="btn">刷新</button></div>
+      </div>
+      <div class="task-tools">
+        <button class="btn primary">新建任务</button>
+        <button class="btn soft">导入任务</button>
+      </div>
+      <div class="task-list">
+        <button class="task active"><strong># 复诊准备清单 + 缺失资料提醒</strong><span><i class="dot ok"></i>已完成 · 5 轮收敛</span></button>
+        <button class="task"><strong># 治疗事件链 B2 业务逻辑</strong><span><i class="dot warn"></i>等待人审 · 第 2 轮</span></button>
+        <button class="task"><strong># 上传入口历史资料补全</strong><span><i class="dot bad"></i>需要恢复 · acpx reconnect</span></button>
+        <button class="task"><strong># 治疗安排详情添加检查项</strong><span><i class="dot ok"></i>已完成 · 3 轮收敛</span></button>
+        <button class="task"><strong># 复查事件链最小领域模型</strong><span><i class="dot warn"></i>等待人审 · 第 1 轮</span></button>
+        <button class="task"><strong># 历史资料补传入口</strong><span><i class="dot bad"></i>需要恢复 · 连接中断</span></button>
+        <button class="task"><strong># 治疗记录列表状态补齐</strong><span><i class="dot ok"></i>已完成 · 2 轮收敛</span></button>
+        <button class="task"><strong># follow-up summary 卡片</strong><span><i class="dot ok"></i>已完成 · 1 轮</span></button>
+      </div>
+      <div class="pager">
+        <button class="btn">上一页</button>
+        <span>1 / 7 · 每页 10 个</span>
+        <button class="btn">下一页</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="task-head">
+        <div>
+          <div class="eyebrow">当前任务</div>
+          <h2>复诊准备清单 + 缺失资料提醒最小闭环</h2>
+          <div class="sub">ws-20260619T122430Z-Y7ZD · cancer-clinic · 06/19 20:58</div>
+        </div>
+        <span class="pill ok">已完成</span>
+      </section>
+
+      <section class="decision">
+        <div class="card primary-card">
+          <h3>当前结论：Codex 验收通过，等待交付处理</h3>
+          <p>这次任务不是一条直线跑完的。Claude Code 负责实现和补证据，Codex 负责审查和验收，人在人审关卡拍板；Orchestrator 只负责装配证据包、记录事实、按规则路由。</p>
+          <div class="next"><b>建议下一步</b><span>查看交付差异，确认是否 merge 到原仓库。</span></div>
+          <div class="actions"><button class="btn primary">查看交付差异</button><button class="btn">导出报告</button><button class="btn">打开管理诊断</button></div>
+        </div>
+        <div class="card">
+          <h3>Token / 预算评估</h3>
+          <div class="caption">只把 token 当作运行风险信号；没有真实价格模型时，不展示确定成本。</div>
+          <div class="budget-grid">
+            <div class="metric"><div class="k">总 token</div><div class="v">215.6k</div></div>
+            <div class="metric"><div class="k">预算占用</div><div class="v">86%</div></div>
+            <div class="metric"><div class="k">实测步骤</div><div class="v">0</div></div>
+            <div class="metric"><div class="k">估算步骤</div><div class="v">23</div></div>
+          </div>
+          <div class="meter"><i></i></div>
+        </div>
+      </section>
+
+      <section class="card stage-card">
+        <div class="stage-head">
+          <div>
+            <h3>流水线概览</h3>
+            <div class="caption">绿色表示这个阶段已经产生过有效证据，不表示流程只跑了一遍。点击阶段查看该阶段的轮次历史。</div>
+          </div>
+          <span class="repair-badge">语义修复轮 4 次</span>
+        </div>
+        <div class="stages" id="stages"></div>
+        <div class="stage-note" id="stageNote">当前查看：验收阶段。该阶段经历过拒收和补证据后的通过。</div>
+        <div class="stage-detail" id="stageDetail"></div>
+      </section>
+
+      <section class="flow">
+        <div class="flow-header">
+          <div>
+            <h3 id="flowTitle">双 Agent 协作流 · 验收阶段</h3>
+            <div class="caption">Claude Code 产出，Codex 审查，人审关卡拍板；Orchestrator 是证据包和规则路由轨道，不是第三个创作 agent。</div>
+          </div>
+          <div class="round-tabs" id="roundTabs"></div>
+        </div>
+        <div class="flow-body">
+          <div class="canvas-wrap">
+            <div class="canvas">
+              <svg width="1040" height="430" viewBox="0 0 1040 430" style="position:absolute;inset:0">
+                <defs>
+                  <marker id="arrow" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#bfc9d9"/></marker>
+                  <marker id="arrowActive" markerWidth="10" markerHeight="10" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563eb"/></marker>
+                </defs>
+                <path class="edge ok" d="M92,215 L142,215" marker-end="url(#arrow)"/>
+                <path class="edge ok" d="M322,215 L372,215" marker-end="url(#arrow)"/>
+                <path class="edge ok" d="M552,215 L602,215" marker-end="url(#arrow)"/>
+                <path class="edge ok" d="M680,215 L744,215" marker-end="url(#arrow)"/>
+                <path id="passEdge" class="edge ok" d="M808,215 L842,215" marker-end="url(#arrow)"/>
+                <path id="deliverEdge" class="edge ok" d="M1022,215 L1028,215" marker-end="url(#arrow)"/>
+                <path id="repairEdge" class="edge reject" d="M776,183 C760,72 405,70 238,150" marker-end="url(#arrowActive)"/>
+                <text x="816" y="198" class="edge-label ok">通过</text>
+                <text x="452" y="68" class="edge-label bad">打回修复</text>
+              </svg>
+              <div class="start"><div class="circle">验</div><span>阶段</span></div>
+              <button class="flow-node claude selected" data-actor="claude" style="left:142px;top:154px">
+                <header><div class="avatar claude">C</div><div><b>Claude Code</b><small>产出 / 修复</small></div></header>
+                <p id="claudeText"></p><span class="chip" id="claudeChip"></span>
+              </button>
+              <button class="flow-node router" data-actor="router" style="left:372px;top:154px">
+                <header><div class="avatar router">R</div><div><b>证据包 / 规则路由</b><small>Orchestrator 轨道</small></div></header>
+                <p id="routerText"></p><span class="chip router" id="routerChip"></span>
+              </button>
+              <button class="flow-node codex" data-actor="codex" style="left:602px;top:154px">
+                <header><div class="avatar codex">X</div><div><b>Codex</b><small>审查 / 验收</small></div></header>
+                <p id="codexText"></p><span class="chip codex" id="codexChip"></span>
+              </button>
+              <div class="gateway"><span>通过?</span></div>
+              <button class="flow-node human" data-actor="human" style="left:842px;top:154px">
+                <header><div class="avatar human">H</div><div><b>Human Gate</b><small>人工拍板</small></div></header>
+                <p id="humanText"></p><span class="chip human" id="humanChip"></span>
+              </button>
+              <div class="flag bad" id="roundFlag" style="left:420px;top:42px">第 4 轮 · REJECT</div>
+            </div>
+          </div>
+          <aside class="detail" id="detail"></aside>
+        </div>
+      </section>
+
+      <section class="loop-grid">
+        <div class="card">
+          <h3>Gate Evidence</h3>
+          <div class="caption">当前或最终决策证据放在这里；历史证据通过上面的轮次查看。</div>
+          <div class="gate-grid"><b>最终验收</b><span>ACCEPT_WITH_NOTES</span></div>
+          <div class="gate-grid"><b>实现证据</b><span>业务路径、构建结果、自测说明已补齐。</span></div>
+          <div class="gate-grid"><b>人工动作</b><span>最终关卡已确认，进入交付查看。</span></div>
+        </div>
+        <div class="card">
+          <h3>Loop / 修复历史</h3>
+          <div class="caption">语义修复轮和运行时 retry 分开表达。这里显示的是业务语义上的回环。</div>
+          <div class="loop-list" id="loopList"></div>
+          <div class="diagnostic"><b>需要排障？</b> 进入管理诊断页查看 raw ledger、execution、stderr 和恢复命令。</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const stages=[
+  {id:"intake",name:"需求",meta:"Claude 2 · Codex 2 · 人审 1",round:1,summary:"需求阶段确认本批只做复诊准备清单和缺失资料提醒，不扩展复查事件链。",evidence:"需求澄清、产品审查、人工确认"},
+  {id:"contract",name:"契约",meta:"总控 2 · 人审 2",round:1,summary:"契约阶段把范围、验收标准和不做项固化为 Task Contract。",evidence:"task-contract.json、human requirement review"},
+  {id:"design",name:"设计",meta:"Claude 3 · Codex 3 · 人审 2",round:2,summary:"设计阶段经历多轮补充，Codex 要求补清边界和验收标准。",evidence:"design handoff、arch review、design approval"},
+  {id:"plan",name:"计划",meta:"Claude 3 · Codex 3 · 人审 2",round:3,summary:"计划阶段把实现拆成可验证步骤，并补充失败路径和回归检查。",evidence:"implementation plan、plan review"},
+  {id:"implement",name:"实现",meta:"Claude 2 · 总控 4",round:4,summary:"实现阶段由 Claude Code 修改代码，Orchestrator 只记录 diff 和 artifact。",evidence:"git diff、artifact contract、agent execution"},
+  {id:"selftest",name:"自测",meta:"Claude 2",round:4,summary:"自测阶段由 Claude Code 说明构建、自测方法和业务路径覆盖。",evidence:"self-test report、build output"},
+  {id:"acceptance",name:"验收",meta:"Codex 2 · 总控 7 · 人审 1",round:5,summary:"验收阶段第 4 轮拒收，第 5 轮补证据后 ACCEPT_WITH_NOTES。",evidence:"codex final acceptance、failure classification、human acceptance"},
+  {id:"delivery",name:"交付",meta:"总控 1 · 人审 1",round:5,summary:"交付阶段生成可查看差异和报告，等待用户显式合并。",evidence:"delivery diff、final report、merge readiness"}
+];
+const rounds=[
+  {
+    id:1,label:"NEEDS_REVISION",type:"revise",title:"需求边界不清",
+    claude:"给出初版验收说明，但范围边界仍偏宽。",
+    router:"装配需求、已有文档和产品审查证据。",
+    codex:"要求收窄本批目标，避免扩展到复查事件链。",
+    human:"确认按最小闭环推进，不扩大需求。"
+  },
+  {
+    id:2,label:"NEEDS_REVISION",type:"revise",title:"设计证据不足",
+    claude:"补充页面入口、状态保护和不做项。",
+    router:"把 contract、diff 范围和设计说明打包给 Codex。",
+    codex:"方向正确，但要求补齐验收标准和边界条件。",
+    human:"要求继续补设计证据，不进入实现。"
+  },
+  {
+    id:3,label:"NEEDS_REVISION",type:"revise",title:"计划需要拆分",
+    claude:"拆分实现步骤和自测方式。",
+    router:"按计划审查 profile 重新生成 context package。",
+    codex:"计划可行，但缺少失败路径和回归检查。",
+    human:"同意拆小，要求补充自测报告结构。"
+  },
+  {
+    id:4,label:"REJECT",type:"reject",title:"验收拒收",
+    claude:"实现已完成，但证据没有覆盖关键业务路径。",
+    router:"采集 artifact contract、diff 和 final summary，路由到验收。",
+    codex:"拒收：缺少业务逻辑覆盖和补证据说明。",
+    human:"不合并，要求 Claude 补验收证据。"
+  },
+  {
+    id:5,label:"ACCEPT_WITH_NOTES",type:"pass",title:"补证据后通过",
+    claude:"补齐验收证据，说明构建、自测和业务路径。",
+    router:"采集 diff、artifact contract、self-test 和 final summary。",
+    codex:"可以交付，后续可继续降低页面分支复杂度。",
+    human:"确认进入交付查看，不再继续修复。"
+  }
+];
+let selectedStage="acceptance";
+let selectedRound=5;
+let selectedActor="claude";
+
+const stageRoot=document.getElementById("stages");
+const stageDetail=document.getElementById("stageDetail");
+const tabs=document.getElementById("roundTabs");
+const detail=document.getElementById("detail");
+const loopList=document.getElementById("loopList");
+const actorLabels={claude:"Claude Code",router:"证据包 / 规则路由",codex:"Codex",human:"Human Gate"};
+const actorRoles={claude:"产出/修复者",router:"平台轨道：装配证据并按规则路由",codex:"审查/验收者",human:"人工拍板者"};
+
+function renderStages(){
+  stageRoot.innerHTML=stages.map(({id,name,meta})=>`
+    <button class="stage ${id===selectedStage?"active":""}" data-stage="${id}">
+      <span class="mark">✓</span>
+      <strong>${name}</strong>
+      <small>${meta}</small>
+    </button>
+  `).join("");
+  stageRoot.querySelectorAll("button").forEach(btn=>{
+    btn.onclick=()=>{
+      selectedStage=btn.dataset.stage;
+      const stage=currentStage();
+      selectedRound=stage.round;
+      selectedActor=defaultActorForStage(stage.id);
+      document.getElementById("stageNote").textContent=`当前查看：${stage.name}阶段。下方协作流显示这个阶段最有代表性的轮次和节点。`;
+      renderStages();
+      renderFlow();
+    };
+  });
+  renderStageDetail();
+}
+
+function renderTabs(){
+  tabs.innerHTML=rounds.map(r=>`
+    <button class="${r.id===selectedRound?"active":""} ${r.type==="reject"?"reject":""}" data-round="${r.id}">
+      第 ${r.id} 轮 · ${r.label}
+    </button>
+  `).join("");
+  tabs.querySelectorAll("button").forEach(btn=>{
+    btn.onclick=()=>{
+      selectedRound=Number(btn.dataset.round);
+      selectedActor="claude";
+      renderFlow();
+    };
+  });
+}
+
+function renderFlow(){
+  const r=rounds.find(item=>item.id===selectedRound);
+  document.getElementById("flowTitle").textContent=`双 Agent 协作流 · ${stageName(selectedStage)}阶段`;
+  document.getElementById("claudeText").textContent=r.claude;
+  document.getElementById("routerText").textContent=r.router;
+  document.getElementById("codexText").textContent=r.codex;
+  document.getElementById("humanText").textContent=r.human;
+  document.getElementById("claudeChip").textContent=r.type==="pass"?"evidence repaired":"draft / repair";
+  document.getElementById("routerChip").textContent=r.type==="pass"?"terminal evidence":"context package";
+  document.getElementById("codexChip").textContent=r.label;
+  document.getElementById("codexChip").className=`chip codex ${r.type==="reject"?"bad":r.type==="pass"?"ok":""}`;
+  document.getElementById("humanChip").textContent=r.type==="pass"?"确认交付":"要求继续修复";
+  document.getElementById("roundFlag").textContent=`第 ${r.id} 轮 · ${r.label}`;
+  document.getElementById("roundFlag").className=`flag ${r.type==="pass"?"ok":"bad"}`;
+  document.getElementById("repairEdge").style.opacity=r.type==="pass"?.24:1;
+  document.querySelectorAll(".flow-node").forEach(n=>n.classList.toggle("selected",n.dataset.actor===selectedActor));
+  renderStages();
+  renderStageDetail();
+  renderTabs();
+  renderDetail(r);
+}
+
+function renderStageDetail(){
+  const stage=currentStage();
+  stageDetail.innerHTML=`
+    <div><b>当前阶段</b><span>${stage.name}</span></div>
+    <div><b>阶段证据</b><span>${stage.evidence}</span><small>${stage.summary}</small></div>
+    <div><b>当前查看对象</b><span>${actorLabels[selectedActor]}</span><small>第 ${selectedRound} 轮 · 点击上方阶段或流程节点会同步更新这里。</small></div>
+  `;
+}
+
+function renderDetail(r){
+  const value=r[selectedActor];
+  const consequence=selectedActor==="router"
+    ? "只记录事实并路由，不替代 Codex 或人的判断。"
+    : selectedActor==="human"
+      ? "人审关卡决定是否继续、打回或进入交付。"
+      : selectedActor==="codex"
+        ? "Codex 的结构化结论会进入 artifact contract，再由规则路由消费。"
+        : "Claude Code 的输出必须形成可审查证据，不能只写自然语言总结。";
+  detail.innerHTML=`
+    <h4>${actorLabels[selectedActor]}</h4>
+    <p>${actorRoles[selectedActor]}</p>
+    <div class="detail-list">
+      <div class="detail-row"><b>本轮发生了什么</b><span>${value}</span></div>
+      <div class="detail-row"><b>本轮结论</b><span>${r.title} · ${r.label}</span></div>
+      <div class="detail-row"><b>边界说明</b><span>${consequence}</span></div>
+      <div class="detail-row"><b>为什么进入下一步</b><span>${r.type==="pass"?"验收已通过，进入交付查看。":"审查或人审要求继续修复，回到前序产出节点。"}</span></div>
+    </div>
+  `;
+}
+
+function renderLoopList(){
+  loopList.innerHTML=rounds.map(r=>`
+    <div class="loop-item">
+      <strong>第 ${r.id} 轮</strong>
+      <div><strong>${r.title}</strong><span>${r.codex}</span></div>
+      <span class="tag ${r.type==="reject"?"bad":r.type==="pass"?"ok":""}">${r.label}</span>
+    </div>
+  `).join("");
+}
+
+function stageName(id){
+  return (stages.find(s=>s.id===id)||stages[0]).name;
+}
+
+function currentStage(){
+  return stages.find(s=>s.id===selectedStage)||stages[0];
+}
+
+function defaultActorForStage(id){
+  if(id==="acceptance") return "codex";
+  if(id==="delivery" || id==="contract") return "router";
+  if(id==="selftest" || id==="implement") return "claude";
+  if(id==="intake" || id==="design" || id==="plan") return "human";
+  return "claude";
+}
+
+document.querySelectorAll(".flow-node").forEach(node=>{
+  node.onclick=()=>{
+    selectedActor=node.dataset.actor;
+    document.getElementById("stageNote").textContent=`当前查看：${stageName(selectedStage)}阶段 / ${actorLabels[selectedActor]}。`;
+    renderFlow();
+  };
+});
+renderStages();
+renderLoopList();
+renderFlow();
+</script>
+</body>
+</html>

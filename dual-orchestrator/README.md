@@ -151,6 +151,22 @@ http://localhost:8080/
 Operator Console 面向最终用户和 reviewer，优先回答“跑到哪、为什么停、下一步做什么”，
 并把 human gate 证据、token 摘要和恢复建议放在同一屏。
 
+控制台使用本机多项目 registry 作为入口索引。用户在首页输入本地 Git 仓库根目录后，
+server 会校验路径并写入：
+
+```text
+~/.dual/operator-workspaces.json
+```
+
+之后首页会默认展示最近项目，并发现该项目的默认 worktree 池：
+
+```text
+<repo-parent>/<repo-name>-agent-runs/
+```
+
+因此 CLI 或自动流程已经启动的 workstream 也会出现在任务列表中；每个任务仍以自己的
+effective workdir / ledger 为准。registry 只负责“有哪些项目/任务入口”，不负责 workflow 状态。
+
 旧入口仍保留为管理诊断页面：
 
 ```text
@@ -160,6 +176,18 @@ http://localhost:8080/mgt/index.html
 管理诊断面向 dual 使用者和开发者，用于查看 ledger、raw facts、node id、RCA、CLI 命令和恢复证据。
 两套页面读取同一组 ledger read model，并通过 SSE 订阅 overview 更新。它们都是本地单用户工具，
 不是托管式多用户 Web 产品。
+
+Token 用量有两种来源：`acpx_stream` 表示从 acpx session stream 读到的真实 usage；
+`artifact_estimate` 表示旧 run 或缺失 stream usage 时，根据 prompt/output/transcript metadata
+估算的观察值。它们都只用于成本和上下文观察，不参与 workflow 路由。
+
+如果需要清理本机历史 worktree，先生成只读计划：
+
+```bash
+./scripts/agent-runs-cleanup-plan.sh --repo /path/to/repo
+```
+
+脚本只打印候选 worktree 和 `git worktree remove` 命令，不会自动删除。
 
 ## 文档入口
 

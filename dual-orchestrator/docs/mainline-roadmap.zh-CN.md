@@ -136,7 +136,7 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | Context budgets | Done, keep testing | `ContextProfiles` 定义 profile budgets；`ContextBuildPackageHandler` 执行 token 估算上限，并对 section 降级或丢弃。 |
 | Context package metadata | Done | 每个 context package 现在都会写 JSON sidecar，记录 profile、token budget、估算 tokens 和每个 section 的降级事实。 |
 | Prompt 语言策略 | Done | Workstream `settings.json` 保存 `promptLanguage`；Agent prompt 会本地化人类可读说明，同时保持 contract keys、enums 和 markers 的机器可读格式。 |
-| Projection | MVP done, keep testing | `workstream-metrics.json` 现在包含 tokenMetrics：按 run、node、agent 和 total 汇总 usage；`runs`、`trace`、`summary`、API overview 和 Operator Console 均消费同一 projection。 |
+| Projection | MVP done, keep testing | `workstream-metrics.json` 包含按 run、node、agent 和 total 汇总的 tokenMetrics。`runs` 和 `trace` 会展示每个步骤的 token source：`acpx_stream` 或 `artifact_estimate`；API overview 和 Operator Console 消费同一套 ledger projection。 |
 | 测试 | Done | `ContextBuildPackageHandlerTest` 覆盖 budget enforcement、degradation 和 metadata sidecar。 |
 | 真实 case 验证 | closure case 已完成 | 2026-06-19 私有业务逻辑 real-case 已完成，未出现 context-window recovery 或 prompt 异常膨胀。 |
 
@@ -157,7 +157,7 @@ P2 让系统足够容易理解，能支撑真实使用和开源评估。
 
 | 项目 | 状态 | 目的 | 设计 |
 |---|---|---|---|
-| Operator Console / Management Diagnostics | MVP implemented | 默认任务视图回答“跑到哪、为什么停、下一步做什么”；管理诊断保留 RCA、CLI、raw facts 和 token/cost。默认入口为 `/`，兼容入口为 `/console.html`，旧管理面板迁到 `/mgt/index.html`。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md)、[operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
+| Operator Console / Management Diagnostics | MVP implemented, keep polishing | 默认任务视图回答“跑到哪、为什么停、下一步做什么”；管理诊断保留 RCA、CLI、raw facts 和 token/cost。默认入口为 `/`，兼容入口为 `/console.html`，旧管理面板迁到 `/mgt/index.html`。任务列表会发现默认 `<repo-name>-agent-runs` worktree 池，因此 CLI/autorun 创建的任务也能从仓库根目录看到。 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md)、[operator-console-implementation-plan.zh-CN.md](design/operator-console-implementation-plan.zh-CN.md) |
 | Delivery view | Partial | 在 completed workstream 上展示 delivery merge 的准备状态和结果。 | [delivery-merge.md](design/delivery-merge.md) |
 | Public benchmark | Partial | 提供不依赖私有项目的可重复证据。 | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
 | 开源文档清理 | Partial | 文档要当前、可读、不绑定内部运行历史。 | [release-checklist.zh-CN.md](release-checklist.zh-CN.md) |
@@ -169,7 +169,6 @@ P0 lifecycle closure 在 MVP 边界内已经完成。不要继续开放式私有
 
 建议顺序：
 
-1. 完成 P1 边界复核：Execution / AgentTask、Recovery、Context budget、Artifact contract、Boundary drift prevention 逐项确认是否仍有 blocker。
-2. 用一次 bounded real-case 或 public benchmark 验证 tokenMetrics 是否能按步骤解释成本和 context 膨胀来源。
-3. 如果 P1 无 blocker，再进入 P2：delivery view、public benchmark 稳定化、开源文档清理。
-4. 私有 real case 只作为特定缺陷的 regression check，不再作为 P0 discovery loop。
+1. 继续 P2：delivery view 和 public benchmark 稳定化。
+2. 开源文档清理保持渐进执行，并保持当前准确；不要重新把私有运行历史写进公开文档。
+3. 私有 real case 只作为特定缺陷的 regression check，不再作为 P0 discovery loop。

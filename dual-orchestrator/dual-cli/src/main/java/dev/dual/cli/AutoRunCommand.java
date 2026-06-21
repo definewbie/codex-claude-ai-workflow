@@ -4,6 +4,7 @@ import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.ledger.file.OperatorWorkspaceRegistry;
 import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamLock;
@@ -15,6 +16,7 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Callable;
 
 @Component
@@ -52,6 +54,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         System.out.println("Autorun started");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Workspace: " + workspaceRoot);
+        registerOperatorWorkspace(workspaceRoot);
 
         while (true) {
             var snapshot = loadSnapshot(paths);
@@ -59,12 +62,14 @@ public final class AutoRunCommand implements Callable<Integer> {
 
             if (snapshot.current().status() == WorkflowStatus.COMPLETED) {
                 refreshSummary(paths);
+                registerOperatorWorkspace(workspaceRoot);
                 System.out.println("Autorun completed.");
                 return 0;
             }
             if (shouldRunBeforeStop(snapshot.current().status())) {
                 if (isRepeatedRecovery(snapshot.node(), attemptedRecoveryKeys)) {
                     refreshSummary(paths);
+                    registerOperatorWorkspace(workspaceRoot);
                     printStopped(snapshot.current().status(), workspaceRoot);
                     return 1;
                 }
@@ -76,6 +81,7 @@ public final class AutoRunCommand implements Callable<Integer> {
             }
             if (isStopped(snapshot.current().status())) {
                 refreshSummary(paths);
+                registerOperatorWorkspace(workspaceRoot);
                 printStopped(snapshot.current().status(), workspaceRoot);
                 return 1;
             }
@@ -84,11 +90,13 @@ public final class AutoRunCommand implements Callable<Integer> {
                 gateCount++;
                 if (gateCount > maxGates) {
                     refreshSummary(paths);
+                    registerOperatorWorkspace(workspaceRoot);
                     System.out.println("Stopped after --max-gates=" + maxGates + ". Review the workflow before continuing.");
                     return 1;
                 }
                 if (isRepeatedGate(snapshot.node(), resolvedGateKeys)) {
                     refreshSummary(paths);
+                    registerOperatorWorkspace(workspaceRoot);
                     System.out.println("Autorun stopped: repeated gate detected in the same iteration: "
                             + snapshot.node().nodeDefinitionId() + " / " + snapshot.node().iterationId());
                     System.out.println("This usually means workflow routing returned to the same gate without opening a new repair iteration.");
@@ -145,9 +153,35 @@ public final class AutoRunCommand implements Callable<Integer> {
 
     private int runUntilPause(Path workspaceRoot, WorkstreamPaths paths) throws Exception {
         System.out.println("Running workflow until next pause...");
+        var heartbeat = new AtomicBoolean(true);
+        var heartbeatThread = progressHeartbeat(workspaceRoot, heartbeat);
+        heartbeatThread.start();
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun run"))) {
             return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+        } finally {
+            heartbeat.set(false);
+            heartbeatThread.interrupt();
         }
+    }
+
+    private Thread progressHeartbeat(Path workspaceRoot, AtomicBoolean running) {
+        var thread = new Thread(() -> {
+            var started = System.currentTimeMillis();
+            while (running.get()) {
+                try {
+                    Thread.sleep(30_000L);
+                } catch (InterruptedException ignored) {
+                    return;
+                }
+                if (running.get()) {
+                    var elapsedSeconds = Math.max(30, (System.currentTimeMillis() - started) / 1000);
+                    System.out.println("Still running (" + elapsedSeconds + "s). Trace: dualctl trace --workdir "
+                            + workspaceRoot + " " + workstreamId);
+                }
+            }
+        }, "dual-autorun-heartbeat");
+        thread.setDaemon(true);
+        return thread;
     }
 
     private static void printSnapshot(Snapshot snapshot) {
@@ -169,6 +203,14 @@ public final class AutoRunCommand implements Callable<Integer> {
             SummaryCommand.writeDefaultSummary(paths);
         } catch (Exception e) {
             System.err.println("Warning: failed to refresh workstream summary: " + e.getMessage());
+        }
+    }
+
+    private void registerOperatorWorkspace(Path workspaceRoot) {
+        try {
+            new OperatorWorkspaceRegistry().registerFromLedger(workspaceRoot, workstreamId);
+        } catch (Exception e) {
+            System.err.println("Warning: failed to update operator workspace registry: " + e.getMessage());
         }
     }
 

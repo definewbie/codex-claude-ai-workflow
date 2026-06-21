@@ -7,6 +7,7 @@ import dev.dual.core.domain.Workstream;
 import dev.dual.core.id.DualIdGenerator;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.LockOwner;
+import dev.dual.ledger.file.OperatorWorkspaceRegistry;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.ledger.file.WorkstreamSettingsDocument;
@@ -108,6 +109,7 @@ public final class StartCommand implements Callable<Integer> {
             );
             CliLedgerFactory.create().initialize(paths, "wf-" + workstreamId.value(), workflowDefinition);
         }
+        registerOperatorWorkspace(repo.gitRoot(), selectedWorktree, workstreamId.value(), firstLine(requirement), "created");
 
         System.out.println("Dual workstream started");
         System.out.println("Workstream: " + workstreamId.value());
@@ -170,6 +172,27 @@ public final class StartCommand implements Callable<Integer> {
                     "workflow contains handler types not built into this CLI: " + unknownHandlers
                             + ". Use --allow-unknown-handlers if these handlers are provided by an external runtime."
             );
+        }
+    }
+
+    private void registerOperatorWorkspace(
+            Path originalRepoRoot,
+            Path effectiveWorkdir,
+            String workstreamId,
+            String title,
+            String status
+    ) {
+        try {
+            new OperatorWorkspaceRegistry().registerWorkstream(
+                    originalRepoRoot,
+                    effectiveWorkdir,
+                    workstreamId,
+                    title,
+                    status,
+                    Instant.now()
+            );
+        } catch (Exception e) {
+            System.err.println("Warning: failed to update operator workspace registry: " + e.getMessage());
         }
     }
 }

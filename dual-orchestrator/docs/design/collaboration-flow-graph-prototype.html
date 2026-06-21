@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dual 协作 · 流程图编排演示</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --surface:#fff; --line:#e3e8f1; --line-2:#cfd7e6;
+    --text:#161f2e; --text-2:#566073; --muted:#8a93a3;
+    --cc:#2563eb; --cc-soft:#eaf2ff;
+    --orch:#e07a0b; --orch-soft:#fdf0dd;
+    --codex:#7c3aed; --codex-soft:#f2ecff;
+    --ok:#16a34a; --ok-soft:#e7f6ee;
+    --warn:#d97706;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 6px 18px rgba(16,24,40,.07);
+    --shadow-lg:0 16px 40px rgba(16,24,40,.14);
+  }
+  *{box-sizing:border-box}html,body{margin:0}
+  body{background:
+    radial-gradient(circle at 10% -8%,rgba(37,99,235,.10),transparent 26%),
+    radial-gradient(circle at 90% -4%,rgba(124,58,237,.09),transparent 24%),var(--bg);
+    color:var(--text);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+  .app{max-width:1240px;margin:0 auto;padding:26px 28px 60px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:850;font-size:19px;background:linear-gradient(135deg,#2563eb,#7c3aed);box-shadow:0 8px 22px rgba(80,80,200,.32)}
+  .brand h1{margin:0;font-size:21px;font-weight:800}.brand p{margin:3px 0 0;font-size:13px;color:var(--text-2)}
+  .ctl{display:flex;align-items:center;gap:8px}
+  .tag{font-size:11px;font-weight:700;color:var(--codex);background:var(--codex-soft);border:1px solid #e4d8ff;border-radius:999px;padding:6px 11px}
+  .btn{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;border-radius:10px;font-size:13px;font-weight:650;background:#fff;border:1px solid var(--line-2);color:var(--text);box-shadow:var(--shadow);transition:.12s}
+  .btn:hover{background:#fbfcff;border-color:#bcc6d6}
+  .btn.primary{background:var(--cc);border-color:var(--cc);color:#fff}.btn.primary:hover{background:#1d4fd1}
+
+  .task{background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .task h2{margin:0;font-size:17px;font-weight:780}.task .meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .conv-mini{display:flex;align-items:center;gap:10px}
+  .conv-mini .lab{font-size:12px;color:var(--muted)}
+  .cp{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:720;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted)}
+  .cp.on{background:var(--cc);border-color:var(--cc);color:#fff}
+  .cp.ok{background:var(--ok-soft);border-color:#bfe6cc;color:#0f7a37}
+  .arrow{color:var(--line-2);font-weight:800}
+
+  .canvas-wrap{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);padding:18px;overflow:auto}
+  .canvas{position:relative;width:1180px;height:560px;margin:0 auto;
+    background-image:radial-gradient(circle,#dde3ee 1.4px,transparent 1.5px);background-size:26px 26px;border-radius:10px}
+
+  /* edges */
+  .edge{fill:none;stroke:#c2cbdc;stroke-width:2.4;transition:stroke .2s}
+  .edge.live{stroke:var(--cc);stroke-width:3.4;stroke-dasharray:7 7;animation:flow .6s linear infinite}
+  .edge.done{stroke:#9fe0b6}
+  @keyframes flow{to{stroke-dashoffset:-28}}
+  .edge-label{font:700 12px/1 -apple-system,sans-serif;fill:var(--muted)}
+  .edge-label.bad{fill:#b42318}.edge-label.ok{fill:#0f7a37}
+
+  /* token */
+  #token{fill:#fff;stroke:var(--cc);stroke-width:3;filter:drop-shadow(0 2px 6px rgba(37,99,235,.5));transition:opacity .2s}
+
+  /* nodes */
+  .n{position:absolute;background:#fff;border:1.5px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:11px 12px;display:flex;flex-direction:column;gap:5px;transition:transform .2s,box-shadow .2s,border-color .2s}
+  .n.active{transform:translateY(-3px);box-shadow:0 12px 26px rgba(37,99,235,.22)}
+  .n.cc.active{border-color:#bcd5ff}.n.orch.active{border-color:#f3cf8a}.n.codex.active{border-color:#d9c9ff}.n.fin.active{border-color:#bcd5ff}
+  .n.done{border-color:#bfe6cc}
+  .n-head{display:flex;align-items:center;gap:8px}
+  .av{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:820;font-size:12px;flex:0 0 auto}
+  .av.cc{background:linear-gradient(135deg,#2563eb,#6d8cff)}
+  .av.orch{background:linear-gradient(135deg,#e07a0b,#f6b13e)}
+  .av.codex{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+  .n-head .who b{display:block;font-size:12.5px;font-weight:760;line-height:1.1}
+  .n-head .who span{display:block;font-size:10.5px;color:var(--muted)}
+  .n .sub{font-size:11.5px;color:var(--text-2);line-height:1.4}
+  .badge{align-self:flex-start;font-size:11px;font-weight:780;border-radius:999px;padding:3px 9px;background:var(--codex-soft);color:var(--codex)}
+  .badge.warn{background:#fdf2e2;color:#9a5800}.badge.ok{background:var(--ok-soft);color:#0f7a37}
+
+  .nub{position:absolute;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid var(--line-2);color:var(--muted);font-size:13px;font-weight:800;box-shadow:var(--shadow);transition:.2s}
+  .nub.start{border-color:#c9d9ee;color:#3b6ea5}.nub.start.active{border-color:var(--cc);color:var(--cc)}
+  .nub.deliver{border-color:#bfe6cc;color:#0f7a37}.nub.deliver.done{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .nub small{position:absolute;top:46px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
+
+  /* gateway */
+  .gw-label{position:absolute;transform:translate(-50%,-50%);font-size:12px;font-weight:800;color:var(--text-2);background:#fff;padding:2px 6px;border-radius:6px}
+
+  .round-flag{position:absolute;left:380px;top:42px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 13px;box-shadow:var(--shadow);font-size:12.5px;font-weight:700;color:var(--bad)}
+  .round-flag b{color:var(--text)}
+
+  .legend{display:flex;gap:14px;justify-content:center;margin-top:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .ld{width:11px;height:11px;border-radius:4px}
+  .ld.cc{background:var(--cc)}.ld.orch{background:var(--orch)}.ld.codex{background:var(--codex)}.ld.gw{background:#fff;border:1.5px solid var(--line-2);transform:rotate(45deg);border-radius:2px}
+
+  .foot{margin-top:18px;text-align:center;font-size:12px;color:var(--muted);line-height:1.6}
+  .foot b{color:var(--text-2)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">D</div>
+      <div>
+        <h1>Dual 协作 · 流程编排</h1>
+        <p>把多轮协作画成一张图：节点连线 + 判定网关 + 真实的打回回环。</p>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="tag">n8n / BPMN 风格 · 自动播放</span>
+      <button class="btn" id="prev"><span>◀</span> 重置</button>
+      <button class="btn primary" id="play"><span id="playIc">⏸</span><span id="playTx">暂停</span></button>
+    </div>
+  </header>
+
+  <section class="task">
+    <div>
+      <h2>治疗记录上传 · 引导文案与校验</h2>
+      <div class="meta">实现阶段 · cancer-clinic · 三方协作流程图演示</div>
+    </div>
+    <div class="conv-mini">
+      <span class="lab">问题收敛</span>
+      <span class="cp" id="cp1">4</span><span class="arrow">→</span>
+      <span class="cp" id="cp2">1</span><span class="arrow">→</span>
+      <span class="cp" id="cp3">0</span>
+    </div>
+  </section>
+
+  <div class="canvas-wrap">
+    <div class="canvas" id="canvas">
+      <!-- round flag on the loop arc -->
+      <div class="round-flag" id="roundFlag"><span>↺</span>第 <b id="roundN">1</b> 轮 · 打回修改</div>
+
+      <!-- SVG edges + gateway + token -->
+      <svg width="1180" height="560" style="position:absolute;inset:0" viewBox="0 0 1180 560">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c2cbdc"></path></marker>
+          <marker id="ah-live" markerWidth="10" markerHeight="10" refX="6.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563eb"></path></marker>
+          <marker id="ah-ok" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#9fe0b6"></path></marker>
+        </defs>
+        <path id="e_start_cc"   class="edge" d="M66,278 L96,278"  marker-end="url(#ah)"></path>
+        <path id="e_cc_orch"    class="edge" d="M271,278 L326,278" marker-end="url(#ah)"></path>
+        <path id="e_orch_codex" class="edge" d="M488,278 L543,278" marker-end="url(#ah)"></path>
+        <path id="e_codex_gw"   class="edge" d="M721,278 L762,278" marker-end="url(#ah)"></path>
+        <path id="e_gw_finalize"class="edge" d="M836,278 C 884,278 884,156 906,156" marker-end="url(#ah)"></path>
+        <path id="e_finalize_deliver" class="edge" d="M1064,156 L1096,156" marker-end="url(#ah)"></path>
+        <path id="e_gw_cc"      class="edge" d="M800,240 C 800,150 800,84 540,84 C 260,84 183,84 183,222" marker-end="url(#ah)"></path>
+        <!-- gateway diamond -->
+        <polygon id="gwShape" points="800,242 836,278 800,314 764,278" fill="#fff" stroke="#cfd7e6" stroke-width="2"></polygon>
+        <text x="800" y="282" text-anchor="middle" font-size="12" font-weight="800" fill="#566073">通过?</text>
+        <!-- branch labels -->
+        <text x="868" y="214" class="edge-label ok">是 · 通过</text>
+        <text x="430" y="74" class="edge-label bad">否 · 打回修改</text>
+        <!-- token -->
+        <circle id="token" r="7" cx="44" cy="278" style="opacity:0"></circle>
+      </svg>
+
+      <!-- gateway label overlay handled in svg; place an HTML accent if needed -->
+
+      <!-- nodes -->
+      <div class="nub start" id="n_start" style="left:23px;top:258px">需<small>开始</small></div>
+
+      <div class="n cc" id="n_cc" style="left:96px;top:222px;width:175px;height:112px">
+        <div class="n-head"><div class="av cc">C</div><div class="who"><b>Claude Code</b><span>动手 · 产出</span></div></div>
+        <div class="sub">写 / 改上传引导文案与校验</div>
+        <span class="badge" id="ccVer">第 1 版</span>
+      </div>
+
+      <div class="n orch" id="n_orch" style="left:326px;top:222px;width:162px;height:112px">
+        <div class="n-head"><div class="av orch">O</div><div class="who"><b>Orchestrator</b><span>协调</span></div></div>
+        <div class="sub">分发审核 / 装配证据 / 推进</div>
+        <span class="badge" style="background:var(--orch-soft);color:#965300">分发</span>
+      </div>
+
+      <div class="n codex" id="n_codex" style="left:543px;top:222px;width:178px;height:112px">
+        <div class="n-head"><div class="av codex">X</div><div class="who"><b>Codex</b><span>把关 · 审查</span></div></div>
+        <div class="sub">逐条核查产出与证据</div>
+        <span class="badge warn" id="codexIssues">发现 4 处</span>
+      </div>
+
+      <div class="n fin" id="n_fin" style="left:906px;top:108px;width:158px;height:96px">
+        <div class="n-head"><div class="av orch">O</div><div class="who"><b>Orchestrator</b><span>收口</span></div></div>
+        <div class="sub">汇总成果，准备交付</div>
+        <span class="badge" style="background:var(--cc-soft);color:#1c4ec4">收口</span>
+      </div>
+
+      <div class="nub deliver" id="n_deliver" style="left:1096px;top:136px">✓<small>交付</small></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="ld cc"></i>Claude Code · 产出</span>
+    <span><i class="ld orch"></i>Orchestrator · 协调</span>
+    <span><i class="ld codex"></i>Codex · 把关</span>
+    <span><i class="ld gw"></i>判定网关 · 通过?</span>
+    <span style="color:var(--cc)">● 流动 token = 当前执行位置</span>
+  </div>
+
+  <div class="foot">
+    和前两版对比：这不是"逐轮翻页"也不是"矩阵表格"，而是一张<b>可执行的流程图</b>——<b>打回回环</b>本身就是"多轮"的形状，<b>判定网关</b>把 Codex 的通过/打回变成一个分叉，沿线流动的 token 让"谁在干活"一目了然。问题数（4→1→0）收敛体现在 Codex 节点的徽标和顶部的收敛指示上。
+  </div>
+</div>
+
+<script>
+const STEPS=[
+ {e:"e_start_cc",   to:"n_cc",     dur:480},
+ {e:"e_cc_orch",    to:"n_orch",   dur:520},
+ {e:"e_orch_codex", to:"n_codex",  dur:520, round:1, issues:4},
+ {e:"e_codex_gw",   to:"gw",       dur:480},
+ {e:"e_gw_cc",      to:"n_cc",     dur:900, loopTo:2},
+ {e:"e_cc_orch",    to:"n_orch",   dur:520},
+ {e:"e_orch_codex", to:"n_codex",  dur:520, round:2, issues:1},
+ {e:"e_codex_gw",   to:"gw",       dur:480},
+ {e:"e_gw_cc",      to:"n_cc",     dur:900, loopTo:3},
+ {e:"e_cc_orch",    to:"n_orch",   dur:520},
+ {e:"e_orch_codex", to:"n_codex",  dur:520, round:3, issues:0},
+ {e:"e_codex_gw",   to:"gw",       dur:480},
+ {e:"e_gw_finalize",to:"n_fin",    dur:820},
+ {e:"e_finalize_deliver",to:"n_deliver",dur:460, done:true},
+];
+const $=id=>document.getElementById(id);
+const svg=document.querySelector("svg");
+const token=$("token");
+let i=0, playing=true, cur=null, lastTs=null, raf=null, holdTimer=null;
+
+function nodeEl(id){return id==="gw"?null:$(id)}
+function setActive(id){
+ ["n_cc","n_orch","n_codex","n_fin","n_start","gwShape"].forEach(k=>{
+   const el=$(k); if(!el)return;
+   if(k==="gwShape"){el.setAttribute("stroke", id==="gw"?"#2563eb":"#cfd7e6"); el.setAttribute("stroke-width", id==="gw"?3:2); return;}
+   el.classList.remove("active");
+ });
+ if(id==="gw"){const s=$("n_start");/*no*/}
+ $("n_start").classList.toggle("active", id==="n_start");
+ if(id==="gw")return;
+ const el=$(id); if(el)el.classList.add("active");
+}
+function markDone(id){
+ if(id==="gw"){return}
+ const el=$(id); if(el){el.classList.remove("active");el.classList.add("done")}
+}
+function resetLap(){$("n_cc").classList.remove("done");$("n_orch").classList.remove("done");$("n_codex").classList.remove("done")}
+
+function clearEdges(){document.querySelectorAll(".edge").forEach(p=>{p.classList.remove("live","done");
+  p.setAttribute("marker-end","url(#ah)")})}
+
+function paintToken(k){
+ const path=svg.querySelector("#"+cur.e); const len=path.getTotalLength();
+ const pt=path.getPointAtLength(len*Math.max(0,Math.min(1,k)));
+ token.setAttribute("cx",pt.x); token.setAttribute("cy",pt.y); token.style.opacity=1;
+}
+function loop(ts){
+ if(!playing)return;
+ if(lastTs==null)lastTs=ts;
+ cur.elapsed+=ts-lastTs; lastTs=ts;
+ const k=cur.elapsed/cur.dur; paintToken(k);
+ if(k>=1){ const done=cur.onDone; cur=null; done&&done(); }
+ else raf=requestAnimationFrame(loop);
+}
+function startSeg(){
+ const s=STEPS[i];
+ const path=svg.querySelector("#"+s.e);
+ path.classList.add("live"); path.setAttribute("marker-end","url(#ah-live)");
+ // activate target at arrival; for now set source done
+ cur={e:s.e,dur:s.dur,elapsed:0,onDone:()=>onArrive(s)};
+ lastTs=null;
+ paintToken(0);
+ if(playing) raf=requestAnimationFrame(loop);
+}
+function onArrive(s){
+ const path=svg.querySelector("#"+s.e);
+ path.classList.remove("live"); path.classList.add("done"); path.setAttribute("marker-end","url(#ah-ok)");
+ // update state
+ if(s.round){ $("roundN").textContent=s.round; $("ccVer").textContent="第 "+s.round+" 版";
+   $("cp1").classList.toggle("on",s.round===1);$("cp2").classList.toggle("on",s.round===2);$("cp3").classList.toggle("on",s.round===3);
+ }
+ if(s.issues!==undefined){
+   const b=$("codexIssues");
+   if(s.issues===0){b.textContent="通过 · 0 问题";b.className="badge ok"}
+   else{b.textContent="发现 "+s.issues+" 处";b.className="badge warn"}
+ }
+ if(s.loopTo){ $("roundFlag").style.color="var(--bad)"; resetLap(); markDone("gw")===undefined; $("gwShape").setAttribute("stroke","#cfd7e6"); }
+ // mark previous node done, activate target
+ if(s.to==="n_cc" && s.loopTo){/* fresh lap */}
+ setActive(s.to);
+ if(s.done){
+   $("n_deliver").classList.add("done"); $("cp3").classList.add("on","ok");
+   $("playIc").textContent="▶"; $("playTx").textContent="重播";
+   playing=false; token.style.opacity=0;
+   return;
+ }
+ i++;
+ if(i>=STEPS.length){return}
+ holdTimer=setTimeout(()=>{ if(playing) startSeg(); else { /* ready to step */ paintTokenAtNext(); } }, s.e.indexOf("gw")>=0?620:120);
+}
+function paintTokenAtNext(){ const s=STEPS[i]; cur={e:s.e,dur:s.dur,elapsed:0,onDone:()=>onArrive(s)}; paintToken(0); }
+
+function resetAll(){
+ cancelAnimationFrame(raf); clearTimeout(holdTimer); playing=true; i=0;
+ $("playIc").textContent="⏸"; $("playTx").textContent="暂停";
+ clearEdges(); resetLap();
+ ["n_cc","n_orch","n_codex","n_fin","n_deliver"].forEach(id=>$(id).classList.remove("done","active"));
+ $("n_start").classList.remove("active");
+ $("codexIssues").textContent="发现 4 处";$("codexIssues").className="badge warn";
+ $("ccVer").textContent="第 1 版";$("roundN").textContent="1";
+ $("cp1").classList.remove("on","ok");$("cp2").classList.remove("on","ok");$("cp3").classList.remove("on","ok");
+ setActive("n_start");
+ startSeg();
+}
+
+$("play").onclick=()=>{
+ if(i>=STEPS.length){ resetAll(); return; }
+ playing=!playing;
+ $("playIc").textContent=playing?"⏸":"▶"; $("playTx").textContent=playing?"暂停":"播放";
+ if(playing){
+   if(cur){ lastTs=null; raf=requestAnimationFrame(loop); }
+   else { i<STEPS.length && startSeg(); }
+ } else { cancelAnimationFrame(raf); }
+};
+$("prev").onclick=()=>resetAll();
+
+resetAll();
+</script>
+</body>
+</html>

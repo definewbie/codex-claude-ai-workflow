@@ -196,6 +196,22 @@ http://localhost:8080/
 任务控制台面向最终用户和 reviewer，显示生命周期进度、当前停止原因、下一步动作、人审证据、
 token 摘要和恢复建议。
 
+控制台使用本机多项目 registry。首页输入本地 Git 仓库根目录后，点击“打开任务池”，
+server 会校验路径并写入：
+
+```text
+~/.dual/operator-workspaces.json
+```
+
+之后首页会记住该项目，并发现它的默认 worktree 池：
+
+```text
+<repo-parent>/<repo-name>-agent-runs/
+```
+
+这样 CLI 或自动流程已经启动的 workstream 也会出现在任务列表中。每个任务的状态、动作和
+trace 链接仍然以自己的 effective workdir / ledger 为准。
+
 管理诊断入口：
 
 ```text
@@ -203,6 +219,22 @@ http://localhost:8080/mgt/index.html
 ```
 
 管理诊断面向 dual 使用者和开发者，用于查看 raw ledger、node id、RCA、CLI 命令和恢复证据。
+
+Token 指标有两种来源：
+
+- `acpx_stream`：从 acpx session stream 匹配到的真实 usage。
+- `artifact_estimate`：缺少 acpx usage 或旧 run 时，根据 prompt/output/transcript metadata
+  估算的观察值。
+
+两者都只用于成本和上下文观察；workflow 路由仍然依赖结构化 contract、typed event 和 recovery signal。
+
+如果要检查本机旧 worktree，但暂时不删除任何内容：
+
+```bash
+./scripts/agent-runs-cleanup-plan.sh --repo /path/to/repo
+```
+
+先检查输出里的 terminal rows，再按需执行打印出的 `git worktree remove ...` 命令。
 
 ## 9. 可选本机 Worker 模式
 

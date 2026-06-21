@@ -223,6 +223,24 @@ The task console is for end users and reviewers. It shows lifecycle progress,
 the current stop reason, the next action, human-review evidence, token
 summaries, and recovery guidance.
 
+The console uses a local multi-project registry. Enter a local Git repository
+root on the homepage, then click **Open task pool**. The server validates the
+path and stores it in:
+
+```text
+~/.dual/operator-workspaces.json
+```
+
+The homepage then remembers the project and discovers its default worktree pool:
+
+```text
+<repo-parent>/<repo-name>-agent-runs/
+```
+
+This lets the console show workstreams started from CLI or autorun flows. Each
+listed task still uses its own effective workdir and ledger for status,
+actions, and trace links.
+
 Management diagnostics:
 
 ```text
@@ -231,6 +249,24 @@ http://localhost:8080/mgt/index.html
 
 Management diagnostics is for dual users and developers who need raw ledger
 facts, node ids, RCA, CLI commands, and recovery evidence.
+
+Token metrics may show one of two sources:
+
+- `acpx_stream`: measured usage matched from the acpx session stream.
+- `artifact_estimate`: fallback estimate from prompt/output/transcript metadata,
+  used for old runs or runs where acpx usage was unavailable.
+
+Both are observation data only. Workflow routing still depends on structured
+contracts, typed events, and recovery signals.
+
+To inspect old local worktrees without deleting anything:
+
+```bash
+./scripts/agent-runs-cleanup-plan.sh --repo /path/to/repo
+```
+
+Review the printed terminal rows first. Delete only the worktrees you no longer
+need with the printed `git worktree remove ...` command.
 
 ## 9. Optional Local Worker Mode
 

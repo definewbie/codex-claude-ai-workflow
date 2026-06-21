@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 @Component
 @Command(name = "runs", description = "List agent runs for a workstream.", mixinStandardHelpOptions = true)
 public final class RunsCommand implements Callable<Integer> {
+    private final RunUsageProjection usageProjection = new RunUsageProjection();
+
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
@@ -47,8 +49,9 @@ public final class RunsCommand implements Callable<Integer> {
             printWarnings(listing.warnings());
             return 0;
         }
-        System.out.println("Run ID\tStatus\tAgent\tNode\tExit\tDuration(ms)\tInputTok\tOutputTok\tTotalTok\tCost\tFailure");
+        System.out.println("Run ID\tStatus\tAgent\tNode\tExit\tDuration(ms)\tSource\tInputTok\tOutputTok\tTotalTok\tCost\tFailure");
         for (var run : runs) {
+            var usage = usageProjection.usageOrEstimate(paths, run);
             System.out.println(String.join("\t",
                     text(run.runId()),
                     text(run.status()),
@@ -56,10 +59,11 @@ public final class RunsCommand implements Callable<Integer> {
                     text(run.nodeId()),
                     run.exitCode() == null ? "" : run.exitCode().toString(),
                     Long.toString(run.durationMs()),
-                    usageValue(run, UsageField.INPUT),
-                    usageValue(run, UsageField.OUTPUT),
-                    usageValue(run, UsageField.TOTAL),
-                    cost(run),
+                    usage == null ? "" : text(usage.source()),
+                    usageValue(usage, UsageField.INPUT),
+                    usageValue(usage, UsageField.OUTPUT),
+                    usageValue(usage, UsageField.TOTAL),
+                    cost(usage),
                     text(run.failureReason())
             ));
         }
@@ -107,23 +111,23 @@ public final class RunsCommand implements Callable<Integer> {
                 && left.toLowerCase(Locale.ROOT).equals(right.toLowerCase(Locale.ROOT));
     }
 
-    private String usageValue(RunMetadata run, UsageField field) {
-        if (run.usage() == null) {
+    private String usageValue(RunMetadata.RunUsage usage, UsageField field) {
+        if (usage == null) {
             return "";
         }
         return switch (field) {
-            case INPUT -> Long.toString(run.usage().inputTokens());
-            case OUTPUT -> Long.toString(run.usage().outputTokens());
-            case TOTAL -> Long.toString(run.usage().totalTokens());
+            case INPUT -> Long.toString(usage.inputTokens());
+            case OUTPUT -> Long.toString(usage.outputTokens());
+            case TOTAL -> Long.toString(usage.totalTokens());
         };
     }
 
-    private String cost(RunMetadata run) {
-        if (run.usage() == null || run.usage().costAmount() == null) {
+    private String cost(RunMetadata.RunUsage usage) {
+        if (usage == null || usage.costAmount() == null) {
             return "";
         }
-        var currency = run.usage().costCurrency() == null ? "" : run.usage().costCurrency();
-        return currency.isBlank() ? run.usage().costAmount().toString() : run.usage().costAmount() + " " + currency;
+        var currency = usage.costCurrency() == null ? "" : usage.costCurrency();
+        return currency.isBlank() ? usage.costAmount().toString() : usage.costAmount() + " " + currency;
     }
 
     private enum UsageField {

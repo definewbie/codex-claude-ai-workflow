@@ -25,9 +25,11 @@ record RunMetadata(
         String workdir,
         String promptPath,
         String outputPath,
+        String transcriptPath,
         String stderrPath,
         String promptMetadataPath,
         String outputMetadataPath,
+        String transcriptMetadataPath,
         String stderrMetadataPath,
         List<String> command,
         Instant startedAt,
@@ -47,7 +49,8 @@ record RunMetadata(
             long cachedWriteTokens,
             long totalTokens,
             BigDecimal costAmount,
-            String costCurrency
+            String costCurrency,
+            String source
     ) {
     }
 }

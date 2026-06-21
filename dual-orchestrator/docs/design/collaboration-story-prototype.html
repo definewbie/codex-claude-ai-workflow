@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dual 协作 · 多轮收敛演示</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --surface:#ffffff; --surface-2:#fbfcff;
+    --line:#e7ebf3; --line-2:#d4dbe7;
+    --text:#161f2e; --text-2:#566073; --muted:#8a93a3;
+    --cc:#2563eb; --cc-2:#6d8cff; --cc-soft:#eaf2ff;
+    --orch:#e07a0b; --orch-2:#f6b13e; --orch-soft:#fdf0dd;
+    --codex:#7c3aed; --codex-2:#a78bfa; --codex-soft:#f2ecff;
+    --ok:#16a34a; --ok-soft:#e7f6ee;
+    --warn:#d97706; --warn-soft:#fdf2e2;
+    --bad:#dc2626; --bad-soft:#fdeceb;
+    --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 14px rgba(16,24,40,.06);
+    --shadow-lg:0 16px 40px rgba(16,24,40,.12);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(circle at 12% -8%, rgba(37,99,235,.10), transparent 26%),
+      radial-gradient(circle at 88% -4%, rgba(124,58,237,.09), transparent 24%),
+      var(--bg);
+    color:var(--text);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+  .app{max-width:1240px;margin:0 auto;padding:26px 28px 70px}
+
+  /* topbar */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#fff;font-weight:850;font-size:19px;
+    background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);box-shadow:0 8px 22px rgba(80,80,200,.32)}
+  .brand h1{margin:0;font-size:21px;font-weight:800}
+  .brand p{margin:3px 0 0;font-size:13px;color:var(--text-2)}
+  .ctl{display:flex;align-items:center;gap:8px}
+  .tag{font-size:11px;font-weight:700;color:var(--codex);background:var(--codex-soft);border:1px solid #e4d8ff;
+    border-radius:999px;padding:6px 11px;letter-spacing:.3px}
+  .btn{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;border-radius:10px;
+    font-size:13px;font-weight:650;background:#fff;border:1px solid var(--line-2);color:var(--text);box-shadow:var(--shadow);transition:.12s}
+  .btn:hover{background:var(--surface-2);border-color:#bcc6d6}
+  .btn.primary{background:var(--cc);border-color:var(--cc);color:#fff}
+  .btn.primary:hover{background:#1d4fd1}
+  .btn .ic{font-size:13px;line-height:1}
+
+  /* task header */
+  .task{background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 22px;margin-bottom:16px;
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .task .left .eb{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  .task .left h2{margin:3px 0 4px;font-size:20px;font-weight:780;line-height:1.3}
+  .task .left .meta{font-size:12.5px;color:var(--muted)}
+  .task .right{display:flex;align-items:center;gap:10px}
+  .stat{display:flex;flex-direction:column;align-items:center;padding:6px 16px;border-left:1px solid var(--line)}
+  .stat:first-child{border-left:0}
+  .stat b{font-size:19px;font-weight:800;line-height:1}
+  .stat span{font-size:11px;color:var(--muted);margin-top:4px}
+
+  /* stepper */
+  .stepper{display:flex;align-items:stretch;gap:0;margin-bottom:18px;background:rgba(255,255,255,.85);
+    border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:8px}
+  .step{flex:1;display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;cursor:pointer;transition:.14s;position:relative}
+  .step:hover{background:var(--surface-2)}
+  .step.active{background:linear-gradient(180deg,#fff,var(--cc-soft));box-shadow:inset 0 0 0 1.5px #cfe0ff}
+  .step .num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;
+    background:#fff;border:2px solid var(--line-2);color:var(--muted);flex:0 0 auto}
+  .step.active .num{background:var(--cc);border-color:var(--cc);color:#fff}
+  .step.done .num{background:var(--ok);border-color:var(--ok);color:#fff}
+  .step .txt{display:flex;flex-direction:column;min-width:0}
+  .step .txt b{font-size:13px;font-weight:720}
+  .step .txt span{font-size:11.5px;color:var(--muted)}
+  .step .sep{position:absolute;right:-6px;top:50%;width:12px;height:2px;background:var(--line-2);transform:translateY(-50%);z-index:0}
+  .step:last-child .sep{display:none}
+
+  /* stage */
+  .stage{background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:22px 24px 20px}
+  .stage-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+  .stage-head .rt{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+  .progress{width:140px;height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cc),var(--codex));border-radius:999px;transition:width .2s linear}
+
+  .flow{display:grid;grid-template-columns:1fr 26px 1fr 26px 1fr;align-items:stretch;gap:0}
+  .role{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px 16px 15px;position:relative;
+    transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;display:flex;flex-direction:column;gap:9px}
+  .role.spot{transform:translateY(-5px);box-shadow:0 14px 30px rgba(16,24,40,.14)}
+  .role.cc.spot{border-color:#bcd5ff}
+  .role.orch.spot{border-color:#f3cf8a}
+  .role.codex.spot{border-color:#d9c9ff}
+  .role-head{display:flex;align-items:center;gap:10px}
+  .av{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:820;font-size:14px;flex:0 0 auto}
+  .av.cc{background:linear-gradient(135deg,#2563eb,#6d8cff)}
+  .av.orch{background:linear-gradient(135deg,#e07a0b,#f6b13e)}
+  .av.codex{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+  .role-head .who b{display:block;font-size:13.5px;font-weight:760}
+  .role-head .who span{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+  .role .label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .role h3{margin:0;font-size:14.5px;font-weight:720;line-height:1.35}
+  .role .desc{margin:0;font-size:12.5px;color:var(--text-2);line-height:1.5}
+  .conn{display:grid;place-items:center;color:var(--line-2);font-size:18px}
+  .conn.on{color:var(--cc)}
+
+  /* cc preview */
+  .preview{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text-2);white-space:pre-wrap;border-left:3px solid var(--cc)}
+  .preview .new{color:var(--ok);font-weight:700}
+  .files{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+  .files span{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--cc-soft);color:#1c4ec4;
+    border-radius:6px;padding:3px 8px}
+
+  /* codex issues */
+  .vbadge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:750;border-radius:999px;padding:4px 10px}
+  .vbadge.warn{background:var(--warn-soft);color:#9a5800}
+  .vbadge.ok{background:var(--ok-soft);color:#0f7a37}
+  .issues{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+  .issue{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.45;color:var(--text-2)}
+  .issue .mk{flex:0 0 auto;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:11px;
+    margin-top:1px;border:1.5px solid var(--line-2);color:var(--muted);background:#fff}
+  .issue.fixed{color:var(--muted);text-decoration:line-through;text-decoration-color:#c2c9d4}
+  .issue.fixed .mk{background:var(--ok);border-color:var(--ok);color:#fff}
+  .issue.open .mk{border-color:var(--warn);color:var(--warn)}
+
+  /* verdict ribbon */
+  .verdict{margin-top:16px;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:13px;
+    border:1px solid var(--line);background:var(--surface-2)}
+  .verdict.warn{background:var(--warn-soft);border-color:#f3d9a8}
+  .verdict.ok{background:var(--ok-soft);border-color:#bfe6cc}
+  .verdict .big{font-size:20px;line-height:1}
+  .verdict .tx b{display:block;font-size:13.5px;font-weight:760}
+  .verdict .tx span{display:block;font-size:12.5px;color:var(--text-2);margin-top:1px}
+
+  /* finale */
+  .finale{text-align:center;padding:30px 20px 24px}
+  .finale .fb{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 14px;
+    font-size:30px;background:var(--ok-soft);color:var(--ok);border:2px solid #bfe6cc}
+  .finale h2{margin:0 0 6px;font-size:23px;font-weight:800}
+  .finale p{margin:0 auto;max-width:50ch;color:var(--text-2);font-size:14px}
+  .finale .sum{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .finale .sum span{font-size:12px;font-weight:650;color:var(--text-2);background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:6px 13px;box-shadow:var(--shadow)}
+
+  /* convergence */
+  .conv{background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:18px 22px;margin-top:16px}
+  .conv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .conv-head h3{margin:0;font-size:14px;font-weight:720}
+  .conv-head .hint{font-size:12px;color:var(--muted)}
+  .bars{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:end;height:120px}
+  .barc{display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .barc .col{width:54px;max-width:100%;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,#f6b13e,#e07a0b);
+    height:0;transition:height .6s cubic-bezier(.2,.7,.3,1);position:relative}
+  .barc.ok .col{background:linear-gradient(180deg,#34d27b,#16a34a)}
+  .barc .col .n{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:14px;font-weight:800;color:var(--text)}
+  .barc .lab{font-size:12px;color:var(--text-2);font-weight:650}
+  .barc.active .lab{color:var(--cc);font-weight:760}
+
+  .foot{margin-top:22px;text-align:center;font-size:12px;color:var(--muted);line-height:1.6}
+  .foot b{color:var(--text-2)}
+
+  @media(max-width:920px){
+    .flow{grid-template-columns:1fr;gap:10px}
+    .conn{transform:rotate(90deg);height:24px}
+    .bars{height:96px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">D</div>
+      <div>
+        <h1>Dual 协作 · 多轮收敛</h1>
+        <p>Claude Code 干活、Codex 把关、Orchestrator 协调 —— 看三方怎么把一件事磨到位。</p>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="tag">演示原型 · 自动播放</span>
+      <button class="btn" id="prev"><span class="ic">◀</span>上一轮</button>
+      <button class="btn primary" id="play"><span class="ic" id="playIc">⏸</span><span id="playTx">暂停</span></button>
+      <button class="btn" id="next">下一轮<span class="ic">▶</span></button>
+    </div>
+  </header>
+
+  <section class="task">
+    <div class="left">
+      <div class="eb">本次任务</div>
+      <h2>治疗记录上传 · 引导文案与校验</h2>
+      <div class="meta">实现阶段 · cancer-clinic · 三方协作演示</div>
+    </div>
+    <div class="right">
+      <div class="stat"><b>3</b><span>协作轮次</span></div>
+      <div class="stat"><b>4 → 0</b><span>问题收敛</span></div>
+      <div class="stat"><b>✓</b><span>已通过验收</span></div>
+    </div>
+  </section>
+
+  <div class="stepper" id="stepper"></div>
+
+  <section class="stage">
+    <div class="stage-head">
+      <div></div>
+      <div class="rt">
+        <span id="phaseTx">Claude Code 正在产出</span>
+        <div class="progress"><i id="prog"></i></div>
+      </div>
+    </div>
+    <div id="stageBody"></div>
+  </section>
+
+  <section class="conv">
+    <div class="conv-head">
+      <h3>未解决问题数 · 随轮次收敛</h3>
+      <span class="hint">每一轮 Codex 把关后，问题越来越少，直到通过。</span>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <div class="foot">
+    和"罗列 ledger 字段"的原版相比：这里<b>没有状态码</b>（NEEDS_REVISION / REJECT → REPAIR 全换成了人话），<b>没有内部术语</b>（contract sidecar / gate packet / repair loop），多轮的价值用<b>问题收敛</b>讲清楚，三个角色用<b>固定颜色和口吻</b>像一个团队在协作。点上方按钮或步进器可手动控制。
+  </div>
+</div>
+
+<script>
+const ISSUES=[
+ "空状态文案和设计稿不一致",
+ "超大文件只提示“上传失败”，没说原因",
+ "不支持拖拽批量上传",
+ "失败后没有重试入口",
+];
+const ROUNDS=[
+ { key:"r1", kind:"round", n:1, vLabel:"需修改", vKind:"warn", vCount:4,
+   cc:{title:"上传引导 · 初稿", voice:"我按需求写了上传引导的初稿：拖入文件、空状态提示、上传中进度。",
+       preview:"把文件拖到这里，或点击选择\n支持 JPG / PNG / PDF\n（空状态）还没有记录，上传第一份吧",
+       add:"", files:["UploadCard.tsx","upload-guide.ts"]},
+   orch:{title:"分发审核", voice:"把这次的产出和改动交给 Codex，等它的意见。"},
+   codex:{title:"审核 · 需修改", vLabel:"需修改 · 4 处", vKind:"warn", fixed:[0,0,0,0]},
+   why:"Codex 列了 4 个问题。Orchestrator 把它们整理成修订要求，打回给 Claude Code。" },
+ { key:"r2", kind:"round", n:2, vLabel:"需修改", vKind:"warn", vCount:1,
+   cc:{title:"上传引导 · 修订", voice:"按意见改了 3 处：空状态文案对齐设计稿、支持拖拽批量、加了失败重试入口。",
+       preview:"把文件拖到这里，或点击选择（可一次选多个）\n支持 JPG / PNG / PDF\n（空状态）还没有记录，上传第一份吧\n上传失败？点这里重试",
+       add:"新增：拖拽批量 · 失败重试", files:["UploadCard.tsx","upload-guide.ts"]},
+   orch:{title:"再分发审核", voice:"把修订版再次交给 Codex 复查。"},
+   codex:{title:"复查 · 还剩 1 处", vLabel:"需修改 · 1 处", vKind:"warn", fixed:[1,0,1,1]},
+   why:"还剩 1 处：超大文件仍只提示“上传失败”，没说原因。Orchestrator 再打回一次。" },
+ { key:"r3", kind:"round", n:3, vLabel:"通过", vKind:"ok", vCount:0,
+   cc:{title:"上传引导 · 终稿", voice:"补完最后一条：按文件大小给出具体原因和压缩建议。",
+       preview:"该文件 8.2MB，超过了 2MB 上限。\n请压缩到 2MB 以内再上传。",
+       add:"新增：超大文件按大小给具体原因", files:["UploadCard.tsx","upload-guide.ts","UploadCard.test.tsx"]},
+   orch:{title:"分发终审", voice:"终稿交给 Codex 做最后审查。"},
+   codex:{title:"终审 · 通过", vLabel:"通过 ✓ · 0 问题", vKind:"ok", fixed:[1,1,1,1]},
+   why:"全部问题已解决。Codex 验收通过，Orchestrator 把成果收口。" },
+ { key:"done", kind:"finale" }
+];
+const $=id=>document.getElementById(id);
+let idx=0, phase=0, playing=true, phaseTimer=null, roundTimer=null;
+const PHASE_MS=950, HOLD_AFTER=420;
+
+function phaseText(r,ph){
+  if(r.kind==="finale") return "交付收口";
+  return ["Claude Code 正在产出","Orchestrator 正在协调","Codex 正在把关","Orchestrator 正在判定"][ph];
+}
+
+function renderStepper(){
+  const h=$("stepper");h.innerHTML="";
+  ROUNDS.forEach((r,i)=>{
+    const last=i===ROUNDS.length-1;
+    const d=document.createElement("div");
+    d.className="step"+(i===idx?" active":"")+(r.kind==="finale"?" done":"");
+    const num=r.kind==="finale"?"✓":r.n;
+    const t1=r.kind==="finale"?"交付":`第 ${r.n} 轮`;
+    const t2=r.kind==="finale"?"合并 / 发 PR":(r.vKind==="ok"?`通过 · 0 问题`:`需修改 · ${r.vCount} 处`);
+    d.innerHTML=`<div class="num">${num}</div><div class="txt"><b>${t1}</b><span>${t2}</span></div>${last?"":'<div class="sep"></div>'}`;
+    d.onclick=()=>{idx=i;phase=0;render();rearm()};
+    h.appendChild(d);
+  });
+}
+
+function issueList(fixed){
+  return ISSUES.map((t,i)=>`<div class="issue ${fixed[i]?"fixed":"open"}"><span class="mk">${fixed[i]?"✓":"!"}</span><span>${t}</span></div>`).join("");
+}
+
+function roleCC(c){
+  const add=c.add?`<div class="preview"><span class="new">+ ${c.add}</span>\n${escapeHtml(c.preview)}</div>`:`<div class="preview">${escapeHtml(c.preview)}</div>`;
+  return `<div class="role cc" data-role="0">
+    <div class="role-head"><div class="av cc">C</div><div class="who"><b>Claude Code</b><span>动手 · 产出</span></div></div>
+    <div class="label">${escapeHtml(c.title)}</div>
+    <p class="desc">${escapeHtml(c.voice)}</p>
+    ${add}
+    <div class="files">${c.files.map(f=>`<span>${escapeHtml(f)}</span>`).join("")}</div>
+  </div>`;
+}
+function roleOrch(o){
+  return `<div class="role orch" data-role="1">
+    <div class="role-head"><div class="av orch">O</div><div class="who"><b>Orchestrator</b><span>协调 · 推进</span></div></div>
+    <div class="label">${escapeHtml(o.title)}</div>
+    <p class="desc">${escapeHtml(o.voice)}</p>
+    <p class="desc" style="margin-top:auto;color:var(--orch);font-weight:600">→ 交给 Codex 把关</p>
+  </div>`;
+}
+function roleCodex(c){
+  return `<div class="role codex" data-role="2">
+    <div class="role-head"><div class="av codex">X</div><div class="who"><b>Codex</b><span>把关 · 审查</span></div></div>
+    <div class="label">${escapeHtml(c.title)}</div>
+    <div><span class="vbadge ${c.vKind}">${escapeHtml(c.vLabel)}</span></div>
+    <div class="issues">${issueList(c.fixed)}</div>
+  </div>`;
+}
+
+function renderStage(){
+  const h=$("stageBody");const r=ROUNDS[idx];
+  if(r.kind==="finale"){
+    h.innerHTML=`<div class="finale">
+      <div class="fb">✓</div>
+      <h2>验收通过 · 进入交付</h2>
+      <p>Orchestrator 汇总本次成果：3 轮协作，4 个问题全部收敛。准备合并到主干 / 发起 PR。</p>
+      <div class="sum">
+        <span>3 轮协作</span><span>Claude 产出 3 版</span><span>Codex 审查 3 次</span><span>4 个问题 → 0</span>
+      </div>
+    </div>`;
+    return;
+  }
+  h.innerHTML=`<div class="flow">
+    ${roleCC(r.cc)}
+    <div class="conn">▶</div>
+    ${roleOrch(r.orch)}
+    <div class="conn">▶</div>
+    ${roleCodex(r.codex)}
+  </div>
+  <div class="verdict ${r.vKind}">
+    <div class="big">${r.vKind==="ok"?"✓":"↻"}</div>
+    <div class="tx"><b>${r.vKind==="ok"?"通过，进入交付":`需修改 · 回到 Claude Code`}</b><span>${escapeHtml(r.why)}</span></div>
+  </div>`;
+}
+
+function renderBars(){
+  const h=$("bars");h.innerHTML="";
+  ROUNDS.filter(r=>r.kind==="round").forEach((r,i)=>{
+    const realIdx=ROUNDS.indexOf(r);
+    const pct=r.vCount===0?6:(r.vCount/4*100);
+    const d=document.createElement("div");
+    d.className="barc "+(r.vKind==="ok"?"ok":"")+(realIdx===idx?" active":"");
+    d.innerHTML=`<div class="col" style="height:0%"><span class="n">${r.vCount}</span></div><div class="lab">第 ${r.n} 轮</div>`;
+    h.appendChild(d);
+    requestAnimationFrame(()=>{d.querySelector(".col").style.height=pct+"%"});
+  });
+}
+
+function spotlight(){
+  const r=ROUNDS[idx];
+  document.querySelectorAll(".role").forEach(el=>el.classList.remove("spot"));
+  if(r.kind!=="finale" && phase<3){
+    const map=["0","1","2"];
+    const el=document.querySelector(`.role[data-role="${map[phase]}"]`);
+    if(el) el.classList.add("spot");
+  }
+}
+
+function render(){
+  renderStepper();renderStage();renderBars();spotlight();
+  $("phaseTx").textContent=phaseText(ROUNDS[idx],phase);
+}
+
+function setProgress(p){$("prog").style.width=Math.max(0,Math.min(100,p))+"%"}
+
+function tick(){
+  const r=ROUNDS[idx];
+  setProgress(0);
+  // animate progress across the phase
+  let start=null;
+  const dur=PHASE_MS;
+  const stepP=ts=>{ if(!start)start=ts; const k=Math.min(1,(ts-start)/dur); setProgress(k*100);
+    if(k<1){phaseRAF=requestAnimationFrame(stepP)} };
+  let phaseRAF=requestAnimationFrame(stepP);
+  $("phaseTx").textContent=phaseText(r,phase);
+  spotlight();
+  phaseTimer=setTimeout(()=>{
+    phase++;
+    if(r.kind==="finale"){ phase=0; next(); rearm(); return; }
+    if(phase>=4){ phase=0; next(); }
+    rearm();
+  }, PHASE_MS+HOLD_AFTER);
+}
+
+function next(){ idx=(idx+1)%ROUNDS.length; phase=0; render(); }
+function prev(){ idx=(idx-1+ROUNDS.length)%ROUNDS.length; phase=0; render(); }
+
+function rearm(){
+  clearTimeout(phaseTimer);
+  if(playing) tick(); else {setProgress(0); $("phaseTx").textContent=phaseText(ROUNDS[idx],phase); spotlight();}
+}
+
+function setPlay(on){ playing=on; $("playIc").textContent=on?"⏸":"▶"; $("playTx").textContent=on?"暂停":"播放"; rearm(); }
+
+$("play").onclick=()=>setPlay(!playing);
+$("next").onclick=()=>{next();rearm()};
+$("prev").onclick=()=>{prev();rearm()};
+
+function escapeHtml(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
+
+render();
+rearm();
+</script>
+</body>
+</html>

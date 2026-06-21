@@ -26,6 +26,7 @@ public final class TraceCommand implements Callable<Integer> {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private final RunUsageProjection usageProjection = new RunUsageProjection();
 
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
@@ -139,7 +140,7 @@ public final class TraceCommand implements Callable<Integer> {
                         + text(run.nodeId()) + "  "
                         + text(run.status()) + "  "
                         + run.durationMs() + "ms  "
-                        + tokenLabel(run));
+                        + tokenLabel(paths, run));
             }
         }
         printRunMetadataWarnings(runListing.warnings());
@@ -412,13 +413,16 @@ public final class TraceCommand implements Callable<Integer> {
                 .toList();
     }
 
-    private String tokenLabel(RunMetadata run) {
-        if (run.usage() == null) {
+    private String tokenLabel(WorkstreamPaths paths, RunMetadata run) {
+        var usage = usageProjection.usageOrEstimate(paths, run);
+        if (usage == null) {
             return "tokens=-";
         }
-        return "tokens=" + run.usage().totalTokens()
-                + " in=" + run.usage().inputTokens()
-                + " out=" + run.usage().outputTokens();
+        var source = usage.source() == null || usage.source().isBlank() ? "" : " source=" + usage.source();
+        return "tokens=" + usage.totalTokens()
+                + " in=" + usage.inputTokens()
+                + " out=" + usage.outputTokens()
+                + source;
     }
 
     private void printRunMetadataWarnings(List<RunMetadataReader.RunMetadataWarning> warnings) {
