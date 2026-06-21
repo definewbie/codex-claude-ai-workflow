@@ -340,18 +340,16 @@ final class MetricsProjectionWriter {
 
     private Map<String, Object> estimatedUsage(WorkstreamPaths paths, Map<String, Object> run) throws IOException {
         var promptTokens = estimatedTokens(paths, text(run.get("promptMetadataPath")));
-        var transcriptTokens = estimatedTokens(paths, text(run.get("transcriptMetadataPath")));
         var outputTokens = estimatedTokens(paths, text(run.get("outputMetadataPath")));
-        var visibleOutputTokens = transcriptTokens > 0 ? transcriptTokens : outputTokens;
-        if (promptTokens == 0 && visibleOutputTokens == 0) {
+        if (promptTokens == 0 && outputTokens == 0) {
             return Map.of();
         }
         var usage = new LinkedHashMap<String, Object>();
         usage.put("inputTokens", promptTokens);
-        usage.put("outputTokens", visibleOutputTokens);
+        usage.put("outputTokens", outputTokens);
         usage.put("cachedReadTokens", 0L);
         usage.put("cachedWriteTokens", 0L);
-        usage.put("totalTokens", promptTokens + visibleOutputTokens);
+        usage.put("totalTokens", promptTokens + outputTokens);
         usage.put("source", "artifact_estimate");
         return usage;
     }
@@ -490,11 +488,11 @@ final class MetricsProjectionWriter {
         builder.append("- Cached Write Tokens: ").append(longValue(total.get("cachedWriteTokens"))).append("\n");
         builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n\n");
         builder.append("### Token Usage By Step\n\n");
-        builder.append("| Node | Agent | Status | Source | Input | Output | Context | Prompt Overhead | Adapter Overhead | Total |\n");
-        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        builder.append("| Node | Agent | Status | Source | Input | Output | Transcript | Context | Prompt Overhead | Adapter Overhead | Total |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
         var runs = tokenMetrics == null ? List.<Map<String, Object>>of() : mapList(tokenMetrics.get("runs"));
         if (runs.isEmpty()) {
-            builder.append("| N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 | 0 |\n");
+            builder.append("| N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 | 0 | 0 |\n");
         } else {
             for (var run : runs) {
                 var usage = map(run.get("usage"));
@@ -505,6 +503,7 @@ final class MetricsProjectionWriter {
                         .append(" | ").append(nonBlank(text(usage.get("source")), Boolean.TRUE.equals(run.get("measured")) ? "acpx_stream" : "unknown"))
                         .append(" | ").append(longValue(usage.get("inputTokens")))
                         .append(" | ").append(longValue(usage.get("outputTokens")))
+                        .append(" | ").append(longValue(breakdown.get("transcriptTokens")))
                         .append(" | ").append(longValue(breakdown.get("contextTokens")))
                         .append(" | ").append(longValue(breakdown.get("promptOverheadTokens")))
                         .append(" | ").append(longValue(breakdown.get("adapterOverheadTokens")))

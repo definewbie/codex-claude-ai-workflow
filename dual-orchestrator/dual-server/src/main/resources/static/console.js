@@ -1028,11 +1028,19 @@ function tokenRunBreakdown(tokens) {
     const total = numberValue(usage.totalTokens);
     const source = usage.source || (run.measured ? "acpx_stream" : run.estimated ? "artifact_estimate" : "unknown");
     const contextTokens = numberValue(breakdown.contextTokens);
+    const transcriptTokens = numberValue(breakdown.transcriptTokens);
     const overheadTokens = numberValue(breakdown.promptOverheadTokens) + numberValue(breakdown.adapterOverheadTokens);
+    const detailParts = [
+      escapeHtml(run.agent || "-"),
+      escapeHtml(source),
+      `context ${contextTokens ? formatNumber(contextTokens) : "-"}`,
+      `transcript ${transcriptTokens ? formatNumber(transcriptTokens) : "-"}`,
+      `overhead ${overheadTokens ? formatNumber(overheadTokens) : "-"}`,
+    ];
     return `
       <div class="token-row">
         <span>${escapeHtml(run.nodeId || run.nodeDefinitionId || "-")}</span>
-        <span>${escapeHtml(run.agent || "-")} · ${escapeHtml(source)} · context ${contextTokens ? formatNumber(contextTokens) : "-"} · overhead ${overheadTokens ? formatNumber(overheadTokens) : "-"}</span>
+        <span>${detailParts.join(" · ")}</span>
         <strong>${total ? formatNumber(total) : "-"}</strong>
       </div>
     `;

@@ -22,8 +22,11 @@ import java.util.regex.Pattern;
  * <p>关键步骤：</p>
  * <ol>
  *     <li>从 stderr 的 {@code [acpx] session ... (<uuid>)} 中定位 stream 文件。</li>
- *     <li>在 stream 中按 prompt 文本匹配本次 {@code session/prompt}。</li>
- *     <li>只读取同一 JSON-RPC request id 的 {@code result.usage}。</li>
+ *     <li>优先在 stream 中按 prompt 文本匹配本次 {@code session/prompt}。</li>
+ *     <li>如果 acpx/Claude Code 改写 prompt 导致无法等值匹配，则回退读取最新
+ *     {@code session/prompt} 对应的 {@code result.usage}。</li>
+ *     <li>如果某个 ACP adapter 不返回 {@code result.usage}，则使用最新
+ *     {@code usage_update.used} 作为 adapter 观测到的总 usage。</li>
  * </ol>
  *
  * <p>这个类只产出外部 adapter 的结构化观测事实，不参与 workflow 路由。</p>
@@ -85,6 +88,10 @@ final class AcpxUsageReader {
 
     private Optional<AcpxUsage> readMatchingUsage(Path streamPath, String promptText) throws IOException {
         String matchedRequestId = null;
+        String latestPromptRequestId = null;
+        AcpxUsage exactUsage = null;
+        AcpxUsage fallbackUsage = null;
+        AcpxUsage usageUpdateFallback = null;
         BigDecimal costAmount = null;
         String costCurrency = "";
         for (var line : Files.readAllLines(streamPath)) {
@@ -95,11 +102,11 @@ final class AcpxUsageReader {
             if (node == null) {
                 continue;
             }
-            if (matchedRequestId == null && isMatchingPrompt(node, promptText)) {
-                matchedRequestId = text(node.get("id"));
-                continue;
-            }
-            if (matchedRequestId == null) {
+            if (isPrompt(node)) {
+                latestPromptRequestId = text(node.get("id"));
+                if (matchedRequestId == null && isMatchingPrompt(node, promptText)) {
+                    matchedRequestId = latestPromptRequestId;
+                }
                 continue;
             }
             if (isUsageUpdate(node)) {
@@ -108,27 +115,61 @@ final class AcpxUsageReader {
                     costAmount = decimal(cost.get("amount"));
                     costCurrency = text(cost.get("currency"));
                 }
+                var used = number(node.at("/params/update/used"));
+                if (used > 0) {
+                    usageUpdateFallback = new AcpxUsage(
+                            0,
+                            0,
+                            0,
+                            0,
+                            used,
+                            costAmount,
+                            costCurrency,
+                            "acpx_usage_update"
+                    );
+                }
             }
-            if (matchedRequestId.equals(text(node.get("id"))) && node.at("/result/usage").isObject()) {
-                var usage = node.at("/result/usage");
-                return Optional.of(new AcpxUsage(
-                        number(usage.get("inputTokens")),
-                        number(usage.get("outputTokens")),
-                        number(usage.get("cachedReadTokens")),
-                        number(usage.get("cachedWriteTokens")),
-                        number(usage.get("totalTokens")),
-                        costAmount,
-                        costCurrency,
-                        "acpx_stream"
-                ));
+            if (node.at("/result/usage").isObject()) {
+                var requestId = text(node.get("id"));
+                var usage = usageFrom(node, costAmount, costCurrency);
+                if (matchedRequestId != null && matchedRequestId.equals(requestId)) {
+                    exactUsage = usage;
+                }
+                if (latestPromptRequestId != null && latestPromptRequestId.equals(requestId)) {
+                    fallbackUsage = usage;
+                }
             }
         }
-        return Optional.empty();
+        if (exactUsage != null) {
+            return Optional.of(exactUsage);
+        }
+        if (fallbackUsage != null) {
+            return Optional.of(fallbackUsage);
+        }
+        return Optional.ofNullable(usageUpdateFallback);
+    }
+
+    private boolean isPrompt(JsonNode node) {
+        return "session/prompt".equals(text(node.get("method")));
     }
 
     private boolean isMatchingPrompt(JsonNode node, String promptText) {
         return "session/prompt".equals(text(node.get("method")))
                 && promptText.equals(text(node.at("/params/prompt/0/text")));
+    }
+
+    private AcpxUsage usageFrom(JsonNode node, BigDecimal costAmount, String costCurrency) {
+        var usage = node.at("/result/usage");
+        return new AcpxUsage(
+                number(usage.get("inputTokens")),
+                number(usage.get("outputTokens")),
+                number(usage.get("cachedReadTokens")),
+                number(usage.get("cachedWriteTokens")),
+                number(usage.get("totalTokens")),
+                costAmount,
+                costCurrency,
+                "acpx_stream"
+        );
     }
 
     private boolean isUsageUpdate(JsonNode node) {

@@ -47,6 +47,9 @@ class MetricsProjectionWriterTest {
         writeArtifactMetadata(paths, mapper, "run-2", "outputMetadataPath", "output.json", 40);
         writeContextPackageMetadata(paths, mapper, "context-design-review.json", "design.codex_review");
         writeRunWithoutUsage(paths, "run-3", "claude", "plan.claude_plan");
+        writeArtifactMetadata(paths, mapper, "run-3", "promptMetadataPath", "prompt.json", 1000);
+        writeArtifactMetadata(paths, mapper, "run-3", "outputMetadataPath", "output.json", 200);
+        writeArtifactMetadata(paths, mapper, "run-3", "transcriptMetadataPath", "transcript.json", 5000);
 
         new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
 
@@ -54,19 +57,20 @@ class MetricsProjectionWriterTest {
         var tokenMetrics = map(metrics.get("tokenMetrics"));
         assertEquals(3, number(tokenMetrics.get("runCount")));
         assertEquals(2, number(tokenMetrics.get("measuredRunCount")));
-        assertEquals(0, number(tokenMetrics.get("estimatedRunCount")));
+        assertEquals(1, number(tokenMetrics.get("estimatedRunCount")));
 
         var total = map(tokenMetrics.get("total"));
-        assertEquals(180, number(total.get("inputTokens")));
-        assertEquals(50, number(total.get("outputTokens")));
+        assertEquals(1180, number(total.get("inputTokens")));
+        assertEquals(250, number(total.get("outputTokens")));
         assertEquals(10, number(total.get("cachedReadTokens")));
         assertEquals(5, number(total.get("cachedWriteTokens")));
-        assertEquals(245, number(total.get("totalTokens")));
+        assertEquals(1445, number(total.get("totalTokens")));
         assertEquals("0.24", map(total.get("costByCurrency")).get("USD").toString());
 
         var byNode = map(tokenMetrics.get("byNode"));
         assertEquals(130, number(map(byNode.get("intake.claude_brainstorm")).get("totalTokens")));
         assertEquals(115, number(map(byNode.get("design.codex_review")).get("totalTokens")));
+        assertEquals(1200, number(map(byNode.get("plan.claude_plan")).get("totalTokens")));
 
         var runs = list(tokenMetrics.get("runs"));
         var codexRun = runs.stream()
@@ -90,10 +94,10 @@ class MetricsProjectionWriterTest {
 
         var markdown = Files.readString(paths.workstreamMetricsMarkdown());
         assertTrue(markdown.contains("## Token Metrics"));
-        assertTrue(markdown.contains("- Estimated Runs: 0"));
-        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | acpx_stream | 100 | 20 | 0 | 0 | 100 | 130 |"));
-        assertTrue(markdown.contains("| design.codex_review | codex | completed | acpx_stream | 80 | 30 | 600 | 300 | 0 | 115 |"));
-        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | unknown | 0 | 0 | 0 | 0 | 0 | 0 |"));
+        assertTrue(markdown.contains("- Estimated Runs: 1"));
+        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | acpx_stream | 100 | 20 | 0 | 0 | 0 | 100 | 130 |"));
+        assertTrue(markdown.contains("| design.codex_review | codex | completed | acpx_stream | 80 | 30 | 0 | 600 | 300 | 0 | 115 |"));
+        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | artifact_estimate | 1000 | 200 | 5000 | 0 | 1000 | 0 | 1200 |"));
         assertTrue(markdown.contains("### Top Context Sections"));
         assertTrue(markdown.contains("| design.codex_review | review | recent_agent_outputs | 420 | 900 | true | false |"));
     }
