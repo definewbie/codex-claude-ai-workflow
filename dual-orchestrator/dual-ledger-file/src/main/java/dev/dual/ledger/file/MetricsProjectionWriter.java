@@ -153,6 +153,7 @@ final class MetricsProjectionWriter {
         var byAgent = new LinkedHashMap<String, UsageMetric>();
         var byNode = new LinkedHashMap<String, UsageMetric>();
         var runs = new ArrayList<Map<String, Object>>();
+        var contextPackages = contextPackagesByTargetNode(paths);
         long runCount = 0;
         long measuredRunCount = 0;
         long estimatedRunCount = 0;
@@ -173,6 +174,9 @@ final class MetricsProjectionWriter {
                 item.put("agent", agent);
                 item.put("status", text(run.get("status")));
                 item.put("durationMs", longValue(run.get("durationMs")));
+                var promptTokens = estimatedTokens(paths, text(run.get("promptMetadataPath")));
+                var outputArtifactTokens = estimatedTokens(paths, text(run.get("outputMetadataPath")));
+                var transcriptTokens = estimatedTokens(paths, text(run.get("transcriptMetadataPath")));
                 var estimated = false;
                 if (usage.isEmpty()) {
                     usage = estimatedUsage(paths, run);
@@ -196,6 +200,13 @@ final class MetricsProjectionWriter {
                     var usageMap = metric.toMap();
                     usageMap.put("source", nonBlank(text(usage.get("source")), estimated ? "artifact_estimate" : "acpx_stream"));
                     item.put("usage", usageMap);
+                    item.put("breakdown", promptBreakdown(
+                            promptTokens,
+                            outputArtifactTokens,
+                            transcriptTokens,
+                            usage,
+                            contextPackages.get(nodeId)
+                    ));
                 }
                 runs.add(item);
             }
@@ -208,7 +219,123 @@ final class MetricsProjectionWriter {
         result.put("byAgent", usageMap(byAgent));
         result.put("byNode", usageMap(byNode));
         result.put("runs", runs);
+        result.put("contextPackages", summarizeContextPackages(contextPackages));
+        result.put("topContextSections", topContextSections(contextPackages, 10));
         return result;
+    }
+
+    private Map<String, Map<String, Object>> contextPackagesByTargetNode(WorkstreamPaths paths) throws IOException {
+        var contextDir = paths.workstreamDir().resolve("context");
+        if (!Files.isDirectory(contextDir)) {
+            return Map.of();
+        }
+        var byTarget = new LinkedHashMap<String, Map<String, Object>>();
+        try (var stream = Files.list(contextDir)) {
+            for (var path : stream
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().endsWith(".json"))
+                    .sorted(Comparator.comparing(file -> file.getFileName().toString()))
+                    .toList()) {
+                var metadata = objectMapper.readValue(path.toFile(), MAP_TYPE);
+                var targetNode = text(metadata.get("targetNode"));
+                if (targetNode.isBlank()) {
+                    continue;
+                }
+                metadata.put("metadataPath", paths.workspaceRoot().relativize(path).toString());
+                byTarget.put(targetNode, metadata);
+            }
+        }
+        return byTarget;
+    }
+
+    private Map<String, Object> promptBreakdown(
+            long promptTokens,
+            long outputArtifactTokens,
+            long transcriptTokens,
+            Map<String, Object> usage,
+            Map<String, Object> contextPackage
+    ) {
+        var contextTokens = longValue(contextPackage == null ? null : contextPackage.get("estimatedTokens"));
+        var inputTokens = longValue(usage.get("inputTokens"));
+        var breakdown = new LinkedHashMap<String, Object>();
+        breakdown.put("promptTokens", promptTokens);
+        breakdown.put("contextTokens", contextTokens);
+        breakdown.put("promptOverheadTokens", Math.max(0, promptTokens - contextTokens));
+        breakdown.put("adapterOverheadTokens", Math.max(0, inputTokens - promptTokens));
+        breakdown.put("outputArtifactTokens", outputArtifactTokens);
+        breakdown.put("transcriptTokens", transcriptTokens);
+        if (contextPackage != null && !contextPackage.isEmpty()) {
+            breakdown.put("contextPackage", contextPackage.get("contextPackage"));
+            breakdown.put("contextPackageMetadata", contextPackage.get("metadataPath"));
+            breakdown.put("contextProfile", text(contextPackage.get("profile")));
+            breakdown.put("contextBudget", longValue(contextPackage.get("tokenBudget")));
+            breakdown.put("contextWithinBudget", Boolean.TRUE.equals(contextPackage.get("withinBudget")));
+            breakdown.put("topSections", topSections(contextPackage, 5));
+        } else {
+            breakdown.put("contextPackage", "");
+            breakdown.put("contextPackageMetadata", "");
+            breakdown.put("contextProfile", "");
+            breakdown.put("contextBudget", 0L);
+            breakdown.put("contextWithinBudget", false);
+            breakdown.put("topSections", List.of());
+        }
+        return breakdown;
+    }
+
+    private List<Map<String, Object>> summarizeContextPackages(Map<String, Map<String, Object>> packagesByTargetNode) {
+        return packagesByTargetNode.entrySet().stream()
+                .<Map<String, Object>>map(entry -> {
+                    var metadata = entry.getValue();
+                    var item = new LinkedHashMap<String, Object>();
+                    item.put("targetNode", entry.getKey());
+                    item.put("builderNode", text(metadata.get("builderNode")));
+                    item.put("profile", text(metadata.get("profile")));
+                    item.put("estimatedTokens", longValue(metadata.get("estimatedTokens")));
+                    item.put("tokenBudget", longValue(metadata.get("tokenBudget")));
+                    item.put("withinBudget", Boolean.TRUE.equals(metadata.get("withinBudget")));
+                    item.put("metadataPath", text(metadata.get("metadataPath")));
+                    item.put("topSections", topSections(metadata, 5));
+                    return item;
+                })
+                .toList();
+    }
+
+    private List<Map<String, Object>> topContextSections(Map<String, Map<String, Object>> packagesByTargetNode, int limit) {
+        var sections = new ArrayList<Map<String, Object>>();
+        for (var entry : packagesByTargetNode.entrySet()) {
+            var metadata = entry.getValue();
+            for (var section : mapList(metadata.get("sections"))) {
+                var item = new LinkedHashMap<String, Object>();
+                item.put("targetNode", entry.getKey());
+                item.put("builderNode", text(metadata.get("builderNode")));
+                item.put("profile", text(metadata.get("profile")));
+                item.put("section", text(section.get("name")));
+                item.put("renderedTokens", longValue(section.get("renderedTokens")));
+                item.put("originalTokens", longValue(section.get("originalTokens")));
+                item.put("degraded", Boolean.TRUE.equals(section.get("degraded")));
+                item.put("dropped", Boolean.TRUE.equals(section.get("dropped")));
+                sections.add(item);
+            }
+        }
+        sections.sort(Comparator.comparingLong((Map<String, Object> item) -> longValue(item.get("renderedTokens"))).reversed());
+        return sections.stream().limit(limit).toList();
+    }
+
+    private List<Map<String, Object>> topSections(Map<String, Object> contextPackage, int limit) {
+        return mapList(contextPackage.get("sections")).stream()
+                .sorted(Comparator.comparingLong((Map<String, Object> section) -> longValue(section.get("renderedTokens"))).reversed())
+                .limit(limit)
+                .<Map<String, Object>>map(section -> {
+                    var item = new LinkedHashMap<String, Object>();
+                    item.put("section", text(section.get("name")));
+                    item.put("renderedTokens", longValue(section.get("renderedTokens")));
+                    item.put("originalTokens", longValue(section.get("originalTokens")));
+                    item.put("softBudgetTokens", longValue(section.get("softBudgetTokens")));
+                    item.put("degraded", Boolean.TRUE.equals(section.get("degraded")));
+                    item.put("dropped", Boolean.TRUE.equals(section.get("dropped")));
+                    return item;
+                })
+                .toList();
     }
 
     private Map<String, Object> estimatedUsage(WorkstreamPaths paths, Map<String, Object> run) throws IOException {
@@ -363,23 +490,43 @@ final class MetricsProjectionWriter {
         builder.append("- Cached Write Tokens: ").append(longValue(total.get("cachedWriteTokens"))).append("\n");
         builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n\n");
         builder.append("### Token Usage By Step\n\n");
-        builder.append("| Node | Agent | Status | Source | Input | Output | Cached Read | Cached Write | Total |\n");
-        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        builder.append("| Node | Agent | Status | Source | Input | Output | Context | Prompt Overhead | Adapter Overhead | Total |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
         var runs = tokenMetrics == null ? List.<Map<String, Object>>of() : mapList(tokenMetrics.get("runs"));
         if (runs.isEmpty()) {
-            builder.append("| N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 |\n");
+            builder.append("| N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 | 0 |\n");
         } else {
             for (var run : runs) {
                 var usage = map(run.get("usage"));
+                var breakdown = map(run.get("breakdown"));
                 builder.append("| ").append(run.get("nodeId"))
                         .append(" | ").append(run.get("agent"))
                         .append(" | ").append(run.get("status"))
                         .append(" | ").append(nonBlank(text(usage.get("source")), Boolean.TRUE.equals(run.get("measured")) ? "acpx_stream" : "unknown"))
                         .append(" | ").append(longValue(usage.get("inputTokens")))
                         .append(" | ").append(longValue(usage.get("outputTokens")))
-                        .append(" | ").append(longValue(usage.get("cachedReadTokens")))
-                        .append(" | ").append(longValue(usage.get("cachedWriteTokens")))
+                        .append(" | ").append(longValue(breakdown.get("contextTokens")))
+                        .append(" | ").append(longValue(breakdown.get("promptOverheadTokens")))
+                        .append(" | ").append(longValue(breakdown.get("adapterOverheadTokens")))
                         .append(" | ").append(longValue(usage.get("totalTokens")))
+                        .append(" |\n");
+            }
+        }
+        builder.append("\n### Top Context Sections\n\n");
+        builder.append("| Target Node | Profile | Section | Rendered | Original | Degraded | Dropped |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- |\n");
+        var topSections = tokenMetrics == null ? List.<Map<String, Object>>of() : mapList(tokenMetrics.get("topContextSections"));
+        if (topSections.isEmpty()) {
+            builder.append("| N/A | N/A | N/A | 0 | 0 | false | false |\n");
+        } else {
+            for (var section : topSections) {
+                builder.append("| ").append(section.get("targetNode"))
+                        .append(" | ").append(section.get("profile"))
+                        .append(" | ").append(section.get("section"))
+                        .append(" | ").append(longValue(section.get("renderedTokens")))
+                        .append(" | ").append(longValue(section.get("originalTokens")))
+                        .append(" | ").append(section.get("degraded"))
+                        .append(" | ").append(section.get("dropped"))
                         .append(" |\n");
             }
         }

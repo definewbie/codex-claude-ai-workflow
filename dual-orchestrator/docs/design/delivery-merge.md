@@ -138,8 +138,10 @@ Delivery
 - Last failure:
 ```
 
-The first UI version may show the command instead of invoking it. Button support
-can follow once the CLI and ledger model are stable.
+The operator console may invoke the explicit merge action directly. The button
+still calls the same delivery boundary as the CLI: it writes the delivery ledger
+and applies the reviewed patch to the target repo index, but it does not commit,
+push, or reopen workflow execution.
 
 ## Tests
 

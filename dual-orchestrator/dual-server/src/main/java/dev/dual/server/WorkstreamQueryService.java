@@ -35,11 +35,13 @@ public class WorkstreamQueryService {
     private final ObjectMapper objectMapper;
     private final FileLedgerStore legacyStore;
     private final WorkflowFileLedger workflowLedger;
+    private final DeliveryViewService deliveryViewService;
 
-    public WorkstreamQueryService(ObjectMapper objectMapper) {
+    public WorkstreamQueryService(ObjectMapper objectMapper, DeliveryViewService deliveryViewService) {
         this.objectMapper = objectMapper;
         this.legacyStore = new FileLedgerStore();
         this.workflowLedger = ServerLedgerFactory.create();
+        this.deliveryViewService = deliveryViewService;
     }
 
     public Map<String, Object> status(Path workspaceRoot, String workstreamId) throws IOException {
@@ -83,6 +85,7 @@ public class WorkstreamQueryService {
         if (Files.exists(paths.deliveryMergePlanJson())) {
             response.put("deliveryMerge", objectMapper.readValue(paths.deliveryMergePlanJson().toFile(), MAP_TYPE));
         }
+        response.put("deliveryView", deliveryViewService.view(root, workstreamId));
         return response;
     }
 
@@ -176,6 +179,7 @@ public class WorkstreamQueryService {
         var artifacts = artifacts(root, paths);
         var completionAudit = completionAudit(paths, artifacts);
         var deliveryMerge = readJson(paths.deliveryMergePlanJson());
+        var deliveryView = deliveryViewService.view(root, workstreamId);
         var goalSatisfaction = readJson(paths.goalSatisfactionJson());
         var currentNode = currentNode(nodes, activeNodeIds);
         var latestAgentRuns = latestAgentRuns(root, paths, 6);
@@ -217,6 +221,7 @@ public class WorkstreamQueryService {
         response.put("artifacts", artifacts);
         response.put("completionAudit", completionAudit);
         response.put("deliveryMerge", deliveryMerge);
+        response.put("deliveryView", deliveryView);
         response.put("recoveryAssessment", recoveryAssessment);
         return response;
     }

@@ -40,7 +40,7 @@ class SchedulerServiceTest {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
-        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+        var scheduler = new SchedulerService(queryService(), actionService);
 
         var response = scheduler.tick(tempDir, 10, 1);
 
@@ -68,7 +68,7 @@ class SchedulerServiceTest {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
-        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+        var scheduler = new SchedulerService(queryService(), actionService);
 
         var response = scheduler.tick(tempDir, 10, 1);
 
@@ -92,7 +92,7 @@ class SchedulerServiceTest {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
-        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+        var scheduler = new SchedulerService(queryService(), actionService);
 
         var response = scheduler.tick(tempDir, 10, 1, true);
 
@@ -118,7 +118,7 @@ class SchedulerServiceTest {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
-        var scheduler = new SchedulerService(new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper()), actionService);
+        var scheduler = new SchedulerService(queryService(), actionService);
 
         var response = scheduler.tick(tempDir, 10, 1, true);
 
@@ -134,6 +134,11 @@ class SchedulerServiceTest {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());
         new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, simpleDefinition());
+    }
+
+    private WorkstreamQueryService queryService() {
+        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        return new WorkstreamQueryService(objectMapper, new DeliveryViewService(objectMapper));
     }
 
     private void createWaitingForHumanWorkstream(String workstreamId) throws Exception {

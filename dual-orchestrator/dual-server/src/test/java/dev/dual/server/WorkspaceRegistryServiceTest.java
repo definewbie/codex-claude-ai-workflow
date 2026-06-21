@@ -21,7 +21,8 @@ class WorkspaceRegistryServiceTest {
         var repo = tempDir.resolve("sample-repo");
         Files.createDirectories(repo.resolve(".git"));
         var registry = new OperatorWorkspaceRegistry(tempDir.resolve("operator-workspaces.json"));
-        var service = new WorkspaceRegistryService(registry, new WorkstreamQueryService(new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules()));
+        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+        var service = new WorkspaceRegistryService(registry, new WorkstreamQueryService(objectMapper, new DeliveryViewService(objectMapper)));
 
         var response = service.register(repo);
         var projects = projects(response);

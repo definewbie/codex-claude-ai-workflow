@@ -126,7 +126,7 @@ hard harness constraints.
 | Recovery typed action | Done, keep testing | `RecoveryAssessment` maps typed runtime reasons to explicit operator actions; `StatusCommand`, `SummaryCommand`, and next-action hints consume the shared attention/recovery read model. |
 | Definition/Contract consistency | Done, keep testing | `ContractRegistryTest` loads bundled workflow JSON and checks node/contract existence plus decision/classifier routing outcomes. |
 | Definition/Handler consistency | Done, keep testing | `AcpxWorkflowHandlerRegistryFactoryTest` resolves every bundled workflow node through the centralized handler capability catalog. |
-| Projection read model | Done for CLI/API MVP, P2 UI polish | `trace`, `status`, and overview read models answer "where is it, why stopped, what next" from ledger facts. |
+| Projection read model | Done for CLI/API/UI MVP, keep polishing | `trace`, `status`, overview, and the operator delivery view answer "where is it, why stopped, what next, and how do I deliver" from ledger facts. |
 | Real-case boundary loop | Done for P0 closure, keep as discipline | The closure real case produced two verifier rejections and the workflow routed both through semantic repair without manual rerun. |
 
 ## P1: Long-Running Reliability

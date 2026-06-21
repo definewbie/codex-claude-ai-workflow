@@ -129,7 +129,9 @@ Delivery
 - Last failure:
 ```
 
-第一版 UI 可以先展示命令，不急着做按钮。等 CLI 和 ledger 模型稳定后，再补按钮。
+Operator Console 可以直接触发显式 merge action。这个按钮仍然走和 CLI 相同的
+delivery 边界：写 delivery ledger，把已审查 patch apply 到 target repo index，
+但不自动 commit、push，也不会重新打开 workflow execution。
 
 ## 测试
 

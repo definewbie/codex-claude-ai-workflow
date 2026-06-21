@@ -110,7 +110,7 @@ LLM 可以建议、生成和解释，但主流程不能依赖 LLM “自觉遵�
 | Recovery typed action | Done, keep testing | `RecoveryAssessment` 按 typed runtime reason 输出明确 operator action；`StatusCommand`、`SummaryCommand` 和 next-action hints 复用 shared attention/recovery read model。 |
 | Definition/Contract consistency | Done, keep testing | `ContractRegistryTest` 加载 bundled workflow JSON，校验节点/contract 存在性以及 decision/classifier routing outcomes。 |
 | Definition/Handler consistency | Done, keep testing | `AcpxWorkflowHandlerRegistryFactoryTest` 通过集中的 handler capability catalog 解析每个 bundled workflow 节点。 |
-| Projection read model | CLI/API MVP 已完成，P2 继续优化 UI | `trace`、`status` 和 overview read model 已基于 ledger facts 回答“跑到哪、为什么停、下一步做什么”。 |
+| Projection read model | CLI/API/UI MVP 已完成，继续打磨 | `trace`、`status`、overview 和 operator delivery view 已基于 ledger facts 回答“跑到哪、为什么停、下一步做什么、如何交付”。 |
 | Real-case boundary loop | P0 closure 已验证，继续作为纪律 | closure real-case 产生两次 verifier rejection，workflow 均通过 semantic repair 自动收敛。 |
 
 ## P1：长任务可靠性

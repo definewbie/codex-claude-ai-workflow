@@ -24,15 +24,18 @@ public class WorkstreamApiController {
     private final WorkstreamQueryService queryService;
     private final WorkstreamActionService actionService;
     private final WorkstreamStreamService streamService;
+    private final DeliveryViewService deliveryViewService;
 
     public WorkstreamApiController(
             WorkstreamQueryService queryService,
             WorkstreamActionService actionService,
-            WorkstreamStreamService streamService
+            WorkstreamStreamService streamService,
+            DeliveryViewService deliveryViewService
     ) {
         this.queryService = queryService;
         this.actionService = actionService;
         this.streamService = streamService;
+        this.deliveryViewService = deliveryViewService;
     }
 
     @GetMapping
@@ -105,6 +108,22 @@ public class WorkstreamApiController {
             @RequestParam(defaultValue = "") String workdir
     ) throws Exception {
         return queryService.currentRecovery(workdirPath(workdir), workstreamId);
+    }
+
+    @GetMapping("/{workstreamId}/delivery")
+    public Map<String, Object> delivery(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir
+    ) {
+        return deliveryViewService.view(workdirPath(workdir), workstreamId);
+    }
+
+    @PostMapping("/{workstreamId}/delivery/merge")
+    public Map<String, Object> deliveryMerge(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir
+    ) throws Exception {
+        return deliveryViewService.merge(workdirPath(workdir), workstreamId);
     }
 
     @PostMapping("/{workstreamId}/resume")

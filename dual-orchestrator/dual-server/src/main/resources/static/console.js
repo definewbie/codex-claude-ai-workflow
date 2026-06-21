@@ -479,12 +479,7 @@ function renderEvidence(status) {
       ["建议", "等待系统到达下一个人闸或恢复状态"],
     ], ["运行中不展示 approve/retry 作为主动作。"]);
   } else if (status === "COMPLETED") {
-    left = evidenceCard("交付就绪检查", "这不是新的流程状态，而是终态后的交付前核对清单。", [
-      ["最终验收", state.overview?.acceptance?.finalDecision || "-"],
-      ["目标结果", state.overview?.goalSatisfaction?.domainOutcome || "-"],
-      ["交付状态", deliveryStatus()],
-      ["终态保护", "已完成任务只能查看、导出或显式合并"],
-    ], completionEvidence());
+    left = deliveryEvidenceCard();
   } else {
     left = evidenceCard("当前状态", "尚无可操作状态。", [["状态", status]], []);
   }
@@ -903,6 +898,7 @@ function renderRca(status) {
     acceptance: state.overview?.acceptance || {},
     goalSatisfaction: state.overview?.goalSatisfaction || {},
     deliveryMerge: state.overview?.deliveryMerge || {},
+    deliveryView: state.overview?.deliveryView || {},
   }, null, 2);
 }
 
@@ -971,6 +967,8 @@ function tokenSummary() {
     runCount: numberValue(tokenMetrics.runCount),
     estimatedRunCount: numberValue(tokenMetrics.estimatedRunCount),
     runs: Array.isArray(tokenMetrics.runs) ? tokenMetrics.runs : runs,
+    topContextSections: Array.isArray(tokenMetrics.topContextSections) ? tokenMetrics.topContextSections : [],
+    contextPackages: Array.isArray(tokenMetrics.contextPackages) ? tokenMetrics.contextPackages : [],
   };
 }
 
@@ -999,6 +997,26 @@ function tokenCard(tokens) {
         ${tokenMetric("估算步骤", String(tokens.estimatedRunCount || 0), "artifact estimate")}
       </div>
       <div class="budget"><i style="width:${tokens.budgetPercent}%"></i></div>
+      ${tokenHotspots(tokens)}
+    </div>
+  `;
+}
+
+function tokenHotspots(tokens) {
+  const sections = (tokens.topContextSections || []).slice(0, 4);
+  if (!sections.length) {
+    return `<div class="cap">暂无 context section 级别的 token breakdown；新任务完成 context package 后会自动出现。</div>`;
+  }
+  return `
+    <div class="token-runs">
+      <div class="cap">Context 最大贡献项：用于判断 token 是否被历史输出、输入材料、Git 证据或契约撑大。</div>
+      ${sections.map((section) => `
+        <div class="token-row">
+          <span>${escapeHtml(section.section || "-")}</span>
+          <span>${escapeHtml(section.targetNode || "-")} · ${escapeHtml(section.profile || "-")}</span>
+          <strong>${formatNumber(numberValue(section.renderedTokens))}</strong>
+        </div>
+      `).join("")}
     </div>
   `;
 }
@@ -1006,12 +1024,15 @@ function tokenCard(tokens) {
 function tokenRunBreakdown(tokens) {
   const rows = (tokens.runs || []).slice(-8).map((run) => {
     const usage = run.usage || {};
+    const breakdown = run.breakdown || {};
     const total = numberValue(usage.totalTokens);
     const source = usage.source || (run.measured ? "acpx_stream" : run.estimated ? "artifact_estimate" : "unknown");
+    const contextTokens = numberValue(breakdown.contextTokens);
+    const overheadTokens = numberValue(breakdown.promptOverheadTokens) + numberValue(breakdown.adapterOverheadTokens);
     return `
       <div class="token-row">
         <span>${escapeHtml(run.nodeId || run.nodeDefinitionId || "-")}</span>
-        <span>${escapeHtml(run.agent || "-")} · ${escapeHtml(source)}</span>
+        <span>${escapeHtml(run.agent || "-")} · ${escapeHtml(source)} · context ${contextTokens ? formatNumber(contextTokens) : "-"} · overhead ${overheadTokens ? formatNumber(overheadTokens) : "-"}</span>
         <strong>${total ? formatNumber(total) : "-"}</strong>
       </div>
     `;
@@ -1070,10 +1091,17 @@ function allowedActions(status) {
     ];
   }
   if (status === "COMPLETED") {
-    return [
-      { label: "查看交付差异", kind: "primary", onClick: () => switchView("management") },
-      { label: "打开旧管理面板", kind: "ghost", onClick: openOldPanel },
-    ];
+    const delivery = deliveryView();
+    const actions = [];
+    if (delivery.canMerge) {
+      actions.push({ label: "合回原始仓库", kind: "primary", onClick: mergeDelivery });
+    } else if (delivery.status === "APPLIED") {
+      actions.push({ label: "查看已暂存差异和命令", kind: "primary", onClick: () => switchView("management") });
+    } else {
+      actions.push({ label: "查看交付差异", kind: "primary", onClick: () => switchView("management") });
+    }
+    actions.push({ label: "打开旧管理面板", kind: "ghost", onClick: openOldPanel });
+    return actions;
   }
   return [{ label: "刷新状态", kind: "ghost", onClick: loadSelected }];
 }
@@ -1106,6 +1134,10 @@ function reviseAndRun() {
 
 function retryCurrent() {
   postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/retry?workdir=${selectedWorkdirParam()}`, { note: "retry from operator console" });
+}
+
+function mergeDelivery() {
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/delivery/merge?workdir=${selectedWorkdirParam()}`);
 }
 
 function commandForStatus(status, assessment) {
@@ -1598,17 +1630,58 @@ function recoveryEvidence() {
   return evidence;
 }
 
+function deliveryEvidenceCard() {
+  const delivery = deliveryView();
+  const changedFiles = asList(delivery.changedFiles);
+  const excludedFiles = asList(delivery.excludedFiles);
+  const blockedReasons = asList(delivery.blockedReasons);
+  const bullets = [
+    ...blockedReasons.map((reason) => `阻塞原因：${reason}`),
+    ...changedFiles.slice(0, 8).map((file) => `业务改动：${file}`),
+    ...excludedFiles.slice(0, 5).map((file) => `已排除：${file}`),
+  ];
+  if (delivery.failureReason) {
+    bullets.unshift(`合并失败：${delivery.failureReason}`);
+  }
+  if (delivery.operatorNextAction || delivery.nextAction) {
+    bullets.push(`下一步：${delivery.operatorNextAction || delivery.nextAction}`);
+  }
+  asList(delivery.nextCommands).forEach((command) => {
+    bullets.push(`命令：${command}`);
+  });
+  if (delivery.status === "APPLIED") {
+    bullets.push("说明：当前只完成暂存，没有自动提交、推送或创建 PR。");
+  }
+  if (!bullets.length) {
+    bullets.push("暂无可展示的交付证据。");
+  }
+  return evidenceCard("交付就绪检查", "这不是新的流程状态，而是终态后的交付前核对清单。", [
+    ["交付状态", deliveryStatus()],
+    ["最终验收", delivery.acceptanceDecision || state.overview?.acceptance?.finalDecision || "-"],
+    ["目标结果", delivery.goalOutcome || state.overview?.goalSatisfaction?.domainOutcome || "-"],
+    ["目标仓库", delivery.targetRepo || "-"],
+    ["业务改动", changedFiles.length ? `${changedFiles.length} 个文件` : "-"],
+    ["终态保护", "已完成任务只能查看、导出或显式合并"],
+  ], bullets);
+}
+
 function completionEvidence() {
-  const delivery = state.overview?.deliveryMerge || {};
+  const delivery = deliveryView();
   const gaps = state.overview?.completionAudit?.gaps || [];
   return [
     delivery.status ? `Delivery merge: ${delivery.status}` : "Delivery merge 尚未执行或未记录。",
+    ...(delivery.operatorNextAction || delivery.nextAction ? [`下一步：${delivery.operatorNextAction || delivery.nextAction}`] : []),
+    ...asList(delivery.nextCommands).map((command) => `命令：${command}`),
     ...asList(gaps).map((gap) => `Completion gap: ${gap}`),
   ];
 }
 
+function deliveryView() {
+  return state.overview?.deliveryView || state.status?.deliveryView || state.overview?.deliveryMerge || state.status?.deliveryMerge || {};
+}
+
 function deliveryStatus() {
-  return state.overview?.deliveryMerge?.status || state.status?.deliveryMerge?.status || "未执行";
+  return deliveryView().status || "未执行";
 }
 
 function latestTimelineText() {

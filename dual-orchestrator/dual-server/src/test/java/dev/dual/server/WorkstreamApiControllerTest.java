@@ -634,7 +634,10 @@ class WorkstreamApiControllerTest {
     void streamServiceClosesActiveStreamsOnShutdown() throws Exception {
         var fixture = createWorkstream("ws-api-stream-shutdown");
         var objectMapper = new ObjectMapper();
-        var streamService = new WorkstreamStreamService(new WorkstreamQueryService(objectMapper), objectMapper);
+        var streamService = new WorkstreamStreamService(
+                new WorkstreamQueryService(objectMapper, new DeliveryViewService(objectMapper)),
+                objectMapper
+        );
 
         streamService.overviewStream(tempDir, fixture.workstreamId(), 60_000);
 
@@ -669,13 +672,15 @@ class WorkstreamApiControllerTest {
 
     private WorkstreamApiController controller() {
         var objectMapper = new ObjectMapper();
-        var queryService = new WorkstreamQueryService(objectMapper);
+        var deliveryViewService = new DeliveryViewService(objectMapper);
+        var queryService = new WorkstreamQueryService(objectMapper, deliveryViewService);
         return new WorkstreamApiController(
                 queryService,
                 new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
                         new dev.dual.runtime.WorkflowRuntimeResult(command.workstreamId(),
                                 dev.dual.core.workflow.WorkflowStatus.COMPLETED, "", "unused")),
-                new WorkstreamStreamService(queryService, objectMapper)
+                new WorkstreamStreamService(queryService, objectMapper),
+                deliveryViewService
         );
     }
 
