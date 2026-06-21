@@ -11,24 +11,28 @@ public final class AgentArtifactEnvelopeParser {
     );
 
     public Optional<AgentArtifactEnvelope> latest(String markdown, String type) {
-        if (markdown == null || markdown.isBlank()) {
+        var matches = all(markdown).stream()
+                .filter(envelope -> type.equals(envelope.type()))
+                .toList();
+        if (matches.isEmpty()) {
             return Optional.empty();
+        }
+        return Optional.of(matches.get(matches.size() - 1));
+    }
+
+    public List<AgentArtifactEnvelope> all(String markdown) {
+        if (markdown == null || markdown.isBlank()) {
+            return List.of();
         }
         List<AgentArtifactEnvelope> matches = new ArrayList<>();
         var matcher = ENVELOPE.matcher(markdown);
         while (matcher.find()) {
-            if (!type.equals(matcher.group("type"))) {
-                continue;
-            }
             matches.add(new AgentArtifactEnvelope(
                     matcher.group("type"),
                     Integer.parseInt(matcher.group("version")),
                     matcher.group("json").trim()
             ));
         }
-        if (matches.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(matches.get(matches.size() - 1));
+        return List.copyOf(matches);
     }
 }

@@ -403,6 +403,60 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void inputArtifactAgentOutputSurfacesEmbeddedBusinessArtifact() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Need a canonical task contract proposal.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-004/outputs/intake-claude-brainstorm.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, """
+                Intake summary.
+
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "objective": "Add a small README note.",
+                  "scope": {"included": ["README.md"], "excluded": ["business code"]},
+                  "acceptance_criteria": ["README contains the note"],
+                  "test_requirements": ["no runtime test required"],
+                  "constraints": ["minimal change"],
+                  "non_goals": ["dependency changes"],
+                  "risk_areas": [],
+                  "open_questions": []
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Candidate task contract proposal is ready.
+                ```
+                """, StandardCharsets.UTF_8);
+        Files.writeString(output.getParent().resolve("intake-claude-brainstorm.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.claude_brainstorm",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Candidate task contract proposal is ready.",
+                  "must_fix": [],
+                  "missing_evidence": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": ""
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("product_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-004/outputs/intake-claude-brainstorm.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("**Embedded Structured Artifacts:**"));
+        assertTrue(markdown.contains("<dual-artifact type=\"task_contract_proposal\" version=\"1\">"));
+        assertTrue(markdown.contains("\"artifact_type\": \"task_contract_proposal\""));
+        assertTrue(markdown.contains("\"objective\": \"Add a small README note.\""));
+        assertTrue(markdown.contains("- Raw Output: "));
+    }
+
+    @Test
     void transcriptInputRefIsNeverExpandedIntoContextPackage() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Transcript guard test.", StandardCharsets.UTF_8);

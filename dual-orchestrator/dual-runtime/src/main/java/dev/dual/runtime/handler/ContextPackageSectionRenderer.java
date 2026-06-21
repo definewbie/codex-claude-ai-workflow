@@ -20,9 +20,11 @@ import java.util.stream.Stream;
 
 final class ContextPackageSectionRenderer {
     private static final int DEFAULT_SNIPPET_CHARS = 4_000;
+    private static final int MAX_EMBEDDED_AGENT_ARTIFACT_CHARS = 4_000;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final AgentArtifactEnvelopeParser AGENT_ARTIFACTS = new AgentArtifactEnvelopeParser();
 
     private ContextPackageSectionRenderer() {
     }
@@ -251,6 +253,7 @@ final class ContextPackageSectionRenderer {
                 continue;
             }
             if (isAgentOutput(path) && appendAgentContractSummary(builder, path)) {
+                appendEmbeddedAgentArtifacts(builder, path);
                 builder.append("- Raw Output: ").append(toDisplayRef(path)).append("\n\n");
                 continue;
             }
@@ -381,6 +384,7 @@ final class ContextPackageSectionRenderer {
     private static void appendAgentOutputSnippet(StringBuilder builder, Path output, int maxSnippetChars) throws IOException {
         builder.append("### ").append(toDisplayRef(output)).append("\n\n");
         if (appendAgentContractSummary(builder, output)) {
+            appendEmbeddedAgentArtifacts(builder, output);
             builder.append("- Raw Output: ").append(toDisplayRef(output)).append("\n\n");
             return;
         }
@@ -422,6 +426,39 @@ final class ContextPackageSectionRenderer {
         }
         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n\n");
         return true;
+    }
+
+    private static void appendEmbeddedAgentArtifacts(StringBuilder builder, Path output) {
+        List<AgentArtifactEnvelope> envelopes;
+        try {
+            envelopes = AGENT_ARTIFACTS.all(Files.readString(output, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            return;
+        }
+        var trustedBusinessArtifacts = envelopes.stream()
+                .filter(envelope -> !"agent_output_contract".equals(envelope.type()))
+                .toList();
+        if (trustedBusinessArtifacts.isEmpty()) {
+            return;
+        }
+        builder.append("**Embedded Structured Artifacts:**\n\n");
+        for (var envelope : trustedBusinessArtifacts) {
+            builder.append("<dual-artifact type=\"")
+                    .append(envelope.type())
+                    .append("\" version=\"")
+                    .append(envelope.version())
+                    .append("\">\n");
+            builder.append(truncatedArtifactJson(envelope.json()));
+            builder.append("\n</dual-artifact>\n\n");
+        }
+    }
+
+    private static String truncatedArtifactJson(String json) {
+        if (json.length() <= MAX_EMBEDDED_AGENT_ARTIFACT_CHARS) {
+            return json.stripTrailing();
+        }
+        return json.substring(0, MAX_EMBEDDED_AGENT_ARTIFACT_CHARS).stripTrailing()
+                + "\n\n[truncated embedded artifact]";
     }
 
     private static void appendListSummary(StringBuilder builder, String label, Object value) {
