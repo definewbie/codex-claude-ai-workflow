@@ -90,6 +90,8 @@ final class RepoScopeGovernance {
         appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 8);
         appendPathList(builder, "Allowed write files", textList(documents.policy().get("writeScope")), 8);
         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
+        appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
+        appendReadAvoidanceRules(builder, documents);
         builder.append("If the task requires reading or editing outside this scope, explain why in the structured artifact so Codex and the human gate can review the scope expansion.\n\n");
     }
 
@@ -149,6 +151,9 @@ final class RepoScopeGovernance {
         var writeCandidates = stageAllowsBusinessWrites(stageId)
                 ? readCandidates.stream().filter(RepoScopeGovernance::looksEditable).limit(MAX_SCOPE_FILES).toList()
                 : List.<String>of();
+        var previousReads = previousReadCounts(workstreamDir, "", objectMapper);
+        var evidenceFiles = evidenceFiles(workstreamDir, objectMapper);
+        var repeatedReadAvoidance = repeatedReadAvoidance(readCandidates, previousReads, evidenceFiles);
 
         var document = new LinkedHashMap<String, Object>();
         document.put("schemaVersion", 1);
@@ -163,8 +168,11 @@ final class RepoScopeGovernance {
         document.put("source", "task_contract+evidence_manifest+git_evidence+repo_map");
         document.put("readCandidates", readCandidates);
         document.put("writeCandidates", writeCandidates);
+        document.put("previouslyReadFiles", previousReads.keySet().stream().limit(MAX_SCOPE_FILES).toList());
+        document.put("repeatedReadAvoidance", repeatedReadAvoidance);
         document.put("expansionRules", List.of(
                 "Prefer files in readCandidates before broad repository search.",
+                "Do not re-read previously inspected files unless this stage needs fresh file contents.",
                 "When a candidate calls an API or imports a nearby module, read that direct dependency before editing.",
                 "If reading outside readCandidates is necessary, explain the reason in the structured artifact."
         ));
@@ -180,6 +188,7 @@ final class RepoScopeGovernance {
     ) {
         var readCandidates = textList(plan.get("readCandidates"));
         var writeCandidates = textList(plan.get("writeCandidates"));
+        var previouslyReadFiles = textList(plan.get("previouslyReadFiles"));
         var policy = new LinkedHashMap<String, Object>();
         policy.put("schemaVersion", 1);
         policy.put("artifactType", "stage_scope_policy");
@@ -192,6 +201,13 @@ final class RepoScopeGovernance {
         policy.put("iterationId", context.instance().iterationId());
         policy.put("readScope", readCandidates);
         policy.put("writeScope", writeCandidates);
+        policy.put("previouslyReadFiles", previouslyReadFiles);
+        policy.put("readReusePolicy", Map.of(
+                "preferExistingEvidence", true,
+                "avoidRepeatedReads", previouslyReadFiles.stream().limit(12).toList(),
+                "requireReasonWhenRereading", true,
+                "reasonField", "verification_summary or scope_expansion_reason in the structured artifact"
+        ));
         policy.put("forbiddenScope", forbiddenScope(stageId));
         policy.put("explorationBudget", Map.of(
                 "extraReadFiles", stageAllowsBroadExploration(stageId) ? 12 : 6,
@@ -222,6 +238,8 @@ final class RepoScopeGovernance {
         report.put("reportPhase", "planned");
         report.put("plannedReadFiles", textList(plan.get("readCandidates")));
         report.put("plannedWriteFiles", textList(policy.get("writeScope")));
+        report.put("plannedPreviouslyReadFiles", textList(plan.get("previouslyReadFiles")));
+        report.put("plannedRepeatedReadAvoidance", mapList(plan.get("repeatedReadAvoidance")));
         report.put("actualReadFiles", List.of());
         report.put("actualWriteFiles", List.of());
         report.put("outsideScopeReads", List.of());
@@ -444,8 +462,131 @@ final class RepoScopeGovernance {
                 .toList();
     }
 
+    private static Map<String, Integer> previousReadCounts(
+            Path workstreamDir,
+            String currentRunId,
+            ObjectMapper objectMapper
+    ) throws IOException {
+        var runsDir = workstreamDir.resolve("runs");
+        if (!Files.isDirectory(runsDir)) {
+            return Map.of();
+        }
+        var counts = new LinkedHashMap<String, Integer>();
+        try (var stream = Files.list(runsDir)) {
+            for (var runDir : stream.filter(Files::isDirectory)
+                    .sorted(Comparator.comparing(path -> path.getFileName().toString()))
+                    .toList()) {
+                if (!currentRunId.isBlank() && runDir.getFileName().toString().equals(currentRunId)) {
+                    continue;
+                }
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                Map<String, Object> run;
+                try {
+                    run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
+                } catch (IOException ignored) {
+                    continue;
+                }
+                for (var file : textList(mapValue(run.get("toolUsage")).get("readFiles"))) {
+                    var normalized = normalize(file);
+                    if (!normalized.isBlank() && !ignoredPath(normalized) && !normalized.startsWith("/")) {
+                        counts.merge(normalized, 1, Integer::sum);
+                    }
+                }
+            }
+        }
+        return counts;
+    }
+
+    private static List<Map<String, Object>> repeatedReadAvoidance(
+            List<String> readCandidates,
+            Map<String, Integer> previousReads,
+            List<String> evidenceFiles
+    ) {
+        if (previousReads.isEmpty()) {
+            return List.of();
+        }
+        var candidateSet = new LinkedHashSet<>(readCandidates);
+        var evidenceSet = new LinkedHashSet<>(evidenceFiles);
+        var items = new ArrayList<Map<String, Object>>();
+        for (var entry : previousReads.entrySet()) {
+            var file = entry.getKey();
+            var inScope = candidateSet.contains(file);
+            var evidenceKnown = evidenceSet.contains(file);
+            if (!inScope && !evidenceKnown) {
+                continue;
+            }
+            var item = new LinkedHashMap<String, Object>();
+            item.put("path", file);
+            item.put("previousCount", entry.getValue());
+            item.put("inReadScope", inScope);
+            item.put("evidenceKnown", evidenceKnown);
+            item.put("guidance", evidenceKnown
+                    ? "Use the existing evidence brief first; re-read only if fresh contents are needed."
+                    : "This file was already inspected; re-read only with a stage-specific reason.");
+            items.add(item);
+            if (items.size() >= 12) {
+                break;
+            }
+        }
+        return List.copyOf(items);
+    }
+
+    private static List<String> evidenceFiles(Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+        var manifest = workstreamDir.resolve("memory").resolve("evidence-manifest.json");
+        if (!Files.isRegularFile(manifest)) {
+            return List.of();
+        }
+        Map<String, Object> document;
+        try {
+            document = objectMapper.readValue(manifest.toFile(), MAP_TYPE);
+        } catch (IOException ignored) {
+            return List.of();
+        }
+        var files = new LinkedHashSet<String>();
+        for (var item : mapList(document.get("items"))) {
+            for (var file : textList(item.get("files"))) {
+                var normalized = normalize(file);
+                if (!normalized.isBlank() && !ignoredPath(normalized) && !normalized.startsWith("/")) {
+                    files.add(normalized);
+                }
+            }
+        }
+        return List.copyOf(files);
+    }
+
+    private static void appendReadAvoidanceRules(StringBuilder builder, Documents documents) {
+        var repeated = mapList(documents.plan().get("repeatedReadAvoidance"));
+        if (repeated.isEmpty()) {
+            builder.append("- Read reuse rule: use the recommended read files first; no repeated-read risk is known yet.\n");
+            return;
+        }
+        builder.append("- Read reuse rule: use existing evidence before re-reading files already inspected in this workstream.\n");
+        builder.append("- Re-read a listed file only when this stage needs fresh contents; record the reason in the structured artifact.\n");
+        builder.append("- Repeated-read risk:\n");
+        for (var item : repeated.stream().limit(6).toList()) {
+            builder.append("  - ")
+                    .append(text(item.get("path")))
+                    .append(" (previous reads: ")
+                    .append(text(item.get("previousCount")))
+                    .append(", evidence known: ")
+                    .append(text(item.get("evidenceKnown")))
+                    .append(")\n");
+        }
+    }
+
     private static String safeFileName(String value) {
         return value == null || value.isBlank() ? "unknown" : value.replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
+    private static String normalize(String value) {
+        var text = value == null ? "" : value.trim();
+        while (text.startsWith("./")) {
+            text = text.substring(2);
+        }
+        return text;
     }
 
     private static String ref(Path workspaceRoot, Path path) {

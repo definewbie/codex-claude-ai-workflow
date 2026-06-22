@@ -1076,6 +1076,14 @@ class ContextBuildPackageHandlerTest {
         var sourceFile = tempDir.resolve("miniprogram/src/pages/treatment-record/index.vue");
         Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "<template>record</template>", StandardCharsets.UTF_8);
+        var previousRun = wsDir.resolve("runs/run-000/run.json");
+        Files.createDirectories(previousRun.getParent());
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(previousRun.toFile(), Map.of(
+                "runId", "run-000",
+                "toolUsage", Map.of(
+                        "readFiles", List.of("miniprogram/src/pages/treatment-record/index.vue", "docs/old.md")
+                )
+        ));
 
         var result = handler.execute(ctx("implementation", List.of()));
 
@@ -1083,6 +1091,8 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Repo Scope Guidance"));
         assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
+        assertTrue(markdown.contains("Already inspected files"));
+        assertTrue(markdown.contains("Read reuse rule"));
 
         var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
         var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
@@ -1098,6 +1108,12 @@ class ContextBuildPackageHandlerTest {
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("miniprogram/src/pages/treatment-record/index.vue"),
                 "file relevance plan should preserve task-contract file scope");
+        assertTrue(plan.get("previouslyReadFiles") instanceof List<?> previousReads
+                        && previousReads.contains("miniprogram/src/pages/treatment-record/index.vue"),
+                "file relevance plan should surface prior reads so the next agent can avoid repeated exploration");
+        assertTrue(plan.get("repeatedReadAvoidance") instanceof List<?> avoidance
+                        && !avoidance.isEmpty(),
+                "file relevance plan should include typed repeated-read avoidance hints");
 
         var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertEquals("implement", policy.get("stageId"));
@@ -1106,11 +1122,17 @@ class ContextBuildPackageHandlerTest {
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
                         && writeScope.contains("miniprogram/src/pages/treatment-record/index.vue"),
                 "implementation policy should expose scoped writable files");
+        assertTrue(policy.get("readReusePolicy") instanceof Map<?, ?> reusePolicy
+                        && Boolean.TRUE.equals(reusePolicy.get("preferExistingEvidence")),
+                "stage scope policy should carry read reuse rules as typed data, not only prompt text");
 
         var report = objectMapper.readValue(wsDir.resolve("artifacts/context-governance/node-001.json").toFile(), Map.class);
         assertEquals("planned", report.get("reportPhase"));
         assertEquals("ctx.test", report.get("builderNodeDefinitionId"));
         assertEquals("next.node", report.get("targetNodeDefinitionId"));
+        assertTrue(report.get("plannedRepeatedReadAvoidance") instanceof List<?> plannedAvoidance
+                        && !plannedAvoidance.isEmpty(),
+                "planned governance report should record repeated-read risks before execution");
         assertEquals(true, report.get("telemetryPending"));
     }
 

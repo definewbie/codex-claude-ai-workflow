@@ -437,6 +437,7 @@ Phase B 成功标准：
 | Execution telemetry | Done for MVP：`run.json` schema v2 增加 `toolUsage` 和 `contextGovernanceActualReportPath`，source of truth 是 adapter 运行事实。 |
 | Operator projection | Done for MVP：overview artifacts 能发现最新治理文件；trace 和 Token 区域能展示 repeated read / evidence hit。后续仍需把治理建议做得更产品化。 |
 | A/B 开关 | Done for MVP：`DUAL_CONTEXT_GOVERNANCE_ENABLED=false` 或 `-Ddual.context.governance.enabled=false` 可关闭治理 artifact 和 guidance。 |
+| Intake seed | Done for MVP：默认 full / contract 生命周期在 `intake.claude_brainstorm` 前生成 `context.intake_claude_brainstorm`，避免首轮完全无 scope seed。 |
 
 ### Phase B：Soft Guidance
 
@@ -446,6 +447,17 @@ Phase B 成功标准：
 2. Codex review packet 增加 scope adherence section。
 3. repeated read 和 outside-scope 进入 review evidence。
 4. 如果超出范围但有合理证据，允许继续；否则进入 warning / human attention。
+
+当前实现状态：
+
+| 项目 | 状态 |
+|---|---|
+| 历史已读文件 | Done for first pass：`FileRelevancePlan` 从历史 `run.json.toolUsage.readFiles` 派生 `previouslyReadFiles`。 |
+| 重复读避免提示 | Done for first pass：`FileRelevancePlan` 写入 `repeatedReadAvoidance`，`StageScopePolicy` 写入 `readReusePolicy`。 |
+| Agent-facing guidance | Done for first pass：`Repo Scope Guidance` 增加 `Already inspected files`、`Read reuse rule` 和 repeated-read risk。 |
+| Planned report | Done for first pass：planned `ContextGovernanceReport` 记录 `plannedPreviouslyReadFiles` 和 `plannedRepeatedReadAvoidance`，用于后续 actual report 对照。 |
+| Codex scope adherence | Partial：Codex 能通过 context package 看到 scope guidance 和 actual report，但 review packet 还没有独立产品化展示 scope adherence section。 |
+| Human attention | Not yet：当前仍是 warning/record 语义，尚未把重复读或越界读升级成人审 attention。 |
 
 ### Phase C：Soft Enforcement
 
@@ -491,12 +503,12 @@ Phase B 成功标准：
 
 ## 15. 下一步
 
-设计确认后，建议先做 Phase A。不要直接进入 hard allowlist。
+Phase A 已完成，Phase B 第一版软约束已落地。仍然不要直接进入 hard allowlist。
 
-Phase A 完成后必须先跑：
+接下来必须先跑：
 
 1. simple acpx case，确认 usage / transcript / governance report 可用；
 2. cancer-clinic 中等复杂 case，确认 planned vs actual 能解释 token 和重复读；
 3. 一次 memory off / memory on / governance on 的 A/B，对比是否真的减少重复探索。
 
-如果 Phase A 只能生成报告但不能解释 token 来源，说明 telemetry 边界仍不完整，应先修 telemetry，不进入 Phase B。
+如果 Phase B 只能生成提示但 actual repeated read 没有下降，说明约束力度不足，应优先改 scope policy / prompt contract / review packet，而不是继续压缩 context package。
