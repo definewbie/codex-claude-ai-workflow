@@ -114,6 +114,61 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void updatesRunMetadataWhenRequiredStructuredArtifactIsMissing() throws Exception {
+        var runRef = writeRunMetadata("run-missing-artifact", "completed");
+        var outputRef = writeOutput("acceptance.md", """
+                # Acceptance
+
+                ```dual-control
+                decision: ACCEPT_WITH_NOTES
+                summary: Accepted with verification notes.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex",
+                "run_metadata", runRef
+        ));
+
+        var validated = validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        var runMetadata = Files.readString(tempDir.resolve(runRef));
+        assertTrue(runMetadata.contains("\"schemaVersion\" : 3"));
+        assertTrue(runMetadata.contains("\"status\" : \"failed\""));
+        assertTrue(runMetadata.contains("\"failureReason\" : \"required_artifact_contract_failed\""));
+        assertTrue(runMetadata.contains("\"executionOutcome\""));
+        assertTrue(runMetadata.contains("\"status\" : \"CONTRACT_FAILED\""));
+        assertTrue(runMetadata.contains("\"recoveryCategory\" : \"ARTIFACT_CONTRACT_FAILURE\""));
+    }
+
+    @Test
+    void updatesRunMetadataWhenAgentOutputContractIsValid() throws Exception {
+        var runRef = writeRunMetadata("run-valid-contract", "completed");
+        var outputRef = writeOutput("review.md", """
+                Review passed.
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Architecture is ready.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex",
+                "run_metadata", runRef
+        ));
+
+        var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var runMetadata = Files.readString(tempDir.resolve(runRef));
+        assertTrue(runMetadata.contains("\"schemaVersion\" : 3"));
+        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+        assertTrue(runMetadata.contains("\"executionOutcome\""));
+        assertTrue(runMetadata.contains("\"status\" : \"SUCCESS\""));
+        assertTrue(runMetadata.contains("\"nodeMaySucceed\" : true"));
+    }
+
+    @Test
     void writesContractFailureDiagnosticWhenRuntimeContextIsPresent() throws Exception {
         Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-test"));
         var outputRef = writeOutput("acceptance.md", """
@@ -713,6 +768,19 @@ class ArtifactContractValidatorTest {
     private String writeOutput(String name, String content) throws Exception {
         var path = tempDir.resolve(name);
         Files.writeString(path, content);
+        return tempDir.relativize(path).toString();
+    }
+
+    private String writeRunMetadata(String runId, String status) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/runs").resolve(runId).resolve("run.json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "%s",
+                  "status": "%s"
+                }
+                """.formatted(runId, status));
         return tempDir.relativize(path).toString();
     }
 

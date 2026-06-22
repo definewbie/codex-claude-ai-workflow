@@ -40,6 +40,16 @@ public record RecoveryAssessment(
         var diagnosticJsonRef = text(result.get("contract_failure_diagnostic_ref"));
         var diagnosticMarkdownRef = text(result.get("contract_failure_diagnostic_markdown_ref"));
         var diagnostic = readDiagnostic(root, diagnosticJsonRef);
+        var outcomeAssessment = fromAgentExecutionOutcome(
+                result.get("agent_execution_outcome"),
+                retry,
+                diagnosticJsonRef,
+                diagnosticMarkdownRef,
+                diagnostic
+        );
+        if (outcomeAssessment != null) {
+            return outcomeAssessment;
+        }
         var diagnosticCategory = text(diagnostic.get("category"));
         var diagnosticHint = text(diagnostic.get("recovery_hint"));
         var failureReason = text(firstNonBlank(
@@ -168,6 +178,120 @@ public record RecoveryAssessment(
                 diagnosticMarkdownRef,
                 diagnostic
         );
+    }
+
+    private static RecoveryAssessment fromAgentExecutionOutcome(
+            Object value,
+            String retry,
+            String diagnosticJsonRef,
+            String diagnosticMarkdownRef,
+            Map<String, Object> diagnostic
+    ) {
+        if (!(value instanceof Map<?, ?> raw)) {
+            return null;
+        }
+        var outcome = asStringMap(raw);
+        var recoveryCategory = text(outcome.get("recoveryCategory"));
+        var primaryReason = text(outcome.get("primaryReason"));
+        var operatorMessage = text(outcome.get("operatorMessage"));
+        if ("ARTIFACT_CONTRACT_FAILURE".equals(recoveryCategory)) {
+            var diagnosticHint = text(diagnostic.get("recovery_hint"));
+            return new RecoveryAssessment(
+                    "artifact_contract_failure",
+                    "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
+                    diagnosticHint.isBlank()
+                            ? blankDefault(operatorMessage, "The agent output contract was invalid or missing. Inspect the diagnostic before retrying.")
+                            : diagnosticHint,
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("OUTPUT_INCOMPLETE".equals(recoveryCategory)) {
+            return new RecoveryAssessment(
+                    "agent_output_incomplete",
+                    "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
+                    blankDefault(operatorMessage, "The agent output stopped before a valid terminal control and artifact boundary."),
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("TIMEOUT_OR_STALLED".equals(recoveryCategory)) {
+            return new RecoveryAssessment(
+                    "agent_timeout_or_stalled",
+                    "RETRY_AFTER_EXTERNAL_FIX",
+                    blankDefault(operatorMessage, "The agent process timed out or stalled before completing the execution boundary."),
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("INTERRUPTED".equals(recoveryCategory)) {
+            return new RecoveryAssessment(
+                    "agent_interrupted",
+                    "INSPECT_BEFORE_RETRY",
+                    blankDefault(operatorMessage, "The agent execution was interrupted before completion."),
+                    retry + "  # only after confirming the interruption cause",
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("RECOVERABLE_ADAPTER_FAILURE".equals(recoveryCategory)) {
+            return new RecoveryAssessment(
+                    adapterClassification(primaryReason),
+                    adapterRetryReadiness(primaryReason),
+                    blankDefault(operatorMessage, "The adapter reported a recoverable execution failure."),
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        if ("NON_RECOVERABLE_ADAPTER_FAILURE".equals(recoveryCategory)) {
+            return new RecoveryAssessment(
+                    "non_recoverable_adapter_failure",
+                    "NEEDS_HUMAN_DECISION",
+                    blankDefault(operatorMessage, "The adapter reported a non-recoverable execution failure."),
+                    retry + "  # only after changing adapter configuration or task boundary",
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
+        return null;
+    }
+
+    private static Map<String, Object> asStringMap(Map<?, ?> raw) {
+        var map = new LinkedHashMap<String, Object>();
+        for (var entry : raw.entrySet()) {
+            if (entry.getKey() != null) {
+                map.put(entry.getKey().toString(), entry.getValue());
+            }
+        }
+        return map;
+    }
+
+    private static String adapterClassification(String primaryReason) {
+        return switch (primaryReason) {
+            case "auth_failed" -> "agent_auth_failed";
+            case "permission_blocked" -> "agent_permission_blocked";
+            case "context_window_exceeded" -> "agent_context_window";
+            case "rate_limited" -> "agent_capacity_recovery";
+            default -> "recoverable_agent_runtime";
+        };
+    }
+
+    private static String adapterRetryReadiness(String primaryReason) {
+        return switch (primaryReason) {
+            case "auth_failed" -> "FIX_AGENT_AUTH_THEN_RETRY";
+            case "rate_limited" -> "WAIT_THEN_RETRY";
+            default -> "RETRY_AFTER_EXTERNAL_FIX";
+        };
     }
 
     public Map<String, Object> toMap() {

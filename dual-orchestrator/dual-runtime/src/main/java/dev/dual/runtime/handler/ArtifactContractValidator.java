@@ -2,6 +2,16 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.AgentExecutionEvidence;
+import dev.dual.core.execution.AgentExecutionOutcome;
+import dev.dual.core.execution.AgentExecutionOutcomeResolver;
+import dev.dual.core.execution.AgentExecutionRetryPolicy;
+import dev.dual.core.execution.ArtifactContractResult;
+import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.TerminalControlResult;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
@@ -19,6 +29,7 @@ public final class ArtifactContractValidator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final AgentExecutionOutcomeResolver OUTCOME_RESOLVER = new AgentExecutionOutcomeResolver();
     private final DualControlBlockParser parser = new DualControlBlockParser();
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
 
@@ -145,6 +156,14 @@ public final class ArtifactContractValidator {
         augmented.put("decision", block.required("decision"));
         augmented.put("summary", block.required("summary"));
         augmented.put("contract_sidecar_ref", sidecarRef);
+        var outcome = OUTCOME_RESOLVER.resolve(new AgentExecutionEvidence(
+                processResult(result),
+                TerminalControlResult.valid(block.required("decision")),
+                List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition))),
+                adapterSignals(result)
+        ));
+        augmented.put("agent_execution_outcome", outcomeToMap(outcome));
+        updateRunMetadata(root, result, outcome);
         return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
     }
 
@@ -411,6 +430,14 @@ public final class ArtifactContractValidator {
         if (diagnostic.present() && !outputRefs.contains(diagnostic.markdownRef())) {
             outputRefs.add(diagnostic.markdownRef());
         }
+        var outcome = OUTCOME_RESOLVER.resolve(new AgentExecutionEvidence(
+                processResult(result),
+                terminalResultFor(reason, message),
+                List.of(artifactResultFor(nodeDefinition, reason, message)),
+                adapterSignals(result)
+        ));
+        failed.put("agent_execution_outcome", outcomeToMap(outcome));
+        updateRunMetadata(workspaceRoot, result, outcome);
         return new NodeResult(
                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
                 NodeStatus.FAILED,
@@ -418,6 +445,110 @@ public final class ArtifactContractValidator {
                 failed,
                 message
         );
+    }
+
+    private static ProcessResult processResult(NodeResult result) {
+        var exitCode = result.result().get("exit_code");
+        if (exitCode instanceof Number number && number.intValue() != 0) {
+            return ProcessResult.nonZeroComplete(number.intValue());
+        }
+        return ProcessResult.exitedZero();
+    }
+
+    private static TerminalControlResult terminalResultFor(String reason, String message) {
+        if (reason == null || reason.isBlank() || "MISSING_DUAL_CONTROL".equals(reason)) {
+            return TerminalControlResult.missing();
+        }
+        if (reason.startsWith("STRUCTURED_") || "CONTROL_ARTIFACT_DECISION_MISMATCH".equals(reason)) {
+            return TerminalControlResult.valid("UNKNOWN");
+        }
+        return TerminalControlResult.invalid(message);
+    }
+
+    private static ArtifactContractResult artifactResultFor(
+            NodeDefinition nodeDefinition,
+            String reason,
+            String message
+    ) {
+        if (reason != null && (reason.startsWith("STRUCTURED_") || "CONTROL_ARTIFACT_DECISION_MISMATCH".equals(reason))) {
+            return new ArtifactContractResult(
+                    requiredArtifactTypeOrDefault(nodeDefinition),
+                    true,
+                    false,
+                    false,
+                    "",
+                    reason,
+                    message
+            );
+        }
+        return ArtifactContractResult.optionalMissing(requiredArtifactTypeOrDefault(nodeDefinition));
+    }
+
+    private static String requiredArtifactTypeOrDefault(NodeDefinition nodeDefinition) {
+        var required = requiredArtifactType(nodeDefinition);
+        return required == null || required.isBlank() ? "agent_output_contract" : required;
+    }
+
+    private static List<AdapterSignal> adapterSignals(NodeResult result) {
+        var reason = text(result.result().get("acpx_failure.reason"));
+        if (reason.isBlank()) {
+            return List.of();
+        }
+        var type = switch (reason) {
+            case "RECOVERABLE_AGENT_RECONNECT" -> AdapterSignalType.AGENT_RECONNECT_REQUIRED;
+            case "RECOVERABLE_SESSION_MISSING" -> AdapterSignalType.SESSION_RESUME_FAILED;
+            case "RECOVERABLE_AGENT_AUTH_FAILED" -> AdapterSignalType.AUTH_FAILED;
+            case "RECOVERABLE_RATE_LIMIT", "RECOVERABLE_AGENT_OVERLOADED" -> AdapterSignalType.RATE_LIMITED;
+            case "RECOVERABLE_CONTEXT_WINDOW" -> AdapterSignalType.CONTEXT_WINDOW_EXCEEDED;
+            case "RECOVERABLE_AGENT_PERMISSION_BLOCKED" -> AdapterSignalType.PERMISSION_BLOCKED;
+            case "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED" -> AdapterSignalType.PROCESS_STALLED;
+            default -> null;
+        };
+        return type == null ? List.of() : List.of(new AdapterSignal(type, reason, 0));
+    }
+
+    private static Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("status", outcome.status().name());
+        map.put("primaryReason", outcome.primaryReason());
+        map.put("nodeMaySucceed", outcome.nodeMaySucceed());
+        map.put("retryPolicy", outcome.retryPolicy().name());
+        map.put("recoveryCategory", outcome.recoveryCategory().name());
+        map.put("operatorMessage", outcome.operatorMessage());
+        map.put("secondarySignals", outcome.secondarySignals().stream()
+                .map(signal -> Map.of(
+                        "type", signal.type().name(),
+                        "severity", signal.type().severity().name(),
+                        "message", signal.message(),
+                        "observedSequence", signal.observedSequence()
+                ))
+                .toList());
+        return map;
+    }
+
+    private static void updateRunMetadata(Path workspaceRoot, NodeResult result, AgentExecutionOutcome outcome) {
+        var runMetadataRef = text(result.result().get("run_metadata"));
+        if (runMetadataRef.isBlank()) {
+            return;
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var path = root.resolve(runMetadataRef).normalize();
+        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+            return;
+        }
+        try {
+            var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
+            json.put("schemaVersion", Math.max(json.path("schemaVersion").asInt(0), 3));
+            json.put("status", outcome.nodeMaySucceed() ? "completed" : "failed");
+            json.put("failureReason", outcome.nodeMaySucceed() ? null : outcome.primaryReason());
+            json.put("recoverable", !outcome.nodeMaySucceed()
+                    && outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
+            json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(outcome)));
+            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
+        } catch (Exception ignored) {
+            // Run metadata is an observability artifact. Contract validation result
+            // remains authoritative even if the historical run file is damaged.
+        }
     }
 
     private sealed interface StructuredAgentArtifact permits

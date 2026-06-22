@@ -69,6 +69,28 @@ class RecoveryAssessmentTest {
     }
 
     @Test
+    void agentExecutionOutcomeTakesPriorityOverLegacyAcpxReason() {
+        var node = failedAcpxNode(Map.of(
+                "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT",
+                "acpx_failure.recoverable", true,
+                "agent_execution_outcome", Map.of(
+                        "status", "CONTRACT_FAILED",
+                        "primaryReason", "required_artifact_contract_failed",
+                        "recoveryCategory", "ARTIFACT_CONTRACT_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "Structured artifact is missing."
+                )
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("artifact_contract_failure", assessment.classification());
+        assertEquals("RETRY_AFTER_OUTPUT_CONTRACT_FIX", assessment.retryReadiness());
+        assertEquals("Structured artifact is missing.", assessment.reason());
+        assertFalse(assessment.suggestedCommand().contains("sessions close"));
+    }
+
+    @Test
     void revisionLimitIsSemanticRecoveryNotRuntimeRetry() {
         var node = new NodeInstanceDocument(
                 1,
