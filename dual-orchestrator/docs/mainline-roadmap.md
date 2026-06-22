@@ -138,6 +138,7 @@ P1 work keeps long agent runs recoverable and affordable.
 | Execution / AgentTask boundary | Partial, worker MVP added | Separate node instance, concrete execution, and agent dispatch facts. | [execution-instance-model.md](design/execution-instance-model.md) |
 | Recovery classification | MVP done, keep adding provider evidence | Distinguish runtime retry, semantic repair, rejected acceptance, and external quota/session failures. | [failure-recovery-and-calibration.md](design/failure-recovery-and-calibration.md) |
 | Context budget governance | MVP done, keep measuring | Prevent context packages from growing until the system becomes unusable. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
+| Ledger-first memory loop | Phase A MVP done, real-case validation pending | Reuse ledger/artifact evidence as Claude Working Memory and Codex Review Evidence Brief before adding RAG. | [ledger-first-memory-loop.zh-CN.md](design/ledger-first-memory-loop.zh-CN.md) |
 | Artifact contract stability | Done for current MVP boundary, keep testing | Route on typed sidecars and compiled stage outcomes, not natural-language guesses. | [artifact-contracts-and-context.md](design/artifact-contracts-and-context.md) |
 | Boundary drift prevention | Partial | Prevent workflow definitions, contract registries, handler registries, and projections from drifting apart. | [boundary-drift-review.zh-CN.md](design/boundary-drift-review.zh-CN.md) |
 
@@ -151,6 +152,7 @@ P1 work keeps long agent runs recoverable and affordable.
 | Report projection | Done, keep testing | Final report summaries consume self-test and acceptance sidecars, not raw Agent Markdown or transcripts. |
 | Context budgets | Done, keep testing | `ContextProfiles` defines profile budgets; `ContextBuildPackageHandler` enforces estimated token limits and degrades/drops sections. |
 | Context package metadata | Done | Every context package now writes a JSON sidecar with profile, token budget, estimated tokens, and per-section degradation facts. |
+| Ledger-first memory loop | Phase A MVP done, real-case validation pending | `EvidenceManifest` writes `memory/evidence-manifest.json`; Claude implementation context renders `Working Memory`; Codex review profiles render `Review Evidence Brief`; context metadata exposes evidence refs and evidence counts. |
 | Prompt language policy | Done | Workstream `settings.json` stores `promptLanguage`; Agent prompts localize human-readable prose while preserving machine-readable contract keys, enums, and markers. |
 | Projection | MVP done, keep testing | `workstream-metrics.json` includes tokenMetrics by run, node, agent, and total. `runs` and `trace` display per-step token source as `acpx_stream` or `artifact_estimate`; API overview and Operator Console consume the same ledger projection. |
 | Tests | Done | `ContextBuildPackageHandlerTest` covers budget enforcement, degradation, and metadata sidecar creation. |
@@ -187,7 +189,10 @@ P2 product-experience work.
 
 Recommended order:
 
-1. Continue P2 with delivery view and public benchmark hardening.
+1. Finish P1 memory-loop validation first: run a simple acpx case to verify package generation, evidence manifest creation, and token metadata, then run a medium cancer-clinic case to compare repeated reads and token breakdown.
+2. If memory-loop validation passes, continue P2 with delivery view, public benchmark hardening, and Operator Console simplification.
+3. Keep open-source docs cleanup incremental and current; do not move private run history back into public docs.
+4. Use private real cases only as targeted regression checks or P1/P2 validation, not as an open-ended P0 discovery loop.
 2. Keep open-source docs cleanup incremental and current; do not reintroduce
    private run history into public-facing docs.
 3. Use private real cases only as targeted regression checks, not as P0

@@ -51,6 +51,13 @@ Adapter 会把 runtime failure matching 收敛在一个很小的 signal catalog 
 
 当 recoverable signal 持续超过有界 grace period 后，adapter 会终止本次 acpx 进程树，并返回可分类的 exit result，让 workflow 进入 `WAITING_FOR_RECOVERY`。默认 grace 是 30 秒，可通过 `DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS` 配置。如果 Java 进程环境里有 `API_TIMEOUT_MS`，默认 grace 会按该 timeout 加一个小 buffer 推导。如果 timeout 只在 Claude ACP 子进程里注入，就需要显式设置 dual 的 grace，避免两个 timeout 互相打架。
 
+另一个独立边界是 prompt 已被 ACP session 接收，但随后没有可信进展。reconnect
+可能已经恢复到 `session/new result` 和 `session/prompt`，但如果后续没有
+assistant、tool、usage 或 terminal contract 事件，就不能无限期保持
+`RUNNING`。这类停滞会被归一化为
+`RECOVERABLE_AGENT_OUTPUT_INTERRUPTED`，而不是业务拒绝。默认 progress timeout
+是 120 秒，可通过 `DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS` 配置。
+
 terminal contract 优先于 reconnect 诊断，但必须是完整契约：闭合的 `dual-control` fence、必需字段，以及后续 `[done] end_turn`。半截或看起来像历史残留的 contract fragment 不能被当成完成。
 
 ### acpx 生命周期信号模型

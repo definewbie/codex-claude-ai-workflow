@@ -31,6 +31,12 @@ Use `git-evidence.json`, `git-status-short.txt`, `diff.stat`, `diff.patch`, and 
 
 {{context_package}}
 
+Evidence use rule:
+
+- If the package contains `Review Evidence Brief`, review that first.
+- Use git evidence and raw artifacts to spot-check high-risk claims or fill explicit gaps.
+- If the brief is insufficient for acceptance, put concrete gaps in `missing_evidence` and choose the appropriate blocking status.
+
 ## Output Contract
 
 Write a Markdown acceptance report with these sections:

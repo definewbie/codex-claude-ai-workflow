@@ -31,6 +31,12 @@ If the proposal is missing, polluted by ledger metadata, materially inconsistent
 
 {{context_package}}
 
+Evidence use rule:
+
+- If the package contains `Review Evidence Brief`, review that first.
+- Use raw artifacts or repository reads only to spot-check high-risk claims or fill explicit evidence gaps.
+- If the brief is insufficient, put concrete gaps in `missing_evidence` instead of broadening the review silently.
+
 ## Output Contract
 
 Write a concise Markdown artifact with these sections:

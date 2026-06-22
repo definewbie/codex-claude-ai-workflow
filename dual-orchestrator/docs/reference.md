@@ -450,6 +450,7 @@ grace 默认是 30 秒，可用下面的环境变量调整：
 
 ```bash
 export DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS=65
+export DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS=120
 export DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS=45
 ```
 
@@ -457,6 +458,18 @@ export DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS=45
 当 `API_TIMEOUT_MS` 出现在 Java 进程环境里，dual 会按它自动推导 grace；如果
 它只在 Claude ACP 子进程中注入，就显式设置
 `DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS`。
+
+`DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS` 是另一条边界：当 ACP session 已经
+接受 `session/prompt`，但后续没有 assistant/tool/usage/terminal contract
+这类可信进展时，dual 会把该节点转为
+`RECOVERABLE_AGENT_OUTPUT_INTERRUPTED`，避免 workstream 长时间停在
+`RUNNING`。
+
+`DUAL_CONTEXT_MEMORY_ENABLED` 是 memory loop 的 A/B 实验开关，默认开启。
+设置为 `false`、`0`、`no` 或 `off` 时，context package 渲染会跳过
+`working_memory` 和 `review_evidence` section。这个开关不会删除 ledger、
+artifact、evidence manifest 或 workflow 状态，只影响 Agent 当前看到的
+context package，用于比较 memory on/off 对 token、工具调用和重复读仓库的影响。
 
 这里的 `<prompt_file>` 不是你手写的需求文件，而是 `dualctl resume` 在 run ledger 里生成的 Agent 指令文件，例如：
 

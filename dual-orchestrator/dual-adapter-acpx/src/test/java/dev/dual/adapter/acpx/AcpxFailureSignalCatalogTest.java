@@ -128,6 +128,21 @@ class AcpxFailureSignalCatalogTest {
     }
 
     @Test
+    void matchesAdapterGeneratedOutputInterruptedDiagnostic() {
+        var evidence = new AcpxFailureEvidence(
+                "",
+                "[dual] acpx recoverable signal persisted reason=RECOVERABLE_AGENT_OUTPUT_INTERRUPTED progress_timeout_ms=1000",
+                4
+        );
+
+        var signal = catalog.match(evidence).orElseThrow();
+
+        assertEquals("agent_output_interrupted", signal.id());
+        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", signal.reason().code());
+        assertTrue(signal.recoverable());
+    }
+
+    @Test
     void matchesNonInteractiveToolPermissionFailuresFromStdout() {
         var evidence = new AcpxFailureEvidence(
                 """

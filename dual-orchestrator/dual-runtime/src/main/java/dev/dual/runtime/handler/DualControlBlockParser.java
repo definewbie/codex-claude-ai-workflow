@@ -75,6 +75,9 @@ public final class DualControlBlockParser {
                 }
                 continue;
             }
+            if (isOrphanFenceBeforeControl(lines, i)) {
+                continue;
+            }
             if (isTopLevelNonControlFence(line)) {
                 insideOtherFence = true;
                 otherFenceMarker = fenceMarker(line);
@@ -104,6 +107,20 @@ public final class DualControlBlockParser {
         return line != null
                 && line.matches("^`{3,}.*$")
                 && !isTopLevelControlFence(line);
+    }
+
+    private static boolean isOrphanFenceBeforeControl(List<String> lines, int index) {
+        if (!"```".equals(lines.get(index))) {
+            return false;
+        }
+        for (int i = index + 1; i < lines.size(); i++) {
+            var candidate = lines.get(i);
+            if (candidate.isBlank()) {
+                continue;
+            }
+            return isTopLevelControlFence(candidate);
+        }
+        return false;
     }
 
     private static String fenceMarker(String line) {

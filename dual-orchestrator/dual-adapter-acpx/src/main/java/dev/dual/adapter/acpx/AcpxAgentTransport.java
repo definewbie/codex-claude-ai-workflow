@@ -18,9 +18,11 @@ public class AcpxAgentTransport {
     private static final int RECOVERABLE_SIGNAL_EXIT_CODE = 4;
     private static final long STDERR_SIGNAL_POLL_SECONDS = 2;
     private static final long DEFAULT_RECOVERABLE_SIGNAL_GRACE_SECONDS = 30;
+    private static final long DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS = 120;
     private static final long TERMINAL_OUTPUT_GRACE_SECONDS = 2;
     private static final long DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS = 45;
     private static final String RECOVERABLE_SIGNAL_GRACE_ENV = "DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS";
+    private static final String AGENT_PROGRESS_TIMEOUT_ENV = "DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS";
     private static final String SESSION_COMMAND_TIMEOUT_ENV = "DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS";
     private static final String API_TIMEOUT_MS_ENV = "API_TIMEOUT_MS";
 
@@ -28,6 +30,7 @@ public class AcpxAgentTransport {
     private final AgentTerminalContract terminalContract = new AgentTerminalContract();
     private final String acpxExecutable;
     private final Duration recoverableSignalGrace;
+    private final Duration agentProgressTimeout;
     private final Duration sessionCommandTimeout;
 
     public AcpxAgentTransport() {
@@ -43,17 +46,30 @@ public class AcpxAgentTransport {
     }
 
     AcpxAgentTransport(String acpxExecutable, Duration recoverableSignalGrace, Duration sessionCommandTimeout) {
+        this(acpxExecutable, recoverableSignalGrace, configuredAgentProgressTimeout(), sessionCommandTimeout);
+    }
+
+    AcpxAgentTransport(
+            String acpxExecutable,
+            Duration recoverableSignalGrace,
+            Duration agentProgressTimeout,
+            Duration sessionCommandTimeout
+    ) {
         if (acpxExecutable == null || acpxExecutable.isBlank()) {
             throw new IllegalArgumentException("acpxExecutable is required");
         }
         if (recoverableSignalGrace == null || recoverableSignalGrace.isNegative()) {
             throw new IllegalArgumentException("recoverableSignalGrace must be zero or positive");
         }
+        if (agentProgressTimeout == null || agentProgressTimeout.isNegative() || agentProgressTimeout.isZero()) {
+            throw new IllegalArgumentException("agentProgressTimeout must be positive");
+        }
         if (sessionCommandTimeout == null || sessionCommandTimeout.isNegative() || sessionCommandTimeout.isZero()) {
             throw new IllegalArgumentException("sessionCommandTimeout must be positive");
         }
         this.acpxExecutable = acpxExecutable;
         this.recoverableSignalGrace = recoverableSignalGrace;
+        this.agentProgressTimeout = agentProgressTimeout;
         this.sessionCommandTimeout = sessionCommandTimeout;
     }
 
@@ -250,7 +266,7 @@ public class AcpxAgentTransport {
         Instant terminalOutputSince = null;
         var startedAt = Instant.now();
         var eventReader = new AgentLifecycleEventReader(request.stdoutPath(), request.stderrPath());
-        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace);
+        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
         while (true) {
             if (process.waitFor(STDERR_SIGNAL_POLL_SECONDS, TimeUnit.SECONDS)) {
                 return process.exitValue();
@@ -387,6 +403,8 @@ public class AcpxAgentTransport {
                 .append(interrupted)
                 .append(" grace_ms=")
                 .append(recoverableSignalGrace.toMillis())
+                .append(" progress_timeout_ms=")
+                .append(agentProgressTimeout.toMillis())
                 .append(" elapsed_ms=")
                 .append(elapsed.toMillis())
                 .append(System.lineSeparator());
@@ -422,6 +440,13 @@ public class AcpxAgentTransport {
         return durationFromSecondsEnv(
                 SESSION_COMMAND_TIMEOUT_ENV,
                 Duration.ofSeconds(DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS)
+        );
+    }
+
+    private static Duration configuredAgentProgressTimeout() {
+        return durationFromSecondsEnv(
+                AGENT_PROGRESS_TIMEOUT_ENV,
+                Duration.ofSeconds(DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS)
         );
     }
 

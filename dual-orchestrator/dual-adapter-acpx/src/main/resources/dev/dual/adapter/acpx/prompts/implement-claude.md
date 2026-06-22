@@ -40,6 +40,12 @@ Repository hygiene:
 
 {{context_package}}
 
+Context use rule:
+
+- If the package contains `Working Memory`, use it before reading repository files.
+- Re-read files only when the memory is missing, stale, or insufficient for implementation.
+- If you must re-read a known file, mention the reason in the implementation report.
+
 ## Output Contract
 
 After implementation, write a Markdown artifact with these sections:

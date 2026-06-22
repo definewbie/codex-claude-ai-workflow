@@ -65,6 +65,17 @@ final class AcpxFailureSignalCatalog {
                         "agent needs reconnect"
                 ),
                 signal(
+                        "agent_output_interrupted",
+                        AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED,
+                        86,
+                        "agent accepted the prompt but stopped producing trusted progress; rebuild or retry the agent session",
+                        true,
+                        true,
+                        "reason=RECOVERABLE_AGENT_OUTPUT_INTERRUPTED",
+                        "recoverable_agent_output_interrupted",
+                        "agent accepted the prompt but produced no trusted progress"
+                ),
+                signal(
                         "agent_permission_blocked",
                         AcpxFailureReason.AGENT_PERMISSION_BLOCKED,
                         85,

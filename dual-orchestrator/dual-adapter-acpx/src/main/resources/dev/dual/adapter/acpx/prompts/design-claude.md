@@ -23,6 +23,12 @@ Do not implement code in this stage. Produce an implementation-ready design that
 
 {{context_package}}
 
+Context use rule:
+
+- If the package contains `Working Memory`, use it before reading repository files.
+- Re-read files only when the memory is missing, stale, or insufficient for this design decision.
+- If you must re-read a known file, mention the reason in the Markdown report.
+
 ## Output Contract
 
 Write a Markdown design artifact with these sections:

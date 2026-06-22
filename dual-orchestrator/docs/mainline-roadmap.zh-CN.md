@@ -26,6 +26,7 @@ delivery merge -> 可追踪完成
 | P0 | 已验收 worktree 合回 original repo | [delivery-merge.zh-CN.md](design/delivery-merge.zh-CN.md) |
 | P1 | Definition / Instance / Execution 和 AgentTask 边界 | [execution-instance-model.zh-CN.md](design/execution-instance-model.zh-CN.md) |
 | P1 | Artifact contract 和 context budget 治理 | [artifact-contracts-and-context.zh-CN.md](design/artifact-contracts-and-context.zh-CN.md) |
+| P1 | Ledger-first memory loop、Working Memory、Review Evidence Brief | [ledger-first-memory-loop.zh-CN.md](design/ledger-first-memory-loop.zh-CN.md) |
 | P1 | Recovery 分类和 calibration | [failure-recovery-and-calibration.zh-CN.md](design/failure-recovery-and-calibration.zh-CN.md) |
 | P2 | Operator overview、trace、API、UI 投影一致性 | [operator-observability.zh-CN.md](design/operator-observability.zh-CN.md) |
 | P2 | Public benchmark 和发布证据 | [testing/real-case-benchmarks/README.md](testing/real-case-benchmarks/README.md) |
@@ -135,6 +136,7 @@ P1 让长时间、多 Agent 的真实运行可恢复、可控成本。
 | Report 投影 | Done, keep testing | Final report summary 消费 self-test 和 acceptance sidecar，不嵌入原始 Agent Markdown 或 transcript。 |
 | Context budgets | Done, keep testing | `ContextProfiles` 定义 profile budgets；`ContextBuildPackageHandler` 执行 token 估算上限，并对 section 降级或丢弃。 |
 | Context package metadata | Done | 每个 context package 现在都会写 JSON sidecar，记录 profile、token budget、估算 tokens 和每个 section 的降级事实。 |
+| Ledger-first memory loop | Phase A MVP done, real-case validation pending | `EvidenceManifest` 写入 `memory/evidence-manifest.json`；Claude implementation context 渲染 `Working Memory`；Codex review profiles 渲染 `Review Evidence Brief`；context metadata 暴露 evidence refs 和 evidence counts。 |
 | Prompt 语言策略 | Done | Workstream `settings.json` 保存 `promptLanguage`；Agent prompt 会本地化人类可读说明，同时保持 contract keys、enums 和 markers 的机器可读格式。 |
 | Projection | MVP done, keep testing | `workstream-metrics.json` 包含按 run、node、agent 和 total 汇总的 tokenMetrics。`runs` 和 `trace` 会展示每个步骤的 token source：`acpx_stream` 或 `artifact_estimate`；API overview 和 Operator Console 消费同一套 ledger projection。 |
 | 测试 | Done | `ContextBuildPackageHandlerTest` 覆盖 budget enforcement、degradation 和 metadata sidecar。 |
@@ -169,6 +171,9 @@ P0 lifecycle closure 在 MVP 边界内已经完成。不要继续开放式私有
 
 建议顺序：
 
-1. 继续 P2：delivery view 和 public benchmark 稳定化。
-2. 开源文档清理保持渐进执行，并保持当前准确；不要重新把私有运行历史写进公开文档。
-3. 私有 real case 只作为特定缺陷的 regression check，不再作为 P0 discovery loop。
+1. 先补齐 `AgentExecution -> AgentExecutionOutcome` 边界。simple real case 已证明 reconnect、terminal control 和 artifact contract 会污染同一个 NodeExecution；详见 [AgentExecution Outcome Model](design/agent-execution-outcome-model.zh-CN.md)。
+2. 修复 outcome 后重跑 simple acpx case，确认不会再出现 `run.status=completed` 但 required artifact missing 的新 run。
+3. simple case 通过后，再继续 P1 memory loop 验证：用 simple / cancer-clinic 对比 repeated read、tool calls 和 token breakdown，验证是否真正降低重复探索。
+4. 如果 P1 验证通过，再继续 P2：delivery view、public benchmark 和 Operator Console 降复杂度。
+5. 开源文档清理保持渐进执行，并保持当前准确；不要重新把私有运行历史写进公开文档。
+6. 私有 real case 只作为特定缺陷的 regression check 或 P1/P2 验证，不再作为 P0 discovery loop。

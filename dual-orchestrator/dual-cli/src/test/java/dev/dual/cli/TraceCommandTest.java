@@ -41,6 +41,8 @@ class TraceCommandTest {
         assertTrue(printed.contains("[ok] intake.claude_brainstorm"));
         assertTrue(printed.contains("[loop] repair: REJECT_IMPLEMENTATION_BUG"));
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
+        assertTrue(printed.contains("Tool Governance:"));
+        assertTrue(printed.contains("README.md x2 evidenceKnown=true"));
         assertTrue(printed.contains("Final Report:"));
         assertTrue(printed.contains("Handoff JSON:"));
         assertFalse(printed.contains("Current Failure:"));
@@ -148,6 +150,7 @@ class TraceCommandTest {
         Files.createDirectories(root.resolve("reports"));
         Files.createDirectories(root.resolve("artifacts/next-stage"));
         Files.createDirectories(root.resolve("delivery"));
+        Files.createDirectories(root.resolve("metrics"));
         Files.createDirectories(root.resolve("recovery"));
         Files.createDirectories(root.resolve("runs/run-1"));
         Files.createDirectories(root.resolve("workflow"));
@@ -182,6 +185,25 @@ class TraceCommandTest {
         Files.writeString(root.resolve("events.jsonl"), """
                 {"event_type":"node_routed","payload":{"outcome":"REJECT_IMPLEMENTATION_BUG"}}
                 {"event_type":"iteration_started","payload":{"trigger_action":"REJECT_IMPLEMENTATION_BUG"}}
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("metrics/workstream-metrics.json"), """
+                {
+                  "schemaVersion": 1,
+                  "toolMetrics": {
+                    "toolCallCount": 5,
+                    "readCount": 4,
+                    "bashCount": 1,
+                    "repeatedReadFiles": [
+                      {
+                        "path": "README.md",
+                        "count": 2,
+                        "nodes": ["intake.claude_brainstorm", "design.claude_design"],
+                        "agents": ["claude"],
+                        "evidenceKnown": true
+                      }
+                    ]
+                  }
+                }
                 """, StandardCharsets.UTF_8);
         Files.writeString(root.resolve("workflow/current.json"), """
                 {

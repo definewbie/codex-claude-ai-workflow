@@ -128,6 +128,11 @@ one NodeInstance
   -> one NodeExecution
 ```
 
+后续实现必须补齐 `AgentTask -> AgentExecution -> AgentExecutionOutcome -> NodeExecution`
+边界。`AgentExecution` 是 acpx / Claude / Codex 调用的聚合根，负责统一
+process result、adapter signal、terminal control 和 artifact contract result。
+详见 [AgentExecution Outcome Model](agent-execution-outcome-model.zh-CN.md)。
+
 当前最小 worker 是本机单任务形态：
 
 ```text

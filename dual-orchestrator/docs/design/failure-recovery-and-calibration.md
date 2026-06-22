@@ -77,6 +77,14 @@ derived from that timeout plus a small buffer. If the timeout is only injected
 inside the Claude ACP child process, set the dual grace explicitly so the two
 timeouts do not fight each other.
 
+There is a second, separate timeout for accepted prompts that stop producing
+trusted progress. A reconnect can recover enough to create a new ACP session and
+accept `session/prompt`, then still stall without assistant, tool, usage, or
+terminal-contract events. That is classified as
+`RECOVERABLE_AGENT_OUTPUT_INTERRUPTED`, not as business rejection. The default
+progress timeout is 120 seconds and can be configured with
+`DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS`.
+
 The terminal contract wins over reconnect diagnostics, but only when it is
 complete: a closed `dual-control` fence with required fields followed by
 `[done] end_turn`. Partial or stale-looking contract fragments are not accepted

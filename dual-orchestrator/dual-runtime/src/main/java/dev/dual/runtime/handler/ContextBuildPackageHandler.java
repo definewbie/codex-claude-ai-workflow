@@ -26,10 +26,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             "iteration_history",
             "human_feedback",
             "recent_agent_outputs",
+            "working_memory",
+            "review_evidence",
             "git_evidence",
             "ledger_pointers",
             "task_contract"
     );
+    private static final List<String> MEMORY_SECTIONS = List.of("working_memory", "review_evidence");
 
     @Override
     public String type() {
@@ -53,7 +56,15 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             return executeGoverned(context, workstreamDir, packagePath, profileName);
         }
 
-        var markdown = renderPackage(context, workstreamDir);
+        var requestedSections = effectiveSections(context);
+        var manifest = requestedSections.stream().anyMatch(ContextBuildPackageHandler::requiresEvidenceManifest)
+                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(), OBJECT_MAPPER)
+                : null;
+        var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
+        var governance = governanceEnabled()
+                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, manifest, OBJECT_MAPPER)
+                : null;
+        var markdown = renderPackage(context, workstreamDir, manifest, governance);
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
         var metadataPath = writeContextPackageMetadata(
                 context,
@@ -61,18 +72,23 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 profileName,
                 null,
                 tokenCount(markdown),
-                List.of()
+                List.of(),
+                manifest,
+                manifestPath,
+                memoryEnabled(),
+                disabledMemorySections(sections(context), requestedSections),
+                governance
         );
 
-        return buildLegacyResult(context, packagePath, metadataPath);
+        return buildLegacyResult(context, packagePath, metadataPath, requestedSections);
     }
 
     private static NodeResult buildLegacyResult(TaskContext context, Path packagePath) {
-        return buildLegacyResult(context, packagePath, null, sections(context));
+        return buildLegacyResult(context, packagePath, null, effectiveSections(context));
     }
 
     private static NodeResult buildLegacyResult(TaskContext context, Path packagePath, Path metadataPath) {
-        return buildLegacyResult(context, packagePath, metadataPath, sections(context));
+        return buildLegacyResult(context, packagePath, metadataPath, effectiveSections(context));
     }
 
     private static NodeResult buildLegacyResult(
@@ -96,8 +112,16 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     private static NodeResult executeGoverned(TaskContext context, Path workstreamDir, Path packagePath, String profileName) throws IOException {
-        var budget = ContextProfiles.budgetFor(profileName);
+        var rawBudget = ContextProfiles.budgetFor(profileName);
+        var budget = effectiveBudget(rawBudget);
         var handoff = loadHandoff(workstreamDir);
+        var manifest = budget.sections().stream().anyMatch(req -> requiresEvidenceManifest(req.section()))
+                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(), OBJECT_MAPPER)
+                : null;
+        var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
+        var governance = governanceEnabled()
+                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, manifest, OBJECT_MAPPER)
+                : null;
 
         // Phase 2: Resolve section availability
         var resolved = new ArrayList<ResolvedSection>();
@@ -131,6 +155,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var builder = new StringBuilder();
         appendGovernedHeader(builder, context, budget, sorted);
         ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
+        RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
 
         for (var rs : sorted) {
             if (rs.dropped || !rs.available) {
@@ -140,7 +165,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 }
                 continue;
             }
-            var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, budget);
+            var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, manifest, budget);
             if (section.failure() != null) {
                 return section.failure();
             }
@@ -159,6 +184,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             builder.setLength(0);
             appendGovernedHeader(builder, context, budget, sorted);
             ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
+            RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
             for (var rs : sorted) {
                 if (rs.dropped || !rs.available) {
                     if (rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER) {
@@ -167,7 +193,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     }
                     continue;
                 }
-                var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, budget);
+                var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, manifest, budget);
                 if (section.failure() != null) {
                     return section.failure();
                 }
@@ -193,7 +219,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 profileName,
                 budget,
                 tokenCount(markdown),
-                sorted
+                sorted,
+                manifest,
+                manifestPath,
+                memoryEnabled(),
+                disabledMemorySections(rawBudget.sections().stream().map(SectionRequirement::section).toList(),
+                        budget.sections().stream().map(SectionRequirement::section).toList()),
+                governance
         );
         return buildLegacyResult(context, packagePath, metadataPath, declaredSections);
     }
@@ -214,6 +246,52 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             int estimatedTokens,
             List<ResolvedSection> sections
     ) throws IOException {
+        return writeContextPackageMetadata(context, packagePath, profileName, budget, estimatedTokens, sections, null, null);
+    }
+
+    private static Path writeContextPackageMetadata(
+            TaskContext context,
+            Path packagePath,
+            String profileName,
+            ContextBudget budget,
+            int estimatedTokens,
+            List<ResolvedSection> sections,
+            EvidenceManifest manifest,
+            Path manifestPath
+    ) throws IOException {
+        return writeContextPackageMetadata(context, packagePath, profileName, budget, estimatedTokens, sections,
+                manifest, manifestPath, memoryEnabled(), List.of());
+    }
+
+    private static Path writeContextPackageMetadata(
+            TaskContext context,
+            Path packagePath,
+            String profileName,
+            ContextBudget budget,
+            int estimatedTokens,
+            List<ResolvedSection> sections,
+            EvidenceManifest manifest,
+            Path manifestPath,
+            boolean memoryEnabled,
+            List<String> memoryDisabledSections
+    ) throws IOException {
+        return writeContextPackageMetadata(context, packagePath, profileName, budget, estimatedTokens, sections,
+                manifest, manifestPath, memoryEnabled, memoryDisabledSections, null);
+    }
+
+    private static Path writeContextPackageMetadata(
+            TaskContext context,
+            Path packagePath,
+            String profileName,
+            ContextBudget budget,
+            int estimatedTokens,
+            List<ResolvedSection> sections,
+            EvidenceManifest manifest,
+            Path manifestPath,
+            boolean memoryEnabled,
+            List<String> memoryDisabledSections,
+            RepoScopeGovernance.Documents governance
+    ) throws IOException {
         var metadataPath = packagePath.resolveSibling(stripMarkdownExtension(packagePath.getFileName().toString()) + ".json");
         var metadata = new LinkedHashMap<String, Object>();
         metadata.put("schemaVersion", 1);
@@ -225,10 +303,26 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         metadata.put("estimatedTokens", estimatedTokens);
         metadata.put("tokenBudget", budget == null ? 0 : budget.totalBudget());
         metadata.put("withinBudget", budget == null || estimatedTokens <= budget.totalBudget());
+        metadata.put("memoryEnabled", memoryEnabled);
+        metadata.put("memoryDisabledSections", memoryDisabledSections);
+        metadata.put("contextGovernanceEnabled", governance != null);
         metadata.put("generatedAt", Instant.now().toString());
         metadata.put("sections", sections.stream()
                 .map(ContextBuildPackageHandler::sectionMetadata)
                 .toList());
+        if (manifest != null && manifestPath != null) {
+            metadata.put("evidenceManifest", toWorkspaceRef(context.workspaceRoot(), manifestPath));
+            metadata.put("evidenceRefCount", manifest.sourceRefs().size());
+            metadata.put("evidenceRefs", manifest.sourceRefs());
+            metadata.put("workingMemoryEvidenceCount", manifest.stageHandoffs().size());
+            metadata.put("reviewEvidenceCount", manifest.reviewItems().size());
+        }
+        if (governance != null) {
+            metadata.put("repoMap", toWorkspaceRef(context.workspaceRoot(), governance.repoMapPath()));
+            metadata.put("fileRelevancePlan", toWorkspaceRef(context.workspaceRoot(), governance.fileRelevancePlanPath()));
+            metadata.put("stageScopePolicy", toWorkspaceRef(context.workspaceRoot(), governance.stageScopePolicyPath()));
+            metadata.put("contextGovernanceReport", toWorkspaceRef(context.workspaceRoot(), governance.governanceReportPath()));
+        }
         OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(metadataPath.toFile(), metadata);
         return metadataPath;
     }
@@ -262,6 +356,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "git_evidence" -> Files.exists(workstreamDir.resolve("artifacts/git-evidence"));
             case "ledger_pointers" -> Files.exists(workstreamDir.resolve("events.jsonl"));
             case "task_contract" -> Files.exists(workstreamDir.resolve("artifacts/task-contract.json"));
+            case "working_memory", "review_evidence" -> Files.exists(workstreamDir.resolve(EvidenceManifest.MANIFEST_REF_NAME));
             default -> false;
         };
     }
@@ -330,10 +425,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             TaskContext context,
             Path workstreamDir,
             StageHandoffDocument handoff,
+            EvidenceManifest manifest,
             ContextBudget budget
     ) throws IOException {
         var section = new StringBuilder();
-        appendGovernedSection(section, rs, context, workstreamDir, handoff, budget);
+        appendGovernedSection(section, rs, context, workstreamDir, handoff, manifest, budget);
         var full = section.toString();
         rs.originalChars = tokenCount(full);
 
@@ -362,6 +458,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     private static void appendGovernedSection(StringBuilder builder, ResolvedSection rs,
                                                TaskContext context, Path workstreamDir,
                                                StageHandoffDocument handoff,
+                                               EvidenceManifest manifest,
                                                ContextBudget budget) throws IOException {
         builder.append("## ").append(sectionTitle(rs.req.section())).append("\n\n");
         var strategy = rs.degraded ? rs.req.degradeTo().strategy() : Degradation.FULL;
@@ -403,6 +500,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "recent_agent_outputs" -> {
                 ContextPackageSectionRenderer.appendRecentAgentOutputsLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 2);
             }
+            case "working_memory" -> {
+                ContextPackageSectionRenderer.appendWorkingMemory(builder, manifest);
+            }
+            case "review_evidence" -> {
+                ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, manifest);
+            }
             case "git_evidence" -> {
                 if (strategy == Degradation.DIFF_STAT) {
                     ContextPackageSectionRenderer.appendGitEvidenceDiffStat(builder, workstreamDir, handoff);
@@ -436,6 +539,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "iteration_history" -> "Iteration History";
             case "human_feedback" -> "Human Feedback";
             case "recent_agent_outputs" -> "Recent Agent Outputs";
+            case "working_memory" -> "Working Memory";
+            case "review_evidence" -> "Review Evidence Brief";
             case "git_evidence" -> "Git Evidence";
             case "ledger_pointers" -> "Ledger Pointers";
             case "task_contract" -> "TaskContract";
@@ -467,11 +572,20 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
-    private static String renderPackage(TaskContext context, Path workstreamDir) throws IOException {
+    private static boolean requiresEvidenceManifest(String section) {
+        return "working_memory".equals(section) || "review_evidence".equals(section);
+    }
+
+    private static String renderPackage(
+            TaskContext context,
+            Path workstreamDir,
+            EvidenceManifest manifest,
+            RepoScopeGovernance.Documents governance
+    ) throws IOException {
         var targetNode = configText(context, "target_node", "(not specified)");
         var purpose = configText(context, "purpose", "Prepare focused context for the next agent step.");
         var profile = profile(context);
-        var sections = sections(context);
+        var sections = effectiveSections(context);
         var maxSnippetChars = maxSnippetChars(context);
         var maxRecentAgentOutputs = maxRecentAgentOutputs(context);
         var requirement = readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)");
@@ -489,6 +603,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.append("- Max Snippet Chars: ").append(maxSnippetChars).append("\n");
         builder.append("- Max Recent Agent Outputs: ").append(maxRecentAgentOutputs).append("\n\n");
         ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
+        RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
 
         if (sections.contains("requirement")) {
             builder.append("## User Requirement\n\n");
@@ -513,6 +628,16 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (sections.contains("recent_agent_outputs")) {
             builder.append("## Recent Agent Outputs\n\n");
             ContextPackageSectionRenderer.appendRecentAgentOutputs(builder, workstreamDir, maxSnippetChars, maxRecentAgentOutputs);
+        }
+
+        if (sections.contains("working_memory")) {
+            builder.append("## Working Memory\n\n");
+            ContextPackageSectionRenderer.appendWorkingMemory(builder, manifest == null ? EvidenceManifest.empty(context.workstreamId()) : manifest);
+        }
+
+        if (sections.contains("review_evidence")) {
+            builder.append("## Review Evidence Brief\n\n");
+            ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, manifest == null ? EvidenceManifest.empty(context.workstreamId()) : manifest);
         }
 
         if (sections.contains("git_evidence")) {
@@ -633,6 +758,69 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             );
             default -> FULL_SECTIONS;
         };
+    }
+
+    private static List<String> effectiveSections(TaskContext context) {
+        return filterMemorySections(sections(context));
+    }
+
+    private static ContextBudget effectiveBudget(ContextBudget budget) {
+        var filtered = budget.sections().stream()
+                .filter(req -> memoryEnabled() || !MEMORY_SECTIONS.contains(req.section()))
+                .toList();
+        if (filtered.size() == budget.sections().size()) {
+            return budget;
+        }
+        return new ContextBudget(budget.totalBudget(), filtered, budget.configOverrides());
+    }
+
+    private static List<String> filterMemorySections(List<String> sections) {
+        if (memoryEnabled()) {
+            return sections;
+        }
+        return sections.stream()
+                .filter(section -> !MEMORY_SECTIONS.contains(section))
+                .toList();
+    }
+
+    private static List<String> disabledMemorySections(List<String> rawSections, List<String> effectiveSections) {
+        if (memoryEnabled()) {
+            return List.of();
+        }
+        return rawSections.stream()
+                .filter(MEMORY_SECTIONS::contains)
+                .filter(section -> !effectiveSections.contains(section))
+                .distinct()
+                .toList();
+    }
+
+    private static boolean memoryEnabled() {
+        var property = System.getProperty("dual.context.memory.enabled");
+        if (property != null && !property.isBlank()) {
+            return !isFalse(property);
+        }
+        var env = System.getenv("DUAL_CONTEXT_MEMORY_ENABLED");
+        if (env != null && !env.isBlank()) {
+            return !isFalse(env);
+        }
+        return true;
+    }
+
+    private static boolean governanceEnabled() {
+        var property = System.getProperty("dual.context.governance.enabled");
+        if (property != null && !property.isBlank()) {
+            return !isFalse(property);
+        }
+        var env = System.getenv("DUAL_CONTEXT_GOVERNANCE_ENABLED");
+        if (env != null && !env.isBlank()) {
+            return !isFalse(env);
+        }
+        return true;
+    }
+
+    private static boolean isFalse(String value) {
+        var normalized = value.trim().toLowerCase(java.util.Locale.ROOT);
+        return normalized.equals("false") || normalized.equals("0") || normalized.equals("no") || normalized.equals("off");
     }
 
     private static int maxSnippetChars(TaskContext context) {

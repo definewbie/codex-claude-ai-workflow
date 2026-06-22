@@ -34,8 +34,8 @@ class AgentExecutionHealthTest {
         health.observe(AgentLifecycleEvent.stderrLine(0, "[acpx] session claude-main · agent needs reconnect"));
         assertEquals(AgentExecutionHealth.Status.RECOVERING, health.assess(Duration.ofSeconds(1)).status());
         assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, health.assess(Duration.ofSeconds(31)).status());
-        health.observe(AgentLifecycleEvent.streamLine(1, "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"session/new\"}"));
-        health.observe(AgentLifecycleEvent.streamLine(2, "{\"jsonrpc\":\"2.0\",\"result\":{\"sessionId\":\"new\"},\"id\":4}"));
+        health.observe(AgentLifecycleEvent.streamLine(1, "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"session/new\"}"), Duration.ofSeconds(59));
+        health.observe(AgentLifecycleEvent.streamLine(2, "{\"jsonrpc\":\"2.0\",\"result\":{\"sessionId\":\"new\"},\"id\":4}"), Duration.ofSeconds(59));
 
         var assessment = health.assess(Duration.ofSeconds(60));
 
@@ -61,7 +61,7 @@ class AgentExecutionHealthTest {
         var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(10));
 
         health.observe(AgentLifecycleEvent.stderrLine(0, "[acpx] session claude-main · agent needs reconnect"));
-        health.observe(AgentLifecycleEvent.streamLine(1, "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"update\":{\"sessionUpdate\":\"agent_thought_chunk\",\"content\":{\"text\":\"working\"}}}}"));
+        health.observe(AgentLifecycleEvent.streamLine(1, "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"update\":{\"sessionUpdate\":\"agent_thought_chunk\",\"content\":{\"text\":\"working\"}}}}"), Duration.ofSeconds(19));
 
         var assessment = health.assess(Duration.ofSeconds(20));
 
@@ -94,5 +94,32 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(10));
 
         assertEquals(AgentExecutionHealth.Status.TERMINAL_SUCCESS, assessment.status());
+    }
+
+    @Test
+    void promptAcceptedWithoutTrustedProgressBecomesRecoverableOutputInterrupted() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(30), Duration.ofSeconds(5));
+
+        health.observe(AgentLifecycleEvent.streamLine(0, "{\"jsonrpc\":\"2.0\",\"result\":{\"sessionId\":\"new\"},\"id\":1}"));
+        health.observe(AgentLifecycleEvent.streamLine(1, "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/prompt\",\"params\":{}}"), Duration.ofSeconds(1));
+
+        var assessment = health.assess(Duration.ofSeconds(7));
+
+        assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, assessment.status());
+        assertEquals(AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code(), assessment.failure().reason());
+        assertTrue(assessment.failure().recoverable());
+    }
+
+    @Test
+    void trustedAgentActivityResetsProgressStallClock() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(30), Duration.ofSeconds(5));
+
+        health.observe(AgentLifecycleEvent.streamLine(0, "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/prompt\",\"params\":{}}"), Duration.ofSeconds(1));
+        health.observe(AgentLifecycleEvent.streamLine(1, "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"update\":{\"sessionUpdate\":\"agent_thought_chunk\",\"content\":{\"text\":\"working\"}}}}"), Duration.ofSeconds(4));
+
+        var assessment = health.assess(Duration.ofSeconds(8));
+
+        assertEquals(AgentExecutionHealth.Status.HEALTHY, assessment.status());
+        assertFalse(assessment.failure().recoverable());
     }
 }

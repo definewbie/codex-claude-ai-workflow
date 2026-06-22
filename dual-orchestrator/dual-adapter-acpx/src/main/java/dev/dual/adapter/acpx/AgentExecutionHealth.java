@@ -14,9 +14,17 @@ import java.time.Duration;
 final class AgentExecutionHealth {
     private static final AcpxFailureClassifier.AcpxFailure NO_FAILURE =
             new AcpxFailureClassifier.AcpxFailure("NONE", "", false, false);
+    private static final AcpxFailureClassifier.AcpxFailure STALLED_AGENT_OUTPUT =
+            new AcpxFailureClassifier.AcpxFailure(
+                    AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code(),
+                    "agent accepted the prompt but produced no trusted progress before the progress timeout",
+                    true,
+                    true
+            );
 
     private final AcpxFailureSignalCatalog signalCatalog;
     private final Duration recoverableSignalGrace;
+    private final Duration progressStallTimeout;
 
     private long lastConsumedSequence = -1;
     private long lastProgressSequence = -1;
@@ -26,8 +34,17 @@ final class AgentExecutionHealth {
     private boolean terminalSuccess;
 
     AgentExecutionHealth(AcpxFailureSignalCatalog signalCatalog, Duration recoverableSignalGrace) {
+        this(signalCatalog, recoverableSignalGrace, recoverableSignalGrace);
+    }
+
+    AgentExecutionHealth(
+            AcpxFailureSignalCatalog signalCatalog,
+            Duration recoverableSignalGrace,
+            Duration progressStallTimeout
+    ) {
         this.signalCatalog = signalCatalog;
         this.recoverableSignalGrace = recoverableSignalGrace;
+        this.progressStallTimeout = progressStallTimeout;
     }
 
     void observe(AgentLifecycleEvent event) {
@@ -80,6 +97,10 @@ final class AgentExecutionHealth {
                 return new Assessment(Status.RECOVERABLE_FAILURE, failure);
             }
             return new Assessment(Status.RECOVERING, failure);
+        }
+        if (lastProgressSequence >= 0
+                && elapsed.minus(lastProgressAt).compareTo(progressStallTimeout) >= 0) {
+            return new Assessment(Status.RECOVERABLE_FAILURE, STALLED_AGENT_OUTPUT);
         }
         if (lastProgressSequence >= 0) {
             return new Assessment(Status.HEALTHY, NO_FAILURE);

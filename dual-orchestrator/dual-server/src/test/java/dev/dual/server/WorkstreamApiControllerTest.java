@@ -173,7 +173,13 @@ class WorkstreamApiControllerTest {
                   "agent": "codex",
                   "nodeId": "acceptance.codex_verifier_review",
                   "status": "completed",
-                  "durationMs": 42
+                  "durationMs": 42,
+                  "toolUsage": {
+                    "toolCallCount": 2,
+                    "readCount": 1,
+                    "writeCount": 0
+                  },
+                  "contextGovernanceActualReportPath": ".agent/workstreams/ws-api-overview/artifacts/context-governance/acceptance.codex_verifier_review-actual-run-001.json"
                 }
                 """, StandardCharsets.UTF_8);
         Files.writeString(paths.eventsJsonl(), """
@@ -197,7 +203,13 @@ class WorkstreamApiControllerTest {
         assertEquals(true, attention.stream().anyMatch(item -> "Repair loop occurred".equals(item.get("title"))));
         assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
         assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
-        assertEquals(1, ((List<Map<String, Object>>) response.get("latestAgentRuns")).size());
+        var latestAgentRuns = (List<Map<String, Object>>) response.get("latestAgentRuns");
+        assertEquals(1, latestAgentRuns.size());
+        assertEquals(2, ((Map<String, Object>) latestAgentRuns.getFirst().get("toolUsage")).get("toolCallCount"));
+        assertEquals(
+                ".agent/workstreams/ws-api-overview/artifacts/context-governance/acceptance.codex_verifier_review-actual-run-001.json",
+                latestAgentRuns.getFirst().get("contextGovernanceActualReportPath")
+        );
         var metrics = (Map<String, Object>) response.get("metrics");
         assertEquals(fixture.workstreamId(), metrics.get("workstreamId"));
         assertEquals(2, metrics.get("nodeCount"));

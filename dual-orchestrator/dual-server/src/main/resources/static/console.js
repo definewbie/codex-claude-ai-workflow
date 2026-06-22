@@ -969,6 +969,7 @@ function tokenSummary() {
     runs: Array.isArray(tokenMetrics.runs) ? tokenMetrics.runs : runs,
     topContextSections: Array.isArray(tokenMetrics.topContextSections) ? tokenMetrics.topContextSections : [],
     contextPackages: Array.isArray(tokenMetrics.contextPackages) ? tokenMetrics.contextPackages : [],
+    toolMetrics: metrics.toolMetrics || {},
   };
 }
 
@@ -998,6 +999,7 @@ function tokenCard(tokens) {
       </div>
       <div class="budget"><i style="width:${tokens.budgetPercent}%"></i></div>
       ${tokenHotspots(tokens)}
+      ${toolGovernanceHotspots(tokens)}
     </div>
   `;
 }
@@ -1019,6 +1021,35 @@ function tokenHotspots(tokens) {
       `).join("")}
     </div>
   `;
+}
+
+function toolGovernanceHotspots(tokens) {
+  const toolMetrics = tokens.toolMetrics || {};
+  const repeated = Array.isArray(toolMetrics.repeatedReadFiles)
+    ? toolMetrics.repeatedReadFiles.slice(0, 4)
+    : [];
+  const toolCalls = numberValue(toolMetrics.toolCallCount);
+  const reads = numberValue(toolMetrics.readCount);
+  const bash = numberValue(toolMetrics.bashCount);
+  if (!toolCalls && !repeated.length) {
+    return `<div class="cap">暂无工具调用治理数据；新 Agent run 完成后会自动投影 repeated read 和 evidence 命中。</div>`;
+  }
+  return `
+    <div class="token-runs">
+      <div class="cap">工具调用治理：tool calls ${formatNumber(toolCalls)} · reads ${formatNumber(reads)} · bash ${formatNumber(bash)}。重复读取用于判断 Agent 是否在反复探索同一批文件。</div>
+      ${repeated.length ? repeated.map((item) => `
+        <div class="token-row">
+          <span>${escapeHtml(item.path || "-")}</span>
+          <span>${escapeHtml((item.evidenceKnown ? "已有证据" : "未命中证据") + " · " + arrayValue(item.nodes).slice(0, 2).join(", "))}</span>
+          <strong>x${formatNumber(numberValue(item.count))}</strong>
+        </div>
+      `).join("") : `<div class="empty">暂无重复读取热点。</div>`}
+    </div>
+  `;
+}
+
+function arrayValue(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 function tokenRunBreakdown(tokens) {

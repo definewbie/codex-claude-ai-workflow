@@ -38,4 +38,23 @@ class DualControlBlockParserTest {
 
         assertEquals("MISSING_DUAL_CONTROL", result.errorCode());
     }
+
+    @Test
+    void acceptsTerminalControlBlockAfterOrphanFenceCloser() {
+        var result = parser.parse("""
+                <dual-artifact type="agent_output_contract" version="1">
+                {"decision":"READY_FOR_ARCH_REVIEW"}
+                </dual-artifact>
+                ```
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Design is ready.
+                ```
+                """);
+
+        assertTrue(result.valid());
+        assertEquals("READY_FOR_ARCH_REVIEW", result.block().required("decision"));
+        assertEquals("Design is ready.", result.block().required("summary"));
+    }
 }

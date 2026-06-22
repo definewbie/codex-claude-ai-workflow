@@ -234,6 +234,38 @@ final class ContextPackageSectionRenderer {
         }
     }
 
+    static void appendWorkingMemory(StringBuilder builder, EvidenceManifest manifest) {
+        var handoffs = manifest.stageHandoffs();
+        if (handoffs.isEmpty()) {
+            builder.append("(no stage handoff evidence yet)\n\n");
+            return;
+        }
+        for (var item : handoffs.stream().limit(3).toList()) {
+            builder.append("### ").append(displayStage(item)).append("\n\n");
+            appendEvidenceSummary(builder, item);
+            appendCompactList(builder, "Known claims", item.claims(), 5);
+            appendCompactList(builder, "Changed files", item.files(), 8);
+            appendCompactList(builder, "Risks / gaps", item.riskTags(), 5);
+            builder.append("- Evidence ref: ").append(item.sourceRef()).append("\n\n");
+        }
+    }
+
+    static void appendReviewEvidenceBrief(StringBuilder builder, EvidenceManifest manifest) {
+        var items = manifest.reviewItems();
+        if (items.isEmpty()) {
+            builder.append("(no structured review evidence yet)\n\n");
+            return;
+        }
+        for (var item : items.stream().limit(10).toList()) {
+            builder.append("### ").append(item.type()).append(" — ").append(displayStage(item)).append("\n\n");
+            appendEvidenceSummary(builder, item);
+            appendCompactList(builder, "Claims", item.claims(), 4);
+            appendCompactList(builder, "Files", item.files(), 8);
+            appendCompactList(builder, "Risks / missing evidence", item.riskTags(), 5);
+            builder.append("- Evidence ref: ").append(item.sourceRef()).append("\n\n");
+        }
+    }
+
     static void appendInputArtifacts(StringBuilder builder, TaskHandler.TaskContext context, int maxSnippetChars) throws IOException {
         if (context.instance().inputRefs().isEmpty()) {
             builder.append("(no direct input refs)\n\n");
@@ -391,6 +423,40 @@ final class ContextPackageSectionRenderer {
         builder.append("```text\n");
         builder.append(snippetWithoutToolLog(output, Math.min(maxSnippetChars, 1_000)));
         builder.append("\n```\n\n");
+    }
+
+    private static void appendEvidenceSummary(StringBuilder builder, EvidenceManifest.EvidenceItem item) {
+        if (!item.summary().isBlank()) {
+            builder.append("- Summary: ").append(item.summary()).append("\n");
+        }
+        if (!item.iterationId().isBlank()) {
+            builder.append("- Iteration: ").append(item.iterationId()).append("\n");
+        }
+        if (!item.nodeInstanceId().isBlank()) {
+            builder.append("- Node: ").append(item.nodeInstanceId()).append("\n");
+        }
+    }
+
+    private static void appendCompactList(StringBuilder builder, String label, List<String> items, int limit) {
+        var values = items.stream()
+                .filter(item -> !item.isBlank())
+                .distinct()
+                .limit(limit)
+                .toList();
+        if (values.isEmpty()) {
+            return;
+        }
+        builder.append("- ").append(label).append(": ").append(String.join("; ", values)).append("\n");
+    }
+
+    private static String displayStage(EvidenceManifest.EvidenceItem item) {
+        if (!item.stageId().isBlank()) {
+            return item.stageId();
+        }
+        if (!item.nodeInstanceId().isBlank()) {
+            return item.nodeInstanceId();
+        }
+        return item.sourceRef();
     }
 
     private static boolean appendAgentContractSummary(StringBuilder builder, Path output) {

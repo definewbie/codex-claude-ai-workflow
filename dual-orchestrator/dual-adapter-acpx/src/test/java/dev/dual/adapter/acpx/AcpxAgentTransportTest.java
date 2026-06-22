@@ -150,6 +150,69 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void stopsWhenSessionPromptStallsAfterReconnectRecovery() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "22222222-3333-4444-5555-666666666666";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-reconnect-prompt-stalls.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent needs reconnect" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":1,"method":"session/new","params":{}}
+                {"jsonrpc":"2.0","result":{"sessionId":"fresh-session"},"id":1}
+                {"jsonrpc":"2.0","id":2,"method":"session/prompt","params":{}}
+                EOF
+                echo "[client] initialize (running)"
+                echo
+                echo "[client] session/new (running)"
+                sleep 20
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(
+                    fakeAcpx.toString(),
+                    Duration.ofSeconds(30),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(1)
+            );
+            var started = System.nanoTime();
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+            assertEquals(4, result.exitCode());
+            assertTrue(elapsedMs < 8_000, "prompt accepted without trusted progress must enter recovery");
+            var stderrText = Files.readString(stderr);
+            assertTrue(stderrText.contains("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED"), stderrText);
+            assertTrue(stderrText.contains("progress_timeout_ms=1000"), stderrText);
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
     void rebuildsReadOnlySessionOnceWhenReconnectRunDoesNotCompleteTerminalContract() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-reconnect-rebuild.sh");
         var state = tempDir.resolve("state.txt");

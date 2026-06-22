@@ -7,6 +7,7 @@ import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -31,6 +32,12 @@ class ContextBuildPackageHandlerTest {
     @BeforeEach
     void setup() {
         wsDir = tempDir.resolve(".agent/workstreams/ws-ctx");
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.clearProperty("dual.context.memory.enabled");
+        System.clearProperty("dual.context.governance.enabled");
     }
 
     // --- Governed pipeline ---
@@ -155,8 +162,10 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(TokenEstimator.defaultEstimator().estimate(markdown) <= 4_000,
                 "product_review package must stay within its 4k token budget");
-        assertTrue(markdown.contains("section degraded to stay within"),
-                "oversized sections should be explicitly degraded");
+        assertFalse(markdown.contains("I".repeat(10_000)),
+                "oversized input artifact must not be expanded into the review package");
+        assertFalse(markdown.contains("R".repeat(10_000)),
+                "oversized recent output must not be expanded into the review package");
         assertFalse(markdown.contains("11.0k / 4.0k"),
                 "governance must not report an over-budget package as successful");
     }
@@ -200,6 +209,46 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Legacy test."));
         assertTrue(markdown.contains("Context Contract"));
         assertTrue(markdown.contains("requirement, ledger_pointers"));
+    }
+
+    @Test
+    void legacyPathCanRenderExplicitWorkingMemorySection() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts/next-stage"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Legacy memory test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/next-stage/handoff.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-ctx",
+                  "stageId": "plan",
+                  "iterationId": "iter-003",
+                  "completedWork": ["Selected the minimal API surface"],
+                  "importantDecisions": ["Do not expand backend schema"],
+                  "changedFiles": ["docs/plan.md"],
+                  "openRisks": ["Needs implementation validation"],
+                  "recommendedNextStage": "Implement the accepted plan."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var def = new NodeDefinition("ctx.custom-memory", NodeKind.TASK, "context.build_package", Map.of(
+                "target_node", "next.node",
+                "profile", "implementation",
+                "include_sections", List.of("requirement", "working_memory")
+        ));
+        var instance = new NodeInstance("node-001", "ctx.custom-memory", NodeKind.TASK, "context.build_package",
+                NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null);
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Working Memory"));
+        assertTrue(markdown.contains("Selected the minimal API surface"));
+        assertTrue(markdown.contains("Do not expand backend schema"));
+        assertTrue(Files.exists(wsDir.resolve("memory/evidence-manifest.json")));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertEquals(".agent/workstreams/ws-ctx/memory/evidence-manifest.json", metadata.get("evidenceManifest"));
     }
 
     // --- Handoff.json consumption ---
@@ -827,6 +876,255 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Update README to point to .agent/workstreams/ exactly."));
         assertTrue(markdown.contains("Remove the misleading statement"));
         assertTrue(markdown.contains("Implementation does not satisfy the accepted TaskContract."));
+    }
+
+    @Test
+    void implementationPackageWritesEvidenceManifestAndWorkingMemory() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts/next-stage"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Memory loop test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/next-stage/handoff.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-ctx",
+                  "stageId": "design",
+                  "iterationId": "iter-002",
+                  "completedWork": ["Mapped the existing upload flow"],
+                  "importantDecisions": ["Reuse the existing API"],
+                  "changedFiles": ["miniprogram/src/pages/record/index.vue"],
+                  "openRisks": ["Manual UX smoke still useful"],
+                  "recommendedNextStage": "Implement scoped UI change."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Working Memory"));
+        assertTrue(markdown.contains("Mapped the existing upload flow"));
+        assertTrue(markdown.contains("Reuse the existing API"));
+        assertTrue(markdown.contains("miniprogram/src/pages/record/index.vue"));
+
+        var manifestPath = wsDir.resolve("memory/evidence-manifest.json");
+        assertTrue(Files.exists(manifestPath), "context build should write rebuildable evidence manifest");
+        var manifest = objectMapper.readValue(manifestPath.toFile(), Map.class);
+        assertTrue(manifest.get("items") instanceof List<?> items && !items.isEmpty());
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertEquals(".agent/workstreams/ws-ctx/memory/evidence-manifest.json", metadata.get("evidenceManifest"));
+        assertTrue(((Number) metadata.get("workingMemoryEvidenceCount")).intValue() > 0);
+        assertTrue(metadata.get("evidenceRefs") instanceof List<?> refs
+                        && refs.contains(".agent/workstreams/ws-ctx/artifacts/next-stage/handoff.json"),
+                "metadata should expose evidence refs used by the package");
+    }
+
+    @Test
+    void memoryDisabledOmitsWorkingMemoryFromImplementationPackage() throws Exception {
+        System.setProperty("dual.context.memory.enabled", "false");
+        Files.createDirectories(wsDir.resolve("artifacts/next-stage"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Memory off test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/next-stage/handoff.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-ctx",
+                  "stageId": "design",
+                  "iterationId": "iter-002",
+                  "completedWork": ["Mapped the existing upload flow"],
+                  "importantDecisions": ["Reuse the existing API"],
+                  "changedFiles": ["miniprogram/src/pages/record/index.vue"],
+                  "openRisks": [],
+                  "recommendedNextStage": "Implement scoped UI change."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertFalse(markdown.contains("## Working Memory"));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertEquals(false, metadata.get("memoryEnabled"));
+        assertTrue(metadata.get("memoryDisabledSections") instanceof List<?> disabled
+                        && disabled.contains("working_memory"),
+                "metadata should record which memory sections were removed for A/B analysis");
+    }
+
+    @Test
+    void reviewPackageIncludesEvidenceBriefFromManifest() throws Exception {
+        Files.createDirectories(wsDir.resolve("runs/run-001/outputs"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Review evidence test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-001/outputs/design-claude.md"), "Design body.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-001/outputs/design-claude.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "source_artifact_type": "agent_output_contract",
+                  "node_id": "design.claude_design",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Design keeps the task scoped.",
+                  "changed_files": ["docs/design.md"],
+                  "open_risks": ["Migration path needs review"],
+                  "verification_summary": "Design-only evidence."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id": "task-ws",
+                  "version": 1,
+                  "created_at": "2026-06-21T00:00:00Z",
+                  "objective": "Keep review evidence scoped.",
+                  "status": "READY_FOR_REVIEW",
+                  "scope": {"included": ["docs/design.md"], "excluded": []},
+                  "acceptance_criteria": ["Reviewer sees evidence brief"],
+                  "test_requirements": [],
+                  "non_goals": [],
+                  "constraints": [],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "compilation_pass": 1,
+                  "source": {"raw_request_ref": "requirement.md", "created_by": "test"}
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design-claude.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Review Evidence Brief"));
+        assertTrue(markdown.contains("Design keeps the task scoped."));
+        assertTrue(markdown.contains("docs/design.md"));
+        assertTrue(markdown.contains("Migration path needs review"));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertTrue(((Number) metadata.get("reviewEvidenceCount")).intValue() > 0);
+    }
+
+    @Test
+    void memoryDisabledOmitsReviewEvidenceBriefFromReviewPackage() throws Exception {
+        System.setProperty("dual.context.memory.enabled", "false");
+        Files.createDirectories(wsDir.resolve("runs/run-001/outputs"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Review evidence off test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-001/outputs/design-claude.md"), "Design body.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-001/outputs/design-claude.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "source_artifact_type": "agent_output_contract",
+                  "node_id": "design.claude_design",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Design keeps the task scoped.",
+                  "changed_files": ["docs/design.md"],
+                  "open_risks": ["Migration path needs review"],
+                  "verification_summary": "Design-only evidence."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design-claude.md")));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertFalse(markdown.contains("## Review Evidence Brief"));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertEquals(false, metadata.get("memoryEnabled"));
+        assertTrue(metadata.get("memoryDisabledSections") instanceof List<?> disabled
+                        && disabled.contains("review_evidence"),
+                "metadata should record disabled review evidence for A/B analysis");
+    }
+
+    @Test
+    void governedPackageWritesRepoScopeGovernanceArtifacts() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("requirement.md"),
+                "Update treatment record upload flow in miniprogram/src/pages/treatment-record/index.vue.",
+                StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id": "task-ws",
+                  "version": 1,
+                  "created_at": "2026-06-21T00:00:00Z",
+                  "objective": "Update treatment record upload flow.",
+                  "status": "READY_FOR_REVIEW",
+                  "scope": {
+                    "included": ["miniprogram/src/pages/treatment-record/index.vue"],
+                    "excluded": ["backend API changes"]
+                  },
+                  "acceptance_criteria": ["Upload entry remains visible"],
+                  "test_requirements": [],
+                  "non_goals": [],
+                  "constraints": [],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "compilation_pass": 1,
+                  "source": {"raw_request_ref": "requirement.md", "created_by": "test"}
+                }
+                """, StandardCharsets.UTF_8);
+        var sourceFile = tempDir.resolve("miniprogram/src/pages/treatment-record/index.vue");
+        Files.createDirectories(sourceFile.getParent());
+        Files.writeString(sourceFile, "<template>record</template>", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Repo Scope Guidance"));
+        assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertEquals(true, metadata.get("contextGovernanceEnabled"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/repo-map.json", metadata.get("repoMap"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/file-relevance-plan-node-001.json", metadata.get("fileRelevancePlan"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/stage-scope-policy-node-001.json", metadata.get("stageScopePolicy"));
+        assertEquals(".agent/workstreams/ws-ctx/artifacts/context-governance/node-001.json", metadata.get("contextGovernanceReport"));
+
+        var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertTrue(plan.get("readCandidates") instanceof List<?> candidates
+                        && candidates.contains("miniprogram/src/pages/treatment-record/index.vue"),
+                "file relevance plan should preserve task-contract file scope");
+
+        var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+        assertEquals("implement", policy.get("stageId"));
+        assertTrue(policy.get("writeScope") instanceof List<?> writeScope
+                        && writeScope.contains("miniprogram/src/pages/treatment-record/index.vue"),
+                "implementation policy should expose scoped writable files");
+
+        var report = objectMapper.readValue(wsDir.resolve("artifacts/context-governance/node-001.json").toFile(), Map.class);
+        assertEquals("planned", report.get("reportPhase"));
+        assertEquals(true, report.get("telemetryPending"));
+    }
+
+    @Test
+    void governanceDisabledOmitsRepoScopeArtifacts() throws Exception {
+        System.setProperty("dual.context.governance.enabled", "false");
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Governance off test.", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertFalse(markdown.contains("Repo Scope Guidance"));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertEquals(false, metadata.get("contextGovernanceEnabled"));
+        assertFalse(Files.exists(wsDir.resolve("memory/repo-map.json")));
+        assertFalse(Files.exists(wsDir.resolve("artifacts/context-governance/node-001.json")));
     }
 
     // --- Helper ---

@@ -32,6 +32,12 @@ Planning-stage boundary:
 
 {{context_package}}
 
+Context use rule:
+
+- If the package contains `Working Memory`, use it before reading repository files.
+- Re-read files only when the memory is missing, stale, or insufficient for planning.
+- If you must re-read a known file, mention the reason in the Markdown plan.
+
 ## Output Contract
 
 Write a Markdown plan with these sections:

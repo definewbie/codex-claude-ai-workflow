@@ -35,6 +35,12 @@ If you accidentally create an output/report file for this run, delete it before 
 
 {{context_package}}
 
+Context use rule:
+
+- If the package contains `Working Memory`, use it and git evidence before re-reading repository files.
+- Re-read files only when the memory, diff, or self-test evidence is insufficient.
+- If you must re-read a known file, mention the reason in the self-test report.
+
 ## Output Contract
 
 Write a Markdown self-test report with these sections:
