@@ -169,7 +169,7 @@ public final class ArtifactContractValidator {
                 List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition)))
         );
         return new NodeResult(
-                outcome.primaryReason(),
+                outcome.nodeMaySucceed() ? result.outcome() : outcome.primaryReason(),
                 nodeStatusFor(outcome),
                 outputRefs,
                 augmented,

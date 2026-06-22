@@ -35,6 +35,7 @@ class ArtifactContractValidatorTest {
         var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals("completed", validated.outcome());
         assertTrue(validated.outputRefs().contains(outputRef));
         assertTrue(validated.outputRefs().contains("review.contract.json"));
     }

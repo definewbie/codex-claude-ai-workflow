@@ -141,7 +141,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 usage
         );
         return NodeResult.completed(
-                "agent_execution_observed",
+                "completed",
                 evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
                 resultFacts(context, runDir, transcriptPath, result, agent, session, runId, failure, interrupted, outputComplete)
         );
