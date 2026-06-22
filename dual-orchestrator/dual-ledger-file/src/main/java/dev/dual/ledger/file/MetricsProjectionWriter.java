@@ -14,8 +14,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -63,6 +65,7 @@ final class MetricsProjectionWriter {
         metrics.put("longestNodes", longestNodes(nodes, 5));
         metrics.put("providerMetrics", providerMetrics(paths));
         metrics.put("tokenMetrics", tokenMetrics(paths));
+        metrics.put("toolMetrics", toolMetrics(paths));
 
         Files.createDirectories(paths.metricsDir());
         jsonWriter.write(paths.workstreamMetricsJson(), metrics);
@@ -116,6 +119,7 @@ final class MetricsProjectionWriter {
             return Map.of();
         }
         var byAgent = new LinkedHashMap<String, ProviderMetric>();
+        var outcomeStatusCounts = new LinkedHashMap<String, Long>();
         try (var stream = Files.list(paths.runsDir())) {
             for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
                 var runJson = runDir.resolve("run.json");
@@ -129,12 +133,17 @@ final class MetricsProjectionWriter {
                 }
                 var metric = byAgent.computeIfAbsent(agent, ignored -> new ProviderMetric());
                 metric.accept(text(run.get("status")), longValue(run.get("durationMs")), Boolean.TRUE.equals(run.get("recoverable")));
+                var outcomeStatus = text(map(run.get("executionOutcome")).get("status"));
+                if (!outcomeStatus.isBlank()) {
+                    outcomeStatusCounts.merge(outcomeStatus, 1L, Long::sum);
+                }
             }
         }
         var result = new LinkedHashMap<String, Object>();
         for (var entry : byAgent.entrySet()) {
             result.put(entry.getKey(), entry.getValue().toMap());
         }
+        result.put("outcomeStatusCounts", outcomeStatusCounts);
         return result;
     }
 
@@ -173,6 +182,8 @@ final class MetricsProjectionWriter {
                 item.put("nodeId", nodeId);
                 item.put("agent", agent);
                 item.put("status", text(run.get("status")));
+                item.put("outcomeStatus", text(map(run.get("executionOutcome")).get("status")));
+                item.put("outcomePrimaryReason", text(map(run.get("executionOutcome")).get("primaryReason")));
                 item.put("durationMs", longValue(run.get("durationMs")));
                 var promptTokens = estimatedTokens(paths, text(run.get("promptMetadataPath")));
                 var outputArtifactTokens = estimatedTokens(paths, text(run.get("outputMetadataPath")));
@@ -222,6 +233,97 @@ final class MetricsProjectionWriter {
         result.put("contextPackages", summarizeContextPackages(contextPackages));
         result.put("topContextSections", topContextSections(contextPackages, 10));
         return result;
+    }
+
+    private Map<String, Object> toolMetrics(WorkstreamPaths paths) throws IOException {
+        if (!Files.isDirectory(paths.runsDir())) {
+            return Map.of(
+                    "runCount", 0,
+                    "toolCallCount", 0,
+                    "readCount", 0,
+                    "writeCount", 0,
+                    "bashCount", 0,
+                    "repeatedReadFiles", List.of(),
+                    "topReadFiles", List.of(),
+                    "runs", List.of()
+            );
+        }
+        var total = new ToolMetric();
+        var readFiles = new LinkedHashMap<String, ReadFileMetric>();
+        var runs = new ArrayList<Map<String, Object>>();
+        var evidenceFiles = evidenceFiles(paths);
+        long runCount = 0;
+        try (var stream = Files.list(paths.runsDir())) {
+            for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                runCount++;
+                var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
+                var toolUsage = map(run.get("toolUsage"));
+                var runId = nonBlank(text(run.get("runId")), runDir.getFileName().toString());
+                var nodeId = nonBlank(text(run.get("nodeId")), "unknown");
+                var agent = nonBlank(text(run.get("agent")), "unknown");
+                var metric = ToolMetric.from(toolUsage);
+                total.add(metric);
+                for (var file : textList(toolUsage.get("readFiles"))) {
+                    var normalized = normalizePath(file);
+                    if (normalized.isBlank() || ignoredTelemetryFile(normalized)) {
+                        continue;
+                    }
+                    readFiles.computeIfAbsent(normalized, ReadFileMetric::new)
+                            .accept(runId, nodeId, agent, evidenceFiles.contains(normalized));
+                }
+                var item = new LinkedHashMap<String, Object>();
+                item.put("runId", runId);
+                item.put("nodeId", nodeId);
+                item.put("agent", agent);
+                item.put("status", text(run.get("status")));
+                item.put("toolUsage", metric.toMap());
+                item.put("readFiles", textList(toolUsage.get("readFiles")));
+                runs.add(item);
+            }
+        }
+        var result = new LinkedHashMap<String, Object>();
+        result.put("runCount", runCount);
+        result.putAll(total.toMap());
+        result.put("repeatedReadFiles", readFiles.values().stream()
+                .filter(ReadFileMetric::isRepeated)
+                .sorted(Comparator
+                        .comparingInt(ReadFileMetric::count).reversed()
+                        .thenComparing(ReadFileMetric::path))
+                .limit(20)
+                .map(ReadFileMetric::toMap)
+                .toList());
+        result.put("topReadFiles", readFiles.values().stream()
+                .sorted(Comparator
+                        .comparingInt(ReadFileMetric::count).reversed()
+                        .thenComparing(ReadFileMetric::path))
+                .limit(20)
+                .map(ReadFileMetric::toMap)
+                .toList());
+        result.put("evidenceFileCount", evidenceFiles.size());
+        result.put("runs", runs);
+        return result;
+    }
+
+    private Set<String> evidenceFiles(WorkstreamPaths paths) throws IOException {
+        var manifest = paths.workstreamDir().resolve("memory").resolve("evidence-manifest.json");
+        if (!Files.isRegularFile(manifest)) {
+            return Set.of();
+        }
+        var document = objectMapper.readValue(manifest.toFile(), MAP_TYPE);
+        var files = new LinkedHashSet<String>();
+        for (var item : mapList(document.get("items"))) {
+            for (var file : textList(item.get("files"))) {
+                var normalized = normalizePath(file);
+                if (!normalized.isBlank()) {
+                    files.add(normalized);
+                }
+            }
+        }
+        return files;
     }
 
     private Map<String, Map<String, Object>> contextPackagesByTargetNode(WorkstreamPaths paths) throws IOException {
@@ -488,11 +590,11 @@ final class MetricsProjectionWriter {
         builder.append("- Cached Write Tokens: ").append(longValue(total.get("cachedWriteTokens"))).append("\n");
         builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n\n");
         builder.append("### Token Usage By Step\n\n");
-        builder.append("| Node | Agent | Status | Source | Input | Output | Transcript | Context | Prompt Overhead | Adapter Overhead | Total |\n");
-        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        builder.append("| Node | Agent | Status | Outcome | Source | Input | Output | Transcript | Context | Prompt Overhead | Adapter Overhead | Total |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
         var runs = tokenMetrics == null ? List.<Map<String, Object>>of() : mapList(tokenMetrics.get("runs"));
         if (runs.isEmpty()) {
-            builder.append("| N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 | 0 | 0 |\n");
+            builder.append("| N/A | N/A | N/A | N/A | N/A | 0 | 0 | 0 | 0 | 0 | 0 | 0 |\n");
         } else {
             for (var run : runs) {
                 var usage = map(run.get("usage"));
@@ -500,6 +602,7 @@ final class MetricsProjectionWriter {
                 builder.append("| ").append(run.get("nodeId"))
                         .append(" | ").append(run.get("agent"))
                         .append(" | ").append(run.get("status"))
+                        .append(" | ").append(nonBlank(text(run.get("outcomeStatus")), "-"))
                         .append(" | ").append(nonBlank(text(usage.get("source")), Boolean.TRUE.equals(run.get("measured")) ? "acpx_stream" : "unknown"))
                         .append(" | ").append(longValue(usage.get("inputTokens")))
                         .append(" | ").append(longValue(usage.get("outputTokens")))
@@ -526,6 +629,29 @@ final class MetricsProjectionWriter {
                         .append(" | ").append(longValue(section.get("originalTokens")))
                         .append(" | ").append(section.get("degraded"))
                         .append(" | ").append(section.get("dropped"))
+                        .append(" |\n");
+            }
+        }
+        builder.append("\n## Tool Metrics\n\n");
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        builder.append("- Tool Calls: ").append(longValue(toolMetrics.get("toolCallCount"))).append("\n");
+        builder.append("- Reads: ").append(longValue(toolMetrics.get("readCount"))).append("\n");
+        builder.append("- Writes: ").append(longValue(toolMetrics.get("writeCount"))).append("\n");
+        builder.append("- Bash Commands: ").append(longValue(toolMetrics.get("bashCount"))).append("\n");
+        builder.append("- Evidence Files: ").append(longValue(toolMetrics.get("evidenceFileCount"))).append("\n\n");
+        builder.append("### Repeated Read Files\n\n");
+        builder.append("| File | Reads | Agents | Nodes | Evidence Known |\n");
+        builder.append("| --- | --- | --- | --- | --- |\n");
+        var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
+        if (repeatedReads.isEmpty()) {
+            builder.append("| N/A | 0 | N/A | N/A | false |\n");
+        } else {
+            for (var item : repeatedReads) {
+                builder.append("| ").append(item.get("path"))
+                        .append(" | ").append(item.get("count"))
+                        .append(" | ").append(String.join(", ", textList(item.get("agents"))))
+                        .append(" | ").append(String.join(", ", textList(item.get("nodes"))))
+                        .append(" | ").append(item.get("evidenceKnown"))
                         .append(" |\n");
             }
         }
@@ -561,8 +687,31 @@ final class MetricsProjectionWriter {
         return value == null ? "" : String.valueOf(value).trim();
     }
 
+    @SuppressWarnings("unchecked")
+    private static List<String> textList(Object value) {
+        if (value instanceof List<?> list) {
+            return list.stream()
+                    .map(MetricsProjectionWriter::text)
+                    .filter(item -> !item.isBlank())
+                    .toList();
+        }
+        return List.of();
+    }
+
     private static String nonBlank(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private static String normalizePath(String value) {
+        var text = text(value);
+        while (text.startsWith("./")) {
+            text = text.substring(2);
+        }
+        return text;
+    }
+
+    private static boolean ignoredTelemetryFile(String value) {
+        return value.startsWith(".agent/") || value.startsWith(".git/") || value.startsWith("/Users/") || value.startsWith("/private/");
     }
 
     @SuppressWarnings("unchecked")
@@ -641,6 +790,84 @@ final class MetricsProjectionWriter {
             map.put("cachedWriteTokens", cachedWriteTokens);
             map.put("totalTokens", totalTokens);
             map.put("costByCurrency", new LinkedHashMap<>(costByCurrency));
+            return map;
+        }
+    }
+
+    private static final class ToolMetric {
+        private long toolCallCount;
+        private long readCount;
+        private long writeCount;
+        private long bashCount;
+        private long otherCount;
+
+        static ToolMetric from(Map<String, Object> toolUsage) {
+            var metric = new ToolMetric();
+            metric.toolCallCount = longValue(toolUsage.get("toolCallCount"));
+            metric.readCount = longValue(toolUsage.get("readCount"));
+            metric.writeCount = longValue(toolUsage.get("writeCount"));
+            metric.bashCount = longValue(toolUsage.get("bashCount"));
+            metric.otherCount = longValue(toolUsage.get("otherCount"));
+            return metric;
+        }
+
+        void add(ToolMetric other) {
+            toolCallCount += other.toolCallCount;
+            readCount += other.readCount;
+            writeCount += other.writeCount;
+            bashCount += other.bashCount;
+            otherCount += other.otherCount;
+        }
+
+        Map<String, Object> toMap() {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("toolCallCount", toolCallCount);
+            map.put("readCount", readCount);
+            map.put("writeCount", writeCount);
+            map.put("bashCount", bashCount);
+            map.put("otherCount", otherCount);
+            return map;
+        }
+    }
+
+    private static final class ReadFileMetric {
+        private final String path;
+        private final Set<String> runIds = new LinkedHashSet<>();
+        private final Set<String> nodes = new LinkedHashSet<>();
+        private final Set<String> agents = new LinkedHashSet<>();
+        private boolean evidenceKnown;
+
+        private ReadFileMetric(String path) {
+            this.path = path;
+        }
+
+        void accept(String runId, String nodeId, String agent, boolean evidenceKnown) {
+            runIds.add(runId);
+            nodes.add(nodeId);
+            agents.add(agent);
+            this.evidenceKnown = this.evidenceKnown || evidenceKnown;
+        }
+
+        boolean isRepeated() {
+            return runIds.size() > 1;
+        }
+
+        int count() {
+            return runIds.size();
+        }
+
+        String path() {
+            return path;
+        }
+
+        Map<String, Object> toMap() {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("path", path);
+            map.put("count", count());
+            map.put("runIds", List.copyOf(runIds));
+            map.put("nodes", List.copyOf(nodes));
+            map.put("agents", List.copyOf(agents));
+            map.put("evidenceKnown", evidenceKnown);
             return map;
         }
     }

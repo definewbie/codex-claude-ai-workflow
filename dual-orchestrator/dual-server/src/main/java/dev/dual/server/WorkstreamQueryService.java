@@ -675,8 +675,13 @@ public class WorkstreamQueryService {
         item.put("agent", text(source.get("agent")));
         item.put("nodeId", text(source.get("nodeId")));
         item.put("status", text(source.get("status")));
+        item.put("executionOutcome", map(source.get("executionOutcome")));
+        item.put("outcomeStatus", text(map(source.get("executionOutcome")).get("status")));
+        item.put("outcomePrimaryReason", text(map(source.get("executionOutcome")).get("primaryReason")));
         item.put("durationMs", text(source.get("durationMs")));
         item.put("usage", map(source.get("usage")));
+        item.put("toolUsage", map(source.get("toolUsage")));
+        item.put("contextGovernanceActualReportPath", text(source.get("contextGovernanceActualReportPath")));
         item.put("ref", root.relativize(runDir.toAbsolutePath().normalize()).toString());
         return item;
     }
@@ -691,6 +696,13 @@ public class WorkstreamQueryService {
         artifact(artifacts, root, "currentFailure", paths.currentFailureMarkdown());
         latestContextPackageMetadata(paths).ifPresent(path ->
                 artifact(artifacts, root, "contextPackageMetadata", path));
+        artifact(artifacts, root, "repoMap", paths.workstreamDir().resolve("memory").resolve("repo-map.json"));
+        latestNamedArtifact(paths.workstreamDir().resolve("memory"), "file-relevance-plan-", ".json").ifPresent(path ->
+                artifact(artifacts, root, "fileRelevancePlan", path));
+        latestNamedArtifact(paths.workstreamDir().resolve("memory"), "stage-scope-policy-", ".json").ifPresent(path ->
+                artifact(artifacts, root, "stageScopePolicy", path));
+        latestNamedArtifact(paths.workstreamDir().resolve("artifacts").resolve("context-governance"), "", ".json").ifPresent(path ->
+                artifact(artifacts, root, "contextGovernanceReport", path));
         return artifacts;
     }
 
@@ -702,6 +714,21 @@ public class WorkstreamQueryService {
         try (var stream = Files.list(contextDir)) {
             return stream
                     .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .max(Comparator.comparingLong(this::lastModifiedMillis));
+        } catch (IOException ignored) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    private java.util.Optional<Path> latestNamedArtifact(Path dir, String prefix, String suffix) {
+        if (!Files.isDirectory(dir)) {
+            return java.util.Optional.empty();
+        }
+        try (var stream = Files.list(dir)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().startsWith(prefix))
+                    .filter(path -> path.getFileName().toString().endsWith(suffix))
                     .max(Comparator.comparingLong(this::lastModifiedMillis));
         } catch (IOException ignored) {
             return java.util.Optional.empty();

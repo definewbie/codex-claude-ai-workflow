@@ -2,10 +2,12 @@ package dev.dual.core.execution;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentExecutionOutcomeResolverTest {
@@ -172,6 +174,64 @@ class AgentExecutionOutcomeResolverTest {
         assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
         assertFalse(outcome.nodeMaySucceed());
         assertEquals(List.of(reconnect), outcome.secondarySignals());
+    }
+
+    @Test
+    void agentExecutionOwnsOutcomeAndRuntimeFacts() {
+        var outcome = resolve(
+                ProcessResult.exitedZero(),
+                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        );
+
+        var execution = new AgentExecution(
+                "agent-exec-1",
+                "ws-test",
+                "wfe-1",
+                "nxe-1",
+                "agent-task-1",
+                "claude",
+                "claude-main",
+                "prompts/prompt.md",
+                "outputs/output.md",
+                Instant.parse("2026-06-22T00:00:00Z"),
+                Instant.parse("2026-06-22T00:00:01Z"),
+                ProcessResult.exitedZero(),
+                List.of(),
+                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                null,
+                null,
+                outcome
+        );
+
+        assertEquals("agent-exec-1", execution.id());
+        assertEquals(AgentExecutionOutcomeStatus.SUCCESS, execution.outcome().status());
+    }
+
+    @Test
+    void agentExecutionRejectsMissingOutcome() {
+        assertThrows(IllegalArgumentException.class, () -> new AgentExecution(
+                "agent-exec-1",
+                "ws-test",
+                "",
+                "",
+                "",
+                "claude",
+                "claude-main",
+                "",
+                "",
+                null,
+                null,
+                ProcessResult.exitedZero(),
+                List.of(),
+                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(),
+                null,
+                null,
+                null
+        ));
     }
 
     private AgentExecutionOutcome resolve(

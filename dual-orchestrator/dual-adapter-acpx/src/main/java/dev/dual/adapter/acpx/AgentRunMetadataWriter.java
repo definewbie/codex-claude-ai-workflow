@@ -14,12 +14,16 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 
 final class AgentRunMetadataWriter {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .enable(SerializationFeature.INDENT_OUTPUT);
+    private final AcpxTranscriptToolUsageReader toolUsageReader = new AcpxTranscriptToolUsageReader();
+    private final ContextGovernanceActualReportWriter governanceActualReportWriter =
+            new ContextGovernanceActualReportWriter();
 
     void writePrepared(
             Path workspaceRoot,
@@ -52,7 +56,7 @@ final class AgentRunMetadataWriter {
                 )
         );
         write(workspaceRoot, runDir, new AgentRunDocument(
-                1,
+                2,
                 runId,
                 workstreamId,
                 nodeId,
@@ -76,6 +80,13 @@ final class AgentRunMetadataWriter {
                 "prepared",
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                List.of(),
+                null,
+                List.of(),
                 null
         ));
     }
@@ -170,6 +181,15 @@ final class AgentRunMetadataWriter {
         var outputMetadataPath = metadataPath(stdoutPath);
         var stderrMetadataPath = metadataPath(stderrPath);
         var transcriptMetadataPath = transcriptPath == null ? null : metadataPath(transcriptPath);
+        var toolUsage = transcriptPath == null ? AcpxToolUsage.empty() : toolUsageReader.read(transcriptPath, workspaceRoot);
+        var governanceReportPath = governanceActualReportWriter.write(
+                workspaceRoot,
+                workstreamId,
+                nodeId,
+                runId,
+                transcriptPath,
+                toolUsage
+        ).orElse(null);
         writeArtifactMetadata(
                 workspaceRoot,
                 promptMetadataPath,
@@ -237,7 +257,7 @@ final class AgentRunMetadataWriter {
                 )
         );
         write(workspaceRoot, runDir, new AgentRunDocument(
-                1,
+                2,
                 runId,
                 workstreamId,
                 nodeId,
@@ -261,7 +281,52 @@ final class AgentRunMetadataWriter {
                 failure == null ? "completed" : "failed",
                 failure == null ? null : failure.reason(),
                 failure == null ? null : failure.recoverable(),
-                usage
+                usage,
+                toolUsage,
+                relativeOrNull(workspaceRoot, governanceReportPath),
+                processResult(workspaceRoot, result, stdoutPath, stderrPath),
+                adapterSignals(failure),
+                null,
+                List.of(),
+                null
+        ));
+    }
+
+    private Map<String, Object> processResult(
+            Path workspaceRoot,
+            AcpxRunResult result,
+            Path stdoutPath,
+            Path stderrPath
+    ) {
+        return Map.of(
+                "command", String.join(" ", result.command()),
+                "exitCode", result.exitCode(),
+                "usability", usability(result).name(),
+                "durationMs", result.durationMs(),
+                "stdoutPath", relative(workspaceRoot, stdoutPath),
+                "stderrPath", relative(workspaceRoot, stderrPath),
+                "interrupted", false,
+                "timedOut", false
+        );
+    }
+
+    private dev.dual.core.execution.ProcessUsability usability(AcpxRunResult result) {
+        if (result.exitCode() == 0) {
+            return dev.dual.core.execution.ProcessUsability.EXITED_ZERO;
+        }
+        return dev.dual.core.execution.ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+    }
+
+    private List<Map<String, Object>> adapterSignals(AcpxFailureClassifier.AcpxFailure failure) {
+        if (failure == null || failure.reason() == null || failure.reason().isBlank()) {
+            return List.of();
+        }
+        return List.of(Map.of(
+                "type", failure.reason(),
+                "severity", failure.recoverable() ? "RECOVERABLE" : "FATAL",
+                "source", "acpx",
+                "message", failure.message(),
+                "superseded", false
         ));
     }
 

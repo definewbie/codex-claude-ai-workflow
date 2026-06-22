@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -138,12 +139,15 @@ public final class TraceCommand implements Callable<Integer> {
                 System.out.println("  " + text(run.runId()) + "  "
                         + text(run.agent()) + "  "
                         + text(run.nodeId()) + "  "
-                        + text(run.status()) + "  "
+                        + runStatusLabel(run) + "  "
                         + run.durationMs() + "ms  "
                         + tokenLabel(paths, run));
             }
         }
         printRunMetadataWarnings(runListing.warnings());
+        System.out.println();
+
+        printToolGovernance(paths);
         System.out.println();
 
         System.out.println("Artifacts:");
@@ -155,6 +159,30 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println("Next:");
         System.out.println(nextAction);
         return 0;
+    }
+
+    private void printToolGovernance(WorkstreamPaths paths) throws Exception {
+        var metrics = readMap(paths.workstreamMetricsJson());
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        System.out.println("Tool Governance:");
+        if (toolMetrics.isEmpty()) {
+            System.out.println("  -");
+            return;
+        }
+        System.out.println("  toolCalls=" + longValue(toolMetrics.get("toolCallCount"))
+                + " reads=" + longValue(toolMetrics.get("readCount"))
+                + " bash=" + longValue(toolMetrics.get("bashCount")));
+        var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
+        if (repeatedReads.isEmpty()) {
+            System.out.println("  repeated reads: -");
+            return;
+        }
+        System.out.println("  repeated reads:");
+        for (var item : repeatedReads.stream().limit(5).toList()) {
+            System.out.println("    " + text(item.get("path")) + " x" + longValue(item.get("count"))
+                    + " evidenceKnown=" + Boolean.TRUE.equals(item.get("evidenceKnown"))
+                    + " nodes=" + String.join(",", listOfText(item.get("nodes"))));
+        }
     }
 
     private Map<String, Object> readMap(Path path) throws Exception {
@@ -425,6 +453,17 @@ public final class TraceCommand implements Callable<Integer> {
                 + source;
     }
 
+    private String runStatusLabel(RunMetadata run) {
+        var outcome = map(run.executionOutcome());
+        var outcomeStatus = text(outcome.get("status"));
+        if (outcomeStatus.isBlank()) {
+            return text(run.status());
+        }
+        var primaryReason = text(outcome.get("primaryReason"));
+        return text(run.status()) + "/" + outcomeStatus
+                + (primaryReason.isBlank() ? "" : "(" + primaryReason + ")");
+    }
+
     private void printRunMetadataWarnings(List<RunMetadataReader.RunMetadataWarning> warnings) {
         if (warnings.isEmpty()) {
             return;
@@ -439,12 +478,52 @@ public final class TraceCommand implements Callable<Integer> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    private Map<String, Object> map(Object value) {
+        if (value instanceof Map<?, ?> source) {
+            var result = new LinkedHashMap<String, Object>();
+            for (var entry : source.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    result.put(key, entry.getValue());
+                }
+            }
+            return result;
+        }
+        return Map.of();
+    }
+
+    private List<Map<String, Object>> mapList(Object value) {
+        if (value instanceof List<?> list) {
+            var result = new ArrayList<Map<String, Object>>();
+            for (var item : list) {
+                var mapped = map(item);
+                if (!mapped.isEmpty()) {
+                    result.add(mapped);
+                }
+            }
+            return List.copyOf(result);
+        }
+        return List.of();
+    }
+
     private List<String> listOfText(Object value) {
         if (value instanceof List<?> list) {
             return list.stream().map(String::valueOf).toList();
         }
         return List.of();
+    }
+
+    private long longValue(Object value) {
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value == null) {
+            return 0L;
+        }
+        try {
+            return Long.parseLong(String.valueOf(value));
+        } catch (NumberFormatException ignored) {
+            return 0L;
+        }
     }
 
     private String marker(Map<String, Object> node) {

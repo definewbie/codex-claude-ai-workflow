@@ -44,9 +44,6 @@ public final class ArtifactContractValidator {
             NodeDefinition nodeDefinition,
             NodeResult result
     ) throws Exception {
-        if (result.status() != NodeStatus.COMPLETED) {
-            return result;
-        }
         if (!"acpx.agent_run".equals(nodeDefinition.handlerType())) {
             return result;
         }
@@ -163,7 +160,13 @@ public final class ArtifactContractValidator {
                 adapterSignals(result)
         ));
         augmented.put("agent_execution_outcome", outcomeToMap(outcome));
-        updateRunMetadata(root, result, outcome);
+        updateRunMetadata(
+                root,
+                result,
+                outcome,
+                TerminalControlResult.valid(block.required("decision")),
+                List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition)))
+        );
         return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
     }
 
@@ -437,7 +440,13 @@ public final class ArtifactContractValidator {
                 adapterSignals(result)
         ));
         failed.put("agent_execution_outcome", outcomeToMap(outcome));
-        updateRunMetadata(workspaceRoot, result, outcome);
+        updateRunMetadata(
+                workspaceRoot,
+                result,
+                outcome,
+                terminalResultFor(reason, message),
+                List.of(artifactResultFor(nodeDefinition, reason, message))
+        );
         return new NodeResult(
                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
                 NodeStatus.FAILED,
@@ -449,8 +458,15 @@ public final class ArtifactContractValidator {
 
     private static ProcessResult processResult(NodeResult result) {
         var exitCode = result.result().get("exit_code");
+        var reason = text(result.result().get("acpx_failure.reason"));
+        if ("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(reason)) {
+            return ProcessResult.interruptedProcess();
+        }
         if (exitCode instanceof Number number && number.intValue() != 0) {
-            return ProcessResult.nonZeroComplete(number.intValue());
+            if (result.status() == NodeStatus.COMPLETED) {
+                return ProcessResult.nonZeroComplete(number.intValue());
+            }
+            return ProcessResult.nonZeroIncomplete(number.intValue());
         }
         return ProcessResult.exitedZero();
     }
@@ -513,6 +529,7 @@ public final class ArtifactContractValidator {
         map.put("primaryReason", outcome.primaryReason());
         map.put("nodeMaySucceed", outcome.nodeMaySucceed());
         map.put("retryPolicy", outcome.retryPolicy().name());
+        map.put("retrySafe", outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
         map.put("recoveryCategory", outcome.recoveryCategory().name());
         map.put("operatorMessage", outcome.operatorMessage());
         map.put("secondarySignals", outcome.secondarySignals().stream()
@@ -520,13 +537,22 @@ public final class ArtifactContractValidator {
                         "type", signal.type().name(),
                         "severity", signal.type().severity().name(),
                         "message", signal.message(),
-                        "observedSequence", signal.observedSequence()
+                        "observedSequence", signal.observedSequence(),
+                        "source", signal.source(),
+                        "sessionId", signal.sessionId(),
+                        "superseded", signal.superseded()
                 ))
                 .toList());
         return map;
     }
 
-    private static void updateRunMetadata(Path workspaceRoot, NodeResult result, AgentExecutionOutcome outcome) {
+    private static void updateRunMetadata(
+            Path workspaceRoot,
+            NodeResult result,
+            AgentExecutionOutcome outcome,
+            TerminalControlResult terminalControlResult,
+            List<ArtifactContractResult> artifactContractResults
+    ) {
         var runMetadataRef = text(result.result().get("run_metadata"));
         if (runMetadataRef.isBlank()) {
             return;
@@ -543,6 +569,16 @@ public final class ArtifactContractValidator {
             json.put("failureReason", outcome.nodeMaySucceed() ? null : outcome.primaryReason());
             json.put("recoverable", !outcome.nodeMaySucceed()
                     && outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
+            if (json.path("processResult").isMissingNode() || json.path("processResult").isNull()) {
+                json.set("processResult", OBJECT_MAPPER.valueToTree(processResultToMap(processResult(result))));
+            }
+            json.set("adapterSignals", OBJECT_MAPPER.valueToTree(adapterSignals(result).stream()
+                    .map(ArtifactContractValidator::adapterSignalToMap)
+                    .toList()));
+            json.set("terminalControlResult", OBJECT_MAPPER.valueToTree(terminalControlToMap(terminalControlResult)));
+            json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
+                    .map(ArtifactContractValidator::artifactContractToMap)
+                    .toList()));
             json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(outcome)));
             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
         } catch (Exception ignored) {
@@ -703,5 +739,53 @@ public final class ArtifactContractValidator {
         static StructuredArtifactResult failed(DualControlParseResult failure) {
             return new StructuredArtifactResult("", null, "", failure);
         }
+    }
+
+    private static Map<String, Object> processResultToMap(ProcessResult process) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("command", process.command());
+        map.put("pid", process.pid());
+        map.put("exitCode", process.exitCode());
+        map.put("usability", process.usability().name());
+        map.put("durationMs", process.durationMs());
+        map.put("stdoutPath", process.stdoutPath());
+        map.put("stderrPath", process.stderrPath());
+        map.put("interrupted", process.interrupted());
+        map.put("timedOut", process.timedOut());
+        return map;
+    }
+
+    private static Map<String, Object> adapterSignalToMap(AdapterSignal signal) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("type", signal.type().name());
+        map.put("severity", signal.type().severity().name());
+        map.put("source", signal.source());
+        map.put("message", signal.message());
+        map.put("sessionId", signal.sessionId());
+        map.put("observedSequence", signal.observedSequence());
+        map.put("superseded", signal.superseded());
+        return map;
+    }
+
+    private static Map<String, Object> terminalControlToMap(TerminalControlResult terminal) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("present", terminal.present());
+        map.put("valid", terminal.valid());
+        map.put("decision", terminal.decision());
+        map.put("summary", terminal.summary());
+        map.put("parseError", terminal.parseError());
+        return map;
+    }
+
+    private static Map<String, Object> artifactContractToMap(ArtifactContractResult artifact) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("contractType", artifact.contractType());
+        map.put("required", artifact.required());
+        map.put("present", artifact.present());
+        map.put("valid", artifact.valid());
+        map.put("path", artifact.path());
+        map.put("errorCode", artifact.errorCode());
+        map.put("errorMessage", artifact.errorMessage());
+        return map;
     }
 }

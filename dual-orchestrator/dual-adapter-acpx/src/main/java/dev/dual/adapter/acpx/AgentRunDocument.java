@@ -2,6 +2,7 @@ package dev.dual.adapter.acpx;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 record AgentRunDocument(
         int schemaVersion,
@@ -28,6 +29,13 @@ record AgentRunDocument(
         String status,
         String failureReason,
         Boolean recoverable,
-        AcpxUsage usage
+        AcpxUsage usage,
+        AcpxToolUsage toolUsage,
+        String contextGovernanceActualReportPath,
+        Map<String, Object> processResult,
+        List<Map<String, Object>> adapterSignals,
+        Map<String, Object> terminalControlResult,
+        List<Map<String, Object>> artifactContractResults,
+        Map<String, Object> executionOutcome
 ) {
 }

@@ -363,11 +363,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             java.nio.file.Path stderrPath
     ) {
         var refs = new java.util.ArrayList<String>();
+        refs.add(context.workspaceRoot().relativize(stderrPath).toString());
+        refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
         if (Files.exists(outputPath)) {
             refs.add(context.workspaceRoot().relativize(outputPath).toString());
         }
-        refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
-        refs.add(context.workspaceRoot().relativize(stderrPath).toString());
         return List.copyOf(refs);
     }
 

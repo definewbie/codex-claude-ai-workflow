@@ -50,6 +50,9 @@ class MetricsProjectionWriterTest {
         writeArtifactMetadata(paths, mapper, "run-3", "promptMetadataPath", "prompt.json", 1000);
         writeArtifactMetadata(paths, mapper, "run-3", "outputMetadataPath", "output.json", 200);
         writeArtifactMetadata(paths, mapper, "run-3", "transcriptMetadataPath", "transcript.json", 5000);
+        appendToolUsage(paths, mapper, "run-1", 3, 2, 0, 1, List.of("README.md", "src/main.js"), List.of("git status --short"));
+        appendToolUsage(paths, mapper, "run-2", 2, 2, 0, 0, List.of("README.md", "docs/spec.md"), List.of());
+        writeEvidenceManifest(paths, mapper, List.of("README.md", "docs/spec.md"));
 
         new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
 
@@ -92,14 +95,25 @@ class MetricsProjectionWriterTest {
         assertEquals("design.codex_review", globalTopSections.get(0).get("targetNode"));
         assertEquals("recent_agent_outputs", globalTopSections.get(0).get("section"));
 
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        assertEquals(5, number(toolMetrics.get("toolCallCount")));
+        assertEquals(4, number(toolMetrics.get("readCount")));
+        assertEquals(1, number(toolMetrics.get("bashCount")));
+        var repeatedReads = list(toolMetrics.get("repeatedReadFiles"));
+        assertEquals("README.md", repeatedReads.get(0).get("path"));
+        assertEquals(2, number(repeatedReads.get(0).get("count")));
+        assertEquals(true, repeatedReads.get(0).get("evidenceKnown"));
+
         var markdown = Files.readString(paths.workstreamMetricsMarkdown());
         assertTrue(markdown.contains("## Token Metrics"));
         assertTrue(markdown.contains("- Estimated Runs: 1"));
-        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | acpx_stream | 100 | 20 | 0 | 0 | 0 | 100 | 130 |"));
-        assertTrue(markdown.contains("| design.codex_review | codex | completed | acpx_stream | 80 | 30 | 0 | 600 | 300 | 0 | 115 |"));
-        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | artifact_estimate | 1000 | 200 | 5000 | 0 | 1000 | 0 | 1200 |"));
+        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | - | acpx_stream | 100 | 20 | 0 | 0 | 0 | 100 | 130 |"));
+        assertTrue(markdown.contains("| design.codex_review | codex | completed | - | acpx_stream | 80 | 30 | 0 | 600 | 300 | 0 | 115 |"));
+        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | - | artifact_estimate | 1000 | 200 | 5000 | 0 | 1000 | 0 | 1200 |"));
         assertTrue(markdown.contains("### Top Context Sections"));
         assertTrue(markdown.contains("| design.codex_review | review | recent_agent_outputs | 420 | 900 | true | false |"));
+        assertTrue(markdown.contains("## Tool Metrics"));
+        assertTrue(markdown.contains("| README.md | 2 | claude, codex | intake.claude_brainstorm, design.codex_review | true |"));
     }
 
     private NodeInstanceDocument node(String instanceId, String definitionId) {
@@ -166,6 +180,51 @@ class MetricsProjectionWriterTest {
         var runDir = paths.runsDir().resolve(runId);
         Files.createDirectories(runDir);
         new AtomicJsonWriter().write(runDir.resolve("run.json"), run);
+    }
+
+    private void appendToolUsage(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId,
+            long toolCallCount,
+            long readCount,
+            long writeCount,
+            long bashCount,
+            List<String> readFiles,
+            List<String> bashCommands
+    ) throws Exception {
+        var runJson = paths.runsDir().resolve(runId).resolve("run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("toolUsage", Map.of(
+                "schemaVersion", 1,
+                "toolCallCount", toolCallCount,
+                "readCount", readCount,
+                "writeCount", writeCount,
+                "bashCount", bashCount,
+                "otherCount", Math.max(0, toolCallCount - readCount - writeCount - bashCount),
+                "readFiles", readFiles,
+                "writeFiles", List.of(),
+                "bashCommands", bashCommands
+        ));
+        new AtomicJsonWriter().write(runJson, run);
+    }
+
+    private void writeEvidenceManifest(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            List<String> files
+    ) throws Exception {
+        var memoryDir = paths.workstreamDir().resolve("memory");
+        Files.createDirectories(memoryDir);
+        var item = new java.util.LinkedHashMap<String, Object>();
+        item.put("id", "task_contract:1");
+        item.put("type", "task_contract");
+        item.put("files", files);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(memoryDir.resolve("evidence-manifest.json").toFile(), Map.of(
+                "schemaVersion", 1,
+                "artifactType", "evidence_manifest",
+                "items", List.of(item)
+        ));
     }
 
     private void writeArtifactMetadata(

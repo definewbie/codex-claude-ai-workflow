@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CLI 侧的 Agent run 读模型。
@@ -39,7 +40,8 @@ record RunMetadata(
         String status,
         String failureReason,
         Boolean recoverable,
-        RunUsage usage
+        RunUsage usage,
+        Map<String, Object> executionOutcome
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     record RunUsage(

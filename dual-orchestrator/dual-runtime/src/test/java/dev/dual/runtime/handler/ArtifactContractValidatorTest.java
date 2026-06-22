@@ -139,6 +139,10 @@ class ArtifactContractValidatorTest {
         assertTrue(runMetadata.contains("\"executionOutcome\""));
         assertTrue(runMetadata.contains("\"status\" : \"CONTRACT_FAILED\""));
         assertTrue(runMetadata.contains("\"recoveryCategory\" : \"ARTIFACT_CONTRACT_FAILURE\""));
+        assertTrue(runMetadata.contains("\"terminalControlResult\""));
+        assertTrue(runMetadata.contains("\"artifactContractResults\""));
+        assertTrue(runMetadata.contains("\"present\" : false"));
+        assertTrue(runMetadata.contains("\"valid\" : false"));
     }
 
     @Test
@@ -166,6 +170,37 @@ class ArtifactContractValidatorTest {
         assertTrue(runMetadata.contains("\"executionOutcome\""));
         assertTrue(runMetadata.contains("\"status\" : \"SUCCESS\""));
         assertTrue(runMetadata.contains("\"nodeMaySucceed\" : true"));
+        assertTrue(runMetadata.contains("\"terminalControlResult\""));
+        assertTrue(runMetadata.contains("\"artifactContractResults\""));
+        assertTrue(runMetadata.contains("\"present\" : true"));
+        assertTrue(runMetadata.contains("\"valid\" : true"));
+    }
+
+    @Test
+    void writesOutcomeForFailedAgentRunInsteadOfSkippingValidation() throws Exception {
+        var runRef = writeRunMetadata("run-failed-incomplete", "failed");
+        var stderrRef = writeOutput("review.stderr.log", "agent needs reconnect");
+        var result = new NodeResult(
+                "RECOVERABLE_AGENT_RECONNECT",
+                NodeStatus.FAILED,
+                List.of(stderrRef),
+                Map.of(
+                        "agent", "codex",
+                        "run_metadata", runRef,
+                        "exit_code", 5,
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT"
+                ),
+                "agent needs reconnect"
+        );
+
+        var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        var runMetadata = Files.readString(tempDir.resolve(runRef));
+        assertTrue(runMetadata.contains("\"schemaVersion\" : 3"));
+        assertTrue(runMetadata.contains("\"executionOutcome\""));
+        assertTrue(runMetadata.contains("\"status\" : \"OUTPUT_INCOMPLETE\""));
+        assertTrue(runMetadata.contains("\"type\" : \"AGENT_RECONNECT_REQUIRED\""));
     }
 
     @Test
