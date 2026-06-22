@@ -1,8 +1,18 @@
 {
   "workflowId": "agent-lifecycle-contract",
   "version": 4,
-  "entryNodeId": "intake.claude_brainstorm",
+  "entryNodeId": "context.intake_claude_brainstorm",
   "nodes": [
+    {
+      "id": "context.intake_claude_brainstorm",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "intake.claude_brainstorm",
+        "profile": "intake",
+        "purpose": "Seed Claude intake with user request and repository scope guidance."
+      }
+    },
     {
       "id": "intake.claude_brainstorm",
       "kind": "TASK",
@@ -382,6 +392,20 @@
     }
   ],
   "edges": [
+    {
+      "from": "context.intake_claude_brainstorm",
+      "on": "completed",
+      "to": "intake.claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Seed the first Claude intake run with repo-scope context.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
     {
       "from": "intake.claude_brainstorm",
       "on": "completed",

@@ -154,4 +154,65 @@ class ContextGovernanceActualReportWriterTest {
         assertEquals(0, json.get("plannedReadFiles").size());
         assertEquals("README.md", json.get("actualReadFiles").get(0).asText());
     }
+
+    @Test
+    void matchesContextBuilderPolicyByTargetNodeDefinitionId() throws Exception {
+        var workspace = tempDir.resolve("repo-target");
+        var workstreamId = "ws-003";
+        var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
+        var memoryDir = workstreamDir.resolve("memory");
+        Files.createDirectories(memoryDir);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("file-relevance-plan-node-context-001.json").toFile(),
+                Map.of(
+                        "nodeDefinitionId", "context.intake_claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "readCandidates", List.of("README.md", "main.py"),
+                        "writeCandidates", List.of()
+                )
+        );
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("stage-scope-policy-node-context-001.json").toFile(),
+                Map.of(
+                        "nodeDefinitionId", "context.intake_claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "nodeInstanceId", "node-context-001",
+                        "iterationId", "iter-001",
+                        "stageId", "intake",
+                        "readScope", List.of("README.md", "main.py"),
+                        "writeScope", List.of()
+                )
+        );
+        var transcript = workstreamDir.resolve("runs/run-001/outputs/intake.transcript.log");
+        Files.createDirectories(transcript.getParent());
+        Files.writeString(transcript, "transcript");
+
+        var output = new ContextGovernanceActualReportWriter().write(
+                workspace,
+                workstreamId,
+                "intake.claude_brainstorm",
+                "run-001",
+                transcript,
+                new AcpxToolUsage(
+                        1,
+                        2,
+                        2,
+                        0,
+                        0,
+                        0,
+                        Map.of("Read", 2),
+                        List.of("README.md", "main.py"),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        assertTrue(output.isPresent());
+        var json = objectMapper.readTree(output.get().toFile());
+        assertEquals(true, json.get("planningAvailable").asBoolean());
+        assertEquals("context.intake_claude_brainstorm", json.get("policyNodeDefinitionId").asText());
+        assertEquals("intake.claude_brainstorm", json.get("targetNodeDefinitionId").asText());
+        assertEquals(2, json.get("plannedReadFiles").size());
+        assertEquals(0, json.get("outsideScopeReads").size());
+    }
 }

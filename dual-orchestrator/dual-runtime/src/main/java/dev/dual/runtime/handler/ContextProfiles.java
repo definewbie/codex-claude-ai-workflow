@@ -11,6 +11,7 @@ final class ContextProfiles {
     private ContextProfiles() {}
 
     private static final Map<String, ContextBudget> PROFILES = Map.of(
+            "intake", intake(),
             "product_review", productReview(),
             "architecture_review", architectureReview(),
             "plan_review", planReview(),
@@ -25,6 +26,23 @@ final class ContextProfiles {
 
     static boolean hasProfile(String profile) {
         return PROFILES.containsKey(profile);
+    }
+
+    static ContextBudget intake() {
+        return new ContextBudget(3_000, List.of(
+                new SectionRequirement("requirement",
+                        MissingPolicy.FAIL, Priority.CRITICAL,
+                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
+                        OverflowPolicy.FAIL, 1_800),
+                new SectionRequirement("task_contract",
+                        MissingPolicy.PLACEHOLDER, Priority.HIGH,
+                        new DegradationPolicy(Degradation.SUMMARY, 0),
+                        OverflowPolicy.DEGRADE, 500),
+                new SectionRequirement("ledger_pointers",
+                        MissingPolicy.SKIP, Priority.LOW,
+                        new DegradationPolicy(Degradation.POINTER_ONLY, 0),
+                        OverflowPolicy.DROP_OPTIONAL, 125)
+        ), Map.of("max_snippet_chars", 1_500, "max_recent_agent_outputs", 0));
     }
 
     static ContextBudget implementation() {

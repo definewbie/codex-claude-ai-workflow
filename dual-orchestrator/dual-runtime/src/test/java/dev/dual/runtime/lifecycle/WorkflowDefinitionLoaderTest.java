@@ -157,7 +157,8 @@ class WorkflowDefinitionLoaderTest {
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
         assertEquals(5, definition.version(), "default full workflow should be loaded from the bundled JSON resource");
-        assertEquals("intake.claude_brainstorm", definition.entryNodeId());
+        assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
+        assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
     }
 
     @Test
@@ -199,7 +200,8 @@ class WorkflowDefinitionLoaderTest {
 
         assertEquals("agent-lifecycle-contract", definition.workflowId());
         assertEquals(4, definition.version());
-        assertEquals("intake.claude_brainstorm", definition.entryNodeId());
+        assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
+        assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
         assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
         assertEquals(NodeKind.TASK, definition.node("acceptance.classify_failure").kind());
     }

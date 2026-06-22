@@ -63,6 +63,12 @@ final class ContextGovernanceActualReportWriter {
         report.put("artifactType", "context_governance_report");
         report.put("workstreamId", workstreamId);
         report.put("nodeDefinitionId", nodeDefinitionId);
+        report.put("policyNodeDefinitionId", text(policy.map(doc -> doc.get("nodeDefinitionId")).orElse(null)));
+        report.put("targetNodeDefinitionId", firstNonBlank(
+                text(policy.map(doc -> doc.get("targetNodeDefinitionId")).orElse(null)),
+                text(plan.map(doc -> doc.get("targetNodeDefinitionId")).orElse(null)),
+                nodeDefinitionId
+        ));
         report.put("nodeInstanceId", text(policy.map(doc -> doc.get("nodeInstanceId")).orElse(null)));
         report.put("iterationId", text(policy.map(doc -> doc.get("iterationId")).orElse(null)));
         report.put("stageId", text(policy.map(doc -> doc.get("stageId")).orElse(null)));
@@ -103,11 +109,22 @@ final class ContextGovernanceActualReportWriter {
         candidates.sort(Comparator.comparing(ContextGovernanceActualReportWriter::lastModified).reversed());
         for (var path : candidates) {
             var json = OBJECT_MAPPER.readTree(path.toFile());
-            if (nodeDefinitionId != null && nodeDefinitionId.equals(text(json.get("nodeDefinitionId")))) {
+            if (matchesNodeDefinition(json, nodeDefinitionId)) {
                 return Optional.of(json);
             }
         }
         return Optional.empty();
+    }
+
+    private static boolean matchesNodeDefinition(JsonNode json, String nodeDefinitionId) {
+        if (nodeDefinitionId == null || nodeDefinitionId.isBlank()) {
+            return false;
+        }
+        var targetNodeDefinitionId = text(json.get("targetNodeDefinitionId"));
+        if (!targetNodeDefinitionId.isBlank()) {
+            return nodeDefinitionId.equals(targetNodeDefinitionId);
+        }
+        return nodeDefinitionId.equals(text(json.get("nodeDefinitionId")));
     }
 
     private static long lastModified(Path path) {
@@ -134,6 +151,16 @@ final class ContextGovernanceActualReportWriter {
 
     private static List<String> firstNonEmpty(List<String> first, List<String> second) {
         return first.isEmpty() ? second : first;
+    }
+
+    private static String firstNonBlank(String first, String second, String fallback) {
+        if (first != null && !first.isBlank()) {
+            return first;
+        }
+        if (second != null && !second.isBlank()) {
+            return second;
+        }
+        return fallback == null ? "" : fallback;
     }
 
     private static List<String> filterRepoFiles(List<String> files) {

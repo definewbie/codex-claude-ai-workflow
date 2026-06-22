@@ -50,10 +50,11 @@ final class RepoScopeGovernance {
             ObjectMapper objectMapper
     ) throws IOException {
         var stageId = stageId(context);
+        var targetNodeDefinitionId = targetNodeDefinitionId(context);
         var repoMap = buildRepoMap(workspaceRoot, workstreamDir, context, objectMapper);
-        var plan = buildFileRelevancePlan(workspaceRoot, workstreamDir, context, manifest, repoMap, objectMapper, stageId);
-        var policy = buildStageScopePolicy(context, stageId, plan);
-        var report = buildInitialReport(context, stageId, plan, policy);
+        var plan = buildFileRelevancePlan(workspaceRoot, workstreamDir, context, manifest, repoMap, objectMapper, stageId, targetNodeDefinitionId);
+        var policy = buildStageScopePolicy(context, stageId, plan, targetNodeDefinitionId);
+        var report = buildInitialReport(context, stageId, plan, policy, targetNodeDefinitionId);
 
         var memoryDir = workstreamDir.resolve("memory");
         var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
@@ -135,7 +136,8 @@ final class RepoScopeGovernance {
             EvidenceManifest manifest,
             Map<String, Object> repoMap,
             ObjectMapper objectMapper,
-            String stageId
+            String stageId,
+            String targetNodeDefinitionId
     ) throws IOException {
         var candidates = new LinkedHashSet<String>();
         addInputRefs(candidates, context);
@@ -155,6 +157,8 @@ final class RepoScopeGovernance {
         document.put("stageId", stageId);
         document.put("nodeInstanceId", context.instance().nodeInstanceId());
         document.put("nodeDefinitionId", context.definition().id());
+        document.put("builderNodeDefinitionId", context.definition().id());
+        document.put("targetNodeDefinitionId", targetNodeDefinitionId);
         document.put("iterationId", context.instance().iterationId());
         document.put("source", "task_contract+evidence_manifest+git_evidence+repo_map");
         document.put("readCandidates", readCandidates);
@@ -171,7 +175,8 @@ final class RepoScopeGovernance {
     private static Map<String, Object> buildStageScopePolicy(
             TaskHandler.TaskContext context,
             String stageId,
-            Map<String, Object> plan
+            Map<String, Object> plan,
+            String targetNodeDefinitionId
     ) {
         var readCandidates = textList(plan.get("readCandidates"));
         var writeCandidates = textList(plan.get("writeCandidates"));
@@ -182,6 +187,8 @@ final class RepoScopeGovernance {
         policy.put("stageId", stageId);
         policy.put("nodeInstanceId", context.instance().nodeInstanceId());
         policy.put("nodeDefinitionId", context.definition().id());
+        policy.put("builderNodeDefinitionId", context.definition().id());
+        policy.put("targetNodeDefinitionId", targetNodeDefinitionId);
         policy.put("iterationId", context.instance().iterationId());
         policy.put("readScope", readCandidates);
         policy.put("writeScope", writeCandidates);
@@ -199,7 +206,8 @@ final class RepoScopeGovernance {
             TaskHandler.TaskContext context,
             String stageId,
             Map<String, Object> plan,
-            Map<String, Object> policy
+            Map<String, Object> policy,
+            String targetNodeDefinitionId
     ) {
         var report = new LinkedHashMap<String, Object>();
         report.put("schemaVersion", 1);
@@ -208,6 +216,8 @@ final class RepoScopeGovernance {
         report.put("stageId", stageId);
         report.put("nodeInstanceId", context.instance().nodeInstanceId());
         report.put("nodeDefinitionId", context.definition().id());
+        report.put("builderNodeDefinitionId", context.definition().id());
+        report.put("targetNodeDefinitionId", targetNodeDefinitionId);
         report.put("iterationId", context.instance().iterationId());
         report.put("reportPhase", "planned");
         report.put("plannedReadFiles", textList(plan.get("readCandidates")));
@@ -393,6 +403,11 @@ final class RepoScopeGovernance {
         var nodeId = context.definition().id();
         var dot = nodeId.indexOf('.');
         return dot > 0 ? nodeId.substring(0, dot) : nodeId;
+    }
+
+    private static String targetNodeDefinitionId(TaskHandler.TaskContext context) {
+        var configured = text(context.definition().config().get("target_node"));
+        return configured.isBlank() ? context.definition().id() : configured;
     }
 
     private static String readBaseCommit(Path workstreamDir, ObjectMapper objectMapper) {

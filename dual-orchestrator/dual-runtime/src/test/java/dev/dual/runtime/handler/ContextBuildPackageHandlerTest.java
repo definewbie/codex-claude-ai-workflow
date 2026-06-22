@@ -1093,18 +1093,24 @@ class ContextBuildPackageHandlerTest {
         assertEquals(".agent/workstreams/ws-ctx/artifacts/context-governance/node-001.json", metadata.get("contextGovernanceReport"));
 
         var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertEquals("ctx.test", plan.get("builderNodeDefinitionId"));
+        assertEquals("next.node", plan.get("targetNodeDefinitionId"));
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("miniprogram/src/pages/treatment-record/index.vue"),
                 "file relevance plan should preserve task-contract file scope");
 
         var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertEquals("implement", policy.get("stageId"));
+        assertEquals("ctx.test", policy.get("builderNodeDefinitionId"));
+        assertEquals("next.node", policy.get("targetNodeDefinitionId"));
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
                         && writeScope.contains("miniprogram/src/pages/treatment-record/index.vue"),
                 "implementation policy should expose scoped writable files");
 
         var report = objectMapper.readValue(wsDir.resolve("artifacts/context-governance/node-001.json").toFile(), Map.class);
         assertEquals("planned", report.get("reportPhase"));
+        assertEquals("ctx.test", report.get("builderNodeDefinitionId"));
+        assertEquals("next.node", report.get("targetNodeDefinitionId"));
         assertEquals(true, report.get("telemetryPending"));
     }
 
