@@ -1,12 +1,11 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.core.workflow.NodeResult;
-import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.execution.ProcessUsability;
 import dev.dual.runtime.handler.TaskHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -124,162 +123,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
         var outputComplete = completionDetector.isComplete(transcriptPath);
         var interrupted = interruptedOutputFailure(result, outputComplete);
-        if (interrupted != null && !failure.recoverable()) {
-            metadataWriter.writeCompleted(
-                    context.workspaceRoot(),
-                    context.workstreamId(),
-                    context.definition().id(),
-                    agent,
-                    session,
-                    promptTemplate,
-                    runId,
-                    runDir,
-                    promptPath,
-                    outputPath,
-                    stderrPath,
-                    transcriptPath,
-                    result,
-                    interrupted,
-                    usage
-            );
-            return failedResult(context, runDir, outputPath, transcriptPath, stderrPath, result, agent, session, runId, interrupted);
-        }
-        if (result.exitCode() == 0 && outputComplete) {
-            metadataWriter.writeCompleted(
-                    context.workspaceRoot(),
-                    context.workstreamId(),
-                    context.definition().id(),
-                    agent,
-                    session,
-                    promptTemplate,
-                    runId,
-                    runDir,
-                    promptPath,
-                    outputPath,
-                    stderrPath,
-                    transcriptPath,
-                    result,
-                    null,
-                    usage
-            );
-            var completedResult = new LinkedHashMap<String, Object>();
-            completedResult.put("run_id", runId);
-            completedResult.put("run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString());
-            completedResult.put("agent", agent);
-            completedResult.put("session", session);
-            completedResult.put("exit_code", result.exitCode());
-            completedResult.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
-            if (failure.recoverable()) {
-                completedResult.put("acpx_recoverable_stderr_ignored", true);
-                completedResult.put("acpx_failure.reason", failure.reason());
-            }
-            return NodeResult.completed(
-                    "completed",
-                    List.of(context.workspaceRoot().relativize(outputPath).toString()),
-                    completedResult
-            );
-        }
-        if (failure.recoverable() && outputComplete) {
-            metadataWriter.writeCompleted(
-                    context.workspaceRoot(),
-                    context.workstreamId(),
-                    context.definition().id(),
-                    agent,
-                    session,
-                    promptTemplate,
-                    runId,
-                    runDir,
-                    promptPath,
-                    outputPath,
-                    stderrPath,
-                    transcriptPath,
-                    result,
-                    null,
-                    usage
-            );
-            var completedResult = new LinkedHashMap<String, Object>();
-            completedResult.put("run_id", runId);
-            completedResult.put("run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString());
-            completedResult.put("agent", agent);
-            completedResult.put("session", session);
-            completedResult.put("exit_code", result.exitCode());
-            completedResult.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
-            completedResult.put("acpx_recoverable_stderr_ignored", true);
-            completedResult.put("acpx_failure.reason", failure.reason());
-            return NodeResult.completed(
-                    "completed",
-                    List.of(context.workspaceRoot().relativize(outputPath).toString()),
-                    completedResult
-            );
-        }
-        if (failure.recoverable()) {
-            metadataWriter.writeCompleted(
-                    context.workspaceRoot(),
-                    context.workstreamId(),
-                    context.definition().id(),
-                    agent,
-                    session,
-                    promptTemplate,
-                    runId,
-                    runDir,
-                    promptPath,
-                    outputPath,
-                    stderrPath,
-                    transcriptPath,
-                    result,
-                    failure,
-                    usage
-            );
-            return failedResult(context, runDir, outputPath, transcriptPath, stderrPath, result, agent, session, runId, failure);
-        }
-        if (result.exitCode() != 0) {
-            if (outputComplete) {
-                metadataWriter.writeCompleted(
-                        context.workspaceRoot(),
-                        context.workstreamId(),
-                        context.definition().id(),
-                        agent,
-                        session,
-                        promptTemplate,
-                        runId,
-                        runDir,
-                        promptPath,
-                        outputPath,
-                        stderrPath,
-                        transcriptPath,
-                        result,
-                        null,
-                        usage
-                );
-                return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(outputPath).toString()), Map.of(
-                        "run_id", runId,
-                        "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
-                        "agent", agent,
-                        "session", session,
-                        "exit_code", result.exitCode(),
-                        "transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString(),
-                        "acpx_exit_tolerated", true
-                ));
-            }
-            metadataWriter.writeCompleted(
-                    context.workspaceRoot(),
-                    context.workstreamId(),
-                    context.definition().id(),
-                    agent,
-                    session,
-                    promptTemplate,
-                    runId,
-                    runDir,
-                    promptPath,
-                    outputPath,
-                    stderrPath,
-                    transcriptPath,
-                    result,
-                    failure,
-                    usage
-            );
-            return failedResult(context, runDir, outputPath, transcriptPath, stderrPath, result, agent, session, runId, failure);
-        }
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
                 context.workstreamId(),
@@ -294,17 +137,14 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 stderrPath,
                 transcriptPath,
                 result,
-                null,
+                metadataFailure(failure, interrupted, outputComplete),
                 usage
         );
-        return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(outputPath).toString()), Map.of(
-                "run_id", runId,
-                "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
-                "agent", agent,
-                "session", session,
-                "exit_code", result.exitCode(),
-                "transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString()
-        ));
+        return NodeResult.completed(
+                "agent_execution_observed",
+                evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
+                resultFacts(context, runDir, transcriptPath, result, agent, session, runId, failure, interrupted, outputComplete)
+        );
     }
 
     private static String configText(TaskContext context, String key) {
@@ -326,37 +166,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return AcpxPermissionProfile.fromName(profile, approveAll(context));
     }
 
-    private static NodeResult failedResult(
-            TaskContext context,
-            java.nio.file.Path runDir,
-            java.nio.file.Path outputPath,
-            java.nio.file.Path transcriptPath,
-            java.nio.file.Path stderrPath,
-            AcpxRunResult result,
-            String agent,
-            String session,
-            String runId,
-            AcpxFailureClassifier.AcpxFailure failure
-    ) {
-        return new NodeResult(
-                failure.reason(),
-                NodeStatus.FAILED,
-                failedOutputRefs(context, outputPath, transcriptPath, stderrPath),
-                Map.of(
-                        "run_id", runId,
-                        "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
-                        "exit_code", result.exitCode(),
-                        "agent", agent,
-                        "session", session,
-                        "transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString(),
-                        "acpx_failure.reason", failure.reason(),
-                        "acpx_failure.recoverable", failure.recoverable()
-                ),
-                failure.message()
-        );
-    }
-
-    private static List<String> failedOutputRefs(
+    private static List<String> evidenceOutputRefs(
             TaskContext context,
             java.nio.file.Path outputPath,
             java.nio.file.Path transcriptPath,
@@ -371,6 +181,69 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return List.copyOf(refs);
     }
 
+    private static Map<String, Object> resultFacts(
+            TaskContext context,
+            java.nio.file.Path runDir,
+            java.nio.file.Path transcriptPath,
+            AcpxRunResult result,
+            String agent,
+            String session,
+            String runId,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxFailureClassifier.AcpxFailure interrupted,
+            boolean outputComplete
+    ) {
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_id", runId);
+        facts.put("run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString());
+        facts.put("agent", agent);
+        facts.put("session", session);
+        facts.put("exit_code", result.exitCode());
+        facts.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
+        facts.put("output_complete", outputComplete);
+        facts.put("process_usability", processUsability(result, failure, interrupted, outputComplete).name());
+        if (interrupted != null) {
+            facts.put("acpx_failure.reason", interrupted.reason());
+            facts.put("acpx_failure.recoverable", interrupted.recoverable());
+        } else if (failure.recoverable()) {
+            facts.put("acpx_failure.reason", failure.reason());
+            facts.put("acpx_failure.recoverable", true);
+        }
+        return facts;
+    }
+
+    private static AcpxFailureClassifier.AcpxFailure metadataFailure(
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxFailureClassifier.AcpxFailure interrupted,
+            boolean outputComplete
+    ) {
+        if (interrupted != null) {
+            return interrupted;
+        }
+        return outputComplete ? null : failure;
+    }
+
+    private static ProcessUsability processUsability(
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxFailureClassifier.AcpxFailure interrupted,
+            boolean outputComplete
+    ) {
+        if (interrupted != null) {
+            return ProcessUsability.INTERRUPTED;
+        }
+        if (result.exitCode() == 0) {
+            return ProcessUsability.EXITED_ZERO;
+        }
+        if (outputComplete) {
+            return ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT;
+        }
+        if (failure.recoverable()) {
+            return ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
+        }
+        return ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+    }
+
     private static String readStringIfExists(java.nio.file.Path path) throws java.io.IOException {
         if (!Files.exists(path)) {
             return "";
@@ -378,11 +251,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return Files.readString(path, StandardCharsets.UTF_8);
     }
 
-    private static AcpxFailureClassifier.AcpxFailure interruptedOutputFailure(
-            AcpxRunResult result,
-            boolean outputComplete
-    ) {
-        if (outputComplete || !result.reachedDeclaredTimeout(Duration.ofSeconds(5))) {
+    private static AcpxFailureClassifier.AcpxFailure interruptedOutputFailure(AcpxRunResult result, boolean outputComplete) {
+        if (outputComplete || !result.reachedDeclaredTimeout(java.time.Duration.ofSeconds(5))) {
             return null;
         }
         return new AcpxFailureClassifier.AcpxFailure(

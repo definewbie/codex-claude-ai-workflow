@@ -35,12 +35,29 @@ final class NodeExecutionGuard {
     }
 
     private static String failedMessage(NodeInstanceDocument node, Map<String, Object> config) {
+        var outcome = outcomeMap(node.result());
+        if (!outcome.isEmpty()) {
+            var retryPolicy = text(outcome.get("retryPolicy"));
+            var reason = text(outcome.get("primaryReason"));
+            if ("AUTO_ALLOWED".equals(retryPolicy)) {
+                var policy = RetryPolicyResolver.resolve(reason, config);
+                return autoRetryLimitMessage(node, policy, reason);
+            }
+            if ("MANUAL_ONLY".equals(retryPolicy)) {
+                return "node " + node.nodeDefinitionId() + " FAILED (" + reason + "), manual recovery or retry required";
+            }
+            return "node " + node.nodeDefinitionId() + " FAILED (" + reason + "), use dualctl retry after inspection";
+        }
         var recoverable = firstNonNull(node.result().get("acpx_failure.recoverable"), node.result().get("recoverable"));
         if (!Boolean.TRUE.equals(recoverable)) {
             return "node " + node.nodeDefinitionId() + " FAILED (not recoverable), use dualctl retry";
         }
         var reason = failureReason(node);
         var policy = RetryPolicyResolver.resolve(reason, config);
+        return autoRetryLimitMessage(node, policy, reason);
+    }
+
+    private static String autoRetryLimitMessage(NodeInstanceDocument node, RetryPolicy policy, String reason) {
         var count = node.result().getOrDefault("auto_retry_count", 0);
         var countInt = count instanceof Number n ? n.intValue() : 0;
         return "node " + node.nodeDefinitionId() + " FAILED, auto-retry limit reached ("
@@ -57,6 +74,16 @@ final class NodeExecutionGuard {
 
     private static Object firstNonNull(Object first, Object second) {
         return first != null ? first : second;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> outcomeMap(Map<String, Object> result) {
+        var value = result.get("agent_execution_outcome");
+        return value instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.of();
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
     record NodeExecutionRejection(String message) {

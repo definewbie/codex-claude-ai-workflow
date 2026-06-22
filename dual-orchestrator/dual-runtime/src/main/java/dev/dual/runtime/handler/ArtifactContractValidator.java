@@ -11,6 +11,7 @@ import dev.dual.core.execution.AgentExecutionOutcomeResolver;
 import dev.dual.core.execution.AgentExecutionRetryPolicy;
 import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.ProcessUsability;
 import dev.dual.core.execution.TerminalControlResult;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeResult;
@@ -167,7 +168,13 @@ public final class ArtifactContractValidator {
                 TerminalControlResult.valid(block.required("decision")),
                 List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition)))
         );
-        return new NodeResult(result.outcome(), result.status(), outputRefs, augmented, result.errorMessage());
+        return new NodeResult(
+                outcome.primaryReason(),
+                nodeStatusFor(outcome),
+                outputRefs,
+                augmented,
+                outcome.nodeMaySucceed() ? result.errorMessage() : outcome.operatorMessage()
+        );
     }
 
     private StructuredArtifactResult structuredArtifact(NodeDefinition nodeDefinition, String markdown, DualControlParseResult parsed) {
@@ -457,18 +464,46 @@ public final class ArtifactContractValidator {
     }
 
     private static ProcessResult processResult(NodeResult result) {
+        var usability = processUsability(result);
         var exitCode = result.result().get("exit_code");
-        var reason = text(result.result().get("acpx_failure.reason"));
-        if ("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(reason)) {
-            return ProcessResult.interruptedProcess();
-        }
         if (exitCode instanceof Number number && number.intValue() != 0) {
-            if (result.status() == NodeStatus.COMPLETED) {
+            if (usability == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT) {
                 return ProcessResult.nonZeroComplete(number.intValue());
+            }
+            if (usability == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
+                return ProcessResult.killedAfterRecoverableSignal();
             }
             return ProcessResult.nonZeroIncomplete(number.intValue());
         }
+        if (usability == ProcessUsability.INTERRUPTED) {
+            return ProcessResult.interruptedProcess();
+        }
+        if (usability == ProcessUsability.TIMED_OUT || usability == ProcessUsability.STALLED) {
+            return ProcessResult.timedOutProcess();
+        }
         return ProcessResult.exitedZero();
+    }
+
+    private static ProcessUsability processUsability(NodeResult result) {
+        var explicit = text(result.result().get("process_usability"));
+        if (!explicit.isBlank()) {
+            try {
+                return ProcessUsability.valueOf(explicit);
+            } catch (IllegalArgumentException ignored) {
+                // Fall back to legacy inference below for historical ledgers.
+            }
+        }
+        var reason = text(result.result().get("acpx_failure.reason"));
+        if ("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(reason)) {
+            return ProcessUsability.INTERRUPTED;
+        }
+        var exitCode = result.result().get("exit_code");
+        if (exitCode instanceof Number number && number.intValue() != 0) {
+            return result.status() == NodeStatus.COMPLETED
+                    ? ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+                    : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+        }
+        return ProcessUsability.EXITED_ZERO;
     }
 
     private static TerminalControlResult terminalResultFor(String reason, String message) {
@@ -569,9 +604,7 @@ public final class ArtifactContractValidator {
             json.put("failureReason", outcome.nodeMaySucceed() ? null : outcome.primaryReason());
             json.put("recoverable", !outcome.nodeMaySucceed()
                     && outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
-            if (json.path("processResult").isMissingNode() || json.path("processResult").isNull()) {
-                json.set("processResult", OBJECT_MAPPER.valueToTree(processResultToMap(processResult(result))));
-            }
+            json.set("processResult", OBJECT_MAPPER.valueToTree(mergedProcessResult(json, processResult(result))));
             json.set("adapterSignals", OBJECT_MAPPER.valueToTree(adapterSignals(result).stream()
                     .map(ArtifactContractValidator::adapterSignalToMap)
                     .toList()));
@@ -585,6 +618,10 @@ public final class ArtifactContractValidator {
             // Run metadata is an observability artifact. Contract validation result
             // remains authoritative even if the historical run file is damaged.
         }
+    }
+
+    private static NodeStatus nodeStatusFor(AgentExecutionOutcome outcome) {
+        return outcome.nodeMaySucceed() ? NodeStatus.COMPLETED : NodeStatus.FAILED;
     }
 
     private sealed interface StructuredAgentArtifact permits
@@ -753,6 +790,21 @@ public final class ArtifactContractValidator {
         map.put("interrupted", process.interrupted());
         map.put("timedOut", process.timedOut());
         return map;
+    }
+
+    private static Map<String, Object> mergedProcessResult(ObjectNode json, ProcessResult process) {
+        var merged = new LinkedHashMap<String, Object>();
+        var existing = json.path("processResult");
+        if (existing.isObject()) {
+            existing.fields().forEachRemaining(entry -> merged.put(entry.getKey(), OBJECT_MAPPER.convertValue(entry.getValue(), Object.class)));
+        }
+        var semantic = processResultToMap(process);
+        for (var entry : semantic.entrySet()) {
+            if (entry.getValue() != null && !String.valueOf(entry.getValue()).isBlank()) {
+                merged.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return merged;
     }
 
     private static Map<String, Object> adapterSignalToMap(AdapterSignal signal) {

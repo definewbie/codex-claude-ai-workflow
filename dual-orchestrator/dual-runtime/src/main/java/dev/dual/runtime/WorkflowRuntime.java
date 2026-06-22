@@ -357,6 +357,15 @@ public final class WorkflowRuntime {
     }
 
     private boolean attemptAutoRetry(WorkstreamPaths paths, NodeInstanceDocument node, NodeDefinition nodeDef) throws Exception {
+        var outcome = outcomeMap(node.result());
+        if (!outcome.isEmpty()) {
+            var retryPolicy = text(outcome.get("retryPolicy"));
+            if (!"AUTO_ALLOWED".equals(retryPolicy)) {
+                return false;
+            }
+            var policy = RetryPolicyResolver.resolve(text(outcome.get("primaryReason")), nodeDef.config());
+            return autoRetry(paths, node, policy);
+        }
         var recoverable = node.result().get("acpx_failure.recoverable");
         if (!Boolean.TRUE.equals(recoverable)) {
             return false;
@@ -364,7 +373,10 @@ public final class WorkflowRuntime {
         var reasonValue = node.result().getOrDefault("acpx_failure.reason", "");
         var reason = reasonValue instanceof String s ? s : String.valueOf(reasonValue);
         var policy = RetryPolicyResolver.resolve(reason, nodeDef.config());
+        return autoRetry(paths, node, policy);
+    }
 
+    private boolean autoRetry(WorkstreamPaths paths, NodeInstanceDocument node, RetryPolicy policy) throws Exception {
         var countValue = node.result().getOrDefault("auto_retry_count", 0);
         var count = (countValue instanceof Number n) ? n.intValue() : 0;
         if (count >= policy.maxRetries()) {
@@ -377,6 +389,16 @@ public final class WorkflowRuntime {
             Thread.sleep(delay);
         }
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> outcomeMap(Map<String, Object> result) {
+        var value = result.get("agent_execution_outcome");
+        return value instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.of();
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
     private Boolean resolveNodeForExecution(WorkstreamPaths paths, NodeInstanceDocument node) throws Exception {

@@ -284,6 +284,58 @@ class RunningStateGuardTest {
     }
 
     @Test
+    void outcomeManualOnlyPreventsLegacyRecoverableAutoRetry() throws Exception {
+        var paths = setup("ws-outcome-manual");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-outcome-manual", SINGLE_TASK);
+
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED, Map.of(
+                "acpx_failure.recoverable", true,
+                "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT",
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "rate_limited",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE"
+                ),
+                "auto_retry_count", 0
+        ));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-outcome-manual"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+        assertTrue(result.message().contains("manual recovery or retry required"));
+        assertEquals(0, ledger.readNodeExecutions(paths).size());
+    }
+
+    @Test
+    void outcomeAutoAllowedIsTheNewAutoRetrySourceOfTruth() throws Exception {
+        var paths = setup("ws-outcome-auto");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-outcome-auto", SINGLE_TASK);
+
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.FAILED, Map.of(
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "rate_limited",
+                        "retryPolicy", "AUTO_ALLOWED",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE"
+                ),
+                "auto_retry_count", 0
+        ));
+        setWorkflowStatus(ledger, paths, WorkflowStatus.WAITING_FOR_RECOVERY);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-outcome-auto"));
+
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
+    }
+
+    @Test
     void failedRecoverableRateLimitAllowsFiveRetries() throws Exception {
         var paths = setup("ws-rate-limit");
         var ledger = new WorkflowFileLedger();

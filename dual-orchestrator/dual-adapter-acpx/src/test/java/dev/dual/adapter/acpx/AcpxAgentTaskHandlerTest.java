@@ -69,11 +69,12 @@ class AcpxAgentTaskHandlerTest {
         var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
         assertTrue(Files.exists(runMetadataPath));
         var runMetadata = Files.readString(runMetadataPath);
-        assertTrue(runMetadata.contains("\"schemaVersion\" : 1"));
+        assertTrue(runMetadata.contains("\"schemaVersion\" : 2"));
         assertTrue(runMetadata.contains("\"status\" : \"prepared\""));
         assertTrue(runMetadata.contains("\"nodeId\" : \"design.claude_design\""));
         assertTrue(runMetadata.contains("\"promptPath\" :"));
         assertTrue(runMetadata.contains("\"promptMetadataPath\" :"));
+        assertTrue(runMetadata.contains("\"toolUsage\" : null"));
         var promptMetadataPath = tempDir.resolve(runMetadataPath.getParent().resolve("prompts/design-claude.md.meta.json"));
         assertTrue(Files.exists(promptMetadataPath));
         var promptMetadata = Files.readString(promptMetadataPath);
@@ -152,11 +153,16 @@ class AcpxAgentTaskHandlerTest {
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals(1, result.outputRefs().size());
-        assertTrue(result.outputRefs().get(0).endsWith("intake-claude-brainstorm.md"));
-        assertFalse(result.outputRefs().get(0).endsWith(".transcript.log"));
+        assertEquals("agent_execution_observed", result.outcome());
+        assertEquals(3, result.outputRefs().size());
+        var finalArtifactRef = result.outputRefs().stream()
+                .filter(ref -> ref.endsWith("intake-claude-brainstorm.md"))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith(".transcript.log")));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith(".stderr.log")));
 
-        var outputPath = tempDir.resolve(result.outputRefs().get(0));
+        var outputPath = tempDir.resolve(finalArtifactRef);
         var finalArtifact = Files.readString(outputPath);
         assertTrue(finalArtifact.contains("<dual-artifact type=\"agent_output_contract\">"));
         assertTrue(finalArtifact.contains("decision: READY_FOR_PRODUCT_REVIEW"));
@@ -324,10 +330,10 @@ class AcpxAgentTaskHandlerTest {
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("completed", result.outcome());
+        assertEquals("agent_execution_observed", result.outcome());
         assertEquals(5, result.result().get("exit_code"));
-        assertEquals(true, result.result().get("acpx_exit_tolerated"));
-        assertTrue(result.outputRefs().get(0).endsWith("intake-claude-brainstorm.md"));
+        assertEquals("EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT", result.result().get("process_usability"));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.md")));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
         assertTrue(runMetadata.contains("\"status\" : \"completed\""));
@@ -364,9 +370,9 @@ class AcpxAgentTaskHandlerTest {
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("completed", result.outcome());
+        assertEquals("agent_execution_observed", result.outcome());
         assertEquals(5, result.result().get("exit_code"));
-        assertEquals(true, result.result().get("acpx_recoverable_stderr_ignored"));
+        assertEquals("EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT", result.result().get("process_usability"));
         assertEquals("RECOVERABLE_AGENT_RECONNECT", result.result().get("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
@@ -403,9 +409,10 @@ class AcpxAgentTaskHandlerTest {
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.outcome());
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("agent_execution_observed", result.outcome());
         assertEquals(0, result.result().get("exit_code"));
+        assertEquals("EXITED_ZERO", result.result().get("process_usability"));
         assertEquals(2, result.outputRefs().size());
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.transcript.log")));
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.stderr.log")));
@@ -444,9 +451,10 @@ class AcpxAgentTaskHandlerTest {
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", result.outcome());
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("agent_execution_observed", result.outcome());
         assertEquals(0, result.result().get("exit_code"));
+        assertEquals("INTERRUPTED", result.result().get("process_usability"));
         assertEquals(true, result.result().get("acpx_failure.recoverable"));
         assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", result.result().get("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
@@ -485,7 +493,8 @@ class AcpxAgentTaskHandlerTest {
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals(true, result.result().get("acpx_recoverable_stderr_ignored"));
+        assertEquals("agent_execution_observed", result.outcome());
+        assertEquals("EXITED_ZERO", result.result().get("process_usability"));
         assertEquals("RECOVERABLE_AGENT_RECONNECT", result.result().get("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
