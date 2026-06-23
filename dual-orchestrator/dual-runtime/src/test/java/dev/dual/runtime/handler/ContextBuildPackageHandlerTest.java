@@ -1101,6 +1101,10 @@ class ContextBuildPackageHandlerTest {
         assertEquals(".agent/workstreams/ws-ctx/memory/file-relevance-plan-node-001.json", metadata.get("fileRelevancePlan"));
         assertEquals(".agent/workstreams/ws-ctx/memory/stage-scope-policy-node-001.json", metadata.get("stageScopePolicy"));
         assertEquals(".agent/workstreams/ws-ctx/artifacts/context-governance/node-001.json", metadata.get("contextGovernanceReport"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/workstream-memory.json", metadata.get("workstreamMemory"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/working-set.json", metadata.get("workingSet"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/file-summaries.json", metadata.get("fileSummaries"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/read-reuse-contract.json", metadata.get("readReuseContract"));
 
         var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
         assertEquals("ctx.test", plan.get("builderNodeDefinitionId"));
@@ -1125,6 +1129,30 @@ class ContextBuildPackageHandlerTest {
         assertTrue(policy.get("readReusePolicy") instanceof Map<?, ?> reusePolicy
                         && Boolean.TRUE.equals(reusePolicy.get("preferExistingEvidence")),
                 "stage scope policy should carry read reuse rules as typed data, not only prompt text");
+
+        var workingSet = objectMapper.readValue(wsDir.resolve("memory/working-set.json").toFile(), Map.class);
+        assertEquals("working_set", workingSet.get("artifactType"));
+        assertTrue(workingSet.get("coreFiles") instanceof List<?> coreFiles
+                        && !coreFiles.isEmpty(),
+                "working set should expose bounded core files for the next agent");
+
+        var fileSummaries = objectMapper.readValue(wsDir.resolve("memory/file-summaries.json").toFile(), Map.class);
+        assertEquals("file_summaries", fileSummaries.get("artifactType"));
+        assertTrue(fileSummaries.get("files") instanceof List<?> summaries
+                        && !summaries.isEmpty(),
+                "file summaries should give agents reusable memory before repeated reads");
+
+        var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
+        assertEquals("read_reuse_contract", readReuse.get("artifactType"));
+        assertTrue(readReuse.get("avoidRepeatingReads") instanceof List<?> avoidReads
+                        && !avoidReads.isEmpty(),
+                "read reuse contract should turn repeated-read risks into structured guidance");
+
+        var workstreamMemory = objectMapper.readValue(wsDir.resolve("memory/workstream-memory.json").toFile(), Map.class);
+        assertEquals("workstream_memory", workstreamMemory.get("artifactType"));
+        assertTrue(workstreamMemory.get("refs") instanceof Map<?, ?> refs
+                        && refs.containsKey("readReuseContract"),
+                "workstream memory should index the reusable memory sidecars");
 
         var report = objectMapper.readValue(wsDir.resolve("artifacts/context-governance/node-001.json").toFile(), Map.class);
         assertEquals("planned", report.get("reportPhase"));

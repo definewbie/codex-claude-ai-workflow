@@ -18,11 +18,14 @@ public class AcpxAgentTransport {
     private static final int RECOVERABLE_SIGNAL_EXIT_CODE = 4;
     private static final long STDERR_SIGNAL_POLL_SECONDS = 2;
     private static final long DEFAULT_RECOVERABLE_SIGNAL_GRACE_SECONDS = 30;
-    private static final long DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS = 120;
+    private static final long DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS = 600;
+    private static final long DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS = DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS;
+    private static final long DEFAULT_QUEUE_TTL_SECONDS = 1800;
     private static final long TERMINAL_OUTPUT_GRACE_SECONDS = 2;
     private static final long DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS = 45;
     private static final String RECOVERABLE_SIGNAL_GRACE_ENV = "DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS";
     private static final String AGENT_PROGRESS_TIMEOUT_ENV = "DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS";
+    private static final String QUEUE_TTL_ENV = "DUAL_ACPX_QUEUE_TTL_SECONDS";
     private static final String SESSION_COMMAND_TIMEOUT_ENV = "DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS";
     private static final String API_TIMEOUT_MS_ENV = "API_TIMEOUT_MS";
 
@@ -32,6 +35,7 @@ public class AcpxAgentTransport {
     private final Duration recoverableSignalGrace;
     private final Duration agentProgressTimeout;
     private final Duration sessionCommandTimeout;
+    private final Duration queueTtl;
 
     public AcpxAgentTransport() {
         this("acpx");
@@ -71,6 +75,7 @@ public class AcpxAgentTransport {
         this.recoverableSignalGrace = recoverableSignalGrace;
         this.agentProgressTimeout = agentProgressTimeout;
         this.sessionCommandTimeout = sessionCommandTimeout;
+        this.queueTtl = configuredQueueTtl();
     }
 
     public boolean isAvailable(Path workdir) {
@@ -88,12 +93,18 @@ public class AcpxAgentTransport {
     public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws IOException, InterruptedException {
         var result = run("claude", request);
         if (isMissingSession(request, result)) {
-            if (createSession("claude", request)) {
+            var bootstrap = ensureSession("claude", request);
+            if (bootstrap.success()) {
                 result = run("claude", request);
+            } else {
+                return bootstrap.toRunResult();
             }
         } else if (isReconnectRequired(request, result)) {
-            if (rebuildSession("claude", request)) {
+            var bootstrap = rebuildSession("claude", request);
+            if (bootstrap.success()) {
                 result = run("claude", request);
+            } else {
+                return bootstrap.toRunResult();
             }
         }
         return result;
@@ -102,12 +113,18 @@ public class AcpxAgentTransport {
     public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws IOException, InterruptedException {
         var result = run("codex", request);
         if (isMissingSession(request, result)) {
-            if (createSession("codex", request)) {
+            var bootstrap = ensureSession("codex", request);
+            if (bootstrap.success()) {
                 result = run("codex", request);
+            } else {
+                return bootstrap.toRunResult();
             }
         } else if (isReconnectRequired(request, result)) {
-            if (rebuildSession("codex", request)) {
+            var bootstrap = rebuildSession("codex", request);
+            if (bootstrap.success()) {
                 result = run("codex", request);
+            } else {
+                return bootstrap.toRunResult();
             }
         }
         return result;
@@ -117,7 +134,9 @@ public class AcpxAgentTransport {
         var command = new ArrayList<String>();
         command.add(acpxExecutable);
         command.add("--timeout");
-        command.add("600");
+        command.add(Long.toString(DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS));
+        command.add("--ttl");
+        command.add(Long.toString(queueTtl.toSeconds()));
         if (request.permissionProfile().promptRetries() > 0) {
             command.add("--prompt-retries");
             command.add(Integer.toString(request.permissionProfile().promptRetries()));
@@ -161,25 +180,25 @@ public class AcpxAgentTransport {
         }
     }
 
-    private boolean createSession(String agent, AcpxRunRequest request) throws InterruptedException {
-        var command = List.of(acpxExecutable, agent, "sessions", "new", "--name", request.sessionName());
+    private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
+        var command = List.of(acpxExecutable, agent, "sessions", "ensure", "--name", request.sessionName());
         var result = runSessionCommand(command, request.workdir());
         if (result.success()) {
-            return true;
+            return result;
         }
         appendSessionCommandFailure(
                 request.stderrPath(),
-                "create",
+                "ensure",
                 agent,
                 request.sessionName(),
                 result
         );
-        return false;
+        return result;
     }
 
-    private boolean rebuildSession(String agent, AcpxRunRequest request) throws InterruptedException {
+    private SessionCommandResult rebuildSession(String agent, AcpxRunRequest request) throws InterruptedException {
         closeSession(agent, request);
-        return createSession(agent, request);
+        return ensureSession(agent, request);
     }
 
     private void closeSession(String agent, AcpxRunRequest request) throws InterruptedException {
@@ -198,6 +217,7 @@ public class AcpxAgentTransport {
 
     private SessionCommandResult runSessionCommand(List<String> command, Path workdir) throws InterruptedException {
         Path outputPath = null;
+        var startedAt = Instant.now();
         try {
             outputPath = Files.createTempFile("dual-acpx-session-", ".log");
             var process = new ProcessBuilder(command)
@@ -208,12 +228,12 @@ public class AcpxAgentTransport {
             var completed = process.waitFor(sessionCommandTimeout.toMillis(), TimeUnit.MILLISECONDS);
             if (!completed) {
                 terminateProcessTree(process.toHandle());
-                return new SessionCommandResult(false, true, -1, readFile(outputPath), command);
+                return new SessionCommandResult(false, true, -1, readFile(outputPath), command, startedAt, Instant.now());
             }
             var exitCode = process.exitValue();
-            return new SessionCommandResult(exitCode == 0, false, exitCode, readFile(outputPath), command);
+            return new SessionCommandResult(exitCode == 0, false, exitCode, readFile(outputPath), command, startedAt, Instant.now());
         } catch (IOException e) {
-            return new SessionCommandResult(false, false, -1, e.getMessage(), command);
+            return new SessionCommandResult(false, false, -1, e.getMessage(), command, startedAt, Instant.now());
         } finally {
             if (outputPath != null) {
                 try {
@@ -450,6 +470,13 @@ public class AcpxAgentTransport {
         );
     }
 
+    private static Duration configuredQueueTtl() {
+        return durationFromSecondsEnv(
+                QUEUE_TTL_ENV,
+                Duration.ofSeconds(DEFAULT_QUEUE_TTL_SECONDS)
+        );
+    }
+
     private static Duration durationFromSecondsEnv(String name, Duration fallback) {
         var value = System.getenv(name);
         if (value == null || value.isBlank()) {
@@ -487,7 +514,12 @@ public class AcpxAgentTransport {
             boolean timedOut,
             int exitCode,
             String output,
-            List<String> command
+            List<String> command,
+            Instant startedAt,
+            Instant finishedAt
     ) {
+        AcpxRunResult toRunResult() {
+            return new AcpxRunResult(RECOVERABLE_SIGNAL_EXIT_CODE, startedAt, finishedAt, command);
+        }
     }
 }

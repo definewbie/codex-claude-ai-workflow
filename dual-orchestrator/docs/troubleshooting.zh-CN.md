@@ -55,9 +55,11 @@ runtime 的处理方式：
 - 把 acpx/Claude reconnect 当成 adapter lifecycle signal。
 - 不会因为旧的 reconnect 文案就杀掉仍在工作的 Agent。
 - 如果后续 stream activity 和完整 terminal contract 证明 Agent 仍在推进，会覆盖旧 reconnect 证据。
-- Agent step 默认使用 run-scoped session：
-  `acpx <agent> -s <base>-<run_id> -f <prompt>`。节点上下文来自 prompt、
-  context package 和 ledger，不应该依赖长生命周期 ACP session 记忆。
+- Agent step 默认使用 workstream-scoped session：
+  `acpx <agent> -s <base>-<workstream_id> -f <prompt>`。节点上下文仍来自 prompt、
+  context package 和 ledger；ACP session 只作为同一 workstream 内的执行缓存和连续性辅助。
+- acpx queue owner 属于这个 session lifecycle。Dual 不应该在每个节点结束后杀掉它；
+  清理由 acpx TTL 负责。默认 TTL 是 1800 秒，可通过 `DUAL_ACPX_QUEUE_TTL_SECONDS` 覆盖。
 
 检查：
 
@@ -66,7 +68,7 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 dualctl trace --workdir <effective_workdir> <workstream_id>
 ```
 
-如果旧 run 是在 run-scoped session 之前启动，并卡在 `session/resume`，先停止该 run，再用当前 CLI build 重试。如果 workflow 进入 recovery，先看恢复评估再 retry：
+如果旧 run 使用了已经过时的 session 策略，并卡在 `session/resume`，先停止该 run，再用当前 CLI build 重试。如果 workflow 进入 recovery，先看恢复评估再 retry：
 
 ```bash
 dualctl recovery show --workdir <effective_workdir> <workstream_id>

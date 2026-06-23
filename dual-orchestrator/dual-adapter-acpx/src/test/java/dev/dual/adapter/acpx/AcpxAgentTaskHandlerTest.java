@@ -72,6 +72,7 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"schemaVersion\" : 2"));
         assertTrue(runMetadata.contains("\"status\" : \"prepared\""));
         assertTrue(runMetadata.contains("\"nodeId\" : \"design.claude_design\""));
+        assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-test\""));
         assertTrue(runMetadata.contains("\"promptPath\" :"));
         assertTrue(runMetadata.contains("\"promptMetadataPath\" :"));
         assertTrue(runMetadata.contains("\"toolUsage\" : null"));
@@ -81,6 +82,42 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(promptMetadata.contains("\"artifactType\" : \"prompt\""));
         assertTrue(promptMetadata.contains("\"sha256\" :"));
         assertTrue(promptMetadata.contains("\"byteSize\" :"));
+    }
+
+    @Test
+    void runScopedSessionRemainsOptIn() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
+        var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "session_scope", "run",
+                "prompt_template", "design-claude"
+        ));
+        var instance = new NodeInstance(
+                "node-design",
+                "design.claude_design",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-design",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+        var runMetadata = Files.readString(runMetadataPath);
+        assertTrue(runMetadata.contains("\"session\" : \"claude-main-run-"));
     }
 
     @Test
@@ -463,6 +500,36 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void recordsSessionBootstrapFailureAsAdapterBoundaryFailure() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new SessionBootstrapFailedTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(4, result.result().get("exit_code"));
+        assertEquals("KILLED_AFTER_RECOVERABLE_SIGNAL", result.result().get("process_usability"));
+        assertEquals(true, result.result().get("acpx_failure.recoverable"));
+        assertEquals("RECOVERABLE_SESSION_BOOTSTRAP_FAILED", result.result().get("acpx_failure.reason"));
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_SESSION_BOOTSTRAP_FAILED\""));
+        assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-test\""));
+    }
+
+    @Test
     void completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -838,6 +905,22 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(0, now, now.plusSeconds(605), List.of("acpx", "--timeout", "600", "claude"));
+        }
+    }
+
+    private static final class SessionBootstrapFailedTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "");
+            Files.writeString(request.stderrPath(), """
+
+                    [dual] acpx session ensure failed agent=claude session=claude-main-ws-test timed_out=true exit_code=-1
+                    """);
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(4, now, now.plusSeconds(45), List.of(
+                    "acpx", "claude", "sessions", "ensure", "--name", request.sessionName()
+            ));
         }
     }
 

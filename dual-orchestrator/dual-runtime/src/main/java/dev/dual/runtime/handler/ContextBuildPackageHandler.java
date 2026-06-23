@@ -322,6 +322,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             metadata.put("fileRelevancePlan", toWorkspaceRef(context.workspaceRoot(), governance.fileRelevancePlanPath()));
             metadata.put("stageScopePolicy", toWorkspaceRef(context.workspaceRoot(), governance.stageScopePolicyPath()));
             metadata.put("contextGovernanceReport", toWorkspaceRef(context.workspaceRoot(), governance.governanceReportPath()));
+            metadata.put("workstreamMemory", toWorkspaceRef(context.workspaceRoot(), governance.workstreamMemoryPath()));
+            metadata.put("workingSet", toWorkspaceRef(context.workspaceRoot(), governance.workingSetPath()));
+            metadata.put("fileSummaries", toWorkspaceRef(context.workspaceRoot(), governance.fileSummariesPath()));
+            metadata.put("readReuseContract", toWorkspaceRef(context.workspaceRoot(), governance.readReuseContractPath()));
         }
         OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(metadataPath.toFile(), metadata);
         return metadataPath;

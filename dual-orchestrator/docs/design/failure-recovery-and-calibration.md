@@ -98,13 +98,14 @@ workflow state and it is not a business failure. `Resource not found` is the
 important example: it only means one `session/resume` attempt failed. It does
 not prove that the current Agent execution failed.
 
-The main lifecycle treats each Agent node as an isolated execution with a
-run-scoped session: `acpx <agent> -s <base>-<run_id> -f <prompt>`. The workflow
-context is the prompt, context package, and ledger, not a long-lived ACP
-session. Session resume remains part of the adapter signal model because older
-runs, custom acpx config, or provider wrappers may still surface those
-diagnostics, but dual should not require cross-node session memory for
-correctness.
+The main lifecycle treats each Agent node as an isolated execution, while the
+acpx session is scoped to the workstream by default:
+`acpx <agent> -s <base>-<workstream_id> -f <prompt>`. The workflow context is
+still the prompt, context package, and ledger; the ACP session is only an
+execution-continuity cache inside one workstream. Session resume remains part of
+the adapter signal model because older runs, custom acpx config, or provider
+wrappers may still surface those diagnostics, but dual should not depend on
+hidden session memory for correctness.
 
 The adapter should therefore convert raw logs into a small lifecycle model:
 

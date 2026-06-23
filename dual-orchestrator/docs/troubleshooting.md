@@ -60,10 +60,13 @@ What the runtime does:
 - It does not kill an active run only because an old reconnect line exists.
 - Later stream activity and a complete terminal contract supersede stale
   reconnect evidence.
-- Agent steps use run-scoped sessions by default:
-  `acpx <agent> -s <base>-<run_id> -f <prompt>`. A node should not rely on
-  long-lived ACP session memory; the prompt, context package, and ledger are
-  the source of task context.
+- Agent steps use workstream-scoped sessions by default:
+  `acpx <agent> -s <base>-<workstream_id> -f <prompt>`. The prompt, context
+  package, and ledger remain the source of task context; the ACP session is
+  only an execution-continuity cache inside one workstream.
+- The acpx queue owner is part of that session lifecycle. Dual should not kill
+  it after each node; acpx TTL owns its cleanup. The default TTL is 1800 seconds
+  and can be overridden with `DUAL_ACPX_QUEUE_TTL_SECONDS`.
 
 Check:
 
@@ -72,7 +75,7 @@ dualctl runs --workdir <effective_workdir> <workstream_id>
 dualctl trace --workdir <effective_workdir> <workstream_id>
 ```
 
-If an old run was started before run-scoped sessions and is stuck in `session/resume`, stop that run and retry with the current CLI build. If the
+If an old run was started with an obsolete session strategy and is stuck in `session/resume`, stop that run and retry with the current CLI build. If the
 workflow is in recovery, inspect the recovery assessment before retrying:
 
 ```bash

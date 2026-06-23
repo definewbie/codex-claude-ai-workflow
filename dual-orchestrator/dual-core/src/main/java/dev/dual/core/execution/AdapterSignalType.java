@@ -2,6 +2,7 @@ package dev.dual.core.execution;
 
 public enum AdapterSignalType {
     AGENT_RECONNECT_REQUIRED(AdapterSignalSeverity.RECOVERABLE),
+    SESSION_BOOTSTRAP_FAILED(AdapterSignalSeverity.RECOVERABLE),
     SESSION_RESUME_FAILED(AdapterSignalSeverity.RECOVERABLE),
     SESSION_RECREATED(AdapterSignalSeverity.INFO),
     AUTH_FAILED(AdapterSignalSeverity.BLOCKING),

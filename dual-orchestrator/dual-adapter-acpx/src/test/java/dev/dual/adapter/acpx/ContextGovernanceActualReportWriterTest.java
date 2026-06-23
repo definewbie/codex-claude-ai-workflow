@@ -101,6 +101,13 @@ class ContextGovernanceActualReportWriterTest {
         assertEquals(1, json.get("repeatedReadFiles").get(0).get("previousCount").asInt());
         assertEquals(true, json.get("repeatedReadFiles").get(0).get("evidenceKnown").asBoolean());
         assertEquals(4, json.get("toolUsage").get("toolCallCount").asInt());
+
+        var metrics = objectMapper.readTree(memoryDir.resolve("memory-metrics.json").toFile());
+        assertEquals("memory_metrics", metrics.get("artifactType").asText());
+        assertEquals(2, metrics.get("readCount").asInt());
+        assertEquals(1, metrics.get("repeatedReadCount").asInt());
+        assertEquals(1, metrics.get("allowedRepeatedReadCount").asInt());
+        assertEquals(1, metrics.get("workingSetHitCount").asInt());
     }
 
     @Test

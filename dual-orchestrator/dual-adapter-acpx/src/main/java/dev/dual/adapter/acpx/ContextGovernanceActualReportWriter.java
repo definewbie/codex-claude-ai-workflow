@@ -58,6 +58,7 @@ final class ContextGovernanceActualReportWriter {
         var actualRead = filterRepoFiles(toolUsage.readFiles());
         var actualWrite = filterRepoFiles(toolUsage.writeFiles());
         var evidenceFiles = evidenceFiles(workstreamDir);
+        var repeatedReadFiles = repeatedReads(workstreamDir, runId, actualRead, evidenceFiles);
         var report = new LinkedHashMap<String, Object>();
         report.put("schemaVersion", 1);
         report.put("artifactType", "context_governance_report");
@@ -81,7 +82,7 @@ final class ContextGovernanceActualReportWriter {
         report.put("actualWriteFiles", actualWrite);
         report.put("outsideScopeReads", outsideScope(actualRead, plannedRead));
         report.put("outsideScopeWrites", outsideScope(actualWrite, plannedWrite));
-        report.put("repeatedReadFiles", repeatedReads(workstreamDir, runId, actualRead, evidenceFiles));
+        report.put("repeatedReadFiles", repeatedReadFiles);
         report.put("toolUsage", toolUsage);
         report.put("transcriptPath", relativeOrNull(workspaceRoot, transcriptPath));
         report.put("telemetryPending", false);
@@ -92,7 +93,43 @@ final class ContextGovernanceActualReportWriter {
         var fileName = safeFileName(nodeDefinitionId) + "-actual-" + safeFileName(runId) + ".json";
         var outputPath = outputDir.resolve(fileName);
         OBJECT_MAPPER.writeValue(outputPath.toFile(), report);
+        writeMemoryMetrics(memoryDir, workstreamId, nodeDefinitionId, runId, plannedRead, actualRead, repeatedReadFiles);
         return Optional.of(outputPath);
+    }
+
+    private static void writeMemoryMetrics(
+            Path memoryDir,
+            String workstreamId,
+            String nodeDefinitionId,
+            String runId,
+            List<String> plannedRead,
+            List<String> actualRead,
+            List<Map<String, Object>> repeatedReadFiles
+    ) throws IOException {
+        Files.createDirectories(memoryDir);
+        var uniqueRead = new LinkedHashSet<>(actualRead);
+        var planned = new LinkedHashSet<>(plannedRead);
+        var repeatedReadCount = repeatedReadFiles.size();
+        var allowedRepeatedReadCount = repeatedReadFiles.stream()
+                .filter(item -> Boolean.TRUE.equals(item.get("evidenceKnown")))
+                .count();
+        var workingSetHitCount = actualRead.stream().filter(planned::contains).count();
+
+        var document = new LinkedHashMap<String, Object>();
+        document.put("schemaVersion", 1);
+        document.put("artifactType", "memory_metrics");
+        document.put("workstreamId", workstreamId);
+        document.put("nodeDefinitionId", nodeDefinitionId);
+        document.put("runId", runId);
+        document.put("readCount", actualRead.size());
+        document.put("uniqueReadCount", uniqueRead.size());
+        document.put("repeatedReadCount", repeatedReadCount);
+        document.put("allowedRepeatedReadCount", allowedRepeatedReadCount);
+        document.put("unexplainedRepeatedReadCount", Math.max(0, repeatedReadCount - (int) allowedRepeatedReadCount));
+        document.put("workingSetHitCount", workingSetHitCount);
+        document.put("workingSetHitRate", actualRead.isEmpty() ? 0.0 : (double) workingSetHitCount / actualRead.size());
+        document.put("generatedAt", Instant.now().toString());
+        OBJECT_MAPPER.writeValue(memoryDir.resolve("memory-metrics.json").toFile(), document);
     }
 
     private static Optional<JsonNode> latestDocument(Path dir, String prefix, String nodeDefinitionId) throws IOException {

@@ -56,7 +56,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var configuredSession = configText(context, "session");
         var promptTemplate = configText(context, "prompt_template");
         var runId = "run-" + Instant.now().toEpochMilli();
-        var session = configuredSession + "-" + runId;
+        var session = sessionName(context, configuredSession, runId);
         var runDir = context.workspaceRoot()
                 .resolve(".agent")
                 .resolve("workstreams")
@@ -153,6 +153,26 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             throw new IllegalArgumentException("config " + key + " is required for " + context.definition().id());
         }
         return text;
+    }
+
+    private static String sessionName(TaskContext context, String configuredSession, String runId) {
+        var value = context.definition().config().getOrDefault("session_scope", "workstream");
+        var scope = value instanceof String text ? text.trim() : String.valueOf(value).trim();
+        if ("run".equals(scope)) {
+            return configuredSession + "-" + runId;
+        }
+        if (!"workstream".equals(scope)) {
+            throw new IllegalArgumentException("unsupported acpx session_scope: " + scope);
+        }
+        return configuredSession + "-" + safeSessionPart(context.workstreamId());
+    }
+
+    private static String safeSessionPart(String value) {
+        var safe = value == null ? "" : value.replaceAll("[^A-Za-z0-9_.-]", "-");
+        if (safe.isBlank()) {
+            return "workstream";
+        }
+        return safe.length() <= 80 ? safe : safe.substring(0, 80);
     }
 
     private static boolean approveAll(TaskContext context) {

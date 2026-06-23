@@ -32,7 +32,7 @@ class AcpxProcessCleanupPolicyTest {
                 new AcpxProcessCleanupPolicy.ProcessInfo(205L, "pyright-langserver --stdio"),
                 knownBefore
         ));
-        assertTrue(AcpxProcessCleanupPolicy.shouldCleanup(
+        assertFalse(AcpxProcessCleanupPolicy.shouldCleanup(
                 new AcpxProcessCleanupPolicy.ProcessInfo(206L, "/usr/local/bin/node /Users/me/.nvm/versions/node/v22/lib/node_modules/acpx/dist/cli.js __queue-owner"),
                 knownBefore
         ));

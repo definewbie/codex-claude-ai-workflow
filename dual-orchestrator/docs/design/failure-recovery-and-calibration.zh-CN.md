@@ -67,11 +67,12 @@ permission blocked 这类文本都只是外部 adapter 观察到的运行时信�
 workflow 状态，也不是业务失败。尤其是 `Resource not found`：它只能说明某次
 `session/resume` 失败，不能直接说明当前 Agent execution 已失败。
 
-主生命周期把每个 Agent 节点视为一次隔离 execution，并使用 run-scoped session：
-`acpx <agent> -s <base>-<run_id> -f <prompt>`。workflow 上下文来自 prompt、
-context package 和 ledger，而不是长生命周期 ACP session 记忆。session resume
-仍然属于 adapter 信号模型，因为旧 run、自定义 acpx 配置或 provider wrapper
-仍可能暴露这类诊断；但 dual 的正确性不应依赖跨节点 session memory。
+主生命周期把每个 Agent 节点视为一次隔离 execution，但 acpx session 默认绑定到
+workstream：
+`acpx <agent> -s <base>-<workstream_id> -f <prompt>`。workflow 上下文仍来自
+prompt、context package 和 ledger；ACP session 只是同一 workstream 内的执行连续性缓存。
+session resume 仍然属于 adapter 信号模型，因为旧 run、自定义 acpx 配置或 provider
+wrapper 仍可能暴露这类诊断；但 dual 的正确性不应依赖隐藏 session memory。
 
 因此 adapter 层需要把原始日志转换为更明确的模型：
 

@@ -87,6 +87,17 @@ final class AcpxFailureSignalCatalog {
                         "tool_use_error>cancelled"
                 ),
                 signal(
+                        "session_bootstrap_failed",
+                        AcpxFailureReason.SESSION_BOOTSTRAP_FAILED,
+                        82,
+                        "acpx session bootstrap failed; inspect the session command evidence, then fix acpx/session environment and retry",
+                        true,
+                        false,
+                        "acpx session ensure failed",
+                        "acpx session new failed",
+                        "acpx session close failed"
+                ),
+                signal(
                         "session_missing",
                         AcpxFailureReason.SESSION_MISSING,
                         80,

@@ -162,6 +162,9 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent needs reconnect" >&2
                 cat > "__STREAM__" <<'EOF'
                 {"jsonrpc":"2.0","id":1,"method":"session/new","params":{}}
@@ -227,17 +230,17 @@ class AcpxAgentTransportTest {
                   echo "closed" >> "__STATE__"
                   exit 0
                 fi
-                if [ "$2" = "sessions" ] && [ "$3" = "new" ]; then
-                  echo "new" >> "__STATE__"
+                if [ "$2" = "sessions" ] && [ "$3" = "ensure" ]; then
+                  echo "ensured" >> "__STATE__"
                   exit 0
                 fi
-                if [ ! -f "__STATE__" ]; then
+                if ! grep -q "failed" "__STATE__" 2>/dev/null; then
                   echo "agent needs reconnect" >&2
                   echo "[client] initialize (running)"
                   echo "[client] session/new (running)"
                   echo "[done] cancelled"
                   echo "[error] RUNTIME: Interrupted"
-                  touch "__STATE__"
+                  echo "failed" >> "__STATE__"
                   exit 4
                 fi
                 echo "ACPX_AFTER_RECONNECT"
@@ -266,25 +269,31 @@ class AcpxAgentTransportTest {
         assertTrue(Files.readString(stdout).contains("ACPX_AFTER_RECONNECT"));
         var args = Files.readString(argsLog);
         assertTrue(args.contains("codex sessions close codex-reviewer"));
-        assertTrue(args.contains("codex sessions new --name codex-reviewer"));
+        assertTrue(args.contains("codex sessions ensure --name codex-reviewer"));
     }
 
     @Test
-    void doesNotHangWhenSessionCreationDoesNotReturn() throws Exception {
+    void boundsSessionBootstrapAfterSessionMissing() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-session-new-hangs.sh");
+        var state = tempDir.resolve("state.txt");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ] && [ "$3" = "new" ]; then
-                  echo "creating session"
+                if [ "$2" = "sessions" ] && [ "$3" = "ensure" ]; then
+                  echo "ensuring session"
                   sleep 20
                   exit 0
                 fi
-                echo "⚠ No acpx session found" >&2
+                if [ -f "__STATE__" ]; then
+                  echo "SECOND_MAIN_AGENT_SHOULD_NOT_RUN" >&2
+                  exit 4
+                fi
+                touch "__STATE__"
+                echo "No acpx session found" >&2
                 exit 4
-                """, StandardCharsets.UTF_8);
+                """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -311,8 +320,9 @@ class AcpxAgentTransportTest {
         assertEquals(4, result.exitCode());
         assertTrue(elapsedMs < 8_000, "session bootstrap must be bounded");
         var stderrText = Files.readString(stderr);
-        assertTrue(stderrText.contains("No acpx session found"));
-        assertTrue(stderrText.contains("[dual] acpx session create failed"));
+        assertTrue(stderrText.contains("No acpx session found"), stderrText);
+        assertFalse(stderrText.contains("SECOND_MAIN_AGENT_SHOULD_NOT_RUN"), stderrText);
+        assertTrue(stderrText.contains("[dual] acpx session ensure failed"));
         assertTrue(stderrText.contains("timed_out=true"));
     }
 
@@ -563,6 +573,9 @@ class AcpxAgentTransportTest {
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
                 if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
                   exit 0
                 fi
                 cat <<'EOF'

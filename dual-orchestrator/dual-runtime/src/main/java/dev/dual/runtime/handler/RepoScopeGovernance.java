@@ -55,6 +55,9 @@ final class RepoScopeGovernance {
         var plan = buildFileRelevancePlan(workspaceRoot, workstreamDir, context, manifest, repoMap, objectMapper, stageId, targetNodeDefinitionId);
         var policy = buildStageScopePolicy(context, stageId, plan, targetNodeDefinitionId);
         var report = buildInitialReport(context, stageId, plan, policy, targetNodeDefinitionId);
+        var workingSet = buildWorkingSet(context, stageId, plan, policy, targetNodeDefinitionId);
+        var fileSummaries = buildFileSummaries(context, stageId, workingSet);
+        var readReuseContract = buildReadReuseContract(context, stageId, plan, policy, targetNodeDefinitionId);
 
         var memoryDir = workstreamDir.resolve("memory");
         var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
@@ -65,14 +68,49 @@ final class RepoScopeGovernance {
         var repoMapPath = memoryDir.resolve("repo-map.json");
         var planPath = memoryDir.resolve("file-relevance-plan-" + nodeKey + ".json");
         var policyPath = memoryDir.resolve("stage-scope-policy-" + nodeKey + ".json");
+        var workingSetPath = memoryDir.resolve("working-set.json");
+        var fileSummariesPath = memoryDir.resolve("file-summaries.json");
+        var readReuseContractPath = memoryDir.resolve("read-reuse-contract.json");
+        var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
         var reportPath = governanceDir.resolve(nodeKey + ".json");
+        var workstreamMemory = buildWorkstreamMemory(
+                context,
+                workspaceRoot,
+                stageId,
+                repoMapPath,
+                planPath,
+                policyPath,
+                workingSetPath,
+                fileSummariesPath,
+                readReuseContractPath
+        );
 
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(repoMapPath.toFile(), repoMap);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(planPath.toFile(), plan);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(policyPath.toFile(), policy);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(workingSetPath.toFile(), workingSet);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(fileSummariesPath.toFile(), fileSummaries);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(readReuseContractPath.toFile(), readReuseContract);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(workstreamMemoryPath.toFile(), workstreamMemory);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(reportPath.toFile(), report);
 
-        return new Documents(repoMap, plan, policy, report, repoMapPath, planPath, policyPath, reportPath);
+        return new Documents(
+                repoMap,
+                plan,
+                policy,
+                report,
+                workingSet,
+                fileSummaries,
+                readReuseContract,
+                repoMapPath,
+                planPath,
+                policyPath,
+                reportPath,
+                workingSetPath,
+                fileSummariesPath,
+                readReuseContractPath,
+                workstreamMemoryPath
+        );
     }
 
     static void appendMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot) {
@@ -86,6 +124,10 @@ final class RepoScopeGovernance {
         builder.append("- Repo map: ").append(ref(workspaceRoot, documents.repoMapPath())).append("\n");
         builder.append("- File relevance plan: ").append(ref(workspaceRoot, documents.fileRelevancePlanPath())).append("\n");
         builder.append("- Stage scope policy: ").append(ref(workspaceRoot, documents.stageScopePolicyPath())).append("\n");
+        builder.append("- Workstream memory: ").append(ref(workspaceRoot, documents.workstreamMemoryPath())).append("\n");
+        builder.append("- Working set: ").append(ref(workspaceRoot, documents.workingSetPath())).append("\n");
+        builder.append("- File summaries: ").append(ref(workspaceRoot, documents.fileSummariesPath())).append("\n");
+        builder.append("- Read reuse contract: ").append(ref(workspaceRoot, documents.readReuseContractPath())).append("\n");
         builder.append("- Governance report: ").append(ref(workspaceRoot, documents.governanceReportPath())).append("\n\n");
         appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 8);
         appendPathList(builder, "Allowed write files", textList(documents.policy().get("writeScope")), 8);
@@ -247,6 +289,155 @@ final class RepoScopeGovernance {
         report.put("telemetryPending", true);
         report.put("generatedAt", Instant.now().toString());
         return report;
+    }
+
+    private static Map<String, Object> buildWorkingSet(
+            TaskHandler.TaskContext context,
+            String stageId,
+            Map<String, Object> plan,
+            Map<String, Object> policy,
+            String targetNodeDefinitionId
+    ) {
+        var repeatedByPath = new LinkedHashMap<String, Map<String, Object>>();
+        for (var item : mapList(plan.get("repeatedReadAvoidance"))) {
+            var path = text(item.get("path"));
+            if (!path.isBlank()) {
+                repeatedByPath.put(path, item);
+            }
+        }
+
+        var coreFiles = new ArrayList<Map<String, Object>>();
+        var supportingFiles = new ArrayList<Map<String, Object>>();
+        for (var path : textList(plan.get("readCandidates"))) {
+            var file = memoryFile(path, repeatedByPath.get(path), "Read candidate from task contract, evidence, git, or repo map.");
+            if (coreFiles.size() < 12) {
+                coreFiles.add(file);
+            } else {
+                supportingFiles.add(file);
+            }
+        }
+
+        var document = new LinkedHashMap<String, Object>();
+        document.put("schemaVersion", 1);
+        document.put("artifactType", "working_set");
+        document.put("workstreamId", context.workstreamId());
+        document.put("stageId", stageId);
+        document.put("nodeInstanceId", context.instance().nodeInstanceId());
+        document.put("nodeDefinitionId", context.definition().id());
+        document.put("targetNodeDefinitionId", targetNodeDefinitionId);
+        document.put("iterationId", context.instance().iterationId());
+        document.put("coreFiles", coreFiles);
+        document.put("supportingFiles", supportingFiles);
+        document.put("allowedWriteFiles", textList(policy.get("writeScope")));
+        document.put("forbiddenScope", textList(policy.get("forbiddenScope")));
+        document.put("generatedAt", Instant.now().toString());
+        return document;
+    }
+
+    private static Map<String, Object> buildFileSummaries(
+            TaskHandler.TaskContext context,
+            String stageId,
+            Map<String, Object> workingSet
+    ) {
+        var files = new ArrayList<Map<String, Object>>();
+        for (var item : mapList(workingSet.get("coreFiles"))) {
+            files.add(fileSummary(item, "core"));
+        }
+        for (var item : mapList(workingSet.get("supportingFiles"))) {
+            files.add(fileSummary(item, "supporting"));
+        }
+
+        var document = new LinkedHashMap<String, Object>();
+        document.put("schemaVersion", 1);
+        document.put("artifactType", "file_summaries");
+        document.put("workstreamId", context.workstreamId());
+        document.put("stageId", stageId);
+        document.put("nodeInstanceId", context.instance().nodeInstanceId());
+        document.put("iterationId", context.instance().iterationId());
+        document.put("files", files);
+        document.put("generatedAt", Instant.now().toString());
+        return document;
+    }
+
+    private static Map<String, Object> buildReadReuseContract(
+            TaskHandler.TaskContext context,
+            String stageId,
+            Map<String, Object> plan,
+            Map<String, Object> policy,
+            String targetNodeDefinitionId
+    ) {
+        var reusePolicy = mapValue(policy.get("readReusePolicy"));
+        var repeated = mapList(plan.get("repeatedReadAvoidance"));
+        var document = new LinkedHashMap<String, Object>();
+        document.put("schemaVersion", 1);
+        document.put("artifactType", "read_reuse_contract");
+        document.put("workstreamId", context.workstreamId());
+        document.put("stageId", stageId);
+        document.put("nodeInstanceId", context.instance().nodeInstanceId());
+        document.put("nodeDefinitionId", context.definition().id());
+        document.put("targetNodeDefinitionId", targetNodeDefinitionId);
+        document.put("iterationId", context.instance().iterationId());
+        document.put("preferExistingEvidence", true);
+        document.put("avoidRepeatingReads", repeated);
+        document.put("allowedRepeatedReadReasons", List.of(
+                "file changed after prior read",
+                "exact current content is needed before editing",
+                "previous evidence does not cover the selected stage"
+        ));
+        document.put("requireReasonWhenRereading", reusePolicy.getOrDefault("requireReasonWhenRereading", true));
+        document.put("reasonField", reusePolicy.getOrDefault("reasonField", "verification_summary or scope_expansion_reason"));
+        document.put("generatedAt", Instant.now().toString());
+        return document;
+    }
+
+    private static Map<String, Object> buildWorkstreamMemory(
+            TaskHandler.TaskContext context,
+            Path workspaceRoot,
+            String stageId,
+            Path repoMapPath,
+            Path planPath,
+            Path policyPath,
+            Path workingSetPath,
+            Path fileSummariesPath,
+            Path readReuseContractPath
+    ) {
+        var document = new LinkedHashMap<String, Object>();
+        document.put("schemaVersion", 1);
+        document.put("artifactType", "workstream_memory");
+        document.put("workstreamId", context.workstreamId());
+        document.put("stageId", stageId);
+        document.put("nodeInstanceId", context.instance().nodeInstanceId());
+        document.put("iterationId", context.instance().iterationId());
+        document.put("refs", Map.of(
+                "repoMap", ref(workspaceRoot, repoMapPath),
+                "fileRelevancePlan", ref(workspaceRoot, planPath),
+                "stageScopePolicy", ref(workspaceRoot, policyPath),
+                "workingSet", ref(workspaceRoot, workingSetPath),
+                "fileSummaries", ref(workspaceRoot, fileSummariesPath),
+                "readReuseContract", ref(workspaceRoot, readReuseContractPath)
+        ));
+        document.put("generatedAt", Instant.now().toString());
+        return document;
+    }
+
+    private static Map<String, Object> memoryFile(String path, Map<String, Object> repeatedRead, String reason) {
+        var file = new LinkedHashMap<String, Object>();
+        file.put("path", path);
+        file.put("reason", reason);
+        file.put("previousReadCount", intValue(repeatedRead == null ? null : repeatedRead.get("previousCount")));
+        file.put("evidenceKnown", repeatedRead != null && Boolean.TRUE.equals(repeatedRead.get("evidenceKnown")));
+        return file;
+    }
+
+    private static Map<String, Object> fileSummary(Map<String, Object> item, String relevance) {
+        var summary = new LinkedHashMap<String, Object>();
+        summary.put("path", text(item.get("path")));
+        summary.put("taskRelevance", relevance);
+        summary.put("summary", "Task-relevant file. Reuse existing evidence before re-reading.");
+        summary.put("previousReadCount", intValue(item.get("previousReadCount")));
+        summary.put("evidenceKnown", Boolean.TRUE.equals(item.get("evidenceKnown")));
+        summary.put("staleness", "unknown");
+        return summary;
     }
 
     private static void addInputRefs(Set<String> candidates, TaskHandler.TaskContext context) {
@@ -634,15 +825,33 @@ final class RepoScopeGovernance {
         return value == null ? "" : String.valueOf(value).trim();
     }
 
+    private static int intValue(Object value) {
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(text(value));
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
     record Documents(
             Map<String, Object> repoMap,
             Map<String, Object> plan,
             Map<String, Object> policy,
             Map<String, Object> report,
+            Map<String, Object> workingSet,
+            Map<String, Object> fileSummaries,
+            Map<String, Object> readReuseContract,
             Path repoMapPath,
             Path fileRelevancePlanPath,
             Path stageScopePolicyPath,
-            Path governanceReportPath
+            Path governanceReportPath,
+            Path workingSetPath,
+            Path fileSummariesPath,
+            Path readReuseContractPath,
+            Path workstreamMemoryPath
     ) {
     }
 }
