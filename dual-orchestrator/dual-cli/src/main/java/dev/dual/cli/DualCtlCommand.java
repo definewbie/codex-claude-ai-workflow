@@ -29,6 +29,7 @@ import picocli.CommandLine.Command;
                 CompleteCommand.class,
                 RetryCommand.class,
                 RecoveryCommand.class,
+                SessionsReapCommand.class,
                 CalibrationCommand.class,
                 ReviewCommand.class,
                 WorkflowCommand.class

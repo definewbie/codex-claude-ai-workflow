@@ -1,5 +1,7 @@
 package dev.dual.server;
 
+import dev.dual.adapter.acpx.AcpxSessionLifecycle;
+import dev.dual.adapter.acpx.WorkstreamSessionCloser;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.LockOwner;
@@ -30,15 +32,37 @@ public class WorkstreamActionService {
 
     private final WorkflowFileLedger ledger;
     private final Supplier<WorkflowResumer> resumerFactory;
+    private final WorkstreamSessionCloser sessionCloser;
 
     @Autowired
     public WorkstreamActionService(ServerWorkflowRuntimeFactory runtimeFactory) {
-        this(ServerLedgerFactory.create(), runtimeFactory::create);
+        this(ServerLedgerFactory.create(), runtimeFactory::create, new AcpxSessionLifecycle());
     }
 
     WorkstreamActionService(WorkflowFileLedger ledger, Supplier<WorkflowResumer> resumerFactory) {
+        this(ledger, resumerFactory, WorkstreamSessionCloser.noop());
+    }
+
+    WorkstreamActionService(WorkflowFileLedger ledger, Supplier<WorkflowResumer> resumerFactory,
+                            WorkstreamSessionCloser sessionCloser) {
         this.ledger = ledger;
         this.resumerFactory = resumerFactory;
+        this.sessionCloser = sessionCloser == null ? WorkstreamSessionCloser.noop() : sessionCloser;
+    }
+
+    /**
+     * P0: 当 workstream 处于终态（COMPLETED / FAILED）时，best-effort 关闭其 acpx session。
+     * 永不影响 workflow 主状态：任何异常都被吞掉（closer 自身也不抛）。
+     */
+    private void maybeCloseTerminalSessions(Path root, String workstreamId) {
+        try {
+            var status = ledger.loadCurrent(paths(root, workstreamId)).status();
+            if (status == WorkflowStatus.COMPLETED || status == WorkflowStatus.FAILED) {
+                sessionCloser.closeWorkstreamSessions(root, workstreamId);
+            }
+        } catch (Exception ignored) {
+            // session cleanup must never affect the workflow's terminal status or the action result
+        }
     }
 
     public Map<String, Object> resume(Path workspaceRoot, String workstreamId, int maxSteps) throws Exception {
@@ -47,7 +71,9 @@ public class WorkstreamActionService {
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api resume"))) {
             assertResumable(paths, "resume");
-            return runLoop(root, workstreamId, maxSteps);
+            var response = runLoop(root, workstreamId, maxSteps);
+            maybeCloseTerminalSessions(root, workstreamId);
+            return response;
         }
     }
 
@@ -58,6 +84,7 @@ public class WorkstreamActionService {
             assertNotCompleted(paths, "retry");
             ledger.retryActiveNode(paths, note);
         }
+        maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("retry", workstreamId, "active node marked ready for retry");
     }
 
@@ -67,6 +94,7 @@ public class WorkstreamActionService {
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery stale"))) {
             ledger.recoverStaleRunningNode(paths, note);
         }
+        maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("recovery.stale", workstreamId, "stale running node moved to recovery");
     }
 
@@ -76,6 +104,7 @@ public class WorkstreamActionService {
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery close mistaken iteration"))) {
             ledger.closeMistakenIteration(paths, note);
         }
+        maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("recovery.close_mistaken_iteration", workstreamId, "mistaken iteration closed");
     }
 
@@ -87,12 +116,14 @@ public class WorkstreamActionService {
             response.put("action", "review.approve.run");
             return response;
         }
+        maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("review.approve", workstreamId, "human gate approved");
     }
 
     public Map<String, Object> complete(Path workspaceRoot, String workstreamId, String note) throws Exception {
         var root = normalize(workspaceRoot);
         resolveGate(root, workstreamId, "complete", note == null || note.isBlank() ? "completed from API" : note);
+        maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("review.complete", workstreamId, "human gate completed");
     }
 
@@ -108,6 +139,7 @@ public class WorkstreamActionService {
             response.put("action", "review.revise.run");
             return response;
         }
+        maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("review.revise", workstreamId, "human gate revision requested");
     }
 

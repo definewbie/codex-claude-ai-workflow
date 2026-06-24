@@ -20,11 +20,11 @@ public final class ResumeCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
-    @Option(names = "--claude-session", description = "acpx Claude session name.")
-    String claudeSession = "claude-main";
-
-    @Option(names = "--codex-session", description = "acpx Codex session name.")
-    String codexSession = "codex-reviewer";
+    // Note: there used to be --claude-session / --codex-session options here. They were dead
+    // (never passed to the runtime) and their bare defaults ("claude-main" / "codex-reviewer")
+    // were misleading — real session names are always workstream-scoped, generated inside
+    // AcpxAgentTaskHandler. Removed in P0 session governance; do not re-add bare session-name
+    // CLI options.
 
     @Parameters(index = "0")
     String workstreamId;

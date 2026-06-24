@@ -1,5 +1,6 @@
 package dev.dual.server;
 
+import dev.dual.adapter.acpx.WorkstreamSessionCloser;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
@@ -16,11 +17,13 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorkstreamActionServiceTest {
     @TempDir
@@ -137,6 +140,68 @@ class WorkstreamActionServiceTest {
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         assertEquals(NodeStatus.READY, node.status());
         assertEquals("try again", node.result().get("retry_note"));
+    }
+
+    @Test
+    void closesAcpxSessionsWhenActionReachesCompleted() throws Exception {
+        var paths = createWorkstream("ws-close-completed", completeGateDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var closed = new ArrayList<String>();
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"),
+                recordingCloser(closed));
+
+        service.complete(tempDir, "ws-close-completed", "done");
+
+        assertEquals(List.of("ws-close-completed"), closed);
+    }
+
+    @Test
+    void doesNotCloseSessionsWhenWorkflowNotTerminal() throws Exception {
+        createWorkstream("ws-not-terminal", simpleDefinition());
+        var closed = new ArrayList<String>();
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused"),
+                recordingCloser(closed));
+
+        service.resume(tempDir, "ws-not-terminal", 3);
+
+        assertTrue(closed.isEmpty());
+    }
+
+    @Test
+    void sessionCloseFailureDoesNotChangeWorkflowTerminalStatus() throws Exception {
+        var paths = createWorkstream("ws-close-failure", completeGateDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"),
+                throwingCloser());
+
+        var response = service.complete(tempDir, "ws-close-failure", "done");
+
+        assertEquals("review.complete", response.get("action"));
+        assertEquals(WorkflowStatus.COMPLETED, ledger.loadCurrent(paths).status());
+    }
+
+    private static WorkstreamSessionCloser recordingCloser(List<String> sink) {
+        return (root, workstreamId) -> {
+            sink.add(workstreamId);
+            return new WorkstreamSessionCloser.CloseSummary(workstreamId, 0, 0, 0);
+        };
+    }
+
+    private static WorkstreamSessionCloser throwingCloser() {
+        return (root, workstreamId) -> {
+            throw new RuntimeException("simulated acpx close failure");
+        };
     }
 
     private WorkstreamPaths createWorkstream(String workstreamId, WorkflowDefinition definition) throws Exception {

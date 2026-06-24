@@ -215,6 +215,30 @@ public class AcpxAgentTransport {
         }
     }
 
+    /**
+     * Close an acpx provider session by name. P0 session-lifecycle cleanup entry
+     * point for the workflow/service layer: <b>never throws</b>, returns false on
+     * any failure so callers can treat cleanup as best-effort without affecting
+     * workflow status. Does not delete on-disk session files; only invokes
+     * {@code acpx <agent> sessions close <sessionName>}.
+     */
+    public boolean closeSession(String agent, Path workdir, String sessionName) {
+        if (agent == null || agent.isBlank() || sessionName == null || sessionName.isBlank()) {
+            return false;
+        }
+        try {
+            return runSessionCommand(
+                    List.of(acpxExecutable, agent, "sessions", "close", sessionName),
+                    workdir
+            ).success();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
     private SessionCommandResult runSessionCommand(List<String> command, Path workdir) throws InterruptedException {
         Path outputPath = null;
         var startedAt = Instant.now();
