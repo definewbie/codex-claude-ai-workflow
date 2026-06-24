@@ -118,8 +118,16 @@ public final class RunsCommand implements Callable<Integer> {
         return switch (field) {
             case INPUT -> Long.toString(usage.inputTokens());
             case OUTPUT -> Long.toString(usage.outputTokens());
-            case TOTAL -> Long.toString(usage.totalTokens());
+            case TOTAL -> isSessionSnapshot(usage)
+                    ? "ctx:" + usage.contextUsedTokens()
+                    : Long.toString(usage.totalTokens());
         };
+    }
+
+    private boolean isSessionSnapshot(RunMetadata.RunUsage usage) {
+        return usage != null
+                && ("SESSION_USED_SNAPSHOT".equals(usage.measurementType())
+                || "acpx_usage_update".equals(usage.source()));
     }
 
     private String cost(RunMetadata.RunUsage usage) {
