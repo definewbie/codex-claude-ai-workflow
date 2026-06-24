@@ -52,7 +52,13 @@ record RunMetadata(
             long totalTokens,
             BigDecimal costAmount,
             String costCurrency,
-            String source
+            String source,
+            String measurementType,
+            String attribution,
+            Boolean cumulative,
+            long contextUsedTokens,
+            BigDecimal sessionCostAmount,
+            String sessionCostCurrency
     ) {
     }
 }

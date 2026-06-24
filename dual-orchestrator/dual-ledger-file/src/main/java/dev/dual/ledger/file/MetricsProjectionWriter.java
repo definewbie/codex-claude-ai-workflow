@@ -152,6 +152,7 @@ final class MetricsProjectionWriter {
             return Map.of(
                     "runCount", 0,
                     "measuredRunCount", 0,
+                    "sessionSnapshotRunCount", 0,
                     "total", new UsageMetric().toMap(),
                     "byAgent", Map.of(),
                     "byNode", Map.of(),
@@ -159,6 +160,7 @@ final class MetricsProjectionWriter {
             );
         }
         var total = new UsageMetric();
+        var estimatedTotal = new UsageMetric();
         var byAgent = new LinkedHashMap<String, UsageMetric>();
         var byNode = new LinkedHashMap<String, UsageMetric>();
         var runs = new ArrayList<Map<String, Object>>();
@@ -166,6 +168,7 @@ final class MetricsProjectionWriter {
         long runCount = 0;
         long measuredRunCount = 0;
         long estimatedRunCount = 0;
+        long sessionSnapshotRunCount = 0;
         try (var stream = Files.list(paths.runsDir())) {
             for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
                 var runJson = runDir.resolve("run.json");
@@ -193,7 +196,11 @@ final class MetricsProjectionWriter {
                     usage = estimatedUsage(paths, run);
                     estimated = !usage.isEmpty();
                 } else {
-                    measuredRunCount++;
+                    if (isSessionSnapshot(usage)) {
+                        sessionSnapshotRunCount++;
+                    } else {
+                        measuredRunCount++;
+                    }
                 }
                 if (usage.isEmpty()) {
                     item.put("measured", false);
@@ -203,13 +210,22 @@ final class MetricsProjectionWriter {
                         estimatedRunCount++;
                     }
                     var metric = UsageMetric.from(usage);
-                    total.add(metric);
-                    byAgent.computeIfAbsent(agent, ignored -> new UsageMetric()).add(metric);
-                    byNode.computeIfAbsent(nodeId, ignored -> new UsageMetric()).add(metric);
+                    var aggregatable = isAggregatableUsage(usage);
+                    if (aggregatable) {
+                        total.add(metric);
+                        byAgent.computeIfAbsent(agent, ignored -> new UsageMetric()).add(metric);
+                        byNode.computeIfAbsent(nodeId, ignored -> new UsageMetric()).add(metric);
+                    } else if (estimated) {
+                        estimatedTotal.add(metric);
+                    }
                     item.put("measured", !estimated);
                     item.put("estimated", estimated);
+                    item.put("aggregated", aggregatable);
                     var usageMap = metric.toMap();
                     usageMap.put("source", nonBlank(text(usage.get("source")), estimated ? "artifact_estimate" : "acpx_stream"));
+                    usageMap.put("measurementType", measurementType(usage, estimated));
+                    usageMap.put("attribution", nonBlank(text(usage.get("attribution")), estimated ? "ARTIFACT_ESTIMATE" : ""));
+                    usageMap.put("cumulative", Boolean.TRUE.equals(usage.get("cumulative")));
                     item.put("usage", usageMap);
                     item.put("breakdown", promptBreakdown(
                             promptTokens,
@@ -226,7 +242,9 @@ final class MetricsProjectionWriter {
         result.put("runCount", runCount);
         result.put("measuredRunCount", measuredRunCount);
         result.put("estimatedRunCount", estimatedRunCount);
+        result.put("sessionSnapshotRunCount", sessionSnapshotRunCount);
         result.put("total", total.toMap());
+        result.put("estimatedTotal", estimatedTotal.toMap());
         result.put("byAgent", usageMap(byAgent));
         result.put("byNode", usageMap(byNode));
         result.put("runs", runs);
@@ -453,7 +471,35 @@ final class MetricsProjectionWriter {
         usage.put("cachedWriteTokens", 0L);
         usage.put("totalTokens", promptTokens + outputTokens);
         usage.put("source", "artifact_estimate");
+        usage.put("measurementType", "ARTIFACT_ESTIMATE");
+        usage.put("cumulative", false);
+        usage.put("contextUsedTokens", 0L);
         return usage;
+    }
+
+    private boolean isAggregatableUsage(Map<String, Object> usage) {
+        // 只有 provider run usage 可以加总。session snapshot 是会话累计值、artifact
+        // estimate 是文件大小估算，二者都不能混进 total/byAgent/byNode。
+        return "PROVIDER_RUN_USAGE".equals(measurementType(usage, false));
+    }
+
+    private boolean isSessionSnapshot(Map<String, Object> usage) {
+        var type = text(usage.get("measurementType"));
+        return "SESSION_USED_SNAPSHOT".equals(type) || "acpx_usage_update".equals(text(usage.get("source")));
+    }
+
+    private String measurementType(Map<String, Object> usage, boolean estimated) {
+        var type = text(usage.get("measurementType"));
+        if (!type.isBlank()) {
+            return type;
+        }
+        if (estimated) {
+            return "ARTIFACT_ESTIMATE";
+        }
+        if ("acpx_usage_update".equals(text(usage.get("source")))) {
+            return "SESSION_USED_SNAPSHOT";
+        }
+        return "PROVIDER_RUN_USAGE";
     }
 
     private long estimatedTokens(WorkstreamPaths paths, String relativeMetadataPath) throws IOException {
@@ -583,12 +629,15 @@ final class MetricsProjectionWriter {
         var total = tokenMetrics == null ? Map.<String, Object>of() : map(tokenMetrics.get("total"));
         builder.append("- Measured Runs: ").append(tokenMetrics == null ? 0 : tokenMetrics.get("measuredRunCount"))
                 .append(" / ").append(tokenMetrics == null ? 0 : tokenMetrics.get("runCount")).append("\n");
+        builder.append("- Session Snapshots: ").append(tokenMetrics == null ? 0 : tokenMetrics.get("sessionSnapshotRunCount")).append("\n");
         builder.append("- Estimated Runs: ").append(tokenMetrics == null ? 0 : tokenMetrics.get("estimatedRunCount")).append("\n");
         builder.append("- Input Tokens: ").append(longValue(total.get("inputTokens"))).append("\n");
         builder.append("- Output Tokens: ").append(longValue(total.get("outputTokens"))).append("\n");
         builder.append("- Cached Read Tokens: ").append(longValue(total.get("cachedReadTokens"))).append("\n");
         builder.append("- Cached Write Tokens: ").append(longValue(total.get("cachedWriteTokens"))).append("\n");
-        builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n\n");
+        builder.append("- Total Tokens: ").append(longValue(total.get("totalTokens"))).append("\n");
+        var estimatedTotal = tokenMetrics == null ? Map.<String, Object>of() : map(tokenMetrics.get("estimatedTotal"));
+        builder.append("- Estimated Tokens (fallback, not in total): ").append(longValue(estimatedTotal.get("totalTokens"))).append("\n\n");
         builder.append("### Token Usage By Step\n\n");
         builder.append("| Node | Agent | Status | Outcome | Source | Input | Output | Transcript | Context | Prompt Overhead | Adapter Overhead | Total |\n");
         builder.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
@@ -751,6 +800,7 @@ final class MetricsProjectionWriter {
         private long cachedReadTokens;
         private long cachedWriteTokens;
         private long totalTokens;
+        private long contextUsedTokens;
         private final LinkedHashMap<String, BigDecimal> costByCurrency = new LinkedHashMap<>();
 
         static UsageMetric from(Map<String, Object> usage) {
@@ -768,6 +818,7 @@ final class MetricsProjectionWriter {
             if (!currency.isBlank() && amount.signum() != 0) {
                 metric.costByCurrency.put(currency, amount);
             }
+            metric.contextUsedTokens = longValue(usage.get("contextUsedTokens"));
             return metric;
         }
 
@@ -777,6 +828,7 @@ final class MetricsProjectionWriter {
             cachedReadTokens += other.cachedReadTokens;
             cachedWriteTokens += other.cachedWriteTokens;
             totalTokens += other.totalTokens;
+            contextUsedTokens = Math.max(contextUsedTokens, other.contextUsedTokens);
             for (var entry : other.costByCurrency.entrySet()) {
                 costByCurrency.merge(entry.getKey(), entry.getValue(), BigDecimal::add);
             }
@@ -789,6 +841,7 @@ final class MetricsProjectionWriter {
             map.put("cachedReadTokens", cachedReadTokens);
             map.put("cachedWriteTokens", cachedWriteTokens);
             map.put("totalTokens", totalTokens);
+            map.put("contextUsedTokens", contextUsedTokens);
             map.put("costByCurrency", new LinkedHashMap<>(costByCurrency));
             return map;
         }

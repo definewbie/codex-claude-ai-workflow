@@ -446,11 +446,28 @@ public final class TraceCommand implements Callable<Integer> {
         if (usage == null) {
             return "tokens=-";
         }
-        var source = usage.source() == null || usage.source().isBlank() ? "" : " source=" + usage.source();
+        var type = usage.measurementType() == null ? "" : usage.measurementType();
+        var src = usage.source() == null || usage.source().isBlank() ? "-" : usage.source();
+        var attr = usage.attribution() == null || usage.attribution().isBlank() ? "-" : usage.attribution();
+        if ("SESSION_USED_SNAPSHOT".equals(type) || "acpx_usage_update".equals(usage.source())) {
+            return "contextUsed=" + usage.contextUsedTokens()
+                    + " type=" + type + " src=" + src
+                    + " (session snapshot, not in total)";
+        }
+        if ("ARTIFACT_ESTIMATE".equals(type) || "artifact_estimate".equals(usage.source())) {
+            return "tokens≈" + usage.totalTokens()
+                    + " in=" + usage.inputTokens() + " out=" + usage.outputTokens()
+                    + " type=" + type + " src=" + src
+                    + " (estimate, not in total)";
+        }
         return "tokens=" + usage.totalTokens()
                 + " in=" + usage.inputTokens()
                 + " out=" + usage.outputTokens()
-                + source;
+                + " cachedRead=" + usage.cachedReadTokens()
+                + " cachedWrite=" + usage.cachedWriteTokens()
+                + " type=" + (type.isBlank() ? "PROVIDER_RUN_USAGE" : type)
+                + " src=" + src
+                + " attr=" + attr;
     }
 
     private String runStatusLabel(RunMetadata run) {

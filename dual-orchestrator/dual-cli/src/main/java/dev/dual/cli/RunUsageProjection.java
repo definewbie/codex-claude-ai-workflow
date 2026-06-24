@@ -40,7 +40,13 @@ final class RunUsageProjection {
                     promptTokens + visibleOutputTokens,
                     null,
                     "",
-                    "artifact_estimate"
+                    "artifact_estimate",
+                    "ARTIFACT_ESTIMATE",
+                    "ARTIFACT_ESTIMATE",
+                    false,
+                    0,
+                    null,
+                    ""
             );
         } catch (IOException ignored) {
             return null;

@@ -148,7 +148,22 @@ class AcpxAgentTaskHandlerTest {
                 stderrPath,
                 new AcpxRunResult(0, startedAt, finishedAt, List.of("acpx", "claude")),
                 null,
-                new AcpxUsage(100, 5, 1000, 2, 1107, new java.math.BigDecimal("0.25"), "USD", "acpx_stream")
+                new AcpxUsage(
+                        100,
+                        5,
+                        1000,
+                        2,
+                        1107,
+                        new java.math.BigDecimal("0.25"),
+                        "USD",
+                        "acpx_stream",
+                        AcpxUsage.PROVIDER_RUN_USAGE,
+                        AcpxUsage.ATTR_EXACT_PROMPT_MATCH,
+                        false,
+                        0,
+                        new java.math.BigDecimal("1.25"),
+                        "USD"
+                )
         );
 
         var runMetadata = Files.readString(runDir.resolve("run.json"));
@@ -161,6 +176,8 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"costAmount\" : 0.25"));
         assertTrue(runMetadata.contains("\"costCurrency\" : \"USD\""));
         assertTrue(runMetadata.contains("\"source\" : \"acpx_stream\""));
+        assertTrue(runMetadata.contains("\"measurementType\" : \"PROVIDER_RUN_USAGE\""));
+        assertTrue(runMetadata.contains("\"sessionCostAmount\" : 1.25"));
         var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.md.meta.json"));
         assertTrue(outputMetadata.contains("\"artifactType\" : \"output\""));
         assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.md\""));

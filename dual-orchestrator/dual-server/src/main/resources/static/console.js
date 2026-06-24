@@ -966,6 +966,7 @@ function tokenSummary() {
     measuredRunCount: numberValue(tokenMetrics.measuredRunCount),
     runCount: numberValue(tokenMetrics.runCount),
     estimatedRunCount: numberValue(tokenMetrics.estimatedRunCount),
+    sessionSnapshotRunCount: numberValue(tokenMetrics.sessionSnapshotRunCount),
     runs: Array.isArray(tokenMetrics.runs) ? tokenMetrics.runs : runs,
     topContextSections: Array.isArray(tokenMetrics.topContextSections) ? tokenMetrics.topContextSections : [],
     contextPackages: Array.isArray(tokenMetrics.contextPackages) ? tokenMetrics.contextPackages : [],
@@ -994,9 +995,10 @@ function tokenCard(tokens) {
       <div class="token-grid">
         ${tokenMetric("总量", tokens.totalLabel, tokens.budgetStatus)}
         ${tokenMetric("预算", tokens.budgetLabel, `${tokens.budgetSource} ${formatNumber(tokens.budgetTokens)}`)}
-        ${tokenMetric("实测步骤", String(tokens.measuredRunCount || 0), "acpx usage")}
+        ${tokenMetric("实测步骤", String(tokens.measuredRunCount || 0), "provider run usage")}
         ${tokenMetric("估算步骤", String(tokens.estimatedRunCount || 0), "artifact estimate")}
       </div>
+      ${tokens.sessionSnapshotRunCount ? `<div class="cap">另有 ${tokens.sessionSnapshotRunCount} 个步骤只拿到 session/context snapshot，不计入总 token。</div>` : ""}
       <div class="budget"><i style="width:${tokens.budgetPercent}%"></i></div>
       ${tokenHotspots(tokens)}
       ${toolGovernanceHotspots(tokens)}
@@ -1057,28 +1059,36 @@ function tokenRunBreakdown(tokens) {
     const usage = run.usage || {};
     const breakdown = run.breakdown || {};
     const total = numberValue(usage.totalTokens);
+    const contextUsed = numberValue(usage.contextUsedTokens);
+    const cachedRead = numberValue(usage.cachedReadTokens);
     const source = usage.source || (run.measured ? "acpx_stream" : run.estimated ? "artifact_estimate" : "unknown");
+    const measurementType = usage.measurementType || source;
+    const attribution = usage.attribution || (run.estimated ? "ARTIFACT_ESTIMATE" : "");
     const contextTokens = numberValue(breakdown.contextTokens);
     const transcriptTokens = numberValue(breakdown.transcriptTokens);
     const overheadTokens = numberValue(breakdown.promptOverheadTokens) + numberValue(breakdown.adapterOverheadTokens);
     const detailParts = [
       escapeHtml(run.agent || "-"),
-      escapeHtml(source),
+      escapeHtml(measurementType),
+      attribution ? `attr=${escapeHtml(attribution)}` : "",
+      `cachedRead ${cachedRead ? formatNumber(cachedRead) : "-"}`,
       `context ${contextTokens ? formatNumber(contextTokens) : "-"}`,
       `transcript ${transcriptTokens ? formatNumber(transcriptTokens) : "-"}`,
       `overhead ${overheadTokens ? formatNumber(overheadTokens) : "-"}`,
-    ];
+    ].filter(Boolean);
+    const value = total || contextUsed;
+    const suffix = total ? "" : contextUsed ? " snapshot" : "";
     return `
       <div class="token-row">
         <span>${escapeHtml(run.nodeId || run.nodeDefinitionId || "-")}</span>
         <span>${detailParts.join(" · ")}</span>
-        <strong>${total ? formatNumber(total) : "-"}</strong>
+        <strong>${value ? formatNumber(value) + suffix : "-"}</strong>
       </div>
     `;
   }).join("");
   return `
     <div class="token-runs">
-      <div class="cap">按步骤统计：${tokens.measuredRunCount || 0} 个实测，${tokens.estimatedRunCount || 0} 个估算，共 ${tokens.runCount || 0} 个 Agent run。展示最近 8 个。</div>
+      <div class="cap">按步骤统计：${tokens.measuredRunCount || 0} 个 provider run usage，${tokens.sessionSnapshotRunCount || 0} 个 session snapshot（不计入总量），${tokens.estimatedRunCount || 0} 个估算（不计入总量），共 ${tokens.runCount || 0} 个 Agent run。cachedRead 随 run 增长 = session 在滚雪球。展示最近 8 个。</div>
       ${rows || `<div class="empty">暂无逐步 token usage。新 run 完成后会写入 run.json 并投影到 metrics。</div>`}
     </div>
   `;

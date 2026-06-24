@@ -43,6 +43,17 @@ class MetricsProjectionWriterTest {
         jsonWriter.write(paths.nodeJson("node-review-002"), node("node-review-002", "design.codex_review"));
         writeRun(paths, "run-1", "claude", "intake.claude_brainstorm", 100, 20, 10, 0, 130, "USD", "0.13");
         writeRun(paths, "run-2", "codex", "design.codex_review", 80, 30, 0, 5, 115, "USD", "0.11");
+        writeRun(paths, "run-snapshot", "codex", "acceptance.codex_review", Map.of(
+                "inputTokens", 0,
+                "outputTokens", 0,
+                "cachedReadTokens", 0,
+                "cachedWriteTokens", 0,
+                "totalTokens", 0,
+                "contextUsedTokens", 50000,
+                "source", "acpx_usage_update",
+                "measurementType", "SESSION_USED_SNAPSHOT",
+                "cumulative", true
+        ));
         writeArtifactMetadata(paths, mapper, "run-2", "promptMetadataPath", "prompt.json", 900);
         writeArtifactMetadata(paths, mapper, "run-2", "outputMetadataPath", "output.json", 40);
         writeContextPackageMetadata(paths, mapper, "context-design-review.json", "design.codex_review");
@@ -58,24 +69,35 @@ class MetricsProjectionWriterTest {
 
         var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
         var tokenMetrics = map(metrics.get("tokenMetrics"));
-        assertEquals(3, number(tokenMetrics.get("runCount")));
+        assertEquals(4, number(tokenMetrics.get("runCount")));
         assertEquals(2, number(tokenMetrics.get("measuredRunCount")));
+        assertEquals(1, number(tokenMetrics.get("sessionSnapshotRunCount")));
         assertEquals(1, number(tokenMetrics.get("estimatedRunCount")));
 
         var total = map(tokenMetrics.get("total"));
-        assertEquals(1180, number(total.get("inputTokens")));
-        assertEquals(250, number(total.get("outputTokens")));
+        assertEquals(180, number(total.get("inputTokens")));
+        assertEquals(50, number(total.get("outputTokens")));
         assertEquals(10, number(total.get("cachedReadTokens")));
         assertEquals(5, number(total.get("cachedWriteTokens")));
-        assertEquals(1445, number(total.get("totalTokens")));
+        assertEquals(245, number(total.get("totalTokens")));
         assertEquals("0.24", map(total.get("costByCurrency")).get("USD").toString());
+
+        var estimatedTotal = map(tokenMetrics.get("estimatedTotal"));
+        assertEquals(1200, number(estimatedTotal.get("totalTokens")));
 
         var byNode = map(tokenMetrics.get("byNode"));
         assertEquals(130, number(map(byNode.get("intake.claude_brainstorm")).get("totalTokens")));
         assertEquals(115, number(map(byNode.get("design.codex_review")).get("totalTokens")));
-        assertEquals(1200, number(map(byNode.get("plan.claude_plan")).get("totalTokens")));
+        assertTrue(!byNode.containsKey("plan.claude_plan"));
 
         var runs = list(tokenMetrics.get("runs"));
+        var snapshotRun = runs.stream()
+                .filter(run -> "acceptance.codex_review".equals(run.get("nodeId")))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(false, snapshotRun.get("aggregated"));
+        assertEquals("SESSION_USED_SNAPSHOT", map(snapshotRun.get("usage")).get("measurementType"));
+        assertEquals(50000, number(map(snapshotRun.get("usage")).get("contextUsedTokens")));
         var codexRun = runs.stream()
                 .filter(run -> "design.codex_review".equals(run.get("nodeId")))
                 .findFirst()
@@ -107,6 +129,7 @@ class MetricsProjectionWriterTest {
         var markdown = Files.readString(paths.workstreamMetricsMarkdown());
         assertTrue(markdown.contains("## Token Metrics"));
         assertTrue(markdown.contains("- Estimated Runs: 1"));
+        assertTrue(markdown.contains("- Session Snapshots: 1"));
         assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | - | acpx_stream | 100 | 20 | 0 | 0 | 0 | 100 | 130 |"));
         assertTrue(markdown.contains("| design.codex_review | codex | completed | - | acpx_stream | 80 | 30 | 0 | 600 | 300 | 0 | 115 |"));
         assertTrue(markdown.contains("| plan.claude_plan | claude | completed | - | artifact_estimate | 1000 | 200 | 5000 | 0 | 1000 | 0 | 1200 |"));
@@ -157,7 +180,10 @@ class MetricsProjectionWriterTest {
                 "cachedWriteTokens", cachedWriteTokens,
                 "totalTokens", totalTokens,
                 "costCurrency", currency,
-                "costAmount", new BigDecimal(cost)
+                "costAmount", new BigDecimal(cost),
+                "source", "acpx_stream",
+                "measurementType", "PROVIDER_RUN_USAGE",
+                "cumulative", false
         ));
     }
 
