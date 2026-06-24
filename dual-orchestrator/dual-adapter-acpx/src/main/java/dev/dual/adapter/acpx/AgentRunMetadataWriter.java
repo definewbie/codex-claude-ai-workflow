@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 final class AgentRunMetadataWriter {
+    private static final String PROMPT_DEBUG_ENV = "DUAL_AGENT_PROMPT_DEBUG";
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -39,6 +40,7 @@ final class AgentRunMetadataWriter {
             Path stderrPath
     ) throws IOException {
         var promptMetadataPath = metadataPath(promptPath);
+        writePromptDebugIfEnabled(promptPath);
         writeArtifactMetadata(
                 workspaceRoot,
                 promptMetadataPath,
@@ -182,6 +184,7 @@ final class AgentRunMetadataWriter {
         var stderrMetadataPath = metadataPath(stderrPath);
         var transcriptMetadataPath = transcriptPath == null ? null : metadataPath(transcriptPath);
         var toolUsage = transcriptPath == null ? AcpxToolUsage.empty() : toolUsageReader.read(transcriptPath, workspaceRoot);
+        writePromptDebugIfEnabled(promptPath);
         var governanceReportPath = governanceActualReportWriter.write(
                 workspaceRoot,
                 workstreamId,
@@ -375,6 +378,22 @@ final class AgentRunMetadataWriter {
 
     private Path metadataPath(Path artifactPath) {
         return artifactPath.resolveSibling(artifactPath.getFileName() + ".meta.json");
+    }
+
+    private void writePromptDebugIfEnabled(Path promptPath) throws IOException {
+        if (!Boolean.parseBoolean(System.getenv(PROMPT_DEBUG_ENV))) {
+            return;
+        }
+        var bytes = Files.exists(promptPath) ? Files.readAllBytes(promptPath) : new byte[0];
+        var debug = new java.util.LinkedHashMap<String, Object>();
+        debug.put("schemaVersion", 1);
+        debug.put("enabledBy", PROMPT_DEBUG_ENV);
+        debug.put("promptPath", promptPath.toString());
+        debug.put("byteSize", bytes.length);
+        debug.put("estimatedTokens", estimatedTokens(bytes.length));
+        debug.put("sha256", sha256(bytes));
+        debug.put("content", new String(bytes, StandardCharsets.UTF_8));
+        objectMapper.writeValue(promptPath.resolveSibling(promptPath.getFileName() + ".debug.json").toFile(), debug);
     }
 
     private long lineCount(byte[] bytes) {
