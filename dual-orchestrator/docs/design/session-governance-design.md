@@ -156,3 +156,42 @@ Troubleshooting：
 - 终态 workstream 的 session 仍残留在 `~/.acpx/sessions/`：跑 `dualctl sessions-reap --workdir <agent-worktree>`；查 `.agent/workstreams/<ws>/session-cleanup.log` 的 closed/failed。
 - `failed > 0`：通常是 acpx 不可用或 session 已不存在；不影响 workflow 终态，可幂等重跑 reap。
 - WAITING_FOR_RECOVERY 长期 abandoned 的 workstream：P0 暂不自动 close（"abandoned" 难定义）；`sessions-reap` 只在它转为 FAILED 时处理。如需清理，先 retry / close-mistaken-iteration 转终态再 reap。
+
+---
+
+## 12. P1 实现状态（已落地：可配置 + 可观测 + 可 A/B 的 session scope）
+
+P1 已实现并测试通过。**它只建立 A/B 能力和观测基础，不直接优化 token、不改默认行为、不引入 RAG、不做摘要种子。**
+
+### 已实现
+- **`SessionScopePolicy`（集中命名）**：session name 的唯一拼装点，handler/CLI/UI 不再自拼。4 档 scope：
+  - `workstream`（默认）→ `base-<workstreamId>`
+  - `stage` → `base-<workstreamId>-<stageId>`
+  - `stage_iteration` → `base-<workstreamId>-<stageId>-<iterationId>`
+  - `run` → `base-<workstreamId>-<runId>`（仍带 workstreamId，避免跨 task 泄漏）
+  - **恒含 workstreamId**（所有 scope，含 run 档），**永不裸名**（不会退化成 `claude-main`）。
+- **per-agent env A/B**：`DUAL_SESSION_SCOPE_CLAUDE` / `DUAL_SESSION_SCOPE_CODEX` ∈ {workstream,stage,stage_iteration,run}。Claude/Codex 可分别配置；未配置 → workstream。
+- **scope 优先级**：env（per-agent）> node-config `session_scope`（legacy opt-in，workstream/run）> 默认 workstream。保留 P1 前 node-config `session_scope=run` 的既有行为（`runScopedSessionRemainsOptIn` 守护）。
+- **stage/iteration 来源**：`NodeInstance.stageId()` / `iterationId()`（workflow 语义字段，非 node-id 子串猜）。缺失时**显式 fallback 到 workstream + reason**；非法 env **fallback + reason**（不静默）。
+- **run.json 记录决策**：每个 agent run 写入 `sessionScope / sessionSegmentKey / sessionScopeReason / stage / semanticIteration`，benchmark 可解释 token 变化。
+- **观测暴露**：metrics `tokenMetrics.runs[]` 含上述字段；`dualctl trace` 每 run 显示 `scope=… seg=…` 与 token 同行；console breakdown 含 `scope/stage/iter`。
+
+### 默认行为不变
+- 未配置 env + node-config（或均为 workstream）时 → scope=workstream，session name = `base-<workstreamId>`，与 P1 前**逐字节一致**。
+
+### 如何做 A/B
+1. 基线：不设 env（默认 workstream）跑一组。
+2. 对照：`DUAL_SESSION_SCOPE_CLAUDE=stage_iteration DUAL_SESSION_SCOPE_CODEX=run` 跑同 case。
+3. 两组都用 P0 已修好的 token 观测对比。
+
+### A/B 应比较的指标
+- 成本/雪球：`total.totalTokens`、`total.cachedReadTokens` 占比、codex `contextUsed` 趋势（是否仍单调膨胀）、`costByCurrency`。
+- 质量（不能为 token 牺牲质量）：Codex 审查结论、acceptance 是否通过、must-fix 数、revision 轮数。
+- 副作用：`toolMetrics.repeatedReadFiles`（短 session 是否导致 agent 重复读文件）、duration。
+- 通过条件：对照组成本显著下降且质量不退化（验收通过、revision 数不升、重复读不升），才考虑改默认。
+
+### 明确未做（留后续）
+- **scope 边界自动 close 上一段 session**：P1 未做（留 P1.5/P2）。当前由 P0 的 terminal close + `sessions-reap` 兜底清理；stage/stage_iteration 段切换时不主动 close 上一段。实现时需保证只 close 不再被复用的段、失败不影响 workflow。
+- **"新 session 带 handoff 摘要种子"**：仍未做（开放问题，取决于 acpx 能力；本次按红线不研究/不实现）。
+- **默认 scope 切换**：未切，仍 workstream；要等 A/B 取证后才决定。
+- **不引入 RAG / GraphRAG**。

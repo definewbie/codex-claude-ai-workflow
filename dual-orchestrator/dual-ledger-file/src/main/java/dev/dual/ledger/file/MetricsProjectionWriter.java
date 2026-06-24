@@ -184,6 +184,11 @@ final class MetricsProjectionWriter {
                 item.put("runId", nonBlank(text(run.get("runId")), runDir.getFileName().toString()));
                 item.put("nodeId", nodeId);
                 item.put("agent", agent);
+                item.put("sessionScope", text(run.get("sessionScope")));
+                item.put("sessionSegmentKey", text(run.get("sessionSegmentKey")));
+                item.put("sessionScopeReason", text(run.get("sessionScopeReason")));
+                item.put("stage", text(run.get("stage")));
+                item.put("semanticIteration", text(run.get("semanticIteration")));
                 item.put("status", text(run.get("status")));
                 item.put("outcomeStatus", text(map(run.get("executionOutcome")).get("status")));
                 item.put("outcomePrimaryReason", text(map(run.get("executionOutcome")).get("primaryReason")));

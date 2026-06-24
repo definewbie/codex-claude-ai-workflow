@@ -37,7 +37,8 @@ final class AgentRunMetadataWriter {
             Path runDir,
             Path promptPath,
             Path stdoutPath,
-            Path stderrPath
+            Path stderrPath,
+            SessionMeta sessionMeta
     ) throws IOException {
         var promptMetadataPath = metadataPath(promptPath);
         writePromptDebugIfEnabled(promptPath);
@@ -64,6 +65,11 @@ final class AgentRunMetadataWriter {
                 nodeId,
                 agent,
                 session,
+                sessionMeta == null ? "" : sessionMeta.scope(),
+                sessionMeta == null ? "" : sessionMeta.segmentKey(),
+                sessionMeta == null ? "" : sessionMeta.reason(),
+                sessionMeta == null ? "" : sessionMeta.stage(),
+                sessionMeta == null ? "" : sessionMeta.semanticIteration(),
                 promptTemplate,
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),
@@ -123,6 +129,7 @@ final class AgentRunMetadataWriter {
                 null,
                 result,
                 failure,
+                null,
                 null
         );
     }
@@ -158,7 +165,8 @@ final class AgentRunMetadataWriter {
                 null,
                 result,
                 failure,
-                usage
+                usage,
+                null
         );
     }
 
@@ -177,7 +185,8 @@ final class AgentRunMetadataWriter {
             Path transcriptPath,
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure,
-            AcpxUsage usage
+            AcpxUsage usage,
+            SessionMeta sessionMeta
     ) throws IOException {
         var promptMetadataPath = metadataPath(promptPath);
         var outputMetadataPath = metadataPath(stdoutPath);
@@ -266,6 +275,11 @@ final class AgentRunMetadataWriter {
                 nodeId,
                 agent,
                 session,
+                sessionMeta == null ? "" : sessionMeta.scope(),
+                sessionMeta == null ? "" : sessionMeta.segmentKey(),
+                sessionMeta == null ? "" : sessionMeta.reason(),
+                sessionMeta == null ? "" : sessionMeta.stage(),
+                sessionMeta == null ? "" : sessionMeta.semanticIteration(),
                 promptTemplate,
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),

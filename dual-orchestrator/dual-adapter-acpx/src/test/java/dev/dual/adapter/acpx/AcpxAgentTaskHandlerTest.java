@@ -117,7 +117,7 @@ class AcpxAgentTaskHandlerTest {
 
         var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
         var runMetadata = Files.readString(runMetadataPath);
-        assertTrue(runMetadata.contains("\"session\" : \"claude-main-run-"));
+        assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-test-run-"));
     }
 
     @Test
@@ -799,6 +799,36 @@ class AcpxAgentTaskHandlerTest {
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
         }
+    }
+
+    @Test
+    void runMetadataRecordsSessionScopeStageAndIteration() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-sess");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-sess", definition, readyInstance("intake.claude_brainstorm")));
+
+        var runJson = Files.walk(workstreamDir.resolve("runs"))
+                .filter(path -> path.getFileName().toString().equals("run.json"))
+                .findFirst()
+                .orElseThrow();
+        var runMetadata = Files.readString(runJson);
+
+        // P1: run.json 必须记录 session scope 决策，便于 benchmark 解释 token 变化
+        assertTrue(runMetadata.contains("\"sessionScope\" : \"workstream\""), runMetadata);
+        assertTrue(runMetadata.contains("\"sessionSegmentKey\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"stage\" : \"stage-test\""), runMetadata);
+        assertTrue(runMetadata.contains("\"semanticIteration\" : \"iter-001\""), runMetadata);
+        // session name 恒含 workstreamId，永不裸名
+        assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-sess\""), runMetadata);
     }
 
     private static NodeInstance readyInstance(String definitionId) {

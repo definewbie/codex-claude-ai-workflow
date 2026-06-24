@@ -141,6 +141,7 @@ public final class TraceCommand implements Callable<Integer> {
                         + text(run.nodeId()) + "  "
                         + runStatusLabel(run) + "  "
                         + run.durationMs() + "ms  "
+                        + sessionScopeLabel(run)
                         + tokenLabel(paths, run));
             }
         }
@@ -439,6 +440,15 @@ public final class TraceCommand implements Callable<Integer> {
         return runs.stream()
                 .skip(Math.max(0, runs.size() - limit))
                 .toList();
+    }
+
+    private static String sessionScopeLabel(RunMetadata run) {
+        var scope = run.sessionScope() == null ? "" : run.sessionScope();
+        if (scope.isBlank()) {
+            return "";
+        }
+        var seg = run.sessionSegmentKey() == null ? "" : run.sessionSegmentKey();
+        return "scope=" + scope + (seg.isBlank() ? "" : " seg=" + seg) + "  ";
     }
 
     private String tokenLabel(WorkstreamPaths paths, RunMetadata run) {

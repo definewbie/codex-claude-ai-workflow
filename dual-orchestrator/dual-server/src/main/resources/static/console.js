@@ -1069,6 +1069,9 @@ function tokenRunBreakdown(tokens) {
     const overheadTokens = numberValue(breakdown.promptOverheadTokens) + numberValue(breakdown.adapterOverheadTokens);
     const detailParts = [
       escapeHtml(run.agent || "-"),
+      run.sessionScope ? `scope=${escapeHtml(run.sessionScope)}` : "",
+      run.stage ? `stage=${escapeHtml(run.stage)}` : "",
+      run.semanticIteration ? `iter=${escapeHtml(run.semanticIteration)}` : "",
       escapeHtml(measurementType),
       attribution ? `attr=${escapeHtml(attribution)}` : "",
       `cachedRead ${cachedRead ? formatNumber(cachedRead) : "-"}`,
