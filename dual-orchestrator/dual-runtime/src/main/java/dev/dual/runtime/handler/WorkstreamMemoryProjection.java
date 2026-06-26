@@ -28,7 +28,7 @@ import java.util.Map;
  * <p>When memory is empty or key fields are missing, only minimal fallback refs
  * are emitted. The old top-N evidence dump is never restored.</p>
  */
-final class WorkstreamMemoryProjection {
+public final class WorkstreamMemoryProjection {
     private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -44,7 +44,7 @@ final class WorkstreamMemoryProjection {
      * reads, last stage outcome, open issues, the reuse directive, and evidence
      * refs. Appends section body only (the caller writes the {@code ##} heading).
      */
-    static void appendAgentHandoff(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+    public static void appendAgentHandoff(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
         var decidedScope = strings(memory.get("decidedScope"));
         var nonGoals = strings(memory.get("nonGoals"));
@@ -81,7 +81,7 @@ final class WorkstreamMemoryProjection {
      * decision summary, the incremental-audit directive, and evidence refs.
      * Appends section body only (the caller writes the {@code ##} heading).
      */
-    static void appendReviewEvidenceBrief(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+    public static void appendReviewEvidenceBrief(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
         var contract = readContract(workstreamDir);
         var verdicts = list(memory.get("priorVerdicts"));

@@ -142,6 +142,7 @@ public final class TraceCommand implements Callable<Integer> {
                         + runStatusLabel(run) + "  "
                         + run.durationMs() + "ms  "
                         + sessionScopeLabel(run)
+                        + sessionCompactionLabel(run)
                         + promptProvenanceLabel(paths, run)
                         + tokenLabel(paths, run));
             }
@@ -187,6 +188,18 @@ public final class TraceCommand implements Callable<Integer> {
         var byVisibility = map(visibility.get("byVisibility"));
         if (!byVisibility.isEmpty()) {
             System.out.println("  usage visibility: " + byVisibility);
+        }
+        var costEconomics = map(attr.get("costEconomics"));
+        var byReliability = map(costEconomics.get("byReliability"));
+        if (!byReliability.isEmpty()) {
+            System.out.println("  cost reliability: " + byReliability
+                    + " costEstimate=" + costEconomics.get("byCostEstimateReliability")
+                    + " clientReported=" + costEconomics.get("clientReportedCostByCurrency")
+                    + " officialCalculated=" + costEconomics.get("officialCalculatedCostByCurrency"));
+        }
+        var byDecision = map(costEconomics.get("byDecision"));
+        if (!byDecision.isEmpty()) {
+            System.out.println("  provider cache decision: " + byDecision);
         }
         var gaps = mapList(visibility.get("gaps"));
         if (!gaps.isEmpty()) {
@@ -528,6 +541,16 @@ public final class TraceCommand implements Callable<Integer> {
         }
         var seg = run.sessionSegmentKey() == null ? "" : run.sessionSegmentKey();
         return "scope=" + scope + (seg.isBlank() ? "" : " seg=" + seg) + "  ";
+    }
+
+    private static String sessionCompactionLabel(RunMetadata run) {
+        if (!Boolean.TRUE.equals(run.sessionCompactionEnabled())) {
+            return "";
+        }
+        var seed = run.sessionCompactionSeedPath() == null || run.sessionCompactionSeedPath().isBlank()
+                ? ""
+                : " seed=" + run.sessionCompactionSeedPath();
+        return "compact=" + run.sessionCompactionMode() + seed + "  ";
     }
 
     private String tokenLabel(WorkstreamPaths paths, RunMetadata run) {

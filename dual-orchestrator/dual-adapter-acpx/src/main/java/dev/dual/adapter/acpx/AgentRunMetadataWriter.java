@@ -39,8 +39,10 @@ final class AgentRunMetadataWriter {
             Path promptPath,
             Path stdoutPath,
             Path stderrPath,
-            SessionMeta sessionMeta
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta
     ) throws IOException {
+        var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
         writePromptDebugIfEnabled(promptPath);
         writeArtifactMetadata(
@@ -71,6 +73,11 @@ final class AgentRunMetadataWriter {
                 sessionMeta == null ? "" : sessionMeta.reason(),
                 sessionMeta == null ? "" : sessionMeta.stage(),
                 sessionMeta == null ? "" : sessionMeta.semanticIteration(),
+                compaction.mode(),
+                compaction.enabled(),
+                compaction.reason(),
+                compaction.seedKind(),
+                compaction.seedPath(),
                 promptTemplate,
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),
@@ -132,6 +139,7 @@ final class AgentRunMetadataWriter {
                 result,
                 failure,
                 null,
+                null,
                 null
         );
     }
@@ -168,6 +176,7 @@ final class AgentRunMetadataWriter {
                 result,
                 failure,
                 usage,
+                null,
                 null
         );
     }
@@ -188,8 +197,10 @@ final class AgentRunMetadataWriter {
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure,
             AcpxUsage usage,
-            SessionMeta sessionMeta
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta
     ) throws IOException {
+        var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
         var outputMetadataPath = metadataPath(stdoutPath);
         var stderrMetadataPath = metadataPath(stderrPath);
@@ -293,6 +304,11 @@ final class AgentRunMetadataWriter {
                 sessionMeta == null ? "" : sessionMeta.reason(),
                 sessionMeta == null ? "" : sessionMeta.stage(),
                 sessionMeta == null ? "" : sessionMeta.semanticIteration(),
+                compaction.mode(),
+                compaction.enabled(),
+                compaction.reason(),
+                compaction.seedKind(),
+                compaction.seedPath(),
                 promptTemplate,
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),

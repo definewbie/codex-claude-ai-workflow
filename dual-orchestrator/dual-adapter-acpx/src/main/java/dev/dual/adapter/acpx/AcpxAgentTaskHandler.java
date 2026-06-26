@@ -21,6 +21,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AcpxUsageReader usageReader;
     private final AgentFinalArtifactExtractor finalArtifactExtractor;
     private final PromptManifestWriter promptManifestWriter = new PromptManifestWriter();
+    private final SessionCompactionPolicy sessionCompactionPolicy = new SessionCompactionPolicy();
+    private final SessionCompactionSeedWriter sessionCompactionSeedWriter = new SessionCompactionSeedWriter();
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         this(transport, prepareOnly, new AcpxUsageReader());
@@ -68,7 +70,16 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 runId,
                 nodeConfigScope.isBlank() ? null : nodeConfigScope
         );
-        var session = sessionDecision.sessionName();
+        var compactionDecision = sessionCompactionPolicy.decide(
+                agent,
+                context.definition().id(),
+                context.workstreamId(),
+                runId,
+                configuredSession,
+                sessionDecision,
+                context.workspaceRoot()
+        );
+        var session = compactionDecision.enabled() ? compactionDecision.sessionName() : sessionDecision.sessionName();
         var sessionMeta = SessionMeta.from(
                 sessionDecision,
                 context.instance().stageId(),
@@ -86,12 +97,23 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
         Files.createDirectories(promptPath.getParent());
         Files.createDirectories(outputPath.getParent());
+        var seedPath = sessionCompactionSeedWriter.write(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                runDir,
+                compactionDecision
+        ).orElse(null);
+        var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
+        if (seedPath != null) {
+            inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
+        }
+        var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
         var rendered = promptRenderer.renderWithSections(
                 context.workspaceRoot(),
                 context.workstreamId(),
                 context.definition().id(),
                 promptTemplate,
-                context.instance().inputRefs()
+                inputRefs
         );
         Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
         promptManifestWriter.write(
@@ -118,7 +140,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     promptPath,
                     outputPath,
                     stderrPath,
-                    sessionMeta
+                    sessionMeta,
+                    compactionMeta
             );
             return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(promptPath).toString()), Map.of(
                     "run_id", runId,
@@ -164,7 +187,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 result,
                 metadataFailure(failure, interrupted, outputComplete),
                 usage,
-                sessionMeta
+                sessionMeta,
+                compactionMeta
         );
         return NodeResult.completed(
                 "completed",

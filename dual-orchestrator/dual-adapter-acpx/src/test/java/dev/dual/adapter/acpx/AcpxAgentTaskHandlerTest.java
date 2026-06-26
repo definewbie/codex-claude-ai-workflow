@@ -85,6 +85,70 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void prepareOnlyRunWritesSessionCompactionSeedWhenExperimentEnabled() throws Exception {
+        System.setProperty(SessionCompactionPolicy.ENV, "implement_boundary");
+        try {
+            var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-compact");
+            Files.createDirectories(workstreamDir.resolve("memory"));
+            Files.writeString(workstreamDir.resolve("requirement.md"), "Implement from typed memory.\n");
+            Files.writeString(workstreamDir.resolve("memory/workstream-memory.json"), """
+                    {
+                      "decidedScope": ["Touch only implementation files"],
+                      "nonGoals": ["Do not redesign workflow"],
+                      "readFiles": [
+                        {"path":"src/a.js","sha":"abcdef123456","summary":"exports a()","trusted":true,"readRunId":"run-old"}
+                      ]
+                    }
+                    """);
+
+            var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
+            var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                    "agent", "claude",
+                    "session", "claude-main",
+                    "prompt_template", "implement-claude"
+            ));
+            var instance = new NodeInstance(
+                    "node-implement",
+                    "implement.claude_implement",
+                    NodeKind.TASK,
+                    "acpx.agent_run",
+                    NodeStatus.READY,
+                    "stage-implement",
+                    "iter-001",
+                    List.of(),
+                    List.of(),
+                    Map.of(),
+                    null,
+                    null,
+                    null
+            );
+
+            var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-compact", definition, instance));
+            var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+            var runMetadata = Files.readString(runMetadataPath);
+            assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-compact-compact-implement.claude_implement\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionMode\" : \"implement_boundary\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionEnabled\" : true"));
+            assertTrue(runMetadata.contains("\"sessionCompactionSeedKind\" : \"agent_handoff\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionSeedPath\" :"));
+
+            var seedPath = runMetadataPath.getParent().resolve("prompts/session-compaction-seed.md");
+            assertTrue(Files.exists(seedPath));
+            var seed = Files.readString(seedPath);
+            assertTrue(seed.contains("Session Compaction Seed"));
+            assertTrue(seed.contains("Touch only implementation files"));
+            assertTrue(seed.contains("src/a.js"));
+
+            var promptPath = runMetadataPath.getParent().resolve("prompts/implement-claude.md");
+            var prompt = Files.readString(promptPath);
+            assertTrue(prompt.contains("session-compaction-seed.md"));
+            assertTrue(prompt.contains("Session Compaction Seed"));
+        } finally {
+            System.clearProperty(SessionCompactionPolicy.ENV);
+        }
+    }
+
+    @Test
     void runScopedSessionRemainsOptIn() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);

@@ -307,6 +307,143 @@ class MetricsProjectionWriterTest {
         assertEquals(2, list(seg.get("runs")).size());
     }
 
+    @Test
+    void tokenAttributionCalculatesProviderCacheAwareCost() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-cost"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        Files.createDirectories(tempDir.resolve(".agent"));
+        jsonWriter.write(tempDir.resolve(".agent/provider-pricing.json"), Map.of(
+                "schemaVersion", 1,
+                "models", List.of(Map.of(
+                        "providerId", "deepseek",
+                        "model", "deepseek-test",
+                        "currency", "USD",
+                        "inputCacheHitPer1M", "0.10",
+                        "inputCacheMissPer1M", "1.00",
+                        "outputPer1M", "2.00"
+                ))
+        ));
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-cost", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(2000, 3000, 1000, "0.0081");
+        usage.put("providerId", "deepseek");
+        usage.put("model", "deepseek-test");
+        writeAttributionRun(paths, "run-cost", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = list(attr.get("perRun"));
+        var cost = map(perRun.get(0).get("costEconomics"));
+
+        assertEquals("deepseek", cost.get("providerId"));
+        assertEquals("deepseek-test", cost.get("model"));
+        assertEquals("provider_cache_tokens_reported", cost.get("cacheSignalReliability"));
+        assertEquals("official_pricing", cost.get("costEstimateReliability"));
+        assertEquals(0, new BigDecimal("0.008100").compareTo(new BigDecimal(cost.get("officialCalculatedCost").toString())));
+        assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(cost.get("clientCostDriftRatio").toString())));
+        assertEquals("matches_official_pricing", cost.get("clientCostConsistency"));
+        assertEquals(1000, number(cost.get("inputCacheHitTokens")));
+        assertEquals(2000, number(cost.get("inputCacheMissTokens")));
+        assertEquals("preserve_session", cost.get("providerCacheDecision"));
+        assertEquals("0.100000", cost.get("cacheHitToMissRatio"));
+
+        var summary = map(attr.get("costEconomics"));
+        assertEquals(1, number(map(summary.get("byReliability")).get("provider_cache_tokens_reported")));
+        assertEquals(1, number(map(summary.get("byCostEstimateReliability")).get("official_pricing")));
+        assertEquals(1, number(map(summary.get("byDecision")).get("preserve_session")));
+        assertEquals(0, new BigDecimal("0.008100")
+                .compareTo(new BigDecimal(map(summary.get("officialCalculatedCostByCurrency")).get("USD").toString())));
+    }
+
+    @Test
+    void tokenAttributionDoesNotTreatClientCostDriftAsCacheSignalContradiction() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-deepseek-cn"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        Files.createDirectories(tempDir.resolve(".agent"));
+        jsonWriter.write(tempDir.resolve(".agent/provider-pricing.json"), Map.of(
+                "schemaVersion", 1,
+                "models", List.of(Map.of(
+                        "providerId", "deepseek",
+                        "model", "deepseek-pro-v4",
+                        "currency", "CNY",
+                        "inputCacheHitPer1M", "0.025",
+                        "inputCacheMissPer1M", "3.00",
+                        "outputPer1M", "6.00"
+                ))
+        ));
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-deepseek-cn", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(85606, 24774, 728704, "1.433452");
+        usage.put("providerId", "deepseek");
+        usage.put("model", "deepseek-pro-v4");
+        writeAttributionRun(paths, "run-cost", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var cost = map(list(attr.get("perRun")).get(0)).get("costEconomics");
+        var costMap = map(cost);
+
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("official_pricing", costMap.get("costEstimateReliability"));
+        assertEquals("differs_from_official_pricing", costMap.get("clientCostConsistency"));
+        assertEquals(0, new BigDecimal("0.423680")
+                .compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+        assertEquals("preserve_session", costMap.get("providerCacheDecision"));
+    }
+
+    @Test
+    void tokenAttributionMarksSubscriptionModelsAsTokenOnly() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-token-only"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        Files.createDirectories(tempDir.resolve(".agent"));
+        jsonWriter.write(tempDir.resolve(".agent/provider-pricing.json"), Map.of(
+                "schemaVersion", 1,
+                "models", List.of(Map.of(
+                        "providerId", "zhipu",
+                        "model", "glm-*",
+                        "currency", "TOKENS_ONLY",
+                        "inputCacheHitPer1M", "0",
+                        "inputCacheMissPer1M", "0",
+                        "outputPer1M", "0"
+                ))
+        ));
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-token-only", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(83685, 36025, 861568, "1.749834");
+        usage.put("providerId", "zhipu");
+        usage.put("model", "glm-5.2");
+        writeAttributionRun(paths, "run-glm", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var cost = map(list(attr.get("perRun")).get(0)).get("costEconomics");
+        var costMap = map(cost);
+
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("token_only", costMap.get("costEstimateReliability"));
+        assertEquals("measure_only", costMap.get("providerCacheDecision"));
+        assertEquals("TOKENS_ONLY", costMap.get("officialCalculatedCurrency"));
+        assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+    }
+
     private void writeAttributionRun(WorkstreamPaths paths, String runId, String agent, String nodeId,
                                      String sessionSegmentKey, Instant startedAt, Map<String, Object> usageMap,
                                      String transcriptPath, int toolCalls, List<String> readFiles) throws Exception {

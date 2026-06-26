@@ -2,11 +2,13 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import dev.dual.core.provider.ProviderCachePolicy;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -235,6 +237,10 @@ final class MetricsProjectionWriter {
                     usageMap.put("measurementType", measurementType(usage, estimated));
                     usageMap.put("attribution", nonBlank(text(usage.get("attribution")), estimated ? "ARTIFACT_ESTIMATE" : ""));
                     usageMap.put("cumulative", Boolean.TRUE.equals(usage.get("cumulative")));
+                    usageMap.put("providerId", text(usage.get("providerId")));
+                    usageMap.put("model", text(usage.get("model")));
+                    usageMap.put("costAmount", usage.get("costAmount"));
+                    usageMap.put("costCurrency", text(usage.get("costCurrency")));
                     item.put("usage", usageMap);
                     item.put("breakdown", promptBreakdown(
                             promptTokens,
@@ -364,6 +370,8 @@ final class MetricsProjectionWriter {
         var runMeta = runTranscriptMeta(paths);
         var readReusePolicy = readReusePolicy(paths);
         var workspaceRoot = paths.workspaceRoot();
+        var pricing = ProviderPricing.load(workspaceRoot, objectMapper);
+        var costSummary = new CostEconomicsSummary();
 
         var perRun = new ArrayList<Map<String, Object>>();
         var byNode = new LinkedHashMap<String, NodeAttribution>();
@@ -393,6 +401,9 @@ final class MetricsProjectionWriter {
             entry.put("providerUsageVisibility", providerUsageVisibility(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("providerUsageUnavailableReason", providerUsageUnavailableReason(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("cost", usage.get("costAmount"));
+            var costEconomics = pricing.costEconomics(usage, text(tr.get("agent")));
+            entry.put("costEconomics", costEconomics);
+            costSummary.add(costEconomics);
             entry.put("transcriptTokens", longValue(breakdown.get("transcriptTokens")));
             entry.put("transcriptBytes", meta.bytes());
             entry.put("toolCalls", longValue(toolUsage.get("toolCallCount")));
@@ -466,6 +477,7 @@ final class MetricsProjectionWriter {
         result.put("schemaVersion", 1);
         result.put("perRun", perRun);
         result.put("usageVisibility", usageVisibilitySummary(perRun));
+        result.put("costEconomics", costSummary.toMap());
         result.put("nodeHotspots", nodeHotspots);
         result.put("fileReadCost", fileReadCost);
         result.put("sessionSnowball", sessionSnowball);
@@ -1139,6 +1151,212 @@ final class MetricsProjectionWriter {
             }
         }
         return BigDecimal.ZERO;
+    }
+
+    private static final class ProviderPricing {
+        private final List<ModelPrice> prices;
+
+        private ProviderPricing(List<ModelPrice> prices) {
+            this.prices = prices;
+        }
+
+        static ProviderPricing load(Path workspaceRoot, ObjectMapper objectMapper) {
+            var configured = System.getenv("DUAL_PROVIDER_PRICING_PATH");
+            var path = configured == null || configured.isBlank()
+                    ? workspaceRoot.resolve(".agent").resolve("provider-pricing.json")
+                    : Path.of(configured);
+            if (!Files.isRegularFile(path)) {
+                return new ProviderPricing(List.of());
+            }
+            try {
+                var doc = objectMapper.readValue(path.toFile(), MAP_TYPE);
+                var out = new ArrayList<ModelPrice>();
+                for (var item : mapList(doc.get("models"))) {
+                    var providerId = text(item.get("providerId"));
+                    var model = text(item.get("model"));
+                    if (providerId.isBlank() || model.isBlank()) {
+                        continue;
+                    }
+                    out.add(new ModelPrice(
+                            providerId,
+                            model,
+                            nonBlank(text(item.get("currency")), "USD"),
+                            decimalValue(item.get("inputCacheHitPer1M")),
+                            decimalValue(item.get("inputCacheMissPer1M")),
+                            decimalValue(item.get("outputPer1M")),
+                            decimalValue(item.get("cacheWritePer1M")),
+                            text(item.get("sourceUrl"))
+                    ));
+                }
+                return new ProviderPricing(out);
+            } catch (IOException ignored) {
+                return new ProviderPricing(List.of());
+            }
+        }
+
+        Map<String, Object> costEconomics(Map<String, Object> usage, String agent) {
+            var result = new LinkedHashMap<String, Object>();
+            var agentKey = agent == null ? "" : agent.trim().toUpperCase();
+            var providerId = nonBlank(
+                    text(usage.get("providerId")),
+                    nonBlank(System.getenv("DUAL_PROVIDER_ID_" + agentKey), nonBlank(System.getenv("DUAL_PROVIDER_ID"), ""))
+            );
+            var model = nonBlank(
+                    text(usage.get("model")),
+                    nonBlank(System.getenv("DUAL_MODEL_" + agentKey), nonBlank(System.getenv("DUAL_MODEL"), ""))
+            );
+            result.put("providerId", providerId);
+            result.put("model", model);
+            result.put("inputCacheHitTokens", longValue(usage.get("cachedReadTokens")));
+            result.put("inputCacheMissTokens", longValue(usage.get("inputTokens")));
+            result.put("outputTokens", longValue(usage.get("outputTokens")));
+            result.put("cacheWriteTokens", longValue(usage.get("cachedWriteTokens")));
+            result.put("clientReportedCost", decimalValue(usage.get("costAmount")));
+            result.put("clientReportedCurrency", text(usage.get("costCurrency")));
+            var type = text(usage.get("measurementType"));
+            if (!"PROVIDER_RUN_USAGE".equals(type)) {
+                result.put("cacheSignalReliability", "not_applicable");
+                result.put("costEstimateReliability", "not_applicable");
+                result.put("providerCacheDecision", "not_applicable");
+                result.put("reason", "not provider run usage");
+                return result;
+            }
+            if (providerId.isBlank() || model.isBlank()) {
+                result.put("cacheSignalReliability", "pricing_unknown");
+                result.put("costEstimateReliability", "pricing_unknown");
+                result.put("providerCacheDecision", "measure_only");
+                result.put("reason", "provider/model missing");
+                return result;
+            }
+            var price = priceFor(providerId, model);
+            if (price == null) {
+                result.put("cacheSignalReliability", "pricing_unknown");
+                result.put("costEstimateReliability", "pricing_unknown");
+                result.put("providerCacheDecision", "measure_only");
+                result.put("reason", "no pricing entry for provider/model");
+                return result;
+            }
+            var policy = ProviderCachePolicy.decide(price.inputCacheHitPer1M(), price.inputCacheMissPer1M());
+            result.put("providerCacheDecision", policy.recommendation());
+            result.put("providerCacheDecisionReason", policy.reason());
+            result.put("cacheHitToMissRatio", policy.cacheHitToMissRatio());
+            var calculated = price.cost(
+                    longValue(usage.get("cachedReadTokens")),
+                    longValue(usage.get("inputTokens")),
+                    longValue(usage.get("outputTokens")),
+                    longValue(usage.get("cachedWriteTokens"))
+            );
+            var reported = decimalValue(usage.get("costAmount"));
+            result.put("officialCalculatedCost", calculated);
+            result.put("officialCalculatedCurrency", price.currency());
+            result.put("officialPricingSourceUrl", price.sourceUrl());
+            result.put("dualCalculatedCost", calculated);
+            result.put("dualCalculatedCurrency", price.currency());
+            result.put("cacheSignalReliability", longValue(usage.get("cachedReadTokens")) > 0
+                    ? "provider_cache_tokens_reported"
+                    : "provider_usage_tokens_reported");
+            if ("TOKENS_ONLY".equalsIgnoreCase(price.currency())) {
+                result.put("costEstimateReliability", "token_only");
+                result.put("reason", "provider/model has no visible per-token billing; token usage only");
+                return result;
+            }
+            result.put("costEstimateReliability", "official_pricing");
+            if (reported.signum() <= 0) {
+                result.put("reason", "client reported cost missing; using official pricing calculation");
+                return result;
+            }
+            var drift = calculated.subtract(reported).abs()
+                    .divide(calculated.max(reported), 4, RoundingMode.HALF_UP);
+            result.put("clientCostDriftRatio", drift);
+            if (drift.compareTo(new BigDecimal("0.15")) <= 0) {
+                result.put("clientCostConsistency", "matches_official_pricing");
+            } else {
+                result.put("clientCostConsistency", "differs_from_official_pricing");
+            }
+            return result;
+        }
+
+        private ModelPrice priceFor(String providerId, String model) {
+            for (var price : prices) {
+                if (price.matches(providerId, model)) {
+                    return price;
+                }
+            }
+            return null;
+        }
+    }
+
+    private record ModelPrice(
+            String providerId,
+            String model,
+            String currency,
+            BigDecimal inputCacheHitPer1M,
+            BigDecimal inputCacheMissPer1M,
+            BigDecimal outputPer1M,
+            BigDecimal cacheWritePer1M,
+            String sourceUrl
+    ) {
+        boolean matches(String candidateProvider, String candidateModel) {
+            return providerId.equalsIgnoreCase(candidateProvider)
+                    && (model.equals(candidateModel)
+                    || (model.endsWith("*") && candidateModel.startsWith(model.substring(0, model.length() - 1))));
+        }
+
+        BigDecimal cost(long cacheHit, long cacheMiss, long output, long cacheWrite) {
+            return BigDecimal.ZERO
+                    .add(perMillion(cacheHit, inputCacheHitPer1M))
+                    .add(perMillion(cacheMiss, inputCacheMissPer1M))
+                    .add(perMillion(output, outputPer1M))
+                    .add(perMillion(cacheWrite, cacheWritePer1M))
+                    .setScale(6, RoundingMode.HALF_UP);
+        }
+
+        private BigDecimal perMillion(long tokens, BigDecimal price) {
+            if (tokens <= 0 || price == null || price.signum() == 0) {
+                return BigDecimal.ZERO;
+            }
+            return price.multiply(BigDecimal.valueOf(tokens))
+                    .divide(BigDecimal.valueOf(1_000_000L), 12, RoundingMode.HALF_UP);
+        }
+    }
+
+    private static final class CostEconomicsSummary {
+        private final LinkedHashMap<String, Long> byReliability = new LinkedHashMap<>();
+        private final LinkedHashMap<String, Long> byCostEstimateReliability = new LinkedHashMap<>();
+        private final LinkedHashMap<String, Long> byDecision = new LinkedHashMap<>();
+        private final LinkedHashMap<String, BigDecimal> clientReportedByCurrency = new LinkedHashMap<>();
+        private final LinkedHashMap<String, BigDecimal> officialCalculatedByCurrency = new LinkedHashMap<>();
+
+        void add(Map<String, Object> costEconomics) {
+            var reliability = nonBlank(text(costEconomics.get("cacheSignalReliability")), "unknown");
+            byReliability.merge(reliability, 1L, Long::sum);
+            var costReliability = nonBlank(text(costEconomics.get("costEstimateReliability")), "unknown");
+            byCostEstimateReliability.merge(costReliability, 1L, Long::sum);
+            var decision = nonBlank(text(costEconomics.get("providerCacheDecision")), "unknown");
+            byDecision.merge(decision, 1L, Long::sum);
+            var reported = decimalValue(costEconomics.get("clientReportedCost"));
+            var reportedCurrency = text(costEconomics.get("clientReportedCurrency"));
+            if (!reportedCurrency.isBlank() && reported.signum() != 0) {
+                clientReportedByCurrency.merge(reportedCurrency, reported, BigDecimal::add);
+            }
+            var calculated = decimalValue(costEconomics.get("officialCalculatedCost"));
+            var calculatedCurrency = text(costEconomics.get("officialCalculatedCurrency"));
+            if (!calculatedCurrency.isBlank() && calculated.signum() != 0) {
+                officialCalculatedByCurrency.merge(calculatedCurrency, calculated, BigDecimal::add);
+            }
+        }
+
+        Map<String, Object> toMap() {
+            var out = new LinkedHashMap<String, Object>();
+            out.put("byReliability", byReliability);
+            out.put("byCostEstimateReliability", byCostEstimateReliability);
+            out.put("byDecision", byDecision);
+            out.put("clientReportedCostByCurrency", clientReportedByCurrency);
+            out.put("officialCalculatedCostByCurrency", officialCalculatedByCurrency);
+            out.put("providerReportedCostByCurrency", clientReportedByCurrency);
+            out.put("dualCalculatedCostByCurrency", officialCalculatedByCurrency);
+            return out;
+        }
     }
 
     private static final class UsageMetric {
