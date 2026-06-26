@@ -20,6 +20,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AgentOutputCompletionDetector completionDetector;
     private final AcpxUsageReader usageReader;
     private final AgentFinalArtifactExtractor finalArtifactExtractor;
+    private final PromptManifestWriter promptManifestWriter = new PromptManifestWriter();
 
     public AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly) {
         this(transport, prepareOnly, new AcpxUsageReader());
@@ -85,16 +86,23 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
         Files.createDirectories(promptPath.getParent());
         Files.createDirectories(outputPath.getParent());
-        Files.writeString(
+        var rendered = promptRenderer.renderWithSections(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                context.definition().id(),
+                promptTemplate,
+                context.instance().inputRefs()
+        );
+        Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
+        promptManifestWriter.write(
+                PromptManifestWriter.manifestPathFor(promptPath),
+                context.workstreamId(),
+                runId,
+                context.definition().id(),
+                agent,
+                promptTemplate,
                 promptPath,
-                promptRenderer.render(
-                        context.workspaceRoot(),
-                        context.workstreamId(),
-                        context.definition().id(),
-                        promptTemplate,
-                        context.instance().inputRefs()
-                ),
-                StandardCharsets.UTF_8
+                rendered.sections()
         );
 
         if (prepareOnly) {

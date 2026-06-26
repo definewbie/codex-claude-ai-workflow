@@ -29,6 +29,7 @@ record RunMetadata(
         String promptTemplate,
         String workdir,
         String promptPath,
+        String promptManifestPath,
         String outputPath,
         String transcriptPath,
         String stderrPath,

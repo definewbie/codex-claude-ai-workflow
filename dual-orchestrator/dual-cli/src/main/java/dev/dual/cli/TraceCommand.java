@@ -142,6 +142,7 @@ public final class TraceCommand implements Callable<Integer> {
                         + runStatusLabel(run) + "  "
                         + run.durationMs() + "ms  "
                         + sessionScopeLabel(run)
+                        + promptProvenanceLabel(paths, run)
                         + tokenLabel(paths, run));
             }
         }
@@ -149,6 +150,7 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println();
 
         printToolGovernance(paths);
+        printTokenAttribution(paths);
         System.out.println();
 
         System.out.println("Artifacts:");
@@ -162,6 +164,53 @@ public final class TraceCommand implements Callable<Integer> {
         return 0;
     }
 
+    private void printTokenAttribution(WorkstreamPaths paths) throws Exception {
+        var metrics = readMap(paths.workstreamMetricsJson());
+        var attr = map(metrics.get("tokenAttribution"));
+        System.out.println("Token Attribution:");
+        if (attr.isEmpty()) {
+            System.out.println("  -");
+            return;
+        }
+        var nodeHotspots = mapList(attr.get("nodeHotspots"));
+        if (!nodeHotspots.isEmpty()) {
+            var top = map(nodeHotspots.get(0));
+            System.out.println("  top node: " + top.get("nodeId")
+                    + " (" + top.get("agent") + ")"
+                    + " total=" + longValue(top.get("totalTokens"))
+                    + " cachedRead=" + longValue(top.get("cachedReadTokens"))
+                    + " output=" + longValue(top.get("outputTokens"))
+                    + " transcriptBytes=" + longValue(top.get("transcriptBytes"))
+                    + " heavy=" + top.get("heavy"));
+        }
+        var visibility = map(attr.get("usageVisibility"));
+        var byVisibility = map(visibility.get("byVisibility"));
+        if (!byVisibility.isEmpty()) {
+            System.out.println("  usage visibility: " + byVisibility);
+        }
+        var gaps = mapList(visibility.get("gaps"));
+        if (!gaps.isEmpty()) {
+            var gap = map(gaps.get(0));
+            System.out.println("  usage gap: " + gap.get("agent") + " " + gap.get("nodeId")
+                    + " visibility=" + gap.get("visibility")
+                    + " reason=" + gap.get("reason"));
+        }
+        for (var seg : mapList(attr.get("sessionSnowball")).stream().limit(2).toList()) {
+            var sm = map(seg);
+            System.out.println("  session " + sm.get("sessionSegmentKey")
+                    + ": transcriptGrowthRun=" + sm.get("maxTranscriptGrowthRun"));
+        }
+        var files = mapList(attr.get("fileReadCost"));
+        if (!files.isEmpty()) {
+            var topFile = map(files.get(0));
+            System.out.println("  top read cost: " + topFile.get("path")
+                    + " x" + longValue(topFile.get("readCount"))
+                    + " bytes=" + longValue(topFile.get("fileBytes"))
+                    + " ~" + longValue(topFile.get("estimatedReadTokens")) + "tok"
+                    + " status=" + topFile.get("rereadReasonStatus"));
+        }
+    }
+
     private void printToolGovernance(WorkstreamPaths paths) throws Exception {
         var metrics = readMap(paths.workstreamMetricsJson());
         var toolMetrics = map(metrics.get("toolMetrics"));
@@ -172,7 +221,8 @@ public final class TraceCommand implements Callable<Integer> {
         }
         System.out.println("  toolCalls=" + longValue(toolMetrics.get("toolCallCount"))
                 + " reads=" + longValue(toolMetrics.get("readCount"))
-                + " bash=" + longValue(toolMetrics.get("bashCount")));
+                + " bash=" + longValue(toolMetrics.get("bashCount"))
+                + " missingRereadReasons=" + longValue(toolMetrics.get("missingRereadReasonCount")));
         var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
         if (repeatedReads.isEmpty()) {
             System.out.println("  repeated reads: -");
@@ -182,6 +232,7 @@ public final class TraceCommand implements Callable<Integer> {
         for (var item : repeatedReads.stream().limit(5).toList()) {
             System.out.println("    " + text(item.get("path")) + " x" + longValue(item.get("count"))
                     + " evidenceKnown=" + Boolean.TRUE.equals(item.get("evidenceKnown"))
+                    + " rereadReason=" + text(item.get("rereadReasonStatus"))
                     + " nodes=" + String.join(",", listOfText(item.get("nodes"))));
         }
     }
@@ -440,6 +491,34 @@ public final class TraceCommand implements Callable<Integer> {
         return runs.stream()
                 .skip(Math.max(0, runs.size() - limit))
                 .toList();
+    }
+
+    private static String promptProvenanceLabel(WorkstreamPaths paths, RunMetadata run) {
+        var ref = run.promptManifestPath();
+        if (ref == null || ref.isBlank()) {
+            return "";
+        }
+        var manifestPath = paths.workspaceRoot().resolve(ref).normalize();
+        if (!Files.isRegularFile(manifestPath)) {
+            return "";
+        }
+        try {
+            var node = MAPPER.readTree(manifestPath.toFile());
+            var total = node.path("totalEstimatedTokens").asLong(0);
+            var sections = node.path("sections");
+            var top = new ArrayList<String>();
+            if (sections.isArray()) {
+                var items = new ArrayList<com.fasterxml.jackson.databind.JsonNode>();
+                sections.forEach(items::add);
+                items.sort(Comparator.comparingLong(
+                        (com.fasterxml.jackson.databind.JsonNode s) -> s.path("estimatedTokens").asLong(0)).reversed());
+                items.stream().limit(3).forEach(s ->
+                        top.add(s.path("name").asText("?") + ":" + s.path("estimatedTokens").asLong(0)));
+            }
+            return "promptTokens=" + total + (top.isEmpty() ? "" : " topSections=" + String.join(",", top)) + "  ";
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private static String sessionScopeLabel(RunMetadata run) {

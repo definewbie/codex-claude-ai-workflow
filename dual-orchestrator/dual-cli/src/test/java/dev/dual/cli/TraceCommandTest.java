@@ -39,10 +39,20 @@ class TraceCommandTest {
         assertTrue(printed.contains("[warning] Accepted with notes"));
         assertTrue(printed.contains("[info] Repair loop occurred"));
         assertTrue(printed.contains("[ok] intake.claude_brainstorm"));
+        assertTrue(printed.contains("promptTokens="));
+        assertTrue(printed.contains("topSections="));
         assertTrue(printed.contains("[loop] repair: REJECT_IMPLEMENTATION_BUG"));
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
         assertTrue(printed.contains("Tool Governance:"));
-        assertTrue(printed.contains("README.md x2 evidenceKnown=true"));
+        assertTrue(printed.contains("missingRereadReasons=1"));
+        assertTrue(printed.contains("README.md x2 evidenceKnown=true rereadReason=missing"));
+        assertTrue(printed.contains("Token Attribution:"));
+        assertTrue(printed.contains("top node: design.claude_design"));
+        assertTrue(printed.contains("heavy=[cachedRead, transcript]"));
+        assertTrue(printed.contains("usage visibility: {provider_run_usage=1, session_snapshot_only=1}"));
+        assertTrue(printed.contains("usage gap: codex acceptance.codex_verifier_review visibility=session_snapshot_only"));
+        assertTrue(printed.contains("transcriptGrowthRun=run-1"));
+        assertTrue(printed.contains("top read cost: README.md"));
         assertTrue(printed.contains("Final Report:"));
         assertTrue(printed.contains("Handoff JSON:"));
         assertFalse(printed.contains("Current Failure:"));
@@ -153,6 +163,10 @@ class TraceCommandTest {
         Files.createDirectories(root.resolve("metrics"));
         Files.createDirectories(root.resolve("recovery"));
         Files.createDirectories(root.resolve("runs/run-1"));
+        Files.createDirectories(root.resolve("runs/run-1/prompts"));
+        Files.writeString(root.resolve("runs/run-1/prompts/review.md.manifest.json"), """
+                {"totalEstimatedTokens": 42, "sections":[{"name":"context_package","estimatedTokens":30},{"name":"requirement","estimatedTokens":12}]}
+                """, StandardCharsets.UTF_8);
         Files.createDirectories(root.resolve("workflow"));
         Files.createDirectories(root.resolve("nodes"));
         Files.writeString(root.resolve("reports/latest-final-report.md"), "# Final\n", StandardCharsets.UTF_8);
@@ -168,6 +182,7 @@ class TraceCommandTest {
                   "nodeId": "acceptance.codex_verifier_review",
                   "agent": "codex",
                   "session": "codex-reviewer",
+                  "promptManifestPath": ".agent/workstreams/ws-trace/runs/run-1/prompts/review.md.manifest.json",
                   "durationMs": 123,
                   "exitCode": 0,
                   "status": "completed",
@@ -199,8 +214,39 @@ class TraceCommandTest {
                         "count": 2,
                         "nodes": ["intake.claude_brainstorm", "design.claude_design"],
                         "agents": ["claude"],
-                        "evidenceKnown": true
+                        "evidenceKnown": true,
+                        "rereadReasonRequired": true,
+                        "rereadReasonStatus": "missing"
                       }
+                    ],
+                    "missingRereadReasonCount": 1
+                  },
+                  "tokenAttribution": {
+                    "schemaVersion": 1,
+                    "usageVisibility": {
+                      "byVisibility": {"provider_run_usage": 1, "session_snapshot_only": 1},
+                      "byAgent": {
+                        "claude": {"provider_run_usage": 1},
+                        "codex": {"session_snapshot_only": 1}
+                      },
+                      "gaps": [
+                        {
+                          "runId": "run-1",
+                          "nodeId": "acceptance.codex_verifier_review",
+                          "agent": "codex",
+                          "visibility": "session_snapshot_only",
+                          "reason": "acpx exposed only cumulative session usage_update; per-run provider result.usage was not attributable"
+                        }
+                      ]
+                    },
+                    "nodeHotspots": [
+                      {"nodeId":"design.claude_design","agent":"claude","runCount":1,"totalTokens":5000,"cachedReadTokens":4500,"outputTokens":200,"transcriptBytes":30000,"heavy":["cachedRead","transcript"]}
+                    ],
+                    "sessionSnowball": [
+                      {"sessionSegmentKey":"ws:ws-trace","maxTranscriptGrowthRun":"run-1","runs":[]}
+                    ],
+                    "fileReadCost": [
+                      {"path":"README.md","readCount":2,"fileBytes":800,"estimatedReadTokens":200,"rereadReasonStatus":"missing"}
                     ]
                   }
                 }

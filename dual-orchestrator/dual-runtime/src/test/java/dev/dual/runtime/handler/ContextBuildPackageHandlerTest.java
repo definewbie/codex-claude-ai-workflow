@@ -213,21 +213,21 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void legacyPathCanRenderExplicitWorkingMemorySection() throws Exception {
-        Files.createDirectories(wsDir.resolve("artifacts/next-stage"));
+        // Working Memory now renders from WorkstreamMemory, not the EvidenceManifest dump.
+        // Seed memory with scope/decisions; EvidenceManifest is still written for provenance.
+        Files.createDirectories(wsDir.resolve("memory"));
         Files.writeString(wsDir.resolve("requirement.md"), "Legacy memory test.", StandardCharsets.UTF_8);
-        Files.writeString(wsDir.resolve("artifacts/next-stage/handoff.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws-ctx",
-                  "stageId": "plan",
-                  "iterationId": "iter-003",
-                  "completedWork": ["Selected the minimal API surface"],
-                  "importantDecisions": ["Do not expand backend schema"],
-                  "changedFiles": ["docs/plan.md"],
-                  "openRisks": ["Needs implementation validation"],
-                  "recommendedNextStage": "Implement the accepted plan."
-                }
-                """, StandardCharsets.UTF_8);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                wsDir.resolve("memory/workstream-memory.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1, "artifactType", "workstream_memory", "workstreamId", "ws-ctx",
+                        "decidedScope", List.of("Selected the minimal API surface"),
+                        "nonGoals", List.of(),
+                        "decisions", List.of(Map.of("stage", "plan", "decision", "READY_TO_IMPLEMENT",
+                                "summary", "Do not expand backend schema")),
+                        "readFiles", List.of(), "openIssues", List.of(),
+                        "priorVerdicts", List.of(), "priorFailures", List.of()
+                ));
 
         var def = new NodeDefinition("ctx.custom-memory", NodeKind.TASK, "context.build_package", Map.of(
                 "target_node", "next.node",
@@ -244,11 +244,121 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Working Memory"));
         assertTrue(markdown.contains("Selected the minimal API surface"));
         assertTrue(markdown.contains("Do not expand backend schema"));
-        assertTrue(Files.exists(wsDir.resolve("memory/evidence-manifest.json")));
+        assertTrue(Files.exists(wsDir.resolve("memory/evidence-manifest.json")),
+                "EvidenceManifest must still be written for provenance/debug");
 
         var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
         var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
         assertEquals(".agent/workstreams/ws-ctx/memory/evidence-manifest.json", metadata.get("evidenceManifest"));
+    }
+
+    @Test
+    void implementationProfileRendersAgentHandoffFromWorkstreamMemory() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("memory"));
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                wsDir.resolve("memory/workstream-memory.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "workstream_memory",
+                        "workstreamId", "ws-ctx",
+                        "decidedScope", List.of("add login"),
+                        "nonGoals", List.of("SSO"),
+                        "readFiles", List.of(Map.of(
+                                "path", "src/a.py", "sha", "s1", "summary", "A file",
+                                "trusted", true, "invalidationReason", "", "readRunId", "run-1")),
+                        "decisions", List.of(Map.of(
+                                "stage", "plan", "decision", "READY_TO_IMPLEMENT", "summary", "approved")),
+                        "openIssues", List.of(Map.of("id", "a", "desc", "handle edge", "status", "open")),
+                        "priorVerdicts", List.of(),
+                        "priorFailures", List.of()
+                ));
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Working Memory"));
+        assertTrue(markdown.contains("add login"));
+        assertTrue(markdown.contains("src/a.py"));
+        assertTrue(markdown.contains("READY_TO_IMPLEMENT"));
+        assertTrue(markdown.contains("handle edge"));
+        assertFalse(markdown.contains("(no stage handoff evidence yet)"));
+    }
+
+    @Test
+    void acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Accept the change.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("memory"));
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                wsDir.resolve("memory/workstream-memory.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1, "artifactType", "workstream_memory", "workstreamId", "ws-ctx",
+                        "priorVerdicts", List.of(Map.of(
+                                "nodeId", "acceptance.codex_verifier_review", "stage", "acceptance",
+                                "decision", "REJECTED", "blocking", true, "mustFix", List.of("fix token race"))),
+                        "openIssues", List.of(Map.of("id", "x", "desc", "verify refresh", "status", "open")),
+                        "readFiles", List.of(), "decisions", List.of()
+                ));
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id": "tc-1",
+                  "version": 1,
+                  "created_at": "2026-06-18T00:00:00Z",
+                  "objective": "Accept the change.",
+                  "status": "READY_FOR_REVIEW",
+                  "scope": {"included": [], "excluded": []},
+                  "acceptance_criteria": ["tokens refreshed"],
+                  "test_requirements": [],
+                  "non_goals": [],
+                  "constraints": [],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "compilation_pass": 1
+                }
+                """, StandardCharsets.UTF_8);
+        var evidenceDir = wsDir.resolve("artifacts/git-evidence");
+        Files.createDirectories(evidenceDir);
+        Files.writeString(evidenceDir.resolve("changed-files.txt"), "src/auth.py\n", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("acceptance", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Review Evidence Brief"));
+        assertTrue(markdown.contains("REJECTED"));
+        assertTrue(markdown.contains("src/auth.py"));
+        assertTrue(markdown.contains("tokens refreshed"));
+        assertTrue(markdown.toLowerCase().contains("incremental"));
+    }
+
+    @Test
+    void unchangedReadFilesAreMarkedReusableInHandoff() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Build it.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("memory"));
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                wsDir.resolve("memory/workstream-memory.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1, "artifactType", "workstream_memory", "workstreamId", "ws-ctx",
+                        "decidedScope", List.of(), "nonGoals", List.of(),
+                        "readFiles", List.of(Map.of(
+                                "path", "src/a.py", "sha", "s1", "summary", "A file",
+                                "trusted", true, "invalidationReason", "", "readRunId", "run-1")),
+                        "decisions", List.of(), "openIssues", List.of(),
+                        "priorVerdicts", List.of(), "priorFailures", List.of()
+                ));
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Reusable reads"), markdown);
+        assertTrue(markdown.contains("reuse unless editing"), markdown);
     }
 
     // --- Handoff.json consumption ---
@@ -1084,6 +1194,22 @@ class ContextBuildPackageHandlerTest {
                         "readFiles", List.of("miniprogram/src/pages/treatment-record/index.vue", "docs/old.md")
                 )
         ));
+        Files.createDirectories(wsDir.resolve("memory"));
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(wsDir.resolve("memory/workstream-memory.json").toFile(), Map.of(
+                "schemaVersion", 1,
+                "artifactType", "workstream_memory",
+                "workstreamId", "ws-ctx",
+                "readFiles", List.of(Map.of(
+                        "path", "miniprogram/src/pages/treatment-record/index.vue",
+                        "sha", "sha-1",
+                        "summary", "Previously read source file (27 bytes).",
+                        "evidenceRole", "source",
+                        "trusted", true,
+                        "invalidationReason", "",
+                        "readRunId", "run-000",
+                        "lastSeenStage", "intake"
+                ))
+        ));
 
         var result = handler.execute(ctx("implementation", List.of()));
 
@@ -1093,6 +1219,8 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
         assertTrue(markdown.contains("Already inspected files"));
         assertTrue(markdown.contains("Read reuse rule"));
+        assertTrue(markdown.contains("their recorded sha is still trusted"));
+        assertTrue(markdown.contains("Previously read source file"));
 
         var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
         var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
@@ -1147,9 +1275,19 @@ class ContextBuildPackageHandlerTest {
         assertTrue(readReuse.get("avoidRepeatingReads") instanceof List<?> avoidReads
                         && !avoidReads.isEmpty(),
                 "read reuse contract should turn repeated-read risks into structured guidance");
+        assertTrue(readReuse.get("reusableReadFiles") instanceof List<?> reusable
+                        && !reusable.isEmpty(),
+                "read reuse contract should derive reusable files from WorkstreamMemory.readFiles");
+        assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
+                "read reuse contract must point agents at the typed reread_reasons field");
+        assertTrue(markdown.contains("record a matching entry in agent_output_contract.reread_reasons"),
+                "context package must require a matching reread_reasons entry per re-read reusable path");
 
         var workstreamMemory = objectMapper.readValue(wsDir.resolve("memory/workstream-memory.json").toFile(), Map.class);
         assertEquals("workstream_memory", workstreamMemory.get("artifactType"));
+        assertTrue(workstreamMemory.get("readFiles") instanceof List<?> remembered
+                        && !remembered.isEmpty(),
+                "context governance must preserve typed read memory instead of overwriting it with refs only");
         assertTrue(workstreamMemory.get("refs") instanceof Map<?, ?> refs
                         && refs.containsKey("readReuseContract"),
                 "workstream memory should index the reusable memory sidecars");

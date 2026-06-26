@@ -39,7 +39,7 @@ Context use rule:
 
 - If the package contains `Working Memory`, use it and git evidence before re-reading repository files.
 - Re-read files only when the memory, diff, or self-test evidence is insufficient.
-- If you must re-read a known file, mention the reason in the self-test report.
+- If you re-read a file listed in reusableReadFiles, you must record a matching entry in agent_output_contract.reread_reasons (see Read Reuse Contract Semantics). Do not put re-read reasons in this report's prose.
 
 ## Output Contract
 

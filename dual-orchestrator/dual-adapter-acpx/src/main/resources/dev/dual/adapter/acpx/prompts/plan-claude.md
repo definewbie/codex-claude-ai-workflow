@@ -36,7 +36,7 @@ Context use rule:
 
 - If the package contains `Working Memory`, use it before reading repository files.
 - Re-read files only when the memory is missing, stale, or insufficient for planning.
-- If you must re-read a known file, mention the reason in the Markdown plan.
+- If you re-read a file listed in reusableReadFiles, you must record a matching entry in agent_output_contract.reread_reasons (see Read Reuse Contract Semantics). Do not put re-read reasons in this report's prose.
 
 ## Output Contract
 

@@ -820,6 +820,82 @@ class ArtifactContractValidatorTest {
         return tempDir.relativize(path).toString();
     }
 
+    @Test
+    void rereadReasonsFlowFromEnvelopeToSidecarAndRunMetadata() throws Exception {
+        var runRef = writeRunMetadata("run-reread-flow", "completed");
+        var outputRef = writeOutput("plan-reread.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Plan needs current file contents before implementation.",
+                  "blocking": true,
+                  "checks": [], "evidence": [], "missing_evidence": [],
+                  "must_fix": ["Rewrite shell commands."],
+                  "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Plan is not execution-ready.",
+                  "failure": {"category_hint":"PLAN_EXECUTION_DISCIPLINE","contract_gaps":["gap"],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":"needs revision"},
+                  "reread_reasons": [
+                    {"path":"src/executor.js","reason":"exact current content is needed before editing","stage":"plan","evidence":"editing command dispatch"}
+                  ]
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Plan needs current file contents before implementation.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var sidecar = Files.readString(tempDir.resolve((String) validated.result().get("contract_sidecar_ref")));
+        assertTrue(sidecar.contains("reread_reasons"), sidecar);
+        assertTrue(sidecar.contains("src/executor.js"), sidecar);
+        var runMetadata = Files.readString(tempDir.resolve(runRef));
+        assertTrue(runMetadata.contains("reread_reasons"), runMetadata);
+        assertTrue(runMetadata.contains("src/executor.js"), runMetadata);
+    }
+
+    @Test
+    void invalidRereadReasonsAreRejected() throws Exception {
+        var runRef = writeRunMetadata("run-reread-bad", "completed");
+        var outputRef = writeOutput("plan-badreread.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Plan needs revision.",
+                  "blocking": true,
+                  "checks": [], "evidence": [], "missing_evidence": [],
+                  "must_fix": ["Rewrite shell commands."],
+                  "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Plan is not execution-ready.",
+                  "failure": {"category_hint":"PLAN_EXECUTION_DISCIPLINE","contract_gaps":["gap"],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":"needs revision"},
+                  "reread_reasons": [
+                    {"path":"src/executor.js","reason":"because I felt like it"}
+                  ]
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Plan needs revision.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+    }
+
     private static NodeDefinition agentNode(String nodeId) {
         return new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of());
     }

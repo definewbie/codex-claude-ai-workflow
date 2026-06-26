@@ -360,7 +360,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "git_evidence" -> Files.exists(workstreamDir.resolve("artifacts/git-evidence"));
             case "ledger_pointers" -> Files.exists(workstreamDir.resolve("events.jsonl"));
             case "task_contract" -> Files.exists(workstreamDir.resolve("artifacts/task-contract.json"));
-            case "working_memory", "review_evidence" -> Files.exists(workstreamDir.resolve(EvidenceManifest.MANIFEST_REF_NAME));
+            case "working_memory", "review_evidence" -> Files.exists(workstreamDir.resolve("memory/workstream-memory.json"));
             default -> false;
         };
     }
@@ -505,10 +505,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 ContextPackageSectionRenderer.appendRecentAgentOutputsLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 2);
             }
             case "working_memory" -> {
-                ContextPackageSectionRenderer.appendWorkingMemory(builder, manifest);
+                ContextPackageSectionRenderer.appendWorkingMemory(builder, workstreamDir, context.workspaceRoot());
             }
             case "review_evidence" -> {
-                ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, manifest);
+                ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, workstreamDir, context.workspaceRoot());
             }
             case "git_evidence" -> {
                 if (strategy == Degradation.DIFF_STAT) {
@@ -636,12 +636,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         if (sections.contains("working_memory")) {
             builder.append("## Working Memory\n\n");
-            ContextPackageSectionRenderer.appendWorkingMemory(builder, manifest == null ? EvidenceManifest.empty(context.workstreamId()) : manifest);
+            ContextPackageSectionRenderer.appendWorkingMemory(builder, workstreamDir, context.workspaceRoot());
         }
 
         if (sections.contains("review_evidence")) {
             builder.append("## Review Evidence Brief\n\n");
-            ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, manifest == null ? EvidenceManifest.empty(context.workstreamId()) : manifest);
+            ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, workstreamDir, context.workspaceRoot());
         }
 
         if (sections.contains("git_evidence")) {

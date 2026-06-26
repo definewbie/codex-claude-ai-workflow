@@ -51,15 +51,17 @@ final class RepoScopeGovernance {
     ) throws IOException {
         var stageId = stageId(context);
         var targetNodeDefinitionId = targetNodeDefinitionId(context);
+        var memoryDir = workstreamDir.resolve("memory");
+        var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
+        var existingMemory = readWorkstreamMemory(workstreamMemoryPath, objectMapper);
         var repoMap = buildRepoMap(workspaceRoot, workstreamDir, context, objectMapper);
         var plan = buildFileRelevancePlan(workspaceRoot, workstreamDir, context, manifest, repoMap, objectMapper, stageId, targetNodeDefinitionId);
         var policy = buildStageScopePolicy(context, stageId, plan, targetNodeDefinitionId);
         var report = buildInitialReport(context, stageId, plan, policy, targetNodeDefinitionId);
         var workingSet = buildWorkingSet(context, stageId, plan, policy, targetNodeDefinitionId);
         var fileSummaries = buildFileSummaries(context, stageId, workingSet);
-        var readReuseContract = buildReadReuseContract(context, stageId, plan, policy, targetNodeDefinitionId);
+        var readReuseContract = buildReadReuseContract(context, stageId, plan, policy, targetNodeDefinitionId, existingMemory);
 
-        var memoryDir = workstreamDir.resolve("memory");
         var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
         Files.createDirectories(memoryDir);
         Files.createDirectories(governanceDir);
@@ -71,12 +73,12 @@ final class RepoScopeGovernance {
         var workingSetPath = memoryDir.resolve("working-set.json");
         var fileSummariesPath = memoryDir.resolve("file-summaries.json");
         var readReuseContractPath = memoryDir.resolve("read-reuse-contract.json");
-        var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
         var reportPath = governanceDir.resolve(nodeKey + ".json");
         var workstreamMemory = buildWorkstreamMemory(
                 context,
                 workspaceRoot,
                 stageId,
+                existingMemory,
                 repoMapPath,
                 planPath,
                 policyPath,
@@ -248,7 +250,7 @@ final class RepoScopeGovernance {
                 "preferExistingEvidence", true,
                 "avoidRepeatedReads", previouslyReadFiles.stream().limit(12).toList(),
                 "requireReasonWhenRereading", true,
-                "reasonField", "verification_summary or scope_expansion_reason in the structured artifact"
+                "reasonField", "agent_output_contract.reread_reasons"
         ));
         policy.put("forbiddenScope", forbiddenScope(stageId));
         policy.put("explorationBudget", Map.of(
@@ -364,10 +366,13 @@ final class RepoScopeGovernance {
             String stageId,
             Map<String, Object> plan,
             Map<String, Object> policy,
-            String targetNodeDefinitionId
+            String targetNodeDefinitionId,
+            Map<String, Object> workstreamMemory
     ) {
         var reusePolicy = mapValue(policy.get("readReusePolicy"));
         var repeated = mapList(plan.get("repeatedReadAvoidance"));
+        var reusableReadFiles = reusableReadFiles(workstreamMemory);
+        var invalidatedReadFiles = invalidatedReadFiles(workstreamMemory);
         var document = new LinkedHashMap<String, Object>();
         document.put("schemaVersion", 1);
         document.put("artifactType", "read_reuse_contract");
@@ -379,13 +384,12 @@ final class RepoScopeGovernance {
         document.put("iterationId", context.instance().iterationId());
         document.put("preferExistingEvidence", true);
         document.put("avoidRepeatingReads", repeated);
-        document.put("allowedRepeatedReadReasons", List.of(
-                "file changed after prior read",
-                "exact current content is needed before editing",
-                "previous evidence does not cover the selected stage"
-        ));
+        document.put("reusableReadFiles", reusableReadFiles);
+        document.put("invalidatedReadFiles", invalidatedReadFiles);
+        document.put("reuseSource", reusableReadFiles.isEmpty() ? "run_history" : "workstream_memory.readFiles");
+        document.put("allowedRepeatedReadReasons", ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS);
         document.put("requireReasonWhenRereading", reusePolicy.getOrDefault("requireReasonWhenRereading", true));
-        document.put("reasonField", reusePolicy.getOrDefault("reasonField", "verification_summary or scope_expansion_reason"));
+        document.put("reasonField", reusePolicy.getOrDefault("reasonField", "agent_output_contract.reread_reasons"));
         document.put("generatedAt", Instant.now().toString());
         return document;
     }
@@ -394,6 +398,7 @@ final class RepoScopeGovernance {
             TaskHandler.TaskContext context,
             Path workspaceRoot,
             String stageId,
+            Map<String, Object> existingMemory,
             Path repoMapPath,
             Path planPath,
             Path policyPath,
@@ -401,13 +406,20 @@ final class RepoScopeGovernance {
             Path fileSummariesPath,
             Path readReuseContractPath
     ) {
-        var document = new LinkedHashMap<String, Object>();
+        var document = new LinkedHashMap<String, Object>(existingMemory);
         document.put("schemaVersion", 1);
         document.put("artifactType", "workstream_memory");
         document.put("workstreamId", context.workstreamId());
         document.put("stageId", stageId);
         document.put("nodeInstanceId", context.instance().nodeInstanceId());
         document.put("iterationId", context.instance().iterationId());
+        document.putIfAbsent("decidedScope", List.of());
+        document.putIfAbsent("nonGoals", List.of());
+        document.putIfAbsent("decisions", List.of());
+        document.putIfAbsent("readFiles", List.of());
+        document.putIfAbsent("openIssues", List.of());
+        document.putIfAbsent("priorVerdicts", List.of());
+        document.putIfAbsent("priorFailures", List.of());
         document.put("refs", Map.of(
                 "repoMap", ref(workspaceRoot, repoMapPath),
                 "fileRelevancePlan", ref(workspaceRoot, planPath),
@@ -418,6 +430,58 @@ final class RepoScopeGovernance {
         ));
         document.put("generatedAt", Instant.now().toString());
         return document;
+    }
+
+    private static Map<String, Object> readWorkstreamMemory(Path workstreamMemoryPath, ObjectMapper objectMapper) {
+        if (!Files.isRegularFile(workstreamMemoryPath)) {
+            return new LinkedHashMap<>();
+        }
+        try {
+            return new LinkedHashMap<>(objectMapper.readValue(workstreamMemoryPath.toFile(), MAP_TYPE));
+        } catch (IOException ignored) {
+            return new LinkedHashMap<>();
+        }
+    }
+
+    private static List<Map<String, Object>> reusableReadFiles(Map<String, Object> workstreamMemory) {
+        var files = new ArrayList<Map<String, Object>>();
+        for (var item : mapList(workstreamMemory.get("readFiles"))) {
+            if (!Boolean.TRUE.equals(item.get("trusted")) || !text(item.get("invalidationReason")).isBlank()) {
+                continue;
+            }
+            files.add(readReuseFile(item, "reuse_existing_summary"));
+        }
+        return files.stream()
+                .sorted(Comparator.comparing(file -> text(file.get("path"))))
+                .limit(24)
+                .toList();
+    }
+
+    private static List<Map<String, Object>> invalidatedReadFiles(Map<String, Object> workstreamMemory) {
+        var files = new ArrayList<Map<String, Object>>();
+        for (var item : mapList(workstreamMemory.get("readFiles"))) {
+            if (text(item.get("invalidationReason")).isBlank()) {
+                continue;
+            }
+            files.add(readReuseFile(item, "fresh_read_allowed"));
+        }
+        return files.stream()
+                .sorted(Comparator.comparing(file -> text(file.get("path"))))
+                .limit(24)
+                .toList();
+    }
+
+    private static Map<String, Object> readReuseFile(Map<String, Object> item, String recommendation) {
+        var file = new LinkedHashMap<String, Object>();
+        file.put("path", text(item.get("path")));
+        file.put("sha", text(item.get("sha")));
+        file.put("summary", text(item.get("summary")));
+        file.put("evidenceRole", text(item.get("evidenceRole")));
+        file.put("readRunId", text(item.get("readRunId")));
+        file.put("lastSeenStage", text(item.get("lastSeenStage")));
+        file.put("invalidationReason", text(item.get("invalidationReason")));
+        file.put("recommendation", recommendation);
+        return file;
     }
 
     private static Map<String, Object> memoryFile(String path, Map<String, Object> repeatedRead, String reason) {
@@ -749,9 +813,34 @@ final class RepoScopeGovernance {
     }
 
     private static void appendReadAvoidanceRules(StringBuilder builder, Documents documents) {
+        var reusable = mapList(documents.readReuseContract().get("reusableReadFiles"));
+        if (!reusable.isEmpty()) {
+            builder.append("- Read reuse contract: the following files were already inspected and their recorded sha is still trusted. Reuse the summary first; re-read only if you need exact current contents for editing or verification.\n");
+            for (var item : reusable.stream().limit(8).toList()) {
+                builder.append("  - ")
+                        .append(text(item.get("path")))
+                        .append(": ")
+                        .append(text(item.get("summary")))
+                        .append("\n");
+            }
+            builder.append("  If you Read any file listed above, you must record a matching entry in agent_output_contract.reread_reasons (path must match exactly). An empty reread_reasons is only valid when you reuse these summaries and do not re-read any of them.\n");
+        }
+        var invalidated = mapList(documents.readReuseContract().get("invalidatedReadFiles"));
+        if (!invalidated.isEmpty()) {
+            builder.append("- Fresh read allowed for invalidated files:\n");
+            for (var item : invalidated.stream().limit(6).toList()) {
+                builder.append("  - ")
+                        .append(text(item.get("path")))
+                        .append(" (")
+                        .append(text(item.get("invalidationReason")))
+                        .append(")\n");
+            }
+        }
         var repeated = mapList(documents.plan().get("repeatedReadAvoidance"));
         if (repeated.isEmpty()) {
-            builder.append("- Read reuse rule: use the recommended read files first; no repeated-read risk is known yet.\n");
+            if (reusable.isEmpty()) {
+                builder.append("- Read reuse rule: use the recommended read files first; no repeated-read risk is known yet.\n");
+            }
             return;
         }
         builder.append("- Read reuse rule: use existing evidence before re-reading files already inspected in this workstream.\n");

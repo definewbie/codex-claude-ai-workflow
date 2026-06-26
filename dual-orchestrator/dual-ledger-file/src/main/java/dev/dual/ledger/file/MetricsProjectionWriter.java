@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -64,8 +65,11 @@ final class MetricsProjectionWriter {
         metrics.put("totalNodeDurationMs", totalDurationMs(nodes));
         metrics.put("longestNodes", longestNodes(nodes, 5));
         metrics.put("providerMetrics", providerMetrics(paths));
-        metrics.put("tokenMetrics", tokenMetrics(paths));
-        metrics.put("toolMetrics", toolMetrics(paths));
+        var tokenMetrics = tokenMetrics(paths);
+        var toolMetrics = toolMetrics(paths);
+        metrics.put("tokenMetrics", tokenMetrics);
+        metrics.put("toolMetrics", toolMetrics);
+        metrics.put("tokenAttribution", tokenAttribution(tokenMetrics, toolMetrics, paths));
 
         Files.createDirectories(paths.metricsDir());
         jsonWriter.write(paths.workstreamMetricsJson(), metrics);
@@ -275,6 +279,7 @@ final class MetricsProjectionWriter {
         var readFiles = new LinkedHashMap<String, ReadFileMetric>();
         var runs = new ArrayList<Map<String, Object>>();
         var evidenceFiles = evidenceFiles(paths);
+        var readReusePolicy = readReusePolicy(paths);
         long runCount = 0;
         try (var stream = Files.list(paths.runsDir())) {
             for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
@@ -290,13 +295,15 @@ final class MetricsProjectionWriter {
                 var agent = nonBlank(text(run.get("agent")), "unknown");
                 var metric = ToolMetric.from(toolUsage);
                 total.add(metric);
+                var declaredRereadPaths = declaredRereadPaths(run.get("reread_reasons"));
                 for (var file : textList(toolUsage.get("readFiles"))) {
                     var normalized = normalizePath(file);
                     if (normalized.isBlank() || ignoredTelemetryFile(normalized)) {
                         continue;
                     }
                     readFiles.computeIfAbsent(normalized, ReadFileMetric::new)
-                            .accept(runId, nodeId, agent, evidenceFiles.contains(normalized));
+                            .accept(runId, nodeId, agent, evidenceFiles.contains(normalized),
+                                    readReusePolicy.requiresReason(normalized), declaredRereadPaths.contains(normalized));
                 }
                 var item = new LinkedHashMap<String, Object>();
                 item.put("runId", runId);
@@ -319,6 +326,15 @@ final class MetricsProjectionWriter {
                 .limit(20)
                 .map(ReadFileMetric::toMap)
                 .toList());
+        result.put("repeatedReadReasonRequiredCount", readFiles.values().stream()
+                .filter(ReadFileMetric::isRepeated)
+                .filter(ReadFileMetric::rereadReasonRequired)
+                .count());
+        result.put("missingRereadReasonCount", readFiles.values().stream()
+                .filter(ReadFileMetric::isRepeated)
+                .filter(ReadFileMetric::rereadReasonMissing)
+                .count());
+        result.put("allowedRepeatedReadReasons", readReusePolicy.allowedReasons());
         result.put("topReadFiles", readFiles.values().stream()
                 .sorted(Comparator
                         .comparingInt(ReadFileMetric::count).reversed()
@@ -329,6 +345,331 @@ final class MetricsProjectionWriter {
         result.put("evidenceFileCount", evidenceFiles.size());
         result.put("runs", runs);
         return result;
+    }
+
+    /**
+     * Read-only token attribution: joins the already-computed token + tool
+     * metrics with transcript bytes and file sizes into four views — per-run,
+     * per-node hotspots, per-file read cost, per-session snowball. It is a read
+     * model for explaining where tokens go; it is not workflow state.
+     */
+    private Map<String, Object> tokenAttribution(
+            Map<String, Object> tokenMetrics, Map<String, Object> toolMetrics, WorkstreamPaths paths
+    ) throws IOException {
+        var tokenRuns = mapList(tokenMetrics.get("runs"));
+        var toolRunsById = new LinkedHashMap<String, Map<String, Object>>();
+        for (var tr : mapList(toolMetrics.get("runs"))) {
+            toolRunsById.put(text(tr.get("runId")), tr);
+        }
+        var runMeta = runTranscriptMeta(paths);
+        var readReusePolicy = readReusePolicy(paths);
+        var workspaceRoot = paths.workspaceRoot();
+
+        var perRun = new ArrayList<Map<String, Object>>();
+        var byNode = new LinkedHashMap<String, NodeAttribution>();
+        var bySession = new LinkedHashMap<String, ArrayList<Map<String, Object>>>();
+        for (var tr : tokenRuns) {
+            var runId = text(tr.get("runId"));
+            var usage = map(tr.get("usage"));
+            var breakdown = map(tr.get("breakdown"));
+            var toolUsage = map(map(toolRunsById.get(runId)).get("toolUsage"));
+            var meta = runMeta.getOrDefault(runId, new RunMeta("", 0L));
+            var entry = new LinkedHashMap<String, Object>();
+            entry.put("runId", runId);
+            entry.put("nodeId", text(tr.get("nodeId")));
+            entry.put("agent", text(tr.get("agent")));
+            entry.put("stage", text(tr.get("stage")));
+            entry.put("sessionSegmentKey", text(tr.get("sessionSegmentKey")));
+            entry.put("sessionScope", text(tr.get("sessionScope")));
+            entry.put("promptTokens", longValue(breakdown.get("promptTokens")));
+            entry.put("contextPackageTokens", longValue(breakdown.get("contextTokens")));
+            entry.put("inputTokens", longValue(usage.get("inputTokens")));
+            entry.put("outputTokens", longValue(usage.get("outputTokens")));
+            entry.put("cachedReadTokens", longValue(usage.get("cachedReadTokens")));
+            entry.put("measurementType", measurementType(usage, Boolean.TRUE.equals(tr.get("estimated"))));
+            entry.put("usageSource", text(usage.get("source")));
+            entry.put("usageAttribution", text(usage.get("attribution")));
+            entry.put("contextUsedTokens", longValue(usage.get("contextUsedTokens")));
+            entry.put("providerUsageVisibility", providerUsageVisibility(usage, Boolean.TRUE.equals(tr.get("estimated"))));
+            entry.put("providerUsageUnavailableReason", providerUsageUnavailableReason(usage, Boolean.TRUE.equals(tr.get("estimated"))));
+            entry.put("cost", usage.get("costAmount"));
+            entry.put("transcriptTokens", longValue(breakdown.get("transcriptTokens")));
+            entry.put("transcriptBytes", meta.bytes());
+            entry.put("toolCalls", longValue(toolUsage.get("toolCallCount")));
+            entry.put("reads", longValue(toolUsage.get("readCount")));
+            entry.put("bash", longValue(toolUsage.get("bashCount")));
+            entry.put("writes", longValue(toolUsage.get("writeCount")));
+            entry.put("startedAt", meta.startedAt());
+            perRun.add(entry);
+            byNode.computeIfAbsent(text(tr.get("nodeId")), key -> new NodeAttribution(text(tr.get("nodeId")), text(tr.get("agent")))).add(entry);
+            var seg = text(tr.get("sessionSegmentKey"));
+            if (!seg.isBlank()) {
+                bySession.computeIfAbsent(seg, key -> new ArrayList<>()).add(entry);
+            }
+        }
+
+        var nodeHotspots = byNode.values().stream()
+                .map(NodeAttribution::toMap)
+                .sorted((a, b) -> Long.compare(longValue(b.get("totalTokens")), longValue(a.get("totalTokens"))))
+                .toList();
+
+        var fileReadCost = new ArrayList<Map<String, Object>>();
+        for (var fr : mapList(toolMetrics.get("topReadFiles"))) {
+            var path = text(fr.get("path"));
+            var bytes = fileSizeSafe(workspaceRoot, path);
+            var fc = new LinkedHashMap<String, Object>();
+            fc.put("path", path);
+            fc.put("readCount", longValue(fr.get("count")));
+            fc.put("runIds", fr.get("runIds"));
+            fc.put("nodes", fr.get("nodes"));
+            fc.put("agents", fr.get("agents"));
+            fc.put("fileBytes", bytes);
+            fc.put("estimatedReadTokens", bytes / 4);
+            fc.put("reusable", readReusePolicy.requiresReason(path));
+            fc.put("rereadReasonStatus", text(fr.get("rereadReasonStatus")));
+            fileReadCost.add(fc);
+        }
+
+        var sessionSnowball = new ArrayList<Map<String, Object>>();
+        for (var segEntry : bySession.entrySet()) {
+            var segRuns = new ArrayList<>(segEntry.getValue());
+            segRuns.sort(Comparator.comparing(m -> text(m.get("startedAt"))));
+            var ordered = new ArrayList<Map<String, Object>>();
+            long prevBytes = 0;
+            long maxGrowth = -1;
+            String maxGrowthRun = "";
+            for (var r : segRuns) {
+                var bytes = longValue(r.get("transcriptBytes"));
+                var delta = bytes - prevBytes;
+                var sr = new LinkedHashMap<String, Object>();
+                sr.put("runId", r.get("runId"));
+                sr.put("nodeId", r.get("nodeId"));
+                sr.put("seq", ordered.size() + 1);
+                sr.put("cachedReadTokens", r.get("cachedReadTokens"));
+                sr.put("transcriptBytes", bytes);
+                sr.put("deltaTranscriptBytes", delta);
+                ordered.add(sr);
+                if (delta > maxGrowth) {
+                    maxGrowth = delta;
+                    maxGrowthRun = text(r.get("runId"));
+                }
+                prevBytes = bytes;
+            }
+            var seg = new LinkedHashMap<String, Object>();
+            seg.put("sessionSegmentKey", segEntry.getKey());
+            seg.put("runs", ordered);
+            seg.put("maxTranscriptGrowthRun", maxGrowthRun);
+            sessionSnowball.add(seg);
+        }
+
+        var result = new LinkedHashMap<String, Object>();
+        result.put("schemaVersion", 1);
+        result.put("perRun", perRun);
+        result.put("usageVisibility", usageVisibilitySummary(perRun));
+        result.put("nodeHotspots", nodeHotspots);
+        result.put("fileReadCost", fileReadCost);
+        result.put("sessionSnowball", sessionSnowball);
+        return result;
+    }
+
+    private Map<String, Object> usageVisibilitySummary(List<Map<String, Object>> perRun) {
+        var byVisibility = new LinkedHashMap<String, Long>();
+        var byAgent = new LinkedHashMap<String, Map<String, Long>>();
+        var gaps = new ArrayList<Map<String, Object>>();
+        for (var run : perRun) {
+            var visibility = nonBlank(text(run.get("providerUsageVisibility")), "unavailable");
+            var agent = nonBlank(text(run.get("agent")), "unknown");
+            byVisibility.merge(visibility, 1L, Long::sum);
+            byAgent.computeIfAbsent(agent, ignored -> new LinkedHashMap<>())
+                    .merge(visibility, 1L, Long::sum);
+            if (!"provider_run_usage".equals(visibility)) {
+                gaps.add(Map.of(
+                        "runId", text(run.get("runId")),
+                        "nodeId", text(run.get("nodeId")),
+                        "agent", agent,
+                        "visibility", visibility,
+                        "reason", text(run.get("providerUsageUnavailableReason"))
+                ));
+            }
+        }
+        var result = new LinkedHashMap<String, Object>();
+        result.put("byVisibility", byVisibility);
+        result.put("byAgent", byAgent);
+        result.put("gaps", gaps);
+        return result;
+    }
+
+    private String providerUsageVisibility(Map<String, Object> usage, boolean estimated) {
+        if (usage.isEmpty()) {
+            return "unavailable";
+        }
+        var type = measurementType(usage, estimated);
+        if ("PROVIDER_RUN_USAGE".equals(type)) {
+            return "provider_run_usage";
+        }
+        if ("SESSION_USED_SNAPSHOT".equals(type)) {
+            return "session_snapshot_only";
+        }
+        if ("ARTIFACT_ESTIMATE".equals(type)) {
+            return "artifact_estimate_only";
+        }
+        return "unavailable";
+    }
+
+    private String providerUsageUnavailableReason(Map<String, Object> usage, boolean estimated) {
+        if (usage.isEmpty()) {
+            return "no usage object was written for this run";
+        }
+        var type = measurementType(usage, estimated);
+        if ("PROVIDER_RUN_USAGE".equals(type)) {
+            return "";
+        }
+        if ("SESSION_USED_SNAPSHOT".equals(type)) {
+            return "acpx exposed only cumulative session usage_update; per-run provider result.usage was not attributable";
+        }
+        if ("ARTIFACT_ESTIMATE".equals(type)) {
+            return "adapter provider usage was unavailable; values are estimated from prompt/output artifacts";
+        }
+        return "unknown usage measurement type: " + type;
+    }
+
+    private Map<String, RunMeta> runTranscriptMeta(WorkstreamPaths paths) throws IOException {
+        var out = new LinkedHashMap<String, RunMeta>();
+        if (!Files.isDirectory(paths.runsDir())) {
+            return out;
+        }
+        try (var stream = Files.list(paths.runsDir())) {
+            for (var runDir : stream.filter(Files::isDirectory).toList()) {
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                Map<String, Object> run;
+                try {
+                    run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
+                } catch (IOException ignored) {
+                    continue;
+                }
+                var runId = nonBlank(text(run.get("runId")), runDir.getFileName().toString());
+                var transcriptPath = text(run.get("transcriptPath"));
+                var bytes = transcriptPath.isBlank() ? 0L : fileSizeSafe(paths.workspaceRoot(), transcriptPath);
+                out.put(runId, new RunMeta(text(run.get("startedAt")), bytes));
+            }
+        }
+        return out;
+    }
+
+    private static long fileSizeSafe(Path workspaceRoot, String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            return 0L;
+        }
+        try {
+            var resolved = workspaceRoot.resolve(relativePath).normalize();
+            if (!resolved.startsWith(workspaceRoot) || !Files.isRegularFile(resolved)) {
+                return 0L;
+            }
+            return Files.size(resolved);
+        } catch (IOException ignored) {
+            return 0L;
+        }
+    }
+
+    private record RunMeta(String startedAt, long bytes) {
+    }
+
+    private static final class NodeAttribution {
+        private final String nodeId;
+        private final String agent;
+        private long runCount;
+        private long promptTokens;
+        private long contextPackageTokens;
+        private long inputTokens;
+        private long outputTokens;
+        private long cachedReadTokens;
+        private long transcriptBytes;
+        private long toolCalls;
+        private long reads;
+        private long bash;
+        private long writes;
+
+        NodeAttribution(String nodeId, String agent) {
+            this.nodeId = nodeId;
+            this.agent = agent;
+        }
+
+        void add(Map<String, Object> run) {
+            runCount++;
+            promptTokens += longValue(run.get("promptTokens"));
+            contextPackageTokens += longValue(run.get("contextPackageTokens"));
+            inputTokens += longValue(run.get("inputTokens"));
+            outputTokens += longValue(run.get("outputTokens"));
+            cachedReadTokens += longValue(run.get("cachedReadTokens"));
+            transcriptBytes += longValue(run.get("transcriptBytes"));
+            toolCalls += longValue(run.get("toolCalls"));
+            reads += longValue(run.get("reads"));
+            bash += longValue(run.get("bash"));
+            writes += longValue(run.get("writes"));
+        }
+
+        Map<String, Object> toMap() {
+            var m = new LinkedHashMap<String, Object>();
+            m.put("nodeId", nodeId);
+            m.put("agent", agent);
+            m.put("runCount", runCount);
+            m.put("promptTokens", promptTokens);
+            m.put("contextPackageTokens", contextPackageTokens);
+            m.put("inputTokens", inputTokens);
+            m.put("outputTokens", outputTokens);
+            m.put("cachedReadTokens", cachedReadTokens);
+            m.put("totalTokens", inputTokens + outputTokens + cachedReadTokens);
+            m.put("transcriptBytes", transcriptBytes);
+            m.put("toolCalls", toolCalls);
+            m.put("reads", reads);
+            m.put("bash", bash);
+            m.put("writes", writes);
+            m.put("heavy", heavy());
+            return m;
+        }
+
+        private List<String> heavy() {
+            var out = new ArrayList<String>();
+            var provider = inputTokens + outputTokens + cachedReadTokens;
+            if (provider > 0 && cachedReadTokens * 100 / provider >= 60) {
+                out.add("cachedRead");
+            }
+            if (inputTokens > 0 && outputTokens > inputTokens) {
+                out.add("output");
+            }
+            if (contextPackageTokens > 0 && promptTokens > contextPackageTokens) {
+                out.add("promptOverhead");
+            }
+            if (reads >= 3 || toolCalls >= 5) {
+                out.add("tools");
+            }
+            if (transcriptBytes >= 20000) {
+                out.add("transcript");
+            }
+            return out;
+        }
+    }
+
+    private ReadReusePolicy readReusePolicy(WorkstreamPaths paths) throws IOException {
+        var contract = paths.workstreamDir().resolve("memory").resolve("read-reuse-contract.json");
+        if (!Files.isRegularFile(contract)) {
+            return ReadReusePolicy.empty();
+        }
+        var document = objectMapper.readValue(contract.toFile(), MAP_TYPE);
+        if (Boolean.FALSE.equals(document.get("requireReasonWhenRereading"))) {
+            return ReadReusePolicy.empty();
+        }
+        var reusableFiles = new LinkedHashSet<String>();
+        for (var item : mapList(document.get("reusableReadFiles"))) {
+            var normalized = normalizePath(text(item.get("path")));
+            if (!normalized.isBlank()) {
+                reusableFiles.add(normalized);
+            }
+        }
+        return new ReadReusePolicy(reusableFiles, textList(document.get("allowedRepeatedReadReasons")));
     }
 
     private Set<String> evidenceFiles(WorkstreamPaths paths) throws IOException {
@@ -694,11 +1035,11 @@ final class MetricsProjectionWriter {
         builder.append("- Bash Commands: ").append(longValue(toolMetrics.get("bashCount"))).append("\n");
         builder.append("- Evidence Files: ").append(longValue(toolMetrics.get("evidenceFileCount"))).append("\n\n");
         builder.append("### Repeated Read Files\n\n");
-        builder.append("| File | Reads | Agents | Nodes | Evidence Known |\n");
-        builder.append("| --- | --- | --- | --- | --- |\n");
+        builder.append("| File | Reads | Agents | Nodes | Evidence Known | Reread Reason |\n");
+        builder.append("| --- | --- | --- | --- | --- | --- |\n");
         var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
         if (repeatedReads.isEmpty()) {
-            builder.append("| N/A | 0 | N/A | N/A | false |\n");
+            builder.append("| N/A | 0 | N/A | N/A | false | N/A |\n");
         } else {
             for (var item : repeatedReads) {
                 builder.append("| ").append(item.get("path"))
@@ -706,6 +1047,7 @@ final class MetricsProjectionWriter {
                         .append(" | ").append(String.join(", ", textList(item.get("agents"))))
                         .append(" | ").append(String.join(", ", textList(item.get("nodes"))))
                         .append(" | ").append(item.get("evidenceKnown"))
+                        .append(" | ").append(item.get("rereadReasonStatus"))
                         .append(" |\n");
             }
         }
@@ -894,16 +1236,21 @@ final class MetricsProjectionWriter {
         private final Set<String> nodes = new LinkedHashSet<>();
         private final Set<String> agents = new LinkedHashSet<>();
         private boolean evidenceKnown;
+        private boolean rereadReasonRequired;
+        private boolean reasonDeclared;
 
         private ReadFileMetric(String path) {
             this.path = path;
         }
 
-        void accept(String runId, String nodeId, String agent, boolean evidenceKnown) {
+        void accept(String runId, String nodeId, String agent, boolean evidenceKnown,
+                    boolean rereadReasonRequired, boolean reasonDeclared) {
             runIds.add(runId);
             nodes.add(nodeId);
             agents.add(agent);
             this.evidenceKnown = this.evidenceKnown || evidenceKnown;
+            this.rereadReasonRequired = this.rereadReasonRequired || rereadReasonRequired;
+            this.reasonDeclared = this.reasonDeclared || reasonDeclared;
         }
 
         boolean isRepeated() {
@@ -918,6 +1265,21 @@ final class MetricsProjectionWriter {
             return path;
         }
 
+        boolean rereadReasonRequired() {
+            return rereadReasonRequired;
+        }
+
+        boolean rereadReasonMissing() {
+            return isRepeated() && rereadReasonRequired && !reasonDeclared;
+        }
+
+        String rereadReasonStatus() {
+            if (!isRepeated() || !rereadReasonRequired) {
+                return "not_required";
+            }
+            return reasonDeclared ? "recorded" : "missing";
+        }
+
         Map<String, Object> toMap() {
             var map = new LinkedHashMap<String, Object>();
             map.put("path", path);
@@ -926,7 +1288,35 @@ final class MetricsProjectionWriter {
             map.put("nodes", List.copyOf(nodes));
             map.put("agents", List.copyOf(agents));
             map.put("evidenceKnown", evidenceKnown);
+            map.put("rereadReasonRequired", rereadReasonRequired);
+            map.put("rereadReasonStatus", rereadReasonStatus());
             return map;
+        }
+    }
+
+    private static Set<String> declaredRereadPaths(Object value) {
+        if (!(value instanceof List<?> list)) {
+            return Set.of();
+        }
+        var paths = new LinkedHashSet<String>();
+        for (var item : list) {
+            if (item instanceof Map<?, ?> map) {
+                var normalized = normalizePath(text(map.get("path")));
+                if (!normalized.isBlank()) {
+                    paths.add(normalized);
+                }
+            }
+        }
+        return paths;
+    }
+
+    private record ReadReusePolicy(Set<String> reusableFiles, List<String> allowedReasons) {
+        static ReadReusePolicy empty() {
+            return new ReadReusePolicy(Set.of(), List.of());
+        }
+
+        boolean requiresReason(String path) {
+            return reusableFiles.contains(path);
         }
     }
 

@@ -166,7 +166,8 @@ public final class ArtifactContractValidator {
                 result,
                 outcome,
                 TerminalControlResult.valid(block.required("decision")),
-                List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition)))
+                List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition))),
+                document.get("reread_reasons")
         );
         return new NodeResult(
                 outcome.nodeMaySucceed() ? result.outcome() : outcome.primaryReason(),
@@ -229,6 +230,10 @@ public final class ArtifactContractValidator {
             if (semanticFailure.isPresent()) {
                 return StructuredArtifactResult.failed(semanticFailure.get());
             }
+            var rereadFailure = AgentContractSemantics.validateRereadReasons(rawDocument.get("reread_reasons"));
+            if (rereadFailure.isPresent()) {
+                return StructuredArtifactResult.failed(rereadFailure.get());
+            }
             return StructuredArtifactResult.valid(expectedType, artifact, structuredDocument.lifecycleStatus());
         } catch (Exception e) {
             return StructuredArtifactResult.failed(DualControlParseResult.invalid(
@@ -271,7 +276,8 @@ public final class ArtifactContractValidator {
                     document.openRisks(),
                     document.changedFiles(),
                     document.verificationSummary(),
-                    document.failure()
+                    document.failure(),
+                    document.rereadReasons()
             );
             case "self_test_report" -> new SelfTestReportArtifact(
                     document.artifactType(),
@@ -452,7 +458,8 @@ public final class ArtifactContractValidator {
                 result,
                 outcome,
                 terminalResultFor(reason, message),
-                List.of(artifactResultFor(nodeDefinition, reason, message))
+                List.of(artifactResultFor(nodeDefinition, reason, message)),
+                null
         );
         return new NodeResult(
                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
@@ -587,7 +594,8 @@ public final class ArtifactContractValidator {
             NodeResult result,
             AgentExecutionOutcome outcome,
             TerminalControlResult terminalControlResult,
-            List<ArtifactContractResult> artifactContractResults
+            List<ArtifactContractResult> artifactContractResults,
+            Object rereadReasons
     ) {
         var runMetadataRef = text(result.result().get("run_metadata"));
         if (runMetadataRef.isBlank()) {
@@ -613,6 +621,9 @@ public final class ArtifactContractValidator {
             json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
                     .map(ArtifactContractValidator::artifactContractToMap)
                     .toList()));
+            if (rereadReasons != null) {
+                json.set("reread_reasons", OBJECT_MAPPER.valueToTree(rereadReasons));
+            }
             json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(outcome)));
             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
         } catch (Exception ignored) {
@@ -679,7 +690,8 @@ public final class ArtifactContractValidator {
             List<String> openRisks,
             List<String> changedFiles,
             String verificationSummary,
-            AgentOutputContractDocument.FailureFields failure
+            AgentOutputContractDocument.FailureFields failure,
+            List<AgentOutputContractDocument.RereadReason> rereadReasons
     ) implements StructuredAgentArtifact {
         @Override
         public void writeSidecarFields(Map<String, Object> document) {
@@ -694,6 +706,8 @@ public final class ArtifactContractValidator {
             document.put("verification_summary", verificationSummary);
             document.put("blocking", blocking);
             document.put("failure", failure.toMap());
+            document.put("reread_reasons", rereadReasons.stream()
+                    .map(AgentOutputContractDocument.RereadReason::toMap).toList());
         }
     }
 

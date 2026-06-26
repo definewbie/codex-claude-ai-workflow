@@ -18,7 +18,7 @@ import java.util.Optional;
  * classification, and human guidance should consume this record instead of
  * repeatedly reading stringly-typed fields from raw maps.
  */
-record AgentOutputContractDocument(
+public record AgentOutputContractDocument(
         String nodeId,
         String stageOutcome,
         String lifecycleStatus,
@@ -39,7 +39,8 @@ record AgentOutputContractDocument(
         String recommendedNextStage,
         String suggestedNextPrompt,
         Map<String, String> control,
-        FailureFields failure
+        FailureFields failure,
+        List<RereadReason> rereadReasons
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -52,7 +53,7 @@ record AgentOutputContractDocument(
         }
     }
 
-    static AgentOutputContractDocument from(Map<String, Object> document) {
+    public static AgentOutputContractDocument from(Map<String, Object> document) {
         return new AgentOutputContractDocument(
                 text(document.get("node_id")),
                 firstNonBlank(document.get("stage_outcome"), document.get("lifecycle_status")),
@@ -74,15 +75,16 @@ record AgentOutputContractDocument(
                 text(document.get("recommended_next_stage")),
                 text(document.get("suggested_next_prompt")),
                 stringMap(document.get("control")),
-                FailureFields.from(objectMap(document.get("failure")))
+                FailureFields.from(objectMap(document.get("failure"))),
+                rereadReasonList(document.get("reread_reasons"))
         );
     }
 
-    boolean hasDecision() {
+    public boolean hasDecision() {
         return !decision.isBlank();
     }
 
-    String canonicalStageOutcome() {
+    public String canonicalStageOutcome() {
         return stageOutcome.isBlank() ? lifecycleStatus : stageOutcome;
     }
 
@@ -132,6 +134,49 @@ record AgentOutputContractDocument(
                     && contextGaps.isEmpty()
                     && reason.isBlank();
         }
+    }
+
+    /**
+     * One declared reason an agent re-read a file already covered by the read-reuse
+     * contract. Optional structured field; presence is validated against the
+     * allowed-reason catalog (see {@code ReadReuseContractReasons}).
+     */
+    public record RereadReason(String path, String reason, String stage, String evidence) {
+        static RereadReason from(Map<String, Object> document) {
+            return new RereadReason(
+                    text(document.get("path")),
+                    text(document.get("reason")),
+                    text(document.get("stage")),
+                    text(document.get("evidence")));
+        }
+
+        Map<String, Object> toMap() {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("path", path);
+            map.put("reason", reason);
+            map.put("stage", stage);
+            map.put("evidence", evidence);
+            return map;
+        }
+    }
+
+    static List<RereadReason> rereadReasonList(Object value) {
+        if (!(value instanceof List<?> list)) {
+            return List.of();
+        }
+        var out = new ArrayList<RereadReason>();
+        for (var item : list) {
+            if (item instanceof Map<?, ?> map) {
+                var copy = new LinkedHashMap<String, Object>();
+                for (var e : map.entrySet()) {
+                    if (e.getKey() instanceof String key) {
+                        copy.put(key, e.getValue());
+                    }
+                }
+                out.add(RereadReason.from(copy));
+            }
+        }
+        return List.copyOf(out);
     }
 
     private static List<String> stringList(Object value) {

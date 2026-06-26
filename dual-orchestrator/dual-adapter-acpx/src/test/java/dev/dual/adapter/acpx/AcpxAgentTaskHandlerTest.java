@@ -801,6 +801,33 @@ class AcpxAgentTaskHandlerTest {
         }
     }
 
+    private static final class RejectionEnvelopeTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Architecture Review
+
+                    Rejected: token refresh missing.
+
+                    <dual-artifact type="agent_output_contract" version="1">
+                    {"node_id":"design.codex_arch_review","artifact_type":"agent_output_contract","decision":"REJECTED","summary":"token refresh missing","must_fix":["refresh token on expiry"],"open_risks":["race on logout"],"changed_files":["src/auth.py"],"stage_outcome":"needs_revision","blocking":true}
+                    </dual-artifact>
+
+                    ```dual-control
+                    decision: REJECTED
+                    needs_human_input: false
+                    summary: token refresh missing
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "codex"));
+        }
+    }
+
     @Test
     void runMetadataRecordsSessionScopeStageAndIteration() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-sess");
@@ -829,6 +856,61 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"semanticIteration\" : \"iter-001\""), runMetadata);
         // session name 恒含 workstreamId，永不裸名
         assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-sess\""), runMetadata);
+    }
+
+    @Test
+    void runWritesPromptManifestByDefault() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-manifest");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+        var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-manifest", definition,
+                readyInstance("intake.claude_brainstorm")));
+
+        // run.json references the manifest
+        var runJson = Files.walk(workstreamDir.resolve("runs"))
+                .filter(p -> p.getFileName().toString().equals("run.json")).findFirst().orElseThrow();
+        var runMetadata = Files.readString(runJson);
+        assertTrue(runMetadata.contains("\"promptManifestPath\" :"), runMetadata);
+
+        // manifest exists with sections + totals (default-on, independent of DUAL_AGENT_PROMPT_DEBUG)
+        var manifest = Files.walk(workstreamDir.resolve("runs"))
+                .filter(p -> p.getFileName().toString().endsWith(".manifest.json")).findFirst().orElseThrow();
+        var manifestText = Files.readString(manifest);
+        assertTrue(manifestText.contains("\"totalEstimatedTokens\""), manifestText);
+        assertTrue(manifestText.contains("\"sections\""), manifestText);
+        assertTrue(manifestText.contains("\"sourceType\""), manifestText);
+        assertTrue(manifestText.contains("\"requirement\""), manifestText);
+
+        // DUAL_AGENT_PROMPT_DEBUG unset -> NO full-content debug dump (manifest ≠ content dump)
+        var debugDump = Files.walk(workstreamDir.resolve("runs"))
+                .filter(p -> p.getFileName().toString().endsWith(".debug.json")).findFirst();
+        assertTrue(debugDump.isEmpty(), "content debug dump must NOT exist when DUAL_AGENT_PROMPT_DEBUG unset");
+    }
+
+    @Test
+    void completedRunWritesSemanticMemoryFromContractEnvelope() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-sem-run");
+        Files.createDirectories(workstreamDir.resolve("artifacts"));
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Ship token refresh.\n");
+        Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
+                {"objective":"o","status":"active","scope":{"included":["token refresh"],"excluded":[]},
+                 "nonGoals":["SSO"],"acceptanceCriteria":["tokens refresh"],"constraints":[],"riskAreas":[]}
+                """);
+
+        var handler = new AcpxAgentTaskHandler(new RejectionEnvelopeTransport(), false);
+        var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "codex", "session", "codex-main", "prompt_template", "design-codex-review"
+        ));
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-sem-run", definition,
+                readyInstance("design.codex_arch_review")));
+
+        var memory = Files.readString(workstreamDir.resolve("memory/workstream-memory.json"));
+        assertTrue(memory.contains("token refresh"), "decidedScope must come from task-contract: " + memory);
+        assertTrue(memory.contains("REJECTED"), "verdict decision must be recorded: " + memory);
+        assertTrue(memory.contains("refresh token on expiry"), "open issue must be recorded: " + memory);
     }
 
     private static NodeInstance readyInstance(String definitionId) {

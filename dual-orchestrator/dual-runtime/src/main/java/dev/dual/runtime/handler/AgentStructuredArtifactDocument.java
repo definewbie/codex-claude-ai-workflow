@@ -33,7 +33,8 @@ record AgentStructuredArtifactDocument(
         String verificationState,
         String recommendedNextStage,
         String suggestedNextPrompt,
-        AgentOutputContractDocument.FailureFields failure
+        AgentOutputContractDocument.FailureFields failure,
+        List<AgentOutputContractDocument.RereadReason> rereadReasons
 ) {
     static AgentStructuredArtifactDocument from(Map<String, Object> document) {
         return new AgentStructuredArtifactDocument(
@@ -58,7 +59,8 @@ record AgentStructuredArtifactDocument(
                 text(document.get("verification_state")),
                 text(document.get("recommended_next_stage")),
                 text(document.get("suggested_next_prompt")),
-                AgentOutputContractDocument.FailureFields.from(objectMap(document.get("failure")))
+                AgentOutputContractDocument.FailureFields.from(objectMap(document.get("failure"))),
+                AgentOutputContractDocument.rereadReasonList(document.get("reread_reasons"))
         );
     }
 

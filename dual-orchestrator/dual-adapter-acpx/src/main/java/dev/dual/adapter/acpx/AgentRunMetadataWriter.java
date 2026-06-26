@@ -25,6 +25,7 @@ final class AgentRunMetadataWriter {
     private final AcpxTranscriptToolUsageReader toolUsageReader = new AcpxTranscriptToolUsageReader();
     private final ContextGovernanceActualReportWriter governanceActualReportWriter =
             new ContextGovernanceActualReportWriter();
+    private final WorkstreamMemoryUpdater workstreamMemoryUpdater = new WorkstreamMemoryUpdater();
 
     void writePrepared(
             Path workspaceRoot,
@@ -73,6 +74,7 @@ final class AgentRunMetadataWriter {
                 promptTemplate,
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),
+                relative(workspaceRoot, PromptManifestWriter.manifestPathFor(promptPath)),
                 relative(workspaceRoot, stdoutPath),
                 null,
                 relative(workspaceRoot, stderrPath),
@@ -193,6 +195,17 @@ final class AgentRunMetadataWriter {
         var stderrMetadataPath = metadataPath(stderrPath);
         var transcriptMetadataPath = transcriptPath == null ? null : metadataPath(transcriptPath);
         var toolUsage = transcriptPath == null ? AcpxToolUsage.empty() : toolUsageReader.read(transcriptPath, workspaceRoot);
+        workstreamMemoryUpdater.updateMemory(
+                workspaceRoot,
+                workstreamId,
+                runId,
+                nodeId,
+                sessionMeta == null ? "" : sessionMeta.stage(),
+                agent,
+                stdoutPath,
+                toolUsage,
+                failure
+        );
         writePromptDebugIfEnabled(promptPath);
         var governanceReportPath = governanceActualReportWriter.write(
                 workspaceRoot,
@@ -283,6 +296,7 @@ final class AgentRunMetadataWriter {
                 promptTemplate,
                 workspaceRoot.toString(),
                 relative(workspaceRoot, promptPath),
+                relative(workspaceRoot, PromptManifestWriter.manifestPathFor(promptPath)),
                 relative(workspaceRoot, stdoutPath),
                 relativeOrNull(workspaceRoot, transcriptPath),
                 relative(workspaceRoot, stderrPath),
