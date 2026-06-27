@@ -117,6 +117,7 @@ Codex review 每次使用 run scoped 或 compacted session，但必须以 Review
 
 - 不引入 GraphRAG / Agentic RAG。
 - 不删除 workstream scoped session。
+- 不实现 acpx keepalive、长连接 worker 或 `PersistentAgentRuntime`；本实验只处理 session transcript compaction 和 typed memory seed，不改变“每个 agent 节点一次独立 Execution”的进程边界。
 - 不把 session snapshot 加总进 provider token total。
 - 不在没有 benchmark 数据前切默认。
 

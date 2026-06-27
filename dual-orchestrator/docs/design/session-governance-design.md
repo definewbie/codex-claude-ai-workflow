@@ -113,6 +113,25 @@ session key 构成如下（**始终含 workstreamId**，杜绝跨 task 共享）
 - **跨 task 隔离**：session key 必须恒含 workstreamId；ResumeCommand 裸名路径必须纳入同一 scope 策略（P0 修）。
 - **观测盲区**：若某 provider 只回 `usage_update`（如本次 codex），per-run 输入用量未知，budget 只能用 `contextUsed` 近似——已是当前最佳信号。
 
+## 9.1 acpx keepalive / PersistentAgentRuntime（未来优化，当前不做）
+
+结论：本轮 session / artifact / harness 治理**不实现** acpx keepalive、长连接 worker 或 `PersistentAgentRuntime`。当前仍保持每个 agent 节点一次独立 Execution：`acpx <agent> -s <session> -f <prompt>`。其中 `-s` 复用 provider/agent session 名和历史上下文，但**不复用 acpx 进程、ACP stdio 连接或请求队列**。
+
+原因：
+
+- 当前主阻塞是 typed artifact / harness 边界不稳，以及 session transcript / memory / provider cache 的可观测与治理；尚未证明 acpx 进程启动或握手固定成本是主要瓶颈。
+- 长连接会引入新的 runtime 生命周期边界：worker 存活、请求排队、heartbeat、hard timeout、process-tree kill、reconnect、request-id usage attribution、stream cursor、失败隔离和上下文污染。若在 artifact contract 尚未稳定前引入，会放大恢复和归因问题。
+- `PersistentAgentRuntime` 属于 Execution 层性能优化，不应混入 session_scope、typed memory、artifact contract 或 reread policy 的语义修复。
+
+进入该优化的前置条件：
+
+1. `plan_artifact` / `handoff_artifact` / harness-owned reread policy 主路径稳定，simple public benchmark 能稳定闭环。
+2. fixed-overhead profiling 证明每节点重启/握手成本显著，例如空 prompt 或最小 prompt 多次运行显示稳定的 5-15s 以上固定耗时。
+3. 设计明确 `PersistentAgentRuntime` 的 source of truth、worker lifecycle、request queue、usage cursor、reconnect/kill 策略，以及与 ledger Execution 聚合根的关系。
+4. 有 A/B 数据对比 per-node exec 与 persistent worker 的 duration、token、cost、quality，且证明收益覆盖复杂度。
+
+在这些条件满足前，keepalive 只记录为未来优化 feature，不能作为当前 token/session 治理的默认前提。
+
 ## 10. 分阶段落地（每阶段都以观测为安全网）
 
 - **P0（纯止损，低风险，不改默认 scope）**
