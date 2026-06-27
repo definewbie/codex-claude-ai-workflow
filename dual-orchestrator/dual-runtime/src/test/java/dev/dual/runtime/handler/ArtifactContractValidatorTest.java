@@ -1048,7 +1048,9 @@ class ArtifactContractValidatorTest {
 
                 ## 2. File-Level Changes（文件级改动）
 
-                - `src/Main.java`
+                ### `src/Main.java`
+
+                - Update the transition map.
 
                 ## 3. Validation Plan（验证计划）
 

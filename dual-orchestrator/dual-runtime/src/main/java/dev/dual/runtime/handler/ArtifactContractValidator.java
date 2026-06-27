@@ -261,9 +261,11 @@ public final class ArtifactContractValidator {
     private static String sectionText(String markdown, String heading) {
         var lines = markdown == null ? List.<String>of() : markdown.lines().toList();
         int start = -1;
+        int startLevel = 0;
         for (int i = 0; i < lines.size(); i++) {
             if (isHeading(lines.get(i), heading)) {
                 start = i + 1;
+                startLevel = headingLevel(lines.get(i));
                 break;
             }
         }
@@ -272,12 +274,28 @@ public final class ArtifactContractValidator {
         }
         int end = lines.size();
         for (int i = start; i < lines.size(); i++) {
-            if (lines.get(i).stripLeading().matches("^#{1,6}\\s+.+")) {
+            var level = headingLevel(lines.get(i));
+            if (level > 0 && level <= startLevel) {
                 end = i;
                 break;
             }
         }
         return String.join("\n", lines.subList(start, end)).strip();
+    }
+
+    private static int headingLevel(String line) {
+        if (line == null) {
+            return 0;
+        }
+        var stripped = line.stripLeading();
+        int level = 0;
+        while (level < stripped.length() && level < 6 && stripped.charAt(level) == '#') {
+            level++;
+        }
+        if (level == 0 || level >= stripped.length() || !Character.isWhitespace(stripped.charAt(level))) {
+            return 0;
+        }
+        return level;
     }
 
     private static boolean isHeading(String line, String heading) {
