@@ -148,13 +148,20 @@ class WorkstreamMemoryUpdaterTest {
         assertEquals("REJECTED", ((Map<?, ?>) verdicts.get(0)).get("decision"));
         var openIssues = (List<?>) memory.get("openIssues");
         var descs = new java.util.ArrayList<String>();
+        var sourceFields = new java.util.ArrayList<String>();
         for (var item : openIssues) {
             if (item instanceof Map<?, ?> m) {
                 descs.add(String.valueOf(m.get("desc")));
+                sourceFields.add(String.valueOf(m.get("sourceField")));
             }
         }
         assertTrue(descs.contains("refresh token on expiry"), descs.toString());
         assertTrue(descs.contains("race on logout"), descs.toString());
+        assertTrue(sourceFields.contains("must_fix"), sourceFields.toString());
+        assertTrue(sourceFields.contains("open_risks"), sourceFields.toString());
+        var fieldSemantics = (Map<?, ?>) memory.get("fieldSemantics");
+        assertTrue(String.valueOf(fieldSemantics.get("projectionOnlyFields")).contains("desc"));
+        assertTrue(String.valueOf(fieldSemantics.get("machineDecisionFields")).contains("sourceField"));
         assertFalse(objectMapper.writeValueAsString(memory).contains("Some narrative prose that must NOT become memory"));
     }
 

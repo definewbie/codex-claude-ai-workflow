@@ -273,13 +273,15 @@ final class WorkstreamMemoryUpdater {
             }
         }
         var raisedBy = !text(agent).isBlank() ? agent : text(nodeId);
-        for (var desc : combinedOpenIssueTexts(contract)) {
+        for (var fact : combinedOpenIssueFacts(contract)) {
+            var desc = fact.desc();
             if (desc.isBlank()) {
                 continue;
             }
             var id = shortHash(desc);
             var issue = byId.computeIfAbsent(id, ignored -> new LinkedHashMap<String, Object>());
             issue.put("id", id);
+            issue.put("sourceField", fact.sourceField());
             issue.put("desc", desc);
             issue.put("raisedBy", raisedBy);
             issue.put("raisedNodeId", text(nodeId));
@@ -312,12 +314,15 @@ final class WorkstreamMemoryUpdater {
         }
     }
 
-    private static List<String> combinedOpenIssueTexts(AgentOutputContractDocument contract) {
-        var all = new ArrayList<String>();
-        contract.mustFix().forEach(all::add);
-        contract.openRisks().forEach(all::add);
-        contract.missingEvidence().forEach(all::add);
+    private static List<OpenIssueFact> combinedOpenIssueFacts(AgentOutputContractDocument contract) {
+        var all = new ArrayList<OpenIssueFact>();
+        contract.mustFix().forEach(item -> all.add(new OpenIssueFact("must_fix", item)));
+        contract.openRisks().forEach(item -> all.add(new OpenIssueFact("open_risks", item)));
+        contract.missingEvidence().forEach(item -> all.add(new OpenIssueFact("missing_evidence", item)));
         return all;
+    }
+
+    private record OpenIssueFact(String sourceField, String desc) {
     }
 
     private void mergeFailure(
@@ -369,6 +374,7 @@ final class WorkstreamMemoryUpdater {
         memory.putIfAbsent("priorVerdicts", List.of());
         memory.putIfAbsent("priorFailures", List.of());
         memory.putIfAbsent("lastStageOutcome", Map.of());
+        memory.putIfAbsent("fieldSemantics", fieldSemantics());
         memory.put("updatedAt", Instant.now().toString());
         Files.createDirectories(memoryPath.getParent());
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(memoryPath.toFile(), memory);
@@ -388,6 +394,7 @@ final class WorkstreamMemoryUpdater {
             memory.put("priorVerdicts", List.of());
             memory.put("priorFailures", List.of());
             memory.put("lastStageOutcome", Map.of());
+            memory.put("fieldSemantics", fieldSemantics());
             return memory;
         }
         try {
@@ -398,8 +405,16 @@ final class WorkstreamMemoryUpdater {
             memory.put("artifactType", "workstream_memory");
             memory.put("workstreamId", workstreamId);
             memory.put("readFiles", List.of());
+            memory.put("fieldSemantics", fieldSemantics());
             return memory;
         }
+    }
+
+    private static Map<String, Object> fieldSemantics() {
+        return Map.of(
+                "machineDecisionFields", List.of("decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status"),
+                "projectionOnlyFields", List.of("summary", "desc", "verificationSummary")
+        );
     }
 
     @SuppressWarnings("unchecked")
