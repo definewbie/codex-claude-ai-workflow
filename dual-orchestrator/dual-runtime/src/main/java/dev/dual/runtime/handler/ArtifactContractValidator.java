@@ -25,11 +25,26 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public final class ArtifactContractValidator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final Pattern STRUCTURED_ARTIFACT_BLOCK = Pattern.compile(
+            "(?s)<dual-artifact\\b[^>]*>.*?</dual-artifact>\\s*"
+    );
+    private static final Pattern DUAL_CONTROL_BLOCK = Pattern.compile(
+            "(?s)```dual-control\\b.*?```\\s*"
+    );
+    private static final List<String> PLAN_BODY_SECTIONS = List.of(
+            "Implementation Steps",
+            "File-Level Changes",
+            "Validation Plan",
+            "Rollback Notes",
+            "Known Risks",
+            "Human Review Checklist"
+    );
     private static final AgentExecutionOutcomeResolver OUTCOME_RESOLVER = new AgentExecutionOutcomeResolver();
     private final DualControlBlockParser parser = new DualControlBlockParser();
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
@@ -84,6 +99,14 @@ public final class ArtifactContractValidator {
                 if (structured.failure() != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, structured.failure());
                 }
+                var bodyFailure = validateFormalArtifactBody(nodeDefinition, markdown);
+                if (bodyFailure != null) {
+                    return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, bodyFailure);
+                }
+                var rereadCoverageFailure = validateRereadCoverage(root, workstreamId, result, structured);
+                if (rereadCoverageFailure != null) {
+                    return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, rereadCoverageFailure);
+                }
                 return withContractSidecar(
                         root,
                         workstreamId,
@@ -103,6 +126,168 @@ public final class ArtifactContractValidator {
             break;
         }
         return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, lastSourceRef, lastInvalid);
+    }
+
+    private static DualControlParseResult validateFormalArtifactBody(NodeDefinition nodeDefinition, String markdown) {
+        if (!"plan.claude_plan".equals(nodeDefinition.id())) {
+            return null;
+        }
+        var body = formalBody(markdown);
+        var missing = PLAN_BODY_SECTIONS.stream()
+                .filter(section -> sectionText(body, section).isBlank())
+                .toList();
+        if (!missing.isEmpty()) {
+            return DualControlParseResult.invalid(
+                    "FORMAL_ARTIFACT_BODY_MISSING",
+                    "plan.claude_plan formal artifact body is missing required plan sections: " + missing
+                            + ". Plan content must be in the workflow output artifact, not only in the acpx transcript.",
+                    Map.of("missing_sections", missing)
+            );
+        }
+        return null;
+    }
+
+    private static DualControlParseResult validateRereadCoverage(
+            Path root,
+            String workstreamId,
+            NodeResult result,
+            StructuredArtifactResult structured
+    ) {
+        if (!(structured.artifact() instanceof AgentOutputArtifact artifact) || workstreamId == null || workstreamId.isBlank()) {
+            return null;
+        }
+        var actualReads = actualReadFiles(root, result);
+        if (actualReads.isEmpty()) {
+            return null;
+        }
+        var reusableReads = reusableReadFiles(root, workstreamId);
+        if (reusableReads.isEmpty()) {
+            return null;
+        }
+        var declared = artifact.rereadReasons().stream()
+                .map(reason -> normalizeRepoPath(reason.path()))
+                .filter(path -> !path.isBlank())
+                .collect(java.util.stream.Collectors.toSet());
+        var missing = actualReads.stream()
+                .filter(reusableReads::contains)
+                .filter(path -> !declared.contains(path))
+                .toList();
+        if (missing.isEmpty()) {
+            return null;
+        }
+        return DualControlParseResult.invalid(
+                "REREAD_REASON_MISSING",
+                "agent re-read reusable files without matching agent_output_contract.reread_reasons entries: " + missing,
+                Map.of("missing_reread_reason_paths", missing)
+        );
+    }
+
+    private static List<String> actualReadFiles(Path root, NodeResult result) {
+        var runMetadataRef = text(result.result().get("run_metadata"));
+        if (runMetadataRef.isBlank()) {
+            return List.of();
+        }
+        var path = root.resolve(runMetadataRef).normalize();
+        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+            return List.of();
+        }
+        try {
+            var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
+            var toolUsage = document.get("toolUsage");
+            if (!(toolUsage instanceof Map<?, ?> map)) {
+                return List.of();
+            }
+            return stringList(map.get("readFiles")).stream()
+                    .map(ArtifactContractValidator::normalizeRepoPath)
+                    .filter(item -> !item.isBlank())
+                    .distinct()
+                    .toList();
+        } catch (Exception ignored) {
+            return List.of();
+        }
+    }
+
+    private static List<String> reusableReadFiles(Path root, String workstreamId) {
+        var path = root.resolve(".agent/workstreams").resolve(workstreamId)
+                .resolve("memory/read-reuse-contract.json").normalize();
+        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+            return List.of();
+        }
+        try {
+            var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
+            var value = document.get("reusableReadFiles");
+            if (!(value instanceof List<?> list)) {
+                return List.of();
+            }
+            var out = new ArrayList<String>();
+            for (var item : list) {
+                if (item instanceof Map<?, ?> map) {
+                    var normalized = normalizeRepoPath(text(map.get("path")));
+                    if (!normalized.isBlank()) {
+                        out.add(normalized);
+                    }
+                }
+            }
+            return out.stream().distinct().toList();
+        } catch (Exception ignored) {
+            return List.of();
+        }
+    }
+
+    private static List<String> stringList(Object value) {
+        if (!(value instanceof List<?> list)) {
+            return List.of();
+        }
+        return list.stream()
+                .filter(item -> item != null && !String.valueOf(item).isBlank())
+                .map(item -> String.valueOf(item).trim())
+                .toList();
+    }
+
+    private static String normalizeRepoPath(String value) {
+        var text = value == null ? "" : value.trim();
+        while (text.startsWith("./")) {
+            text = text.substring(2);
+        }
+        return text;
+    }
+
+    private static String formalBody(String markdown) {
+        var withoutArtifacts = STRUCTURED_ARTIFACT_BLOCK.matcher(markdown == null ? "" : markdown).replaceAll("");
+        return DUAL_CONTROL_BLOCK.matcher(withoutArtifacts).replaceAll("").strip();
+    }
+
+    private static String sectionText(String markdown, String heading) {
+        var lines = markdown == null ? List.<String>of() : markdown.lines().toList();
+        int start = -1;
+        for (int i = 0; i < lines.size(); i++) {
+            if (isHeading(lines.get(i), heading)) {
+                start = i + 1;
+                break;
+            }
+        }
+        if (start < 0) {
+            return "";
+        }
+        int end = lines.size();
+        for (int i = start; i < lines.size(); i++) {
+            if (lines.get(i).stripLeading().matches("^#{1,6}\\s+.+")) {
+                end = i;
+                break;
+            }
+        }
+        return String.join("\n", lines.subList(start, end)).strip();
+    }
+
+    private static boolean isHeading(String line, String heading) {
+        if (line == null) {
+            return false;
+        }
+        var normalized = line.stripLeading()
+                .replaceFirst("^#{1,6}\\s+", "")
+                .replaceFirst("^\\d+[.)]\\s+", "")
+                .strip();
+        return normalized.equalsIgnoreCase(heading);
     }
 
     private static NodeResult withContractSidecar(
@@ -253,7 +438,7 @@ public final class ArtifactContractValidator {
             case "implement.claude_self_test_report" -> "self_test_report";
             case "acceptance.codex_verifier_review" -> "acceptance_review";
             case "stage.claude_handoff" -> "stage_handoff";
-            default -> null;
+            default -> ContractRegistry.hasContract(nodeDefinition.id()) ? "agent_output_contract" : null;
         };
     }
 

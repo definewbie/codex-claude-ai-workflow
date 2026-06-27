@@ -15,7 +15,6 @@ final class AgentFinalArtifactExtractor {
     private static final String CONTROL_FENCE = "```dual-control";
     private static final String ARTIFACT_OPEN = "<dual-artifact";
     private static final String ARTIFACT_CLOSE = "</dual-artifact>";
-    private static final String JSON_FENCE = "```json";
     private static final String DONE_MARKER = "[done] end_turn";
 
     Optional<String> extract(String transcript) {
@@ -32,9 +31,7 @@ final class AgentFinalArtifactExtractor {
         var artifactStart = latestCompleteArtifactStartBeforeControl(normalized, controlStart);
         var artifact = artifactStart >= 0
                 ? normalized.substring(artifactStart, end)
-                : jsonFenceArtifactBeforeControl(normalized, controlStart)
-                        .map(json -> canonicalEnvelope(json, normalized.substring(controlStart, end)))
-                        .orElseGet(() -> normalized.substring(controlStart, end));
+                : normalized.substring(controlStart, end);
         artifact = artifact
                 .replace(DONE_MARKER, "")
                 .strip();
@@ -72,56 +69,4 @@ final class AgentFinalArtifactExtractor {
         return tag.contains("type=\"") && !tag.contains("\\\"");
     }
 
-    private static Optional<JsonFenceArtifact> jsonFenceArtifactBeforeControl(String transcript, int controlStart) {
-        var jsonStart = transcript.lastIndexOf(JSON_FENCE, controlStart);
-        if (jsonStart < 0) {
-            return Optional.empty();
-        }
-        var contentStart = jsonStart + JSON_FENCE.length();
-        var jsonEnd = transcript.indexOf("```", contentStart);
-        if (jsonEnd < 0 || jsonEnd > controlStart) {
-            return Optional.empty();
-        }
-        var body = transcript.substring(contentStart, jsonEnd).strip();
-        var type = artifactType(body);
-        if (type.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(new JsonFenceArtifact(type.get(), body));
-    }
-
-    private static Optional<String> artifactType(String jsonBody) {
-        var marker = "\"artifact_type\"";
-        var key = jsonBody.indexOf(marker);
-        if (key < 0) {
-            return Optional.empty();
-        }
-        var colon = jsonBody.indexOf(':', key + marker.length());
-        if (colon < 0) {
-            return Optional.empty();
-        }
-        var firstQuote = jsonBody.indexOf('"', colon + 1);
-        if (firstQuote < 0) {
-            return Optional.empty();
-        }
-        var secondQuote = jsonBody.indexOf('"', firstQuote + 1);
-        if (secondQuote < 0) {
-            return Optional.empty();
-        }
-        var type = jsonBody.substring(firstQuote + 1, secondQuote).strip();
-        return type.isBlank() ? Optional.empty() : Optional.of(type);
-    }
-
-    private static String canonicalEnvelope(JsonFenceArtifact artifact, String controlBlock) {
-        return """
-                <dual-artifact type="%s" version="1">
-                %s
-                </dual-artifact>
-
-                %s
-                """.formatted(artifact.type(), artifact.jsonBody(), controlBlock.strip());
-    }
-
-    private record JsonFenceArtifact(String type, String jsonBody) {
-    }
 }

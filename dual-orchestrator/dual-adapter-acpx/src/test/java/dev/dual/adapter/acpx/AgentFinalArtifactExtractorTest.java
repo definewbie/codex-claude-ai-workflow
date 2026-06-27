@@ -92,7 +92,7 @@ class AgentFinalArtifactExtractorTest {
     }
 
     @Test
-    void canonicalizesTypedJsonFenceBeforeTerminalControl() {
+    void doesNotCanonicalizeJsonFenceBeforeTerminalControl() {
         var result = extractor.extract("""
                 Design notes.
 
@@ -113,9 +113,10 @@ class AgentFinalArtifactExtractorTest {
                 """);
 
         assertTrue(result.isPresent());
-        assertTrue(result.get().startsWith("<dual-artifact type=\"agent_output_contract\" version=\"1\">"));
-        assertTrue(result.get().contains("\"decision\": \"READY_FOR_ARCH_REVIEW\""));
+        assertTrue(result.get().startsWith("```dual-control"));
         assertTrue(result.get().contains("decision: READY_FOR_ARCH_REVIEW"));
+        assertFalse(result.get().contains("<dual-artifact"));
+        assertFalse(result.get().contains("\"artifact_type\""));
         assertFalse(result.get().contains("Design notes."));
         assertFalse(result.get().contains("```json"));
         assertFalse(result.get().contains("[done]"));

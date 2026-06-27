@@ -26,6 +26,26 @@ class ArtifactContractValidatorTest {
         var outputRef = writeOutput("review.md", """
                 Review passed.
 
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Architecture is ready.",
+                  "blocking": false,
+                  "checks": ["reviewed design"],
+                  "evidence": ["design matches contract"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Architecture review is complete.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
                 ```dual-control
                 decision: READY_FOR_ARCH_REVIEW
                 summary: Architecture is ready.
@@ -44,6 +64,26 @@ class ArtifactContractValidatorTest {
     void writesContractSidecarForValidAgentOutput() throws Exception {
         var outputRef = writeOutput("review.md", """
                 Review passed.
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Architecture is ready.",
+                  "blocking": false,
+                  "checks": ["reviewed design"],
+                  "evidence": ["design matches contract"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Architecture review is complete.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
 
                 ```dual-control
                 decision: READY_FOR_ARCH_REVIEW
@@ -70,13 +110,25 @@ class ArtifactContractValidatorTest {
         var outputRef = writeOutput("review.md", """
                 # Review
 
-                ## Must Fix
-
-                - None. The proposal preserves the user intent.
-
-                ## Product Risks
-
-                - Modal wording must stay non-medical.
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Intake is ready.",
+                  "blocking": false,
+                  "checks": ["reviewed requirement"],
+                  "evidence": ["requirement is understood"],
+                  "missing_evidence": [],
+                  "must_fix": ["None. The proposal preserves the user intent."],
+                  "acceptance_notes": [],
+                  "open_risks": ["Modal wording must stay non-medical."],
+                  "changed_files": [],
+                  "verification_summary": "Product review is complete.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
 
                 ```dual-control
                 decision: READY_FOR_PRODUCT_REVIEW
@@ -151,6 +203,26 @@ class ArtifactContractValidatorTest {
         var runRef = writeRunMetadata("run-valid-contract", "completed");
         var outputRef = writeOutput("review.md", """
                 Review passed.
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Architecture is ready.",
+                  "blocking": false,
+                  "checks": ["reviewed design"],
+                  "evidence": ["design matches contract"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Architecture review is complete.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
 
                 ```dual-control
                 decision: READY_FOR_ARCH_REVIEW
@@ -801,6 +873,104 @@ class ArtifactContractValidatorTest {
         assertEquals(result, validator.validate(tempDir, node, result));
     }
 
+    @Test
+    void rejectsPlanOutputWhenFormalPlanBodyIsMissing() throws Exception {
+        var outputRef = writeOutput("plan.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PLAN_REVIEW",
+                  "summary": "Plan is ready for review.",
+                  "blocking": false,
+                  "checks": ["reviewed requirements"],
+                  "evidence": ["contract reviewed"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Plan will be validated during implementation.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PLAN_REVIEW
+                summary: Plan is ready for review.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(tempDir, agentNode("plan.claude_plan", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", validated.outcome());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("FORMAL_ARTIFACT_BODY_MISSING"));
+        assertTrue(String.valueOf(validated.result().get("message")).contains("Implementation Steps"));
+    }
+
+    @Test
+    void acceptsPlanOutputWhenFormalPlanBodyContainsRequiredSections() throws Exception {
+        var outputRef = writeOutput("plan.md", """
+                # Implementation Steps
+
+                1. Update the follow-up summary query boundary.
+
+                # File-Level Changes
+
+                - `src/followup.js`: add the reminder filter.
+
+                # Validation Plan
+
+                - Run the targeted follow-up summary tests.
+
+                # Rollback Notes
+
+                - Revert the query change if validation fails.
+
+                # Known Risks
+
+                - Existing records may not include reminder metadata.
+
+                # Human Review Checklist
+
+                - Confirm reminder wording and affected patient records.
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PLAN_REVIEW",
+                  "summary": "Plan is ready for review.",
+                  "blocking": false,
+                  "checks": ["reviewed requirements"],
+                  "evidence": ["formal plan body is present"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Plan will be validated during implementation.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PLAN_REVIEW
+                summary: Plan is ready for review.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(tempDir, agentNode("plan.claude_plan", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertTrue(validated.outputRefs().contains("plan.contract.json"));
+    }
+
     private String writeOutput(String name, String content) throws Exception {
         var path = tempDir.resolve(name);
         Files.writeString(path, content);
@@ -896,6 +1066,94 @@ class ArtifactContractValidatorTest {
         assertEquals(NodeStatus.FAILED, validated.status());
     }
 
+    @Test
+    void rejectsReusableFileRereadWithoutMatchingRereadReason() throws Exception {
+        writeReadReuseContract("src/executor.js");
+        var runRef = writeRunMetadataWithReads("run-reread-missing", "src/executor.js");
+        var outputRef = writeOutput("implement.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "IMPLEMENTED",
+                  "summary": "Implementation complete.",
+                  "blocking": false,
+                  "checks": ["edited executor"],
+                  "evidence": ["implementation updated"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": ["src/executor.js"],
+                  "verification_summary": "Ready for self-test.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""},
+                  "reread_reasons": []
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: IMPLEMENTED
+                summary: Implementation complete.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude",
+                "run_metadata", runRef
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-1",
+                agentNode("implement.claude_implement", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("REREAD_REASON_MISSING"));
+        assertTrue(String.valueOf(validated.result().get("message")).contains("src/executor.js"));
+    }
+
+    @Test
+    void acceptsReusableFileRereadWithMatchingRereadReason() throws Exception {
+        writeReadReuseContract("src/executor.js");
+        var runRef = writeRunMetadataWithReads("run-reread-recorded", "src/executor.js");
+        var outputRef = writeOutput("implement.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "IMPLEMENTED",
+                  "summary": "Implementation complete.",
+                  "blocking": false,
+                  "checks": ["edited executor"],
+                  "evidence": ["implementation updated"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": ["src/executor.js"],
+                  "verification_summary": "Ready for self-test.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""},
+                  "reread_reasons": [
+                    {"path":"src/executor.js","reason":"exact current content is needed before editing","stage":"implement","evidence":"editing executor"}
+                  ]
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: IMPLEMENTED
+                summary: Implementation complete.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude",
+                "run_metadata", runRef
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-1",
+                agentNode("implement.claude_implement", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+    }
+
     private static NodeDefinition agentNode(String nodeId) {
         return new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of());
     }
@@ -907,5 +1165,38 @@ class ArtifactContractValidatorTest {
                 "acpx.agent_run",
                 Map.of("expected_artifact", expectedArtifact)
         );
+    }
+
+    private String writeRunMetadataWithReads(String runId, String... readFiles) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/runs").resolve(runId).resolve("run.json");
+        Files.createDirectories(path.getParent());
+        var reads = java.util.Arrays.stream(readFiles)
+                .map(file -> "\"" + file + "\"")
+                .collect(java.util.stream.Collectors.joining(", "));
+        Files.writeString(path, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "%s",
+                  "status": "completed",
+                  "toolUsage": {
+                    "readFiles": [%s]
+                  }
+                }
+                """.formatted(runId, reads));
+        return tempDir.relativize(path).toString();
+    }
+
+    private void writeReadReuseContract(String... reusableFiles) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/memory/read-reuse-contract.json");
+        Files.createDirectories(path.getParent());
+        var files = java.util.Arrays.stream(reusableFiles)
+                .map(file -> "{\"path\":\"" + file + "\",\"summary\":\"previously read\",\"trusted\":true}")
+                .collect(java.util.stream.Collectors.joining(", "));
+        Files.writeString(path, """
+                {
+                  "schemaVersion": 1,
+                  "reusableReadFiles": [%s]
+                }
+                """.formatted(files));
     }
 }
