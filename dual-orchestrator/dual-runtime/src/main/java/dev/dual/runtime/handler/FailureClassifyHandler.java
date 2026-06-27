@@ -70,9 +70,8 @@ public final class FailureClassifyHandler implements TaskHandler {
                 reviewMetadata.map(metadata -> metadata.failure().missingTests()).orElse(List.of()));
         List<String> contextGaps = extractStringList(instanceResult, "context_gaps",
                 reviewMetadata.map(metadata -> metadata.failure().contextGaps()).orElse(List.of()));
-        String categoryHint = reviewMetadata
-                .map(metadata -> metadata.failure().categoryHint())
-                .orElse("");
+        String categoryHint = extractString(instanceResult, "category_hint",
+                reviewMetadata.map(metadata -> metadata.failure().categoryHint()).orElse(""));
 
         // Read git evidence for changed file count
         int changedFileCount = readChangedFileCount(workstreamDir);

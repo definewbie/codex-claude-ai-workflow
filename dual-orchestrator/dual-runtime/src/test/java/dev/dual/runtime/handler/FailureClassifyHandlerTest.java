@@ -91,7 +91,8 @@ class FailureClassifyHandlerTest {
         var handler = new FailureClassifyHandler();
         var result = handler.execute(taskContext(
                 Map.of("decision", "ACCEPT_WITH_NOTES",
-                        "summary", "Accepted with only manual runtime verification notes.")
+                        "summary", "Accepted with only manual runtime verification notes.",
+                        "category_hint", "REVIEW_NOISE")
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -190,7 +191,9 @@ class FailureClassifyHandlerTest {
 
         var handler = new FailureClassifyHandler();
         var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT", "summary", "minor stylistic issue")
+                Map.of("decision", "REJECT",
+                        "summary", "minor stylistic issue",
+                        "category_hint", "REVIEW_NOISE")
         ));
 
         // REVIEW_NOISE is now reserved for explicit non-blocking review noise signals.

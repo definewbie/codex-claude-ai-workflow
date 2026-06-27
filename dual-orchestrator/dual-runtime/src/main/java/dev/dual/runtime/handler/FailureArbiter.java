@@ -115,7 +115,7 @@ public final class FailureArbiter {
 
         // Rule 7: REVIEW_NOISE
         // A hard REJECT with changed files should bias toward repair unless the
-        // review summary itself clearly says the issue is non-blocking noise.
+        // typed review category explicitly says this is review noise.
         boolean hasGaps = contractGaps != null && !contractGaps.isEmpty();
         boolean hasOOS = outOfScopeFiles != null && !outOfScopeFiles.isEmpty();
         boolean hasMissing = missingTests != null && !missingTests.isEmpty();
@@ -123,7 +123,7 @@ public final class FailureArbiter {
         boolean noOptionalFields = !hasGaps && !hasOOS && !hasMissing && !hasContextGaps;
         boolean noAmbiguity = taskContract == null ||
                 (taskContract.ambiguityNotes() == null || taskContract.ambiguityNotes().isEmpty());
-        if (noOptionalFields && noAmbiguity && ReviewNoiseSemantics.isLikelyReviewNoise(reviewDecision, reviewSummary)) {
+        if (noOptionalFields && noAmbiguity && isReviewNoise(categoryHint)) {
             var suggestedAction = "REJECT".equals(reviewDecision)
                     ? "Re-run acceptance review automatically"
                     : "Record non-blocking acceptance notes and continue";
@@ -144,11 +144,23 @@ public final class FailureArbiter {
         if (categoryHint == null || categoryHint.isBlank()) {
             return false;
         }
-        var normalized = categoryHint.trim().toLowerCase(java.util.Locale.ROOT);
-        return normalized.contains("insufficient_verification")
-                || normalized.contains("insufficient_evidence")
-                || normalized.contains("missing_test")
-                || normalized.contains("missing_verification");
+        var normalized = normalizeCategoryHint(categoryHint);
+        return normalized.equals("VERIFICATION_INSUFFICIENT")
+                || normalized.equals("INSUFFICIENT_VERIFICATION")
+                || normalized.equals("INSUFFICIENT_EVIDENCE")
+                || normalized.equals("MISSING_VERIFICATION")
+                || normalized.equals("MISSING_TEST");
+    }
+
+    private boolean isReviewNoise(String categoryHint) {
+        return "REVIEW_NOISE".equals(normalizeCategoryHint(categoryHint));
+    }
+
+    private String normalizeCategoryHint(String categoryHint) {
+        return categoryHint == null ? "" : categoryHint.trim()
+                .replace('-', '_')
+                .replace(' ', '_')
+                .toUpperCase(java.util.Locale.ROOT);
     }
 
     private FailureClassification build(FailureCategory category, int rule,

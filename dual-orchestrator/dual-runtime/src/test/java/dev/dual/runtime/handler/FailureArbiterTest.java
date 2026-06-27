@@ -170,7 +170,7 @@ class FailureArbiterTest {
     }
 
     @Test
-    void rule5_verificationInsufficientFromCategoryHint() {
+    void rule5_verificationInsufficientFromCategoryHintCatalogAlias() {
         var contract = minimalContract(
                 List.of(),
                 List.of("file1.java"),
@@ -185,6 +185,24 @@ class FailureArbiterTest {
         );
         assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
         assertEquals(5, result.matchedRule());
+    }
+
+    @Test
+    void categoryHintSubstringDoesNotClassifyVerificationInsufficient() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null,
+                null,
+                null,
+                "Verification evidence is incomplete", contract,
+                3, "REJECT", "not_actually_insufficient_verification_noise"
+        );
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(8, result.matchedRule());
     }
 
     // --- Rule 6: TOOL_LIMITATION ---
@@ -209,15 +227,27 @@ class FailureArbiterTest {
     // --- Rule 7: REVIEW_NOISE ---
 
     @Test
-    void rule6_reviewNoise() {
+    void rule6_reviewNoiseFromTypedCategoryHint() {
+        var result = arbiter.classify(
+                null, null, null,
+                null,
+                "minor stylistic issue", null,
+                5, "REJECT", "REVIEW_NOISE"
+        );
+        assertEquals(FailureCategory.REVIEW_NOISE, result.category());
+        assertEquals(7, result.matchedRule());
+    }
+
+    @Test
+    void summaryTextDoesNotClassifyReviewNoiseWithoutTypedHint() {
         var result = arbiter.classify(
                 null, null, null,
                 null,
                 "minor stylistic issue", null,
                 5, "REJECT"
         );
-        assertEquals(FailureCategory.REVIEW_NOISE, result.category());
-        assertEquals(7, result.matchedRule());
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(8, result.matchedRule());
     }
 
     @Test
