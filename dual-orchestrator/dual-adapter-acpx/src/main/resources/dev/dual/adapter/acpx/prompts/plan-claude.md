@@ -40,7 +40,9 @@ Context use rule:
 
 ## Output Contract
 
-Write a Markdown plan with these sections:
+Write a Markdown plan with these sections (human-readable display only — the
+orchestrator does not parse these headings; the typed `plan_artifact` below is
+the machine-readable source of truth for the plan body):
 
 1. Implementation Steps
 2. File-Level Changes
@@ -57,11 +59,29 @@ Required control keys:
 
 {{required_control_keys}}
 
-Before the final control block, write this structured artifact. Keep it factual
-and consistent with the Markdown plan. If your decision is `BLOCKED`, set
-`lifecycle_status` to `BLOCKED`, set `blocking` to `true`, and include a concrete
-`failure.reason` plus at least one `missing_evidence`, `must_fix`, or
-`open_risks` item.
+Before the final control block, write these two typed artifacts.
+
+First, the `plan_artifact` — the typed plan body. All six fields are required
+and non-empty (the orchestrator validates them, not the Markdown headings). Keep
+them consistent with the Markdown display above.
+
+<dual-artifact type="plan_artifact" version="1">
+{
+  "artifact_type": "plan_artifact",
+  "schema_version": 1,
+  "implementation_steps": ["concrete, ordered implementation steps"],
+  "file_level_changes": ["path: intended change for each file you plan to edit"],
+  "validation_plan": ["commands/checks the self-test node will run"],
+  "rollback_notes": "how to revert if validation fails",
+  "known_risks": ["at least one risk; write 'None identified.' if truly none"],
+  "human_review_checklist": ["what a human reviewer should confirm"]
+}
+</dual-artifact>
+
+Then the control artifact. Keep it factual and consistent with the plan. If your
+decision is `BLOCKED`, set `lifecycle_status` to `BLOCKED`, set `blocking` to
+`true`, and include a concrete `failure.reason` plus at least one
+`missing_evidence`, `must_fix`, or `open_risks` item.
 
 <dual-artifact type="agent_output_contract" version="1">
 {

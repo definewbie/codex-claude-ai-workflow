@@ -23,29 +23,17 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class ArtifactContractValidator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
-    private static final Pattern STRUCTURED_ARTIFACT_BLOCK = Pattern.compile(
-            "(?s)<dual-artifact\\b[^>]*>.*?</dual-artifact>\\s*"
-    );
-    private static final Pattern DUAL_CONTROL_BLOCK = Pattern.compile(
-            "(?s)```dual-control\\b.*?```\\s*"
-    );
-    private static final List<String> PLAN_BODY_SECTIONS = List.of(
-            "Implementation Steps",
-            "File-Level Changes",
-            "Validation Plan",
-            "Rollback Notes",
-            "Known Risks",
-            "Human Review Checklist"
-    );
     private static final AgentExecutionOutcomeResolver OUTCOME_RESOLVER = new AgentExecutionOutcomeResolver();
     private final DualControlBlockParser parser = new DualControlBlockParser();
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
@@ -100,9 +88,9 @@ public final class ArtifactContractValidator {
                 if (structured.failure() != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, structured.failure());
                 }
-                var bodyFailure = validateFormalArtifactBody(nodeDefinition, markdown);
-                if (bodyFailure != null) {
-                    return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, bodyFailure);
+                var planArtifactFailure = validatePlanArtifact(nodeDefinition, markdown);
+                if (planArtifactFailure != null) {
+                    return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, planArtifactFailure);
                 }
                 var rereadCoverageFailure = validateRereadCoverage(root, workstreamId, result, structured);
                 if (rereadCoverageFailure != null) {
@@ -129,20 +117,39 @@ public final class ArtifactContractValidator {
         return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, lastSourceRef, lastInvalid);
     }
 
-    private static DualControlParseResult validateFormalArtifactBody(NodeDefinition nodeDefinition, String markdown) {
+    /**
+     * Validates the typed {@code plan_artifact} envelope for {@code plan.claude_plan}.
+     * This replaces Markdown-section parsing: the six required plan-body fields live
+     * in the typed artifact (source of truth); Markdown plan prose is display-only.
+     */
+    private DualControlParseResult validatePlanArtifact(NodeDefinition nodeDefinition, String markdown) {
         if (!"plan.claude_plan".equals(nodeDefinition.id())) {
             return null;
         }
-        var body = formalBody(markdown);
-        var missing = PLAN_BODY_SECTIONS.stream()
-                .filter(section -> sectionText(body, section).isBlank())
-                .toList();
-        if (!missing.isEmpty()) {
+        var envelope = artifactParser.latest(markdown, "plan_artifact");
+        if (envelope.isEmpty()) {
             return DualControlParseResult.invalid(
-                    "FORMAL_ARTIFACT_BODY_MISSING",
-                    "plan.claude_plan formal artifact body is missing required plan sections: " + missing
-                            + ". Plan content must be in the workflow output artifact, not only in the acpx transcript.",
-                    Map.of("missing_sections", missing)
+                    "PLAN_ARTIFACT_MISSING",
+                    "plan.claude_plan requires a typed plan_artifact envelope. The Markdown plan sections are human-readable display only and are no longer the source of truth for plan body validation.",
+                    Map.of()
+            );
+        }
+        Map<String, Object> raw;
+        try {
+            raw = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
+        } catch (Exception parseFailure) {
+            return DualControlParseResult.invalid(
+                    "PLAN_ARTIFACT_PARSE_FAILED",
+                    "plan.claude_plan plan_artifact envelope could not be parsed: " + parseFailure.getMessage(),
+                    Map.of()
+            );
+        }
+        var missing = PlanArtifactDocument.from(raw).missingRequiredField();
+        if (missing.isPresent()) {
+            return DualControlParseResult.invalid(
+                    "PLAN_ARTIFACT_BODY_MISSING",
+                    "plan.claude_plan plan_artifact is missing required field: " + missing.get(),
+                    Map.of("missing_field", missing.get())
             );
         }
         return null;
@@ -165,21 +172,19 @@ public final class ArtifactContractValidator {
         if (reusableReads.isEmpty()) {
             return null;
         }
-        var declared = artifact.rereadReasons().stream()
-                .map(reason -> normalizeRepoPath(reason.path()))
-                .filter(path -> !path.isBlank())
-                .collect(java.util.stream.Collectors.toSet());
-        var missing = actualReads.stream()
-                .filter(reusableReads::contains)
-                .filter(path -> !declared.contains(path))
-                .toList();
-        if (missing.isEmpty()) {
+        var invalidatedReads = invalidatedReadFiles(root, workstreamId);
+        var expectedEdits = expectedEditFiles(artifact);
+        // Harness-computed policy: justified by expected edit or invalidation only.
+        // agent_output_contract.reread_reasons is a supplementary explanation, NOT the justification.
+        var policy = RereadPolicyCalculator.compute(actualReads, reusableReads, invalidatedReads, expectedEdits);
+        if (policy.denied().isEmpty()) {
             return null;
         }
         return DualControlParseResult.invalid(
-                "REREAD_REASON_MISSING",
-                "agent re-read reusable files without matching agent_output_contract.reread_reasons entries: " + missing,
-                Map.of("missing_reread_reason_paths", missing)
+                "REREAD_POLICY_DENIED",
+                "agent re-read reusable files without an expected edit or invalidation: " + policy.denied()
+                        + ". (Re-read justification is harness-computed; reread_reasons is supplementary, not the source of truth.)",
+                Map.of("denied_reread_paths", policy.denied())
         );
     }
 
@@ -208,19 +213,27 @@ public final class ArtifactContractValidator {
         }
     }
 
-    private static List<String> reusableReadFiles(Path root, String workstreamId) {
+    private static Set<String> reusableReadFiles(Path root, String workstreamId) {
+        return readReuseContractFiles(root, workstreamId, "reusableReadFiles");
+    }
+
+    private static Set<String> invalidatedReadFiles(Path root, String workstreamId) {
+        return readReuseContractFiles(root, workstreamId, "invalidatedReadFiles");
+    }
+
+    private static Set<String> readReuseContractFiles(Path root, String workstreamId, String key) {
         var path = root.resolve(".agent/workstreams").resolve(workstreamId)
                 .resolve("memory/read-reuse-contract.json").normalize();
         if (!path.startsWith(root) || !Files.isRegularFile(path)) {
-            return List.of();
+            return Set.of();
         }
         try {
             var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
-            var value = document.get("reusableReadFiles");
+            var value = document.get(key);
             if (!(value instanceof List<?> list)) {
-                return List.of();
+                return Set.of();
             }
-            var out = new ArrayList<String>();
+            var out = new LinkedHashSet<String>();
             for (var item : list) {
                 if (item instanceof Map<?, ?> map) {
                     var normalized = normalizeRepoPath(text(map.get("path")));
@@ -229,10 +242,31 @@ public final class ArtifactContractValidator {
                     }
                 }
             }
-            return out.stream().distinct().toList();
+            return out;
         } catch (Exception ignored) {
-            return List.of();
+            return Set.of();
         }
+    }
+
+    /**
+     * Objective expected-edit set: files this run is entitled to re-read because
+     * it edits them. Sourced ONLY from the agent-declared {@code changed_files}.
+     *
+     * <p>Task-contract {@code scope.included} is intentionally excluded — scope
+     * describes the task, not "files edited this run". Treating scope as edit
+     * permission would silently widen the re-read policy (any
+     * README/docs/source/test in scope would become re-readable), masking the
+     * repeated-read problem this policy exists to govern. If a future typed
+     * plan-sidecar edit source is added, it must be its own named, owned read
+     * model — never task scope.</p>
+     */
+    private static Set<String> expectedEditFiles(AgentOutputArtifact artifact) {
+        var edits = new LinkedHashSet<String>();
+        artifact.changedFiles().stream()
+                .map(ArtifactContractValidator::normalizeRepoPath)
+                .filter(path -> !path.isBlank())
+                .forEach(edits::add);
+        return edits;
     }
 
     private static List<String> stringList(Object value) {
@@ -251,68 +285,6 @@ public final class ArtifactContractValidator {
             text = text.substring(2);
         }
         return text;
-    }
-
-    private static String formalBody(String markdown) {
-        var withoutArtifacts = STRUCTURED_ARTIFACT_BLOCK.matcher(markdown == null ? "" : markdown).replaceAll("");
-        return DUAL_CONTROL_BLOCK.matcher(withoutArtifacts).replaceAll("").strip();
-    }
-
-    private static String sectionText(String markdown, String heading) {
-        var lines = markdown == null ? List.<String>of() : markdown.lines().toList();
-        int start = -1;
-        int startLevel = 0;
-        for (int i = 0; i < lines.size(); i++) {
-            if (isHeading(lines.get(i), heading)) {
-                start = i + 1;
-                startLevel = headingLevel(lines.get(i));
-                break;
-            }
-        }
-        if (start < 0) {
-            return "";
-        }
-        int end = lines.size();
-        for (int i = start; i < lines.size(); i++) {
-            var level = headingLevel(lines.get(i));
-            if (level > 0 && level <= startLevel) {
-                end = i;
-                break;
-            }
-        }
-        return String.join("\n", lines.subList(start, end)).strip();
-    }
-
-    private static int headingLevel(String line) {
-        if (line == null) {
-            return 0;
-        }
-        var stripped = line.stripLeading();
-        int level = 0;
-        while (level < stripped.length() && level < 6 && stripped.charAt(level) == '#') {
-            level++;
-        }
-        if (level == 0 || level >= stripped.length() || !Character.isWhitespace(stripped.charAt(level))) {
-            return 0;
-        }
-        return level;
-    }
-
-    private static boolean isHeading(String line, String heading) {
-        if (line == null) {
-            return false;
-        }
-        var normalized = line.stripLeading()
-                .replaceFirst("^#{1,6}\\s+", "")
-                .replaceFirst("^\\d+[.)]\\s+", "")
-                .strip();
-        return normalized.equalsIgnoreCase(heading)
-                || normalized.regionMatches(true, 0, heading + " ", 0, heading.length() + 1)
-                || normalized.regionMatches(true, 0, heading + "（", 0, heading.length() + 1)
-                || normalized.regionMatches(true, 0, heading + "(", 0, heading.length() + 1)
-                || normalized.regionMatches(true, 0, heading + ":", 0, heading.length() + 1)
-                || normalized.regionMatches(true, 0, heading + "：", 0, heading.length() + 1)
-                || normalized.regionMatches(true, 0, heading + "-", 0, heading.length() + 1);
     }
 
     private static NodeResult withContractSidecar(

@@ -4,6 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * LEGACY fallback reader that extracts list/text fields from Markdown sections.
+ *
+ * <p>Used only by {@code ArtifactContractValidator.addEvidenceFields} when an
+ * agent output has NO typed structured artifact (legacy compatibility). It is
+ * not a source of truth: contract routing / completion / plan-body / handoff /
+ * re-read decisions read typed JSON artifacts, not these Markdown sections. New
+ * semantics must not depend on this reader.</p>
+ */
 final class MarkdownArtifactFields {
     private MarkdownArtifactFields() {
     }

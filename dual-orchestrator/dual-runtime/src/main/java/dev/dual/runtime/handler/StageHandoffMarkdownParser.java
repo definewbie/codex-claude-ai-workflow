@@ -6,10 +6,17 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Extracts stable next-stage handoff fields from flexible Markdown.
+ * LEGACY display-only fallback reader for next-stage handoff fields from Markdown.
  *
- * Claude is allowed to write naturally, but the runtime should centralize the
- * few heuristic rules needed to derive handoff.json and next-stage prompts.
+ * <p>The main path is the typed {@code stage_handoff} structured artifact —
+ * emitted in the {@code agent_output_contract} envelope and read via the
+ * contract sidecar by {@code PromptGenerateNextStageHandler.structuredHandoff}.
+ * This parser is used ONLY when no typed {@code stage_handoff} sidecar is
+ * present (legacy / Markdown-only outputs).</p>
+ *
+ * <p>It is not a source of truth: routing, completion, plan-body, handoff, and
+ * re-read decisions read typed JSON artifacts, not these Markdown sections. New
+ * handoff semantics belong in the typed artifact, not here.</p>
  */
 final class StageHandoffMarkdownParser {
     private static final Set<String> COMPLETED_WORK_HEADINGS = Set.of(
