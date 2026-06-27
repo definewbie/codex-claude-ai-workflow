@@ -70,6 +70,9 @@ public final class FailureClassifyHandler implements TaskHandler {
                 reviewMetadata.map(metadata -> metadata.failure().missingTests()).orElse(List.of()));
         List<String> contextGaps = extractStringList(instanceResult, "context_gaps",
                 reviewMetadata.map(metadata -> metadata.failure().contextGaps()).orElse(List.of()));
+        String categoryHint = reviewMetadata
+                .map(metadata -> metadata.failure().categoryHint())
+                .orElse("");
 
         // Read git evidence for changed file count
         int changedFileCount = readChangedFileCount(workstreamDir);
@@ -77,7 +80,7 @@ public final class FailureClassifyHandler implements TaskHandler {
         // Classify
         var classification = arbiter.classify(
                 contractGaps, outOfScopeFiles, missingTests, contextGaps,
-                reviewSummary, taskContract, changedFileCount, reviewDecision
+                reviewSummary, taskContract, changedFileCount, reviewDecision, categoryHint
         );
 
         // Write artifact
@@ -215,6 +218,7 @@ public final class FailureClassifyHandler implements TaskHandler {
             case CONTRACT_GAP, CONTRACT_AMBIGUITY -> "CONTRACT_TEMPLATE";
             case CONTEXT_INSUFFICIENT -> "CONTEXT_RULE";
             case IMPLEMENTATION_BUG -> "REGRESSION_TEST";
+            case VERIFICATION_INSUFFICIENT -> null;
             case TOOL_LIMITATION, REVIEW_NOISE -> null;
         };
     }

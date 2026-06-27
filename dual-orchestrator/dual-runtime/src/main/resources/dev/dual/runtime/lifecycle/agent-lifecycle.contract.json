@@ -940,6 +940,20 @@
     },
     {
       "from": "acceptance.classify_failure",
+      "on": "REJECT_VERIFICATION_INSUFFICIENT",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Acceptance rejected because verification evidence is insufficient"
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
       "on": "REJECT_TOOL_LIMITATION",
       "to": "context.implement_claude",
       "condition": null,
@@ -1011,6 +1025,20 @@
     {
       "from": "acceptance.classify_failure",
       "on": "NOTED_CONTEXT_INSUFFICIENT",
+      "to": "acceptance.generate_final_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "NOTED_VERIFICATION_INSUFFICIENT",
       "to": "acceptance.generate_final_report",
       "condition": null,
       "metadata": {

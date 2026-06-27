@@ -83,10 +83,10 @@ public final class ContractRegistry {
             Set.of(
                     "REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY",
                     "REJECT_IMPLEMENTATION_BUG", "REJECT_CONTEXT_INSUFFICIENT",
-                    "REJECT_TOOL_LIMITATION", "REJECT_REVIEW_NOISE",
+                    "REJECT_VERIFICATION_INSUFFICIENT", "REJECT_TOOL_LIMITATION", "REJECT_REVIEW_NOISE",
                     "NOTED_CONTRACT_GAP", "NOTED_CONTRACT_AMBIGUITY",
                     "NOTED_IMPLEMENTATION_BUG", "NOTED_CONTEXT_INSUFFICIENT",
-                    "NOTED_TOOL_LIMITATION", "NOTED_REVIEW_NOISE"
+                    "NOTED_VERIFICATION_INSUFFICIENT", "NOTED_TOOL_LIMITATION", "NOTED_REVIEW_NOISE"
             ),
             Set.of("category", "reasoning", "matched_rule", "classification_ref")
     );

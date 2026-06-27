@@ -45,14 +45,15 @@ class FailureClassificationTest {
     }
 
     @Test
-    void enumHasSixValues() {
+    void enumHasSevenValues() {
         FailureCategory[] values = FailureCategory.values();
-        assertEquals(6, values.length);
+        assertEquals(7, values.length);
         assertTrue(Arrays.asList(values).containsAll(List.of(
                 FailureCategory.CONTRACT_GAP,
                 FailureCategory.CONTRACT_AMBIGUITY,
                 FailureCategory.IMPLEMENTATION_BUG,
                 FailureCategory.CONTEXT_INSUFFICIENT,
+                FailureCategory.VERIFICATION_INSUFFICIENT,
                 FailureCategory.TOOL_LIMITATION,
                 FailureCategory.REVIEW_NOISE
         )));
@@ -132,17 +133,17 @@ class FailureClassificationTest {
         // Above range
         assertThrows(IllegalArgumentException.class, () -> sampleClassification(
                 FailureCategory.IMPLEMENTATION_BUG, "reasoning", "action", "source",
-                Instant.now(), 8, "REJECT", List.of()
+                Instant.now(), 9, "REJECT", List.of()
         ));
         // Boundary valid: 1
         assertDoesNotThrow(() -> sampleClassification(
                 FailureCategory.IMPLEMENTATION_BUG, "reasoning", "action", "source",
                 Instant.now(), 1, "REJECT", List.of()
         ));
-        // Boundary valid: 7
+        // Boundary valid: 8
         assertDoesNotThrow(() -> sampleClassification(
                 FailureCategory.IMPLEMENTATION_BUG, "reasoning", "action", "source",
-                Instant.now(), 7, "REJECT", List.of()
+                Instant.now(), 8, "REJECT", List.of()
         ));
     }
 

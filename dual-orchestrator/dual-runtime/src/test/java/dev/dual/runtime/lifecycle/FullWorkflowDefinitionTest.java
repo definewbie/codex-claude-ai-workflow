@@ -130,6 +130,7 @@ class FullWorkflowDefinitionTest {
                 "NOTED_CONTRACT_AMBIGUITY",
                 "NOTED_IMPLEMENTATION_BUG",
                 "NOTED_CONTEXT_INSUFFICIENT",
+                "NOTED_VERIFICATION_INSUFFICIENT",
                 "NOTED_TOOL_LIMITATION",
                 "NOTED_REVIEW_NOISE"
         );
@@ -170,6 +171,21 @@ class FullWorkflowDefinitionTest {
             assertFalse(edges.get(0).metadata().loopReason().isBlank(),
                     "REJECT edge '" + outcome + "' should explain why a new iteration starts");
         }
+    }
+
+    @Test
+    void fullVariantRejectVerificationInsufficientRoutesToSelfTestEvidenceCollection() {
+        WorkflowDefinition wf = factory.forVariant("full");
+
+        var edges = wf.edgesFrom("acceptance.classify_failure").stream()
+                .filter(e -> "REJECT_VERIFICATION_INSUFFICIENT".equals(e.on()))
+                .toList();
+
+        assertEquals(1, edges.size(),
+                "Expected exactly one edge from acceptance.classify_failure on 'REJECT_VERIFICATION_INSUFFICIENT'");
+        assertEquals("implement.claude_self_test_report", edges.get(0).to(),
+                "Verification evidence gaps should rerun self-test evidence collection, not implementation repair");
+        assertEquals("loop", edges.get(0).metadata().transitionType());
     }
 
 }

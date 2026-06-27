@@ -38,6 +38,23 @@ public final class FailureArbiter {
             int changedFileCount,
             String reviewDecision
     ) {
+        return classify(
+                contractGaps, outOfScopeFiles, missingTests, contextGaps,
+                reviewSummary, taskContract, changedFileCount, reviewDecision, ""
+        );
+    }
+
+    public FailureClassification classify(
+            List<String> contractGaps,
+            List<String> outOfScopeFiles,
+            List<String> missingTests,
+            List<String> contextGaps,
+            String reviewSummary,
+            TaskContract taskContract,
+            int changedFileCount,
+            String reviewDecision,
+            String categoryHint
+    ) {
         // Rule 1: CONTRACT_GAP
         if (contractGaps != null && !contractGaps.isEmpty()) {
             return build(FailureCategory.CONTRACT_GAP, 1,
@@ -77,15 +94,26 @@ public final class FailureArbiter {
                     contextGaps, reviewDecision);
         }
 
-        // Rule 5: TOOL_LIMITATION
+        // Rule 5: VERIFICATION_INSUFFICIENT
+        if ((missingTests != null && !missingTests.isEmpty()) || isVerificationInsufficient(categoryHint)) {
+            var evidence = missingTests == null ? List.<String>of() : missingTests;
+            var detail = evidence.isEmpty() ? "typed review category_hint indicates insufficient verification evidence"
+                    : "Review identified missing verification evidence: " + String.join(", ", evidence);
+            return build(FailureCategory.VERIFICATION_INSUFFICIENT, 5,
+                    detail,
+                    "Re-run self-test/evidence collection before implementation repair",
+                    evidence, reviewDecision);
+        }
+
+        // Rule 6: TOOL_LIMITATION
         if (changedFileCount == 0) {
-            return build(FailureCategory.TOOL_LIMITATION, 5,
+            return build(FailureCategory.TOOL_LIMITATION, 6,
                     "No files were changed — tool/execution issue",
                     "Retry implementation with adjusted tool configuration",
                     List.of(), reviewDecision);
         }
 
-        // Rule 6: REVIEW_NOISE
+        // Rule 7: REVIEW_NOISE
         // A hard REJECT with changed files should bias toward repair unless the
         // review summary itself clearly says the issue is non-blocking noise.
         boolean hasGaps = contractGaps != null && !contractGaps.isEmpty();
@@ -99,17 +127,28 @@ public final class FailureArbiter {
             var suggestedAction = "REJECT".equals(reviewDecision)
                     ? "Re-run acceptance review automatically"
                     : "Record non-blocking acceptance notes and continue";
-            return build(FailureCategory.REVIEW_NOISE, 6,
+            return build(FailureCategory.REVIEW_NOISE, 7,
                     "No structured failure indicators found — likely reviewer noise",
                     suggestedAction,
                     List.of(), reviewDecision);
         }
 
-        // Rule 7 (fallback): IMPLEMENTATION_BUG
-        return build(FailureCategory.IMPLEMENTATION_BUG, 7,
+        // Rule 8 (fallback): IMPLEMENTATION_BUG
+        return build(FailureCategory.IMPLEMENTATION_BUG, 8,
                 "Default classification — assume implementation needs fixing",
                 "Re-implement addressing review feedback",
                 List.of(), reviewDecision);
+    }
+
+    private boolean isVerificationInsufficient(String categoryHint) {
+        if (categoryHint == null || categoryHint.isBlank()) {
+            return false;
+        }
+        var normalized = categoryHint.trim().toLowerCase(java.util.Locale.ROOT);
+        return normalized.contains("insufficient_verification")
+                || normalized.contains("insufficient_evidence")
+                || normalized.contains("missing_test")
+                || normalized.contains("missing_verification");
     }
 
     private FailureClassification build(FailureCategory category, int rule,

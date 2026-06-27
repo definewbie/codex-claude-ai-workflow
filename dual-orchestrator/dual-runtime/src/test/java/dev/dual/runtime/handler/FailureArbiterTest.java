@@ -146,10 +146,48 @@ class FailureArbiterTest {
                 3, "REJECT"
         );
         assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
-        assertEquals(7, result.matchedRule());
+        assertEquals(8, result.matchedRule());
     }
 
-    // --- Rule 5: TOOL_LIMITATION ---
+    // --- Rule 5: VERIFICATION_INSUFFICIENT ---
+
+    @Test
+    void rule5_verificationInsufficientFromMissingTests() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null,
+                List.of("backend pytest evidence missing"),
+                null,
+                "Verification evidence is incomplete", contract,
+                3, "REJECT"
+        );
+        assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
+        assertEquals(5, result.matchedRule());
+    }
+
+    @Test
+    void rule5_verificationInsufficientFromCategoryHint() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null,
+                null,
+                null,
+                "Verification evidence is incomplete", contract,
+                3, "REJECT", "insufficient_verification"
+        );
+        assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
+        assertEquals(5, result.matchedRule());
+    }
+
+    // --- Rule 6: TOOL_LIMITATION ---
 
     @Test
     void rule5_toolLimitation() {
@@ -165,10 +203,10 @@ class FailureArbiterTest {
                 0, "REJECT"  // changedFileCount == 0
         );
         assertEquals(FailureCategory.TOOL_LIMITATION, result.category());
-        assertEquals(5, result.matchedRule());
+        assertEquals(6, result.matchedRule());
     }
 
-    // --- Rule 6: REVIEW_NOISE ---
+    // --- Rule 7: REVIEW_NOISE ---
 
     @Test
     void rule6_reviewNoise() {
@@ -179,7 +217,7 @@ class FailureArbiterTest {
                 5, "REJECT"
         );
         assertEquals(FailureCategory.REVIEW_NOISE, result.category());
-        assertEquals(6, result.matchedRule());
+        assertEquals(7, result.matchedRule());
     }
 
     @Test
@@ -193,10 +231,10 @@ class FailureArbiterTest {
                 "REJECT"
         );
         assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
-        assertEquals(7, result.matchedRule());
+        assertEquals(8, result.matchedRule());
     }
 
-    // --- Rule 7: fallback IMPLEMENTATION_BUG ---
+    // --- Rule 8: fallback IMPLEMENTATION_BUG ---
 
     @Test
     void rule7_fallback_implementationBug() {
@@ -208,13 +246,13 @@ class FailureArbiterTest {
         var result = arbiter.classify(
                 null,  // no contract gaps
                 null,  // no out of scope files
-                List.of("some test is missing"),  // missingTests present -> noOptionalFields is false
+                null,
                 null,
                 "doesn't pass", contract,
                 3, "REJECT"
         );
         assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
-        assertEquals(7, result.matchedRule());
+        assertEquals(8, result.matchedRule());
     }
 
     // --- Cross-cutting: ACCEPT_WITH_NOTES ---

@@ -16,21 +16,23 @@ class FailureClassifyRegistryTest {
     void classifyFailureContractHasCorrectAllowedDecisions() {
         var contract = ContractRegistry.forNode("acceptance.classify_failure");
         var allowed = contract.allowedDecisions();
-        // 6 REJECT_* outcomes
+        // 7 REJECT_* outcomes
         assertTrue(allowed.contains("REJECT_CONTRACT_GAP"));
         assertTrue(allowed.contains("REJECT_CONTRACT_AMBIGUITY"));
         assertTrue(allowed.contains("REJECT_IMPLEMENTATION_BUG"));
         assertTrue(allowed.contains("REJECT_CONTEXT_INSUFFICIENT"));
+        assertTrue(allowed.contains("REJECT_VERIFICATION_INSUFFICIENT"));
         assertTrue(allowed.contains("REJECT_TOOL_LIMITATION"));
         assertTrue(allowed.contains("REJECT_REVIEW_NOISE"));
-        // 6 NOTED_* outcomes
+        // 7 NOTED_* outcomes
         assertTrue(allowed.contains("NOTED_CONTRACT_GAP"));
         assertTrue(allowed.contains("NOTED_CONTRACT_AMBIGUITY"));
         assertTrue(allowed.contains("NOTED_IMPLEMENTATION_BUG"));
         assertTrue(allowed.contains("NOTED_CONTEXT_INSUFFICIENT"));
+        assertTrue(allowed.contains("NOTED_VERIFICATION_INSUFFICIENT"));
         assertTrue(allowed.contains("NOTED_TOOL_LIMITATION"));
         assertTrue(allowed.contains("NOTED_REVIEW_NOISE"));
-        assertEquals(12, allowed.size());
+        assertEquals(14, allowed.size());
     }
 
     @Test

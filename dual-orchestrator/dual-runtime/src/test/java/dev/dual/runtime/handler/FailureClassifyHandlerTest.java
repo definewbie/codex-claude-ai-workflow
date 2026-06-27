@@ -241,7 +241,7 @@ class FailureClassifyHandlerTest {
 
     @Test
     void classifyPreservesInsufficientEvidenceStageOutcomeFromAcceptanceSidecar() throws Exception {
-        writeMinimalContract();
+        writeCleanContract();
         writeGitEvidence("M src/A.java\n", null, null);
 
         var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
@@ -253,6 +253,7 @@ class FailureClassifyHandlerTest {
                   "lifecycle_status": "INSUFFICIENT_EVIDENCE",
                   "summary": "Generated evidence does not prove the implementation.",
                   "failure": {
+                    "category_hint": "insufficient_verification",
                     "missing_tests": ["manual walkthrough evidence"],
                     "reason": "Verification evidence is incomplete."
                   }
@@ -267,6 +268,8 @@ class FailureClassifyHandlerTest {
 
         assertEquals("REJECT", result.result().get("review_decision"));
         assertEquals("INSUFFICIENT_EVIDENCE", result.result().get("stage_outcome"));
+        assertEquals("REJECT_VERIFICATION_INSUFFICIENT", result.outcome());
+        assertEquals("VERIFICATION_INSUFFICIENT", result.result().get("category"));
     }
 
     @Test
