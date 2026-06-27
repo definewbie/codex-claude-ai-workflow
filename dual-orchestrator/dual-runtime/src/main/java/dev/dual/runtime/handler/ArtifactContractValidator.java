@@ -288,7 +288,13 @@ public final class ArtifactContractValidator {
                 .replaceFirst("^#{1,6}\\s+", "")
                 .replaceFirst("^\\d+[.)]\\s+", "")
                 .strip();
-        return normalized.equalsIgnoreCase(heading);
+        return normalized.equalsIgnoreCase(heading)
+                || normalized.regionMatches(true, 0, heading + " ", 0, heading.length() + 1)
+                || normalized.regionMatches(true, 0, heading + "（", 0, heading.length() + 1)
+                || normalized.regionMatches(true, 0, heading + "(", 0, heading.length() + 1)
+                || normalized.regionMatches(true, 0, heading + ":", 0, heading.length() + 1)
+                || normalized.regionMatches(true, 0, heading + "：", 0, heading.length() + 1)
+                || normalized.regionMatches(true, 0, heading + "-", 0, heading.length() + 1);
     }
 
     private static NodeResult withContractSidecar(

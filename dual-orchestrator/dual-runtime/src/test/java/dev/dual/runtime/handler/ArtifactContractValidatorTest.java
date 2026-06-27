@@ -1039,6 +1039,65 @@ class ArtifactContractValidatorTest {
         assertTrue(validated.outputRefs().contains("plan.contract.json"));
     }
 
+    @Test
+    void acceptsPlanOutputWhenRequiredSectionsHaveLocalizedSuffixes() throws Exception {
+        var outputRef = writeOutput("plan.md", """
+                ## 1. Implementation Steps（实现步骤）
+
+                1. Update the follow-up query.
+
+                ## 2. File-Level Changes（文件级改动）
+
+                - `src/Main.java`
+
+                ## 3. Validation Plan（验证计划）
+
+                - Run the targeted follow-up summary tests.
+
+                ## 4. Rollback Notes（回滚说明）
+
+                - Revert the query change if validation fails.
+
+                ## 5. Known Risks（已知风险）
+
+                - Existing records may not include reminder metadata.
+
+                ## 6. Human Review Checklist（人工评审清单）
+
+                - Confirm reminder wording and affected patient records.
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PLAN_REVIEW",
+                  "summary": "Plan is ready for review.",
+                  "blocking": false,
+                  "checks": ["reviewed requirements"],
+                  "evidence": ["formal plan body is present"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Plan will be validated during implementation.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PLAN_REVIEW
+                summary: Plan is ready for review.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(tempDir, agentNode("plan.claude_plan", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+    }
+
     private String writeOutput(String name, String content) throws Exception {
         var path = tempDir.resolve(name);
         Files.writeString(path, content);
