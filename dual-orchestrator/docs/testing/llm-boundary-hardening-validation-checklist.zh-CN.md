@@ -16,6 +16,7 @@
 | V8 | 残留旧入口扫描 | 不得残留 `ReviewNoiseSemantics`、JSON fence canonicalization 入口、旧 canonical envelope 代码 | PASS | `rg` 扫描无结果 |
 | V9 | 受影响模块回归 | `dual-runtime`、`dual-adapter-acpx`、`dual-ledger-file`、`dual-cli`、`dual-server` 测试必须全绿 | PASS | 五模块 + 依赖 reactor `BUILD SUCCESS` |
 | V10 | Patch 质量 | `git diff --check` 必须通过 | PASS | `git diff --check` 无输出 |
+| V11 | Simple semantic real-case | controlled fake acpx 走真实 `dualctl` / worktree / ledger path；必须分别证明 plan 正文缺失、review noise summary、reread reason 缺失会命中对应 typed 边界 | PASS | `scripts/semantic-boundary-smoke.sh all` |
 
 ## 验证记录
 
@@ -24,7 +25,10 @@
   结果：BUILD SUCCESS；runtime 65 tests，adapter 15 tests。
 - 全量受影响模块回归：
   `rtk mvn -pl dual-adapter-acpx,dual-runtime,dual-ledger-file,dual-cli,dual-server -am test`
-  结果：BUILD SUCCESS；runtime 368，adapter 191，ledger 123，cli 57，server 52。
+  结果：BUILD SUCCESS；runtime 370，adapter 192，ledger 123，cli 57，server 52。
+- Simple semantic real-case：
+  `rtk proxy dual-orchestrator/scripts/semantic-boundary-smoke.sh all`
+  结果：BUILD SUCCESS；`plan-body` 命中 `FORMAL_ARTIFACT_BODY_MISSING`；`review-noise` 未因 summary 自然语言进入 `REVIEW_NOISE`；`reread-reason` 命中 `REREAD_REASON_MISSING`。
 - 残留扫描：
   `rtk proxy rg -n "ReviewNoiseSemantics|canonicalEnvelope|JSON_FENCE|jsonFenceArtifactBeforeControl" ...`
   结果：无匹配。
