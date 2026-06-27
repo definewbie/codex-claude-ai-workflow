@@ -112,17 +112,23 @@ final class AcpxUsageReader {
             if (!Files.isRegularFile(streamPath)) {
                 return Optional.empty();
             }
-            return readMatchingUsageWithRetry(streamPath, Files.readString(promptPath));
+            var metadata = AcpxProviderMetadata.read(sessionsDir.resolve(sessionId.get() + ".json"));
+            return readMatchingUsageWithRetry(streamPath, Files.readString(promptPath), metadata);
         } catch (IOException ignored) {
             return Optional.empty();
         }
     }
 
-    private Optional<AcpxUsage> readMatchingUsageWithRetry(Path streamPath, String promptText) throws IOException {
+    private Optional<AcpxUsage> readMatchingUsageWithRetry(
+            Path streamPath,
+            String promptText,
+            AcpxProviderMetadata metadata
+    ) throws IOException {
         for (var attempt = 0; attempt < retryAttempts; attempt++) {
             var match = readMatchingUsage(streamPath, promptText);
             if (match.hasProviderUsage() || attempt == retryAttempts - 1) {
-                return Optional.ofNullable(match.best());
+                var best = match.best();
+                return best == null ? Optional.empty() : Optional.of(best.withProviderMetadata(metadata));
             }
             sleepBeforeRetry();
         }
@@ -193,7 +199,11 @@ final class AcpxUsageReader {
                             true,
                             used,
                             costAmount,
-                            costCurrency
+                            costCurrency,
+                            "",
+                            "",
+                            "",
+                            ""
                     );
                 }
             }
@@ -261,7 +271,11 @@ final class AcpxUsageReader {
                 false,
                 0,
                 sessionCostAmount,
-                sessionCostCurrency
+                sessionCostCurrency,
+                "",
+                "",
+                "",
+                ""
         );
     }
 

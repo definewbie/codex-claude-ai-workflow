@@ -444,6 +444,38 @@ class MetricsProjectionWriterTest {
         assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
     }
 
+    @Test
+    void tokenAttributionKeepsSubscriptionTokensWhenPricingFileIsAbsent() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-glm-subscription"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-glm-subscription", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(83685, 36025, 861568, "0");
+        usage.put("providerId", "zhipu");
+        usage.put("model", "glm-5.2");
+        usage.put("billingMode", "subscription_tokens");
+        usage.put("providerMetadataSource", "acpx_session_json");
+        writeAttributionRun(paths, "run-glm-subscription", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("zhipu", costMap.get("providerId"));
+        assertEquals("glm-5.2", costMap.get("model"));
+        assertEquals("subscription_tokens", costMap.get("billingMode"));
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("subscription_unpriced", costMap.get("costEstimateReliability"));
+        assertEquals("measure_only", costMap.get("providerCacheDecision"));
+    }
+
     private void writeAttributionRun(WorkstreamPaths paths, String runId, String agent, String nodeId,
                                      String sessionSegmentKey, Instant startedAt, Map<String, Object> usageMap,
                                      String transcriptPath, int toolCalls, List<String> readFiles) throws Exception {

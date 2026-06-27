@@ -226,7 +226,11 @@ class AcpxAgentTaskHandlerTest {
                         false,
                         0,
                         new java.math.BigDecimal("1.25"),
-                        "USD"
+                        "USD",
+                        "zhipu",
+                        "glm-5.2",
+                        AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS,
+                        AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON
                 )
         );
 

@@ -16,6 +16,14 @@
 
 如果技术债已经影响主流程稳定性、职责边界、状态一致性、artifact contract、测试可信度或后续开发速度，必须优先修复，而不是写入 TODO 后继续叠功能。
 
+## Objective Preservation Principle
+
+实现或优化过程中不得丢失本轮主目标。开工前必须把当前目标写成可验证口径，例如 token、成本、延迟、质量、闭环状态、边界拒绝能力或 UI 行为；收口时必须逐项验证。
+
+如果目标涉及可观测性或成本归因，不允许因为 provider/model 缺失、价格未知、cache 命中难解释或包月计费不可折算金额，就降级为“不可算”。至少必须保留明确状态：真实 token、provider/model、billing mode、是否可计算金额、是否仅 token-only / subscription-unpriced / pricing-unknown。
+
+发现实现偏离主目标时，必须先修复目标链路，再继续后续优化；不能用新增功能掩盖验收口径缺失。
+
 ## Sibling Boundary Sweep
 
 当一次修改迁移、删除或集中某个 source of truth 时，必须同步检查同一边界下的兄弟概念，不能只修用户点名的一个方法、一个 variant、一个 UI 面板或一个测试。

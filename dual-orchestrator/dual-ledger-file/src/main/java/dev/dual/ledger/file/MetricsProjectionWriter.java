@@ -239,6 +239,8 @@ final class MetricsProjectionWriter {
                     usageMap.put("cumulative", Boolean.TRUE.equals(usage.get("cumulative")));
                     usageMap.put("providerId", text(usage.get("providerId")));
                     usageMap.put("model", text(usage.get("model")));
+                    usageMap.put("billingMode", text(usage.get("billingMode")));
+                    usageMap.put("providerMetadataSource", text(usage.get("providerMetadataSource")));
                     usageMap.put("costAmount", usage.get("costAmount"));
                     usageMap.put("costCurrency", text(usage.get("costCurrency")));
                     item.put("usage", usageMap);
@@ -1205,8 +1207,11 @@ final class MetricsProjectionWriter {
                     text(usage.get("model")),
                     nonBlank(System.getenv("DUAL_MODEL_" + agentKey), nonBlank(System.getenv("DUAL_MODEL"), ""))
             );
+            var billingMode = nonBlank(text(usage.get("billingMode")), System.getenv("DUAL_BILLING_MODE"));
             result.put("providerId", providerId);
             result.put("model", model);
+            result.put("billingMode", billingMode);
+            result.put("providerMetadataSource", text(usage.get("providerMetadataSource")));
             result.put("inputCacheHitTokens", longValue(usage.get("cachedReadTokens")));
             result.put("inputCacheMissTokens", longValue(usage.get("inputTokens")));
             result.put("outputTokens", longValue(usage.get("outputTokens")));
@@ -1230,6 +1235,15 @@ final class MetricsProjectionWriter {
             }
             var price = priceFor(providerId, model);
             if (price == null) {
+                if (isSubscriptionTokenBilling(billingMode)) {
+                    result.put("cacheSignalReliability", longValue(usage.get("cachedReadTokens")) > 0
+                            ? "provider_cache_tokens_reported"
+                            : "provider_usage_tokens_reported");
+                    result.put("costEstimateReliability", "subscription_unpriced");
+                    result.put("providerCacheDecision", "measure_only");
+                    result.put("reason", "subscription or bundled billing; token usage is attributable but no per-token cost is visible");
+                    return result;
+                }
                 result.put("cacheSignalReliability", "pricing_unknown");
                 result.put("costEstimateReliability", "pricing_unknown");
                 result.put("providerCacheDecision", "measure_only");
@@ -1283,6 +1297,11 @@ final class MetricsProjectionWriter {
                 }
             }
             return null;
+        }
+
+        private boolean isSubscriptionTokenBilling(String billingMode) {
+            return "subscription_tokens".equalsIgnoreCase(billingMode)
+                    || "token_only".equalsIgnoreCase(billingMode);
         }
     }
 

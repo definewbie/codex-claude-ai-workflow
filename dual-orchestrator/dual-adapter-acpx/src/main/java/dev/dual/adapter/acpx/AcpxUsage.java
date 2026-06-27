@@ -32,7 +32,11 @@ record AcpxUsage(
         boolean cumulative,
         long contextUsedTokens,
         BigDecimal sessionCostAmount,
-        String sessionCostCurrency
+        String sessionCostCurrency,
+        String providerId,
+        String model,
+        String billingMode,
+        String providerMetadataSource
 ) {
     static final String PROVIDER_RUN_USAGE = "PROVIDER_RUN_USAGE";
     static final String SESSION_USED_SNAPSHOT = "SESSION_USED_SNAPSHOT";
@@ -57,5 +61,47 @@ record AcpxUsage(
         if (sessionCostCurrency == null) {
             sessionCostCurrency = "";
         }
+        if (providerId == null) {
+            providerId = "";
+        }
+        if (model == null) {
+            model = "";
+        }
+        if (billingMode == null) {
+            billingMode = "";
+        }
+        if (providerMetadataSource == null) {
+            providerMetadataSource = "";
+        }
+    }
+
+    AcpxUsage withProviderMetadata(AcpxProviderMetadata metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return this;
+        }
+        return new AcpxUsage(
+                inputTokens,
+                outputTokens,
+                cachedReadTokens,
+                cachedWriteTokens,
+                totalTokens,
+                costAmount,
+                costCurrency,
+                source,
+                measurementType,
+                attribution,
+                cumulative,
+                contextUsedTokens,
+                sessionCostAmount,
+                sessionCostCurrency,
+                firstNonBlank(providerId, metadata.providerId()),
+                firstNonBlank(model, metadata.model()),
+                firstNonBlank(billingMode, metadata.billingMode()),
+                firstNonBlank(providerMetadataSource, metadata.source())
+        );
+    }
+
+    private static String firstNonBlank(String current, String fallback) {
+        return current == null || current.isBlank() ? (fallback == null ? "" : fallback) : current;
     }
 }

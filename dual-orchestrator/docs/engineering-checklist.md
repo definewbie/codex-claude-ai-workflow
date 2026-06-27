@@ -198,6 +198,13 @@ source-of-truth model, projection behavior, and regression tests to agree.
 
 - Projections are read models, not sources of truth.
 - Timeline, trace, operator panel, and API should consume the same ledger facts.
+- Before implementing token, cost, latency, quality, or operator-observability
+  work, write the acceptance metric first and verify it at the end. Do not let a
+  run fall back to an ambiguous "unknown" state when a typed partial fact exists.
+  For token/cost attribution this means preserving provider, model, billing
+  mode, real token counts, and whether money can be calculated separately
+  (`official_pricing`, `subscription_unpriced`, `token_only`, or
+  `pricing_unknown`).
 - Operator-facing "why stopped / next action / retry safety" must come from
   `WorkstreamAttention` or an equivalent centralized read model. Do not
   recompute this separately in CLI, API, UI, or markdown summaries.

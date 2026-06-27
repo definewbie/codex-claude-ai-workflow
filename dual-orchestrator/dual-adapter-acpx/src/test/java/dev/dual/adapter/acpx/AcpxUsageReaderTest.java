@@ -25,6 +25,9 @@ class AcpxUsageReaderTest {
         var stderrPath = tempDir.resolve("stderr.log");
         Files.writeString(promptPath, "real prompt");
         Files.writeString(stderrPath, "[acpx] session claude-main (" + sessionId + ") · agent connected\n");
+        Files.writeString(sessionsDir.resolve(sessionId + ".json"), """
+                {"current_model_id":"default","available_models":[{"id":"model","description":"Use the default model (currently glm-5.2[1m])"}]}
+                """);
         Files.writeString(sessionsDir.resolve(sessionId + ".stream.ndjson"), """
                 {"jsonrpc":"2.0","id":1,"method":"session/prompt","params":{"prompt":[{"type":"text","text":"other prompt"}]}}
                 {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"usage_update","used":11,"size":200000,"cost":{"amount":0.10,"currency":"USD"}}}}
@@ -49,6 +52,10 @@ class AcpxUsageReaderTest {
         assertEquals(AcpxUsage.ATTR_EXACT_PROMPT_MATCH, usage.get().attribution());
         assertEquals("0.25", usage.get().sessionCostAmount().toPlainString());
         assertEquals("USD", usage.get().sessionCostCurrency());
+        assertEquals("zhipu", usage.get().providerId());
+        assertEquals("glm-5.2", usage.get().model());
+        assertEquals(AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS, usage.get().billingMode());
+        assertEquals(AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON, usage.get().providerMetadataSource());
     }
 
     @Test
