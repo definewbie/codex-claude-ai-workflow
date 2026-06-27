@@ -106,6 +106,74 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void passesValidTaskContractProposalArtifact() throws Exception {
+        Files.writeString(tempDir.resolve("README.md"), "# Sample\n");
+        var outputRef = writeOutput("intake.md", """
+                <dual-artifact type="task_contract_proposal" version="1">
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Update the sample workflow.",
+                  "scope": {
+                    "included": ["README.md"],
+                    "excluded": ["new: out-of-scope.md"]
+                  },
+                  "acceptance_criteria": [
+                    "README describes the changed workflow.",
+                    "No unrelated files are changed."
+                  ],
+                  "test_requirements": ["Inspect README diff."],
+                  "constraints": ["Keep the change documentation-only."],
+                  "non_goals": ["Do not edit application code."],
+                  "risk_areas": ["Scope creep"],
+                  "evidence_refs": ["README.md"],
+                  "open_questions": []
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Task contract proposal is ready.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(
+                tempDir,
+                agentNode("intake.claude_brainstorm", "task_contract_proposal"),
+                result
+        );
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertTrue(validated.outputRefs().contains("intake.contract.json"));
+        var sidecar = Files.readString(tempDir.resolve("intake.contract.json"));
+        assertTrue(sidecar.contains("\"source_artifact_type\" : \"task_contract_proposal\""));
+        assertTrue(sidecar.contains("\"decision\" : \"READY_FOR_PRODUCT_REVIEW\""));
+        assertTrue(sidecar.contains("Task contract proposal emitted and mechanically validated."));
+    }
+
+    @Test
+    void failsWhenTaskContractProposalArtifactIsMissing() throws Exception {
+        var outputRef = writeOutput("intake.md", """
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Task contract proposal is ready.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(
+                tempDir,
+                agentNode("intake.claude_brainstorm", "task_contract_proposal"),
+                result
+        );
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", validated.outcome());
+        assertTrue(String.valueOf(validated.result().get("message")).contains("task_contract_proposal"));
+    }
+
+    @Test
     void positiveDecisionWithMustFixFailsContractEvenWhenTextClaimsNoBlockingIssue() throws Exception {
         var outputRef = writeOutput("review.md", """
                 # Review

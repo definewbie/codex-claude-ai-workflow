@@ -41,6 +41,40 @@ class AgentFinalArtifactExtractorTest {
     }
 
     @Test
+    void keepsFormalMarkdownBodyBeforeCanonicalArtifact() {
+        var result = extractor.extract("""
+                [tool] Read src/Main.java (completed)
+                  output:
+                    public class Main {}
+
+                # Implementation Steps
+
+                1. Update the follow-up query.
+
+                # File-Level Changes
+
+                - `src/Main.java`
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {"summary":"Plan ready"}
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PLAN_REVIEW
+                summary: ready
+                ```
+                """);
+
+        assertTrue(result.isPresent());
+        assertTrue(result.get().startsWith("# Implementation Steps"));
+        assertTrue(result.get().contains("# File-Level Changes"));
+        assertTrue(result.get().contains("<dual-artifact"));
+        assertTrue(result.get().contains("decision: READY_FOR_PLAN_REVIEW"));
+        assertFalse(result.get().contains("[tool]"));
+        assertFalse(result.get().contains("public class Main"));
+    }
+
+    @Test
     void fallsBackToTerminalControlBlockWhenNoStructuredArtifactExists() {
         var result = extractor.extract("""
                 Business summary.

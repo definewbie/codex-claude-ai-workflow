@@ -19,7 +19,10 @@
       "agent" : "claude",
       "session" : "claude-main",
       "permission_profile" : "observe",
-      "prompt_template" : "intake-claude-brainstorm"
+      "prompt_template" : "intake-claude-brainstorm",
+      "expected_artifact" : "task_contract_proposal",
+      "artifact_compiler" : "task_contract_proposal_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
     }
   }, {
     "id" : "context.intake_codex_product_review",

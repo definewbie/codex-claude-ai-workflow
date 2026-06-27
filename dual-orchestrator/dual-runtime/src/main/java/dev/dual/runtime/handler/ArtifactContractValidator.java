@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class ArtifactContractValidator {
@@ -95,7 +96,7 @@ public final class ArtifactContractValidator {
             var markdown = Files.readString(path, StandardCharsets.UTF_8);
             var parsed = parser.parse(markdown, contract);
             if (parsed.valid()) {
-                var structured = structuredArtifact(nodeDefinition, markdown, parsed);
+                var structured = structuredArtifact(root, nodeDefinition, markdown, parsed);
                 if (structured.failure() != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, structured.failure());
                 }
@@ -363,7 +364,12 @@ public final class ArtifactContractValidator {
         );
     }
 
-    private StructuredArtifactResult structuredArtifact(NodeDefinition nodeDefinition, String markdown, DualControlParseResult parsed) {
+    private StructuredArtifactResult structuredArtifact(
+            Path workspaceRoot,
+            NodeDefinition nodeDefinition,
+            String markdown,
+            DualControlParseResult parsed
+    ) {
         var expectedType = requiredArtifactType(nodeDefinition);
         if (expectedType == null) {
             return StructuredArtifactResult.none();
@@ -379,7 +385,12 @@ public final class ArtifactContractValidator {
         try {
             var rawDocument = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
             var structuredDocument = AgentStructuredArtifactDocument.from(rawDocument);
-            var artifact = toStructuredArtifact(expectedType, structuredDocument);
+            var artifact = toStructuredArtifact(
+                    expectedType,
+                    structuredDocument,
+                    parsed.block().required("decision"),
+                    parsed.block().required("summary")
+            );
             if (!expectedType.equals(artifact.artifactType())) {
                 return StructuredArtifactResult.failed(DualControlParseResult.invalid(
                         "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
@@ -411,7 +422,7 @@ public final class ArtifactContractValidator {
                         Map.of("required_artifact_type", expectedType)
                 ));
             }
-            var semanticFailure = AgentContractSemantics.validateStructuredArtifact(expectedType, structuredDocument);
+            var semanticFailure = validateStructuredArtifact(expectedType, structuredDocument, rawDocument, workspaceRoot);
             if (semanticFailure.isPresent()) {
                 return StructuredArtifactResult.failed(semanticFailure.get());
             }
@@ -427,6 +438,35 @@ public final class ArtifactContractValidator {
                     Map.of("required_artifact_type", expectedType)
             ));
         }
+    }
+
+    private static Optional<DualControlParseResult> validateStructuredArtifact(
+            String expectedType,
+            AgentStructuredArtifactDocument structuredDocument,
+            Map<String, Object> rawDocument,
+            Path workspaceRoot
+    ) {
+        if ("task_contract_proposal".equals(expectedType)) {
+            try {
+                var proposal = OBJECT_MAPPER.convertValue(rawDocument, TaskContractProposal.class);
+                var errors = new TaskContractProposalValidator().validate(proposal, workspaceRoot);
+                if (!errors.isEmpty()) {
+                    return Optional.of(DualControlParseResult.invalid(
+                            "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION",
+                            "task_contract_proposal failed mechanical validation: " + errors,
+                            Map.of("errors", errors)
+                    ));
+                }
+                return Optional.empty();
+            } catch (IllegalArgumentException e) {
+                return Optional.of(DualControlParseResult.invalid(
+                        "STRUCTURED_ARTIFACT_PARSE_FAILED",
+                        "task_contract_proposal JSON could not be parsed: " + e.getMessage(),
+                        Map.of("required_artifact_type", expectedType)
+                ));
+            }
+        }
+        return AgentContractSemantics.validateStructuredArtifact(expectedType, structuredDocument);
     }
 
     private static String requiredArtifactType(NodeDefinition nodeDefinition) {
@@ -446,8 +486,18 @@ public final class ArtifactContractValidator {
         return value == null ? "" : String.valueOf(value).trim();
     }
 
-    private static StructuredAgentArtifact toStructuredArtifact(String expectedType, AgentStructuredArtifactDocument document) {
+    private static StructuredAgentArtifact toStructuredArtifact(
+            String expectedType,
+            AgentStructuredArtifactDocument document,
+            String controlDecision,
+            String controlSummary
+    ) {
         return switch (expectedType) {
+            case "task_contract_proposal" -> new TaskContractProposalArtifact(
+                    document.artifactType(),
+                    controlDecision,
+                    controlSummary
+            );
             case "agent_output_contract" -> new AgentOutputArtifact(
                     document.artifactType(),
                     document.decision(),
@@ -822,6 +872,7 @@ public final class ArtifactContractValidator {
     }
 
     private sealed interface StructuredAgentArtifact permits
+            TaskContractProposalArtifact,
             AgentOutputArtifact,
             SelfTestReportArtifact,
             AcceptanceReviewArtifact,
@@ -833,6 +884,27 @@ public final class ArtifactContractValidator {
         String summary();
 
         void writeSidecarFields(Map<String, Object> document);
+    }
+
+    private record TaskContractProposalArtifact(
+            String artifactType,
+            String decision,
+            String summary
+    ) implements StructuredAgentArtifact {
+        @Override
+        public void writeSidecarFields(Map<String, Object> document) {
+            document.put("must_fix", List.of());
+            document.put("open_risks", List.of());
+            document.put("changed_files", List.of());
+            document.put("checks_run", List.of("task_contract_proposal mechanical validation"));
+            document.put("checks_skipped", List.of());
+            document.put("evidence", List.of("canonical task_contract_proposal artifact"));
+            document.put("missing_evidence", List.of());
+            document.put("acceptance_notes", List.of());
+            document.put("verification_summary", "Task contract proposal emitted and mechanically validated.");
+            document.put("blocking", false);
+            document.put("failure", AgentOutputContractDocument.FailureFields.empty().toMap());
+        }
     }
 
     private record SelfTestReportArtifact(

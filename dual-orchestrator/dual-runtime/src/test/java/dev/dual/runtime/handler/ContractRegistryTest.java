@@ -209,6 +209,7 @@ class ContractRegistryTest {
     @Test
     void structuredArtifactNodesDeclareExpectedArtifactAndCompilerInWorkflowDefinition() throws Exception {
         var expected = Map.of(
+                "intake.claude_brainstorm", "task_contract_proposal",
                 "intake.codex_product_review", "agent_output_contract",
                 "design.claude_design", "agent_output_contract",
                 "design.codex_arch_review", "agent_output_contract",
