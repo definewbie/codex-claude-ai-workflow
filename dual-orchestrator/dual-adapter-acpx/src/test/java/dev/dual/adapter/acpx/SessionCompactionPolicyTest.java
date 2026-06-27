@@ -58,6 +58,7 @@ class SessionCompactionPolicyTest {
     @Test
     void providerCacheAwarePreservesSessionWhenCacheHitIsCheap() throws Exception {
         writePricing("deepseek", "deepseek-pro-v4", "0.003625", "0.435");
+        writeMetrics("ws-1", 1000);
 
         var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
                 "claude-main", base, tempDir, name -> switch (name) {
@@ -70,6 +71,44 @@ class SessionCompactionPolicyTest {
         assertFalse(decision.enabled());
         assertEquals("claude-main-ws-1", decision.sessionName());
         assertTrue(decision.reason().contains("preserve_session"));
+    }
+
+    @Test
+    void providerCacheAwareCompactsForStabilityWhenCachedTranscriptIsLarge() throws Exception {
+        writePricing("zhipu", "glm-5.2", "0", "0");
+        writeMetrics("ws-1", 1_500_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    case "DUAL_PROVIDER_ID_CLAUDE" -> "zhipu";
+                    case "DUAL_MODEL_CLAUDE" -> "glm-5.2";
+                    default -> "";
+                });
+
+        assertTrue(decision.enabled());
+        assertEquals("claude-main-ws-1-compact-implement.claude_implement", decision.sessionName());
+        assertEquals("agent_handoff", decision.seedKind());
+        assertTrue(decision.reason().contains("stability_compaction"));
+        assertTrue(decision.reason().contains("cachedReadTokens=1500000"));
+    }
+
+    @Test
+    void providerCacheAwareStillMeasuresTokenOnlyWhenStabilityThresholdNotReached() throws Exception {
+        writePricing("zhipu", "glm-5.2", "0", "0");
+        writeMetrics("ws-1", 500_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    case "DUAL_PROVIDER_ID_CLAUDE" -> "zhipu";
+                    case "DUAL_MODEL_CLAUDE" -> "glm-5.2";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("measure_only"));
     }
 
     @Test
@@ -105,5 +144,23 @@ class SessionCompactionPolicyTest {
                   }]
                 }
                 """.formatted(providerId, model, hit, miss));
+    }
+
+    private void writeMetrics(String workstreamId, long cachedReadTokens) throws Exception {
+        var metricsDir = tempDir.resolve(".agent")
+                .resolve("workstreams")
+                .resolve(workstreamId)
+                .resolve("metrics");
+        Files.createDirectories(metricsDir);
+        Files.writeString(metricsDir.resolve("workstream-metrics.json"), """
+                {
+                  "schemaVersion": 1,
+                  "tokenMetrics": {
+                    "total": {
+                      "cachedReadTokens": %d
+                    }
+                  }
+                }
+                """.formatted(cachedReadTokens));
     }
 }

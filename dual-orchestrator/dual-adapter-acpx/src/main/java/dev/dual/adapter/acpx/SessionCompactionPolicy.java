@@ -23,6 +23,8 @@ import java.util.function.Function;
  */
 final class SessionCompactionPolicy {
     static final String ENV = "DUAL_SESSION_COMPACTION_EXPERIMENT";
+    static final String STABILITY_CACHED_READ_THRESHOLD_ENV = "DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS";
+    private static final long DEFAULT_STABILITY_CACHED_READ_THRESHOLD = 1_000_000L;
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -108,6 +110,19 @@ final class SessionCompactionPolicy {
             return Decision.off(baseDecision.sessionName(), baseDecision.segmentKey());
         }
         if (configured == Mode.PROVIDER_CACHE_AWARE) {
+            var stabilityDecision = stabilityDecision(workstreamId, workspaceRoot, lookup);
+            if (stabilityDecision.shouldCompact()) {
+                return compactDecision(agent, nodeId, workstreamId, runId, baseSessionName, configured)
+                        .map(decision -> new Decision(
+                                decision.mode(),
+                                true,
+                                decision.sessionName(),
+                                decision.segmentKey(),
+                                decision.seedKind(),
+                                "env:" + ENV + "=provider_cache_aware; stability_compaction; " + stabilityDecision.reason()
+                        ))
+                        .orElseGet(() -> Decision.off(baseDecision.sessionName(), baseDecision.segmentKey()));
+            }
             var cacheDecision = providerCacheDecision(agent, workspaceRoot, lookup);
             if (!"consider_compaction".equals(cacheDecision.recommendation())) {
                 return new Decision(
@@ -124,6 +139,51 @@ final class SessionCompactionPolicy {
         }
         return compactDecision(agent, nodeId, workstreamId, runId, baseSessionName, configured)
                 .orElseGet(() -> Decision.off(baseDecision.sessionName(), baseDecision.segmentKey()));
+    }
+
+    private static StabilityDecision stabilityDecision(
+            String workstreamId,
+            Path workspaceRoot,
+            Function<String, String> lookup
+    ) {
+        if (workspaceRoot == null || workstreamId == null || workstreamId.isBlank()) {
+            return StabilityDecision.off("metrics unavailable");
+        }
+        var threshold = longValue(
+                lookup.apply(STABILITY_CACHED_READ_THRESHOLD_ENV),
+                DEFAULT_STABILITY_CACHED_READ_THRESHOLD
+        );
+        if (threshold <= 0) {
+            return StabilityDecision.off("stability threshold disabled");
+        }
+        var metricsPath = workspaceRoot.resolve(".agent")
+                .resolve("workstreams")
+                .resolve(workstreamId)
+                .resolve("metrics")
+                .resolve("workstream-metrics.json");
+        if (!Files.isRegularFile(metricsPath)) {
+            return StabilityDecision.off("metrics unavailable");
+        }
+        try {
+            var doc = OBJECT_MAPPER.readValue(metricsPath.toFile(), MAP_TYPE);
+            var cachedRead = cachedReadTokens(doc);
+            if (cachedRead >= threshold) {
+                return new StabilityDecision(
+                        true,
+                        "cachedReadTokens=" + cachedRead + " >= " + threshold
+                );
+            }
+            return StabilityDecision.off("cachedReadTokens=" + cachedRead + " < " + threshold);
+        } catch (IOException | RuntimeException ignored) {
+            return StabilityDecision.off("metrics unavailable");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static long cachedReadTokens(Map<String, Object> doc) {
+        var tokenMetrics = doc.get("tokenMetrics") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
+        var total = tokenMetrics.get("total") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
+        return longValue(total.get("cachedReadTokens"), 0);
     }
 
     private static java.util.Optional<Decision> compactDecision(
@@ -211,6 +271,20 @@ final class SessionCompactionPolicy {
         return first == null || first.isBlank() ? (fallback == null ? "" : fallback.trim()) : first.trim();
     }
 
+    private static long longValue(Object value, long defaultValue) {
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value != null) {
+            try {
+                return Long.parseLong(String.valueOf(value).trim());
+            } catch (NumberFormatException ignored) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
+    }
+
     @SuppressWarnings("unchecked")
     private static List<Map<String, Object>> mapList(Object value) {
         return value instanceof List<?> list ? (List<Map<String, Object>>) list : List.of();
@@ -242,6 +316,12 @@ final class SessionCompactionPolicy {
             return providerId.equalsIgnoreCase(candidateProvider)
                     && (model.equals(candidateModel)
                     || (model.endsWith("*") && candidateModel.startsWith(model.substring(0, model.length() - 1))));
+        }
+    }
+
+    private record StabilityDecision(boolean shouldCompact, String reason) {
+        static StabilityDecision off(String reason) {
+            return new StabilityDecision(false, reason);
         }
     }
 
