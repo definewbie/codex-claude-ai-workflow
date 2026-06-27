@@ -27,6 +27,35 @@ class AcpxProviderMetadataTest {
     }
 
     @Test
+    void resolvesGlmFromNestedAcpxModelConfig() throws Exception {
+        var metadata = AcpxProviderMetadata.fromJson(mapper.readTree("""
+                {
+                  "acpx": {
+                    "current_model_id": "default",
+                    "config_options": [{
+                      "id": "model",
+                      "currentValue": "default",
+                      "options": [{
+                        "description": "Use the default model (currently glm-5.2[1m]) · $5/$25 per Mtok",
+                        "name": "Default (recommended)",
+                        "value": "default"
+                      }, {
+                        "description": "Custom Opus model",
+                        "name": "glm-5.2",
+                        "value": "opus"
+                      }]
+                    }]
+                  }
+                }
+                """));
+
+        assertEquals("zhipu", metadata.providerId());
+        assertEquals("glm-5.2", metadata.model());
+        assertEquals(AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS, metadata.billingMode());
+        assertEquals(AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON, metadata.source());
+    }
+
+    @Test
     void resolvesOpenAiModelFromCurrentModelId() {
         var metadata = AcpxProviderMetadata.fromJson(mapper.valueToTree(Map.of(
                 "current_model_id", "gpt-5.5/high"

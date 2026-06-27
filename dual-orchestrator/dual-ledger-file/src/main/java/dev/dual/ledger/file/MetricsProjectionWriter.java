@@ -396,10 +396,16 @@ final class MetricsProjectionWriter {
             entry.put("inputTokens", longValue(usage.get("inputTokens")));
             entry.put("outputTokens", longValue(usage.get("outputTokens")));
             entry.put("cachedReadTokens", longValue(usage.get("cachedReadTokens")));
+            entry.put("cachedWriteTokens", longValue(usage.get("cachedWriteTokens")));
+            entry.put("totalTokens", longValue(usage.get("totalTokens")));
             entry.put("measurementType", measurementType(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("usageSource", text(usage.get("source")));
             entry.put("usageAttribution", text(usage.get("attribution")));
             entry.put("contextUsedTokens", longValue(usage.get("contextUsedTokens")));
+            entry.put("providerId", text(usage.get("providerId")));
+            entry.put("model", text(usage.get("model")));
+            entry.put("billingMode", text(usage.get("billingMode")));
+            entry.put("providerMetadataSource", text(usage.get("providerMetadataSource")));
             entry.put("providerUsageVisibility", providerUsageVisibility(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("providerUsageUnavailableReason", providerUsageUnavailableReason(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("cost", usage.get("costAmount"));

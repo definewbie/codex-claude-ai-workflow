@@ -58,7 +58,8 @@ record AcpxProviderMetadata(String providerId, String model, String billingMode,
     }
 
     static AcpxProviderMetadata fromJson(JsonNode root) {
-        var model = currentModel(root)
+        var model = configuredModel(root)
+                .or(() -> currentModel(root))
                 .or(() -> defaultModelFromDescription(root))
                 .or(() -> firstKnownModelMention(root))
                 .orElse("");
@@ -77,7 +78,7 @@ record AcpxProviderMetadata(String providerId, String model, String billingMode,
     }
 
     private static Optional<String> currentModel(JsonNode root) {
-        var raw = text(root == null ? null : root.get("current_model_id"));
+        var raw = firstFieldText(root, "current_model_id");
         var normalized = normalizeModel(raw);
         if (normalized.isBlank() || "default".equalsIgnoreCase(normalized) || "auto".equalsIgnoreCase(normalized)) {
             return Optional.empty();
@@ -85,17 +86,61 @@ record AcpxProviderMetadata(String providerId, String model, String billingMode,
         return Optional.of(normalized);
     }
 
-    private static Optional<String> defaultModelFromDescription(JsonNode root) {
-        for (var value : allText(root)) {
-            var matcher = DEFAULT_MODEL_PATTERN.matcher(value);
-            if (matcher.find()) {
-                var model = normalizeModel(matcher.group(1));
-                if (!model.isBlank()) {
-                    return Optional.of(model);
-                }
+    private static Optional<String> configuredModel(JsonNode root) {
+        var options = root == null ? null : root.at("/acpx/config_options");
+        if (options == null || !options.isArray()) {
+            return Optional.empty();
+        }
+        for (var config : options) {
+            if (!"model".equals(text(config.get("id")))) {
+                continue;
+            }
+            var currentValue = text(config.get("currentValue"));
+            var selected = selectedOption(config.get("options"), currentValue);
+            if (selected.isEmpty()) {
+                return Optional.empty();
+            }
+            var descriptionModel = modelFromDescription(text(selected.get().get("description")));
+            if (descriptionModel.isPresent()) {
+                return descriptionModel;
+            }
+            var name = normalizeModel(text(selected.get().get("name")));
+            if (!name.isBlank() && PROVIDER_RULES.stream().anyMatch(rule -> rule.matches(name))) {
+                return Optional.of(name);
             }
         }
         return Optional.empty();
+    }
+
+    private static Optional<JsonNode> selectedOption(JsonNode options, String currentValue) {
+        if (options == null || !options.isArray()) {
+            return Optional.empty();
+        }
+        for (var option : options) {
+            if (text(option.get("value")).equals(currentValue)) {
+                return Optional.of(option);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> defaultModelFromDescription(JsonNode root) {
+        for (var value : allText(root)) {
+            var model = modelFromDescription(value);
+            if (model.isPresent()) {
+                return model;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> modelFromDescription(String value) {
+        var matcher = DEFAULT_MODEL_PATTERN.matcher(value == null ? "" : value);
+        if (!matcher.find()) {
+            return Optional.empty();
+        }
+        var model = normalizeModel(matcher.group(1));
+        return model.isBlank() ? Optional.empty() : Optional.of(model);
     }
 
     private static Optional<String> firstKnownModelMention(JsonNode root) {
@@ -141,6 +186,33 @@ record AcpxProviderMetadata(String providerId, String model, String billingMode,
 
     private static String text(JsonNode node) {
         return node == null || node.isMissingNode() || node.isNull() ? "" : node.asText();
+    }
+
+    private static String firstFieldText(JsonNode node, String fieldName) {
+        if (node == null || node.isMissingNode() || node.isNull()) {
+            return "";
+        }
+        if (node.isObject()) {
+            var direct = node.get(fieldName);
+            if (direct != null && !direct.isNull()) {
+                return direct.asText();
+            }
+            var fields = node.fields();
+            while (fields.hasNext()) {
+                var value = firstFieldText(fields.next().getValue(), fieldName);
+                if (!value.isBlank()) {
+                    return value;
+                }
+            }
+        } else if (node.isArray()) {
+            for (var child : node) {
+                var value = firstFieldText(child, fieldName);
+                if (!value.isBlank()) {
+                    return value;
+                }
+            }
+        }
+        return "";
     }
 
     private record ProviderRule(String modelPrefix, String providerId, String billingMode) {

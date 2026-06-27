@@ -468,6 +468,12 @@ class MetricsProjectionWriterTest {
         var perRun = map(list(attr.get("perRun")).get(0));
         var costMap = map(perRun.get("costEconomics"));
 
+        assertEquals("zhipu", perRun.get("providerId"));
+        assertEquals("glm-5.2", perRun.get("model"));
+        assertEquals("subscription_tokens", perRun.get("billingMode"));
+        assertEquals("acpx_session_json", perRun.get("providerMetadataSource"));
+        assertEquals(981278, number(perRun.get("totalTokens")));
+        assertEquals(861568, number(perRun.get("cachedReadTokens")));
         assertEquals("zhipu", costMap.get("providerId"));
         assertEquals("glm-5.2", costMap.get("model"));
         assertEquals("subscription_tokens", costMap.get("billingMode"));
