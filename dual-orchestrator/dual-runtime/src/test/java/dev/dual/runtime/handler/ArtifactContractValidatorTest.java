@@ -1249,6 +1249,52 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void acceptsReviewerRereadDeclaredByReadReuseContractPolicy() throws Exception {
+        writeReadReuseContractWithAllowed("intake.codex_product_review", "src/api.js", "src/api.js");
+        var runRef = writeRunMetadataWithReads("run-review-reread-allowed", "src/api.js");
+        var outputRef = writeOutput("product-review.md", productReviewEnvelope());
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-review",
+                agentNode("intake.codex_product_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+    }
+
+    @Test
+    void ignoresAllowedRereadFilesForDifferentTargetNode() throws Exception {
+        writeReadReuseContractWithAllowed("design.codex_arch_review", "src/api.js", "src/api.js");
+        var runRef = writeRunMetadataWithReads("run-review-reread-stale", "src/api.js");
+        var outputRef = writeOutput("product-review.md", productReviewEnvelope());
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-review",
+                agentNode("intake.codex_product_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("REREAD_POLICY_DENIED"));
+    }
+
+    @Test
+    void reviewerSelfReportedRereadReasonWithoutTypedAllowanceStillFails() throws Exception {
+        writeReadReuseContract("src/api.js");
+        var runRef = writeRunMetadataWithReads("run-review-self-report", "src/api.js");
+        var outputRef = writeOutput("product-review.md", productReviewEnvelope("""
+                [{"path":"src/api.js","reason":"previous evidence does not cover the selected stage"}]
+                """));
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-review",
+                agentNode("intake.codex_product_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("REREAD_POLICY_DENIED"));
+    }
+
+    @Test
     void acceptsReusableFileRereadDeclaredByTypedPlanReferenceFiles() throws Exception {
         writeReadReuseContract("src/api.js");
         writeCanonicalPlanArtifact("src/followup.js", "src/api.js");
@@ -1332,6 +1378,40 @@ summary: Implementation complete.
 """;
     }
 
+    private String productReviewEnvelope() {
+        return productReviewEnvelope("[]");
+    }
+
+    private String productReviewEnvelope(String rereadReasonsJson) {
+        return """
+<dual-artifact type="agent_output_contract" version="1">
+{
+  "artifact_type": "agent_output_contract",
+  "schema_version": 1,
+  "lifecycle_status": "READY",
+  "decision": "READY_FOR_PRODUCT_REVIEW",
+  "summary": "Product review complete.",
+  "blocking": false,
+  "checks": ["reviewed product contract"],
+  "evidence": ["source spot check completed"],
+  "missing_evidence": [],
+  "must_fix": [],
+  "acceptance_notes": [],
+  "open_risks": [],
+  "changed_files": [],
+  "verification_summary": "Ready for product review.",
+  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""},
+  "reread_reasons": %s
+}
+</dual-artifact>
+
+```dual-control
+decision: READY_FOR_PRODUCT_REVIEW
+summary: Product review complete.
+```
+""".formatted(rereadReasonsJson);
+    }
+
     private static NodeDefinition agentNode(String nodeId) {
         return new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of());
     }
@@ -1402,6 +1482,19 @@ summary: Implementation complete.
                   "invalidatedReadFiles": [{"path":"%s","invalidationReason":"file changed since prior read"}]
                 }
                 """.formatted(reusableFile, invalidatedFile));
+    }
+
+    private void writeReadReuseContractWithAllowed(String targetNodeDefinitionId, String reusableFile, String allowedFile) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/memory/read-reuse-contract.json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, """
+                {
+                  "schemaVersion": 1,
+                  "targetNodeDefinitionId": "%s",
+                  "reusableReadFiles": [{"path":"%s","summary":"previously read","trusted":true,"evidenceRole":"source"}],
+                  "allowedRereadFiles": [{"path":"%s","reason":"previous evidence does not cover the selected stage","source":"workstream_memory.readFiles"}]
+                }
+                """.formatted(targetNodeDefinitionId, reusableFile, allowedFile));
     }
 
     private void writeCanonicalPlanArtifact(String editFile, String referenceFile) throws Exception {

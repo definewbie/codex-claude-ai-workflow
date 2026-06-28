@@ -175,9 +175,17 @@ public final class ArtifactContractValidator {
         }
         var invalidatedReads = invalidatedReadFiles(root, workstreamId);
         var expectedEdits = allowedRereadFiles(root, workstreamId, nodeDefinition, artifact);
-        // Harness-computed policy: justified by expected edit/reference plan or invalidation only.
+        var contractAllowedReads = allowedRereadFiles(root, workstreamId, nodeDefinition);
+        // Harness-computed policy: justified by expected edit/reference plan,
+        // invalidation, or typed read-reuse contract allowance only.
         // agent_output_contract.reread_reasons is a supplementary explanation, NOT the justification.
-        var policy = RereadPolicyCalculator.compute(actualReads, reusableReads, invalidatedReads, expectedEdits);
+        var policy = RereadPolicyCalculator.compute(
+                actualReads,
+                reusableReads,
+                invalidatedReads,
+                expectedEdits,
+                contractAllowedReads
+        );
         if (policy.denied().isEmpty()) {
             return null;
         }
@@ -222,7 +230,15 @@ public final class ArtifactContractValidator {
         return readReuseContractFiles(root, workstreamId, "invalidatedReadFiles");
     }
 
+    private static Set<String> allowedRereadFiles(Path root, String workstreamId, NodeDefinition nodeDefinition) {
+        return readReuseContractFiles(root, workstreamId, "allowedRereadFiles", nodeDefinition.id());
+    }
+
     private static Set<String> readReuseContractFiles(Path root, String workstreamId, String key) {
+        return readReuseContractFiles(root, workstreamId, key, "");
+    }
+
+    private static Set<String> readReuseContractFiles(Path root, String workstreamId, String key, String expectedTargetNode) {
         var path = root.resolve(".agent/workstreams").resolve(workstreamId)
                 .resolve("memory/read-reuse-contract.json").normalize();
         if (!path.startsWith(root) || !Files.isRegularFile(path)) {
@@ -230,6 +246,9 @@ public final class ArtifactContractValidator {
         }
         try {
             var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
+            if (!expectedTargetNode.isBlank() && !expectedTargetNode.equals(text(document.get("targetNodeDefinitionId")))) {
+                return Set.of();
+            }
             var value = document.get(key);
             if (!(value instanceof List<?> list)) {
                 return Set.of();

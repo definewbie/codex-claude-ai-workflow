@@ -373,6 +373,7 @@ final class RepoScopeGovernance {
         var repeated = mapList(plan.get("repeatedReadAvoidance"));
         var reusableReadFiles = reusableReadFiles(workstreamMemory);
         var invalidatedReadFiles = invalidatedReadFiles(workstreamMemory);
+        var allowedRereadFiles = allowedRereadFiles(targetNodeDefinitionId, reusableReadFiles);
         var document = new LinkedHashMap<String, Object>();
         document.put("schemaVersion", 1);
         document.put("artifactType", "read_reuse_contract");
@@ -386,6 +387,7 @@ final class RepoScopeGovernance {
         document.put("avoidRepeatingReads", repeated);
         document.put("reusableReadFiles", reusableReadFiles);
         document.put("invalidatedReadFiles", invalidatedReadFiles);
+        document.put("allowedRereadFiles", allowedRereadFiles);
         document.put("reuseSource", reusableReadFiles.isEmpty() ? "run_history" : "workstream_memory.readFiles");
         document.put("allowedRepeatedReadReasons", ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS);
         document.put("requireReasonWhenRereading", reusePolicy.getOrDefault("requireReasonWhenRereading", true));
@@ -469,6 +471,37 @@ final class RepoScopeGovernance {
                 .sorted(Comparator.comparing(file -> text(file.get("path"))))
                 .limit(24)
                 .toList();
+    }
+
+    private static List<Map<String, Object>> allowedRereadFiles(
+            String targetNodeDefinitionId,
+            List<Map<String, Object>> reusableReadFiles
+    ) {
+        if (!requiresEvidenceReview(targetNodeDefinitionId)) {
+            return List.of();
+        }
+        return reusableReadFiles.stream()
+                .filter(item -> "source".equals(text(item.get("evidenceRole"))))
+                .map(item -> {
+                    var file = new LinkedHashMap<String, Object>();
+                    file.put("path", text(item.get("path")));
+                    file.put("reason", "previous evidence does not cover the selected stage");
+                    file.put("source", "workstream_memory.readFiles");
+                    file.put("evidenceRole", text(item.get("evidenceRole")));
+                    return (Map<String, Object>) file;
+                })
+                .limit(12)
+                .toList();
+    }
+
+    private static boolean requiresEvidenceReview(String targetNodeDefinitionId) {
+        if (!ContractRegistry.hasContract(targetNodeDefinitionId)) {
+            return false;
+        }
+        var decisions = ContractRegistry.forNode(targetNodeDefinitionId).allowedDecisions();
+        return decisions.contains("NEEDS_REVISION")
+                || decisions.contains("REJECT")
+                || decisions.contains("ACCEPT_WITH_NOTES");
     }
 
     private static Map<String, Object> readReuseFile(Map<String, Object> item, String recommendation) {

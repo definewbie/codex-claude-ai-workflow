@@ -1347,6 +1347,9 @@ class ContextBuildPackageHandlerTest {
         assertTrue(readReuse.get("reusableReadFiles") instanceof List<?> reusable
                         && !reusable.isEmpty(),
                 "read reuse contract should derive reusable files from WorkstreamMemory.readFiles");
+        assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed
+                        && allowed.isEmpty(),
+                "non-review targets should not receive review reread allowances");
         assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
                 "read reuse contract must point agents at the typed reread_reasons field");
         assertTrue(markdown.contains("record a matching entry in agent_output_contract.reread_reasons"),
@@ -1372,6 +1375,79 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void reviewTargetReceivesTypedSourceRereadAllowance() throws Exception {
+        System.setProperty("dual.context.governance.enabled", "true");
+        Files.createDirectories(wsDir.resolve("memory"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Review source evidence.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("memory/workstream-memory.json"), """
+                {
+                  "schemaVersion": 1,
+                  "artifactType": "workstream_memory",
+                  "workstreamId": "ws-ctx",
+                  "readFiles": [{
+                    "path": "src/api.js",
+                    "sha": "abc",
+                    "summary": "defs: loadApi",
+                    "evidenceRole": "source",
+                    "readRunId": "run-1",
+                    "lastSeenStage": "stage-intake",
+                    "invalidationReason": "",
+                    "trusted": true
+                  }, {
+                    "path": "docs/spec.md",
+                    "sha": "def",
+                    "summary": "headings: Spec",
+                    "evidenceRole": "documentation",
+                    "readRunId": "run-1",
+                    "lastSeenStage": "stage-intake",
+                    "invalidationReason": "",
+                    "trusted": true
+                  }]
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("product_review", List.of(), "intake.codex_product_review"));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
+        assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed
+                        && allowed.stream().anyMatch(item -> String.valueOf(item).contains("src/api.js"))
+                        && allowed.stream().noneMatch(item -> String.valueOf(item).contains("docs/spec.md")),
+                "review targets should receive typed source-file verification allowance only");
+    }
+
+    @Test
+    void implementTargetDoesNotReceiveTypedSourceRereadAllowance() throws Exception {
+        System.setProperty("dual.context.governance.enabled", "true");
+        Files.createDirectories(wsDir.resolve("memory"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Implement source change.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("memory/workstream-memory.json"), """
+                {
+                  "schemaVersion": 1,
+                  "artifactType": "workstream_memory",
+                  "workstreamId": "ws-ctx",
+                  "readFiles": [{
+                    "path": "src/api.js",
+                    "sha": "abc",
+                    "summary": "defs: loadApi",
+                    "evidenceRole": "source",
+                    "readRunId": "run-1",
+                    "lastSeenStage": "stage-intake",
+                    "invalidationReason": "",
+                    "trusted": true
+                  }]
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(), "implement.claude_implement"));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
+        assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed && allowed.isEmpty(),
+                "producer targets must use changed_files/plan/invalidation, not review reread allowance");
+    }
+
+    @Test
     void governanceDisabledOmitsRepoScopeArtifacts() throws Exception {
         System.setProperty("dual.context.governance.enabled", "false");
         Files.createDirectories(wsDir);
@@ -1393,10 +1469,14 @@ class ContextBuildPackageHandlerTest {
     // --- Helper ---
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
+        return ctx(profile, inputRefs, "next.node");
+    }
+
+    private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs, String targetNode) {
         return new TaskHandler.TaskContext(
                 tempDir, "ws-ctx",
                 new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "next.node",
+                        "target_node", targetNode,
                         "profile", profile
                 )),
                 new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",

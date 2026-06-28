@@ -42,6 +42,18 @@ class RereadPolicyCalculatorTest {
     }
 
     @Test
+    void reReadAllowedByTypedReadReuseContractIsAllowed() {
+        var result = RereadPolicyCalculator.compute(
+                Set.of("src/api.js"),
+                Set.of("src/api.js"),
+                Set.of(),
+                Set.of(),
+                Set.of("src/api.js"));
+        assertTrue(result.denied().isEmpty());
+        assertTrue(result.decisions().get(0).reason().contains("previous evidence"));
+    }
+
+    @Test
     void reReadOfNonExpectedReusableFileIsDenied() {
         var result = RereadPolicyCalculator.compute(
                 Set.of("src/a.js", "docs/b.md"),

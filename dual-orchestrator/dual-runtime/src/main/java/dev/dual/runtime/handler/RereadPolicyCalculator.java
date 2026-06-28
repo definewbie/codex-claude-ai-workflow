@@ -9,7 +9,8 @@ import java.util.Set;
 /**
  * Harness-computed re-read policy: decides whether re-reading a reusable file
  * is justified, from objective facts only — actual reads, the read-reuse
- * contract (reusable + invalidated), and the expected edit set.
+ * contract (reusable + invalidated + allowed review reads), and the expected
+ * edit set.
  *
  * <p>It deliberately does NOT consult agent self-reported {@code reread_reasons}
  * as the sole justification; that field remains a supplementary explanation
@@ -31,6 +32,14 @@ final class RereadPolicyCalculator {
                           Set<String> reusableReadFiles,
                           Set<String> invalidatedReadFiles,
                           Set<String> expectedEditFiles) {
+        return compute(actualReads, reusableReadFiles, invalidatedReadFiles, expectedEditFiles, Set.of());
+    }
+
+    static Result compute(Collection<String> actualReads,
+                          Set<String> reusableReadFiles,
+                          Set<String> invalidatedReadFiles,
+                          Set<String> expectedEditFiles,
+                          Set<String> allowedRereadFiles) {
         if (actualReads == null) {
             return new Result(List.of(), List.of());
         }
@@ -40,6 +49,7 @@ final class RereadPolicyCalculator {
         }
         var invalidated = invalidatedReadFiles == null ? Set.<String>of() : invalidatedReadFiles;
         var expectedEdits = expectedEditFiles == null ? Set.<String>of() : expectedEditFiles;
+        var allowedRereads = allowedRereadFiles == null ? Set.<String>of() : allowedRereadFiles;
 
         var decisions = new ArrayList<Decision>();
         var denied = new ArrayList<String>();
@@ -62,6 +72,9 @@ final class RereadPolicyCalculator {
             } else if (invalidated.contains(path)) {
                 allowed = true;
                 reason = "file changed after prior read";
+            } else if (allowedRereads.contains(path)) {
+                allowed = true;
+                reason = "previous evidence does not cover the selected stage";
             } else {
                 allowed = false;
                 reason = "reusable file re-read without an expected edit or invalidation";
