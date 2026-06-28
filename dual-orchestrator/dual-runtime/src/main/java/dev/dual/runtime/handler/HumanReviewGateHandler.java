@@ -325,19 +325,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         if (fromRefs.isPresent() && !fromRefs.get().isEmpty()) {
             return fromRefs.get();
         }
-        return latestRunAgentDecision(context);
-    }
-
-    private AgentDecisionSummary latestRunAgentDecision(GateContext context) {
-        try {
-            return AgentEvidenceIndex.load(workstreamDir(context), objectMapper)
-                    .latest()
-                    .map(entry -> agentDecisionFromSidecar(context, entry))
-                    .filter(summary -> !summary.isEmpty())
-                    .orElse(AgentDecisionSummary.empty());
-        } catch (Exception ignored) {
-            return AgentDecisionSummary.empty();
-        }
+        return AgentDecisionSummary.empty();
     }
 
     private AgentDecisionSummary agentDecisionFromSidecar(GateContext context, AgentEvidenceIndex.Entry entry) {

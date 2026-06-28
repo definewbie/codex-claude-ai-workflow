@@ -480,7 +480,9 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
 
-        var result = handler.execute(ctx("architecture_review", List.of()));
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/design-codex-review.md"
+        )));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -924,7 +926,9 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
 
-        var result = handler.execute(ctx("architecture_review", List.of()));
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-001/outputs/acceptance.contract.json"
+        )));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -977,7 +981,9 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
 
-        var result = handler.execute(ctx("implementation", List.of()));
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-004/outputs/acceptance-codex-review.contract.json"
+        )));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -986,6 +992,69 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Update README to point to .agent/workstreams/ exactly."));
         assertTrue(markdown.contains("Remove the misleading statement"));
         assertTrue(markdown.contains("Implementation does not satisfy the accepted TaskContract."));
+    }
+
+    @Test
+    void stateEvidenceBoundaryUsesRoutedAcceptanceAndIgnoresUnroutedNewerSidecars() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.createDirectories(wsDir.resolve("runs/run-routed/outputs"));
+        Files.createDirectories(wsDir.resolve("runs/run-unrouted-newer/outputs"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Routed evidence boundary test.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/failure-classification.json"), """
+                {
+                  "category": "VERIFICATION_GAP",
+                  "suggestedAction": "Repair only the routed verifier gap."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-routed/outputs/acceptance-codex-review.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "Routed verifier says evidence is insufficient.",
+                  "lifecycle_status": "REJECTED",
+                  "must_fix": ["Add routed verification evidence."],
+                  "failure": {
+                    "category_hint": "VERIFICATION_GAP",
+                    "contract_gaps": ["Routed acceptance lacks proof."],
+                    "out_of_scope_files": [],
+                    "missing_tests": [],
+                    "context_gaps": [],
+                    "reason": "Routed rejection must drive repair."
+                  },
+                  "evidence_state": {
+                    "blocking": true,
+                    "must_fix_count": 1
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("runs/run-unrouted-newer/outputs/acceptance-codex-review.contract.json"), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Unrouted newer acceptance must not affect current repair.",
+                  "lifecycle_status": "ACCEPTED_WITH_NOTES",
+                  "must_fix": [],
+                  "missing_evidence": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Unrouted acceptance."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-routed/outputs/acceptance-codex-review.contract.json"
+        )));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Current Repair Objective"));
+        assertTrue(markdown.contains("Routed verifier says evidence is insufficient."));
+        assertTrue(markdown.contains("Add routed verification evidence."));
+        assertTrue(markdown.contains("Routed rejection must drive repair."));
+        assertFalse(markdown.contains("Unrouted newer acceptance must not affect current repair."));
+        assertFalse(markdown.contains("decision=ACCEPT_WITH_NOTES"));
     }
 
     @Test

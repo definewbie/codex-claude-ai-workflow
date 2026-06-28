@@ -60,11 +60,15 @@ class ReportGenerateFinalHandlerTest {
         Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
 
         var handler = new ReportGenerateFinalHandler();
+        var inputRefs = List.of(
+                ".agent/workstreams/ws-rpt/runs/run-002/outputs/implement-claude-self-test.contract.json",
+                ".agent/workstreams/ws-rpt/runs/run-003/outputs/acceptance-codex-review.contract.json"
+        );
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir, "ws-rpt",
                 new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
                 new NodeInstance("node-001", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+                        NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -205,11 +209,15 @@ class ReportGenerateFinalHandlerTest {
                 """, StandardCharsets.UTF_8);
 
         var handler = new ReportGenerateFinalHandler();
+        var inputRefs = List.of(
+                ".agent/workstreams/ws-rpt-evidence/runs/run-007/outputs/implement-claude-self-test.contract.json",
+                ".agent/workstreams/ws-rpt-evidence/runs/run-007/outputs/acceptance-codex-review.contract.json"
+        );
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir, "ws-rpt-evidence",
                 new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
                 new NodeInstance("node-007", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+                        NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
         ));
 
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
@@ -219,6 +227,48 @@ class ReportGenerateFinalHandlerTest {
         assertTrue(report.contains("device smoke: simulator unavailable"));
         assertTrue(report.contains("No physical device validation."));
         assertTrue(report.contains("Run visual smoke before release."));
+    }
+
+    @Test
+    void finalReportUsesRoutedVerificationRefsNotUnroutedNewerRuns() throws Exception {
+        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-routed");
+        var routedDir = wsDir.resolve("runs/run-001/outputs");
+        var unroutedDir = wsDir.resolve("runs/run-999/outputs");
+        Files.createDirectories(routedDir);
+        Files.createDirectories(unroutedDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Routed evidence report.", StandardCharsets.UTF_8);
+        Files.writeString(routedDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "Routed rejection.",
+                  "verification_summary": "Routed acceptance evidence is the only source."
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(unroutedDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT",
+                  "summary": "Unrouted newer acceptance.",
+                  "verification_summary": "This newer file must not be selected."
+                }
+                """, StandardCharsets.UTF_8);
+
+        var handler = new ReportGenerateFinalHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-routed",
+                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
+                new NodeInstance("node-routed", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
+                        NodeStatus.READY, "stage-test", "iter-001",
+                        List.of(".agent/workstreams/ws-rpt-routed/runs/run-001/outputs/acceptance-codex-review.contract.json"),
+                        List.of(), Map.of(), null, null, null)
+        ));
+
+        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
+        assertTrue(report.contains("Routed acceptance evidence is the only source."));
+        assertTrue(report.contains("REJECT"));
+        assertTrue(!report.contains("This newer file must not be selected."));
+        assertTrue(!report.contains("Unrouted newer acceptance."));
     }
 
     @Test

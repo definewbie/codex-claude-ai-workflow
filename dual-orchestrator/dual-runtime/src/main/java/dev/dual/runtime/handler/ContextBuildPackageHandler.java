@@ -154,7 +154,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         // Phase 4: Render sections with degradation
         var builder = new StringBuilder();
         appendGovernedHeader(builder, context, budget, sorted);
-        ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
+        ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
         RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
 
         for (var rs : sorted) {
@@ -183,7 +183,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
             builder.setLength(0);
             appendGovernedHeader(builder, context, budget, sorted);
-            ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
+            ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
             RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
             for (var rs : sorted) {
                 if (rs.dropped || !rs.available) {
@@ -606,7 +606,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         builder.append("- Included Sections: ").append(String.join(", ", sections)).append("\n");
         builder.append("- Max Snippet Chars: ").append(maxSnippetChars).append("\n");
         builder.append("- Max Recent Agent Outputs: ").append(maxRecentAgentOutputs).append("\n\n");
-        ContextStateEvidenceBoundaryRenderer.append(builder, workstreamDir, OBJECT_MAPPER);
+        ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
         RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
 
         if (sections.contains("requirement")) {

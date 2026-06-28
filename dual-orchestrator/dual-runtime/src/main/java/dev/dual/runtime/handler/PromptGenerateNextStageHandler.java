@@ -33,10 +33,11 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var handoffSource = structuredHandoff(context, sourceRefs)
                 .map(handoff -> new HandoffSource(handoff, renderStructuredHandoffContext(handoff), true))
                 .orElseGet(() -> new HandoffSource(markdownHandoff(context, sourceRefs, handoffText), handoffText, false));
-        var handoff = handoffSource.document();
+        var handoff = withLatestVerificationState(sourceRefs, context, handoffSource.document());
+        var handoffContextText = handoffSource.structured() ? renderStructuredHandoffContext(handoff) : handoffSource.contextText();
         var suggestedPrompt = handoff.suggestedNextPrompt();
         var promptPath = outputDir.resolve("next-stage-prompt.md");
-        Files.writeString(promptPath, renderPrompt(context, sourceRefs, suggestedPrompt, handoffSource.contextText()), StandardCharsets.UTF_8);
+        Files.writeString(promptPath, renderPrompt(context, sourceRefs, suggestedPrompt, handoffContextText), StandardCharsets.UTF_8);
 
         var handoffJsonPath = outputDir.resolve("handoff.json");
         Files.writeString(handoffJsonPath, renderHandoffJson(handoff), StandardCharsets.UTF_8);
@@ -129,6 +130,62 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
 
     private static String renderHandoffJson(StageHandoffDocument handoff) throws IOException {
         return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(handoff.toMap());
+    }
+
+    private static StageHandoffDocument withLatestVerificationState(List<String> sourceRefs, TaskContext context, StageHandoffDocument handoff)
+            throws IOException {
+        var verificationState = latestVerificationState(sourceRefs, context);
+        if (verificationState.isBlank()) {
+            return handoff;
+        }
+        return new StageHandoffDocument(
+                handoff.schemaVersion(),
+                handoff.workstreamId(),
+                handoff.stageId(),
+                handoff.iterationId(),
+                handoff.sourceHandoffPath(),
+                handoff.completedWork(),
+                handoff.importantDecisions(),
+                handoff.changedFiles(),
+                handoff.openRisks(),
+                verificationState,
+                handoff.recommendedNextStage(),
+                handoff.suggestedNextPrompt(),
+                handoff.generatedAt()
+        );
+    }
+
+    private static String latestVerificationState(List<String> sourceRefs, TaskContext context) {
+        var parts = new java.util.ArrayList<String>();
+        latestInputContract(sourceRefs, context, "implement-claude-self-test.contract.json")
+                .map(AgentOutputContractDocument::verificationSummary)
+                .filter(summary -> !summary.isBlank())
+                .ifPresent(summary -> parts.add("Self-test: " + summary));
+        latestInputContract(sourceRefs, context, "acceptance-codex-review.contract.json")
+                .filter(document -> !document.verificationSummary().isBlank())
+                .map(document -> "Acceptance (" + document.decision() + "): " + document.verificationSummary())
+                .filter(summary -> !summary.isBlank())
+                .ifPresent(parts::add);
+        return String.join("\n", parts);
+    }
+
+    private static java.util.Optional<AgentOutputContractDocument> latestInputContract(
+            List<String> sourceRefs,
+            TaskContext context,
+            String fileName
+    ) {
+        for (int i = sourceRefs.size() - 1; i >= 0; i--) {
+            var ref = sourceRefs.get(i);
+            if (!Path.of(ref).getFileName().toString().equals(fileName)) {
+                continue;
+            }
+            var path = context.workspaceRoot().resolve(ref).normalize();
+            var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
+            if (document.isPresent()) {
+                return document;
+            }
+        }
+        return java.util.Optional.empty();
     }
 
     private static java.util.Optional<StageHandoffDocument> structuredHandoff(TaskContext context, List<String> sourceRefs) throws IOException {

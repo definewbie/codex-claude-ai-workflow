@@ -26,14 +26,15 @@ final class ContextStateEvidenceBoundaryRenderer {
     private ContextStateEvidenceBoundaryRenderer() {
     }
 
-    static void append(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+    static void append(StringBuilder builder, TaskHandler.TaskContext context, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
         builder.append("## State & Evidence Boundary\n\n");
         builder.append("This package separates deterministic harness facts from agent proposals.\n\n");
 
         appendTrustedFacts(builder, workstreamDir, objectMapper);
-        appendCurrentRepairObjective(builder, workstreamDir, objectMapper);
+        var routedEvidence = AgentEvidenceIndex.fromRefs(context.workspaceRoot(), context.instance().inputRefs(), objectMapper);
+        appendCurrentRepairObjective(builder, workstreamDir, objectMapper, routedEvidence);
         appendHumanDecisions(builder, workstreamDir, objectMapper);
-        appendAgentProposedStates(builder, workstreamDir, objectMapper);
+        appendAgentProposedStates(builder, routedEvidence);
         appendPendingGaps(builder, workstreamDir, objectMapper);
     }
 
@@ -62,9 +63,13 @@ final class ContextStateEvidenceBoundaryRenderer {
         }
     }
 
-    private static void appendCurrentRepairObjective(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
-        var latestRejected = AgentEvidenceIndex.load(workstreamDir, objectMapper)
-                .recent(20)
+    private static void appendCurrentRepairObjective(
+            StringBuilder builder,
+            Path workstreamDir,
+            ObjectMapper objectMapper,
+            AgentEvidenceIndex routedEvidence
+    ) throws IOException {
+        var latestRejected = routedEvidence.recent(20)
                 .stream()
                 .filter(ContextStateEvidenceBoundaryRenderer::isRejectedAcceptance)
                 .findFirst();
@@ -122,11 +127,11 @@ final class ContextStateEvidenceBoundaryRenderer {
         }
     }
 
-    private static void appendAgentProposedStates(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+    private static void appendAgentProposedStates(StringBuilder builder, AgentEvidenceIndex routedEvidence) {
         builder.append("\n### Agent Proposed States\n\n");
-        var entries = AgentEvidenceIndex.load(workstreamDir, objectMapper).recent(5);
+        var entries = routedEvidence.recent(5);
         if (entries.isEmpty()) {
-            builder.append("- No validated agent sidecars yet\n");
+            builder.append("- No routed validated agent sidecars yet\n");
             return;
         }
         for (var entry : entries) {

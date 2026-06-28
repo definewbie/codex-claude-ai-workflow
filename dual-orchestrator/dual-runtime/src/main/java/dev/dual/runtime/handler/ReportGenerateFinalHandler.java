@@ -70,13 +70,13 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         appendFailureClassificationSection(builder, workstreamDir);
 
         builder.append("## Verification Evidence\n\n");
-        appendVerificationEvidence(builder, workstreamDir);
+        appendVerificationEvidence(builder, context);
 
         builder.append("## Acceptance Summary\n\n");
-        appendLatestContractSummary(builder, workstreamDir, "acceptance-codex-review.contract.json");
+        appendLatestContractSummary(builder, context, "acceptance-codex-review.contract.json");
 
         builder.append("## Developer Self-Test Summary\n\n");
-        appendLatestContractSummary(builder, workstreamDir, "implement-claude-self-test.contract.json");
+        appendLatestContractSummary(builder, context, "implement-claude-self-test.contract.json");
 
         builder.append("## Git Evidence\n\n");
         appendGitEvidence(builder, workstreamDir);
@@ -199,9 +199,9 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static void appendVerificationEvidence(StringBuilder builder, Path workstreamDir) throws IOException {
-        var selfTest = latestFileMatching(workstreamDir.resolve("runs"), "implement-claude-self-test.contract.json");
-        var acceptance = latestFileMatching(workstreamDir.resolve("runs"), "acceptance-codex-review.contract.json");
+    private static void appendVerificationEvidence(StringBuilder builder, TaskContext context) throws IOException {
+        var selfTest = latestInputContractPath(context, "implement-claude-self-test.contract.json");
+        var acceptance = latestInputContractPath(context, "acceptance-codex-review.contract.json");
         if (selfTest == null && acceptance == null) {
             builder.append("(structured verification evidence not available)\n\n");
             return;
@@ -253,8 +253,8 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static void appendLatestContractSummary(StringBuilder builder, Path workstreamDir, String fileName) throws IOException {
-        var sidecar = latestFileMatching(workstreamDir.resolve("runs"), fileName);
+    private static void appendLatestContractSummary(StringBuilder builder, TaskContext context, String fileName) throws IOException {
+        var sidecar = latestInputContractPath(context, fileName);
         if (sidecar == null) {
             builder.append("(not available)\n\n");
             return;
@@ -338,17 +338,19 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static Path latestFileMatching(Path root, String fileName) throws IOException {
-        if (!Files.exists(root)) {
-            return null;
+    private static Path latestInputContractPath(TaskContext context, String fileName) {
+        var refs = context.instance().inputRefs();
+        for (int i = refs.size() - 1; i >= 0; i--) {
+            var ref = refs.get(i);
+            if (!Path.of(ref).getFileName().toString().equals(fileName)) {
+                continue;
+            }
+            var path = context.workspaceRoot().resolve(ref).normalize();
+            if (Files.isRegularFile(path)) {
+                return path;
+            }
         }
-        try (Stream<Path> paths = Files.walk(root)) {
-            return paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().equals(fileName))
-                    .max(Comparator.comparing(ReportGenerateFinalHandler::lastModified))
-                    .orElse(null);
-        }
+        return null;
     }
 
     private static Instant lastModified(Path path) {

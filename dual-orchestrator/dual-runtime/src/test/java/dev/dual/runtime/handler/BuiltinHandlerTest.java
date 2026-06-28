@@ -344,7 +344,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void humanGateReviewPacketFallsBackToLatestRunDecisionWhenGateInputsAreDeliveryOnly() throws Exception {
+    void humanGateReviewPacketDoesNotUseUnroutedRunDecisionWhenGateInputsAreDeliveryOnly() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
         var deliveryDir = workstreamDir.resolve("delivery");
         var outputsDir = workstreamDir.resolve("runs/run-100/outputs");
@@ -378,9 +378,14 @@ class BuiltinHandlerTest {
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
-        assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
-        assertTrue(markdown.contains("Functional requirements are met, but cleanup is needed."));
-        assertTrue(markdown.contains("Remove generated cache files before handoff."));
+        assertFalse(markdown.contains("ACCEPT_WITH_NOTES"));
+        assertFalse(markdown.contains("Functional requirements are met, but cleanup is needed."));
+        assertFalse(markdown.contains("Remove generated cache files before handoff."));
+        assertTrue(markdown.contains("No decisive recommendation is available."));
+
+        var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
+        var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"latestAgentDecision\" : { }"));
     }
 
     @Test
@@ -1420,7 +1425,10 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 taskDefinition("acceptance.generate_final_report", "report.generate_final"),
-                node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final")
+                node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", List.of(
+                        ".agent/workstreams/ws/runs/run-010/outputs/implement-claude-self-test.contract.json",
+                        ".agent/workstreams/ws/runs/run-011/outputs/acceptance-codex-review.contract.json"
+                ))
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());

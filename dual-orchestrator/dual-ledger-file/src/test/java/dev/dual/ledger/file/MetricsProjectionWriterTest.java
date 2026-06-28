@@ -189,6 +189,76 @@ class MetricsProjectionWriterTest {
         assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
     }
 
+    @Test
+    void repeatedReadAuthorizedByCanonicalPlanIsNotMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+        Files.createDirectories(paths.workstreamDir().resolve("artifacts/plan"));
+        jsonWriter.write(paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json"), Map.of(
+                "schemaVersion", 1,
+                "canonical_source", "plan.claude_plan",
+                "edit_files", List.of(),
+                "reference_files", List.of("README.md")
+        ));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        var repeated = list(toolMetrics.get("repeatedReadFiles"));
+
+        assertEquals("README.md", repeated.get(0).get("path"));
+        assertEquals("plan_authorized", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(0, number(toolMetrics.get("missingRereadReasonCount")));
+    }
+
+    @Test
+    void repeatedReadAuthorizedByCanonicalPlanEditFileIsNotMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan-edit"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+        Files.createDirectories(paths.workstreamDir().resolve("artifacts/plan"));
+        jsonWriter.write(paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json"), Map.of(
+                "schemaVersion", 1,
+                "canonical_source", "plan.claude_plan",
+                "edit_files", List.of("README.md"),
+                "reference_files", List.of()
+        ));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        var repeated = list(toolMetrics.get("repeatedReadFiles"));
+
+        assertEquals("plan_authorized", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(0, number(toolMetrics.get("missingRereadReasonCount")));
+    }
+
+    @Test
+    void repeatedReadNotAuthorizedByCanonicalPlanRemainsMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan-control"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+        Files.createDirectories(paths.workstreamDir().resolve("artifacts/plan"));
+        jsonWriter.write(paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json"), Map.of(
+                "schemaVersion", 1,
+                "canonical_source", "plan.claude_plan",
+                "edit_files", List.of("src/other.js"),
+                "reference_files", List.of()
+        ));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        var repeated = list(toolMetrics.get("repeatedReadFiles"));
+
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+    }
+
     private void setupRereadFixture(
             WorkstreamPaths paths,
             AtomicJsonWriter jsonWriter,

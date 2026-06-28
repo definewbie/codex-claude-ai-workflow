@@ -49,6 +49,19 @@ final class AgentEvidenceIndex {
         }
     }
 
+    static AgentEvidenceIndex fromRefs(Path workspaceRoot, List<String> refs, ObjectMapper objectMapper) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var entries = refs.stream()
+                .map(ref -> sidecarPathForRef(root, ref))
+                .flatMap(Optional::stream)
+                .distinct()
+                .map(path -> readEntry(path, objectMapper))
+                .flatMap(Optional::stream)
+                .sorted(Entry.ORDER.reversed())
+                .toList();
+        return new AgentEvidenceIndex(entries);
+    }
+
     static Optional<Entry> latestFromRefs(Path workspaceRoot, List<String> refs, ObjectMapper objectMapper) {
         var root = workspaceRoot.toAbsolutePath().normalize();
         return refs.stream()
