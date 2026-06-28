@@ -209,7 +209,7 @@ final class MetricsProjectionWriter {
                 } else {
                     if (isSessionSnapshot(usage)) {
                         sessionSnapshotRunCount++;
-                    } else {
+                    } else if (isAggregatableUsage(usage)) {
                         measuredRunCount++;
                     }
                 }
@@ -241,6 +241,7 @@ final class MetricsProjectionWriter {
                     usageMap.put("model", text(usage.get("model")));
                     usageMap.put("billingMode", text(usage.get("billingMode")));
                     usageMap.put("providerMetadataSource", text(usage.get("providerMetadataSource")));
+                    usageMap.put("unavailableReason", text(usage.get("unavailableReason")));
                     usageMap.put("costAmount", usage.get("costAmount"));
                     usageMap.put("costCurrency", text(usage.get("costCurrency")));
                     item.put("usage", usageMap);
@@ -551,6 +552,10 @@ final class MetricsProjectionWriter {
         }
         if ("ARTIFACT_ESTIMATE".equals(type)) {
             return "adapter provider usage was unavailable; values are estimated from prompt/output artifacts";
+        }
+        if ("UNAVAILABLE".equals(type)) {
+            var reason = text(usage.get("unavailableReason"));
+            return reason.isBlank() ? "provider usage unavailable" : reason;
         }
         return "unknown usage measurement type: " + type;
     }

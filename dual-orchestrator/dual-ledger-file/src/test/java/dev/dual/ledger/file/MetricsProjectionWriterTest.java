@@ -54,6 +54,16 @@ class MetricsProjectionWriterTest {
                 "measurementType", "SESSION_USED_SNAPSHOT",
                 "cumulative", true
         ));
+        writeRun(paths, "run-unavailable", "claude", "implement.claude_implement", Map.of(
+                "inputTokens", 0,
+                "outputTokens", 0,
+                "cachedReadTokens", 0,
+                "cachedWriteTokens", 0,
+                "totalTokens", 0,
+                "source", "not_available",
+                "measurementType", "UNAVAILABLE",
+                "unavailableReason", "AGENT_RECONNECT_REQUIRED"
+        ));
         writeArtifactMetadata(paths, mapper, "run-2", "promptMetadataPath", "prompt.json", 900);
         writeArtifactMetadata(paths, mapper, "run-2", "outputMetadataPath", "output.json", 40);
         writeContextPackageMetadata(paths, mapper, "context-design-review.json", "design.codex_review");
@@ -70,7 +80,7 @@ class MetricsProjectionWriterTest {
 
         var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
         var tokenMetrics = map(metrics.get("tokenMetrics"));
-        assertEquals(4, number(tokenMetrics.get("runCount")));
+        assertEquals(5, number(tokenMetrics.get("runCount")));
         assertEquals(2, number(tokenMetrics.get("measuredRunCount")));
         assertEquals(1, number(tokenMetrics.get("sessionSnapshotRunCount")));
         assertEquals(1, number(tokenMetrics.get("estimatedRunCount")));
@@ -99,6 +109,13 @@ class MetricsProjectionWriterTest {
         assertEquals(false, snapshotRun.get("aggregated"));
         assertEquals("SESSION_USED_SNAPSHOT", map(snapshotRun.get("usage")).get("measurementType"));
         assertEquals(50000, number(map(snapshotRun.get("usage")).get("contextUsedTokens")));
+        var unavailableRun = runs.stream()
+                .filter(run -> "implement.claude_implement".equals(run.get("nodeId")))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(false, unavailableRun.get("aggregated"));
+        assertEquals("UNAVAILABLE", map(unavailableRun.get("usage")).get("measurementType"));
+        assertEquals("AGENT_RECONNECT_REQUIRED", map(unavailableRun.get("usage")).get("unavailableReason"));
         var codexRun = runs.stream()
                 .filter(run -> "design.codex_review".equals(run.get("nodeId")))
                 .findFirst()
@@ -130,6 +147,13 @@ class MetricsProjectionWriterTest {
         assertEquals("missing", repeatedReads.get(0).get("rereadReasonStatus"));
         assertEquals(1, number(toolMetrics.get("repeatedReadReasonRequiredCount")));
         assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+
+        var visibility = map(map(metrics.get("tokenAttribution")).get("usageVisibility"));
+        assertEquals(1, number(map(visibility.get("byVisibility")).get("unavailable")));
+        var gaps = list(visibility.get("gaps"));
+        assertTrue(gaps.stream().anyMatch(gap ->
+                "implement.claude_implement".equals(gap.get("nodeId"))
+                        && "AGENT_RECONNECT_REQUIRED".equals(gap.get("reason"))));
 
         var markdown = Files.readString(paths.workstreamMetricsMarkdown());
         assertTrue(markdown.contains("## Token Metrics"));

@@ -62,6 +62,7 @@ class TraceCommandTest {
     @Test
     void printsRecoveryNextActionForFailedWorkstream() throws Exception {
         writeFailedLedger();
+        writeReconnectRun();
 
         var command = new TraceCommand();
         command.workdir = tempDir;
@@ -77,6 +78,8 @@ class TraceCommandTest {
         assertTrue(printed.contains("dualctl recovery show --workdir"));
         assertTrue(printed.contains("dualctl retry --workdir"));
         assertTrue(printed.contains("Current Failure:"));
+        assertTrue(printed.contains("failed/RECOVERABLE_FAILED(AGENT_RECONNECT_REQUIRED)"));
+        assertTrue(printed.contains("tokens=unavailable type=UNAVAILABLE src=not_available reason=AGENT_RECONNECT_REQUIRED"));
     }
 
     @Test
@@ -153,6 +156,49 @@ class TraceCommandTest {
                 "openGateIds": ["gate-node-human-gate"],
                 """);
         writeSummary("{}");
+    }
+
+    private void writeReconnectRun() throws Exception {
+        var run = tempDir.resolve(".agent/workstreams/ws-trace/runs/run-1/run.json");
+        Files.writeString(run, """
+                {
+                  "schemaVersion": 4,
+                  "runId": "run-1",
+                  "workstreamId": "ws-trace",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "session": "claude-main-ws-trace",
+                  "sessionScope": "workstream",
+                  "sessionSegmentKey": "ws:ws-trace",
+                  "durationMs": 1000,
+                  "exitCode": 4,
+                  "status": "failed",
+                  "failureReason": "RECOVERABLE_AGENT_RECONNECT",
+                  "recoverable": true,
+                  "executionAttempt": {
+                    "attemptId": "att-run-1",
+                    "status": "RECOVERABLE_FAILED",
+                    "processStatus": "RECONNECT_REQUIRED",
+                    "failureSignal": "AGENT_RECONNECT_REQUIRED",
+                    "recoverable": true,
+                    "retrySafe": false,
+                    "message": "agent needs reconnect",
+                    "sessionName": "claude-main-ws-trace",
+                    "sessionScope": "workstream",
+                    "sessionSegmentKey": "ws:ws-trace"
+                  },
+                  "usage": {
+                    "inputTokens": 0,
+                    "outputTokens": 0,
+                    "cachedReadTokens": 0,
+                    "cachedWriteTokens": 0,
+                    "totalTokens": 0,
+                    "source": "not_available",
+                    "measurementType": "UNAVAILABLE",
+                    "unavailableReason": "AGENT_RECONNECT_REQUIRED"
+                  }
+                }
+                """, StandardCharsets.UTF_8);
     }
 
     private void writeBaseLedger(String status, String activeBlock) throws Exception {

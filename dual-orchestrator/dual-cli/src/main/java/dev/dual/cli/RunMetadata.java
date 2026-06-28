@@ -51,6 +51,7 @@ record RunMetadata(
         String failureReason,
         Boolean recoverable,
         RunUsage usage,
+        Map<String, Object> executionAttempt,
         Map<String, Object> executionOutcome
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -68,7 +69,8 @@ record RunMetadata(
             Boolean cumulative,
             long contextUsedTokens,
             BigDecimal sessionCostAmount,
-            String sessionCostCurrency
+            String sessionCostCurrency,
+            String unavailableReason
     ) {
     }
 }

@@ -572,6 +572,16 @@ public final class TraceCommand implements Callable<Integer> {
                     + " type=" + type + " src=" + src
                     + " (estimate, not in total)";
         }
+        if ("UNAVAILABLE".equals(type)) {
+            var reason = usage.unavailableReason() == null || usage.unavailableReason().isBlank()
+                    ? "-"
+                    : usage.unavailableReason();
+            return "tokens=unavailable"
+                    + " type=UNAVAILABLE"
+                    + " src=" + src
+                    + " reason=" + reason
+                    + " (not in total)";
+        }
         return "tokens=" + usage.totalTokens()
                 + " in=" + usage.inputTokens()
                 + " out=" + usage.outputTokens()
@@ -586,7 +596,14 @@ public final class TraceCommand implements Callable<Integer> {
         var outcome = map(run.executionOutcome());
         var outcomeStatus = text(outcome.get("status"));
         if (outcomeStatus.isBlank()) {
-            return text(run.status());
+            var attempt = map(run.executionAttempt());
+            var attemptStatus = text(attempt.get("status"));
+            if (attemptStatus.isBlank()) {
+                return text(run.status());
+            }
+            var failureSignal = text(attempt.get("failureSignal"));
+            return text(run.status()) + "/" + attemptStatus
+                    + (failureSignal.isBlank() ? "" : "(" + failureSignal + ")");
         }
         var primaryReason = text(outcome.get("primaryReason"));
         return text(run.status()) + "/" + outcomeStatus
