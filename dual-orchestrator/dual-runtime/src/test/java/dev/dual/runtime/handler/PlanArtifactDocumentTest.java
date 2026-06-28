@@ -21,6 +21,8 @@ class PlanArtifactDocumentTest {
         m.put("artifact_type", "plan_artifact");
         m.put("schema_version", 1);
         m.put("implementation_steps", List.of("step 1", "step 2"));
+        m.put("edit_files", List.of("src/a.js"));
+        m.put("reference_files", List.of("src/api.js"));
         m.put("file_level_changes", List.of("src/a.js"));
         m.put("validation_plan", List.of("npm test"));
         m.put("rollback_notes", "revert src/a.js");
@@ -35,6 +37,8 @@ class PlanArtifactDocumentTest {
         assertEquals("plan_artifact", doc.artifactType());
         assertEquals(1, doc.schemaVersion());
         assertEquals(List.of("step 1", "step 2"), doc.implementationSteps());
+        assertEquals(List.of("src/a.js"), doc.editFiles());
+        assertEquals(List.of("src/api.js"), doc.referenceFiles());
         assertEquals(List.of("src/a.js"), doc.fileLevelChanges());
         assertEquals(List.of("npm test"), doc.validationPlan());
         assertEquals("revert src/a.js", doc.rollbackNotes());
@@ -50,7 +54,7 @@ class PlanArtifactDocumentTest {
     @Test
     void missingRequiredFieldReportsEachMissingField() {
         for (String key : List.of(
-                "implementation_steps", "file_level_changes", "validation_plan",
+                "implementation_steps", "edit_files", "file_level_changes", "validation_plan",
                 "rollback_notes", "known_risks", "human_review_checklist")) {
             var m = fullMap();
             m.put(key, m.get(key) instanceof List ? List.of() : "");
@@ -58,6 +62,16 @@ class PlanArtifactDocumentTest {
             assertTrue(missing.isPresent(), "expected missing for " + key);
             assertEquals(key, missing.get(), "reported field should match missing key " + key);
         }
+        var missingReferenceDeclaration = fullMap();
+        missingReferenceDeclaration.remove("reference_files");
+        var referenceMissing = PlanArtifactDocument.from(missingReferenceDeclaration).missingRequiredField();
+        assertTrue(referenceMissing.isPresent());
+        assertEquals("reference_files", referenceMissing.get());
+
+        var emptyReferences = fullMap();
+        emptyReferences.put("reference_files", List.of());
+        assertTrue(PlanArtifactDocument.from(emptyReferences).missingRequiredField().isEmpty(),
+                "reference_files must be declared but may be empty");
     }
 
     @Test

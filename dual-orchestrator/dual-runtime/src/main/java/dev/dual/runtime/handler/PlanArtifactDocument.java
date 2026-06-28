@@ -25,11 +25,15 @@ public record PlanArtifactDocument(
         String artifactType,
         int schemaVersion,
         List<String> implementationSteps,
+        List<String> editFiles,
+        List<String> referenceFiles,
         List<String> fileLevelChanges,
         List<String> validationPlan,
         String rollbackNotes,
         List<String> knownRisks,
-        List<String> humanReviewChecklist
+        List<String> humanReviewChecklist,
+        boolean editFilesDeclared,
+        boolean referenceFilesDeclared
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -39,11 +43,15 @@ public record PlanArtifactDocument(
                 text(document.get("artifact_type")),
                 intValue(document.get("schema_version"), 1),
                 stringList(document.get("implementation_steps")),
+                stringList(document.get("edit_files")),
+                stringList(document.get("reference_files")),
                 stringList(document.get("file_level_changes")),
                 stringList(document.get("validation_plan")),
                 text(document.get("rollback_notes")),
                 stringList(document.get("known_risks")),
-                stringList(document.get("human_review_checklist"))
+                stringList(document.get("human_review_checklist")),
+                document.containsKey("edit_files"),
+                document.containsKey("reference_files")
         );
     }
 
@@ -63,6 +71,12 @@ public record PlanArtifactDocument(
     public Optional<String> missingRequiredField() {
         if (implementationSteps.isEmpty()) {
             return Optional.of("implementation_steps");
+        }
+        if (!editFilesDeclared || editFiles.isEmpty()) {
+            return Optional.of("edit_files");
+        }
+        if (!referenceFilesDeclared) {
+            return Optional.of("reference_files");
         }
         if (fileLevelChanges.isEmpty()) {
             return Optional.of("file_level_changes");

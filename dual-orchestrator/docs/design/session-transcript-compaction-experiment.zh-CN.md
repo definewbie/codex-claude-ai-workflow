@@ -67,8 +67,35 @@ Codex review 每次使用 run scoped 或 compacted session，但必须以 Review
 
 新增显式实验开关，不改变默认值：
 
-- `DUAL_SESSION_COMPACTION_EXPERIMENT=off|implement_boundary|codex_incremental|both`
+- `DUAL_SESSION_COMPACTION_EXPERIMENT=off|implement_boundary|codex_incremental|both|provider_cache_aware`
 - `DUAL_SESSION_COMPACTION_MAX_SEED_TOKENS=<n>`
+- `DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS=<n>`：hard stability threshold，默认 `1000000`。
+- `DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS=<n>`：Claude implement family soft stability threshold，默认 `500000`。
+
+`provider_cache_aware` 有两条独立决策轴：
+
+- 经济轴：provider/model pricing 可用时，按 cache hit 与 cache miss 的价格比决定保留 session 还是 compaction。
+- 稳定性轴：无论 pricing 是否可用，只要当前 agent 的 cachedRead 达到 hard threshold，或 Claude implement family 达到 soft threshold，就允许使用 typed seed 创建 compact session。
+
+稳定性判断优先读取 `tokenMetrics.byAgent[agent].cachedReadTokens`。只有旧 metrics 缺少 agent 聚合时才回退到 workstream total，避免其它 agent 的 cachedRead 推高当前 agent 的 compaction 决策。
+
+阈值命中只表示当前 run 进入 compaction 候选；实际创建 compact session 仍要求该 node family 有明确 seed strategy。当前候选族是 Claude implement/self-test/handoff 与 Codex review。非候选节点会保留原 session，并在 run metadata 记录 `provider_cache_aware / not_applicable_for_node`。
+
+`pricing_unknown` / `subscription_unpriced` 只影响美元成本估算和经济型自动压缩，不阻止稳定性压缩。GLM 包月场景属于 token-only 稳定性治理：不计算美元收益，但仍控制 transcript/cachedRead 体量。
+
+### Verification Gate 选择
+
+`provider_cache_aware` 是策略决策模式，不是确定性 compaction 验证模式。它允许输出 `measure_only`、`preserve_session`、`not_applicable_for_node`，因此不能用于证明“本 case 一定会启用 compaction”。
+
+如果本轮真实 case 的目标是验证 compact session 本身是否可用、`seedKind=agent_handoff` 是否足以保持质量、以及 implement token 峰值是否下降，必须使用确定性模式：
+
+```bash
+DUAL_SESSION_COMPACTION_EXPERIMENT=implement_boundary
+```
+
+这时 `implement.claude_implement` / `implement.claude_self_test_report` / `stage.claude_handoff` 必须创建 compact session；若 run metadata 中 `sessionCompactionEnabled=false`、`seedKind` 为空或 reason 包含 `measure_only`，本轮复测直接判定为 `INVALID`，不能继续用 acceptance 结果补偿。
+
+`provider_cache_aware` 的验证目标只能是策略是否正确选择保留或压缩 session；它的 PASS 条件必须包含当前 pricing/cache/stability 输入，而不是固定要求 compaction 生效。
 
 实现时必须记录每个 run 的：
 

@@ -24,7 +24,10 @@ import java.util.function.Function;
 final class SessionCompactionPolicy {
     static final String ENV = "DUAL_SESSION_COMPACTION_EXPERIMENT";
     static final String STABILITY_CACHED_READ_THRESHOLD_ENV = "DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS";
+    static final String IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD_ENV =
+            "DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS";
     private static final long DEFAULT_STABILITY_CACHED_READ_THRESHOLD = 1_000_000L;
+    private static final long DEFAULT_IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD = 500_000L;
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -110,7 +113,7 @@ final class SessionCompactionPolicy {
             return Decision.off(baseDecision.sessionName(), baseDecision.segmentKey());
         }
         if (configured == Mode.PROVIDER_CACHE_AWARE) {
-            var stabilityDecision = stabilityDecision(workstreamId, workspaceRoot, lookup);
+            var stabilityDecision = stabilityDecision(agent, nodeId, workstreamId, workspaceRoot, lookup);
             if (stabilityDecision.shouldCompact()) {
                 return compactDecision(agent, nodeId, workstreamId, runId, baseSessionName, configured)
                         .map(decision -> new Decision(
@@ -121,7 +124,7 @@ final class SessionCompactionPolicy {
                                 decision.seedKind(),
                                 "env:" + ENV + "=provider_cache_aware; stability_compaction; " + stabilityDecision.reason()
                         ))
-                        .orElseGet(() -> Decision.off(baseDecision.sessionName(), baseDecision.segmentKey()));
+                        .orElseGet(() -> notApplicable(baseDecision, "stability_compaction; " + stabilityDecision.reason()));
             }
             var cacheDecision = providerCacheDecision(agent, workspaceRoot, lookup);
             if (!"consider_compaction".equals(cacheDecision.recommendation())) {
@@ -135,13 +138,15 @@ final class SessionCompactionPolicy {
                 );
             }
             return compactDecision(agent, nodeId, workstreamId, runId, baseSessionName, configured)
-                    .orElseGet(() -> Decision.off(baseDecision.sessionName(), baseDecision.segmentKey()));
+                    .orElseGet(() -> notApplicable(baseDecision, cacheDecision.recommendation() + "; " + cacheDecision.reason()));
         }
         return compactDecision(agent, nodeId, workstreamId, runId, baseSessionName, configured)
                 .orElseGet(() -> Decision.off(baseDecision.sessionName(), baseDecision.segmentKey()));
     }
 
     private static StabilityDecision stabilityDecision(
+            String agent,
+            String nodeId,
             String workstreamId,
             Path workspaceRoot,
             Function<String, String> lookup
@@ -153,9 +158,6 @@ final class SessionCompactionPolicy {
                 lookup.apply(STABILITY_CACHED_READ_THRESHOLD_ENV),
                 DEFAULT_STABILITY_CACHED_READ_THRESHOLD
         );
-        if (threshold <= 0) {
-            return StabilityDecision.off("stability threshold disabled");
-        }
         var metricsPath = workspaceRoot.resolve(".agent")
                 .resolve("workstreams")
                 .resolve(workstreamId)
@@ -166,12 +168,25 @@ final class SessionCompactionPolicy {
         }
         try {
             var doc = OBJECT_MAPPER.readValue(metricsPath.toFile(), MAP_TYPE);
-            var cachedRead = cachedReadTokens(doc);
-            if (cachedRead >= threshold) {
+            var cachedRead = cachedReadTokens(doc, agent);
+            if (threshold > 0 && cachedRead >= threshold) {
                 return new StabilityDecision(
                         true,
                         "cachedReadTokens=" + cachedRead + " >= " + threshold
                 );
+            }
+            var implementThreshold = longValue(
+                    lookup.apply(IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD_ENV),
+                    DEFAULT_IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD
+            );
+            if (implementThreshold > 0 && isClaudeImplementBoundary(agent, nodeId) && cachedRead >= implementThreshold) {
+                return new StabilityDecision(
+                        true,
+                        "implement boundary cachedReadTokens=" + cachedRead + " >= " + implementThreshold
+                );
+            }
+            if (threshold <= 0 && implementThreshold <= 0) {
+                return StabilityDecision.off("stability threshold disabled");
             }
             return StabilityDecision.off("cachedReadTokens=" + cachedRead + " < " + threshold);
         } catch (IOException | RuntimeException ignored) {
@@ -180,10 +195,29 @@ final class SessionCompactionPolicy {
     }
 
     @SuppressWarnings("unchecked")
-    private static long cachedReadTokens(Map<String, Object> doc) {
+    private static long cachedReadTokens(Map<String, Object> doc, String agent) {
         var tokenMetrics = doc.get("tokenMetrics") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
+        var byAgent = tokenMetrics.get("byAgent") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
+        if (!byAgent.isEmpty()) {
+            var agentMetric = byAgent.get(agent == null ? "" : agent.trim().toLowerCase(Locale.ROOT));
+            if (agentMetric instanceof Map<?, ?> map) {
+                return longValue(((Map<String, Object>) map).get("cachedReadTokens"), 0);
+            }
+            return 0;
+        }
         var total = tokenMetrics.get("total") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
         return longValue(total.get("cachedReadTokens"), 0);
+    }
+
+    private static Decision notApplicable(SessionScopePolicy.Decision baseDecision, String reason) {
+        return new Decision(
+                Mode.PROVIDER_CACHE_AWARE,
+                false,
+                baseDecision.sessionName(),
+                baseDecision.segmentKey(),
+                "",
+                "env:" + ENV + "=provider_cache_aware; not_applicable_for_node; " + reason
+        );
     }
 
     private static java.util.Optional<Decision> compactDecision(

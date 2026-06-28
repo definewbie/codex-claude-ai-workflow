@@ -29,7 +29,11 @@ Provider cache aware 的目标是把每次 agent run 拆成：
 - `SessionCompactionPolicy` 新增 `provider_cache_aware` 实验模式：
   - cache hit 很便宜时保留原 session，避免 naive compaction 把便宜 cache hit 换成昂贵 cache miss。
   - cache hit 昂贵时，才对既有 Claude implement / Codex review 目标节点启用 compaction。
-  - pricing 缺失或未知时只观测，不自动 compaction。
+  - pricing 缺失或未知时，不做经济型自动 compaction；但稳定性 compaction 仍可由 cachedRead token 阈值触发。
+  - 默认 hard stability 阈值为 `DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS=1000000`；Claude implement family 另有 soft stability 阈值 `DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS=500000`，用于在 implement 放大 transcript 前切换到带 handoff seed 的 compact session。
+  - stability 阈值按当前 agent 的 `tokenMetrics.byAgent[agent].cachedReadTokens` 判断；只有旧 metrics 缺少 `byAgent` 时才回退到 workstream total，避免 Codex cachedRead 误触发 Claude compaction。
+  - stability 阈值只把当前 run 标记为 compaction 候选；实际 compact 仍要求当前 node family 有明确 seed strategy。当前候选族是 Claude implement/self-test/handoff 和 Codex review。
+- `provider_cache_aware` 不是 deterministic compaction mode。真实 case 若目标是证明 `sessionCompactionEnabled=true` 与 `seedKind=agent_handoff`，应使用 `DUAL_SESSION_COMPACTION_EXPERIMENT=implement_boundary`；否则当 pricing 不可用或阈值未达时，`provider_cache_aware` 合法结果就是 `measure_only` / preserve session，不能被解释为 compaction 验证成功。
 - 当前价格配置使用扁平 `models[]` 文件：默认读取 `<workdir>/.agent/provider-pricing.json`，也可用 `DUAL_PROVIDER_PRICING_PATH` 指定。
 - DeepSeek 国内账单已用 2026-06 CSV 验证：`input_cache_hit_tokens=0.000000025 CNY/token`、`input_cache_miss_tokens=0.000003 CNY/token`、`output_tokens=0.000006 CNY/token`，三次 simple benchmark 复算为 `1.3907498 CNY`，与当天账单增量量级一致。
 
@@ -332,7 +336,8 @@ docs/testing/provider-cache-probes/<timestamp>/result.json
 | cache hit 高、cache miss 低、cost 低、无窗口风险 | 不压缩 | cache 在工作，压缩会破坏便宜上下文 |
 | cache hit 高、窗口接近上限、cost 仍低 | 可压缩但标记为 stability optimization | 目标是稳定性，不是省钱 |
 | cache hit 高、cache miss/output/cost 同时上升 | 压缩候选 | 说明上下文雪球已转化为真实成本 |
-| cacheSignalReliability != verified | 不自动压缩，只提示 | usage 不可信，不能自动决策 |
+| cacheSignalReliability != verified，且无窗口/稳定性风险 | 不做经济型自动压缩，只提示 | usage 不可信，不能自动做成本决策 |
+| pricing unknown / subscription unpriced，但 cachedRead 超过 stability 阈值 | 可压缩并标记为 stability optimization | 价格未知不等于 token/window 风险不存在 |
 | 上次压缩后 cost 上升或 toolCalls 上升 | 回退策略 | 当前 compaction seed 不足以替代 session memory |
 
 ### 5.4 Compaction 不是单一开关
@@ -408,7 +413,8 @@ decision=keep-session|compact|observe reason=...
 验收：
 
 - `clientReportedCost` 与 `officialCalculatedCost` 差异可见。
-- 未配置 provider/model 时，不允许自动 compaction，只能显示 `pricing_unknown`。
+- 未配置 provider/model 时，不允许基于经济账自动 compaction，只能显示 `pricing_unknown`。
+- `pricing_unknown` / `subscription_unpriced` 不阻止 stability compaction；当 cachedRead 达到 hard threshold 或 Claude implement soft threshold 时，仍允许压缩并记录 `stability_compaction` 理由。
 
 ### Phase 2：Provider Cache Aware Read Model
 
@@ -488,4 +494,6 @@ Required tests：
 
 Accepted debt：
 - 价格配置需要人工更新或未来自动拉取；短期接受手动维护，但必须带 `updatedAt/sourceUrl`。
-- GLM/custom proxy 的真实 cache billing 可能不可验证；短期标记 `unknown`，禁止自动 compaction。
+- GLM/custom proxy 的真实 cache billing 可能不可验证；短期标记为 `subscription_unpriced` 或 `pricing_unknown`。这只禁止经济型自动 compaction，不禁止 token/window 稳定性 compaction。
+- `provider_cache_aware` 当前从 `workstream-metrics.json` 读取 cachedRead 聚合来做下一次 execution policy 判断。严格分层下 metrics 是 projection，不应长期作为 policy input；短期接受是因为该 projection 已是由 run usage typed facts 生成的 read model，且策略只读不写。后续应收敛为命名的 `TokenAttributionReadModel` / `SessionCompactionSignal`，由 ledger facts 生成后供 policy 消费。
+- 当前 compact 候选节点族与 seed kind 在 `SessionCompactionPolicy` 中作为实验性 capability catalog 硬编码：Claude implement/self-test/handoff 使用 `agent_handoff`，Codex review 使用 `review_evidence_brief`。短期接受是因为实验只覆盖这两个已定义 seed strategy 的节点族；如果新增 workflow variant、节点族或 seed kind，必须迁移为显式 registry/config，并增加 definition/registry 一致性测试。

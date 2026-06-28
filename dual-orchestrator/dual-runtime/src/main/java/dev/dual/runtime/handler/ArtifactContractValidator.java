@@ -92,7 +92,7 @@ public final class ArtifactContractValidator {
                 if (planArtifactFailure != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, planArtifactFailure);
                 }
-                var rereadCoverageFailure = validateRereadCoverage(root, workstreamId, result, structured);
+                var rereadCoverageFailure = validateRereadCoverage(root, workstreamId, nodeDefinition, result, structured);
                 if (rereadCoverageFailure != null) {
                     return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, rereadCoverageFailure);
                 }
@@ -158,6 +158,7 @@ public final class ArtifactContractValidator {
     private static DualControlParseResult validateRereadCoverage(
             Path root,
             String workstreamId,
+            NodeDefinition nodeDefinition,
             NodeResult result,
             StructuredArtifactResult structured
     ) {
@@ -173,8 +174,8 @@ public final class ArtifactContractValidator {
             return null;
         }
         var invalidatedReads = invalidatedReadFiles(root, workstreamId);
-        var expectedEdits = expectedEditFiles(artifact);
-        // Harness-computed policy: justified by expected edit or invalidation only.
+        var expectedEdits = allowedRereadFiles(root, workstreamId, nodeDefinition, artifact);
+        // Harness-computed policy: justified by expected edit/reference plan or invalidation only.
         // agent_output_contract.reread_reasons is a supplementary explanation, NOT the justification.
         var policy = RereadPolicyCalculator.compute(actualReads, reusableReads, invalidatedReads, expectedEdits);
         if (policy.denied().isEmpty()) {
@@ -249,24 +250,61 @@ public final class ArtifactContractValidator {
     }
 
     /**
-     * Objective expected-edit set: files this run is entitled to re-read because
-     * it edits them. Sourced ONLY from the agent-declared {@code changed_files}.
+     * Objective allowed-reread set: files this run is entitled to re-read because
+     * it either edits them now ({@code changed_files}) or the typed plan declared
+     * them as implementation edit/reference files. Task scope is intentionally
+     * excluded — scope is user intent, not a reread permission boundary.
      *
-     * <p>Task-contract {@code scope.included} is intentionally excluded — scope
-     * describes the task, not "files edited this run". Treating scope as edit
-     * permission would silently widen the re-read policy (any
-     * README/docs/source/test in scope would become re-readable), masking the
-     * repeated-read problem this policy exists to govern. If a future typed
-     * plan-sidecar edit source is added, it must be its own named, owned read
-     * model — never task scope.</p>
+     * <p>The canonical plan artifact is an orchestrator-owned read model written
+     * only after {@code plan.claude_plan} passes contract validation. Do not scan
+     * historical run folders or infer from Markdown prose.</p>
      */
-    private static Set<String> expectedEditFiles(AgentOutputArtifact artifact) {
-        var edits = new LinkedHashSet<String>();
+    private static Set<String> allowedRereadFiles(
+            Path root,
+            String workstreamId,
+            NodeDefinition nodeDefinition,
+            AgentOutputArtifact artifact
+    ) {
+        var allowed = new LinkedHashSet<String>();
         artifact.changedFiles().stream()
                 .map(ArtifactContractValidator::normalizeRepoPath)
                 .filter(path -> !path.isBlank())
-                .forEach(edits::add);
-        return edits;
+                .forEach(allowed::add);
+        if (!mayUsePlanArtifactForRereadPolicy(nodeDefinition)) {
+            return allowed;
+        }
+        canonicalPlanArtifact(root, workstreamId).ifPresent(plan -> {
+            plan.editFiles().stream()
+                    .map(ArtifactContractValidator::normalizeRepoPath)
+                    .filter(path -> !path.isBlank())
+                    .forEach(allowed::add);
+            plan.referenceFiles().stream()
+                    .map(ArtifactContractValidator::normalizeRepoPath)
+                    .filter(path -> !path.isBlank())
+                    .forEach(allowed::add);
+        });
+        return allowed;
+    }
+
+    private static boolean mayUsePlanArtifactForRereadPolicy(NodeDefinition nodeDefinition) {
+        var id = nodeDefinition.id();
+        return id.startsWith("implement.") || "stage.claude_handoff".equals(id);
+    }
+
+    private static Optional<PlanArtifactDocument> canonicalPlanArtifact(Path root, String workstreamId) {
+        if (workstreamId == null || workstreamId.isBlank()) {
+            return Optional.empty();
+        }
+        var path = canonicalPlanArtifactPath(root, workstreamId);
+        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+            return Optional.empty();
+        }
+        return PlanArtifactDocument.read(path, OBJECT_MAPPER);
+    }
+
+    private static Path canonicalPlanArtifactPath(Path root, String workstreamId) {
+        return root.resolve(".agent/workstreams").resolve(workstreamId)
+                .resolve("artifacts/plan/plan_artifact.json").normalize();
     }
 
     private static List<String> stringList(Object value) {
@@ -331,11 +369,26 @@ public final class ArtifactContractValidator {
         if (!outputRefs.contains(sidecarRef)) {
             outputRefs.add(sidecarRef);
         }
+        var planArtifactRef = writePlanArtifactSidecarIfPresent(
+                root,
+                workstreamId,
+                nodeInstanceId,
+                nodeDefinition,
+                outputPath,
+                outputRef,
+                markdown
+        );
+        planArtifactRef.ifPresent(ref -> {
+            if (!outputRefs.contains(ref)) {
+                outputRefs.add(ref);
+            }
+        });
         var augmented = new LinkedHashMap<String, Object>();
         augmented.putAll(result.result());
         augmented.put("decision", block.required("decision"));
         augmented.put("summary", block.required("summary"));
         augmented.put("contract_sidecar_ref", sidecarRef);
+        planArtifactRef.ifPresent(ref -> augmented.put("plan_artifact_ref", ref));
         var outcome = OUTCOME_RESOLVER.resolve(new AgentExecutionEvidence(
                 processResult(result),
                 TerminalControlResult.valid(block.required("decision")),
@@ -358,6 +411,48 @@ public final class ArtifactContractValidator {
                 augmented,
                 outcome.nodeMaySucceed() ? result.errorMessage() : outcome.operatorMessage()
         );
+    }
+
+    private static Optional<String> writePlanArtifactSidecarIfPresent(
+            Path root,
+            String workstreamId,
+            String nodeInstanceId,
+            NodeDefinition nodeDefinition,
+            Path outputPath,
+            String outputRef,
+            String markdown
+    ) throws Exception {
+        if (!"plan.claude_plan".equals(nodeDefinition.id())) {
+            return Optional.empty();
+        }
+        var envelope = new AgentArtifactEnvelopeParser().latest(markdown, "plan_artifact");
+        if (envelope.isEmpty()) {
+            return Optional.empty();
+        }
+        var raw = OBJECT_MAPPER.readValue(envelope.get().json(), MAP_TYPE);
+        var sidecarPath = PlanArtifactSidecar.pathFor(outputPath);
+        Files.writeString(
+                sidecarPath,
+                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(raw) + "\n",
+                StandardCharsets.UTF_8
+        );
+        if (workstreamId != null && !workstreamId.isBlank()) {
+            var canonicalPath = canonicalPlanArtifactPath(root, workstreamId);
+            Files.createDirectories(canonicalPath.getParent());
+            var canonical = new LinkedHashMap<String, Object>();
+            canonical.putAll(raw);
+            canonical.put("workstream_id", workstreamId);
+            canonical.put("node_instance_id", nodeInstanceId == null ? "" : nodeInstanceId);
+            canonical.put("source_output_ref", outputRef == null ? "" : outputRef);
+            canonical.put("generated_at", Instant.now().toString());
+            canonical.put("canonical_source", "plan.claude_plan");
+            Files.writeString(
+                    canonicalPath,
+                    OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(canonical) + "\n",
+                    StandardCharsets.UTF_8
+            );
+        }
+        return Optional.of(root.relativize(sidecarPath).toString());
     }
 
     private StructuredArtifactResult structuredArtifact(

@@ -959,10 +959,15 @@ class ArtifactContractValidatorTest {
         var outputRef = writeOutput("plan.md", planOutput("", PLAN_ARTIFACT_FULL));
         var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
 
-        var validated = validator.validate(tempDir, agentNode("plan.claude_plan", "agent_output_contract"), result);
+        var validated = validator.validate(tempDir, "ws-test", "node-plan", agentNode("plan.claude_plan", "agent_output_contract"), result);
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
         assertTrue(validated.outputRefs().contains("plan.contract.json"));
+        assertTrue(validated.outputRefs().contains("plan.plan.json"));
+        assertEquals("plan.plan.json", validated.result().get("plan_artifact_ref"));
+        assertTrue(Files.readString(tempDir.resolve("plan.plan.json")).contains("\"edit_files\""));
+        assertTrue(Files.readString(tempDir.resolve(".agent/workstreams/ws-test/artifacts/plan/plan_artifact.json"))
+                .contains("\"canonical_source\""));
     }
 
     @Test
@@ -995,6 +1000,8 @@ class ArtifactContractValidatorTest {
               "artifact_type": "plan_artifact",
               "schema_version": 1,
               "implementation_steps": ["Update the follow-up summary query boundary."],
+              "edit_files": ["src/followup.js"],
+              "reference_files": ["src/api.js"],
               "file_level_changes": ["src/followup.js: add the reminder filter."],
               "validation_plan": ["Run the targeted follow-up summary tests."],
               "rollback_notes": "Revert the query change if validation fails.",
@@ -1010,6 +1017,8 @@ class ArtifactContractValidatorTest {
               "artifact_type": "plan_artifact",
               "schema_version": 1,
               "implementation_steps": [],
+              "edit_files": ["src/followup.js"],
+              "reference_files": [],
               "file_level_changes": ["src/followup.js: add the reminder filter."],
               "validation_plan": ["Run the targeted follow-up summary tests."],
               "rollback_notes": "Revert the query change if validation fails.",
@@ -1239,6 +1248,56 @@ class ArtifactContractValidatorTest {
         assertEquals(NodeStatus.COMPLETED, validated.status());
     }
 
+    @Test
+    void acceptsReusableFileRereadDeclaredByTypedPlanReferenceFiles() throws Exception {
+        writeReadReuseContract("src/api.js");
+        writeCanonicalPlanArtifact("src/followup.js", "src/api.js");
+        var runRef = writeRunMetadataWithReads("run-reread-plan-reference", "src/api.js");
+        var outputRef = writeOutput("implement.md", implementEnvelope(List.of(), "[]"));
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-1",
+                agentNode("implement.claude_implement", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+    }
+
+    @Test
+    void ignoresHistoricalRunPlanArtifactsWhenCanonicalPlanDoesNotAuthorizeRead() throws Exception {
+        writeReadReuseContract("src/api.js");
+        writeHistoricalRunPlanArtifact("src/api.js");
+        writeCanonicalPlanArtifact("src/followup.js", "src/other-api.js");
+        var runRef = writeRunMetadataWithReads("run-reread-old-plan", "src/api.js");
+        var outputRef = writeOutput("implement.md", implementEnvelope(List.of(), "[]"));
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-1",
+                agentNode("implement.claude_implement", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("REREAD_POLICY_DENIED"));
+        assertTrue(String.valueOf(validated.result().get("message")).contains("src/api.js"));
+    }
+
+    @Test
+    void planNodeDoesNotUseCanonicalPlanToAuthorizeItsOwnReread() throws Exception {
+        writeReadReuseContract("src/api.js");
+        writeCanonicalPlanArtifact("src/followup.js", "src/api.js");
+        var runRef = writeRunMetadataWithReads("run-plan-reread-canonical", "src/api.js");
+        var outputRef = writeOutput("plan.md", planOutput("", PLAN_ARTIFACT_FULL));
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude", "run_metadata", runRef));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-plan",
+                agentNode("plan.claude_plan", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("REREAD_POLICY_DENIED"));
+        assertTrue(String.valueOf(validated.result().get("message")).contains("src/api.js"));
+    }
+
     private String implementEnvelope(List<String> changedFiles, String rereadReasonsJson) {
         var changed = changedFiles.stream()
                 .map(file -> "\"" + file + "\"")
@@ -1343,5 +1402,43 @@ summary: Implementation complete.
                   "invalidatedReadFiles": [{"path":"%s","invalidationReason":"file changed since prior read"}]
                 }
                 """.formatted(reusableFile, invalidatedFile));
+    }
+
+    private void writeCanonicalPlanArtifact(String editFile, String referenceFile) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/artifacts/plan/plan_artifact.json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, """
+                {
+                  "artifact_type": "plan_artifact",
+                  "schema_version": 1,
+                  "implementation_steps": ["implement scoped change"],
+                  "edit_files": ["%s"],
+                  "reference_files": ["%s"],
+                  "file_level_changes": ["%s: update implementation"],
+                  "validation_plan": ["run targeted validation"],
+                  "rollback_notes": "revert edit file",
+                  "known_risks": ["none"],
+                  "human_review_checklist": ["confirm behavior"]
+                }
+                """.formatted(editFile, referenceFile, editFile));
+    }
+
+    private void writeHistoricalRunPlanArtifact(String referenceFile) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/runs/run-old-plan/outputs/plan-claude.plan.json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, """
+                {
+                  "artifact_type": "plan_artifact",
+                  "schema_version": 1,
+                  "implementation_steps": ["old plan"],
+                  "edit_files": ["src/old.js"],
+                  "reference_files": ["%s"],
+                  "file_level_changes": ["src/old.js: old change"],
+                  "validation_plan": ["old validation"],
+                  "rollback_notes": "old rollback",
+                  "known_risks": ["old risk"],
+                  "human_review_checklist": ["old checklist"]
+                }
+                """.formatted(referenceFile));
     }
 }

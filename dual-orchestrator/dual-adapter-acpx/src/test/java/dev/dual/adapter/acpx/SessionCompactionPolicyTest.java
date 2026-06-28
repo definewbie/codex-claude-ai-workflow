@@ -45,6 +45,21 @@ class SessionCompactionPolicyTest {
     }
 
     @Test
+    void implementBoundaryIsDeterministicAndDoesNotDependOnPricingOrPriorMetrics() {
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "implement_boundary";
+                    default -> "";
+                });
+
+        assertTrue(decision.enabled());
+        assertEquals("implement_boundary", decision.mode().wire());
+        assertEquals("claude-main-ws-1-compact-implement.claude_implement", decision.sessionName());
+        assertEquals("agent_handoff", decision.seedKind());
+        assertTrue(decision.reason().contains("implement boundary compaction"));
+    }
+
+    @Test
     void codexIncrementalUsesRunScopedCompactSession() {
         var decision = policy.decide("codex", "acceptance.codex_verifier_review", "ws-1", "run-2",
                 "codex-reviewer", base, name -> "codex_incremental");
@@ -94,9 +109,121 @@ class SessionCompactionPolicyTest {
     }
 
     @Test
+    void providerCacheAwareCompactsForStabilityEvenWhenPricingIsUnavailable() throws Exception {
+        writeMetrics("ws-1", 1_500_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertTrue(decision.enabled());
+        assertEquals("claude-main-ws-1-compact-implement.claude_implement", decision.sessionName());
+        assertEquals("agent_handoff", decision.seedKind());
+        assertTrue(decision.reason().contains("stability_compaction"));
+        assertTrue(decision.reason().contains("cachedReadTokens=1500000"));
+    }
+
+    @Test
+    void providerCacheAwareCompactsClaudeImplementAtSoftStabilityThreshold() throws Exception {
+        writeMetrics("ws-1", 600_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertTrue(decision.enabled());
+        assertEquals("claude-main-ws-1-compact-implement.claude_implement", decision.sessionName());
+        assertEquals("agent_handoff", decision.seedKind());
+        assertTrue(decision.reason().contains("implement boundary"));
+        assertTrue(decision.reason().contains("cachedReadTokens=600000"));
+    }
+
+    @Test
+    void providerCacheAwareDoesNotApplyImplementSoftThresholdToOtherNodes() throws Exception {
+        writeMetrics("ws-1", 600_000);
+
+        var decision = policy.decide("claude", "design.claude_design", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("measure_only"));
+    }
+
+    @Test
+    void providerCacheAwareKeepsObservableReasonWhenHardThresholdHitsNonTargetNode() throws Exception {
+        writeAgentMetrics("ws-1", 1_500_000, 0);
+
+        var decision = policy.decide("claude", "design.claude_design", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("provider_cache_aware", decision.mode().wire());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("not_applicable_for_node"));
+        assertTrue(decision.reason().contains("stability_compaction"));
+    }
+
+    @Test
+    void providerCacheAwareUsesCurrentAgentCachedReadNotWorkstreamTotal() throws Exception {
+        writeAgentMetrics("ws-1", 100_000, 1_500_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("measure_only"));
+    }
+
+    @Test
+    void providerCacheAwareDoesNotFallbackToTotalWhenCurrentAgentMetricIsMissing() throws Exception {
+        writeCodexOnlyMetrics("ws-1", 1_500_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("measure_only"));
+    }
+
+    @Test
+    void providerCacheAwareImplementSoftThresholdWorksWhenHardThresholdDisabled() throws Exception {
+        writeMetrics("ws-1", 600_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    case SessionCompactionPolicy.STABILITY_CACHED_READ_THRESHOLD_ENV -> "0";
+                    default -> "";
+                });
+
+        assertTrue(decision.enabled());
+        assertEquals("claude-main-ws-1-compact-implement.claude_implement", decision.sessionName());
+        assertTrue(decision.reason().contains("implement boundary"));
+    }
+
+    @Test
     void providerCacheAwareStillMeasuresTokenOnlyWhenStabilityThresholdNotReached() throws Exception {
         writePricing("zhipu", "glm-5.2", "0", "0");
-        writeMetrics("ws-1", 500_000);
+        writeMetrics("ws-1", 400_000);
 
         var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
                 "claude-main", base, tempDir, name -> switch (name) {
@@ -108,6 +235,23 @@ class SessionCompactionPolicyTest {
 
         assertFalse(decision.enabled());
         assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("measure_only"));
+    }
+
+    @Test
+    void providerCacheAwareIsNotADeterministicCompactionVerificationMode() throws Exception {
+        writeMetrics("ws-1", 488_320);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("provider_cache_aware", decision.mode().wire());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertEquals("", decision.seedKind());
         assertTrue(decision.reason().contains("measure_only"));
     }
 
@@ -162,5 +306,54 @@ class SessionCompactionPolicyTest {
                   }
                 }
                 """.formatted(cachedReadTokens));
+    }
+
+    private void writeAgentMetrics(String workstreamId, long claudeCachedReadTokens, long codexCachedReadTokens) throws Exception {
+        var metricsDir = tempDir.resolve(".agent")
+                .resolve("workstreams")
+                .resolve(workstreamId)
+                .resolve("metrics");
+        Files.createDirectories(metricsDir);
+        Files.writeString(metricsDir.resolve("workstream-metrics.json"), """
+                {
+                  "schemaVersion": 1,
+                  "tokenMetrics": {
+                    "total": {
+                      "cachedReadTokens": %d
+                    },
+                    "byAgent": {
+                      "claude": {
+                        "cachedReadTokens": %d
+                      },
+                      "codex": {
+                        "cachedReadTokens": %d
+                      }
+                    }
+                  }
+                }
+                """.formatted(claudeCachedReadTokens + codexCachedReadTokens, claudeCachedReadTokens, codexCachedReadTokens));
+    }
+
+    private void writeCodexOnlyMetrics(String workstreamId, long codexCachedReadTokens) throws Exception {
+        var metricsDir = tempDir.resolve(".agent")
+                .resolve("workstreams")
+                .resolve(workstreamId)
+                .resolve("metrics");
+        Files.createDirectories(metricsDir);
+        Files.writeString(metricsDir.resolve("workstream-metrics.json"), """
+                {
+                  "schemaVersion": 1,
+                  "tokenMetrics": {
+                    "total": {
+                      "cachedReadTokens": %d
+                    },
+                    "byAgent": {
+                      "codex": {
+                        "cachedReadTokens": %d
+                      }
+                    }
+                  }
+                }
+                """.formatted(codexCachedReadTokens, codexCachedReadTokens));
     }
 }

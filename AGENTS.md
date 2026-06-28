@@ -24,6 +24,53 @@
 
 发现实现偏离主目标时，必须先修复目标链路，再继续后续优化；不能用新增功能掩盖验收口径缺失。
 
+## Verification Boundary Discipline
+
+真实 case、benchmark、A/B 实验或 provider 行为验证，必须先把“要证明什么”转成可执行的前置条件和中途止损条件，不能只把它写成事后观察项。
+
+每次启动真实运行前，必须先写出并通过下面的 `Verification Gate`。没有这个 gate，或者 gate 中任一项无法回答，不允许启动真实 provider / real-case / benchmark / A/B：
+
+```text
+Verification Gate:
+- Target:
+- Source of truth:
+- Trigger precondition:
+- How precondition is checked before run:
+- PASS:
+- FAIL:
+- INVALID:
+- Stop-loss:
+- Run artifact freshness:
+```
+
+字段含义：
+
+- `Target`: 本次唯一主目标，必须是可验证事实，例如 `implement.claude_implement.sessionCompactionEnabled=true`，不是“看看效果”。
+- `Source of truth`: 用哪个 typed artifact / run.json / metrics / ledger 字段判定结果。
+- `Trigger precondition`: 启动前必须满足的触发条件，例如阈值、provider/model、billing mode、session state、前序 token。
+- `How precondition is checked before run`: 启动前用什么命令或 read model 证明会触发。不能写“预计”“应该”。
+- `PASS`: 成功必须同时满足哪些字段和质量条件。
+- `FAIL`: 哪些字段或质量条件不满足时算失败。
+- `INVALID`: 哪些情况说明本轮不能证明目标，例如旧 jar、旧 server、`measure_only`、`pricing_unknown`、字段缺失、触发条件未满足。
+- `Stop-loss`: 何时必须中断，避免继续消耗 token 或污染判断。
+- `Run artifact freshness`: 如何证明运行工件包含本轮代码，例如 build 成功、jar 时间、server 重启、worker 版本或脚本未使用 `--skip-build`。
+
+例如要验证 `implement.claude_implement.sessionCompactionEnabled=true`、`seedKind=agent_handoff`、token 下降或质量不退化，启动前必须确认：
+
+- 运行工件已经包含本轮代码，不能因为 `--skip-build`、旧 jar、旧 server 或旧 worker 导致复测无效。
+- 触发条件在当前 case 中必然可达；如果依赖阈值、provider metadata、pricing、billing mode、session state 或历史 token，必须先用 ledger/read model 计算并确认会触发。不能靠“应该会触发”启动真实 provider 消耗。
+- 验收字段必须在 run metadata / metrics / typed artifact 中有明确字段；如果字段为 `null`、`measure_only`、`pricing_unknown`、`not_applicable` 或 fallback reason，必须视为未验证，不得解释为成功。
+- 中途一旦发现核心验收字段不满足，必须停止该 case 并报告根因；不能继续跑完整流程来弥补前置验证失败。
+- 如果同一类验证连续失败两次，必须回到模型边界分析，重新定义 trigger / owner / SoT / projection；不能继续调阈值或补 prompt。
+
+真实验证的结论必须区分三类：
+
+- `PASS`: 目标字段已触发，质量与边界验收同时通过。
+- `FAIL`: 目标字段未触发、边界不满足、质量退化或 stop-loss 触发。
+- `INVALID`: 测试工件、触发前提、provider 配置或观测链路错误，导致本轮不能证明目标。
+
+不得把 `INVALID` 说成“部分成功”；必须先修复验证链路。
+
 ## Sibling Boundary Sweep
 
 当一次修改迁移、删除或集中某个 source of truth 时，必须同步检查同一边界下的兄弟概念，不能只修用户点名的一个方法、一个 variant、一个 UI 面板或一个测试。
