@@ -3,6 +3,10 @@ package dev.dual.adapter.acpx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.AgentExecutionAttempt;
+import dev.dual.core.execution.AgentExecutionAttemptStatus;
+import dev.dual.core.execution.AgentExecutionProcessStatus;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -104,6 +108,7 @@ final class AgentRunMetadataWriter {
                 List.of(),
                 null,
                 List.of(),
+                null,
                 null
         ));
     }
@@ -226,6 +231,21 @@ final class AgentRunMetadataWriter {
                 transcriptPath,
                 toolUsage
         ).orElse(null);
+        var attempt = executionAttempt(
+                runId,
+                workstreamId,
+                nodeId,
+                agent,
+                session,
+                sessionMeta,
+                result,
+                failure,
+                relative(workspaceRoot, stderrPath),
+                relativeOrNull(workspaceRoot, transcriptPath)
+        );
+        var effectiveUsage = usage == null && failure != null
+                ? AcpxUsage.unavailable(unavailableReason(attempt))
+                : usage;
         writeArtifactMetadata(
                 workspaceRoot,
                 promptMetadataPath,
@@ -328,13 +348,14 @@ final class AgentRunMetadataWriter {
                 failure == null ? "completed" : "failed",
                 failure == null ? null : failure.reason(),
                 failure == null ? null : failure.recoverable(),
-                usage,
+                effectiveUsage,
                 toolUsage,
                 relativeOrNull(workspaceRoot, governanceReportPath),
-                processResult(workspaceRoot, result, stdoutPath, stderrPath),
+                processResult(workspaceRoot, result, stdoutPath, stderrPath, failure),
                 adapterSignals(failure),
                 null,
                 List.of(),
+                executionAttemptToMap(attempt),
                 null
         ));
     }
@@ -343,12 +364,13 @@ final class AgentRunMetadataWriter {
             Path workspaceRoot,
             AcpxRunResult result,
             Path stdoutPath,
-            Path stderrPath
+            Path stderrPath,
+            AcpxFailureClassifier.AcpxFailure failure
     ) {
         return Map.of(
                 "command", String.join(" ", result.command()),
                 "exitCode", result.exitCode(),
-                "usability", usability(result).name(),
+                "usability", usability(result, failure).name(),
                 "durationMs", result.durationMs(),
                 "stdoutPath", relative(workspaceRoot, stdoutPath),
                 "stderrPath", relative(workspaceRoot, stderrPath),
@@ -357,11 +379,146 @@ final class AgentRunMetadataWriter {
         );
     }
 
-    private dev.dual.core.execution.ProcessUsability usability(AcpxRunResult result) {
+    private dev.dual.core.execution.ProcessUsability usability(
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure
+    ) {
+        if (failure != null && AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code().equals(failure.reason())) {
+            return dev.dual.core.execution.ProcessUsability.INTERRUPTED;
+        }
         if (result.exitCode() == 0) {
             return dev.dual.core.execution.ProcessUsability.EXITED_ZERO;
         }
+        if (failure != null && failure.recoverable()) {
+            return dev.dual.core.execution.ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
+        }
         return dev.dual.core.execution.ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+    }
+
+    private AgentExecutionAttempt executionAttempt(
+            String runId,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            SessionMeta sessionMeta,
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure,
+            String stderrPath,
+            String transcriptPath
+    ) {
+        var processStatus = processStatus(result, failure);
+        var failureSignal = failureSignal(failure);
+        var status = attemptStatus(failure);
+        var recoverable = failure != null && failure.recoverable();
+        var message = failure == null ? "completed" : attemptMessage(failure);
+        return new AgentExecutionAttempt(
+                "att-" + runId,
+                runId,
+                workstreamId,
+                nodeId,
+                agent,
+                status,
+                processStatus,
+                failureSignal,
+                recoverable,
+                false,
+                message,
+                stderrPath,
+                transcriptPath,
+                session,
+                "",
+                sessionMeta == null ? "" : sessionMeta.scope(),
+                sessionMeta == null ? "" : sessionMeta.segmentKey(),
+                result.startedAt(),
+                result.finishedAt()
+        );
+    }
+
+    private AgentExecutionAttemptStatus attemptStatus(AcpxFailureClassifier.AcpxFailure failure) {
+        if (failure == null) {
+            return AgentExecutionAttemptStatus.COMPLETED;
+        }
+        return failure.recoverable()
+                ? AgentExecutionAttemptStatus.RECOVERABLE_FAILED
+                : AgentExecutionAttemptStatus.RUNTIME_FAILED;
+    }
+
+    private AgentExecutionProcessStatus processStatus(
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure
+    ) {
+        if (failure == null) {
+            return AgentExecutionProcessStatus.EXITED;
+        }
+        if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
+            return AgentExecutionProcessStatus.RECONNECT_REQUIRED;
+        }
+        if (AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code().equals(failure.reason())) {
+            return AgentExecutionProcessStatus.INTERRUPTED;
+        }
+        if (result.reachedDeclaredTimeout(java.time.Duration.ZERO)) {
+            return AgentExecutionProcessStatus.TIMED_OUT;
+        }
+        return AgentExecutionProcessStatus.FAILED;
+    }
+
+    private AdapterSignalType failureSignal(AcpxFailureClassifier.AcpxFailure failure) {
+        if (failure == null) {
+            return null;
+        }
+        if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
+            return AdapterSignalType.AGENT_RECONNECT_REQUIRED;
+        }
+        if (AcpxFailureReason.SESSION_BOOTSTRAP_FAILED.code().equals(failure.reason())
+                || AcpxFailureReason.SESSION_MISSING.code().equals(failure.reason())) {
+            return AdapterSignalType.SESSION_BOOTSTRAP_FAILED;
+        }
+        if (AcpxFailureReason.RATE_LIMIT.code().equals(failure.reason())) {
+            return AdapterSignalType.RATE_LIMITED;
+        }
+        if (AcpxFailureReason.CONTEXT_WINDOW.code().equals(failure.reason())) {
+            return AdapterSignalType.CONTEXT_WINDOW_EXCEEDED;
+        }
+        if (AcpxFailureReason.AGENT_PERMISSION_BLOCKED.code().equals(failure.reason())) {
+            return AdapterSignalType.PERMISSION_BLOCKED;
+        }
+        if (AcpxFailureReason.AGENT_AUTH_FAILED.code().equals(failure.reason())) {
+            return AdapterSignalType.AUTH_FAILED;
+        }
+        return AdapterSignalType.PROCESS_STALLED;
+    }
+
+    private String attemptMessage(AcpxFailureClassifier.AcpxFailure failure) {
+        if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
+            return "agent needs reconnect: " + failure.message();
+        }
+        return failure.message();
+    }
+
+    private String unavailableReason(AgentExecutionAttempt attempt) {
+        return attempt.failureSignal() == null ? attempt.status().name() : attempt.failureSignal().name();
+    }
+
+    private Map<String, Object> executionAttemptToMap(AgentExecutionAttempt attempt) {
+        if (attempt == null) {
+            return null;
+        }
+        var map = new java.util.LinkedHashMap<String, Object>();
+        map.put("attemptId", attempt.attemptId());
+        map.put("status", attempt.status().name());
+        map.put("processStatus", attempt.processStatus().name());
+        map.put("failureSignal", attempt.failureSignal() == null ? null : attempt.failureSignal().name());
+        map.put("recoverable", attempt.recoverable());
+        map.put("retrySafe", attempt.retrySafe());
+        map.put("message", attempt.message());
+        map.put("stderrPath", attempt.stderrPath());
+        map.put("transcriptPath", attempt.transcriptPath());
+        map.put("sessionName", attempt.sessionName());
+        map.put("sessionId", attempt.sessionId());
+        map.put("sessionScope", attempt.sessionScope());
+        map.put("sessionSegmentKey", attempt.sessionSegmentKey());
+        return map;
     }
 
     private List<Map<String, Object>> adapterSignals(AcpxFailureClassifier.AcpxFailure failure) {

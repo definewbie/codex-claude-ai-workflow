@@ -47,6 +47,7 @@ record AgentRunDocument(
         List<Map<String, Object>> adapterSignals,
         Map<String, Object> terminalControlResult,
         List<Map<String, Object>> artifactContractResults,
+        Map<String, Object> executionAttempt,
         Map<String, Object> executionOutcome
 ) {
 }

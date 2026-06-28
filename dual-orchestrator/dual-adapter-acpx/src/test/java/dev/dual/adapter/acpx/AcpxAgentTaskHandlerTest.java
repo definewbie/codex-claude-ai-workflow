@@ -230,7 +230,8 @@ class AcpxAgentTaskHandlerTest {
                         "zhipu",
                         "glm-5.2",
                         AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS,
-                        AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON
+                        AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON,
+                        ""
                 )
         );
 
@@ -541,6 +542,13 @@ class AcpxAgentTaskHandlerTest {
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
         assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_RECONNECT\""));
+        assertTrue(runMetadata.contains("\"executionAttempt\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"status\" : \"RECOVERABLE_FAILED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"processStatus\" : \"RECONNECT_REQUIRED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"message\" : \"agent needs reconnect"), runMetadata);
+        assertTrue(runMetadata.contains("\"measurementType\" : \"UNAVAILABLE\""), runMetadata);
+        assertTrue(runMetadata.contains("\"unavailableReason\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
     }
 
     @Test

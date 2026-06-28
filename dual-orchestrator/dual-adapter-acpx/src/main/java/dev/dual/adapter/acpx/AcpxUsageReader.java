@@ -203,6 +203,7 @@ final class AcpxUsageReader {
                             "",
                             "",
                             "",
+                            "",
                             ""
                     );
                 }
@@ -272,6 +273,7 @@ final class AcpxUsageReader {
                 0,
                 sessionCostAmount,
                 sessionCostCurrency,
+                "",
                 "",
                 "",
                 "",

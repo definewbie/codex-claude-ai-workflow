@@ -36,10 +36,12 @@ record AcpxUsage(
         String providerId,
         String model,
         String billingMode,
-        String providerMetadataSource
+        String providerMetadataSource,
+        String unavailableReason
 ) {
     static final String PROVIDER_RUN_USAGE = "PROVIDER_RUN_USAGE";
     static final String SESSION_USED_SNAPSHOT = "SESSION_USED_SNAPSHOT";
+    static final String UNAVAILABLE = "UNAVAILABLE";
 
     /** result.usage 精确匹配到本次 prompt 文本。 */
     static final String ATTR_EXACT_PROMPT_MATCH = "EXACT_PROMPT_MATCH";
@@ -73,6 +75,33 @@ record AcpxUsage(
         if (providerMetadataSource == null) {
             providerMetadataSource = "";
         }
+        if (unavailableReason == null) {
+            unavailableReason = "";
+        }
+    }
+
+    static AcpxUsage unavailable(String reason) {
+        return new AcpxUsage(
+                0,
+                0,
+                0,
+                0,
+                0,
+                null,
+                "",
+                "not_available",
+                UNAVAILABLE,
+                "",
+                false,
+                0,
+                null,
+                "",
+                "",
+                "",
+                "",
+                "",
+                reason == null ? "" : reason
+        );
     }
 
     AcpxUsage withProviderMetadata(AcpxProviderMetadata metadata) {
@@ -97,7 +126,8 @@ record AcpxUsage(
                 firstNonBlank(providerId, metadata.providerId()),
                 firstNonBlank(model, metadata.model()),
                 firstNonBlank(billingMode, metadata.billingMode()),
-                firstNonBlank(providerMetadataSource, metadata.source())
+                firstNonBlank(providerMetadataSource, metadata.source()),
+                unavailableReason
         );
     }
 
