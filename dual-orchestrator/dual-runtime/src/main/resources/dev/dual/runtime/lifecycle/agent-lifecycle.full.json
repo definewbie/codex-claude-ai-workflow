@@ -1,6 +1,6 @@
 {
   "workflowId" : "agent-lifecycle-full",
-  "version" : 5,
+  "version" : 6,
   "entryNodeId" : "context.intake_claude_brainstorm",
   "nodes" : [ {
     "id" : "context.intake_claude_brainstorm",
@@ -18,7 +18,7 @@
     "config" : {
       "agent" : "claude",
       "session" : "claude-main",
-      "permission_profile" : "observe",
+      "permission_profile" : "contract_discovery",
       "prompt_template" : "intake-claude-brainstorm",
       "expected_artifact" : "task_contract_proposal",
       "artifact_compiler" : "task_contract_proposal_compiler",

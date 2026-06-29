@@ -378,6 +378,31 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void contractDiscoveryProfileDoesNotAllowDirectRead() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var transport = new CapturingApprovalTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm",
+                "permission_profile", "contract_discovery"
+        ));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("intake.claude_brainstorm")));
+
+        assertEquals(false, transport.lastApproveAll);
+        assertEquals("contract_discovery", transport.lastPermissionProfile.name());
+        assertFalse(transport.lastPermissionProfile.allowedTools().contains("Read"));
+        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Grep"));
+        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Glob"));
+        assertEquals(List.of("search"), transport.lastPermissionProfile.autoApproveKinds());
+    }
+
+    @Test
     void nodePermissionProfileIsPassedToAcpxTransport() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);

@@ -18,7 +18,7 @@ class WorkflowVariantSelectorTest {
     void forVariant_null_returnsFullVariant() {
         WorkflowDefinition wf = factory.forVariant(null);
         assertEquals("agent-lifecycle-full", wf.workflowId());
-        assertEquals(5, wf.version());
+        assertEquals(6, wf.version());
     }
 
     @Test
@@ -37,14 +37,14 @@ class WorkflowVariantSelectorTest {
     void forVariant_contract_returnsContractVariant() {
         WorkflowDefinition wf = factory.forVariant("contract");
         assertEquals("agent-lifecycle-contract", wf.workflowId());
-        assertEquals(4, wf.version());
+        assertEquals(5, wf.version());
     }
 
     @Test
     void forVariant_full_returnsFullVariant() {
         WorkflowDefinition wf = factory.forVariant("full");
         assertEquals("agent-lifecycle-full", wf.workflowId());
-        assertEquals(5, wf.version());
+        assertEquals(6, wf.version());
     }
 
     @Test

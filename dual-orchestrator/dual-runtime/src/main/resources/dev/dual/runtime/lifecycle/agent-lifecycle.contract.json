@@ -1,6 +1,6 @@
 {
   "workflowId": "agent-lifecycle-contract",
-  "version": 4,
+  "version": 5,
   "entryNodeId": "context.intake_claude_brainstorm",
   "nodes": [
     {
@@ -20,7 +20,7 @@
       "config": {
         "agent": "claude",
         "session": "claude-main",
-        "permission_profile": "observe",
+        "permission_profile": "contract_discovery",
         "prompt_template": "intake-claude-brainstorm",
         "expected_artifact": "task_contract_proposal",
         "artifact_compiler": "task_contract_proposal_compiler",

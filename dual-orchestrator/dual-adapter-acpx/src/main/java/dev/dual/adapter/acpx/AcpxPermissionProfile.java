@@ -11,8 +11,9 @@ import java.util.List;
  * acpx 的 `--permission-policy` 不理解 `Bash(ls *)` 这类 Claude Code 模式；
  * 它只能按 ACP 工具种类或标题批准权限请求。Claude Code 的
  * `allowedTools` 只能进一步限制 Claude Code 工具名，不能弥补 ACP 层
- * 对 execute 的过度批准。因此 observe/review 不自动批准 execute；计划和
- * 审视阶段必须使用 Read/Grep/Glob 这类只读工具，验证命令留给 self-test。
+ * 对 execute 的过度批准。因此 discovery/observe/review 不自动批准 execute；
+ * intake contract discovery 也不自动批准 direct Read，避免实现级探索在单个
+ * external run 内先烧 token、后置 validator 才拦截。
  */
 record AcpxPermissionProfile(
         String name,
@@ -40,11 +41,19 @@ record AcpxPermissionProfile(
             return observe();
         }
         return switch (name) {
+            case "contract_discovery" -> contractDiscovery();
             case "observe" -> observe();
             case "review" -> review();
             case "implement" -> implement();
             default -> throw new IllegalArgumentException("unsupported acpx permission profile: " + name);
         };
+    }
+
+    static AcpxPermissionProfile contractDiscovery() {
+        return new AcpxPermissionProfile("contract_discovery", false, List.of(
+                "Grep",
+                "Glob"
+        ), List.of("search"), 1);
     }
 
     static AcpxPermissionProfile observe() {

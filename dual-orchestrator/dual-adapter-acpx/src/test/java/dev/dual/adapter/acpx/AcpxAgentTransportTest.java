@@ -456,6 +456,48 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void passesSearchOnlyToolsWhenPermissionProfileIsContractDiscovery() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-contract-discovery-args.sh");
+        var argsLog = tempDir.resolve("args.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                printf '%s\\n' "$@" > "__ARGS_LOG__"
+                echo "ACPX_DONE"
+                exit 0
+                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractDiscovery()
+        ));
+
+        assertEquals(0, result.exitCode());
+        var args = Files.readString(argsLog);
+        assertTrue(args.contains("--non-interactive-permissions"));
+        assertTrue(args.contains("--permission-policy"));
+        assertTrue(args.contains("\"autoApprove\":[\"search\"]"));
+        assertTrue(args.contains("--allowed-tools"));
+        assertTrue(args.contains("Grep,Glob"));
+        assertFalse(args.contains("Read,Grep,Glob"));
+        assertFalse(args.contains("\"read\""));
+        assertFalse(args.contains("\"execute\""));
+    }
+
+    @Test
     void addsPromptRetryForReadOnlyProfilesOnly() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-readonly-retry-args.sh");
         var argsLog = tempDir.resolve("args.log");

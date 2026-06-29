@@ -156,7 +156,7 @@ class WorkflowDefinitionLoaderTest {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null);
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
-        assertEquals(5, definition.version(), "default full workflow should be loaded from the bundled JSON resource");
+        assertEquals(6, definition.version(), "default full workflow should be loaded from the bundled JSON resource");
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
     }
@@ -180,7 +180,7 @@ class WorkflowDefinitionLoaderTest {
     @Test
     void bundledAgentNodesDeclarePermissionProfiles() throws Exception {
         var loader = new WorkflowDefinitionLoader();
-        var allowedProfiles = java.util.Set.of("observe", "review", "implement");
+        var allowedProfiles = java.util.Set.of("contract_discovery", "observe", "review", "implement");
 
         for (var variant : java.util.List.of("full", "contract")) {
             var definition = loader.loadOrDefault(null, variant);
@@ -195,11 +195,26 @@ class WorkflowDefinitionLoaderTest {
     }
 
     @Test
+    void bundledIntakeClaudeUsesContractDiscoveryPermissionProfile() throws Exception {
+        var loader = new WorkflowDefinitionLoader();
+
+        for (var variant : java.util.List.of("full", "contract")) {
+            var definition = loader.loadOrDefault(null, variant);
+
+            assertEquals(
+                    "contract_discovery",
+                    definition.node("intake.claude_brainstorm").config().get("permission_profile"),
+                    variant + " intake must not use the broad observe profile"
+            );
+        }
+    }
+
+    @Test
     void bundledContractWorkflowIsLoadedFromClasspathResource() throws Exception {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "contract");
 
         assertEquals("agent-lifecycle-contract", definition.workflowId());
-        assertEquals(4, definition.version());
+        assertEquals(5, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
         assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
