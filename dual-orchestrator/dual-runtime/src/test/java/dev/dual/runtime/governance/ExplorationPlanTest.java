@@ -1,0 +1,70 @@
+package dev.dual.runtime.governance;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ExplorationPlanTest {
+    @Test
+    void intakePlanLimitsDirectReadsAndFramesDiscoveryAsContractScopeNotImplementation() {
+        var catalog = AgentCapabilityCatalog.fromAvailableCommands(
+                "ws-001",
+                "intake.claude_brainstorm",
+                Set.of("rtk", "codegraph")
+        );
+
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "intake",
+                "intake.claude_brainstorm",
+                "node-001",
+                "iter-001",
+                List.of("README.md", "docs/product.md"),
+                List.of(),
+                catalog
+        );
+
+        var document = plan.toDocument();
+
+        assertEquals("agent_exploration_plan", document.get("artifactType"));
+        assertEquals("contract_discovery", document.get("explorationIntent"));
+        assertEquals("warn", document.get("failureMode"));
+        assertEquals(3, ((Number) document.get("maxDirectReadFiles")).intValue());
+        assertTrue(document.get("preferredCapabilityKinds") instanceof List<?> kinds
+                && kinds.contains("symbol_index")
+                && kinds.contains("token_filtered_shell"));
+        assertTrue(document.get("forbiddenExplorationIntents") instanceof List<?> forbidden
+                && forbidden.contains("implementation_design")
+                && forbidden.contains("full_repo_audit"));
+    }
+
+    @Test
+    void implementPlanAllowsEditExecutionButStillKeepsWarnMode() {
+        var catalog = AgentCapabilityCatalog.fromAvailableCommands(
+                "ws-001",
+                "implement.claude_implement",
+                Set.of("rtk")
+        );
+
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "implement",
+                "implement.claude_implement",
+                "node-010",
+                "iter-001",
+                List.of("src/app.js", "src/app.test.js"),
+                List.of("src/app.js"),
+                catalog
+        );
+
+        var document = plan.toDocument();
+
+        assertEquals("edit_execution", document.get("explorationIntent"));
+        assertEquals("warn", document.get("failureMode"));
+        assertEquals(List.of("src/app.js"), document.get("expectedEditFiles"));
+    }
+}

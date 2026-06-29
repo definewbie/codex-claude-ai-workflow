@@ -66,6 +66,20 @@ class ContextGovernanceActualReportWriterTest {
                         "writeScope", List.of("src/main.py")
                 )
         );
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("exploration-plan-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "agent_exploration_plan",
+                        "nodeDefinitionId", "implement.claude_implement",
+                        "targetNodeDefinitionId", "implement.claude_implement",
+                        "stageId", "implement",
+                        "maxDirectReadFiles", 1,
+                        "allowedDirectReadFiles", List.of("src/main.py"),
+                        "expectedEditFiles", List.of("src/main.py"),
+                        "failureMode", "warn"
+                )
+        );
         var toolUsage = new AcpxToolUsage(
                 1,
                 4,
@@ -100,6 +114,9 @@ class ContextGovernanceActualReportWriterTest {
         assertEquals("src/main.py", json.get("repeatedReadFiles").get(0).get("path").asText());
         assertEquals(1, json.get("repeatedReadFiles").get(0).get("previousCount").asInt());
         assertEquals(true, json.get("repeatedReadFiles").get(0).get("evidenceKnown").asBoolean());
+        assertEquals("warn", json.get("explorationPolicyResult").get("status").asText());
+        assertEquals("DIRECT_READ_BUDGET_EXCEEDED",
+                json.get("explorationPolicyResult").get("violations").get(0).get("type").asText());
         assertEquals(4, json.get("toolUsage").get("toolCallCount").asInt());
 
         var metrics = objectMapper.readTree(memoryDir.resolve("memory-metrics.json").toFile());

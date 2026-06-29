@@ -2,6 +2,8 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.runtime.governance.AgentCapabilityCatalog;
+import dev.dual.runtime.governance.ExplorationPlan;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -61,6 +63,17 @@ final class RepoScopeGovernance {
         var workingSet = buildWorkingSet(context, stageId, plan, policy, targetNodeDefinitionId);
         var fileSummaries = buildFileSummaries(context, stageId, workingSet);
         var readReuseContract = buildReadReuseContract(context, stageId, plan, policy, targetNodeDefinitionId, existingMemory);
+        var capabilityCatalog = AgentCapabilityCatalog.detect(context.workstreamId(), targetNodeDefinitionId);
+        var explorationPlan = ExplorationPlan.fromScope(
+                context.workstreamId(),
+                stageId,
+                targetNodeDefinitionId,
+                context.instance().nodeInstanceId(),
+                context.instance().iterationId(),
+                textList(policy.get("readScope")),
+                textList(policy.get("writeScope")),
+                capabilityCatalog
+        ).toDocument();
 
         var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
         Files.createDirectories(memoryDir);
@@ -73,6 +86,8 @@ final class RepoScopeGovernance {
         var workingSetPath = memoryDir.resolve("working-set.json");
         var fileSummariesPath = memoryDir.resolve("file-summaries.json");
         var readReuseContractPath = memoryDir.resolve("read-reuse-contract.json");
+        var capabilityCatalogPath = memoryDir.resolve("agent-capability-catalog.json");
+        var explorationPlanPath = memoryDir.resolve("exploration-plan-" + nodeKey + ".json");
         var reportPath = governanceDir.resolve(nodeKey + ".json");
         var workstreamMemory = buildWorkstreamMemory(
                 context,
@@ -93,6 +108,8 @@ final class RepoScopeGovernance {
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(workingSetPath.toFile(), workingSet);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(fileSummariesPath.toFile(), fileSummaries);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(readReuseContractPath.toFile(), readReuseContract);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(capabilityCatalogPath.toFile(), capabilityCatalog.toDocument());
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(explorationPlanPath.toFile(), explorationPlan);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(workstreamMemoryPath.toFile(), workstreamMemory);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(reportPath.toFile(), report);
 
@@ -104,6 +121,8 @@ final class RepoScopeGovernance {
                 workingSet,
                 fileSummaries,
                 readReuseContract,
+                capabilityCatalog.toDocument(),
+                explorationPlan,
                 repoMapPath,
                 planPath,
                 policyPath,
@@ -111,6 +130,8 @@ final class RepoScopeGovernance {
                 workingSetPath,
                 fileSummariesPath,
                 readReuseContractPath,
+                capabilityCatalogPath,
+                explorationPlanPath,
                 workstreamMemoryPath
         );
     }
@@ -966,6 +987,8 @@ final class RepoScopeGovernance {
             Map<String, Object> workingSet,
             Map<String, Object> fileSummaries,
             Map<String, Object> readReuseContract,
+            Map<String, Object> agentCapabilityCatalog,
+            Map<String, Object> agentExplorationPlan,
             Path repoMapPath,
             Path fileRelevancePlanPath,
             Path stageScopePolicyPath,
@@ -973,6 +996,8 @@ final class RepoScopeGovernance {
             Path workingSetPath,
             Path fileSummariesPath,
             Path readReuseContractPath,
+            Path agentCapabilityCatalogPath,
+            Path agentExplorationPlanPath,
             Path workstreamMemoryPath
     ) {
     }

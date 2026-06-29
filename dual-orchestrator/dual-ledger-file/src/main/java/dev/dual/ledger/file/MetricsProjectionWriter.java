@@ -345,6 +345,7 @@ final class MetricsProjectionWriter {
                 .filter(ReadFileMetric::isRepeated)
                 .filter(ReadFileMetric::rereadReasonMissing)
                 .count());
+        result.put("explorationPolicy", explorationPolicyMetrics(paths));
         result.put("allowedRepeatedReadReasons", readReusePolicy.allowedReasons());
         result.put("topReadFiles", readFiles.values().stream()
                 .sorted(Comparator
@@ -678,6 +679,50 @@ final class MetricsProjectionWriter {
             }
             return out;
         }
+    }
+
+    private Map<String, Object> explorationPolicyMetrics(WorkstreamPaths paths) throws IOException {
+        var governanceDir = paths.workstreamDir().resolve("artifacts").resolve("context-governance");
+        var warnings = new ArrayList<Map<String, Object>>();
+        long passCount = 0;
+        long warnCount = 0;
+        long failCount = 0;
+        if (Files.isDirectory(governanceDir)) {
+            try (var stream = Files.list(governanceDir)) {
+                for (var path : stream
+                        .filter(Files::isRegularFile)
+                        .filter(file -> file.getFileName().toString().endsWith(".json"))
+                        .sorted(Comparator.comparing(file -> file.getFileName().toString()))
+                        .toList()) {
+                    var report = objectMapper.readValue(path.toFile(), MAP_TYPE);
+                    if (!"actual".equals(text(report.get("reportPhase")))) {
+                        continue;
+                    }
+                    var result = map(report.get("explorationPolicyResult"));
+                    var status = text(result.get("status"));
+                    if ("pass".equals(status)) {
+                        passCount++;
+                    } else if ("warn".equals(status)) {
+                        warnCount++;
+                        var item = new LinkedHashMap<String, Object>();
+                        item.put("runId", text(report.get("runId")));
+                        item.put("nodeId", text(report.get("nodeDefinitionId")));
+                        item.put("violations", mapList(result.get("violations")));
+                        warnings.add(item);
+                    } else if ("fail".equals(status)) {
+                        failCount++;
+                    }
+                }
+            }
+        }
+        var document = new LinkedHashMap<String, Object>();
+        document.put("schemaVersion", 1);
+        document.put("mode", "warn");
+        document.put("passCount", passCount);
+        document.put("warnCount", warnCount);
+        document.put("failCount", failCount);
+        document.put("warnings", warnings);
+        return document;
     }
 
     private ReadReusePolicy readReusePolicy(WorkstreamPaths paths) throws IOException {
@@ -1082,6 +1127,9 @@ final class MetricsProjectionWriter {
         builder.append("- Reads: ").append(longValue(toolMetrics.get("readCount"))).append("\n");
         builder.append("- Writes: ").append(longValue(toolMetrics.get("writeCount"))).append("\n");
         builder.append("- Bash Commands: ").append(longValue(toolMetrics.get("bashCount"))).append("\n");
+        builder.append("- Exploration Policy Warnings: ")
+                .append(longValue(map(toolMetrics.get("explorationPolicy")).get("warnCount")))
+                .append("\n");
         builder.append("- Evidence Files: ").append(longValue(toolMetrics.get("evidenceFileCount"))).append("\n\n");
         builder.append("### Repeated Read Files\n\n");
         builder.append("| File | Reads | Agents | Nodes | Evidence Known | Reread Reason |\n");

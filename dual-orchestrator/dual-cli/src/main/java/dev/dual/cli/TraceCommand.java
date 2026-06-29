@@ -235,7 +235,8 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println("  toolCalls=" + longValue(toolMetrics.get("toolCallCount"))
                 + " reads=" + longValue(toolMetrics.get("readCount"))
                 + " bash=" + longValue(toolMetrics.get("bashCount"))
-                + " missingRereadReasons=" + longValue(toolMetrics.get("missingRereadReasonCount")));
+                + " missingRereadReasons=" + longValue(toolMetrics.get("missingRereadReasonCount"))
+                + " explorationWarnings=" + longValue(map(toolMetrics.get("explorationPolicy")).get("warnCount")));
         var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
         if (repeatedReads.isEmpty()) {
             System.out.println("  repeated reads: -");

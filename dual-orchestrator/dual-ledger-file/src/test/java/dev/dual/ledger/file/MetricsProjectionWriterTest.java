@@ -75,6 +75,7 @@ class MetricsProjectionWriterTest {
         appendToolUsage(paths, mapper, "run-2", 2, 2, 0, 0, List.of("README.md", "docs/spec.md"), List.of());
         writeEvidenceManifest(paths, mapper, List.of("README.md", "docs/spec.md"));
         writeReadReuseContract(paths, mapper, List.of("README.md"));
+        writeActualGovernanceReport(paths, mapper, "run-2", "design.codex_review", "warn");
 
         new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
 
@@ -147,6 +148,13 @@ class MetricsProjectionWriterTest {
         assertEquals("missing", repeatedReads.get(0).get("rereadReasonStatus"));
         assertEquals(1, number(toolMetrics.get("repeatedReadReasonRequiredCount")));
         assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+        var explorationPolicy = map(toolMetrics.get("explorationPolicy"));
+        assertEquals(1, number(explorationPolicy.get("warnCount")));
+        assertEquals(0, number(explorationPolicy.get("failCount")));
+        var warnings = list(explorationPolicy.get("warnings"));
+        assertEquals("design.codex_review", warnings.get(0).get("nodeId"));
+        assertEquals("DIRECT_READ_BUDGET_EXCEEDED",
+                list(warnings.get(0).get("violations")).get(0).get("type"));
 
         var visibility = map(map(metrics.get("tokenAttribution")).get("usageVisibility"));
         assertEquals(1, number(map(visibility.get("byVisibility")).get("unavailable")));
@@ -165,6 +173,7 @@ class MetricsProjectionWriterTest {
         assertTrue(markdown.contains("### Top Context Sections"));
         assertTrue(markdown.contains("| design.codex_review | review | recent_agent_outputs | 420 | 900 | true | false |"));
         assertTrue(markdown.contains("## Tool Metrics"));
+        assertTrue(markdown.contains("- Exploration Policy Warnings: 1"));
         assertTrue(markdown.contains("| README.md | 2 | claude, codex | intake.claude_brainstorm, design.codex_review | true | missing |"));
     }
 
@@ -771,6 +780,35 @@ class MetricsProjectionWriterTest {
                         "previous evidence does not cover the selected stage"
                 ),
                 "reusableReadFiles", reusable
+        ));
+    }
+
+    private void writeActualGovernanceReport(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId,
+            String nodeId,
+            String status
+    ) throws Exception {
+        var dir = paths.workstreamDir().resolve("artifacts/context-governance");
+        Files.createDirectories(dir);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(dir.resolve(nodeId.replace('.', '_') + "-actual-" + runId + ".json").toFile(), Map.of(
+                "schemaVersion", 1,
+                "artifactType", "context_governance_report",
+                "reportPhase", "actual",
+                "runId", runId,
+                "nodeDefinitionId", nodeId,
+                "explorationPolicyResult", Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "exploration_policy_result",
+                        "mode", "warn",
+                        "status", status,
+                        "violations", List.of(Map.of(
+                                "type", "DIRECT_READ_BUDGET_EXCEEDED",
+                                "severity", "warn",
+                                "message", "Actual direct Read count exceeds the exploration plan budget."
+                        ))
+                )
         ));
     }
 

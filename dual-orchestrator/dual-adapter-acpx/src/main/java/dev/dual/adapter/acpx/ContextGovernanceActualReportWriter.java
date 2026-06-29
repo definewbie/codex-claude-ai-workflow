@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.runtime.governance.ExplorationPolicyEvaluator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,6 +52,7 @@ final class ContextGovernanceActualReportWriter {
         var memoryDir = workstreamDir.resolve(MEMORY_DIR);
         var plan = latestDocument(memoryDir, "file-relevance-plan-", nodeDefinitionId);
         var policy = latestDocument(memoryDir, "stage-scope-policy-", nodeDefinitionId);
+        var explorationPlan = latestDocument(memoryDir, "exploration-plan-", nodeDefinitionId);
         var plannedRead = firstNonEmpty(textList(plan.map(doc -> doc.get("readCandidates")).orElse(null)),
                 textList(policy.map(doc -> doc.get("readScope")).orElse(null)));
         var plannedWrite = firstNonEmpty(textList(plan.map(doc -> doc.get("writeCandidates")).orElse(null)),
@@ -83,6 +85,10 @@ final class ContextGovernanceActualReportWriter {
         report.put("outsideScopeReads", outsideScope(actualRead, plannedRead));
         report.put("outsideScopeWrites", outsideScope(actualWrite, plannedWrite));
         report.put("repeatedReadFiles", repeatedReadFiles);
+        report.put("explorationPolicyResult", ExplorationPolicyEvaluator.evaluate(
+                map(explorationPlan.orElse(null)),
+                actualRead
+        ));
         report.put("toolUsage", toolUsage);
         report.put("transcriptPath", relativeOrNull(workspaceRoot, transcriptPath));
         report.put("telemetryPending", false);
@@ -332,6 +338,14 @@ final class ContextGovernanceActualReportWriter {
             return "";
         }
         return node.asText("");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> map(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return Map.of();
+        }
+        return OBJECT_MAPPER.convertValue(node, Map.class);
     }
 
     private static String relativeOrNull(Path workspaceRoot, Path path) {

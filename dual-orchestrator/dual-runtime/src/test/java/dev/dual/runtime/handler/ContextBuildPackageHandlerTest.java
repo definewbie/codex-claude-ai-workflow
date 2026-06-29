@@ -1302,6 +1302,8 @@ class ContextBuildPackageHandlerTest {
         assertEquals(".agent/workstreams/ws-ctx/memory/working-set.json", metadata.get("workingSet"));
         assertEquals(".agent/workstreams/ws-ctx/memory/file-summaries.json", metadata.get("fileSummaries"));
         assertEquals(".agent/workstreams/ws-ctx/memory/read-reuse-contract.json", metadata.get("readReuseContract"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/agent-capability-catalog.json", metadata.get("agentCapabilityCatalog"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/exploration-plan-node-001.json", metadata.get("agentExplorationPlan"));
 
         var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
         assertEquals("ctx.test", plan.get("builderNodeDefinitionId"));
@@ -1355,6 +1357,19 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("record a matching entry in agent_output_contract.reread_reasons"),
                 "context package must require a matching reread_reasons entry per re-read reusable path");
 
+        var capabilityCatalog = objectMapper.readValue(wsDir.resolve("memory/agent-capability-catalog.json").toFile(), Map.class);
+        assertEquals("agent_capability_catalog", capabilityCatalog.get("artifactType"));
+        assertTrue(capabilityCatalog.get("capabilities") instanceof List<?> capabilities
+                        && !capabilities.isEmpty(),
+                "context governance should expose available exploration capabilities as typed data");
+
+        var explorationPlan = objectMapper.readValue(wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
+        assertEquals("agent_exploration_plan", explorationPlan.get("artifactType"));
+        assertEquals("edit_execution", explorationPlan.get("explorationIntent"));
+        assertEquals("warn", explorationPlan.get("failureMode"));
+        assertTrue(explorationPlan.get("expectedEditFiles") instanceof List<?> edits
+                        && edits.contains("miniprogram/src/pages/treatment-record/index.vue"),
+                "exploration plan should carry expected edit files for post-run evaluation");
         var workstreamMemory = objectMapper.readValue(wsDir.resolve("memory/workstream-memory.json").toFile(), Map.class);
         assertEquals("workstream_memory", workstreamMemory.get("artifactType"));
         assertTrue(workstreamMemory.get("readFiles") instanceof List<?> remembered

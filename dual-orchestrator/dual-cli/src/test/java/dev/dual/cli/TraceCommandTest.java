@@ -45,6 +45,7 @@ class TraceCommandTest {
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
         assertTrue(printed.contains("Tool Governance:"));
         assertTrue(printed.contains("missingRereadReasons=1"));
+        assertTrue(printed.contains("explorationWarnings=1"));
         assertTrue(printed.contains("README.md x2 evidenceKnown=true rereadReason=missing"));
         assertTrue(printed.contains("Token Attribution:"));
         assertTrue(printed.contains("top node: design.claude_design"));
@@ -254,6 +255,19 @@ class TraceCommandTest {
                     "toolCallCount": 5,
                     "readCount": 4,
                     "bashCount": 1,
+                    "explorationPolicy": {
+                      "warnCount": 1,
+                      "failCount": 0,
+                      "warnings": [
+                        {
+                          "runId": "run-1",
+                          "nodeId": "design.claude_design",
+                          "violations": [
+                            {"type": "DIRECT_READ_BUDGET_EXCEEDED", "severity": "warn"}
+                          ]
+                        }
+                      ]
+                    },
                     "repeatedReadFiles": [
                       {
                         "path": "README.md",
