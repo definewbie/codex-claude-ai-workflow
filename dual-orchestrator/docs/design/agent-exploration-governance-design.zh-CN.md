@@ -559,7 +559,8 @@ Accepted debt:
 
 - P2 intake BLOCK：`ExplorationPlan.failureMode=intake:block`；`ArtifactContractValidator` 在 validated `agent_output_contract` sidecar 可用后回刷 actual report / result / run.json，并将 `status=failed` 的 exploration policy result 转为 contract failure。放行依据只来自 typed `scope_expansion_request.requested_paths`，不能从 stdout/transcript/prose 推断。
 - P2 误杀保护：`actualDirectReadFiles=[]` 必须保持为空，不得 fallback 到 `actualReadFiles`；token-filtered search/list 不计入 direct read；scope expansion 只放行请求的 bounded files，不是全局 waiver。
-- P2 execution permission：`intake.claude_brainstorm` 在 bundled `full` / `contract` workflow 中使用 `permission_profile=contract_discovery`。该 profile 在 acpx adapter 层只允许 `Grep,Glob`，只 auto-approve ACP `search`，不传 `--approve-reads`，不允许 direct `Read`。这是执行前边界，用于阻止单个长 run 在后置 validator 生效前做实现级文件读取。
+- P2 execution permission：`intake.claude_brainstorm` 在 bundled `full` / `contract` workflow 中使用 `permission_profile=contract_discovery`。该 profile 在 acpx adapter 层只允许 `Grep,Glob`，只 auto-approve ACP `search`，不传 `--approve-reads`，并显式传 `--deny-all` 与 `--no-terminal`。原因是 acpx 的 `permission-policy` 只处理 ACP permission request；`fs/read_text_file` 与 Terminal 这类 adapter capability 需要由 `permissionMode=deny-all` / terminal capability exposure 直接约束。该 profile 不允许 direct `Read` 或 unrestricted Terminal，这是执行前边界，用于阻止单个长 run 在后置 validator 生效前做实现级文件读取。
+- P2 prompt alignment：`intake-claude-brainstorm` 不再要求 “Read the repository”；它要求使用 orchestrator-provided seed / memory / contract scope / Exploration Plan，缺证据时输出 typed `scope_expansion_request`，避免 agent-facing 指令与 execution policy 冲突。
 
 尚未启用：
 

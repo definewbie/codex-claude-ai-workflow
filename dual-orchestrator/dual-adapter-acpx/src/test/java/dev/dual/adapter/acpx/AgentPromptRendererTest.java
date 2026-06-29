@@ -61,6 +61,8 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Do not create, edit, or delete files under .agent/"));
         assertTrue(prompt.contains("Only the orchestrator writes run ledger artifacts"));
         assertTrue(prompt.contains("Explicitly address each Must Fix"));
+        assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan"));
+        assertFalse(prompt.contains("Read the repository"));
         assertTrue(prompt.contains("<dual-artifact type=\"task_contract_proposal\" version=\"1\">"));
         assertTrue(prompt.contains("\"artifact_type\": \"task_contract_proposal\""));
     }

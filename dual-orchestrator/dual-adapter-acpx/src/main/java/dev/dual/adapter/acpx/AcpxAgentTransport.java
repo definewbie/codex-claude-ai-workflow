@@ -144,6 +144,9 @@ public class AcpxAgentTransport {
         if (request.approveAll()) {
             command.add("--approve-all");
         } else {
+            if (request.permissionProfile().denyAll()) {
+                command.add("--deny-all");
+            }
             if (request.permissionProfile().approveReads()) {
                 command.add("--approve-reads");
             }
@@ -156,6 +159,9 @@ public class AcpxAgentTransport {
             if (!request.permissionProfile().allowedTools().isEmpty()) {
                 command.add("--allowed-tools");
                 command.add(request.permissionProfile().allowedToolsArgument());
+            }
+            if (!request.permissionProfile().terminalEnabled()) {
+                command.add("--no-terminal");
             }
         }
         command.add(agent);

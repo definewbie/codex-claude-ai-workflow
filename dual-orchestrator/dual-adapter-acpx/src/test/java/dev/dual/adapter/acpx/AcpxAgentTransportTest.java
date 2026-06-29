@@ -488,6 +488,8 @@ class AcpxAgentTransportTest {
         assertEquals(0, result.exitCode());
         var args = Files.readString(argsLog);
         assertTrue(args.contains("--non-interactive-permissions"));
+        assertTrue(args.contains("--deny-all"));
+        assertTrue(args.contains("--no-terminal"));
         assertFalse(args.contains("--approve-reads"));
         assertTrue(args.contains("--permission-policy"));
         assertTrue(args.contains("\"autoApprove\":[\"search\"]"));
