@@ -144,7 +144,9 @@ public class AcpxAgentTransport {
         if (request.approveAll()) {
             command.add("--approve-all");
         } else {
-            command.add("--approve-reads");
+            if (request.permissionProfile().approveReads()) {
+                command.add("--approve-reads");
+            }
             command.add("--non-interactive-permissions");
             command.add("fail");
             if (!request.permissionProfile().permissionPolicyJson().isBlank()) {

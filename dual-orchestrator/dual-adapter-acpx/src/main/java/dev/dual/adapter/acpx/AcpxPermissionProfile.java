@@ -83,6 +83,10 @@ record AcpxPermissionProfile(
         return String.join(",", allowedTools);
     }
 
+    boolean approveReads() {
+        return autoApproveKinds.contains("read");
+    }
+
     String permissionPolicyJson() {
         if (autoApproveKinds.isEmpty()) {
             return "";
