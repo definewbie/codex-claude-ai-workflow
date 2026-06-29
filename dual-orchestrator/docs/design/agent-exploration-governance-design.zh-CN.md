@@ -1,6 +1,6 @@
 # Agent 探索治理设计：让 intake 停止实现级仓库探索
 
-> 状态：设计稿，未实现。
+> 状态：P0/P1 已实现；P2 intake BLOCK enforcement 已启用；review 仍保持 WARN。
 > 触发：cancer-clinic real-case 中 `intake.claude_brainstorm` 用 293s/380s 做了接近实现级的仓库探索，读取大量 docs/source/API 文件，导致 token 和耗时失控。
 > 目标：不靠 prompt 硬喊“少读文件”，而是由 orchestrator 显式管理阶段探索意图、可用能力和实际读写边界。
 
@@ -495,7 +495,7 @@ memory/read-reuse 仍然必要，但它是下游机制：
 
 ## 10. Boundary Review
 
-**Boundary Review: WARN → 设计可推进，不能直接实现 BLOCK。**
+**Boundary Review: PASS for P2 intake BLOCK；review BLOCK 仍为 WARN rollout。**
 
 Touched boundaries:
 
@@ -543,3 +543,24 @@ Accepted debt:
 - 直接切 session；
 - 在 prompt 里硬写 codegraph/rtk；
 - 自建完整代码图谱作为第一步。
+
+## 12. 实现状态（2026-06-29）
+
+已实现：
+
+- P0：`AgentCapabilityCatalog` sidecar、`ExplorationPlan` sidecar、agent-facing `## Exploration Plan` projection、prompt manifest `sourceType=exploration_plan`。
+- P1：`ExplorationPolicyEvaluator`、execution actual report、`exploration-policy-result-*.json` sidecar、`run.json.explorationPolicyResult`、metrics/trace violation 投影。
+- P1 capability usage：actual usage 只从原始/native tool id 或 command executable 事实匹配 capability provider；不得扫描整条 Bash 命令参数，否则 `grep codegraph docs`、`echo rtk` 这类文本会被误判为能力使用。
+- P1 provider attribution：`byTool` 是分类后的行为统计，不能单独证明 provider；例如 `rtk read` 可以统计为 read 行为，但不能证明 native `Read` capability。`ExplorationPolicyResult`、actual report、metrics 和 trace 必须保留 `actualCapabilityUsages={kind,provider,source}`，避免只保留 kind 后丢失 provider 证据。
+- P1 scope expansion attribution：outside-plan read 的 waiver 只能来自已验证的 `agent_output_contract` sidecar；raw stdout、transcript 或 agent 正文里的 `scope_expansion_request` 不是 SoT。若 actual report 写入时 sidecar 尚未生成，则本次 report 只能作为 provisional projection，不放行该读取；`ArtifactContractValidator` 写入 validated sidecar 后必须用该 sidecar/read model 回刷 actual report、`exploration-policy-result-*.json` 和 `run.json.explorationPolicyResult`，不能从自然语言补判。
+- 小预算 context profile 使用 compact governance projection；完整 sidecar 仍然是 source of truth，compact projection 只保留必要 refs 和探索约束。
+
+已启用：
+
+- P2 intake BLOCK：`ExplorationPlan.failureMode=intake:block`；`ArtifactContractValidator` 在 validated `agent_output_contract` sidecar 可用后回刷 actual report / result / run.json，并将 `status=failed` 的 exploration policy result 转为 contract failure。放行依据只来自 typed `scope_expansion_request.requested_paths`，不能从 stdout/transcript/prose 推断。
+- P2 误杀保护：`actualDirectReadFiles=[]` 必须保持为空，不得 fallback 到 `actualReadFiles`；token-filtered search/list 不计入 direct read；scope expansion 只放行请求的 bounded files，不是全局 waiver。
+
+尚未启用：
+
+- P2 review BLOCK：codex review 全量读多个 source/docs 仍保持 WARN，待 real-case 校准后再切。
+- `repo-map.kind` 目前是集中式 file-kind policy，可支撑 intake BLOCK 的 source/test 识别；继续不能把它描述成完整语义代码索引。
