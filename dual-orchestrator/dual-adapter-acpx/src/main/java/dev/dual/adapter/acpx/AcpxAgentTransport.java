@@ -91,6 +91,12 @@ public class AcpxAgentTransport {
     }
 
     public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws IOException, InterruptedException {
+        if (request.permissionProfile().requiresFreshSession()) {
+            var bootstrap = ensureSession("claude", request);
+            if (!bootstrap.success()) {
+                return bootstrap.toRunResult();
+            }
+        }
         var result = run("claude", request);
         if (isMissingSession(request, result)) {
             var bootstrap = ensureSession("claude", request);
@@ -137,33 +143,7 @@ public class AcpxAgentTransport {
         command.add(Long.toString(DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS));
         command.add("--ttl");
         command.add(Long.toString(queueTtl.toSeconds()));
-        if (request.permissionProfile().promptRetries() > 0) {
-            command.add("--prompt-retries");
-            command.add(Integer.toString(request.permissionProfile().promptRetries()));
-        }
-        if (request.approveAll()) {
-            command.add("--approve-all");
-        } else {
-            if (request.permissionProfile().denyAll()) {
-                command.add("--deny-all");
-            }
-            if (request.permissionProfile().approveReads()) {
-                command.add("--approve-reads");
-            }
-            command.add("--non-interactive-permissions");
-            command.add("fail");
-            if (!request.permissionProfile().permissionPolicyJson().isBlank()) {
-                command.add("--permission-policy");
-                command.add(request.permissionProfile().permissionPolicyJson());
-            }
-            if (!request.permissionProfile().allowedTools().isEmpty()) {
-                command.add("--allowed-tools");
-                command.add(request.permissionProfile().allowedToolsArgument());
-            }
-            if (!request.permissionProfile().terminalEnabled()) {
-                command.add("--no-terminal");
-            }
-        }
+        addPermissionArguments(command, request);
         command.add(agent);
         command.add("-s");
         command.add(request.sessionName());
@@ -191,9 +171,48 @@ public class AcpxAgentTransport {
         }
     }
 
+    private void addPermissionArguments(ArrayList<String> command, AcpxRunRequest request) {
+        if (request.permissionProfile().promptRetries() > 0) {
+            command.add("--prompt-retries");
+            command.add(Integer.toString(request.permissionProfile().promptRetries()));
+        }
+        if (request.approveAll()) {
+            command.add("--approve-all");
+        } else {
+            if (request.permissionProfile().denyAll()) {
+                command.add("--deny-all");
+            }
+            if (request.permissionProfile().approveReads()) {
+                command.add("--approve-reads");
+            }
+            command.add("--non-interactive-permissions");
+            command.add("fail");
+            if (!request.permissionProfile().permissionPolicyJson().isBlank()) {
+                command.add("--permission-policy");
+                command.add(request.permissionProfile().permissionPolicyJson());
+            }
+            if (!request.permissionProfile().allowedTools().isEmpty()) {
+                command.add("--allowed-tools");
+                command.add(request.permissionProfile().allowedToolsArgument());
+            }
+            if (!request.permissionProfile().terminalEnabled()) {
+                command.add("--no-terminal");
+            }
+        }
+    }
+
     private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
-        var command = List.of(acpxExecutable, agent, "sessions", "ensure", "--name", request.sessionName());
-        var result = runSessionCommand(command, request.workdir());
+        var command = new ArrayList<String>();
+        command.add(acpxExecutable);
+        if (request.permissionProfile().requiresFreshSession()) {
+            addPermissionArguments(command, request);
+        }
+        command.add(agent);
+        command.add("sessions");
+        command.add(request.permissionProfile().requiresFreshSession() ? "new" : "ensure");
+        command.add("--name");
+        command.add(request.sessionName());
+        var result = runSessionCommand(command, request.workdir(), request.permissionProfile().simpleClaudeCode());
         if (result.success()) {
             return result;
         }
@@ -251,15 +270,22 @@ public class AcpxAgentTransport {
     }
 
     private SessionCommandResult runSessionCommand(List<String> command, Path workdir) throws InterruptedException {
+        return runSessionCommand(command, workdir, false);
+    }
+
+    private SessionCommandResult runSessionCommand(List<String> command, Path workdir, boolean simpleClaudeCode) throws InterruptedException {
         Path outputPath = null;
         var startedAt = Instant.now();
         try {
             outputPath = Files.createTempFile("dual-acpx-session-", ".log");
-            var process = new ProcessBuilder(command)
+            var processBuilder = new ProcessBuilder(command)
                     .directory(workdir.toFile())
                     .redirectErrorStream(true)
-                    .redirectOutput(outputPath.toFile())
-                    .start();
+                    .redirectOutput(outputPath.toFile());
+            if (simpleClaudeCode) {
+                processBuilder.environment().put("CLAUDE_CODE_SIMPLE", "1");
+            }
+            var process = processBuilder.start();
             var completed = process.waitFor(sessionCommandTimeout.toMillis(), TimeUnit.MILLISECONDS);
             if (!completed) {
                 terminateProcessTree(process.toHandle());

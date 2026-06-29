@@ -504,6 +504,52 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void bootstrapsContractDiscoveryWithRestrictedFreshSessionBeforePrompt() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-contract-discovery-session.sh");
+        var argsLog = tempDir.resolve("args.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
+                printf '%s\\n' "---" >> "__ARGS_LOG__"
+                echo "$*" | grep -q "claude sessions new" && exit 0
+                echo "ACPX_DONE"
+                exit 0
+                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractDiscovery()
+        ));
+
+        assertEquals(0, result.exitCode());
+        var args = Files.readString(argsLog);
+        var sessionNew = args.indexOf("claude\nsessions\nnew\n--name\nclaude-main-run-001");
+        var promptRun = args.indexOf("claude\n-s\nclaude-main-run-001\n-f\n" + prompt);
+        assertTrue(sessionNew >= 0, args);
+        assertTrue(promptRun > sessionNew, args);
+        assertTrue(args.contains("--deny-all"));
+        assertTrue(args.contains("--no-terminal"));
+        assertTrue(args.contains("--allowed-tools\nGrep,Glob"));
+        assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"));
+        assertFalse(args.contains("--approve-reads"));
+    }
+
+    @Test
     void addsPromptRetryForReadOnlyProfilesOnly() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-readonly-retry-args.sh");
         var argsLog = tempDir.resolve("args.log");

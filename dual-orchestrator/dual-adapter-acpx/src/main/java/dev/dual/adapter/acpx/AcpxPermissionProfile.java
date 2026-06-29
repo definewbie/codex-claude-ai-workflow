@@ -93,6 +93,10 @@ record AcpxPermissionProfile(
         return autoApproveKinds.contains("read");
     }
 
+    boolean requiresFreshSession() {
+        return simpleClaudeCode;
+    }
+
     String permissionPolicyJson() {
         if (autoApproveKinds.isEmpty()) {
             return "";
