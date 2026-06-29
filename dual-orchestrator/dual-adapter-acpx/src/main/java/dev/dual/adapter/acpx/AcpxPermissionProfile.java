@@ -20,6 +20,7 @@ record AcpxPermissionProfile(
         boolean approveAll,
         boolean denyAll,
         boolean terminalEnabled,
+        boolean simpleClaudeCode,
         List<String> allowedTools,
         List<String> autoApproveKinds,
         int promptRetries
@@ -52,14 +53,14 @@ record AcpxPermissionProfile(
     }
 
     static AcpxPermissionProfile contractDiscovery() {
-        return new AcpxPermissionProfile("contract_discovery", false, true, false, List.of(
+        return new AcpxPermissionProfile("contract_discovery", false, true, false, true, List.of(
                 "Grep",
                 "Glob"
         ), List.of("search"), 1);
     }
 
     static AcpxPermissionProfile observe() {
-        return new AcpxPermissionProfile("observe", false, false, true, List.of(
+        return new AcpxPermissionProfile("observe", false, false, true, false, List.of(
                 "Read",
                 "Grep",
                 "Glob"
@@ -73,6 +74,7 @@ record AcpxPermissionProfile(
                 false,
                 false,
                 true,
+                false,
                 observe.allowedTools(),
                 observe.autoApproveKinds(),
                 observe.promptRetries()
@@ -80,7 +82,7 @@ record AcpxPermissionProfile(
     }
 
     static AcpxPermissionProfile implement() {
-        return new AcpxPermissionProfile("implement", true, false, true, List.of(), List.of(), 0);
+        return new AcpxPermissionProfile("implement", true, false, true, false, List.of(), List.of(), 0);
     }
 
     String allowedToolsArgument() {

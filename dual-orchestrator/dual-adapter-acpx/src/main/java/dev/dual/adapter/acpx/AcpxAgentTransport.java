@@ -172,11 +172,14 @@ public class AcpxAgentTransport {
 
         var managedProcessBaseline = managedToolPids();
         var startedAt = Instant.now();
-        var process = new ProcessBuilder(command)
+        var processBuilder = new ProcessBuilder(command)
                 .directory(request.workdir().toFile())
                 .redirectOutput(request.stdoutPath().toFile())
-                .redirectError(request.stderrPath().toFile())
-                .start();
+                .redirectError(request.stderrPath().toFile());
+        if (request.permissionProfile().simpleClaudeCode()) {
+            processBuilder.environment().put("CLAUDE_CODE_SIMPLE", "1");
+        }
+        var process = processBuilder.start();
         try {
             var exitCode = waitForExitOrRecoverableSignal(process, request);
             return new AcpxRunResult(exitCode, startedAt, Instant.now(), List.copyOf(command));

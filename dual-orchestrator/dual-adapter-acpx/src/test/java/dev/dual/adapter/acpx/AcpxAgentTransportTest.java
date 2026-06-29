@@ -422,6 +422,7 @@ class AcpxAgentTransportTest {
                   exit 0
                 fi
                 printf '%s\\n' "$@" > "__ARGS_LOG__"
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
@@ -465,6 +466,7 @@ class AcpxAgentTransportTest {
                   exit 0
                 fi
                 printf '%s\\n' "$@" > "__ARGS_LOG__"
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
@@ -495,6 +497,7 @@ class AcpxAgentTransportTest {
         assertTrue(args.contains("\"autoApprove\":[\"search\"]"));
         assertTrue(args.contains("--allowed-tools"));
         assertTrue(args.contains("Grep,Glob"));
+        assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"));
         assertFalse(args.contains("Read,Grep,Glob"));
         assertFalse(args.contains("\"read\""));
         assertFalse(args.contains("\"execute\""));
