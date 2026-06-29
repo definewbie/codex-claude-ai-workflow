@@ -20,7 +20,7 @@ This smoke uses a controlled fake acpx but drives the real dualctl/worktree/ledg
 path. It validates semantic boundary failures:
   plan-body     plan.claude_plan missing formal plan body is rejected
   review-noise  prose "minor stylistic issue" does not classify as REVIEW_NOISE
-  reread-reason reusable file re-read without reread_reasons is rejected
+  reread-reason reusable file re-read outside the computed reread policy is rejected
 EOF
 }
 
@@ -68,6 +68,13 @@ tool_read_readme() {
   cat <<'EOF'
 [tool] Read README.md (completed)
   input: {"file_path":"README.md"}
+EOF
+}
+
+tool_read_notes() {
+  cat <<'EOF'
+[tool] Read NOTES.md (completed)
+  input: {"file_path":"NOTES.md"}
 EOF
 }
 
@@ -168,6 +175,21 @@ valid_plan() {
 
 - Confirm function and docs.
 
+<dual-artifact type="plan_artifact" version="1">
+{
+  "artifact_type": "plan_artifact",
+  "schema_version": 1,
+  "implementation_steps": ["Update main.py with goodbye().", "Document goodbye() in README.md."],
+  "edit_files": ["main.py", "README.md"],
+  "reference_files": [],
+  "file_level_changes": ["main.py", "README.md"],
+  "validation_plan": ["Import main and assert goodbye()."],
+  "rollback_notes": "Revert main.py and README.md.",
+  "known_risks": ["Missing documentation."],
+  "human_review_checklist": ["Confirm function and docs."]
+}
+</dual-artifact>
+
 EOF
   agent_contract "READY_FOR_PLAN_REVIEW" "Plan body is complete."
 }
@@ -175,6 +197,9 @@ EOF
 case "$template" in
   intake-claude-brainstorm.md)
     tool_read_readme
+    if [[ "$case_name" == "reread-reason" ]]; then
+      tool_read_notes
+    fi
     task_contract_proposal
     ;;
   intake-codex-product-review.md)
@@ -198,7 +223,7 @@ case "$template" in
     ;;
   implement-claude.md)
     if [[ "$case_name" == "reread-reason" ]]; then
-      tool_read_readme
+      tool_read_notes
     fi
     if [[ -f main.py ]] && ! grep -q "def goodbye" main.py; then
       cat >> main.py <<'PY'
@@ -378,6 +403,11 @@ setup_repo() {
     cat > README.md <<'EOF'
 # Semantic Fixture
 EOF
+    cat > NOTES.md <<'EOF'
+# Internal Notes
+
+This file is intentionally outside the implementation plan.
+EOF
     cat > main.py <<'EOF'
 def hello():
     return "world"
@@ -424,9 +454,9 @@ run_until_boundary() {
 assert_plan_body() {
   local workdir="$1" ws="$2"
   dualctl recovery show --workdir "$workdir" "$ws" > "$workdir/recovery-show.txt" 2>&1 || true
-  grep -R "FORMAL_ARTIFACT_BODY_MISSING" "$workdir/.agent/workstreams/$ws" >/dev/null \
-    || fail "plan-body: expected FORMAL_ARTIFACT_BODY_MISSING"
-  pass "plan-body: missing formal plan body is blocked"
+  grep -R "PLAN_ARTIFACT_MISSING" "$workdir/.agent/workstreams/$ws" >/dev/null \
+    || fail "plan-body: expected PLAN_ARTIFACT_MISSING"
+  pass "plan-body: missing typed plan_artifact is blocked"
 }
 
 assert_review_noise() {
@@ -442,9 +472,9 @@ assert_review_noise() {
 
 assert_reread_reason() {
   local workdir="$1" ws="$2"
-  grep -R "REREAD_REASON_MISSING" "$workdir/.agent/workstreams/$ws" >/dev/null \
-    || fail "reread-reason: expected REREAD_REASON_MISSING"
-  pass "reread-reason: reusable re-read without matching reason is blocked"
+  grep -R "REREAD_POLICY_DENIED" "$workdir/.agent/workstreams/$ws" >/dev/null \
+    || fail "reread-reason: expected REREAD_POLICY_DENIED"
+  pass "reread-reason: reusable re-read outside computed policy is blocked"
 }
 
 run_case() {
