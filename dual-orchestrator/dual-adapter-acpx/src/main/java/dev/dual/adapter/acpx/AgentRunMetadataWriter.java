@@ -105,6 +105,9 @@ final class AgentRunMetadataWriter {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
                 List.of(),
                 null,
                 List.of(),
@@ -228,9 +231,13 @@ final class AgentRunMetadataWriter {
                 workstreamId,
                 nodeId,
                 runId,
+                stdoutPath,
                 transcriptPath,
                 toolUsage
         ).orElse(null);
+        var explorationPolicyResult = explorationPolicyResult(governanceReportPath);
+        var explorationPolicyResultPath = explorationPolicyResultPath(workspaceRoot, governanceReportPath);
+        var agentExplorationPlanPath = agentExplorationPlanPath(workspaceRoot, governanceReportPath);
         var attempt = executionAttempt(
                 runId,
                 workstreamId,
@@ -350,7 +357,10 @@ final class AgentRunMetadataWriter {
                 failure == null ? null : failure.recoverable(),
                 effectiveUsage,
                 toolUsage,
+                relativeOrNull(workspaceRoot, agentExplorationPlanPath),
                 relativeOrNull(workspaceRoot, governanceReportPath),
+                relativeOrNull(workspaceRoot, explorationPolicyResultPath),
+                explorationPolicyResult,
                 processResult(workspaceRoot, result, stdoutPath, stderrPath, failure),
                 adapterSignals(failure),
                 null,
@@ -377,6 +387,52 @@ final class AgentRunMetadataWriter {
                 "interrupted", false,
                 "timedOut", false
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> explorationPolicyResult(Path governanceReportPath) {
+        if (governanceReportPath == null || !Files.isRegularFile(governanceReportPath)) {
+            return null;
+        }
+        try {
+            var report = objectMapper.readValue(governanceReportPath.toFile(), Map.class);
+            var result = report.get("explorationPolicyResult");
+            return result instanceof Map<?, ?> map ? (Map<String, Object>) map : null;
+        } catch (IOException | RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private Path explorationPolicyResultPath(Path workspaceRoot, Path governanceReportPath) {
+        if (governanceReportPath == null || !Files.isRegularFile(governanceReportPath)) {
+            return null;
+        }
+        try {
+            var report = objectMapper.readValue(governanceReportPath.toFile(), Map.class);
+            var ref = report.get("explorationPolicyResultPath");
+            if (ref == null || String.valueOf(ref).isBlank()) {
+                return null;
+            }
+            return workspaceRoot.resolve(String.valueOf(ref)).normalize();
+        } catch (IOException | RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private Path agentExplorationPlanPath(Path workspaceRoot, Path governanceReportPath) {
+        if (governanceReportPath == null || !Files.isRegularFile(governanceReportPath)) {
+            return null;
+        }
+        try {
+            var report = objectMapper.readValue(governanceReportPath.toFile(), Map.class);
+            var ref = report.get("agentExplorationPlanPath");
+            if (ref == null || String.valueOf(ref).isBlank()) {
+                return null;
+            }
+            return workspaceRoot.resolve(String.valueOf(ref)).normalize();
+        } catch (IOException | RuntimeException ignored) {
+            return null;
+        }
     }
 
     private dev.dual.core.execution.ProcessUsability usability(

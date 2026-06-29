@@ -236,7 +236,21 @@ public final class TraceCommand implements Callable<Integer> {
                 + " reads=" + longValue(toolMetrics.get("readCount"))
                 + " bash=" + longValue(toolMetrics.get("bashCount"))
                 + " missingRereadReasons=" + longValue(toolMetrics.get("missingRereadReasonCount"))
-                + " explorationWarnings=" + longValue(map(toolMetrics.get("explorationPolicy")).get("warnCount")));
+                + " explorationWarnings=" + longValue(map(toolMetrics.get("explorationPolicy")).get("warnCount"))
+                + " explorationFailures=" + longValue(map(toolMetrics.get("explorationPolicy")).get("failCount")));
+        var explorationViolations = mapList(map(toolMetrics.get("explorationPolicy")).get("violations"));
+        if (!explorationViolations.isEmpty()) {
+            System.out.println("  exploration violations:");
+            for (var item : explorationViolations.stream().limit(5).toList()) {
+                System.out.println("    " + text(item.get("nodeId"))
+                        + " " + text(item.get("runId"))
+                        + " " + text(item.get("severity"))
+                        + " " + text(item.get("type"))
+                        + " " + text(item.get("message"))
+                        + capabilityUsageLabel(item)
+                        + " plan=" + text(item.get("agentExplorationPlanPath")));
+            }
+        }
         var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
         if (repeatedReads.isEmpty()) {
             System.out.println("  repeated reads: -");
@@ -249,6 +263,23 @@ public final class TraceCommand implements Callable<Integer> {
                     + " rereadReason=" + text(item.get("rereadReasonStatus"))
                     + " nodes=" + String.join(",", listOfText(item.get("nodes"))));
         }
+    }
+
+    private String capabilityUsageLabel(Map<String, Object> item) {
+        var usages = mapList(item.get("actualCapabilityUsages"));
+        if (usages.isEmpty()) {
+            return "";
+        }
+        var values = new ArrayList<String>();
+        for (var usage : usages) {
+            var kind = text(usage.get("kind"));
+            var provider = text(usage.get("provider"));
+            var source = text(usage.get("source"));
+            if (!kind.isBlank() && !provider.isBlank()) {
+                values.add(kind + ":" + provider + (source.isBlank() ? "" : "/" + source));
+            }
+        }
+        return values.isEmpty() ? "" : " capabilities=" + String.join(",", values);
     }
 
     private Map<String, Object> readMap(Path path) throws Exception {

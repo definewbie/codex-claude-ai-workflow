@@ -935,6 +935,52 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void completedRunEmbedsExplorationPolicyResultInRunMetadata() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-explore");
+        Files.createDirectories(workstreamDir.resolve("memory"));
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+        Files.writeString(workstreamDir.resolve("memory/exploration-plan-node-intake.json"), """
+                {
+                  "schemaVersion": 1,
+                  "artifactType": "agent_exploration_plan",
+                  "workstreamId": "ws-explore",
+                  "stageId": "intake",
+                  "nodeDefinitionId": "intake.claude_brainstorm",
+                  "targetNodeDefinitionId": "intake.claude_brainstorm",
+                  "nodeInstanceId": "node-intake",
+                  "iterationId": "iter-001",
+                  "explorationIntent": "contract_discovery",
+                  "preferredCapabilityKinds": ["symbol_index", "direct_file_read"],
+                  "allowedDirectReadFiles": ["README.md"],
+                  "maxDirectReadFiles": 1,
+                  "failureMode": "warn"
+                }
+                """);
+
+        var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-explore", definition,
+                readyInstance("intake.claude_brainstorm")));
+
+        var runJson = Files.walk(workstreamDir.resolve("runs"))
+                .filter(path -> path.getFileName().toString().equals("run.json"))
+                .findFirst()
+                .orElseThrow();
+        var runMetadata = Files.readString(runJson);
+        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"READ_OUTSIDE_EXPLORATION_SCOPE\""), runMetadata);
+        assertTrue(runMetadata.contains("\"SCOPE_EXPANSION_REQUEST_MISSING\""), runMetadata);
+        assertTrue(runMetadata.contains("\"agentExplorationPlanPath\" :"), runMetadata);
+        assertTrue(runMetadata.contains("exploration-plan-node-intake.json"), runMetadata);
+        assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
+    }
+
+    @Test
     void runWritesPromptManifestByDefault() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-manifest");
         Files.createDirectories(workstreamDir);

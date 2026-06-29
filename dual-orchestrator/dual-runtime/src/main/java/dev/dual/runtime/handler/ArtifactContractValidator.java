@@ -16,6 +16,7 @@ import dev.dual.core.execution.TerminalControlResult;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.runtime.governance.ExplorationPolicyEvaluator;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -402,6 +403,11 @@ public final class ArtifactContractValidator {
                 outputRefs.add(ref);
             }
         });
+        var explorationFailure = refreshExplorationPolicyProjection(root, result, AgentOutputContractDocument.from(document));
+        if (explorationFailure.isPresent()) {
+            return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                    explorationFailure.get());
+        }
         var augmented = new LinkedHashMap<String, Object>();
         augmented.putAll(result.result());
         augmented.put("decision", block.required("decision"));
@@ -540,6 +546,10 @@ public final class ArtifactContractValidator {
             if (rereadFailure.isPresent()) {
                 return StructuredArtifactResult.failed(rereadFailure.get());
             }
+            var scopeExpansionFailure = AgentContractSemantics.validateScopeExpansionRequest(rawDocument.get("scope_expansion_request"));
+            if (scopeExpansionFailure.isPresent()) {
+                return StructuredArtifactResult.failed(scopeExpansionFailure.get());
+            }
             return StructuredArtifactResult.valid(expectedType, artifact, structuredDocument.lifecycleStatus());
         } catch (Exception e) {
             return StructuredArtifactResult.failed(DualControlParseResult.invalid(
@@ -622,7 +632,8 @@ public final class ArtifactContractValidator {
                     document.changedFiles(),
                     document.verificationSummary(),
                     document.failure(),
-                    document.rereadReasons()
+                    document.rereadReasons(),
+                    document.scopeExpansionRequest()
             );
             case "self_test_report" -> new SelfTestReportArtifact(
                     document.artifactType(),
@@ -977,6 +988,157 @@ public final class ArtifactContractValidator {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private static Optional<DualControlParseResult> refreshExplorationPolicyProjection(
+            Path workspaceRoot,
+            NodeResult result,
+            AgentOutputContractDocument validatedContract
+    ) {
+        var runMetadataRef = text(result.result().get("run_metadata"));
+        if (runMetadataRef.isBlank()) {
+            return Optional.empty();
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var runMetadataPath = root.resolve(runMetadataRef).normalize();
+        if (!runMetadataPath.startsWith(root) || !Files.isRegularFile(runMetadataPath)) {
+            return Optional.empty();
+        }
+        try {
+            var runJson = (ObjectNode) OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+            var governanceReportPath = resolveWorkspaceRef(
+                    root,
+                    firstNonBlank(
+                            runJson.path("contextGovernanceActualReportPath").asText(""),
+                            runJson.path("contextGovernanceReportPath").asText("")
+                    )
+            );
+            if (governanceReportPath.isEmpty() || !Files.isRegularFile(governanceReportPath.get())) {
+                return Optional.empty();
+            }
+            var report = (ObjectNode) OBJECT_MAPPER.readTree(governanceReportPath.get().toFile());
+            var explorationPlanPath = resolveWorkspaceRef(root, report.path("agentExplorationPlanPath").asText(""));
+            var explorationPlan = explorationPlanPath
+                    .filter(Files::isRegularFile)
+                    .map(path -> readMap(path).orElse(Map.<String, Object>of()))
+                    .orElse(Map.of());
+            var actualDirectReads = stringList(fieldOrLegacy(report, "actualDirectReadFiles", "actualReadFiles"));
+            var actualCapabilities = capabilityKinds(report);
+            var actualDirectReadKinds = stringMap(fieldOrLegacy(report, "actualDirectReadFileKinds", "actualReadFileKinds"));
+            var actualCapabilityUsages = mapList(OBJECT_MAPPER.convertValue(report.path("actualCapabilityUsages"), Object.class));
+            var refreshed = ExplorationPolicyEvaluator.evaluate(
+                    explorationPlan,
+                    actualDirectReads,
+                    actualCapabilities,
+                    validatedContract.scopeExpansionRequest().requestedPaths(),
+                    actualDirectReadKinds,
+                    actualCapabilityUsages
+            );
+            report.set("explorationPolicyResult", OBJECT_MAPPER.valueToTree(refreshed));
+            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(governanceReportPath.get().toFile(), report);
+
+            var resultPath = resolveWorkspaceRef(root, report.path("explorationPolicyResultPath").asText(""));
+            if (resultPath.isPresent()) {
+                Files.createDirectories(resultPath.get().getParent());
+                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(resultPath.get().toFile(), refreshed);
+            }
+            runJson.set("explorationPolicyResult", OBJECT_MAPPER.valueToTree(refreshed));
+            resultPath.ifPresent(path -> runJson.put("explorationPolicyResultPath", root.relativize(path).toString()));
+            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(runMetadataPath.toFile(), runJson);
+            if (explorationPolicyFailed(refreshed)) {
+                return Optional.of(DualControlParseResult.invalid(
+                        "EXPLORATION_POLICY_DENIED",
+                        "Agent exploration exceeded the typed exploration plan boundary.",
+                        Map.of("explorationPolicyResult", refreshed)
+                ));
+            }
+        } catch (Exception ignored) {
+            // Contract validation remains authoritative. Exploration projection is
+            // refreshed opportunistically after the validated sidecar exists.
+        }
+        return Optional.empty();
+    }
+
+    private static boolean explorationPolicyFailed(Map<String, Object> result) {
+        return "failed".equals(text(result.get("status")));
+    }
+
+    private static Optional<Path> resolveWorkspaceRef(Path root, String ref) {
+        if (ref == null || ref.isBlank()) {
+            return Optional.empty();
+        }
+        var path = root.resolve(ref).normalize();
+        if (!path.startsWith(root)) {
+            return Optional.empty();
+        }
+        return Optional.of(path);
+    }
+
+    private static Object fieldOrLegacy(ObjectNode node, String field, String legacyField) {
+        if (node.has(field)) {
+            return OBJECT_MAPPER.convertValue(node.get(field), Object.class);
+        }
+        return OBJECT_MAPPER.convertValue(node.path(legacyField), Object.class);
+    }
+
+    private static String firstNonBlank(String first, String second) {
+        return first != null && !first.isBlank() ? first : second;
+    }
+
+    private static Optional<Map<String, Object>> readMap(Path path) {
+        try {
+            return Optional.of(OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
+    }
+
+    private static List<String> capabilityKinds(ObjectNode report) {
+        var values = new LinkedHashSet<String>();
+        for (var item : mapList(OBJECT_MAPPER.convertValue(report.path("actualCapabilityUsages"), Object.class))) {
+            var kind = text(item.get("kind"));
+            if (!kind.isBlank()) {
+                values.add(kind);
+            }
+        }
+        return List.copyOf(values);
+    }
+
+    private static List<Map<String, Object>> mapList(Object value) {
+        if (!(value instanceof Iterable<?> iterable)) {
+            return List.of();
+        }
+        var values = new ArrayList<Map<String, Object>>();
+        for (var item : iterable) {
+            if (!(item instanceof Map<?, ?> map)) {
+                continue;
+            }
+            var copy = new LinkedHashMap<String, Object>();
+            for (var entry : map.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    copy.put(key, entry.getValue());
+                }
+            }
+            values.add(copy);
+        }
+        return List.copyOf(values);
+    }
+
+    private static Map<String, String> stringMap(Object value) {
+        if (!(value instanceof Map<?, ?> map)) {
+            return Map.of();
+        }
+        var copy = new LinkedHashMap<String, String>();
+        for (var entry : map.entrySet()) {
+            if (entry.getKey() instanceof String key && entry.getValue() != null) {
+                var text = String.valueOf(entry.getValue()).trim();
+                if (!text.isBlank()) {
+                    copy.put(key, text);
+                }
+            }
+        }
+        return Map.copyOf(copy);
+    }
+
     private static NodeStatus nodeStatusFor(AgentExecutionOutcome outcome) {
         return outcome.nodeMaySucceed() ? NodeStatus.COMPLETED : NodeStatus.FAILED;
     }
@@ -1058,7 +1220,8 @@ public final class ArtifactContractValidator {
             List<String> changedFiles,
             String verificationSummary,
             AgentOutputContractDocument.FailureFields failure,
-            List<AgentOutputContractDocument.RereadReason> rereadReasons
+            List<AgentOutputContractDocument.RereadReason> rereadReasons,
+            AgentOutputContractDocument.ScopeExpansionRequest scopeExpansionRequest
     ) implements StructuredAgentArtifact {
         @Override
         public void writeSidecarFields(Map<String, Object> document) {
@@ -1075,6 +1238,9 @@ public final class ArtifactContractValidator {
             document.put("failure", failure.toMap());
             document.put("reread_reasons", rereadReasons.stream()
                     .map(AgentOutputContractDocument.RereadReason::toMap).toList());
+            if (!scopeExpansionRequest.isEmpty()) {
+                document.put("scope_expansion_request", scopeExpansionRequest.toMap());
+            }
         }
     }
 

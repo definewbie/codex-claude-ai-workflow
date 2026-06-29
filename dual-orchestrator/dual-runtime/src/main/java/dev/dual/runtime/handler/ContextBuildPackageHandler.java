@@ -155,7 +155,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var builder = new StringBuilder();
         appendGovernedHeader(builder, context, budget, sorted);
         ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
-        RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
+        RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot(), compactGovernance(budget));
 
         for (var rs : sorted) {
             if (rs.dropped || !rs.available) {
@@ -184,7 +184,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             builder.setLength(0);
             appendGovernedHeader(builder, context, budget, sorted);
             ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
-            RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot());
+            RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot(), compactGovernance(budget));
             for (var rs : sorted) {
                 if (rs.dropped || !rs.available) {
                     if (rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER) {
@@ -839,6 +839,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static int maxRecentAgentOutputs(TaskContext context) {
         return positiveIntConfig(context, "max_recent_agent_outputs", MAX_RECENT_AGENT_OUTPUTS, Map.of());
+    }
+
+    private static boolean compactGovernance(ContextBudget budget) {
+        return Boolean.TRUE.equals(budget.configOverrides().get("compact_governance"));
     }
 
     private static int positiveIntConfig(TaskContext context, String key, int fallback, Map<String, Object> overrides) {

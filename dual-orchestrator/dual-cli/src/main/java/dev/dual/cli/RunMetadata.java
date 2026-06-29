@@ -51,6 +51,10 @@ record RunMetadata(
         String failureReason,
         Boolean recoverable,
         RunUsage usage,
+        String agentExplorationPlanPath,
+        String contextGovernanceActualReportPath,
+        String explorationPolicyResultPath,
+        Map<String, Object> explorationPolicyResult,
         Map<String, Object> executionAttempt,
         Map<String, Object> executionOutcome
 ) {

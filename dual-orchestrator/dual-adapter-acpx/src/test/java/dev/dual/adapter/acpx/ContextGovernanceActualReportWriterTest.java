@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.runtime.handler.AgentOutputContractSidecar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -88,9 +89,11 @@ class ContextGovernanceActualReportWriterTest {
                 1,
                 0,
                 Map.of("Read", 2, "Edit", 1, "Bash", 1),
+                List.of("Read", "Edit", "Bash"),
                 List.of("src/main.py", "src/extra.py"),
                 List.of("src/extra.py"),
-                List.of("npm test")
+                List.of("npm test"),
+                List.of("npm")
         );
         var transcript = workstreamDir.resolve("runs/run-001/outputs/implement.transcript.log");
         Files.createDirectories(transcript.getParent());
@@ -163,7 +166,9 @@ class ContextGovernanceActualReportWriterTest {
                         0,
                         0,
                         Map.of("Read", 1),
+                        List.of("Read"),
                         List.of("README.md"),
+                        List.of(),
                         List.of(),
                         List.of()
                 )
@@ -225,7 +230,9 @@ class ContextGovernanceActualReportWriterTest {
                         0,
                         0,
                         Map.of("Read", 2),
+                        List.of("Read"),
                         List.of("README.md", "main.py"),
+                        List.of(),
                         List.of(),
                         List.of()
                 )
@@ -238,5 +245,332 @@ class ContextGovernanceActualReportWriterTest {
         assertEquals("intake.claude_brainstorm", json.get("targetNodeDefinitionId").asText());
         assertEquals(2, json.get("plannedReadFiles").size());
         assertEquals(0, json.get("outsideScopeReads").size());
+    }
+
+    @Test
+    void invalidScopeExpansionRequestDoesNotWaiveOutsideReads() throws Exception {
+        var workspace = tempDir.resolve("repo-invalid-scope-expansion");
+        var workstreamId = "ws-004";
+        var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
+        var memoryDir = workstreamDir.resolve("memory");
+        Files.createDirectories(memoryDir);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("exploration-plan-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "agent_exploration_plan",
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "stageId", "intake",
+                        "maxDirectReadFiles", 5,
+                        "allowedDirectReadFiles", List.of("README.md"),
+                        "preferredCapabilityKinds", List.of("symbol_index"),
+                        "failureMode", "warn"
+                )
+        );
+        var transcript = workstreamDir.resolve("runs/run-001/outputs/intake.transcript.log");
+        var output = workstreamDir.resolve("runs/run-001/outputs/intake.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(transcript, "transcript");
+        Files.writeString(output, """
+                <dual-artifact type="agent_output_contract" version="1">
+                {"node_id":"intake.claude_brainstorm","decision":"READY_FOR_PRODUCT_REVIEW",
+                 "summary":"request is invalid","scope_expansion_request":{"requested_files":["src/extra.py"],"reason":""}}
+                </dual-artifact>
+                """);
+
+        var report = new ContextGovernanceActualReportWriter().write(
+                workspace,
+                workstreamId,
+                "intake.claude_brainstorm",
+                "run-001",
+                output,
+                transcript,
+                new AcpxToolUsage(
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        Map.of("Read", 1),
+                        List.of("Read"),
+                        List.of("src/extra.py"),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        assertTrue(report.isPresent());
+        var json = objectMapper.readTree(report.get().toFile());
+        var result = json.get("explorationPolicyResult");
+        assertEquals(0, result.get("scopeExpansionFiles").size());
+        var violations = new java.util.ArrayList<String>();
+        result.get("violations").forEach(item -> violations.add(item.get("type").asText()));
+        assertTrue(violations.contains("READ_OUTSIDE_EXPLORATION_SCOPE"), violations.toString());
+        assertTrue(violations.contains("SCOPE_EXPANSION_REQUEST_MISSING"), violations.toString());
+    }
+
+    @Test
+    void rawScopeExpansionRequestDoesNotWaiveWithoutValidatedSidecar() throws Exception {
+        var workspace = tempDir.resolve("repo-raw-scope-expansion");
+        var workstreamId = "ws-005";
+        var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
+        var memoryDir = workstreamDir.resolve("memory");
+        Files.createDirectories(memoryDir);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("exploration-plan-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "agent_exploration_plan",
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "stageId", "intake",
+                        "maxDirectReadFiles", 5,
+                        "allowedDirectReadFiles", List.of("README.md"),
+                        "failureMode", "warn"
+                )
+        );
+        var transcript = workstreamDir.resolve("runs/run-001/outputs/intake.transcript.log");
+        var output = workstreamDir.resolve("runs/run-001/outputs/intake.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(transcript, "transcript");
+        Files.writeString(output, """
+                <dual-artifact type="agent_output_contract" version="1">
+                {"node_id":"intake.claude_brainstorm","decision":"READY_FOR_PRODUCT_REVIEW",
+                 "summary":"request is raw","scope_expansion_request":{"requested_files":["src/extra.py"],"reason":"need boundary check","evidence":"seed lacks route"}}
+                </dual-artifact>
+                """);
+
+        var report = new ContextGovernanceActualReportWriter().write(
+                workspace,
+                workstreamId,
+                "intake.claude_brainstorm",
+                "run-001",
+                output,
+                transcript,
+                new AcpxToolUsage(
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        Map.of("Read", 1),
+                        List.of("Read"),
+                        List.of("src/extra.py"),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        assertTrue(report.isPresent());
+        var result = objectMapper.readTree(report.get().toFile()).get("explorationPolicyResult");
+        assertEquals(0, result.get("scopeExpansionFiles").size());
+        var violations = new java.util.ArrayList<String>();
+        result.get("violations").forEach(item -> violations.add(item.get("type").asText()));
+        assertTrue(violations.contains("READ_OUTSIDE_EXPLORATION_SCOPE"), violations.toString());
+        assertTrue(violations.contains("SCOPE_EXPANSION_REQUEST_MISSING"), violations.toString());
+    }
+
+    @Test
+    void validatedScopeExpansionSidecarWaivesOutsideReads() throws Exception {
+        var workspace = tempDir.resolve("repo-sidecar-scope-expansion");
+        var workstreamId = "ws-006";
+        var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
+        var memoryDir = workstreamDir.resolve("memory");
+        Files.createDirectories(memoryDir);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("exploration-plan-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "agent_exploration_plan",
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "stageId", "intake",
+                        "maxDirectReadFiles", 5,
+                        "allowedDirectReadFiles", List.of("README.md"),
+                        "failureMode", "warn"
+                )
+        );
+        var transcript = workstreamDir.resolve("runs/run-001/outputs/intake.transcript.log");
+        var output = workstreamDir.resolve("runs/run-001/outputs/intake.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(transcript, "transcript");
+        Files.writeString(output, "agent output already validated elsewhere");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                AgentOutputContractSidecar.pathFor(output).toFile(),
+                Map.of(
+                        "node_id", "intake.claude_brainstorm",
+                        "decision", "READY_FOR_PRODUCT_REVIEW",
+                        "summary", "validated request",
+                        "scope_expansion_request", Map.of(
+                                "requested_files", List.of("src/extra.py"),
+                                "reason", "need boundary check",
+                                "evidence", "seed lacks route"
+                        )
+                )
+        );
+
+        var report = new ContextGovernanceActualReportWriter().write(
+                workspace,
+                workstreamId,
+                "intake.claude_brainstorm",
+                "run-001",
+                output,
+                transcript,
+                new AcpxToolUsage(
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        Map.of("Read", 1),
+                        List.of("Read"),
+                        List.of("src/extra.py"),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        assertTrue(report.isPresent());
+        var result = objectMapper.readTree(report.get().toFile()).get("explorationPolicyResult");
+        assertEquals("src/extra.py", result.get("scopeExpansionFiles").get(0).asText());
+        assertEquals(0, result.get("violations").size());
+    }
+
+    @Test
+    void rtkReadReportsReadFileAndRtkCapabilityWithoutNativeReadProvider() throws Exception {
+        var workspace = tempDir.resolve("repo-rtk-read-capability");
+        var workstreamId = "ws-007";
+        var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
+        var memoryDir = workstreamDir.resolve("memory");
+        Files.createDirectories(memoryDir);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("agent-capability-catalog.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "capabilities", List.of(
+                                Map.of("kind", "direct_file_read", "provider", "Read"),
+                                Map.of("kind", "token_filtered_shell", "provider", "rtk")
+                        )
+                )
+        );
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("exploration-plan-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "agent_exploration_plan",
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "stageId", "intake",
+                        "maxDirectReadFiles", 5,
+                        "allowedDirectReadFiles", List.of("docs/product.md"),
+                        "preferredCapabilityKinds", List.of("token_filtered_shell"),
+                        "failureMode", "warn"
+                )
+        );
+        var transcript = workstreamDir.resolve("runs/run-001/outputs/intake.transcript.log");
+        Files.createDirectories(transcript.getParent());
+        Files.writeString(transcript, "transcript");
+
+        var report = new ContextGovernanceActualReportWriter().write(
+                workspace,
+                workstreamId,
+                "intake.claude_brainstorm",
+                "run-001",
+                transcript,
+                new AcpxToolUsage(
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        Map.of("Read", 1),
+                        List.of("Bash"),
+                        List.of("docs/product.md"),
+                        List.of(),
+                        List.of("rtk read docs/product.md"),
+                        List.of("rtk")
+                )
+        );
+
+        assertTrue(report.isPresent());
+        var json = objectMapper.readTree(report.get().toFile());
+        assertEquals("docs/product.md", json.get("actualReadFiles").get(0).asText());
+        assertEquals(1, json.get("actualCapabilityUsages").size());
+        assertEquals("token_filtered_shell", json.get("actualCapabilityUsages").get(0).get("kind").asText());
+        assertEquals("rtk", json.get("actualCapabilityUsages").get(0).get("provider").asText());
+        assertEquals("command_executable", json.get("actualCapabilityUsages").get(0).get("source").asText());
+    }
+
+    @Test
+    void tokenFilteredSearchDoesNotCountAgainstDirectReadBudget() throws Exception {
+        var workspace = tempDir.resolve("repo-rtk-grep-capability");
+        var workstreamId = "ws-008";
+        var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
+        var memoryDir = workstreamDir.resolve("memory");
+        Files.createDirectories(memoryDir);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("agent-capability-catalog.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "capabilities", List.of(
+                                Map.of("kind", "token_filtered_shell", "provider", "rtk")
+                        )
+                )
+        );
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("exploration-plan-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "artifactType", "agent_exploration_plan",
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "stageId", "intake",
+                        "maxDirectReadFiles", 0,
+                        "allowedDirectReadFiles", List.of(),
+                        "preferredCapabilityKinds", List.of("token_filtered_shell"),
+                        "failureMode", "warn"
+                )
+        );
+        var transcript = workstreamDir.resolve("runs/run-001/outputs/intake.transcript.log");
+        Files.createDirectories(transcript.getParent());
+        Files.writeString(transcript, "transcript");
+
+        var report = new ContextGovernanceActualReportWriter().write(
+                workspace,
+                workstreamId,
+                "intake.claude_brainstorm",
+                "run-001",
+                transcript,
+                new AcpxToolUsage(
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        Map.of("Grep", 1),
+                        List.of("Bash"),
+                        List.of("src"),
+                        List.of(),
+                        List.of(),
+                        List.of("rtk grep issueWorkflow src"),
+                        List.of("rtk")
+                )
+        );
+
+        assertTrue(report.isPresent());
+        var json = objectMapper.readTree(report.get().toFile());
+        assertEquals("src", json.get("actualReadFiles").get(0).asText());
+        assertEquals(0, json.get("actualDirectReadFiles").size());
+        assertEquals("pass", json.get("explorationPolicyResult").get("status").asText());
+        assertEquals("token_filtered_shell", json.get("actualCapabilityUsages").get(0).get("kind").asText());
     }
 }

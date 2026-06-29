@@ -153,8 +153,27 @@ class MetricsProjectionWriterTest {
         assertEquals(0, number(explorationPolicy.get("failCount")));
         var warnings = list(explorationPolicy.get("warnings"));
         assertEquals("design.codex_review", warnings.get(0).get("nodeId"));
+        assertTrue(String.valueOf(warnings.get(0).get("agentExplorationPlanPath"))
+                .endsWith("exploration-plan-run-2.json"));
+        assertTrue(String.valueOf(warnings.get(0).get("explorationPolicyResultPath"))
+                .endsWith("exploration-policy-result-run-2.json"));
+        assertEquals("symbol_index",
+                list(warnings.get(0).get("actualCapabilityUsages")).get(0).get("kind"));
+        assertEquals("codegraph",
+                list(warnings.get(0).get("actualCapabilityUsages")).get(0).get("provider"));
+        assertEquals("command_executable",
+                list(warnings.get(0).get("actualCapabilityUsages")).get(0).get("source"));
         assertEquals("DIRECT_READ_BUDGET_EXCEEDED",
                 list(warnings.get(0).get("violations")).get(0).get("type"));
+        var explorationViolations = list(explorationPolicy.get("violations"));
+        assertEquals("run-2", explorationViolations.get(0).get("runId"));
+        assertEquals("design.codex_review", explorationViolations.get(0).get("nodeId"));
+        assertEquals("warn", explorationViolations.get(0).get("severity"));
+        assertEquals("DIRECT_READ_BUDGET_EXCEEDED", explorationViolations.get(0).get("type"));
+        assertEquals("codegraph",
+                list(explorationViolations.get(0).get("actualCapabilityUsages")).get(0).get("provider"));
+        assertTrue(String.valueOf(explorationViolations.get(0).get("agentExplorationPlanPath"))
+                .endsWith("exploration-plan-run-2.json"));
 
         var visibility = map(map(metrics.get("tokenAttribution")).get("usageVisibility"));
         assertEquals(1, number(map(visibility.get("byVisibility")).get("unavailable")));
@@ -174,6 +193,9 @@ class MetricsProjectionWriterTest {
         assertTrue(markdown.contains("| design.codex_review | review | recent_agent_outputs | 420 | 900 | true | false |"));
         assertTrue(markdown.contains("## Tool Metrics"));
         assertTrue(markdown.contains("- Exploration Policy Warnings: 1"));
+        assertTrue(markdown.contains("- Exploration Policy Failures: 0"));
+        assertTrue(markdown.contains("### Exploration Policy Violations"));
+        assertTrue(markdown.contains("| design.codex_review | run-2 | warn | DIRECT_READ_BUDGET_EXCEEDED | Actual direct Read count exceeds the exploration plan budget. |"));
         assertTrue(markdown.contains("| README.md | 2 | claude, codex | intake.claude_brainstorm, design.codex_review | true | missing |"));
     }
 
@@ -798,11 +820,20 @@ class MetricsProjectionWriterTest {
                 "reportPhase", "actual",
                 "runId", runId,
                 "nodeDefinitionId", nodeId,
+                "agentExplorationPlanPath", ".agent/workstreams/" + paths.workstreamId().value()
+                        + "/memory/exploration-plan-" + runId + ".json",
+                "explorationPolicyResultPath", ".agent/workstreams/" + paths.workstreamId().value()
+                        + "/artifacts/context-governance/exploration-policy-result-" + runId + ".json",
                 "explorationPolicyResult", Map.of(
                         "schemaVersion", 1,
                         "artifactType", "exploration_policy_result",
                         "mode", "warn",
                         "status", status,
+                        "actualCapabilityUsages", List.of(Map.of(
+                                "kind", "symbol_index",
+                                "provider", "codegraph",
+                                "source", "command_executable"
+                        )),
                         "violations", List.of(Map.of(
                                 "type", "DIRECT_READ_BUDGET_EXCEEDED",
                                 "severity", "warn",

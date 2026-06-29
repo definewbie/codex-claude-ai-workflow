@@ -34,8 +34,9 @@ class WorkstreamMemoryUpdaterTest {
                 "intake.claude_brainstorm",
                 "intake",
                 new AcpxToolUsage(1, 2, 2, 0, 0, 0, Map.of("Read", 2),
+                        List.of("Read"),
                         List.of("src/main.py", "./README.md", ".agent/workstreams/ws-memory/runs/run-001/run.json"),
-                        List.of(), List.of())
+                        List.of(), List.of(), List.of())
         );
 
         var memory = objectMapper.readValue(updater.memoryPath(tempDir, "ws-memory").toFile(), Map.class);
@@ -60,7 +61,8 @@ class WorkstreamMemoryUpdaterTest {
 
         var updater = new WorkstreamMemoryUpdater();
         var usage = new AcpxToolUsage(1, 1, 1, 0, 0, 0, Map.of("Read", 1),
-                List.of("src/main.py"), List.of(), List.of());
+                List.of("Read"),
+                List.of("src/main.py"), List.of(), List.of(), List.of());
         updater.updateReadFiles(tempDir, "ws-memory", "run-001", "intake.claude_brainstorm", "intake", usage);
         updater.updateReadFiles(tempDir, "ws-memory", "run-001", "intake.claude_brainstorm", "intake", usage);
 
@@ -89,7 +91,8 @@ class WorkstreamMemoryUpdaterTest {
 
         updater.updateReadFiles(tempDir, "ws-memory", "run-001", "intake.claude_brainstorm", "intake",
                 new AcpxToolUsage(1, 1, 1, 0, 0, 0, Map.of("Read", 1),
-                        List.of("src/main.py"), List.of(), List.of()));
+                        List.of("Read"),
+                        List.of("src/main.py"), List.of(), List.of(), List.of()));
 
         var memory = objectMapper.readValue(memoryPath.toFile(), Map.class);
         assertEquals("workstream_memory", memory.get("artifactType"));
@@ -231,7 +234,8 @@ class WorkstreamMemoryUpdaterTest {
         new WorkstreamMemoryUpdater().updateMemory(tempDir, "ws-summary", "run-1", "intake.claude_brainstorm",
                 "intake", "claude", null,
                 new AcpxToolUsage(1, 3, 3, 0, 0, 0, Map.of("Read", 3),
-                        List.of("src/auth.js", "docs/auth.md", "test/auth.test.js"), List.of(), List.of()),
+                        List.of("Read"),
+                        List.of("src/auth.js", "docs/auth.md", "test/auth.test.js"), List.of(), List.of(), List.of()),
                 null);
 
         var memory = objectMapper.readValue(new WorkstreamMemoryUpdater().memoryPath(tempDir, "ws-summary").toFile(), Map.class);
@@ -264,7 +268,8 @@ class WorkstreamMemoryUpdaterTest {
         new WorkstreamMemoryUpdater().updateMemory(tempDir, "ws-fallback", "run-1", "n",
                 "intake", "claude", null,
                 new AcpxToolUsage(1, 1, 1, 0, 0, 0, Map.of("Read", 1),
-                        List.of("bin/data.json"), List.of(), List.of()),
+                        List.of("Read"),
+                        List.of("bin/data.json"), List.of(), List.of(), List.of()),
                 null);
 
         var memory = objectMapper.readValue(new WorkstreamMemoryUpdater().memoryPath(tempDir, "ws-fallback").toFile(), Map.class);

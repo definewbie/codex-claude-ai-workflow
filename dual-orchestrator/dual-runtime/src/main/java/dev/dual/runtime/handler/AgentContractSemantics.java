@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-final class AgentContractSemantics {
+public final class AgentContractSemantics {
     private AgentContractSemantics() {
     }
 
@@ -54,6 +54,83 @@ final class AgentContractSemantics {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Validates the optional typed exploration expansion request. The field is
+     * the harness-owned escape hatch for reads outside an {@code ExplorationPlan}.
+     * It must be structured JSON so policy evaluation can consume it without
+     * scanning prose.
+     */
+    public static Optional<DualControlParseResult> validateScopeExpansionRequest(Object rawValue) {
+        if (rawValue == null) {
+            return Optional.empty();
+        }
+        if (!(rawValue instanceof Map<?, ?> raw)) {
+            return Optional.of(DualControlParseResult.invalid(
+                    "SCOPE_EXPANSION_REQUEST_NOT_OBJECT",
+                    "scope_expansion_request must be an object",
+                    Map.of()));
+        }
+        var requested = stringList(raw.get("requested_files"));
+        var read = stringList(raw.get("read_files"));
+        var files = stringList(raw.get("files"));
+        if (requested.invalidIndex() >= 0) {
+            return invalidScopeExpansionList("requested_files", requested.invalidIndex());
+        }
+        if (read.invalidIndex() >= 0) {
+            return invalidScopeExpansionList("read_files", read.invalidIndex());
+        }
+        if (files.invalidIndex() >= 0) {
+            return invalidScopeExpansionList("files", files.invalidIndex());
+        }
+        if (requested.values().isEmpty() && read.values().isEmpty() && files.values().isEmpty()) {
+            return Optional.of(DualControlParseResult.invalid(
+                    "SCOPE_EXPANSION_REQUEST_FILES_REQUIRED",
+                    "scope_expansion_request requires at least one path in requested_files, read_files, or files",
+                    Map.of()));
+        }
+        if (raw.containsKey("reason") && text(raw.get("reason")).isBlank()) {
+            return Optional.of(DualControlParseResult.invalid(
+                    "SCOPE_EXPANSION_REQUEST_REASON_BLANK",
+                    "scope_expansion_request.reason is present but blank",
+                    Map.of()));
+        }
+        if (raw.containsKey("evidence") && text(raw.get("evidence")).isBlank()) {
+            return Optional.of(DualControlParseResult.invalid(
+                    "SCOPE_EXPANSION_REQUEST_EVIDENCE_BLANK",
+                    "scope_expansion_request.evidence is present but blank",
+                    Map.of()));
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<DualControlParseResult> invalidScopeExpansionList(String field, int index) {
+        return Optional.of(DualControlParseResult.invalid(
+                "SCOPE_EXPANSION_REQUEST_PATH_INVALID",
+                "scope_expansion_request." + field + "[" + index + "] must be a non-blank string",
+                Map.of("field", field, "index", index)));
+    }
+
+    private static StringListValidation stringList(Object rawValue) {
+        if (rawValue == null) {
+            return new StringListValidation(List.of(), -1);
+        }
+        if (!(rawValue instanceof List<?> list)) {
+            return new StringListValidation(List.of(), 0);
+        }
+        var values = new java.util.ArrayList<String>();
+        for (int i = 0; i < list.size(); i++) {
+            var value = list.get(i);
+            if (!(value instanceof String text) || text.trim().isBlank()) {
+                return new StringListValidation(List.of(), i);
+            }
+            values.add(text.trim());
+        }
+        return new StringListValidation(List.copyOf(values), -1);
+    }
+
+    private record StringListValidation(List<String> values, int invalidIndex) {
     }
 
     private static String text(Object value) {

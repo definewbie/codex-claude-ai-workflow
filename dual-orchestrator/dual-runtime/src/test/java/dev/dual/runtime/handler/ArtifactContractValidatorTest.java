@@ -1163,6 +1163,552 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void scopeExpansionRequestFlowsFromEnvelopeToSidecar() throws Exception {
+        var outputRef = writeOutput("scope-expansion.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Need one bounded API file before product review.",
+                  "blocking": true,
+                  "checks": [], "evidence": [], "missing_evidence": ["API boundary not in seed"],
+                  "must_fix": ["Approve bounded scope expansion."],
+                  "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Seed and memory are insufficient.",
+                  "failure": {"category_hint":"SCOPE_EXPANSION_REQUIRED","contract_gaps":["API boundary missing"],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":"Need API boundary evidence."},
+                  "scope_expansion_request": {
+                    "requested_files": ["docs/api.md"],
+                    "reason": "Need API boundary evidence.",
+                    "evidence": "Seed and memory do not cover API surface."
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Need one bounded API file before product review.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var sidecar = Files.readString(tempDir.resolve((String) validated.result().get("contract_sidecar_ref")));
+        assertTrue(sidecar.contains("\"scope_expansion_request\""), sidecar);
+        assertTrue(sidecar.contains("\"docs/api.md\""), sidecar);
+    }
+
+    @Test
+    void validatedScopeExpansionRefreshesExplorationProjection() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var memoryDir = workstreamDir.resolve("memory");
+        var governanceDir = workstreamDir.resolve("artifacts/context-governance");
+        var runDir = workstreamDir.resolve("runs/run-001");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(governanceDir);
+        Files.createDirectories(runDir);
+        var planPath = memoryDir.resolve("exploration-plan-node-001.json");
+        var reportPath = governanceDir.resolve("intake-actual-run-001.json");
+        var resultPath = governanceDir.resolve("exploration-policy-result-intake-run-001.json");
+        var runPath = runDir.resolve("run.json");
+        Files.writeString(planPath, """
+                {
+                  "schemaVersion": 1,
+                  "stageId": "intake",
+                  "maxDirectReadFiles": 5,
+                  "allowedDirectReadFiles": ["README.md"],
+                  "preferredCapabilityKinds": ["symbol_index"],
+                  "failureMode": "block"
+                }
+                """);
+        Files.writeString(resultPath, """
+                {
+                  "schemaVersion": 1,
+                  "status": "warn",
+                  "violations": [{"type":"SCOPE_EXPANSION_REQUEST_MISSING"}],
+                  "scopeExpansionFiles": []
+                }
+                """);
+        Files.writeString(reportPath, """
+                {
+                  "schemaVersion": 1,
+                  "agentExplorationPlanPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "actualDirectReadFiles": ["docs/api.md"],
+                  "actualDirectReadFileKinds": {"docs/api.md":"documentation"},
+                  "actualCapabilityUsages": [{"kind":"direct_file_read","provider":"Read","source":"tool_id"}],
+                  "explorationPolicyResult": {
+                    "schemaVersion": 1,
+                    "status": "warn",
+                    "violations": [{"type":"SCOPE_EXPANSION_REQUEST_MISSING"}],
+                    "scopeExpansionFiles": []
+                  }
+                }
+                """.formatted(tempDir.relativize(planPath), tempDir.relativize(resultPath)));
+        Files.writeString(runPath, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "run-001",
+                  "status": "completed",
+                  "contextGovernanceActualReportPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "explorationPolicyResult": {
+                    "schemaVersion": 1,
+                    "status": "warn",
+                    "violations": [{"type":"SCOPE_EXPANSION_REQUEST_MISSING"}],
+                    "scopeExpansionFiles": []
+                  }
+                }
+                """.formatted(tempDir.relativize(reportPath), tempDir.relativize(resultPath)));
+        var outputRef = writeOutput("scope-expansion-refresh.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Need one bounded API file before product review.",
+                  "blocking": true,
+                  "checks": [], "evidence": [], "missing_evidence": ["API boundary not in seed"],
+                  "must_fix": ["Approve bounded scope expansion."],
+                  "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Seed and memory are insufficient.",
+                  "failure": {"category_hint":"SCOPE_EXPANSION_REQUIRED","contract_gaps":["API boundary missing"],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":"Need API boundary evidence."},
+                  "scope_expansion_request": {
+                    "requested_files": ["docs/api.md"],
+                    "reason": "Need API boundary evidence.",
+                    "evidence": "Seed and memory do not cover API surface."
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Need one bounded API file before product review.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude",
+                "run_metadata", tempDir.relativize(runPath).toString()
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-1",
+                agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var refreshedReport = Files.readString(reportPath);
+        var refreshedResult = Files.readString(resultPath);
+        var refreshedRun = Files.readString(runPath);
+        assertTrue(refreshedReport.contains("\"scopeExpansionFiles\""), refreshedReport);
+        assertTrue(refreshedReport.contains("\"docs/api.md\""), refreshedReport);
+        assertTrue(refreshedReport.contains("\"status\" : \"pass\""), refreshedReport);
+        assertTrue(refreshedResult.contains("\"status\" : \"pass\""), refreshedResult);
+        assertTrue(refreshedRun.contains("\"status\" : \"pass\""), refreshedRun);
+        assertTrue(!refreshedRun.contains("SCOPE_EXPANSION_REQUEST_MISSING"), refreshedRun);
+    }
+
+    @Test
+    void validatedScopeExpansionRefreshPreservesEmptyDirectReads() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var memoryDir = workstreamDir.resolve("memory");
+        var governanceDir = workstreamDir.resolve("artifacts/context-governance");
+        var runDir = workstreamDir.resolve("runs/run-rtk");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(governanceDir);
+        Files.createDirectories(runDir);
+        var planPath = memoryDir.resolve("exploration-plan-node-rtk.json");
+        var reportPath = governanceDir.resolve("intake-actual-run-rtk.json");
+        var resultPath = governanceDir.resolve("exploration-policy-result-intake-run-rtk.json");
+        var runPath = runDir.resolve("run.json");
+        Files.writeString(planPath, """
+                {
+                  "schemaVersion": 1,
+                  "stageId": "intake",
+                  "maxDirectReadFiles": 0,
+                  "allowedDirectReadFiles": [],
+                  "preferredCapabilityKinds": ["token_filtered_shell"],
+                  "failureMode": "block"
+                }
+                """);
+        Files.writeString(resultPath, """
+                {
+                  "schemaVersion": 1,
+                  "status": "pass",
+                  "violations": [],
+                  "scopeExpansionFiles": []
+                }
+                """);
+        Files.writeString(reportPath, """
+                {
+                  "schemaVersion": 1,
+                  "agentExplorationPlanPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "actualReadFiles": ["src"],
+                  "actualDirectReadFiles": [],
+                  "actualReadFileKinds": {"src":"source"},
+                  "actualDirectReadFileKinds": {},
+                  "actualCapabilityUsages": [{"kind":"token_filtered_shell","provider":"rtk","source":"command_executable"}],
+                  "explorationPolicyResult": {
+                    "schemaVersion": 1,
+                    "status": "pass",
+                    "violations": [],
+                    "scopeExpansionFiles": []
+                  }
+                }
+                """.formatted(tempDir.relativize(planPath), tempDir.relativize(resultPath)));
+        Files.writeString(runPath, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "run-rtk",
+                  "status": "completed",
+                  "contextGovernanceActualReportPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "explorationPolicyResult": {
+                    "schemaVersion": 1,
+                    "status": "pass",
+                    "violations": [],
+                    "scopeExpansionFiles": []
+                  }
+                }
+                """.formatted(tempDir.relativize(reportPath), tempDir.relativize(resultPath)));
+        var outputRef = writeOutput("scope-expansion-refresh-rtk.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Token-filtered repository query was enough.",
+                  "blocking": false,
+                  "checks": [], "evidence": [], "missing_evidence": [],
+                  "must_fix": [], "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "No direct file reads were needed.",
+                  "failure": {"category_hint":"NONE","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""},
+                  "scope_expansion_request": null
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Token-filtered repository query was enough.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude",
+                "run_metadata", tempDir.relativize(runPath).toString()
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-1",
+                agentNode("intake.claude_brainstorm", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var refreshedReport = Files.readString(reportPath);
+        var refreshedResult = Files.readString(resultPath);
+        var refreshedRun = Files.readString(runPath);
+        assertTrue(refreshedReport.contains("\"actualDirectReadFiles\" : [ ]"), refreshedReport);
+        assertTrue(refreshedReport.contains("\"status\" : \"pass\""), refreshedReport);
+        assertTrue(refreshedResult.contains("\"status\" : \"pass\""), refreshedResult);
+        assertTrue(refreshedRun.contains("\"status\" : \"pass\""), refreshedRun);
+        assertTrue(!refreshedRun.contains("READ_OUTSIDE_EXPLORATION_SCOPE"), refreshedRun);
+    }
+
+    @Test
+    void intakeExplorationBlockFailureFailsContractValidation() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var memoryDir = workstreamDir.resolve("memory");
+        var governanceDir = workstreamDir.resolve("artifacts/context-governance");
+        var runDir = workstreamDir.resolve("runs/run-intake-block");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(governanceDir);
+        Files.createDirectories(runDir);
+        var planPath = memoryDir.resolve("exploration-plan-node-block.json");
+        var reportPath = governanceDir.resolve("intake-actual-run-block.json");
+        var resultPath = governanceDir.resolve("exploration-policy-result-intake-run-block.json");
+        var runPath = runDir.resolve("run.json");
+        Files.writeString(planPath, """
+                {
+                  "schemaVersion": 1,
+                  "stageId": "intake",
+                  "maxDirectReadFiles": 1,
+                  "allowedDirectReadFiles": ["README.md"],
+                  "preferredCapabilityKinds": ["symbol_index"],
+                  "failureMode": "block"
+                }
+                """);
+        Files.writeString(resultPath, """
+                {"schemaVersion": 1, "status": "warn", "violations": []}
+                """);
+        Files.writeString(reportPath, """
+                {
+                  "schemaVersion": 1,
+                  "agentExplorationPlanPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "actualDirectReadFiles": ["README.md", "src/api.js"],
+                  "actualDirectReadFileKinds": {"README.md":"doc","src/api.js":"source"},
+                  "actualCapabilityUsages": [{"kind":"direct_file_read","provider":"Read","source":"tool_id"}],
+                  "explorationPolicyResult": {"schemaVersion": 1, "status": "warn", "violations": []}
+                }
+                """.formatted(tempDir.relativize(planPath), tempDir.relativize(resultPath)));
+        Files.writeString(runPath, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "run-intake-block",
+                  "status": "completed",
+                  "contextGovernanceActualReportPath": "%s",
+                  "explorationPolicyResultPath": "%s"
+                }
+                """.formatted(tempDir.relativize(reportPath), tempDir.relativize(resultPath)));
+        var outputRef = writeOutput("intake-block.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Intake complete.",
+                  "blocking": false,
+                  "checks": [], "evidence": [], "missing_evidence": [],
+                  "must_fix": [], "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Ready.",
+                  "failure": {"category_hint":"NONE","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Intake complete.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude",
+                "run_metadata", tempDir.relativize(runPath).toString()
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-block",
+                agentNode("intake.claude_brainstorm", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("EXPLORATION_POLICY_DENIED"),
+                String.valueOf(validated.result()));
+        var refreshedRun = Files.readString(runPath);
+        assertTrue(refreshedRun.contains("\"status\" : \"failed\""), refreshedRun);
+        assertTrue(refreshedRun.contains("IMPLEMENTATION_LEVEL_EXPLORATION_IN_INTAKE"), refreshedRun);
+    }
+
+    @Test
+    void intakeScopeExpansionBlockAllowsOnlyRequestedDirectReads() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var memoryDir = workstreamDir.resolve("memory");
+        var governanceDir = workstreamDir.resolve("artifacts/context-governance");
+        var runDir = workstreamDir.resolve("runs/run-intake-partial-scope");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(governanceDir);
+        Files.createDirectories(runDir);
+        var planPath = memoryDir.resolve("exploration-plan-node-partial.json");
+        var reportPath = governanceDir.resolve("intake-actual-run-partial.json");
+        var resultPath = governanceDir.resolve("exploration-policy-result-intake-run-partial.json");
+        var runPath = runDir.resolve("run.json");
+        Files.writeString(planPath, """
+                {
+                  "schemaVersion": 1,
+                  "stageId": "intake",
+                  "maxDirectReadFiles": 5,
+                  "allowedDirectReadFiles": ["README.md"],
+                  "preferredCapabilityKinds": [],
+                  "failureMode": "block"
+                }
+                """);
+        Files.writeString(resultPath, """
+                {"schemaVersion": 1, "status": "warn", "violations": []}
+                """);
+        Files.writeString(reportPath, """
+                {
+                  "schemaVersion": 1,
+                  "agentExplorationPlanPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "actualDirectReadFiles": ["README.md", "docs/api.md", "src/api.js"],
+                  "actualDirectReadFileKinds": {"README.md":"doc","docs/api.md":"documentation","src/api.js":"source"},
+                  "actualCapabilityUsages": [{"kind":"direct_file_read","provider":"Read","source":"tool_id"}],
+                  "explorationPolicyResult": {"schemaVersion": 1, "status": "warn", "violations": []}
+                }
+                """.formatted(tempDir.relativize(planPath), tempDir.relativize(resultPath)));
+        Files.writeString(runPath, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "run-intake-partial-scope",
+                  "status": "completed",
+                  "contextGovernanceActualReportPath": "%s",
+                  "explorationPolicyResultPath": "%s"
+                }
+                """.formatted(tempDir.relativize(reportPath), tempDir.relativize(resultPath)));
+        var outputRef = writeOutput("intake-partial-scope.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Ready with one bounded API doc expansion.",
+                  "blocking": false,
+                  "checks": [], "evidence": ["Bounded API doc was requested."], "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Seed and memory are insufficient.",
+                  "failure": {"category_hint":"SCOPE_EXPANSION_REQUIRED","contract_gaps":["API boundary missing"],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":"Need API boundary evidence."},
+                  "scope_expansion_request": {
+                    "requested_files": ["docs/api.md"],
+                    "reason": "Need API boundary evidence.",
+                    "evidence": "Seed and memory do not cover API surface."
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: Ready with one bounded API doc expansion.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "claude",
+                "run_metadata", tempDir.relativize(runPath).toString()
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-partial",
+                agentNode("intake.claude_brainstorm", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("EXPLORATION_POLICY_DENIED"),
+                String.valueOf(validated.result()));
+        var refreshedRun = Files.readString(runPath);
+        assertTrue(refreshedRun.contains("src/api.js"), refreshedRun);
+        assertTrue(refreshedRun.contains("\"scopeExpansionFiles\""), refreshedRun);
+    }
+
+    @Test
+    void acceptanceReviewExplorationWarnDoesNotFailContractValidation() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var memoryDir = workstreamDir.resolve("memory");
+        var governanceDir = workstreamDir.resolve("artifacts/context-governance");
+        var runDir = workstreamDir.resolve("runs/run-acceptance-warn");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(governanceDir);
+        Files.createDirectories(runDir);
+        var planPath = memoryDir.resolve("exploration-plan-node-acceptance.json");
+        var reportPath = governanceDir.resolve("acceptance-actual-run-warn.json");
+        var resultPath = governanceDir.resolve("exploration-policy-result-acceptance-run-warn.json");
+        var runPath = runDir.resolve("run.json");
+        Files.writeString(planPath, """
+                {
+                  "schemaVersion": 1,
+                  "stageId": "acceptance",
+                  "maxDirectReadFiles": 1,
+                  "allowedDirectReadFiles": ["README.md"],
+                  "preferredCapabilityKinds": ["symbol_index"],
+                  "failureMode": "warn"
+                }
+                """);
+        Files.writeString(resultPath, """
+                {"schemaVersion": 1, "status": "pass", "violations": []}
+                """);
+        Files.writeString(reportPath, """
+                {
+                  "schemaVersion": 1,
+                  "agentExplorationPlanPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "actualDirectReadFiles": ["README.md", "src/api.js"],
+                  "actualDirectReadFileKinds": {"README.md":"doc","src/api.js":"source"},
+                  "actualCapabilityUsages": [{"kind":"direct_file_read","provider":"Read","source":"tool_id"}],
+                  "explorationPolicyResult": {"schemaVersion": 1, "status": "pass", "violations": []}
+                }
+                """.formatted(tempDir.relativize(planPath), tempDir.relativize(resultPath)));
+        Files.writeString(runPath, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "run-acceptance-warn",
+                  "status": "completed",
+                  "contextGovernanceActualReportPath": "%s",
+                  "explorationPolicyResultPath": "%s"
+                }
+                """.formatted(tempDir.relativize(reportPath), tempDir.relativize(resultPath)));
+        var outputRef = writeOutput("acceptance-warn.md", """
+                <dual-artifact type="acceptance_review" version="1">
+                {
+                  "artifact_type": "acceptance_review",
+                  "schema_version": 1,
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Accepted with notes.",
+                  "blocking": false,
+                  "checks": ["reviewed evidence"],
+                  "evidence": ["diff reviewed"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": ["Review exploration remains warning-only."],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Accepted with non-blocking notes.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: ACCEPT_WITH_NOTES
+                summary: Accepted with notes.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex",
+                "run_metadata", tempDir.relativize(runPath).toString()
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-acceptance-warn",
+                agentNode("acceptance.codex_verifier_review"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var refreshedRun = Files.readString(runPath);
+        assertTrue(refreshedRun.contains("\"status\" : \"warn\""), refreshedRun);
+        assertTrue(refreshedRun.contains("READ_OUTSIDE_EXPLORATION_SCOPE"), refreshedRun);
+    }
+
+    @Test
+    void invalidScopeExpansionRequestIsRejected() throws Exception {
+        var outputRef = writeOutput("scope-expansion-bad.md", """
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "NEEDS_REVISION",
+                  "decision": "NEEDS_REVISION",
+                  "summary": "Need one bounded API file before product review.",
+                  "blocking": true,
+                  "checks": [], "evidence": [], "missing_evidence": ["API boundary not in seed"],
+                  "must_fix": ["Approve bounded scope expansion."],
+                  "acceptance_notes": [], "open_risks": [], "changed_files": [],
+                  "verification_summary": "Seed and memory are insufficient.",
+                  "failure": {"category_hint":"SCOPE_EXPANSION_REQUIRED","contract_gaps":["API boundary missing"],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":"Need API boundary evidence."},
+                  "scope_expansion_request": {
+                    "requested_files": []
+                  }
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: NEEDS_REVISION
+                summary: Need one bounded API file before product review.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "claude"));
+
+        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error"))
+                .contains("SCOPE_EXPANSION_REQUEST_FILES_REQUIRED"));
+    }
+
+    @Test
     void acceptsReusableFileRereadOfExpectedEditWithoutSelfReport() throws Exception {
         // implement re-reads src/executor.js, which it edits (in changed_files). The harness
         // policy allows this WITHOUT any agent_output_contract.reread_reasons — the agent is no

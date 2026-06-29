@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.runtime.handler.AgentOutputContractSidecar;
 import dev.dual.runtime.governance.ExplorationPolicyEvaluator;
 
 import java.io.IOException;
@@ -42,6 +43,18 @@ final class ContextGovernanceActualReportWriter {
             Path transcriptPath,
             AcpxToolUsage toolUsage
     ) throws IOException {
+        return write(workspaceRoot, workstreamId, nodeDefinitionId, runId, null, transcriptPath, toolUsage);
+    }
+
+    Optional<Path> write(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeDefinitionId,
+            String runId,
+            Path outputPath,
+            Path transcriptPath,
+            AcpxToolUsage toolUsage
+    ) throws IOException {
         if (workspaceRoot == null || workstreamId == null || workstreamId.isBlank() || toolUsage == null) {
             return Optional.empty();
         }
@@ -52,15 +65,36 @@ final class ContextGovernanceActualReportWriter {
         var memoryDir = workstreamDir.resolve(MEMORY_DIR);
         var plan = latestDocument(memoryDir, "file-relevance-plan-", nodeDefinitionId);
         var policy = latestDocument(memoryDir, "stage-scope-policy-", nodeDefinitionId);
+        var explorationPlanPath = latestDocumentPath(memoryDir, "exploration-plan-", nodeDefinitionId);
         var explorationPlan = latestDocument(memoryDir, "exploration-plan-", nodeDefinitionId);
+        var capabilityCatalog = document(memoryDir.resolve("agent-capability-catalog.json"));
+        var repoMap = document(memoryDir.resolve("repo-map.json"));
         var plannedRead = firstNonEmpty(textList(plan.map(doc -> doc.get("readCandidates")).orElse(null)),
                 textList(policy.map(doc -> doc.get("readScope")).orElse(null)));
         var plannedWrite = firstNonEmpty(textList(plan.map(doc -> doc.get("writeCandidates")).orElse(null)),
                 textList(policy.map(doc -> doc.get("writeScope")).orElse(null)));
         var actualRead = filterRepoFiles(toolUsage.readFiles());
+        var actualDirectRead = filterRepoFiles(toolUsage.directReadFiles());
+        var actualReadKinds = readKinds(repoMap.orElse(null), actualRead);
+        var actualDirectReadKinds = readKinds(repoMap.orElse(null), actualDirectRead);
         var actualWrite = filterRepoFiles(toolUsage.writeFiles());
+        var actualCapabilityUsages = ToolUsageCapabilityClassifier.classifyUsages(toolUsage, map(capabilityCatalog.orElse(null)));
+        var actualCapabilities = actualCapabilityUsages.stream()
+                .map(item -> textValue(item.get("kind")))
+                .filter(kind -> !kind.isBlank())
+                .distinct()
+                .toList();
+        var scopeExpansionFiles = scopeExpansionFiles(outputPath);
         var evidenceFiles = evidenceFiles(workstreamDir);
         var repeatedReadFiles = repeatedReads(workstreamDir, runId, actualRead, evidenceFiles);
+        var explorationPolicyResult = ExplorationPolicyEvaluator.evaluate(
+                map(explorationPlan.orElse(null)),
+                actualDirectRead,
+                actualCapabilities,
+                scopeExpansionFiles,
+                actualDirectReadKinds,
+                actualCapabilityUsages
+        );
         var report = new LinkedHashMap<String, Object>();
         report.put("schemaVersion", 1);
         report.put("artifactType", "context_governance_report");
@@ -80,15 +114,17 @@ final class ContextGovernanceActualReportWriter {
         report.put("planningAvailable", plan.isPresent() || policy.isPresent());
         report.put("plannedReadFiles", plannedRead);
         report.put("plannedWriteFiles", plannedWrite);
+        report.put("agentExplorationPlanPath", relativeOrNull(workspaceRoot, explorationPlanPath.orElse(null)));
         report.put("actualReadFiles", actualRead);
+        report.put("actualDirectReadFiles", actualDirectRead);
+        report.put("actualReadFileKinds", actualReadKinds);
+        report.put("actualDirectReadFileKinds", actualDirectReadKinds);
+        report.put("actualCapabilityUsages", actualCapabilityUsages);
         report.put("actualWriteFiles", actualWrite);
         report.put("outsideScopeReads", outsideScope(actualRead, plannedRead));
         report.put("outsideScopeWrites", outsideScope(actualWrite, plannedWrite));
         report.put("repeatedReadFiles", repeatedReadFiles);
-        report.put("explorationPolicyResult", ExplorationPolicyEvaluator.evaluate(
-                map(explorationPlan.orElse(null)),
-                actualRead
-        ));
+        report.put("explorationPolicyResult", explorationPolicyResult);
         report.put("toolUsage", toolUsage);
         report.put("transcriptPath", relativeOrNull(workspaceRoot, transcriptPath));
         report.put("telemetryPending", false);
@@ -97,10 +133,24 @@ final class ContextGovernanceActualReportWriter {
         var outputDir = workstreamDir.resolve(GOVERNANCE_DIR);
         Files.createDirectories(outputDir);
         var fileName = safeFileName(nodeDefinitionId) + "-actual-" + safeFileName(runId) + ".json";
-        var outputPath = outputDir.resolve(fileName);
-        OBJECT_MAPPER.writeValue(outputPath.toFile(), report);
+        var reportPath = outputDir.resolve(fileName);
+        var resultPath = outputDir.resolve("exploration-policy-result-" + safeFileName(nodeDefinitionId)
+                + "-" + safeFileName(runId) + ".json");
+        report.put("explorationPolicyResultPath", relativeOrNull(workspaceRoot, resultPath));
+        OBJECT_MAPPER.writeValue(resultPath.toFile(), explorationPolicyResult);
+        OBJECT_MAPPER.writeValue(reportPath.toFile(), report);
         writeMemoryMetrics(memoryDir, workstreamId, nodeDefinitionId, runId, plannedRead, actualRead, repeatedReadFiles);
-        return Optional.of(outputPath);
+        return Optional.of(reportPath);
+    }
+
+    private static List<String> scopeExpansionFiles(Path outputPath) {
+        try {
+            return AgentOutputContractSidecar.read(outputPath, OBJECT_MAPPER)
+                    .map(document -> document.scopeExpansionRequest().requestedPaths())
+                    .orElse(List.of());
+        } catch (RuntimeException ignored) {
+            return List.of();
+        }
     }
 
     private static void writeMemoryMetrics(
@@ -139,6 +189,14 @@ final class ContextGovernanceActualReportWriter {
     }
 
     private static Optional<JsonNode> latestDocument(Path dir, String prefix, String nodeDefinitionId) throws IOException {
+        var path = latestDocumentPath(dir, prefix, nodeDefinitionId);
+        if (path.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(OBJECT_MAPPER.readTree(path.get().toFile()));
+    }
+
+    private static Optional<Path> latestDocumentPath(Path dir, String prefix, String nodeDefinitionId) throws IOException {
         if (!Files.isDirectory(dir)) {
             return Optional.empty();
         }
@@ -153,10 +211,43 @@ final class ContextGovernanceActualReportWriter {
         for (var path : candidates) {
             var json = OBJECT_MAPPER.readTree(path.toFile());
             if (matchesNodeDefinition(json, nodeDefinitionId)) {
-                return Optional.of(json);
+                return Optional.of(path);
             }
         }
         return Optional.empty();
+    }
+
+    private static Optional<JsonNode> document(Path path) throws IOException {
+        if (path == null || !Files.isRegularFile(path)) {
+            return Optional.empty();
+        }
+        return Optional.of(OBJECT_MAPPER.readTree(path.toFile()));
+    }
+
+    private static Map<String, String> readKinds(JsonNode repoMap, List<String> actualReadFiles) {
+        if (repoMap == null || actualReadFiles == null || actualReadFiles.isEmpty()) {
+            return Map.of();
+        }
+        var byPath = new LinkedHashMap<String, String>();
+        var files = repoMap.get("files");
+        if (files != null && files.isArray()) {
+            for (var item : files) {
+                var path = normalize(text(item.get("path")));
+                var kind = text(item.get("kind"));
+                if (!path.isBlank() && !kind.isBlank()) {
+                    byPath.put(path, kind);
+                }
+            }
+        }
+        var result = new LinkedHashMap<String, String>();
+        for (var path : actualReadFiles) {
+            var normalized = normalize(path);
+            var kind = byPath.get(normalized);
+            if (kind != null && !kind.isBlank()) {
+                result.put(normalized, kind);
+            }
+        }
+        return Map.copyOf(result);
     }
 
     private static boolean matchesNodeDefinition(JsonNode json, String nodeDefinitionId) {
@@ -338,6 +429,10 @@ final class ContextGovernanceActualReportWriter {
             return "";
         }
         return node.asText("");
+    }
+
+    private static String textValue(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
     }
 
     @SuppressWarnings("unchecked")

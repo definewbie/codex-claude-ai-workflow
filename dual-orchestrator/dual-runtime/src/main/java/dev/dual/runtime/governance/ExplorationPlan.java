@@ -51,7 +51,7 @@ public final class ExplorationPlan {
         document.put("expectedEditFiles", normalizedList(writeScope));
         document.put("maxDirectReadFiles", maxDirectReads);
         document.put("forbiddenExplorationIntents", forbiddenIntents(stage));
-        document.put("failureMode", "warn");
+        document.put("failureMode", failureMode(stage));
         document.put("generatedAt", Instant.now().toString());
         return new ExplorationPlan(document);
     }
@@ -95,6 +95,10 @@ public final class ExplorationPlan {
             case "design", "plan" -> 6;
             default -> 12;
         };
+    }
+
+    private static String failureMode(String stage) {
+        return "intake".equals(stage) ? "block" : "warn";
     }
 
     private static List<String> forbiddenIntents(String stage) {

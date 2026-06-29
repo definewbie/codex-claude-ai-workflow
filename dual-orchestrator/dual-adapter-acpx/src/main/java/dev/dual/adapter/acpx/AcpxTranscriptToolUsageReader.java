@@ -51,36 +51,39 @@ final class AcpxTranscriptToolUsageReader {
             return AcpxToolUsage.empty();
         }
         var byTool = new LinkedHashMap<String, Integer>();
+        var toolIds = new LinkedHashSet<String>();
         var readFiles = new LinkedHashSet<String>();
+        var directReadFiles = new LinkedHashSet<String>();
         var writeFiles = new LinkedHashSet<String>();
         var bashCommands = new LinkedHashSet<String>();
+        var commandExecutables = new LinkedHashSet<String>();
         PendingTool pending = null;
         for (var line : Files.readAllLines(transcriptPath, StandardCharsets.UTF_8)) {
             var bracketTool = bracketToolIn(line, workspaceRoot);
             if (bracketTool.isPresent()) {
                 if (pending != null) {
-                    record(pending, byTool, readFiles, writeFiles, bashCommands);
+                    record(pending, byTool, toolIds, readFiles, directReadFiles, writeFiles, bashCommands, commandExecutables);
                 }
                 pending = bracketTool.get();
                 if (pending.hasEvidence()) {
-                    record(pending, byTool, readFiles, writeFiles, bashCommands);
+                    record(pending, byTool, toolIds, readFiles, directReadFiles, writeFiles, bashCommands, commandExecutables);
                     pending = null;
                 }
                 continue;
             }
             if (pending != null && mergeInputLine(pending, line, workspaceRoot)) {
-                record(pending, byTool, readFiles, writeFiles, bashCommands);
+                record(pending, byTool, toolIds, readFiles, directReadFiles, writeFiles, bashCommands, commandExecutables);
                 pending = null;
                 continue;
             }
             if (pending != null && !line.trim().isBlank()) {
-                record(pending, byTool, readFiles, writeFiles, bashCommands);
+                record(pending, byTool, toolIds, readFiles, directReadFiles, writeFiles, bashCommands, commandExecutables);
                 pending = null;
             }
-            consumeLine(line, workspaceRoot, byTool, readFiles, writeFiles, bashCommands);
+            consumeLine(line, workspaceRoot, byTool, toolIds, readFiles, directReadFiles, writeFiles, bashCommands, commandExecutables);
         }
         if (pending != null) {
-            record(pending, byTool, readFiles, writeFiles, bashCommands);
+            record(pending, byTool, toolIds, readFiles, directReadFiles, writeFiles, bashCommands, commandExecutables);
         }
         var readCount = countMatching(byTool, "Read", "Glob", "Grep", "LS");
         var writeCount = countMatching(byTool, "Edit", "Write", "MultiEdit");
@@ -95,9 +98,12 @@ final class AcpxTranscriptToolUsageReader {
                 bashCount,
                 Math.max(0, total - known),
                 Map.copyOf(byTool),
+                List.copyOf(toolIds),
                 List.copyOf(readFiles),
+                List.copyOf(directReadFiles),
                 List.copyOf(writeFiles),
-                List.copyOf(bashCommands)
+                List.copyOf(bashCommands),
+                List.copyOf(commandExecutables)
         );
     }
 
@@ -105,25 +111,37 @@ final class AcpxTranscriptToolUsageReader {
             String line,
             Path workspaceRoot,
             Map<String, Integer> byTool,
+            Set<String> toolIds,
             Set<String> readFiles,
+            Set<String> directReadFiles,
             Set<String> writeFiles,
-            Set<String> bashCommands
+            Set<String> bashCommands,
+            Set<String> commandExecutables
     ) {
         var tools = toolsIn(line);
         if (tools.isEmpty()) {
             return;
         }
+        var paths = new LinkedHashSet<>(pathsIn(line, workspaceRoot));
         for (var tool : tools) {
-            byTool.merge(tool, 1, Integer::sum);
-        }
-        var paths = pathsIn(line, workspaceRoot);
-        for (var tool : tools) {
-            if (isReadTool(tool)) {
+            var behaviorTool = tool;
+            toolIds.add(tool);
+            if ("Bash".equals(tool)) {
+                var command = commandIn(line);
+                if (command.isPresent()) {
+                    recordCommand(command.get(), bashCommands, commandExecutables);
+                    behaviorTool = classifyCommand(command.get()).orElse("Bash");
+                    commandPath(behaviorTool, command.get(), workspaceRoot).ifPresent(paths::add);
+                }
+            }
+            byTool.merge(behaviorTool, 1, Integer::sum);
+            if (isReadTool(behaviorTool)) {
                 readFiles.addAll(paths);
-            } else if (isWriteTool(tool)) {
+                if (isDirectReadTool(behaviorTool)) {
+                    directReadFiles.addAll(paths);
+                }
+            } else if (isWriteTool(behaviorTool)) {
                 writeFiles.addAll(paths);
-            } else if ("Bash".equals(tool)) {
-                commandIn(line).ifPresent(bashCommands::add);
             }
         }
     }
@@ -134,8 +152,9 @@ final class AcpxTranscriptToolUsageReader {
             return Optional.empty();
         }
         var body = matcher.group("body").trim();
+        var toolId = toolIdFromBracketBody(body);
         var tool = toolFromBracketBody(body);
-        var pending = new PendingTool(tool);
+        var pending = new PendingTool(toolId, tool);
         pathsIn(body, workspaceRoot).forEach(pending::addPath);
         fallbackPathFromBody(tool, body, workspaceRoot).ifPresent(pending::addPath);
         if ("Bash".equals(tool) && !isGenericBashBody(body)) {
@@ -154,7 +173,7 @@ final class AcpxTranscriptToolUsageReader {
         commandIn(body).ifPresent(command -> {
             pending.setCommand(command);
             classifyCommand(command).ifPresent(pending::setTool);
-            commandPath(command, workspaceRoot).ifPresent(pending::addPath);
+            commandPath(pending.tool(), command, workspaceRoot).ifPresent(pending::addPath);
         });
         return true;
     }
@@ -162,19 +181,32 @@ final class AcpxTranscriptToolUsageReader {
     private static void record(
             PendingTool pending,
             Map<String, Integer> byTool,
+            Set<String> toolIds,
             Set<String> readFiles,
+            Set<String> directReadFiles,
             Set<String> writeFiles,
-            Set<String> bashCommands
+            Set<String> bashCommands,
+            Set<String> commandExecutables
     ) {
         var tool = pending.tool();
         byTool.merge(tool, 1, Integer::sum);
+        toolIds.add(pending.toolId());
         if (isReadTool(tool)) {
             readFiles.addAll(pending.paths());
+            if (isDirectReadTool(tool)) {
+                directReadFiles.addAll(pending.paths());
+            }
         } else if (isWriteTool(tool)) {
             writeFiles.addAll(pending.paths());
         } else if ("Bash".equals(tool)) {
-            pending.command().ifPresent(bashCommands::add);
+            pending.command().ifPresent(command -> recordCommand(command, bashCommands, commandExecutables));
         }
+        pending.command().ifPresent(command -> executableIn(command).ifPresent(commandExecutables::add));
+    }
+
+    private static void recordCommand(String command, Set<String> bashCommands, Set<String> commandExecutables) {
+        bashCommands.add(command);
+        executableIn(command).ifPresent(commandExecutables::add);
     }
 
     private static List<String> toolsIn(String line) {
@@ -237,9 +269,106 @@ final class AcpxTranscriptToolUsageReader {
         return command.isBlank() ? Optional.empty() : Optional.of(command);
     }
 
+    private static Optional<String> executableIn(String command) {
+        var tokens = shellTokens(command);
+        for (var token : tokens) {
+            var text = unquote(token);
+            if (text.isBlank() || text.contains("=") && text.indexOf('=') > 0 && !text.startsWith("./")) {
+                continue;
+            }
+            if ("env".equals(text)) {
+                continue;
+            }
+            return Optional.of(normalizeExecutable(text));
+        }
+        return Optional.empty();
+    }
+
+    private static List<String> shellTokens(String command) {
+        var tokens = new ArrayList<String>();
+        var current = new StringBuilder();
+        char quote = 0;
+        for (var i = 0; i < command.length(); i++) {
+            var ch = command.charAt(i);
+            if (quote != 0) {
+                if (ch == quote) {
+                    quote = 0;
+                } else {
+                    current.append(ch);
+                }
+                continue;
+            }
+            if (ch == '\'' || ch == '"') {
+                quote = ch;
+                continue;
+            }
+            if (Character.isWhitespace(ch)) {
+                addShellToken(tokens, current);
+                continue;
+            }
+            if (ch == '&' || ch == '|' || ch == ';') {
+                addShellToken(tokens, current);
+                break;
+            }
+            current.append(ch);
+        }
+        addShellToken(tokens, current);
+        return List.copyOf(tokens);
+    }
+
+    private static void addShellToken(List<String> tokens, StringBuilder current) {
+        if (!current.isEmpty()) {
+            tokens.add(current.toString());
+            current.setLength(0);
+        }
+    }
+
+    private static String normalizeExecutable(String value) {
+        var text = value.toLowerCase(Locale.ROOT);
+        while (text.startsWith("./")) {
+            text = text.substring(2);
+        }
+        var slash = text.lastIndexOf('/');
+        return slash >= 0 ? text.substring(slash + 1) : text;
+    }
+
     private static String toolFromBracketBody(String body) {
         var command = body.trim();
         return classifyCommand(command).orElse("Bash");
+    }
+
+    private static String toolIdFromBracketBody(String body) {
+        var command = body.trim();
+        return nativeToolId(command).orElse("Bash");
+    }
+
+    private static Optional<String> nativeToolId(String command) {
+        var lower = command.trim().toLowerCase(Locale.ROOT);
+        if (lower.equals("read file")) {
+            return Optional.of("Read");
+        }
+        if (lower.equals("edit")) {
+            return Optional.of("Edit");
+        }
+        if (lower.equals("write")) {
+            return Optional.of("Write");
+        }
+        if (lower.equals("multiedit")) {
+            return Optional.of("MultiEdit");
+        }
+        if (lower.equals("find") || lower.equals("glob")) {
+            return Optional.of("Glob");
+        }
+        if (lower.equals("grep")) {
+            return Optional.of("Grep");
+        }
+        if (lower.equals("ls")) {
+            return Optional.of("LS");
+        }
+        if (lower.equals("task")) {
+            return Optional.of("Task");
+        }
+        return Optional.empty();
     }
 
     private static Optional<String> classifyCommand(String command) {
@@ -247,6 +376,10 @@ final class AcpxTranscriptToolUsageReader {
         var lower = normalized.toLowerCase(Locale.ROOT);
         if (containsShellControlOperator(lower)) {
             return Optional.of("Bash");
+        }
+        var tokenTool = classifyCommandTokens(shellTokens(normalized));
+        if (tokenTool.isPresent()) {
+            return tokenTool;
         }
         if (lower.equals("read file") || lower.startsWith("read ") || lower.startsWith("rtk read ")) {
             return Optional.of("Read");
@@ -275,6 +408,32 @@ final class AcpxTranscriptToolUsageReader {
         return Optional.empty();
     }
 
+    private static Optional<String> classifyCommandTokens(List<String> tokens) {
+        if (tokens.isEmpty()) {
+            return Optional.empty();
+        }
+        var executable = normalizeExecutable(unquote(tokens.get(0)));
+        var commandIndex = 0;
+        if ("rtk".equals(executable)) {
+            if (tokens.size() < 2) {
+                return Optional.empty();
+            }
+            executable = normalizeExecutable(unquote(tokens.get(1)));
+            commandIndex = 1;
+        }
+        return switch (executable) {
+            case "read" -> tokens.size() > commandIndex + 1 ? Optional.of("Read") : Optional.empty();
+            case "edit" -> tokens.size() > commandIndex + 1 ? Optional.of("Edit") : Optional.empty();
+            case "write" -> tokens.size() > commandIndex + 1 ? Optional.of("Write") : Optional.empty();
+            case "multiedit" -> tokens.size() > commandIndex + 1 ? Optional.of("MultiEdit") : Optional.empty();
+            case "find", "glob" -> Optional.of("Glob");
+            case "grep", "rg" -> Optional.of("Grep");
+            case "ls" -> Optional.of("LS");
+            case "task" -> tokens.size() > commandIndex + 1 ? Optional.of("Task") : Optional.empty();
+            default -> Optional.empty();
+        };
+    }
+
     private static boolean containsShellControlOperator(String command) {
         return command.contains("&&") || command.contains("||") || command.contains(";") || command.contains("|");
     }
@@ -286,7 +445,7 @@ final class AcpxTranscriptToolUsageReader {
         if ("read file".equalsIgnoreCase(body.trim())) {
             return Optional.empty();
         }
-        return commandPath(body, workspaceRoot);
+        return commandPath(tool, body, workspaceRoot);
     }
 
     private static boolean isGenericBashBody(String body) {
@@ -294,12 +453,12 @@ final class AcpxTranscriptToolUsageReader {
         return "bash".equals(normalized) || "terminal".equals(normalized);
     }
 
-    private static Optional<String> commandPath(String command, Path workspaceRoot) {
+    private static Optional<String> commandPath(String behaviorTool, String command, Path workspaceRoot) {
         var parts = command.trim().split("\\s+");
         if (parts.length == 0) {
             return Optional.empty();
         }
-        var index = pathArgumentIndex(parts);
+        var index = pathArgumentIndex(behaviorTool, parts);
         while (index >= 0 && index < parts.length && parts[index].startsWith("-")) {
             index++;
         }
@@ -310,14 +469,42 @@ final class AcpxTranscriptToolUsageReader {
         return path.isBlank() ? Optional.empty() : Optional.of(path);
     }
 
-    private static int pathArgumentIndex(String[] parts) {
-        if (parts.length >= 3 && "rtk".equalsIgnoreCase(parts[0])) {
+    private static int pathArgumentIndex(String behaviorTool, String[] parts) {
+        if ("Grep".equals(behaviorTool)) {
+            return grepPathArgumentIndex(parts);
+        }
+        if (parts.length >= 3 && isCommand(parts[0], "rtk")) {
             return 2;
         }
         if (parts.length >= 2) {
             return 1;
         }
         return -1;
+    }
+
+    private static int grepPathArgumentIndex(String[] parts) {
+        if (parts.length < 3) {
+            return -1;
+        }
+        var commandIndex = isCommand(parts[0], "rtk") ? 1 : 0;
+        if (commandIndex >= parts.length || !isGrepExecutable(parts[commandIndex])) {
+            return -1;
+        }
+        for (var index = parts.length - 1; index > commandIndex; index--) {
+            var value = unquote(parts[index]);
+            if (!value.isBlank() && !value.startsWith("-")) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isGrepExecutable(String value) {
+        return isCommand(value, "grep") || isCommand(value, "rg");
+    }
+
+    private static boolean isCommand(String value, String expected) {
+        return normalizeExecutable(value).equals(expected);
     }
 
     private static String unquote(String text) {
@@ -347,6 +534,10 @@ final class AcpxTranscriptToolUsageReader {
 
     private static boolean isReadTool(String tool) {
         return "Read".equals(tool) || "Glob".equals(tool) || "Grep".equals(tool) || "LS".equals(tool);
+    }
+
+    private static boolean isDirectReadTool(String tool) {
+        return "Read".equals(tool);
     }
 
     private static boolean isWriteTool(String tool) {
@@ -395,12 +586,18 @@ final class AcpxTranscriptToolUsageReader {
     }
 
     private static final class PendingTool {
+        private final String toolId;
         private String tool;
         private final List<String> paths = new ArrayList<>();
         private String command;
 
-        private PendingTool(String tool) {
+        private PendingTool(String toolId, String tool) {
+            this.toolId = toolId;
             this.tool = tool;
+        }
+
+        private String toolId() {
+            return toolId;
         }
 
         private String tool() {

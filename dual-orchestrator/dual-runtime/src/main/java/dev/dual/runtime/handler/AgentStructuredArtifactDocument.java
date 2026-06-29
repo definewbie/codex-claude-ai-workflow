@@ -34,7 +34,8 @@ record AgentStructuredArtifactDocument(
         String recommendedNextStage,
         String suggestedNextPrompt,
         AgentOutputContractDocument.FailureFields failure,
-        List<AgentOutputContractDocument.RereadReason> rereadReasons
+        List<AgentOutputContractDocument.RereadReason> rereadReasons,
+        AgentOutputContractDocument.ScopeExpansionRequest scopeExpansionRequest
 ) {
     static AgentStructuredArtifactDocument from(Map<String, Object> document) {
         return new AgentStructuredArtifactDocument(
@@ -60,7 +61,8 @@ record AgentStructuredArtifactDocument(
                 text(document.get("recommended_next_stage")),
                 text(document.get("suggested_next_prompt")),
                 AgentOutputContractDocument.FailureFields.from(objectMap(document.get("failure"))),
-                AgentOutputContractDocument.rereadReasonList(document.get("reread_reasons"))
+                AgentOutputContractDocument.rereadReasonList(document.get("reread_reasons")),
+                AgentOutputContractDocument.ScopeExpansionRequest.from(objectMap(document.get("scope_expansion_request")))
         );
     }
 

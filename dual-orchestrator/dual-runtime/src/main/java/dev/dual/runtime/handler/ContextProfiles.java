@@ -104,7 +104,7 @@ final class ContextProfiles {
                         MissingPolicy.SKIP, Priority.LOW,
                         new DegradationPolicy(Degradation.POINTER_ONLY, 0),
                         OverflowPolicy.DROP_OPTIONAL, 125)
-        ), Map.of("max_snippet_chars", 2_000, "max_recent_agent_outputs", 3));
+        ), Map.of("max_snippet_chars", 2_000, "max_recent_agent_outputs", 3, "compact_governance", true));
     }
 
     static ContextBudget architectureReview() {

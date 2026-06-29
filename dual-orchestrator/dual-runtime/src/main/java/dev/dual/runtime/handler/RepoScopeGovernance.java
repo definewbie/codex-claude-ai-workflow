@@ -137,6 +137,10 @@ final class RepoScopeGovernance {
     }
 
     static void appendMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot) {
+        appendMarkdownGuidance(builder, documents, workspaceRoot, false);
+    }
+
+    static void appendMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot, boolean compact) {
         if (documents == null) {
             return;
         }
@@ -144,6 +148,10 @@ final class RepoScopeGovernance {
         builder.append("This section is a passive harness guardrail. It guides repository exploration but does not replace task contract, artifact validation, or human approval.\n\n");
         builder.append("- Stage: ").append(text(documents.policy().get("stageId"))).append("\n");
         builder.append("- Scope policy: ").append(text(documents.policy().get("scopeExceedPolicy"))).append("\n");
+        if (compact) {
+            appendCompactMarkdownGuidance(builder, documents, workspaceRoot);
+            return;
+        }
         builder.append("- Repo map: ").append(ref(workspaceRoot, documents.repoMapPath())).append("\n");
         builder.append("- File relevance plan: ").append(ref(workspaceRoot, documents.fileRelevancePlanPath())).append("\n");
         builder.append("- Stage scope policy: ").append(ref(workspaceRoot, documents.stageScopePolicyPath())).append("\n");
@@ -151,13 +159,39 @@ final class RepoScopeGovernance {
         builder.append("- Working set: ").append(ref(workspaceRoot, documents.workingSetPath())).append("\n");
         builder.append("- File summaries: ").append(ref(workspaceRoot, documents.fileSummariesPath())).append("\n");
         builder.append("- Read reuse contract: ").append(ref(workspaceRoot, documents.readReuseContractPath())).append("\n");
+        builder.append("- Agent capability catalog: ").append(ref(workspaceRoot, documents.agentCapabilityCatalogPath())).append("\n");
+        builder.append("- Agent exploration plan: ").append(ref(workspaceRoot, documents.agentExplorationPlanPath())).append("\n");
         builder.append("- Governance report: ").append(ref(workspaceRoot, documents.governanceReportPath())).append("\n\n");
+        appendExplorationPlan(builder, documents);
         appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 8);
         appendPathList(builder, "Allowed write files", textList(documents.policy().get("writeScope")), 8);
         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
         appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
         appendReadAvoidanceRules(builder, documents);
         builder.append("If the task requires reading or editing outside this scope, explain why in the structured artifact so Codex and the human gate can review the scope expansion.\n\n");
+    }
+
+    private static void appendCompactMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot) {
+        builder.append("- Governance refs: explorationPlan=")
+                .append(ref(workspaceRoot, documents.agentExplorationPlanPath()))
+                .append("; capabilityCatalog=")
+                .append(ref(workspaceRoot, documents.agentCapabilityCatalogPath()))
+                .append("; readReuseContract=")
+                .append(ref(workspaceRoot, documents.readReuseContractPath()))
+                .append("\n\n");
+        appendExplorationPlan(builder, documents);
+    }
+
+    private static void appendExplorationPlan(StringBuilder builder, Documents documents) {
+        builder.append("## Exploration Plan\n\n");
+        builder.append("- intent=").append(text(documents.agentExplorationPlan().get("explorationIntent")))
+                .append("; mode=").append(text(documents.agentExplorationPlan().get("failureMode")))
+                .append("; directReadBudget=").append(text(documents.agentExplorationPlan().get("maxDirectReadFiles")))
+                .append("; prefer=").append(inlineList(textList(documents.agentExplorationPlan().get("preferredCapabilityKinds")), 3))
+                .append("; capabilities=").append(inlineList(capabilitySummaries(documents.agentCapabilityCatalog()), 4))
+                .append("; allowedReads=").append(inlineList(textList(documents.agentExplorationPlan().get("allowedDirectReadFiles")), 3))
+                .append("\n");
+        builder.append("- Missing evidence: use agent_output_contract.scope_expansion_request; do not broad-read.\n\n");
     }
 
     private static Map<String, Object> buildRepoMap(
@@ -938,6 +972,15 @@ final class RepoScopeGovernance {
         }
     }
 
+    private static String inlineList(List<String> values, int limit) {
+        if (values.isEmpty()) {
+            return "(none planned)";
+        }
+        var shown = values.stream().limit(limit).toList();
+        var suffix = values.size() > shown.size() ? " +" + (values.size() - shown.size()) + " more" : "";
+        return String.join(", ", shown) + suffix;
+    }
+
     @SuppressWarnings("unchecked")
     private static List<Map<String, Object>> mapList(Object value) {
         if (!(value instanceof List<?> list)) {
@@ -962,6 +1005,24 @@ final class RepoScopeGovernance {
                 .map(RepoScopeGovernance::text)
                 .filter(text -> !text.isBlank())
                 .toList();
+    }
+
+    private static List<String> capabilitySummaries(Map<String, Object> capabilityCatalog) {
+        if (capabilityCatalog == null || !(capabilityCatalog.get("capabilities") instanceof List<?> list)) {
+            return List.of();
+        }
+        var values = new ArrayList<String>();
+        for (var item : list) {
+            if (!(item instanceof Map<?, ?> map)) {
+                continue;
+            }
+            var kind = text(map.get("kind"));
+            var provider = text(map.get("provider"));
+            if (!kind.isBlank() && !provider.isBlank()) {
+                values.add(kind + ":" + provider);
+            }
+        }
+        return List.copyOf(values);
     }
 
     private static String text(Object value) {

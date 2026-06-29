@@ -32,7 +32,7 @@ class ExplorationPlanTest {
 
         assertEquals("agent_exploration_plan", document.get("artifactType"));
         assertEquals("contract_discovery", document.get("explorationIntent"));
-        assertEquals("warn", document.get("failureMode"));
+        assertEquals("block", document.get("failureMode"));
         assertEquals(3, ((Number) document.get("maxDirectReadFiles")).intValue());
         assertTrue(document.get("preferredCapabilityKinds") instanceof List<?> kinds
                 && kinds.contains("symbol_index")

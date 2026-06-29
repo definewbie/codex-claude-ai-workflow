@@ -49,6 +49,7 @@ final class AgentPromptRenderer {
         var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics();
         var readReuseContractSemantics = readReuseContractSemantics();
         var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
+        var explorationPlanSection = explorationPlanSection(workspaceRoot, inputRefs);
         var hasInputs = inputRefs != null && !inputRefs.isEmpty();
 
         var content = workspaceGuard + "\n\n" + languagePolicy + "\n\n"
@@ -88,6 +89,10 @@ final class AgentPromptRenderer {
                         hasInputs ? String.join(",", inputRefs) : "(none)",
                         readReuseContractSection, "typed memory read-reuse projection",
                         !readReuseContractSection.isBlank()),
+                new PromptSection("exploration_plan", "exploration_plan",
+                        hasInputs ? String.join(",", inputRefs) : "(none)",
+                        explorationPlanSection, "typed exploration plan projection",
+                        !explorationPlanSection.isBlank()),
                 new PromptSection("contract_review_principles", "static_instruction",
                         "contract-review-principles.md", contractReviewPrinciples, "review principles", true),
                 new PromptSection("prompt_contract", "tool_policy", "ContractRegistry:" + nodeId,
@@ -218,6 +223,14 @@ final class AgentPromptRenderer {
     }
 
     private String readReuseContractSection(Path workspaceRoot, List<String> inputRefs) {
+        return contextPackageSubsection(workspaceRoot, inputRefs, "Read reuse contract:");
+    }
+
+    private String explorationPlanSection(Path workspaceRoot, List<String> inputRefs) {
+        return contextPackageSubsection(workspaceRoot, inputRefs, "## Exploration Plan");
+    }
+
+    private String contextPackageSubsection(Path workspaceRoot, List<String> inputRefs, String marker) {
         if (inputRefs == null || inputRefs.isEmpty()) {
             return "";
         }
@@ -229,7 +242,7 @@ final class AgentPromptRenderer {
             if (!Files.isRegularFile(path)) {
                 continue;
             }
-            var extracted = extractReadReuseContractSection(readIfExists(path));
+            var extracted = extractContextPackageSubsection(readIfExists(path), marker);
             if (!extracted.isBlank()) {
                 return extracted;
             }
@@ -237,13 +250,16 @@ final class AgentPromptRenderer {
         return "";
     }
 
-    private String extractReadReuseContractSection(String contextPackage) {
-        var marker = "Read reuse contract:";
+    private String extractContextPackageSubsection(String contextPackage, String marker) {
         var start = contextPackage.indexOf(marker);
         if (start < 0) {
             return "";
         }
-        var end = contextPackage.indexOf("## User Requirement", start);
+        var end = contextPackage.indexOf("\n## ", start + marker.length());
+        var userRequirement = contextPackage.indexOf("## User Requirement", start);
+        if (userRequirement >= 0 && (end < 0 || userRequirement < end)) {
+            end = userRequirement;
+        }
         if (end < 0) {
             end = contextPackage.length();
         }

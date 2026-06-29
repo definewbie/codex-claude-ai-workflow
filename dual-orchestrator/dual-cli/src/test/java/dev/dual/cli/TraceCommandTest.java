@@ -46,6 +46,11 @@ class TraceCommandTest {
         assertTrue(printed.contains("Tool Governance:"));
         assertTrue(printed.contains("missingRereadReasons=1"));
         assertTrue(printed.contains("explorationWarnings=1"));
+        assertTrue(printed.contains("explorationFailures=0"));
+        assertTrue(printed.contains("exploration violations:"));
+        assertTrue(printed.contains("design.claude_design run-1 warn DIRECT_READ_BUDGET_EXCEEDED"));
+        assertTrue(printed.contains("capabilities=symbol_index:codegraph/command_executable"));
+        assertTrue(printed.contains("plan=.agent/workstreams/ws-trace/memory/exploration-plan-run-1.json"));
         assertTrue(printed.contains("README.md x2 evidenceKnown=true rereadReason=missing"));
         assertTrue(printed.contains("Token Attribution:"));
         assertTrue(printed.contains("top node: design.claude_design"));
@@ -258,6 +263,19 @@ class TraceCommandTest {
                     "explorationPolicy": {
                       "warnCount": 1,
                       "failCount": 0,
+                      "violations": [
+                        {
+                          "runId": "run-1",
+                          "nodeId": "design.claude_design",
+                          "severity": "warn",
+                          "type": "DIRECT_READ_BUDGET_EXCEEDED",
+                          "message": "Actual direct Read count exceeds the exploration plan budget.",
+                          "actualCapabilityUsages": [
+                            {"kind": "symbol_index", "provider": "codegraph", "source": "command_executable"}
+                          ],
+                          "agentExplorationPlanPath": ".agent/workstreams/ws-trace/memory/exploration-plan-run-1.json"
+                        }
+                      ],
                       "warnings": [
                         {
                           "runId": "run-1",

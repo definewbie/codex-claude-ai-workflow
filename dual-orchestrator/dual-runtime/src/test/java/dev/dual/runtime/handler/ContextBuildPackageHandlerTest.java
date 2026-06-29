@@ -168,6 +168,8 @@ class ContextBuildPackageHandlerTest {
                 "oversized recent output must not be expanded into the review package");
         assertFalse(markdown.contains("11.0k / 4.0k"),
                 "governance must not report an over-budget package as successful");
+        assertTrue(markdown.contains("capabilities=direct_file_read:Read"),
+                "compact governance must keep available capability providers agent-facing");
     }
 
     @Test
@@ -1285,6 +1287,10 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Repo Scope Guidance"));
+        assertTrue(markdown.contains("Exploration Plan"));
+        assertTrue(markdown.contains("edit_execution"));
+        assertTrue(markdown.contains("agent-capability-catalog.json"));
+        assertTrue(markdown.contains("exploration-plan-node-001.json"));
         assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
         assertTrue(markdown.contains("Already inspected files"));
         assertTrue(markdown.contains("Read reuse rule"));
