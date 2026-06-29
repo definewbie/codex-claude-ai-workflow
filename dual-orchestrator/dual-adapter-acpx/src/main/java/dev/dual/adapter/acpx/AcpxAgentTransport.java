@@ -32,25 +32,43 @@ public class AcpxAgentTransport {
     private final AcpxFailureClassifier failureClassifier = new AcpxFailureClassifier();
     private final AgentTerminalContract terminalContract = new AgentTerminalContract();
     private final String acpxExecutable;
+    private final String claudeExecutable;
     private final Duration recoverableSignalGrace;
     private final Duration agentProgressTimeout;
     private final Duration sessionCommandTimeout;
     private final Duration queueTtl;
 
     public AcpxAgentTransport() {
-        this("acpx");
+        this("acpx", "claude");
     }
 
     AcpxAgentTransport(String acpxExecutable) {
-        this(acpxExecutable, configuredRecoverableSignalGrace());
+        this(acpxExecutable, "claude");
+    }
+
+    AcpxAgentTransport(String acpxExecutable, String claudeExecutable) {
+        this(acpxExecutable, claudeExecutable, configuredRecoverableSignalGrace());
     }
 
     AcpxAgentTransport(String acpxExecutable, Duration recoverableSignalGrace) {
-        this(acpxExecutable, recoverableSignalGrace, configuredSessionCommandTimeout());
+        this(acpxExecutable, "claude", recoverableSignalGrace);
+    }
+
+    AcpxAgentTransport(String acpxExecutable, String claudeExecutable, Duration recoverableSignalGrace) {
+        this(acpxExecutable, claudeExecutable, recoverableSignalGrace, configuredSessionCommandTimeout());
     }
 
     AcpxAgentTransport(String acpxExecutable, Duration recoverableSignalGrace, Duration sessionCommandTimeout) {
-        this(acpxExecutable, recoverableSignalGrace, configuredAgentProgressTimeout(), sessionCommandTimeout);
+        this(acpxExecutable, "claude", recoverableSignalGrace, sessionCommandTimeout);
+    }
+
+    AcpxAgentTransport(
+            String acpxExecutable,
+            String claudeExecutable,
+            Duration recoverableSignalGrace,
+            Duration sessionCommandTimeout
+    ) {
+        this(acpxExecutable, claudeExecutable, recoverableSignalGrace, configuredAgentProgressTimeout(), sessionCommandTimeout);
     }
 
     AcpxAgentTransport(
@@ -59,8 +77,21 @@ public class AcpxAgentTransport {
             Duration agentProgressTimeout,
             Duration sessionCommandTimeout
     ) {
+        this(acpxExecutable, "claude", recoverableSignalGrace, agentProgressTimeout, sessionCommandTimeout);
+    }
+
+    AcpxAgentTransport(
+            String acpxExecutable,
+            String claudeExecutable,
+            Duration recoverableSignalGrace,
+            Duration agentProgressTimeout,
+            Duration sessionCommandTimeout
+    ) {
         if (acpxExecutable == null || acpxExecutable.isBlank()) {
             throw new IllegalArgumentException("acpxExecutable is required");
+        }
+        if (claudeExecutable == null || claudeExecutable.isBlank()) {
+            throw new IllegalArgumentException("claudeExecutable is required");
         }
         if (recoverableSignalGrace == null || recoverableSignalGrace.isNegative()) {
             throw new IllegalArgumentException("recoverableSignalGrace must be zero or positive");
@@ -72,6 +103,7 @@ public class AcpxAgentTransport {
             throw new IllegalArgumentException("sessionCommandTimeout must be positive");
         }
         this.acpxExecutable = acpxExecutable;
+        this.claudeExecutable = claudeExecutable;
         this.recoverableSignalGrace = recoverableSignalGrace;
         this.agentProgressTimeout = agentProgressTimeout;
         this.sessionCommandTimeout = sessionCommandTimeout;
@@ -91,6 +123,9 @@ public class AcpxAgentTransport {
     }
 
     public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws IOException, InterruptedException {
+        if (request.permissionProfile().requiresNativeClaudeRunner()) {
+            return runNativeClaudeOneShot(request);
+        }
         if (request.permissionProfile().requiresFreshSession()) {
             var bootstrap = ensureSession("claude", request);
             if (!bootstrap.success()) {
@@ -114,6 +149,47 @@ public class AcpxAgentTransport {
             }
         }
         return result;
+    }
+
+    private AcpxRunResult runNativeClaudeOneShot(AcpxRunRequest request) throws IOException, InterruptedException {
+        var command = new ArrayList<String>();
+        command.add(claudeExecutable);
+        command.add("--print");
+        command.add("--input-format");
+        command.add("text");
+        command.add("--output-format");
+        command.add("text");
+        command.add("--bare");
+        command.add("--safe-mode");
+        command.add("--no-session-persistence");
+        command.add("--permission-mode");
+        command.add("dontAsk");
+        command.add("--tools");
+        command.add(request.permissionProfile().allowedToolsArgument());
+        command.add("--allowedTools");
+        command.add(request.permissionProfile().allowedToolsArgument());
+        command.add("--disallowedTools");
+        command.add("Bash,Read,Edit,Write,NotebookEdit,WebFetch,WebSearch");
+
+        var managedProcessBaseline = managedToolPids();
+        var startedAt = Instant.now();
+        var processBuilder = new ProcessBuilder(command)
+                .directory(request.workdir().toFile())
+                .redirectInput(request.promptPath().toFile())
+                .redirectOutput(request.stdoutPath().toFile())
+                .redirectError(request.stderrPath().toFile());
+        processBuilder.environment().put("CLAUDE_CODE_SIMPLE", "1");
+        processBuilder.environment().put("CLAUDE_CODE_SAFE_MODE", "1");
+        var process = processBuilder.start();
+        try {
+            var exitCode = waitForExitOrRecoverableSignal(process, request);
+            return new AcpxRunResult(exitCode, startedAt, Instant.now(), List.copyOf(command));
+        } finally {
+            if (process.isAlive()) {
+                process.destroyForcibly();
+            }
+            cleanupManagedToolsStartedByRun(managedProcessBaseline);
+        }
     }
 
     public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws IOException, InterruptedException {

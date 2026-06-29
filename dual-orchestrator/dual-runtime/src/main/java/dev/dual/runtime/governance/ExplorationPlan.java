@@ -65,6 +65,8 @@ public final class ExplorationPlan {
         var preferred = new ArrayList<String>();
         if (List.of("intake", "design", "plan", "acceptance").contains(stage)) {
             addIfAvailable(preferred, available, "symbol_index");
+        }
+        if (List.of("design", "plan", "acceptance").contains(stage)) {
             addIfAvailable(preferred, available, "token_filtered_shell");
         }
         addIfAvailable(preferred, available, "direct_file_read");
@@ -90,7 +92,7 @@ public final class ExplorationPlan {
 
     private static int maxDirectReads(String stage) {
         return switch (stage) {
-            case "intake" -> 3;
+            case "intake" -> 0;
             case "acceptance" -> 4;
             case "design", "plan" -> 6;
             default -> 12;

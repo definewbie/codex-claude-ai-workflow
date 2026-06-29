@@ -35,6 +35,8 @@ final class RepoScopeGovernance {
     };
     private static final int MAX_REPO_FILES = 300;
     private static final int MAX_SCOPE_FILES = 24;
+    private static final int MAX_SEED_DIGEST_FILES = 8;
+    private static final int MAX_SEED_DIGEST_CHARS = 1200;
     private static final Pattern PATHISH = Pattern.compile("^[\\w./@+\\-]+\\.[\\w+\\-]+$|^[\\w./@+\\-]+/.*$");
     private static final Set<String> IGNORED_DIRS = Set.of(
             ".git", ".agent", "node_modules", "target", "build", "dist", ".next", ".nuxt",
@@ -164,6 +166,8 @@ final class RepoScopeGovernance {
         builder.append("- Governance report: ").append(ref(workspaceRoot, documents.governanceReportPath())).append("\n\n");
         appendExplorationPlan(builder, documents);
         appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 8);
+        appendPathList(builder, "Contract scope candidates", textList(documents.plan().get("contractScopeCandidates")), 12);
+        appendSeedEvidenceDigests(builder, documents);
         appendPathList(builder, "Allowed write files", textList(documents.policy().get("writeScope")), 8);
         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
         appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
@@ -192,6 +196,21 @@ final class RepoScopeGovernance {
                 .append("; allowedReads=").append(inlineList(textList(documents.agentExplorationPlan().get("allowedDirectReadFiles")), 3))
                 .append("\n");
         builder.append("- Missing evidence: use agent_output_contract.scope_expansion_request; do not broad-read.\n\n");
+    }
+
+    private static void appendSeedEvidenceDigests(StringBuilder builder, Documents documents) {
+        var digests = mapList(documents.plan().get("seedEvidenceDigests"));
+        if (digests.isEmpty()) {
+            return;
+        }
+        builder.append("## Seed Evidence Digests\n\n");
+        builder.append("Use these orchestrator-prepared digests before direct file reads. They are bounded projections from recommended files, not a license for broad repository exploration.\n\n");
+        for (var item : digests.stream().limit(MAX_SEED_DIGEST_FILES).toList()) {
+            builder.append("- ").append(text(item.get("path"))).append(": ")
+                    .append(text(item.get("digest")).replace("\n", " / "))
+                    .append("\n");
+        }
+        builder.append("\n");
     }
 
     private static Map<String, Object> buildRepoMap(
@@ -245,7 +264,9 @@ final class RepoScopeGovernance {
         addContractPaths(candidates, workstreamDir, objectMapper);
         addEvidenceFiles(candidates, manifest);
         addGitChangedFiles(candidates, workstreamDir);
-        addRepoMapMatches(candidates, repoMap, readRequirement(workstreamDir));
+        var requirement = readRequirement(workstreamDir);
+        var requirementTerms = requirementTerms(requirement);
+        addRepoMapMatches(candidates, repoMap, requirementTerms);
         var readCandidates = bounded(candidates, MAX_SCOPE_FILES);
         var writeCandidates = stageAllowsBusinessWrites(stageId)
                 ? readCandidates.stream().filter(RepoScopeGovernance::looksEditable).limit(MAX_SCOPE_FILES).toList()
@@ -266,6 +287,8 @@ final class RepoScopeGovernance {
         document.put("iterationId", context.instance().iterationId());
         document.put("source", "task_contract+evidence_manifest+git_evidence+repo_map");
         document.put("readCandidates", readCandidates);
+        document.put("contractScopeCandidates", contractScopeCandidates(readCandidates));
+        document.put("seedEvidenceDigests", seedEvidenceDigests(workspaceRoot, readCandidates, requirementTerms));
         document.put("writeCandidates", writeCandidates);
         document.put("previouslyReadFiles", previousReads.keySet().stream().limit(MAX_SCOPE_FILES).toList());
         document.put("repeatedReadAvoidance", repeatedReadAvoidance);
@@ -632,21 +655,51 @@ final class RepoScopeGovernance {
         }
     }
 
-    private static void addRepoMapMatches(Set<String> candidates, Map<String, Object> repoMap, String requirement) {
-        var terms = requirementTerms(requirement);
+    private static void addRepoMapMatches(Set<String> candidates, Map<String, Object> repoMap, List<String> terms) {
+        var scored = new ArrayList<Map.Entry<String, Integer>>();
         for (var item : mapList(repoMap.get("files"))) {
             var path = text(item.get("path"));
             if (path.isBlank()) {
                 continue;
             }
-            var lower = path.toLowerCase(java.util.Locale.ROOT);
-            if (terms.stream().anyMatch(lower::contains)) {
-                addPathCandidate(candidates, path);
-            }
-            if (candidates.size() >= MAX_SCOPE_FILES) {
-                return;
+            var score = repoPathScore(path, terms);
+            if (score > 0) {
+                scored.add(Map.entry(path, score));
             }
         }
+        scored.stream()
+                .sorted((left, right) -> {
+                    var byScore = Integer.compare(right.getValue(), left.getValue());
+                    return byScore != 0 ? byScore : left.getKey().compareTo(right.getKey());
+                })
+                .limit(MAX_SCOPE_FILES)
+                .forEach(entry -> addPathCandidate(candidates, entry.getKey()));
+    }
+
+    private static int repoPathScore(String path, List<String> terms) {
+        if (terms == null || terms.isEmpty()) {
+            return 0;
+        }
+        var normalizedPath = path.toLowerCase(java.util.Locale.ROOT);
+        var searchablePath = normalizedPath.replace('_', '-');
+        var score = 0;
+        for (var term : terms) {
+            var normalizedTerm = term.toLowerCase(java.util.Locale.ROOT);
+            if (normalizedTerm.isBlank()) {
+                continue;
+            }
+            var searchableTerm = normalizedTerm.replace('_', '-');
+            if (searchablePath.contains(searchableTerm)) {
+                score += searchableTerm.length() >= 7 ? 2 : 1;
+            }
+        }
+        if (normalizedPath.startsWith("docs/")) {
+            score += 1;
+        }
+        if (looksEditable(normalizedPath)) {
+            score += 1;
+        }
+        return score;
     }
 
     private static List<String> requirementTerms(String requirement) {
@@ -659,7 +712,76 @@ final class RepoScopeGovernance {
                 terms.add(token);
             }
         }
-        return terms.stream().limit(16).toList();
+        return terms.stream().toList();
+    }
+
+    private static List<String> contractScopeCandidates(List<String> readCandidates) {
+        if (readCandidates == null || readCandidates.isEmpty()) {
+            return List.of();
+        }
+        return readCandidates.stream()
+                .filter(path -> !path.isBlank())
+                .filter(path -> !path.startsWith(".agent/"))
+                .limit(MAX_SCOPE_FILES)
+                .toList();
+    }
+
+    private static List<Map<String, Object>> seedEvidenceDigests(
+            Path workspaceRoot,
+            List<String> readCandidates,
+            List<String> requirementTerms
+    ) throws IOException {
+        var digests = new ArrayList<Map<String, Object>>();
+        for (var path : contractScopeCandidates(readCandidates)) {
+            if (digests.size() >= MAX_SEED_DIGEST_FILES) {
+                break;
+            }
+            var absolute = workspaceRoot.resolve(path).normalize();
+            if (!absolute.startsWith(workspaceRoot.toAbsolutePath().normalize()) || !Files.isRegularFile(absolute)) {
+                continue;
+            }
+            var digest = seedDigest(absolute, requirementTerms);
+            if (digest.isBlank()) {
+                continue;
+            }
+            var item = new LinkedHashMap<String, Object>();
+            item.put("path", path);
+            item.put("digest", digest);
+            item.put("source", "orchestrator_seed_projection");
+            digests.add(item);
+        }
+        return digests;
+    }
+
+    private static String seedDigest(Path file, List<String> requirementTerms) throws IOException {
+        var lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+        var selected = new ArrayList<String>();
+        var terms = requirementTerms == null ? List.<String>of() : requirementTerms.stream()
+                .map(term -> term.toLowerCase(java.util.Locale.ROOT).replace('_', '-'))
+                .filter(term -> !term.isBlank())
+                .toList();
+        for (var line : lines) {
+            var trimmed = line.strip();
+            if (trimmed.isBlank()) {
+                continue;
+            }
+            var lower = trimmed.toLowerCase(java.util.Locale.ROOT).replace('_', '-');
+            if (trimmed.startsWith("#") || terms.stream().anyMatch(lower::contains)) {
+                selected.add(trimmed);
+            }
+            if (selected.size() >= 8) {
+                break;
+            }
+        }
+        if (selected.isEmpty()) {
+            selected.addAll(lines.stream()
+                    .map(String::strip)
+                    .filter(line -> !line.isBlank())
+                    .limit(4)
+                    .toList());
+        }
+        var digest = String.join(" / ", selected);
+        return digest.length() <= MAX_SEED_DIGEST_CHARS ? digest : digest.substring(0, MAX_SEED_DIGEST_CHARS);
     }
 
     private static void addPathCandidate(Set<String> candidates, String raw) {

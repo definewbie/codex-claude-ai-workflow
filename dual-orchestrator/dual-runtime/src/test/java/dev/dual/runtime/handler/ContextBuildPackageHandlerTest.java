@@ -1396,6 +1396,48 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void governedIntakePackageDerivesConcreteScopeCandidatesFromRepoMap() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), """
+                # 复诊准备清单与缺失资料提醒闭环
+
+                如果已有 follow-up summary / treatment event / exam report 聚合逻辑，优先在其附近补充。
+                前端复诊相关页面能展示这个准备状态。
+                """, StandardCharsets.UTF_8);
+        writeFile("backend/app/api/treatment_events.py", "def list_treatment_events(): pass\n");
+        writeFile("backend/app/schemas/summary.py", "class FollowUpSummary: pass\n");
+        writeFile("miniprogram/src/pages/follow-up-summary/index.vue", "<template>follow up</template>\n");
+        writeFile("backend/tests/test_treatment_events.py", "def test_treatment_event_chain(): pass\n");
+        writeFile("docs/superpowers/specs/2026-05-20-treatment-event-chain-api-usage.md", """
+                # Treatment Event Chain API Usage
+
+                follow-up summary should reuse treatment event and exam report evidence.
+                """);
+
+        var result = handler.execute(ctx("requirements", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Contract scope candidates"));
+        assertTrue(markdown.contains("Seed Evidence Digests"));
+        assertTrue(markdown.contains("backend/app/api/treatment_events.py"));
+        assertTrue(markdown.contains("miniprogram/src/pages/follow-up-summary/index.vue"));
+
+        var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertTrue(plan.get("readCandidates") instanceof List<?> candidates
+                        && candidates.contains("backend/app/api/treatment_events.py")
+                        && candidates.contains("miniprogram/src/pages/follow-up-summary/index.vue"),
+                "Chinese requirements with English domain anchors should produce concrete repo-map candidates");
+        assertTrue(plan.get("contractScopeCandidates") instanceof List<?> scopeCandidates
+                        && scopeCandidates.contains("backend/app/api/treatment_events.py")
+                        && scopeCandidates.contains("miniprogram/src/pages/follow-up-summary/index.vue"),
+                "contract scope candidates should be typed paths the intake artifact can legally cite");
+        assertTrue(plan.get("seedEvidenceDigests") instanceof List<?> digests
+                        && !digests.isEmpty(),
+                "intake should receive bounded seed evidence instead of needing direct Read");
+    }
+
+    @Test
     void reviewTargetReceivesTypedSourceRereadAllowance() throws Exception {
         System.setProperty("dual.context.governance.enabled", "true");
         Files.createDirectories(wsDir.resolve("memory"));
@@ -1488,6 +1530,12 @@ class ContextBuildPackageHandlerTest {
     }
 
     // --- Helper ---
+
+    private void writeFile(String relativePath, String content) throws Exception {
+        var path = tempDir.resolve(relativePath);
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, content, StandardCharsets.UTF_8);
+    }
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
         return ctx(profile, inputRefs, "next.node");

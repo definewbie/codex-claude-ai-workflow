@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExplorationPolicyEvaluatorTest {
     @Test
-    void warnsWhenIntakePerformsImplementationLevelDirectReads() {
+    void blocksWhenIntakePerformsAnyDirectRead() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
                 "intake",
@@ -36,12 +36,12 @@ class ExplorationPolicyEvaluatorTest {
         assertEquals("block", result.get("mode"));
         assertEquals("failed", result.get("status"));
         assertTrue(result.get("violations") instanceof List<?> violations
-                && violations.toString().contains("DIRECT_READ_BUDGET_EXCEEDED")
+                && violations.toString().contains("DIRECT_READ_FORBIDDEN")
                 && violations.toString().contains("READ_OUTSIDE_EXPLORATION_SCOPE"));
     }
 
     @Test
-    void passesWhenReadsStayWithinPlan() {
+    void passesWhenIntakeUsesNoDirectReads() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
                 "intake",
@@ -55,7 +55,7 @@ class ExplorationPolicyEvaluatorTest {
 
         var result = ExplorationPolicyEvaluator.evaluate(
                 plan.toDocument(),
-                List.of("README.md", "docs/product.md")
+                List.of()
         );
 
         assertEquals("pass", result.get("status"));
@@ -63,7 +63,7 @@ class ExplorationPolicyEvaluatorTest {
     }
 
     @Test
-    void allowsOutsideReadsWhenTypedScopeExpansionRequestsTheFiles() {
+    void intakeScopeExpansionDoesNotPermitDirectReadWhenRunnerForbidsIt() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
                 "intake",
@@ -82,8 +82,9 @@ class ExplorationPolicyEvaluatorTest {
                 List.of("src/newEvidence.js")
         );
 
-        assertEquals("pass", result.get("status"));
-        assertEquals(List.of(), result.get("violations"));
+        assertEquals("failed", result.get("status"));
+        assertTrue(result.get("violations") instanceof List<?> violations
+                && violations.toString().contains("DIRECT_READ_FORBIDDEN"));
     }
 
     @Test
@@ -117,13 +118,13 @@ class ExplorationPolicyEvaluatorTest {
     void scopeExpansionPreventsBudgetFailureButDoesNotWaiveUnrequestedFiles() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
-                "intake",
-                "intake.claude_brainstorm",
+                "design",
+                "design.claude_design",
                 "node-001",
                 "iter-001",
                 List.of("README.md"),
                 List.of(),
-                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "intake.claude_brainstorm", List.of())
+                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "design.claude_design", List.of())
         );
 
         var result = ExplorationPolicyEvaluator.evaluate(
@@ -166,7 +167,7 @@ class ExplorationPolicyEvaluatorTest {
     }
 
     @Test
-    void doesNotInferImplementationLevelFromPathWithoutRepoMapKind() {
+    void intakeDirectReadIsForbiddenEvenWhenRepoMapKindIsDocumentation() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
                 "intake",
@@ -186,21 +187,22 @@ class ExplorationPolicyEvaluatorTest {
                 Map.of("src/newEvidence.js", "doc")
         );
 
-        assertEquals("pass", result.get("status"));
-        assertEquals(List.of(), result.get("violations"));
+        assertEquals("failed", result.get("status"));
+        assertTrue(result.get("violations") instanceof List<?> violations
+                && violations.toString().contains("DIRECT_READ_FORBIDDEN"));
     }
 
     @Test
     void warnsWhenPreferredCapabilityWasAvailableButNotUsedBeforeBroadReads() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
-                "intake",
-                "intake.claude_brainstorm",
+                "design",
+                "design.claude_design",
                 "node-001",
                 "iter-001",
                 List.of("README.md", "docs/product.md", "docs/api.md"),
                 List.of(),
-                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "intake.claude_brainstorm",
+                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "design.claude_design",
                         List.of("codegraph", "rtk"))
         );
 

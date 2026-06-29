@@ -66,7 +66,14 @@ public final class ExplorationPolicyEvaluator {
         var blockMode = "block".equals(failureMode);
         var violations = new ArrayList<Map<String, Object>>();
 
-        if (maxDirectReads > 0 && actualReads.size() > maxDirectReads && requestedScopeFiles.isEmpty()) {
+        if (maxDirectReads == 0 && !actualReads.isEmpty()) {
+            violations.add(violation(
+                    "DIRECT_READ_FORBIDDEN",
+                    "The exploration plan forbids direct Read in this stage.",
+                    Map.of("actualDirectReadFiles", actualReads),
+                    severity(blockMode)
+            ));
+        } else if (maxDirectReads > 0 && actualReads.size() > maxDirectReads && requestedScopeFiles.isEmpty()) {
             violations.add(violation(
                     "DIRECT_READ_BUDGET_EXCEEDED",
                     "Actual direct Read count exceeds the exploration plan budget.",

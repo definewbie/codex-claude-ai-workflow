@@ -58,13 +58,36 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Node: intake.claude_brainstorm"));
         assertTrue(prompt.contains("Build a safer agent workflow."));
         assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("This intake run uses restricted contract discovery"));
+        assertTrue(prompt.contains("Do not output shell commands or Bash code fences"));
+        assertFalse(prompt.contains("Run all shell commands from the effective workspace above."));
         assertTrue(prompt.contains("Do not create, edit, or delete files under .agent/"));
         assertTrue(prompt.contains("Only the orchestrator writes run ledger artifacts"));
+        assertTrue(prompt.contains("Do not start an open-ended repository survey"));
+        assertTrue(prompt.contains("still emit the required `task_contract_proposal` plus final `dual-control` block"));
+        assertTrue(prompt.contains("This intake stage is seed-only contract drafting"));
+        assertTrue(prompt.contains("do not call tools"));
+        assertTrue(prompt.contains("do not ask to list directories"));
+        assertTrue(prompt.contains("A prose-only response is a contract failure"));
         assertTrue(prompt.contains("Explicitly address each Must Fix"));
         assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan"));
         assertFalse(prompt.contains("Read the repository"));
+        assertFalse(prompt.contains("bounded discovery tools"));
         assertTrue(prompt.contains("<dual-artifact type=\"task_contract_proposal\" version=\"1\">"));
         assertTrue(prompt.contains("\"artifact_type\": \"task_contract_proposal\""));
+    }
+
+    @Test
+    void nonIntakePromptsKeepShellWorkspaceGuard() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "implement.claude_implement", "implement-claude", List.of());
+
+        assertTrue(prompt.contains("Run all shell commands from the effective workspace above."));
+        assertFalse(prompt.contains("This intake run uses restricted contract discovery"));
     }
 
     @Test
@@ -165,6 +188,34 @@ class AgentPromptRendererTest {
 
         assertTrue(prompt.contains("Execution Workspace Guard"));
         assertTrue(prompt.contains(tempDir.toAbsolutePath().normalize().toString()));
+        assertTrue(prompt.contains("[outside-workspace path removed]"));
+        assertTrue(!prompt.contains("/private/projects/internal-product"));
+    }
+
+    @Test
+    void preservesRepoRelativePathsWhenSanitizingContextPreview() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+        Files.writeString(contextPath, """
+                - Contract scope candidates:
+                  - miniprogram/src/pages/follow-up-summary/index.vue
+                  - backend/app/models/treatment_event.py
+                External file: /private/projects/internal-product/src/main.py
+                """);
+
+        var prompt = new AgentPromptRenderer()
+                .render(
+                        tempDir,
+                        "ws-test",
+                        "intake.claude_brainstorm",
+                        "intake-claude-brainstorm",
+                        List.of(".agent/workstreams/ws-test/context/node-context.md")
+                );
+
+        assertTrue(prompt.contains("miniprogram/src/pages/follow-up-summary/index.vue"));
+        assertTrue(prompt.contains("backend/app/models/treatment_event.py"));
         assertTrue(prompt.contains("[outside-workspace path removed]"));
         assertTrue(!prompt.contains("/private/projects/internal-product"));
     }

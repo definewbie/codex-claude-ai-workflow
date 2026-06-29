@@ -26,7 +26,7 @@ final class AgentPromptRenderer {
             "required_control_keys", "decision_example"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
-    private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(?<!<)(/[^\\s\"'`)]+)");
+    private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(?<![<\\p{Alnum}._-])(/[^\\s\"'`)]+)");
 
     String render(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
         return renderWithSections(workspaceRoot, workstreamId, nodeId, promptTemplate, inputRefs).content();
@@ -45,7 +45,7 @@ final class AgentPromptRenderer {
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
-        var workspaceGuard = workspaceGuard(workspaceRoot);
+        var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
         var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics();
         var readReuseContractSemantics = readReuseContractSemantics();
         var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
@@ -367,8 +367,20 @@ final class AgentPromptRenderer {
         }
     }
 
-    private String workspaceGuard(Path workspaceRoot) {
+    private String workspaceGuard(Path workspaceRoot, String nodeId) {
         var root = workspaceRoot.toAbsolutePath().normalize();
+        if ("intake.claude_brainstorm".equals(nodeId)) {
+            return """
+                    ## Execution Workspace Guard
+
+                    - Effective workspace: %s
+                    - This intake run uses restricted contract discovery. Use orchestrator-provided context and bounded discovery only.
+                    - Do not output shell commands or Bash code fences as a substitute for the required structured artifact.
+                    - Modify files only inside the effective workspace.
+                    - Ignore absolute paths outside the effective workspace even if they appear in quoted prior outputs.
+                    - Do not run commands with `git -C` pointing outside the effective workspace.
+                    """.formatted(root).stripTrailing();
+        }
         return """
                 ## Execution Workspace Guard
 

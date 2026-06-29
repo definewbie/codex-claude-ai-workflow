@@ -143,6 +143,7 @@ public final class TraceCommand implements Callable<Integer> {
                         + run.durationMs() + "ms  "
                         + sessionScopeLabel(run)
                         + sessionCompactionLabel(run)
+                        + explorationPolicyLabel(run)
                         + promptProvenanceLabel(paths, run)
                         + tokenLabel(paths, run));
             }
@@ -583,6 +584,20 @@ public final class TraceCommand implements Callable<Integer> {
                 ? ""
                 : " seed=" + run.sessionCompactionSeedPath();
         return "compact=" + run.sessionCompactionMode() + seed + "  ";
+    }
+
+    private String explorationPolicyLabel(RunMetadata run) {
+        var result = map(run.explorationPolicyResult());
+        var status = text(result.get("status"));
+        var plan = run.agentExplorationPlanPath() == null ? "" : run.agentExplorationPlanPath();
+        if (status.isBlank() && plan.isBlank()) {
+            return "";
+        }
+        var violations = mapList(result.get("violations")).size();
+        return "exploration=" + (status.isBlank() ? "-" : status)
+                + (violations == 0 ? "" : " violations=" + violations)
+                + (plan.isBlank() ? "" : " plan=" + plan)
+                + "  ";
     }
 
     private String tokenLabel(WorkstreamPaths paths, RunMetadata run) {

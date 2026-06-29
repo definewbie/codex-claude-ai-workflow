@@ -49,8 +49,10 @@ public final class AgentCapabilityCatalog {
         }
 
         var capabilities = new ArrayList<Map<String, Object>>();
-        capabilities.add(capability("direct_file_read", "Read", "Direct file content retrieval tool."));
-        if (commands.contains("rtk")) {
+        if (allowsDirectFileRead(nodeDefinitionId)) {
+            capabilities.add(capability("direct_file_read", "Read", "Direct file content retrieval tool."));
+        }
+        if (allowsTokenFilteredShell(nodeDefinitionId) && commands.contains("rtk")) {
             capabilities.add(capability("token_filtered_shell", "rtk", "Token-filtered shell command surface."));
         }
         if (commands.contains("codegraph")) {
@@ -89,6 +91,14 @@ public final class AgentCapabilityCatalog {
         item.put("provider", provider);
         item.put("description", description);
         return item;
+    }
+
+    private static boolean allowsDirectFileRead(String nodeDefinitionId) {
+        return !"intake.claude_brainstorm".equals(text(nodeDefinitionId));
+    }
+
+    private static boolean allowsTokenFilteredShell(String nodeDefinitionId) {
+        return !"intake.claude_brainstorm".equals(text(nodeDefinitionId));
     }
 
     private static Set<String> availableCommands() {

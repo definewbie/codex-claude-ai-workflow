@@ -42,6 +42,66 @@ dualctl() {
 make_fake_acpx() {
   local bin_dir="$1"
   mkdir -p "$bin_dir"
+  cat > "$bin_dir/claude" <<'FAKE_CLAUDE'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--version" ]]; then
+  echo "semantic-boundary-fake-claude 1.0"
+  exit 0
+fi
+
+case_name="${DUAL_SEMANTIC_CASE:-}"
+
+tool_read_readme() {
+  cat <<'EOF'
+[tool] Read README.md (completed)
+  input: {"file_path":"README.md"}
+EOF
+}
+
+tool_read_notes() {
+  cat <<'EOF'
+[tool] Read NOTES.md (completed)
+  input: {"file_path":"NOTES.md"}
+EOF
+}
+
+task_contract_proposal() {
+  cat <<'EOF'
+<dual-artifact type="task_contract_proposal" version="1">
+{
+  "artifact_type": "task_contract_proposal",
+  "schema_version": 1,
+  "objective": "Add goodbye() and document it.",
+  "scope": {
+    "included": ["main.py", "README.md"],
+    "excluded": ["Do not change __main__ output"]
+  },
+  "acceptance_criteria": [
+    "main.py defines goodbye() returning goodbye",
+    "README.md documents goodbye()"
+  ],
+  "constraints": ["Keep changes scoped"],
+  "non_goals": ["No dependencies"],
+  "risk_areas": ["Missing docs"],
+  "test_requirements": ["Import main and check goodbye"],
+  "evidence_refs": ["main.py", "README.md"],
+  "open_questions": []
+}
+</dual-artifact>
+
+```dual-control
+decision: READY_FOR_PRODUCT_REVIEW
+summary: Requirement is clear.
+```
+EOF
+}
+
+task_contract_proposal
+FAKE_CLAUDE
+  chmod +x "$bin_dir/claude"
+
   cat > "$bin_dir/acpx" <<'FAKE'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -206,6 +266,9 @@ case "$template" in
     agent_contract "READY_FOR_PRODUCT_REVIEW" "Product review passed."
     ;;
   design-claude.md)
+    if [[ "$case_name" == "reread-reason" ]]; then
+      tool_read_notes
+    fi
     agent_contract "READY_FOR_ARCH_REVIEW" "Design passed."
     ;;
   design-codex-review.md)

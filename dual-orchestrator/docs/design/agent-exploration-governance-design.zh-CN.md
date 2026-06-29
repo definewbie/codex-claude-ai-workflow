@@ -176,7 +176,7 @@
 
 #### ExplorationPlan
 
-每个 agent run 前由 context builder 生成：
+每个 agent run 前由 context builder 生成。下面是当前 P2 的 intake 形态：
 
 ```json
 {
@@ -190,15 +190,13 @@
     "是否需要向人请求范围扩展？"
   ],
   "preferredCapabilityKinds": [
-    "symbol_index",
-    "token_filtered_shell"
+    "symbol_index"
   ],
   "directReadPolicy": {
     "allowedWhen": [
-      "seed file listed by orchestrator",
-      "exact current content needed to validate contract boundary"
+      "future stream-json ToolUsage integration only"
     ],
-    "maxDirectReads": 3
+    "maxDirectReads": 0
   },
   "forbiddenIntent": [
     "implementation_design",
@@ -213,11 +211,36 @@
 }
 ```
 
+#### Contract scope candidates / seed evidence digests
+
+`intake.claude_brainstorm` 当前不能在执行期使用 direct file read。原因是 native Claude one-shot 可以收住
+`Bash/Edit/Write` 等工具边界，但在没有 stream-json execution fact 接入前，允许 `Read` 会让后置
+`ExplorationPolicyResult` 无法可靠校验实际读取。
+因此当前 P2 实现中，intake contract discovery 依靠 orchestrator seed projection，而不是 agent direct Read。
+
+`intake.claude_brainstorm` 不能在执行期做实现级仓库探索，但 `task_contract_proposal.scope.included`
+又必须是可机械校验的 repo-relative path。因此 contract discovery 需要一个明确的中间投影：
+
+- `file_relevance_plan.contractScopeCandidates`：orchestrator 从 task contract、evidence manifest、git evidence、repo map
+  和需求关键词中计算出的合法候选路径。agent 只能从这些路径中选择 `scope.included`，或用
+  `new:<repo-relative-file>` 声明确实不存在的新文件。
+- `file_relevance_plan.seedEvidenceDigests`：orchestrator 对候选 seed 文件生成的 bounded digest。它提供足够的产品/范围证据，
+  让 intake 不需要为了形成合同而直接读取 docs/source/test。
+
+如果未来把 native Claude runner 改成 `stream-json` 并能把 `Read` tool events 转成 `ToolUsage` typed fact，
+可以重新打开 intake 的 bounded direct read budget；在此之前，`AgentCapabilityCatalog` 不应向
+`intake.claude_brainstorm` 发布 `direct_file_read` 或 `token_filtered_shell` capability，
+`ExplorationPlan.maxDirectReadFiles` 应为 `0`，`preferredCapabilityKinds` 不应包含 shell/read 能力。
+
+这不是放宽 contract validator。相反，validator 继续拒绝自然语言占位、ledger/context metadata 和不存在路径。
+如果候选路径不足，agent 必须在 `open_questions` / `risk_areas` / `test_requirements` 里记录缺口，
+但 `scope.included` 仍必须保持 path-shaped。
+
 #### 阶段语义
 
 | 阶段 | explorationIntent | 允许探索 | 不允许 |
 |---|---|---|---|
-| intake | `contract_discovery` | seed / memory / symbol index / 少量边界验证 | 实现设计、全量 API 阅读、测试方案 |
+| intake | `contract_discovery` | seed / memory / contractScopeCandidates / seedEvidenceDigests / symbol index | direct Read、shell/listing、实现设计、全量 API 阅读、测试方案 |
 | design | `architecture_discovery` | 目标模块结构、依赖、接口边界 | 修改代码、跑实现级验证 |
 | plan | `change_planning` | 已选方案涉及的文件、风险、验证路径 | 重新做需求发现 |
 | implement | `edit_execution` | 编辑文件前精确读取、局部依赖 | 扩展需求范围 |
@@ -227,7 +250,7 @@
 
 run 完成后，根据 `ToolUsage` 与 `ExplorationPlan` 生成 `ExplorationPolicyResult`：
 
-- direct Read 超过预算；
+- direct Read 超过预算；当前 intake 预算为 0，因此任何 direct Read 都是 violation；
 - Read 不在 seed / readScope / changedFiles / scopeExpansion 中；
 - intake 出现实现级大量 source/API 读取；
 - 没有使用可用的 preferred capability，直接大范围 Read；
@@ -386,13 +409,13 @@ memory/read-reuse 仍然必要，但它是下游机制：
    - `token_filtered_shell` capability 可用，provider 是 rtk；
    - `direct_file_read` capability 可用，provider 是 Read。
 2. exploration plan 声明：
-   - intake 首选 `symbol_index` / `token_filtered_shell`；
-   - direct file read 只用于 seed 或精确边界验证。
+   - 当前 P2 intake 首选 `symbol_index`，并显式不发布 shell/read 能力；
+   - direct file read 只在未来 stream-json ToolUsage 能转成 typed fact 后，才可重新作为 bounded budget 打开。
 3. agent-facing projection 展示：
-   - “For contract discovery, use available `symbol_index` capability before direct file reads.”
+   - “For contract discovery, use orchestrator seed projections and available `symbol_index`; do not request shell/list/read tools in intake.”
    - 如果 provider 是 codegraph，则展示具体入口名；如果不是，则展示可用替代能力。
 4. harness 在 run 后评价：
-   - 如果 direct Read 大量发生且没有 capability 尝试或 scope expansion，记录/阻断。
+   - 如果 intake 出现 direct Read 或 shell/listing 请求，记录/阻断。
 
 这样触发 skill 的方式是 **capability-driven**，不是 if-else prompt。
 
@@ -407,15 +430,15 @@ memory/read-reuse 仍然必要，但它是下游机制：
 - 第二轮 intake 仍有 `707k` tokens；
 - 问题集中在“contract discovery 阶段做了 implementation discovery”。
 
-如果方案 B 生效，预期：
+如果当前 P2 seed-only contract drafting 生效，预期：
 
 | 指标 | 预期 |
 |---|---|
-| intake direct Read 文件数 | 从 16 降到 3-5 |
+| intake direct Read 文件数 | 从 16 降到 0 |
 | intake tool calls | 降 40%-70% |
 | intake elapsed time | 降 30%-60%，取决于 provider 推理速度 |
 | cachedRead token | 不一定同比下降，因为 provider cache 仍可能命中，但 transcript 增长会减缓 |
-| 质量 | 不应下降；缺证据时转 scope expansion，而不是少审 |
+| 质量 | 不应下降；缺证据时写入 typed contract 的 open_questions/risk/test requirements，而不是 prose-only 或继续探索 |
 
 重要：收益不是靠“少看证据”，而是靠 **先用索引/seed 判断范围，缺证据时结构化请求扩展**。
 
@@ -478,7 +501,7 @@ memory/read-reuse 仍然必要，但它是下游机制：
 
 1. simple semantic case：验证不会误杀。
 2. cancer-clinic same task：
-   - stop-loss：intake direct Read > 5 且无 scope expansion → stop；
+   - stop-loss：intake direct Read > 0 或出现 shell/listing tool intent → stop；
    - stop-loss：GLM token > 3M before acceptance → stop；
    - 验证：intake 不再读 16 个文件；如果证据不足，输出 scope expansion request。
 
@@ -559,9 +582,9 @@ Accepted debt:
 
 - P2 intake BLOCK：`ExplorationPlan.failureMode=intake:block`；`ArtifactContractValidator` 在 validated `agent_output_contract` sidecar 可用后回刷 actual report / result / run.json，并将 `status=failed` 的 exploration policy result 转为 contract failure。放行依据只来自 typed `scope_expansion_request.requested_paths`，不能从 stdout/transcript/prose 推断。
 - P2 误杀保护：`actualDirectReadFiles=[]` 必须保持为空，不得 fallback 到 `actualReadFiles`；token-filtered search/list 不计入 direct read；scope expansion 只放行请求的 bounded files，不是全局 waiver。
-- P2 execution permission：`intake.claude_brainstorm` 在 bundled `full` / `contract` workflow 中使用 `permission_profile=contract_discovery`。该 profile 在 acpx adapter 层只允许 `Grep,Glob`，只 auto-approve ACP `search`，不传 `--approve-reads`，并显式传 `--deny-all` 与 `--no-terminal`。原因是 acpx 的 `permission-policy` 只处理 ACP permission request；`fs/read_text_file` 与 Terminal 这类 adapter capability 需要由 `permissionMode=deny-all` / terminal capability exposure 直接约束。该 profile 不允许 direct `Read` 或 unrestricted Terminal，这是执行前边界，用于阻止单个长 run 在后置 validator 生效前做实现级文件读取。
+- P2 execution permission：`intake.claude_brainstorm` 在 bundled `full` / `contract` workflow 中使用 `permission_profile=contract_discovery`。该 profile 是执行前边界：只允许 `Grep,Glob` 类搜索能力，不允许 direct `Read` 或 unrestricted Terminal，用于阻止单个长 run 在后置 validator 生效前做实现级文件读取。adapter 必须选择能真实 enforce 该 profile 的 runner；对 Claude 来说，当前实现使用 native Claude one-shot runner，而不是 acpx Claude ACP persistent session。
 - P2 Claude Code runtime isolation：`contract_discovery` 还必须设置 `CLAUDE_CODE_SIMPLE=1`。原因是 Claude Code 默认会加载 project/local settings、auto-memory、CLAUDE.md discovery 等隐式上下文通道；这些不是 orchestrator-managed seed / memory / contract scope / Exploration Plan，也不会被 acpx `permission-policy` 或 `--deny-all` 完整表达。intake contract discovery 的 SoT 只能来自 orchestrator 显式装配的上下文；若需要更多证据，agent 必须输出 typed `scope_expansion_request`，不能通过 Claude project memory 或本地自动发现绕过探索计划。
-- P2 restricted session bootstrap：`contract_discovery` 必须在 prompt 前创建 fresh restricted session，并把同一组 `--deny-all` / `--no-terminal` / `--allowed-tools Grep,Glob` / `CLAUDE_CODE_SIMPLE=1` 用于 session 创建。原因是 acpx `sessions ensure` 默认创建的 Claude ACP session 不携带这些 session options，后续 prompt 级 `allowedTools` 不能可靠收紧已存在 session 的工具能力。该 profile 不复用旧 session；intake 的连续性只能来自 orchestrator context package，不来自 provider transcript 或 Claude Code session memory。
+- P2 native restricted runner：`contract_discovery` 不再通过 acpx Claude ACP persistent session 执行，而是路由到 native Claude CLI one-shot runner：`claude --print --bare --safe-mode --no-session-persistence --tools Grep,Glob --allowedTools Grep,Glob --disallowedTools Bash,Read,Edit,Write,NotebookEdit,WebFetch,WebSearch --permission-mode dontAsk`，并通过 stdin 传入 prompt。实测原因：acpx session record 已保存 `allowed_tools=["Grep","Glob"]`，但 Claude ACP 仍向模型暴露 `Terminal` / `Read` 能力，说明 acpx session options 不能作为 `contract_discovery` 的强执行边界。该 profile 不创建、不复用 acpx session；intake 的连续性只能来自 orchestrator context package，不来自 provider transcript 或 Claude Code session memory。
 - P2 prompt alignment：`intake-claude-brainstorm` 不再要求 “Read the repository”；它要求使用 orchestrator-provided seed / memory / contract scope / Exploration Plan，缺证据时输出 typed `scope_expansion_request`，避免 agent-facing 指令与 execution policy 冲突。
 
 尚未启用：

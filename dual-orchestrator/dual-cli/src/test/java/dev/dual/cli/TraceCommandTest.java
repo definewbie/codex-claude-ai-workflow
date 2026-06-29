@@ -43,6 +43,7 @@ class TraceCommandTest {
         assertTrue(printed.contains("topSections="));
         assertTrue(printed.contains("[loop] repair: REJECT_IMPLEMENTATION_BUG"));
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
+        assertTrue(printed.contains("exploration=pass plan=.agent/workstreams/ws-trace/memory/exploration-plan-run-1.json"));
         assertTrue(printed.contains("Tool Governance:"));
         assertTrue(printed.contains("missingRereadReasons=1"));
         assertTrue(printed.contains("explorationWarnings=1"));
@@ -238,6 +239,13 @@ class TraceCommandTest {
                   "durationMs": 123,
                   "exitCode": 0,
                   "status": "completed",
+                  "agentExplorationPlanPath": ".agent/workstreams/ws-trace/memory/exploration-plan-run-1.json",
+                  "explorationPolicyResultPath": ".agent/workstreams/ws-trace/artifacts/context-governance/exploration-policy-result-run-1.json",
+                  "explorationPolicyResult": {
+                    "status": "pass",
+                    "mode": "warn",
+                    "violations": []
+                  },
                   "usage": {
                     "inputTokens": 10,
                     "outputTokens": 2,

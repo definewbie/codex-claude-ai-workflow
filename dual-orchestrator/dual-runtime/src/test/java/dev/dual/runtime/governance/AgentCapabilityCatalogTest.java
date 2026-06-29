@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentCapabilityCatalogTest {
     @Test
-    void recordsAvailableSymbolAndTokenFilteredCapabilitiesWithoutProviderPromptHardcoding() {
+    void intakeContractDiscoveryDoesNotAdvertiseDirectReadOrShellCapability() {
         var catalog = AgentCapabilityCatalog.fromAvailableCommands(
                 "ws-001",
                 "intake.claude_brainstorm",
@@ -19,18 +19,17 @@ class AgentCapabilityCatalogTest {
         var document = catalog.toDocument();
 
         assertEquals("agent_capability_catalog", document.get("artifactType"));
-        assertTrue(catalog.hasKind("token_filtered_shell"));
+        assertEquals(false, catalog.hasKind("token_filtered_shell"));
         assertTrue(catalog.hasKind("symbol_index"));
-        assertTrue(catalog.hasKind("direct_file_read"));
+        assertEquals(false, catalog.hasKind("direct_file_read"));
         assertTrue(document.toString().contains("codegraph"));
-        assertTrue(document.toString().contains("rtk"));
     }
 
     @Test
-    void alwaysKeepsDirectFileReadButDoesNotInventUnavailableSymbolIndex() {
+    void nonIntakeNodesKeepDirectFileReadButDoNotInventUnavailableSymbolIndex() {
         var catalog = AgentCapabilityCatalog.fromAvailableCommands(
                 "ws-001",
-                "intake.claude_brainstorm",
+                "implement.claude_implement",
                 Set.of()
         );
 

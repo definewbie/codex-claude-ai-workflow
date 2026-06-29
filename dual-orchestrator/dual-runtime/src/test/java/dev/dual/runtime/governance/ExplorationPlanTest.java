@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExplorationPlanTest {
     @Test
-    void intakePlanLimitsDirectReadsAndFramesDiscoveryAsContractScopeNotImplementation() {
+    void intakePlanDisablesDirectReadsAndFramesDiscoveryAsContractScopeNotImplementation() {
         var catalog = AgentCapabilityCatalog.fromAvailableCommands(
                 "ws-001",
                 "intake.claude_brainstorm",
@@ -33,10 +33,11 @@ class ExplorationPlanTest {
         assertEquals("agent_exploration_plan", document.get("artifactType"));
         assertEquals("contract_discovery", document.get("explorationIntent"));
         assertEquals("block", document.get("failureMode"));
-        assertEquals(3, ((Number) document.get("maxDirectReadFiles")).intValue());
+        assertEquals(0, ((Number) document.get("maxDirectReadFiles")).intValue());
         assertTrue(document.get("preferredCapabilityKinds") instanceof List<?> kinds
                 && kinds.contains("symbol_index")
-                && kinds.contains("token_filtered_shell"));
+                && !kinds.contains("token_filtered_shell")
+                && !kinds.contains("direct_file_read"));
         assertTrue(document.get("forbiddenExplorationIntents") instanceof List<?> forbidden
                 && forbidden.contains("implementation_design")
                 && forbidden.contains("full_repo_audit"));

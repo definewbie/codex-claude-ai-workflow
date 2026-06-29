@@ -457,27 +457,45 @@ class AcpxAgentTransportTest {
     }
 
     @Test
-    void passesSearchOnlyToolsWhenPermissionProfileIsContractDiscovery() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-contract-discovery-args.sh");
-        var argsLog = tempDir.resolve("args.log");
+    void runsContractDiscoveryThroughNativeClaudeWithHardToolBoundary() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
+        var fakeClaude = tempDir.resolve("claude-restricted.sh");
+        var acpxLog = tempDir.resolve("acpx.log");
+        var claudeLog = tempDir.resolve("claude.log");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
-                if [ "$1" = "--help" ]; then
-                  exit 0
-                fi
-                printf '%s\\n' "$@" > "__ARGS_LOG__"
-                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
-                echo "ACPX_DONE"
+                printf '%s\\n' "$@" >> "__ACPX_LOG__"
+                exit 99
+                """.replace("__ACPX_LOG__", acpxLog.toString()), StandardCharsets.UTF_8);
+        Files.writeString(fakeClaude, """
+                #!/bin/sh
+                printf '%s\\n' "$@" > "__CLAUDE_LOG__"
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__CLAUDE_LOG__"
+                printf 'STDIN_START\\n' >> "__CLAUDE_LOG__"
+                cat >> "__CLAUDE_LOG__"
+                cat <<'EOF'
+                # Intake
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: native restricted runner completed
+                ```
+                EOF
                 exit 0
-                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+                """.replace("__CLAUDE_LOG__", claudeLog.toString()), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
+        assertTrue(fakeClaude.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
         var stdout = tempDir.resolve("stdout.md");
         var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        Files.writeString(prompt, "# Prompt\nUse orchestrator seed only.\n", StandardCharsets.UTF_8);
 
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var transport = new AcpxAgentTransport(
+                fakeAcpx.toString(),
+                fakeClaude.toString(),
+                Duration.ofSeconds(1)
+        );
         var result = transport.runClaudeDesign(new AcpxRunRequest(
                 tempDir,
                 "claude-main-run-001",
@@ -488,65 +506,19 @@ class AcpxAgentTransportTest {
         ));
 
         assertEquals(0, result.exitCode());
-        var args = Files.readString(argsLog);
-        assertTrue(args.contains("--non-interactive-permissions"));
-        assertTrue(args.contains("--deny-all"));
-        assertTrue(args.contains("--no-terminal"));
-        assertFalse(args.contains("--approve-reads"));
-        assertTrue(args.contains("--permission-policy"));
-        assertTrue(args.contains("\"autoApprove\":[\"search\"]"));
-        assertTrue(args.contains("--allowed-tools"));
-        assertTrue(args.contains("Grep,Glob"));
-        assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"));
-        assertFalse(args.contains("Read,Grep,Glob"));
-        assertFalse(args.contains("\"read\""));
-        assertFalse(args.contains("\"execute\""));
-    }
-
-    @Test
-    void bootstrapsContractDiscoveryWithRestrictedFreshSessionBeforePrompt() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-contract-discovery-session.sh");
-        var argsLog = tempDir.resolve("args.log");
-        Files.writeString(fakeAcpx, """
-                #!/bin/sh
-                if [ "$1" = "--help" ]; then
-                  exit 0
-                fi
-                printf '%s\\n' "$@" >> "__ARGS_LOG__"
-                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
-                printf '%s\\n' "---" >> "__ARGS_LOG__"
-                echo "$*" | grep -q "claude sessions new" && exit 0
-                echo "ACPX_DONE"
-                exit 0
-                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
-        assertTrue(fakeAcpx.toFile().setExecutable(true));
-
-        var prompt = tempDir.resolve("prompt.md");
-        var stdout = tempDir.resolve("stdout.md");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
-
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
-        var result = transport.runClaudeDesign(new AcpxRunRequest(
-                tempDir,
-                "claude-main-run-001",
-                prompt,
-                stdout,
-                stderr,
-                AcpxPermissionProfile.contractDiscovery()
-        ));
-
-        assertEquals(0, result.exitCode());
-        var args = Files.readString(argsLog);
-        var sessionNew = args.indexOf("claude\nsessions\nnew\n--name\nclaude-main-run-001");
-        var promptRun = args.indexOf("claude\n-s\nclaude-main-run-001\n-f\n" + prompt);
-        assertTrue(sessionNew >= 0, args);
-        assertTrue(promptRun > sessionNew, args);
-        assertTrue(args.contains("--deny-all"));
-        assertTrue(args.contains("--no-terminal"));
-        assertTrue(args.contains("--allowed-tools\nGrep,Glob"));
-        assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"));
-        assertFalse(args.contains("--approve-reads"));
+        assertFalse(Files.exists(acpxLog), "contract discovery must not use acpx Claude ACP when hard tool isolation is required");
+        var args = Files.readString(claudeLog);
+        assertTrue(args.contains("--print"), args);
+        assertTrue(args.contains("--bare"), args);
+        assertTrue(args.contains("--safe-mode"), args);
+        assertTrue(args.contains("--no-session-persistence"), args);
+        assertTrue(args.contains("--tools\nGrep,Glob"), args);
+        assertTrue(args.contains("--allowedTools\nGrep,Glob"), args);
+        assertTrue(args.contains("--disallowedTools\nBash,Read,Edit,Write,NotebookEdit,WebFetch,WebSearch"), args);
+        assertTrue(args.contains("--permission-mode\ndontAsk"), args);
+        assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"), args);
+        assertTrue(args.contains("STDIN_START\n# Prompt\nUse orchestrator seed only."), args);
+        assertTrue(Files.readString(stdout).contains("READY_FOR_PRODUCT_REVIEW"));
     }
 
     @Test

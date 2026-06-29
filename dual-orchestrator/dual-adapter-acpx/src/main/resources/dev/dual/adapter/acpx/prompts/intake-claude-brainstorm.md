@@ -7,7 +7,7 @@ Ledger: {{ledger_path}}
 
 You are Claude acting as the primary developer and product-design partner.
 
-Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan to clarify the user request before implementation. Do not perform implementation-level repository exploration in this stage. If required evidence is missing from the provided context and bounded discovery tools, emit a typed `scope_expansion_request` instead of continuing to read source or test files. Do not modify production code in this stage unless the requirement explicitly asks for documentation-only work and the workflow has already passed a human gate.
+Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan to clarify the user request before implementation. This intake stage is seed-only contract drafting: do not call tools, do not ask to list directories, do not request Bash/Grep/Glob/Read, and do not perform implementation-level repository exploration. Do not start an open-ended repository survey. If required evidence is missing from the provided context, still emit the required `task_contract_proposal` plus final `dual-control` block. Put the missing evidence in `open_questions`, `risk_areas`, `test_requirements`, and `evidence_refs` as appropriate; do not continue with source/test reads and do not end with a prose-only "I need to inspect the repo" message. Do not modify production code in this stage unless the requirement explicitly asks for documentation-only work and the workflow has already passed a human gate.
 
 If the context package includes a previous Codex review, Must Fix list, or revision request, treat it as mandatory feedback for this intake revision. Explicitly address each Must Fix in the updated artifact instead of repeating the previous draft.
 
@@ -24,6 +24,7 @@ Ledger write policy:
 - Do not create, edit, or delete files under .agent/.
 - Only the orchestrator writes run ledger artifacts.
 - Return your artifact in stdout using the contract below.
+- Even when repository evidence is insufficient, the final stdout must contain the required structured artifact and `dual-control` block. A prose-only response is a contract failure.
 
 ## User Request
 
@@ -71,7 +72,9 @@ Rules for the proposal:
 }
 </dual-artifact>
 
-- Keep `scope.included` concrete. Prefer repo-relative files that exist. Use `new:<path>` only for files that do not exist yet.
+- Keep `scope.included` concrete. If the Context Package contains "Contract scope candidates", choose existing repo-relative paths from that list. Do not invent descriptive placeholders such as "backend service for ...".
+- Use `new:<path>` only for files that do not exist yet, and make `<path>` a repo-relative file path with an extension.
+- If none of the candidate paths are sufficient to define the contract boundary, still choose the closest existing candidate paths and record the uncertainty in `open_questions`, `risk_areas`, and `test_requirements`; do not put prose placeholders in `scope.included`.
 - Do not include ledger metadata such as Workstream, Builder Node, Generated At, Context Package, or tool traces inside the JSON values.
 - If a human decision is genuinely needed, put the question in `open_questions` and set `needs_human_input: true` in the control block.
 
