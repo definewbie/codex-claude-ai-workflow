@@ -194,6 +194,36 @@ class CalibrationCommandTest {
     }
 
     @Test
+    void billingCsvCanCompareAmountExportAgainstCostSummaryExport() throws Exception {
+        writeProviderPricing();
+        var amountCsv = tempDir.resolve("amount-2026-6.csv");
+        Files.writeString(amountCsv, """
+                user_id,utc_date,model,api_key_name,api_key,type,price,amount
+                user,2026-06-01,deepseek-v4-pro,key,sk,input_cache_hit_tokens,0.000000025,196992
+                user,2026-06-01,deepseek-v4-pro,key,sk,input_cache_miss_tokens,0.000003,228427
+                user,2026-06-01,deepseek-v4-pro,key,sk,output_tokens,0.000006,20572
+                """, StandardCharsets.UTF_8);
+        var costCsv = tempDir.resolve("cost-2026-6.csv");
+        Files.writeString(costCsv, """
+                user_id,utc_date,model,wallet_type,cost,currency
+                user,2026-06-01,deepseek-v4-pro,Paid,0.8136378000000000,CNY
+                """, StandardCharsets.UTF_8);
+
+        var command = new CalibrationBillingCsvCommand();
+        command.workdir = tempDir;
+        command.csv = amountCsv;
+        command.costCsv = costCsv;
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Usage exported total: 0.813638"));
+        assertTrue(printed.contains("Cost summary exported total: 0.813638"));
+        assertTrue(printed.contains("Usage vs cost summary: matches_cost_summary"));
+        assertTrue(printed.contains("Exported delta: 0.000000"));
+        assertTrue(printed.contains("Provider amount/cost files are consistent."));
+    }
+
+    @Test
     void billingCsvReportsUnknownPricingWithoutInventingCost() throws Exception {
         writeProviderPricing();
         var csv = tempDir.resolve("unknown-billing.csv");

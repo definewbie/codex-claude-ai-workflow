@@ -442,11 +442,11 @@ not_applicable
 - 已补 `dualctl calibration billing-csv --csv <file> --workdir <repo>` 离线校准入口，
   复用 core 的 `ProviderBillingCsvCalibration` 和同一 `ProviderPricingCatalog`，用于把
   provider 账单导出和 dual 价格 catalog 做同口径对账。
-- P0.5 账单离线校准进展：真实 DeepSeek `amount-2026-6.csv`（按 token type 逐行导出）
-  已能由 `dualctl calibration billing-csv` 按 catalog 聚合为 18 个 usage 组，导出金额
-  `20.603468 CNY` 与 dual calculated total `20.603468 CNY` 精确一致，所有行均为
-  `matches_official_pricing`。同目录 `cost-2026-6.csv` 是金额摘要表，不含 token
-  breakdown；系统现在明确标为 `cost_summary_only`，不再误报 `pricing_unknown`。
+- P0.5 账单离线校准能力已支持 DeepSeek 真实导出的双文件形态：
+  `dualctl calibration billing-csv --csv amount-2026-6.csv --cost-csv cost-2026-6.csv`
+  会同时校准 amount token 明细、cost summary 汇总，并输出二者的 exported total 差异和
+  `matches_cost_summary` / `differs_from_cost_summary`。fixture 已覆盖 amount/cost 一致路径。
+  若真实账单文件在当前环境不可访问，不能宣称真实校准完成，只能宣称离线校准入口和公式已覆盖。
 - P0.5 仍未完成的部分是 GLM 控制台 token 增量对齐，以及 complex real-case 下
   provider/model/billingMode/cachedRead 字段的完整复核。
 - 2026-06-30 real-case 复核：`ws-20260630T120421Z-7Y5D` 的
@@ -931,7 +931,8 @@ Required tests:
 - attempt/outcome contradiction test.
 - reconnect/stalled/terminal-detected tests.
 - GLM subscription-token-only attribution test 已覆盖。
-- DeepSeek metered pricing fixture、CSV calibration fixture 和 billing-csv CLI fixture 已覆盖；真实账单 CSV 校准尚未覆盖。
+- DeepSeek metered pricing fixture、CSV calibration fixture、amount/cost 双 CSV 对账 fixture
+  和 billing-csv CLI fixture 已覆盖；真实账单 CSV 校准尚未覆盖。
 - OpenAI/ChatGPT token-only projection test 已覆盖。
 - Anthropic/Claude cache pricing projection test 已覆盖。
 - stage scope policy tests beyond intake are present; run-level ExplorationPolicyResult / WARN closure proof is covered

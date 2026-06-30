@@ -12,6 +12,14 @@ public final class ProviderBillingCsvCalibration {
     private ProviderBillingCsvCalibration() {
     }
 
+    public static PairedReport compareUsageAndCost(String usageCsv, String costCsv, ProviderPricingCatalog pricing) {
+        var usageReport = parse(usageCsv, pricing);
+        var costReport = parse(costCsv, pricing);
+        var delta = usageReport.exportedTotal().subtract(costReport.exportedTotal()).abs()
+                .setScale(6, RoundingMode.HALF_UP);
+        return new PairedReport(usageReport, costReport, delta, costSummaryConsistency(usageReport.exportedTotal(), costReport.exportedTotal()));
+    }
+
     public static Report parse(String csv, ProviderPricingCatalog pricing) {
         var lines = csv == null ? List.<String>of() : csv.lines()
                 .filter(line -> !line.isBlank())
@@ -163,6 +171,17 @@ public final class ProviderBillingCsvCalibration {
                 : "differs_from_official_pricing";
     }
 
+    private static String costSummaryConsistency(BigDecimal usageExported, BigDecimal costSummaryExported) {
+        if (costSummaryExported.signum() <= 0) {
+            return usageExported.signum() <= 0 ? "matches_cost_summary" : "cost_summary_missing";
+        }
+        var drift = usageExported.subtract(costSummaryExported).abs()
+                .divide(usageExported.max(costSummaryExported), 4, RoundingMode.HALF_UP);
+        return drift.compareTo(new BigDecimal("0.15")) <= 0
+                ? "matches_cost_summary"
+                : "differs_from_cost_summary";
+    }
+
     private static String text(Map<String, String> row, String key) {
         return row.getOrDefault(key, "").trim();
     }
@@ -264,6 +283,14 @@ public final class ProviderBillingCsvCalibration {
         public Report {
             rows = List.copyOf(rows);
         }
+    }
+
+    public record PairedReport(
+            Report usageReport,
+            Report costReport,
+            BigDecimal exportedDelta,
+            String consistency
+    ) {
     }
 
     private static final class UsageAggregate {

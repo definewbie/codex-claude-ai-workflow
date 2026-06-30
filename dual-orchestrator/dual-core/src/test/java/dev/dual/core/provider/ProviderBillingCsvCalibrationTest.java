@@ -137,6 +137,39 @@ class ProviderBillingCsvCalibrationTest {
         assertEquals("matches_official_pricing", report.consistency());
     }
 
+    @Test
+    void comparesProviderAmountExportAgainstCostSummaryExport() throws Exception {
+        writePricing("""
+                {
+                  "schemaVersion": 1,
+                  "models": [{
+                    "providerId": "deepseek",
+                    "model": "deepseek-v4-pro",
+                    "currency": "CNY",
+                    "inputCacheHitPer1M": "0.025",
+                    "inputCacheMissPer1M": "3.00",
+                    "outputPer1M": "6.00"
+                  }]
+                }
+                """);
+        var pricing = ProviderPricingCatalog.load(tempDir, new ObjectMapper(), name -> "");
+
+        var report = ProviderBillingCsvCalibration.compareUsageAndCost("""
+                user_id,utc_date,model,api_key_name,api_key,type,price,amount
+                user,2026-06-01,deepseek-v4-pro,key,sk,input_cache_hit_tokens,0.000000025,196992
+                user,2026-06-01,deepseek-v4-pro,key,sk,input_cache_miss_tokens,0.000003,228427
+                user,2026-06-01,deepseek-v4-pro,key,sk,output_tokens,0.000006,20572
+                """, """
+                user_id,utc_date,model,wallet_type,cost,currency
+                user,2026-06-01,deepseek-v4-pro,Paid,0.8136378000000000,CNY
+                """, pricing);
+
+        assertEquals(0, new BigDecimal("0.813638").compareTo(report.usageReport().exportedTotal()));
+        assertEquals(0, new BigDecimal("0.813638").compareTo(report.costReport().exportedTotal()));
+        assertEquals(0, BigDecimal.ZERO.compareTo(report.exportedDelta()));
+        assertEquals("matches_cost_summary", report.consistency());
+    }
+
     private void writePricing(String json) throws Exception {
         var agentDir = tempDir.resolve(".agent");
         Files.createDirectories(agentDir);
