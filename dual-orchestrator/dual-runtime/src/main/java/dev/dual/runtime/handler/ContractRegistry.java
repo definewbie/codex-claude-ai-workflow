@@ -158,6 +158,10 @@ public final class ContractRegistry {
         return CONTRACTS.containsKey(nodeId);
     }
 
+    public static boolean supportsRereadReasonField(String nodeId) {
+        return hasContract(nodeId) && forNode(nodeId).emitsArtifact("agent_output_contract");
+    }
+
     public static Set<String> allNodeIds() {
         return CONTRACTS.keySet();
     }

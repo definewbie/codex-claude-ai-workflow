@@ -3,7 +3,6 @@ package dev.dual.adapter.acpx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.domain.PromptLanguage;
 import dev.dual.runtime.handler.ContractRegistry;
-import dev.dual.runtime.handler.ReadReuseContractReasons;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -46,18 +45,14 @@ final class AgentPromptRenderer {
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
-        var outputArtifactTypes = outputArtifactTypes(nodeId);
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
         var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics();
-        var readReuseContractSemantics = outputArtifactTypes.contains("agent_output_contract")
-                ? readReuseContractSemantics()
-                : "";
         var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
         var explorationPlanSection = explorationPlanSection(workspaceRoot, inputRefs);
         var hasInputs = inputRefs != null && !inputRefs.isEmpty();
 
         var content = workspaceGuard + "\n\n" + languagePolicy + "\n\n"
-                + structuredArtifactFieldSemantics + optionalSection(readReuseContractSemantics) + "\n\n" + template
+                + structuredArtifactFieldSemantics + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
                 .replace("{{node_id}}", nodeId)
                 .replace("{{prompt_template}}", promptTemplate)
@@ -77,11 +72,6 @@ final class AgentPromptRenderer {
         sections.add(new PromptSection("structured_artifact_field_semantics", "tool_policy",
                 "structured-artifact-field-semantics",
                 structuredArtifactFieldSemantics, "structured artifact field semantics", true));
-        if (!readReuseContractSemantics.isBlank()) {
-            sections.add(new PromptSection("read_reuse_contract_semantics", "tool_policy",
-                    "read-reuse-contract-semantics",
-                    readReuseContractSemantics, "agent_output_contract read-reuse field semantics", true));
-        }
         sections.add(new PromptSection("template_static_frame", "static_instruction",
                 TEMPLATE_ROOT + promptTemplate + ".md",
                 VARIABLE_PATTERN.matcher(template).replaceAll(""), "prompt skeleton instructions", true));
@@ -105,17 +95,6 @@ final class AgentPromptRenderer {
                         + "\n" + promptContract.decisionExample(),
                 "allowed decisions / required control keys", true));
         return new RenderedPrompt(content, sections);
-    }
-
-    private String optionalSection(String content) {
-        return content == null || content.isBlank() ? "" : "\n\n" + content;
-    }
-
-    private Set<String> outputArtifactTypes(String nodeId) {
-        if (!ContractRegistry.hasContract(nodeId)) {
-            return Set.of();
-        }
-        return ContractRegistry.forNode(nodeId).outputArtifactTypes();
     }
 
     private PromptContract promptContract(String nodeId) {
@@ -218,23 +197,6 @@ final class AgentPromptRenderer {
                 - If the decision is positive, ready, or accepted, keep blocking fields empty: `blocking=false`, `must_fix=[]`, `missing_evidence=[]`, and `failure.reason=""`.
                 - Do not use `must_fix` to list review comments that you already resolved. Put resolved review comments in `checks`, `evidence`, or `acceptance_notes` instead.
                 """.stripTrailing();
-    }
-
-    private String readReuseContractSemantics() {
-        var allowed = String.join("`, `", ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS);
-        return """
-                ## Read Reuse Contract Semantics
-
-                - If the context package contains a read reuse contract, treat it as the orchestrator-owned memory boundary for files already inspected in this workstream.
-                - The `reusableReadFiles` list names files already read this workstream; reuse their recorded summary and do NOT call `Read` on them again unless this stage truly needs fresh contents.
-                - `reread_reasons` is NOT an optional audit note. Rule: every `reusableReadFiles` path you actually re-read with `Read` MUST have a matching entry in your `agent_output_contract.reread_reasons`. One entry per re-read path; the `path` must match the read-reuse-contract path exactly.
-                - If you did NOT re-read any `reusableReadFiles` file (you only reused summaries), then `"reread_reasons": []` is correct and expected.
-                - If you re-read a `reusableReadFiles` file (including README/docs/source/test), you MUST NOT leave `reread_reasons` empty — add a matching entry.
-                - Entry shape: `{ "path": "<exact reusableReadFiles path>", "reason": "<one allowed reason>", "stage": "<optional, non-blank>", "evidence": "<optional, non-blank>" }`.
-                - `reason` must be exactly one of: `%s`.
-                - Example: `"reread_reasons": [{"path":"src/issueWorkflow.js","reason":"exact current content is needed before editing","stage":"implement","evidence":"editing transition table requires current code around transition map"}]`
-                - Do not put re-read reasons in `verification_summary`, `evidence`, `checks`, or `scope_expansion_reason`; use `reread_reasons` so the orchestrator can tell justified re-reads from unjustified ones.
-                """.formatted(allowed).stripTrailing();
     }
 
     private String readReuseContractSection(Path workspaceRoot, List<String> inputRefs) {

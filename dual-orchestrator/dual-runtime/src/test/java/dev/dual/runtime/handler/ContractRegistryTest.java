@@ -249,6 +249,18 @@ class ContractRegistryTest {
     }
 
     @Test
+    void rereadReasonFieldSupportFollowsTypedOutputArtifactBoundary() {
+        assertFalse(ContractRegistry.supportsRereadReasonField("intake.claude_brainstorm"),
+                "task_contract_proposal nodes must not receive agent_output_contract reread fields");
+        assertTrue(ContractRegistry.supportsRereadReasonField("implement.claude_implement"),
+                "agent_output_contract implementation nodes may receive typed reread reason guidance");
+        assertFalse(ContractRegistry.supportsRereadReasonField("implement.claude_self_test_report"),
+                "self_test_report nodes must not receive agent_output_contract reread fields");
+        assertFalse(ContractRegistry.supportsRereadReasonField("acceptance.codex_verifier_review"),
+                "acceptance_review nodes must not receive agent_output_contract reread fields");
+    }
+
+    @Test
     void decisionNodeRoutingOutcomesMatchAllowedContractDecisions() throws Exception {
         for (var definition : bundledDefinitions()) {
             for (var node : definition.nodes()) {

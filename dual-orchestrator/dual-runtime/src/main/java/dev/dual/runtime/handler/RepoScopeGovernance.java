@@ -327,8 +327,8 @@ final class RepoScopeGovernance {
         policy.put("readReusePolicy", Map.of(
                 "preferExistingEvidence", true,
                 "avoidRepeatedReads", previouslyReadFiles.stream().limit(12).toList(),
-                "requireReasonWhenRereading", targetEmitsAgentOutputContract(targetNodeDefinitionId),
-                "reasonField", targetEmitsAgentOutputContract(targetNodeDefinitionId)
+                "requireReasonWhenRereading", targetSupportsRereadReasonField(targetNodeDefinitionId),
+                "reasonField", targetSupportsRereadReasonField(targetNodeDefinitionId)
                         ? "agent_output_contract.reread_reasons"
                         : ""
         ));
@@ -471,7 +471,7 @@ final class RepoScopeGovernance {
         document.put("reuseSource", reusableReadFiles.isEmpty() ? "run_history" : "workstream_memory.readFiles");
         var requireReason = Boolean.TRUE.equals(reusePolicy.getOrDefault(
                 "requireReasonWhenRereading",
-                targetEmitsAgentOutputContract(targetNodeDefinitionId)
+                targetSupportsRereadReasonField(targetNodeDefinitionId)
         ));
         document.put("requireReasonWhenRereading", requireReason);
         document.put("reasonField", requireReason
@@ -904,9 +904,8 @@ final class RepoScopeGovernance {
         return configured.isBlank() ? context.definition().id() : configured;
     }
 
-    private static boolean targetEmitsAgentOutputContract(String targetNodeDefinitionId) {
-        return ContractRegistry.hasContract(targetNodeDefinitionId)
-                && ContractRegistry.forNode(targetNodeDefinitionId).emitsArtifact("agent_output_contract");
+    private static boolean targetSupportsRereadReasonField(String targetNodeDefinitionId) {
+        return ContractRegistry.supportsRereadReasonField(targetNodeDefinitionId);
     }
 
     private static String readBaseCommit(Path workstreamDir, ObjectMapper objectMapper) {
@@ -1051,9 +1050,13 @@ final class RepoScopeGovernance {
             }
             var reasonField = text(documents.readReuseContract().get("reasonField"));
             if (!reasonField.isBlank()) {
+                var allowedReasons = String.join("`, `", ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS);
                 builder.append("  If you Read any file listed above, you must record a matching entry in ")
                         .append(reasonField)
                         .append(" (path must match exactly). An empty reread_reasons is only valid when you reuse these summaries and do not re-read any of them.\n");
+                builder.append("  Entry shape: {\"path\":\"<exact reusableReadFiles path>\",\"reason\":\"<one allowed reason>\",\"stage\":\"<optional, non-blank>\",\"evidence\":\"<optional, non-blank>\"}. Allowed reasons: `")
+                        .append(allowedReasons)
+                        .append("`.\n");
             } else {
                 builder.append("  Do not re-read these files unless this stage needs exact current contents; this target artifact does not declare a reread reason field, so the harness will judge re-reads from changed_files, invalidation, and allowed-reread policy.\n");
             }

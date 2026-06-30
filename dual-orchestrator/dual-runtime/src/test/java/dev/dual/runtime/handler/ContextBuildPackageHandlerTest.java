@@ -1534,6 +1534,9 @@ class ContextBuildPackageHandlerTest {
                 "producer targets must use changed_files/plan/invalidation, not review reread allowance");
         assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
                 "implement agent_output_contract targets should receive the typed reread reason field");
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("agent_output_contract.reread_reasons"));
+        assertTrue(markdown.contains("Entry shape:"));
     }
 
     @Test
