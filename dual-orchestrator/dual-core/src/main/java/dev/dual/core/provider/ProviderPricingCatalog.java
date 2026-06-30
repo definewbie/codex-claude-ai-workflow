@@ -17,6 +17,7 @@ import java.util.function.Function;
 public final class ProviderPricingCatalog {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final String DEFAULT_RESOURCE = "/dev/dual/core/provider/provider-pricing.default.json";
 
     private final List<ModelPrice> prices;
 
@@ -38,32 +39,49 @@ public final class ProviderPricingCatalog {
                 ? workspaceRoot.resolve(".agent").resolve("provider-pricing.json")
                 : Path.of(configured);
         if (!Files.isRegularFile(path)) {
-            return new ProviderPricingCatalog(List.of());
+            if (configured != null && !configured.isBlank()) {
+                return new ProviderPricingCatalog(List.of());
+            }
+            return loadDefaultResource(objectMapper);
         }
         try {
-            var doc = objectMapper.readValue(path.toFile(), MAP_TYPE);
-            var out = new ArrayList<ModelPrice>();
-            for (var item : mapList(doc.get("models"))) {
-                var providerId = text(item.get("providerId"));
-                var model = text(item.get("model"));
-                if (providerId.isBlank() || model.isBlank()) {
-                    continue;
-                }
-                out.add(new ModelPrice(
-                        providerId,
-                        model,
-                        nonBlank(text(item.get("currency")), "USD"),
-                        decimal(item.get("inputCacheHitPer1M")),
-                        decimal(item.get("inputCacheMissPer1M")),
-                        decimal(item.get("outputPer1M")),
-                        decimal(item.get("cacheWritePer1M")),
-                        text(item.get("sourceUrl"))
-                ));
-            }
-            return new ProviderPricingCatalog(out);
+            return fromDocument(objectMapper.readValue(path.toFile(), MAP_TYPE));
         } catch (IOException ignored) {
             return new ProviderPricingCatalog(List.of());
         }
+    }
+
+    private static ProviderPricingCatalog loadDefaultResource(ObjectMapper objectMapper) {
+        try (var stream = ProviderPricingCatalog.class.getResourceAsStream(DEFAULT_RESOURCE)) {
+            if (stream == null) {
+                return new ProviderPricingCatalog(List.of());
+            }
+            return fromDocument(objectMapper.readValue(stream, MAP_TYPE));
+        } catch (IOException ignored) {
+            return new ProviderPricingCatalog(List.of());
+        }
+    }
+
+    private static ProviderPricingCatalog fromDocument(Map<String, Object> doc) {
+        var out = new ArrayList<ModelPrice>();
+        for (var item : mapList(doc.get("models"))) {
+            var providerId = text(item.get("providerId"));
+            var model = text(item.get("model"));
+            if (providerId.isBlank() || model.isBlank()) {
+                continue;
+            }
+            out.add(new ModelPrice(
+                    providerId,
+                    model,
+                    nonBlank(text(item.get("currency")), "USD"),
+                    decimal(item.get("inputCacheHitPer1M")),
+                    decimal(item.get("inputCacheMissPer1M")),
+                    decimal(item.get("outputPer1M")),
+                    decimal(item.get("cacheWritePer1M")),
+                    text(item.get("sourceUrl"))
+            ));
+        }
+        return new ProviderPricingCatalog(out);
     }
 
     public Optional<ModelPrice> priceFor(String providerId, String model) {

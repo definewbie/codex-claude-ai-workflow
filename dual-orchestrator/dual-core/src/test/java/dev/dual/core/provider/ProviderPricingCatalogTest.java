@@ -95,6 +95,34 @@ class ProviderPricingCatalogTest {
         assertTrue(catalog.priceFor("openai", "chatgpt").isPresent());
     }
 
+    @Test
+    void loadsPackagedDefaultPricingWhenWorkspacePricingIsAbsent() {
+        var catalog = ProviderPricingCatalog.load(tempDir, mapper, name -> "");
+
+        assertTrue(catalog.priceFor("deepseek", "deepseek-pro-v4").isPresent());
+        assertTrue(catalog.priceFor("deepseek", "deepseek-v4-pro").isPresent());
+        assertTrue(catalog.priceFor("anthropic", "claude-sonnet-4.5").isPresent());
+        assertTrue(catalog.priceFor("openai", "chatgpt").isPresent());
+        assertTrue(catalog.priceFor("zhipu", "glm-5.2").isPresent());
+        assertEquals("TOKENS_ONLY", catalog.priceFor("zhipu", "glm-5.2").orElseThrow().currency());
+    }
+
+    @Test
+    void packagedDefaultPricingMatchesRepositoryExample() throws Exception {
+        var example = Files.isRegularFile(Path.of("config/provider-pricing.example.json"))
+                ? Path.of("config/provider-pricing.example.json")
+                : Path.of("../config/provider-pricing.example.json");
+        try (var packaged = ProviderPricingCatalog.class.getResourceAsStream(
+                "/dev/dual/core/provider/provider-pricing.default.json")) {
+            assertTrue(Files.isRegularFile(example));
+            assertTrue(packaged != null);
+            assertEquals(
+                    mapper.readTree(example.toFile()),
+                    mapper.readTree(packaged)
+            );
+        }
+    }
+
     private void writePricing(String json) throws Exception {
         var agentDir = tempDir.resolve(".agent");
         Files.createDirectories(agentDir);

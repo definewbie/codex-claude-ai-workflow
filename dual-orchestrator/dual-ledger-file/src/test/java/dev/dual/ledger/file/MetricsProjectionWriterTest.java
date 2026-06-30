@@ -652,7 +652,7 @@ class MetricsProjectionWriterTest {
     }
 
     @Test
-    void tokenAttributionKeepsSubscriptionTokensWhenPricingFileIsAbsent() throws Exception {
+    void tokenAttributionUsesPackagedTokenOnlyPricingWhenWorkspacePricingFileIsAbsent() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-glm-subscription"));
         var jsonWriter = new AtomicJsonWriter();
         var mapper = jsonWriter.objectMapper();
@@ -689,7 +689,7 @@ class MetricsProjectionWriterTest {
         assertEquals(861568, number(costAttribution.get("inputCacheHitTokens")));
         assertEquals(83685, number(costAttribution.get("inputCacheMissTokens")));
         assertEquals("subscription_token_only", costAttribution.get("billingMode"));
-        assertEquals("subscription_unpriced", costAttribution.get("reliability"));
+        assertEquals("token_only", costAttribution.get("reliability"));
         assertEquals("provider_reported", costAttribution.get("cacheSignalSource"));
         var providerCachePolicy = map(perRun.get("providerCachePolicy"));
         assertEquals("token_policy_active", providerCachePolicy.get("mode"));
@@ -699,10 +699,10 @@ class MetricsProjectionWriterTest {
         assertEquals("glm-5.2", costMap.get("model"));
         assertEquals("subscription_token_only", costMap.get("billingMode"));
         assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
-        assertEquals("subscription_unpriced", costMap.get("costEstimateReliability"));
+        assertEquals("token_only", costMap.get("costEstimateReliability"));
         assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
         assertEquals(
-                "provider/model and cache token signal are known; amount is subscription-unpriced",
+                "provider/model and cache token signal are known; amount is token-only",
                 costMap.get("providerCacheDecisionReason"));
     }
 

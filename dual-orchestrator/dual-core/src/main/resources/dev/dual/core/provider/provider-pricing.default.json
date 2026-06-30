@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-06-26",
+  "models": [
+    {
+      "providerId": "deepseek",
+      "model": "deepseek-pro-v4",
+      "currency": "CNY",
+      "inputCacheHitPer1M": "0.025",
+      "inputCacheMissPer1M": "3.00",
+      "outputPer1M": "6.00",
+      "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "sourceNote": "Mainland China billing export: input_cache_hit_tokens=0.000000025 CNY/token, input_cache_miss_tokens=0.000003 CNY/token, output_tokens=0.000006 CNY/token."
+    },
+    {
+      "providerId": "deepseek",
+      "model": "deepseek-v4-pro",
+      "currency": "CNY",
+      "inputCacheHitPer1M": "0.025",
+      "inputCacheMissPer1M": "3.00",
+      "outputPer1M": "6.00",
+      "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "sourceNote": "Mainland China billing export: input_cache_hit_tokens=0.000000025 CNY/token, input_cache_miss_tokens=0.000003 CNY/token, output_tokens=0.000006 CNY/token."
+    },
+    {
+      "providerId": "deepseek",
+      "model": "deepseek-pro-v4",
+      "currency": "USD",
+      "inputCacheHitPer1M": "0.003625",
+      "inputCacheMissPer1M": "0.435",
+      "outputPer1M": "0.87",
+      "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/"
+    },
+    {
+      "providerId": "deepseek",
+      "model": "deepseek-v4-pro",
+      "currency": "USD",
+      "inputCacheHitPer1M": "0.003625",
+      "inputCacheMissPer1M": "0.435",
+      "outputPer1M": "0.87",
+      "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/"
+    },
+    {
+      "providerId": "anthropic",
+      "model": "claude-sonnet-4.5",
+      "currency": "USD",
+      "inputCacheHitPer1M": "0.30",
+      "inputCacheMissPer1M": "3.00",
+      "outputPer1M": "15.00",
+      "cacheWritePer1M": "3.75",
+      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "sourceNote": "Anthropic lists Sonnet 4.5 base input $3/MTok, cache hits $0.30/MTok, 5m cache writes $3.75/MTok, output $15/MTok."
+    },
+    {
+      "providerId": "openai",
+      "model": "chatgpt",
+      "currency": "TOKENS_ONLY",
+      "inputCacheHitPer1M": "0",
+      "inputCacheMissPer1M": "0",
+      "outputPer1M": "0",
+      "sourceUrl": "https://openai.com/business/pricing/",
+      "sourceNote": "ChatGPT/Codex workspace usage is plan/subscription based in this setup; keep token visibility but do not calculate per-token cost unless an API pricing model is configured."
+    },
+    {
+      "providerId": "zhipu",
+      "model": "glm-*",
+      "currency": "TOKENS_ONLY",
+      "inputCacheHitPer1M": "0",
+      "inputCacheMissPer1M": "0",
+      "outputPer1M": "0",
+      "sourceNote": "Configured as token-only because this environment uses a monthly/subscription GLM channel without visible per-token billing."
+    }
+  ]
+}

@@ -370,6 +370,13 @@ not_applicable
   `clientCostConsistency` 区分 provider reported cost 与 official calculated cost 的差异。
 - `cacheSignalSource` 已在 `costAttribution` 中显式区分 `provider_reported` /
   `not_applicable` / `unavailable`。
+- provider pricing catalog 已具备随包默认 Definition：当 workdir 没有
+  `.agent/provider-pricing.json` 且没有 `DUAL_PROVIDER_PRICING_PATH` 时，
+  core 会加载 packaged `provider-pricing.default.json`。默认 catalog 覆盖
+  DeepSeek CNY/USD、Anthropic Sonnet、OpenAI/ChatGPT token-only 和 Zhipu/GLM
+  token-only，避免真实运行因为没有复制 pricing 文件而退回 `pricing_unknown`。
+- 已补一致性测试，保证 packaged default 和仓库
+  `config/provider-pricing.example.json` 同步，防止 pricing Definition 双写漂移。
 
 ### 5.6 修复方案
 
