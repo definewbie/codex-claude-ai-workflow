@@ -10,15 +10,26 @@ public record NodeOutputContract(
         Set<String> requiredKeys,
         Set<String> allowedDecisions,
         Set<String> optionalKeys,
-        Set<String> outputArtifactTypes
+        Set<String> outputArtifactTypes,
+        Set<String> supportedArtifactFields
 ) {
+    public NodeOutputContract(
+            String nodeId,
+            Set<String> requiredKeys,
+            Set<String> allowedDecisions,
+            Set<String> optionalKeys,
+            Set<String> outputArtifactTypes
+    ) {
+        this(nodeId, requiredKeys, allowedDecisions, optionalKeys, outputArtifactTypes, Set.of());
+    }
+
     public NodeOutputContract(
             String nodeId,
             Set<String> requiredKeys,
             Set<String> allowedDecisions,
             Set<String> optionalKeys
     ) {
-        this(nodeId, requiredKeys, allowedDecisions, optionalKeys, Set.of());
+        this(nodeId, requiredKeys, allowedDecisions, optionalKeys, Set.of(), Set.of());
     }
 
     public NodeOutputContract {
@@ -26,6 +37,7 @@ public record NodeOutputContract(
         allowedDecisions = Set.copyOf(allowedDecisions);
         optionalKeys = optionalKeys == null ? Set.of() : Set.copyOf(optionalKeys);
         outputArtifactTypes = outputArtifactTypes == null ? Set.of() : Set.copyOf(outputArtifactTypes);
+        supportedArtifactFields = supportedArtifactFields == null ? Set.of() : Set.copyOf(supportedArtifactFields);
     }
 
     public void validate(DualControlBlock block) {
@@ -58,5 +70,9 @@ public record NodeOutputContract(
 
     public boolean emitsArtifact(String artifactType) {
         return outputArtifactTypes.contains(artifactType);
+    }
+
+    public boolean supportsArtifactField(String fieldName) {
+        return supportedArtifactFields.contains(fieldName);
     }
 }

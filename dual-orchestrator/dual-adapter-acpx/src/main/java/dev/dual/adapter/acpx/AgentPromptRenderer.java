@@ -46,7 +46,7 @@ final class AgentPromptRenderer {
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
-        var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics();
+        var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics(nodeId);
         var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
         var explorationPlanSection = explorationPlanSection(workspaceRoot, inputRefs);
         var hasInputs = inputRefs != null && !inputRefs.isEmpty();
@@ -71,7 +71,8 @@ final class AgentPromptRenderer {
                 languagePolicy, "output language policy", true));
         sections.add(new PromptSection("structured_artifact_field_semantics", "tool_policy",
                 "structured-artifact-field-semantics",
-                structuredArtifactFieldSemantics, "structured artifact field semantics", true));
+                structuredArtifactFieldSemantics, "structured artifact field semantics",
+                !structuredArtifactFieldSemantics.isBlank()));
         sections.add(new PromptSection("template_static_frame", "static_instruction",
                 TEMPLATE_ROOT + promptTemplate + ".md",
                 VARIABLE_PATTERN.matcher(template).replaceAll(""), "prompt skeleton instructions", true));
@@ -189,7 +190,14 @@ final class AgentPromptRenderer {
         return configured;
     }
 
-    private String structuredArtifactFieldSemantics() {
+    private String structuredArtifactFieldSemantics(String nodeId) {
+        if (!ContractRegistry.hasContract(nodeId)) {
+            return "";
+        }
+        var contract = ContractRegistry.forNode(nodeId);
+        if (!contract.emitsArtifact("agent_output_contract") && !contract.emitsArtifact("acceptance_review")) {
+            return "";
+        }
         return """
                 ## Structured Artifact Field Semantics
 

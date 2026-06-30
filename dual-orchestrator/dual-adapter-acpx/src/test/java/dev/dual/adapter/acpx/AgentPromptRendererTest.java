@@ -346,6 +346,8 @@ class AgentPromptRendererTest {
                         "intake-claude-brainstorm", List.of());
 
         assertTrue(rendered.content().contains("<dual-artifact type=\"task_contract_proposal\""));
+        assertFalse(rendered.content().contains("Structured Artifact Field Semantics"), rendered.content());
+        assertFalse(rendered.content().contains("`must_fix`, `missing_evidence`, `open_risks`"), rendered.content());
         assertFalse(rendered.content().contains("Read Reuse Contract Semantics"), rendered.content());
         assertFalse(rendered.content().contains("reread_reasons"), rendered.content());
         assertTrue(rendered.sections().stream().noneMatch(

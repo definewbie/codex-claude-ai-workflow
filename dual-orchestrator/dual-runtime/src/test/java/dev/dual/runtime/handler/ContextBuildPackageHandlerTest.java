@@ -1499,8 +1499,11 @@ class ContextBuildPackageHandlerTest {
                         && allowed.stream().anyMatch(item -> String.valueOf(item).contains("src/api.js"))
                         && allowed.stream().noneMatch(item -> String.valueOf(item).contains("docs/spec.md")),
                 "review targets should receive typed source-file verification allowance only");
-        assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
-                "agent_output_contract targets should receive the typed reread reason field");
+        assertEquals("", readReuse.get("reasonField"),
+                "review targets may receive harness-computed reread allowances but must not see implementation reread fields");
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertFalse(markdown.contains("agent_output_contract.reread_reasons"),
+                "review context package must not leak implementation reread fields");
     }
 
     @Test

@@ -54,7 +54,8 @@ public final class ContractRegistry {
             Set.of("decision", "summary"),
             Set.of("IMPLEMENTED", "BLOCKED"),
             Set.of(),
-            Set.of("agent_output_contract")
+            Set.of("agent_output_contract"),
+            Set.of("reread_reasons")
     );
     private static final NodeOutputContract IMPLEMENT_SELF_TEST = new NodeOutputContract(
             "implement.claude_self_test_report",
@@ -159,7 +160,7 @@ public final class ContractRegistry {
     }
 
     public static boolean supportsRereadReasonField(String nodeId) {
-        return hasContract(nodeId) && forNode(nodeId).emitsArtifact("agent_output_contract");
+        return hasContract(nodeId) && forNode(nodeId).supportsArtifactField("reread_reasons");
     }
 
     public static Set<String> allNodeIds() {

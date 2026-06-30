@@ -252,6 +252,12 @@ class ContractRegistryTest {
     void rereadReasonFieldSupportFollowsTypedOutputArtifactBoundary() {
         assertFalse(ContractRegistry.supportsRereadReasonField("intake.claude_brainstorm"),
                 "task_contract_proposal nodes must not receive agent_output_contract reread fields");
+        assertFalse(ContractRegistry.supportsRereadReasonField("intake.codex_product_review"),
+                "review nodes must use harness-computed reread policy, not self-reported reread fields");
+        assertFalse(ContractRegistry.supportsRereadReasonField("design.claude_design"),
+                "design producer nodes must not receive implementation reread fields");
+        assertFalse(ContractRegistry.supportsRereadReasonField("plan.claude_plan"),
+                "plan producer nodes must not receive implementation reread fields");
         assertTrue(ContractRegistry.supportsRereadReasonField("implement.claude_implement"),
                 "agent_output_contract implementation nodes may receive typed reread reason guidance");
         assertFalse(ContractRegistry.supportsRereadReasonField("implement.claude_self_test_report"),
