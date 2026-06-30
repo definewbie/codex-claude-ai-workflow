@@ -568,6 +568,10 @@ P0 必须先于 P0.5 完整收口。
 - `AcpxAgentTaskHandlerTest` 已覆盖成功 agent run 的 `run.json` 内嵌
   `explorationPolicyResult` / `contextGovernanceActualReportPath`，包括没有预置
   exploration plan 的路径，避免 governance evidence 静默缺失。
+- `ArtifactContractValidatorTest` 已覆盖 acceptance/review 的 block-mode contract 行为：
+  当 typed `ExplorationPlan.failureMode=block` 且 review 直接读取 scope 外文件时，
+  validator 刷新 `ExplorationPolicyResult` 并以 `EXPLORATION_POLICY_DENIED` 失败；
+  warn-mode 仍只作为 projection，不改变节点结果。
 - 这只完成了 context governance sidecar、run metadata 和 metrics projection 的合成链路；
   尚未通过真实 provider 证明每个 real-case agent run 都写出有效 `ExplorationPolicyResult`，
   也尚未证明 review 阶段 WARN 已收敛。

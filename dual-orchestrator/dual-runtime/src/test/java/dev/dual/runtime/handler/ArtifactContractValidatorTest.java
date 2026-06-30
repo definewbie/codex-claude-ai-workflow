@@ -1761,6 +1761,93 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void acceptanceReviewExplorationBlockFailsContractValidation() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var memoryDir = workstreamDir.resolve("memory");
+        var governanceDir = workstreamDir.resolve("artifacts/context-governance");
+        var runDir = workstreamDir.resolve("runs/run-acceptance-block");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(governanceDir);
+        Files.createDirectories(runDir);
+        var planPath = memoryDir.resolve("exploration-plan-node-acceptance-block.json");
+        var reportPath = governanceDir.resolve("acceptance-actual-run-block.json");
+        var resultPath = governanceDir.resolve("exploration-policy-result-acceptance-run-block.json");
+        var runPath = runDir.resolve("run.json");
+        Files.writeString(planPath, """
+                {
+                  "schemaVersion": 1,
+                  "stageId": "acceptance",
+                  "maxDirectReadFiles": 1,
+                  "allowedDirectReadFiles": ["README.md"],
+                  "preferredCapabilityKinds": ["symbol_index"],
+                  "failureMode": "block"
+                }
+                """);
+        Files.writeString(resultPath, """
+                {"schemaVersion": 1, "status": "pass", "violations": []}
+                """);
+        Files.writeString(reportPath, """
+                {
+                  "schemaVersion": 1,
+                  "agentExplorationPlanPath": "%s",
+                  "explorationPolicyResultPath": "%s",
+                  "actualDirectReadFiles": ["README.md", "src/api.js"],
+                  "actualDirectReadFileKinds": {"README.md":"doc","src/api.js":"source"},
+                  "actualCapabilityUsages": [{"kind":"direct_file_read","provider":"Read","source":"tool_id"}],
+                  "explorationPolicyResult": {"schemaVersion": 1, "status": "pass", "violations": []}
+                }
+                """.formatted(tempDir.relativize(planPath), tempDir.relativize(resultPath)));
+        Files.writeString(runPath, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "run-acceptance-block",
+                  "status": "completed",
+                  "contextGovernanceActualReportPath": "%s",
+                  "explorationPolicyResultPath": "%s"
+                }
+                """.formatted(tempDir.relativize(reportPath), tempDir.relativize(resultPath)));
+        var outputRef = writeOutput("acceptance-block.md", """
+                <dual-artifact type="acceptance_review" version="1">
+                {
+                  "artifact_type": "acceptance_review",
+                  "schema_version": 1,
+                  "decision": "ACCEPT_WITH_NOTES",
+                  "summary": "Accepted with notes.",
+                  "blocking": false,
+                  "checks": ["reviewed evidence"],
+                  "evidence": ["diff reviewed"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": ["Review should remain within the evidence brief."],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Accepted with non-blocking notes.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: ACCEPT_WITH_NOTES
+                summary: Accepted with notes.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex",
+                "run_metadata", tempDir.relativize(runPath).toString()
+        ));
+
+        var validated = validator.validate(tempDir, "ws-test", "node-acceptance-block",
+                agentNode("acceptance.codex_verifier_review"), result);
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(String.valueOf(validated.result().get("parse_error")).contains("EXPLORATION_POLICY_DENIED"),
+                String.valueOf(validated.result()));
+        var refreshedRun = Files.readString(runPath);
+        assertTrue(refreshedRun.contains("\"status\" : \"failed\""), refreshedRun);
+        assertTrue(refreshedRun.contains("READ_OUTSIDE_EXPLORATION_SCOPE"), refreshedRun);
+    }
+
+    @Test
     void invalidScopeExpansionRequestIsRejected() throws Exception {
         var outputRef = writeOutput("scope-expansion-bad.md", """
                 <dual-artifact type="agent_output_contract" version="1">
