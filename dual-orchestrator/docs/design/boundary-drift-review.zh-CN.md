@@ -77,12 +77,21 @@ MVP 允许的短期状态：
 
 - Java registry 可以暂时保留，因为它是集中式 validator，不是散落 if-else。
 
-必须补的保护：
+必须保留的保护：
 
 - 增加 definition-contract consistency test：
   - 所有 agent / decision / classifier node 必须有 contract。
   - contract allowed decisions 必须覆盖该 node 的 outgoing edge outcomes。
   - contract 里不存在 workflow definition 没有的 node。
+
+当前状态（2026-07-01）：
+
+- `ContractRegistryTest.registryEntriesPointToBundledWorkflowNodes` 已防止 Java registry 中出现 workflow definition 不存在的 contract node。
+- `ContractRegistryTest.bundledWorkflowNodesThatNeedContractsHaveContracts` 已防止 bundled workflow 中需要结构化输出契约的节点漏配 contract。
+- `ContractRegistryTest.structuredArtifactNodesDeclareExpectedArtifactAndCompilerInWorkflowDefinition` 已校验 workflow definition 的 `expected_artifact` 与 `ContractRegistry.outputArtifactTypes` 对齐。
+- `ContractRegistryTest.decisionNodeRoutingOutcomesMatchAllowedContractDecisions` 和 `failureClassifierRoutingOutcomesMatchAllowedContractDecisions` 已校验 decision / classifier 的 contract decisions 与 routing edges 对齐。
+
+因此该保护项不再是待做项；它仍是必须持续运行的防漂移测试。
 
 长期方向：
 
@@ -153,7 +162,7 @@ MVP 允许的短期状态：
 |---|---|---|---|
 | P0 | Recovery typed reason 到 operator action 的映射 | real-case 已暴露，直接影响恢复能力 | 已开始修复 |
 | P0 | Human gate action normalization 去重 | 防止 CLI/UI/API 行为漂移 | 已开始修复 |
-| P0 | Workflow JSON 和 ContractRegistry 一致性测试 | 防止新增节点后 contract 漏配 | 待做 |
+| P0 | Workflow JSON 和 ContractRegistry 一致性测试 | 防止新增节点后 contract 漏配 | 已覆盖，继续运行 |
 | P1 | Handler capability catalog | 防止 runtime/validate/docs 支持范围不一致 | 待做 |
 | P1 | Projection read model 收口 | 防止 trace/status/operator panel 各说各话 | 待做 |
 
