@@ -225,9 +225,12 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   prepared metadata；运行完成后写出 `executionAttempt.status=COMPLETED` 和
   `executionOutcome.status=SUCCESS`。这证明 normal run path 不再等完整 transport
   返回后才首次落盘 run.json。
-- 仍未完成：raw Claude CLI `--print` 路径没有 provider usage 输出，因此 run.json
-  只能记录 `usage.measurementType=UNAVAILABLE`，不能把 GLM 控制台真实 token 自动归因到
-  provider run。该问题属于 P0.5 usage acquisition 缺口，不得伪装成真实 0 token。
+- native Claude CLI `--print --output-format json` 路径已补 usage acquisition：成功 JSON 会进入
+  run.json `usage.measurementType=PROVIDER_RUN_USAGE`，并保留
+  `provider=zhipu`、`model=glm-5.2`、`billingMode=subscription_token_only`。
+  失败 JSON（例如 `is_error=true` 且 usage 全 0）必须记录为
+  `usage.measurementType=UNAVAILABLE` 和明确 `unavailableReason`，不能伪装成真实 0 token。
+  仍未完成的是 provider 成功运行后的真实 GLM 控制台 token 增量对账和 complex case 复核。
 
 ### 4.5 修复方案
 
@@ -429,9 +432,12 @@ not_applicable
 - 同一 run 的 `sessionCompactionReason` 为
   `subscription_token_only; cache economics are non-monetary; compaction controlled by stability thresholds`，
   不再因 provider/model 缺失进入 `provider/model pricing unavailable`。
-- 仍未完成：GLM token 数只能从外部控制台对账，dual 内部没有从 raw Claude CLI 获取真实
-  provider token 的 source of truth；因此 metrics 中 provider run token 仍为 `UNAVAILABLE`，
-  不能用于证明 token 降低。
+- native Claude JSON success path 已能把 GLM provider token 写入 run.json / metrics；
+  `CLAUDE_JSON_RESULT` 是该 direct path 的 usage attribution。失败 JSON 不计入 measured total，
+  会保留为 `UNAVAILABLE`，避免 all-zero provider error 污染 token 归因。
+- 仍未完成：由于最近 real-case / public benchmark 均在 provider connectivity preflight 或
+  provider connection 阶段失败，尚缺一轮 provider 成功的 GLM 控制台 token 增量对账；因此目前不能证明
+  token 降低或 complex real-case 下 GLM token attribution 全链路通过。
 
 ### 5.6 修复方案
 
