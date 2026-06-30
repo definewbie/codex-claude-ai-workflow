@@ -69,6 +69,39 @@ class ProjectionsRefreshCommandTest {
         assertTrue(!Files.exists(tempDir.resolve(".agent/workstreams/ws-missing/timeline.json")));
     }
 
+    @Test
+    void refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger() throws Exception {
+        writeStaleRunningLedgerWithoutProjections();
+        var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-stale/workflow/current.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-stale/nodes/node-1.json");
+        var runJson = tempDir.resolve(".agent/workstreams/ws-stale/runs/run-stale/run.json");
+        var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
+        var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
+        var runBefore = Files.readString(runJson, StandardCharsets.UTF_8);
+
+        var command = new ProjectionsRefreshCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-stale";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Execution consistency: stale_legacy_running=1"));
+        var metrics = tempDir.resolve(".agent/workstreams/ws-stale/metrics/workstream-metrics.json");
+        var metricsJson = MAPPER.readValue(metrics.toFile(), Map.class);
+        var provider = map(metricsJson.get("providerMetrics"));
+        assertEquals(1, number(map(provider.get("executionConsistencyCounts")).get("stale_legacy_running")));
+        var tokenRun = map(list(map(metricsJson.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("stale_legacy_running", tokenRun.get("executionConsistency"));
+        var attrRun = map(list(map(metricsJson.get("tokenAttribution")).get("perRun")).get(0));
+        assertEquals("stale_legacy_running", attrRun.get("executionConsistency"));
+        assertEquals(workflowBefore, Files.readString(workflowCurrent, StandardCharsets.UTF_8),
+                "projection replay must not mutate workflow/current.json source of truth");
+        assertEquals(nodeBefore, Files.readString(nodeJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate node source of truth");
+        assertEquals(runBefore, Files.readString(runJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate run.json execution read model");
+    }
+
     private void writeLedgerWithoutProjections() throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-refresh");
         Files.createDirectories(root.resolve("workflow"));
@@ -138,6 +171,78 @@ class ProjectionsRefreshCommandTest {
                 """, StandardCharsets.UTF_8);
     }
 
+    private void writeStaleRunningLedgerWithoutProjections() throws Exception {
+        var root = tempDir.resolve(".agent/workstreams/ws-stale");
+        Files.createDirectories(root.resolve("workflow"));
+        Files.createDirectories(root.resolve("nodes"));
+        Files.createDirectories(root.resolve("runs/run-stale"));
+
+        Files.writeString(root.resolve("workflow/current.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-stale",
+                  "workflowInstanceId": "wf-stale",
+                  "workflowId": "agent-lifecycle-full",
+                  "definitionVersion": 1,
+                  "status": "RUNNING",
+                  "activeNodeInstanceIds": ["node-1"],
+                  "openGateIds": [],
+                  "lastEventId": "evt-1",
+                  "updatedAt": "2026-06-30T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("nodes/node-1.json"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-1",
+                  "nodeDefinitionId": "implement.claude_implement",
+                  "kind": "TASK",
+                  "handlerType": "acpx.agent_run",
+                  "status": "RUNNING",
+                  "stageId": "stage-implement",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "result": {},
+                  "runRef": "run-stale",
+                  "latestExecutionId": "exec-stale",
+                  "startedAt": "2026-06-30T00:00:00Z",
+                  "finishedAt": null
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("runs/run-stale/run.json"), """
+                {
+                  "schemaVersion": 4,
+                  "runId": "run-stale",
+                  "workstreamId": "ws-stale",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "status": "running",
+                  "durationMs": 1000,
+                  "usage": {
+                    "inputTokens": 100,
+                    "outputTokens": 20,
+                    "cachedReadTokens": 300,
+                    "cachedWriteTokens": 0,
+                    "totalTokens": 420,
+                    "source": "acpx_stream",
+                    "measurementType": "PROVIDER_RUN_USAGE"
+                  },
+                  "executionAttempt": {
+                    "status": "STALLED",
+                    "processStatus": "PROCESS_STALLED",
+                    "failureSignal": "AGENT_PROCESS_STALLED"
+                  },
+                  "executionOutcome": {
+                    "status": "RUNTIME_FAILED",
+                    "primaryReason": "AGENT_PROCESS_STALLED",
+                    "nodeMaySucceed": false
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+    }
+
     private String captureStdout(ThrowingCallable callable) throws Exception {
         var originalOut = System.out;
         var out = new ByteArrayOutputStream();
@@ -158,6 +263,10 @@ class ProjectionsRefreshCommandTest {
     @SuppressWarnings("unchecked")
     private java.util.List<Map<String, Object>> list(Object value) {
         return (java.util.List<Map<String, Object>>) value;
+    }
+
+    private Number number(Object value) {
+        return (Number) value;
     }
 
     @FunctionalInterface

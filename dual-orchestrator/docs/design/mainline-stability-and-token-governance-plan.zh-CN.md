@@ -196,6 +196,13 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `ProjectionsRefreshCommandTest.refreshesTimelineAndMetricsFromExistingLedger` 已断言 refresh 后
   `workflow/current.json`、`nodes/*.json` 和 `runs/*/run.json` 字节不变，防止 replay 入口
   变成隐式状态迁移。
+- refresh 入口已补充 execution consistency warning 输出：当历史 ledger replay 后的 metrics
+  中存在 `stale_legacy_running` / `attempt_outcome_conflict` 等非 `consistent` 计数时，
+  CLI 会从 `metrics/workstream-metrics.json.providerMetrics.executionConsistencyCounts`
+  投影出 `Execution consistency: ...`。该输出仍是 read model 消费，不反写 ledger。
+  `ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger`
+  已覆盖 stale legacy RUNNING fixture，并验证 metrics / token attribution / stdout 三处都能看到
+  `stale_legacy_running`。
 - `executionTimeline` 已覆盖 transport 后段关键事件：adapter 在最终 artifact 提取后写入
   `artifact_extracted`，runtime finalizer 在 contract validation 后写入 `contract_validated`。
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；
@@ -337,6 +344,8 @@ P0 不需要先消耗真实 provider token，可以用 synthetic / replay 证明
 4. Historical ledger replay：
    - 对已有 problematic workstream 离线 replay；
    - 不重新跑模型，只验证新 projection 能识别旧冲突，并标为 `INVALID_LEGACY_CONFLICT` 或 projection warning。
+   - synthetic stale legacy RUNNING replay 已覆盖到 `dualctl projections refresh` 入口；
+   - 真实 problematic workstream replay 仍需在可访问历史 ledger 上执行，不能用 synthetic fixture 替代。
 
 5. Contradiction test：
    - 构造 `executionAttempt=RUNTIME_FAILED + executionOutcome=SUCCESS`；
@@ -906,6 +915,7 @@ Projection surfaces:
 Findings:
 - intake exploration boundary is closed.
 - execution attempt/outcome consistency has local finalizer/resolver/projection coverage;
+  `dualctl projections refresh` now surfaces synthetic stale legacy RUNNING warnings from the metrics read model;
   problematic real workstream replay is still missing.
 - token economics has local read-model coverage for GLM token-only, DeepSeek pricing,
   OpenAI token-only, and Anthropic cache pricing; real bill calibration and complex

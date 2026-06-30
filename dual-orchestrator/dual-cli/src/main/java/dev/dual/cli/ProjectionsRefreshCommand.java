@@ -1,5 +1,7 @@
 package dev.dual.cli;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
@@ -10,11 +12,16 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @Component
 @Command(name = "refresh", description = "Regenerate timeline and metrics projections from the ledger.", mixinStandardHelpOptions = true)
 public final class ProjectionsRefreshCommand implements Callable<Integer> {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {};
+
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
@@ -34,6 +41,27 @@ public final class ProjectionsRefreshCommand implements Callable<Integer> {
         System.out.println("Projections refreshed");
         System.out.println("Timeline: " + paths.timelineJson());
         System.out.println("Metrics: " + paths.workstreamMetricsJson());
+        executionConsistencySummary(paths).ifPresent(summary ->
+                System.out.println("Execution consistency: " + summary));
         return 0;
+    }
+
+    private java.util.Optional<String> executionConsistencySummary(WorkstreamPaths paths) throws Exception {
+        if (!Files.isRegularFile(paths.workstreamMetricsJson())) {
+            return java.util.Optional.empty();
+        }
+        var metrics = OBJECT_MAPPER.readValue(paths.workstreamMetricsJson().toFile(), MAP_TYPE);
+        var providerMetrics = map(metrics.get("providerMetrics"));
+        var counts = map(providerMetrics.get("executionConsistencyCounts"));
+        var summary = counts.entrySet().stream()
+                .filter(entry -> !"consistent".equals(entry.getKey()))
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(", "));
+        return summary.isBlank() ? java.util.Optional.empty() : java.util.Optional.of(summary);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> map(Object value) {
+        return value instanceof Map<?, ?> ? (Map<String, Object>) value : Map.of();
     }
 }
