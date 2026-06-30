@@ -23,6 +23,12 @@ class ProjectionsRefreshCommandTest {
     @Test
     void refreshesTimelineAndMetricsFromExistingLedger() throws Exception {
         writeLedgerWithoutProjections();
+        var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-refresh/workflow/current.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-refresh/nodes/node-1.json");
+        var runJson = tempDir.resolve(".agent/workstreams/ws-refresh/runs/run-1/run.json");
+        var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
+        var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
+        var runBefore = Files.readString(runJson, StandardCharsets.UTF_8);
 
         var command = new ProjectionsRefreshCommand();
         command.workdir = tempDir;
@@ -45,6 +51,12 @@ class ProjectionsRefreshCommandTest {
         var topRuns = list(executionLatency.get("topRuns"));
         assertEquals("run-1", topRuns.get(0).get("runId"));
         assertEquals("post_process", topRuns.get(0).get("dominantPhase"));
+        assertEquals(workflowBefore, Files.readString(workflowCurrent, StandardCharsets.UTF_8),
+                "projection replay must not mutate workflow/current.json source of truth");
+        assertEquals(nodeBefore, Files.readString(nodeJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate node source of truth");
+        assertEquals(runBefore, Files.readString(runJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate run.json execution read model");
     }
 
     @Test
