@@ -33,14 +33,14 @@ import java.util.Map;
  * single runtime writer that combines those facts with process evidence and
  * persists terminal attempt/outcome fields into the agent run read model.</p>
  */
-final class AgentRunMetadataFinalizer {
+public final class AgentRunMetadataFinalizer {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
 
     private final AgentExecutionFinalizer executionFinalizer;
 
-    AgentRunMetadataFinalizer() {
+    public AgentRunMetadataFinalizer() {
         this(new AgentExecutionFinalizer(new AgentExecutionOutcomeResolver()));
     }
 
@@ -49,6 +49,29 @@ final class AgentRunMetadataFinalizer {
             throw new IllegalArgumentException("executionFinalizer is required");
         }
         this.executionFinalizer = executionFinalizer;
+    }
+
+    public NodeResult finalizeNodeResult(Path workspaceRoot, NodeResult result) {
+        if (!AgentExecutionResultFacts.present(result)) {
+            return result;
+        }
+        var outcome = finalizeRunMetadata(
+                workspaceRoot,
+                result,
+                AgentExecutionResultFacts.terminalControlResult(result),
+                AgentExecutionResultFacts.artifactContractResults(result),
+                AgentExecutionResultFacts.rereadReasons(result)
+        );
+        var finalized = new LinkedHashMap<String, Object>();
+        finalized.putAll(result.result());
+        finalized.put("agent_execution_outcome", outcomeToMap(outcome));
+        return new NodeResult(
+                outcome.nodeMaySucceed() ? result.outcome() : outcome.primaryReason(),
+                outcome.nodeMaySucceed() ? result.status() : dev.dual.core.workflow.NodeStatus.FAILED,
+                result.outputRefs(),
+                finalized,
+                outcome.nodeMaySucceed() ? result.errorMessage() : outcome.operatorMessage()
+        );
     }
 
     AgentExecutionOutcome finalizeRunMetadata(
@@ -85,9 +108,10 @@ final class AgentRunMetadataFinalizer {
             json.set("adapterSignals", OBJECT_MAPPER.valueToTree(adapterSignals(result).stream()
                     .map(AgentRunMetadataFinalizer::adapterSignalToMap)
                     .toList()));
-            json.set("terminalControlResult", OBJECT_MAPPER.valueToTree(terminalControlToMap(terminalControlResult)));
+            json.set("terminalControlResult", OBJECT_MAPPER.valueToTree(
+                    AgentExecutionResultFacts.terminalControlToMap(terminalControlResult)));
             json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
-                    .map(AgentRunMetadataFinalizer::artifactContractToMap)
+                    .map(AgentExecutionResultFacts::artifactContractToMap)
                     .toList()));
             if (rereadReasons != null) {
                 json.set("reread_reasons", OBJECT_MAPPER.valueToTree(rereadReasons));
@@ -279,28 +303,6 @@ final class AgentRunMetadataFinalizer {
         map.put("sessionId", signal.sessionId());
         map.put("observedSequence", signal.observedSequence());
         map.put("superseded", signal.superseded());
-        return map;
-    }
-
-    private static Map<String, Object> terminalControlToMap(TerminalControlResult terminal) {
-        var map = new LinkedHashMap<String, Object>();
-        map.put("present", terminal.present());
-        map.put("valid", terminal.valid());
-        map.put("decision", terminal.decision());
-        map.put("summary", terminal.summary());
-        map.put("parseError", terminal.parseError());
-        return map;
-    }
-
-    private static Map<String, Object> artifactContractToMap(ArtifactContractResult artifact) {
-        var map = new LinkedHashMap<String, Object>();
-        map.put("contractType", artifact.contractType());
-        map.put("required", artifact.required());
-        map.put("present", artifact.present());
-        map.put("valid", artifact.valid());
-        map.put("path", artifact.path());
-        map.put("errorCode", artifact.errorCode());
-        map.put("errorMessage", artifact.errorMessage());
         return map;
     }
 

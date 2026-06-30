@@ -3,7 +3,6 @@ package dev.dual.runtime.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.dual.core.execution.AgentExecutionOutcome;
 import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.TerminalControlResult;
 import dev.dual.core.workflow.NodeDefinition;
@@ -28,7 +27,6 @@ public final class ArtifactContractValidator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
-    private static final AgentRunMetadataFinalizer RUN_METADATA_FINALIZER = new AgentRunMetadataFinalizer();
     private final DualControlBlockParser parser = new DualControlBlockParser();
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
 
@@ -407,20 +405,16 @@ public final class ArtifactContractValidator {
         augmented.put("summary", block.required("summary"));
         augmented.put("contract_sidecar_ref", sidecarRef);
         planArtifactRef.ifPresent(ref -> augmented.put("plan_artifact_ref", ref));
-        var outcome = RUN_METADATA_FINALIZER.finalizeRunMetadata(
-                root,
-                result,
+        return AgentExecutionResultFacts.attach(new NodeResult(
+                result.outcome(),
+                result.status(),
+                outputRefs,
+                augmented,
+                result.errorMessage()
+        ),
                 TerminalControlResult.valid(block.required("decision")),
                 List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition))),
                 document.get("reread_reasons")
-        );
-        augmented.put("agent_execution_outcome", AgentRunMetadataFinalizer.outcomeToMap(outcome));
-        return new NodeResult(
-                outcome.nodeMaySucceed() ? result.outcome() : outcome.primaryReason(),
-                nodeStatusFor(outcome),
-                outputRefs,
-                augmented,
-                outcome.nodeMaySucceed() ? result.errorMessage() : outcome.operatorMessage()
         );
     }
 
@@ -788,21 +782,13 @@ public final class ArtifactContractValidator {
         if (diagnostic.present() && !outputRefs.contains(diagnostic.markdownRef())) {
             outputRefs.add(diagnostic.markdownRef());
         }
-        var outcome = RUN_METADATA_FINALIZER.finalizeRunMetadata(
-                workspaceRoot,
-                result,
-                terminalResultFor(reason, message),
-                List.of(artifactResultFor(nodeDefinition, reason, message)),
-                null
-        );
-        failed.put("agent_execution_outcome", AgentRunMetadataFinalizer.outcomeToMap(outcome));
-        return new NodeResult(
+        return AgentExecutionResultFacts.attach(new NodeResult(
                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
                 NodeStatus.FAILED,
                 outputRefs,
                 failed,
                 message
-        );
+        ), terminalResultFor(reason, message), List.of(artifactResultFor(nodeDefinition, reason, message)), null);
     }
 
     private static TerminalControlResult terminalResultFor(String reason, String message) {
@@ -1000,10 +986,6 @@ public final class ArtifactContractValidator {
             }
         }
         return Map.copyOf(copy);
-    }
-
-    private static NodeStatus nodeStatusFor(AgentExecutionOutcome outcome) {
-        return outcome.nodeMaySucceed() ? NodeStatus.COMPLETED : NodeStatus.FAILED;
     }
 
     private sealed interface StructuredAgentArtifact permits

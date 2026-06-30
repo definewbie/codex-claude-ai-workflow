@@ -14,6 +14,7 @@ import dev.dual.ledger.file.WorkflowExecutionDocument;
 import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.ContractEventTypes;
 import dev.dual.runtime.handler.DecisionHandler;
@@ -38,6 +39,7 @@ public final class WorkflowRuntime {
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
     private final ArtifactContractValidator artifactContractValidator;
+    private final AgentRunMetadataFinalizer runMetadataFinalizer;
     private final AgentTaskDispatchMode dispatchMode;
 
     public WorkflowRuntime(WorkflowFileLedger ledger, HandlerRegistry handlers) {
@@ -55,6 +57,7 @@ public final class WorkflowRuntime {
         this.handlers = handlers;
         this.dispatchMode = dispatchMode == null ? AgentTaskDispatchMode.INLINE : dispatchMode;
         this.artifactContractValidator = new ArtifactContractValidator();
+        this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
     }
 
     /**
@@ -262,6 +265,7 @@ public final class WorkflowRuntime {
                     nodeDefinition,
                     result
             );
+            result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);
             ledger.markAgentTaskFinished(paths, agentTask, result);
             ledger.finishNodeExecution(paths, nodeExecution, result);
             return result;

@@ -23,6 +23,7 @@ class ArtifactContractValidatorTest {
     Path tempDir;
 
     private final ArtifactContractValidator validator = new ArtifactContractValidator();
+    private final AgentRunMetadataFinalizer finalizer = new AgentRunMetadataFinalizer();
 
     @Test
     void passesValidAgentOutputContract() throws Exception {
@@ -253,7 +254,7 @@ class ArtifactContractValidatorTest {
                 "run_metadata", runRef
         ));
 
-        var validated = validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("acceptance.codex_verifier_review"), result));
 
         assertEquals(NodeStatus.FAILED, validated.status());
         var runMetadata = Files.readString(tempDir.resolve(runRef));
@@ -305,7 +306,7 @@ class ArtifactContractValidatorTest {
                 "run_metadata", runRef
         ));
 
-        var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("design.codex_arch_review"), result));
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
         var runMetadata = Files.readString(tempDir.resolve(runRef));
@@ -356,7 +357,7 @@ class ArtifactContractValidatorTest {
                 "run_metadata", runRef
         ));
 
-        var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("design.codex_arch_review"), result));
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
         var runMetadata = OBJECT_MAPPER.readTree(tempDir.resolve(runRef).toFile());
@@ -385,7 +386,7 @@ class ArtifactContractValidatorTest {
                 "agent needs reconnect"
         );
 
-        var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("design.codex_arch_review"), result));
 
         assertEquals(NodeStatus.FAILED, validated.status());
         var runMetadata = Files.readString(tempDir.resolve(runRef));
@@ -526,7 +527,7 @@ class ArtifactContractValidatorTest {
                 ```
                 """);
         var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
-        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result));
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
         var sidecar = Files.readString(tempDir.resolve("plan-review.contract.json"));
@@ -599,7 +600,7 @@ class ArtifactContractValidatorTest {
                 ```
                 """);
         var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex"));
-        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result));
 
         assertEquals(NodeStatus.FAILED, validated.status());
         assertTrue(String.valueOf(validated.result().get("message"))
@@ -1199,7 +1200,7 @@ class ArtifactContractValidatorTest {
                 """);
         var result = NodeResult.completed("completed", List.of(outputRef), Map.of("agent", "codex", "run_metadata", runRef));
 
-        var validated = validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result);
+        var validated = finalizeValidated(validator.validate(tempDir, agentNode("plan.codex_plan_review", "agent_output_contract"), result));
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
         var sidecar = Files.readString(tempDir.resolve((String) validated.result().get("contract_sidecar_ref")));
@@ -2111,6 +2112,10 @@ summary: Product review complete.
                   "invalidatedReadFiles": [{"path":"%s","invalidationReason":"file changed since prior read"}]
                 }
                 """.formatted(reusableFile, invalidatedFile));
+    }
+
+    private NodeResult finalizeValidated(NodeResult result) {
+        return finalizer.finalizeNodeResult(tempDir, result);
     }
 
     private void writeReadReuseContractWithAllowed(String targetNodeDefinitionId, String reusableFile, String allowedFile) throws Exception {

@@ -12,6 +12,7 @@ import dev.dual.ledger.file.WorkflowExecutionDocument;
 import dev.dual.ledger.file.WorkflowExecutionStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.GateHandler;
@@ -32,6 +33,7 @@ public final class AgentWorker {
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
     private final ArtifactContractValidator artifactContractValidator;
+    private final AgentRunMetadataFinalizer runMetadataFinalizer;
 
     public AgentWorker(WorkflowFileLedger ledger, HandlerRegistry handlers) {
         if (ledger == null) {
@@ -43,6 +45,7 @@ public final class AgentWorker {
         this.ledger = ledger;
         this.handlers = handlers;
         this.artifactContractValidator = new ArtifactContractValidator();
+        this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
     }
 
     public AgentWorkerResult runOne(WorkflowCommand command) throws Exception {
@@ -117,6 +120,7 @@ public final class AgentWorker {
                     nodeDefinition,
                     result
             );
+            result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);
             ledger.markAgentTaskFinished(paths, task, result);
             ledger.finishNodeExecution(paths, nodeExecution, result);
             return result;
