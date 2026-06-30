@@ -1,18 +1,20 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
 public record AcpxExecutionEvent(
-        String kind,
+        AgentExecutionTimelineEventKind kind,
         String source,
         long sequence,
         Instant observedAt,
         long elapsedMs
 ) {
     public AcpxExecutionEvent {
-        if (kind == null || kind.isBlank()) {
+        if (kind == null) {
             throw new IllegalArgumentException("kind is required");
         }
         source = source == null ? "" : source;
@@ -24,14 +26,14 @@ public record AcpxExecutionEvent(
         }
     }
 
-    static AcpxExecutionEvent now(String kind, String source, long sequence, Instant startedAt) {
+    static AcpxExecutionEvent now(AgentExecutionTimelineEventKind kind, String source, long sequence, Instant startedAt) {
         var now = Instant.now();
         return new AcpxExecutionEvent(kind, source, sequence, now, Duration.between(startedAt, now).toMillis());
     }
 
     Map<String, Object> toMap() {
         return Map.of(
-                "kind", kind,
+                "kind", kind.wireName(),
                 "source", source,
                 "sequence", sequence,
                 "observedAt", observedAt.toString(),

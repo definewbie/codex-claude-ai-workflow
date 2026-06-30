@@ -176,10 +176,11 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   adapter 初始 run metadata 和 finalizer 终态 metadata 均使用同一语义。
 - 已有 projection contradiction 检测：`MetricsProjectionWriter.executionConsistency` 会标记
   `attempt_outcome_conflict` / `legacy_outcome_conflict`。
+- `executionTimeline` 事件名已收敛到 core-level `AgentExecutionTimelineEventKind`；
+  adapter 只能写 typed event kind，`run.json` 仍输出兼容的 wire string。
 
 仍未完成：
 
-- `executionTimeline` 已存在，但事件名仍是 adapter 字符串事件；尚未收敛成 core-level typed event catalog。
 - `artifact validator 只返回 ArtifactContractResult` 还不是纯模型形态；当前 validator 仍调用
   finalizer 完成 run metadata finalization，下一步应继续把 contract validation result 和 execution
   finalization 编排边界拆清。

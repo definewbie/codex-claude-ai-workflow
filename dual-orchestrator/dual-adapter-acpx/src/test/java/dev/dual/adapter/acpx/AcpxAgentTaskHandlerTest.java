@@ -1,5 +1,6 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -976,7 +977,7 @@ class AcpxAgentTaskHandlerTest {
                     now.plusSeconds(1),
                     List.of("acpx", "claude"),
                     List.of(new AcpxExecutionEvent(
-                            "terminal_control_detected",
+                            AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
                             "stdout",
                             7,
                             now.plusMillis(750),
