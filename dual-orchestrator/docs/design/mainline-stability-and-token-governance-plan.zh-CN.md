@@ -103,6 +103,8 @@ Mainline Decision Gate:
 - 如果真实验证因为 provider、jar freshness、pricing、trigger precondition 或观测链路问题失效，结论必须是 `INVALID`，不能拿来证明治理有效。
 - 如果同一类边界问题连续两次失败，必须回到本节重新定义 owner / SoT / invariant；不能继续调阈值、补 prompt 或堆 projection。
 
+本 gate 的格式校验由 `scripts/lib/mainline-decision-gate.sh` 提供。它只证明“开工前的主线目标、边界、SoT、漂移路径和完成证据已经写清楚”，不替代 P2 的真实 provider `Verification Gate`，也不证明任何 runtime 行为已经完成。
+
 ## 3. 未完成目标清单
 
 | 目标 | 当前状态 | 缺口 | 优先级 |
