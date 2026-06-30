@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 record AcpxProviderMetadata(String providerId, String model, String billingMode, String source) {
     static final String SOURCE_ACPX_SESSION_JSON = "acpx_session_json";
     static final String BILLING_METERED = "metered";
-    static final String BILLING_SUBSCRIPTION_TOKENS = "subscription_tokens";
+    static final String BILLING_SUBSCRIPTION_TOKENS = "subscription_token_only";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Pattern DEFAULT_MODEL_PATTERN = Pattern.compile(
