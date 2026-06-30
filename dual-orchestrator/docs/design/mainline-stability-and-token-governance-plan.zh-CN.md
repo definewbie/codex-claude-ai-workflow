@@ -586,6 +586,11 @@ INVALID。
 typed adapter failure signal（`RECOVERABLE_PROVIDER_CONNECTION_FAILED`），而不是继续退化成
 `ACPX_EXIT_1` / `PROCESS_STALLED` / artifact contract failure。
 
+同一轮还暴露了报告投影缺口：即使 runtime 已把 provider 连接失败类型化，`run-real-case.sh` /
+`real-case-benchmark-summary.sh` 也不能只输出 `FAIL`。当 run.json 中存在 provider 前置条件失败
+枚举时，real-case summary 必须输出 `benchmark_grade=INVALID` 和明确的 `invalid_reason`，否则 P2
+矩阵会把“测试无效”误读成“生命周期失败”。
+
 ## 8. P3：Session Keep-alive / 性能优化
 
 这是未来优化，不抢 P0/P1。

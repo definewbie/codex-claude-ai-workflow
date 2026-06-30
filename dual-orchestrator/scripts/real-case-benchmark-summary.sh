@@ -180,24 +180,26 @@ case_name() {
 
 benchmark_grade() {
   local file="$1"
-  local status repo_clean missing_artifacts rejects decisions
+  local status repo_clean missing_artifacts rejects decisions invalid
   status="$(json_value "$file" '.final_status')"
   repo_clean="$(json_value "$file" '.original_repo_clean')"
   missing_artifacts="$(missing_artifacts "$file")"
   rejects="$(json_int "$file" '.acceptance_reject_count')"
   decisions="$(jq -r '(.acceptance_decisions // []) | join(", ")' "$file")"
-  real_case_grade "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects"
+  invalid="$(json_value "$file" '.invalid_reason')"
+  real_case_grade "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects" "$invalid"
 }
 
 benchmark_grade_reason() {
   local file="$1"
-  local status repo_clean missing_artifacts rejects decisions
+  local status repo_clean missing_artifacts rejects decisions invalid
   status="$(json_value "$file" '.final_status')"
   repo_clean="$(json_value "$file" '.original_repo_clean')"
   missing_artifacts="$(missing_artifacts "$file")"
   rejects="$(json_int "$file" '.acceptance_reject_count')"
   decisions="$(jq -r '(.acceptance_decisions // []) | join(", ")' "$file")"
-  real_case_grade_reason "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects"
+  invalid="$(json_value "$file" '.invalid_reason')"
+  real_case_grade_reason "$status" "$repo_clean" "$missing_artifacts" "$decisions" "$rejects" "$invalid"
 }
 
 confidence_from_decision() {
@@ -217,6 +219,7 @@ write_markdown() {
   local pass=0
   local pass_warn=0
   local fail_count=0
+  local invalid_count=0
   local clean=0
   local reject_total=0
   local repair_total=0
@@ -231,6 +234,7 @@ write_markdown() {
     case "$grade" in
       PASS) pass=$((pass + 1)) ;;
       PASS-WARN) pass_warn=$((pass_warn + 1)) ;;
+      INVALID) invalid_count=$((invalid_count + 1)) ;;
       FAIL) fail_count=$((fail_count + 1)) ;;
     esac
     [[ "$(json_value "$file" '.final_status')" == "COMPLETED" ]] && completed=$((completed + 1))
@@ -254,6 +258,7 @@ write_markdown() {
 | Runs | $total |
 | PASS | $pass |
 | PASS-WARN | $pass_warn |
+| INVALID | $invalid_count |
 | FAIL | $fail_count |
 | Completed | $completed |
 | Original repo clean | $clean |

@@ -578,6 +578,20 @@ missing_artifacts() {
   printf '%s' "${missing[*]}"
 }
 
+invalid_reason() {
+  [[ -n "$WS_DIR" && -d "$WS_DIR/runs" ]] || {
+    printf ''
+    return
+  }
+  if grep -R -m 1 -E \
+    '"failureReason"[[:space:]]*:[[:space:]]*"RECOVERABLE_PROVIDER_CONNECTION_FAILED"|"type"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"|"failureSignal"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"' \
+    "$WS_DIR/runs" >/dev/null 2>&1; then
+    printf 'provider_connection_failed'
+    return
+  fi
+  printf ''
+}
+
 original_repo_clean_bool() {
   local file="$CASE_DIR/logs/original-git-status-short.log"
   if [[ -f "$file" && ! -s "$file" ]]; then
@@ -591,7 +605,7 @@ write_summary_json() {
   local summary="$CASE_DIR/summary.json"
   local gate_rounds node_count run_count iteration_count design_revision_count reject_count repair_count
   local original_clean final_report_present handoff_present next_prompt_present delivery_body_present workstream_summary_present
-  local decisions final_decision missing grade reason confidence confidence_reason
+  local decisions final_decision missing invalid grade reason confidence confidence_reason
   gate_rounds="$(count_lines_matching "$CASE_DIR/logs/autorun.log" '^Gate ')"
   node_count="$(count_lines_matching "$CASE_DIR/logs/timeline.log" '^  ')"
   run_count="$(agent_run_count)"
@@ -605,13 +619,14 @@ write_summary_json() {
   workstream_summary_present="$(artifact_present_bool "reports/workstream-summary.md")"
   decisions="$(acceptance_decisions_text)"
   missing="$(missing_artifacts)"
+  invalid="$(invalid_reason)"
   reject_count="$(acceptance_reject_count)"
   repair_count="$(repair_loop_count)"
   final_decision="$(final_acceptance_decision "$decisions")"
   confidence="$(verification_confidence "$final_decision" "$missing")"
   confidence_reason="$(verification_confidence_reason "$final_decision" "$missing")"
-  grade="$(real_case_grade "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
-  reason="$(real_case_grade_reason "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count")"
+  grade="$(real_case_grade "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count" "$invalid")"
+  reason="$(real_case_grade_reason "$FINAL_STATUS" "$original_clean" "$missing" "$decisions" "$reject_count" "$invalid")"
 
   {
     echo "{"
@@ -640,6 +655,7 @@ write_summary_json() {
     echo "  \"verification_confidence\": \"$(json_escape "$confidence")\","
     echo "  \"verification_confidence_reason\": \"$(json_escape "$confidence_reason")\","
     echo "  \"original_repo_clean\": $original_clean,"
+    echo "  \"invalid_reason\": \"$(json_escape "$invalid")\","
     echo "  \"benchmark_grade\": \"$(json_escape "$grade")\","
     echo "  \"benchmark_grade_reason\": \"$(json_escape "$reason")\","
     echo "  \"artifacts\": {"
@@ -673,7 +689,7 @@ write_report() {
   local next_prompt="$WS_DIR/artifacts/next-stage/next-stage-prompt.md"
   local delivery_body="$WS_DIR/delivery/pr-body.md"
   local delivery_commit="$WS_DIR/delivery/commit-message.txt"
-  local grade reason decisions final_decision reject_count repair_count missing confidence confidence_reason
+  local grade reason decisions final_decision reject_count repair_count missing invalid confidence confidence_reason
   grade="$(grep -E '"benchmark_grade"[[:space:]]*:' "$summary" | sed -E 's/.*"benchmark_grade"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
   reason="$(grep -E '"benchmark_grade_reason"[[:space:]]*:' "$summary" | sed -E 's/.*"benchmark_grade_reason"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
   decisions="$(acceptance_decisions_text)"
@@ -681,6 +697,7 @@ write_report() {
   reject_count="$(acceptance_reject_count)"
   repair_count="$(repair_loop_count)"
   missing="$(missing_artifacts)"
+  invalid="$(invalid_reason)"
   confidence="$(verification_confidence "$final_decision" "$missing")"
   confidence_reason="$(verification_confidence_reason "$final_decision" "$missing")"
 
@@ -723,6 +740,7 @@ write_report() {
     echo "- Verification Confidence: $confidence"
     echo "- Verification Confidence Reason: $confidence_reason"
     echo "- Original Repo Clean: $(original_repo_clean_bool)"
+    echo "- Invalid Reason: ${invalid:-none}"
     echo "- Benchmark Grade: ${grade:-unknown}"
     echo "- Benchmark Reason: ${reason:-unknown}"
     echo

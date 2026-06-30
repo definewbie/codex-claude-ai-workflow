@@ -12,8 +12,11 @@ real_case_grade() {
   local missing_artifacts="$3"
   local acceptance_decisions="$4"
   local rejects="$5"
+  local invalid_reason="${6:-}"
 
-  if [[ "$status" != "COMPLETED" ]]; then
+  if [[ -n "$invalid_reason" ]]; then
+    printf 'INVALID'
+  elif [[ "$status" != "COMPLETED" ]]; then
     printf 'FAIL'
   elif [[ "$repo_clean" != "true" ]]; then
     printf 'FAIL'
@@ -34,8 +37,11 @@ real_case_grade_reason() {
   local missing_artifacts="$3"
   local acceptance_decisions="$4"
   local rejects="$5"
+  local invalid_reason="${6:-}"
 
-  if [[ "$status" != "COMPLETED" ]]; then
+  if [[ -n "$invalid_reason" ]]; then
+    printf 'invalid=%s' "$invalid_reason"
+  elif [[ "$status" != "COMPLETED" ]]; then
     printf 'status=%s' "$status"
   elif [[ "$repo_clean" != "true" ]]; then
     printf 'original_repo_dirty'
