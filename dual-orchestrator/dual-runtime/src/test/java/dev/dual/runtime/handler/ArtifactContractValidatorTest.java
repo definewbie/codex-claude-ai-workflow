@@ -367,6 +367,10 @@ class ArtifactContractValidatorTest {
         assertTrue(runMetadata.path("executionAttempt").path("failureSignal").isNull());
         assertEquals("SUCCESS", runMetadata.path("executionOutcome").path("status").asText());
         assertTrue(runMetadata.path("executionOutcome").path("nodeMaySucceed").asBoolean());
+        assertEquals(
+                "contract_validated",
+                runMetadata.path("executionTimeline").get(0).path("kind").asText()
+        );
     }
 
     @Test

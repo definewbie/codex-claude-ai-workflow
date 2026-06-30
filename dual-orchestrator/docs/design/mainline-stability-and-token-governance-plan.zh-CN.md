@@ -178,6 +178,8 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `attempt_outcome_conflict` / `legacy_outcome_conflict`。
 - `executionTimeline` 事件名已收敛到 core-level `AgentExecutionTimelineEventKind`；
   adapter 只能写 typed event kind，`run.json` 仍输出兼容的 wire string。
+- `executionTimeline` 已覆盖 transport 后段关键事件：adapter 在最终 artifact 提取后写入
+  `artifact_extracted`，runtime finalizer 在 contract validation 后写入 `contract_validated`。
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；
   validator 只附加 terminal/artifact typed facts，`WorkflowRuntime` / `AgentWorker`
   在 ledger 写入前调用 `AgentRunMetadataFinalizer` 统一合成 terminal attempt/outcome。

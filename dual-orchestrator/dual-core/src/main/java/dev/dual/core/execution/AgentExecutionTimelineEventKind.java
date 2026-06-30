@@ -6,7 +6,9 @@ public enum AgentExecutionTimelineEventKind {
     TERMINAL_CONTROL_DETECTED("terminal_control_detected"),
     TERMINAL_CONTROL_GRACE_ELAPSED("terminal_control_grace_elapsed"),
     RECOVERABLE_SIGNAL_DETECTED("recoverable_signal_detected"),
-    PROCESS_EXITED("process_exited");
+    PROCESS_EXITED("process_exited"),
+    ARTIFACT_EXTRACTED("artifact_extracted"),
+    CONTRACT_VALIDATED("contract_validated");
 
     private final String wireName;
 

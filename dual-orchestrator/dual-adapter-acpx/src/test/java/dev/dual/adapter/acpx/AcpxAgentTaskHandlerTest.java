@@ -1139,6 +1139,7 @@ class AcpxAgentTaskHandlerTest {
         var runMetadata = Files.readString(runJson);
         assertTrue(runMetadata.contains("\"executionTimeline\" :"), runMetadata);
         assertTrue(runMetadata.contains("\"kind\" : \"terminal_control_detected\""), runMetadata);
+        assertTrue(runMetadata.contains("\"kind\" : \"artifact_extracted\""), runMetadata);
         assertTrue(runMetadata.contains("\"elapsedMs\" : 750"), runMetadata);
     }
 

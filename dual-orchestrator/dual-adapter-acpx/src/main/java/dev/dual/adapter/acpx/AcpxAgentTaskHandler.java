@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.ProcessUsability;
 import dev.dual.runtime.handler.TaskHandler;
 
@@ -165,12 +166,18 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 : transport.runCodexDesignReview(request);
         var usage = usageReader.read(promptPath, stderrPath).orElse(null);
         var finalArtifact = finalArtifactExtractor.extract(readStringIfExists(transcriptPath));
+        var resultWithArtifactTimeline = result;
         if (finalArtifact.isPresent()) {
             Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
+            resultWithArtifactTimeline = appendTimelineEvent(
+                    result,
+                    AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
+                    "adapter"
+            );
         }
         var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
         var outputComplete = completionDetector.isComplete(transcriptPath);
-        var interrupted = interruptedOutputFailure(result, outputComplete);
+        var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
                 context.workstreamId(),
@@ -184,7 +191,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 outputPath,
                 stderrPath,
                 transcriptPath,
-                result,
+                resultWithArtifactTimeline,
                 metadataFailure(failure, interrupted, outputComplete),
                 usage,
                 sessionMeta,
@@ -193,7 +200,23 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return NodeResult.completed(
                 "completed",
                 evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
-                resultFacts(context, runDir, transcriptPath, result, agent, session, runId, failure, interrupted, outputComplete)
+                resultFacts(context, runDir, transcriptPath, resultWithArtifactTimeline, agent, session, runId, failure, interrupted, outputComplete)
+        );
+    }
+
+    private static AcpxRunResult appendTimelineEvent(
+            AcpxRunResult result,
+            AgentExecutionTimelineEventKind kind,
+            String source
+    ) {
+        var timeline = new java.util.ArrayList<>(result.executionTimeline());
+        timeline.add(AcpxExecutionEvent.now(kind, source, timeline.size() + 1L, result.startedAt()));
+        return new AcpxRunResult(
+                result.exitCode(),
+                result.startedAt(),
+                result.finishedAt(),
+                result.command(),
+                timeline
         );
     }
 

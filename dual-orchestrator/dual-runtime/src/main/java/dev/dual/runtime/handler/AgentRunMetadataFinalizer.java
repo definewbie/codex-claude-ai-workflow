@@ -13,6 +13,7 @@ import dev.dual.core.execution.AgentExecutionOutcome;
 import dev.dual.core.execution.AgentExecutionOutcomeResolver;
 import dev.dual.core.execution.AgentExecutionProcessStatus;
 import dev.dual.core.execution.AgentExecutionRetryPolicy;
+import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.ProcessResult;
 import dev.dual.core.execution.ProcessUsability;
@@ -21,7 +22,9 @@ import dev.dual.core.workflow.NodeResult;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,6 +119,7 @@ public final class AgentRunMetadataFinalizer {
             if (rereadReasons != null) {
                 json.set("reread_reasons", OBJECT_MAPPER.valueToTree(rereadReasons));
             }
+            appendTimelineEvent(json, AgentExecutionTimelineEventKind.CONTRACT_VALIDATED);
             json.set("executionAttempt", OBJECT_MAPPER.valueToTree(executionAttemptToMap(finalized.attempt())));
             json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(finalized.outcome())));
             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
@@ -360,5 +364,25 @@ public final class AgentRunMetadataFinalizer {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private static void appendTimelineEvent(ObjectNode json, AgentExecutionTimelineEventKind kind) {
+        var timeline = new ArrayList<Map<String, Object>>();
+        var existing = json.get("executionTimeline");
+        if (existing != null && existing.isArray()) {
+            for (var item : existing) {
+                timeline.add(OBJECT_MAPPER.convertValue(item, MAP_TYPE));
+            }
+        }
+        var startedAt = instantOrNull(text(json.get("startedAt")));
+        var observedAt = Instant.now();
+        timeline.add(Map.of(
+                "kind", kind.wireName(),
+                "source", "runtime",
+                "sequence", timeline.size() + 1L,
+                "observedAt", observedAt.toString(),
+                "elapsedMs", startedAt == null ? 0L : Math.max(0L, Duration.between(startedAt, observedAt).toMillis())
+        ));
+        json.set("executionTimeline", OBJECT_MAPPER.valueToTree(timeline));
     }
 }
