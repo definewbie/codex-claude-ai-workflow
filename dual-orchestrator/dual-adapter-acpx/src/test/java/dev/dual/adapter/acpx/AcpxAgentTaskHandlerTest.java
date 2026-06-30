@@ -1042,6 +1042,10 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"semanticIteration\" : \"iter-001\""), runMetadata);
         // session name 恒含 workstreamId，永不裸名
         assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-sess\""), runMetadata);
+        // Even without a prebuilt exploration plan, run metadata must expose the
+        // governance result instead of silently omitting the boundary evidence.
+        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
     }
 
     @Test

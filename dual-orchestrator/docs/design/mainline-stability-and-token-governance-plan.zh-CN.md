@@ -540,8 +540,12 @@ P0 必须先于 P0.5 完整收口。
 - `MetricsProjectionWriter` 已对齐 `ExplorationPolicyEvaluator` 的失败 wire value：
   evaluator 输出 `status=failed` 时，metrics / markdown 会进入 `failCount` /
   `failures`，不再漏算为非失败。
-- 这只完成了 context governance sidecar 的策略边界对齐；尚未证明每个真实 agent run
-  都写出 `ExplorationPolicyResult`，也尚未证明 review 阶段 WARN 已收敛。
+- `AcpxAgentTaskHandlerTest` 已覆盖成功 agent run 的 `run.json` 内嵌
+  `explorationPolicyResult` / `contextGovernanceActualReportPath`，包括没有预置
+  exploration plan 的路径，避免 governance evidence 静默缺失。
+- 这只完成了 context governance sidecar、run metadata 和 metrics projection 的合成链路；
+  尚未通过真实 provider 证明每个 real-case agent run 都写出有效 `ExplorationPolicyResult`，
+  也尚未证明 review 阶段 WARN 已收敛。
 
 ### 6.2 P1B：Provider-cache-aware / Transcript Compaction
 
