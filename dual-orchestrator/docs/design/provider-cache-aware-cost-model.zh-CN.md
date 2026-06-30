@@ -495,5 +495,5 @@ Required tests：
 Accepted debt：
 - 价格配置需要人工更新或未来自动拉取；短期接受手动维护，但必须带 `updatedAt/sourceUrl`。
 - GLM/custom proxy 的真实 cache billing 可能不可验证；短期标记为 `subscription_unpriced` 或 `pricing_unknown`。这只禁止经济型自动 compaction，不禁止 token/window 稳定性 compaction。
-- `provider_cache_aware` 当前从 `workstream-metrics.json` 读取 cachedRead 聚合来做下一次 execution policy 判断。严格分层下 metrics 是 projection，不应长期作为 policy input；短期接受是因为该 projection 已是由 run usage typed facts 生成的 read model，且策略只读不写。后续应收敛为命名的 `TokenAttributionReadModel` / `SessionCompactionSignal`，由 ledger facts 生成后供 policy 消费。
+- `provider_cache_aware` 当前通过 `SessionCompactionSignal` 读取 cachedRead 聚合来做下一次 execution policy 判断。`SessionCompactionSignal` 已经把 metrics projection layout 隔离在命名 read model 边界内，policy 不再直接解析 `workstream-metrics.json`。剩余债务是底层来源仍是 projection；后续应进一步收敛为由 ledger facts 直接生成的 `TokenAttributionReadModel` / `SessionCompactionSignal`。
 - 当前 compact 候选节点族与 seed kind 在 `SessionCompactionPolicy` 中作为实验性 capability catalog 硬编码：Claude implement/self-test/handoff 使用 `agent_handoff`，Codex review 使用 `review_evidence_brief`。短期接受是因为实验只覆盖这两个已定义 seed strategy 的节点族；如果新增 workflow variant、节点族或 seed kind，必须迁移为显式 registry/config，并增加 definition/registry 一致性测试。

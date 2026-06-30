@@ -158,55 +158,31 @@ final class SessionCompactionPolicy {
                 lookup.apply(STABILITY_CACHED_READ_THRESHOLD_ENV),
                 DEFAULT_STABILITY_CACHED_READ_THRESHOLD
         );
-        var metricsPath = workspaceRoot.resolve(".agent")
-                .resolve("workstreams")
-                .resolve(workstreamId)
-                .resolve("metrics")
-                .resolve("workstream-metrics.json");
-        if (!Files.isRegularFile(metricsPath)) {
+        var signal = SessionCompactionSignal.load(workspaceRoot, workstreamId);
+        if (!signal.available()) {
             return StabilityDecision.off("metrics unavailable");
         }
-        try {
-            var doc = OBJECT_MAPPER.readValue(metricsPath.toFile(), MAP_TYPE);
-            var cachedRead = cachedReadTokens(doc, agent);
-            if (threshold > 0 && cachedRead >= threshold) {
-                return new StabilityDecision(
-                        true,
-                        "cachedReadTokens=" + cachedRead + " >= " + threshold
-                );
-            }
-            var implementThreshold = longValue(
-                    lookup.apply(IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD_ENV),
-                    DEFAULT_IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD
+        var cachedRead = signal.cachedReadTokensFor(agent);
+        if (threshold > 0 && cachedRead >= threshold) {
+            return new StabilityDecision(
+                    true,
+                    "cachedReadTokens=" + cachedRead + " >= " + threshold
             );
-            if (implementThreshold > 0 && isClaudeImplementBoundary(agent, nodeId) && cachedRead >= implementThreshold) {
-                return new StabilityDecision(
-                        true,
-                        "implement boundary cachedReadTokens=" + cachedRead + " >= " + implementThreshold
-                );
-            }
-            if (threshold <= 0 && implementThreshold <= 0) {
-                return StabilityDecision.off("stability threshold disabled");
-            }
-            return StabilityDecision.off("cachedReadTokens=" + cachedRead + " < " + threshold);
-        } catch (IOException | RuntimeException ignored) {
-            return StabilityDecision.off("metrics unavailable");
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static long cachedReadTokens(Map<String, Object> doc, String agent) {
-        var tokenMetrics = doc.get("tokenMetrics") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
-        var byAgent = tokenMetrics.get("byAgent") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
-        if (!byAgent.isEmpty()) {
-            var agentMetric = byAgent.get(agent == null ? "" : agent.trim().toLowerCase(Locale.ROOT));
-            if (agentMetric instanceof Map<?, ?> map) {
-                return longValue(((Map<String, Object>) map).get("cachedReadTokens"), 0);
-            }
-            return 0;
+        var implementThreshold = longValue(
+                lookup.apply(IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD_ENV),
+                DEFAULT_IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD
+        );
+        if (implementThreshold > 0 && isClaudeImplementBoundary(agent, nodeId) && cachedRead >= implementThreshold) {
+            return new StabilityDecision(
+                    true,
+                    "implement boundary cachedReadTokens=" + cachedRead + " >= " + implementThreshold
+            );
         }
-        var total = tokenMetrics.get("total") instanceof Map<?, ?> map ? (Map<String, Object>) map : Map.<String, Object>of();
-        return longValue(total.get("cachedReadTokens"), 0);
+        if (threshold <= 0 && implementThreshold <= 0) {
+            return StabilityDecision.off("stability threshold disabled");
+        }
+        return StabilityDecision.off("cachedReadTokens=" + cachedRead + " < " + threshold);
     }
 
     private static Decision notApplicable(SessionScopePolicy.Decision baseDecision, String reason) {
