@@ -189,6 +189,7 @@ class MetricsProjectionWriterTest {
         assertEquals(1000, number(latency.get("totalDurationMs")));
         assertEquals(100, number(latency.get("terminalDetectedMs")));
         assertEquals(200, number(latency.get("processWaitCompletedMs")));
+        assertEquals(90, number(latency.get("processBeforeTerminalMs")));
         assertEquals(700, number(latency.get("artifactExtractedMs")));
         assertEquals(900, number(latency.get("contractValidatedMs")));
         assertEquals(100, number(latency.get("terminalToProcessWaitMs")));
@@ -606,9 +607,46 @@ class MetricsProjectionWriterTest {
         var latency = map(attrRun.get("executionLatency"));
 
         assertEquals(575, number(latency.get("contractValidatedMs")));
+        assertEquals(500, number(latency.get("processBeforeTerminalMs")));
         assertEquals(0, number(latency.get("terminalToProcessWaitMs")));
         assertEquals(75, number(latency.get("postProcessMs")));
         assertEquals("process_wait", latency.get("dominantPhase"));
+    }
+
+    @Test
+    void executionLatencyClassifiesLongWaitAfterTerminalSeparately() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-latency-terminal-wait"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-latency-terminal-wait", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+        writeAttributionRun(paths, "run-terminal-wait", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runJson = paths.runsDir().resolve("run-terminal-wait/run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("durationMs", 400_000);
+        run.put("executionTimeline", List.of(
+                Map.of("kind", "process_started", "elapsedMs", 10),
+                Map.of("kind", "terminal_control_detected", "elapsedMs", 1_000),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 381_000),
+                Map.of("kind", "artifact_extracted", "elapsedMs", 381_050),
+                Map.of("kind", "contract_validated", "elapsedMs", 381_100)
+        ));
+        jsonWriter.write(runJson, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        var latency = map(attrRun.get("executionLatency"));
+
+        assertEquals(990, number(latency.get("processBeforeTerminalMs")));
+        assertEquals(380_000, number(latency.get("terminalToProcessWaitMs")));
+        assertEquals(100, number(latency.get("postProcessMs")));
+        assertEquals("terminal_to_process_wait", latency.get("dominantPhase"));
     }
 
     @Test

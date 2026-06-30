@@ -260,6 +260,10 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   计算 elapsed；`dominantPhase` 按可观测阶段耗时最大值选择，而不是固定优先返回
   post-process。这样可以避免历史 run 明明大部分时间在外部进程等待，却被 read model
   误标为 dual post-process。
+- `dominantPhase` 已改为基于非重叠阶段判断：`processBeforeTerminalMs`、
+  `terminalToProcessWaitMs`、`terminalGraceMs`、`postProcessMs`。保留
+  `processWaitCompletedMs` 作为累计进程等待 timestamp，但不再把它和 delta 阶段直接比较，
+  避免 cumulative value 天然压过 terminal/post-process 阶段。
 - 已补离线 projection replay 入口：`dualctl projections refresh --workdir <workspace> <workstreamId>`
   会从现有 ledger / run.json 重新生成 `timeline.json` 和
   `metrics/workstream-metrics.json`，用于历史 problematic workstream 的 P0/P0.5
@@ -307,7 +311,8 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   “terminal contract 出现后 transport/process 还等了多久”。离线 replay
   `/private/tmp/dual-public-issue-flow-20260630T094929Z-agent-runs/ws-20260630T095114Z-B8FP`
   显示该历史样本最大 terminal 后等待为
-  `run-1782813767103 implement.claude_implement terminalToProcessWaitMs=587`，
+  `run-1782813767103 implement.claude_implement processBeforeTerminalMs=411388`、
+  `terminalToProcessWaitMs=587`，
   其余 terminal 样本为 217ms、209ms、180ms、29ms。该 replay 同时暴露
   `Execution consistency: missing_outcome=10`，因此只能作为 latency projection 证据，
   不能作为 P0 outcome 完成证据。原始 293s/380s terminal-after-detected 长等待样本仍未找到，

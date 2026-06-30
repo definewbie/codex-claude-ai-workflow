@@ -198,6 +198,7 @@ public final class TraceCommand implements Callable<Integer> {
                     + " run=" + topLatency.get("runId")
                     + " totalMs=" + longValue(topLatency.get("totalDurationMs"))
                     + " terminalDetectedMs=" + longValue(topLatency.get("terminalDetectedMs"))
+                    + " processBeforeTerminalMs=" + longValue(topLatency.get("processBeforeTerminalMs"))
                     + " terminalToProcessWaitMs=" + longValue(topLatency.get("terminalToProcessWaitMs"))
                     + " processWaitMs=" + longValue(topLatency.get("processWaitCompletedMs"))
                     + " contractValidatedMs=" + longValue(topLatency.get("contractValidatedMs"))

@@ -760,6 +760,9 @@ final class MetricsProjectionWriter {
         var terminalGraceElapsed = elapsed(timeline, "terminal_control_grace_elapsed", startedAt);
         var artifactExtracted = elapsed(timeline, "artifact_extracted", startedAt);
         var contractValidated = elapsed(timeline, "contract_validated", startedAt);
+        var processBeforeTerminalMs = terminalDetected > 0
+                ? positiveDelta(processStarted, terminalDetected)
+                : processWaitCompleted;
         var terminalGraceMs = positiveDelta(terminalDetected, terminalGraceElapsed);
         var terminalToProcessWaitMs = positiveDelta(terminalDetected, processWaitCompleted);
         var postProcessMs = positiveDelta(processWaitCompleted, contractValidated);
@@ -769,6 +772,7 @@ final class MetricsProjectionWriter {
         result.put("totalDurationMs", total);
         result.put("processStartedMs", processStarted);
         result.put("processWaitCompletedMs", processWaitCompleted);
+        result.put("processBeforeTerminalMs", processBeforeTerminalMs);
         result.put("terminalDetectedMs", terminalDetected);
         result.put("terminalGraceElapsedMs", terminalGraceElapsed);
         result.put("terminalGraceMs", terminalGraceMs);
@@ -777,7 +781,13 @@ final class MetricsProjectionWriter {
         result.put("contractValidatedMs", contractValidated);
         result.put("postProcessMs", postProcessMs);
         result.put("terminalToContractMs", terminalToContractMs);
-        result.put("dominantPhase", dominantExecutionPhase(total, processWaitCompleted, terminalGraceMs, postProcessMs));
+        result.put("dominantPhase", dominantExecutionPhase(
+                total,
+                processBeforeTerminalMs,
+                terminalToProcessWaitMs,
+                terminalGraceMs,
+                postProcessMs
+        ));
         return result;
     }
 
@@ -825,12 +835,22 @@ final class MetricsProjectionWriter {
         return start > 0 && end >= start ? end - start : 0L;
     }
 
-    private String dominantExecutionPhase(long total, long processWaitCompleted, long terminalGraceMs, long postProcessMs) {
+    private String dominantExecutionPhase(
+            long total,
+            long processBeforeTerminalMs,
+            long terminalToProcessWaitMs,
+            long terminalGraceMs,
+            long postProcessMs
+    ) {
         var phase = "unknown";
         var max = 0L;
-        if (processWaitCompleted > max) {
+        if (processBeforeTerminalMs > max) {
             phase = "process_wait";
-            max = processWaitCompleted;
+            max = processBeforeTerminalMs;
+        }
+        if (terminalToProcessWaitMs > max) {
+            phase = "terminal_to_process_wait";
+            max = terminalToProcessWaitMs;
         }
         if (terminalGraceMs > max) {
             phase = "terminal_grace";
