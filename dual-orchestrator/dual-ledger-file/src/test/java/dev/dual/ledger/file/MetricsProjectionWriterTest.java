@@ -794,6 +794,43 @@ class MetricsProjectionWriterTest {
         assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
     }
 
+    @Test
+    void tokenAttributionPreservesProviderRunTokensWhenProviderModelPricingIsUnknown() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-pricing-unknown"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-pricing-unknown", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(1234, 567, 8901, "0");
+        writeAttributionRun(paths, "run-unknown-pricing", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costAttribution = map(perRun.get("costAttribution"));
+        var providerCachePolicy = map(perRun.get("providerCachePolicy"));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("provider_run_usage", perRun.get("providerUsageVisibility"));
+        assertEquals(1234, number(perRun.get("inputTokens")));
+        assertEquals(567, number(perRun.get("outputTokens")));
+        assertEquals(8901, number(perRun.get("cachedReadTokens")));
+        assertEquals(10702, number(perRun.get("totalTokens")));
+        assertEquals(1234, number(costAttribution.get("inputCacheMissTokens")));
+        assertEquals(8901, number(costAttribution.get("inputCacheHitTokens")));
+        assertEquals(567, number(costAttribution.get("outputTokens")));
+        assertEquals("pricing_unknown", costAttribution.get("reliability"));
+        assertEquals("unavailable", costAttribution.get("cacheSignalSource"));
+        assertEquals(false, providerCachePolicy.get("inputsComplete"));
+        assertEquals("measure_only", providerCachePolicy.get("mode"));
+        assertEquals("provider/model missing", costMap.get("reason"));
+    }
+
     private void writeAttributionRun(WorkstreamPaths paths, String runId, String agent, String nodeId,
                                      String sessionSegmentKey, Instant startedAt, Map<String, Object> usageMap,
                                      String transcriptPath, int toolCalls, List<String> readFiles) throws Exception {

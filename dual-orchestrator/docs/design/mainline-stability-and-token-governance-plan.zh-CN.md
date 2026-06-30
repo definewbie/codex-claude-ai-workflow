@@ -459,6 +459,12 @@ not_applicable
 - native Claude JSON success path 已能把 GLM provider token 写入 run.json / metrics；
   `CLAUDE_JSON_RESULT` 是该 direct path 的 usage attribution。失败 JSON 不计入 measured total，
   会保留为 `UNAVAILABLE`，避免 all-zero provider error 污染 token 归因。
+- 2026-07-01 补充离线证明：`MetricsProjectionWriterTest.tokenAttributionPreservesProviderRunTokensWhenProviderModelPricingIsUnknown`
+  构造 `PROVIDER_RUN_USAGE` 但缺失 provider/model/pricing 的 run，断言 metrics 仍保留
+  `inputTokens`、`outputTokens`、`cachedReadTokens`、`totalTokens` 以及
+  `costAttribution.inputCacheMissTokens/inputCacheHitTokens/outputTokens`；同时
+  `costAttribution.reliability=pricing_unknown`、`providerCachePolicy.mode=measure_only`、
+  `inputsComplete=false`。这条测试防止实现因为价格未知而把真实 provider token 归零或伪装成成功经济决策。
 - 仍未完成：由于最近 real-case / public benchmark 均在 provider connectivity preflight 或
   provider connection 阶段失败，尚缺一轮 provider 成功的 GLM 控制台 token 增量对账；因此目前不能证明
   token 降低或 complex real-case 下 GLM token attribution 全链路通过。
