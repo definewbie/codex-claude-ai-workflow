@@ -470,6 +470,44 @@ class MetricsProjectionWriterTest {
     }
 
     @Test
+    void tokenAttributionMarksStaleLegacyRunningAfterTerminalAttempt() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-stale-running"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-stale-running", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+        writeAttributionRun(paths, "run-stale", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runPath = paths.runsDir().resolve("run-stale/run.json");
+        var run = mapper.readValue(runPath.toFile(), Map.class);
+        run.put("status", "running");
+        run.put("executionAttempt", Map.of(
+                "status", "STALLED",
+                "processStatus", "PROCESS_STALLED",
+                "failureSignal", "AGENT_PROCESS_STALLED"
+        ));
+        run.put("executionOutcome", Map.of(
+                "status", "RUNTIME_FAILED",
+                "primaryReason", "AGENT_PROCESS_STALLED",
+                "nodeMaySucceed", false
+        ));
+        jsonWriter.write(runPath, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("stale_legacy_running", tokenRun.get("executionConsistency"));
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        assertEquals("stale_legacy_running", attrRun.get("executionConsistency"));
+        var provider = map(metrics.get("providerMetrics"));
+        assertEquals(1, number(map(provider.get("executionConsistencyCounts")).get("stale_legacy_running")));
+    }
+
+    @Test
     void tokenAttributionCalculatesProviderCacheAwareCost() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-cost"));
         var jsonWriter = new AtomicJsonWriter();

@@ -181,10 +181,10 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；
   validator 只附加 terminal/artifact typed facts，`WorkflowRuntime` / `AgentWorker`
   在 ledger 写入前调用 `AgentRunMetadataFinalizer` 统一合成 terminal attempt/outcome。
-
-仍未完成：
-
-- stale RUNNING 的历史 ledger replay / projection warning 仍需要更完整的 fixture 验证。
+- stale RUNNING 历史投影已补充 fixture：当 legacy `run.status=running` 但 typed
+  `executionAttempt` 已进入终态时，`MetricsProjectionWriter.executionConsistency`
+  标记为 `stale_legacy_running`，并同步出现在 token run、token attribution 和
+  provider consistency summary 中。
 
 ### 4.5 修复方案
 

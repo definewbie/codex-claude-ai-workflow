@@ -1371,6 +1371,9 @@ final class MetricsProjectionWriter {
         if (!nodeMaySucceed && "COMPLETED".equals(attemptStatus)) {
             return "attempt_outcome_conflict";
         }
+        if ("running".equals(legacyStatus) && isTerminalAttemptStatus(attemptStatus)) {
+            return "stale_legacy_running";
+        }
         if (nodeMaySucceed && !"completed".equals(legacyStatus)) {
             return "legacy_outcome_conflict";
         }
@@ -1378,6 +1381,10 @@ final class MetricsProjectionWriter {
             return "legacy_outcome_conflict";
         }
         return outcomeStatus.isBlank() ? "missing_outcome_status" : "consistent";
+    }
+
+    private static boolean isTerminalAttemptStatus(String status) {
+        return !status.isBlank() && !"RUNNING".equals(status);
     }
 
     @SuppressWarnings("unchecked")
