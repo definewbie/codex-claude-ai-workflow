@@ -57,6 +57,8 @@ class TraceCommandTest {
         assertTrue(printed.contains("top node: design.claude_design"));
         assertTrue(printed.contains("heavy=[cachedRead, transcript]"));
         assertTrue(printed.contains("usage visibility: {provider_run_usage=1, session_snapshot_only=1}"));
+        assertTrue(printed.contains("cost reliability: {pricing_unknown=1}"));
+        assertTrue(printed.contains("provider cache decision: {measure_only=1}"));
         assertTrue(printed.contains("usage gap: codex acceptance.codex_verifier_review visibility=session_snapshot_only"));
         assertTrue(printed.contains("execution latency: design.claude_design run=run-1 totalMs=1000"));
         assertTrue(printed.contains("phase=post_process"));
@@ -350,7 +352,14 @@ class TraceCommandTest {
                     ],
                     "fileReadCost": [
                       {"path":"README.md","readCount":2,"fileBytes":800,"estimatedReadTokens":200,"rereadReasonStatus":"missing"}
-                    ]
+                    ],
+                    "costEconomics": {
+                      "byReliability": {"pricing_unknown": 1},
+                      "byCostEstimateReliability": {"pricing_unknown": 1},
+                      "clientReportedCostByCurrency": {},
+                      "officialCalculatedCostByCurrency": {},
+                      "byDecision": {"measure_only": 1}
+                    }
                   }
                 }
                 """, StandardCharsets.UTF_8);

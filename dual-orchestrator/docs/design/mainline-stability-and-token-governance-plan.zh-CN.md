@@ -474,6 +474,11 @@ not_applicable
   `costAttribution.inputCacheMissTokens/inputCacheHitTokens/outputTokens`；同时
   `costAttribution.reliability=pricing_unknown`、`providerCachePolicy.mode=measure_only`、
   `inputsComplete=false`。这条测试防止实现因为价格未知而把真实 provider token 归零或伪装成成功经济决策。
+- 2026-07-01 补充 CLI 可见性证明：`TraceCommandTest.printsOneScreenTraceForCompletedWorkstream`
+  已锁定 `dualctl trace` 的 Token Attribution 区块会显示
+  `cost reliability: {pricing_unknown=...}` 和
+  `provider cache decision: {measure_only=...}`。这保证 token/cost attribution 不只存在于
+  `workstream-metrics.json`，操作者在 CLI 入口也能看到“真实 token 已保留，但价格/经济决策不可证明”的状态。
 - 仍未完成：由于最近 real-case / public benchmark 均在 provider connectivity preflight 或
   provider connection 阶段失败，尚缺一轮 provider 成功的 GLM 控制台 token 增量对账；因此目前不能证明
   token 降低或 complex real-case 下 GLM token attribution 全链路通过。
