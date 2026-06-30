@@ -916,6 +916,10 @@ Findings:
   `attention[0]` come directly from shared `WorkstreamAttentionEvaluator`; CLI and API therefore share
   the main operator attention read model. Static console rendering and secondary attention items still need
   a broader UI/API sibling sweep before projection consistency can be called complete.
+- Static console / management console primary cards no longer infer `whyStopped` or `nextAction` from
+  `workflow.status`; they render API-provided `whyStopped` / `nextAction` and show an explicit read-model
+  unavailable message if projection data is missing. Secondary attention items remain as UI-side supplemental
+  hints and still need a separate sibling sweep.
 - full real-case validation is not yet valid as a final acceptance signal.
 
 Required fixes:
@@ -933,6 +937,8 @@ Required tests:
   by metrics and trace fixtures; remaining gap is real-case improvement evidence.
 - Workstream API overview primary attention consistency test 已覆盖：server `whyStopped` / `nextAction` /
   `attention[0]` 必须等于 `WorkstreamAttentionEvaluator.evaluate(paths)` 的投影。
+- Static console projection boundary test 已覆盖：`console.js` 和 `static/mgt/app.js` 的主 overview
+  卡片不得保留 `friendlyWhy*` / `friendlyNext*` 这类按 workflow status 推断主 attention 的 fallback。
 - full verification gate fixture test 已覆盖；remaining gap 是真实 P2 case 矩阵尚未执行。
 
 Accepted debt:

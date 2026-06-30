@@ -295,8 +295,8 @@ function renderOverview(data) {
     ["End state", completionAudit.lifecycleState || (workflow.status === "COMPLETED" ? "ENDED" : "-")],
     ["Completion audit", completionAudit.status || "-"],
   ]);
-  els.overviewWhy.textContent = friendlyWhyStopped(data);
-  els.overviewNext.textContent = friendlyNextAction(data);
+  els.overviewWhy.textContent = data.whyStopped || "Attention read model unavailable. Rebuild projections or refresh the workstream.";
+  els.overviewNext.textContent = data.nextAction || "Refresh after projections are rebuilt.";
   renderOverviewAttention(derivedAttention(data));
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
@@ -569,80 +569,6 @@ function renderOverviewCards(items) {
     `;
     els.overviewCards.appendChild(card);
   }
-}
-
-function friendlyWhyStopped(data) {
-  const workflow = data.workflow || {};
-  const status = workflow.status || "";
-  const currentNode = workflow.currentNode || "";
-  const goal = data.goalSatisfaction || {};
-  if (goal.domainOutcome === "NEEDS_REPAIR") {
-    return "目标尚未满足：验收或审查证据要求进入修复循环。";
-  }
-  if (goal.domainOutcome === "NEEDS_REDESIGN") {
-    return "目标尚未满足：审查证据要求回到设计或计划阶段。";
-  }
-  if (status === "WAITING_FOR_HUMAN") {
-    if (isNextStageGate(currentNode)) {
-      return "本阶段已经完成，正在等待你决定：结束这个 workstream，还是进入下一轮。";
-    }
-    return "等待人工审查：请先阅读 Gate Evidence / Review Packet，再批准继续或要求修改。";
-  }
-  if (status === "WAITING_FOR_RECOVERY") {
-    return `需要恢复：${currentNode || "当前节点"} 失败或需要人工处理。请先查看失败摘要，再决定是否 Retry。`;
-  }
-  if (status === "FAILED" || status === "BLOCKED") {
-    return `流程已停止：${currentNode || "当前节点"} 无法继续。请查看 recovery 信息。`;
-  }
-  if (status === "RUNNING") {
-    const stale = staleRunningSignal(data);
-    if (stale) {
-      return `状态可能不一致：${stale}`;
-    }
-    return currentNode ? `正在执行：${currentNode}` : "正在执行 workflow。";
-  }
-  if (status === "COMPLETED") {
-    const lifecycle = completionAuditState(data);
-    return lifecycle === "ENDED"
-      ? "workflow 已结束，后续只能做观测、总结或交付检查，不会继续推进节点。"
-      : "workflow 已完成。";
-  }
-  return data.whyStopped || "-";
-}
-
-function friendlyNextAction(data) {
-  const workflow = data.workflow || {};
-  const status = workflow.status || "";
-  const currentNode = workflow.currentNode || "";
-  const goal = data.goalSatisfaction || {};
-  if (goal.domainOutcome === "NEEDS_REPAIR" || goal.domainOutcome === "NEEDS_REDESIGN") {
-    return "建议：继续运行 goal loop，让系统带着证据进入下一轮修复或修订。";
-  }
-  if (status === "WAITING_FOR_HUMAN") {
-    if (isNextStageGate(currentNode)) {
-      return "建议：如果本阶段已满足目标，点击“完成 workstream”。后续阶段应通过新的明确入口启动。";
-    }
-    return "建议：阅读证据后点击“批准并继续”，或填写反馈并点击“请求修改”。";
-  }
-  if (status === "WAITING_FOR_RECOVERY" || status === "FAILED" || status === "BLOCKED") {
-    return "建议：先查看 Recovery Summary，理解失败原因；确认外部问题已解决后再重试。";
-  }
-  if (status === "RUNNING") {
-    return "建议：等待当前节点结束，或刷新查看最新状态。";
-  }
-  if (status === "COMPLETED") {
-    const completion = data.completionAudit || {};
-    if (completion.status === "needs_review") {
-      return "建议：先查看 completion audit 的缺口，再决定是否补齐交付产物。";
-    }
-    return "建议：查看最终报告、handoff 和交付产物。";
-  }
-  return data.nextAction || "-";
-}
-
-function completionAuditState(data) {
-  const completion = data.completionAudit || {};
-  return completion.lifecycleState || "";
 }
 
 function derivedAttention(data) {

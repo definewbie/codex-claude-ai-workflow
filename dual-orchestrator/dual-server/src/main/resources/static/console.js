@@ -402,8 +402,8 @@ function renderSelectionPanels() {
 
 function renderPrimary(status) {
   const overview = state.overview || {};
-  const why = overview.whyStopped || friendlyWhy(status);
-  const next = overview.nextAction || friendlyNext(status);
+  const why = overview.whyStopped || "Attention read model unavailable. Rebuild projections or refresh the workstream.";
+  const next = overview.nextAction || "Refresh after projections are rebuilt.";
   const kind = primaryKind(status);
 
   els.primaryCard.className = `primary-card ${kind}`;
@@ -1600,22 +1600,6 @@ function primaryTitle(status) {
   if (status === "RUNNING") return "系统正在执行任务";
   if (status === "COMPLETED") return "任务已完成";
   return "任务状态";
-}
-
-function friendlyWhy(status) {
-  if (status === "WAITING_FOR_HUMAN") return "当前停在人闸，需要阅读证据后批准或请求修改。";
-  if (status === "WAITING_FOR_RECOVERY") return "当前有运行时故障，需要恢复后继续。";
-  if (status === "RUNNING") return "当前任务正在执行。";
-  if (status === "COMPLETED") return "任务已进入终态。";
-  return "状态信息不足。";
-}
-
-function friendlyNext(status) {
-  if (status === "WAITING_FOR_HUMAN") return "阅读 Gate Evidence 后批准继续，或请求修改。";
-  if (status === "WAITING_FOR_RECOVERY") return "查看 RCA，确认外部条件后重试当前节点。";
-  if (status === "RUNNING") return "等待系统到达下一个人闸。";
-  if (status === "COMPLETED") return "查看交付差异并显式合并。";
-  return "刷新状态。";
 }
 
 function rcaSymptom(status, assessment) {
