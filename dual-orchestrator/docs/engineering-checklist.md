@@ -22,6 +22,43 @@ external Agent adapters, recovery, human gates, or projection disagreement.
   adapter or artifact boundary problem.
 - If the boundary is unclear, stop and clarify the model before implementing.
 
+## Phase Promotion Discipline
+
+Before changing runtime execution, provider/token attribution, repo scope
+governance, provider-cache-aware behavior, session compaction, real-case
+scripts, or benchmark gates, classify the target phase and status:
+
+```text
+Target phase: P0 / P0.5 / P1 / P2 / P3
+Current phase status: Implemented / Verified / Promoted
+Upstream promotion evidence:
+```
+
+Definitions:
+
+- `Implemented`: code exists and local tests may pass. This is not enough to
+  unlock downstream phases.
+- `Verified`: the phase has been proven against its source of truth by targeted
+  tests, historical replay, offline calibration, or a controlled smoke.
+- `Promoted`: the phase has passed its required gates and can be used as an
+  upstream dependency for lower-priority work.
+
+Ordering rule:
+
+- P0 must be promoted before P0.5 implementation, real effectiveness
+  validation, or attribution conclusions are accepted.
+- P0 and P0.5 must both be promoted before starting P1/P2/P3 feature work,
+  default-strategy changes, complex real-case benefit claims, or token-saving
+  conclusions.
+- Lower-priority work is allowed before promotion only when it is explicitly a
+  direct fix for the currently locked higher-priority blocker and is gated as
+  that higher-priority phase.
+
+Do not use "tests green", "implemented locally", "measure_only", "warning
+visible", or "ran one case" as promotion evidence. Promotion evidence must name
+the source of truth, the command or replay/calibration used, and the PASS /
+FAIL / INVALID criteria.
+
 ## Model Ownership Check
 
 Before changing workflow, state, recovery, retry, scheduler, human gate,

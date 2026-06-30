@@ -24,6 +24,8 @@ cat >"$complete" <<'EOF'
 # Mainline Decision Gate
 
 - Target phase: P0.5
+- Current phase status: Verified
+- Upstream promotion evidence: P0 promoted by historical replay and execution outcome consistency tests
 - Boundary owner: TokenEconomics
 - Source of truth being changed or strengthened: ProviderModelIdentity + CostAttribution
 - Drift path being removed or centralized: provider-specific cost rules move into ProviderPricingCatalog
@@ -42,6 +44,8 @@ cat >"$missing" <<'EOF'
 # Mainline Decision Gate
 
 - Target phase: P0
+- Current phase status: Implemented
+- Upstream promotion evidence: not required for P0
 - Boundary owner: AgentExecutionAttempt
 - Source of truth being changed or strengthened: AgentExecutionOutcome
 EOF
@@ -56,6 +60,8 @@ cat >"$todo" <<'EOF'
 # Mainline Decision Gate
 
 - Target phase: TODO choose phase
+- Current phase status: Verified
+- Upstream promotion evidence: P0 promoted
 - Boundary owner: AgentExecutionAttempt
 - Source of truth being changed or strengthened: AgentExecutionOutcome
 - Drift path being removed or centralized: runtime writer split
@@ -74,6 +80,8 @@ cat >"$tradeoff" <<'EOF'
 # Mainline Decision Gate
 
 - Target phase: P1
+- Current phase status: Verified
+- Upstream promotion evidence: P0 promoted and P0.5 promoted by token attribution gates
 - Boundary owner: Projection read model
 - Source of truth being changed or strengthened: add one warning to trace
 - Drift path being removed or centralized: none
@@ -93,6 +101,8 @@ cat >"$case_insensitive" <<'EOF'
 # Mainline Decision Gate
 
 - Target phase: P1
+- Current phase status: Verified
+- Upstream promotion evidence: P0 promoted and P0.5 promoted by token attribution gates
 - Boundary owner: AgentExecutionAttempt
 - Source of truth being changed or strengthened: Add one WARNING to trace output
 - Drift path being removed or centralized: N/A
@@ -112,6 +122,8 @@ cat >"$invalid_phase" <<'EOF'
 # Mainline Decision Gate
 
 - Target phase: Maybe
+- Current phase status: Verified
+- Upstream promotion evidence: P0 promoted
 - Boundary owner: AgentExecutionAttempt
 - Source of truth being changed or strengthened: AgentExecutionOutcome finalizer
 - Drift path being removed or centralized: legacy handler outcome writers move behind finalizer
@@ -121,3 +133,54 @@ cat >"$invalid_phase" <<'EOF'
 EOF
 
 assert_eq "Target phase" "$(mainline_decision_gate_tradeoff_flags "$invalid_phase")" "invalid phase rejected"
+
+invalid_status="$tmp/invalid-status.md"
+cat >"$invalid_status" <<'EOF'
+# Mainline Decision Gate
+
+- Target phase: P0
+- Current phase status: Done
+- Upstream promotion evidence: not required for P0
+- Boundary owner: AgentExecutionAttempt
+- Source of truth being changed or strengthened: AgentExecutionOutcome finalizer
+- Drift path being removed or centralized: legacy handler outcome writers move behind finalizer
+- Explicit non-goals: no provider run
+- Proof required before claiming completion: boundary test covers adapter signal preservation
+- Remaining gaps that must stay visible: real replay missing
+EOF
+
+assert_eq "Current phase status" "$(mainline_decision_gate_tradeoff_flags "$invalid_status")" "invalid status rejected"
+
+p1_without_upstream="$tmp/p1-without-upstream.md"
+cat >"$p1_without_upstream" <<'EOF'
+# Mainline Decision Gate
+
+- Target phase: P1
+- Current phase status: Implemented
+- Upstream promotion evidence: P0 has tests, P0.5 has local implementation
+- Boundary owner: RepoScopeGovernance
+- Source of truth being changed or strengthened: ExplorationPolicyResult validator
+- Drift path being removed or centralized: review read rules move into RepoScopeGovernance
+- Explicit non-goals: no complex real-case
+- Proof required before claiming completion: policy test rejects out-of-scope review read
+- Remaining gaps that must stay visible: real provider validation missing
+EOF
+
+assert_eq "Upstream promotion evidence" "$(mainline_decision_gate_tradeoff_flags "$p1_without_upstream")" "p1 requires promoted upstream evidence"
+
+p05_without_p0="$tmp/p05-without-p0.md"
+cat >"$p05_without_p0" <<'EOF'
+# Mainline Decision Gate
+
+- Target phase: P0.5
+- Current phase status: Verified
+- Upstream promotion evidence: P0 implemented locally
+- Boundary owner: TokenEconomics
+- Source of truth being changed or strengthened: ProviderModelIdentity + CostAttribution
+- Drift path being removed or centralized: provider-specific cost rules move into ProviderPricingCatalog
+- Explicit non-goals: no real provider run
+- Proof required before claiming completion: billing CSV fixture and CLI calibration output match official pricing
+- Remaining gaps that must stay visible: real bill files are unavailable in this environment
+EOF
+
+assert_eq "Upstream promotion evidence" "$(mainline_decision_gate_tradeoff_flags "$p05_without_p0")" "p0.5 requires p0 promotion"

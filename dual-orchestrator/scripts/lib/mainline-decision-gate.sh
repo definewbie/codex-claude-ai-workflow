@@ -17,6 +17,8 @@ mainline_decision_gate_field_value() {
 mainline_decision_gate_required_fields() {
   cat <<'EOF'
 Target phase
+Current phase status
+Upstream promotion evidence
 Boundary owner
 Source of truth being changed or strengthened
 Drift path being removed or centralized
@@ -59,6 +61,30 @@ mainline_decision_gate_tradeoff_flags() {
         && "$lower" != "p3" ]]; then
       flags+=("$field")
       continue
+    fi
+    if [[ "$field" == "Current phase status" \
+        && "$lower" != "implemented" \
+        && "$lower" != "verified" \
+        && "$lower" != "promoted" ]]; then
+      flags+=("$field")
+      continue
+    fi
+    if [[ "$field" == "Upstream promotion evidence" ]]; then
+      local phase
+      phase="$(printf '%s' "$(mainline_decision_gate_field_value "$file" "Target phase")" | tr '[:upper:]' '[:lower:]')"
+      if [[ "$phase" == "p1" || "$phase" == "p2" || "$phase" == "p3" ]]; then
+        if [[ "$lower" != *promoted* \
+            || "$lower" != *p0* \
+            || "$lower" != *p0.5* ]]; then
+          flags+=("$field")
+          continue
+        fi
+      elif [[ "$phase" == "p0.5" ]]; then
+        if [[ "$lower" != *promoted* || "$lower" != *p0* ]]; then
+          flags+=("$field")
+          continue
+        fi
+      fi
     fi
     if [[ "$field" == "Drift path being removed or centralized" \
         && ( "$lower" == "none" \

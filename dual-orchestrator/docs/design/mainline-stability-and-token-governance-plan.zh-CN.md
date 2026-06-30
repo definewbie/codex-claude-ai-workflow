@@ -88,6 +88,8 @@ flowchart TD
 ```text
 Mainline Decision Gate:
 - Target phase: P0 / P0.5 / P1 / P2 / P3
+- Current phase status: Implemented / Verified / Promoted
+- Upstream promotion evidence:
 - Boundary owner:
 - Source of truth being changed or strengthened:
 - Drift path being removed or centralized:
@@ -98,6 +100,11 @@ Mainline Decision Gate:
 
 判定规则：
 
+- `Implemented` 只表示代码和本地测试存在；不能作为下游阶段依赖。
+- `Verified` 表示该阶段的 Source of Truth 已被 targeted test、historical replay、离线账单校准或受控 smoke 证明；仍不能自动作为下游默认依赖。
+- `Promoted` 表示该阶段的必要 gate 已经通过，且可以作为下一优先级阶段的前置事实。
+- P0 未 `Promoted` 时，不得推进 P0.5 实现、真实有效性验证或结论归因；唯一例外是该改动直接修复 P0 的阻塞项，并在 gate 中声明为 P0。
+- P0 和 P0.5 未同时 `Promoted` 时，不得启动 P1/P2/P3 的功能推进、默认策略切换、complex real-case 验证或收益归因；唯一例外是该改动直接修复 P0/P0.5 的阻塞项，并在 gate 中声明为 P0/P0.5。
 - 如果答案是“增加一处兼容 fallback”“多显示一个 warning”“强化 prompt 文案”“再跑一次看看”，默认判为不通过，除非同时说明它删除了哪个旧 source of truth 或强化了哪个 typed boundary。
 - 如果一个修复只让当前测试通过，但不改变 source of truth、validator、policy、catalog、ledger event 或共享 read model，不能计入 P0 / P0.5 / P1 完成度。
 - 如果真实验证因为 provider、jar freshness、pricing、trigger precondition 或观测链路问题失效，结论必须是 `INVALID`，不能拿来证明治理有效。
@@ -105,7 +112,24 @@ Mainline Decision Gate:
 
 本 gate 的格式校验由 `scripts/lib/mainline-decision-gate.sh` 提供。它只证明“开工前的主线目标、边界、SoT、漂移路径和完成证据已经写清楚”，不替代 P2 的真实 provider `Verification Gate`，也不证明任何 runtime 行为已经完成。
 
-2026-07-01 加固：`mainline-decision-gate.sh` 不再只检查字段是否存在；它会拒绝非法 phase、`Drift path=none/N/A`、以及把 `warning` / `prompt` / `fallback` / `measure_only` / `record_only` / `trace only` / `再跑一次看看` 等低收益 trade-off 写成主线修复的 gate。该规则的目的不是增加流程负担，而是防止实现再次从 SoT / typed boundary / catalog / policy / ledger event 滑向局部显示、提示词或兼容补丁。
+2026-07-01 加固：`mainline-decision-gate.sh` 不再只检查字段是否存在；它会拒绝非法 phase / phase status、`Drift path=none/N/A`、P1/P2/P3 缺少 P0+P0.5 promoted 证据、P0.5 缺少 P0 promoted 证据，以及把 `warning` / `prompt` / `fallback` / `measure_only` / `record_only` / `trace only` / `再跑一次看看` 等低收益 trade-off 写成主线修复的 gate。该规则的目的不是增加流程负担，而是防止实现再次从 SoT / typed boundary / catalog / policy / ledger event 滑向局部显示、提示词或兼容补丁。
+
+### 2.3 当前 Phase Lock
+
+当前锁定阶段：P0。P0 `Promoted` 后才允许进入 P0.5。
+
+在 P0 未 `Promoted` 前，禁止推进 P0.5/P1/P2/P3。P0 和 P0.5 同时 `Promoted` 前，禁止：
+
+- 开发或扩大 P1/P2/P3 功能；
+- 将 provider-cache-aware、session compaction、repo scope governance 或 memory loop 切为默认策略；
+- 用 complex real-case 验证 P1/P2 收益；
+- 把 P1/P2 的本地实现状态写成主线完成。
+
+当前允许的工作仅限：
+
+- 直接修复 P0 执行事实边界、慢点归因、stale / reconnect / timeout / terminal wait / run.json 落盘问题；
+- 为 P0 验证补充 replay、fixture、trace 或 gate，但不得把这些 observation-only 改动伪装成下游治理收益。
+- P0 `Promoted` 后，才允许直接修复 P0.5 provider/model/token/cost/cache attribution、GLM token-only 对账、DeepSeek/OpenAI/Claude pricing catalog 问题。
 
 ## 3. 未完成目标清单
 
