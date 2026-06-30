@@ -777,8 +777,9 @@ probe 使用当前配置的 Claude CLI / provider 做一次最小 JSON 输出调
 `preflight.json`。若 probe 返回 `is_error=true`、非零 exit 或超时，runner 输出
 `final_status=INVALID_PROVIDER_PREFLIGHT`、`benchmark_grade=INVALID`，并且不会创建 workstream。
 这保证 provider 连接失败不会再被误读成 lifecycle、artifact contract、token governance 或
-provider-cache-aware 的失败。`DUAL_REAL_CASE_PROVIDER_PROBE=0` 只允许显式跳过 probe，用于离线
-脚本路径验证；真实 provider benchmark 不应关闭该 probe。
+provider-cache-aware 的失败。`DUAL_REAL_CASE_PROVIDER_PROBE=0` 会产生
+`providerProbeStatus=skipped`，必须视为 `INVALID`，只能用于离线验证 runner 会拒绝未证明的
+provider 前置条件；真实 provider benchmark 不允许关闭该 probe。
 
 2026-06-30 public benchmark 复测：fresh build 通过，但 provider probe 返回 Claude JSON
 `is_error=true`，错误为 `ConnectionRefused`，usage 全 0。因此该轮被正确归类为

@@ -182,7 +182,7 @@ public_benchmark_write_verification_gate() {
 - How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, preflight artifact freshness, and providerProbeStatus=passed before starting a workstream.
 - PASS: Workflow reaches COMPLETED, original repo stays clean, key artifacts exist, final acceptance is ACCEPT or ACCEPT_WITH_NOTES, and trace/metrics can explain execution/token state.
 - FAIL: Workflow does not complete, original repo is polluted, required report/handoff/delivery artifacts are missing, or acceptance rejects without expected repair evidence.
-- INVALID: preflight artifact freshness is not proven, providerProbeStatus is failed/timeout, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
+- INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
 - Stop-loss: The script stops on start/autorun failure and writes local evidence; do not launch a second benchmark automatically.
 - Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence.
 EOF

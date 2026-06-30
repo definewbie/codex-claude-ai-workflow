@@ -72,6 +72,14 @@ if real_case_artifact_freshness_is_valid unproven_skip_build; then
   exit 1
 fi
 
+assert_eq "artifact_freshness_unproven_skip_build" \
+  "$(real_case_artifact_freshness_invalid_reason unproven_skip_build)" \
+  "skip build invalid reason"
+
+assert_eq "" \
+  "$(real_case_artifact_freshness_invalid_reason fresh)" \
+  "fresh artifact has no invalid reason"
+
 probe_json="$tmp/provider-result.json"
 printf '{"type":"result","is_error":false,"result":"OK"}\n' >"$probe_json"
 assert_eq "passed" \
@@ -100,8 +108,8 @@ if ! real_case_provider_probe_is_valid passed; then
   exit 1
 fi
 
-if ! real_case_provider_probe_is_valid skipped; then
-  printf '[FAIL] skipped provider probe should be valid\n' >&2
+if real_case_provider_probe_is_valid skipped; then
+  printf '[FAIL] skipped provider probe should not be valid\n' >&2
   exit 1
 fi
 
@@ -109,3 +117,19 @@ if real_case_provider_probe_is_valid failed; then
   printf '[FAIL] failed provider probe should not be valid\n' >&2
   exit 1
 fi
+
+assert_eq "provider_preflight_failed" \
+  "$(real_case_provider_probe_invalid_reason failed)" \
+  "provider probe failed invalid reason"
+
+assert_eq "provider_preflight_timeout" \
+  "$(real_case_provider_probe_invalid_reason timeout)" \
+  "provider probe timeout invalid reason"
+
+assert_eq "provider_preflight_skipped" \
+  "$(real_case_provider_probe_invalid_reason skipped)" \
+  "provider probe skipped invalid reason"
+
+assert_eq "" \
+  "$(real_case_provider_probe_invalid_reason passed)" \
+  "provider probe passed has no invalid reason"

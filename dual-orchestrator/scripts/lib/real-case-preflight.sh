@@ -99,6 +99,17 @@ real_case_artifact_freshness_is_valid() {
   [[ "$1" == "fresh" || "$1" == "fresh_existing_artifact" ]]
 }
 
+real_case_artifact_freshness_invalid_reason() {
+  local status="$1"
+  if real_case_artifact_freshness_is_valid "$status"; then
+    printf ''
+  elif [[ -n "$status" ]]; then
+    printf 'artifact_freshness_%s' "$status"
+  else
+    printf 'artifact_freshness_unknown'
+  fi
+}
+
 real_case_provider_probe_status() {
   local exit_code="$1"
   local result_json="$2"
@@ -160,5 +171,17 @@ real_case_provider_probe_reason() {
 }
 
 real_case_provider_probe_is_valid() {
-  [[ "$1" == "passed" || "$1" == "skipped" ]]
+  [[ "$1" == "passed" ]]
+}
+
+real_case_provider_probe_invalid_reason() {
+  local status="$1"
+  case "$status" in
+    failed|timeout|skipped)
+      printf 'provider_preflight_%s' "$status"
+      ;;
+    *)
+      printf ''
+      ;;
+  esac
 }

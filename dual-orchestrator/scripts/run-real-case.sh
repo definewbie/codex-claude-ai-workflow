@@ -334,6 +334,9 @@ write_preflight_evidence() {
   if [[ "$freshness_valid" != true ]]; then
     fail "run artifact freshness is not proven: $freshness_status ($freshness_reason)"
     fail "Preflight evidence: $preflight"
+    FINAL_STATUS="INVALID_ARTIFACT_FRESHNESS"
+    write_report
+    update_benchmark_index
     exit 1
   fi
   if ! real_case_provider_probe_is_valid "$PROVIDER_PROBE_STATUS"; then
@@ -697,14 +700,22 @@ missing_artifacts() {
 invalid_reason() {
   local preflight="$CASE_DIR/preflight.json"
   if [[ -f "$preflight" ]]; then
-    local probe_status
+    local freshness_status probe_status reason
     if command -v jq >/dev/null 2>&1; then
+      freshness_status="$(jq -r '.artifactFreshnessStatus // ""' "$preflight" 2>/dev/null || true)"
       probe_status="$(jq -r '.providerProbeStatus // ""' "$preflight" 2>/dev/null || true)"
     else
+      freshness_status="$(grep -E '"artifactFreshnessStatus"[[:space:]]*:' "$preflight" | sed -E 's/.*"artifactFreshnessStatus"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' | head -1)"
       probe_status="$(grep -E '"providerProbeStatus"[[:space:]]*:' "$preflight" | sed -E 's/.*"providerProbeStatus"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' | head -1)"
     fi
-    if [[ "$probe_status" == "failed" || "$probe_status" == "timeout" ]]; then
-      printf 'provider_preflight_%s' "$probe_status"
+    reason="$(real_case_artifact_freshness_invalid_reason "$freshness_status")"
+    if [[ -n "$reason" ]]; then
+      printf '%s' "$reason"
+      return
+    fi
+    reason="$(real_case_provider_probe_invalid_reason "$probe_status")"
+    if [[ -n "$reason" ]]; then
+      printf '%s' "$reason"
       return
     fi
   fi

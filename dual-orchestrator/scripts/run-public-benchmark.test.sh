@@ -28,5 +28,5 @@ public_benchmark_write_verification_gate
 
 assert_contains "$VERIFICATION_GATE" "provider connectivity probe passes" "gate trigger precondition"
 assert_contains "$VERIFICATION_GATE" "providerProbeStatus=passed" "gate precondition check"
-assert_contains "$VERIFICATION_GATE" "providerProbeStatus is failed/timeout" "gate invalid condition"
+assert_contains "$VERIFICATION_GATE" "providerProbeStatus is not passed" "gate invalid condition"
 assert_contains "$VERIFICATION_GATE" "recording provider probe evidence" "gate freshness evidence"
