@@ -530,6 +530,16 @@ P0 必须先于 P0.5 完整收口。
 - 越界读取有 typed reason。
 - review 阶段不再长期停在 WARN。
 
+2026-06-30 进展：
+
+- `RepoScopeGovernance` 生成的 `stage-scope-policy` 已按阶段显式映射
+  `scopeExceedPolicy`：`intake/acceptance=block`，
+  `design/plan/implement/self_test=warn`，`delivery=block_business_code_edits`。
+- 已补 `ContextBuildPackageHandlerTest.governedStageScopePoliciesMatchStageBoundaries`，
+  防止 intake/design/plan/implement/acceptance 再回落到默认 `record_only`。
+- 这只完成了 context governance sidecar 的策略边界对齐；尚未证明每个真实 agent run
+  都写出 `ExplorationPolicyResult`，也尚未证明 review 阶段 WARN 已收敛。
+
 ### 6.2 P1B：Provider-cache-aware / Transcript Compaction
 
 目标：只在能证明收益时启用，不按直觉切 session。
@@ -692,7 +702,7 @@ Findings:
 - intake exploration boundary is closed.
 - execution attempt/outcome consistency is not yet closed.
 - token economics is not yet reliable enough for provider-cache-aware decisions.
-- stage scope governance after intake is incomplete.
+- stage scope policy mapping after intake is aligned, but run-level ExplorationPolicyResult and review WARN closure are not yet proven.
 - full real-case validation is not yet valid as a final acceptance signal.
 
 Required fixes:
@@ -704,7 +714,7 @@ Required tests:
 - reconnect/stalled/terminal-detected tests.
 - GLM subscription-token-only attribution test.
 - DeepSeek metered pricing calibration test.
-- stage scope policy tests beyond intake.
+- stage scope policy tests beyond intake are present; remaining gap is run-level ExplorationPolicyResult / WARN closure proof.
 - full verification gate fixture test.
 
 Accepted debt:

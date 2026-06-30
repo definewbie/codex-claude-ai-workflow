@@ -861,9 +861,9 @@ final class RepoScopeGovernance {
 
     private static String scopeExceedPolicy(String stageId) {
         return switch (stageId) {
-            case "acceptance" -> "block";
+            case "intake", "acceptance" -> "block";
             case "delivery" -> "block_business_code_edits";
-            case "implement", "self_test" -> "warn";
+            case "design", "plan", "implement", "self_test" -> "warn";
             default -> "record_only";
         };
     }

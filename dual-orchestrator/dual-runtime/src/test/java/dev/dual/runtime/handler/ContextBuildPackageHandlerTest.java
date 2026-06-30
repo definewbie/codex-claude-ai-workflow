@@ -1326,6 +1326,7 @@ class ContextBuildPackageHandlerTest {
 
         var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertEquals("implement", policy.get("stageId"));
+        assertEquals("warn", policy.get("scopeExceedPolicy"));
         assertEquals("ctx.test", policy.get("builderNodeDefinitionId"));
         assertEquals("next.node", policy.get("targetNodeDefinitionId"));
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
@@ -1393,6 +1394,27 @@ class ContextBuildPackageHandlerTest {
                         && !plannedAvoidance.isEmpty(),
                 "planned governance report should record repeated-read risks before execution");
         assertEquals(true, report.get("telemetryPending"));
+    }
+
+    @Test
+    void governedStageScopePoliciesMatchStageBoundaries() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Keep stage governance explicit.", StandardCharsets.UTF_8);
+
+        Map<String, String> expected = Map.of(
+                "product_review", "block",
+                "architecture_review", "warn",
+                "plan_review", "warn",
+                "implementation", "warn",
+                "acceptance", "block"
+        );
+        for (var entry : expected.entrySet()) {
+            var result = handler.execute(ctx(entry.getKey(), List.of()));
+
+            assertEquals(NodeStatus.COMPLETED, result.status(), entry.getKey());
+            var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+            assertEquals(entry.getValue(), policy.get("scopeExceedPolicy"), entry.getKey());
+        }
     }
 
     @Test
