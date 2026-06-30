@@ -731,6 +731,11 @@ typed adapter failure signal（`RECOVERABLE_PROVIDER_CONNECTION_FAILED`），而
 adapter signal `type`），不会从 free-form provider 文本推断 INVALID。无 `jq` 环境下保留 typed-field
 grep fallback，仅用于兼容旧运行环境。
 
+2026-06-30 补充：provider capacity / overload 也必须按 typed runtime precondition failure
+归类为 `INVALID`，而不是 benchmark `FAIL`。`RECOVERABLE_AGENT_OVERLOADED` /
+`AGENT_OVERLOADED` 会投影为 `invalid_reason=provider_overloaded`；free-form 文本
+（例如 provider stderr 中的 `API Error: 529`）不会单独触发 INVALID，避免报告层重新引入自然语言判断。
+
 ## 8. P3：Session Keep-alive / 性能优化
 
 这是未来优化，不抢 P0/P1。

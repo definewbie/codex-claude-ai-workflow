@@ -53,7 +53,26 @@ assert_eq "provider_connection_failed" \
 cat >"$tmp/runs/run-2/run.json" <<'JSON'
 {
   "runId": "run-2",
+  "executionAttempt": {
+    "failureSignal": "AGENT_OVERLOADED"
+  }
+}
+JSON
+
+assert_eq "provider_overloaded" \
+  "$(real_case_invalid_reason_from_runs_dir "$tmp/runs")" \
+  "execution attempt agent overloaded"
+
+cat >"$tmp/runs/run-2/run.json" <<'JSON'
+{
+  "runId": "run-2",
   "message": "Unable to connect to API (FailedToOpenSocket)"
+}
+JSON
+cat >"$tmp/runs/run-3/run.json" <<'JSON'
+{
+  "runId": "run-3",
+  "message": "API Error: 529 [model overloaded]"
 }
 JSON
 

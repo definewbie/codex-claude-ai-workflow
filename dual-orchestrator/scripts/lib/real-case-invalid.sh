@@ -21,6 +21,17 @@ real_case_invalid_reason_from_runs_dir() {
       ' "$file" >/dev/null 2>&1; then
         printf 'provider_connection_failed'
         return
+      elif jq -e '
+        .. | objects | select(
+          .failureReason? == "RECOVERABLE_AGENT_OVERLOADED"
+          or .failureSignal? == "AGENT_OVERLOADED"
+          or .unavailableReason? == "AGENT_OVERLOADED"
+          or .type? == "AGENT_OVERLOADED"
+          or .type? == "RECOVERABLE_AGENT_OVERLOADED"
+        )
+      ' "$file" >/dev/null 2>&1; then
+        printf 'provider_overloaded'
+        return
       fi
     done < <(find "$runs_dir" -name run.json -type f | sort)
     printf ''
@@ -33,6 +44,12 @@ real_case_invalid_reason_from_runs_dir() {
     '"failureReason"[[:space:]]*:[[:space:]]*"RECOVERABLE_PROVIDER_CONNECTION_FAILED"|"type"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"|"failureSignal"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"|"unavailableReason"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"' \
     "$runs_dir" >/dev/null 2>&1; then
     printf 'provider_connection_failed'
+    return
+  fi
+  if grep -R -m 1 -E \
+    '"failureReason"[[:space:]]*:[[:space:]]*"RECOVERABLE_AGENT_OVERLOADED"|"type"[[:space:]]*:[[:space:]]*"AGENT_OVERLOADED"|"type"[[:space:]]*:[[:space:]]*"RECOVERABLE_AGENT_OVERLOADED"|"failureSignal"[[:space:]]*:[[:space:]]*"AGENT_OVERLOADED"|"unavailableReason"[[:space:]]*:[[:space:]]*"AGENT_OVERLOADED"' \
+    "$runs_dir" >/dev/null 2>&1; then
+    printf 'provider_overloaded'
     return
   fi
   printf ''

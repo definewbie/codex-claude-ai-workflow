@@ -20,4 +20,5 @@ assert_eq "PASS" "$(real_case_grade COMPLETED true "" "ACCEPT" 0)" "completed ac
 assert_eq "FAIL" "$(real_case_grade START_FAILED true "" "" 0)" "start failed"
 assert_eq "INVALID" "$(real_case_grade START_FAILED true "" "" 0 provider_connection_failed)" "invalid precondition"
 assert_eq "invalid=provider_connection_failed" "$(real_case_grade_reason START_FAILED true "" "" 0 provider_connection_failed)" "invalid reason"
-
+assert_eq "INVALID" "$(real_case_grade START_FAILED true "" "" 0 provider_overloaded)" "invalid provider overloaded"
+assert_eq "invalid=provider_overloaded" "$(real_case_grade_reason START_FAILED true "" "" 0 provider_overloaded)" "invalid overloaded reason"
