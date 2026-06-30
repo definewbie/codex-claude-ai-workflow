@@ -113,6 +113,13 @@ MVP 允许的短期状态：
 
 - 单机 CLI 第一版可以手写装配，但必须有测试证明 bundled workflow 中的 handler type 都能被 runtime resolve。
 
+当前状态（2026-07-01）：
+
+- `AcpxWorkflowHandlerRegistryFactoryTest.resolvesEveryBundledWorkflowHandler` 已加载 bundled `full` / `contract` workflow，并验证每个 node 的 `kind` / `handlerType` 都能由当前 acpx runtime registry resolve。
+- `HandlerRegistryTest` 已覆盖 handler lookup、missing handler fast-fail 和 duplicate handler type 拒绝。
+
+因此 handler registry 已有最小防漂移测试；长期方向仍是 capability catalog 继续作为唯一装配边界，不能让 CLI validate、runtime registry 和文档各自维护不同支持范围。
+
 长期方向：
 
 - handler capability catalog 统一输出 supported handler types。
@@ -163,7 +170,7 @@ MVP 允许的短期状态：
 | P0 | Recovery typed reason 到 operator action 的映射 | real-case 已暴露，直接影响恢复能力 | 已开始修复 |
 | P0 | Human gate action normalization 去重 | 防止 CLI/UI/API 行为漂移 | 已开始修复 |
 | P0 | Workflow JSON 和 ContractRegistry 一致性测试 | 防止新增节点后 contract 漏配 | 已覆盖，继续运行 |
-| P1 | Handler capability catalog | 防止 runtime/validate/docs 支持范围不一致 | 待做 |
+| P1 | Handler capability catalog | 防止 runtime/validate/docs 支持范围不一致 | 已有最小测试，继续收口 |
 | P1 | Projection read model 收口 | 防止 trace/status/operator panel 各说各话 | 待做 |
 
 ## 不做的事
