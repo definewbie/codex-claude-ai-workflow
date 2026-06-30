@@ -1,8 +1,11 @@
 package dev.dual.adapter.acpx;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 public class AcpxAgentTransport {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final int RECOVERABLE_SIGNAL_EXIT_CODE = 4;
     private static final long STDERR_SIGNAL_POLL_SECONDS = 2;
     private static final long DEFAULT_RECOVERABLE_SIGNAL_GRACE_SECONDS = 30;
@@ -161,7 +165,7 @@ public class AcpxAgentTransport {
         command.add("--input-format");
         command.add("text");
         command.add("--output-format");
-        command.add("text");
+        command.add("json");
         command.add("--bare");
         command.add("--safe-mode");
         command.add("--no-session-persistence");
@@ -176,10 +180,11 @@ public class AcpxAgentTransport {
 
         var managedProcessBaseline = managedToolPids();
         var startedAt = Instant.now();
+        var rawJsonPath = nativeClaudeResultPath(request.stdoutPath());
         var processBuilder = new ProcessBuilder(command)
                 .directory(request.workdir().toFile())
                 .redirectInput(request.promptPath().toFile())
-                .redirectOutput(request.stdoutPath().toFile())
+                .redirectOutput(rawJsonPath.toFile())
                 .redirectError(request.stderrPath().toFile());
         processBuilder.environment().put("CLAUDE_CODE_SIMPLE", "1");
         processBuilder.environment().put("CLAUDE_CODE_SAFE_MODE", "1");
@@ -196,13 +201,106 @@ public class AcpxAgentTransport {
                     startedAt,
                     Map.of("exitCode", waitResult.exitCode())
             ));
-            return new AcpxRunResult(waitResult.exitCode(), startedAt, Instant.now(), List.copyOf(command), timeline);
+            var nativeResult = readNativeClaudeResult(rawJsonPath, request.stdoutPath());
+            return new AcpxRunResult(
+                    waitResult.exitCode(),
+                    startedAt,
+                    Instant.now(),
+                    List.copyOf(command),
+                    timeline,
+                    nativeResult.usage()
+            );
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
             }
             cleanupManagedToolsStartedByRun(managedProcessBaseline);
         }
+    }
+
+    private static Path nativeClaudeResultPath(Path transcriptPath) {
+        var fileName = transcriptPath.getFileName().toString();
+        return transcriptPath.resolveSibling(fileName + ".native-result.json");
+    }
+
+    private NativeClaudeResult readNativeClaudeResult(Path rawJsonPath, Path transcriptPath) throws IOException {
+        if (!Files.exists(rawJsonPath)) {
+            return new NativeClaudeResult(null);
+        }
+        var raw = Files.readString(rawJsonPath, StandardCharsets.UTF_8);
+        if (raw.isBlank()) {
+            Files.writeString(transcriptPath, "", StandardCharsets.UTF_8);
+            return new NativeClaudeResult(null);
+        }
+        try {
+            var root = OBJECT_MAPPER.readTree(raw);
+            var resultText = text(root.get("result"));
+            Files.writeString(
+                    transcriptPath,
+                    resultText.isBlank() ? raw : resultText,
+                    StandardCharsets.UTF_8
+            );
+            return new NativeClaudeResult(nativeClaudeUsage(root));
+        } catch (IOException parseFailure) {
+            Files.writeString(transcriptPath, raw, StandardCharsets.UTF_8);
+            return new NativeClaudeResult(null);
+        }
+    }
+
+    private AcpxUsage nativeClaudeUsage(JsonNode root) {
+        if (root != null && root.path("is_error").asBoolean(false)) {
+            return null;
+        }
+        var usage = root == null ? null : root.get("usage");
+        if (usage == null || !usage.isObject()) {
+            return null;
+        }
+        var inputTokens = number(usage.get("input_tokens"));
+        var outputTokens = number(usage.get("output_tokens"));
+        var cachedReadTokens = number(usage.get("cache_read_input_tokens"));
+        var cachedWriteTokens = number(usage.get("cache_creation_input_tokens"));
+        var totalTokens = inputTokens + outputTokens + cachedReadTokens + cachedWriteTokens;
+        var metadata = AcpxProviderMetadata.runtimeDefault();
+        var rawCostAmount = decimal(root.get("total_cost_usd"));
+        var costAmount = AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS.equals(metadata.billingMode())
+                ? null
+                : rawCostAmount;
+        return new AcpxUsage(
+                inputTokens,
+                outputTokens,
+                cachedReadTokens,
+                cachedWriteTokens,
+                totalTokens,
+                costAmount,
+                costAmount == null ? "" : "USD",
+                "claude_json_result",
+                AcpxUsage.PROVIDER_RUN_USAGE,
+                AcpxUsage.ATTR_CLAUDE_JSON_RESULT,
+                false,
+                0,
+                costAmount,
+                costAmount == null ? "" : "USD",
+                "",
+                "",
+                "",
+                "",
+                ""
+        ).withProviderMetadata(metadata);
+    }
+
+    private record NativeClaudeResult(AcpxUsage usage) {
+    }
+
+    private static String text(JsonNode node) {
+        return node == null || node.isMissingNode() || node.isNull() ? "" : node.asText();
+    }
+
+    private static long number(JsonNode node) {
+        return node == null || !node.isNumber() ? 0 : node.asLong();
+    }
+
+    private static BigDecimal decimal(JsonNode node) {
+        return node == null || !node.isNumber() ? null : node.decimalValue();
     }
 
     public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws IOException, InterruptedException {

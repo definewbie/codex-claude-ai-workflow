@@ -49,6 +49,8 @@ record AcpxUsage(
     static final String ATTR_LATEST_PROMPT_IN_SESSION = "LATEST_PROMPT_IN_SESSION";
     /** 只有 usage_update，没有 result.usage，记录为会话累计快照。 */
     static final String ATTR_SESSION_USAGE_UPDATE = "SESSION_USAGE_UPDATE";
+    /** Claude CLI JSON result 中的 usage，归属于本次 --print run。 */
+    static final String ATTR_CLAUDE_JSON_RESULT = "CLAUDE_JSON_RESULT";
 
     AcpxUsage {
         if (measurementType == null || measurementType.isBlank()) {

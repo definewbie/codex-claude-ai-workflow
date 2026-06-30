@@ -179,7 +179,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var result = "claude".equals(agent)
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);
-        var usage = usageReader.read(promptPath, stderrPath).orElse(null);
+        var usage = result.usage() != null
+                ? result.usage()
+                : usageReader.read(promptPath, stderrPath).orElse(null);
         var finalArtifact = finalArtifactExtractor.extract(readStringIfExists(transcriptPath));
         var resultWithArtifactTimeline = result;
         if (finalArtifact.isPresent()) {
@@ -231,7 +233,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 result.startedAt(),
                 result.finishedAt(),
                 result.command(),
-                timeline
+                timeline,
+                result.usage()
         );
     }
 

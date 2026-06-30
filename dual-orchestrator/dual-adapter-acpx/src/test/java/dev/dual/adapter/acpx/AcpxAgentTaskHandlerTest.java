@@ -456,6 +456,40 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new CompletingTransportUsageTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"source\" : \"claude_json_result\""), runMetadata);
+        assertTrue(runMetadata.contains("\"attribution\" : \"CLAUDE_JSON_RESULT\""), runMetadata);
+        assertTrue(runMetadata.contains("\"inputTokens\" : 12"), runMetadata);
+        assertTrue(runMetadata.contains("\"cachedReadTokens\" : 34"), runMetadata);
+        assertTrue(runMetadata.contains("\"cachedWriteTokens\" : 5"), runMetadata);
+        assertTrue(runMetadata.contains("\"outputTokens\" : 6"), runMetadata);
+        assertTrue(runMetadata.contains("\"totalTokens\" : 57"), runMetadata);
+        assertTrue(runMetadata.contains("\"provider\" : \"zhipu\""), runMetadata);
+        assertTrue(runMetadata.contains("\"model\" : \"glm-5.2\""), runMetadata);
+        assertTrue(runMetadata.contains("\"billingMode\" : \"subscription_token_only\""), runMetadata);
+    }
+
+    @Test
     void nonImplementationAgentNodeRunsWithoutApproveAll() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -1496,6 +1530,57 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class CompletingTransportUsageTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    ## Requirement Restatement
+
+                    Ready.
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            var usage = new AcpxUsage(
+                    12,
+                    6,
+                    34,
+                    5,
+                    57,
+                    null,
+                    "",
+                    "claude_json_result",
+                    AcpxUsage.PROVIDER_RUN_USAGE,
+                    AcpxUsage.ATTR_CLAUDE_JSON_RESULT,
+                    false,
+                    0,
+                    null,
+                    "",
+                    "zhipu",
+                    "glm-5.2",
+                    AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS,
+                    AcpxProviderMetadata.SOURCE_CLAUDE_SETTINGS_ENV,
+                    ""
+            );
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("claude", "--print"),
+                    List.of(),
+                    usage
+            );
         }
     }
 

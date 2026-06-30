@@ -9,10 +9,21 @@ public record AcpxRunResult(
         Instant startedAt,
         Instant finishedAt,
         List<String> command,
-        List<AcpxExecutionEvent> executionTimeline
+        List<AcpxExecutionEvent> executionTimeline,
+        AcpxUsage usage
 ) {
     public AcpxRunResult(int exitCode, Instant startedAt, Instant finishedAt, List<String> command) {
-        this(exitCode, startedAt, finishedAt, command, List.of());
+        this(exitCode, startedAt, finishedAt, command, List.of(), null);
+    }
+
+    public AcpxRunResult(
+            int exitCode,
+            Instant startedAt,
+            Instant finishedAt,
+            List<String> command,
+            List<AcpxExecutionEvent> executionTimeline
+    ) {
+        this(exitCode, startedAt, finishedAt, command, executionTimeline, null);
     }
 
     public AcpxRunResult {
