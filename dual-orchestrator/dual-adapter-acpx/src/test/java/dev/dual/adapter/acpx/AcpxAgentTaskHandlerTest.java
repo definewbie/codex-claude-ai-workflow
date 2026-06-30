@@ -656,10 +656,11 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("completed", result.outcome());
         assertEquals(5, result.result().get("exit_code"));
         assertEquals("EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT", result.result().get("process_usability"));
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.result().get("acpx_failure.reason"));
+        assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
         assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+        assertFalse(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
     }
 
     @Test
@@ -850,10 +851,11 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
         assertEquals("EXITED_ZERO", result.result().get("process_usability"));
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", result.result().get("acpx_failure.reason"));
+        assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
         assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+        assertFalse(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
     }
 
     @Test

@@ -217,7 +217,18 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         return NodeResult.completed(
                 "completed",
                 evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
-                resultFacts(context, runDir, transcriptPath, resultWithArtifactTimeline, agent, session, runId, failure, interrupted, outputComplete)
+                resultFacts(
+                        context,
+                        runDir,
+                        transcriptPath,
+                        resultWithArtifactTimeline,
+                        agent,
+                        session,
+                        runId,
+                        metadataFailure(failure, interrupted, outputComplete),
+                        interrupted,
+                        outputComplete
+                )
         );
     }
 
@@ -296,7 +307,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         if (interrupted != null) {
             facts.put("acpx_failure.reason", interrupted.reason());
             facts.put("acpx_failure.recoverable", interrupted.recoverable());
-        } else if (failure.recoverable()) {
+        } else if (failure != null && failure.recoverable()) {
             facts.put("acpx_failure.reason", failure.reason());
             facts.put("acpx_failure.recoverable", true);
         }
@@ -329,7 +340,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         if (outputComplete) {
             return ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT;
         }
-        if (failure.recoverable()) {
+        if (failure != null && failure.recoverable()) {
             return ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
         }
         return ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;

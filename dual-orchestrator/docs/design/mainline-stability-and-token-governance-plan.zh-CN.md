@@ -225,6 +225,12 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   prepared metadata；运行完成后写出 `executionAttempt.status=COMPLETED` 和
   `executionOutcome.status=SUCCESS`。这证明 normal run path 不再等完整 transport
   返回后才首次落盘 run.json。
+- 2026-06-30 补充：`agent needs reconnect` 不能被无条件解释为本次 execution
+  的 blocking failure。若本次 agent run 已经形成完整 terminal control 和 required
+  typed artifact，acpx stderr 中的 reconnect 只表示 post-run session health warning，
+  不应通过 `acpx_failure.reason` 再次注入 `NodeResult` 并覆盖成功 outcome。若输出
+  不完整或 terminal/artifact contract 不满足，reconnect 仍作为 recoverable adapter
+  failure 进入 execution boundary。
 - native Claude CLI `--print --output-format json` 路径已补 usage acquisition：成功 JSON 会进入
   run.json `usage.measurementType=PROVIDER_RUN_USAGE`，并保留
   `provider=zhipu`、`model=glm-5.2`、`billingMode=subscription_token_only`。
