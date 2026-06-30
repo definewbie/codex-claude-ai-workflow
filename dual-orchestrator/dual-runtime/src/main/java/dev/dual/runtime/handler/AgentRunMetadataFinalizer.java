@@ -255,8 +255,8 @@ public final class AgentRunMetadataFinalizer {
                 attempt.path("sessionId").asText(""),
                 attempt.path("sessionScope").asText(""),
                 attempt.path("sessionSegmentKey").asText(""),
-                instantOrNull(attempt.path("startedAt").asText("")),
-                instantOrNull(attempt.path("finishedAt").asText(""))
+                firstInstant(attempt.path("startedAt").asText(""), json.path("startedAt").asText("")),
+                firstInstant(attempt.path("finishedAt").asText(""), json.path("finishedAt").asText(""))
         );
     }
 
@@ -320,6 +320,11 @@ public final class AgentRunMetadataFinalizer {
         } catch (RuntimeException ignored) {
             return null;
         }
+    }
+
+    private static Instant firstInstant(String first, String second) {
+        var parsed = instantOrNull(first);
+        return parsed == null ? instantOrNull(second) : parsed;
     }
 
     private static <E extends Enum<E>> E enumValue(Class<E> type, String value, E fallback) {

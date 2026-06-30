@@ -62,6 +62,58 @@ class AgentRunMetadataFinalizerTest {
         assertEquals("MODEL_MISMATCH", signal.get("type"));
     }
 
+    @Test
+    void persistsSuccessfulExecutionOutcomeToRunMetadata() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-ok/runs/run-2/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-2",
+                  "workstreamId": "ws-ok",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "status": "completed",
+                  "startedAt": "2026-05-24T00:00:00Z",
+                  "finishedAt": "2026-05-24T00:00:03Z",
+                  "executionAttempt": {
+                    "attemptId": "att-run-2",
+                    "status": "COMPLETED",
+                    "processStatus": "EXITED",
+                    "message": "completed"
+                  }
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_id", "run-2");
+        facts.put("run_metadata", ".agent/workstreams/ws-ok/runs/run-2/run.json");
+        facts.put("agent", "claude");
+        facts.put("exit_code", 0);
+        facts.put("process_usability", "EXITED_ZERO");
+
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), TerminalControlResult.valid("IMPLEMENTED"), List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        assertEquals(3, json.get("schemaVersion"));
+        assertEquals("completed", json.get("status"));
+        var terminal = map(json.get("terminalControlResult"));
+        assertEquals(true, terminal.get("present"));
+        var contracts = list(json.get("artifactContractResults"));
+        assertEquals(1, contracts.size());
+        var outcome = map(json.get("executionOutcome"));
+        assertEquals("SUCCESS", outcome.get("status"));
+        assertEquals(true, outcome.get("nodeMaySucceed"));
+    }
+
     @SuppressWarnings("unchecked")
     private static Map<String, Object> map(Object value) {
         return (Map<String, Object>) value;

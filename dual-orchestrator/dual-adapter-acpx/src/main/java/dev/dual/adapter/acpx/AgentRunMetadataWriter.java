@@ -621,6 +621,10 @@ final class AgentRunMetadataWriter {
         }
         var map = new java.util.LinkedHashMap<String, Object>();
         map.put("attemptId", attempt.attemptId());
+        map.put("runId", attempt.runId());
+        map.put("workstreamId", attempt.workstreamId());
+        map.put("nodeId", attempt.nodeId());
+        map.put("agent", attempt.agent());
         map.put("status", attempt.status().name());
         map.put("processStatus", attempt.processStatus().name());
         map.put("failureSignal", attempt.failureSignal() == null ? null : attempt.failureSignal().name());
@@ -633,6 +637,8 @@ final class AgentRunMetadataWriter {
         map.put("sessionId", attempt.sessionId());
         map.put("sessionScope", attempt.sessionScope());
         map.put("sessionSegmentKey", attempt.sessionSegmentKey());
+        map.put("startedAt", attempt.startedAt() == null ? null : attempt.startedAt().toString());
+        map.put("finishedAt", attempt.finishedAt() == null ? null : attempt.finishedAt().toString());
         return map;
     }
 

@@ -1,5 +1,6 @@
 package dev.dual.adapter.acpx;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
@@ -22,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTaskHandlerTest {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @TempDir
     Path tempDir;
 
@@ -308,6 +311,13 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"source\" : \"acpx_stream\""));
         assertTrue(runMetadata.contains("\"measurementType\" : \"PROVIDER_RUN_USAGE\""));
         assertTrue(runMetadata.contains("\"sessionCostAmount\" : 1.25"));
+        var executionAttempt = OBJECT_MAPPER.readTree(runMetadata).path("executionAttempt");
+        assertEquals("run-001", executionAttempt.path("runId").asText());
+        assertEquals("ws-test", executionAttempt.path("workstreamId").asText());
+        assertEquals("design.claude_design", executionAttempt.path("nodeId").asText());
+        assertEquals("claude", executionAttempt.path("agent").asText());
+        assertEquals("2026-05-24T00:00:00Z", executionAttempt.path("startedAt").asText());
+        assertEquals("2026-05-24T00:00:03Z", executionAttempt.path("finishedAt").asText());
         var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.md.meta.json"));
         assertTrue(outputMetadata.contains("\"artifactType\" : \"output\""));
         assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.md\""));
