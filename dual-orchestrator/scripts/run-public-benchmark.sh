@@ -44,7 +44,9 @@ Options:
                             Human-readable Agent output language. Default: auto.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
-  --skip-build              Reuse the existing dualctl jar.
+  --skip-build              Forwarded to run-real-case.sh, which rejects real
+                            provider runs when artifact freshness cannot be
+                            proven.
   --cleanup-worktree        Remove the generated agent worktree after reporting.
   --update-benchmark-index  Refresh benchmark-index.md after the run.
   -h, --help                Show this help.
@@ -174,13 +176,13 @@ write_verification_gate() {
 
 - Target: Run the public benchmark case $CASE_ID through the full dual lifecycle with real acpx agents.
 - Source of truth: Generated report summary.json, workstream ledger, run.json, workstream-metrics.json, and dualctl trace for the created workstream.
-- Trigger precondition: Disposable benchmark repo exists, task file exists, acpx is available, and run-real-case.sh will build fresh artifacts unless --skip-build is explicitly passed.
-- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, and this gate before starting.
+- Trigger precondition: Disposable benchmark repo exists, task file exists, acpx is available, and run-real-case.sh builds fresh artifacts before provider execution.
+- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, and preflight artifact freshness before starting.
 - PASS: Workflow reaches COMPLETED, original repo stays clean, key artifacts exist, final acceptance is ACCEPT or ACCEPT_WITH_NOTES, and trace/metrics can explain execution/token state.
 - FAIL: Workflow does not complete, original repo is polluted, required report/handoff/delivery artifacts are missing, or acceptance rejects without expected repair evidence.
-- INVALID: dualctl jar is stale due to --skip-build misuse, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
+- INVALID: preflight artifact freshness is not proven, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
 - Stop-loss: The script stops on start/autorun failure and writes local evidence; do not launch a second benchmark automatically.
-- Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting unless --skip-build is passed and logged.
+- Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting and writes preflight.json proving the executed jar is fresh.
 EOF
 }
 

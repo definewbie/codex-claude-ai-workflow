@@ -671,12 +671,16 @@ Verification Gate:
 ### 7.3 当前实现状态
 
 `run-real-case.sh` 已要求显式传入 `--verification-gate <gate.md>`，并在启动真实 provider 前校验
-Verification Gate 的 9 个字段均已填写。`run-public-benchmark.sh` 会为 public benchmark 自动生成
-case-specific gate 并传入 `run-real-case.sh`。
+Verification Gate 的 9 个字段均已填写。除字段校验外，runner 还会在启动 workstream 前写入
+`preflight.json`，用脚本自身可证明的事实记录 repo/task/gate/acpx/build/artifact freshness。真实 provider
+运行必须能证明执行 jar 是本轮构建产物；`--skip-build` 会被标记为 `unproven_skip_build` 并在 provider
+执行前停止，不能作为有效 real-case / benchmark 证据。
 
-这只证明 P2 的入口约束已经落地，不证明 P2 real-case 矩阵已经通过。simple semantic、simple token
-benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of truth 判定 PASS / FAIL /
-INVALID。
+`run-public-benchmark.sh` 会为 public benchmark 自动生成 case-specific gate 并传入 `run-real-case.sh`。
+
+这只证明 P2 的入口约束和 runner 自证 preflight 已经落地，不证明 P2 real-case 矩阵已经通过。simple
+semantic、simple token benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of
+truth 判定 PASS / FAIL / INVALID。
 
 2026-06-30 public benchmark 复测结果：`intake.claude_brainstorm` 在首次真实 provider 调用阶段失败，acpx
 输出 `Unable to connect to API (FailedToOpenSocket)`。该轮不能证明 lifecycle、token 或 provider-cache-aware

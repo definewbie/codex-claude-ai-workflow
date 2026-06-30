@@ -25,6 +25,8 @@ REPORT_ROOT="$PROJECT_ROOT/docs/testing/real-case-reports"
 source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
 # shellcheck source=scripts/lib/real-case-invalid.sh
 source "$PROJECT_ROOT/scripts/lib/real-case-invalid.sh"
+# shellcheck source=scripts/lib/real-case-preflight.sh
+source "$PROJECT_ROOT/scripts/lib/real-case-preflight.sh"
 
 REPO=""
 TASK_FILE=""
@@ -44,6 +46,9 @@ CASE_DIR=""
 FINAL_STATUS="UNKNOWN"
 STARTED_AT=""
 FINISHED_AT=""
+BUILD_STARTED_EPOCH=""
+BUILD_FINISHED_EPOCH=""
+BUILD_MODE=""
 
 usage() {
   cat <<'EOF'
@@ -63,7 +68,9 @@ Options:
                             Human-readable Agent output language. Default: auto.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
-  --skip-build              Do not run Maven package before starting.
+  --skip-build              Do not run Maven package before starting. This is
+                            rejected for real provider runs because artifact
+                            freshness cannot be proven.
   --cleanup-worktree        Remove the created worktree after report generation.
   --update-benchmark-index  Refresh docs/testing/real-case-benchmarks/benchmark-index.md after writing this case report.
   -h, --help                Show this help.
@@ -228,17 +235,61 @@ validate_verification_gate() {
 }
 
 build_project() {
+  BUILD_STARTED_EPOCH="$(date '+%s')"
   if [[ "$SKIP_BUILD" == true ]]; then
     [[ -f "$JAR_PATH" ]] || {
       fail "dualctl jar not found: $JAR_PATH"
       exit 1
     }
+    BUILD_MODE="skip_build"
+    BUILD_FINISHED_EPOCH="$(date '+%s')"
     log "Skipping build; using $JAR_PATH"
     return
   fi
 
+  BUILD_MODE="maven_package"
   log "Building dual-cli and dual-server..."
   (cd "$PROJECT_ROOT" && mvn -pl dual-cli,dual-server -am package)
+  BUILD_FINISHED_EPOCH="$(date '+%s')"
+}
+
+write_preflight_evidence() {
+  local preflight="$CASE_DIR/preflight.json"
+  local freshness_status freshness_reason freshness_valid jar_mtime
+  freshness_status="$(real_case_artifact_freshness_status "$SKIP_BUILD" "$JAR_PATH" "$BUILD_STARTED_EPOCH")"
+  freshness_reason="$(real_case_artifact_freshness_reason "$freshness_status")"
+  if real_case_artifact_freshness_is_valid "$freshness_status"; then
+    freshness_valid=true
+  else
+    freshness_valid=false
+  fi
+  jar_mtime="$(real_case_file_mtime_epoch "$JAR_PATH")"
+
+  {
+    echo "{"
+    echo "  \"schemaVersion\": 1,"
+    echo "  \"repo\": \"$(json_escape "$REPO")\","
+    echo "  \"taskFile\": \"$(json_escape "$TASK_FILE")\","
+    echo "  \"verificationGate\": \"$(json_escape "$VERIFICATION_GATE")\","
+    echo "  \"variant\": \"$(json_escape "$VARIANT")\","
+    echo "  \"promptLanguage\": \"$(json_escape "$PROMPT_LANGUAGE")\","
+    echo "  \"acpxAvailable\": true,"
+    echo "  \"buildMode\": \"$(json_escape "$BUILD_MODE")\","
+    echo "  \"buildStartedEpoch\": ${BUILD_STARTED_EPOCH:-0},"
+    echo "  \"buildFinishedEpoch\": ${BUILD_FINISHED_EPOCH:-0},"
+    echo "  \"jarPath\": \"$(json_escape "$JAR_PATH")\","
+    echo "  \"jarMtimeEpoch\": ${jar_mtime:-0},"
+    echo "  \"artifactFreshnessStatus\": \"$(json_escape "$freshness_status")\","
+    echo "  \"artifactFreshnessReason\": \"$(json_escape "$freshness_reason")\","
+    echo "  \"artifactFreshnessProven\": $freshness_valid"
+    echo "}"
+  } >"$preflight"
+
+  if [[ "$freshness_valid" != true ]]; then
+    fail "run artifact freshness is not proven: $freshness_status ($freshness_reason)"
+    fail "Preflight evidence: $preflight"
+    exit 1
+  fi
 }
 
 init_case_dir() {
@@ -417,6 +468,15 @@ verification_gate_json() {
     printf '"%s": "%s"' "$key" "$(json_escape "$value")"
   done
   printf '}'
+}
+
+preflight_json() {
+  local preflight="$CASE_DIR/preflight.json"
+  if [[ -f "$preflight" ]]; then
+    cat "$preflight"
+  else
+    printf '{}'
+  fi
 }
 
 count_lines_matching() {
@@ -630,6 +690,7 @@ write_summary_json() {
     echo "  \"repo\": \"$(json_escape "$REPO")\","
     echo "  \"task_file\": \"$(json_escape "$TASK_FILE")\","
     echo "  \"verification_gate\": $(verification_gate_json),"
+    echo "  \"preflight\": $(preflight_json),"
     echo "  \"workstream\": \"$(json_escape "${WORKSTREAM_ID:-unknown}")\","
     echo "  \"effective_workdir\": \"$(json_escape "${WORKSPACE_DIR:-unknown}")\","
     echo "  \"ledger\": \"$(json_escape "${WS_DIR:-unknown}")\","
@@ -736,6 +797,16 @@ write_report() {
     echo "- Benchmark Grade: ${grade:-unknown}"
     echo "- Benchmark Reason: ${reason:-unknown}"
     echo
+    echo "## Preflight Evidence"
+    echo
+    echo '```json'
+    if [[ -f "$CASE_DIR/preflight.json" ]]; then
+      cat "$CASE_DIR/preflight.json"
+    else
+      echo "{}"
+    fi
+    echo '```'
+    echo
     echo "## Summary JSON"
     echo
     echo '```text'
@@ -819,8 +890,9 @@ update_benchmark_index() {
 main() {
   parse_args "$@"
   validate_inputs
-  build_project
   init_case_dir
+  build_project
+  write_preflight_evidence
   trap handle_interrupt INT TERM
   start_workstream
   status_snapshot "after-start" || true
