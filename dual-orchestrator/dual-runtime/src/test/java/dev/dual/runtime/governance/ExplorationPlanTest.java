@@ -68,4 +68,30 @@ class ExplorationPlanTest {
         assertEquals("warn", document.get("failureMode"));
         assertEquals(List.of("src/app.js"), document.get("expectedEditFiles"));
     }
+
+    @Test
+    void acceptancePlanUsesBlockModeForIncrementalReviewScope() {
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "acceptance",
+                "acceptance.codex_verifier_review",
+                "node-020",
+                "iter-001",
+                List.of("docs/diff-summary.md", "src/app.js"),
+                List.of(),
+                AgentCapabilityCatalog.fromAvailableCommands(
+                        "ws-001",
+                        "acceptance.codex_verifier_review",
+                        Set.of("rtk", "codegraph")
+                )
+        );
+
+        var document = plan.toDocument();
+
+        assertEquals("incremental_review", document.get("explorationIntent"));
+        assertEquals("block", document.get("failureMode"));
+        assertEquals(4, ((Number) document.get("maxDirectReadFiles")).intValue());
+        assertTrue(document.get("forbiddenExplorationIntents") instanceof List<?> forbidden
+                && forbidden.contains("full_repo_audit"));
+    }
 }

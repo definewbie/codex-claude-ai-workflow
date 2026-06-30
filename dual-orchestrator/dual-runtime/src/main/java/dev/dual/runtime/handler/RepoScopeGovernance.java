@@ -848,7 +848,7 @@ final class RepoScopeGovernance {
     }
 
     private static boolean stageAllowsBroadExploration(String stageId) {
-        return "intake".equals(stageId) || "design".equals(stageId) || "plan".equals(stageId);
+        return false;
     }
 
     private static List<String> forbiddenScope(String stageId) {
@@ -861,6 +861,7 @@ final class RepoScopeGovernance {
 
     private static String scopeExceedPolicy(String stageId) {
         return switch (stageId) {
+            case "acceptance" -> "block";
             case "delivery" -> "block_business_code_edits";
             case "implement", "self_test" -> "warn";
             default -> "record_only";

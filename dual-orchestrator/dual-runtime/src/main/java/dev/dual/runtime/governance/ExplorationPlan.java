@@ -100,7 +100,7 @@ public final class ExplorationPlan {
     }
 
     private static String failureMode(String stage) {
-        return "intake".equals(stage) ? "block" : "warn";
+        return ("intake".equals(stage) || "acceptance".equals(stage)) ? "block" : "warn";
     }
 
     private static List<String> forbiddenIntents(String stage) {

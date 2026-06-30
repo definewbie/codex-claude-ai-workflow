@@ -245,4 +245,36 @@ class ExplorationPolicyEvaluatorTest {
         assertEquals(List.of(Map.of("kind", "symbol_index", "provider", "codegraph", "source", "command_executable")),
                 result.get("actualCapabilityUsages"));
     }
+
+    @Test
+    void acceptanceOutsideScopeReadFailsInsteadOfWarns() {
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "acceptance",
+                "acceptance.codex_verifier_review",
+                "node-030",
+                "iter-001",
+                List.of("docs/diff-summary.md"),
+                List.of(),
+                AgentCapabilityCatalog.fromAvailableCommands(
+                        "ws-001",
+                        "acceptance.codex_verifier_review",
+                        List.of("codegraph", "rtk")
+                )
+        );
+
+        var result = ExplorationPolicyEvaluator.evaluate(
+                plan.toDocument(),
+                List.of("docs/diff-summary.md", "src/unplanned.js"),
+                List.of("direct_file_read"),
+                List.of(),
+                Map.of("docs/diff-summary.md", "doc", "src/unplanned.js", "source")
+        );
+
+        assertEquals("block", result.get("mode"));
+        assertEquals("failed", result.get("status"));
+        assertTrue(result.get("violations") instanceof List<?> violations
+                && violations.toString().contains("READ_OUTSIDE_EXPLORATION_SCOPE")
+                && violations.toString().contains("block"));
+    }
 }
