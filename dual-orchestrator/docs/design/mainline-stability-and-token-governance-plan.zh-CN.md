@@ -112,7 +112,7 @@ Mainline Decision Gate:
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，真实 replay 待做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；仍缺 problematic workstream replay | P0 |
 | acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，真实慢点待复核 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；仍缺 problematic real-case 慢点复核 | P0 |
 | stale RUNNING / PROCESS_STALLED | synthetic 覆盖，real replay 待做 | dead pid resume 会进入 recovery 并标记 node execution stale；仍缺历史 problematic workstream replay | P0 |
-| provider/model/token attribution | 本地读模型和 CSV fixture 已覆盖，真实账单校准待做 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 已覆盖 DeepSeek 账单公式；仍缺真实账单文件校准和真实复杂 case 复测 | P0.5 |
+| provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
 | intake exploration governance | 已完成 | 只覆盖 intake，不代表整体 readCount/token 下降 | Done |
@@ -522,6 +522,14 @@ not_applicable
   会同时校准 amount token 明细、cost summary 汇总，并输出二者的 exported total 差异和
   `matches_cost_summary` / `differs_from_cost_summary`。fixture 已覆盖 amount/cost 一致路径。
   若真实账单文件在当前环境不可访问，不能宣称真实校准完成，只能宣称离线校准入口和公式已覆盖。
+- 2026-07-01 真实账单校准：使用
+  `/Users/kriswang/Desktop/平台工程面试/usage_data_2026_6/amount-2026-6.csv`
+  和 `cost-2026-6.csv` 执行
+  `dualctl calibration billing-csv --csv ... --cost-csv ...`，`Rows=18`，
+  amount 明细 exported total、dual calculated total 与 cost summary exported total
+  均为 `20.603468 CNY`，`Consistency=matches_official_pricing` 且
+  `Usage vs cost summary=matches_cost_summary`。这证明 DeepSeek 价格 catalog、
+  amount token 明细解析和 cost summary 对账口径已与真实账单一致。
 - P0.5 仍未完成的部分是 GLM 控制台 token 增量对齐，以及 complex real-case 下
   provider/model/billingMode/cachedRead 字段的完整复核。
 - 2026-06-30 real-case 复核：`ws-20260630T120421Z-7Y5D` 的
@@ -658,7 +666,8 @@ GLM 包月也进入 catalog，但 amount price 可以为 null，billing mode 为
    - 选定时间窗口，对比 dual calculated DeepSeek amount；
    - 不跑模型，不消耗 token。
    - 当前已覆盖 fixture CSV 和 `dualctl calibration billing-csv` CLI 入口；
-   - 真实账单文件路径缺失或账单字段无法映射时，不得宣称完成真实校准。
+- DeepSeek 2026-06 真实账单 amount/cost 双文件已完成离线校准，金额精确一致。
+  后续新增 provider 或账单格式时仍需按相同 gate 重新校准。
 
 5. Provider cache decision matrix：
    - provider known + priced + cache signal reliable -> active；
