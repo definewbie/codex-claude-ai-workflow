@@ -385,6 +385,38 @@ json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+verification_gate_json() {
+  local gate="$CASE_DIR/verification-gate.md"
+  if [[ ! -f "$gate" ]]; then
+    printf '{}'
+    return
+  fi
+  local fields=(
+    "Target"
+    "Source of truth"
+    "Trigger precondition"
+    "How precondition is checked before run"
+    "PASS"
+    "FAIL"
+    "INVALID"
+    "Stop-loss"
+    "Run artifact freshness"
+  )
+  local first=true field value key
+  printf '{'
+  for field in "${fields[@]}"; do
+    value="$(gate_field_value "$gate" "$field")"
+    key="$(printf '%s' "$field" | tr '[:upper:]' '[:lower:]' | sed 's/ /_/g; s/-/_/g')"
+    if [[ "$first" == true ]]; then
+      first=false
+    else
+      printf ', '
+    fi
+    printf '"%s": "%s"' "$key" "$(json_escape "$value")"
+  done
+  printf '}'
+}
+
 count_lines_matching() {
   local file="$1"
   local pattern="$2"
@@ -590,6 +622,7 @@ write_summary_json() {
     echo "  \"prompt_language\": \"$(json_escape "$PROMPT_LANGUAGE")\","
     echo "  \"repo\": \"$(json_escape "$REPO")\","
     echo "  \"task_file\": \"$(json_escape "$TASK_FILE")\","
+    echo "  \"verification_gate\": $(verification_gate_json),"
     echo "  \"workstream\": \"$(json_escape "${WORKSTREAM_ID:-unknown}")\","
     echo "  \"effective_workdir\": \"$(json_escape "${WORKSPACE_DIR:-unknown}")\","
     echo "  \"ledger\": \"$(json_escape "${WS_DIR:-unknown}")\","
@@ -666,6 +699,14 @@ write_report() {
     echo "- Effective Workdir: ${WORKSPACE_DIR:-unknown}"
     echo "- Ledger: ${WS_DIR:-unknown}"
     echo "- Task File: $TASK_FILE"
+    echo
+    echo "## Verification Gate"
+    echo
+    if [[ -f "$CASE_DIR/verification-gate.md" ]]; then
+      cat "$CASE_DIR/verification-gate.md"
+    else
+      echo "Verification gate was not captured."
+    fi
     echo
     echo "## Metrics"
     echo
