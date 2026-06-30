@@ -11,6 +11,7 @@
 #   ./scripts/run-public-benchmark.sh --list-cases
 #   ./scripts/run-public-benchmark.sh --case public-issue-flow-review-state
 #   ./scripts/run-public-benchmark.sh --dest /tmp/dual-issue-flow-benchmark
+#   DUAL_GLM_BASELINE_TOKENS=43540000 ./scripts/run-public-benchmark.sh --validation-target glm-token-attribution
 #   ./scripts/run-public-benchmark.sh --skip-build --update-benchmark-index
 #
 
@@ -29,6 +30,7 @@ CLEANUP_WORKTREE=false
 UPDATE_BENCHMARK_INDEX=false
 SUITE_FILE="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-suite.json"
 VERIFICATION_GATE=""
+VALIDATION_TARGET="lifecycle"
 
 usage() {
   cat <<'EOF'
@@ -49,6 +51,10 @@ Options:
                             proven.
   --cleanup-worktree        Remove the generated agent worktree after reporting.
   --update-benchmark-index  Refresh benchmark-index.md after the run.
+  --validation-target <lifecycle|glm-token-attribution>
+                            Verification target for the generated gate.
+                            Default: lifecycle. glm-token-attribution requires
+                            DUAL_GLM_BASELINE_TOKENS=<current GLM console total>.
   -h, --help                Show this help.
 
 The script uses real acpx Claude/Codex sessions. It auto-approves human gates
@@ -139,6 +145,10 @@ parse_args() {
       --update-benchmark-index)
         UPDATE_BENCHMARK_INDEX=true
         ;;
+      --validation-target)
+        shift
+        VALIDATION_TARGET="${1:-}"
+        ;;
       -h|--help)
         usage
         exit 0
@@ -169,10 +179,42 @@ prepare_repo() {
   }
 }
 
+validate_validation_target() {
+  case "$VALIDATION_TARGET" in
+    lifecycle) ;;
+    glm-token-attribution)
+      [[ "${DUAL_GLM_BASELINE_TOKENS:-}" =~ ^[0-9]+$ ]] || {
+        fail "DUAL_GLM_BASELINE_TOKENS=<integer token total> is required for --validation-target glm-token-attribution"
+        exit 1
+      }
+      ;;
+    *)
+      fail "--validation-target must be lifecycle or glm-token-attribution"
+      exit 1
+      ;;
+  esac
+}
+
 public_benchmark_write_verification_gate() {
   local safe_case_id
   safe_case_id="$(printf '%s' "$CASE_ID" | tr -c 'A-Za-z0-9_.-' '_')"
   VERIFICATION_GATE="$(mktemp "${TMPDIR:-/tmp}/dual-verification-gate-${safe_case_id}.XXXXXX")"
+  if [[ "$VALIDATION_TARGET" == "glm-token-attribution" ]]; then
+    cat >"$VERIFICATION_GATE" <<EOF
+# Verification Gate: $CASE_ID / GLM token attribution
+
+- Target: Validate GLM-5.2 provider token attribution for the public benchmark case $CASE_ID without using money as the acceptance metric.
+- Source of truth: pre-run GLM console token total DUAL_GLM_BASELINE_TOKENS=${DUAL_GLM_BASELINE_TOKENS}, post-run GLM console token total captured after the run, workstream run.json providerModelIdentity, workstream-metrics.json tokenAttribution.perRun, and dualctl trace Token Attribution.
+- Trigger precondition: DUAL_GLM_BASELINE_TOKENS is a numeric token total captured from the GLM console immediately before the run; disposable benchmark repo exists; task file exists; acpx is available; run-real-case.sh builds fresh artifacts; provider connectivity probe passes before workflow execution.
+- How precondition is checked before run: run-public-benchmark.sh refuses this target unless DUAL_GLM_BASELINE_TOKENS is numeric; prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, preflight artifact freshness, and providerProbeStatus=passed before starting a workstream.
+- PASS: Workflow reaches COMPLETED; GLM provider runs in run.json and workstream-metrics.json preserve provider=zhipu, model=glm-5.2, billingMode=subscription_token_only, real input/output/cachedRead token counts, costAttribution.reliability=token_only, and providerCachePolicy.mode=token_policy_active; post-run GLM console token total minus DUAL_GLM_BASELINE_TOKENS matches the summed GLM totalTokens in metrics within the documented console bucket granularity.
+- FAIL: Workflow does not complete, GLM provider/model/billingMode is wrong, real GLM token counts are missing or zero for completed provider runs, metrics and trace disagree on GLM totalTokens, or post-run GLM console delta contradicts summed GLM totalTokens beyond the documented console bucket granularity.
+- INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, DUAL_GLM_BASELINE_TOKENS was not captured immediately before this run, post-run GLM console total is not captured, the executed provider is not GLM-5.2 through Zhipu, required metrics/run.json/trace artifacts are missing, or this gate does not match the executed case.
+- Stop-loss: Stop on provider preflight failure, start/autorun failure, missing providerModelIdentity after the first completed GLM run, or GLM console token delta exceeding 3,000,000 before acceptance; do not launch a second benchmark automatically.
+- Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence.
+EOF
+    return
+  fi
   cat >"$VERIFICATION_GATE" <<EOF
 # Verification Gate: $CASE_ID
 
@@ -207,6 +249,7 @@ run_case() {
   [[ "$CLEANUP_WORKTREE" == true ]] && args+=(--cleanup-worktree)
   [[ "$UPDATE_BENCHMARK_INDEX" == true ]] && args+=(--update-benchmark-index)
 
+  validate_validation_target
   public_benchmark_write_verification_gate
   args+=(--verification-gate "$VERIFICATION_GATE")
 

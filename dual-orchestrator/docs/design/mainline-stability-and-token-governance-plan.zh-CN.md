@@ -582,6 +582,16 @@ not_applicable
 - 仍未完成：由于最近 real-case / public benchmark 均在 provider connectivity preflight 或
   provider connection 阶段失败，尚缺一轮 provider 成功的 GLM 控制台 token 增量对账；因此目前不能证明
   token 降低或 complex real-case 下 GLM token attribution 全链路通过。
+- public benchmark 入口已增加显式 P0.5 验证目标：
+  `run-public-benchmark.sh --validation-target glm-token-attribution`。该目标在启动真实
+  provider 前要求 `DUAL_GLM_BASELINE_TOKENS=<integer>`，并生成专门的 Verification Gate：
+  PASS 必须证明 `provider=zhipu`、`model=glm-5.2`、
+  `billingMode=subscription_token_only`、真实 input/output/cachedRead token、
+  `costAttribution.reliability=token_only`、`providerCachePolicy.mode=token_policy_active`，
+  且 post-run GLM 控制台 token delta 与 metrics 中 GLM `totalTokens` 对齐。
+  `run-public-benchmark.test.sh` 会把 lifecycle gate 和 GLM token gate 都交给
+  `verification-gate.sh` 校验，防止 token 对账目标退化为泛泛 lifecycle benchmark。
+  这只补齐真实验证入口和前置 gate，不代表 GLM 对账已经通过。
 
 ### 5.6 修复方案
 
