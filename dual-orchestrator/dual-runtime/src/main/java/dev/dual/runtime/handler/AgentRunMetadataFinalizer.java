@@ -1,0 +1,362 @@
+package dev.dual.runtime.handler;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.AgentExecutionAttempt;
+import dev.dual.core.execution.AgentExecutionAttemptStatus;
+import dev.dual.core.execution.AgentExecutionEvidence;
+import dev.dual.core.execution.AgentExecutionFinalizer;
+import dev.dual.core.execution.AgentExecutionOutcome;
+import dev.dual.core.execution.AgentExecutionOutcomeResolver;
+import dev.dual.core.execution.AgentExecutionProcessStatus;
+import dev.dual.core.execution.AgentExecutionRetryPolicy;
+import dev.dual.core.execution.ArtifactContractResult;
+import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.ProcessUsability;
+import dev.dual.core.execution.TerminalControlResult;
+import dev.dual.core.workflow.NodeResult;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Owns the run.json execution finalization projection.
+ *
+ * <p>Artifact validators provide terminal/artifact facts. This class is the
+ * single runtime writer that combines those facts with process evidence and
+ * persists terminal attempt/outcome fields into the agent run read model.</p>
+ */
+final class AgentRunMetadataFinalizer {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
+
+    private final AgentExecutionFinalizer executionFinalizer;
+
+    AgentRunMetadataFinalizer() {
+        this(new AgentExecutionFinalizer(new AgentExecutionOutcomeResolver()));
+    }
+
+    AgentRunMetadataFinalizer(AgentExecutionFinalizer executionFinalizer) {
+        if (executionFinalizer == null) {
+            throw new IllegalArgumentException("executionFinalizer is required");
+        }
+        this.executionFinalizer = executionFinalizer;
+    }
+
+    AgentExecutionOutcome finalizeRunMetadata(
+            Path workspaceRoot,
+            NodeResult result,
+            TerminalControlResult terminalControlResult,
+            List<ArtifactContractResult> artifactContractResults,
+            Object rereadReasons
+    ) {
+        var evidence = new AgentExecutionEvidence(
+                processResult(result),
+                terminalControlResult,
+                artifactContractResults,
+                adapterSignals(result)
+        );
+        var runMetadataRef = text(result.result().get("run_metadata"));
+        if (runMetadataRef.isBlank()) {
+            return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var path = root.resolve(runMetadataRef).normalize();
+        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+            return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
+        }
+        try {
+            var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
+            var processResult = mergedProcessResult(json, processResult(result));
+            var finalized = executionFinalizer.finalize(baseAttempt(json, result), evidence);
+            json.put("schemaVersion", Math.max(json.path("schemaVersion").asInt(0), 3));
+            json.put("status", finalized.legacyStatus());
+            json.put("failureReason", finalized.legacyFailureReason());
+            json.put("recoverable", finalized.legacyRecoverable());
+            json.set("processResult", OBJECT_MAPPER.valueToTree(processResult));
+            json.set("adapterSignals", OBJECT_MAPPER.valueToTree(adapterSignals(result).stream()
+                    .map(AgentRunMetadataFinalizer::adapterSignalToMap)
+                    .toList()));
+            json.set("terminalControlResult", OBJECT_MAPPER.valueToTree(terminalControlToMap(terminalControlResult)));
+            json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
+                    .map(AgentRunMetadataFinalizer::artifactContractToMap)
+                    .toList()));
+            if (rereadReasons != null) {
+                json.set("reread_reasons", OBJECT_MAPPER.valueToTree(rereadReasons));
+            }
+            json.set("executionAttempt", OBJECT_MAPPER.valueToTree(executionAttemptToMap(finalized.attempt())));
+            json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(finalized.outcome())));
+            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
+            return finalized.outcome();
+        } catch (Exception ignored) {
+            // Run metadata is an observability artifact. Contract validation result
+            // remains authoritative even if the historical run file is damaged.
+            return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
+        }
+    }
+
+    private static List<AdapterSignal> adapterSignals(NodeResult result) {
+        var reason = text(result.result().get("acpx_failure.reason"));
+        if (reason.isBlank()) {
+            return List.of();
+        }
+        var type = switch (reason) {
+            case "RECOVERABLE_AGENT_RECONNECT" -> AdapterSignalType.AGENT_RECONNECT_REQUIRED;
+            case "RECOVERABLE_SESSION_BOOTSTRAP_FAILED" -> AdapterSignalType.SESSION_BOOTSTRAP_FAILED;
+            case "RECOVERABLE_SESSION_MISSING" -> AdapterSignalType.SESSION_RESUME_FAILED;
+            case "RECOVERABLE_AGENT_AUTH_FAILED" -> AdapterSignalType.AUTH_FAILED;
+            case "RECOVERABLE_PROVIDER_CONNECTION_FAILED" -> AdapterSignalType.PROVIDER_CONNECTION_FAILED;
+            case "RECOVERABLE_RATE_LIMIT", "RECOVERABLE_AGENT_OVERLOADED" -> AdapterSignalType.RATE_LIMITED;
+            case "RECOVERABLE_CONTEXT_WINDOW" -> AdapterSignalType.CONTEXT_WINDOW_EXCEEDED;
+            case "RECOVERABLE_AGENT_PERMISSION_BLOCKED" -> AdapterSignalType.PERMISSION_BLOCKED;
+            case "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED" -> AdapterSignalType.PROCESS_STALLED;
+            default -> null;
+        };
+        return type == null ? List.of() : List.of(new AdapterSignal(type, reason, 0));
+    }
+
+    static Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("status", outcome.status().name());
+        map.put("primaryReason", outcome.primaryReason());
+        map.put("nodeMaySucceed", outcome.nodeMaySucceed());
+        map.put("retryPolicy", outcome.retryPolicy().name());
+        map.put("retrySafe", outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
+        map.put("recoveryCategory", outcome.recoveryCategory().name());
+        map.put("operatorMessage", outcome.operatorMessage());
+        map.put("secondarySignals", outcome.secondarySignals().stream()
+                .map(signal -> Map.of(
+                        "type", signal.type().name(),
+                        "severity", signal.type().severity().name(),
+                        "message", signal.message(),
+                        "observedSequence", signal.observedSequence(),
+                        "source", signal.source(),
+                        "sessionId", signal.sessionId(),
+                        "superseded", signal.superseded()
+                ))
+                .toList());
+        return map;
+    }
+
+    private static ProcessResult processResult(NodeResult result) {
+        var usability = processUsability(result);
+        var exitCode = result.result().get("exit_code");
+        if (exitCode instanceof Number number && number.intValue() != 0) {
+            if (usability == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT) {
+                return ProcessResult.nonZeroComplete(number.intValue());
+            }
+            if (usability == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
+                return ProcessResult.killedAfterRecoverableSignal();
+            }
+            return ProcessResult.nonZeroIncomplete(number.intValue());
+        }
+        if (usability == ProcessUsability.INTERRUPTED) {
+            return ProcessResult.interruptedProcess();
+        }
+        if (usability == ProcessUsability.TIMED_OUT || usability == ProcessUsability.STALLED) {
+            return ProcessResult.timedOutProcess();
+        }
+        return ProcessResult.exitedZero();
+    }
+
+    private static ProcessUsability processUsability(NodeResult result) {
+        var explicit = text(result.result().get("process_usability"));
+        if (!explicit.isBlank()) {
+            try {
+                return ProcessUsability.valueOf(explicit);
+            } catch (IllegalArgumentException ignored) {
+                // Fall back to legacy inference below for historical ledgers.
+            }
+        }
+        var reason = text(result.result().get("acpx_failure.reason"));
+        if ("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(reason)) {
+            return ProcessUsability.INTERRUPTED;
+        }
+        var exitCode = result.result().get("exit_code");
+        if (exitCode instanceof Number number && number.intValue() != 0) {
+            return result.status() == dev.dual.core.workflow.NodeStatus.COMPLETED
+                    ? ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+                    : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+        }
+        return ProcessUsability.EXITED_ZERO;
+    }
+
+    private static Map<String, Object> processResultToMap(ProcessResult process) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("command", process.command());
+        map.put("pid", process.pid());
+        map.put("exitCode", process.exitCode());
+        map.put("usability", process.usability().name());
+        map.put("durationMs", process.durationMs());
+        map.put("stdoutPath", process.stdoutPath());
+        map.put("stderrPath", process.stderrPath());
+        map.put("interrupted", process.interrupted());
+        map.put("timedOut", process.timedOut());
+        return map;
+    }
+
+    private static AgentExecutionAttempt baseAttempt(ObjectNode json, NodeResult result) {
+        var attempt = json.path("executionAttempt");
+        var runId = firstNonBlank(json.path("runId").asText(""), text(result.result().get("run_id")), "run-unknown");
+        return new AgentExecutionAttempt(
+                firstNonBlank(attempt.path("attemptId").asText(""), "att-" + runId),
+                runId,
+                firstNonBlank(json.path("workstreamId").asText(""), attempt.path("workstreamId").asText("")),
+                firstNonBlank(json.path("nodeId").asText(""), attempt.path("nodeId").asText("")),
+                firstNonBlank(json.path("agent").asText(""), attempt.path("agent").asText(""), text(result.result().get("agent"))),
+                enumValue(AgentExecutionAttemptStatus.class, attempt.path("status").asText(""),
+                        AgentExecutionAttemptStatus.PROCESS_EXITED),
+                enumValue(AgentExecutionProcessStatus.class, attempt.path("processStatus").asText(""),
+                        AgentExecutionProcessStatus.EXITED),
+                enumValue(AdapterSignalType.class, attempt.path("failureSignal").asText(""), null),
+                attempt.path("recoverable").asBoolean(false),
+                attempt.path("retrySafe").asBoolean(false),
+                firstNonBlank(attempt.path("message").asText(""), "process exited"),
+                attempt.path("stderrPath").asText(""),
+                attempt.path("transcriptPath").asText(""),
+                attempt.path("sessionName").asText(""),
+                attempt.path("sessionId").asText(""),
+                attempt.path("sessionScope").asText(""),
+                attempt.path("sessionSegmentKey").asText(""),
+                instantOrNull(attempt.path("startedAt").asText("")),
+                instantOrNull(attempt.path("finishedAt").asText(""))
+        );
+    }
+
+    private static Map<String, Object> executionAttemptToMap(AgentExecutionAttempt attempt) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("attemptId", attempt.attemptId());
+        map.put("runId", attempt.runId());
+        map.put("workstreamId", attempt.workstreamId());
+        map.put("nodeId", attempt.nodeId());
+        map.put("agent", attempt.agent());
+        map.put("status", attempt.status().name());
+        map.put("processStatus", attempt.processStatus().name());
+        map.put("failureSignal", attempt.failureSignal() == null ? null : attempt.failureSignal().name());
+        map.put("recoverable", attempt.recoverable());
+        map.put("retrySafe", attempt.retrySafe());
+        map.put("message", attempt.message());
+        map.put("stderrPath", attempt.stderrPath());
+        map.put("transcriptPath", attempt.transcriptPath());
+        map.put("sessionName", attempt.sessionName());
+        map.put("sessionId", attempt.sessionId());
+        map.put("sessionScope", attempt.sessionScope());
+        map.put("sessionSegmentKey", attempt.sessionSegmentKey());
+        map.put("startedAt", attempt.startedAt() == null ? null : attempt.startedAt().toString());
+        map.put("finishedAt", attempt.finishedAt() == null ? null : attempt.finishedAt().toString());
+        return map;
+    }
+
+    private static Map<String, Object> mergedProcessResult(ObjectNode json, ProcessResult process) {
+        var merged = new LinkedHashMap<String, Object>();
+        var existing = json.path("processResult");
+        if (existing.isObject()) {
+            existing.fields().forEachRemaining(entry -> merged.put(entry.getKey(), OBJECT_MAPPER.convertValue(entry.getValue(), Object.class)));
+        }
+        var semantic = processResultToMap(process);
+        for (var entry : semantic.entrySet()) {
+            if (entry.getValue() != null && !String.valueOf(entry.getValue()).isBlank()) {
+                merged.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return merged;
+    }
+
+    private static Map<String, Object> adapterSignalToMap(AdapterSignal signal) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("type", signal.type().name());
+        map.put("severity", signal.type().severity().name());
+        map.put("source", signal.source());
+        map.put("message", signal.message());
+        map.put("sessionId", signal.sessionId());
+        map.put("observedSequence", signal.observedSequence());
+        map.put("superseded", signal.superseded());
+        return map;
+    }
+
+    private static Map<String, Object> terminalControlToMap(TerminalControlResult terminal) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("present", terminal.present());
+        map.put("valid", terminal.valid());
+        map.put("decision", terminal.decision());
+        map.put("summary", terminal.summary());
+        map.put("parseError", terminal.parseError());
+        return map;
+    }
+
+    private static Map<String, Object> artifactContractToMap(ArtifactContractResult artifact) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("contractType", artifact.contractType());
+        map.put("required", artifact.required());
+        map.put("present", artifact.present());
+        map.put("valid", artifact.valid());
+        map.put("path", artifact.path());
+        map.put("errorCode", artifact.errorCode());
+        map.put("errorMessage", artifact.errorMessage());
+        return map;
+    }
+
+    private static Instant instantOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Instant.parse(value);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private static <E extends Enum<E>> E enumValue(Class<E> type, String value, E fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        try {
+            return Enum.valueOf(type, value);
+        } catch (RuntimeException ignored) {
+            return fallback;
+        }
+    }
+
+    private static int intValue(Object value) {
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        if (value == null) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
+    private static String firstNonBlank(String first, String second) {
+        return firstNonBlank(new String[]{first, second});
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return "";
+        }
+        for (var value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return "";
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+}
