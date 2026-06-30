@@ -150,6 +150,66 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void prepareOnlyProviderCacheAwareWritesCompactionSeedWhenStabilitySignalTriggers() throws Exception {
+        System.setProperty(SessionCompactionPolicy.ENV, "provider_cache_aware");
+        try {
+            var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-cache-aware");
+            Files.createDirectories(workstreamDir.resolve("memory"));
+            Files.writeString(workstreamDir.resolve("requirement.md"), "Implement from typed memory.\n");
+            Files.writeString(workstreamDir.resolve("memory/workstream-memory.json"), """
+                    {
+                      "decidedScope": ["Keep the implementation boundary narrow"],
+                      "readFiles": [
+                        {"path":"src/cache.js","sha":"123456abcdef","summary":"exports cache policy","trusted":true,"readRunId":"run-old"}
+                      ]
+                    }
+                    """);
+            writeCompactionMetrics("ws-cache-aware", 1_500_000, 0);
+
+            var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
+            var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                    "agent", "claude",
+                    "session", "claude-main",
+                    "prompt_template", "implement-claude"
+            ));
+            var instance = new NodeInstance(
+                    "node-implement",
+                    "implement.claude_implement",
+                    NodeKind.TASK,
+                    "acpx.agent_run",
+                    NodeStatus.READY,
+                    "stage-implement",
+                    "iter-001",
+                    List.of(),
+                    List.of(),
+                    Map.of(),
+                    null,
+                    null,
+                    null
+            );
+
+            var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-cache-aware", definition, instance));
+            var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+            var runMetadata = Files.readString(runMetadataPath);
+            assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-cache-aware-compact-implement.claude_implement\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionMode\" : \"provider_cache_aware\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionEnabled\" : true"));
+            assertTrue(runMetadata.contains("\"sessionCompactionReason\" : \"env:DUAL_SESSION_COMPACTION_EXPERIMENT=provider_cache_aware; stability_compaction; cachedReadTokens=1500000 >= 1000000\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionSeedKind\" : \"agent_handoff\""));
+            assertTrue(runMetadata.contains("\"sessionCompactionSeedPath\" :"));
+
+            var seedPath = runMetadataPath.getParent().resolve("prompts/session-compaction-seed.md");
+            assertTrue(Files.exists(seedPath));
+            var seed = Files.readString(seedPath);
+            assertTrue(seed.contains("Session Compaction Seed"));
+            assertTrue(seed.contains("Keep the implementation boundary narrow"));
+            assertTrue(seed.contains("src/cache.js"));
+        } finally {
+            System.clearProperty(SessionCompactionPolicy.ENV);
+        }
+    }
+
+    @Test
     void runScopedSessionRemainsOptIn() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -1186,6 +1246,33 @@ class AcpxAgentTaskHandlerTest {
                 null,
                 null
         );
+    }
+
+    private void writeCompactionMetrics(String workstreamId, long claudeCachedReadTokens, long codexCachedReadTokens)
+            throws Exception {
+        var metricsDir = tempDir.resolve(".agent")
+                .resolve("workstreams")
+                .resolve(workstreamId)
+                .resolve("metrics");
+        Files.createDirectories(metricsDir);
+        Files.writeString(metricsDir.resolve("workstream-metrics.json"), """
+                {
+                  "schemaVersion": 1,
+                  "tokenMetrics": {
+                    "total": {
+                      "cachedReadTokens": %d
+                    },
+                    "byAgent": {
+                      "claude": {
+                        "cachedReadTokens": %d
+                      },
+                      "codex": {
+                        "cachedReadTokens": %d
+                      }
+                    }
+                  }
+                }
+                """.formatted(claudeCachedReadTokens + codexCachedReadTokens, claudeCachedReadTokens, codexCachedReadTokens));
     }
 
     private static final class CapturingApprovalTransport extends AcpxAgentTransport {

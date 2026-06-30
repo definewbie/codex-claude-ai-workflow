@@ -588,7 +588,11 @@ treatment 行为：
   不是 provider/model attribution 缺失。
 - 现有 synthetic tests 覆盖：DeepSeek cache hit 便宜时 preserve session、昂贵价格时 compact、
   GLM/token-only 或无 pricing 但 cachedRead 超阈值时 stability compaction active。
-  尚未完成的是同一 real-case 下 `sessionCompactionEnabled=true` 且质量不退化的真实验证。
+- 已补 handler 级 synthetic proof：在 `provider_cache_aware` + metrics stability signal 达标时，
+  `AcpxAgentTaskHandler` 会写出 compact session、`sessionCompactionEnabled=true`、
+  `sessionCompactionSeedKind=agent_handoff` 和 `session-compaction-seed.md`，不再只停留在
+  `SessionCompactionPolicy` 纯函数测试。
+- 尚未完成的是同一 real-case 下 `sessionCompactionEnabled=true` 且质量不退化的真实验证。
 
 ## 7. P2：Real-case 验证矩阵
 
