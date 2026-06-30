@@ -27,6 +27,8 @@ source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
 source "$PROJECT_ROOT/scripts/lib/real-case-invalid.sh"
 # shellcheck source=scripts/lib/real-case-preflight.sh
 source "$PROJECT_ROOT/scripts/lib/real-case-preflight.sh"
+# shellcheck source=scripts/lib/verification-gate.sh
+source "$PROJECT_ROOT/scripts/lib/verification-gate.sh"
 
 REPO=""
 TASK_FILE=""
@@ -194,41 +196,12 @@ validate_inputs() {
   esac
 }
 
-gate_field_value() {
-  local file="$1"
-  local field="$2"
-  awk -v field="$field" '
-    $0 ~ "^[[:space:]]*-[[:space:]]*" field ":[[:space:]]*" {
-      sub("^[[:space:]]*-[[:space:]]*" field ":[[:space:]]*", "")
-      print
-      exit
-    }
-  ' "$file"
-}
-
 validate_verification_gate() {
   local file="$1"
-  local missing=()
-  local field value
-  local fields=(
-    "Target"
-    "Source of truth"
-    "Trigger precondition"
-    "How precondition is checked before run"
-    "PASS"
-    "FAIL"
-    "INVALID"
-    "Stop-loss"
-    "Run artifact freshness"
-  )
-  for field in "${fields[@]}"; do
-    value="$(gate_field_value "$file" "$field")"
-    if [[ -z "$value" || "$value" == "TODO"* || "$value" == "TBD"* ]]; then
-      missing+=("$field")
-    fi
-  done
-  if [[ "${#missing[@]}" -gt 0 ]]; then
-    fail "verification gate is incomplete: ${missing[*]}"
+  local missing
+  missing="$(verification_gate_missing_fields "$file")"
+  if [[ -n "$missing" ]]; then
+    fail "verification gate is incomplete: ${missing//|/ }"
     fail "Gate file: $file"
     exit 1
   fi
@@ -458,7 +431,7 @@ verification_gate_json() {
   local first=true field value key
   printf '{'
   for field in "${fields[@]}"; do
-    value="$(gate_field_value "$gate" "$field")"
+    value="$(verification_gate_field_value "$gate" "$field")"
     key="$(printf '%s' "$field" | tr '[:upper:]' '[:lower:]' | sed 's/ /_/g; s/-/_/g')"
     if [[ "$first" == true ]]; then
       first=false

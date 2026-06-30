@@ -682,6 +682,10 @@ Verification Gate 的 9 个字段均已填写。除字段校验外，runner 还�
 semantic、simple token benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of
 truth 判定 PASS / FAIL / INVALID。
 
+Verification Gate 的字段解析和完整性校验已下沉到 `scripts/lib/verification-gate.sh`，并由
+`verification-gate.test.sh` 覆盖完整 gate、缺字段 gate、TODO/TBD gate 三类 fixture。该测试只证明
+gate 文件格式不会被空字段绕过，不替代真实 provider 前置条件和业务质量验证。
+
 2026-06-30 public benchmark 复测结果：`intake.claude_brainstorm` 在首次真实 provider 调用阶段失败，acpx
 输出 `Unable to connect to API (FailedToOpenSocket)`。该轮不能证明 lifecycle、token 或 provider-cache-aware
 目标，必须按 provider/runtime 前置条件失败处理，不能当作 P2 benchmark 结论。修复要求：该错误必须进入
@@ -779,7 +783,7 @@ Required tests:
 - GLM subscription-token-only attribution test.
 - DeepSeek metered pricing calibration test.
 - stage scope policy tests beyond intake are present; remaining gap is run-level ExplorationPolicyResult / WARN closure proof.
-- full verification gate fixture test.
+- full verification gate fixture test 已覆盖；remaining gap 是真实 P2 case 矩阵尚未执行。
 
 Accepted debt:
 - P3 keep-alive is explicitly deferred until execution attempt model is stable.
