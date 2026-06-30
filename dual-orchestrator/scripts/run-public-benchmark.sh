@@ -28,6 +28,7 @@ SKIP_BUILD=false
 CLEANUP_WORKTREE=false
 UPDATE_BENCHMARK_INDEX=false
 SUITE_FILE="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-suite.json"
+VERIFICATION_GATE=""
 
 usage() {
   cat <<'EOF'
@@ -166,6 +167,23 @@ prepare_repo() {
   }
 }
 
+write_verification_gate() {
+  VERIFICATION_GATE="$DEST_DIR/.dual-verification-gate.md"
+  cat >"$VERIFICATION_GATE" <<EOF
+# Verification Gate: $CASE_ID
+
+- Target: Run the public benchmark case $CASE_ID through the full dual lifecycle with real acpx agents.
+- Source of truth: Generated report summary.json, workstream ledger, run.json, workstream-metrics.json, and dualctl trace for the created workstream.
+- Trigger precondition: Disposable benchmark repo exists, task file exists, acpx is available, and run-real-case.sh will build fresh artifacts unless --skip-build is explicitly passed.
+- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, and this gate before starting.
+- PASS: Workflow reaches COMPLETED, original repo stays clean, key artifacts exist, final acceptance is ACCEPT or ACCEPT_WITH_NOTES, and trace/metrics can explain execution/token state.
+- FAIL: Workflow does not complete, original repo is polluted, required report/handoff/delivery artifacts are missing, or acceptance rejects without expected repair evidence.
+- INVALID: dualctl jar is stale due to --skip-build misuse, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
+- Stop-loss: The script stops on start/autorun failure and writes local evidence; do not launch a second benchmark automatically.
+- Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting unless --skip-build is passed and logged.
+EOF
+}
+
 run_case() {
   resolve_case
   [[ -f "$TASK_FILE" ]] || {
@@ -184,6 +202,9 @@ run_case() {
   [[ "$SKIP_BUILD" == true ]] && args+=(--skip-build)
   [[ "$CLEANUP_WORKTREE" == true ]] && args+=(--cleanup-worktree)
   [[ "$UPDATE_BENCHMARK_INDEX" == true ]] && args+=(--update-benchmark-index)
+
+  write_verification_gate
+  args+=(--verification-gate "$VERIFICATION_GATE")
 
   log "Running public benchmark against: $DEST_DIR"
   log "Case: $CASE_ID"

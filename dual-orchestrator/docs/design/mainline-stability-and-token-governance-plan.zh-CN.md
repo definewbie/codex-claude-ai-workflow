@@ -570,6 +570,16 @@ Verification Gate:
 - 如果核心字段为 `null`、`measure_only`、`pricing_unknown`、`not_applicable`，且该字段是目标前提，则本轮无效。
 - 如果同类验证连续失败两次，必须回到模型边界分析，不能继续调阈值或补 prompt。
 
+### 7.3 当前实现状态
+
+`run-real-case.sh` 已要求显式传入 `--verification-gate <gate.md>`，并在启动真实 provider 前校验
+Verification Gate 的 9 个字段均已填写。`run-public-benchmark.sh` 会为 public benchmark 自动生成
+case-specific gate 并传入 `run-real-case.sh`。
+
+这只证明 P2 的入口约束已经落地，不证明 P2 real-case 矩阵已经通过。simple semantic、simple token
+benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of truth 判定 PASS / FAIL /
+INVALID。
+
 ## 8. P3：Session Keep-alive / 性能优化
 
 这是未来优化，不抢 P0/P1。

@@ -10,6 +10,7 @@
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --variant full
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --prompt-language zh-CN
+#   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --verification-gate /path/to/gate.md
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --cleanup-worktree
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --update-benchmark-index
 #
@@ -25,6 +26,7 @@ source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
 
 REPO=""
 TASK_FILE=""
+VERIFICATION_GATE=""
 VARIANT="full"
 PROMPT_LANGUAGE="auto"
 MAX_STEPS=80
@@ -49,6 +51,10 @@ Usage:
 Options:
   --repo <path>             Target git repository.
   --task-file <path>        Requirement markdown file.
+  --verification-gate <path>
+                            Required markdown gate proving target, source of truth,
+                            preconditions, pass/fail/invalid criteria, stop-loss,
+                            and artifact freshness before provider execution.
   --variant <contract|full>
                             Workflow variant. Default: full.
   --prompt-language <auto|en|zh-CN>
@@ -105,6 +111,10 @@ parse_args() {
         shift
         TASK_FILE="${1:-}"
         ;;
+      --verification-gate)
+        shift
+        VERIFICATION_GATE="${1:-}"
+        ;;
       --variant)
         shift
         VARIANT="${1:-}"
@@ -147,12 +157,16 @@ parse_args() {
 validate_inputs() {
   [[ -n "$REPO" ]] || { fail "--repo is required"; exit 1; }
   [[ -n "$TASK_FILE" ]] || { fail "--task-file is required"; exit 1; }
+  [[ -n "$VERIFICATION_GATE" ]] || { fail "--verification-gate is required before running real provider cases"; exit 1; }
 
   REPO="$(abs_path "$REPO")"
   TASK_FILE="$(abs_path "$TASK_FILE")"
+  VERIFICATION_GATE="$(abs_path "$VERIFICATION_GATE")"
 
   [[ -d "$REPO" ]] || { fail "repo not found: $REPO"; exit 1; }
   [[ -f "$TASK_FILE" ]] || { fail "task file not found: $TASK_FILE"; exit 1; }
+  [[ -f "$VERIFICATION_GATE" ]] || { fail "verification gate not found: $VERIFICATION_GATE"; exit 1; }
+  validate_verification_gate "$VERIFICATION_GATE"
   git -C "$REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
     fail "repo must be a git repository: $REPO"
     exit 1
@@ -169,6 +183,46 @@ validate_inputs() {
     auto|en|zh-CN|zh|zh-cn) ;;
     *) fail "--prompt-language must be auto, en, or zh-CN"; exit 1 ;;
   esac
+}
+
+gate_field_value() {
+  local file="$1"
+  local field="$2"
+  awk -v field="$field" '
+    $0 ~ "^[[:space:]]*-[[:space:]]*" field ":[[:space:]]*" {
+      sub("^[[:space:]]*-[[:space:]]*" field ":[[:space:]]*", "")
+      print
+      exit
+    }
+  ' "$file"
+}
+
+validate_verification_gate() {
+  local file="$1"
+  local missing=()
+  local field value
+  local fields=(
+    "Target"
+    "Source of truth"
+    "Trigger precondition"
+    "How precondition is checked before run"
+    "PASS"
+    "FAIL"
+    "INVALID"
+    "Stop-loss"
+    "Run artifact freshness"
+  )
+  for field in "${fields[@]}"; do
+    value="$(gate_field_value "$file" "$field")"
+    if [[ -z "$value" || "$value" == "TODO"* || "$value" == "TBD"* ]]; then
+      missing+=("$field")
+    fi
+  done
+  if [[ "${#missing[@]}" -gt 0 ]]; then
+    fail "verification gate is incomplete: ${missing[*]}"
+    fail "Gate file: $file"
+    exit 1
+  fi
 }
 
 build_project() {
@@ -193,6 +247,7 @@ init_case_dir() {
   CASE_DIR="$REPORT_ROOT/$stamp"
   mkdir -p "$CASE_DIR/logs"
   cp "$TASK_FILE" "$CASE_DIR/task.md"
+  cp "$VERIFICATION_GATE" "$CASE_DIR/verification-gate.md"
 }
 
 start_workstream() {

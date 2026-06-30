@@ -37,6 +37,11 @@ Preferred public path:
 ./scripts/run-public-benchmark.sh
 ```
 
+`run-public-benchmark.sh` generates a concrete Verification Gate for the
+selected public case and passes it to `run-real-case.sh`. Direct calls to
+`run-real-case.sh` must provide `--verification-gate <gate.md>`; the runner
+rejects real provider execution without it.
+
 List available public cases:
 
 ```bash
