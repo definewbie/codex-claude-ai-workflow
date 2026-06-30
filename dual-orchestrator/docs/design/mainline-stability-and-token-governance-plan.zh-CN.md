@@ -111,9 +111,9 @@ Mainline Decision Gate:
 
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
-| `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，真实 replay 待做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；仍缺 problematic workstream replay | P0 |
+| `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，历史 recoverable replay 已做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；历史 `RECOVERABLE_ADAPTER_FAILURE` replay 已证明 refresh 不改 ledger 且能投影 typed outcome；仍缺 stale RUNNING / 慢点类 problematic replay | P0 |
 | acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，真实慢点待复核 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；仍缺 problematic real-case 慢点复核 | P0 |
-| stale RUNNING / PROCESS_STALLED | synthetic 覆盖，real replay 待做 | dead pid resume 会进入 recovery 并标记 node execution stale；仍缺历史 problematic workstream replay | P0 |
+| stale RUNNING / PROCESS_STALLED | synthetic 覆盖，recoverable failure 历史 replay 已做 | dead pid resume 会进入 recovery 并标记 node execution stale；历史 recoverable failure replay 已验证 projection 不改 ledger；仍缺 stale RUNNING 历史 replay | P0 |
 | provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
@@ -278,6 +278,23 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `adapterSignals[0].reason=RECOVERABLE_TRANSPORT_FAILED`，并经
   `AgentRunMetadataFinalizer` 形成 `executionOutcome.status=RECOVERABLE_ADAPTER_FAILURE`、
   `usage.measurementType=UNAVAILABLE` 和 `unavailableReason=PROCESS_STALLED`。
+- 已执行 historical problematic workstream replay（不启动 provider）：
+  复制 `/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260630T120421Z-7Y5D`
+  到 `/private/tmp/dual-p0-replay-ws-20260630T120421Z-7Y5D` 后运行
+  `dualctl projections refresh --workdir ... ws-20260630T120421Z-7Y5D`。
+  replay 前后 `workflow/current.json` 与两个 `runs/*/run.json` 的 SHA1 均保持不变，
+  证明 refresh 只更新 projection/read model，不迁移或修补 ledger source of truth。
+  该历史样本投影出：
+  `providerMetrics.outcomeStatusCounts.RECOVERABLE_ADAPTER_FAILURE=1`、
+  `tokenAttribution.perRun[1].attemptFailureSignal=RATE_LIMITED`、
+  `tokenAttribution.perRun[1].outcomeStatus=RECOVERABLE_ADAPTER_FAILURE`、
+  `tokenAttribution.usageVisibility.gaps[].reason=RATE_LIMITED`。
+  同一 replay 也保留了 GLM run 的
+  `providerModelIdentity.provider=zhipu`、`model=glm-5.2`、
+  `billingMode=subscription_token_only` 和 `usageVisibility` 中的
+  `PROCESS_STALLED` gap。结论：recoverable adapter failure 的 historical replay
+  链路已可证明；这不是 full real-case pass，也不证明 stale RUNNING / slow-point
+  类历史 replay 已完成。
 - refresh 入口已补充 execution consistency warning 输出：当历史 ledger replay 后的 metrics
   中存在 `stale_legacy_running` / `attempt_outcome_conflict` 等非 `consistent` 计数时，
   CLI 会从 `metrics/workstream-metrics.json.providerMetrics.executionConsistencyCounts`
