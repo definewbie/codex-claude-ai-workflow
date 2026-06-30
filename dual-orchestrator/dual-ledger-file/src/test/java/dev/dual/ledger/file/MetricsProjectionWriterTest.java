@@ -601,7 +601,10 @@ class MetricsProjectionWriterTest {
 
         assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
         assertEquals("token_only", costMap.get("costEstimateReliability"));
-        assertEquals("measure_only", costMap.get("providerCacheDecision"));
+        assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
+        assertEquals(
+                "provider/model and cache token signal are known; amount is token-only",
+                costMap.get("providerCacheDecisionReason"));
         assertEquals("TOKENS_ONLY", costMap.get("officialCalculatedCurrency"));
         assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
     }
@@ -649,13 +652,16 @@ class MetricsProjectionWriterTest {
         var providerCachePolicy = map(perRun.get("providerCachePolicy"));
         assertEquals("token_policy_active", providerCachePolicy.get("mode"));
         assertEquals(true, providerCachePolicy.get("inputsComplete"));
-        assertTrue(String.valueOf(providerCachePolicy.get("reason")).contains("subscription-unpriced"));
+        assertTrue(String.valueOf(providerCachePolicy.get("reason")).contains("not metered"));
         assertEquals("zhipu", costMap.get("providerId"));
         assertEquals("glm-5.2", costMap.get("model"));
         assertEquals("subscription_token_only", costMap.get("billingMode"));
         assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
         assertEquals("subscription_unpriced", costMap.get("costEstimateReliability"));
-        assertEquals("measure_only", costMap.get("providerCacheDecision"));
+        assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
+        assertEquals(
+                "provider/model and cache token signal are known; amount is subscription-unpriced",
+                costMap.get("providerCacheDecisionReason"));
     }
 
     private void writeAttributionRun(WorkstreamPaths paths, String runId, String agent, String nodeId,

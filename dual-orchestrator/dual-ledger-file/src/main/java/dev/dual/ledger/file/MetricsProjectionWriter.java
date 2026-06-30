@@ -591,11 +591,11 @@ final class MetricsProjectionWriter {
         var cacheReliability = text(costEconomics.get("cacheSignalReliability"));
         var mode = text(costEconomics.get("providerCacheDecision"));
         var reason = nonBlank(text(costEconomics.get("providerCacheDecisionReason")), text(costEconomics.get("reason")));
-        if ("subscription_unpriced".equals(costReliability)
+        if (("subscription_unpriced".equals(costReliability) || "token_only".equals(costReliability))
                 && ("provider_cache_tokens_reported".equals(cacheReliability)
                 || "provider_usage_tokens_reported".equals(cacheReliability))) {
             mode = "token_policy_active";
-            reason = "provider/model and cache token signal are known; amount is subscription-unpriced";
+            reason = "provider/model and cache token signal are known; amount is not metered by visible per-token pricing";
         }
         return Map.of(
                 "mode", mode,
@@ -1523,7 +1523,9 @@ final class MetricsProjectionWriter {
                             ? "provider_cache_tokens_reported"
                             : "provider_usage_tokens_reported");
                     result.put("costEstimateReliability", "subscription_unpriced");
-                    result.put("providerCacheDecision", "measure_only");
+                    result.put("providerCacheDecision", "token_policy_active");
+                    result.put("providerCacheDecisionReason",
+                            "provider/model and cache token signal are known; amount is subscription-unpriced");
                     result.put("reason", "subscription or bundled billing; token usage is attributable but no per-token cost is visible");
                     return result;
                 }
@@ -1553,6 +1555,9 @@ final class MetricsProjectionWriter {
                     ? "provider_cache_tokens_reported"
                     : "provider_usage_tokens_reported");
             if ("TOKENS_ONLY".equalsIgnoreCase(price.currency())) {
+                result.put("providerCacheDecision", "token_policy_active");
+                result.put("providerCacheDecisionReason",
+                        "provider/model and cache token signal are known; amount is token-only");
                 result.put("costEstimateReliability", "token_only");
                 result.put("reason", "provider/model has no visible per-token billing; token usage only");
                 return result;
