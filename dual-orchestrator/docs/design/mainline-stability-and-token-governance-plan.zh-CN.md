@@ -285,6 +285,12 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger`
   已覆盖 stale legacy RUNNING fixture，并验证 metrics / token attribution / stdout 三处都能看到
   `stale_legacy_running`。
+- `ProjectionsRefreshCommandTest.refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger`
+  已补充 attempt/outcome 冲突 replay fixture：当历史 run.json 中
+  `executionAttempt.status=RECOVERABLE_FAILED` 但 `executionOutcome.status=SUCCESS` 时，
+  `dualctl projections refresh` 会输出并投影 `attempt_outcome_conflict=1`，同时断言
+  `workflow/current.json`、`nodes/*.json` 和 `runs/*/run.json` 均不被修改。这证明
+  replay 入口能暴露执行事实冲突，但仍不等价于 problematic real workstream 已复核。
 - execution consistency classification 已从 `MetricsProjectionWriter` / `TraceCommand`
   的重复实现收口到 `ExecutionConsistencyClassifier`。`TraceCommandTest` 已覆盖 legacy
   `run.status=running` 但 typed attempt/outcome 已终态的历史 run 会显示

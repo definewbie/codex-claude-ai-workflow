@@ -102,6 +102,39 @@ class ProjectionsRefreshCommandTest {
                 "projection replay must not mutate run.json execution read model");
     }
 
+    @Test
+    void refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger() throws Exception {
+        writeAttemptOutcomeConflictLedgerWithoutProjections();
+        var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-conflict/workflow/current.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-conflict/nodes/node-1.json");
+        var runJson = tempDir.resolve(".agent/workstreams/ws-conflict/runs/run-conflict/run.json");
+        var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
+        var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
+        var runBefore = Files.readString(runJson, StandardCharsets.UTF_8);
+
+        var command = new ProjectionsRefreshCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-conflict";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Execution consistency: attempt_outcome_conflict=1"));
+        var metrics = tempDir.resolve(".agent/workstreams/ws-conflict/metrics/workstream-metrics.json");
+        var metricsJson = MAPPER.readValue(metrics.toFile(), Map.class);
+        var provider = map(metricsJson.get("providerMetrics"));
+        assertEquals(1, number(map(provider.get("executionConsistencyCounts")).get("attempt_outcome_conflict")));
+        var tokenRun = map(list(map(metricsJson.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("attempt_outcome_conflict", tokenRun.get("executionConsistency"));
+        var attrRun = map(list(map(metricsJson.get("tokenAttribution")).get("perRun")).get(0));
+        assertEquals("attempt_outcome_conflict", attrRun.get("executionConsistency"));
+        assertEquals(workflowBefore, Files.readString(workflowCurrent, StandardCharsets.UTF_8),
+                "projection replay must not mutate workflow/current.json source of truth");
+        assertEquals(nodeBefore, Files.readString(nodeJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate node source of truth");
+        assertEquals(runBefore, Files.readString(runJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate run.json execution read model");
+    }
+
     private void writeLedgerWithoutProjections() throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-refresh");
         Files.createDirectories(root.resolve("workflow"));
@@ -238,6 +271,78 @@ class ProjectionsRefreshCommandTest {
                     "status": "RUNTIME_FAILED",
                     "primaryReason": "AGENT_PROCESS_STALLED",
                     "nodeMaySucceed": false
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+    }
+
+    private void writeAttemptOutcomeConflictLedgerWithoutProjections() throws Exception {
+        var root = tempDir.resolve(".agent/workstreams/ws-conflict");
+        Files.createDirectories(root.resolve("workflow"));
+        Files.createDirectories(root.resolve("nodes"));
+        Files.createDirectories(root.resolve("runs/run-conflict"));
+
+        Files.writeString(root.resolve("workflow/current.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-conflict",
+                  "workflowInstanceId": "wf-conflict",
+                  "workflowId": "agent-lifecycle-full",
+                  "definitionVersion": 1,
+                  "status": "RUNNING",
+                  "activeNodeInstanceIds": ["node-1"],
+                  "openGateIds": [],
+                  "lastEventId": "evt-1",
+                  "updatedAt": "2026-06-30T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("nodes/node-1.json"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-1",
+                  "nodeDefinitionId": "intake.codex_product_review",
+                  "kind": "TASK",
+                  "handlerType": "acpx.agent_run",
+                  "status": "RUNNING",
+                  "stageId": "stage-intake",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "result": {},
+                  "runRef": "run-conflict",
+                  "latestExecutionId": "exec-conflict",
+                  "startedAt": "2026-06-30T00:00:00Z",
+                  "finishedAt": null
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("runs/run-conflict/run.json"), """
+                {
+                  "schemaVersion": 4,
+                  "runId": "run-conflict",
+                  "workstreamId": "ws-conflict",
+                  "nodeId": "intake.codex_product_review",
+                  "agent": "codex",
+                  "status": "failed",
+                  "durationMs": 1000,
+                  "usage": {
+                    "inputTokens": 100,
+                    "outputTokens": 20,
+                    "cachedReadTokens": 0,
+                    "cachedWriteTokens": 0,
+                    "totalTokens": 120,
+                    "source": "acpx_stream",
+                    "measurementType": "PROVIDER_RUN_USAGE"
+                  },
+                  "executionAttempt": {
+                    "status": "RECOVERABLE_FAILED",
+                    "processStatus": "RECONNECT_REQUIRED",
+                    "failureSignal": "AGENT_RECONNECT_REQUIRED"
+                  },
+                  "executionOutcome": {
+                    "status": "SUCCESS",
+                    "primaryReason": "completed",
+                    "nodeMaySucceed": true
                   }
                 }
                 """, StandardCharsets.UTF_8);
