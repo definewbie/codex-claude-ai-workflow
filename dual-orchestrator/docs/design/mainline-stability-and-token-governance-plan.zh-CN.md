@@ -1,0 +1,657 @@
+# 主线稳定性与 Token 治理总控计划
+
+> 状态：设计总控文档。
+> 更新日期：2026-06-30。
+> 目的：把执行边界、token/cost 归因、repo scope 治理和 real-case 验证拆成可验收的主线，避免继续在真实 case 中边跑边补洞。
+
+## 1. 当前结论
+
+`intake` 探索治理已经完成：`intake.claude_brainstorm` 不再发布 direct read / shell 能力，且 bounded cancer-clinic run 已证明 `actualDirectReadFiles=[]`、`explorationPolicyResult.status=pass`。
+
+但这不等于系统整体可稳定跑完整 real-case。当前仍有四条主线未闭环：
+
+1. runtime 执行事实边界未完全收口；
+2. provider/model/token/cost 经济模型未完全收口；
+3. repo scope / read governance 只覆盖了 intake，后续阶段仍可自由探索；
+4. full real-case 验证链路没有稳定的前置 gate 和 stop-loss。
+
+因此，下一步不能直接用 complex real-case 证明整体能力。必须先把执行事实和成本归因做成可靠 source of truth，否则 real-case 结果会继续混杂：
+
+```text
+Agent 是否完成
+acpx 是否返回
+transport 是否等待
+run.json 是否落盘
+executionAttempt 是否 stale
+provider token 是否可归因
+session transcript 是否膨胀
+```
+
+## 2. Source of Truth 分层
+
+```mermaid
+flowchart TD
+  WD["WorkflowDefinition / NodeDefinition"] --> WI["WorkflowInstance / NodeInstance"]
+  WI --> AE["AgentExecutionAttempt"]
+  AE --> AO["AgentExecutionOutcome"]
+  AO --> NI["NodeExecution transition"]
+
+  EXT["acpx / Claude Code / Codex process"] --> AE
+  SIG["stderr / stream / exit / timeout / reconnect"] --> AE
+  ART["Typed artifacts"] --> AO
+  USAGE["Provider usage"] --> ECON["TokenEconomics"]
+  MEM["WorkstreamMemory / RepoScope"] --> CTX["Context package"]
+  CTX --> EXT
+
+  AE --> RUN["run.json read model"]
+  AO --> RUN
+  ECON --> MET["metrics / trace / UI"]
+  RUN --> MET
+```
+
+| 层 | Source of Truth | 负责 | 不负责 |
+| --- | --- | --- | --- |
+| Definition | workflow JSON / contract registry | 节点、边、契约定义 | 外部进程事实 |
+| Instance | workflow / node ledger | 流程状态 | acpx stderr、token 经济 |
+| Execution | `AgentExecutionAttempt` | pid、command、stdout、stderr、exit、timeout、reconnect、stalled | 业务判断 |
+| Outcome | `AgentExecutionOutcome` | 将 process facts + typed artifacts 合成唯一执行结果 | UI 展示 |
+| Artifact | typed artifact sidecar | agent 语义输出 | runtime failure 分类 |
+| Context Governance | repo scope / memory / exploration plan | 当前阶段该读什么、能改什么、如何越界 | workflow graph |
+| Economics | provider/model/cost attribution | token、cache hit、价格、billing mode | 业务路由 |
+| Projection | run.json / metrics / trace / UI | 展示统一 read model | 发明状态 |
+
+核心规则：
+
+- `NodeExecution` 只能消费 `AgentExecutionOutcome`。
+- `run.json` 是 read model，不是第二套状态机。
+- provider usage 缺失是 observability 状态，不允许伪装成 0 token。
+- session / transcript 是 runtime cache，不是 workflow memory 的 source of truth。
+- UI / CLI / API 只能投影统一 read model。
+
+## 3. 未完成目标清单
+
+| 目标 | 当前状态 | 缺口 | 优先级 |
+| --- | --- | --- | --- |
+| `AgentExecutionAttempt -> AgentExecutionOutcome` | 部分实现 | 出现 `executionOutcome=SUCCESS` 但 `executionAttempt=RUNTIME_FAILED/PROCESS_STALLED` | P0 |
+| acpx / CC / Codex 执行生命周期 | 未完整建模 | terminal 已出现但 transport 继续等 293s/380s 的原因不可解释 | P0 |
+| stale RUNNING / PROCESS_STALLED | 部分处理 | 能显示，但不能证明 runtime 状态和真实 agent 输出一致 | P0 |
+| provider/model/token attribution | 部分实现 | GLM 包月、DeepSeek 价格、OpenAI/Codex、Claude cache 还不是统一模型 | P0.5 |
+| provider-cache-aware | 设计/实验中 | 多处仍可能是 `measure_only`，缺少 active 生效证明 | P1 |
+| session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
+| intake exploration governance | 已完成 | 只覆盖 intake，不代表整体 readCount/token 下降 | Done |
+| design/plan/implement/review repo scope governance | 未完成 | 后续阶段仍可能自由探索；review 仍 WARN | P1 |
+| memory loop / read reuse | 部分实现 | 对 token 收益有限；必须和 scope governance 结合 | P1 |
+| artifact boundary | 大体完成 | `plan_artifact`、`stage_handoff`、`rereadPolicy` 已类型化，但缺完整 real-case 验证 | P1 |
+| projection consistency | 部分完成 | CLI trace 已补；UI/API/operator 是否同源还未整体 sweep | P1 |
+| full complex real-case | 未完成 | 只有 bounded run，没有完整端到端验收 | P2 |
+| acpx 慢 / 每节点启动慢 | 未完成 | 未拆分 provider 推理慢、transport 等待慢、session 操作慢、dual 落盘慢 | P0/P1 |
+| session keep-alive | 未来优化 | 需要在 execution attempt 模型稳定后做 | P3 |
+
+## 4. P0：执行事实边界收口
+
+### 4.1 目标
+
+让系统能准确回答：
+
+```text
+agent 到底有没有完成？
+如果没完成，卡在哪里？
+如果 terminal 已经出现，为什么还继续等待？
+如果 run.json 落盘晚，晚在哪里？
+```
+
+### 4.2 需要实现
+
+1. 完整 `AgentExecutionAttempt` 生命周期：
+
+```text
+PREPARED
+PROCESS_STARTED
+STREAMING
+TERMINAL_DETECTED
+PROCESS_EXITED
+ARTIFACT_EXTRACTED
+CONTRACT_VALIDATED
+COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | STALLED
+```
+
+2. `AgentExecutionOutcomeResolver` 成为唯一合成点：
+
+- process exit code；
+- terminal control；
+- required typed artifact；
+- adapter signal；
+- timeout / stalled；
+- usage availability。
+
+3. transport 分段记录：
+
+- process started timestamp；
+- first stdout/stderr timestamp；
+- terminal detected timestamp；
+- last progress timestamp；
+- process exited timestamp；
+- artifact extracted timestamp；
+- contract validated timestamp。
+
+4. 禁止状态冲突：
+
+- 不允许 `executionOutcome.status=SUCCESS` 同时 `executionAttempt.status=RUNTIME_FAILED`；
+- 不允许 `PROCESS_STALLED` 和成功 outcome 并存；
+- 不允许 artifact validator 直接消费 raw stderr。
+
+### 4.3 验收
+
+- `agent needs reconnect` 必须写出 `run.json`。
+- `run.json.executionAttempt.failureSignal=AGENT_RECONNECT_REQUIRED`。
+- 节点不允许 stale `RUNNING`。
+- workflow 进入明确 recoverable 状态。
+- `current-failure.md` / CLI recovery 能显示 reconnect 原因。
+- metrics 显示 usage unavailable reason，而不是误报真实 0 token。
+- artifact validator 不把 reconnect 当 artifact contract failure。
+- retry/recovery action 能看到 sessionName / sessionId / session scope。
+- 中断脚本后，残留 RUNNING 能被 stale guard 识别或恢复。
+
+### 4.4 当前实现缺口
+
+当前代码里已经存在 `AgentExecutionAttempt`、`AgentExecutionOutcome`、
+`AgentExecutionOutcomeResolver`、`AgentExecutionHealth` 和 run.json
+`executionAttempt` / `executionOutcome` 投影。但它们还没有成为唯一执行事实边界。
+
+| 缺口 | 表现 | 根因 | 修复方向 |
+| --- | --- | --- | --- |
+| attempt/outcome 可冲突 | `executionOutcome=SUCCESS` 但 `executionAttempt=RUNTIME_FAILED/PROCESS_STALLED` | attempt 与 outcome 不是同一个 resolver 原子生成 | 引入单一 `AgentExecutionFinalizer`，一次性生成 terminal attempt、outcome 和 legacy run fields |
+| terminal detected 后等待不可解释 | terminal 已出现，但 transport 继续等 293s/380s | 只有最终状态，没有阶段 timestamp / event segment | 记录 `terminalDetectedAt`、`processExitedAt`、`artifactExtractedAt`、`contractValidatedAt` |
+| transport 仍偏串行黑盒 | run.json 落盘依赖 handler 收到完整 transport 结果 | process streaming 事件没有持久化 read model | 增加 attempt event log 或 run.json `executionTimeline[]` |
+| `PROCESS_STALLED` 可污染成功 | stdout 已完整，仍因 watchdog/stalled 写 runtime failed | process usability 和 artifact validity 没有统一裁决 | outcome resolver 输入必须包含 `ProcessUsability + TerminalControlResult + ArtifactContractResults` |
+| artifact validator 仍能参与 outcome 写入 | validator 会刷新 `executionOutcome` | outcome ownership 分散 | validator 只返回 `ArtifactContractResult`，不直接决定 runtime outcome |
+| stale RUNNING 证明不足 | 可显示 stale，但不一定能恢复一致状态 | terminal attempt 未必 always written | 无论成功、失败、timeout、interrupted，都必须写 terminal attempt |
+
+### 4.5 修复方案
+
+建议按四个小提交修复。
+
+#### Commit 1：模型收口
+
+新增或收敛 `AgentExecutionFinalizer`。
+
+输入：
+
+- `ProcessResult`
+- `AgentExecutionAttempt`
+- `TerminalControlResult`
+- `ArtifactContractResult[]`
+- `AdapterSignal[]`
+- `UsageResult`
+
+输出：
+
+- terminal `AgentExecutionAttempt`
+- single `AgentExecutionOutcome`
+- legacy `run.status / failureReason / recoverable`
+
+规则：
+
+- 禁止多个组件各自写 outcome；
+- artifact validator 只产出 artifact contract result；
+- transport 只产出 process facts 和 adapter signals；
+- handler 只负责持久化 finalizer 的结果。
+
+#### Commit 2：事件时间线
+
+run.json 增加 additive 字段：
+
+```json
+"executionTimeline": [
+  {"kind": "PROCESS_STARTED", "at": "..."},
+  {"kind": "STDOUT_PROGRESS", "at": "..."},
+  {"kind": "TERMINAL_DETECTED", "at": "..."},
+  {"kind": "PROCESS_EXITED", "at": "..."},
+  {"kind": "ARTIFACT_EXTRACTED", "at": "..."},
+  {"kind": "CONTRACT_VALIDATED", "at": "..."}
+]
+```
+
+该字段是 read model，不改变 workflow definition。
+
+#### Commit 3：冲突防线
+
+增加 invariant：
+
+- `SUCCESS` outcome 不允许搭配 `RUNTIME_FAILED / STALLED / TIMED_OUT` attempt；
+- `CONTRACT_FAILED` 不允许被 runtime reconnect 覆盖成 success；
+- `USAGE_UNAVAILABLE` 不能单独改变业务状态；
+- projection 读到历史冲突时必须显示 projection warning，而不是静默展示成功。
+
+#### Commit 4：projection 统一
+
+- metrics / trace / recovery 全部优先读 finalizer 结果；
+- legacy fallback 只用于历史 run；
+- current failure / recovery action 使用同一 failure signal。
+
+### 4.6 不跑真实 case 的证明方法
+
+P0 不需要先消耗真实 provider token，可以用 synthetic / replay 证明模型有效。
+
+1. Outcome resolver table tests：
+   - exit 0 + valid terminal + valid artifact -> success；
+   - exit nonzero + valid terminal + valid artifact -> success with warning 或按设计定义；
+   - terminal missing -> contract failure；
+   - artifact missing -> contract failure；
+   - reconnect signal + incomplete artifact -> recoverable failure；
+   - stalled + valid terminal 但 process 未退出 -> 必须唯一裁决，不能冲突。
+
+2. Fake acpx transport tests：
+   - fake process 输出 terminal 后不退出，验证 `TERMINAL_DETECTED` timestamp 和 timeout/stalled outcome；
+   - fake process reconnect 后输出完整 artifact，验证 resolver 结果；
+   - fake process exit 0 但无 artifact，验证 contract failure。
+
+3. Golden run.json tests：
+   - 给定 stdout/stderr/transcript/contract result fixture，生成 run.json；
+   - assert attempt/outcome/run.status 三者一致。
+
+4. Historical ledger replay：
+   - 对已有 problematic workstream 离线 replay；
+   - 不重新跑模型，只验证新 projection 能识别旧冲突，并标为 `INVALID_LEGACY_CONFLICT` 或 projection warning。
+
+5. Contradiction test：
+   - 构造 `executionAttempt=RUNTIME_FAILED + executionOutcome=SUCCESS`；
+   - metrics/trace 必须报 warning，不能静默展示成功。
+
+## 5. P0.5：Provider / Model / Token Attribution
+
+### 5.1 目标
+
+不能再因为 provider/model 缺失、GLM 包月、cache hit 难解释，就把成本和 token 降级成不可算。
+
+### 5.2 领域对象
+
+`ProviderModelIdentity`：
+
+```json
+{
+  "provider": "zhipu|deepseek|openai|anthropic|unknown",
+  "model": "glm-5.2|deepseek-pro-v4|gpt-*|claude-*",
+  "source": "client_config|acpx_stream|env|fallback",
+  "confidence": "high|medium|low"
+}
+```
+
+`BillingMode`：
+
+```text
+metered_priced
+subscription_token_only
+pricing_unknown
+not_applicable
+```
+
+`CostAttribution`：
+
+```json
+{
+  "inputCacheMissTokens": 0,
+  "inputCacheHitTokens": 0,
+  "outputTokens": 0,
+  "cachedWriteTokens": 0,
+  "clientReportedCost": {},
+  "officialCalculatedCost": {},
+  "reliability": "official|calculated|token_only|unknown"
+}
+```
+
+### 5.3 规则
+
+- GLM 包月：金额可以不算，但 token 必须算；`billingMode=subscription_token_only`。
+- DeepSeek：按官方价格计算，cache hit / cache miss / output 分开。
+- OpenAI / Codex：按模型价格表计算；如果无法获得模型，标 `pricing_unknown`，但保留真实 token。
+- Anthropic / Claude：按模型价格表计算；provider cache hit 必须单独展示。
+
+### 5.4 验收
+
+- GLM run 显示 provider/model/billingMode/token。
+- DeepSeek run 与账单增量能对齐到合理误差。
+- `pricing_unknown` 只允许真实未知，不允许因实现缺失出现。
+- provider-cache-aware 决策有前置字段，不再靠猜。
+
+### 5.5 当前实现缺口
+
+当前代码里已有 `AcpxProviderMetadata`、`providerCacheDecision`、
+`cacheSignalReliability`、`costEstimateReliability` 等字段，但它们还没有形成完整经济模型。
+
+| 缺口 | 表现 | 根因 | 修复方向 |
+| --- | --- | --- | --- |
+| provider/model identity 不稳定 | GLM 有时仍可能被视为 `pricing_unknown` | provider metadata 没成为 run-level typed identity | run.json 写入 `providerModelIdentity` |
+| GLM 包月语义不完整 | 金额不可算时可能降级 unknown | token-only billing 没有强制语义 | `billingMode=subscription_token_only`，金额 not_applicable，token 必须有效 |
+| DeepSeek 价格校准不闭环 | 控制台/账单和 dual 计算可能不一致 | 官方价格表和账单校准没进入测试 | 增加 pricing fixture + CSV 校准测试 |
+| provider-cache-aware 无法证明 active | 仍可能 `measure_only` | strategy decision 与 billing reliability 绑定不清 | 增加 `providerCachePolicy` typed block |
+| cachedRead 是否真 cache hit 不可验证 | cachedRead 很大但成本是否下降不明确 | 没区分 provider reported cache hit 和 local inference | 增加 `cacheSignalSource=provider_reported|inferred|unavailable` |
+| Codex/OpenAI/Claude 未完整纳入 | 价格模型主要围绕 GLM/DeepSeek | provider catalog 不完整 | provider pricing catalog 支持 zhipu/deepseek/openai/anthropic |
+
+### 5.6 修复方案
+
+#### ProviderModelIdentity
+
+run.json 增加：
+
+```json
+"providerModelIdentity": {
+  "provider": "zhipu",
+  "model": "glm-5.2",
+  "source": "acpx_stream|env|config|fallback",
+  "confidence": "high"
+}
+```
+
+#### BillingMode
+
+run.json / metrics 增加：
+
+```json
+"billingMode": "subscription_token_only"
+```
+
+枚举：
+
+```text
+metered_priced
+subscription_token_only
+pricing_unknown
+not_applicable
+```
+
+#### CostAttribution
+
+metrics 增加统一 block：
+
+```json
+"costAttribution": {
+  "inputCacheMissTokens": 0,
+  "inputCacheHitTokens": 0,
+  "outputTokens": 0,
+  "billingMode": "subscription_token_only",
+  "clientReportedCost": null,
+  "officialCalculatedCost": null,
+  "reliability": "token_only"
+}
+```
+
+#### PricingCatalog
+
+价格和 billing 规则集中到 catalog，不散落 if-else。
+
+字段：
+
+- provider；
+- model pattern；
+- input cache miss price；
+- input cache hit price；
+- output price；
+- currency；
+- effective date；
+- billing mode。
+
+GLM 包月也进入 catalog，但 amount price 可以为 null，billing mode 为 `subscription_token_only`。
+
+#### Provider-cache-aware 决策
+
+决策输入必须是 typed：
+
+- provider known；
+- model known；
+- billing mode；
+- cache signal reliability；
+- expected cache hit economics。
+
+决策输出：
+
+```json
+"providerCachePolicy": {
+  "mode": "active|measure_only|disabled",
+  "reason": "...",
+  "inputsComplete": true
+}
+```
+
+### 5.7 不跑真实 case 的证明方法
+
+1. Pricing catalog unit tests：
+   - `glm-5.2` -> provider `zhipu`，billing `subscription_token_only`；
+   - `deepseek-pro-v4` -> provider `deepseek`，billing `metered_priced`；
+   - `gpt-*` -> provider `openai`；
+   - unknown -> `pricing_unknown`。
+
+2. Fixture usage calculation：
+   - 给定固定 usage：input cache hit、input cache miss、output；
+   - 计算 DeepSeek 成本，和 expected value 精确匹配。
+
+3. GLM token-only test：
+   - 给定 GLM usage；
+   - assert token preserved；
+   - assert cost amount is null / not_applicable；
+   - assert reliability = `token_only`；
+   - assert 绝不能是 `pricing_unknown`。
+
+4. CSV offline calibration：
+   - 读取账单 CSV；
+   - 选定时间窗口，对比 dual calculated DeepSeek amount；
+   - 不跑模型，不消耗 token。
+
+5. Provider cache decision matrix：
+   - provider known + priced + cache signal reliable -> active；
+   - provider known + subscription token-only -> active 或 token-policy active，按设计；
+   - provider unknown -> measure_only；
+   - cache signal unavailable -> measure_only。
+
+6. Recorded stream replay：
+   - 用已有 acpx stream / run.json usage fixture；
+   - replay metrics projection，验证 provider/model/cost fields。
+
+### 5.8 与 P0 的依赖关系
+
+P0 必须先于 P0.5 完整收口。
+
+原因：
+
+- 如果 attempt/outcome 不可信，run usage/cost 归因也会污染；
+- 如果 `PROCESS_STALLED` 但 agent 其实成功，usage 应归属成功 run 还是 failed run 无法判断；
+- 如果同一次外部调用被 retry 或 stale replay，成本可能重复算或漏算。
+
+因此 P0.5 的实现可以准备，但真实有效性验证必须依赖 P0 的 attempt/outcome 一致性。
+
+### 5.9 建议提交拆分
+
+1. `feat(runtime): finalize agent execution outcomes from typed attempt evidence`
+2. `feat(acpx): record execution timeline for agent attempts`
+3. `feat(metrics): flag attempt/outcome contradictions in projections`
+4. `feat(cost): add provider model identity and billing mode`
+5. `feat(cost): calculate provider cache economics from pricing catalog`
+
+## 6. P1：Repo Scope 与 Token 治理
+
+### 6.1 P1A：Stage Scope Governance 扩展
+
+`intake` 已收住。后续需要扩展到：
+
+- design；
+- plan；
+- implement；
+- self-test；
+- acceptance / review。
+
+| 阶段 | 应该读 | 不应该读 | policy |
+| --- | --- | --- | --- |
+| intake | seed / memory / scope candidates | source/test/doc 全量探索 | block |
+| design | contract scope + nearby architecture evidence | 实现级逐文件探索 | warn -> block |
+| plan | design artifact + contract scope | 重新需求发现 | warn |
+| implement | changed_files / expected edit files | 无理由重读无关文件 | warn -> block |
+| self-test | changed_files + test evidence | 全仓探索 | warn |
+| acceptance | review evidence brief + diff | 全量重审仓库 | warn -> block |
+
+验收：
+
+- 每个 agent run 都有 `ExplorationPlan`。
+- 每个 agent run 都有 `ExplorationPolicyResult`。
+- actual reads 和 planned reads 可对比。
+- 越界读取有 typed reason。
+- review 阶段不再长期停在 WARN。
+
+### 6.2 P1B：Provider-cache-aware / Transcript Compaction
+
+目标：只在能证明收益时启用，不按直觉切 session。
+
+treatment 触发前置条件：
+
+- provider/model 已识别；
+- billing mode 非 unknown；
+- threshold 会触发；
+- jar/server 是最新；
+- `provider-cache-aware` 为 active，不是 `measure_only`。
+
+treatment 行为：
+
+- implement 阶段 transcript 超阈值时 compact；
+- seedKind = `agent_handoff`；
+- compact 后不降低 artifact contract 质量。
+
+验收：
+
+- `implement.claude_implement.sessionCompactionEnabled=true`；
+- `sessionCompactionSeedKind=agent_handoff`；
+- implement cachedRead / transcriptBytes 下降；
+- input cache miss 不明显上升；
+- readCount / toolCall 不反弹；
+- acceptance 质量不退化。
+
+如果达不到，结论是策略无效或触发条件错误，不能继续调 prompt 解释为成功。
+
+## 7. P2：Real-case 验证矩阵
+
+### 7.1 Case 类型
+
+1. simple semantic real-case：
+   - artifact boundary；
+   - reread policy；
+   - review noise；
+   - execution outcome。
+
+2. simple token benchmark：
+   - GLM token-only；
+   - DeepSeek metered；
+   - provider-cache-aware；
+   - readCount。
+
+3. cancer-clinic medium complex：
+   - 完整闭环；
+   - stop-loss；
+   - acceptance quality；
+   - token / cost / read / latency。
+
+### 7.2 Verification Gate
+
+每次真实 provider / benchmark / A/B 前必须写出并通过：
+
+```text
+Verification Gate:
+- Target:
+- Source of truth:
+- Trigger precondition:
+- How precondition is checked before run:
+- PASS:
+- FAIL:
+- INVALID:
+- Stop-loss:
+- Run artifact freshness:
+```
+
+规则：
+
+- `INVALID` 不能说成部分成功。
+- 如果核心字段为 `null`、`measure_only`、`pricing_unknown`、`not_applicable`，且该字段是目标前提，则本轮无效。
+- 如果同类验证连续失败两次，必须回到模型边界分析，不能继续调阈值或补 prompt。
+
+## 8. P3：Session Keep-alive / 性能优化
+
+这是未来优化，不抢 P0/P1。
+
+可选方案：
+
+1. Persistent worker / keep-alive adapter：
+   - dual 和 acpx/cc 保持长连接；
+   - node run 变成 request/response；
+   - 需要事件流、attempt id、heartbeat。
+
+2. Session pool：
+   - 不保持进程，只管理 session 生命周期；
+   - 比 persistent worker 简单；
+   - 对启动慢帮助有限。
+
+3. Native runner per profile：
+   - contract discovery / simple review 使用 native `claude --print`；
+   - implement 保留 acpx；
+   - 风险是 adapter 分叉。
+
+验收：
+
+- run startup latency 下降；
+- 不牺牲 attempt/outcome 事实记录；
+- 不引入新的 stale RUNNING。
+
+## 9. 推荐执行顺序
+
+1. P0：`AgentExecutionAttempt / AgentExecutionOutcome` 完整收口。
+2. P0.5：provider/model/token/cost attribution 收口。
+3. P1A：stage scope governance 扩展到 design/plan/implement/review。
+4. P1B：provider-cache-aware / transcript compaction A/B。
+5. P2：完整 real-case 验证矩阵。
+6. P3：session keep-alive / persistent worker。
+
+任何跳过 P0/P0.5 直接跑 complex real-case 的结果，都只能作为问题采样，不能作为治理效果证明。
+
+## 10. Boundary Review
+
+```text
+Boundary Review: WARN
+
+Touched boundaries:
+- External adapter / activity boundary
+- Agent execution lifecycle
+- Provider usage economics
+- Context governance / repo scope
+- Projection read model
+
+Source of truth:
+- Execution: AgentExecutionAttempt
+- Outcome: AgentExecutionOutcome
+- Artifact: typed artifact sidecars
+- Economics: ProviderModelIdentity + CostAttribution
+- Scope: ExplorationPlan + ExplorationPolicyResult
+
+Projection surfaces:
+- run.json
+- metrics/workstream-metrics.json
+- dualctl trace/status/recovery
+- operator UI/API
+
+Findings:
+- intake exploration boundary is closed.
+- execution attempt/outcome consistency is not yet closed.
+- token economics is not yet reliable enough for provider-cache-aware decisions.
+- stage scope governance after intake is incomplete.
+- full real-case validation is not yet valid as a final acceptance signal.
+
+Required fixes:
+- Complete P0 and P0.5 before P1/P2 evidence claims.
+- Do not classify INVALID real-case runs as partial success.
+
+Required tests:
+- attempt/outcome contradiction test.
+- reconnect/stalled/terminal-detected tests.
+- GLM subscription-token-only attribution test.
+- DeepSeek metered pricing calibration test.
+- stage scope policy tests beyond intake.
+- full verification gate fixture test.
+
+Accepted debt:
+- P3 keep-alive is explicitly deferred until execution attempt model is stable.
+```
