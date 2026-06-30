@@ -103,6 +103,42 @@ class ProjectionsRefreshCommandTest {
     }
 
     @Test
+    void refreshSurfacesHistoricalDeadPidRunningNodeWithoutMutatingLedger() throws Exception {
+        writeHistoricalDeadPidRunningLedgerWithoutProjections();
+        var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-historical-stale/workflow/current.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-historical-stale/nodes/node-1.json");
+        var runJson = tempDir.resolve(".agent/workstreams/ws-historical-stale/runs/run-old/run.json");
+        var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
+        var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
+        var runBefore = Files.readString(runJson, StandardCharsets.UTF_8);
+
+        var command = new ProjectionsRefreshCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-historical-stale";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Execution consistency: "));
+        assertTrue(printed.contains("missing_attempt_and_outcome=1"));
+        assertTrue(printed.contains("stale_legacy_running=1"));
+        var metrics = tempDir.resolve(".agent/workstreams/ws-historical-stale/metrics/workstream-metrics.json");
+        var metricsJson = MAPPER.readValue(metrics.toFile(), Map.class);
+        var provider = map(metricsJson.get("providerMetrics"));
+        var counts = map(provider.get("executionConsistencyCounts"));
+        assertEquals(1, number(counts.get("missing_attempt_and_outcome")));
+        assertEquals(1, number(counts.get("stale_legacy_running")));
+        assertEquals(1, number(metricsJson.get("runningCount")));
+        var tokenRun = map(list(map(metricsJson.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("missing_attempt_and_outcome", tokenRun.get("executionConsistency"));
+        assertEquals(workflowBefore, Files.readString(workflowCurrent, StandardCharsets.UTF_8),
+                "projection replay must not mutate workflow/current.json source of truth");
+        assertEquals(nodeBefore, Files.readString(nodeJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate node source of truth");
+        assertEquals(runBefore, Files.readString(runJson, StandardCharsets.UTF_8),
+                "projection replay must not mutate run.json execution read model");
+    }
+
+    @Test
     void refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger() throws Exception {
         writeAttemptOutcomeConflictLedgerWithoutProjections();
         var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-conflict/workflow/current.json");
@@ -271,6 +307,69 @@ class ProjectionsRefreshCommandTest {
                     "status": "RUNTIME_FAILED",
                     "primaryReason": "AGENT_PROCESS_STALLED",
                     "nodeMaySucceed": false
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+    }
+
+    private void writeHistoricalDeadPidRunningLedgerWithoutProjections() throws Exception {
+        var root = tempDir.resolve(".agent/workstreams/ws-historical-stale");
+        Files.createDirectories(root.resolve("workflow"));
+        Files.createDirectories(root.resolve("nodes"));
+        Files.createDirectories(root.resolve("runs/run-old"));
+
+        Files.writeString(root.resolve("workflow/current.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-historical-stale",
+                  "workflowInstanceId": "wf-historical-stale",
+                  "workflowId": "agent-lifecycle-full",
+                  "definitionVersion": 1,
+                  "status": "RUNNING",
+                  "activeNodeInstanceIds": ["node-1"],
+                  "openGateIds": [],
+                  "lastEventId": "evt-1",
+                  "updatedAt": "2026-06-30T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("nodes/node-1.json"), """
+                {
+                  "schemaVersion": 1,
+                  "nodeInstanceId": "node-1",
+                  "nodeDefinitionId": "implement.claude_self_test_report",
+                  "kind": "TASK",
+                  "handlerType": "acpx.agent_run",
+                  "status": "RUNNING",
+                  "stageId": "stage-implement",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "result": {"running_pid": 999999999},
+                  "runRef": null,
+                  "latestExecutionId": "",
+                  "startedAt": "2026-06-30T00:00:00Z",
+                  "finishedAt": null
+                }
+                """, StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("runs/run-old/run.json"), """
+                {
+                  "schemaVersion": 4,
+                  "runId": "run-old",
+                  "workstreamId": "ws-historical-stale",
+                  "nodeId": "implement.claude_self_test_report",
+                  "agent": "claude",
+                  "status": "failed",
+                  "durationMs": 1000,
+                  "failureReason": "ACPX_EXIT_143",
+                  "usage": {
+                    "inputTokens": 100,
+                    "outputTokens": 20,
+                    "cachedReadTokens": 300,
+                    "cachedWriteTokens": 0,
+                    "totalTokens": 420,
+                    "source": "acpx_stream",
+                    "measurementType": "PROVIDER_RUN_USAGE"
                   }
                 }
                 """, StandardCharsets.UTF_8);

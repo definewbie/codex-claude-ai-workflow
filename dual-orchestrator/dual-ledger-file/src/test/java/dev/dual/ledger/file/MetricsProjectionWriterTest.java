@@ -532,6 +532,50 @@ class MetricsProjectionWriterTest {
     }
 
     @Test
+    void providerMetricsMarksHistoricalActiveNodeWithDeadPidAsStaleLegacyRunning() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-historical-stale"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-historical-stale", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), new NodeInstanceDocument(
+                1,
+                "n1",
+                "implement.claude_self_test_report",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.RUNNING,
+                "main",
+                "iter-001",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of("running_pid", 999_999_999L),
+                null,
+                "",
+                Instant.parse("2026-06-19T00:00:00Z"),
+                null
+        ));
+        writeAttributionRun(paths, "run-old", "claude", "implement.claude_self_test_report", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var provider = map(metrics.get("providerMetrics"));
+        var counts = map(provider.get("executionConsistencyCounts"));
+
+        assertEquals(1, number(counts.get("missing_attempt_and_outcome")));
+        assertEquals(1, number(counts.get("stale_legacy_running")));
+        assertEquals(1, number(metrics.get("runningCount")));
+        var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("missing_attempt_and_outcome", tokenRun.get("executionConsistency"),
+                "run-level classification must not invent active-node state");
+    }
+
+    @Test
     void tokenAttributionCalculatesProviderCacheAwareCost() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-cost"));
         var jsonWriter = new AtomicJsonWriter();

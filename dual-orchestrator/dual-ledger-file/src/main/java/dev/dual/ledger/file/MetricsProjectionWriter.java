@@ -6,6 +6,7 @@ import dev.dual.core.provider.ProviderCostAttribution;
 import dev.dual.core.provider.ProviderPricingCatalog;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.WorkflowStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -66,7 +67,7 @@ final class MetricsProjectionWriter {
         metrics.put("runningCount", nodes.stream().filter(node -> node.status() == NodeStatus.RUNNING).count());
         metrics.put("totalNodeDurationMs", totalDurationMs(nodes));
         metrics.put("longestNodes", longestNodes(nodes, 5));
-        metrics.put("providerMetrics", providerMetrics(paths));
+        metrics.put("providerMetrics", providerMetrics(paths, current, nodes));
         var tokenMetrics = tokenMetrics(paths);
         var toolMetrics = toolMetrics(paths);
         metrics.put("tokenMetrics", tokenMetrics);
@@ -120,33 +121,38 @@ final class MetricsProjectionWriter {
         }
     }
 
-    private Map<String, Object> providerMetrics(WorkstreamPaths paths) throws IOException {
-        if (!Files.isDirectory(paths.runsDir())) {
-            return Map.of();
-        }
+    private Map<String, Object> providerMetrics(
+            WorkstreamPaths paths,
+            WorkflowCurrentDocument current,
+            List<NodeInstanceDocument> nodes
+    ) throws IOException {
         var byAgent = new LinkedHashMap<String, ProviderMetric>();
         var outcomeStatusCounts = new LinkedHashMap<String, Long>();
         var executionConsistencyCounts = new LinkedHashMap<String, Long>();
-        try (var stream = Files.list(paths.runsDir())) {
-            for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
-                var runJson = runDir.resolve("run.json");
-                if (!Files.isRegularFile(runJson)) {
-                    continue;
+        if (Files.isDirectory(paths.runsDir())) {
+            try (var stream = Files.list(paths.runsDir())) {
+                for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
+                    var runJson = runDir.resolve("run.json");
+                    if (!Files.isRegularFile(runJson)) {
+                        continue;
+                    }
+                    var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
+                    var agent = text(run.get("agent"));
+                    if (agent.isBlank()) {
+                        agent = "unknown";
+                    }
+                    var metric = byAgent.computeIfAbsent(agent, ignored -> new ProviderMetric());
+                    metric.accept(text(run.get("status")), longValue(run.get("durationMs")), Boolean.TRUE.equals(run.get("recoverable")));
+                    var outcomeStatus = text(map(run.get("executionOutcome")).get("status"));
+                    if (!outcomeStatus.isBlank()) {
+                        outcomeStatusCounts.merge(outcomeStatus, 1L, Long::sum);
+                    }
+                    executionConsistencyCounts.merge(ExecutionConsistencyClassifier.classify(run), 1L, Long::sum);
                 }
-                var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);
-                var agent = text(run.get("agent"));
-                if (agent.isBlank()) {
-                    agent = "unknown";
-                }
-                var metric = byAgent.computeIfAbsent(agent, ignored -> new ProviderMetric());
-                metric.accept(text(run.get("status")), longValue(run.get("durationMs")), Boolean.TRUE.equals(run.get("recoverable")));
-                var outcomeStatus = text(map(run.get("executionOutcome")).get("status"));
-                if (!outcomeStatus.isBlank()) {
-                    outcomeStatusCounts.merge(outcomeStatus, 1L, Long::sum);
-                }
-                executionConsistencyCounts.merge(ExecutionConsistencyClassifier.classify(run), 1L, Long::sum);
             }
         }
+        legacyActiveNodeExecutionConsistency(current, nodes)
+                .forEach(signal -> executionConsistencyCounts.merge(signal, 1L, Long::sum));
         var result = new LinkedHashMap<String, Object>();
         for (var entry : byAgent.entrySet()) {
             result.put(entry.getKey(), entry.getValue().toMap());
@@ -154,6 +160,36 @@ final class MetricsProjectionWriter {
         result.put("outcomeStatusCounts", outcomeStatusCounts);
         result.put("executionConsistencyCounts", executionConsistencyCounts);
         return result;
+    }
+
+    private List<String> legacyActiveNodeExecutionConsistency(
+            WorkflowCurrentDocument current,
+            List<NodeInstanceDocument> nodes
+    ) {
+        if (current.status() != WorkflowStatus.RUNNING || current.activeNodeInstanceIds().isEmpty()) {
+            return List.of();
+        }
+        var byId = nodes.stream().collect(Collectors.toMap(
+                NodeInstanceDocument::nodeInstanceId,
+                Function.identity(),
+                (left, right) -> left,
+                LinkedHashMap::new
+        ));
+        var signals = new ArrayList<String>();
+        for (var nodeInstanceId : current.activeNodeInstanceIds()) {
+            var node = byId.get(nodeInstanceId);
+            if (node == null || node.status() != NodeStatus.RUNNING) {
+                continue;
+            }
+            var pid = longValue(node.result().get("running_pid"));
+            if (pid > 0 && ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)) {
+                continue;
+            }
+            if (pid > 0) {
+                signals.add("stale_legacy_running");
+            }
+        }
+        return signals;
     }
 
     private Map<String, Object> tokenMetrics(WorkstreamPaths paths) throws IOException {

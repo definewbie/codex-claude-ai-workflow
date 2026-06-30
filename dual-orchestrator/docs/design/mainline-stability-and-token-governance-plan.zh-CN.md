@@ -111,9 +111,9 @@ Mainline Decision Gate:
 
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
-| `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，历史 recoverable replay 已做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；历史 `RECOVERABLE_ADAPTER_FAILURE` replay 已证明 refresh 不改 ledger 且能投影 typed outcome；仍缺 stale RUNNING / 慢点类 problematic replay | P0 |
+| `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，历史 replay 已做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；历史 `RECOVERABLE_ADAPTER_FAILURE` replay 已证明 refresh 不改 ledger 且能投影 typed outcome；历史 stale RUNNING replay 已证明 dead pid active node 可投影为 `stale_legacy_running`；仍缺慢点类 problematic replay | P0 |
 | acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，真实慢点待复核 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；仍缺 problematic real-case 慢点复核 | P0 |
-| stale RUNNING / PROCESS_STALLED | synthetic 覆盖，recoverable failure 历史 replay 已做 | dead pid resume 会进入 recovery 并标记 node execution stale；历史 recoverable failure replay 已验证 projection 不改 ledger；仍缺 stale RUNNING 历史 replay | P0 |
+| stale RUNNING / PROCESS_STALLED | synthetic 覆盖，historical projection replay 已做 | dead pid resume 会进入 recovery 并标记 node execution stale；历史 recoverable failure replay 已验证 projection 不改 ledger；历史 old-ledger stale RUNNING replay 已验证 projection 可暴露 active node dead pid；仍缺真实慢点类复核 | P0 |
 | provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
@@ -302,6 +302,20 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger`
   已覆盖 stale legacy RUNNING fixture，并验证 metrics / token attribution / stdout 三处都能看到
   `stale_legacy_running`。
+- 已执行 stale RUNNING historical problematic workstream replay（不启动 provider）：
+  复制 `/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T081345Z-SHXP`
+  到 `/private/tmp/dual-p0-stale-replay-ws-20260602T081345Z-SHXP` 后运行
+  `dualctl projections refresh --workdir ... ws-20260602T081345Z-SHXP`。
+  replay 前后 `workflow/current.json`、active node
+  `nodes/node-implement-claude_self_test_report-042.json` 和
+  `runs/run-1780394031400/run.json` 的 SHA1 均保持不变，证明 refresh 只更新
+  projection/read model，不迁移或修补 ledger source of truth。
+  该历史样本保持 `workflowStatus=RUNNING`、`runningCount=1`，同时投影出
+  `providerMetrics.executionConsistencyCounts.missing_attempt_and_outcome=15` 和
+  `providerMetrics.executionConsistencyCounts.stale_legacy_running=1`。其中 run 级
+  `tokenMetrics.runs[0].executionConsistency` 仍保持
+  `missing_attempt_and_outcome`，active node dead pid 的 stale signal 由 metrics 汇总层额外暴露；
+  这避免把 node/current 的 execution 事实错误写进单个 legacy run。
 - `ProjectionsRefreshCommandTest.refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger`
   已补充 attempt/outcome 冲突 replay fixture：当历史 run.json 中
   `executionAttempt.status=RECOVERABLE_FAILED` 但 `executionOutcome.status=SUCCESS` 时，
@@ -317,14 +331,19 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；
   validator 只附加 terminal/artifact typed facts，`WorkflowRuntime` / `AgentWorker`
   在 ledger 写入前调用 `AgentRunMetadataFinalizer` 统一合成 terminal attempt/outcome。
-- stale RUNNING 历史投影已补充 fixture：当 legacy `run.status=running` 但 typed
-  `executionAttempt` 已进入终态时，`MetricsProjectionWriter.executionConsistency`
-  标记为 `stale_legacy_running`，并同步出现在 token run、token attribution 和
-  provider consistency summary 中。
+- stale RUNNING 历史投影已补充两类 fixture：
+  1. 当 legacy `run.status=running` 但 typed `executionAttempt` 已进入终态时，
+     `MetricsProjectionWriter.executionConsistency` 标记为 `stale_legacy_running`，
+     并同步出现在 token run、token attribution 和 provider consistency summary 中。
+  2. 当 old ledger 的 `workflow/current.json` 和 active node 仍为 `RUNNING`、node
+     `result.running_pid` 已死亡、legacy run 又缺少 `executionAttempt/executionOutcome`
+     时，run 级仍标记为 `missing_attempt_and_outcome`，provider consistency summary
+     额外投影 `stale_legacy_running=1`。这是 projection read model，不反写 ledger。
 - stale RUNNING runtime 路径已有 synthetic coverage：resume 遇到 dead `running_pid`
   会写入 `node_stale_running_detected` event、进入 `WAITING_FOR_RECOVERY`、把当前 node
   标记为 `FAILED/recoverable`，并把最新 `NodeExecution` 标为 `STALE`。这证明 runtime
-  不会继续重跑 stale 节点；尚未覆盖历史 real workstream replay。
+  不会继续重跑 stale 节点；historical replay 证明 projection 能发现旧 ledger dead-pid
+  矛盾，但不等价于自动执行 recovery。
 - 已补齐 acpx failure catalog 与 execution outcome 的 sibling gap：
   `RECOVERABLE_AGENT_MODEL_MISMATCH` 现在会被 adapter / runtime finalizer 映射为
   typed `AdapterSignalType.MODEL_MISMATCH`，并进入 `executionAttempt.failureSignal`
