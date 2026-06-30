@@ -11,6 +11,7 @@ import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.ledger.file.FileLedgerStore;
 import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -199,6 +200,10 @@ class WorkstreamApiControllerTest {
         assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
         assertEquals(true, response.get("nextAction").toString().contains("dualctl review show"));
         var attention = (List<Map<String, Object>>) response.get("attention");
+        var sharedAttention = WorkstreamAttentionEvaluator.evaluate(paths);
+        assertEquals(sharedAttention.detail(), response.get("whyStopped"));
+        assertEquals(sharedNextAction(sharedAttention), response.get("nextAction"));
+        assertEquals(sharedAttention.toMap(), attention.getFirst());
         assertEquals(true, attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
         assertEquals(true, attention.stream().anyMatch(item -> "Repair loop occurred".equals(item.get("title"))));
         assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
@@ -694,6 +699,13 @@ class WorkstreamApiControllerTest {
                 new WorkstreamStreamService(queryService, objectMapper),
                 deliveryViewService
         );
+    }
+
+    private String sharedNextAction(dev.dual.ledger.file.WorkstreamAttention attention) {
+        if (attention.command().isBlank()) {
+            return attention.nextAction();
+        }
+        return attention.nextAction() + " Command: " + attention.command();
     }
 
     private Fixture createWorkstream(String workstreamIdValue) throws Exception {

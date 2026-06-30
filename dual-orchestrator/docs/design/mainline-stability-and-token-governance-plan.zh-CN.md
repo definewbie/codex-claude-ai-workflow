@@ -912,6 +912,10 @@ Findings:
   case validation are still missing.
 - stage scope policy mapping after intake is aligned. Run-level ExplorationPolicyResult and review WARN/FAIL projection
   are locally proven through metrics and trace fixtures; real-case readCount/token improvement is not yet proven.
+- server overview projection now has API-level coverage that `whyStopped`, `nextAction`, and the primary
+  `attention[0]` come directly from shared `WorkstreamAttentionEvaluator`; CLI and API therefore share
+  the main operator attention read model. Static console rendering and secondary attention items still need
+  a broader UI/API sibling sweep before projection consistency can be called complete.
 - full real-case validation is not yet valid as a final acceptance signal.
 
 Required fixes:
@@ -927,6 +931,8 @@ Required tests:
 - Anthropic/Claude cache pricing projection test 已覆盖。
 - stage scope policy tests beyond intake are present; run-level ExplorationPolicyResult / WARN closure proof is covered
   by metrics and trace fixtures; remaining gap is real-case improvement evidence.
+- Workstream API overview primary attention consistency test 已覆盖：server `whyStopped` / `nextAction` /
+  `attention[0]` 必须等于 `WorkstreamAttentionEvaluator.evaluate(paths)` 的投影。
 - full verification gate fixture test 已覆盖；remaining gap 是真实 P2 case 矩阵尚未执行。
 
 Accepted debt:
