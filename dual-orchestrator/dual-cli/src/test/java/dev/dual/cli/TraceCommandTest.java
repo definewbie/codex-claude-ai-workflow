@@ -129,6 +129,20 @@ class TraceCommandTest {
         assertTrue(printed.contains("run-missing  metadata unavailable: missing run.json"));
     }
 
+    @Test
+    void usesSharedExecutionConsistencyForStaleLegacyRunningRun() throws Exception {
+        writeCompletedLedger();
+        writeStaleLegacyRunningRun();
+
+        var command = new TraceCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-trace";
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("running/RUNTIME_FAILED(AGENT_PROCESS_STALLED) executionConsistency=stale_legacy_running"));
+    }
+
     private void writeCompletedLedger() throws Exception {
         writeBaseLedger("COMPLETED", """
                 "activeNodeInstanceIds": [],
@@ -207,6 +221,32 @@ class TraceCommandTest {
                     "source": "not_available",
                     "measurementType": "UNAVAILABLE",
                     "unavailableReason": "AGENT_RECONNECT_REQUIRED"
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+    }
+
+    private void writeStaleLegacyRunningRun() throws Exception {
+        var runDir = tempDir.resolve(".agent/workstreams/ws-trace/runs/run-stale");
+        Files.createDirectories(runDir);
+        Files.writeString(runDir.resolve("run.json"), """
+                {
+                  "schemaVersion": 4,
+                  "runId": "run-stale",
+                  "workstreamId": "ws-trace",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "durationMs": 1000,
+                  "status": "running",
+                  "executionAttempt": {
+                    "status": "STALLED",
+                    "processStatus": "PROCESS_STALLED",
+                    "failureSignal": "AGENT_PROCESS_STALLED"
+                  },
+                  "executionOutcome": {
+                    "status": "RUNTIME_FAILED",
+                    "primaryReason": "AGENT_PROCESS_STALLED",
+                    "nodeMaySucceed": false
                   }
                 }
                 """, StandardCharsets.UTF_8);

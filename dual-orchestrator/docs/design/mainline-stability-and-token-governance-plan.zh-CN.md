@@ -203,6 +203,10 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger`
   已覆盖 stale legacy RUNNING fixture，并验证 metrics / token attribution / stdout 三处都能看到
   `stale_legacy_running`。
+- execution consistency classification 已从 `MetricsProjectionWriter` / `TraceCommand`
+  的重复实现收口到 `ExecutionConsistencyClassifier`。`TraceCommandTest` 已覆盖 legacy
+  `run.status=running` 但 typed attempt/outcome 已终态的历史 run 会显示
+  `executionConsistency=stale_legacy_running`，避免 trace 和 metrics 对同一旧 run 给出不同解释。
 - `executionTimeline` 已覆盖 transport 后段关键事件：adapter 在最终 artifact 提取后写入
   `artifact_extracted`，runtime finalizer 在 contract validation 后写入 `contract_validated`。
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；

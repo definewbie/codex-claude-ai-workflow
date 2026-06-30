@@ -58,6 +58,14 @@ record RunMetadata(
         Map<String, Object> executionAttempt,
         Map<String, Object> executionOutcome
 ) {
+    Map<String, Object> executionFacts() {
+        return Map.of(
+                "status", status == null ? "" : status,
+                "executionAttempt", executionAttempt == null ? Map.of() : executionAttempt,
+                "executionOutcome", executionOutcome == null ? Map.of() : executionOutcome
+        );
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     record RunUsage(
             long inputTokens,

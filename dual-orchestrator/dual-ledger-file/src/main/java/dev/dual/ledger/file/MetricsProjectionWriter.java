@@ -144,7 +144,7 @@ final class MetricsProjectionWriter {
                 if (!outcomeStatus.isBlank()) {
                     outcomeStatusCounts.merge(outcomeStatus, 1L, Long::sum);
                 }
-                executionConsistencyCounts.merge(executionConsistency(run), 1L, Long::sum);
+                executionConsistencyCounts.merge(ExecutionConsistencyClassifier.classify(run), 1L, Long::sum);
             }
         }
         var result = new LinkedHashMap<String, Object>();
@@ -207,7 +207,7 @@ final class MetricsProjectionWriter {
                 item.put("outcomeStatus", text(outcome.get("status")));
                 item.put("outcomePrimaryReason", text(outcome.get("primaryReason")));
                 item.put("outcomeNodeMaySucceed", Boolean.TRUE.equals(outcome.get("nodeMaySucceed")));
-                item.put("executionConsistency", executionConsistency(run));
+                item.put("executionConsistency", ExecutionConsistencyClassifier.classify(run));
                 item.put("durationMs", longValue(run.get("durationMs")));
                 var promptTokens = estimatedTokens(paths, text(run.get("promptMetadataPath")));
                 var outputArtifactTokens = estimatedTokens(paths, text(run.get("outputMetadataPath")));
@@ -1433,44 +1433,6 @@ final class MetricsProjectionWriter {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
-    }
-
-    private static String executionConsistency(Map<String, Object> run) {
-        var attempt = map(run.get("executionAttempt"));
-        var outcome = map(run.get("executionOutcome"));
-        if (attempt.isEmpty() && outcome.isEmpty()) {
-            return "missing_attempt_and_outcome";
-        }
-        if (attempt.isEmpty()) {
-            return "missing_attempt";
-        }
-        if (outcome.isEmpty()) {
-            return "missing_outcome";
-        }
-        var legacyStatus = text(run.get("status"));
-        var attemptStatus = text(attempt.get("status"));
-        var outcomeStatus = text(outcome.get("status"));
-        var nodeMaySucceed = Boolean.TRUE.equals(outcome.get("nodeMaySucceed"));
-        if (nodeMaySucceed && !"COMPLETED".equals(attemptStatus)) {
-            return "attempt_outcome_conflict";
-        }
-        if (!nodeMaySucceed && "COMPLETED".equals(attemptStatus)) {
-            return "attempt_outcome_conflict";
-        }
-        if ("running".equals(legacyStatus) && isTerminalAttemptStatus(attemptStatus)) {
-            return "stale_legacy_running";
-        }
-        if (nodeMaySucceed && !"completed".equals(legacyStatus)) {
-            return "legacy_outcome_conflict";
-        }
-        if (!nodeMaySucceed && "completed".equals(legacyStatus)) {
-            return "legacy_outcome_conflict";
-        }
-        return outcomeStatus.isBlank() ? "missing_outcome_status" : "consistent";
-    }
-
-    private static boolean isTerminalAttemptStatus(String status) {
-        return !status.isBlank() && !"RUNNING".equals(status);
     }
 
     @SuppressWarnings("unchecked")

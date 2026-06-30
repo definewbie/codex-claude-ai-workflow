@@ -3,6 +3,7 @@ package dev.dual.cli;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
+import dev.dual.ledger.file.ExecutionConsistencyClassifier;
 import dev.dual.ledger.file.IterationSemantics;
 import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
@@ -653,7 +654,7 @@ public final class TraceCommand implements Callable<Integer> {
     private String runStatusLabel(RunMetadata run) {
         var outcome = map(run.executionOutcome());
         var outcomeStatus = text(outcome.get("status"));
-        var consistency = executionConsistency(run);
+        var consistency = ExecutionConsistencyClassifier.classify(run.executionFacts());
         var consistencySuffix = "consistent".equals(consistency) || consistency.isBlank()
                 ? ""
                 : " executionConsistency=" + consistency;
@@ -672,35 +673,6 @@ public final class TraceCommand implements Callable<Integer> {
         return text(run.status()) + "/" + outcomeStatus
                 + (primaryReason.isBlank() ? "" : "(" + primaryReason + ")")
                 + consistencySuffix;
-    }
-
-    private String executionConsistency(RunMetadata run) {
-        var attempt = map(run.executionAttempt());
-        var outcome = map(run.executionOutcome());
-        if (attempt.isEmpty() && outcome.isEmpty()) {
-            return "missing_attempt_and_outcome";
-        }
-        if (attempt.isEmpty()) {
-            return "missing_attempt";
-        }
-        if (outcome.isEmpty()) {
-            return "missing_outcome";
-        }
-        var attemptStatus = text(attempt.get("status"));
-        var nodeMaySucceed = Boolean.TRUE.equals(outcome.get("nodeMaySucceed"));
-        if (nodeMaySucceed && !"COMPLETED".equals(attemptStatus)) {
-            return "attempt_outcome_conflict";
-        }
-        if (!nodeMaySucceed && "COMPLETED".equals(attemptStatus)) {
-            return "attempt_outcome_conflict";
-        }
-        if (nodeMaySucceed && !"completed".equals(text(run.status()))) {
-            return "legacy_outcome_conflict";
-        }
-        if (!nodeMaySucceed && "completed".equals(text(run.status()))) {
-            return "legacy_outcome_conflict";
-        }
-        return "consistent";
     }
 
     private void printRunMetadataWarnings(List<RunMetadataReader.RunMetadataWarning> warnings) {
