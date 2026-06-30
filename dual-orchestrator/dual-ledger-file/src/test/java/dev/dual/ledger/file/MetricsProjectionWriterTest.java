@@ -191,6 +191,7 @@ class MetricsProjectionWriterTest {
         assertEquals(200, number(latency.get("processWaitCompletedMs")));
         assertEquals(700, number(latency.get("artifactExtractedMs")));
         assertEquals(900, number(latency.get("contractValidatedMs")));
+        assertEquals(100, number(latency.get("terminalToProcessWaitMs")));
         assertEquals(800, number(latency.get("terminalToContractMs")));
         assertEquals("post_process", latency.get("dominantPhase"));
         var executionLatency = map(attribution.get("executionLatency"));
@@ -605,6 +606,7 @@ class MetricsProjectionWriterTest {
         var latency = map(attrRun.get("executionLatency"));
 
         assertEquals(575, number(latency.get("contractValidatedMs")));
+        assertEquals(0, number(latency.get("terminalToProcessWaitMs")));
         assertEquals(75, number(latency.get("postProcessMs")));
         assertEquals("process_wait", latency.get("dominantPhase"));
     }

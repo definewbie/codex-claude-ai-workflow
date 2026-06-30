@@ -136,7 +136,7 @@ Mainline Decision Gate:
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，历史 replay 已做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；历史 `RECOVERABLE_ADAPTER_FAILURE` replay 已证明 refresh 不改 ledger 且能投影 typed outcome；历史 stale RUNNING replay 已证明 dead pid active node 可投影为 `stale_legacy_running`；仍缺慢点类 problematic replay | P0 |
-| acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，历史慢点 replay 已做 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；历史 `ws-20260630T112054Z-N4YR` replay 已证明样本慢点由 `process_wait` 主导且不改 run SoT；仍缺 terminal-after-detected 长等待类样本复核 | P0 |
+| acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，历史慢点 replay 已做 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；历史 `ws-20260630T112054Z-N4YR` replay 已证明样本慢点由 `process_wait` 主导且不改 run SoT；public terminal-event replay 已显示样本 terminal 后 process wait 最高 587ms，但仍缺原始 293s/380s terminal-after-detected 长等待类样本复核 | P0 |
 | stale RUNNING / PROCESS_STALLED | synthetic 覆盖，historical projection replay 已做 | dead pid resume 会进入 recovery 并标记 node execution stale；历史 recoverable failure replay 已验证 projection 不改 ledger；历史 old-ledger stale RUNNING replay 已验证 projection 可暴露 active node dead pid；仍缺真实慢点类复核 | P0 |
 | provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
@@ -147,7 +147,7 @@ Mainline Decision Gate:
 | artifact boundary | 大体完成 | `plan_artifact`、`stage_handoff`、`rereadPolicy` 已类型化，但缺完整 real-case 验证 | P1 |
 | projection consistency | 部分完成 | CLI trace 已补；UI/API/operator 是否同源还未整体 sweep | P1 |
 | full complex real-case | 未完成 | 只有 bounded run，没有完整端到端验收 | P2 |
-| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，历史 replay 已证明一个慢点样本 | metrics/trace 已能展示 execution latency top run 和 dominant phase；历史 replay 显示 `intake.claude_brainstorm` / `intake.codex_product_review` 均由 `process_wait` 主导；仍缺 terminal contract 已出现但 transport 继续等待的样本，以及 provider 推理慢、session 操作慢、dual 落盘慢的进一步拆分 | P0/P1 |
+| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，历史 replay 已证明一个慢点样本 | metrics/trace 已能展示 execution latency top run、terminalToProcessWaitMs 和 dominant phase；历史 replay 显示 `intake.claude_brainstorm` / `intake.codex_product_review` 均由 `process_wait` 主导；已有 public terminal-event replay 未复现长 terminal wait；仍缺原始 terminal contract 已出现但 transport 继续等待的样本，以及 provider 推理慢、session 操作慢、dual 落盘慢的进一步拆分 | P0/P1 |
 | session keep-alive | 未来优化 | 需要在 execution attempt 模型稳定后做 | P3 |
 
 ## 4. P0：执行事实边界收口
@@ -249,7 +249,10 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
 - `MetricsProjectionWriter.tokenAttribution.perRun[].executionLatency` 已把
   `executionTimeline` 投影为 read model：`processWaitCompletedMs`、
   `terminalDetectedMs`、`artifactExtractedMs`、`contractValidatedMs`、
-  `terminalToContractMs` 和 `dominantPhase`。`dualctl trace` 的 Token Attribution
+  `terminalToProcessWaitMs`、`terminalToContractMs` 和 `dominantPhase`。
+  `terminalToProcessWaitMs` 只回答 terminal contract 出现后 transport/process 还等待多久；
+  `terminalToContractMs` 才包含后续 artifact extraction / contract validation。
+  `dualctl trace` 的 Token Attribution
   也会显示最长 execution latency run，用于定位 provider/process wait、terminal grace
   或 post-process/contract validation 慢点。
 - `executionLatency` 已修正两个 projection 误判点：当 timeline event 的
@@ -300,6 +303,15 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `processWaitCompletedMs=79502`、`contractValidatedMs=90415`、
   `postProcessMs=10913`、`dominantPhase=process_wait`。
   这证明该样本慢点在外部 process/provider wait，不是 dual 落盘或 contract validation。
+- `terminalToProcessWaitMs` 已补入 metrics / trace，用于直接回答
+  “terminal contract 出现后 transport/process 还等了多久”。离线 replay
+  `/private/tmp/dual-public-issue-flow-20260630T094929Z-agent-runs/ws-20260630T095114Z-B8FP`
+  显示该历史样本最大 terminal 后等待为
+  `run-1782813767103 implement.claude_implement terminalToProcessWaitMs=587`，
+  其余 terminal 样本为 217ms、209ms、180ms、29ms。该 replay 同时暴露
+  `Execution consistency: missing_outcome=10`，因此只能作为 latency projection 证据，
+  不能作为 P0 outcome 完成证据。原始 293s/380s terminal-after-detected 长等待样本仍未找到，
+  不得据此宣称该类问题已解决。
 - acpx transport / post-processing 异常现在会在 adapter 边界内转成 typed
   `RECOVERABLE_TRANSPORT_FAILED` failure reason 和 canonical
   `AdapterSignalType.PROCESS_STALLED`，并写入 run.json prepared/completed read model；

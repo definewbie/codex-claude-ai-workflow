@@ -61,6 +61,7 @@ class TraceCommandTest {
         assertTrue(printed.contains("provider cache decision: {measure_only=1}"));
         assertTrue(printed.contains("usage gap: codex acceptance.codex_verifier_review visibility=session_snapshot_only"));
         assertTrue(printed.contains("execution latency: design.claude_design run=run-1 totalMs=1000"));
+        assertTrue(printed.contains("terminalToProcessWaitMs=200"));
         assertTrue(printed.contains("phase=post_process"));
         assertTrue(printed.contains("transcriptGrowthRun=run-1"));
         assertTrue(printed.contains("top read cost: README.md"));
@@ -381,6 +382,7 @@ class TraceCommandTest {
                           "agent": "claude",
                           "totalDurationMs": 1000,
                           "terminalDetectedMs": 300,
+                          "terminalToProcessWaitMs": 200,
                           "processWaitCompletedMs": 500,
                           "contractValidatedMs": 900,
                           "dominantPhase": "post_process"

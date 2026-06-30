@@ -761,6 +761,7 @@ final class MetricsProjectionWriter {
         var artifactExtracted = elapsed(timeline, "artifact_extracted", startedAt);
         var contractValidated = elapsed(timeline, "contract_validated", startedAt);
         var terminalGraceMs = positiveDelta(terminalDetected, terminalGraceElapsed);
+        var terminalToProcessWaitMs = positiveDelta(terminalDetected, processWaitCompleted);
         var postProcessMs = positiveDelta(processWaitCompleted, contractValidated);
         var terminalToContractMs = positiveDelta(terminalDetected, contractValidated);
         var result = new LinkedHashMap<String, Object>();
@@ -771,6 +772,7 @@ final class MetricsProjectionWriter {
         result.put("terminalDetectedMs", terminalDetected);
         result.put("terminalGraceElapsedMs", terminalGraceElapsed);
         result.put("terminalGraceMs", terminalGraceMs);
+        result.put("terminalToProcessWaitMs", terminalToProcessWaitMs);
         result.put("artifactExtractedMs", artifactExtracted);
         result.put("contractValidatedMs", contractValidated);
         result.put("postProcessMs", postProcessMs);
