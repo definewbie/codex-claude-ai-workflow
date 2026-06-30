@@ -71,3 +71,24 @@ assert_eq \
   "Target|Trigger precondition" \
   "$(verification_gate_missing_fields "$todo")" \
   "todo fields"
+
+weak="$tmp/weak.md"
+cat >"$weak" <<'EOF'
+# Verification Gate
+
+- Target: prove provider-cache-aware
+- Source of truth: metrics
+- Trigger precondition: should trigger because cachedRead is high
+- How precondition is checked before run: run it and see
+- PASS: measure_only is visible
+- FAIL: required fields do not match
+- INVALID: pricing_unknown
+- Stop-loss: stop if it looks bad
+- Run artifact freshness: use --skip-build
+EOF
+
+assert_eq \
+  "Trigger precondition|How precondition is checked before run|PASS|INVALID|Stop-loss|Run artifact freshness" \
+  "$(verification_gate_tradeoff_flags "$weak")" \
+  "weak verification fields rejected"
+assert_eq "false" "$(verification_gate_is_complete "$weak" && printf true || printf false)" "weak gate rejected"

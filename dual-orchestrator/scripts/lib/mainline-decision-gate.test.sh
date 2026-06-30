@@ -83,7 +83,41 @@ cat >"$tradeoff" <<'EOF'
 EOF
 
 assert_eq \
-  "Source of truth being changed or strengthened|Proof required before claiming completion" \
+  "Source of truth being changed or strengthened|Drift path being removed or centralized|Proof required before claiming completion" \
   "$(mainline_decision_gate_tradeoff_flags "$tradeoff")" \
   "tradeoff flags"
 assert_eq "false" "$(mainline_decision_gate_is_complete "$tradeoff" && printf true || printf false)" "tradeoff gate rejected"
+
+case_insensitive="$tmp/case-insensitive.md"
+cat >"$case_insensitive" <<'EOF'
+# Mainline Decision Gate
+
+- Target phase: P1
+- Boundary owner: AgentExecutionAttempt
+- Source of truth being changed or strengthened: Add one WARNING to trace output
+- Drift path being removed or centralized: N/A
+- Explicit non-goals: no provider run
+- Proof required before claiming completion: tests green
+- Remaining gaps that must stay visible: real replay missing
+EOF
+
+assert_eq \
+  "Source of truth being changed or strengthened|Drift path being removed or centralized" \
+  "$(mainline_decision_gate_tradeoff_flags "$case_insensitive")" \
+  "case-insensitive tradeoff flags"
+assert_eq "false" "$(mainline_decision_gate_is_complete "$case_insensitive" && printf true || printf false)" "case-insensitive tradeoff rejected"
+
+invalid_phase="$tmp/invalid-phase.md"
+cat >"$invalid_phase" <<'EOF'
+# Mainline Decision Gate
+
+- Target phase: Maybe
+- Boundary owner: AgentExecutionAttempt
+- Source of truth being changed or strengthened: AgentExecutionOutcome finalizer
+- Drift path being removed or centralized: legacy handler outcome writers move behind finalizer
+- Explicit non-goals: no provider run
+- Proof required before claiming completion: boundary test covers adapter signal preservation
+- Remaining gaps that must stay visible: real replay missing
+EOF
+
+assert_eq "Target phase" "$(mainline_decision_gate_tradeoff_flags "$invalid_phase")" "invalid phase rejected"

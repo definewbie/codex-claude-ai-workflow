@@ -105,6 +105,8 @@ Mainline Decision Gate:
 
 本 gate 的格式校验由 `scripts/lib/mainline-decision-gate.sh` 提供。它只证明“开工前的主线目标、边界、SoT、漂移路径和完成证据已经写清楚”，不替代 P2 的真实 provider `Verification Gate`，也不证明任何 runtime 行为已经完成。
 
+2026-07-01 加固：`mainline-decision-gate.sh` 不再只检查字段是否存在；它会拒绝非法 phase、`Drift path=none/N/A`、以及把 `warning` / `prompt` / `fallback` / `measure_only` / `record_only` / `trace only` / `再跑一次看看` 等低收益 trade-off 写成主线修复的 gate。该规则的目的不是增加流程负担，而是防止实现再次从 SoT / typed boundary / catalog / policy / ledger event 滑向局部显示、提示词或兼容补丁。
+
 ## 3. 未完成目标清单
 
 | 目标 | 当前状态 | 缺口 | 优先级 |
@@ -885,6 +887,12 @@ metrics/projections。不能用旧 report 的 `START_FAILED` / `WAITING_FOR_RECO
 Verification Gate 的字段解析和完整性校验已下沉到 `scripts/lib/verification-gate.sh`，并由
 `verification-gate.test.sh` 覆盖完整 gate、缺字段 gate、TODO/TBD gate 三类 fixture。该测试只证明
 gate 文件格式不会被空字段绕过，不替代真实 provider 前置条件和业务质量验证。
+
+2026-07-01 加固：`verification-gate.sh` 会拒绝弱验证字段。`should` / `probably` / `预计` / `应该` /
+`跑完再看` / `measure_only` / `pricing_unknown` / `not_applicable` / `--skip-build` 不能作为
+Trigger precondition、precondition check、PASS、INVALID、Stop-loss 或 Run artifact freshness 的有效内容。
+因此，真实运行前如果触发条件、计费状态、provider-cache-aware 模式或构建 freshness 无法被脚本和 typed
+read model 证明，本轮必须在启动 provider 前判为 `INVALID`，不能继续消耗 token 后再解释。
 
 2026-06-30 public benchmark 复测结果：`intake.claude_brainstorm` 在首次真实 provider 调用阶段失败，acpx
 输出 `Unable to connect to API (FailedToOpenSocket)`。该轮不能证明 lifecycle、token 或 provider-cache-aware

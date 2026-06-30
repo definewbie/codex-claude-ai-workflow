@@ -46,17 +46,41 @@ mainline_decision_gate_missing_fields() {
 mainline_decision_gate_tradeoff_flags() {
   local file="$1"
   local flags=()
-  local value
+  local value lower
   while IFS= read -r field; do
     [[ -n "$field" ]] || continue
     value="$(mainline_decision_gate_field_value "$file" "$field")"
-    if [[ "$value" == *warning* \
-        || "$value" == *prompt* \
-        || "$value" == *fallback* \
-        || "$value" == *兼容* \
-        || "$value" == *再跑一次* \
-        || "$value" == *看看* \
-        || "$value" == *trade-off* ]]; then
+    lower="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+    if [[ "$field" == "Target phase" \
+        && "$lower" != "p0" \
+        && "$lower" != "p0.5" \
+        && "$lower" != "p1" \
+        && "$lower" != "p2" \
+        && "$lower" != "p3" ]]; then
+      flags+=("$field")
+      continue
+    fi
+    if [[ "$field" == "Drift path being removed or centralized" \
+        && ( "$lower" == "none" \
+          || "$lower" == "n/a" \
+          || "$lower" == "na" \
+          || "$lower" == "no drift" \
+          || "$lower" == "not applicable" ) ]]; then
+      flags+=("$field")
+      continue
+    fi
+    if [[ "$lower" == *warning* \
+        || "$lower" == *prompt* \
+        || "$lower" == *fallback* \
+        || "$lower" == *measure_only* \
+        || "$lower" == *record_only* \
+        || "$lower" == *"trace only"* \
+        || "$lower" == *"display only"* \
+        || "$lower" == *兼容* \
+        || "$lower" == *再跑一次* \
+        || "$lower" == *看看* \
+        || "$lower" == *先观察* \
+        || "$lower" == *trade-off* ]]; then
       flags+=("$field")
     fi
   done < <(mainline_decision_gate_required_fields)
