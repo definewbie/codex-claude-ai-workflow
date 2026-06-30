@@ -706,6 +706,74 @@ class MetricsProjectionWriterTest {
                 costMap.get("providerCacheDecisionReason"));
     }
 
+    @Test
+    void tokenAttributionUsesPackagedAnthropicCachePricingWhenWorkspacePricingFileIsAbsent() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-anthropic-pricing"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-anthropic-pricing", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(1000, 200, 3000, "0");
+        usage.put("cachedWriteTokens", 400);
+        usage.put("providerId", "anthropic");
+        usage.put("model", "claude-sonnet-4.5");
+        writeAttributionRun(paths, "run-anthropic", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("anthropic", perRun.get("providerId"));
+        assertEquals("claude-sonnet-4.5", perRun.get("model"));
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("official_pricing", costMap.get("costEstimateReliability"));
+        assertEquals("USD", costMap.get("officialCalculatedCurrency"));
+        assertEquals(0, new BigDecimal("0.008400")
+                .compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+        assertEquals(3000, number(costMap.get("inputCacheHitTokens")));
+        assertEquals(1000, number(costMap.get("inputCacheMissTokens")));
+        assertEquals(400, number(costMap.get("cacheWriteTokens")));
+    }
+
+    @Test
+    void tokenAttributionUsesPackagedOpenAiTokenOnlyPricingWhenWorkspacePricingFileIsAbsent() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-openai-token-only"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-openai-token-only", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "acceptance.codex_verifier_review"));
+
+        var usage = usage(1200, 300, 800, "0");
+        usage.put("providerId", "openai");
+        usage.put("model", "chatgpt");
+        usage.put("billingMode", "subscription_tokens");
+        writeAttributionRun(paths, "run-openai", "codex", "acceptance.codex_verifier_review", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("openai", perRun.get("providerId"));
+        assertEquals("chatgpt", perRun.get("model"));
+        assertEquals("subscription_token_only", perRun.get("billingMode"));
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("token_only", costMap.get("costEstimateReliability"));
+        assertEquals("TOKENS_ONLY", costMap.get("officialCalculatedCurrency"));
+        assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+        assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
+    }
+
     private void writeAttributionRun(WorkstreamPaths paths, String runId, String agent, String nodeId,
                                      String sessionSegmentKey, Instant startedAt, Map<String, Object> usageMap,
                                      String transcriptPath, int toolCalls, List<String> readFiles) throws Exception {
