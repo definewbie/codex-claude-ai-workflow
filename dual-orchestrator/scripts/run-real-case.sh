@@ -205,10 +205,16 @@ validate_inputs() {
 
 validate_verification_gate() {
   local file="$1"
-  local missing
+  local missing weak
   missing="$(verification_gate_missing_fields "$file")"
   if [[ -n "$missing" ]]; then
     fail "verification gate is incomplete: ${missing//|/ }"
+    fail "Gate file: $file"
+    exit 1
+  fi
+  weak="$(verification_gate_tradeoff_flags "$file")"
+  if [[ -n "$weak" ]]; then
+    fail "verification gate has weak proof fields: ${weak//|/ }"
     fail "Gate file: $file"
     exit 1
   fi
@@ -995,4 +1001,6 @@ main() {
   exit 1
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

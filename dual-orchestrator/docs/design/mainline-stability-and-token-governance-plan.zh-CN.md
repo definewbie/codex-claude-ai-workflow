@@ -893,6 +893,8 @@ gate 文件格式不会被空字段绕过，不替代真实 provider 前置条�
 Trigger precondition、precondition check、PASS、INVALID、Stop-loss 或 Run artifact freshness 的有效内容。
 因此，真实运行前如果触发条件、计费状态、provider-cache-aware 模式或构建 freshness 无法被脚本和 typed
 read model 证明，本轮必须在启动 provider 前判为 `INVALID`，不能继续消耗 token 后再解释。
+`run-real-case.sh` 的入口校验已调用同一 weak-proof 检查；弱 gate 会在 repo / task / acpx / provider probe
+之前失败，避免真实 provider 被无效验证计划触发。`run-real-case.test.sh` 覆盖该入口行为。
 
 2026-06-30 public benchmark 复测结果：`intake.claude_brainstorm` 在首次真实 provider 调用阶段失败，acpx
 输出 `Unable to connect to API (FailedToOpenSocket)`。该轮不能证明 lifecycle、token 或 provider-cache-aware
