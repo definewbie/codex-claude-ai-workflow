@@ -161,7 +161,7 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
 | 缺口 | 表现 | 根因 | 修复方向 |
 | --- | --- | --- | --- |
 | attempt/outcome 可冲突 | `executionOutcome=SUCCESS` 但 `executionAttempt=RUNTIME_FAILED/PROCESS_STALLED` | attempt 与 outcome 不是同一个 resolver 原子生成 | 引入单一 `AgentExecutionFinalizer`，一次性生成 terminal attempt、outcome 和 legacy run fields |
-| terminal detected 后等待不可解释 | terminal 已出现，但 transport 继续等 293s/380s | 只有最终状态，没有阶段 timestamp / event segment | 记录 `terminalDetectedAt`、`processExitedAt`、`artifactExtractedAt`、`contractValidatedAt` |
+| terminal detected 后等待不可解释 | terminal 已出现，但 transport 继续等 293s/380s | 只有最终状态，没有阶段 timestamp / event segment | 已补 typed `executionTimeline[].details`，仍需真实/回放案例验证具体慢点 |
 | transport 仍偏串行黑盒 | run.json 落盘依赖 handler 收到完整 transport 结果 | process streaming 事件没有持久化 read model | 增加 attempt event log 或 run.json `executionTimeline[]` |
 | `PROCESS_STALLED` 可污染成功 | stdout 已完整，仍因 watchdog/stalled 写 runtime failed | process usability 和 artifact validity 没有统一裁决 | outcome resolver 输入必须包含 `ProcessUsability + TerminalControlResult + ArtifactContractResults` |
 | artifact validator 仍能参与 outcome 写入 | validator 会刷新 `executionOutcome` | outcome ownership 分散 | validator 只返回 `ArtifactContractResult`，不直接决定 runtime outcome |
@@ -178,6 +178,11 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `attempt_outcome_conflict` / `legacy_outcome_conflict`。
 - `executionTimeline` 事件名已收敛到 core-level `AgentExecutionTimelineEventKind`；
   adapter 只能写 typed event kind，`run.json` 仍输出兼容的 wire string。
+- `executionTimeline` 已补充 typed `details`：`process_wait_completed` / `process_exited`
+  写入 `exitCode`，`terminal_control_detected` 写入 `graceMs`，
+  `terminal_control_grace_elapsed` 写入 `waitMode=terminal_control_grace`、
+  `action=terminate_process_tree`、`exitCode` 和 `graceMs`。因此 run.json 可以区分
+  “进程自然退出”和“terminal contract 完整后 adapter 主动结束等待”，不用再靠日志或耗时猜测。
 - `executionTimeline` 已覆盖 transport 后段关键事件：adapter 在最终 artifact 提取后写入
   `artifact_extracted`，runtime finalizer 在 contract validation 后写入 `contract_validated`。
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；
@@ -233,12 +238,12 @@ run.json 增加 additive 字段：
 
 ```json
 "executionTimeline": [
-  {"kind": "PROCESS_STARTED", "at": "..."},
-  {"kind": "STDOUT_PROGRESS", "at": "..."},
-  {"kind": "TERMINAL_DETECTED", "at": "..."},
-  {"kind": "PROCESS_EXITED", "at": "..."},
-  {"kind": "ARTIFACT_EXTRACTED", "at": "..."},
-  {"kind": "CONTRACT_VALIDATED", "at": "..."}
+  {"kind": "process_started", "observedAt": "...", "elapsedMs": 0},
+  {"kind": "terminal_control_detected", "observedAt": "...", "elapsedMs": 1200, "details": {"graceMs": 2000}},
+  {"kind": "terminal_control_grace_elapsed", "observedAt": "...", "elapsedMs": 3200, "details": {"waitMode": "terminal_control_grace", "action": "terminate_process_tree", "exitCode": 0}},
+  {"kind": "process_exited", "observedAt": "...", "elapsedMs": 3210, "details": {"exitCode": 0}},
+  {"kind": "artifact_extracted", "observedAt": "..."},
+  {"kind": "contract_validated", "observedAt": "..."}
 ]
 ```
 

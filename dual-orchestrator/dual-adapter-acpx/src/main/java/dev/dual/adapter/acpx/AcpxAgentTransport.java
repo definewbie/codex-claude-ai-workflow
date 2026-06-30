@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -188,7 +189,13 @@ public class AcpxAgentTransport {
             timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_STARTED, "adapter", 0, startedAt));
             var waitResult = waitForExitOrRecoverableSignal(process, request);
             timeline.addAll(waitResult.executionTimeline());
-            timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_EXITED, "adapter", timeline.size(), startedAt));
+            timeline.add(AcpxExecutionEvent.now(
+                    AgentExecutionTimelineEventKind.PROCESS_EXITED,
+                    "adapter",
+                    timeline.size(),
+                    startedAt,
+                    Map.of("exitCode", waitResult.exitCode())
+            ));
             return new AcpxRunResult(waitResult.exitCode(), startedAt, Instant.now(), List.copyOf(command), timeline);
         } finally {
             if (process.isAlive()) {
@@ -247,7 +254,13 @@ public class AcpxAgentTransport {
             timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_STARTED, "adapter", 0, startedAt));
             var waitResult = waitForExitOrRecoverableSignal(process, request);
             timeline.addAll(waitResult.executionTimeline());
-            timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_EXITED, "adapter", timeline.size(), startedAt));
+            timeline.add(AcpxExecutionEvent.now(
+                    AgentExecutionTimelineEventKind.PROCESS_EXITED,
+                    "adapter",
+                    timeline.size(),
+                    startedAt,
+                    Map.of("exitCode", waitResult.exitCode())
+            ));
             return new AcpxRunResult(waitResult.exitCode(), startedAt, Instant.now(), List.copyOf(command), timeline);
         } finally {
             if (process.isAlive()) {
@@ -437,7 +450,13 @@ public class AcpxAgentTransport {
         var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
         while (true) {
             if (process.waitFor(STDERR_SIGNAL_POLL_SECONDS, TimeUnit.SECONDS)) {
-                timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED, "adapter", eventReader.nextSequence(), startedAt));
+                timeline.add(AcpxExecutionEvent.now(
+                        AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
+                        "adapter",
+                        eventReader.nextSequence(),
+                        startedAt,
+                        Map.of("exitCode", process.exitValue(), "waitMode", "process_exit")
+                ));
                 return new ProcessWaitResult(process.exitValue(), List.copyOf(timeline));
             }
             var elapsed = Duration.between(startedAt, Instant.now());
@@ -451,7 +470,8 @@ public class AcpxAgentTransport {
                             AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
                             "stdout",
                             eventReader.nextSequence(),
-                            startedAt
+                            startedAt,
+                            Map.of("graceMs", Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS).toMillis())
                     ));
                     continue;
                 }
@@ -462,7 +482,13 @@ public class AcpxAgentTransport {
                             AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED,
                             "adapter",
                             eventReader.nextSequence(),
-                            startedAt
+                            startedAt,
+                            Map.of(
+                                    "exitCode", 0,
+                                    "waitMode", "terminal_control_grace",
+                                    "action", "terminate_process_tree",
+                                    "graceMs", Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS).toMillis()
+                            )
                     ));
                     terminateProcessTree(process.toHandle());
                     return new ProcessWaitResult(0, List.copyOf(timeline));
@@ -477,7 +503,13 @@ public class AcpxAgentTransport {
                         AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED,
                         "adapter",
                         eventReader.nextSequence(),
-                        startedAt
+                        startedAt,
+                        Map.of(
+                                "exitCode", RECOVERABLE_SIGNAL_EXIT_CODE,
+                                "waitMode", "recoverable_signal",
+                                "action", "terminate_process_tree",
+                                "failureReason", assessment.failure().reason()
+                        )
                 ));
                 terminateProcessTree(process.toHandle());
                 return new ProcessWaitResult(RECOVERABLE_SIGNAL_EXIT_CODE, List.copyOf(timeline));

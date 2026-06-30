@@ -1,5 +1,6 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -679,6 +680,17 @@ class AcpxAgentTransportTest {
         assertEquals(0, result.exitCode());
         assertTrue(elapsedMs < 8_000, "terminal contract should end the adapter wait without waiting for process sleep");
         assertTrue(Files.readString(stdout).contains("[done] end_turn"));
+        var graceEvent = result.executionTimeline().stream()
+                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED)
+                .findFirst()
+                .orElseThrow();
+        assertEquals("terminal_control_grace", graceEvent.details().get("waitMode"));
+        assertEquals("terminate_process_tree", graceEvent.details().get("action"));
+        assertEquals(0, graceEvent.details().get("exitCode"));
+        assertTrue(result.executionTimeline().stream()
+                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_EXITED)
+                .map(event -> event.details())
+                .anyMatch(details -> Integer.valueOf(0).equals(details.get("exitCode"))));
     }
 
     @Test
