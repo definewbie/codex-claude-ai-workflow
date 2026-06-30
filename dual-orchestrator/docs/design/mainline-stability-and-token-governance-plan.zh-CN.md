@@ -576,6 +576,20 @@ treatment 行为：
 
 如果达不到，结论是策略无效或触发条件错误，不能继续调 prompt 解释为成功。
 
+2026-06-30 状态说明：
+
+- `provider_cache_aware` 当前不是无条件压缩开关。它只在两类条件下 active：
+  1. stability signal 显示当前 agent cachedRead 超过阈值；
+  2. pricing catalog 显示 cache hit 相对 cache miss 昂贵，`ProviderCachePolicy`
+     返回 `consider_compaction`。
+- GLM 包月 / token-only 场景不应被当成金额 `pricing_unknown`。P0.5 的责任是保留
+  provider/model/billingMode 和真实 token；P1B 的责任是在 token stability 阈值或明确价格经济账
+  支持时触发 compaction。没有达到阈值时出现 `measure_only` 是有效的“不触发”结论，
+  不是 provider/model attribution 缺失。
+- 现有 synthetic tests 覆盖：DeepSeek cache hit 便宜时 preserve session、昂贵价格时 compact、
+  GLM/token-only 或无 pricing 但 cachedRead 超阈值时 stability compaction active。
+  尚未完成的是同一 real-case 下 `sessionCompactionEnabled=true` 且质量不退化的真实验证。
+
 ## 7. P2：Real-case 验证矩阵
 
 ### 7.1 Case 类型
