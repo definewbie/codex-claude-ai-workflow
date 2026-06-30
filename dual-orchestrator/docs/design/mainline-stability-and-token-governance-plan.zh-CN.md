@@ -215,6 +215,19 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `AgentExecutionProcessStatus.RECONNECT_REQUIRED`；`MODEL_MISMATCH` 这类非 reconnect
   recoverable failure 会保持为 `FAILED` process status，避免违反
   `RECONNECT_REQUIRED` 必须带 reconnect signal 的核心 invariant。
+- 2026-06-30 real-case 复核：`ws-20260630T120421Z-7Y5D` 在
+  `intake.codex_product_review` 收到 acpx stderr `agent needs reconnect` 后，
+  run.json 写出 `executionAttempt.status=RECOVERABLE_FAILED`、
+  `failureSignal=RATE_LIMITED`、`executionOutcome.status=RECOVERABLE_ADAPTER_FAILURE`、
+  `nodeMaySucceed=false`，workflow 停在 `WAITING_FOR_RECOVERY`，没有继续按成功路由。
+  这证明 reconnect / rate-limit adapter signal 已由 execution boundary 阻断。
+- 同一 real-case 的 `intake.claude_brainstorm` run.json 已在进程启动前写出
+  prepared metadata；运行完成后写出 `executionAttempt.status=COMPLETED` 和
+  `executionOutcome.status=SUCCESS`。这证明 normal run path 不再等完整 transport
+  返回后才首次落盘 run.json。
+- 仍未完成：raw Claude CLI `--print` 路径没有 provider usage 输出，因此 run.json
+  只能记录 `usage.measurementType=UNAVAILABLE`，不能把 GLM 控制台真实 token 自动归因到
+  provider run。该问题属于 P0.5 usage acquisition 缺口，不得伪装成真实 0 token。
 
 ### 4.5 修复方案
 
@@ -409,6 +422,16 @@ not_applicable
   provider 账单导出和 dual 价格 catalog 做同口径对账。
 - P0.5 仍未完成的部分是账单/真实运行校准：真实 DeepSeek CSV 文件校准、GLM 控制台 token
   增量对齐、以及 complex real-case 下 provider/model/billingMode/cachedRead 字段的完整复核。
+- 2026-06-30 real-case 复核：`ws-20260630T120421Z-7Y5D` 的
+  `intake.claude_brainstorm` run.json 已从 Claude settings env 识别
+  `provider=zhipu`、`model=glm-5.2`、`billingMode=subscription_token_only`、
+  `source=claude_settings_env`，不再降级为 `pricing_unknown`。
+- 同一 run 的 `sessionCompactionReason` 为
+  `subscription_token_only; cache economics are non-monetary; compaction controlled by stability thresholds`，
+  不再因 provider/model 缺失进入 `provider/model pricing unavailable`。
+- 仍未完成：GLM token 数只能从外部控制台对账，dual 内部没有从 raw Claude CLI 获取真实
+  provider token 的 source of truth；因此 metrics 中 provider run token 仍为 `UNAVAILABLE`，
+  不能用于证明 token 降低。
 
 ### 5.6 修复方案
 
