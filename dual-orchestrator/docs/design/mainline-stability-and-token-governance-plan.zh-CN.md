@@ -358,6 +358,15 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `tokenAttribution.perRun[1].attemptFailureSignal=RATE_LIMITED`、
   `tokenAttribution.perRun[1].outcomeStatus=RECOVERABLE_ADAPTER_FAILURE`、
   `tokenAttribution.usageVisibility.gaps[].reason=RATE_LIMITED`。
+- transport 运行中 execution event 已不再只停留在 adapter 内存 timeline：
+  `AcpxRunRequest` 可携带 `AcpxExecutionEventSink`，`AcpxAgentTransport` 每产生
+  `process_started`、`terminal_control_detected`、`terminal_control_grace_elapsed`、
+  `recoverable_signal_detected`、`process_wait_completed` 和 `process_exited` 时，
+  会同步通知 sink；`AcpxAgentTaskHandler` 将 sink 接到 prepared `run.json.executionTimeline`
+  的追加写入。最终 `writeCompleted` 仍以 `AcpxRunResult.executionTimeline` 写入完整
+  terminal timeline。这只关闭“运行中 run.json 看不到 execution event”的证据缺口，
+  不证明 293s/380s 慢点已经定位；真实慢点仍必须通过 live run 的 run.json / stdout /
+  stderr / process tree 证据链判定。
   同一 replay 也保留了 GLM run 的
   `providerModelIdentity.provider=zhipu`、`model=glm-5.2`、
   `billingMode=subscription_token_only` 和 `usageVisibility` 中的

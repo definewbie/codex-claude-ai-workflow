@@ -153,14 +153,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             ));
         }
 
-        var request = new AcpxRunRequest(
-                context.workspaceRoot(),
-                session,
-                promptPath,
-                transcriptPath,
-                stderrPath,
-                permissionProfile(context)
-        );
         metadataWriter.writePrepared(
                 context.workspaceRoot(),
                 context.workstreamId(),
@@ -175,6 +167,15 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 stderrPath,
                 sessionMeta,
                 compactionMeta
+        );
+        var request = new AcpxRunRequest(
+                context.workspaceRoot(),
+                session,
+                promptPath,
+                transcriptPath,
+                stderrPath,
+                permissionProfile(context),
+                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
         );
         try {
             var result = "claude".equals(agent)

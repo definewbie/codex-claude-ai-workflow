@@ -1,5 +1,6 @@
 package dev.dual.adapter.acpx;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -16,6 +17,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -375,6 +378,43 @@ final class AgentRunMetadataWriter {
                 null,
                 executionTimeline(result)
         ));
+    }
+
+    void appendExecutionEvent(Path runJsonPath, AcpxExecutionEvent event) {
+        if (runJsonPath == null || event == null || !Files.isRegularFile(runJsonPath)) {
+            return;
+        }
+        try {
+            var root = objectMapper.readValue(
+                    runJsonPath.toFile(),
+                    new TypeReference<LinkedHashMap<String, Object>>() {
+                    }
+            );
+            var existing = root.get("executionTimeline");
+            var timeline = existing instanceof List<?> list ? new ArrayList<Object>(list) : new ArrayList<>();
+            var eventMap = new LinkedHashMap<String, Object>(event.toMap());
+            if (!containsExecutionEvent(timeline, eventMap)) {
+                timeline.add(eventMap);
+            }
+            root.put("executionTimeline", timeline);
+            objectMapper.writeValue(runJsonPath.toFile(), root);
+        } catch (IOException | RuntimeException ignored) {
+            // In-flight timeline persistence is best-effort. The terminal writeCompleted
+            // path still writes the authoritative final event list from AcpxRunResult.
+        }
+    }
+
+    private boolean containsExecutionEvent(List<Object> timeline, Map<String, Object> event) {
+        return timeline.stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .anyMatch(existing -> sameExecutionEvent(existing, event));
+    }
+
+    private boolean sameExecutionEvent(Map<?, ?> left, Map<String, Object> right) {
+        return String.valueOf(left.get("kind")).equals(String.valueOf(right.get("kind")))
+                && String.valueOf(left.get("sequence")).equals(String.valueOf(right.get("sequence")))
+                && String.valueOf(left.get("observedAt")).equals(String.valueOf(right.get("observedAt")));
     }
 
     private Map<String, Object> providerModelIdentity(AcpxUsage usage) {

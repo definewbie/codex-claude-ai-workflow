@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -710,6 +711,7 @@ class AcpxAgentTransportTest {
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
 
         var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+        var observedEvents = new ArrayList<AcpxExecutionEvent>();
         var started = System.nanoTime();
         var result = transport.runClaudeDesign(new AcpxRunRequest(
                 tempDir,
@@ -717,7 +719,8 @@ class AcpxAgentTransportTest {
                 prompt,
                 stdout,
                 stderr,
-                false
+                AcpxPermissionProfile.fromName("", false),
+                observedEvents::add
         ));
         var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
@@ -741,6 +744,12 @@ class AcpxAgentTransportTest {
                 .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_EXITED)
                 .map(event -> event.details())
                 .anyMatch(details -> Integer.valueOf(0).equals(details.get("exitCode"))));
+        assertTrue(observedEvents.stream()
+                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
+        assertTrue(observedEvents.stream()
+                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED));
+        assertTrue(observedEvents.stream()
+                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_EXITED));
     }
 
     @Test

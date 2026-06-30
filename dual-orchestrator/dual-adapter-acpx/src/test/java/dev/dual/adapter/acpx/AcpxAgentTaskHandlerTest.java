@@ -355,6 +355,56 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void preparedRunCanPersistExecutionTimelineEventBeforeCompletion() throws Exception {
+        var runDir = tempDir.resolve(".agent/workstreams/ws-test/runs/run-prepared");
+        var promptPath = runDir.resolve("prompts/intake-claude.md");
+        var outputPath = runDir.resolve("outputs/intake-claude.md");
+        var stderrPath = runDir.resolve("outputs/intake-claude.stderr.log");
+        Files.createDirectories(promptPath.getParent());
+        Files.createDirectories(outputPath.getParent());
+        Files.writeString(promptPath, "# Prompt\n");
+        Files.writeString(outputPath, "");
+        Files.writeString(stderrPath, "");
+
+        var writer = new AgentRunMetadataWriter();
+        writer.writePrepared(
+                tempDir,
+                "ws-test",
+                "intake.claude_brainstorm",
+                "claude",
+                "claude-main",
+                "intake-claude-brainstorm",
+                "run-prepared",
+                runDir,
+                promptPath,
+                outputPath,
+                stderrPath,
+                null,
+                null
+        );
+
+        writer.appendExecutionEvent(
+                runDir.resolve("run.json"),
+                new AcpxExecutionEvent(
+                        AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
+                        "stdout",
+                        3,
+                        Instant.parse("2026-07-01T00:00:00Z"),
+                        1200,
+                        Map.of("graceMs", 2000)
+                )
+        );
+
+        var root = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
+        assertEquals("prepared", root.path("status").asText());
+        var timeline = root.path("executionTimeline");
+        assertEquals(1, timeline.size());
+        assertEquals("terminal_control_detected", timeline.get(0).path("kind").asText());
+        assertEquals(1200, timeline.get(0).path("elapsedMs").asLong());
+        assertEquals(2000, timeline.get(0).path("details").path("graceMs").asLong());
+    }
+
+    @Test
     void completedRunSplitsRawTranscriptFromFinalArtifactOutput() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);

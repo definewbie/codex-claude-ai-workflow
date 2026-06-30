@@ -8,8 +8,24 @@ public record AcpxRunRequest(
         Path promptPath,
         Path stdoutPath,
         Path stderrPath,
-        AcpxPermissionProfile permissionProfile
+        AcpxPermissionProfile permissionProfile,
+        AcpxExecutionEventSink executionEventSink
 ) {
+    public AcpxRunRequest(
+            Path workdir,
+            String sessionName,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            AcpxPermissionProfile permissionProfile
+    ) {
+        this(workdir, sessionName, promptPath, stdoutPath, stderrPath, permissionProfile, AcpxExecutionEventSink.NOOP);
+    }
+
+    public AcpxRunRequest {
+        executionEventSink = executionEventSink == null ? AcpxExecutionEventSink.NOOP : executionEventSink;
+    }
+
     public AcpxRunRequest(
             Path workdir,
             String sessionName,

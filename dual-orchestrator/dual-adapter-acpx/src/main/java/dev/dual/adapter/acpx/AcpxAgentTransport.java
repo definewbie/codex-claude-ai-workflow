@@ -191,10 +191,15 @@ public class AcpxAgentTransport {
         var process = processBuilder.start();
         try {
             var timeline = new ArrayList<AcpxExecutionEvent>();
-            timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_STARTED, "adapter", 0, startedAt));
+            recordEvent(timeline, request, AcpxExecutionEvent.now(
+                    AgentExecutionTimelineEventKind.PROCESS_STARTED,
+                    "adapter",
+                    0,
+                    startedAt
+            ));
             var waitResult = waitForExitOrRecoverableSignal(process, request);
             timeline.addAll(waitResult.executionTimeline());
-            timeline.add(AcpxExecutionEvent.now(
+            recordEvent(timeline, request, AcpxExecutionEvent.now(
                     AgentExecutionTimelineEventKind.PROCESS_EXITED,
                     "adapter",
                     timeline.size(),
@@ -349,10 +354,15 @@ public class AcpxAgentTransport {
         var process = processBuilder.start();
         try {
             var timeline = new ArrayList<AcpxExecutionEvent>();
-            timeline.add(AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.PROCESS_STARTED, "adapter", 0, startedAt));
+            recordEvent(timeline, request, AcpxExecutionEvent.now(
+                    AgentExecutionTimelineEventKind.PROCESS_STARTED,
+                    "adapter",
+                    0,
+                    startedAt
+            ));
             var waitResult = waitForExitOrRecoverableSignal(process, request);
             timeline.addAll(waitResult.executionTimeline());
-            timeline.add(AcpxExecutionEvent.now(
+            recordEvent(timeline, request, AcpxExecutionEvent.now(
                     AgentExecutionTimelineEventKind.PROCESS_EXITED,
                     "adapter",
                     timeline.size(),
@@ -395,6 +405,16 @@ public class AcpxAgentTransport {
             if (!request.permissionProfile().terminalEnabled()) {
                 command.add("--no-terminal");
             }
+        }
+    }
+
+    private void recordEvent(List<AcpxExecutionEvent> timeline, AcpxRunRequest request, AcpxExecutionEvent event) {
+        timeline.add(event);
+        try {
+            request.executionEventSink().accept(event);
+        } catch (RuntimeException ignored) {
+            // Timeline persistence is a read-model aid. Adapter execution facts still
+            // return in the final AcpxRunResult and must not be corrupted by a sink failure.
         }
     }
 
@@ -548,7 +568,7 @@ public class AcpxAgentTransport {
         var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
         while (true) {
             if (process.waitFor(STDERR_SIGNAL_POLL_SECONDS, TimeUnit.SECONDS)) {
-                timeline.add(AcpxExecutionEvent.now(
+                recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
                         "adapter",
                         eventReader.nextSequence(),
@@ -564,7 +584,7 @@ public class AcpxAgentTransport {
             if (terminalContract.isComplete(readFile(request.stdoutPath()))) {
                 if (terminalOutputSince == null) {
                     terminalOutputSince = Instant.now();
-                    timeline.add(AcpxExecutionEvent.now(
+                    recordEvent(timeline, request, AcpxExecutionEvent.now(
                             AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
                             "stdout",
                             eventReader.nextSequence(),
@@ -576,7 +596,7 @@ public class AcpxAgentTransport {
                 if (Duration.between(terminalOutputSince, Instant.now())
                         .compareTo(Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS)) >= 0) {
                     health.observe(AgentLifecycleEvent.terminalContractSeen(eventReader.nextSequence()), elapsed);
-                    timeline.add(AcpxExecutionEvent.now(
+                    recordEvent(timeline, request, AcpxExecutionEvent.now(
                             AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED,
                             "adapter",
                             eventReader.nextSequence(),
@@ -597,7 +617,7 @@ public class AcpxAgentTransport {
             var assessment = health.assess(elapsed);
             if (assessment.status() == AgentExecutionHealth.Status.RECOVERABLE_FAILURE) {
                 appendAdapterDiagnostic(request.stderrPath(), assessment.failure(), startedAt, assessment.failure().interruptRunningProcess());
-                timeline.add(AcpxExecutionEvent.now(
+                recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED,
                         "adapter",
                         eventReader.nextSequence(),
