@@ -76,6 +76,7 @@ class MetricsProjectionWriterTest {
         writeEvidenceManifest(paths, mapper, List.of("README.md", "docs/spec.md"));
         writeReadReuseContract(paths, mapper, List.of("README.md"));
         writeActualGovernanceReport(paths, mapper, "run-2", "design.codex_review", "warn");
+        writeActualGovernanceReport(paths, mapper, "run-unavailable", "implement.claude_implement", "failed");
 
         new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
 
@@ -150,9 +151,11 @@ class MetricsProjectionWriterTest {
         assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
         var explorationPolicy = map(toolMetrics.get("explorationPolicy"));
         assertEquals(1, number(explorationPolicy.get("warnCount")));
-        assertEquals(0, number(explorationPolicy.get("failCount")));
+        assertEquals(1, number(explorationPolicy.get("failCount")));
         var warnings = list(explorationPolicy.get("warnings"));
         assertEquals("design.codex_review", warnings.get(0).get("nodeId"));
+        var failures = list(explorationPolicy.get("failures"));
+        assertEquals("implement.claude_implement", failures.get(0).get("nodeId"));
         assertTrue(String.valueOf(warnings.get(0).get("agentExplorationPlanPath"))
                 .endsWith("exploration-plan-run-2.json"));
         assertTrue(String.valueOf(warnings.get(0).get("explorationPolicyResultPath"))
@@ -193,9 +196,10 @@ class MetricsProjectionWriterTest {
         assertTrue(markdown.contains("| design.codex_review | review | recent_agent_outputs | 420 | 900 | true | false |"));
         assertTrue(markdown.contains("## Tool Metrics"));
         assertTrue(markdown.contains("- Exploration Policy Warnings: 1"));
-        assertTrue(markdown.contains("- Exploration Policy Failures: 0"));
+        assertTrue(markdown.contains("- Exploration Policy Failures: 1"));
         assertTrue(markdown.contains("### Exploration Policy Violations"));
         assertTrue(markdown.contains("| design.codex_review | run-2 | warn | DIRECT_READ_BUDGET_EXCEEDED | Actual direct Read count exceeds the exploration plan budget. |"));
+        assertTrue(markdown.contains("| implement.claude_implement | run-unavailable | block | DIRECT_READ_BUDGET_EXCEEDED | Actual direct Read count exceeds the exploration plan budget. |"));
         assertTrue(markdown.contains("| README.md | 2 | claude, codex | intake.claude_brainstorm, design.codex_review | true | missing |"));
     }
 
@@ -931,7 +935,7 @@ class MetricsProjectionWriterTest {
                         )),
                         "violations", List.of(Map.of(
                                 "type", "DIRECT_READ_BUDGET_EXCEEDED",
-                                "severity", "warn",
+                                "severity", "failed".equals(status) ? "block" : "warn",
                                 "message", "Actual direct Read count exceeds the exploration plan budget."
                         ))
                 )

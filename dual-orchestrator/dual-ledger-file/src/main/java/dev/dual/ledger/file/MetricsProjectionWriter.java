@@ -812,7 +812,7 @@ final class MetricsProjectionWriter {
                         var item = explorationPolicyItem(report, result, path);
                         warnings.add(item);
                         violations.addAll(explorationViolations(item));
-                    } else if ("fail".equals(status)) {
+                    } else if ("failed".equals(status)) {
                         failCount++;
                         var item = explorationPolicyItem(report, result, path);
                         failures.add(item);
