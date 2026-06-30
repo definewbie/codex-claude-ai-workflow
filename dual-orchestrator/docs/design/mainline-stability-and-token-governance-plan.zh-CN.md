@@ -650,6 +650,12 @@ P0 必须先于 P0.5 完整收口。
 - `AcpxAgentTaskHandlerTest` 已覆盖失败 agent run 的 run-level governance 投影：
   reconnect failure 和 provider connection failure 都会在 `run.json` 写入
   `explorationPolicyResultPath` / `explorationPolicyResult`，避免 P1A 在失败路径上出现治理盲区。
+- read-reuse prompt injection 边界已收口：`reread_reasons` 不再由
+  `AgentPromptRenderer` 或阶段 prompt 模板全局注入；只有 `RepoScopeGovernance`
+  生成的 typed `read-reuse-contract.json.reasonField` 声明
+  `agent_output_contract.reread_reasons` 时，context package 才会展示该字段、
+  entry shape 和 allowed reason catalog。`task_contract_proposal`、`self_test_report`
+  和 `acceptance_review` 等非 owner artifact 不会收到该字段，避免 prompt 注入污染。
 - 这只完成了 context governance sidecar、run metadata 和 metrics projection 的合成链路；
   尚未通过真实 provider 证明每个 real-case agent run 都写出有效 `ExplorationPolicyResult`，
   也尚未证明 review 阶段 WARN 已收敛。
