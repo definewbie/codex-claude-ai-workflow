@@ -79,7 +79,7 @@ flowchart TD
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
 | intake exploration governance | 已完成 | 只覆盖 intake，不代表整体 readCount/token 下降 | Done |
-| design/plan/implement/review repo scope governance | 未完成 | 后续阶段仍可能自由探索；review 仍 WARN | P1 |
+| design/plan/implement/review repo scope governance | 本地 projection 已覆盖，真实收益待证 | stage policy mapping、run-level ExplorationPolicyResult、metrics/trace WARN/FAIL 聚合已有测试；仍缺真实 case 下 readCount/token 下降证明 | P1 |
 | memory loop / read reuse | 部分实现 | 对 token 收益有限；必须和 scope governance 结合 | P1 |
 | artifact boundary | 大体完成 | `plan_artifact`、`stage_handoff`、`rereadPolicy` 已类型化，但缺完整 real-case 验证 | P1 |
 | projection consistency | 部分完成 | CLI trace 已补；UI/API/operator 是否同源还未整体 sweep | P1 |
@@ -791,7 +791,8 @@ Findings:
 - token economics has local read-model coverage for GLM token-only, DeepSeek pricing,
   OpenAI token-only, and Anthropic cache pricing; real bill calibration and complex
   case validation are still missing.
-- stage scope policy mapping after intake is aligned, but run-level ExplorationPolicyResult and review WARN closure are not yet proven.
+- stage scope policy mapping after intake is aligned. Run-level ExplorationPolicyResult and review WARN/FAIL projection
+  are locally proven through metrics and trace fixtures; real-case readCount/token improvement is not yet proven.
 - full real-case validation is not yet valid as a final acceptance signal.
 
 Required fixes:
@@ -805,7 +806,8 @@ Required tests:
 - DeepSeek metered pricing fixture、CSV calibration fixture 和 billing-csv CLI fixture 已覆盖；真实账单 CSV 校准尚未覆盖。
 - OpenAI/ChatGPT token-only projection test 已覆盖。
 - Anthropic/Claude cache pricing projection test 已覆盖。
-- stage scope policy tests beyond intake are present; remaining gap is run-level ExplorationPolicyResult / WARN closure proof.
+- stage scope policy tests beyond intake are present; run-level ExplorationPolicyResult / WARN closure proof is covered
+  by metrics and trace fixtures; remaining gap is real-case improvement evidence.
 - full verification gate fixture test 已覆盖；remaining gap 是真实 P2 case 矩阵尚未执行。
 
 Accepted debt:
