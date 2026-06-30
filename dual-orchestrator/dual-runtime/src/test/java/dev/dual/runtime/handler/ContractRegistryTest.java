@@ -228,12 +228,24 @@ class ContractRegistryTest {
                 assertNotNull(node, definition.workflowId() + " missing node " + entry.getKey());
                 assertEquals(entry.getValue(), String.valueOf(node.config().get("expected_artifact")),
                         definition.workflowId() + " node " + entry.getKey() + " missing expected_artifact");
+                assertTrue(ContractRegistry.forNode(entry.getKey()).outputArtifactTypes().contains(entry.getValue()),
+                        definition.workflowId() + " node " + entry.getKey()
+                                + " expected_artifact is not declared in ContractRegistry outputArtifactTypes");
                 assertTrue(String.valueOf(node.config().get("artifact_compiler")).endsWith("_compiler"),
                         definition.workflowId() + " node " + entry.getKey() + " missing artifact_compiler");
                 assertTrue(node.config().get("allowed_stage_outcomes") instanceof List<?>,
                         definition.workflowId() + " node " + entry.getKey() + " missing allowed_stage_outcomes");
             }
         }
+    }
+
+    @Test
+    void planClaudeDeclaresBothControlAndPlanArtifacts() {
+        var contract = ContractRegistry.forNode("plan.claude_plan");
+        assertTrue(contract.emitsArtifact("agent_output_contract"),
+                "plan.claude_plan still emits the control contract");
+        assertTrue(contract.emitsArtifact("plan_artifact"),
+                "plan.claude_plan must declare the typed plan body artifact so prompt injection can follow artifact contracts");
     }
 
     @Test

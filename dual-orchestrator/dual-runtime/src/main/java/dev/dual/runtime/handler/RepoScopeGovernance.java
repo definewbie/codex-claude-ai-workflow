@@ -327,8 +327,10 @@ final class RepoScopeGovernance {
         policy.put("readReusePolicy", Map.of(
                 "preferExistingEvidence", true,
                 "avoidRepeatedReads", previouslyReadFiles.stream().limit(12).toList(),
-                "requireReasonWhenRereading", true,
-                "reasonField", "agent_output_contract.reread_reasons"
+                "requireReasonWhenRereading", targetEmitsAgentOutputContract(targetNodeDefinitionId),
+                "reasonField", targetEmitsAgentOutputContract(targetNodeDefinitionId)
+                        ? "agent_output_contract.reread_reasons"
+                        : ""
         ));
         policy.put("forbiddenScope", forbiddenScope(stageId));
         policy.put("explorationBudget", Map.of(
@@ -467,9 +469,17 @@ final class RepoScopeGovernance {
         document.put("invalidatedReadFiles", invalidatedReadFiles);
         document.put("allowedRereadFiles", allowedRereadFiles);
         document.put("reuseSource", reusableReadFiles.isEmpty() ? "run_history" : "workstream_memory.readFiles");
-        document.put("allowedRepeatedReadReasons", ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS);
-        document.put("requireReasonWhenRereading", reusePolicy.getOrDefault("requireReasonWhenRereading", true));
-        document.put("reasonField", reusePolicy.getOrDefault("reasonField", "agent_output_contract.reread_reasons"));
+        var requireReason = Boolean.TRUE.equals(reusePolicy.getOrDefault(
+                "requireReasonWhenRereading",
+                targetEmitsAgentOutputContract(targetNodeDefinitionId)
+        ));
+        document.put("requireReasonWhenRereading", requireReason);
+        document.put("reasonField", requireReason
+                ? reusePolicy.getOrDefault("reasonField", "agent_output_contract.reread_reasons")
+                : "");
+        if (requireReason) {
+            document.put("allowedRepeatedReadReasons", ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS);
+        }
         document.put("generatedAt", Instant.now().toString());
         return document;
     }
@@ -894,6 +904,11 @@ final class RepoScopeGovernance {
         return configured.isBlank() ? context.definition().id() : configured;
     }
 
+    private static boolean targetEmitsAgentOutputContract(String targetNodeDefinitionId) {
+        return ContractRegistry.hasContract(targetNodeDefinitionId)
+                && ContractRegistry.forNode(targetNodeDefinitionId).emitsArtifact("agent_output_contract");
+    }
+
     private static String readBaseCommit(Path workstreamDir, ObjectMapper objectMapper) {
         var gitEvidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
         if (!Files.isRegularFile(gitEvidence)) {
@@ -1034,7 +1049,14 @@ final class RepoScopeGovernance {
                         .append(text(item.get("summary")))
                         .append("\n");
             }
-            builder.append("  If you Read any file listed above, you must record a matching entry in agent_output_contract.reread_reasons (path must match exactly). An empty reread_reasons is only valid when you reuse these summaries and do not re-read any of them.\n");
+            var reasonField = text(documents.readReuseContract().get("reasonField"));
+            if (!reasonField.isBlank()) {
+                builder.append("  If you Read any file listed above, you must record a matching entry in ")
+                        .append(reasonField)
+                        .append(" (path must match exactly). An empty reread_reasons is only valid when you reuse these summaries and do not re-read any of them.\n");
+            } else {
+                builder.append("  Do not re-read these files unless this stage needs exact current contents; this target artifact does not declare a reread reason field, so the harness will judge re-reads from changed_files, invalidation, and allowed-reread policy.\n");
+            }
         }
         var invalidated = mapList(documents.readReuseContract().get("invalidatedReadFiles"));
         if (!invalidated.isEmpty()) {

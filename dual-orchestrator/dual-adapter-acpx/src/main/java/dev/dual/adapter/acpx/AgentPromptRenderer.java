@@ -10,6 +10,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,16 +46,18 @@ final class AgentPromptRenderer {
         var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
+        var outputArtifactTypes = outputArtifactTypes(nodeId);
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
         var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics();
-        var readReuseContractSemantics = readReuseContractSemantics();
+        var readReuseContractSemantics = outputArtifactTypes.contains("agent_output_contract")
+                ? readReuseContractSemantics()
+                : "";
         var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
         var explorationPlanSection = explorationPlanSection(workspaceRoot, inputRefs);
         var hasInputs = inputRefs != null && !inputRefs.isEmpty();
 
         var content = workspaceGuard + "\n\n" + languagePolicy + "\n\n"
-                + structuredArtifactFieldSemantics + "\n\n"
-                + readReuseContractSemantics + "\n\n" + template
+                + structuredArtifactFieldSemantics + optionalSection(readReuseContractSemantics) + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
                 .replace("{{node_id}}", nodeId)
                 .replace("{{prompt_template}}", promptTemplate)
@@ -66,41 +69,53 @@ final class AgentPromptRenderer {
                 .replace("{{required_control_keys}}", promptContract.requiredControlKeys())
                 .replace("{{decision_example}}", promptContract.decisionExample());
 
-        var sections = List.of(
-                new PromptSection("workspace_guard", "static_instruction", "workspace-guard",
-                        workspaceGuard, "execution safety boundary", true),
-                new PromptSection("language_policy", "static_instruction", "language-policy",
-                        languagePolicy, "output language policy", true),
-                new PromptSection("structured_artifact_field_semantics", "tool_policy",
-                        "structured-artifact-field-semantics",
-                        structuredArtifactFieldSemantics, "structured artifact field semantics", true),
-                new PromptSection("read_reuse_contract_semantics", "tool_policy",
-                        "read-reuse-contract-semantics",
-                        readReuseContractSemantics, "read reuse contract semantics", true),
-                new PromptSection("template_static_frame", "static_instruction",
-                        TEMPLATE_ROOT + promptTemplate + ".md",
-                        VARIABLE_PATTERN.matcher(template).replaceAll(""), "prompt skeleton instructions", true),
-                new PromptSection("requirement", "requirement", workstreamDir + "/requirement.md",
-                        requirement, "task requirement", true),
-                new PromptSection("context_package", "context_package",
-                        hasInputs ? String.join(",", inputRefs) : "(none)",
-                        contextPackage, "prior artifacts / assembled context", hasInputs),
-                new PromptSection("read_reuse_contract", "read_reuse_contract",
-                        hasInputs ? String.join(",", inputRefs) : "(none)",
-                        readReuseContractSection, "typed memory read-reuse projection",
-                        !readReuseContractSection.isBlank()),
-                new PromptSection("exploration_plan", "exploration_plan",
-                        hasInputs ? String.join(",", inputRefs) : "(none)",
-                        explorationPlanSection, "typed exploration plan projection",
-                        !explorationPlanSection.isBlank()),
-                new PromptSection("contract_review_principles", "static_instruction",
-                        "contract-review-principles.md", contractReviewPrinciples, "review principles", true),
-                new PromptSection("prompt_contract", "tool_policy", "ContractRegistry:" + nodeId,
-                        promptContract.allowedDecisions() + "\n" + promptContract.requiredControlKeys()
-                                + "\n" + promptContract.decisionExample(),
-                        "allowed decisions / required control keys", true)
-        );
+        var sections = new ArrayList<PromptSection>();
+        sections.add(new PromptSection("workspace_guard", "static_instruction", "workspace-guard",
+                workspaceGuard, "execution safety boundary", true));
+        sections.add(new PromptSection("language_policy", "static_instruction", "language-policy",
+                languagePolicy, "output language policy", true));
+        sections.add(new PromptSection("structured_artifact_field_semantics", "tool_policy",
+                "structured-artifact-field-semantics",
+                structuredArtifactFieldSemantics, "structured artifact field semantics", true));
+        if (!readReuseContractSemantics.isBlank()) {
+            sections.add(new PromptSection("read_reuse_contract_semantics", "tool_policy",
+                    "read-reuse-contract-semantics",
+                    readReuseContractSemantics, "agent_output_contract read-reuse field semantics", true));
+        }
+        sections.add(new PromptSection("template_static_frame", "static_instruction",
+                TEMPLATE_ROOT + promptTemplate + ".md",
+                VARIABLE_PATTERN.matcher(template).replaceAll(""), "prompt skeleton instructions", true));
+        sections.add(new PromptSection("requirement", "requirement", workstreamDir + "/requirement.md",
+                requirement, "task requirement", true));
+        sections.add(new PromptSection("context_package", "context_package",
+                hasInputs ? String.join(",", inputRefs) : "(none)",
+                contextPackage, "prior artifacts / assembled context", hasInputs));
+        sections.add(new PromptSection("read_reuse_contract", "read_reuse_contract",
+                hasInputs ? String.join(",", inputRefs) : "(none)",
+                readReuseContractSection, "typed memory read-reuse projection",
+                !readReuseContractSection.isBlank()));
+        sections.add(new PromptSection("exploration_plan", "exploration_plan",
+                hasInputs ? String.join(",", inputRefs) : "(none)",
+                explorationPlanSection, "typed exploration plan projection",
+                !explorationPlanSection.isBlank()));
+        sections.add(new PromptSection("contract_review_principles", "static_instruction",
+                "contract-review-principles.md", contractReviewPrinciples, "review principles", true));
+        sections.add(new PromptSection("prompt_contract", "tool_policy", "ContractRegistry:" + nodeId,
+                promptContract.allowedDecisions() + "\n" + promptContract.requiredControlKeys()
+                        + "\n" + promptContract.decisionExample(),
+                "allowed decisions / required control keys", true));
         return new RenderedPrompt(content, sections);
+    }
+
+    private String optionalSection(String content) {
+        return content == null || content.isBlank() ? "" : "\n\n" + content;
+    }
+
+    private Set<String> outputArtifactTypes(String nodeId) {
+        if (!ContractRegistry.hasContract(nodeId)) {
+            return Set.of();
+        }
+        return ContractRegistry.forNode(nodeId).outputArtifactTypes();
     }
 
     private PromptContract promptContract(String nodeId) {

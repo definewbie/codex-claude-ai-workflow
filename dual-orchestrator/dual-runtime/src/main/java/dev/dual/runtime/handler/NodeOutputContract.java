@@ -9,12 +9,23 @@ public record NodeOutputContract(
         String nodeId,
         Set<String> requiredKeys,
         Set<String> allowedDecisions,
-        Set<String> optionalKeys
+        Set<String> optionalKeys,
+        Set<String> outputArtifactTypes
 ) {
+    public NodeOutputContract(
+            String nodeId,
+            Set<String> requiredKeys,
+            Set<String> allowedDecisions,
+            Set<String> optionalKeys
+    ) {
+        this(nodeId, requiredKeys, allowedDecisions, optionalKeys, Set.of());
+    }
+
     public NodeOutputContract {
         requiredKeys = Set.copyOf(requiredKeys);
         allowedDecisions = Set.copyOf(allowedDecisions);
         optionalKeys = optionalKeys == null ? Set.of() : Set.copyOf(optionalKeys);
+        outputArtifactTypes = outputArtifactTypes == null ? Set.of() : Set.copyOf(outputArtifactTypes);
     }
 
     public void validate(DualControlBlock block) {
@@ -43,5 +54,9 @@ public record NodeOutputContract(
         keys.addAll(requiredKeys);
         keys.addAll(optionalKeys);
         return Collections.unmodifiableSet(keys);
+    }
+
+    public boolean emitsArtifact(String artifactType) {
+        return outputArtifactTypes.contains(artifactType);
     }
 }

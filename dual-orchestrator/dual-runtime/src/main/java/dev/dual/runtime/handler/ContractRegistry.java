@@ -11,61 +11,71 @@ public final class ContractRegistry {
             "intake.claude_brainstorm",
             Set.of("decision", "summary"),
             Set.of("READY_FOR_PRODUCT_REVIEW"),
-            Set.of("needs_human_input")
+            Set.of("needs_human_input"),
+            Set.of("task_contract_proposal")
     );
     private static final NodeOutputContract INTAKE_PRODUCT_REVIEW = new NodeOutputContract(
             "intake.codex_product_review",
             Set.of("decision", "summary"),
             Set.of("READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED"),
-            Set.of()
+            Set.of(),
+            Set.of("agent_output_contract")
     );
     private static final NodeOutputContract DESIGN_CLAUDE = new NodeOutputContract(
             "design.claude_design",
             Set.of("decision", "summary"),
             Set.of("READY_FOR_ARCH_REVIEW"),
-            Set.of()
+            Set.of(),
+            Set.of("agent_output_contract")
     );
     private static final NodeOutputContract DESIGN_ARCH_REVIEW = new NodeOutputContract(
             "design.codex_arch_review",
             Set.of("decision", "summary"),
             Set.of("READY_FOR_ARCH_REVIEW", "NEEDS_REVISION", "BLOCKED"),
-            Set.of()
+            Set.of(),
+            Set.of("agent_output_contract")
     );
     private static final NodeOutputContract PLAN_CLAUDE = new NodeOutputContract(
             "plan.claude_plan",
             Set.of("decision", "summary"),
             Set.of("READY_FOR_PLAN_REVIEW"),
-            Set.of()
+            Set.of(),
+            Set.of("agent_output_contract", "plan_artifact")
     );
     private static final NodeOutputContract PLAN_REVIEW = new NodeOutputContract(
             "plan.codex_plan_review",
             Set.of("decision", "summary"),
             Set.of("READY_TO_IMPLEMENT", "NEEDS_REVISION", "BLOCKED"),
-            Set.of()
+            Set.of(),
+            Set.of("agent_output_contract")
     );
     private static final NodeOutputContract IMPLEMENT_CLAUDE = new NodeOutputContract(
             "implement.claude_implement",
             Set.of("decision", "summary"),
             Set.of("IMPLEMENTED", "BLOCKED"),
-            Set.of()
+            Set.of(),
+            Set.of("agent_output_contract")
     );
     private static final NodeOutputContract IMPLEMENT_SELF_TEST = new NodeOutputContract(
             "implement.claude_self_test_report",
             Set.of("decision", "summary"),
             Set.of("SELF_TEST_COMPLETE", "SELF_TEST_INCOMPLETE", "BLOCKED"),
-            Set.of()
+            Set.of(),
+            Set.of("self_test_report")
     );
     private static final NodeOutputContract ACCEPTANCE_REVIEW = new NodeOutputContract(
             "acceptance.codex_verifier_review",
             Set.of("decision", "summary"),
             Set.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT"),
-            Set.of("contract_gaps", "out_of_scope_files", "missing_tests", "context_gaps")
+            Set.of("contract_gaps", "out_of_scope_files", "missing_tests", "context_gaps"),
+            Set.of("acceptance_review")
     );
     private static final NodeOutputContract STAGE_HANDOFF = new NodeOutputContract(
             "stage.claude_handoff",
             Set.of("decision", "summary"),
             Set.of("HANDOFF_READY"),
-            Set.of()
+            Set.of(),
+            Set.of("stage_handoff")
     );
 
     // --- Contract nodes (task contract compilation) ---

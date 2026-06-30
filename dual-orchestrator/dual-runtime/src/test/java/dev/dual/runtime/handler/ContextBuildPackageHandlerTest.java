@@ -1359,10 +1359,10 @@ class ContextBuildPackageHandlerTest {
         assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed
                         && allowed.isEmpty(),
                 "non-review targets should not receive review reread allowances");
-        assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
-                "read reuse contract must point agents at the typed reread_reasons field");
-        assertTrue(markdown.contains("record a matching entry in agent_output_contract.reread_reasons"),
-                "context package must require a matching reread_reasons entry per re-read reusable path");
+        assertEquals("", readReuse.get("reasonField"),
+                "targets without a registered agent_output_contract artifact must not see its reread field");
+        assertFalse(markdown.contains("agent_output_contract.reread_reasons"),
+                "context package must not leak agent_output_contract fields into targets that do not declare that artifact");
 
         var capabilityCatalog = objectMapper.readValue(wsDir.resolve("memory/agent-capability-catalog.json").toFile(), Map.class);
         assertEquals("agent_capability_catalog", capabilityCatalog.get("artifactType"));
@@ -1499,6 +1499,8 @@ class ContextBuildPackageHandlerTest {
                         && allowed.stream().anyMatch(item -> String.valueOf(item).contains("src/api.js"))
                         && allowed.stream().noneMatch(item -> String.valueOf(item).contains("docs/spec.md")),
                 "review targets should receive typed source-file verification allowance only");
+        assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
+                "agent_output_contract targets should receive the typed reread reason field");
     }
 
     @Test
@@ -1530,6 +1532,8 @@ class ContextBuildPackageHandlerTest {
         var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
         assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed && allowed.isEmpty(),
                 "producer targets must use changed_files/plan/invalidation, not review reread allowance");
+        assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
+                "implement agent_output_contract targets should receive the typed reread reason field");
     }
 
     @Test
