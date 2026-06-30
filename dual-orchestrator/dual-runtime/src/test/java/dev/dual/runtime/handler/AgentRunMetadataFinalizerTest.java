@@ -209,6 +209,71 @@ class AgentRunMetadataFinalizerTest {
         assertEquals("EXITED", attempt.get("processStatus"));
     }
 
+    @Test
+    void usesAdapterSignalsFromRunMetadataAsOutcomeEvidence() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-signal/runs/run-signal/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-signal",
+                  "workstreamId": "ws-signal",
+                  "nodeId": "intake.codex_product_review",
+                  "agent": "codex",
+                  "status": "failed",
+                  "processResult": {
+                    "command": "acpx codex",
+                    "pid": 123,
+                    "exitCode": 0,
+                    "usability": "EXITED_ZERO",
+                    "durationMs": 1200,
+                    "stdoutPath": ".agent/workstreams/ws-signal/runs/run-signal/stdout.md",
+                    "stderrPath": ".agent/workstreams/ws-signal/runs/run-signal/stderr.log",
+                    "interrupted": false,
+                    "timedOut": false
+                  },
+                  "adapterSignals": [ {
+                    "type": "RATE_LIMITED",
+                    "severity": "RECOVERABLE",
+                    "source": "acpx_stream",
+                    "message": "provider rate limit",
+                    "sessionId": "sess-1",
+                    "observedSequence": 7,
+                    "superseded": false
+                  } ]
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_id", "run-signal");
+        facts.put("run_metadata", ".agent/workstreams/ws-signal/runs/run-signal/run.json");
+        facts.put("agent", "codex");
+        facts.put("exit_code", 0);
+
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        var outcome = map(json.get("executionOutcome"));
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", outcome.get("status"));
+        assertEquals(false, outcome.get("nodeMaySucceed"));
+        var attempt = map(json.get("executionAttempt"));
+        assertEquals("RECOVERABLE_FAILED", attempt.get("status"));
+        assertEquals("RATE_LIMITED", attempt.get("failureSignal"));
+        var signal = map(list(json.get("adapterSignals")).get(0));
+        assertEquals("RATE_LIMITED", signal.get("type"));
+        assertEquals("acpx_stream", signal.get("source"));
+        assertEquals("sess-1", signal.get("sessionId"));
+    }
+
     @SuppressWarnings("unchecked")
     private static Map<String, Object> map(Object value) {
         return (Map<String, Object>) value;

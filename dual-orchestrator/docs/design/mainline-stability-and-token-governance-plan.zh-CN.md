@@ -248,6 +248,16 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   当 run.json processResult 表示“非零退出但完整输出”、terminal control 和
   required artifact 均有效时，最终 outcome 必须是 `SUCCESS_WITH_WARNINGS`，
   attempt 必须是 `COMPLETED/EXITED`。
+- 同一 execution evidence 边界下，`AgentRunMetadataFinalizer` 也已改为合并
+  `run.json.adapterSignals` 与 legacy `NodeResult` adapter signal fallback，并把合并后的
+  signals 传给 `AgentExecutionFinalizer`。这避免 adapter 已落盘
+  `RATE_LIMITED` / reconnect / provider failure 等 typed signal，但 finalizer 因
+  `NodeResult` 缺少 `acpx_failure.reason` 把 signals 覆盖为空并误判成功。
+- 已补回归测试
+  `AgentRunMetadataFinalizerTest.usesAdapterSignalsFromRunMetadataAsOutcomeEvidence`：
+  当 run.json adapterSignals 含 `RATE_LIMITED`、但 NodeResult 没有 legacy failure fact 时，
+  最终 outcome 必须是 `RECOVERABLE_ADAPTER_FAILURE`，attempt 必须是
+  `RECOVERABLE_FAILED`，并保留 adapter signal 的 source / sessionId。
 - refresh 入口已补充 execution consistency warning 输出：当历史 ledger replay 后的 metrics
   中存在 `stale_legacy_running` / `attempt_outcome_conflict` 等非 `consistent` 计数时，
   CLI 会从 `metrics/workstream-metrics.json.providerMetrics.executionConsistencyCounts`

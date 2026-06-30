@@ -108,11 +108,12 @@ public final class AgentRunMetadataFinalizer {
         try {
             var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
             var process = processResultFromRunMetadata(json, processResult(result));
+            var signals = adapterSignalsFromRunMetadata(json, adapterSignals(result));
             var evidence = new AgentExecutionEvidence(
                     process,
                     terminalControlResult,
                     artifactContractResults,
-                    adapterSignals(result)
+                    signals
             );
             var processResult = mergedProcessResult(json, process);
             var finalized = executionFinalizer.finalize(baseAttempt(json, result), evidence);
@@ -121,7 +122,7 @@ public final class AgentRunMetadataFinalizer {
             json.put("failureReason", finalized.legacyFailureReason());
             json.put("recoverable", finalized.legacyRecoverable());
             json.set("processResult", OBJECT_MAPPER.valueToTree(processResult));
-            json.set("adapterSignals", OBJECT_MAPPER.valueToTree(adapterSignals(result).stream()
+            json.set("adapterSignals", OBJECT_MAPPER.valueToTree(signals.stream()
                     .map(AgentRunMetadataFinalizer::adapterSignalToMap)
                     .toList()));
             json.set("terminalControlResult", OBJECT_MAPPER.valueToTree(
@@ -169,6 +170,41 @@ public final class AgentRunMetadataFinalizer {
             default -> null;
         };
         return type == null ? List.of() : List.of(new AdapterSignal(type, reason, 0));
+    }
+
+    private static List<AdapterSignal> adapterSignalsFromRunMetadata(ObjectNode json, List<AdapterSignal> fallback) {
+        var merged = new ArrayList<AdapterSignal>();
+        var existing = json.path("adapterSignals");
+        if (existing.isArray()) {
+            for (var item : existing) {
+                var type = enumValue(AdapterSignalType.class, item.path("type").asText(""), null);
+                if (type == null) {
+                    continue;
+                }
+                merged.add(new AdapterSignal(
+                        type,
+                        item.path("message").asText(""),
+                        item.path("observedSequence").isNumber() ? Math.max(0L, item.path("observedSequence").asLong()) : 0L,
+                        item.path("source").asText(""),
+                        item.path("sessionId").asText(""),
+                        item.path("superseded").isBoolean() && item.path("superseded").asBoolean()
+                ));
+            }
+        }
+        for (var signal : fallback) {
+            if (merged.stream().noneMatch(existingSignal -> sameAdapterSignal(existingSignal, signal))) {
+                merged.add(signal);
+            }
+        }
+        return List.copyOf(merged);
+    }
+
+    private static boolean sameAdapterSignal(AdapterSignal first, AdapterSignal second) {
+        return first.type() == second.type()
+                && first.observedSequence() == second.observedSequence()
+                && first.message().equals(second.message())
+                && first.source().equals(second.source())
+                && first.sessionId().equals(second.sessionId());
     }
 
     static Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {
