@@ -84,24 +84,37 @@ public final class AgentRunMetadataFinalizer {
             List<ArtifactContractResult> artifactContractResults,
             Object rereadReasons
     ) {
-        var evidence = new AgentExecutionEvidence(
-                processResult(result),
-                terminalControlResult,
-                artifactContractResults,
-                adapterSignals(result)
-        );
         var runMetadataRef = text(result.result().get("run_metadata"));
         if (runMetadataRef.isBlank()) {
+            var evidence = new AgentExecutionEvidence(
+                    processResult(result),
+                    terminalControlResult,
+                    artifactContractResults,
+                    adapterSignals(result)
+            );
             return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
         }
         var root = workspaceRoot.toAbsolutePath().normalize();
         var path = root.resolve(runMetadataRef).normalize();
         if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+            var evidence = new AgentExecutionEvidence(
+                    processResult(result),
+                    terminalControlResult,
+                    artifactContractResults,
+                    adapterSignals(result)
+            );
             return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
         }
         try {
             var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
-            var processResult = mergedProcessResult(json, processResult(result));
+            var process = processResultFromRunMetadata(json, processResult(result));
+            var evidence = new AgentExecutionEvidence(
+                    process,
+                    terminalControlResult,
+                    artifactContractResults,
+                    adapterSignals(result)
+            );
+            var processResult = mergedProcessResult(json, process);
             var finalized = executionFinalizer.finalize(baseAttempt(json, result), evidence);
             json.put("schemaVersion", Math.max(json.path("schemaVersion").asInt(0), 3));
             json.put("status", finalized.legacyStatus());
@@ -127,6 +140,12 @@ public final class AgentRunMetadataFinalizer {
         } catch (Exception ignored) {
             // Run metadata is an observability artifact. Contract validation result
             // remains authoritative even if the historical run file is damaged.
+            var evidence = new AgentExecutionEvidence(
+                    processResult(result),
+                    terminalControlResult,
+                    artifactContractResults,
+                    adapterSignals(result)
+            );
             return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
         }
     }
@@ -297,6 +316,28 @@ public final class AgentRunMetadataFinalizer {
             }
         }
         return merged;
+    }
+
+    private static ProcessResult processResultFromRunMetadata(ObjectNode json, ProcessResult fallback) {
+        var existing = json.path("processResult");
+        if (!existing.isObject()) {
+            return fallback;
+        }
+        var usability = enumValue(ProcessUsability.class, existing.path("usability").asText(""), null);
+        if (usability == null) {
+            return fallback;
+        }
+        return new ProcessResult(
+                existing.path("command").asText(fallback.command()),
+                existing.path("pid").isNumber() ? existing.path("pid").asLong() : fallback.pid(),
+                existing.path("exitCode").isNumber() ? existing.path("exitCode").asInt() : fallback.exitCode(),
+                usability,
+                existing.path("durationMs").isNumber() ? Math.max(0L, existing.path("durationMs").asLong()) : fallback.durationMs(),
+                existing.path("stdoutPath").asText(fallback.stdoutPath()),
+                existing.path("stderrPath").asText(fallback.stderrPath()),
+                existing.path("interrupted").isBoolean() ? existing.path("interrupted").asBoolean() : fallback.interrupted(),
+                existing.path("timedOut").isBoolean() ? existing.path("timedOut").asBoolean() : fallback.timedOut()
+        );
     }
 
     private static Map<String, Object> adapterSignalToMap(AdapterSignal signal) {

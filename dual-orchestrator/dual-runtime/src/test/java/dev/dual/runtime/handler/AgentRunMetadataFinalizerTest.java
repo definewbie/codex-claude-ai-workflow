@@ -158,6 +158,57 @@ class AgentRunMetadataFinalizerTest {
         assertEquals(true, outcome.get("nodeMaySucceed"));
     }
 
+    @Test
+    void usesAdapterProcessResultAsOutcomeEvidenceInsteadOfLegacyNodeStatus() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-process/runs/run-process/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-process",
+                  "workstreamId": "ws-process",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "status": "failed",
+                  "processResult": {
+                    "command": "acpx claude",
+                    "pid": 123,
+                    "exitCode": 1,
+                    "usability": "EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT",
+                    "durationMs": 1200,
+                    "stdoutPath": ".agent/workstreams/ws-process/runs/run-process/stdout.md",
+                    "stderrPath": ".agent/workstreams/ws-process/runs/run-process/stderr.log",
+                    "interrupted": false,
+                    "timedOut": false
+                  }
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_id", "run-process");
+        facts.put("run_metadata", ".agent/workstreams/ws-process/runs/run-process/run.json");
+        facts.put("agent", "claude");
+        facts.put("exit_code", 1);
+
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.FAILED,
+                List.of(),
+                facts,
+                ""
+        ), TerminalControlResult.valid("IMPLEMENTED"), List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        var outcome = map(json.get("executionOutcome"));
+        assertEquals("SUCCESS_WITH_WARNINGS", outcome.get("status"));
+        assertEquals(true, outcome.get("nodeMaySucceed"));
+        var attempt = map(json.get("executionAttempt"));
+        assertEquals("COMPLETED", attempt.get("status"));
+        assertEquals("EXITED", attempt.get("processStatus"));
+    }
+
     @SuppressWarnings("unchecked")
     private static Map<String, Object> map(Object value) {
         return (Map<String, Object>) value;
