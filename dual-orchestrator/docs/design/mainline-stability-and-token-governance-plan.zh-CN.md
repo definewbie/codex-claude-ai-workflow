@@ -72,7 +72,7 @@ flowchart TD
 
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
-| `AgentExecutionAttempt -> AgentExecutionOutcome` | 部分实现 | 出现 `executionOutcome=SUCCESS` 但 `executionAttempt=RUNTIME_FAILED/PROCESS_STALLED` | P0 |
+| `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，真实 replay 待做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；仍缺 problematic workstream replay | P0 |
 | acpx / CC / Codex 执行生命周期 | 未完整建模 | terminal 已出现但 transport 继续等 293s/380s 的原因不可解释 | P0 |
 | stale RUNNING / PROCESS_STALLED | synthetic 覆盖，real replay 待做 | dead pid resume 会进入 recovery 并标记 node execution stale；仍缺历史 problematic workstream replay | P0 |
 | provider/model/token attribution | 本地读模型已覆盖，真实账单校准待做 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；仍缺 DeepSeek CSV 离线校准和真实复杂 case 复测 | P0.5 |
@@ -776,7 +776,8 @@ Projection surfaces:
 
 Findings:
 - intake exploration boundary is closed.
-- execution attempt/outcome consistency is not yet closed.
+- execution attempt/outcome consistency has local finalizer/resolver/projection coverage;
+  problematic real workstream replay is still missing.
 - token economics has local read-model coverage for GLM token-only, DeepSeek pricing,
   OpenAI token-only, and Anthropic cache pricing; real bill calibration and complex
   case validation are still missing.
