@@ -68,6 +68,41 @@ flowchart TD
 - session / transcript 是 runtime cache，不是 workflow memory 的 source of truth。
 - UI / CLI / API 只能投影统一 read model。
 
+## 2.1 主线架构不变量
+
+下面这些是不允许用局部 trade-off 替代的主线不变量。任何实现、修复、benchmark 或文档更新，如果不能让其中至少一个不变量更真实，就不属于本计划范围。
+
+| 不变量 | 必须成立 | 不允许的替代 |
+| --- | --- | --- |
+| 执行事实唯一 | 外部 agent 进程事实必须先进入 `AgentExecutionAttempt`，再由唯一 resolver 形成 `AgentExecutionOutcome`，最后驱动 `NodeExecution` | handler / validator / projection 各自写状态；用 trace warning 代替执行边界收口 |
+| 语义输出类型化 | LLM 输出必须通过 typed artifact / validator 才能参与路由、验收、修复、handoff 或 reread policy | 从 Markdown 标题、summary prose、stderr 文本或 prompt 约束直接推断业务语义 |
+| 经济模型可归因 | 每次 provider run 必须保留真实 token、provider、model、billing mode、cache signal source 和 cost reliability | GLM 包月、模型未知或价格未知时降级为 0、unknown 总账，或跳过 token 口径 |
+| repo scope 由 orchestrator 管 | 每个阶段该读什么、能改什么、越界如何处理，必须由 `ExplorationPlan` / `ExplorationPolicyResult` / read-reuse contract 明确表达 | 让 Claude/Codex 自由探索后再用 prompt 要求“少读” |
+| projection 不发明状态 | UI / CLI / API / report 只能消费统一 read model；状态、next action、why stopped 必须同源 | 各 surface 根据 workflow status、node id、latest run、failure 文件各自猜测 |
+| 验证先于真实消耗 | real-case / benchmark 启动前必须有可执行 Verification Gate，且触发条件、artifact freshness、stop-loss 已证明 | 先跑 case 再解释结果，或把 `INVALID` 说成部分成功 |
+
+### 2.2 主线决策门
+
+进入任何实现前，必须先通过下面的决策门；否则不得继续写代码或启动真实 provider：
+
+```text
+Mainline Decision Gate:
+- Target phase: P0 / P0.5 / P1 / P2 / P3
+- Boundary owner:
+- Source of truth being changed or strengthened:
+- Drift path being removed or centralized:
+- Explicit non-goals:
+- Proof required before claiming completion:
+- Remaining gaps that must stay visible:
+```
+
+判定规则：
+
+- 如果答案是“增加一处兼容 fallback”“多显示一个 warning”“强化 prompt 文案”“再跑一次看看”，默认判为不通过，除非同时说明它删除了哪个旧 source of truth 或强化了哪个 typed boundary。
+- 如果一个修复只让当前测试通过，但不改变 source of truth、validator、policy、catalog、ledger event 或共享 read model，不能计入 P0 / P0.5 / P1 完成度。
+- 如果真实验证因为 provider、jar freshness、pricing、trigger precondition 或观测链路问题失效，结论必须是 `INVALID`，不能拿来证明治理有效。
+- 如果同一类边界问题连续两次失败，必须回到本节重新定义 owner / SoT / invariant；不能继续调阈值、补 prompt 或堆 projection。
+
 ## 3. 未完成目标清单
 
 | 目标 | 当前状态 | 缺口 | 优先级 |

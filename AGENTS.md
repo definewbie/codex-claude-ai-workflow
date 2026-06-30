@@ -24,6 +24,16 @@
 
 发现实现偏离主目标时，必须先修复目标链路，再继续后续优化；不能用新增功能掩盖验收口径缺失。
 
+不得把“更容易通过测试的局部折中”替代为主线目标完成。例如：用 projection warning 替代 execution source of truth 收口、用 prompt 文案替代 artifact contract、用 token 观测替代 token 治理、用 synthetic fixture 替代已要求的 real-case proof、用兼容 fallback 替代删除漂移 source of truth。若某个方案只是 trade-off，必须先说明它为何仍然推进最终目标；否则停止实现，回到模型和边界分析。
+
+每次进入 `mainline-stability-and-token-governance-plan.zh-CN.md` 相关开发前，必须先回答：
+
+- 本次改动推进的是 P0 / P0.5 / P1 / P2 / P3 中哪一个主线目标？
+- 它修复的是哪个 source of truth 或边界，而不是哪个表面症状？
+- 它会删除、集中或强化哪个旧的漂移路径？
+- 哪个测试或 replay 能证明该边界，而不是只证明当前实现细节？
+- 哪些目标仍未完成，不能在收口报告里声称完成？
+
 ## Verification Boundary Discipline
 
 真实 case、benchmark、A/B 实验或 provider 行为验证，必须先把“要证明什么”转成可执行的前置条件和中途止损条件，不能只把它写成事后观察项。
