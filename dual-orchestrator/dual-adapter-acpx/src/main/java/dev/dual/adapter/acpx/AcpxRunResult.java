@@ -4,7 +4,22 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-public record AcpxRunResult(int exitCode, Instant startedAt, Instant finishedAt, List<String> command) {
+public record AcpxRunResult(
+        int exitCode,
+        Instant startedAt,
+        Instant finishedAt,
+        List<String> command,
+        List<AcpxExecutionEvent> executionTimeline
+) {
+    public AcpxRunResult(int exitCode, Instant startedAt, Instant finishedAt, List<String> command) {
+        this(exitCode, startedAt, finishedAt, command, List.of());
+    }
+
+    public AcpxRunResult {
+        command = command == null ? List.of() : List.copyOf(command);
+        executionTimeline = executionTimeline == null ? List.of() : List.copyOf(executionTimeline);
+    }
+
     public long durationMs() {
         return Duration.between(startedAt, finishedAt).toMillis();
     }

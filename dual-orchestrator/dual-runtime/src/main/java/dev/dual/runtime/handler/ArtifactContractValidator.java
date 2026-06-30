@@ -5,11 +5,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.AgentExecutionAttempt;
+import dev.dual.core.execution.AgentExecutionAttemptStatus;
+import dev.dual.core.execution.AgentExecutionFinalizer;
 import dev.dual.core.execution.AgentExecutionEvidence;
 import dev.dual.core.execution.AgentExecutionOutcome;
 import dev.dual.core.execution.AgentExecutionOutcomeResolver;
+import dev.dual.core.execution.AgentExecutionProcessStatus;
 import dev.dual.core.execution.AgentExecutionRetryPolicy;
 import dev.dual.core.execution.ArtifactContractResult;
+import dev.dual.core.execution.FinalizedAgentExecution;
 import dev.dual.core.execution.ProcessResult;
 import dev.dual.core.execution.ProcessUsability;
 import dev.dual.core.execution.TerminalControlResult;
@@ -36,6 +41,7 @@ public final class ArtifactContractValidator {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private static final AgentExecutionOutcomeResolver OUTCOME_RESOLVER = new AgentExecutionOutcomeResolver();
+    private static final AgentExecutionFinalizer EXECUTION_FINALIZER = new AgentExecutionFinalizer(OUTCOME_RESOLVER);
     private final DualControlBlockParser parser = new DualControlBlockParser();
     private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
 
@@ -424,7 +430,6 @@ public final class ArtifactContractValidator {
         updateRunMetadata(
                 root,
                 result,
-                outcome,
                 TerminalControlResult.valid(block.required("decision")),
                 List.of(ArtifactContractResult.requiredValid(requiredArtifactTypeOrDefault(nodeDefinition))),
                 document.get("reread_reasons")
@@ -812,7 +817,6 @@ public final class ArtifactContractValidator {
         updateRunMetadata(
                 workspaceRoot,
                 result,
-                outcome,
                 terminalResultFor(reason, message),
                 List.of(artifactResultFor(nodeDefinition, reason, message)),
                 null
@@ -948,7 +952,6 @@ public final class ArtifactContractValidator {
     private static void updateRunMetadata(
             Path workspaceRoot,
             NodeResult result,
-            AgentExecutionOutcome outcome,
             TerminalControlResult terminalControlResult,
             List<ArtifactContractResult> artifactContractResults,
             Object rereadReasons
@@ -964,12 +967,19 @@ public final class ArtifactContractValidator {
         }
         try {
             var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
+            var processResult = mergedProcessResult(json, processResult(result));
+            var evidence = new AgentExecutionEvidence(
+                    processResult(result),
+                    terminalControlResult,
+                    artifactContractResults,
+                    adapterSignals(result)
+            );
+            var finalized = EXECUTION_FINALIZER.finalize(baseAttempt(json, result), evidence);
             json.put("schemaVersion", Math.max(json.path("schemaVersion").asInt(0), 3));
-            json.put("status", outcome.nodeMaySucceed() ? "completed" : "failed");
-            json.put("failureReason", outcome.nodeMaySucceed() ? null : outcome.primaryReason());
-            json.put("recoverable", !outcome.nodeMaySucceed()
-                    && outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
-            json.set("processResult", OBJECT_MAPPER.valueToTree(mergedProcessResult(json, processResult(result))));
+            json.put("status", finalized.legacyStatus());
+            json.put("failureReason", finalized.legacyFailureReason());
+            json.put("recoverable", finalized.legacyRecoverable());
+            json.set("processResult", OBJECT_MAPPER.valueToTree(processResult));
             json.set("adapterSignals", OBJECT_MAPPER.valueToTree(adapterSignals(result).stream()
                     .map(ArtifactContractValidator::adapterSignalToMap)
                     .toList()));
@@ -980,7 +990,8 @@ public final class ArtifactContractValidator {
             if (rereadReasons != null) {
                 json.set("reread_reasons", OBJECT_MAPPER.valueToTree(rereadReasons));
             }
-            json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(outcome)));
+            json.set("executionAttempt", OBJECT_MAPPER.valueToTree(executionAttemptToMap(finalized.attempt())));
+            json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(finalized.outcome())));
             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
         } catch (Exception ignored) {
             // Run metadata is an observability artifact. Contract validation result
@@ -1081,7 +1092,19 @@ public final class ArtifactContractValidator {
     }
 
     private static String firstNonBlank(String first, String second) {
-        return first != null && !first.isBlank() ? first : second;
+        return firstNonBlank(new String[]{first, second});
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return "";
+        }
+        for (var value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return "";
     }
 
     private static Optional<Map<String, Object>> readMap(Path path) {
@@ -1340,6 +1363,58 @@ public final class ArtifactContractValidator {
         return map;
     }
 
+    private static AgentExecutionAttempt baseAttempt(ObjectNode json, NodeResult result) {
+        var attempt = json.path("executionAttempt");
+        var runId = firstNonBlank(json.path("runId").asText(""), text(result.result().get("run_id")), "run-unknown");
+        return new AgentExecutionAttempt(
+                firstNonBlank(attempt.path("attemptId").asText(""), "att-" + runId),
+                runId,
+                firstNonBlank(json.path("workstreamId").asText(""), attempt.path("workstreamId").asText("")),
+                firstNonBlank(json.path("nodeId").asText(""), attempt.path("nodeId").asText("")),
+                firstNonBlank(json.path("agent").asText(""), attempt.path("agent").asText(""), text(result.result().get("agent"))),
+                enumValue(AgentExecutionAttemptStatus.class, attempt.path("status").asText(""),
+                        AgentExecutionAttemptStatus.PROCESS_EXITED),
+                enumValue(AgentExecutionProcessStatus.class, attempt.path("processStatus").asText(""),
+                        AgentExecutionProcessStatus.EXITED),
+                enumValue(AdapterSignalType.class, attempt.path("failureSignal").asText(""), null),
+                attempt.path("recoverable").asBoolean(false),
+                attempt.path("retrySafe").asBoolean(false),
+                firstNonBlank(attempt.path("message").asText(""), "process exited"),
+                attempt.path("stderrPath").asText(""),
+                attempt.path("transcriptPath").asText(""),
+                attempt.path("sessionName").asText(""),
+                attempt.path("sessionId").asText(""),
+                attempt.path("sessionScope").asText(""),
+                attempt.path("sessionSegmentKey").asText(""),
+                instantOrNull(attempt.path("startedAt").asText("")),
+                instantOrNull(attempt.path("finishedAt").asText(""))
+        );
+    }
+
+    private static Map<String, Object> executionAttemptToMap(AgentExecutionAttempt attempt) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("attemptId", attempt.attemptId());
+        map.put("runId", attempt.runId());
+        map.put("workstreamId", attempt.workstreamId());
+        map.put("nodeId", attempt.nodeId());
+        map.put("agent", attempt.agent());
+        map.put("status", attempt.status().name());
+        map.put("processStatus", attempt.processStatus().name());
+        map.put("failureSignal", attempt.failureSignal() == null ? null : attempt.failureSignal().name());
+        map.put("recoverable", attempt.recoverable());
+        map.put("retrySafe", attempt.retrySafe());
+        map.put("message", attempt.message());
+        map.put("stderrPath", attempt.stderrPath());
+        map.put("transcriptPath", attempt.transcriptPath());
+        map.put("sessionName", attempt.sessionName());
+        map.put("sessionId", attempt.sessionId());
+        map.put("sessionScope", attempt.sessionScope());
+        map.put("sessionSegmentKey", attempt.sessionSegmentKey());
+        map.put("startedAt", attempt.startedAt() == null ? null : attempt.startedAt().toString());
+        map.put("finishedAt", attempt.finishedAt() == null ? null : attempt.finishedAt().toString());
+        return map;
+    }
+
     private static Map<String, Object> mergedProcessResult(ObjectNode json, ProcessResult process) {
         var merged = new LinkedHashMap<String, Object>();
         var existing = json.path("processResult");
@@ -1365,6 +1440,28 @@ public final class ArtifactContractValidator {
         map.put("observedSequence", signal.observedSequence());
         map.put("superseded", signal.superseded());
         return map;
+    }
+
+    private static Instant instantOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Instant.parse(value);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private static <E extends Enum<E>> E enumValue(Class<E> type, String value, E fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        try {
+            return Enum.valueOf(type, value);
+        } catch (RuntimeException ignored) {
+            return fallback;
+        }
     }
 
     private static Map<String, Object> terminalControlToMap(TerminalControlResult terminal) {

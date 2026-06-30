@@ -352,6 +352,10 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"inputTokens\" : 100"));
         assertTrue(runMetadata.contains("\"cachedReadTokens\" : 1000"));
         assertTrue(runMetadata.contains("\"costAmount\" : 0.25"));
+        assertTrue(runMetadata.contains("\"providerModelIdentity\" :"));
+        assertTrue(runMetadata.contains("\"provider\" : \"zhipu\""));
+        assertTrue(runMetadata.contains("\"model\" : \"glm-5.2\""));
+        assertTrue(runMetadata.contains("\"billingMode\" : \"subscription_token_only\""));
     }
 
     @Test
@@ -902,6 +906,41 @@ class AcpxAgentTaskHandlerTest {
         }
     }
 
+    private static final class TimelineCompletingTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    <dual-artifact type="agent_output_contract">
+                    {"artifact_type":"agent_output_contract","summary":"Ready"}
+                    </dual-artifact>
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude"),
+                    List.of(new AcpxExecutionEvent(
+                            "terminal_control_detected",
+                            "stdout",
+                            7,
+                            now.plusMillis(750),
+                            750
+                    ))
+            );
+        }
+    }
+
     private static final class RejectionEnvelopeTransport extends AcpxAgentTransport {
         @Override
         public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws java.io.IOException {
@@ -1035,6 +1074,26 @@ class AcpxAgentTaskHandlerTest {
         var debugDump = Files.walk(workstreamDir.resolve("runs"))
                 .filter(p -> p.getFileName().toString().endsWith(".debug.json")).findFirst();
         assertTrue(debugDump.isEmpty(), "content debug dump must NOT exist when DUAL_AGENT_PROMPT_DEBUG unset");
+    }
+
+    @Test
+    void runWritesExecutionTimeline() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-timeline");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+        var handler = new AcpxAgentTaskHandler(new TimelineCompletingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
+
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-timeline", definition,
+                readyInstance("intake.claude_brainstorm")));
+
+        var runJson = Files.walk(workstreamDir.resolve("runs"))
+                .filter(p -> p.getFileName().toString().equals("run.json")).findFirst().orElseThrow();
+        var runMetadata = Files.readString(runJson);
+        assertTrue(runMetadata.contains("\"executionTimeline\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"kind\" : \"terminal_control_detected\""), runMetadata);
+        assertTrue(runMetadata.contains("\"elapsedMs\" : 750"), runMetadata);
     }
 
     @Test
@@ -1249,6 +1308,15 @@ class AcpxAgentTaskHandlerTest {
                     [done] end_turn
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main (" + sessionId + ") · agent connected\n");
+            Files.writeString(sessionsDir.resolve(sessionId + ".json"), """
+                    {
+                      "current_model_id": "default",
+                      "available_models": [{
+                        "id": "model",
+                        "description": "Use the default model (currently glm-5.2[1m]) · bundled subscription"
+                      }]
+                    }
+                    """);
             var promptText = Files.readString(request.promptPath())
                     .replace("\\", "\\\\")
                     .replace("\"", "\\\"")

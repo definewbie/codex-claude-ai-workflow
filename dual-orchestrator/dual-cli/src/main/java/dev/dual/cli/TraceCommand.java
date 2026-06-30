@@ -642,19 +642,54 @@ public final class TraceCommand implements Callable<Integer> {
     private String runStatusLabel(RunMetadata run) {
         var outcome = map(run.executionOutcome());
         var outcomeStatus = text(outcome.get("status"));
+        var consistency = executionConsistency(run);
+        var consistencySuffix = "consistent".equals(consistency) || consistency.isBlank()
+                ? ""
+                : " executionConsistency=" + consistency;
         if (outcomeStatus.isBlank()) {
             var attempt = map(run.executionAttempt());
             var attemptStatus = text(attempt.get("status"));
             if (attemptStatus.isBlank()) {
-                return text(run.status());
+                return text(run.status()) + consistencySuffix;
             }
             var failureSignal = text(attempt.get("failureSignal"));
             return text(run.status()) + "/" + attemptStatus
-                    + (failureSignal.isBlank() ? "" : "(" + failureSignal + ")");
+                    + (failureSignal.isBlank() ? "" : "(" + failureSignal + ")")
+                    + consistencySuffix;
         }
         var primaryReason = text(outcome.get("primaryReason"));
         return text(run.status()) + "/" + outcomeStatus
-                + (primaryReason.isBlank() ? "" : "(" + primaryReason + ")");
+                + (primaryReason.isBlank() ? "" : "(" + primaryReason + ")")
+                + consistencySuffix;
+    }
+
+    private String executionConsistency(RunMetadata run) {
+        var attempt = map(run.executionAttempt());
+        var outcome = map(run.executionOutcome());
+        if (attempt.isEmpty() && outcome.isEmpty()) {
+            return "missing_attempt_and_outcome";
+        }
+        if (attempt.isEmpty()) {
+            return "missing_attempt";
+        }
+        if (outcome.isEmpty()) {
+            return "missing_outcome";
+        }
+        var attemptStatus = text(attempt.get("status"));
+        var nodeMaySucceed = Boolean.TRUE.equals(outcome.get("nodeMaySucceed"));
+        if (nodeMaySucceed && !"COMPLETED".equals(attemptStatus)) {
+            return "attempt_outcome_conflict";
+        }
+        if (!nodeMaySucceed && "COMPLETED".equals(attemptStatus)) {
+            return "attempt_outcome_conflict";
+        }
+        if (nodeMaySucceed && !"completed".equals(text(run.status()))) {
+            return "legacy_outcome_conflict";
+        }
+        if (!nodeMaySucceed && "completed".equals(text(run.status()))) {
+            return "legacy_outcome_conflict";
+        }
+        return "consistent";
     }
 
     private void printRunMetadataWarnings(List<RunMetadataReader.RunMetadataWarning> warnings) {

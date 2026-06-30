@@ -41,6 +41,7 @@ record AgentRunDocument(
         String failureReason,
         Boolean recoverable,
         AcpxUsage usage,
+        Map<String, Object> providerModelIdentity,
         AcpxToolUsage toolUsage,
         String agentExplorationPlanPath,
         String contextGovernanceActualReportPath,
@@ -51,6 +52,7 @@ record AgentRunDocument(
         Map<String, Object> terminalControlResult,
         List<Map<String, Object>> artifactContractResults,
         Map<String, Object> executionAttempt,
-        Map<String, Object> executionOutcome
+        Map<String, Object> executionOutcome,
+        List<Map<String, Object>> executionTimeline
 ) {
 }

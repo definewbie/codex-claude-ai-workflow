@@ -1,5 +1,6 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeResult;
@@ -16,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArtifactContractValidatorTest {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @TempDir
     Path tempDir;
 
@@ -315,6 +318,54 @@ class ArtifactContractValidatorTest {
         assertTrue(runMetadata.contains("\"artifactContractResults\""));
         assertTrue(runMetadata.contains("\"present\" : true"));
         assertTrue(runMetadata.contains("\"valid\" : true"));
+    }
+
+    @Test
+    void finalizesRunMetadataAttemptAndOutcomeFromSameEvidence() throws Exception {
+        var runRef = writeRunMetadataWithRecoverableAttempt("run-finalize-attempt");
+        var outputRef = writeOutput("review-finalized.md", """
+                Review passed.
+
+                <dual-artifact type="agent_output_contract" version="1">
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "lifecycle_status": "READY",
+                  "decision": "READY_FOR_ARCH_REVIEW",
+                  "summary": "Architecture is ready.",
+                  "blocking": false,
+                  "checks": ["reviewed design"],
+                  "evidence": ["design matches contract"],
+                  "missing_evidence": [],
+                  "must_fix": [],
+                  "acceptance_notes": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "Architecture review is complete.",
+                  "failure": {"category_hint":"","contract_gaps":[],"out_of_scope_files":[],"missing_tests":[],"context_gaps":[],"reason":""}
+                }
+                </dual-artifact>
+
+                ```dual-control
+                decision: READY_FOR_ARCH_REVIEW
+                summary: Architecture is ready.
+                ```
+                """);
+        var result = NodeResult.completed("completed", List.of(outputRef), Map.of(
+                "agent", "codex",
+                "run_metadata", runRef
+        ));
+
+        var validated = validator.validate(tempDir, agentNode("design.codex_arch_review"), result);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        var runMetadata = OBJECT_MAPPER.readTree(tempDir.resolve(runRef).toFile());
+        assertEquals("completed", runMetadata.path("status").asText());
+        assertEquals("COMPLETED", runMetadata.path("executionAttempt").path("status").asText());
+        assertEquals("EXITED", runMetadata.path("executionAttempt").path("processStatus").asText());
+        assertTrue(runMetadata.path("executionAttempt").path("failureSignal").isNull());
+        assertEquals("SUCCESS", runMetadata.path("executionOutcome").path("status").asText());
+        assertTrue(runMetadata.path("executionOutcome").path("nodeMaySucceed").asBoolean());
     }
 
     @Test
@@ -1083,6 +1134,38 @@ class ArtifactContractValidatorTest {
                   "status": "%s"
                 }
                 """.formatted(runId, status));
+        return tempDir.relativize(path).toString();
+    }
+
+    private String writeRunMetadataWithRecoverableAttempt(String runId) throws Exception {
+        var path = tempDir.resolve(".agent/workstreams/ws-test/runs").resolve(runId).resolve("run.json");
+        Files.createDirectories(path.getParent());
+        Files.writeString(path, """
+                {
+                  "schemaVersion": 3,
+                  "runId": "%s",
+                  "workstreamId": "ws-test",
+                  "nodeId": "design.codex_arch_review",
+                  "agent": "codex",
+                  "status": "failed",
+                  "executionAttempt": {
+                    "attemptId": "att-%s",
+                    "status": "RECOVERABLE_FAILED",
+                    "processStatus": "RECONNECT_REQUIRED",
+                    "failureSignal": "AGENT_RECONNECT_REQUIRED",
+                    "recoverable": true,
+                    "retrySafe": false,
+                    "message": "agent needs reconnect",
+                    "stderrPath": "runs/%s/stderr.log",
+                    "transcriptPath": "runs/%s/transcript.ndjson",
+                    "sessionName": "codex-reviewer-ws-test",
+                    "sessionScope": "workstream",
+                    "sessionSegmentKey": "ws:ws-test",
+                    "startedAt": "2026-06-30T00:00:00Z",
+                    "finishedAt": "2026-06-30T00:01:00Z"
+                  }
+                }
+                """.formatted(runId, runId, runId, runId));
         return tempDir.relativize(path).toString();
     }
 

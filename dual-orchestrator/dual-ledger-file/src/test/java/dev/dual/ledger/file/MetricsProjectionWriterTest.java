@@ -433,6 +433,43 @@ class MetricsProjectionWriterTest {
     }
 
     @Test
+    void tokenAttributionMarksExecutionAttemptOutcomeConflicts() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-conflict"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-conflict", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "design.codex_arch_review"));
+        writeAttributionRun(paths, "run-conflict", "codex", "design.codex_arch_review", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runPath = paths.runsDir().resolve("run-conflict/run.json");
+        var run = mapper.readValue(runPath.toFile(), Map.class);
+        run.put("executionAttempt", Map.of(
+                "status", "RECOVERABLE_FAILED",
+                "processStatus", "RECONNECT_REQUIRED",
+                "failureSignal", "AGENT_RECONNECT_REQUIRED"
+        ));
+        run.put("executionOutcome", Map.of(
+                "status", "SUCCESS",
+                "primaryReason", "completed",
+                "nodeMaySucceed", true
+        ));
+        jsonWriter.write(runPath, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("attempt_outcome_conflict", tokenRun.get("executionConsistency"));
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        assertEquals("attempt_outcome_conflict", attrRun.get("executionConsistency"));
+        var provider = map(metrics.get("providerMetrics"));
+        assertEquals(1, number(map(provider.get("executionConsistencyCounts")).get("attempt_outcome_conflict")));
+    }
+
+    @Test
     void tokenAttributionCalculatesProviderCacheAwareCost() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-cost"));
         var jsonWriter = new AtomicJsonWriter();
@@ -595,13 +632,27 @@ class MetricsProjectionWriterTest {
 
         assertEquals("zhipu", perRun.get("providerId"));
         assertEquals("glm-5.2", perRun.get("model"));
-        assertEquals("subscription_tokens", perRun.get("billingMode"));
+        assertEquals("subscription_token_only", perRun.get("billingMode"));
         assertEquals("acpx_session_json", perRun.get("providerMetadataSource"));
+        var identity = map(perRun.get("providerModelIdentity"));
+        assertEquals("zhipu", identity.get("provider"));
+        assertEquals("glm-5.2", identity.get("model"));
+        assertEquals("subscription_token_only", identity.get("billingMode"));
         assertEquals(981278, number(perRun.get("totalTokens")));
         assertEquals(861568, number(perRun.get("cachedReadTokens")));
+        var costAttribution = map(perRun.get("costAttribution"));
+        assertEquals(861568, number(costAttribution.get("inputCacheHitTokens")));
+        assertEquals(83685, number(costAttribution.get("inputCacheMissTokens")));
+        assertEquals("subscription_token_only", costAttribution.get("billingMode"));
+        assertEquals("subscription_unpriced", costAttribution.get("reliability"));
+        assertEquals("provider_reported", costAttribution.get("cacheSignalSource"));
+        var providerCachePolicy = map(perRun.get("providerCachePolicy"));
+        assertEquals("token_policy_active", providerCachePolicy.get("mode"));
+        assertEquals(true, providerCachePolicy.get("inputsComplete"));
+        assertTrue(String.valueOf(providerCachePolicy.get("reason")).contains("subscription-unpriced"));
         assertEquals("zhipu", costMap.get("providerId"));
         assertEquals("glm-5.2", costMap.get("model"));
-        assertEquals("subscription_tokens", costMap.get("billingMode"));
+        assertEquals("subscription_token_only", costMap.get("billingMode"));
         assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
         assertEquals("subscription_unpriced", costMap.get("costEstimateReliability"));
         assertEquals("measure_only", costMap.get("providerCacheDecision"));

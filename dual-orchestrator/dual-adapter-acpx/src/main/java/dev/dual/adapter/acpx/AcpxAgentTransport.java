@@ -182,8 +182,12 @@ public class AcpxAgentTransport {
         processBuilder.environment().put("CLAUDE_CODE_SAFE_MODE", "1");
         var process = processBuilder.start();
         try {
-            var exitCode = waitForExitOrRecoverableSignal(process, request);
-            return new AcpxRunResult(exitCode, startedAt, Instant.now(), List.copyOf(command));
+            var timeline = new ArrayList<AcpxExecutionEvent>();
+            timeline.add(AcpxExecutionEvent.now("process_started", "adapter", 0, startedAt));
+            var waitResult = waitForExitOrRecoverableSignal(process, request);
+            timeline.addAll(waitResult.executionTimeline());
+            timeline.add(AcpxExecutionEvent.now("process_exited", "adapter", timeline.size(), startedAt));
+            return new AcpxRunResult(waitResult.exitCode(), startedAt, Instant.now(), List.copyOf(command), timeline);
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
@@ -237,8 +241,12 @@ public class AcpxAgentTransport {
         }
         var process = processBuilder.start();
         try {
-            var exitCode = waitForExitOrRecoverableSignal(process, request);
-            return new AcpxRunResult(exitCode, startedAt, Instant.now(), List.copyOf(command));
+            var timeline = new ArrayList<AcpxExecutionEvent>();
+            timeline.add(AcpxExecutionEvent.now("process_started", "adapter", 0, startedAt));
+            var waitResult = waitForExitOrRecoverableSignal(process, request);
+            timeline.addAll(waitResult.executionTimeline());
+            timeline.add(AcpxExecutionEvent.now("process_exited", "adapter", timeline.size(), startedAt));
+            return new AcpxRunResult(waitResult.exitCode(), startedAt, Instant.now(), List.copyOf(command), timeline);
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
@@ -419,14 +427,16 @@ public class AcpxAgentTransport {
         }
     }
 
-    private int waitForExitOrRecoverableSignal(Process process, AcpxRunRequest request) throws InterruptedException {
+    private ProcessWaitResult waitForExitOrRecoverableSignal(Process process, AcpxRunRequest request) throws InterruptedException {
         Instant terminalOutputSince = null;
         var startedAt = Instant.now();
+        var timeline = new ArrayList<AcpxExecutionEvent>();
         var eventReader = new AgentLifecycleEventReader(request.stdoutPath(), request.stderrPath());
         var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
         while (true) {
             if (process.waitFor(STDERR_SIGNAL_POLL_SECONDS, TimeUnit.SECONDS)) {
-                return process.exitValue();
+                timeline.add(AcpxExecutionEvent.now("process_wait_completed", "adapter", eventReader.nextSequence(), startedAt));
+                return new ProcessWaitResult(process.exitValue(), List.copyOf(timeline));
             }
             var elapsed = Duration.between(startedAt, Instant.now());
             for (var event : eventReader.readNewEvents()) {
@@ -435,13 +445,25 @@ public class AcpxAgentTransport {
             if (terminalContract.isComplete(readFile(request.stdoutPath()))) {
                 if (terminalOutputSince == null) {
                     terminalOutputSince = Instant.now();
+                    timeline.add(AcpxExecutionEvent.now(
+                            "terminal_control_detected",
+                            "stdout",
+                            eventReader.nextSequence(),
+                            startedAt
+                    ));
                     continue;
                 }
                 if (Duration.between(terminalOutputSince, Instant.now())
                         .compareTo(Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS)) >= 0) {
                     health.observe(AgentLifecycleEvent.terminalContractSeen(eventReader.nextSequence()), elapsed);
+                    timeline.add(AcpxExecutionEvent.now(
+                            "terminal_control_grace_elapsed",
+                            "adapter",
+                            eventReader.nextSequence(),
+                            startedAt
+                    ));
                     terminateProcessTree(process.toHandle());
-                    return 0;
+                    return new ProcessWaitResult(0, List.copyOf(timeline));
                 }
             } else {
                 terminalOutputSince = null;
@@ -449,8 +471,14 @@ public class AcpxAgentTransport {
             var assessment = health.assess(elapsed);
             if (assessment.status() == AgentExecutionHealth.Status.RECOVERABLE_FAILURE) {
                 appendAdapterDiagnostic(request.stderrPath(), assessment.failure(), startedAt, assessment.failure().interruptRunningProcess());
+                timeline.add(AcpxExecutionEvent.now(
+                        "recoverable_signal_detected",
+                        "adapter",
+                        eventReader.nextSequence(),
+                        startedAt
+                ));
                 terminateProcessTree(process.toHandle());
-                return RECOVERABLE_SIGNAL_EXIT_CODE;
+                return new ProcessWaitResult(RECOVERABLE_SIGNAL_EXIT_CODE, List.copyOf(timeline));
             }
         }
     }
@@ -658,5 +686,8 @@ public class AcpxAgentTransport {
         AcpxRunResult toRunResult() {
             return new AcpxRunResult(RECOVERABLE_SIGNAL_EXIT_CODE, startedAt, finishedAt, command);
         }
+    }
+
+    private record ProcessWaitResult(int exitCode, List<AcpxExecutionEvent> executionTimeline) {
     }
 }

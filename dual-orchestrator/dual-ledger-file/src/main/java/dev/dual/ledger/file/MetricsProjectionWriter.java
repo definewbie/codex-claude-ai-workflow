@@ -126,6 +126,7 @@ final class MetricsProjectionWriter {
         }
         var byAgent = new LinkedHashMap<String, ProviderMetric>();
         var outcomeStatusCounts = new LinkedHashMap<String, Long>();
+        var executionConsistencyCounts = new LinkedHashMap<String, Long>();
         try (var stream = Files.list(paths.runsDir())) {
             for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
                 var runJson = runDir.resolve("run.json");
@@ -143,6 +144,7 @@ final class MetricsProjectionWriter {
                 if (!outcomeStatus.isBlank()) {
                     outcomeStatusCounts.merge(outcomeStatus, 1L, Long::sum);
                 }
+                executionConsistencyCounts.merge(executionConsistency(run), 1L, Long::sum);
             }
         }
         var result = new LinkedHashMap<String, Object>();
@@ -150,6 +152,7 @@ final class MetricsProjectionWriter {
             result.put(entry.getKey(), entry.getValue().toMap());
         }
         result.put("outcomeStatusCounts", outcomeStatusCounts);
+        result.put("executionConsistencyCounts", executionConsistencyCounts);
         return result;
     }
 
@@ -196,8 +199,15 @@ final class MetricsProjectionWriter {
                 item.put("stage", text(run.get("stage")));
                 item.put("semanticIteration", text(run.get("semanticIteration")));
                 item.put("status", text(run.get("status")));
-                item.put("outcomeStatus", text(map(run.get("executionOutcome")).get("status")));
-                item.put("outcomePrimaryReason", text(map(run.get("executionOutcome")).get("primaryReason")));
+                var attempt = map(run.get("executionAttempt"));
+                var outcome = map(run.get("executionOutcome"));
+                item.put("attemptStatus", text(attempt.get("status")));
+                item.put("attemptProcessStatus", text(attempt.get("processStatus")));
+                item.put("attemptFailureSignal", text(attempt.get("failureSignal")));
+                item.put("outcomeStatus", text(outcome.get("status")));
+                item.put("outcomePrimaryReason", text(outcome.get("primaryReason")));
+                item.put("outcomeNodeMaySucceed", Boolean.TRUE.equals(outcome.get("nodeMaySucceed")));
+                item.put("executionConsistency", executionConsistency(run));
                 item.put("durationMs", longValue(run.get("durationMs")));
                 var promptTokens = estimatedTokens(paths, text(run.get("promptMetadataPath")));
                 var outputArtifactTokens = estimatedTokens(paths, text(run.get("outputMetadataPath")));
@@ -245,6 +255,7 @@ final class MetricsProjectionWriter {
                     usageMap.put("costAmount", usage.get("costAmount"));
                     usageMap.put("costCurrency", text(usage.get("costCurrency")));
                     item.put("usage", usageMap);
+                    item.put("providerModelIdentity", providerModelIdentity(usageMap));
                     item.put("breakdown", promptBreakdown(
                             promptTokens,
                             outputArtifactTokens,
@@ -395,6 +406,10 @@ final class MetricsProjectionWriter {
             entry.put("stage", text(tr.get("stage")));
             entry.put("sessionSegmentKey", text(tr.get("sessionSegmentKey")));
             entry.put("sessionScope", text(tr.get("sessionScope")));
+            entry.put("attemptStatus", text(tr.get("attemptStatus")));
+            entry.put("attemptProcessStatus", text(tr.get("attemptProcessStatus")));
+            entry.put("outcomeStatus", text(tr.get("outcomeStatus")));
+            entry.put("executionConsistency", text(tr.get("executionConsistency")));
             entry.put("promptTokens", longValue(breakdown.get("promptTokens")));
             entry.put("contextPackageTokens", longValue(breakdown.get("contextTokens")));
             entry.put("inputTokens", longValue(usage.get("inputTokens")));
@@ -406,15 +421,34 @@ final class MetricsProjectionWriter {
             entry.put("usageSource", text(usage.get("source")));
             entry.put("usageAttribution", text(usage.get("attribution")));
             entry.put("contextUsedTokens", longValue(usage.get("contextUsedTokens")));
-            entry.put("providerId", text(usage.get("providerId")));
-            entry.put("model", text(usage.get("model")));
-            entry.put("billingMode", text(usage.get("billingMode")));
-            entry.put("providerMetadataSource", text(usage.get("providerMetadataSource")));
+            var identity = map(tr.get("providerModelIdentity"));
+            var providerId = nonBlank(text(identity.get("provider")), text(usage.get("providerId")));
+            var model = nonBlank(text(identity.get("model")), text(usage.get("model")));
+            var billingMode = normalizeBillingMode(nonBlank(text(identity.get("billingMode")), text(usage.get("billingMode"))));
+            var providerSource = nonBlank(text(identity.get("source")), text(usage.get("providerMetadataSource")));
+            entry.put("providerId", providerId);
+            entry.put("model", model);
+            entry.put("billingMode", billingMode);
+            entry.put("providerMetadataSource", providerSource);
+            entry.put("providerModelIdentity", Map.of(
+                    "provider", providerId,
+                    "model", model,
+                    "billingMode", billingMode,
+                    "source", providerSource,
+                    "confidence", nonBlank(text(identity.get("confidence")), providerId.isBlank() || model.isBlank() ? "low" : "high")
+            ));
             entry.put("providerUsageVisibility", providerUsageVisibility(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("providerUsageUnavailableReason", providerUsageUnavailableReason(usage, Boolean.TRUE.equals(tr.get("estimated"))));
             entry.put("cost", usage.get("costAmount"));
-            var costEconomics = pricing.costEconomics(usage, text(tr.get("agent")));
+            var costInput = new LinkedHashMap<>(usage);
+            costInput.put("providerId", providerId);
+            costInput.put("model", model);
+            costInput.put("billingMode", billingMode);
+            costInput.put("providerMetadataSource", providerSource);
+            var costEconomics = pricing.costEconomics(costInput, text(tr.get("agent")));
             entry.put("costEconomics", costEconomics);
+            entry.put("costAttribution", costAttribution(costEconomics));
+            entry.put("providerCachePolicy", providerCachePolicy(costEconomics));
             costSummary.add(costEconomics);
             entry.put("transcriptTokens", longValue(breakdown.get("transcriptTokens")));
             entry.put("transcriptBytes", meta.bytes());
@@ -521,6 +555,74 @@ final class MetricsProjectionWriter {
         result.put("byAgent", byAgent);
         result.put("gaps", gaps);
         return result;
+    }
+
+    private Map<String, Object> providerModelIdentity(Map<String, Object> usage) {
+        var provider = text(usage.get("providerId"));
+        var model = text(usage.get("model"));
+        var billingMode = normalizeBillingMode(nonBlank(text(usage.get("billingMode")), "pricing_unknown"));
+        return Map.of(
+                "provider", provider.isBlank() ? "unknown" : provider,
+                "model", model,
+                "billingMode", billingMode,
+                "source", text(usage.get("providerMetadataSource")),
+                "confidence", provider.isBlank() || model.isBlank() ? "low" : "high"
+        );
+    }
+
+    private Map<String, Object> costAttribution(Map<String, Object> costEconomics) {
+        var result = new LinkedHashMap<String, Object>();
+        result.put("inputCacheMissTokens", longValue(costEconomics.get("inputCacheMissTokens")));
+        result.put("inputCacheHitTokens", longValue(costEconomics.get("inputCacheHitTokens")));
+        result.put("outputTokens", longValue(costEconomics.get("outputTokens")));
+        result.put("cachedWriteTokens", longValue(costEconomics.get("cacheWriteTokens")));
+        result.put("billingMode", text(costEconomics.get("billingMode")));
+        result.put("clientReportedCost", costEconomics.get("clientReportedCost"));
+        result.put("clientReportedCurrency", text(costEconomics.get("clientReportedCurrency")));
+        result.put("officialCalculatedCost", costEconomics.get("officialCalculatedCost"));
+        result.put("officialCalculatedCurrency", text(costEconomics.get("officialCalculatedCurrency")));
+        result.put("reliability", text(costEconomics.get("costEstimateReliability")));
+        result.put("cacheSignalSource", cacheSignalSource(costEconomics));
+        return result;
+    }
+
+    private Map<String, Object> providerCachePolicy(Map<String, Object> costEconomics) {
+        var costReliability = text(costEconomics.get("costEstimateReliability"));
+        var cacheReliability = text(costEconomics.get("cacheSignalReliability"));
+        var mode = text(costEconomics.get("providerCacheDecision"));
+        var reason = nonBlank(text(costEconomics.get("providerCacheDecisionReason")), text(costEconomics.get("reason")));
+        if ("subscription_unpriced".equals(costReliability)
+                && ("provider_cache_tokens_reported".equals(cacheReliability)
+                || "provider_usage_tokens_reported".equals(cacheReliability))) {
+            mode = "token_policy_active";
+            reason = "provider/model and cache token signal are known; amount is subscription-unpriced";
+        }
+        return Map.of(
+                "mode", mode,
+                "reason", reason,
+                "inputsComplete", !"pricing_unknown".equals(costReliability)
+                        && !"pricing_unknown".equals(cacheReliability),
+                "cacheSignalReliability", cacheReliability,
+                "costEstimateReliability", costReliability
+        );
+    }
+
+    private String cacheSignalSource(Map<String, Object> costEconomics) {
+        var reliability = text(costEconomics.get("cacheSignalReliability"));
+        if ("provider_cache_tokens_reported".equals(reliability) || "provider_usage_tokens_reported".equals(reliability)) {
+            return "provider_reported";
+        }
+        if ("not_applicable".equals(reliability)) {
+            return "not_applicable";
+        }
+        return "unavailable";
+    }
+
+    private String normalizeBillingMode(String billingMode) {
+        if ("subscription_tokens".equalsIgnoreCase(billingMode) || "token_only".equalsIgnoreCase(billingMode)) {
+            return "subscription_token_only";
+        }
+        return billingMode == null ? "" : billingMode;
     }
 
     private String providerUsageVisibility(Map<String, Object> usage, boolean estimated) {
@@ -1247,6 +1349,37 @@ final class MetricsProjectionWriter {
         return value == null ? "" : String.valueOf(value).trim();
     }
 
+    private static String executionConsistency(Map<String, Object> run) {
+        var attempt = map(run.get("executionAttempt"));
+        var outcome = map(run.get("executionOutcome"));
+        if (attempt.isEmpty() && outcome.isEmpty()) {
+            return "missing_attempt_and_outcome";
+        }
+        if (attempt.isEmpty()) {
+            return "missing_attempt";
+        }
+        if (outcome.isEmpty()) {
+            return "missing_outcome";
+        }
+        var legacyStatus = text(run.get("status"));
+        var attemptStatus = text(attempt.get("status"));
+        var outcomeStatus = text(outcome.get("status"));
+        var nodeMaySucceed = Boolean.TRUE.equals(outcome.get("nodeMaySucceed"));
+        if (nodeMaySucceed && !"COMPLETED".equals(attemptStatus)) {
+            return "attempt_outcome_conflict";
+        }
+        if (!nodeMaySucceed && "COMPLETED".equals(attemptStatus)) {
+            return "attempt_outcome_conflict";
+        }
+        if (nodeMaySucceed && !"completed".equals(legacyStatus)) {
+            return "legacy_outcome_conflict";
+        }
+        if (!nodeMaySucceed && "completed".equals(legacyStatus)) {
+            return "legacy_outcome_conflict";
+        }
+        return outcomeStatus.isBlank() ? "missing_outcome_status" : "consistent";
+    }
+
     @SuppressWarnings("unchecked")
     private static List<String> textList(Object value) {
         if (value instanceof List<?> list) {
@@ -1357,7 +1490,7 @@ final class MetricsProjectionWriter {
                     text(usage.get("model")),
                     nonBlank(System.getenv("DUAL_MODEL_" + agentKey), nonBlank(System.getenv("DUAL_MODEL"), ""))
             );
-            var billingMode = nonBlank(text(usage.get("billingMode")), System.getenv("DUAL_BILLING_MODE"));
+            var billingMode = normalizeBillingMode(nonBlank(text(usage.get("billingMode")), System.getenv("DUAL_BILLING_MODE")));
             result.put("providerId", providerId);
             result.put("model", model);
             result.put("billingMode", billingMode);
@@ -1450,8 +1583,16 @@ final class MetricsProjectionWriter {
         }
 
         private boolean isSubscriptionTokenBilling(String billingMode) {
-            return "subscription_tokens".equalsIgnoreCase(billingMode)
+            return "subscription_token_only".equalsIgnoreCase(billingMode)
+                    || "subscription_tokens".equalsIgnoreCase(billingMode)
                     || "token_only".equalsIgnoreCase(billingMode);
+        }
+
+        private String normalizeBillingMode(String billingMode) {
+            if ("subscription_tokens".equalsIgnoreCase(billingMode) || "token_only".equalsIgnoreCase(billingMode)) {
+                return "subscription_token_only";
+            }
+            return billingMode == null ? "" : billingMode;
         }
     }
 

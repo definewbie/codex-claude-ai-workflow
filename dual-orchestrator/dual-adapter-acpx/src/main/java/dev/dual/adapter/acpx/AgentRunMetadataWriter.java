@@ -102,6 +102,7 @@ final class AgentRunMetadataWriter {
                 null,
                 null,
                 null,
+                Map.of(),
                 null,
                 null,
                 null,
@@ -112,7 +113,8 @@ final class AgentRunMetadataWriter {
                 null,
                 List.of(),
                 null,
-                null
+                null,
+                List.of()
         ));
     }
 
@@ -356,6 +358,7 @@ final class AgentRunMetadataWriter {
                 failure == null ? null : failure.reason(),
                 failure == null ? null : failure.recoverable(),
                 effectiveUsage,
+                providerModelIdentity(effectiveUsage),
                 toolUsage,
                 relativeOrNull(workspaceRoot, agentExplorationPlanPath),
                 relativeOrNull(workspaceRoot, governanceReportPath),
@@ -366,8 +369,46 @@ final class AgentRunMetadataWriter {
                 null,
                 List.of(),
                 executionAttemptToMap(attempt),
-                null
+                null,
+                executionTimeline(result)
         ));
+    }
+
+    private Map<String, Object> providerModelIdentity(AcpxUsage usage) {
+        if (usage == null || (usage.providerId().isBlank() && usage.model().isBlank() && usage.billingMode().isBlank())) {
+            return Map.of(
+                    "provider", "unknown",
+                    "model", "",
+                    "billingMode", "pricing_unknown",
+                    "source", "",
+                    "confidence", "low"
+            );
+        }
+        var provider = usage.providerId().isBlank() ? "unknown" : usage.providerId();
+        var billingMode = normalizeBillingMode(usage.billingMode().isBlank() ? "pricing_unknown" : usage.billingMode());
+        return Map.of(
+                "provider", provider,
+                "model", usage.model(),
+                "billingMode", billingMode,
+                "source", usage.providerMetadataSource(),
+                "confidence", provider.equals("unknown") || usage.model().isBlank() ? "low" : "high"
+        );
+    }
+
+    private String normalizeBillingMode(String billingMode) {
+        if ("subscription_tokens".equalsIgnoreCase(billingMode) || "token_only".equalsIgnoreCase(billingMode)) {
+            return "subscription_token_only";
+        }
+        return billingMode == null ? "" : billingMode;
+    }
+
+    private List<Map<String, Object>> executionTimeline(AcpxRunResult result) {
+        if (result == null || result.executionTimeline().isEmpty()) {
+            return List.of();
+        }
+        return result.executionTimeline().stream()
+                .map(AcpxExecutionEvent::toMap)
+                .toList();
     }
 
     private Map<String, Object> processResult(
