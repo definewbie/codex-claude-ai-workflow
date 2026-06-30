@@ -580,6 +580,12 @@ case-specific gate 并传入 `run-real-case.sh`。
 benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of truth 判定 PASS / FAIL /
 INVALID。
 
+2026-06-30 public benchmark 复测结果：`intake.claude_brainstorm` 在首次真实 provider 调用阶段失败，acpx
+输出 `Unable to connect to API (FailedToOpenSocket)`。该轮不能证明 lifecycle、token 或 provider-cache-aware
+目标，必须按 provider/runtime 前置条件失败处理，不能当作 P2 benchmark 结论。修复要求：该错误必须进入
+typed adapter failure signal（`RECOVERABLE_PROVIDER_CONNECTION_FAILED`），而不是继续退化成
+`ACPX_EXIT_1` / `PROCESS_STALLED` / artifact contract failure。
+
 ## 8. P3：Session Keep-alive / 性能优化
 
 这是未来优化，不抢 P0/P1。

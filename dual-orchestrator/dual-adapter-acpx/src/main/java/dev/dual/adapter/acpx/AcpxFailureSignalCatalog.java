@@ -56,6 +56,17 @@ final class AcpxFailureSignalCatalog {
                         "api error: 401"
                 ),
                 signal(
+                        "provider_connection_failed",
+                        AcpxFailureReason.PROVIDER_CONNECTION_FAILED,
+                        87,
+                        "agent provider connection failed; verify the provider network/socket state, then run dualctl retry",
+                        true,
+                        false,
+                        "failedtoopensocket",
+                        "failed to open socket",
+                        "unable to connect to api"
+                ),
+                signal(
                         "agent_reconnect",
                         AcpxFailureReason.AGENT_RECONNECT,
                         10,

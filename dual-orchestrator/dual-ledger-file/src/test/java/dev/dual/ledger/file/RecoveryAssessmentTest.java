@@ -159,6 +159,43 @@ class RecoveryAssessmentTest {
         assertTrue(assessment.suggestedCommand().contains("dualctl retry"));
     }
 
+    @Test
+    void providerConnectionFailureAsksForProviderAvailabilityBeforeRetry() {
+        var node = failedAcpxNode(Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "acpx_failure.reason", "RECOVERABLE_PROVIDER_CONNECTION_FAILED",
+                "acpx_failure.recoverable", true
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("provider_connection_failed", assessment.classification());
+        assertEquals("WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY", assessment.retryReadiness());
+        assertTrue(assessment.reason().contains("provider connection"));
+        assertFalse(assessment.suggestedCommand().contains("sessions close"));
+        assertTrue(assessment.suggestedCommand().contains("dualctl retry"));
+    }
+
+    @Test
+    void providerConnectionFailureFromExecutionOutcomeUsesSpecificReadiness() {
+        var node = failedAcpxNode(Map.of(
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "provider_connection_failed",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "Provider socket was unavailable."
+                )
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("provider_connection_failed", assessment.classification());
+        assertEquals("WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY", assessment.retryReadiness());
+        assertEquals("Provider socket was unavailable.", assessment.reason());
+    }
+
     private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {
         return new NodeInstanceDocument(
                 1,

@@ -111,6 +111,17 @@ public record RecoveryAssessment(
                     diagnostic
             );
         }
+        if ("RECOVERABLE_PROVIDER_CONNECTION_FAILED".equals(failureReason)) {
+            return new RecoveryAssessment(
+                    "provider_connection_failed",
+                    "WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY",
+                    "The agent provider connection failed before a trustworthy agent output boundary. Verify provider/network/socket availability, then retry the same active node.",
+                    retry,
+                    diagnosticJsonRef,
+                    diagnosticMarkdownRef,
+                    diagnostic
+            );
+        }
         if ("RECOVERABLE_AGENT_RECONNECT".equals(failureReason)
                 || "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(failureReason)
                 || "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)
@@ -280,6 +291,7 @@ public record RecoveryAssessment(
         return switch (primaryReason) {
             case "auth_failed" -> "agent_auth_failed";
             case "permission_blocked" -> "agent_permission_blocked";
+            case "provider_connection_failed" -> "provider_connection_failed";
             case "context_window_exceeded" -> "agent_context_window";
             case "rate_limited" -> "agent_capacity_recovery";
             default -> "recoverable_agent_runtime";
@@ -290,6 +302,7 @@ public record RecoveryAssessment(
         return switch (primaryReason) {
             case "auth_failed" -> "FIX_AGENT_AUTH_THEN_RETRY";
             case "rate_limited" -> "WAIT_THEN_RETRY";
+            case "provider_connection_failed" -> "WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY";
             default -> "RETRY_AFTER_EXTERNAL_FIX";
         };
     }

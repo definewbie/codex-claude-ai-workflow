@@ -81,6 +81,21 @@ class AcpxFailureSignalCatalogTest {
     }
 
     @Test
+    void matchesProviderConnectionFailureBeforeGenericExit() {
+        var evidence = new AcpxFailureEvidence(
+                "[error] RUNTIME: API Error: Unable to connect to API (FailedToOpenSocket)",
+                "",
+                1
+        );
+
+        var signal = catalog.match(evidence).orElseThrow();
+
+        assertEquals("provider_connection_failed", signal.id());
+        assertEquals("RECOVERABLE_PROVIDER_CONNECTION_FAILED", signal.reason().code());
+        assertTrue(signal.recoverable());
+    }
+
+    @Test
     void choosesHighestPrioritySignalInsteadOfListOrder() {
         var catalog = new AcpxFailureSignalCatalog(List.of(
                 new AcpxFailureSignal(

@@ -652,6 +652,37 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void recordsProviderConnectionFailureAsAdapterBoundaryFailure() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new ProviderConnectionFailedTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(1, result.result().get("exit_code"));
+        assertEquals("KILLED_AFTER_RECOVERABLE_SIGNAL", result.result().get("process_usability"));
+        assertEquals(true, result.result().get("acpx_failure.recoverable"));
+        assertEquals("RECOVERABLE_PROVIDER_CONNECTION_FAILED", result.result().get("acpx_failure.reason"));
+        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_PROVIDER_CONNECTION_FAILED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"failureSignal\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"unavailableReason\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
+    }
+
+    @Test
     void completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -761,6 +792,20 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("RECOVERABLE_AGENT_AUTH_FAILED", failure.reason());
         assertEquals(true, failure.recoverable());
         assertTrue(failure.message().contains("authentication"));
+    }
+
+    @Test
+    void classifiesProviderConnectionFailureFromRuntimeStdout() throws Exception {
+        var stdout = tempDir.resolve("stdout.log");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(stdout, "[error] RUNTIME: API Error: Unable to connect to API (FailedToOpenSocket)\n");
+        Files.writeString(stderr, "");
+
+        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 1);
+
+        assertEquals("RECOVERABLE_PROVIDER_CONNECTION_FAILED", failure.reason());
+        assertEquals(true, failure.recoverable());
+        assertTrue(failure.message().contains("provider connection"));
     }
 
     @Test
@@ -1256,6 +1301,17 @@ class AcpxAgentTaskHandlerTest {
             return new AcpxRunResult(4, now, now.plusSeconds(45), List.of(
                     "acpx", "claude", "sessions", "ensure", "--name", request.sessionName()
             ));
+        }
+    }
+
+    private static final class ProviderConnectionFailedTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "[error] RUNTIME: API Error: Unable to connect to API (FailedToOpenSocket)\n");
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(1, now, now.plusSeconds(188), List.of("acpx", "claude"));
         }
     }
 

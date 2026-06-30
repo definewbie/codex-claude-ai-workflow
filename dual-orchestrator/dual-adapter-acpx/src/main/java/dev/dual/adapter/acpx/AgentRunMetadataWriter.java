@@ -583,6 +583,9 @@ final class AgentRunMetadataWriter {
         if (AcpxFailureReason.AGENT_AUTH_FAILED.code().equals(failure.reason())) {
             return AdapterSignalType.AUTH_FAILED;
         }
+        if (AcpxFailureReason.PROVIDER_CONNECTION_FAILED.code().equals(failure.reason())) {
+            return AdapterSignalType.PROVIDER_CONNECTION_FAILED;
+        }
         return AdapterSignalType.PROCESS_STALLED;
     }
 
