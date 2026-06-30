@@ -48,7 +48,10 @@ public final class AgentExecutionFinalizer {
         var status = attemptStatus(outcome);
         var processStatus = processStatus(evidence.processResult(), outcome);
         var failureSignal = status == AgentExecutionAttemptStatus.COMPLETED ? null : primaryFailureSignal(outcome);
-        var recoverable = status == AgentExecutionAttemptStatus.RECOVERABLE_FAILED;
+        var recoverable = status == AgentExecutionAttemptStatus.RECOVERABLE_FAILED
+                || status == AgentExecutionAttemptStatus.TIMED_OUT
+                || status == AgentExecutionAttemptStatus.STALLED
+                || status == AgentExecutionAttemptStatus.INTERRUPTED;
         return new AgentExecutionAttempt(
                 base.attemptId(),
                 base.runId(),
@@ -78,6 +81,14 @@ public final class AgentExecutionFinalizer {
         }
         if (outcome.status() == AgentExecutionOutcomeStatus.CONTRACT_FAILED) {
             return AgentExecutionAttemptStatus.CONTRACT_FAILED;
+        }
+        if (outcome.status() == AgentExecutionOutcomeStatus.TIMEOUT) {
+            return "process_stalled".equals(outcome.primaryReason())
+                    ? AgentExecutionAttemptStatus.STALLED
+                    : AgentExecutionAttemptStatus.TIMED_OUT;
+        }
+        if (outcome.status() == AgentExecutionOutcomeStatus.INTERRUPTED) {
+            return AgentExecutionAttemptStatus.INTERRUPTED;
         }
         if (outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE) {
             return AgentExecutionAttemptStatus.RECOVERABLE_FAILED;

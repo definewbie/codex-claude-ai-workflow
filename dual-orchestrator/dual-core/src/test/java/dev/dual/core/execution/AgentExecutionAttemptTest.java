@@ -102,7 +102,7 @@ class AgentExecutionAttemptTest {
                 "ws-1",
                 "intake.claude_brainstorm",
                 "claude",
-                AgentExecutionAttemptStatus.RECOVERABLE_FAILED,
+                AgentExecutionAttemptStatus.TIMED_OUT,
                 AgentExecutionProcessStatus.TIMED_OUT,
                 AdapterSignalType.PROCESS_STALLED,
                 true,
@@ -119,5 +119,59 @@ class AgentExecutionAttemptTest {
         ));
 
         assertEquals("terminal attempt requires finishedAt", error.getMessage());
+    }
+
+    @Test
+    void timedOutProcessRequiresTimedOutAttemptStatus() {
+        var error = assertThrows(IllegalArgumentException.class, () -> new AgentExecutionAttempt(
+                "att-1",
+                "run-1",
+                "ws-1",
+                "intake.claude_brainstorm",
+                "claude",
+                AgentExecutionAttemptStatus.RECOVERABLE_FAILED,
+                AgentExecutionProcessStatus.TIMED_OUT,
+                AdapterSignalType.PROCESS_STALLED,
+                true,
+                false,
+                "timed out",
+                "",
+                "",
+                "claude-main-ws-1",
+                "",
+                "workstream",
+                "ws:ws-1",
+                Instant.parse("2026-06-28T00:00:00Z"),
+                Instant.parse("2026-06-28T00:00:01Z")
+        ));
+
+        assertEquals("timed out process must use TIMED_OUT attempt status", error.getMessage());
+    }
+
+    @Test
+    void stalledProcessRequiresStalledAttemptStatus() {
+        var error = assertThrows(IllegalArgumentException.class, () -> new AgentExecutionAttempt(
+                "att-1",
+                "run-1",
+                "ws-1",
+                "intake.claude_brainstorm",
+                "claude",
+                AgentExecutionAttemptStatus.RECOVERABLE_FAILED,
+                AgentExecutionProcessStatus.STALLED,
+                AdapterSignalType.PROCESS_STALLED,
+                true,
+                false,
+                "stalled",
+                "",
+                "",
+                "claude-main-ws-1",
+                "",
+                "workstream",
+                "ws:ws-1",
+                Instant.parse("2026-06-28T00:00:00Z"),
+                Instant.parse("2026-06-28T00:00:01Z")
+        ));
+
+        assertEquals("stalled process must use STALLED attempt status", error.getMessage());
     }
 }

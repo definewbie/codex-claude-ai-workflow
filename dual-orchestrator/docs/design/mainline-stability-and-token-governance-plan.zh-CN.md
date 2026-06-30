@@ -167,6 +167,24 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
 | artifact validator 仍能参与 outcome 写入 | validator 会刷新 `executionOutcome` | outcome ownership 分散 | validator 只返回 `ArtifactContractResult`，不直接决定 runtime outcome |
 | stale RUNNING 证明不足 | 可显示 stale，但不一定能恢复一致状态 | terminal attempt 未必 always written | 无论成功、失败、timeout、interrupted，都必须写 terminal attempt |
 
+2026-06-30 进展：
+
+- 已引入 `AgentRunMetadataFinalizer`，把 `run.json` 的 `executionAttempt` / `executionOutcome`
+  终态写入从 `ArtifactContractValidator` 中抽出；validator 只提供 terminal/artifact contract facts。
+- `AgentExecutionFinalizer` 已成为 terminal attempt、outcome 和 legacy run fields 的统一合成点。
+- `AgentExecutionAttemptStatus` 已补齐 `TIMED_OUT`、`STALLED`、`INTERRUPTED` 三个终态；
+  adapter 初始 run metadata 和 finalizer 终态 metadata 均使用同一语义。
+- 已有 projection contradiction 检测：`MetricsProjectionWriter.executionConsistency` 会标记
+  `attempt_outcome_conflict` / `legacy_outcome_conflict`。
+
+仍未完成：
+
+- `executionTimeline` 已存在，但事件名仍是 adapter 字符串事件；尚未收敛成 core-level typed event catalog。
+- `artifact validator 只返回 ArtifactContractResult` 还不是纯模型形态；当前 validator 仍调用
+  finalizer 完成 run metadata finalization，下一步应继续把 contract validation result 和 execution
+  finalization 编排边界拆清。
+- stale RUNNING 的历史 ledger replay / projection warning 仍需要更完整的 fixture 验证。
+
 ### 4.5 修复方案
 
 建议按四个小提交修复。

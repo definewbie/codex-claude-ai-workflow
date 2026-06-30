@@ -10,5 +10,8 @@ public enum AgentExecutionAttemptStatus {
     COMPLETED,
     CONTRACT_FAILED,
     RECOVERABLE_FAILED,
+    TIMED_OUT,
+    STALLED,
+    INTERRUPTED,
     RUNTIME_FAILED
 }

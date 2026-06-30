@@ -63,7 +63,7 @@ class AgentExecutionFinalizerTest {
     }
 
     @Test
-    void timeoutProducesRecoverableFailedAttemptAndNoSuccessContradiction() {
+    void timeoutProducesTimedOutAttemptAndNoSuccessContradiction() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.timedOutProcess(),
                 TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
@@ -72,10 +72,43 @@ class AgentExecutionFinalizerTest {
         ));
 
         assertEquals(AgentExecutionOutcomeStatus.TIMEOUT, finalized.outcome().status());
-        assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
+        assertEquals(AgentExecutionAttemptStatus.TIMED_OUT, finalized.attempt().status());
         assertEquals(AgentExecutionProcessStatus.TIMED_OUT, finalized.attempt().processStatus());
         assertEquals("failed", finalized.legacyStatus());
         assertEquals("process_timed_out", finalized.legacyFailureReason());
+        assertTrue(finalized.legacyRecoverable());
+    }
+
+    @Test
+    void stalledProducesStalledAttemptAndNoSuccessContradiction() {
+        var stalled = finalizer.finalize(baseAttempt(), evidence(
+                new ProcessResult("", null, null, ProcessUsability.STALLED, 0, "", "", false, false),
+                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.TIMEOUT, stalled.outcome().status());
+        assertEquals("process_stalled", stalled.outcome().primaryReason());
+        assertEquals(AgentExecutionAttemptStatus.STALLED, stalled.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.STALLED, stalled.attempt().processStatus());
+        assertTrue(stalled.legacyRecoverable());
+    }
+
+    @Test
+    void interruptedProducesInterruptedAttemptAndNoSuccessContradiction() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.interruptedProcess(),
+                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.INTERRUPTED, finalized.outcome().status());
+        assertEquals(AgentExecutionAttemptStatus.INTERRUPTED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.INTERRUPTED, finalized.attempt().processStatus());
+        assertEquals("failed", finalized.legacyStatus());
+        assertEquals("process_interrupted", finalized.legacyFailureReason());
         assertTrue(finalized.legacyRecoverable());
     }
 

@@ -506,7 +506,7 @@ final class AgentRunMetadataWriter {
     ) {
         var processStatus = processStatus(result, failure);
         var failureSignal = failureSignal(failure);
-        var status = attemptStatus(failure);
+        var status = attemptStatus(processStatus, failure);
         var recoverable = failure != null && failure.recoverable();
         var message = failure == null ? "completed" : attemptMessage(failure);
         return new AgentExecutionAttempt(
@@ -532,9 +532,21 @@ final class AgentRunMetadataWriter {
         );
     }
 
-    private AgentExecutionAttemptStatus attemptStatus(AcpxFailureClassifier.AcpxFailure failure) {
+    private AgentExecutionAttemptStatus attemptStatus(
+            AgentExecutionProcessStatus processStatus,
+            AcpxFailureClassifier.AcpxFailure failure
+    ) {
         if (failure == null) {
             return AgentExecutionAttemptStatus.COMPLETED;
+        }
+        if (processStatus == AgentExecutionProcessStatus.TIMED_OUT) {
+            return AgentExecutionAttemptStatus.TIMED_OUT;
+        }
+        if (processStatus == AgentExecutionProcessStatus.STALLED) {
+            return AgentExecutionAttemptStatus.STALLED;
+        }
+        if (processStatus == AgentExecutionProcessStatus.INTERRUPTED) {
+            return AgentExecutionAttemptStatus.INTERRUPTED;
         }
         return failure.recoverable()
                 ? AgentExecutionAttemptStatus.RECOVERABLE_FAILED

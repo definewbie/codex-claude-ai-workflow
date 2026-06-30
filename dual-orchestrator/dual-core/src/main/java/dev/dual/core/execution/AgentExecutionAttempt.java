@@ -36,6 +36,9 @@ public record AgentExecutionAttempt(
             AgentExecutionAttemptStatus.COMPLETED,
             AgentExecutionAttemptStatus.CONTRACT_FAILED,
             AgentExecutionAttemptStatus.RECOVERABLE_FAILED,
+            AgentExecutionAttemptStatus.TIMED_OUT,
+            AgentExecutionAttemptStatus.STALLED,
+            AgentExecutionAttemptStatus.INTERRUPTED,
             AgentExecutionAttemptStatus.RUNTIME_FAILED
     );
 
@@ -70,7 +73,7 @@ public record AgentExecutionAttempt(
         if (status == AgentExecutionAttemptStatus.COMPLETED && recoverable) {
             throw new IllegalArgumentException("completed attempt cannot be recoverable");
         }
-        if (status == AgentExecutionAttemptStatus.RECOVERABLE_FAILED && !recoverable) {
+        if (recoverableTerminal(status) && !recoverable) {
             throw new IllegalArgumentException("recoverable failure attempt must be recoverable");
         }
         if (processStatus == AgentExecutionProcessStatus.RECONNECT_REQUIRED
@@ -78,12 +81,16 @@ public record AgentExecutionAttempt(
             throw new IllegalArgumentException("reconnect process requires AGENT_RECONNECT_REQUIRED failureSignal");
         }
         if (processStatus == AgentExecutionProcessStatus.TIMED_OUT
-                && status != AgentExecutionAttemptStatus.RECOVERABLE_FAILED) {
-            throw new IllegalArgumentException("timed out process must be recoverable failed");
+                && status != AgentExecutionAttemptStatus.TIMED_OUT) {
+            throw new IllegalArgumentException("timed out process must use TIMED_OUT attempt status");
+        }
+        if (processStatus == AgentExecutionProcessStatus.STALLED
+                && status != AgentExecutionAttemptStatus.STALLED) {
+            throw new IllegalArgumentException("stalled process must use STALLED attempt status");
         }
         if (processStatus == AgentExecutionProcessStatus.INTERRUPTED
-                && status != AgentExecutionAttemptStatus.RECOVERABLE_FAILED) {
-            throw new IllegalArgumentException("interrupted process must be recoverable failed");
+                && status != AgentExecutionAttemptStatus.INTERRUPTED) {
+            throw new IllegalArgumentException("interrupted process must use INTERRUPTED attempt status");
         }
     }
 
@@ -93,6 +100,13 @@ public record AgentExecutionAttempt(
 
     private static boolean terminal(AgentExecutionAttemptStatus status) {
         return TERMINAL_STATUSES.contains(status);
+    }
+
+    private static boolean recoverableTerminal(AgentExecutionAttemptStatus status) {
+        return status == AgentExecutionAttemptStatus.RECOVERABLE_FAILED
+                || status == AgentExecutionAttemptStatus.TIMED_OUT
+                || status == AgentExecutionAttemptStatus.STALLED
+                || status == AgentExecutionAttemptStatus.INTERRUPTED;
     }
 
     private static String requireText(String field, String value) {
