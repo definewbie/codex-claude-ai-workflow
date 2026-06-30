@@ -1159,7 +1159,7 @@ class ArtifactContractValidatorTest {
                     "processStatus": "RECONNECT_REQUIRED",
                     "failureSignal": "AGENT_RECONNECT_REQUIRED",
                     "recoverable": true,
-                    "retrySafe": false,
+                    "retrySafe": true,
                     "message": "agent needs reconnect",
                     "stderrPath": "runs/%s/stderr.log",
                     "transcriptPath": "runs/%s/transcript.ndjson",

@@ -63,6 +63,50 @@ class AgentRunMetadataFinalizerTest {
     }
 
     @Test
+    void persistsRetrySafeConsistentlyForManualRecoverableAdapterFailure() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-reconnect/runs/run-reconnect/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-reconnect",
+                  "workstreamId": "ws-reconnect",
+                  "nodeId": "intake.codex_product_review",
+                  "agent": "codex",
+                  "status": "failed"
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", ".agent/workstreams/ws-reconnect/runs/run-reconnect/run.json");
+        facts.put("exit_code", 0);
+        facts.put("process_usability", "EXITED_ZERO");
+        facts.put("acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT");
+        facts.put("acpx_failure.recoverable", true);
+
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "RECOVERABLE_AGENT_RECONNECT",
+                NodeStatus.FAILED,
+                List.of(),
+                facts,
+                "agent needs reconnect"
+        ), TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        var attempt = map(json.get("executionAttempt"));
+        assertEquals("RECOVERABLE_FAILED", attempt.get("status"));
+        assertEquals("AGENT_RECONNECT_REQUIRED", attempt.get("failureSignal"));
+        assertEquals(true, attempt.get("retrySafe"));
+        var outcome = map(json.get("executionOutcome"));
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", outcome.get("status"));
+        assertEquals("MANUAL_ONLY", outcome.get("retryPolicy"));
+        assertEquals(true, outcome.get("retrySafe"));
+    }
+
+    @Test
     void persistsSuccessfulExecutionOutcomeToRunMetadata() throws Exception {
         var runJson = tempDir.resolve(".agent/workstreams/ws-ok/runs/run-2/run.json");
         Files.createDirectories(runJson.getParent());

@@ -62,7 +62,7 @@ public final class AgentExecutionFinalizer {
                 processStatus,
                 failureSignal,
                 recoverable,
-                outcome.retryPolicy() == AgentExecutionRetryPolicy.AUTO_ALLOWED,
+                outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE,
                 outcome.operatorMessage(),
                 base.stderrPath(),
                 base.transcriptPath(),

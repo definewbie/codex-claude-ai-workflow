@@ -190,7 +190,7 @@ class TraceCommandTest {
                     "processStatus": "RECONNECT_REQUIRED",
                     "failureSignal": "AGENT_RECONNECT_REQUIRED",
                     "recoverable": true,
-                    "retrySafe": false,
+                    "retrySafe": true,
                     "message": "agent needs reconnect",
                     "sessionName": "claude-main-ws-trace",
                     "sessionScope": "workstream",

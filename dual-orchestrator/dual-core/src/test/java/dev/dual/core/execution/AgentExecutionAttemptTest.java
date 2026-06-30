@@ -22,7 +22,7 @@ class AgentExecutionAttemptTest {
                 AgentExecutionProcessStatus.RECONNECT_REQUIRED,
                 AdapterSignalType.AGENT_RECONNECT_REQUIRED,
                 true,
-                false,
+                true,
                 "acpx reported agent needs reconnect",
                 "outputs/implement.stderr.log",
                 "outputs/implement.transcript.log",
@@ -36,7 +36,7 @@ class AgentExecutionAttemptTest {
 
         assertTrue(attempt.terminal());
         assertTrue(attempt.recoverable());
-        assertFalse(attempt.retrySafe());
+        assertTrue(attempt.retrySafe());
         assertEquals(AdapterSignalType.AGENT_RECONNECT_REQUIRED, attempt.failureSignal());
     }
 

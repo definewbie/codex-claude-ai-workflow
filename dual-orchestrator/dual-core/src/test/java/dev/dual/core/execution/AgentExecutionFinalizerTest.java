@@ -59,7 +59,10 @@ class AgentExecutionFinalizerTest {
         assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
         assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
         assertEquals(AdapterSignalType.AGENT_RECONNECT_REQUIRED, finalized.attempt().failureSignal());
+        assertTrue(finalized.attempt().retrySafe());
+        assertEquals(AgentExecutionRetryPolicy.MANUAL_ONLY, finalized.outcome().retryPolicy());
         assertEquals("failed", finalized.legacyStatus());
+        assertTrue(finalized.legacyRecoverable());
     }
 
     @Test
