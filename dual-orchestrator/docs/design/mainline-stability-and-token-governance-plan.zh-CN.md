@@ -656,10 +656,11 @@ typed adapter failure signal（`RECOVERABLE_PROVIDER_CONNECTION_FAILED`），而
 枚举时，real-case summary 必须输出 `benchmark_grade=INVALID` 和明确的 `invalid_reason`，否则 P2
 矩阵会把“测试无效”误读成“生命周期失败”。
 
-2026-06-30 状态：`real-case-grade.sh` 和 benchmark index 已支持 `INVALID` / `invalid_reason`；
-`run-real-case.sh` 也会基于 run.json 中的 typed failure fields 输出 `provider_connection_failed`。
-但当前提取仍是 shell 文本匹配 typed JSON 字段，不是 JSON parser 级读取。它可以避免把 provider
-前置失败误报成普通 FAIL，但仍不能作为 P2 grading read-model 已完全收口的证明。
+2026-06-30 状态：`real-case-grade.sh` 和 benchmark index 已支持 `INVALID` / `invalid_reason`。
+`run-real-case.sh` 的 invalid reason 提取已下沉到 `scripts/lib/real-case-invalid.sh`，优先使用
+`jq` 读取 run.json typed fields（`failureReason` / `failureSignal` / `unavailableReason` /
+adapter signal `type`），不会从 free-form provider 文本推断 INVALID。无 `jq` 环境下保留 typed-field
+grep fallback，仅用于兼容旧运行环境。
 
 ## 8. P3：Session Keep-alive / 性能优化
 

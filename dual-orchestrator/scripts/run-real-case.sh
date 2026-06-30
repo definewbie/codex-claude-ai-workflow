@@ -23,6 +23,8 @@ REPORT_ROOT="$PROJECT_ROOT/docs/testing/real-case-reports"
 
 # shellcheck source=scripts/lib/real-case-grade.sh
 source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
+# shellcheck source=scripts/lib/real-case-invalid.sh
+source "$PROJECT_ROOT/scripts/lib/real-case-invalid.sh"
 
 REPO=""
 TASK_FILE=""
@@ -579,17 +581,7 @@ missing_artifacts() {
 }
 
 invalid_reason() {
-  [[ -n "$WS_DIR" && -d "$WS_DIR/runs" ]] || {
-    printf ''
-    return
-  }
-  if grep -R -m 1 -E \
-    '"failureReason"[[:space:]]*:[[:space:]]*"RECOVERABLE_PROVIDER_CONNECTION_FAILED"|"type"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"|"failureSignal"[[:space:]]*:[[:space:]]*"PROVIDER_CONNECTION_FAILED"' \
-    "$WS_DIR/runs" >/dev/null 2>&1; then
-    printf 'provider_connection_failed'
-    return
-  fi
-  printf ''
+  real_case_invalid_reason_from_runs_dir "${WS_DIR:-}/runs"
 }
 
 original_repo_clean_bool() {
