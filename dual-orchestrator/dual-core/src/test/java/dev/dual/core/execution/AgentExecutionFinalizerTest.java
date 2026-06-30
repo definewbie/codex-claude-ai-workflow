@@ -63,6 +63,21 @@ class AgentExecutionFinalizerTest {
     }
 
     @Test
+    void killedAfterNonReconnectRecoverableSignalDoesNotBecomeReconnectProcessStatus() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.killedAfterRecoverableSignal(),
+                TerminalControlResult.missing(),
+                List.of(),
+                List.of(AdapterSignal.of(AdapterSignalType.MODEL_MISMATCH))
+        ));
+
+        assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.FAILED, finalized.attempt().processStatus());
+        assertEquals(AdapterSignalType.MODEL_MISMATCH, finalized.attempt().failureSignal());
+        assertEquals(AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE, finalized.outcome().status());
+    }
+
+    @Test
     void timeoutProducesTimedOutAttemptAndNoSuccessContradiction() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.timedOutProcess(),

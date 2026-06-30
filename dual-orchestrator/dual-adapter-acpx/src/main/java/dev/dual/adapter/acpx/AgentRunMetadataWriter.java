@@ -579,6 +579,9 @@ final class AgentRunMetadataWriter {
         if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
             return AdapterSignalType.AGENT_RECONNECT_REQUIRED;
         }
+        if (AcpxFailureReason.AGENT_MODEL_MISMATCH.code().equals(failure.reason())) {
+            return AdapterSignalType.MODEL_MISMATCH;
+        }
         if (AcpxFailureReason.SESSION_BOOTSTRAP_FAILED.code().equals(failure.reason())
                 || AcpxFailureReason.SESSION_MISSING.code().equals(failure.reason())) {
             return AdapterSignalType.SESSION_BOOTSTRAP_FAILED;

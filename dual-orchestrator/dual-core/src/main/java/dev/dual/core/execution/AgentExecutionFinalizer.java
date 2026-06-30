@@ -107,10 +107,16 @@ public final class AgentExecutionFinalizer {
             case TIMED_OUT -> AgentExecutionProcessStatus.TIMED_OUT;
             case INTERRUPTED -> AgentExecutionProcessStatus.INTERRUPTED;
             case STALLED -> AgentExecutionProcessStatus.STALLED;
-            case KILLED_AFTER_RECOVERABLE_SIGNAL -> AgentExecutionProcessStatus.RECONNECT_REQUIRED;
+            case KILLED_AFTER_RECOVERABLE_SIGNAL -> hasSignal(outcome, AdapterSignalType.AGENT_RECONNECT_REQUIRED)
+                    ? AgentExecutionProcessStatus.RECONNECT_REQUIRED
+                    : AgentExecutionProcessStatus.FAILED;
             case EXITED_ZERO, EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT, EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT ->
                     AgentExecutionProcessStatus.FAILED;
         };
+    }
+
+    private static boolean hasSignal(AgentExecutionOutcome outcome, AdapterSignalType type) {
+        return outcome.secondarySignals().stream().anyMatch(signal -> signal.type() == type);
     }
 
     private static AdapterSignalType primaryFailureSignal(AgentExecutionOutcome outcome) {

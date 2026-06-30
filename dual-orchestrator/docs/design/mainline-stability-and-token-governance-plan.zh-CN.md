@@ -187,6 +187,15 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `executionAttempt` 已进入终态时，`MetricsProjectionWriter.executionConsistency`
   标记为 `stale_legacy_running`，并同步出现在 token run、token attribution 和
   provider consistency summary 中。
+- 已补齐 acpx failure catalog 与 execution outcome 的 sibling gap：
+  `RECOVERABLE_AGENT_MODEL_MISMATCH` 现在会被 adapter / runtime finalizer 映射为
+  typed `AdapterSignalType.MODEL_MISMATCH`，并进入 `executionAttempt.failureSignal`
+  和 `executionOutcome.secondarySignals`。
+- `KILLED_AFTER_RECOVERABLE_SIGNAL` 不再默认等价于 `RECONNECT_REQUIRED`。
+  只有 secondary signal 包含 `AGENT_RECONNECT_REQUIRED` 时才写
+  `AgentExecutionProcessStatus.RECONNECT_REQUIRED`；`MODEL_MISMATCH` 这类非 reconnect
+  recoverable failure 会保持为 `FAILED` process status，避免违反
+  `RECONNECT_REQUIRED` 必须带 reconnect signal 的核心 invariant。
 
 ### 4.5 修复方案
 
