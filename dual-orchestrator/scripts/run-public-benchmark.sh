@@ -170,7 +170,9 @@ prepare_repo() {
 }
 
 write_verification_gate() {
-  VERIFICATION_GATE="$DEST_DIR/.dual-verification-gate.md"
+  local safe_case_id
+  safe_case_id="$(printf '%s' "$CASE_ID" | tr -c 'A-Za-z0-9_.-' '_')"
+  VERIFICATION_GATE="$(mktemp "${TMPDIR:-/tmp}/dual-verification-gate-${safe_case_id}.XXXXXX.md")"
   cat >"$VERIFICATION_GATE" <<EOF
 # Verification Gate: $CASE_ID
 

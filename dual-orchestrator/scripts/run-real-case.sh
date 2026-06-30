@@ -228,8 +228,9 @@ build_project() {
 
 write_preflight_evidence() {
   local preflight="$CASE_DIR/preflight.json"
-  local freshness_status freshness_reason freshness_valid jar_mtime
-  freshness_status="$(real_case_artifact_freshness_status "$SKIP_BUILD" "$JAR_PATH" "$BUILD_STARTED_EPOCH")"
+  local freshness_status freshness_reason freshness_valid jar_mtime latest_input_mtime
+  latest_input_mtime="$(real_case_latest_jvm_input_epoch "$PROJECT_ROOT")"
+  freshness_status="$(real_case_artifact_freshness_status "$SKIP_BUILD" "$JAR_PATH" "$BUILD_STARTED_EPOCH" "$latest_input_mtime")"
   freshness_reason="$(real_case_artifact_freshness_reason "$freshness_status")"
   if real_case_artifact_freshness_is_valid "$freshness_status"; then
     freshness_valid=true
@@ -252,6 +253,7 @@ write_preflight_evidence() {
     echo "  \"buildFinishedEpoch\": ${BUILD_FINISHED_EPOCH:-0},"
     echo "  \"jarPath\": \"$(json_escape "$JAR_PATH")\","
     echo "  \"jarMtimeEpoch\": ${jar_mtime:-0},"
+    echo "  \"latestJvmInputMtimeEpoch\": ${latest_input_mtime:-0},"
     echo "  \"artifactFreshnessStatus\": \"$(json_escape "$freshness_status")\","
     echo "  \"artifactFreshnessReason\": \"$(json_escape "$freshness_reason")\","
     echo "  \"artifactFreshnessProven\": $freshness_valid"

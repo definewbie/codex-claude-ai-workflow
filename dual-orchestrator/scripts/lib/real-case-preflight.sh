@@ -15,10 +15,33 @@ real_case_file_mtime_epoch() {
   stat -c '%Y' "$file" 2>/dev/null || printf ''
 }
 
+real_case_latest_jvm_input_epoch() {
+  local project_root="$1"
+  [[ -n "$project_root" && -d "$project_root" ]] || {
+    printf ''
+    return
+  }
+  local latest=0 path mtime
+  while IFS= read -r path; do
+    mtime="$(real_case_file_mtime_epoch "$path")"
+    [[ -n "$mtime" && "$mtime" -gt "$latest" ]] && latest="$mtime"
+  done < <(
+    {
+      find "$project_root" -maxdepth 2 -name pom.xml -type f 2>/dev/null
+      find "$project_root" -maxdepth 3 -path '*/src/main' -type d 2>/dev/null |
+        while IFS= read -r dir; do
+          find "$dir" -type f 2>/dev/null
+        done
+    } | sort
+  )
+  [[ "$latest" -gt 0 ]] && printf '%s' "$latest" || printf ''
+}
+
 real_case_artifact_freshness_status() {
   local skip_build="$1"
   local jar_path="$2"
   local build_started_epoch="$3"
+  local latest_input_epoch="${4:-}"
   local mtime
 
   if [[ "$skip_build" == "true" ]]; then
@@ -34,11 +57,15 @@ real_case_artifact_freshness_status() {
     printf 'jar_mtime_unavailable'
     return
   fi
-  if [[ "$mtime" -lt "$build_started_epoch" ]]; then
-    printf 'jar_not_fresh'
+  if [[ "$mtime" -ge "$build_started_epoch" ]]; then
+    printf 'fresh'
     return
   fi
-  printf 'fresh'
+  if [[ -n "$latest_input_epoch" && "$mtime" -ge "$latest_input_epoch" ]]; then
+    printf 'fresh_existing_artifact'
+    return
+  fi
+  printf 'jar_not_fresh'
 }
 
 real_case_artifact_freshness_reason() {
@@ -46,6 +73,9 @@ real_case_artifact_freshness_reason() {
   case "$status" in
     fresh)
       printf 'jar_mtime_is_after_build_start'
+      ;;
+    fresh_existing_artifact)
+      printf 'jar_mtime_covers_project_inputs'
       ;;
     unproven_skip_build)
       printf 'skip_build_cannot_prove_current_code_is_in_the_executed_jar'
@@ -66,5 +96,5 @@ real_case_artifact_freshness_reason() {
 }
 
 real_case_artifact_freshness_is_valid() {
-  [[ "$1" == "fresh" ]]
+  [[ "$1" == "fresh" || "$1" == "fresh_existing_artifact" ]]
 }

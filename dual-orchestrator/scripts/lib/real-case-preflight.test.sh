@@ -33,6 +33,14 @@ assert_eq "jar_not_fresh" \
   "$(real_case_artifact_freshness_status false "$jar" "$future")" \
   "stale jar before build start"
 
+assert_eq "fresh_existing_artifact" \
+  "$(real_case_artifact_freshness_status false "$jar" "$future" "$past")" \
+  "existing jar covers project inputs"
+
+assert_eq "jar_not_fresh" \
+  "$(real_case_artifact_freshness_status false "$jar" "$future" "$future")" \
+  "existing jar before project inputs is stale"
+
 assert_eq "unproven_skip_build" \
   "$(real_case_artifact_freshness_status true "$jar" "$past")" \
   "skip build is unproven"
@@ -45,8 +53,17 @@ assert_eq "jar_mtime_is_after_build_start" \
   "$(real_case_artifact_freshness_reason fresh)" \
   "fresh reason"
 
+assert_eq "jar_mtime_covers_project_inputs" \
+  "$(real_case_artifact_freshness_reason fresh_existing_artifact)" \
+  "existing artifact reason"
+
 if ! real_case_artifact_freshness_is_valid fresh; then
   printf '[FAIL] fresh should be valid\n' >&2
+  exit 1
+fi
+
+if ! real_case_artifact_freshness_is_valid fresh_existing_artifact; then
+  printf '[FAIL] existing artifact that covers inputs should be valid\n' >&2
   exit 1
 fi
 

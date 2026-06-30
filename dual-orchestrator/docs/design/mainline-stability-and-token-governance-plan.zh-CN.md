@@ -736,6 +736,12 @@ grep fallback，仅用于兼容旧运行环境。
 `AGENT_OVERLOADED` 会投影为 `invalid_reason=provider_overloaded`；free-form 文本
 （例如 provider stderr 中的 `API Error: 529`）不会单独触发 INVALID，避免报告层重新引入自然语言判断。
 
+2026-06-30 补充：artifact freshness 不再要求 Maven 每次都必须重写 jar。fresh build 成功后，
+若 jar mtime 早于本次 build start，但仍晚于所有会进入 JVM artifact 的 `pom.xml` 和
+`src/main` 输入文件，preflight 记录 `artifactFreshnessStatus=fresh_existing_artifact`、
+`artifactFreshnessReason=jar_mtime_covers_project_inputs`，并视为可验证。这样可以避免 Maven
+增量构建未触碰 jar mtime 时把有效运行误判为 `jar_not_fresh`；脚本、文档、测试文件变化不会被错误要求进入 jar。
+
 ## 8. P3：Session Keep-alive / 性能优化
 
 这是未来优化，不抢 P0/P1。
