@@ -347,6 +347,19 @@ not_applicable
 | cachedRead 是否真 cache hit 不可验证 | cachedRead 很大但成本是否下降不明确 | 没区分 provider reported cache hit 和 local inference | 增加 `cacheSignalSource=provider_reported|inferred|unavailable` |
 | Codex/OpenAI/Claude 未完整纳入 | 价格模型主要围绕 GLM/DeepSeek | provider catalog 不完整 | provider pricing catalog 支持 zhipu/deepseek/openai/anthropic |
 
+2026-06-30 进展：
+
+- `ProviderPricingCatalog` 已收敛到 core provider 模型中，metrics 成本归因和
+  `SessionCompactionPolicy` 的 provider-cache-aware 决策共用同一 catalog，不再各自解析
+  `provider-pricing.json`。
+- GLM / Zhipu 的包月 token-only 语义已有 run-level `providerModelIdentity`、
+  `billingMode=subscription_token_only`、`costAttribution.reliability=subscription_unpriced`
+  和 `providerCachePolicy.mode=token_policy_active` 覆盖。
+- DeepSeek CNY/USD cache-hit/cache-miss/output 价格已有 fixture 计算覆盖，并能通过
+  `clientCostConsistency` 区分 provider reported cost 与 official calculated cost 的差异。
+- `cacheSignalSource` 已在 `costAttribution` 中显式区分 `provider_reported` /
+  `not_applicable` / `unavailable`。
+
 ### 5.6 修复方案
 
 #### ProviderModelIdentity

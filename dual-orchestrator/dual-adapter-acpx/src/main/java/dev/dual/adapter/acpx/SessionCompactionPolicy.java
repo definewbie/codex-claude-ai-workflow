@@ -1,17 +1,11 @@
 package dev.dual.adapter.acpx;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.provider.ProviderCachePolicy;
+import dev.dual.core.provider.ProviderPricingCatalog;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -28,8 +22,6 @@ final class SessionCompactionPolicy {
             "DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS";
     private static final long DEFAULT_STABILITY_CACHED_READ_THRESHOLD = 1_000_000L;
     private static final long DEFAULT_IMPLEMENT_STABILITY_CACHED_READ_THRESHOLD = 500_000L;
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-    };
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     enum Mode {
@@ -265,7 +257,9 @@ final class SessionCompactionPolicy {
         if (providerId.isBlank() || model.isBlank() || workspaceRoot == null) {
             return new ProviderCachePolicy.Decision("measure_only", "", "provider/model pricing unavailable");
         }
-        var price = ProviderPricing.load(workspaceRoot, lookup).priceFor(providerId, model);
+        var price = ProviderPricingCatalog.load(workspaceRoot, OBJECT_MAPPER, lookup)
+                .priceFor(providerId, model)
+                .orElse(null);
         if (price == null) {
             return new ProviderCachePolicy.Decision("measure_only", "", "provider/model pricing unavailable");
         }
@@ -295,84 +289,10 @@ final class SessionCompactionPolicy {
         return defaultValue;
     }
 
-    @SuppressWarnings("unchecked")
-    private static List<Map<String, Object>> mapList(Object value) {
-        return value instanceof List<?> list ? (List<Map<String, Object>>) list : List.of();
-    }
-
-    private static String text(Object value) {
-        return value == null ? "" : String.valueOf(value).trim();
-    }
-
-    private static BigDecimal decimal(Object value) {
-        if (value instanceof BigDecimal decimal) {
-            return decimal;
-        }
-        if (value instanceof Number number) {
-            return BigDecimal.valueOf(number.doubleValue());
-        }
-        if (value != null) {
-            try {
-                return new BigDecimal(String.valueOf(value));
-            } catch (NumberFormatException ignored) {
-                return BigDecimal.ZERO;
-            }
-        }
-        return BigDecimal.ZERO;
-    }
-
-    private record ProviderPrice(String providerId, String model, BigDecimal inputCacheHitPer1M, BigDecimal inputCacheMissPer1M) {
-        boolean matches(String candidateProvider, String candidateModel) {
-            return providerId.equalsIgnoreCase(candidateProvider)
-                    && (model.equals(candidateModel)
-                    || (model.endsWith("*") && candidateModel.startsWith(model.substring(0, model.length() - 1))));
-        }
-    }
-
     private record StabilityDecision(boolean shouldCompact, String reason) {
         static StabilityDecision off(String reason) {
             return new StabilityDecision(false, reason);
         }
     }
 
-    private record ProviderPricing(List<ProviderPrice> prices) {
-        static ProviderPricing load(Path workspaceRoot, Function<String, String> lookup) {
-            var configured = lookup.apply("DUAL_PROVIDER_PRICING_PATH");
-            var path = configured == null || configured.isBlank()
-                    ? workspaceRoot.resolve(".agent").resolve("provider-pricing.json")
-                    : Path.of(configured);
-            if (!Files.isRegularFile(path)) {
-                return new ProviderPricing(List.of());
-            }
-            try {
-                var doc = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
-                var out = new ArrayList<ProviderPrice>();
-                for (var item : mapList(doc.get("models"))) {
-                    var providerId = text(item.get("providerId"));
-                    var model = text(item.get("model"));
-                    if (providerId.isBlank() || model.isBlank()) {
-                        continue;
-                    }
-                    out.add(new ProviderPrice(
-                            providerId,
-                            model,
-                            decimal(item.get("inputCacheHitPer1M")),
-                            decimal(item.get("inputCacheMissPer1M"))
-                    ));
-                }
-                return new ProviderPricing(out);
-            } catch (IOException ignored) {
-                return new ProviderPricing(List.of());
-            }
-        }
-
-        ProviderPrice priceFor(String providerId, String model) {
-            for (var price : prices) {
-                if (price.matches(providerId, model)) {
-                    return price;
-                }
-            }
-            return null;
-        }
-    }
 }

@@ -3,6 +3,7 @@ package dev.dual.ledger.file;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import dev.dual.core.provider.ProviderCachePolicy;
+import dev.dual.core.provider.ProviderPricingCatalog;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
@@ -387,7 +388,7 @@ final class MetricsProjectionWriter {
         var runMeta = runTranscriptMeta(paths);
         var readReusePolicy = readReusePolicy(paths);
         var workspaceRoot = paths.workspaceRoot();
-        var pricing = ProviderPricing.load(workspaceRoot, objectMapper);
+        var pricing = new CostEconomicsCalculator(ProviderPricingCatalog.load(workspaceRoot, objectMapper));
         var costSummary = new CostEconomicsSummary();
 
         var perRun = new ArrayList<Map<String, Object>>();
@@ -1445,45 +1446,11 @@ final class MetricsProjectionWriter {
         return BigDecimal.ZERO;
     }
 
-    private static final class ProviderPricing {
-        private final List<ModelPrice> prices;
+    private static final class CostEconomicsCalculator {
+        private final ProviderPricingCatalog pricing;
 
-        private ProviderPricing(List<ModelPrice> prices) {
-            this.prices = prices;
-        }
-
-        static ProviderPricing load(Path workspaceRoot, ObjectMapper objectMapper) {
-            var configured = System.getenv("DUAL_PROVIDER_PRICING_PATH");
-            var path = configured == null || configured.isBlank()
-                    ? workspaceRoot.resolve(".agent").resolve("provider-pricing.json")
-                    : Path.of(configured);
-            if (!Files.isRegularFile(path)) {
-                return new ProviderPricing(List.of());
-            }
-            try {
-                var doc = objectMapper.readValue(path.toFile(), MAP_TYPE);
-                var out = new ArrayList<ModelPrice>();
-                for (var item : mapList(doc.get("models"))) {
-                    var providerId = text(item.get("providerId"));
-                    var model = text(item.get("model"));
-                    if (providerId.isBlank() || model.isBlank()) {
-                        continue;
-                    }
-                    out.add(new ModelPrice(
-                            providerId,
-                            model,
-                            nonBlank(text(item.get("currency")), "USD"),
-                            decimalValue(item.get("inputCacheHitPer1M")),
-                            decimalValue(item.get("inputCacheMissPer1M")),
-                            decimalValue(item.get("outputPer1M")),
-                            decimalValue(item.get("cacheWritePer1M")),
-                            text(item.get("sourceUrl"))
-                    ));
-                }
-                return new ProviderPricing(out);
-            } catch (IOException ignored) {
-                return new ProviderPricing(List.of());
-            }
+        private CostEconomicsCalculator(ProviderPricingCatalog pricing) {
+            this.pricing = pricing;
         }
 
         Map<String, Object> costEconomics(Map<String, Object> usage, String agent) {
@@ -1523,7 +1490,7 @@ final class MetricsProjectionWriter {
                 result.put("reason", "provider/model missing");
                 return result;
             }
-            var price = priceFor(providerId, model);
+            var price = pricing.priceFor(providerId, model).orElse(null);
             if (price == null) {
                 if (isSubscriptionTokenBilling(billingMode)) {
                     result.put("cacheSignalReliability", longValue(usage.get("cachedReadTokens")) > 0
@@ -1585,15 +1552,6 @@ final class MetricsProjectionWriter {
             return result;
         }
 
-        private ModelPrice priceFor(String providerId, String model) {
-            for (var price : prices) {
-                if (price.matches(providerId, model)) {
-                    return price;
-                }
-            }
-            return null;
-        }
-
         private boolean isSubscriptionTokenBilling(String billingMode) {
             return "subscription_token_only".equalsIgnoreCase(billingMode)
                     || "subscription_tokens".equalsIgnoreCase(billingMode)
@@ -1605,40 +1563,6 @@ final class MetricsProjectionWriter {
                 return "subscription_token_only";
             }
             return billingMode == null ? "" : billingMode;
-        }
-    }
-
-    private record ModelPrice(
-            String providerId,
-            String model,
-            String currency,
-            BigDecimal inputCacheHitPer1M,
-            BigDecimal inputCacheMissPer1M,
-            BigDecimal outputPer1M,
-            BigDecimal cacheWritePer1M,
-            String sourceUrl
-    ) {
-        boolean matches(String candidateProvider, String candidateModel) {
-            return providerId.equalsIgnoreCase(candidateProvider)
-                    && (model.equals(candidateModel)
-                    || (model.endsWith("*") && candidateModel.startsWith(model.substring(0, model.length() - 1))));
-        }
-
-        BigDecimal cost(long cacheHit, long cacheMiss, long output, long cacheWrite) {
-            return BigDecimal.ZERO
-                    .add(perMillion(cacheHit, inputCacheHitPer1M))
-                    .add(perMillion(cacheMiss, inputCacheMissPer1M))
-                    .add(perMillion(output, outputPer1M))
-                    .add(perMillion(cacheWrite, cacheWritePer1M))
-                    .setScale(6, RoundingMode.HALF_UP);
-        }
-
-        private BigDecimal perMillion(long tokens, BigDecimal price) {
-            if (tokens <= 0 || price == null || price.signum() == 0) {
-                return BigDecimal.ZERO;
-            }
-            return price.multiply(BigDecimal.valueOf(tokens))
-                    .divide(BigDecimal.valueOf(1_000_000L), 12, RoundingMode.HALF_UP);
         }
     }
 
