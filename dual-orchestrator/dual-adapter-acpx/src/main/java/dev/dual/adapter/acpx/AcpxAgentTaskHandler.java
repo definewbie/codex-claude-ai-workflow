@@ -161,6 +161,21 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 stderrPath,
                 permissionProfile(context)
         );
+        metadataWriter.writePrepared(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                context.definition().id(),
+                agent,
+                session,
+                promptTemplate,
+                runId,
+                runDir,
+                promptPath,
+                outputPath,
+                stderrPath,
+                sessionMeta,
+                compactionMeta
+        );
         var result = "claude".equals(agent)
                 ? transport.runClaudeDesign(request)
                 : transport.runCodexDesignReview(request);

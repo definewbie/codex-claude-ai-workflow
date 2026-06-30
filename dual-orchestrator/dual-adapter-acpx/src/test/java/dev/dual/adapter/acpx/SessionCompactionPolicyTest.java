@@ -239,6 +239,25 @@ class SessionCompactionPolicyTest {
     }
 
     @Test
+    void providerCacheAwareUsesClaudeCompatibleRuntimeMetadataWhenExplicitProviderIsUnset() throws Exception {
+        writePricing("zhipu", "glm-5.2", "0", "0");
+        writeMetrics("ws-1", 400_000);
+
+        var decision = policy.decide("claude", "implement.claude_implement", "ws-1", "run-1",
+                "claude-main", base, tempDir, name -> switch (name) {
+                    case SessionCompactionPolicy.ENV -> "provider_cache_aware";
+                    case "ANTHROPIC_BASE_URL" -> "https://open.bigmodel.cn/api/anthropic";
+                    case "ANTHROPIC_DEFAULT_SONNET_MODEL" -> "glm-5.2";
+                    default -> "";
+                });
+
+        assertFalse(decision.enabled());
+        assertEquals("claude-main-ws-1", decision.sessionName());
+        assertTrue(decision.reason().contains("subscription_token_only"));
+        assertFalse(decision.reason().contains("provider/model pricing unavailable"));
+    }
+
+    @Test
     void providerCacheAwareIsNotADeterministicCompactionVerificationMode() throws Exception {
         writeMetrics("ws-1", 488_320);
 

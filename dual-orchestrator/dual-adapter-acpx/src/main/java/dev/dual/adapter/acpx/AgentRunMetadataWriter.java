@@ -252,9 +252,12 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, stderrPath),
                 relativeOrNull(workspaceRoot, transcriptPath)
         );
-        var effectiveUsage = usage == null && failure != null
-                ? AcpxUsage.unavailable(unavailableReason(attempt))
-                : usage;
+        var effectiveUsage = usage;
+        if (failure != null) {
+            effectiveUsage = usage == null
+                    ? AcpxUsage.unavailable(unavailableReason(attempt))
+                    : usage.withUnavailableReason(unavailableReason(attempt));
+        }
         writeArtifactMetadata(
                 workspaceRoot,
                 promptMetadataPath,

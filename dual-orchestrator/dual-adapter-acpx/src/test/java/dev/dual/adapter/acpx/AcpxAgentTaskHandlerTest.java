@@ -89,6 +89,32 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void normalRunWritesPreparedMetadataBeforeLaunchingAgentProcess() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var transport = new PreparedMetadataObservedTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertTrue(transport.sawPreparedRunJson);
+    }
+
+
+    @Test
     void prepareOnlyRunWritesSessionCompactionSeedWhenExperimentEnabled() throws Exception {
         System.setProperty(SessionCompactionPolicy.ENV, "implement_boundary");
         try {
@@ -994,6 +1020,34 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class PreparedMetadataObservedTransport extends AcpxAgentTransport {
+        private boolean sawPreparedRunJson;
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            var runJson = request.stdoutPath().getParent().getParent().resolve("run.json");
+            sawPreparedRunJson = Files.exists(runJson)
+                    && Files.readString(runJson).contains("\"status\" : \"prepared\"");
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    <dual-artifact type="agent_output_contract">
+                    {"artifact_type":"agent_output_contract","summary":"Ready"}
+                    </dual-artifact>
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
         }
     }
 

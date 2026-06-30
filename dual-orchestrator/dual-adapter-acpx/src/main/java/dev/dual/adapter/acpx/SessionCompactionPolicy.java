@@ -252,18 +252,51 @@ final class SessionCompactionPolicy {
             Function<String, String> lookup
     ) {
         var agentKey = agent == null ? "" : agent.trim().toUpperCase(Locale.ROOT);
-        var providerId = nonBlank(lookup.apply("DUAL_PROVIDER_ID_" + agentKey), lookup.apply("DUAL_PROVIDER_ID"));
-        var model = nonBlank(lookup.apply("DUAL_MODEL_" + agentKey), lookup.apply("DUAL_MODEL"));
+        var runtimeMetadata = AcpxProviderMetadata.fromEnvironment(lookup, AcpxProviderMetadata.SOURCE_ENV);
+        if (runtimeMetadata.isEmpty()) {
+            runtimeMetadata = AcpxProviderMetadata.runtimeDefault();
+        }
+        var explicitProviderId = nonBlank(lookup.apply("DUAL_PROVIDER_ID_" + agentKey), lookup.apply("DUAL_PROVIDER_ID"));
+        var explicitModel = nonBlank(lookup.apply("DUAL_MODEL_" + agentKey), lookup.apply("DUAL_MODEL"));
+        var providerId = nonBlank(explicitProviderId, runtimeMetadata.providerId());
+        var model = nonBlank(explicitModel, runtimeMetadata.model());
         if (providerId.isBlank() || model.isBlank() || workspaceRoot == null) {
             return new ProviderCachePolicy.Decision("measure_only", "", "provider/model pricing unavailable");
         }
         var price = ProviderPricingCatalog.load(workspaceRoot, OBJECT_MAPPER, lookup)
                 .priceFor(providerId, model)
                 .orElse(null);
+        if (AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS.equals(runtimeMetadata.billingMode())
+                && metadataMatches(runtimeMetadata, providerId, model)) {
+            return new ProviderCachePolicy.Decision(
+                    "measure_only",
+                    "",
+                    "subscription_token_only; cache economics are non-monetary; compaction controlled by stability thresholds"
+            );
+        }
         if (price == null) {
             return new ProviderCachePolicy.Decision("measure_only", "", "provider/model pricing unavailable");
         }
         return ProviderCachePolicy.decide(price.inputCacheHitPer1M(), price.inputCacheMissPer1M());
+    }
+
+    private static boolean metadataMatches(AcpxProviderMetadata metadata, String providerId, String model) {
+        return metadata != null
+                && metadata.providerId().equalsIgnoreCase(providerId == null ? "" : providerId)
+                && modelMatches(metadata.model(), model);
+    }
+
+    private static boolean modelMatches(String metadataModel, String model) {
+        if (metadataModel == null || metadataModel.isBlank() || model == null || model.isBlank()) {
+            return false;
+        }
+        if (metadataModel.equalsIgnoreCase(model)) {
+            return true;
+        }
+        if (model.endsWith("*")) {
+            return metadataModel.regionMatches(true, 0, model, 0, model.length() - 1);
+        }
+        return false;
     }
 
     private static String lookup(String name) {
@@ -271,8 +304,19 @@ final class SessionCompactionPolicy {
         return property == null || property.isBlank() ? System.getenv(name) : property;
     }
 
-    private static String nonBlank(String first, String fallback) {
-        return first == null || first.isBlank() ? (fallback == null ? "" : fallback.trim()) : first.trim();
+    private static String nonBlank(String first, String... fallbacks) {
+        if (first != null && !first.isBlank()) {
+            return first.trim();
+        }
+        if (fallbacks == null) {
+            return "";
+        }
+        for (var fallback : fallbacks) {
+            if (fallback != null && !fallback.isBlank()) {
+                return fallback.trim();
+            }
+        }
+        return "";
     }
 
     private static long longValue(Object value, long defaultValue) {

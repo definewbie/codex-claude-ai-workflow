@@ -396,7 +396,7 @@ class ArtifactContractValidatorTest {
         var runMetadata = Files.readString(tempDir.resolve(runRef));
         assertTrue(runMetadata.contains("\"schemaVersion\" : 3"));
         assertTrue(runMetadata.contains("\"executionOutcome\""));
-        assertTrue(runMetadata.contains("\"status\" : \"OUTPUT_INCOMPLETE\""));
+        assertTrue(runMetadata.contains("\"status\" : \"RECOVERABLE_ADAPTER_FAILURE\""));
         assertTrue(runMetadata.contains("\"type\" : \"AGENT_RECONNECT_REQUIRED\""));
     }
 

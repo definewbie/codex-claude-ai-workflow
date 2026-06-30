@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -21,6 +22,8 @@ import java.util.regex.Pattern;
  */
 record AcpxProviderMetadata(String providerId, String model, String billingMode, String source) {
     static final String SOURCE_ACPX_SESSION_JSON = "acpx_session_json";
+    static final String SOURCE_ENV = "env";
+    static final String SOURCE_CLAUDE_SETTINGS_ENV = "claude_settings_env";
     static final String BILLING_METERED = "metered";
     static final String BILLING_SUBSCRIPTION_TOKENS = "subscription_token_only";
 
@@ -55,6 +58,61 @@ record AcpxProviderMetadata(String providerId, String model, String billingMode,
         } catch (IOException ignored) {
             return empty();
         }
+    }
+
+    static AcpxProviderMetadata runtimeDefault() {
+        var fromEnv = fromEnvironment(System::getenv, SOURCE_ENV);
+        if (!fromEnv.isEmpty()) {
+            return fromEnv;
+        }
+        var settingsPath = Path.of(
+                firstNonBlank(System.getenv("CLAUDE_CONFIG_DIR"), Path.of(System.getProperty("user.home"), ".claude").toString()),
+                "settings.json"
+        );
+        return fromClaudeSettings(settingsPath);
+    }
+
+    static AcpxProviderMetadata fromClaudeSettings(Path settingsJson) {
+        if (settingsJson == null || !Files.isRegularFile(settingsJson)) {
+            return empty();
+        }
+        try {
+            var envNode = MAPPER.readTree(settingsJson.toFile()).get("env");
+            return fromEnvironment(name -> text(envNode == null ? null : envNode.get(name)), SOURCE_CLAUDE_SETTINGS_ENV);
+        } catch (IOException ignored) {
+            return empty();
+        }
+    }
+
+    static AcpxProviderMetadata fromEnvironment(Function<String, String> env, String source) {
+        if (env == null) {
+            return empty();
+        }
+        var explicitProvider = normalizeProvider(env.apply("DUAL_CLAUDE_PROVIDER"));
+        var model = firstNonBlank(
+                env.apply("DUAL_CLAUDE_MODEL"),
+                env.apply("ANTHROPIC_MODEL"),
+                env.apply("CLAUDE_CODE_MODEL"),
+                env.apply("ANTHROPIC_DEFAULT_SONNET_MODEL"),
+                env.apply("ANTHROPIC_DEFAULT_OPUS_MODEL"),
+                env.apply("ANTHROPIC_DEFAULT_HAIKU_MODEL")
+        );
+        var providerFromModel = providerForModel(model);
+        var providerFromBaseUrl = providerForBaseUrl(firstNonBlank(
+                env.apply("DUAL_CLAUDE_BASE_URL"),
+                env.apply("ANTHROPIC_BASE_URL")
+        ));
+        var provider = firstNonBlank(explicitProvider, providerFromModel, providerFromBaseUrl);
+        var normalizedModel = normalizeModel(model);
+        if (provider.isBlank() && normalizedModel.isBlank()) {
+            return empty();
+        }
+        var billing = firstNonBlank(
+                env.apply("DUAL_CLAUDE_BILLING_MODE"),
+                billingForProvider(provider),
+                billingForModel(normalizedModel)
+        );
+        return new AcpxProviderMetadata(provider, normalizedModel, billing, source);
     }
 
     static AcpxProviderMetadata fromJson(JsonNode root) {
@@ -182,6 +240,74 @@ record AcpxProviderMetadata(String providerId, String model, String billingMode,
             value = value.substring(0, bracket);
         }
         return value.replaceAll("[,.;:]+$", "").trim();
+    }
+
+    private static String normalizeProvider(String raw) {
+        if (raw == null) {
+            return "";
+        }
+        var value = raw.trim().toLowerCase(Locale.ROOT);
+        if (value.equals("glm") || value.equals("zhipuai") || value.equals("bigmodel")) {
+            return "zhipu";
+        }
+        return value;
+    }
+
+    private static String providerForModel(String model) {
+        var normalized = normalizeModel(model);
+        return PROVIDER_RULES.stream()
+                .filter(rule -> rule.matches(normalized))
+                .findFirst()
+                .map(ProviderRule::providerId)
+                .orElse("");
+    }
+
+    private static String providerForBaseUrl(String baseUrl) {
+        if (baseUrl == null) {
+            return "";
+        }
+        var value = baseUrl.toLowerCase(Locale.ROOT);
+        if (value.contains("bigmodel") || value.contains("zhipu") || value.contains("glm")) {
+            return "zhipu";
+        }
+        if (value.contains("deepseek")) {
+            return "deepseek";
+        }
+        if (value.contains("openai")) {
+            return "openai";
+        }
+        if (value.contains("anthropic")) {
+            return "anthropic";
+        }
+        return "";
+    }
+
+    private static String billingForProvider(String provider) {
+        return switch (provider == null ? "" : provider) {
+            case "zhipu" -> BILLING_SUBSCRIPTION_TOKENS;
+            case "deepseek", "openai", "anthropic" -> BILLING_METERED;
+            default -> "";
+        };
+    }
+
+    private static String billingForModel(String model) {
+        return PROVIDER_RULES.stream()
+                .filter(rule -> rule.matches(model))
+                .findFirst()
+                .map(ProviderRule::billingMode)
+                .orElse("");
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return "";
+        }
+        for (var value : values) {
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return "";
     }
 
     private static String text(JsonNode node) {

@@ -48,7 +48,7 @@ class AgentExecutionFinalizerTest {
     }
 
     @Test
-    void reconnectWarningWithCompleteEvidenceSucceedsWithCompletedAttempt() {
+    void reconnectSignalWithCompleteEvidenceBecomesRecoverableFailure() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.exitedZero(),
                 TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
@@ -56,10 +56,10 @@ class AgentExecutionFinalizerTest {
                 List.of(AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED))
         ));
 
-        assertEquals(AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS, finalized.outcome().status());
-        assertEquals(AgentExecutionAttemptStatus.COMPLETED, finalized.attempt().status());
-        assertNull(finalized.attempt().failureSignal());
-        assertEquals("completed", finalized.legacyStatus());
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
+        assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
+        assertEquals(AdapterSignalType.AGENT_RECONNECT_REQUIRED, finalized.attempt().failureSignal());
+        assertEquals("failed", finalized.legacyStatus());
     }
 
     @Test
@@ -74,7 +74,7 @@ class AgentExecutionFinalizerTest {
         assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
         assertEquals(AgentExecutionProcessStatus.FAILED, finalized.attempt().processStatus());
         assertEquals(AdapterSignalType.MODEL_MISMATCH, finalized.attempt().failureSignal());
-        assertEquals(AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE, finalized.outcome().status());
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
     }
 
     @Test

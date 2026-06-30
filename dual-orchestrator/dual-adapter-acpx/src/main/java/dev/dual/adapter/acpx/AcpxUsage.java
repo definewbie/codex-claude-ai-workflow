@@ -81,6 +81,10 @@ record AcpxUsage(
     }
 
     static AcpxUsage unavailable(String reason) {
+        return unavailable(reason, AcpxProviderMetadata.empty());
+    }
+
+    static AcpxUsage unavailable(String reason, AcpxProviderMetadata metadata) {
         return new AcpxUsage(
                 0,
                 0,
@@ -101,7 +105,7 @@ record AcpxUsage(
                 "",
                 "",
                 reason == null ? "" : reason
-        );
+        ).withProviderMetadata(metadata);
     }
 
     AcpxUsage withProviderMetadata(AcpxProviderMetadata metadata) {
@@ -128,6 +132,30 @@ record AcpxUsage(
                 firstNonBlank(billingMode, metadata.billingMode()),
                 firstNonBlank(providerMetadataSource, metadata.source()),
                 unavailableReason
+        );
+    }
+
+    AcpxUsage withUnavailableReason(String reason) {
+        return new AcpxUsage(
+                inputTokens,
+                outputTokens,
+                cachedReadTokens,
+                cachedWriteTokens,
+                totalTokens,
+                costAmount,
+                costCurrency,
+                source,
+                measurementType,
+                attribution,
+                cumulative,
+                contextUsedTokens,
+                sessionCostAmount,
+                sessionCostCurrency,
+                providerId,
+                model,
+                billingMode,
+                providerMetadataSource,
+                reason == null ? "" : reason
         );
     }
 

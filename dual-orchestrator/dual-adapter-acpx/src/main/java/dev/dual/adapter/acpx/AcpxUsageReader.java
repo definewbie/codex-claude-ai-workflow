@@ -51,6 +51,7 @@ final class AcpxUsageReader {
     private final Path sessionsDir;
     private final int retryAttempts;
     private final long retryDelayMs;
+    private final AcpxProviderMetadata fallbackMetadata;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     AcpxUsageReader() {
@@ -62,9 +63,14 @@ final class AcpxUsageReader {
     }
 
     AcpxUsageReader(Path sessionsDir, int retryAttempts, long retryDelayMs) {
+        this(sessionsDir, retryAttempts, retryDelayMs, null);
+    }
+
+    AcpxUsageReader(Path sessionsDir, int retryAttempts, long retryDelayMs, AcpxProviderMetadata fallbackMetadata) {
         this.sessionsDir = sessionsDir;
         this.retryAttempts = Math.max(1, retryAttempts);
         this.retryDelayMs = Math.max(0, retryDelayMs);
+        this.fallbackMetadata = fallbackMetadata;
     }
 
     private static int configuredRetryAttempts() {
@@ -106,7 +112,10 @@ final class AcpxUsageReader {
             var stderr = Files.exists(stderrPath) ? Files.readString(stderrPath) : "";
             var sessionId = sessionIdFrom(stderr);
             if (sessionId.isEmpty() || !Files.isRegularFile(promptPath)) {
-                return Optional.empty();
+                var metadata = fallbackMetadata == null ? AcpxProviderMetadata.runtimeDefault() : fallbackMetadata;
+                return metadata.isEmpty()
+                        ? Optional.empty()
+                        : Optional.of(AcpxUsage.unavailable("NO_ACPX_SESSION_ID", metadata));
             }
             var streamPath = sessionsDir.resolve(sessionId.get() + ".stream.ndjson");
             if (!Files.isRegularFile(streamPath)) {

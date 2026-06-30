@@ -45,7 +45,7 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void reconnectWithValidTerminalAndArtifactSucceedsWithWarnings() {
+    void reconnectWithValidTerminalAndArtifactCannotSucceed() {
         var reconnect = AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED);
 
         var outcome = resolve(
@@ -55,13 +55,15 @@ class AgentExecutionOutcomeResolverTest {
                 List.of(reconnect)
         );
 
-        assertEquals(AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS, outcome.status());
-        assertTrue(outcome.nodeMaySucceed());
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
+        assertEquals("agent_reconnect_required", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+        assertEquals(RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE, outcome.recoveryCategory());
         assertEquals(List.of(reconnect), outcome.secondarySignals());
     }
 
     @Test
-    void reconnectWithValidTerminalButMissingArtifactKeepsContractAsPrimary() {
+    void reconnectWithValidTerminalButMissingArtifactKeepsAdapterBoundaryAsPrimary() {
         var reconnect = AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED);
 
         var outcome = resolve(
@@ -71,10 +73,10 @@ class AgentExecutionOutcomeResolverTest {
                 List.of(reconnect)
         );
 
-        assertEquals(AgentExecutionOutcomeStatus.CONTRACT_FAILED, outcome.status());
-        assertEquals("required_artifact_contract_failed", outcome.primaryReason());
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
+        assertEquals("agent_reconnect_required", outcome.primaryReason());
         assertEquals(List.of(reconnect), outcome.secondarySignals());
-        assertEquals(RecoveryCategory.ARTIFACT_CONTRACT_FAILURE, outcome.recoveryCategory());
+        assertEquals(RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE, outcome.recoveryCategory());
     }
 
     @Test

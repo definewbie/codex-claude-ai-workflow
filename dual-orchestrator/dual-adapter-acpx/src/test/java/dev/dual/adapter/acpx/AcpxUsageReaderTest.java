@@ -203,4 +203,29 @@ class AcpxUsageReaderTest {
         assertEquals(AcpxUsage.ATTR_SESSION_USAGE_UPDATE, usage.get().attribution());
         assertTrue(usage.get().cumulative());
     }
+
+    @Test
+    void recordsProviderIdentityWhenClaudeDirectRunHasNoAcpxSessionId() throws Exception {
+        var promptPath = tempDir.resolve("prompt-direct.md");
+        var stderrPath = tempDir.resolve("stderr-direct.log");
+        Files.writeString(promptPath, "real prompt");
+        Files.writeString(stderrPath, "");
+        var metadata = new AcpxProviderMetadata(
+                "zhipu",
+                "glm-5.2",
+                AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS,
+                AcpxProviderMetadata.SOURCE_CLAUDE_SETTINGS_ENV
+        );
+
+        var usage = new AcpxUsageReader(tempDir.resolve("sessions-direct"), 1, 0, metadata)
+                .read(promptPath, stderrPath);
+
+        assertTrue(usage.isPresent());
+        assertEquals(AcpxUsage.UNAVAILABLE, usage.get().measurementType());
+        assertEquals("NO_ACPX_SESSION_ID", usage.get().unavailableReason());
+        assertEquals("zhipu", usage.get().providerId());
+        assertEquals("glm-5.2", usage.get().model());
+        assertEquals(AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS, usage.get().billingMode());
+        assertEquals(AcpxProviderMetadata.SOURCE_CLAUDE_SETTINGS_ENV, usage.get().providerMetadataSource());
+    }
 }

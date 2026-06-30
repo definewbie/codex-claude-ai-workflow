@@ -24,6 +24,6 @@ public enum AdapterSignalType {
     }
 
     public boolean blocksSuccess() {
-        return severity == AdapterSignalSeverity.BLOCKING;
+        return severity != AdapterSignalSeverity.INFO;
     }
 }
