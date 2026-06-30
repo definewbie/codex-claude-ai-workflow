@@ -45,11 +45,22 @@ Definitions:
 
 Ordering rule:
 
-- P0 must be promoted before P0.5 implementation, real effectiveness
-  validation, or attribution conclusions are accepted.
-- P0 and P0.5 must both be promoted before starting P1/P2/P3 feature work,
-  default-strategy changes, complex real-case benefit claims, or token-saving
-  conclusions.
+- Current phase lock allows only P0 and P0.5 work. P1/P2/P3 are hard-stopped
+  until this lock is explicitly removed.
+- P0 remains the highest priority. P0.5 work is allowed only for
+  provider/model/token/cost/cache attribution, GLM token-only reconciliation,
+  pricing catalog calibration, and blockers that directly affect P0/P0.5
+  proof.
+- P1/P2/P3 work is not allowed during the current lock, even if local code,
+  tests, or historical evidence already exist. Do not implement, expand,
+  benchmark, switch defaults, or claim benefits for provider-cache-aware,
+  session compaction, repo-scope governance, memory-loop, complex real-case, or
+  keep-alive work.
+- P1/P2/P3 findings may only be recorded as visible P0/P0.5 gaps or blockers.
+  They must not turn into feature work.
+- After the lock is removed, P0 and P0.5 must both be promoted before starting
+  P1/P2/P3 feature work, default-strategy changes, complex real-case benefit
+  claims, or token-saving conclusions.
 - Lower-priority work is allowed before promotion only when it is explicitly a
   direct fix for the currently locked higher-priority blocker and is gated as
   that higher-priority phase.
@@ -58,6 +69,11 @@ Do not use "tests green", "implemented locally", "measure_only", "warning
 visible", or "ran one case" as promotion evidence. Promotion evidence must name
 the source of truth, the command or replay/calibration used, and the PASS /
 FAIL / INVALID criteria.
+
+The executable gate in `scripts/lib/mainline-decision-gate.sh` must reject any
+current `Target phase` outside P0/P0.5. If the script and this checklist
+disagree, treat that as a boundary drift bug and fix the gate before continuing
+feature work.
 
 ## Model Ownership Check
 

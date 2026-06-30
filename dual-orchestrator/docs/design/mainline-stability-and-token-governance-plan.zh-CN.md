@@ -112,13 +112,20 @@ Mainline Decision Gate:
 
 本 gate 的格式校验由 `scripts/lib/mainline-decision-gate.sh` 提供。它只证明“开工前的主线目标、边界、SoT、漂移路径和完成证据已经写清楚”，不替代 P2 的真实 provider `Verification Gate`，也不证明任何 runtime 行为已经完成。
 
-2026-07-01 加固：`mainline-decision-gate.sh` 不再只检查字段是否存在；它会拒绝非法 phase / phase status、`Drift path=none/N/A`、P1/P2/P3 缺少 P0+P0.5 promoted 证据、P0.5 缺少 P0 promoted 证据，以及把 `warning` / `prompt` / `fallback` / `measure_only` / `record_only` / `trace only` / `再跑一次看看` 等低收益 trade-off 写成主线修复的 gate。该规则的目的不是增加流程负担，而是防止实现再次从 SoT / typed boundary / catalog / policy / ledger event 滑向局部显示、提示词或兼容补丁。
+2026-07-01 加固：`mainline-decision-gate.sh` 不再只检查字段是否存在；它会拒绝非法 phase / phase status、`Drift path=none/N/A`、P0.5 缺少 P0 promoted 证据，以及把 `warning` / `prompt` / `fallback` / `measure_only` / `record_only` / `trace only` / `再跑一次看看` 等低收益 trade-off 写成主线修复的 gate。当前硬锁期内，脚本还会直接拒绝 P1/P2/P3 作为 `Target phase`，即使 gate 声称 P0/P0.5 已 promoted。该规则的目的不是增加流程负担，而是防止实现再次从 SoT / typed boundary / catalog / policy / ledger event 滑向局部显示、提示词或兼容补丁。
 
 ### 2.3 当前 Phase Lock
 
-当前锁定阶段：P0。P0 `Promoted` 后才允许进入 P0.5。
+当前允许阶段：P0 / P0.5。P1/P2/P3 全部锁定，直到用户显式解除。
 
-在 P0 未 `Promoted` 前，禁止推进 P0.5/P1/P2/P3。P0 和 P0.5 同时 `Promoted` 前，禁止：
+阶段晋级规则：
+
+- P0 仍是最高优先级；P0 未 `Promoted` 前，P0.5 只能做直接修复 P0 blocker 或 P0.5 自身 attribution blocker 的工作，不能用来声明整体 token 治理收益。
+- P0.5 只能围绕 provider/model/token/cost/cache attribution、GLM token-only 对账、DeepSeek/OpenAI/Claude pricing catalog 和相关 read-model 校准。
+- P1/P2/P3 禁止启动、禁止实现、禁止真实验证、禁止收益归因；即使某个 P1/P2 功能已有本地代码或历史测试，也不得继续扩大。
+- P1/P2/P3 的唯一允许动作是：把已发现的问题记录为 P0/P0.5 的 blocker 或 visible gap，不写功能代码。
+
+在 P0 和 P0.5 同时 `Promoted` 前，禁止：
 
 - 开发或扩大 P1/P2/P3 功能；
 - 将 provider-cache-aware、session compaction、repo scope governance 或 memory loop 切为默认策略；
@@ -128,8 +135,8 @@ Mainline Decision Gate:
 当前允许的工作仅限：
 
 - 直接修复 P0 执行事实边界、慢点归因、stale / reconnect / timeout / terminal wait / run.json 落盘问题；
-- 为 P0 验证补充 replay、fixture、trace 或 gate，但不得把这些 observation-only 改动伪装成下游治理收益。
-- P0 `Promoted` 后，才允许直接修复 P0.5 provider/model/token/cost/cache attribution、GLM token-only 对账、DeepSeek/OpenAI/Claude pricing catalog 问题。
+- 直接修复 P0.5 provider/model/token/cost/cache attribution、GLM token-only 对账、DeepSeek/OpenAI/Claude pricing catalog 和账单校准问题；
+- 为 P0/P0.5 验证补充 replay、fixture、trace、calibration 或 gate，但不得把这些 observation-only 改动伪装成下游治理收益。
 
 ## 3. 未完成目标清单
 

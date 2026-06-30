@@ -91,7 +91,7 @@ cat >"$tradeoff" <<'EOF'
 EOF
 
 assert_eq \
-  "Source of truth being changed or strengthened|Drift path being removed or centralized|Proof required before claiming completion" \
+  "Target phase|Source of truth being changed or strengthened|Drift path being removed or centralized|Proof required before claiming completion" \
   "$(mainline_decision_gate_tradeoff_flags "$tradeoff")" \
   "tradeoff flags"
 assert_eq "false" "$(mainline_decision_gate_is_complete "$tradeoff" && printf true || printf false)" "tradeoff gate rejected"
@@ -112,7 +112,7 @@ cat >"$case_insensitive" <<'EOF'
 EOF
 
 assert_eq \
-  "Source of truth being changed or strengthened|Drift path being removed or centralized" \
+  "Target phase|Source of truth being changed or strengthened|Drift path being removed or centralized" \
   "$(mainline_decision_gate_tradeoff_flags "$case_insensitive")" \
   "case-insensitive tradeoff flags"
 assert_eq "false" "$(mainline_decision_gate_is_complete "$case_insensitive" && printf true || printf false)" "case-insensitive tradeoff rejected"
@@ -166,7 +166,24 @@ cat >"$p1_without_upstream" <<'EOF'
 - Remaining gaps that must stay visible: real provider validation missing
 EOF
 
-assert_eq "Upstream promotion evidence" "$(mainline_decision_gate_tradeoff_flags "$p1_without_upstream")" "p1 requires promoted upstream evidence"
+assert_eq "Target phase|Upstream promotion evidence" "$(mainline_decision_gate_tradeoff_flags "$p1_without_upstream")" "current lock rejects p1 before upstream evidence"
+
+p1_even_with_upstream="$tmp/p1-even-with-upstream.md"
+cat >"$p1_even_with_upstream" <<'EOF'
+# Mainline Decision Gate
+
+- Target phase: P1
+- Current phase status: Verified
+- Upstream promotion evidence: P0 promoted and P0.5 promoted by explicit phase gates
+- Boundary owner: RepoScopeGovernance
+- Source of truth being changed or strengthened: ExplorationPolicyResult validator
+- Drift path being removed or centralized: stage read policy moves into RepoScopeGovernance
+- Explicit non-goals: no complex real-case
+- Proof required before claiming completion: policy test rejects out-of-scope review read
+- Remaining gaps that must stay visible: real provider validation missing
+EOF
+
+assert_eq "Target phase" "$(mainline_decision_gate_tradeoff_flags "$p1_even_with_upstream")" "current lock rejects p1 even with upstream promotion"
 
 p05_without_p0="$tmp/p05-without-p0.md"
 cat >"$p05_without_p0" <<'EOF'

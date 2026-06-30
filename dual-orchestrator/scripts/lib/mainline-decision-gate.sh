@@ -62,6 +62,12 @@ mainline_decision_gate_tradeoff_flags() {
       flags+=("$field")
       continue
     fi
+    if [[ "$field" == "Target phase" \
+        && "$lower" != "p0" \
+        && "$lower" != "p0.5" ]]; then
+      flags+=("$field")
+      continue
+    fi
     if [[ "$field" == "Current phase status" \
         && "$lower" != "implemented" \
         && "$lower" != "verified" \
