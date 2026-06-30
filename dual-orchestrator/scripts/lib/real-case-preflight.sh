@@ -98,3 +98,67 @@ real_case_artifact_freshness_reason() {
 real_case_artifact_freshness_is_valid() {
   [[ "$1" == "fresh" || "$1" == "fresh_existing_artifact" ]]
 }
+
+real_case_provider_probe_status() {
+  local exit_code="$1"
+  local result_json="$2"
+
+  if [[ "$exit_code" == "124" ]]; then
+    printf 'timeout'
+    return
+  fi
+  if [[ "$exit_code" != "0" ]]; then
+    printf 'failed'
+    return
+  fi
+  if [[ ! -f "$result_json" ]]; then
+    printf 'failed'
+    return
+  fi
+  if command -v jq >/dev/null 2>&1; then
+    if jq -e '.is_error == true' "$result_json" >/dev/null 2>&1; then
+      printf 'failed'
+      return
+    fi
+    if jq -e '.type == "result"' "$result_json" >/dev/null 2>&1; then
+      printf 'passed'
+      return
+    fi
+    printf 'failed'
+    return
+  fi
+  if grep -Eq '"is_error"[[:space:]]*:[[:space:]]*true' "$result_json"; then
+    printf 'failed'
+    return
+  fi
+  if grep -Eq '"type"[[:space:]]*:[[:space:]]*"result"' "$result_json"; then
+    printf 'passed'
+    return
+  fi
+  printf 'failed'
+}
+
+real_case_provider_probe_reason() {
+  local status="$1"
+  case "$status" in
+    passed)
+      printf 'provider_probe_completed'
+      ;;
+    skipped)
+      printf 'provider_probe_disabled'
+      ;;
+    timeout)
+      printf 'provider_probe_timed_out'
+      ;;
+    failed)
+      printf 'provider_probe_failed'
+      ;;
+    *)
+      printf 'provider_probe_unknown'
+      ;;
+  esac
+}
+
+real_case_provider_probe_is_valid() {
+  [[ "$1" == "passed" || "$1" == "skipped" ]]
+}

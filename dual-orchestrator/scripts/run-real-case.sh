@@ -51,6 +51,13 @@ FINISHED_AT=""
 BUILD_STARTED_EPOCH=""
 BUILD_FINISHED_EPOCH=""
 BUILD_MODE=""
+PROVIDER_PROBE_ENABLED="${DUAL_REAL_CASE_PROVIDER_PROBE:-1}"
+PROVIDER_PROBE_STATUS="not_run"
+PROVIDER_PROBE_REASON="not_run"
+PROVIDER_PROBE_EXIT_CODE=0
+PROVIDER_PROBE_TIMEOUT_SECONDS="${DUAL_REAL_CASE_PROVIDER_PROBE_TIMEOUT_SECONDS:-180}"
+PROVIDER_PROBE_RESULT_PATH=""
+PROVIDER_PROBE_STDERR_PATH=""
 
 usage() {
   cat <<'EOF'
@@ -226,6 +233,63 @@ build_project() {
   BUILD_FINISHED_EPOCH="$(date '+%s')"
 }
 
+run_provider_probe() {
+  PROVIDER_PROBE_RESULT_PATH="$CASE_DIR/provider-probe-result.json"
+  PROVIDER_PROBE_STDERR_PATH="$CASE_DIR/provider-probe-stderr.log"
+  local prompt_path="$CASE_DIR/provider-probe-prompt.txt"
+
+  if [[ "$PROVIDER_PROBE_ENABLED" == "0" || "$PROVIDER_PROBE_ENABLED" == "false" ]]; then
+    PROVIDER_PROBE_STATUS="skipped"
+    PROVIDER_PROBE_REASON="$(real_case_provider_probe_reason "$PROVIDER_PROBE_STATUS")"
+    return 0
+  fi
+
+  command -v claude >/dev/null 2>&1 || {
+    PROVIDER_PROBE_STATUS="failed"
+    PROVIDER_PROBE_REASON="claude_cli_not_found"
+    PROVIDER_PROBE_EXIT_CODE=127
+    return 1
+  }
+
+  printf 'Provider connectivity probe. Reply exactly: OK. Do not use tools.\n' >"$prompt_path"
+  local -a command=(
+    claude
+    --print
+    --input-format text
+    --output-format json
+    --bare
+    --safe-mode
+    --no-session-persistence
+    --permission-mode dontAsk
+    --disallowedTools Bash,Read,Edit,Write,NotebookEdit,WebFetch,WebSearch
+  )
+
+  "${command[@]}" <"$prompt_path" >"$PROVIDER_PROBE_RESULT_PATH" 2>"$PROVIDER_PROBE_STDERR_PATH" &
+  local pid="$!"
+  local started now elapsed
+  started="$(date '+%s')"
+  while kill -0 "$pid" >/dev/null 2>&1; do
+    now="$(date '+%s')"
+    elapsed="$((now - started))"
+    if [[ "$elapsed" -ge "$PROVIDER_PROBE_TIMEOUT_SECONDS" ]]; then
+      kill "$pid" >/dev/null 2>&1 || true
+      sleep 1
+      kill -9 "$pid" >/dev/null 2>&1 || true
+      wait "$pid" >/dev/null 2>&1 || true
+      PROVIDER_PROBE_EXIT_CODE=124
+      PROVIDER_PROBE_STATUS="timeout"
+      PROVIDER_PROBE_REASON="$(real_case_provider_probe_reason "$PROVIDER_PROBE_STATUS")"
+      return 1
+    fi
+    sleep 1
+  done
+  wait "$pid" || PROVIDER_PROBE_EXIT_CODE="$?"
+  PROVIDER_PROBE_EXIT_CODE="${PROVIDER_PROBE_EXIT_CODE:-0}"
+  PROVIDER_PROBE_STATUS="$(real_case_provider_probe_status "$PROVIDER_PROBE_EXIT_CODE" "$PROVIDER_PROBE_RESULT_PATH")"
+  PROVIDER_PROBE_REASON="$(real_case_provider_probe_reason "$PROVIDER_PROBE_STATUS")"
+  real_case_provider_probe_is_valid "$PROVIDER_PROBE_STATUS"
+}
+
 write_preflight_evidence() {
   local preflight="$CASE_DIR/preflight.json"
   local freshness_status freshness_reason freshness_valid jar_mtime latest_input_mtime
@@ -256,13 +320,28 @@ write_preflight_evidence() {
     echo "  \"latestJvmInputMtimeEpoch\": ${latest_input_mtime:-0},"
     echo "  \"artifactFreshnessStatus\": \"$(json_escape "$freshness_status")\","
     echo "  \"artifactFreshnessReason\": \"$(json_escape "$freshness_reason")\","
-    echo "  \"artifactFreshnessProven\": $freshness_valid"
+    echo "  \"artifactFreshnessProven\": $freshness_valid,"
+    echo "  \"providerProbeEnabled\": \"$(json_escape "$PROVIDER_PROBE_ENABLED")\","
+    echo "  \"providerProbeStatus\": \"$(json_escape "$PROVIDER_PROBE_STATUS")\","
+    echo "  \"providerProbeReason\": \"$(json_escape "$PROVIDER_PROBE_REASON")\","
+    echo "  \"providerProbeExitCode\": ${PROVIDER_PROBE_EXIT_CODE:-0},"
+    echo "  \"providerProbeTimeoutSeconds\": ${PROVIDER_PROBE_TIMEOUT_SECONDS:-0},"
+    echo "  \"providerProbeResultPath\": \"$(json_escape "$PROVIDER_PROBE_RESULT_PATH")\","
+    echo "  \"providerProbeStderrPath\": \"$(json_escape "$PROVIDER_PROBE_STDERR_PATH")\""
     echo "}"
   } >"$preflight"
 
   if [[ "$freshness_valid" != true ]]; then
     fail "run artifact freshness is not proven: $freshness_status ($freshness_reason)"
     fail "Preflight evidence: $preflight"
+    exit 1
+  fi
+  if ! real_case_provider_probe_is_valid "$PROVIDER_PROBE_STATUS"; then
+    fail "provider preflight failed: $PROVIDER_PROBE_STATUS ($PROVIDER_PROBE_REASON)"
+    fail "Preflight evidence: $preflight"
+    FINAL_STATUS="INVALID_PROVIDER_PREFLIGHT"
+    write_report
+    update_benchmark_index
     exit 1
   fi
 }
@@ -616,6 +695,19 @@ missing_artifacts() {
 }
 
 invalid_reason() {
+  local preflight="$CASE_DIR/preflight.json"
+  if [[ -f "$preflight" ]]; then
+    local probe_status
+    if command -v jq >/dev/null 2>&1; then
+      probe_status="$(jq -r '.providerProbeStatus // ""' "$preflight" 2>/dev/null || true)"
+    else
+      probe_status="$(grep -E '"providerProbeStatus"[[:space:]]*:' "$preflight" | sed -E 's/.*"providerProbeStatus"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' | head -1)"
+    fi
+    if [[ "$probe_status" == "failed" || "$probe_status" == "timeout" ]]; then
+      printf 'provider_preflight_%s' "$probe_status"
+      return
+    fi
+  fi
   real_case_invalid_reason_from_runs_dir "${WS_DIR:-}/runs"
 }
 
@@ -867,6 +959,7 @@ main() {
   validate_inputs
   init_case_dir
   build_project
+  run_provider_probe || true
   write_preflight_evidence
   trap handle_interrupt INT TERM
   start_workstream

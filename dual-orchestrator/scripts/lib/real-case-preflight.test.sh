@@ -71,3 +71,41 @@ if real_case_artifact_freshness_is_valid unproven_skip_build; then
   printf '[FAIL] skip build should not be valid\n' >&2
   exit 1
 fi
+
+probe_json="$tmp/provider-result.json"
+printf '{"type":"result","is_error":false,"result":"OK"}\n' >"$probe_json"
+assert_eq "passed" \
+  "$(real_case_provider_probe_status 0 "$probe_json")" \
+  "provider probe passed on successful result json"
+
+printf '{"type":"result","is_error":true,"result":"API Error"}\n' >"$probe_json"
+assert_eq "failed" \
+  "$(real_case_provider_probe_status 0 "$probe_json")" \
+  "provider probe failed on error result json"
+
+assert_eq "failed" \
+  "$(real_case_provider_probe_status 1 "$probe_json")" \
+  "provider probe failed on nonzero exit"
+
+assert_eq "timeout" \
+  "$(real_case_provider_probe_status 124 "$probe_json")" \
+  "provider probe timeout"
+
+assert_eq "provider_probe_failed" \
+  "$(real_case_provider_probe_reason failed)" \
+  "provider probe failed reason"
+
+if ! real_case_provider_probe_is_valid passed; then
+  printf '[FAIL] passed provider probe should be valid\n' >&2
+  exit 1
+fi
+
+if ! real_case_provider_probe_is_valid skipped; then
+  printf '[FAIL] skipped provider probe should be valid\n' >&2
+  exit 1
+fi
+
+if real_case_provider_probe_is_valid failed; then
+  printf '[FAIL] failed provider probe should not be valid\n' >&2
+  exit 1
+fi
