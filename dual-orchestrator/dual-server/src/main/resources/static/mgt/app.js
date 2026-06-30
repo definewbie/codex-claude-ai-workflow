@@ -297,7 +297,7 @@ function renderOverview(data) {
   ]);
   els.overviewWhy.textContent = data.whyStopped || "Attention read model unavailable. Rebuild projections or refresh the workstream.";
   els.overviewNext.textContent = data.nextAction || "Refresh after projections are rebuilt.";
-  renderOverviewAttention(derivedAttention(data));
+  renderOverviewAttention(data.attention || []);
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
   renderOverviewDeliveryMerge(data.deliveryMerge || {}, data);
@@ -571,48 +571,8 @@ function renderOverviewCards(items) {
   }
 }
 
-function derivedAttention(data) {
-  const items = [...(data.attention || [])];
-  const stale = staleRunningSignal(data);
-  if (stale) {
-    items.unshift({
-      severity: "critical",
-      title: "Running state looks stale",
-      detail: stale,
-      command: `dualctl recovery show --workdir "${data.workspace || ""}" ${data.workstreamId || state.selectedId}`,
-    });
-  }
-  const goal = data.goalSatisfaction || {};
-  if (goal.domainOutcome === "NEEDS_REPAIR" || goal.domainOutcome === "NEEDS_REDESIGN") {
-    items.unshift({
-      severity: "warning",
-      title: "Goal loop needs another iteration",
-      detail: goal.reason || "Verifier or human evidence indicates the goal is not satisfied yet.",
-      command: `dualctl run --workdir "${data.workspace || ""}" ${data.workstreamId || state.selectedId}`,
-    });
-  }
-  return items;
-}
-
-function staleRunningSignal(data) {
-  const workflow = data.workflow || {};
-  if (workflow.status !== "RUNNING") {
-    return "";
-  }
-  const currentNode = workflow.currentNode || "";
-  const latest = (data.latestAgentRuns || [])[0] || {};
-  const failureAvailable = Boolean(data.artifacts?.currentFailure?.available);
-  if (latest.status === "failed" && (!currentNode || latest.nodeId === currentNode)) {
-    return `The active node is ${currentNode || "unknown"}, but the latest agent run failed. Inspect recovery before continuing.`;
-  }
-  if (failureAvailable) {
-    return `The workflow is marked RUNNING, but a current failure summary exists. Inspect recovery before continuing.`;
-  }
-  return "";
-}
-
-function isStaleRunningOverview() {
-  return state.overview ? Boolean(staleRunningSignal(state.overview)) : false;
+function hasRuntimeRecoveryAttention(data) {
+  return (data.attention || []).some((item) => item.category === "RUNTIME_RECOVERY");
 }
 
 function durationLabel(value) {
@@ -1140,7 +1100,7 @@ function updateActions(data) {
   const activeKind = activeNode.kind || "";
   const activeDefinition = activeNode.nodeDefinitionId || "";
   const nextStageGate = activeDefinition.includes("next_stage");
-  const staleRunning = isStaleRunningOverview();
+  const staleRunning = hasRuntimeRecoveryAttention(data);
   const recoveryActionVisible = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY"].includes(status);
 
   setActionVisibility({

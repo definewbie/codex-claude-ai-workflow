@@ -27,5 +27,11 @@ class StaticConsoleProjectionBoundaryTest {
                 "management console must consume WorkstreamAttention via API, not infer whyStopped from status");
         assertFalse(mgt.contains("friendlyNextAction("),
                 "management console must consume WorkstreamAttention via API, not infer nextAction from status");
+        assertFalse(mgt.contains("derivedAttention("),
+                "management console must render API attention items directly, not synthesize secondary attention");
+        assertFalse(mgt.contains("staleRunningSignal("),
+                "management console must consume runtime recovery attention from API, not infer stale running locally");
+        assertTrue(mgt.contains("hasRuntimeRecoveryAttention(data)"));
+        assertTrue(mgt.contains("item.category === \"RUNTIME_RECOVERY\""));
     }
 }
