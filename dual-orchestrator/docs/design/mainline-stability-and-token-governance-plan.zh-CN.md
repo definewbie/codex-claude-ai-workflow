@@ -231,6 +231,16 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   不应通过 `acpx_failure.reason` 再次注入 `NodeResult` 并覆盖成功 outcome。若输出
   不完整或 terminal/artifact contract 不满足，reconnect 仍作为 recoverable adapter
   failure 进入 execution boundary。
+- 2026-06-30 retry 复核：对 public benchmark workstream
+  `ws-20260630T144326Z-WUDW` 执行一次 `retry` + `resume` 后，新 run
+  `run-1782832521162` 写出 `executionAttempt.status=COMPLETED`、
+  `failureSignal=null`、`executionOutcome.status=SUCCESS`、
+  `adapterSignals=[]`、`agent_output_contract.valid=true`，workflow 从
+  `intake.codex_product_review` 推进到 `intake.decision`。该验证证明 fresh jar
+  能使既有失败节点越过 recovery 边界，但不能单独证明“新 run 再次出现
+  `agent needs reconnect` stderr 时也会被 suppress”，因为本次 retry stderr 是
+  `agent connected`。因此 post-run reconnect suppression 的直接证据仍来自
+  unit tests 与旧失败 run 根因分析，不能把这次 retry 夸大成完整 real-case 证明。
 - native Claude CLI `--print --output-format json` 路径已补 usage acquisition：成功 JSON 会进入
   run.json `usage.measurementType=PROVIDER_RUN_USAGE`，并保留
   `provider=zhipu`、`model=glm-5.2`、`billingMode=subscription_token_only`。
@@ -744,6 +754,12 @@ Verification Gate 的 9 个字段均已填写。除字段校验外，runner 还�
 这只证明 P2 的入口约束和 runner 自证 preflight 已经落地，不证明 P2 real-case 矩阵已经通过。simple
 semantic、simple token benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of
 truth 判定 PASS / FAIL / INVALID。
+
+报告 freshness 规则：`run-real-case.sh` 生成的 `report.md` / `summary.json` 是本次脚本运行结束时的
+快照，不是 workstream 的持续 SoT。若后续通过 `dualctl retry` / `resume` / `run` 继续推进同一个
+workstream，验收必须重新读取 ledger `workflow/current.json`、相关 `run.json`、typed artifacts 和
+metrics/projections。不能用旧 report 的 `START_FAILED` / `WAITING_FOR_RECOVERY` 覆盖后续 ledger 事实；
+若需要报告作为证据，必须重新生成或另写 verification result 文档。
 
 Verification Gate 的字段解析和完整性校验已下沉到 `scripts/lib/verification-gate.sh`，并由
 `verification-gate.test.sh` 覆盖完整 gate、缺字段 gate、TODO/TBD gate 三类 fixture。该测试只证明
