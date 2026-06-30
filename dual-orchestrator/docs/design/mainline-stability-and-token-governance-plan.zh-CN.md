@@ -766,6 +766,18 @@ Verification Gate 的 9 个字段均已填写。除字段校验外，runner 还�
 semantic、simple token benchmark 和 cancer-clinic medium complex 仍必须分别执行，并用各自的 Source of
 truth 判定 PASS / FAIL / INVALID。
 
+2026-07-01 simple semantic controlled smoke：`scripts/semantic-boundary-smoke.sh all` 已通过。
+该 smoke 使用 fake acpx，但驱动真实 `dualctl` / worktree / ledger 路径，覆盖三条语义边界：
+
+- `plan-body`：`plan.claude_plan` 缺少 typed `plan_artifact` 会被卡住，不能靠 Markdown 正文通过；
+- `review-noise`：Codex summary prose 中的 “minor stylistic issue” 不会触发 `REVIEW_NOISE` 放行；
+- `reread-reason`：reusable file 的非预期重读会被 harness 计算出的 `REREAD_POLICY_DENIED` 阻断，
+  不依赖 agent 自述 `reread_reasons`。
+
+这证明 simple semantic boundary 的 controlled path 已闭环；它不证明真实 provider、
+token/cost attribution、provider-cache-aware、session compaction 或 cancer-clinic complex case。
+这些仍必须按各自 Verification Gate 单独验证。
+
 报告 freshness 规则：`run-real-case.sh` 生成的 `report.md` / `summary.json` 是本次脚本运行结束时的
 快照，不是 workstream 的持续 SoT。若后续通过 `dualctl retry` / `resume` / `run` 继续推进同一个
 workstream，验收必须重新读取 ledger `workflow/current.json`、相关 `run.json`、typed artifacts 和
