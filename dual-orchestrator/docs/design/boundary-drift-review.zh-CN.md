@@ -43,6 +43,14 @@ Source of truth：
   - `semantic_revision_limit`
 - CLI/API/UI 只显示这些分类和建议命令。
 
+当前状态（2026-07-01）：
+
+- `RecoveryAssessment` 已作为 operator-facing recovery read model，优先消费 typed `agent_execution_outcome`，再兼容 legacy `acpx_failure.reason`。
+- `RecoveryAssessmentTest` 已覆盖 artifact contract failure 优先级、revision limit、output interrupted、auth failure、provider connection failure 和 execution outcome 驱动的 provider connection failure。
+- `RecoveryShowCommandTest` 已覆盖 CLI 展示 `agent_session_recovery` 等 typed classification。
+
+因此 recovery typed reason 到 operator action 的 P0 主路径已实现；后续风险在于新增 provider failure signal 时必须同步补 recovery assessment 测试，不能退回泛化文案。
+
 ### 2. Human gate action 只能由 ledger boundary 归一化
 
 Source of truth：
@@ -60,6 +68,14 @@ Source of truth：
 - CLI/API/UI 发送用户动作，例如 `approve`。
 - Ledger 记录 `requested_action` 和 canonical `human_action`。
 - 只有 ledger 能根据当前 gate 和 workflow edge 做动作归一化。
+
+当前状态（2026-07-01）：
+
+- `RoutingEngine.resolveOpenGate` 负责 gate action canonicalization，并在 node result 中同时写入 `requested_action` 和 canonical `human_action`。
+- `WorkflowGateResolutionTest.approvingOpenGateRoutesByHumanAction` 已覆盖 ledger 将 open gate resolution 路由到 canonical edge。
+- `ReviewDecideCommandTest` 已覆盖 CLI 入口提交 action 后由 ledger 边界完成归一化。
+
+因此 human gate action normalization 的 P0 主路径已实现；CLI/API/UI 不应再各自翻译 `approve/approved`。
 
 ### 3. Workflow definition 和 artifact contract 不能长期双写
 
@@ -167,8 +183,8 @@ MVP 允许的短期状态：
 
 | 优先级 | 项目 | 原因 | 状态 |
 |---|---|---|---|
-| P0 | Recovery typed reason 到 operator action 的映射 | real-case 已暴露，直接影响恢复能力 | 已开始修复 |
-| P0 | Human gate action normalization 去重 | 防止 CLI/UI/API 行为漂移 | 已开始修复 |
+| P0 | Recovery typed reason 到 operator action 的映射 | real-case 已暴露，直接影响恢复能力 | 已覆盖，新增 signal 需补测试 |
+| P0 | Human gate action normalization 去重 | 防止 CLI/UI/API 行为漂移 | 已覆盖，继续运行 |
 | P0 | Workflow JSON 和 ContractRegistry 一致性测试 | 防止新增节点后 contract 漏配 | 已覆盖，继续运行 |
 | P1 | Handler capability catalog | 防止 runtime/validate/docs 支持范围不一致 | 已有最小测试，继续收口 |
 | P1 | Projection read model 收口 | 防止 trace/status/operator panel 各说各话 | 待做 |
