@@ -75,7 +75,7 @@ flowchart TD
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，真实 replay 待做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；仍缺 problematic workstream replay | P0 |
 | acpx / CC / Codex 执行生命周期 | 未完整建模 | terminal 已出现但 transport 继续等 293s/380s 的原因不可解释 | P0 |
 | stale RUNNING / PROCESS_STALLED | synthetic 覆盖，real replay 待做 | dead pid resume 会进入 recovery 并标记 node execution stale；仍缺历史 problematic workstream replay | P0 |
-| provider/model/token attribution | 本地读模型已覆盖，真实账单校准待做 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；仍缺 DeepSeek CSV 离线校准和真实复杂 case 复测 | P0.5 |
+| provider/model/token attribution | 本地读模型和 CSV fixture 已覆盖，真实账单校准待做 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 已覆盖 DeepSeek 账单公式；仍缺真实账单文件校准和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
 | intake exploration governance | 已完成 | 只覆盖 intake，不代表整体 readCount/token 下降 | Done |
@@ -362,7 +362,7 @@ not_applicable
 | --- | --- | --- | --- |
 | provider/model identity 不稳定 | GLM 有时仍可能被视为 `pricing_unknown` | provider metadata 没成为 run-level typed identity | 已补：run-level `providerModelIdentity` + projection test |
 | GLM 包月语义不完整 | 金额不可算时可能降级 unknown | token-only billing 没有强制语义 | 已补：`billingMode=subscription_token_only`、`costAttribution.reliability=token_only`，token 必须有效 |
-| DeepSeek 价格校准不闭环 | 控制台/账单和 dual 计算可能不一致 | 官方价格表和账单校准没进入测试 | 部分完成：fixture 精确计算已覆盖；仍缺 CSV 离线校准测试 |
+| DeepSeek 价格校准不闭环 | 控制台/账单和 dual 计算可能不一致 | 官方价格表和账单校准没进入测试 | 部分完成：fixture 精确计算与 CSV parser 校准已覆盖；仍缺真实账单文件校准 |
 | provider-cache-aware 无法证明 active | 仍可能 `measure_only` | strategy decision 与 billing reliability 绑定不清 | 部分完成：本地 policy matrix 已覆盖；仍缺真实 run active 触发证明 |
 | cachedRead 是否真 cache hit 不可验证 | cachedRead 很大但成本是否下降不明确 | 没区分 provider reported cache hit 和 local inference | 已补：`cacheSignalSource=provider_reported|inferred|unavailable` |
 | Codex/OpenAI/Claude 未完整纳入 | 价格模型主要围绕 GLM/DeepSeek | provider catalog 不完整 | 已补：packaged catalog + metrics projection 覆盖 zhipu/deepseek/openai/anthropic |
@@ -389,7 +389,12 @@ not_applicable
 - 已补 metrics projection 层测试，证明 packaged default 在没有 workspace pricing 文件时也能让
   Anthropic/Claude 进入 `official_pricing`、OpenAI/ChatGPT 进入 `token_only`，而不是
   因读模型缺口降级成 `pricing_unknown`。
-- P0.5 仍未完成的部分是账单/真实运行校准：DeepSeek CSV 离线校准、GLM 控制台 token
+- 已把成本归因公式从 ledger 私有计算器提升到 core provider 边界：
+  metrics projection 和 CSV 离线校准共用 `ProviderCostAttribution` /
+  `ProviderPricingCatalog`，避免两套成本公式漂移。
+- 已补 `ProviderBillingCsvCalibration` fixture 测试，证明 DeepSeek billing export
+  的 cache-hit/cache-miss/output token 能按官方 catalog 算出 expected CNY amount。
+- P0.5 仍未完成的部分是账单/真实运行校准：真实 DeepSeek CSV 文件校准、GLM 控制台 token
   增量对齐、以及 complex real-case 下 provider/model/billingMode/cachedRead 字段的完整复核。
 
 ### 5.6 修复方案
@@ -500,6 +505,7 @@ GLM 包月也进入 catalog，但 amount price 可以为 null，billing mode 为
    - 读取账单 CSV；
    - 选定时间窗口，对比 dual calculated DeepSeek amount；
    - 不跑模型，不消耗 token。
+   - 当前已覆盖 fixture CSV；真实账单文件路径缺失时不得宣称完成真实校准。
 
 5. Provider cache decision matrix：
    - provider known + priced + cache signal reliable -> active；
@@ -792,7 +798,7 @@ Required tests:
 - attempt/outcome contradiction test.
 - reconnect/stalled/terminal-detected tests.
 - GLM subscription-token-only attribution test 已覆盖。
-- DeepSeek metered pricing fixture 已覆盖；CSV offline calibration 尚未覆盖。
+- DeepSeek metered pricing fixture 和 CSV calibration fixture 已覆盖；真实账单 CSV 校准尚未覆盖。
 - OpenAI/ChatGPT token-only projection test 已覆盖。
 - Anthropic/Claude cache pricing projection test 已覆盖。
 - stage scope policy tests beyond intake are present; remaining gap is run-level ExplorationPolicyResult / WARN closure proof.

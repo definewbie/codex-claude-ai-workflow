@@ -2,14 +2,13 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
-import dev.dual.core.provider.ProviderCachePolicy;
+import dev.dual.core.provider.ProviderCostAttribution;
 import dev.dual.core.provider.ProviderPricingCatalog;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -388,7 +387,7 @@ final class MetricsProjectionWriter {
         var runMeta = runTranscriptMeta(paths);
         var readReusePolicy = readReusePolicy(paths);
         var workspaceRoot = paths.workspaceRoot();
-        var pricing = new CostEconomicsCalculator(ProviderPricingCatalog.load(workspaceRoot, objectMapper));
+        var pricing = ProviderPricingCatalog.load(workspaceRoot, objectMapper);
         var costSummary = new CostEconomicsSummary();
 
         var perRun = new ArrayList<Map<String, Object>>();
@@ -425,7 +424,7 @@ final class MetricsProjectionWriter {
             var identity = map(tr.get("providerModelIdentity"));
             var providerId = nonBlank(text(identity.get("provider")), text(usage.get("providerId")));
             var model = nonBlank(text(identity.get("model")), text(usage.get("model")));
-            var billingMode = normalizeBillingMode(nonBlank(text(identity.get("billingMode")), text(usage.get("billingMode"))));
+            var billingMode = ProviderCostAttribution.normalizeBillingMode(nonBlank(text(identity.get("billingMode")), text(usage.get("billingMode"))));
             var providerSource = nonBlank(text(identity.get("source")), text(usage.get("providerMetadataSource")));
             entry.put("providerId", providerId);
             entry.put("model", model);
@@ -446,7 +445,7 @@ final class MetricsProjectionWriter {
             costInput.put("model", model);
             costInput.put("billingMode", billingMode);
             costInput.put("providerMetadataSource", providerSource);
-            var costEconomics = pricing.costEconomics(costInput, text(tr.get("agent")));
+            var costEconomics = ProviderCostAttribution.calculate(pricing, costInput, text(tr.get("agent")), System::getenv);
             entry.put("costEconomics", costEconomics);
             entry.put("costAttribution", costAttribution(costEconomics));
             entry.put("providerCachePolicy", providerCachePolicy(costEconomics));
@@ -561,7 +560,7 @@ final class MetricsProjectionWriter {
     private Map<String, Object> providerModelIdentity(Map<String, Object> usage) {
         var provider = text(usage.get("providerId"));
         var model = text(usage.get("model"));
-        var billingMode = normalizeBillingMode(nonBlank(text(usage.get("billingMode")), "pricing_unknown"));
+        var billingMode = ProviderCostAttribution.normalizeBillingMode(nonBlank(text(usage.get("billingMode")), "pricing_unknown"));
         return Map.of(
                 "provider", provider.isBlank() ? "unknown" : provider,
                 "model", model,
@@ -617,13 +616,6 @@ final class MetricsProjectionWriter {
             return "not_applicable";
         }
         return "unavailable";
-    }
-
-    private String normalizeBillingMode(String billingMode) {
-        if ("subscription_tokens".equalsIgnoreCase(billingMode) || "token_only".equalsIgnoreCase(billingMode)) {
-            return "subscription_token_only";
-        }
-        return billingMode == null ? "" : billingMode;
     }
 
     private String providerUsageVisibility(Map<String, Object> usage, boolean estimated) {
@@ -1444,126 +1436,6 @@ final class MetricsProjectionWriter {
             }
         }
         return BigDecimal.ZERO;
-    }
-
-    private static final class CostEconomicsCalculator {
-        private final ProviderPricingCatalog pricing;
-
-        private CostEconomicsCalculator(ProviderPricingCatalog pricing) {
-            this.pricing = pricing;
-        }
-
-        Map<String, Object> costEconomics(Map<String, Object> usage, String agent) {
-            var result = new LinkedHashMap<String, Object>();
-            var agentKey = agent == null ? "" : agent.trim().toUpperCase();
-            var providerId = nonBlank(
-                    text(usage.get("providerId")),
-                    nonBlank(System.getenv("DUAL_PROVIDER_ID_" + agentKey), nonBlank(System.getenv("DUAL_PROVIDER_ID"), ""))
-            );
-            var model = nonBlank(
-                    text(usage.get("model")),
-                    nonBlank(System.getenv("DUAL_MODEL_" + agentKey), nonBlank(System.getenv("DUAL_MODEL"), ""))
-            );
-            var billingMode = normalizeBillingMode(nonBlank(text(usage.get("billingMode")), System.getenv("DUAL_BILLING_MODE")));
-            result.put("providerId", providerId);
-            result.put("model", model);
-            result.put("billingMode", billingMode);
-            result.put("providerMetadataSource", text(usage.get("providerMetadataSource")));
-            result.put("inputCacheHitTokens", longValue(usage.get("cachedReadTokens")));
-            result.put("inputCacheMissTokens", longValue(usage.get("inputTokens")));
-            result.put("outputTokens", longValue(usage.get("outputTokens")));
-            result.put("cacheWriteTokens", longValue(usage.get("cachedWriteTokens")));
-            result.put("clientReportedCost", decimalValue(usage.get("costAmount")));
-            result.put("clientReportedCurrency", text(usage.get("costCurrency")));
-            var type = text(usage.get("measurementType"));
-            if (!"PROVIDER_RUN_USAGE".equals(type)) {
-                result.put("cacheSignalReliability", "not_applicable");
-                result.put("costEstimateReliability", "not_applicable");
-                result.put("providerCacheDecision", "not_applicable");
-                result.put("reason", "not provider run usage");
-                return result;
-            }
-            if (providerId.isBlank() || model.isBlank()) {
-                result.put("cacheSignalReliability", "pricing_unknown");
-                result.put("costEstimateReliability", "pricing_unknown");
-                result.put("providerCacheDecision", "measure_only");
-                result.put("reason", "provider/model missing");
-                return result;
-            }
-            var price = pricing.priceFor(providerId, model).orElse(null);
-            if (price == null) {
-                if (isSubscriptionTokenBilling(billingMode)) {
-                    result.put("cacheSignalReliability", longValue(usage.get("cachedReadTokens")) > 0
-                            ? "provider_cache_tokens_reported"
-                            : "provider_usage_tokens_reported");
-                    result.put("costEstimateReliability", "subscription_unpriced");
-                    result.put("providerCacheDecision", "token_policy_active");
-                    result.put("providerCacheDecisionReason",
-                            "provider/model and cache token signal are known; amount is subscription-unpriced");
-                    result.put("reason", "subscription or bundled billing; token usage is attributable but no per-token cost is visible");
-                    return result;
-                }
-                result.put("cacheSignalReliability", "pricing_unknown");
-                result.put("costEstimateReliability", "pricing_unknown");
-                result.put("providerCacheDecision", "measure_only");
-                result.put("reason", "no pricing entry for provider/model");
-                return result;
-            }
-            var policy = ProviderCachePolicy.decide(price.inputCacheHitPer1M(), price.inputCacheMissPer1M());
-            result.put("providerCacheDecision", policy.recommendation());
-            result.put("providerCacheDecisionReason", policy.reason());
-            result.put("cacheHitToMissRatio", policy.cacheHitToMissRatio());
-            var calculated = price.cost(
-                    longValue(usage.get("cachedReadTokens")),
-                    longValue(usage.get("inputTokens")),
-                    longValue(usage.get("outputTokens")),
-                    longValue(usage.get("cachedWriteTokens"))
-            );
-            var reported = decimalValue(usage.get("costAmount"));
-            result.put("officialCalculatedCost", calculated);
-            result.put("officialCalculatedCurrency", price.currency());
-            result.put("officialPricingSourceUrl", price.sourceUrl());
-            result.put("dualCalculatedCost", calculated);
-            result.put("dualCalculatedCurrency", price.currency());
-            result.put("cacheSignalReliability", longValue(usage.get("cachedReadTokens")) > 0
-                    ? "provider_cache_tokens_reported"
-                    : "provider_usage_tokens_reported");
-            if ("TOKENS_ONLY".equalsIgnoreCase(price.currency())) {
-                result.put("providerCacheDecision", "token_policy_active");
-                result.put("providerCacheDecisionReason",
-                        "provider/model and cache token signal are known; amount is token-only");
-                result.put("costEstimateReliability", "token_only");
-                result.put("reason", "provider/model has no visible per-token billing; token usage only");
-                return result;
-            }
-            result.put("costEstimateReliability", "official_pricing");
-            if (reported.signum() <= 0) {
-                result.put("reason", "client reported cost missing; using official pricing calculation");
-                return result;
-            }
-            var drift = calculated.subtract(reported).abs()
-                    .divide(calculated.max(reported), 4, RoundingMode.HALF_UP);
-            result.put("clientCostDriftRatio", drift);
-            if (drift.compareTo(new BigDecimal("0.15")) <= 0) {
-                result.put("clientCostConsistency", "matches_official_pricing");
-            } else {
-                result.put("clientCostConsistency", "differs_from_official_pricing");
-            }
-            return result;
-        }
-
-        private boolean isSubscriptionTokenBilling(String billingMode) {
-            return "subscription_token_only".equalsIgnoreCase(billingMode)
-                    || "subscription_tokens".equalsIgnoreCase(billingMode)
-                    || "token_only".equalsIgnoreCase(billingMode);
-        }
-
-        private String normalizeBillingMode(String billingMode) {
-            if ("subscription_tokens".equalsIgnoreCase(billingMode) || "token_only".equalsIgnoreCase(billingMode)) {
-                return "subscription_token_only";
-            }
-            return billingMode == null ? "" : billingMode;
-        }
     }
 
     private static final class CostEconomicsSummary {
