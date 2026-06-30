@@ -31,6 +31,7 @@ import picocli.CommandLine.Command;
                 RecoveryCommand.class,
                 SessionsReapCommand.class,
                 CalibrationCommand.class,
+                ProjectionsCommand.class,
                 ReviewCommand.class,
                 WorkflowCommand.class
         }

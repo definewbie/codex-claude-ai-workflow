@@ -419,7 +419,7 @@ public final class WorkflowFileLedger {
         refreshProjections(paths);
     }
 
-    private void refreshProjections(WorkstreamPaths paths) throws IOException {
+    public void refreshProjections(WorkstreamPaths paths) throws IOException {
         timelineProjectionWriter.write(paths);
         metricsProjectionWriter.write(paths);
     }

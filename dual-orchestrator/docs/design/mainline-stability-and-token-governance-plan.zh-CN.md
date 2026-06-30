@@ -189,6 +189,10 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `terminalToContractMs` 和 `dominantPhase`。`dualctl trace` 的 Token Attribution
   也会显示最长 execution latency run，用于定位 provider/process wait、terminal grace
   或 post-process/contract validation 慢点。
+- 已补离线 projection replay 入口：`dualctl projections refresh --workdir <workspace> <workstreamId>`
+  会从现有 ledger / run.json 重新生成 `timeline.json` 和
+  `metrics/workstream-metrics.json`，用于历史 problematic workstream 的 P0/P0.5
+  证明链。该命令只刷新 read model，不启动 provider，不改变 workflow/node/run source of truth。
 - `executionTimeline` 已覆盖 transport 后段关键事件：adapter 在最终 artifact 提取后写入
   `artifact_extracted`，runtime finalizer 在 contract validation 后写入 `contract_validated`。
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；
