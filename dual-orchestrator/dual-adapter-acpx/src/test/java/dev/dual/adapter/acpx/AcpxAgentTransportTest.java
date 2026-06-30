@@ -680,10 +680,16 @@ class AcpxAgentTransportTest {
         assertEquals(0, result.exitCode());
         assertTrue(elapsedMs < 8_000, "terminal contract should end the adapter wait without waiting for process sleep");
         assertTrue(Files.readString(stdout).contains("[done] end_turn"));
+        var terminalDetected = result.executionTimeline().stream()
+                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(2000L, ((Number) terminalDetected.details().get("graceMs")).longValue());
         var graceEvent = result.executionTimeline().stream()
                 .filter(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED)
                 .findFirst()
                 .orElseThrow();
+        assertTrue(graceEvent.elapsedMs() >= terminalDetected.elapsedMs());
         assertEquals("terminal_control_grace", graceEvent.details().get("waitMode"));
         assertEquals("terminate_process_tree", graceEvent.details().get("action"));
         assertEquals(0, graceEvent.details().get("exitCode"));
