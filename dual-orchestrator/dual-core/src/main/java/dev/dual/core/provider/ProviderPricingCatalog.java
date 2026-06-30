@@ -93,6 +93,15 @@ public final class ProviderPricingCatalog {
         return Optional.empty();
     }
 
+    public List<ModelPrice> pricesForModel(String model) {
+        if (model == null || model.isBlank()) {
+            return List.of();
+        }
+        return prices.stream()
+                .filter(price -> price.matchesModel(model))
+                .toList();
+    }
+
     @SuppressWarnings("unchecked")
     private static List<Map<String, Object>> mapList(Object value) {
         return value instanceof List<?> list ? (List<Map<String, Object>>) list : List.of();
@@ -135,8 +144,12 @@ public final class ProviderPricingCatalog {
     ) {
         public boolean matches(String candidateProvider, String candidateModel) {
             return providerId.equalsIgnoreCase(candidateProvider)
-                    && (model.equals(candidateModel)
-                    || (model.endsWith("*") && candidateModel.startsWith(model.substring(0, model.length() - 1))));
+                    && matchesModel(candidateModel);
+        }
+
+        public boolean matchesModel(String candidateModel) {
+            return model.equals(candidateModel)
+                    || (model.endsWith("*") && candidateModel.startsWith(model.substring(0, model.length() - 1)));
         }
 
         public BigDecimal cost(long cacheHit, long cacheMiss, long output, long cacheWrite) {

@@ -41,6 +41,16 @@
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/"
     },
     {
+      "providerId": "deepseek",
+      "model": "deepseek-v4-flash",
+      "currency": "CNY",
+      "inputCacheHitPer1M": "0.02",
+      "inputCacheMissPer1M": "1.00",
+      "outputPer1M": "2.00",
+      "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "sourceNote": "Mainland China billing export: input_cache_hit_tokens=0.00000002 CNY/token, input_cache_miss_tokens=0.000001 CNY/token, output_tokens=0.000002 CNY/token."
+    },
+    {
       "providerId": "anthropic",
       "model": "claude-sonnet-4.5",
       "currency": "USD",

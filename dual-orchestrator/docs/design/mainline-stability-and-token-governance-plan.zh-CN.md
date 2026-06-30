@@ -439,8 +439,13 @@ not_applicable
 - 已补 `dualctl calibration billing-csv --csv <file> --workdir <repo>` 离线校准入口，
   复用 core 的 `ProviderBillingCsvCalibration` 和同一 `ProviderPricingCatalog`，用于把
   provider 账单导出和 dual 价格 catalog 做同口径对账。
-- P0.5 仍未完成的部分是账单/真实运行校准：真实 DeepSeek CSV 文件校准、GLM 控制台 token
-  增量对齐、以及 complex real-case 下 provider/model/billingMode/cachedRead 字段的完整复核。
+- P0.5 账单离线校准进展：真实 DeepSeek `amount-2026-6.csv`（按 token type 逐行导出）
+  已能由 `dualctl calibration billing-csv` 按 catalog 聚合为 18 个 usage 组，导出金额
+  `20.603468 CNY` 与 dual calculated total `20.603468 CNY` 精确一致，所有行均为
+  `matches_official_pricing`。同目录 `cost-2026-6.csv` 是金额摘要表，不含 token
+  breakdown；系统现在明确标为 `cost_summary_only`，不再误报 `pricing_unknown`。
+- P0.5 仍未完成的部分是 GLM 控制台 token 增量对齐，以及 complex real-case 下
+  provider/model/billingMode/cachedRead 字段的完整复核。
 - 2026-06-30 real-case 复核：`ws-20260630T120421Z-7Y5D` 的
   `intake.claude_brainstorm` run.json 已从 Claude settings env 识别
   `provider=zhipu`、`model=glm-5.2`、`billingMode=subscription_token_only`、
