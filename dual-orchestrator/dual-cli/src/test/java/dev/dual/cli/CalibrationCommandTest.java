@@ -170,6 +170,51 @@ class CalibrationCommandTest {
         assertEquals(1, templateText.split("calibration-candidate: candidate-7", -1).length - 1);
     }
 
+    @Test
+    void billingCsvComparesProviderExportWithConfiguredPricingCatalog() throws Exception {
+        writeProviderPricing();
+        var csv = tempDir.resolve("deepseek-billing.csv");
+        Files.writeString(csv, """
+                provider,model,input_cache_hit_tokens,input_cache_miss_tokens,output_tokens,cache_write_tokens,amount,currency
+                deepseek,deepseek-pro-v4,728704,85606,24774,0,0.423680,CNY
+                """, StandardCharsets.UTF_8);
+
+        var command = new CalibrationBillingCsvCommand();
+        command.workdir = tempDir;
+        command.csv = csv;
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Billing CSV Calibration"));
+        assertTrue(printed.contains("Rows: 1"));
+        assertTrue(printed.contains("Exported total: 0.423680"));
+        assertTrue(printed.contains("Dual calculated total: 0.423680"));
+        assertTrue(printed.contains("Consistency: matches_official_pricing"));
+        assertTrue(printed.contains("deepseek\tdeepseek-pro-v4\tCNY\t0.423680\t0.423680\tmatches_official_pricing"));
+    }
+
+    @Test
+    void billingCsvReportsUnknownPricingWithoutInventingCost() throws Exception {
+        writeProviderPricing();
+        var csv = tempDir.resolve("unknown-billing.csv");
+        Files.writeString(csv, """
+                provider,model,input_tokens,output_tokens,amount,currency
+                unknown,model-x,1000,100,0.123456,USD
+                """, StandardCharsets.UTF_8);
+
+        var command = new CalibrationBillingCsvCommand();
+        command.workdir = tempDir;
+        command.csv = csv;
+
+        var printed = captureStdout(command::call);
+
+        assertTrue(printed.contains("Rows: 1"));
+        assertTrue(printed.contains("Exported total: 0.123456"));
+        assertTrue(printed.contains("Dual calculated total: 0.000000"));
+        assertTrue(printed.contains("Consistency: pricing_unknown"));
+        assertTrue(printed.contains("unknown\tmodel-x\tUSD\t0.123456\t0\tpricing_unknown"));
+    }
+
     private String captureStdout(ThrowingCallable callable) throws Exception {
         var originalOut = System.out;
         var out = new ByteArrayOutputStream();
@@ -239,6 +284,26 @@ class CalibrationCommandTest {
                   }
                 }
                 """.formatted(candidateId), StandardCharsets.UTF_8);
+    }
+
+    private void writeProviderPricing() throws Exception {
+        Files.createDirectories(tempDir.resolve(".agent"));
+        Files.writeString(tempDir.resolve(".agent/provider-pricing.json"), """
+                {
+                  "models": [
+                    {
+                      "providerId": "deepseek",
+                      "model": "deepseek-pro-v4",
+                      "currency": "CNY",
+                      "inputCacheHitPer1M": 0.025,
+                      "inputCacheMissPer1M": 3.0,
+                      "outputPer1M": 6.0,
+                      "cacheWritePer1M": 0.0,
+                      "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing/"
+                    }
+                  ]
+                }
+                """, StandardCharsets.UTF_8);
     }
 
     private Path candidateJson(String candidateId) {

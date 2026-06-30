@@ -394,6 +394,9 @@ not_applicable
   `ProviderPricingCatalog`，避免两套成本公式漂移。
 - 已补 `ProviderBillingCsvCalibration` fixture 测试，证明 DeepSeek billing export
   的 cache-hit/cache-miss/output token 能按官方 catalog 算出 expected CNY amount。
+- 已补 `dualctl calibration billing-csv --csv <file> --workdir <repo>` 离线校准入口，
+  复用 core 的 `ProviderBillingCsvCalibration` 和同一 `ProviderPricingCatalog`，用于把
+  provider 账单导出和 dual 价格 catalog 做同口径对账。
 - P0.5 仍未完成的部分是账单/真实运行校准：真实 DeepSeek CSV 文件校准、GLM 控制台 token
   增量对齐、以及 complex real-case 下 provider/model/billingMode/cachedRead 字段的完整复核。
 
@@ -505,7 +508,8 @@ GLM 包月也进入 catalog，但 amount price 可以为 null，billing mode 为
    - 读取账单 CSV；
    - 选定时间窗口，对比 dual calculated DeepSeek amount；
    - 不跑模型，不消耗 token。
-   - 当前已覆盖 fixture CSV；真实账单文件路径缺失时不得宣称完成真实校准。
+   - 当前已覆盖 fixture CSV 和 `dualctl calibration billing-csv` CLI 入口；
+   - 真实账单文件路径缺失或账单字段无法映射时，不得宣称完成真实校准。
 
 5. Provider cache decision matrix：
    - provider known + priced + cache signal reliable -> active；
@@ -798,7 +802,7 @@ Required tests:
 - attempt/outcome contradiction test.
 - reconnect/stalled/terminal-detected tests.
 - GLM subscription-token-only attribution test 已覆盖。
-- DeepSeek metered pricing fixture 和 CSV calibration fixture 已覆盖；真实账单 CSV 校准尚未覆盖。
+- DeepSeek metered pricing fixture、CSV calibration fixture 和 billing-csv CLI fixture 已覆盖；真实账单 CSV 校准尚未覆盖。
 - OpenAI/ChatGPT token-only projection test 已覆盖。
 - Anthropic/Claude cache pricing projection test 已覆盖。
 - stage scope policy tests beyond intake are present; remaining gap is run-level ExplorationPolicyResult / WARN closure proof.
