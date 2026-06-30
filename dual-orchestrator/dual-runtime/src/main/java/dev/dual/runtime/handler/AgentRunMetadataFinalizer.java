@@ -138,16 +138,15 @@ public final class AgentRunMetadataFinalizer {
             json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(finalized.outcome())));
             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
             return finalized.outcome();
-        } catch (Exception ignored) {
-            // Run metadata is an observability artifact. Contract validation result
-            // remains authoritative even if the historical run file is damaged.
+        } catch (Exception failure) {
             var evidence = new AgentExecutionEvidence(
                     processResult(result),
                     terminalControlResult,
                     artifactContractResults,
                     adapterSignals(result)
             );
-            return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
+            var outcome = executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
+            throw new IllegalStateException("failed to finalize agent run metadata for outcome " + outcome.status(), failure);
         }
     }
 
@@ -167,6 +166,7 @@ public final class AgentRunMetadataFinalizer {
             case "RECOVERABLE_CONTEXT_WINDOW" -> AdapterSignalType.CONTEXT_WINDOW_EXCEEDED;
             case "RECOVERABLE_AGENT_PERMISSION_BLOCKED" -> AdapterSignalType.PERMISSION_BLOCKED;
             case "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED" -> AdapterSignalType.PROCESS_STALLED;
+            case "RECOVERABLE_TRANSPORT_FAILED" -> AdapterSignalType.PROCESS_STALLED;
             default -> null;
         };
         return type == null ? List.of() : List.of(new AdapterSignal(type, reason, 0));
@@ -363,10 +363,18 @@ public final class AgentRunMetadataFinalizer {
         if (usability == null) {
             return fallback;
         }
+        Long pid = fallback.pid();
+        if (existing.path("pid").isNumber()) {
+            pid = existing.path("pid").asLong();
+        }
+        Integer exitCode = fallback.exitCode();
+        if (existing.path("exitCode").isNumber()) {
+            exitCode = existing.path("exitCode").asInt();
+        }
         return new ProcessResult(
                 existing.path("command").asText(fallback.command()),
-                existing.path("pid").isNumber() ? existing.path("pid").asLong() : fallback.pid(),
-                existing.path("exitCode").isNumber() ? existing.path("exitCode").asInt() : fallback.exitCode(),
+                pid,
+                exitCode,
                 usability,
                 existing.path("durationMs").isNumber() ? Math.max(0L, existing.path("durationMs").asLong()) : fallback.durationMs(),
                 existing.path("stdoutPath").asText(fallback.stdoutPath()),

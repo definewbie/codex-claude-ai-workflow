@@ -6,6 +6,8 @@ import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
+import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.TaskHandler;
 
 import org.junit.jupiter.api.Test;
@@ -819,6 +821,60 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void recordsTransportExceptionAsTerminalAdapterBoundaryFailure() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new ThrowingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(1, result.result().get("exit_code"));
+        assertEquals("KILLED_AFTER_RECOVERABLE_SIGNAL", result.result().get("process_usability"));
+        assertEquals(true, result.result().get("acpx_failure.recoverable"));
+        assertEquals("RECOVERABLE_TRANSPORT_FAILED", result.result().get("acpx_failure.reason"));
+        var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+        var runMetadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+        assertEquals("failed", runMetadata.path("status").asText());
+        assertEquals("RECOVERABLE_TRANSPORT_FAILED", runMetadata.path("failureReason").asText());
+        assertEquals("PROCESS_STALLED", runMetadata.path("executionAttempt").path("failureSignal").asText());
+        assertTrue(runMetadata.path("executionOutcome").isNull(), runMetadata.toPrettyString());
+        assertEquals("PROCESS_STALLED", runMetadata.path("adapterSignals").get(0).path("type").asText());
+        assertEquals("RECOVERABLE_TRANSPORT_FAILED", runMetadata.path("adapterSignals").get(0).path("reason").asText());
+
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-test",
+                "node-intake",
+                definition,
+                result
+        );
+        assertTrue(validated.result().containsKey("agent_execution_terminal_control_result"), validated.result().toString());
+        assertTrue(validated.result().containsKey("agent_execution_artifact_contract_results"), validated.result().toString());
+        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
+
+        runMetadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+        assertEquals("failed", runMetadata.path("status").asText());
+        assertEquals("process_stalled", runMetadata.path("failureReason").asText());
+        assertEquals("PROCESS_STALLED", runMetadata.path("executionAttempt").path("failureSignal").asText());
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", runMetadata.path("executionOutcome").path("status").asText());
+        assertEquals("UNAVAILABLE", runMetadata.path("usage").path("measurementType").asText());
+        assertEquals("PROCESS_STALLED", runMetadata.path("usage").path("unavailableReason").asText());
+    }
+
+    @Test
     void completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -1084,6 +1140,13 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class ThrowingTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            throw new java.io.IOException("simulated transport failure");
         }
     }
 

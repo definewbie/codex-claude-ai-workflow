@@ -604,6 +604,9 @@ final class AgentRunMetadataWriter {
         if (AcpxFailureReason.PROVIDER_CONNECTION_FAILED.code().equals(failure.reason())) {
             return AdapterSignalType.PROVIDER_CONNECTION_FAILED;
         }
+        if (AcpxFailureReason.TRANSPORT_FAILED.code().equals(failure.reason())) {
+            return AdapterSignalType.PROCESS_STALLED;
+        }
         return AdapterSignalType.PROCESS_STALLED;
     }
 
@@ -649,13 +652,15 @@ final class AgentRunMetadataWriter {
         if (failure == null || failure.reason() == null || failure.reason().isBlank()) {
             return List.of();
         }
-        return List.of(Map.of(
-                "type", failure.reason(),
-                "severity", failure.recoverable() ? "RECOVERABLE" : "FATAL",
-                "source", "acpx",
-                "message", failure.message(),
-                "superseded", false
-        ));
+        var type = failureSignal(failure);
+        var map = new java.util.LinkedHashMap<String, Object>();
+        map.put("type", type == null ? AdapterSignalType.PROCESS_STALLED.name() : type.name());
+        map.put("reason", failure.reason());
+        map.put("severity", failure.recoverable() ? "RECOVERABLE" : "FATAL");
+        map.put("source", "acpx");
+        map.put("message", failure.message());
+        map.put("superseded", false);
+        return List.of(map);
     }
 
     private void write(Path workspaceRoot, Path runDir, AgentRunDocument document) throws IOException {

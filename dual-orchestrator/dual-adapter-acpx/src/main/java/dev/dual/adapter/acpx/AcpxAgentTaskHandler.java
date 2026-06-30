@@ -176,25 +176,111 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 sessionMeta,
                 compactionMeta
         );
-        var result = "claude".equals(agent)
-                ? transport.runClaudeDesign(request)
-                : transport.runCodexDesignReview(request);
-        var usage = result.usage() != null
-                ? result.usage()
-                : usageReader.read(promptPath, stderrPath).orElse(null);
-        var finalArtifact = finalArtifactExtractor.extract(readStringIfExists(transcriptPath));
-        var resultWithArtifactTimeline = result;
-        if (finalArtifact.isPresent()) {
-            Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
-            resultWithArtifactTimeline = appendTimelineEvent(
-                    result,
-                    AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
-                    "adapter"
+        try {
+            var result = "claude".equals(agent)
+                    ? transport.runClaudeDesign(request)
+                    : transport.runCodexDesignReview(request);
+            var usage = result.usage() != null
+                    ? result.usage()
+                    : usageReader.read(promptPath, stderrPath).orElse(null);
+            var finalArtifact = finalArtifactExtractor.extract(readStringIfExists(transcriptPath));
+            var resultWithArtifactTimeline = result;
+            if (finalArtifact.isPresent()) {
+                Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
+                resultWithArtifactTimeline = appendTimelineEvent(
+                        result,
+                        AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
+                        "adapter"
+                );
+            }
+            var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
+            var outputComplete = completionDetector.isComplete(transcriptPath);
+            var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
+            metadataWriter.writeCompleted(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    context.definition().id(),
+                    agent,
+                    session,
+                    promptTemplate,
+                    runId,
+                    runDir,
+                    promptPath,
+                    outputPath,
+                    stderrPath,
+                    transcriptPath,
+                    resultWithArtifactTimeline,
+                    metadataFailure(failure, interrupted, outputComplete),
+                    usage,
+                    sessionMeta,
+                    compactionMeta
+            );
+            return NodeResult.completed(
+                    "completed",
+                    evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
+                    resultFacts(
+                            context,
+                            runDir,
+                            transcriptPath,
+                            resultWithArtifactTimeline,
+                            agent,
+                            session,
+                            runId,
+                            metadataFailure(failure, interrupted, outputComplete),
+                            interrupted,
+                            outputComplete
+                    )
+            );
+        } catch (Exception failure) {
+            return transportFailureResult(
+                    context,
+                    runDir,
+                    promptPath,
+                    outputPath,
+                    stderrPath,
+                    transcriptPath,
+                    agent,
+                    session,
+                    promptTemplate,
+                    runId,
+                    sessionMeta,
+                    compactionMeta,
+                    failure
             );
         }
-        var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
-        var outputComplete = completionDetector.isComplete(transcriptPath);
-        var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
+    }
+
+    private NodeResult transportFailureResult(
+            TaskContext context,
+            java.nio.file.Path runDir,
+            java.nio.file.Path promptPath,
+            java.nio.file.Path outputPath,
+            java.nio.file.Path stderrPath,
+            java.nio.file.Path transcriptPath,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta,
+            Exception cause
+    ) throws java.io.IOException {
+        if (cause instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
+        Files.createDirectories(stderrPath.getParent());
+        Files.writeString(stderrPath, "acpx transport failed: " + cause.getMessage() + "\n", StandardCharsets.UTF_8);
+        if (!Files.exists(transcriptPath)) {
+            Files.writeString(transcriptPath, "", StandardCharsets.UTF_8);
+        }
+        var now = Instant.now();
+        var result = new AcpxRunResult(1, now, now, List.of("acpx", agent, "transport"));
+        var failure = new AcpxFailureClassifier.AcpxFailure(
+                AcpxFailureReason.TRANSPORT_FAILED.code(),
+                "acpx transport failed: " + cause.getMessage(),
+                true,
+                false
+        );
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
                 context.workstreamId(),
@@ -208,9 +294,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 outputPath,
                 stderrPath,
                 transcriptPath,
-                resultWithArtifactTimeline,
-                metadataFailure(failure, interrupted, outputComplete),
-                usage,
+                result,
+                failure,
+                null,
                 sessionMeta,
                 compactionMeta
         );
@@ -221,13 +307,13 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         context,
                         runDir,
                         transcriptPath,
-                        resultWithArtifactTimeline,
+                        result,
                         agent,
                         session,
                         runId,
-                        metadataFailure(failure, interrupted, outputComplete),
-                        interrupted,
-                        outputComplete
+                        failure,
+                        null,
+                        false
                 )
         );
     }

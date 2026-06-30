@@ -77,7 +77,9 @@ final class AgentExecutionResultFacts {
 
     static boolean present(NodeResult result) {
         return result.result().containsKey(TERMINAL_CONTROL_RESULT)
-                || result.result().containsKey(ARTIFACT_CONTRACT_RESULTS);
+                || result.result().containsKey(ARTIFACT_CONTRACT_RESULTS)
+                || (result.result().containsKey("run_metadata")
+                && result.result().containsKey("process_usability"));
     }
 
     static Map<String, Object> terminalControlToMap(TerminalControlResult terminal) {

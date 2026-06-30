@@ -255,11 +255,29 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   signals 传给 `AgentExecutionFinalizer`。这避免 adapter 已落盘
   `RATE_LIMITED` / reconnect / provider failure 等 typed signal，但 finalizer 因
   `NodeResult` 缺少 `acpx_failure.reason` 把 signals 覆盖为空并误判成功。
+- acpx transport / post-processing 异常现在会在 adapter 边界内转成 typed
+  `RECOVERABLE_TRANSPORT_FAILED` failure reason 和 canonical
+  `AdapterSignalType.PROCESS_STALLED`，并写入 run.json prepared/completed read model；
+  handler 返回 adapter process facts，让 runtime finalizer 继续形成
+  `executionOutcome.status=RECOVERABLE_ADAPTER_FAILURE`。这避免 transport 抛异常后只由
+  worker 捕获、run.json 停留在 prepared 或缺少 terminal outcome 的状态裂缝。
+- `AgentRunMetadataWriter.adapterSignals[]` 的 `type` 已统一写 canonical
+  `AdapterSignalType`，原始 acpx failure reason 保留在 `reason` 字段。这样
+  `executionAttempt.failureSignal`、`adapterSignals[].type` 和 finalizer 输入不再存在
+  “一个字段是 catalog reason、另一个字段是 AdapterSignalType”的编码漂移。
 - 已补回归测试
   `AgentRunMetadataFinalizerTest.usesAdapterSignalsFromRunMetadataAsOutcomeEvidence`：
   当 run.json adapterSignals 含 `RATE_LIMITED`、但 NodeResult 没有 legacy failure fact 时，
   最终 outcome 必须是 `RECOVERABLE_ADAPTER_FAILURE`，attempt 必须是
   `RECOVERABLE_FAILED`，并保留 adapter signal 的 source / sessionId。
+- 已补回归测试
+  `AcpxAgentTaskHandlerTest.recordsTransportExceptionAsTerminalAdapterBoundaryFailure`：
+  当 acpx transport 抛出 `IOException` 时，handler 不把异常裸抛给 workflow worker，
+  而是写出 failed run metadata、`executionAttempt.failureSignal=PROCESS_STALLED`、
+  canonical `adapterSignals[0].type=PROCESS_STALLED`、
+  `adapterSignals[0].reason=RECOVERABLE_TRANSPORT_FAILED`，并经
+  `AgentRunMetadataFinalizer` 形成 `executionOutcome.status=RECOVERABLE_ADAPTER_FAILURE`、
+  `usage.measurementType=UNAVAILABLE` 和 `unavailableReason=PROCESS_STALLED`。
 - refresh 入口已补充 execution consistency warning 输出：当历史 ledger replay 后的 metrics
   中存在 `stale_legacy_running` / `attempt_outcome_conflict` 等非 `consistent` 计数时，
   CLI 会从 `metrics/workstream-metrics.json.providerMetrics.executionConsistencyCounts`
