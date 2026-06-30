@@ -398,7 +398,7 @@ final class MetricsProjectionWriter {
             var usage = map(tr.get("usage"));
             var breakdown = map(tr.get("breakdown"));
             var toolUsage = map(map(toolRunsById.get(runId)).get("toolUsage"));
-            var meta = runMeta.getOrDefault(runId, new RunMeta("", 0L));
+            var meta = runMeta.getOrDefault(runId, new RunMeta("", 0L, Map.of()));
             var entry = new LinkedHashMap<String, Object>();
             entry.put("runId", runId);
             entry.put("nodeId", text(tr.get("nodeId")));
@@ -452,6 +452,7 @@ final class MetricsProjectionWriter {
             costSummary.add(costEconomics);
             entry.put("transcriptTokens", longValue(breakdown.get("transcriptTokens")));
             entry.put("transcriptBytes", meta.bytes());
+            entry.put("executionLatency", meta.executionLatency());
             entry.put("toolCalls", longValue(toolUsage.get("toolCallCount")));
             entry.put("reads", longValue(toolUsage.get("readCount")));
             entry.put("bash", longValue(toolUsage.get("bashCount")));
@@ -527,7 +528,35 @@ final class MetricsProjectionWriter {
         result.put("nodeHotspots", nodeHotspots);
         result.put("fileReadCost", fileReadCost);
         result.put("sessionSnowball", sessionSnowball);
+        result.put("executionLatency", executionLatencySummary(perRun));
         return result;
+    }
+
+    private Map<String, Object> executionLatencySummary(List<Map<String, Object>> perRun) {
+        var topRuns = perRun.stream()
+                .map(run -> {
+                    var latency = map(run.get("executionLatency"));
+                    var item = new LinkedHashMap<String, Object>();
+                    item.put("runId", text(run.get("runId")));
+                    item.put("nodeId", text(run.get("nodeId")));
+                    item.put("agent", text(run.get("agent")));
+                    item.put("totalDurationMs", longValue(latency.get("totalDurationMs")));
+                    item.put("terminalDetectedMs", longValue(latency.get("terminalDetectedMs")));
+                    item.put("processWaitCompletedMs", longValue(latency.get("processWaitCompletedMs")));
+                    item.put("artifactExtractedMs", longValue(latency.get("artifactExtractedMs")));
+                    item.put("contractValidatedMs", longValue(latency.get("contractValidatedMs")));
+                    item.put("terminalToContractMs", longValue(latency.get("terminalToContractMs")));
+                    item.put("dominantPhase", text(latency.get("dominantPhase")));
+                    return item;
+                })
+                .filter(item -> longValue(item.get("totalDurationMs")) > 0)
+                .sorted((a, b) -> Long.compare(longValue(b.get("totalDurationMs")), longValue(a.get("totalDurationMs"))))
+                .limit(10)
+                .toList();
+        return Map.of(
+                "schemaVersion", 1,
+                "topRuns", topRuns
+        );
     }
 
     private Map<String, Object> usageVisibilitySummary(List<Map<String, Object>> perRun) {
@@ -676,10 +705,74 @@ final class MetricsProjectionWriter {
                 var runId = nonBlank(text(run.get("runId")), runDir.getFileName().toString());
                 var transcriptPath = text(run.get("transcriptPath"));
                 var bytes = transcriptPath.isBlank() ? 0L : fileSizeSafe(paths.workspaceRoot(), transcriptPath);
-                out.put(runId, new RunMeta(text(run.get("startedAt")), bytes));
+                out.put(runId, new RunMeta(text(run.get("startedAt")), bytes, executionLatency(run)));
             }
         }
         return out;
+    }
+
+    private Map<String, Object> executionLatency(Map<String, Object> run) {
+        var timeline = mapList(run.get("executionTimeline"));
+        var total = longValue(run.get("durationMs"));
+        var processStarted = elapsed(timeline, "process_started");
+        var processWaitCompleted = firstPositive(
+                elapsed(timeline, "process_wait_completed"),
+                elapsed(timeline, "process_exited")
+        );
+        var terminalDetected = elapsed(timeline, "terminal_control_detected");
+        var terminalGraceElapsed = elapsed(timeline, "terminal_control_grace_elapsed");
+        var artifactExtracted = elapsed(timeline, "artifact_extracted");
+        var contractValidated = elapsed(timeline, "contract_validated");
+        var terminalGraceMs = positiveDelta(terminalDetected, terminalGraceElapsed);
+        var postProcessMs = positiveDelta(processWaitCompleted, contractValidated);
+        var terminalToContractMs = positiveDelta(terminalDetected, contractValidated);
+        var result = new LinkedHashMap<String, Object>();
+        result.put("schemaVersion", 1);
+        result.put("totalDurationMs", total);
+        result.put("processStartedMs", processStarted);
+        result.put("processWaitCompletedMs", processWaitCompleted);
+        result.put("terminalDetectedMs", terminalDetected);
+        result.put("terminalGraceElapsedMs", terminalGraceElapsed);
+        result.put("terminalGraceMs", terminalGraceMs);
+        result.put("artifactExtractedMs", artifactExtracted);
+        result.put("contractValidatedMs", contractValidated);
+        result.put("postProcessMs", postProcessMs);
+        result.put("terminalToContractMs", terminalToContractMs);
+        result.put("dominantPhase", dominantExecutionPhase(total, processWaitCompleted, terminalGraceMs, postProcessMs));
+        return result;
+    }
+
+    private long elapsed(List<Map<String, Object>> timeline, String kind) {
+        return timeline.stream()
+                .filter(event -> kind.equals(text(event.get("kind"))))
+                .map(event -> longValue(event.get("elapsedMs")))
+                .filter(value -> value > 0)
+                .findFirst()
+                .orElse(0L);
+    }
+
+    private long firstPositive(long first, long second) {
+        return first > 0 ? first : second;
+    }
+
+    private long positiveDelta(long start, long end) {
+        return start > 0 && end >= start ? end - start : 0L;
+    }
+
+    private String dominantExecutionPhase(long total, long processWaitCompleted, long terminalGraceMs, long postProcessMs) {
+        if (terminalGraceMs > 0 && terminalGraceMs >= postProcessMs) {
+            return "terminal_grace";
+        }
+        if (postProcessMs > 0) {
+            return "post_process";
+        }
+        if (processWaitCompleted > 0 && processWaitCompleted >= total / 2) {
+            return "process_wait";
+        }
+        if (total > 0) {
+            return "execution_total";
+        }
+        return "unknown";
     }
 
     private static long fileSizeSafe(Path workspaceRoot, String relativePath) {
@@ -697,7 +790,7 @@ final class MetricsProjectionWriter {
         }
     }
 
-    private record RunMeta(String startedAt, long bytes) {
+    private record RunMeta(String startedAt, long bytes, Map<String, Object> executionLatency) {
     }
 
     private static final class NodeAttribution {

@@ -73,7 +73,7 @@ flowchart TD
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，真实 replay 待做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；仍缺 problematic workstream replay | P0 |
-| acpx / CC / Codex 执行生命周期 | 未完整建模 | terminal 已出现但 transport 继续等 293s/380s 的原因不可解释 | P0 |
+| acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，真实慢点待复核 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；仍缺 problematic real-case 慢点复核 | P0 |
 | stale RUNNING / PROCESS_STALLED | synthetic 覆盖，real replay 待做 | dead pid resume 会进入 recovery 并标记 node execution stale；仍缺历史 problematic workstream replay | P0 |
 | provider/model/token attribution | 本地读模型和 CSV fixture 已覆盖，真实账单校准待做 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 已覆盖 DeepSeek 账单公式；仍缺真实账单文件校准和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
@@ -84,7 +84,7 @@ flowchart TD
 | artifact boundary | 大体完成 | `plan_artifact`、`stage_handoff`、`rereadPolicy` 已类型化，但缺完整 real-case 验证 | P1 |
 | projection consistency | 部分完成 | CLI trace 已补；UI/API/operator 是否同源还未整体 sweep | P1 |
 | full complex real-case | 未完成 | 只有 bounded run，没有完整端到端验收 | P2 |
-| acpx 慢 / 每节点启动慢 | 未完成 | 未拆分 provider 推理慢、transport 等待慢、session 操作慢、dual 落盘慢 | P0/P1 |
+| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，真实结论待证 | metrics/trace 已能展示 execution latency top run 和 dominant phase；仍缺真实 case 下 provider 推理慢、transport 等待慢、session 操作慢、dual 落盘慢的分解样本 | P0/P1 |
 | session keep-alive | 未来优化 | 需要在 execution attempt 模型稳定后做 | P3 |
 
 ## 4. P0：执行事实边界收口
@@ -183,6 +183,12 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `terminal_control_grace_elapsed` 写入 `waitMode=terminal_control_grace`、
   `action=terminate_process_tree`、`exitCode` 和 `graceMs`。因此 run.json 可以区分
   “进程自然退出”和“terminal contract 完整后 adapter 主动结束等待”，不用再靠日志或耗时猜测。
+- `MetricsProjectionWriter.tokenAttribution.perRun[].executionLatency` 已把
+  `executionTimeline` 投影为 read model：`processWaitCompletedMs`、
+  `terminalDetectedMs`、`artifactExtractedMs`、`contractValidatedMs`、
+  `terminalToContractMs` 和 `dominantPhase`。`dualctl trace` 的 Token Attribution
+  也会显示最长 execution latency run，用于定位 provider/process wait、terminal grace
+  或 post-process/contract validation 慢点。
 - `executionTimeline` 已覆盖 transport 后段关键事件：adapter 在最终 artifact 提取后写入
   `artifact_extracted`，runtime finalizer 在 contract validation 后写入 `contract_validated`。
 - `ArtifactContractValidator` 不再写 run metadata 或 `agent_execution_outcome`；

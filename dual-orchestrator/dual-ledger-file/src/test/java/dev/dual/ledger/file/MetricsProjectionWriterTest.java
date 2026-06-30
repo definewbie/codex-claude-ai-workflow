@@ -73,6 +73,7 @@ class MetricsProjectionWriterTest {
         writeArtifactMetadata(paths, mapper, "run-3", "transcriptMetadataPath", "transcript.json", 5000);
         appendToolUsage(paths, mapper, "run-1", 3, 2, 0, 1, List.of("README.md", "src/main.js"), List.of("git status --short"));
         appendToolUsage(paths, mapper, "run-2", 2, 2, 0, 0, List.of("README.md", "docs/spec.md"), List.of());
+        appendExecutionTimeline(paths, mapper, "run-1");
         writeEvidenceManifest(paths, mapper, List.of("README.md", "docs/spec.md"));
         writeReadReuseContract(paths, mapper, List.of("README.md"));
         writeActualGovernanceReport(paths, mapper, "run-2", "design.codex_review", "warn");
@@ -177,6 +178,25 @@ class MetricsProjectionWriterTest {
                 list(explorationViolations.get(0).get("actualCapabilityUsages")).get(0).get("provider"));
         assertTrue(String.valueOf(explorationViolations.get(0).get("agentExplorationPlanPath"))
                 .endsWith("exploration-plan-run-2.json"));
+
+        var attribution = map(metrics.get("tokenAttribution"));
+        var attributedRuns = list(attribution.get("perRun"));
+        var intakeAttribution = attributedRuns.stream()
+                .filter(run -> "run-1".equals(run.get("runId")))
+                .findFirst()
+                .orElseThrow();
+        var latency = map(intakeAttribution.get("executionLatency"));
+        assertEquals(1000, number(latency.get("totalDurationMs")));
+        assertEquals(300, number(latency.get("terminalDetectedMs")));
+        assertEquals(500, number(latency.get("processWaitCompletedMs")));
+        assertEquals(700, number(latency.get("artifactExtractedMs")));
+        assertEquals(900, number(latency.get("contractValidatedMs")));
+        assertEquals(600, number(latency.get("terminalToContractMs")));
+        assertEquals("post_process", latency.get("dominantPhase"));
+        var executionLatency = map(attribution.get("executionLatency"));
+        var topExecutionRuns = list(executionLatency.get("topRuns"));
+        assertEquals("run-1", topExecutionRuns.get(0).get("runId"));
+        assertEquals("post_process", topExecutionRuns.get(0).get("dominantPhase"));
 
         var visibility = map(map(metrics.get("tokenAttribution")).get("usageVisibility"));
         assertEquals(1, number(map(visibility.get("byVisibility")).get("unavailable")));
@@ -923,6 +943,23 @@ class MetricsProjectionWriterTest {
                 "readFiles", readFiles,
                 "writeFiles", List.of(),
                 "bashCommands", bashCommands
+        ));
+        new AtomicJsonWriter().write(runJson, run);
+    }
+
+    private void appendExecutionTimeline(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId
+    ) throws Exception {
+        var runJson = paths.runsDir().resolve(runId).resolve("run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("executionTimeline", List.of(
+                Map.of("kind", "process_started", "elapsedMs", 10),
+                Map.of("kind", "terminal_control_detected", "elapsedMs", 300),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 500),
+                Map.of("kind", "artifact_extracted", "elapsedMs", 700),
+                Map.of("kind", "contract_validated", "elapsedMs", 900)
         ));
         new AtomicJsonWriter().write(runJson, run);
     }

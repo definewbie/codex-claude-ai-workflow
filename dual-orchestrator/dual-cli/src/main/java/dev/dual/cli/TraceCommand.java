@@ -190,6 +190,17 @@ public final class TraceCommand implements Callable<Integer> {
         if (!byVisibility.isEmpty()) {
             System.out.println("  usage visibility: " + byVisibility);
         }
+        var latencyRuns = mapList(map(attr.get("executionLatency")).get("topRuns"));
+        if (!latencyRuns.isEmpty()) {
+            var topLatency = map(latencyRuns.get(0));
+            System.out.println("  execution latency: " + topLatency.get("nodeId")
+                    + " run=" + topLatency.get("runId")
+                    + " totalMs=" + longValue(topLatency.get("totalDurationMs"))
+                    + " terminalDetectedMs=" + longValue(topLatency.get("terminalDetectedMs"))
+                    + " processWaitMs=" + longValue(topLatency.get("processWaitCompletedMs"))
+                    + " contractValidatedMs=" + longValue(topLatency.get("contractValidatedMs"))
+                    + " phase=" + topLatency.get("dominantPhase"));
+        }
         var costEconomics = map(attr.get("costEconomics"));
         var byReliability = map(costEconomics.get("byReliability"));
         if (!byReliability.isEmpty()) {

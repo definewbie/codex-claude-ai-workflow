@@ -58,6 +58,8 @@ class TraceCommandTest {
         assertTrue(printed.contains("heavy=[cachedRead, transcript]"));
         assertTrue(printed.contains("usage visibility: {provider_run_usage=1, session_snapshot_only=1}"));
         assertTrue(printed.contains("usage gap: codex acceptance.codex_verifier_review visibility=session_snapshot_only"));
+        assertTrue(printed.contains("execution latency: design.claude_design run=run-1 totalMs=1000"));
+        assertTrue(printed.contains("phase=post_process"));
         assertTrue(printed.contains("transcriptGrowthRun=run-1"));
         assertTrue(printed.contains("top read cost: README.md"));
         assertTrue(printed.contains("Final Report:"));
@@ -328,6 +330,21 @@ class TraceCommandTest {
                     "nodeHotspots": [
                       {"nodeId":"design.claude_design","agent":"claude","runCount":1,"totalTokens":5000,"cachedReadTokens":4500,"outputTokens":200,"transcriptBytes":30000,"heavy":["cachedRead","transcript"]}
                     ],
+                    "executionLatency": {
+                      "schemaVersion": 1,
+                      "topRuns": [
+                        {
+                          "runId": "run-1",
+                          "nodeId": "design.claude_design",
+                          "agent": "claude",
+                          "totalDurationMs": 1000,
+                          "terminalDetectedMs": 300,
+                          "processWaitCompletedMs": 500,
+                          "contractValidatedMs": 900,
+                          "dominantPhase": "post_process"
+                        }
+                      ]
+                    },
                     "sessionSnowball": [
                       {"sessionSegmentKey":"ws:ws-trace","maxTranscriptGrowthRun":"run-1","runs":[]}
                     ],
