@@ -233,6 +233,21 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `ProjectionsRefreshCommandTest.refreshesTimelineAndMetricsFromExistingLedger` 已断言 refresh 后
   `workflow/current.json`、`nodes/*.json` 和 `runs/*/run.json` 字节不变，防止 replay 入口
   变成隐式状态迁移。
+
+2026-07-01 进展：
+
+- `AgentRunMetadataFinalizer` 已改为在 `run.json.processResult` 存在且含合法
+  `ProcessUsability` 时，优先把该 adapter process fact 作为
+  `AgentExecutionEvidence.processResult` 传给 `AgentExecutionFinalizer`。
+  只有 run metadata 缺失、越界、损坏或 processResult 不合法时，才退回 legacy
+  `NodeResult` 推断。这样可以避免 adapter 已经记录
+  `EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT`，但 runtime 仍因 legacy
+  `NodeStatus.FAILED + exit_code=1` 推成 `OUTPUT_INCOMPLETE`。
+- 已补回归测试
+  `AgentRunMetadataFinalizerTest.usesAdapterProcessResultAsOutcomeEvidenceInsteadOfLegacyNodeStatus`：
+  当 run.json processResult 表示“非零退出但完整输出”、terminal control 和
+  required artifact 均有效时，最终 outcome 必须是 `SUCCESS_WITH_WARNINGS`，
+  attempt 必须是 `COMPLETED/EXITED`。
 - refresh 入口已补充 execution consistency warning 输出：当历史 ledger replay 后的 metrics
   中存在 `stale_legacy_running` / `attempt_outcome_conflict` 等非 `consistent` 计数时，
   CLI 会从 `metrics/workstream-metrics.json.providerMetrics.executionConsistencyCounts`
