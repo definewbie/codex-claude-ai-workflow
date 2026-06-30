@@ -74,7 +74,7 @@ flowchart TD
 | --- | --- | --- | --- |
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | 部分实现 | 出现 `executionOutcome=SUCCESS` 但 `executionAttempt=RUNTIME_FAILED/PROCESS_STALLED` | P0 |
 | acpx / CC / Codex 执行生命周期 | 未完整建模 | terminal 已出现但 transport 继续等 293s/380s 的原因不可解释 | P0 |
-| stale RUNNING / PROCESS_STALLED | 部分处理 | 能显示，但不能证明 runtime 状态和真实 agent 输出一致 | P0 |
+| stale RUNNING / PROCESS_STALLED | synthetic 覆盖，real replay 待做 | dead pid resume 会进入 recovery 并标记 node execution stale；仍缺历史 problematic workstream replay | P0 |
 | provider/model/token attribution | 部分实现 | GLM 包月、DeepSeek 价格、OpenAI/Codex、Claude cache 还不是统一模型 | P0.5 |
 | provider-cache-aware | 设计/实验中 | 多处仍可能是 `measure_only`，缺少 active 生效证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
@@ -192,6 +192,10 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `executionAttempt` 已进入终态时，`MetricsProjectionWriter.executionConsistency`
   标记为 `stale_legacy_running`，并同步出现在 token run、token attribution 和
   provider consistency summary 中。
+- stale RUNNING runtime 路径已有 synthetic coverage：resume 遇到 dead `running_pid`
+  会写入 `node_stale_running_detected` event、进入 `WAITING_FOR_RECOVERY`、把当前 node
+  标记为 `FAILED/recoverable`，并把最新 `NodeExecution` 标为 `STALE`。这证明 runtime
+  不会继续重跑 stale 节点；尚未覆盖历史 real workstream replay。
 - 已补齐 acpx failure catalog 与 execution outcome 的 sibling gap：
   `RECOVERABLE_AGENT_MODEL_MISMATCH` 现在会被 adapter / runtime finalizer 映射为
   typed `AdapterSignalType.MODEL_MISMATCH`，并进入 `executionAttempt.failureSignal`
