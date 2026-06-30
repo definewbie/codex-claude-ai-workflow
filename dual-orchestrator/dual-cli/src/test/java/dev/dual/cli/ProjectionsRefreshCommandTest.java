@@ -50,7 +50,7 @@ class ProjectionsRefreshCommandTest {
         var executionLatency = map(attribution.get("executionLatency"));
         var topRuns = list(executionLatency.get("topRuns"));
         assertEquals("run-1", topRuns.get(0).get("runId"));
-        assertEquals("post_process", topRuns.get(0).get("dominantPhase"));
+        assertEquals("process_wait", topRuns.get(0).get("dominantPhase"));
         assertEquals(workflowBefore, Files.readString(workflowCurrent, StandardCharsets.UTF_8),
                 "projection replay must not mutate workflow/current.json source of truth");
         assertEquals(nodeBefore, Files.readString(nodeJson, StandardCharsets.UTF_8),

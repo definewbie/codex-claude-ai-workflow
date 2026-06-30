@@ -112,7 +112,7 @@ Mainline Decision Gate:
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，历史 replay 已做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；历史 `RECOVERABLE_ADAPTER_FAILURE` replay 已证明 refresh 不改 ledger 且能投影 typed outcome；历史 stale RUNNING replay 已证明 dead pid active node 可投影为 `stale_legacy_running`；仍缺慢点类 problematic replay | P0 |
-| acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，真实慢点待复核 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；仍缺 problematic real-case 慢点复核 | P0 |
+| acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，历史慢点 replay 已做 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；历史 `ws-20260630T112054Z-N4YR` replay 已证明样本慢点由 `process_wait` 主导且不改 run SoT；仍缺 terminal-after-detected 长等待类样本复核 | P0 |
 | stale RUNNING / PROCESS_STALLED | synthetic 覆盖，historical projection replay 已做 | dead pid resume 会进入 recovery 并标记 node execution stale；历史 recoverable failure replay 已验证 projection 不改 ledger；历史 old-ledger stale RUNNING replay 已验证 projection 可暴露 active node dead pid；仍缺真实慢点类复核 | P0 |
 | provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
@@ -123,7 +123,7 @@ Mainline Decision Gate:
 | artifact boundary | 大体完成 | `plan_artifact`、`stage_handoff`、`rereadPolicy` 已类型化，但缺完整 real-case 验证 | P1 |
 | projection consistency | 部分完成 | CLI trace 已补；UI/API/operator 是否同源还未整体 sweep | P1 |
 | full complex real-case | 未完成 | 只有 bounded run，没有完整端到端验收 | P2 |
-| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，真实结论待证 | metrics/trace 已能展示 execution latency top run 和 dominant phase；仍缺真实 case 下 provider 推理慢、transport 等待慢、session 操作慢、dual 落盘慢的分解样本 | P0/P1 |
+| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，历史 replay 已证明一个慢点样本 | metrics/trace 已能展示 execution latency top run 和 dominant phase；历史 replay 显示 `intake.claude_brainstorm` / `intake.codex_product_review` 均由 `process_wait` 主导；仍缺 terminal contract 已出现但 transport 继续等待的样本，以及 provider 推理慢、session 操作慢、dual 落盘慢的进一步拆分 | P0/P1 |
 | session keep-alive | 未来优化 | 需要在 execution attempt 模型稳定后做 | P3 |
 
 ## 4. P0：执行事实边界收口
@@ -228,6 +228,11 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `terminalToContractMs` 和 `dominantPhase`。`dualctl trace` 的 Token Attribution
   也会显示最长 execution latency run，用于定位 provider/process wait、terminal grace
   或 post-process/contract validation 慢点。
+- `executionLatency` 已修正两个 projection 误判点：当 timeline event 的
+  `elapsedMs` 缺失或为 0 时，会用 run `startedAt` 与 event `observedAt`
+  计算 elapsed；`dominantPhase` 按可观测阶段耗时最大值选择，而不是固定优先返回
+  post-process。这样可以避免历史 run 明明大部分时间在外部进程等待，却被 read model
+  误标为 dual post-process。
 - 已补离线 projection replay 入口：`dualctl projections refresh --workdir <workspace> <workstreamId>`
   会从现有 ledger / run.json 重新生成 `timeline.json` 和
   `metrics/workstream-metrics.json`，用于历史 problematic workstream 的 P0/P0.5
@@ -255,6 +260,22 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   signals 传给 `AgentExecutionFinalizer`。这避免 adapter 已落盘
   `RATE_LIMITED` / reconnect / provider failure 等 typed signal，但 finalizer 因
   `NodeResult` 缺少 `acpx_failure.reason` 把 signals 覆盖为空并误判成功。
+- `MetricsProjectionWriterTest.executionLatencyFallsBackToObservedAtWhenElapsedIsMissing`
+  已覆盖 observedAt fallback：当 `contract_validated.elapsedMs=0` 但 `observedAt`
+  存在时，`contractValidatedMs` 必须从事件时间计算，且 dominant phase 不能因为
+  post-process delta 被误判。
+- 历史 replay 已在
+  `/private/tmp/dual-p0-latency-replay-ws-20260630T112054Z-N4YR`
+  上验证：`dualctl projections refresh` 后两个源 run.json hash 保持
+  `2fdb07d88fdd8eeffd98492a6795f1d9a0763005` /
+  `1d5962a978dc188713f222f31c6aec10abd45143` 不变；
+  `run-1782818454884 intake.claude_brainstorm` 为
+  `processWaitCompletedMs=141015`、`contractValidatedMs=141102`、
+  `postProcessMs=87`、`dominantPhase=process_wait`；
+  `run-1782818596121 intake.codex_product_review` 为
+  `processWaitCompletedMs=79502`、`contractValidatedMs=90415`、
+  `postProcessMs=10913`、`dominantPhase=process_wait`。
+  这证明该样本慢点在外部 process/provider wait，不是 dual 落盘或 contract validation。
 - acpx transport / post-processing 异常现在会在 adapter 边界内转成 typed
   `RECOVERABLE_TRANSPORT_FAILED` failure reason 和 canonical
   `AdapterSignalType.PROCESS_STALLED`，并写入 run.json prepared/completed read model；

@@ -187,11 +187,11 @@ class MetricsProjectionWriterTest {
                 .orElseThrow();
         var latency = map(intakeAttribution.get("executionLatency"));
         assertEquals(1000, number(latency.get("totalDurationMs")));
-        assertEquals(300, number(latency.get("terminalDetectedMs")));
-        assertEquals(500, number(latency.get("processWaitCompletedMs")));
+        assertEquals(100, number(latency.get("terminalDetectedMs")));
+        assertEquals(200, number(latency.get("processWaitCompletedMs")));
         assertEquals(700, number(latency.get("artifactExtractedMs")));
         assertEquals(900, number(latency.get("contractValidatedMs")));
-        assertEquals(600, number(latency.get("terminalToContractMs")));
+        assertEquals(800, number(latency.get("terminalToContractMs")));
         assertEquals("post_process", latency.get("dominantPhase"));
         var executionLatency = map(attribution.get("executionLatency"));
         var topExecutionRuns = list(executionLatency.get("topRuns"));
@@ -573,6 +573,40 @@ class MetricsProjectionWriterTest {
         var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
         assertEquals("missing_attempt_and_outcome", tokenRun.get("executionConsistency"),
                 "run-level classification must not invent active-node state");
+    }
+
+    @Test
+    void executionLatencyFallsBackToObservedAtWhenElapsedIsMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-latency-observed-at"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-latency-observed-at", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "intake.claude_brainstorm"));
+        writeAttributionRun(paths, "run-observed", "claude", "intake.claude_brainstorm", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runJson = paths.runsDir().resolve("run-observed/run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("durationMs", 1000);
+        run.put("executionTimeline", List.of(
+                Map.of("kind", "process_started", "elapsedMs", 7, "observedAt", "2026-06-19T00:00:00.007Z"),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 500, "observedAt", "2026-06-19T00:00:00.500Z"),
+                Map.of("kind", "artifact_extracted", "elapsedMs", 540, "observedAt", "2026-06-19T00:00:00.540Z"),
+                Map.of("kind", "contract_validated", "elapsedMs", 0, "observedAt", "2026-06-19T00:00:00.575Z")
+        ));
+        jsonWriter.write(runJson, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        var latency = map(attrRun.get("executionLatency"));
+
+        assertEquals(575, number(latency.get("contractValidatedMs")));
+        assertEquals(75, number(latency.get("postProcessMs")));
+        assertEquals("process_wait", latency.get("dominantPhase"));
     }
 
     @Test
@@ -1037,8 +1071,8 @@ class MetricsProjectionWriterTest {
         var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
         run.put("executionTimeline", List.of(
                 Map.of("kind", "process_started", "elapsedMs", 10),
-                Map.of("kind", "terminal_control_detected", "elapsedMs", 300),
-                Map.of("kind", "process_wait_completed", "elapsedMs", 500),
+                Map.of("kind", "terminal_control_detected", "elapsedMs", 100),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 200),
                 Map.of("kind", "artifact_extracted", "elapsedMs", 700),
                 Map.of("kind", "contract_validated", "elapsedMs", 900)
         ));

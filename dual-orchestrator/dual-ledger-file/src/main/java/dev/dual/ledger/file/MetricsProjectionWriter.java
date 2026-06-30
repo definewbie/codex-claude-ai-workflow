@@ -750,15 +750,16 @@ final class MetricsProjectionWriter {
     private Map<String, Object> executionLatency(Map<String, Object> run) {
         var timeline = mapList(run.get("executionTimeline"));
         var total = longValue(run.get("durationMs"));
-        var processStarted = elapsed(timeline, "process_started");
+        var startedAt = text(run.get("startedAt"));
+        var processStarted = elapsed(timeline, "process_started", startedAt);
         var processWaitCompleted = firstPositive(
-                elapsed(timeline, "process_wait_completed"),
-                elapsed(timeline, "process_exited")
+                elapsed(timeline, "process_wait_completed", startedAt),
+                elapsed(timeline, "process_exited", startedAt)
         );
-        var terminalDetected = elapsed(timeline, "terminal_control_detected");
-        var terminalGraceElapsed = elapsed(timeline, "terminal_control_grace_elapsed");
-        var artifactExtracted = elapsed(timeline, "artifact_extracted");
-        var contractValidated = elapsed(timeline, "contract_validated");
+        var terminalDetected = elapsed(timeline, "terminal_control_detected", startedAt);
+        var terminalGraceElapsed = elapsed(timeline, "terminal_control_grace_elapsed", startedAt);
+        var artifactExtracted = elapsed(timeline, "artifact_extracted", startedAt);
+        var contractValidated = elapsed(timeline, "contract_validated", startedAt);
         var terminalGraceMs = positiveDelta(terminalDetected, terminalGraceElapsed);
         var postProcessMs = positiveDelta(processWaitCompleted, contractValidated);
         var terminalToContractMs = positiveDelta(terminalDetected, contractValidated);
@@ -778,13 +779,40 @@ final class MetricsProjectionWriter {
         return result;
     }
 
-    private long elapsed(List<Map<String, Object>> timeline, String kind) {
+    private long elapsed(List<Map<String, Object>> timeline, String kind, String startedAt) {
+        var start = parseInstant(startedAt);
         return timeline.stream()
                 .filter(event -> kind.equals(text(event.get("kind"))))
-                .map(event -> longValue(event.get("elapsedMs")))
+                .map(event -> eventElapsedMs(event, start))
                 .filter(value -> value > 0)
                 .findFirst()
                 .orElse(0L);
+    }
+
+    private long eventElapsedMs(Map<String, Object> event, Instant start) {
+        var elapsedMs = longValue(event.get("elapsedMs"));
+        if (elapsedMs > 0) {
+            return elapsedMs;
+        }
+        if (start == null) {
+            return 0L;
+        }
+        var observedAt = parseInstant(text(event.get("observedAt")));
+        if (observedAt == null || observedAt.isBefore(start)) {
+            return 0L;
+        }
+        return Duration.between(start, observedAt).toMillis();
+    }
+
+    private Instant parseInstant(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Instant.parse(value);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private long firstPositive(long first, long second) {
@@ -796,19 +824,24 @@ final class MetricsProjectionWriter {
     }
 
     private String dominantExecutionPhase(long total, long processWaitCompleted, long terminalGraceMs, long postProcessMs) {
-        if (terminalGraceMs > 0 && terminalGraceMs >= postProcessMs) {
-            return "terminal_grace";
+        var phase = "unknown";
+        var max = 0L;
+        if (processWaitCompleted > max) {
+            phase = "process_wait";
+            max = processWaitCompleted;
         }
-        if (postProcessMs > 0) {
-            return "post_process";
+        if (terminalGraceMs > max) {
+            phase = "terminal_grace";
+            max = terminalGraceMs;
         }
-        if (processWaitCompleted > 0 && processWaitCompleted >= total / 2) {
-            return "process_wait";
+        if (postProcessMs > max) {
+            phase = "post_process";
+            max = postProcessMs;
         }
-        if (total > 0) {
+        if (max == 0L && total > 0) {
             return "execution_total";
         }
-        return "unknown";
+        return phase;
     }
 
     private static long fileSizeSafe(Path workspaceRoot, String relativePath) {
