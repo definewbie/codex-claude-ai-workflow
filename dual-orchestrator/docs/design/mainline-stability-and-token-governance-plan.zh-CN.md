@@ -572,6 +572,9 @@ P0 必须先于 P0.5 完整收口。
   当 typed `ExplorationPlan.failureMode=block` 且 review 直接读取 scope 外文件时，
   validator 刷新 `ExplorationPolicyResult` 并以 `EXPLORATION_POLICY_DENIED` 失败；
   warn-mode 仍只作为 projection，不改变节点结果。
+- `AcpxAgentTaskHandlerTest` 已覆盖失败 agent run 的 run-level governance 投影：
+  reconnect failure 和 provider connection failure 都会在 `run.json` 写入
+  `explorationPolicyResultPath` / `explorationPolicyResult`，避免 P1A 在失败路径上出现治理盲区。
 - 这只完成了 context governance sidecar、run metadata 和 metrics projection 的合成链路；
   尚未通过真实 provider 证明每个 real-case agent run 都写出有效 `ExplorationPolicyResult`，
   也尚未证明 review 阶段 WARN 已收敛。

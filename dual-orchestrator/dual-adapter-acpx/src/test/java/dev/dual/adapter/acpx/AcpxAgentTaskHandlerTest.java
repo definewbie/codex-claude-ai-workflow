@@ -639,6 +639,8 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"message\" : \"agent needs reconnect"), runMetadata);
         assertTrue(runMetadata.contains("\"measurementType\" : \"UNAVAILABLE\""), runMetadata);
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"explorationPolicyResultPath\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
     }
 
     @Test
@@ -741,6 +743,8 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertTrue(runMetadata.contains("\"failureSignal\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"explorationPolicyResultPath\" :"), runMetadata);
+        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
     }
 
     @Test
