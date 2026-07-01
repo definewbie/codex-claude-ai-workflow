@@ -274,6 +274,72 @@ class AgentRunMetadataFinalizerTest {
         assertEquals("sess-1", signal.get("sessionId"));
     }
 
+    @Test
+    void persistedAdapterSignalTakesPrecedenceOverLegacyNodeResultFallback() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-signal-priority/runs/run-signal-priority/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-signal-priority",
+                  "workstreamId": "ws-signal-priority",
+                  "nodeId": "intake.claude_brainstorm",
+                  "agent": "claude",
+                  "status": "failed",
+                  "processResult": {
+                    "command": "acpx claude",
+                    "pid": 123,
+                    "exitCode": 0,
+                    "usability": "EXITED_ZERO",
+                    "durationMs": 1200,
+                    "stdoutPath": ".agent/workstreams/ws-signal-priority/runs/run-signal-priority/stdout.md",
+                    "stderrPath": ".agent/workstreams/ws-signal-priority/runs/run-signal-priority/stderr.log",
+                    "interrupted": false,
+                    "timedOut": false
+                  },
+                  "adapterSignals": [ {
+                    "type": "PROVIDER_CONNECTION_FAILED",
+                    "severity": "RECOVERABLE",
+                    "source": "native_result",
+                    "message": "provider returned 529",
+                    "sessionId": "provider-session",
+                    "observedSequence": 3,
+                    "superseded": false
+                  } ]
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_id", "run-signal-priority");
+        facts.put("run_metadata", ".agent/workstreams/ws-signal-priority/runs/run-signal-priority/run.json");
+        facts.put("agent", "claude");
+        facts.put("exit_code", 0);
+        facts.put("acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT");
+        facts.put("acpx_failure.recoverable", true);
+
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "RECOVERABLE_AGENT_RECONNECT",
+                NodeStatus.FAILED,
+                List.of(),
+                facts,
+                "legacy reconnect fallback"
+        ), TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        var outcome = map(json.get("executionOutcome"));
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", outcome.get("status"));
+        assertEquals("provider_connection_failed", outcome.get("primaryReason"));
+        var attempt = map(json.get("executionAttempt"));
+        assertEquals("PROVIDER_CONNECTION_FAILED", attempt.get("failureSignal"));
+        var firstSignal = map(list(json.get("adapterSignals")).get(0));
+        assertEquals("PROVIDER_CONNECTION_FAILED", firstSignal.get("type"));
+        assertEquals("native_result", firstSignal.get("source"));
+        assertEquals("provider-session", firstSignal.get("sessionId"));
+    }
+
     @SuppressWarnings("unchecked")
     private static Map<String, Object> map(Object value) {
         return (Map<String, Object>) value;
