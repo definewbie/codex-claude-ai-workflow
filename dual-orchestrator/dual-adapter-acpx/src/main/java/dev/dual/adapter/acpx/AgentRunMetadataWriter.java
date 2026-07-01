@@ -4,10 +4,19 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AdapterSignalType;
 import dev.dual.core.execution.AgentExecutionAttempt;
 import dev.dual.core.execution.AgentExecutionAttemptStatus;
+import dev.dual.core.execution.AgentExecutionEvidence;
+import dev.dual.core.execution.AgentExecutionFinalizer;
+import dev.dual.core.execution.AgentExecutionOutcome;
 import dev.dual.core.execution.AgentExecutionProcessStatus;
+import dev.dual.core.execution.AgentExecutionRetryPolicy;
+import dev.dual.core.execution.ArtifactContractResult;
+import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.ProcessUsability;
+import dev.dual.core.execution.TerminalControlResult;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -257,6 +266,7 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, stderrPath),
                 relativeOrNull(workspaceRoot, transcriptPath)
         );
+        var executionOutcome = executionOutcome(workspaceRoot, result, stdoutPath, stderrPath, failure, attempt);
         var effectiveUsage = usage;
         if (failure != null) {
             effectiveUsage = usage == null
@@ -377,7 +387,7 @@ final class AgentRunMetadataWriter {
                 null,
                 List.of(),
                 executionAttemptToMap(attempt),
-                null,
+                outcomeToMap(executionOutcome),
                 executionTimeline(result)
         ));
         return new CompletionWriteResult(
@@ -601,6 +611,74 @@ final class AgentRunMetadataWriter {
         );
     }
 
+    private AgentExecutionOutcome executionOutcome(
+            Path workspaceRoot,
+            AcpxRunResult result,
+            Path stdoutPath,
+            Path stderrPath,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AgentExecutionAttempt attempt
+    ) {
+        var process = processResultEvidence(workspaceRoot, result, stdoutPath, stderrPath, failure);
+        var evidence = new AgentExecutionEvidence(
+                process,
+                failure == null ? TerminalControlResult.valid("agent_terminal_contract") : TerminalControlResult.missing(),
+                failure == null && hasContent(stdoutPath)
+                        ? List.of(ArtifactContractResult.requiredValid("agent_output_contract"))
+                        : List.of(),
+                adapterSignalEvidence(failure)
+        );
+        return new AgentExecutionFinalizer().finalize(attempt, evidence).outcome();
+    }
+
+    private ProcessResult processResultEvidence(
+            Path workspaceRoot,
+            AcpxRunResult result,
+            Path stdoutPath,
+            Path stderrPath,
+            AcpxFailureClassifier.AcpxFailure failure
+    ) {
+        var usability = usability(result, failure);
+        var durationMs = Duration.between(result.startedAt(), result.finishedAt()).toMillis();
+        return new ProcessResult(
+                String.join(" ", result.command()),
+                null,
+                result.exitCode(),
+                usability,
+                Math.max(0, durationMs),
+                relative(workspaceRoot, stdoutPath),
+                relative(workspaceRoot, stderrPath),
+                usability == ProcessUsability.INTERRUPTED,
+                usability == ProcessUsability.TIMED_OUT
+        );
+    }
+
+    private List<AdapterSignal> adapterSignalEvidence(AcpxFailureClassifier.AcpxFailure failure) {
+        if (failure == null || failure.reason() == null || failure.reason().isBlank()) {
+            return List.of();
+        }
+        var type = failureSignal(failure);
+        if (type == null) {
+            return List.of();
+        }
+        return List.of(new AdapterSignal(
+                type,
+                failure.message(),
+                0,
+                "acpx",
+                "",
+                false
+        ));
+    }
+
+    private boolean hasContent(Path path) {
+        try {
+            return path != null && Files.isRegularFile(path) && Files.size(path) > 0;
+        } catch (IOException ignored) {
+            return false;
+        }
+    }
+
     private AgentExecutionAttemptStatus attemptStatus(
             AgentExecutionProcessStatus processStatus,
             AcpxFailureClassifier.AcpxFailure failure
@@ -647,6 +725,9 @@ final class AgentRunMetadataWriter {
         }
         if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
             return AdapterSignalType.AGENT_RECONNECT_REQUIRED;
+        }
+        if (AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code().equals(failure.reason())) {
+            return null;
         }
         if (AcpxFailureReason.AGENT_MODEL_MISMATCH.code().equals(failure.reason())) {
             return AdapterSignalType.MODEL_MISMATCH;
@@ -714,13 +795,46 @@ final class AgentRunMetadataWriter {
         return map;
     }
 
+    private Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {
+        if (outcome == null) {
+            return null;
+        }
+        var map = new java.util.LinkedHashMap<String, Object>();
+        map.put("status", outcome.status().name());
+        map.put("primaryReason", outcome.primaryReason());
+        map.put("nodeMaySucceed", outcome.nodeMaySucceed());
+        map.put("retryPolicy", outcome.retryPolicy().name());
+        map.put("retrySafe", outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
+        map.put("recoveryCategory", outcome.recoveryCategory().name());
+        map.put("operatorMessage", outcome.operatorMessage());
+        map.put("secondarySignals", outcome.secondarySignals().stream()
+                .map(this::signalToMap)
+                .toList());
+        return map;
+    }
+
+    private Map<String, Object> signalToMap(AdapterSignal signal) {
+        var map = new java.util.LinkedHashMap<String, Object>();
+        map.put("type", signal.type().name());
+        map.put("severity", signal.type().severity().name());
+        map.put("message", signal.message());
+        map.put("observedSequence", signal.observedSequence());
+        map.put("source", signal.source());
+        map.put("sessionId", signal.sessionId());
+        map.put("superseded", signal.superseded());
+        return map;
+    }
+
     private List<Map<String, Object>> adapterSignals(AcpxFailureClassifier.AcpxFailure failure) {
         if (failure == null || failure.reason() == null || failure.reason().isBlank()) {
             return List.of();
         }
         var type = failureSignal(failure);
+        if (type == null) {
+            return List.of();
+        }
         var map = new java.util.LinkedHashMap<String, Object>();
-        map.put("type", type == null ? AdapterSignalType.PROCESS_STALLED.name() : type.name());
+        map.put("type", type.name());
         map.put("reason", failure.reason());
         map.put("severity", failure.recoverable() ? "RECOVERABLE" : "FATAL");
         map.put("source", "acpx");

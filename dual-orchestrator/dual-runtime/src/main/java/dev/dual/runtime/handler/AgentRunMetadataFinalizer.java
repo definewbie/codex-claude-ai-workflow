@@ -217,16 +217,20 @@ public final class AgentRunMetadataFinalizer {
         map.put("recoveryCategory", outcome.recoveryCategory().name());
         map.put("operatorMessage", outcome.operatorMessage());
         map.put("secondarySignals", outcome.secondarySignals().stream()
-                .map(signal -> Map.of(
-                        "type", signal.type().name(),
-                        "severity", signal.type().severity().name(),
-                        "message", signal.message(),
-                        "observedSequence", signal.observedSequence(),
-                        "source", signal.source(),
-                        "sessionId", signal.sessionId(),
-                        "superseded", signal.superseded()
-                ))
+                .map(AgentRunMetadataFinalizer::signalToMap)
                 .toList());
+        return map;
+    }
+
+    private static Map<String, Object> signalToMap(AdapterSignal signal) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("type", signal.type().name());
+        map.put("severity", signal.type().severity().name());
+        map.put("message", signal.message());
+        map.put("observedSequence", signal.observedSequence());
+        map.put("source", signal.source());
+        map.put("sessionId", signal.sessionId());
+        map.put("superseded", signal.superseded());
         return map;
     }
 

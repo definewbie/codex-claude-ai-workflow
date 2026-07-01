@@ -923,9 +923,13 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("INTERRUPTED", result.result().get("process_usability"));
         assertEquals(true, result.result().get("acpx_failure.recoverable"));
         assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", result.result().get("acpx_failure.reason"));
-        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        assertTrue(runMetadata.contains("\"exitCode\" : 0"));
-        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_OUTPUT_INTERRUPTED\""));
+        var runMetadata = OBJECT_MAPPER.readTree(tempDir.resolve((String) result.result().get("run_metadata")).toFile());
+        assertEquals(0, runMetadata.path("exitCode").asInt());
+        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", runMetadata.path("failureReason").asText());
+        assertEquals("INTERRUPTED", runMetadata.path("executionAttempt").path("status").asText());
+        assertEquals("INTERRUPTED", runMetadata.path("executionAttempt").path("processStatus").asText());
+        assertEquals("INTERRUPTED", runMetadata.path("executionOutcome").path("status").asText());
+        assertEquals(0, runMetadata.path("adapterSignals").size());
     }
 
     @Test
@@ -1021,7 +1025,10 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("failed", runMetadata.path("status").asText());
         assertEquals("RECOVERABLE_TRANSPORT_FAILED", runMetadata.path("failureReason").asText());
         assertEquals("PROCESS_STALLED", runMetadata.path("executionAttempt").path("failureSignal").asText());
-        assertTrue(runMetadata.path("executionOutcome").isNull(), runMetadata.toPrettyString());
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", runMetadata.path("executionOutcome").path("status").asText(),
+                runMetadata.toPrettyString());
+        assertEquals("process_stalled", runMetadata.path("executionOutcome").path("primaryReason").asText(),
+                runMetadata.toPrettyString());
         assertEquals("PROCESS_STALLED", runMetadata.path("adapterSignals").get(0).path("type").asText());
         assertEquals("RECOVERABLE_TRANSPORT_FAILED", runMetadata.path("adapterSignals").get(0).path("reason").asText());
 
@@ -1581,8 +1588,10 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-explore", definition,
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-explore", definition,
                 readyInstance("intake.claude_brainstorm")));
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("EXPLORATION_POLICY_VIOLATION", result.outcome());
 
         var runJson = Files.walk(workstreamDir.resolve("runs"))
                 .filter(path -> path.getFileName().toString().equals("run.json"))
@@ -1596,6 +1605,14 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"agentExplorationPlanPath\" :"), runMetadata);
         assertTrue(runMetadata.contains("exploration-plan-node-intake-claude_brainstorm.json"), runMetadata);
         assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
+
+        var root = OBJECT_MAPPER.readTree(runJson.toFile());
+        assertEquals("SUCCESS", root.path("executionOutcome").path("status").asText(),
+                "policy failure must not rewrite process/artifact success into an adapter failure");
+        assertEquals("COMPLETED", root.path("executionAttempt").path("status").asText(),
+                "successful process execution remains completed even when harness policy rejects the node");
+        assertEquals(0, root.path("adapterSignals").size(),
+                "policy failure must not synthesize PROCESS_STALLED or another adapter signal");
     }
 
     @Test
