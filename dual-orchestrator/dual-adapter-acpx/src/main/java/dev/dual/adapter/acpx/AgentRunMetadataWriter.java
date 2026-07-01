@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -421,10 +422,26 @@ final class AgentRunMetadataWriter {
                 timeline.add(eventMap);
             }
             root.put("executionTimeline", timeline);
-            objectMapper.writeValue(runJsonPath.toFile(), root);
+            writeJsonAtomically(runJsonPath, root);
         } catch (IOException | RuntimeException ignored) {
             // In-flight timeline persistence is best-effort. The terminal writeCompleted
             // path still writes the authoritative final event list from AcpxRunResult.
+        }
+    }
+
+    private void writeJsonAtomically(Path target, Object value) throws IOException {
+        var directory = target.getParent();
+        Files.createDirectories(directory);
+        var tmp = Files.createTempFile(directory, target.getFileName().toString(), ".tmp");
+        try {
+            objectMapper.writeValue(tmp.toFile(), value);
+            try {
+                Files.move(tmp, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException atomicFailure) {
+                Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(tmp);
         }
     }
 

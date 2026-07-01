@@ -395,9 +395,26 @@ class AcpxAgentTaskHandlerTest {
                         Map.of("graceMs", 2000)
                 )
         );
+        writer.appendExecutionEvent(
+                runDir.resolve("run.json"),
+                new AcpxExecutionEvent(
+                        AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
+                        "stdout",
+                        3,
+                        Instant.parse("2026-07-01T00:00:00Z"),
+                        1200,
+                        Map.of("graceMs", 2000)
+                )
+        );
 
         var root = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
         assertEquals("prepared", root.path("status").asText());
+        assertTrue(root.path("failureReason").isMissingNode() || root.path("failureReason").isNull(),
+                "in-flight timeline append must not write terminal failure reason");
+        assertTrue(root.path("executionAttempt").isMissingNode() || root.path("executionAttempt").isNull(),
+                "in-flight timeline append must not write execution attempt");
+        assertTrue(root.path("executionOutcome").isMissingNode() || root.path("executionOutcome").isNull(),
+                "in-flight timeline append must not write execution outcome");
         var timeline = root.path("executionTimeline");
         assertEquals(1, timeline.size());
         assertEquals("terminal_control_detected", timeline.get(0).path("kind").asText());
