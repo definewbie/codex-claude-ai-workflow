@@ -194,7 +194,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         "adapter"
                 );
             }
-            var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
+            var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode(), result.nativeTerminal());
             var outputComplete = completionDetector.isComplete(transcriptPath);
             var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
             metadataWriter.writeCompleted(

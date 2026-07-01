@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTransportTest {
@@ -565,6 +566,88 @@ class AcpxAgentTransportTest {
         assertEquals(null, result.usage());
         assertTrue(Files.readString(stdout).contains("API Error: Unable to connect to API"));
         assertTrue(Files.exists(tempDir.resolve("stdout.md.native-result.json")));
+    }
+
+    @Test
+    void nativeClaudeSuccessPopulatesNativeTerminalSuccess() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
+        var fakeClaude = tempDir.resolve("claude-success.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                exit 99
+                """, StandardCharsets.UTF_8);
+        Files.writeString(fakeClaude, """
+                #!/bin/sh
+                cat >/dev/null
+                cat <<'EOF'
+                {"type":"result","subtype":"success","is_error":false,"stop_reason":"end_turn","result":"plain markdown result without a dual-control fence","total_cost_usd":0.104,"usage":{"input_tokens":4062,"output_tokens":3385,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
+                EOF
+                exit 0
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        assertTrue(fakeClaude.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractDiscovery()
+        ));
+
+        assertEquals(0, result.exitCode());
+        assertNotNull(result.nativeTerminal(), "native claude run must populate terminal evidence from native-result.json");
+        assertTrue(result.nativeTerminal().isNativeTerminalSuccess(),
+                "exit 0 + is_error=false + stop_reason=end_turn is native terminal success");
+        assertEquals(7447, result.usage().totalTokens());
+    }
+
+    @Test
+    void nativeClaudeIsErrorPopulatesNativeTerminalError() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
+        var fakeClaude = tempDir.resolve("claude-error.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                exit 99
+                """, StandardCharsets.UTF_8);
+        Files.writeString(fakeClaude, """
+                #!/bin/sh
+                cat >/dev/null
+                cat <<'EOF'
+                {"type":"result","is_error":true,"result":"API Error: Unable to connect to API (FailedToOpenSocket)","total_cost_usd":0,"usage":{"input_tokens":0,"output_tokens":0,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
+                EOF
+                exit 1
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        assertTrue(fakeClaude.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractDiscovery()
+        ));
+
+        assertEquals(1, result.exitCode());
+        assertNotNull(result.nativeTerminal());
+        assertFalse(result.nativeTerminal().isNativeTerminalSuccess(),
+                "is_error=true is not native terminal success even when native-result.json is parseable");
+        assertTrue(result.nativeTerminal().error());
     }
 
     @Test

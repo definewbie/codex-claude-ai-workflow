@@ -213,7 +213,8 @@ public class AcpxAgentTransport {
                     Instant.now(),
                     List.copyOf(command),
                     timeline,
-                    nativeResult.usage()
+                    nativeResult.usage(),
+                    nativeResult.toTerminal()
             );
         } finally {
             if (process.isAlive()) {
@@ -230,12 +231,12 @@ public class AcpxAgentTransport {
 
     private NativeClaudeResult readNativeClaudeResult(Path rawJsonPath, Path transcriptPath) throws IOException {
         if (!Files.exists(rawJsonPath)) {
-            return new NativeClaudeResult(null);
+            return NativeClaudeResult.missing();
         }
         var raw = Files.readString(rawJsonPath, StandardCharsets.UTF_8);
         if (raw.isBlank()) {
             Files.writeString(transcriptPath, "", StandardCharsets.UTF_8);
-            return new NativeClaudeResult(null);
+            return NativeClaudeResult.missing();
         }
         try {
             var root = OBJECT_MAPPER.readTree(raw);
@@ -245,10 +246,16 @@ public class AcpxAgentTransport {
                     resultText.isBlank() ? raw : resultText,
                     StandardCharsets.UTF_8
             );
-            return new NativeClaudeResult(nativeClaudeUsage(root));
+            return new NativeClaudeResult(
+                    nativeClaudeUsage(root),
+                    true,
+                    root.path("is_error").asBoolean(false),
+                    text(root.get("stop_reason")),
+                    text(root.get("subtype"))
+            );
         } catch (IOException parseFailure) {
             Files.writeString(transcriptPath, raw, StandardCharsets.UTF_8);
-            return new NativeClaudeResult(null);
+            return NativeClaudeResult.missing();
         }
     }
 
@@ -293,7 +300,20 @@ public class AcpxAgentTransport {
         ).withProviderMetadata(metadata);
     }
 
-    private record NativeClaudeResult(AcpxUsage usage) {
+    private record NativeClaudeResult(
+            AcpxUsage usage,
+            boolean parseable,
+            boolean error,
+            String stopReason,
+            String subtype
+    ) {
+        static NativeClaudeResult missing() {
+            return new NativeClaudeResult(null, false, false, null, null);
+        }
+
+        NativeClaudeTerminal toTerminal() {
+            return new NativeClaudeTerminal(parseable, error, stopReason, subtype);
+        }
     }
 
     private static String text(JsonNode node) {

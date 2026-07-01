@@ -10,10 +10,11 @@ public record AcpxRunResult(
         Instant finishedAt,
         List<String> command,
         List<AcpxExecutionEvent> executionTimeline,
-        AcpxUsage usage
+        AcpxUsage usage,
+        NativeClaudeTerminal nativeTerminal
 ) {
     public AcpxRunResult(int exitCode, Instant startedAt, Instant finishedAt, List<String> command) {
-        this(exitCode, startedAt, finishedAt, command, List.of(), null);
+        this(exitCode, startedAt, finishedAt, command, List.of(), null, null);
     }
 
     public AcpxRunResult(
@@ -23,7 +24,18 @@ public record AcpxRunResult(
             List<String> command,
             List<AcpxExecutionEvent> executionTimeline
     ) {
-        this(exitCode, startedAt, finishedAt, command, executionTimeline, null);
+        this(exitCode, startedAt, finishedAt, command, executionTimeline, null, null);
+    }
+
+    public AcpxRunResult(
+            int exitCode,
+            Instant startedAt,
+            Instant finishedAt,
+            List<String> command,
+            List<AcpxExecutionEvent> executionTimeline,
+            AcpxUsage usage
+    ) {
+        this(exitCode, startedAt, finishedAt, command, executionTimeline, usage, null);
     }
 
     public AcpxRunResult {
