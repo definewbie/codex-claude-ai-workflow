@@ -65,7 +65,11 @@ final class RepoScopeGovernance {
         var workingSet = buildWorkingSet(context, stageId, plan, policy, targetNodeDefinitionId);
         var fileSummaries = buildFileSummaries(context, stageId, workingSet);
         var readReuseContract = buildReadReuseContract(context, stageId, plan, policy, targetNodeDefinitionId, existingMemory);
-        var capabilityCatalog = AgentCapabilityCatalog.detect(context.workstreamId(), targetNodeDefinitionId);
+        var capabilityCatalog = AgentCapabilityCatalog.detect(
+                context.workstreamId(),
+                targetNodeDefinitionId,
+                context.definition().config()
+        );
         var explorationPlan = ExplorationPlan.fromScope(
                 context.workstreamId(),
                 stageId,
@@ -88,7 +92,7 @@ final class RepoScopeGovernance {
         var workingSetPath = memoryDir.resolve("working-set.json");
         var fileSummariesPath = memoryDir.resolve("file-summaries.json");
         var readReuseContractPath = memoryDir.resolve("read-reuse-contract.json");
-        var capabilityCatalogPath = memoryDir.resolve("agent-capability-catalog.json");
+        var capabilityCatalogPath = memoryDir.resolve("agent-capability-catalog-" + nodeKey + ".json");
         var explorationPlanPath = memoryDir.resolve("exploration-plan-" + nodeKey + ".json");
         var reportPath = governanceDir.resolve(nodeKey + ".json");
         var workstreamMemory = buildWorkstreamMemory(

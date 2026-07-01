@@ -1289,7 +1289,7 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Repo Scope Guidance"));
         assertTrue(markdown.contains("Exploration Plan"));
         assertTrue(markdown.contains("edit_execution"));
-        assertTrue(markdown.contains("agent-capability-catalog.json"));
+        assertTrue(markdown.contains("agent-capability-catalog-node-001.json"));
         assertTrue(markdown.contains("exploration-plan-node-001.json"));
         assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
         assertTrue(markdown.contains("Already inspected files"));
@@ -1308,7 +1308,7 @@ class ContextBuildPackageHandlerTest {
         assertEquals(".agent/workstreams/ws-ctx/memory/working-set.json", metadata.get("workingSet"));
         assertEquals(".agent/workstreams/ws-ctx/memory/file-summaries.json", metadata.get("fileSummaries"));
         assertEquals(".agent/workstreams/ws-ctx/memory/read-reuse-contract.json", metadata.get("readReuseContract"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/agent-capability-catalog.json", metadata.get("agentCapabilityCatalog"));
+        assertEquals(".agent/workstreams/ws-ctx/memory/agent-capability-catalog-node-001.json", metadata.get("agentCapabilityCatalog"));
         assertEquals(".agent/workstreams/ws-ctx/memory/exploration-plan-node-001.json", metadata.get("agentExplorationPlan"));
 
         var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
@@ -1364,7 +1364,8 @@ class ContextBuildPackageHandlerTest {
         assertFalse(markdown.contains("agent_output_contract.reread_reasons"),
                 "context package must not leak agent_output_contract fields into targets that do not declare that artifact");
 
-        var capabilityCatalog = objectMapper.readValue(wsDir.resolve("memory/agent-capability-catalog.json").toFile(), Map.class);
+        var capabilityCatalogPath = (String) metadata.get("agentCapabilityCatalog");
+        var capabilityCatalog = objectMapper.readValue(tempDir.resolve(capabilityCatalogPath).toFile(), Map.class);
         assertEquals("agent_capability_catalog", capabilityCatalog.get("artifactType"));
         assertTrue(capabilityCatalog.get("capabilities") instanceof List<?> capabilities
                         && !capabilities.isEmpty(),

@@ -10,9 +10,9 @@ import java.util.Map;
 /**
  * Typed exploration plan for one agent run.
  *
- * The plan is a bounded execution guardrail. P1 intentionally uses WARN mode:
- * it records when an agent drifts into broad exploration but does not mutate
- * workflow state.
+ * The plan is a bounded execution guardrail. Design, plan, intake, and review
+ * runs are harness-enforced because broad discovery in those stages is a mainline
+ * latency and token-governance boundary, not just observability.
  */
 public final class ExplorationPlan {
     private final Map<String, Object> document;
@@ -100,7 +100,10 @@ public final class ExplorationPlan {
     }
 
     private static String failureMode(String stage) {
-        return ("intake".equals(stage) || "acceptance".equals(stage)) ? "block" : "warn";
+        return switch (stage) {
+            case "intake", "design", "plan", "acceptance" -> "block";
+            default -> "warn";
+        };
     }
 
     private static List<String> forbiddenIntents(String stage) {

@@ -864,11 +864,11 @@ P0 必须先于 P0.5 完整收口。
 | 阶段 | 应该读 | 不应该读 | policy |
 | --- | --- | --- | --- |
 | intake | seed / memory / scope candidates | source/test/doc 全量探索 | block |
-| design | contract scope + nearby architecture evidence | 实现级逐文件探索 | warn -> block |
-| plan | design artifact + contract scope | 重新需求发现 | warn |
+| design | contract scope + nearby architecture evidence | 实现级逐文件探索 | block |
+| plan | design artifact + contract scope | 重新需求发现 | block |
 | implement | changed_files / expected edit files | 无理由重读无关文件 | warn -> block |
 | self-test | changed_files + test evidence | 全仓探索 | warn |
-| acceptance | review evidence brief + diff | 全量重审仓库 | warn -> block |
+| acceptance | review evidence brief + diff | 全量重审仓库 | block |
 
 验收：
 
@@ -907,6 +907,21 @@ P0 必须先于 P0.5 完整收口。
 - 这只完成了 context governance sidecar、run metadata 和 metrics projection 的合成链路；
   尚未通过真实 provider 证明每个 real-case agent run 都写出有效 `ExplorationPolicyResult`，
   也尚未证明 review 阶段 WARN 已收敛。
+
+2026-07-01 P0.5 blocker closure:
+
+- `AgentRunGovernanceContext` 已保证每个 concrete agent run 在 prompt 输入中获得
+  per-run governance context；prompt manifest 中 `exploration_plan` 不再允许是空 section。
+- `AgentCapabilityCatalog` 改为 permission-aware，并按 node/run 生成
+  `agent-capability-catalog-<node>.json`；如果当前 permission profile 不允许 shell，
+  catalog 不再宣传 `rtk` / `codegraph` 这类 shell-backed capability。
+- `ExplorationPlan.failureMode` 已将 `intake/design/plan/acceptance` 收为 `block`；
+  `ExplorationPolicyEvaluatorTest` 覆盖 design direct Read 超预算会进入 failed/block。
+- `AcpxAgentTaskHandler` 已将 failed `explorationPolicyResult` 升级为节点级
+  `EXPLORATION_POLICY_VIOLATION`，而不是只写 projection warning；run.json 同时保留
+  process/execution attempt 的原始成功事实，区分 harness failure 和 adapter failure。
+- 本阶段仍未声明 token/latency benefit；complex real-case 只能在 Verification Gate 明确
+  source of truth、stop-loss、artifact freshness 后启动。
 
 ### 6.2 P1B：Provider-cache-aware / Transcript Compaction
 

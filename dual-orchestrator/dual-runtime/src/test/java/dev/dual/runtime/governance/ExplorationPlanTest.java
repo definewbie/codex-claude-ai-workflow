@@ -14,7 +14,9 @@ class ExplorationPlanTest {
         var catalog = AgentCapabilityCatalog.fromAvailableCommands(
                 "ws-001",
                 "intake.claude_brainstorm",
-                Set.of("rtk", "codegraph")
+                Set.of("rtk", "codegraph"),
+                false,
+                false
         );
 
         var plan = ExplorationPlan.fromScope(
@@ -35,12 +37,38 @@ class ExplorationPlanTest {
         assertEquals("block", document.get("failureMode"));
         assertEquals(0, ((Number) document.get("maxDirectReadFiles")).intValue());
         assertTrue(document.get("preferredCapabilityKinds") instanceof List<?> kinds
-                && kinds.contains("symbol_index")
+                && !kinds.contains("symbol_index")
                 && !kinds.contains("token_filtered_shell")
                 && !kinds.contains("direct_file_read"));
         assertTrue(document.get("forbiddenExplorationIntents") instanceof List<?> forbidden
                 && forbidden.contains("implementation_design")
                 && forbidden.contains("full_repo_audit"));
+    }
+
+    @Test
+    void designPlanBlocksBroadExplorationInsteadOfOnlyWarning() {
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "design",
+                "design.claude_design",
+                "node-009",
+                "iter-001",
+                List.of("docs/product.md", "src/app.js"),
+                List.of(),
+                AgentCapabilityCatalog.fromAvailableCommands(
+                        "ws-001",
+                        "design.claude_design",
+                        Set.of("rtk", "codegraph"),
+                        true,
+                        false
+                )
+        );
+
+        var document = plan.toDocument();
+
+        assertEquals("architecture_discovery", document.get("explorationIntent"));
+        assertEquals("block", document.get("failureMode"));
+        assertEquals(6, ((Number) document.get("maxDirectReadFiles")).intValue());
     }
 
     @Test

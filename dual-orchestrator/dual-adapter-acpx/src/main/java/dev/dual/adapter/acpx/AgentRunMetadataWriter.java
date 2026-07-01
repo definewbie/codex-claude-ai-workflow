@@ -121,7 +121,7 @@ final class AgentRunMetadataWriter {
         ));
     }
 
-    void writeCompleted(
+    CompletionWriteResult writeCompleted(
             Path workspaceRoot,
             String workstreamId,
             String nodeId,
@@ -136,7 +136,7 @@ final class AgentRunMetadataWriter {
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure
     ) throws IOException {
-        writeCompleted(
+        return writeCompleted(
                 workspaceRoot,
                 workstreamId,
                 nodeId,
@@ -157,7 +157,7 @@ final class AgentRunMetadataWriter {
         );
     }
 
-    void writeCompleted(
+    CompletionWriteResult writeCompleted(
             Path workspaceRoot,
             String workstreamId,
             String nodeId,
@@ -173,7 +173,7 @@ final class AgentRunMetadataWriter {
             AcpxFailureClassifier.AcpxFailure failure,
             AcpxUsage usage
     ) throws IOException {
-        writeCompleted(
+        return writeCompleted(
                 workspaceRoot,
                 workstreamId,
                 nodeId,
@@ -194,7 +194,7 @@ final class AgentRunMetadataWriter {
         );
     }
 
-    void writeCompleted(
+    CompletionWriteResult writeCompleted(
             Path workspaceRoot,
             String workstreamId,
             String nodeId,
@@ -243,6 +243,8 @@ final class AgentRunMetadataWriter {
         var explorationPolicyResult = explorationPolicyResult(governanceReportPath);
         var explorationPolicyResultPath = explorationPolicyResultPath(workspaceRoot, governanceReportPath);
         var agentExplorationPlanPath = agentExplorationPlanPath(workspaceRoot, governanceReportPath);
+        var policyFailure = explorationPolicyFailure(explorationPolicyResult);
+        var topLevelFailure = failure == null ? policyFailure : failure;
         var attempt = executionAttempt(
                 runId,
                 workstreamId,
@@ -360,9 +362,9 @@ final class AgentRunMetadataWriter {
                 result.finishedAt(),
                 Duration.between(result.startedAt(), result.finishedAt()).toMillis(),
                 result.exitCode(),
-                failure == null ? "completed" : "failed",
-                failure == null ? null : failure.reason(),
-                failure == null ? null : failure.recoverable(),
+                topLevelFailure == null ? "completed" : "failed",
+                topLevelFailure == null ? null : topLevelFailure.reason(),
+                topLevelFailure == null ? null : topLevelFailure.recoverable(),
                 effectiveUsage,
                 providerModelIdentity(effectiveUsage),
                 toolUsage,
@@ -378,6 +380,18 @@ final class AgentRunMetadataWriter {
                 null,
                 executionTimeline(result)
         ));
+        return new CompletionWriteResult(
+                explorationPolicyResult,
+                relativeOrNull(workspaceRoot, explorationPolicyResultPath),
+                policyFailure != null
+        );
+    }
+
+    record CompletionWriteResult(
+            Map<String, Object> explorationPolicyResult,
+            String explorationPolicyResultPath,
+            boolean explorationPolicyFailed
+    ) {
     }
 
     void appendExecutionEvent(Path runJsonPath, AcpxExecutionEvent event) {
@@ -485,6 +499,18 @@ final class AgentRunMetadataWriter {
         } catch (IOException | RuntimeException ignored) {
             return null;
         }
+    }
+
+    private AcpxFailureClassifier.AcpxFailure explorationPolicyFailure(Map<String, Object> explorationPolicyResult) {
+        if (explorationPolicyResult == null || !"failed".equals(text(explorationPolicyResult.get("status")))) {
+            return null;
+        }
+        return new AcpxFailureClassifier.AcpxFailure(
+                "EXPLORATION_POLICY_VIOLATION",
+                "agent exploration policy failed; inspect explorationPolicyResult for violations",
+                false,
+                false
+        );
     }
 
     private Path explorationPolicyResultPath(Path workspaceRoot, Path governanceReportPath) {
@@ -792,5 +818,9 @@ final class AgentRunMetadataWriter {
 
     private String relativeOrNull(Path workspaceRoot, Path path) {
         return path == null ? null : relative(workspaceRoot, path);
+    }
+
+    private String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
     }
 }

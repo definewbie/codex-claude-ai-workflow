@@ -33,10 +33,35 @@ public final class AgentCapabilityCatalog {
         return fromAvailableCommands(workstreamId, nodeDefinitionId, availableCommands());
     }
 
+    public static AgentCapabilityCatalog detect(
+            String workstreamId,
+            String nodeDefinitionId,
+            Map<String, Object> nodeConfig
+    ) {
+        var permission = CapabilityPermission.fromNodeConfig(nodeConfig);
+        return fromAvailableCommands(
+                workstreamId,
+                nodeDefinitionId,
+                availableCommands(),
+                permission.directReadAllowed(),
+                permission.shellAllowed()
+        );
+    }
+
     public static AgentCapabilityCatalog fromAvailableCommands(
             String workstreamId,
             String nodeDefinitionId,
             Collection<String> availableCommands
+    ) {
+        return fromAvailableCommands(workstreamId, nodeDefinitionId, availableCommands, true, true);
+    }
+
+    public static AgentCapabilityCatalog fromAvailableCommands(
+            String workstreamId,
+            String nodeDefinitionId,
+            Collection<String> availableCommands,
+            boolean directReadAllowed,
+            boolean shellAllowed
     ) {
         var commands = new LinkedHashSet<String>();
         if (availableCommands != null) {
@@ -49,15 +74,15 @@ public final class AgentCapabilityCatalog {
         }
 
         var capabilities = new ArrayList<Map<String, Object>>();
-        if (allowsDirectFileRead(nodeDefinitionId)) {
+        if (directReadAllowed && allowsDirectFileRead(nodeDefinitionId)) {
             capabilities.add(capability("direct_file_read", "Read", "Direct file content retrieval tool."));
         }
-        if (allowsTokenFilteredShell(nodeDefinitionId) && commands.contains("rtk")) {
+        if (shellAllowed && allowsTokenFilteredShell(nodeDefinitionId) && commands.contains("rtk")) {
             capabilities.add(capability("token_filtered_shell", "rtk", "Token-filtered shell command surface."));
         }
-        if (commands.contains("codegraph")) {
+        if (shellAllowed && commands.contains("codegraph")) {
             capabilities.add(capability("symbol_index", "codegraph", "Symbol-level repository index."));
-        } else if (commands.contains("gitnexus")) {
+        } else if (shellAllowed && commands.contains("gitnexus")) {
             capabilities.add(capability("symbol_index", "gitnexus", "Symbol-level repository index."));
         }
         return new AgentCapabilityCatalog(workstreamId, nodeDefinitionId, capabilities);
@@ -126,5 +151,20 @@ public final class AgentCapabilityCatalog {
 
     private static String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private record CapabilityPermission(boolean directReadAllowed, boolean shellAllowed) {
+        static CapabilityPermission fromNodeConfig(Map<String, Object> nodeConfig) {
+            if (nodeConfig != null && Boolean.TRUE.equals(nodeConfig.get("approve_all"))) {
+                return new CapabilityPermission(true, true);
+            }
+            var profile = text(nodeConfig == null ? null : nodeConfig.get("permission_profile"));
+            return switch (profile) {
+                case "contract_discovery" -> new CapabilityPermission(false, false);
+                case "observe", "review" -> new CapabilityPermission(true, false);
+                case "implement" -> new CapabilityPermission(true, true);
+                default -> new CapabilityPermission(true, false);
+            };
+        }
     }
 }

@@ -67,7 +67,10 @@ final class ContextGovernanceActualReportWriter {
         var policy = latestDocument(memoryDir, "stage-scope-policy-", nodeDefinitionId);
         var explorationPlanPath = latestDocumentPath(memoryDir, "exploration-plan-", nodeDefinitionId);
         var explorationPlan = latestDocument(memoryDir, "exploration-plan-", nodeDefinitionId);
-        var capabilityCatalog = document(memoryDir.resolve("agent-capability-catalog.json"));
+        var capabilityCatalog = latestDocument(memoryDir, "agent-capability-catalog-", nodeDefinitionId);
+        if (capabilityCatalog.isEmpty()) {
+            capabilityCatalog = document(memoryDir.resolve("agent-capability-catalog.json"));
+        }
         var repoMap = document(memoryDir.resolve("repo-map.json"));
         var plannedRead = firstNonEmpty(textList(plan.map(doc -> doc.get("readCandidates")).orElse(null)),
                 textList(policy.map(doc -> doc.get("readScope")).orElse(null)));

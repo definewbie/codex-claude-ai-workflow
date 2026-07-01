@@ -3,6 +3,7 @@ package dev.dual.adapter.acpx;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.ProcessUsability;
+import dev.dual.runtime.handler.AgentRunGovernanceContext;
 import dev.dual.runtime.handler.TaskHandler;
 
 import java.nio.charset.StandardCharsets;
@@ -105,6 +106,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 compactionDecision
         ).orElse(null);
         var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
+        inputRefs.add(AgentRunGovernanceContext.ensure(context, runId));
         if (seedPath != null) {
             inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
         }
@@ -198,7 +200,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode(), result.nativeTerminal());
             var outputComplete = completionDetector.isComplete(transcriptPath);
             var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
-            metadataWriter.writeCompleted(
+            var completion = metadataWriter.writeCompleted(
                     context.workspaceRoot(),
                     context.workstreamId(),
                     context.definition().id(),
@@ -217,6 +219,24 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     sessionMeta,
                     compactionMeta
             );
+            if (completion.explorationPolicyFailed()) {
+                return new NodeResult(
+                        "EXPLORATION_POLICY_VIOLATION",
+                        dev.dual.core.workflow.NodeStatus.FAILED,
+                        evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
+                        explorationPolicyFailureFacts(
+                                context,
+                                runDir,
+                                transcriptPath,
+                                resultWithArtifactTimeline,
+                                agent,
+                                session,
+                                runId,
+                                completion
+                        ),
+                        "agent exploration policy failed"
+                );
+            }
             return NodeResult.completed(
                     "completed",
                     evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
@@ -318,6 +338,35 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         false
                 )
         );
+    }
+
+    private static Map<String, Object> explorationPolicyFailureFacts(
+            TaskContext context,
+            java.nio.file.Path runDir,
+            java.nio.file.Path transcriptPath,
+            AcpxRunResult result,
+            String agent,
+            String session,
+            String runId,
+            AgentRunMetadataWriter.CompletionWriteResult completion
+    ) {
+        var facts = resultFacts(
+                context,
+                runDir,
+                transcriptPath,
+                result,
+                agent,
+                session,
+                runId,
+                null,
+                null,
+                true
+        );
+        facts.put("harness_failure.reason", "EXPLORATION_POLICY_VIOLATION");
+        facts.put("harness_failure.recoverable", false);
+        facts.put("exploration_policy_result", completion.explorationPolicyResult());
+        facts.put("exploration_policy_result_path", completion.explorationPolicyResultPath());
+        return facts;
     }
 
     private static AcpxRunResult appendTimelineEvent(

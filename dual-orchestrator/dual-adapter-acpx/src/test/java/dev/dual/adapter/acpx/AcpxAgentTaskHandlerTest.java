@@ -98,17 +98,18 @@ class AcpxAgentTaskHandlerTest {
 
         var transport = new PreparedMetadataObservedTransport();
         var handler = new AcpxAgentTaskHandler(transport, false);
-        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
-                "prompt_template", "intake-claude-brainstorm"
+                "permission_profile", "implement",
+                "prompt_template", "implement-claude"
         ));
 
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
                 "ws-test",
                 definition,
-                readyInstance("intake.claude_brainstorm")
+                readyInstance("implement.claude_implement")
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -427,10 +428,8 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
         assertEquals(3, result.outputRefs().size());
-        var finalArtifactRef = result.outputRefs().stream()
-                .filter(ref -> ref.endsWith("intake-claude-brainstorm.md"))
-                .findFirst()
-                .orElseThrow();
+        var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+        var finalArtifactRef = OBJECT_MAPPER.readTree(runMetadataPath.toFile()).path("outputPath").asText();
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith(".transcript.log")));
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith(".stderr.log")));
 
@@ -446,11 +445,11 @@ class AcpxAgentTaskHandlerTest {
         var transcriptRef = (String) result.result().get("transcript_ref");
         assertTrue(transcriptRef.endsWith(".transcript.log"));
         var transcript = Files.readString(tempDir.resolve(transcriptRef));
-        assertTrue(transcript.contains("[tool] Read huge-file.md"));
+        assertTrue(transcript.contains("[tool] Bash echo ok"));
         assertTrue(transcript.contains("input:"));
         assertTrue(transcript.contains("output:"));
 
-        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+        var runMetadata = Files.readString(runMetadataPath);
         assertTrue(runMetadata.contains("\"outputPath\" :"));
         assertTrue(runMetadata.contains("\"transcriptPath\" :"));
         assertTrue(runMetadata.contains("\"transcriptMetadataPath\" :"));
@@ -1405,6 +1404,34 @@ class AcpxAgentTaskHandlerTest {
             Files.createDirectories(request.stdoutPath().getParent());
             Files.writeString(request.stdoutPath(), """
                     [client] initialize (running)
+                    [tool] Bash echo ok (completed)
+                      input: {"command":"echo ok"}
+                      output:
+                        This tool transcript must stay out of workflow outputRefs.
+
+                    <dual-artifact type="agent_output_contract">
+                    {"artifact_type":"agent_output_contract","summary":"Ready"}
+                    </dual-artifact>
+
+                    ```dual-control
+                    decision: READY_FOR_PRODUCT_REVIEW
+                    needs_human_input: false
+                    summary: ready
+                    ```
+
+                    [done] end_turn
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class DirectReadCompletingTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
                     [tool] Read huge-file.md (completed)
                       input: {"file":"huge-file.md"}
                       output:
@@ -1496,7 +1523,7 @@ class AcpxAgentTaskHandlerTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
 
-        var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
+        var handler = new AcpxAgentTaskHandler(new DirectReadCompletingTransport(), false);
         var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
@@ -1543,11 +1570,11 @@ class AcpxAgentTaskHandlerTest {
                   "preferredCapabilityKinds": ["symbol_index", "direct_file_read"],
                   "allowedDirectReadFiles": ["README.md"],
                   "maxDirectReadFiles": 1,
-                  "failureMode": "warn"
+                  "failureMode": "block"
                 }
                 """);
 
-        var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
+        var handler = new AcpxAgentTaskHandler(new DirectReadCompletingTransport(), false);
         var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
@@ -1563,10 +1590,11 @@ class AcpxAgentTaskHandlerTest {
                 .orElseThrow();
         var runMetadata = Files.readString(runJson);
         assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"READ_OUTSIDE_EXPLORATION_SCOPE\""), runMetadata);
-        assertTrue(runMetadata.contains("\"SCOPE_EXPANSION_REQUEST_MISSING\""), runMetadata);
+        assertTrue(runMetadata.contains("\"status\" : \"failed\""), runMetadata);
+        assertTrue(runMetadata.contains("\"failureReason\" : \"EXPLORATION_POLICY_VIOLATION\""), runMetadata);
+        assertTrue(runMetadata.contains("\"DIRECT_READ_FORBIDDEN\""), runMetadata);
         assertTrue(runMetadata.contains("\"agentExplorationPlanPath\" :"), runMetadata);
-        assertTrue(runMetadata.contains("exploration-plan-node-intake.json"), runMetadata);
+        assertTrue(runMetadata.contains("exploration-plan-node-intake-claude_brainstorm.json"), runMetadata);
         assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
     }
 
@@ -1595,6 +1623,13 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(manifestText.contains("\"sections\""), manifestText);
         assertTrue(manifestText.contains("\"sourceType\""), manifestText);
         assertTrue(manifestText.contains("\"requirement\""), manifestText);
+        var manifestJson = OBJECT_MAPPER.readTree(manifest.toFile());
+        var explorationSection = java.util.stream.StreamSupport.stream(manifestJson.path("sections").spliterator(), false)
+                .filter(section -> "exploration_plan".equals(section.path("name").asText()))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(explorationSection.path("bytes").asInt() > 0, explorationSection.toPrettyString());
+        assertTrue(explorationSection.path("estimatedTokens").asInt() > 0, explorationSection.toPrettyString());
 
         // DUAL_AGENT_PROMPT_DEBUG unset -> NO full-content debug dump (manifest ≠ content dump)
         var debugDump = Files.walk(workstreamDir.resolve("runs"))

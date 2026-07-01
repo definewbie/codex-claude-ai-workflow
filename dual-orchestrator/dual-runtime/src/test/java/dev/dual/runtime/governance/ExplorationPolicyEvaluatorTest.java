@@ -141,6 +141,33 @@ class ExplorationPolicyEvaluatorTest {
     }
 
     @Test
+    void designDirectReadBudgetExceededFailsInsteadOfWarns() {
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "design",
+                "design.claude_design",
+                "node-001",
+                "iter-001",
+                List.of("README.md", "docs/api.md", "docs/auth.md", "docs/roles.md", "src/a.js", "src/b.js"),
+                List.of(),
+                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "design.claude_design", List.of())
+        );
+
+        var result = ExplorationPolicyEvaluator.evaluate(
+                plan.toDocument(),
+                List.of("README.md", "docs/api.md", "docs/auth.md", "docs/roles.md", "src/a.js", "src/b.js", "src/c.js"),
+                List.of("direct_file_read"),
+                List.of()
+        );
+
+        assertEquals("block", result.get("mode"));
+        assertEquals("failed", result.get("status"));
+        assertTrue(result.get("violations") instanceof List<?> violations
+                && violations.toString().contains("DIRECT_READ_BUDGET_EXCEEDED")
+                && violations.toString().contains("severity=block"));
+    }
+
+    @Test
     void warnsForIntakeImplementationLevelReadsBasedOnRepoMapKinds() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",

@@ -454,6 +454,18 @@ class ContextGovernanceActualReportWriterTest {
                 memoryDir.resolve("agent-capability-catalog.json").toFile(),
                 Map.of(
                         "schemaVersion", 1,
+                        "nodeDefinitionId", "other.node",
+                        "capabilities", List.of(
+                                Map.of("kind", "direct_file_read", "provider", "Read")
+                        )
+                )
+        );
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(
+                memoryDir.resolve("agent-capability-catalog-node-001.json").toFile(),
+                Map.of(
+                        "schemaVersion", 1,
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
                         "capabilities", List.of(
                                 Map.of("kind", "direct_file_read", "provider", "Read"),
                                 Map.of("kind", "token_filtered_shell", "provider", "rtk")
@@ -517,9 +529,11 @@ class ContextGovernanceActualReportWriterTest {
         var memoryDir = workstreamDir.resolve("memory");
         Files.createDirectories(memoryDir);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(
-                memoryDir.resolve("agent-capability-catalog.json").toFile(),
+                memoryDir.resolve("agent-capability-catalog-node-001.json").toFile(),
                 Map.of(
                         "schemaVersion", 1,
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
                         "capabilities", List.of(
                                 Map.of("kind", "token_filtered_shell", "provider", "rtk")
                         )
