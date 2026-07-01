@@ -109,6 +109,57 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
+    void rateLimitWithValidTerminalAndArtifactRemainsRecoverableAdapterFailure() {
+        var signal = AdapterSignal.of(AdapterSignalType.RATE_LIMITED);
+
+        var outcome = resolve(
+                ProcessResult.exitedZero(),
+                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of(signal)
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
+        assertEquals("rate_limited", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+        assertEquals(RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE, outcome.recoveryCategory());
+        assertEquals(List.of(signal), outcome.secondarySignals());
+    }
+
+    @Test
+    void providerConnectionWithMissingArtifactKeepsAdapterBoundaryPrimary() {
+        var signal = AdapterSignal.of(AdapterSignalType.PROVIDER_CONNECTION_FAILED);
+
+        var outcome = resolve(
+                ProcessResult.exitedZero(),
+                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
+                List.of(signal)
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
+        assertEquals("provider_connection_failed", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+        assertEquals(RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE, outcome.recoveryCategory());
+        assertEquals(List.of(signal), outcome.secondarySignals());
+    }
+
+    @Test
+    void nonZeroIncompleteWithValidTerminalAndArtifactDoesNotSucceed() {
+        var outcome = resolve(
+                ProcessResult.nonZeroIncomplete(5),
+                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE, outcome.status());
+        assertEquals("process_output_incomplete", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+        assertEquals(RecoveryCategory.OUTPUT_INCOMPLETE, outcome.recoveryCategory());
+    }
+
+    @Test
     void timeoutCannotSucceed() {
         var outcome = resolve(
                 ProcessResult.timedOutProcess(),
