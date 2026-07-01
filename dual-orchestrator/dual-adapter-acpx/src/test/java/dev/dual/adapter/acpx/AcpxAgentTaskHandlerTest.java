@@ -757,6 +757,46 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void nativeClaudeResultTypedArtifactEnvelopeIsExtractedIntoOutput() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new NativeArtifactEnvelopeTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+        var instance = new NodeInstance(
+                "node-intake",
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.READY,
+                "stage-intake",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null
+        );
+
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var outputRef = result.outputRefs().stream()
+                .filter(ref -> ref.endsWith("intake-claude-brainstorm.md"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no output ref: " + result.outputRefs()));
+        var output = Files.readString(tempDir.resolve(outputRef));
+        assertTrue(output.contains("<dual-artifact type=\"task_contract_proposal\""),
+                "native typed artifact envelope must be extracted into the workflow output: " + output);
+    }
+
+    @Test
     void completesReconnectExitWhenStdoutHasCompleteTerminalArtifact() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -1290,6 +1330,36 @@ class AcpxAgentTaskHandlerTest {
                     List.of(),
                     null,
                     new NativeClaudeTerminal(true, true, null, null)
+            );
+        }
+    }
+
+    // Native claude --print result that carries only the typed artifact envelope,
+    // without the session dual-control fence. The adapter must still recognize the
+    // typed artifact so it flows into the shared artifact contract.
+    private static final class NativeArtifactEnvelopeTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), """
+                    # Intake Brainstorm
+
+                    Plain native claude --print prose around the typed artifact.
+
+                    <dual-artifact type="task_contract_proposal" version="1">
+                    {"artifact_type":"task_contract_proposal","decision":"PROCEED","summary":"ready"}
+                    </dual-artifact>
+                    """);
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-07-01T00:12:08Z");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(60),
+                    List.of("claude", "--print", "--output-format", "json"),
+                    List.of(),
+                    null,
+                    new NativeClaudeTerminal(true, false, "end_turn", "success")
             );
         }
     }

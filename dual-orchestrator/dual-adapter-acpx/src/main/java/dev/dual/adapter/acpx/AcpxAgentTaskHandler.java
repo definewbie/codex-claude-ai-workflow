@@ -184,7 +184,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             var usage = result.usage() != null
                     ? result.usage()
                     : usageReader.read(promptPath, stderrPath).orElse(null);
-            var finalArtifact = finalArtifactExtractor.extract(readStringIfExists(transcriptPath));
+            var transcriptText = readStringIfExists(transcriptPath);
+            var finalArtifact = finalArtifactExtractor.extract(transcriptText, result.nativeTerminal());
             var resultWithArtifactTimeline = result;
             if (finalArtifact.isPresent()) {
                 Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
