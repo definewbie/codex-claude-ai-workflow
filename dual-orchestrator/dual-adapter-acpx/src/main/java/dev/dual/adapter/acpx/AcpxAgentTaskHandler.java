@@ -142,6 +142,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runDir,
                     promptPath,
                     outputPath,
+                    transcriptPath,
                     stderrPath,
                     sessionMeta,
                     compactionMeta
@@ -166,6 +167,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 runDir,
                 promptPath,
                 outputPath,
+                transcriptPath,
                 stderrPath,
                 sessionMeta,
                 compactionMeta

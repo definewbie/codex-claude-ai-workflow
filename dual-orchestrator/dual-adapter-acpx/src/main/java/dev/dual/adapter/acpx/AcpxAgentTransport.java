@@ -195,7 +195,8 @@ public class AcpxAgentTransport {
                     AgentExecutionTimelineEventKind.PROCESS_STARTED,
                     "adapter",
                     0,
-                    startedAt
+                    startedAt,
+                    Map.of("pid", process.pid())
             ));
             var waitResult = waitForExitOrRecoverableSignal(process, request);
             timeline.addAll(waitResult.executionTimeline());
@@ -378,7 +379,8 @@ public class AcpxAgentTransport {
                     AgentExecutionTimelineEventKind.PROCESS_STARTED,
                     "adapter",
                     0,
-                    startedAt
+                    startedAt,
+                    Map.of("pid", process.pid())
             ));
             var waitResult = waitForExitOrRecoverableSignal(process, request);
             timeline.addAll(waitResult.executionTimeline());
@@ -584,6 +586,13 @@ public class AcpxAgentTransport {
         Instant terminalOutputSince = null;
         var startedAt = Instant.now();
         var timeline = new ArrayList<AcpxExecutionEvent>();
+        recordEvent(timeline, request, AcpxExecutionEvent.now(
+                AgentExecutionTimelineEventKind.PROCESS_WAIT_STARTED,
+                "adapter",
+                timeline.size(),
+                startedAt,
+                Map.of("pid", process.pid())
+        ));
         var eventReader = new AgentLifecycleEventReader(request.stdoutPath(), request.stderrPath());
         var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
         while (true) {

@@ -55,6 +55,7 @@ final class AgentRunMetadataWriter {
             Path runDir,
             Path promptPath,
             Path stdoutPath,
+            Path transcriptPath,
             Path stderrPath,
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta
@@ -100,7 +101,7 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, promptPath),
                 relative(workspaceRoot, PromptManifestWriter.manifestPathFor(promptPath)),
                 relative(workspaceRoot, stdoutPath),
-                null,
+                relativeOrNull(workspaceRoot, transcriptPath),
                 relative(workspaceRoot, stderrPath),
                 relative(workspaceRoot, promptMetadataPath),
                 null,
@@ -125,7 +126,8 @@ final class AgentRunMetadataWriter {
                 List.of(),
                 null,
                 List.of(),
-                null,
+                executionAttemptToMap(preparedExecutionAttempt(
+                        workspaceRoot, workstreamId, nodeId, agent, session, runId, transcriptPath, stderrPath, sessionMeta)),
                 null,
                 List.of()
         ));
@@ -810,6 +812,47 @@ final class AgentRunMetadataWriter {
         map.put("startedAt", attempt.startedAt() == null ? null : attempt.startedAt().toString());
         map.put("finishedAt", attempt.finishedAt() == null ? null : attempt.finishedAt().toString());
         return map;
+    }
+
+    /**
+     * Non-terminal attempt recorded at prepare time so an agent run can never
+     * sit at {@code status=prepared} with no execution evidence. This is not a
+     * terminal outcome; {@code AgentRunMetadataFinalizer} overwrites it on
+     * completion, and {@code AgentExecutionAttemptReconciler} closes it if the
+     * transport never returns.
+     */
+    private AgentExecutionAttempt preparedExecutionAttempt(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String runId,
+            Path transcriptPath,
+            Path stderrPath,
+            SessionMeta sessionMeta
+    ) {
+        return new AgentExecutionAttempt(
+                "att-" + runId,
+                runId,
+                workstreamId,
+                nodeId,
+                agent,
+                AgentExecutionAttemptStatus.RUNNING,
+                AgentExecutionProcessStatus.RUNNING,
+                null,
+                false,
+                false,
+                "agent execution prepared",
+                relative(workspaceRoot, stderrPath),
+                relative(workspaceRoot, transcriptPath),
+                session == null ? "" : session,
+                "",
+                sessionMeta == null ? "" : sessionMeta.scope(),
+                sessionMeta == null ? "" : sessionMeta.segmentKey(),
+                java.time.Instant.now(),
+                null
+        );
     }
 
     private Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {

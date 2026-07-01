@@ -651,6 +651,58 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void nativeClaudeTimelineRecordsPidAndWaitStartedBeforeWaitCompleted() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-noop.sh");
+        var fakeClaude = tempDir.resolve("claude-timeline.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                exit 99
+                """, StandardCharsets.UTF_8);
+        Files.writeString(fakeClaude, """
+                #!/bin/sh
+                cat >/dev/null
+                cat <<'EOF'
+                {"type":"result","subtype":"success","is_error":false,"stop_reason":"end_turn","result":"native timeline","total_cost_usd":0,"usage":{"input_tokens":11,"output_tokens":7,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
+                EOF
+                exit 0
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        assertTrue(fakeClaude.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractDiscovery()
+        ));
+
+        var timeline = result.executionTimeline();
+        var kinds = timeline.stream().map(AcpxExecutionEvent::kind).toList();
+        var processStarted = timeline.stream()
+                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_STARTED)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no process_started event: " + kinds));
+        assertNotNull(processStarted.details().get("pid"),
+                "process_started must carry the external pid so a stale run can be reconciled: " + kinds);
+        var pid = ((Number) processStarted.details().get("pid")).longValue();
+        assertTrue(pid > 0, "pid must be a real external process id: " + pid);
+        int waitStartedIdx = kinds.indexOf(AgentExecutionTimelineEventKind.PROCESS_WAIT_STARTED);
+        int waitCompletedIdx = kinds.indexOf(AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED);
+        assertTrue(waitStartedIdx >= 0, "timeline must record process_wait_started: " + kinds);
+        assertTrue(waitCompletedIdx >= 0, "timeline must record process_wait_completed: " + kinds);
+        assertTrue(waitStartedIdx < waitCompletedIdx,
+                "process_wait_started must precede process_wait_completed: " + kinds);
+    }
+
+    @Test
     void addsPromptRetryForReadOnlyProfilesOnly() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-readonly-retry-args.sh");
         var argsLog = tempDir.resolve("args.log");

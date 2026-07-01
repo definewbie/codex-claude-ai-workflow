@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RunningStateGuardTest {
@@ -210,6 +211,105 @@ class RunningStateGuardTest {
         assertEquals(List.of("recovery-" + recoveredNode.nodeInstanceId()), current.openGateIds());
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_detected"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_recovered"));
+    }
+
+    @Test
+    void staleRunningNodeReconcilesInFlightAgentRunBeforeRecovery() throws Exception {
+        var paths = setup("ws-reconcile");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-reconcile", SINGLE_TASK);
+        var node = ledger.loadNode(paths, "node-task-under_test-001");
+        writeNodeStatus(ledger, paths, node, NodeStatus.RUNNING, Map.of("running_pid", 999999L));
+
+        // The in-flight agent run that never returned: prepared, no terminal outcome, dead pid.
+        var runJson = paths.runsDir().resolve("run-stale").resolve("run.json");
+        Files.createDirectories(runJson.getParent());
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var runNode = mapper.createObjectNode();
+        runNode.put("schemaVersion", 3);
+        runNode.put("status", "prepared");
+        runNode.put("runId", "run-stale");
+        runNode.put("workstreamId", "ws-reconcile");
+        runNode.put("nodeId", "task.under_test");
+        runNode.put("agent", "claude");
+        runNode.put("promptPath", ".agent/runs/run-stale/prompts/task.md");
+        runNode.put("stdoutPath", ".agent/runs/run-stale/outputs/task.md");
+        runNode.put("stderrPath", ".agent/runs/run-stale/outputs/task.stderr.log");
+        runNode.put("startedAt", java.time.Instant.now().toString());
+        var attempt = mapper.createObjectNode();
+        attempt.put("attemptId", "att-run-stale");
+        attempt.put("runId", "run-stale");
+        attempt.put("status", "RUNNING");
+        attempt.put("processStatus", "RUNNING");
+        attempt.put("startedAt", java.time.Instant.now().toString());
+        runNode.set("executionAttempt", attempt);
+        var processResult = mapper.createObjectNode();
+        processResult.put("pid", 999999L);
+        runNode.set("processResult", processResult);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), runNode);
+
+        var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-reconcile"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+        var current = ledger.loadCurrent(paths);
+        var recoveredNode = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals(NodeStatus.FAILED, recoveredNode.status());
+        var reconciled = mapper.readTree(runJson.toFile());
+        assertEquals("failed", reconciled.path("status").asText(),
+                "reconciled in-flight run must move to failed status");
+        assertEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText(),
+                "stale in-flight agent run must be reconciled to a typed terminal outcome, not left without one");
+        assertFalse(reconciled.path("executionAttempt").path("status").asText("").isBlank(),
+                "reconciled run must carry a terminal executionAttempt");
+    }
+
+    @Test
+    void resumeReconcilesLeftoverStaleRunBeforeExecutingReadyNode() throws Exception {
+        var paths = setup("ws-reconcile-before-run");
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-reconcile-before-run", SINGLE_TASK);
+
+        // A leftover in-flight agent run from a previous attempt that never returned.
+        var runJson = paths.runsDir().resolve("run-leftover").resolve("run.json");
+        Files.createDirectories(runJson.getParent());
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var runNode = mapper.createObjectNode();
+        runNode.put("schemaVersion", 3);
+        runNode.put("status", "prepared");
+        runNode.put("runId", "run-leftover");
+        runNode.put("workstreamId", "ws-reconcile-before-run");
+        runNode.put("nodeId", "task.under_test");
+        runNode.put("agent", "claude");
+        runNode.put("startedAt", java.time.Instant.now().toString());
+        var attempt = mapper.createObjectNode();
+        attempt.put("attemptId", "att-run-leftover");
+        attempt.put("runId", "run-leftover");
+        attempt.put("status", "RUNNING");
+        attempt.put("processStatus", "RUNNING");
+        attempt.put("startedAt", java.time.Instant.now().toString());
+        runNode.set("executionAttempt", attempt);
+        var processResult = mapper.createObjectNode();
+        processResult.put("pid", 999999L);
+        runNode.set("processResult", processResult);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), runNode);
+
+        var executed = new int[] {0};
+        var runtime = new WorkflowRuntime(ledger, registry(new CountingTask(executed)));
+        var result = runtime.resume(new WorkflowCommand(tempDir, "ws-reconcile-before-run"));
+
+        var reconciled = mapper.readTree(runJson.toFile());
+        assertEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText(),
+                "pre-resume reconcile must close a leftover stale in-flight run to a typed outcome");
+        assertEquals("failed", reconciled.path("status").asText());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status(),
+                "resume must stop at recovery after reconciling a stale active-node attempt");
+        assertEquals(0, executed[0],
+                "resume must not create or execute a new task after stale attempt reconciliation");
+        var current = ledger.loadCurrent(paths);
+        var recoveredNode = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals(NodeStatus.FAILED, recoveredNode.status());
+        assertEquals("STALE_RUNNING_ATTEMPT", recoveredNode.result().get("reason"));
     }
 
     @Test
@@ -573,6 +673,17 @@ class RunningStateGuardTest {
 
         @Override
         public NodeResult execute(TaskContext context) {
+            return NodeResult.completed("completed", List.of(), Map.of("ok", true));
+        }
+    }
+
+    private record CountingTask(int[] count) implements TaskHandler {
+        @Override
+        public String type() { return "test.handler"; }
+
+        @Override
+        public NodeResult execute(TaskContext context) {
+            count[0]++;
             return NodeResult.completed("completed", List.of(), Map.of("ok", true));
         }
     }

@@ -356,15 +356,17 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void preparedRunCanPersistExecutionTimelineEventBeforeCompletion() throws Exception {
+    void preparedRunHasNonTerminalExecutionAttemptAndTimelineAppendDoesNotFinalizeIt() throws Exception {
         var runDir = tempDir.resolve(".agent/workstreams/ws-test/runs/run-prepared");
         var promptPath = runDir.resolve("prompts/intake-claude.md");
         var outputPath = runDir.resolve("outputs/intake-claude.md");
+        var transcriptPath = runDir.resolve("outputs/intake-claude.transcript.log");
         var stderrPath = runDir.resolve("outputs/intake-claude.stderr.log");
         Files.createDirectories(promptPath.getParent());
         Files.createDirectories(outputPath.getParent());
         Files.writeString(promptPath, "# Prompt\n");
         Files.writeString(outputPath, "");
+        Files.writeString(transcriptPath, "");
         Files.writeString(stderrPath, "");
 
         var writer = new AgentRunMetadataWriter();
@@ -379,47 +381,109 @@ class AcpxAgentTaskHandlerTest {
                 runDir,
                 promptPath,
                 outputPath,
+                transcriptPath,
                 stderrPath,
                 null,
                 null
         );
 
+        var prepared = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
+        assertEquals("prepared", prepared.path("status").asText());
+        var preparedAttempt = prepared.path("executionAttempt");
+        assertFalse(preparedAttempt.isMissingNode() || preparedAttempt.isNull(),
+                "writePrepared must record a non-terminal executionAttempt");
+        assertEquals("RUNNING", preparedAttempt.path("status").asText());
+        assertEquals("RUNNING", preparedAttempt.path("processStatus").asText());
+        assertTrue(preparedAttempt.path("transcriptPath").asText().endsWith("outputs/intake-claude.transcript.log"),
+                "prepared attempt must point to the execution transcript, not the final artifact output");
+        assertTrue(prepared.path("executionOutcome").isMissingNode() || prepared.path("executionOutcome").isNull(),
+                "writePrepared must not write a terminal executionOutcome");
+        assertTrue(prepared.path("failureReason").isMissingNode() || prepared.path("failureReason").isNull(),
+                "writePrepared must not write a terminal failureReason");
+
         writer.appendExecutionEvent(
                 runDir.resolve("run.json"),
                 new AcpxExecutionEvent(
-                        AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
-                        "stdout",
-                        3,
+                        AgentExecutionTimelineEventKind.PROCESS_STARTED,
+                        "adapter",
+                        1,
                         Instant.parse("2026-07-01T00:00:00Z"),
-                        1200,
-                        Map.of("graceMs", 2000)
+                        0
                 )
         );
-        writer.appendExecutionEvent(
-                runDir.resolve("run.json"),
-                new AcpxExecutionEvent(
-                        AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
-                        "stdout",
-                        3,
-                        Instant.parse("2026-07-01T00:00:00Z"),
-                        1200,
-                        Map.of("graceMs", 2000)
-                )
+
+        var finalized = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
+        assertEquals("prepared", finalized.path("status").asText(),
+                "in-flight timeline append must not change run status");
+        var timeline = finalized.path("executionTimeline");
+        var kinds = new java.util.ArrayList<String>();
+        timeline.forEach(node -> kinds.add(node.path("kind").asText()));
+        assertTrue(kinds.contains("process_started"), "timeline must contain process_started: " + kinds);
+        var attemptAfterAppend = finalized.path("executionAttempt");
+        assertFalse(attemptAfterAppend.isMissingNode() || attemptAfterAppend.isNull(),
+                "in-flight timeline append must not drop the executionAttempt");
+        assertEquals("RUNNING", attemptAfterAppend.path("status").asText(),
+                "in-flight timeline append must not finalize or terminalize the attempt");
+        assertEquals("RUNNING", attemptAfterAppend.path("processStatus").asText());
+        assertTrue(finalized.path("executionOutcome").isMissingNode() || finalized.path("executionOutcome").isNull(),
+                "in-flight timeline append must not synthesize an executionOutcome");
+        assertTrue(finalized.path("failureReason").isMissingNode() || finalized.path("failureReason").isNull(),
+                "in-flight timeline append must not write a terminal failureReason");
+    }
+
+    @Test
+    void preparedRunWritesNonTerminalExecutionAttemptWithoutOutcome() throws Exception {
+        var runDir = tempDir.resolve(".agent/workstreams/ws-test/runs/run-prepared-attempt");
+        var promptPath = runDir.resolve("prompts/intake-claude.md");
+        var outputPath = runDir.resolve("outputs/intake-claude.md");
+        var transcriptPath = runDir.resolve("outputs/intake-claude.transcript.log");
+        var stderrPath = runDir.resolve("outputs/intake-claude.stderr.log");
+        Files.createDirectories(promptPath.getParent());
+        Files.createDirectories(outputPath.getParent());
+        Files.writeString(promptPath, "# Prompt\n");
+        Files.writeString(outputPath, "");
+        Files.writeString(transcriptPath, "");
+        Files.writeString(stderrPath, "");
+
+        new AgentRunMetadataWriter().writePrepared(
+                tempDir,
+                "ws-test",
+                "intake.claude_brainstorm",
+                "claude",
+                "claude-main",
+                "intake-claude-brainstorm",
+                "run-prepared-attempt",
+                runDir,
+                promptPath,
+                outputPath,
+                transcriptPath,
+                stderrPath,
+                null,
+                null
         );
 
         var root = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
         assertEquals("prepared", root.path("status").asText());
-        assertTrue(root.path("failureReason").isMissingNode() || root.path("failureReason").isNull(),
-                "in-flight timeline append must not write terminal failure reason");
-        assertTrue(root.path("executionAttempt").isMissingNode() || root.path("executionAttempt").isNull(),
-                "in-flight timeline append must not write execution attempt");
-        assertTrue(root.path("executionOutcome").isMissingNode() || root.path("executionOutcome").isNull(),
-                "in-flight timeline append must not write execution outcome");
-        var timeline = root.path("executionTimeline");
-        assertEquals(1, timeline.size());
-        assertEquals("terminal_control_detected", timeline.get(0).path("kind").asText());
-        assertEquals(1200, timeline.get(0).path("elapsedMs").asLong());
-        assertEquals(2000, timeline.get(0).path("details").path("graceMs").asLong());
+        var attempt = root.path("executionAttempt");
+        assertFalse(attempt.isMissingNode() || attempt.isNull(),
+                "prepared run must carry a non-terminal executionAttempt so the boundary can be reconciled");
+        assertEquals("RUNNING", attempt.path("status").asText());
+        assertEquals("RUNNING", attempt.path("processStatus").asText());
+        assertEquals("att-run-prepared-attempt", attempt.path("attemptId").asText());
+        assertEquals("run-prepared-attempt", attempt.path("runId").asText());
+        assertEquals("ws-test", attempt.path("workstreamId").asText());
+        assertEquals("intake.claude_brainstorm", attempt.path("nodeId").asText());
+        assertEquals("claude", attempt.path("agent").asText());
+        assertTrue(attempt.path("transcriptPath").asText().endsWith("outputs/intake-claude.transcript.log"),
+                "prepared attempt must preserve the transcript path for stale reconciliation");
+        assertTrue(attempt.path("startedAt").asText().startsWith("2"),
+                "prepared attempt must record startedAt");
+        var finishedAt = attempt.path("finishedAt").asText("");
+        assertTrue(finishedAt.isEmpty() || "null".equals(finishedAt),
+                "non-terminal attempt must not carry finishedAt: " + finishedAt);
+        var outcome = root.path("executionOutcome");
+        assertTrue(outcome.isMissingNode() || outcome.isNull(),
+                "prepared run must not write a terminal executionOutcome");
     }
 
     @Test

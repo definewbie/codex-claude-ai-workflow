@@ -14,6 +14,7 @@ import dev.dual.ledger.file.WorkflowExecutionDocument;
 import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.AgentExecutionAttemptReconciler;
 import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.ContractEventTypes;
@@ -22,6 +23,7 @@ import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,10 +38,13 @@ import java.util.Map;
  * any new execution side effects.
  */
 public final class WorkflowRuntime {
+    private static final Duration DEFAULT_STALE_ATTEMPT_TIMEOUT = Duration.ofMinutes(30);
+
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
     private final ArtifactContractValidator artifactContractValidator;
     private final AgentRunMetadataFinalizer runMetadataFinalizer;
+    private final AgentExecutionAttemptReconciler attemptReconciler;
     private final AgentTaskDispatchMode dispatchMode;
 
     public WorkflowRuntime(WorkflowFileLedger ledger, HandlerRegistry handlers) {
@@ -58,6 +63,7 @@ public final class WorkflowRuntime {
         this.dispatchMode = dispatchMode == null ? AgentTaskDispatchMode.INLINE : dispatchMode;
         this.artifactContractValidator = new ArtifactContractValidator();
         this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
+        this.attemptReconciler = new AgentExecutionAttemptReconciler(DEFAULT_STALE_ATTEMPT_TIMEOUT);
     }
 
     /**
@@ -85,6 +91,15 @@ public final class WorkflowRuntime {
                     "workflow is terminal: " + current.status()
             );
         }
+        // Reconcile any in-flight agent run for the active node whose transport
+        // never returned before this resume creates new execution side effects.
+        // If a run is reconciled, stop at recovery instead of creating another
+        // attempt for the same node.
+        var reconciled = reconcileActiveNodeAttempts(command, paths, definition, current);
+        if (reconciled != null) {
+            return reconciled;
+        }
+
         var workflowExecution = ledger.startWorkflowExecution(paths, current, "resume");
         var nodeExecutionIds = new ArrayList<String>();
         var workflowExecutionFinished = false;
@@ -122,6 +137,50 @@ public final class WorkflowRuntime {
         }
         var result = executeActiveSnapshot(command, paths, definition, current, workflowExecution, nodeExecutionIds);
         return new ResumeOutcome(result, workflowExecutionStatus(result.status()));
+    }
+
+    private WorkflowRuntimeResult reconcileActiveNodeAttempts(
+            WorkflowCommand command,
+            WorkstreamPaths paths,
+            WorkflowDefinition definition,
+            WorkflowCurrentDocument current
+    ) throws Exception {
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            return null;
+        }
+        for (var activeNodeId : current.activeNodeInstanceIds()) {
+            var node = ledger.loadNode(paths, activeNodeId);
+            var count = attemptReconciler.reconcileRuns(paths.runsDir(), node.nodeDefinitionId());
+            if (count <= 0) {
+                continue;
+            }
+            if (node.status() == NodeStatus.RUNNING) {
+                recoverStaleRunningNode(paths, node, node.result().getOrDefault("running_pid", ""));
+            } else {
+                ledger.completeAndRoute(
+                        paths,
+                        definition,
+                        node.nodeInstanceId(),
+                        NodeStatus.FAILED,
+                        "STALE_RUNNING_ATTEMPT",
+                        node.outputRefs(),
+                        Map.of(
+                                "reason", "STALE_RUNNING_ATTEMPT",
+                                "message", "A previous agent execution attempt was reconciled to a typed terminal outcome before resume.",
+                                "recoverable", true,
+                                "reconciled_attempt_count", count
+                        )
+                );
+            }
+            var next = ledger.loadCurrent(paths);
+            return new WorkflowRuntimeResult(
+                    command.workstreamId(),
+                    next.status(),
+                    activeNodeDefinitionId(paths, next),
+                    "workflow stopped at reconciled stale agent execution"
+            );
+        }
+        return null;
     }
 
     private WorkflowRuntimeResult rejectRecoveryOrAutoRetry(
@@ -457,6 +516,9 @@ public final class WorkflowRuntime {
     }
 
     private void recoverStaleRunningNode(WorkstreamPaths paths, NodeInstanceDocument node, Object pid) throws Exception {
+        // Close any in-flight agent run.json (transport never returned / process killed) to a
+        // typed terminal executionAttempt+executionOutcome before the node/workflow transition.
+        attemptReconciler.reconcileRuns(paths.runsDir());
         ledger.appendEvent(paths, "stale-running-" + node.nodeInstanceId() + "-" + System.currentTimeMillis(),
                 "node_stale_running_detected", Map.of(
                         "node", node.nodeDefinitionId(),
