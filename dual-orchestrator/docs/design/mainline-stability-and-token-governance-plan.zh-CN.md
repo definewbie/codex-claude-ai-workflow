@@ -464,6 +464,29 @@ COMPLETED | CONTRACT_FAILED | RECOVERABLE_FAILED | RUNTIME_FAILED | TIMED_OUT | 
   `usage.measurementType=UNAVAILABLE` 和明确 `unavailableReason`，不能伪装成真实 0 token。
   仍未完成的是 provider 成功运行后的真实 GLM 控制台 token 增量对账和 complex case 复核。
 
+- 2026-07-02 P0 execution lifecycle 收口（提交 `a41770c9b` + 本轮 timeout policy）：`writePrepared` 一旦创建 run.json
+  就写入非终结态 `executionAttempt`（`status=RUNNING`/`processStatus=RUNNING`，`executionOutcome=null`）；
+  transport 记录 `process_started(pid)` 与 `process_wait_started`，run.json 在运行中即可解释当前卡在 process wait；
+  新增 runtime `AgentExecutionAttemptReconciler` 在 resume/恢复时把 transport 未返回（process 被 kill / 超时）的
+  in-flight run 收敛为 typed terminal outcome（dead pid → `INTERRUPTED`；超过 stale timeout → `TIMEOUT`），
+  并通过 `WorkflowRuntime` 同步把 node 置 `FAILED`、workflow 置 `WAITING_FOR_RECOVERY`，不继续误跑新 agent run。
+  真实受控验证（cancer-clinic + glm-4.6）：transport java 被 kill 后，run.json 从 prepared/RUNNING 收敛为
+  `executionAttempt.status=INTERRUPTED` + `executionOutcome.status=INTERRUPTED`（`primaryReason=process_interrupted`），
+  timeline 追加 `process_interrupted`，workflow 停在 recovery，run count 不变；projections refresh
+  `executionConsistencyCounts=consistent`，不再出现 `missing_attempt_and_outcome` / `stale_legacy_running`。
+  这是同类 failure mode（transport 未返回、resume 需收敛 execution outcome）的闭环，不是对旧 `ws-TFF4` 状态的逐字复现
+  ——新 invariant 下 prepared 即有 `executionAttempt=RUNNING`，因此旧 “prepared + null attempt/outcome” 状态不再发生。
+- 2026-07-02 live-but-no-progress timeout 收口（本轮）：`WorkflowRuntime` 不再硬编码 stale timeout（原 30min），
+  改为通过 `AgentExecutionAttemptTimeoutPolicy` 注入；reconciler 只接受 `Duration`，不直接读 env。
+  policy 集中解析 `DUAL_STALE_ATTEMPT_TIMEOUT_MS`（正毫秒；缺省/非数字/<=0 回退默认 8min），默认 8min 与
+  real-case stop-loss “single run unexpected long wait” 语义一致。timeout reconcile 的 timeline details 记录
+  `timeoutMs`，便于事后解释为什么 timeout；dead pid 仍立即 `INTERRUPTED`，不受 timeout 影响。
+  注意：这只是让 live no-progress 有可控 timeout，不代表 token/latency 问题已解决。
+- Provider precondition debt（非 P0 lifecycle risk，单独列）：`~/.claude/settings.json` env
+  `ANTHROPIC_DEFAULT_OPUS/SONNET_MODEL=glm-5.2` 与 `HAIKU=glm-4.7-air` 在 BigModel 上是无效模型代码（400 模型不存在），
+  当前 real-case 通过 `ANTHROPIC_MODEL=glm-4.6` 临时覆盖运行；这是 provider precondition 问题，与 execution lifecycle 边界无关，
+  不影响 P0 closure verdict。更新到有效代码（如 `glm-4.6`）即可去掉临时覆盖。
+
 ### 4.5 修复方案
 
 建议按四个小提交修复。

@@ -92,6 +92,49 @@ class AgentExecutionAttemptReconcilerTest {
     }
 
     @Test
+    void timeoutReconcileRecordsConfiguredTimeoutMsInTimeline() throws Exception {
+        var runJson = writeInFlightRun("run-timeout-ms", null, Instant.now().minus(Duration.ofHours(1)));
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(8)).reconcile(runJson);
+
+        assertEquals("TIMEOUT", result.outcome().status().name());
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        long timeoutMs = -1L;
+        var reason = "";
+        for (var item : node.path("executionTimeline")) {
+            if ("attempt_reconciled".equals(item.path("kind").asText(""))) {
+                reason = item.path("details").path("reason").asText("");
+                timeoutMs = item.path("details").path("timeoutMs").asLong(-1L);
+                break;
+            }
+        }
+        assertEquals("stale_running_attempt", reason, "expected an attempt_reconciled timeline event");
+        assertEquals(8L * 60_000L, timeoutMs,
+                "timeout reconcile must record the configured timeoutMs so the timeout is explainable later");
+    }
+
+    @Test
+    void deadPidWithinTimeoutReconcilesImmediatelyToInterrupted() throws Exception {
+        // startedAt well within the timeout, but the pid is dead: INTERRUPTED immediately, not TIMEOUT.
+        var runJson = writeInFlightRun("run-dead-within", 99_999_994L, Instant.now().minusSeconds(10));
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(8)).reconcile(runJson);
+
+        assertTrue(result.reconciled());
+        assertEquals("INTERRUPTED", result.outcome().status().name(),
+                "a dead pid must reconcile to INTERRUPTED regardless of the timeout");
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        var reason = "";
+        for (var item : node.path("executionTimeline")) {
+            if ("process_interrupted".equals(item.path("kind").asText(""))) {
+                reason = item.path("details").path("reason").asText("");
+                break;
+            }
+        }
+        assertEquals("process_interrupted", reason);
+    }
+
+    @Test
     void completedRunIsNotReconciled() throws Exception {
         var outcome = MAPPER.createObjectNode();
         outcome.put("status", "SUCCESS");

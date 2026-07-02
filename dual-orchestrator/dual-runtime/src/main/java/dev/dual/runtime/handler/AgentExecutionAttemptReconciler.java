@@ -139,14 +139,16 @@ public final class AgentExecutionAttemptReconciler {
             return Optional.of(new Classification(
                     ProcessResult.interruptedProcess(),
                     AgentExecutionTimelineEventKind.PROCESS_INTERRUPTED,
-                    "process_interrupted"));
+                    "process_interrupted",
+                    null));
         }
         var startedAt = readStartedAt(json);
         if (startedAt != null && Duration.between(startedAt, now).compareTo(staleTimeout) > 0) {
             return Optional.of(new Classification(
                     ProcessResult.timedOutProcess(),
                     AgentExecutionTimelineEventKind.ATTEMPT_RECONCILED,
-                    "stale_running_attempt"));
+                    "stale_running_attempt",
+                    staleTimeout.toMillis()));
         }
         return Optional.empty();
     }
@@ -318,6 +320,9 @@ public final class AgentExecutionAttemptReconciler {
         var details = new LinkedHashMap<String, Object>();
         details.put("reason", classification.reason());
         details.put("reconciled", true);
+        if (classification.timeoutMs() != null) {
+            details.put("timeoutMs", classification.timeoutMs());
+        }
         timeline.add(Map.of(
                 "kind", classification.timelineKind().wireName(),
                 "source", "runtime",
@@ -352,7 +357,8 @@ public final class AgentExecutionAttemptReconciler {
     private record Classification(
             ProcessResult process,
             AgentExecutionTimelineEventKind timelineKind,
-            String reason
+            String reason,
+            Long timeoutMs
     ) {
     }
 

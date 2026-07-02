@@ -15,6 +15,7 @@ import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.handler.AgentExecutionAttemptReconciler;
+import dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicy;
 import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.ContractEventTypes;
@@ -23,7 +24,6 @@ import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,8 +38,6 @@ import java.util.Map;
  * any new execution side effects.
  */
 public final class WorkflowRuntime {
-    private static final Duration DEFAULT_STALE_ATTEMPT_TIMEOUT = Duration.ofMinutes(30);
-
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
     private final ArtifactContractValidator artifactContractValidator;
@@ -63,7 +61,7 @@ public final class WorkflowRuntime {
         this.dispatchMode = dispatchMode == null ? AgentTaskDispatchMode.INLINE : dispatchMode;
         this.artifactContractValidator = new ArtifactContractValidator();
         this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
-        this.attemptReconciler = new AgentExecutionAttemptReconciler(DEFAULT_STALE_ATTEMPT_TIMEOUT);
+        this.attemptReconciler = new AgentExecutionAttemptReconciler(new AgentExecutionAttemptTimeoutPolicy().timeout());
     }
 
     /**
