@@ -60,8 +60,44 @@ assert_contains "$VERIFICATION_GATE" "costAttribution.reliability=token_only" "g
 assert_contains "$VERIFICATION_GATE" "providerCachePolicy.mode=token_policy_active" "glm cache policy pass"
 assert_contains "$VERIFICATION_GATE" "GLM console token delta exceeding 3,000,000 before acceptance" "glm stop-loss"
 
+# provider-model-attribution: generic L1/L2 gate, no baseline required
+VALIDATION_TARGET="provider-model-attribution"
+DUAL_GLM_BASELINE_TOKENS=""
+validate_validation_target
+public_benchmark_write_verification_gate
+assert_gate_valid "$VERIFICATION_GATE" "provider-model-attribution gate"
+assert_contains "$VERIFICATION_GATE" "Provider/Model usage & economics attribution" "pma gate title"
+assert_contains "$VERIFICATION_GATE" "measurementType=PROVIDER_RUN_USAGE (not an artifact estimate)" "pma L1 pass criterion"
+assert_contains "$VERIFICATION_GATE" "expectedRunnerKind/providerProbeRunnerKind/providerProbePathMatchesExpected" "pma probe-path evidence"
+
+# zhipu-glm-console-calibration: direct L3 target, requires baseline
+VALIDATION_TARGET="zhipu-glm-console-calibration"
+DUAL_GLM_BASELINE_TOKENS="43540000"
+validate_validation_target
+public_benchmark_write_verification_gate
+assert_gate_valid "$VERIFICATION_GATE" "zhipu-glm-console-calibration gate"
+assert_contains "$VERIFICATION_GATE" "Zhipu GLM console calibration" "calibration gate title"
+
+# deprecated alias glm-token-attribution normalizes to zhipu-glm-console-calibration
+VALIDATION_TARGET="glm-token-attribution"
+DUAL_GLM_BASELINE_TOKENS="43540000"
+validate_validation_target
+[[ "$VALIDATION_TARGET" == "zhipu-glm-console-calibration" ]] || {
+  printf '[FAIL] glm-token-attribution alias did not normalize (got: %s)\n' "$VALIDATION_TARGET" >&2
+  exit 1
+}
+
+# invalid target rejected
+VALIDATION_TARGET="bogus-target"
+if (validate_validation_target) 2>/dev/null; then
+  printf '[FAIL] invalid validation target accepted\n' >&2
+  exit 1
+fi
+
+# baseline missing for zhipu-glm-console-calibration rejected
+VALIDATION_TARGET="zhipu-glm-console-calibration"
 DUAL_GLM_BASELINE_TOKENS=""
 if (validate_validation_target) 2>/dev/null; then
-  printf '[FAIL] glm-token-attribution target accepted missing baseline\n' >&2
+  printf '[FAIL] zhipu-glm-console-calibration target accepted missing baseline\n' >&2
   exit 1
 fi

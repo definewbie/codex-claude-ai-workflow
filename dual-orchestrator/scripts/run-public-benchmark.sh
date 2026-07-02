@@ -51,10 +51,14 @@ Options:
                             proven.
   --cleanup-worktree        Remove the generated agent worktree after reporting.
   --update-benchmark-index  Refresh benchmark-index.md after the run.
-  --validation-target <lifecycle|glm-token-attribution>
+  --validation-target <lifecycle|provider-model-attribution|zhipu-glm-console-calibration>
                             Verification target for the generated gate.
-                            Default: lifecycle. glm-token-attribution requires
+                            Default: lifecycle. provider-model-attribution is the
+                            generic L1/L2 provider/model/usage/economics gate (no
+                            baseline required). zhipu-glm-console-calibration is the
+                            L3 GLM console reconciliation and requires
                             DUAL_GLM_BASELINE_TOKENS=<current GLM console total>.
+                            glm-token-attribution is a deprecated alias for the latter.
   -h, --help                Show this help.
 
 The script uses real acpx Claude/Codex sessions. It auto-approves human gates
@@ -180,16 +184,22 @@ prepare_repo() {
 }
 
 validate_validation_target() {
+  # Deprecated alias: glm-token-attribution -> zhipu-glm-console-calibration (L3 external reconciliation)
+  if [[ "$VALIDATION_TARGET" == "glm-token-attribution" ]]; then
+    log "[DEPRECATION] --validation-target glm-token-attribution is deprecated; use zhipu-glm-console-calibration."
+    VALIDATION_TARGET="zhipu-glm-console-calibration"
+  fi
   case "$VALIDATION_TARGET" in
     lifecycle) ;;
-    glm-token-attribution)
+    provider-model-attribution) ;;
+    zhipu-glm-console-calibration)
       [[ "${DUAL_GLM_BASELINE_TOKENS:-}" =~ ^[0-9]+$ ]] || {
-        fail "DUAL_GLM_BASELINE_TOKENS=<integer token total> is required for --validation-target glm-token-attribution"
+        fail "DUAL_GLM_BASELINE_TOKENS=<integer token total> is required for --validation-target zhipu-glm-console-calibration"
         exit 1
       }
       ;;
     *)
-      fail "--validation-target must be lifecycle or glm-token-attribution"
+      fail "--validation-target must be lifecycle, provider-model-attribution, or zhipu-glm-console-calibration"
       exit 1
       ;;
   esac
@@ -199,9 +209,9 @@ public_benchmark_write_verification_gate() {
   local safe_case_id
   safe_case_id="$(printf '%s' "$CASE_ID" | tr -c 'A-Za-z0-9_.-' '_')"
   VERIFICATION_GATE="$(mktemp "${TMPDIR:-/tmp}/dual-verification-gate-${safe_case_id}.XXXXXX")"
-  if [[ "$VALIDATION_TARGET" == "glm-token-attribution" ]]; then
+  if [[ "$VALIDATION_TARGET" == "zhipu-glm-console-calibration" ]]; then
     cat >"$VERIFICATION_GATE" <<EOF
-# Verification Gate: $CASE_ID / GLM token attribution
+# Verification Gate: $CASE_ID / Zhipu GLM console calibration (L3 external reconciliation)
 
 - Target: Validate GLM-5.2 provider token attribution for the public benchmark case $CASE_ID without using money as the acceptance metric.
 - Source of truth: pre-run GLM console token total DUAL_GLM_BASELINE_TOKENS=${DUAL_GLM_BASELINE_TOKENS}, post-run GLM console token total captured after the run, workstream run.json providerModelIdentity, workstream-metrics.json tokenAttribution.perRun, and dualctl trace Token Attribution.
@@ -212,6 +222,22 @@ public_benchmark_write_verification_gate() {
 - INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, DUAL_GLM_BASELINE_TOKENS was not captured immediately before this run, post-run GLM console total is not captured, the executed provider is not GLM-5.2 through Zhipu, required metrics/run.json/trace artifacts are missing, or this gate does not match the executed case.
 - Stop-loss: Stop on provider preflight failure, start/autorun failure, missing providerModelIdentity after the first completed GLM run, or GLM console token delta exceeding 3,000,000 before acceptance; do not launch a second benchmark automatically.
 - Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence.
+EOF
+    return
+  fi
+  if [[ "$VALIDATION_TARGET" == "provider-model-attribution" ]]; then
+    cat >"$VERIFICATION_GATE" <<EOF
+# Verification Gate: $CASE_ID / Provider/Model usage & economics attribution
+
+- Target: Validate provider/model/usage/economics attribution (L1 usage + L2 economics) for the public benchmark case $CASE_ID; provider-agnostic, not GLM-specific.
+- Source of truth: run.json usage/providerModelIdentity/costAttribution; workstream-metrics.json tokenAttribution.perRun; dualctl trace Token Attribution.
+- Trigger precondition: Disposable benchmark repo exists; task file exists; acpx is available; run-real-case.sh builds fresh artifacts; provider connectivity probe matches the actual runner kind and passes.
+- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task, acpx, variant, prompt language, this gate, preflight artifact freshness, expectedRunnerKind/providerProbeRunnerKind/providerProbePathMatchesExpected, and providerProbeStatus=passed before starting a workstream.
+- PASS: At least one provider run has measurementType=PROVIDER_RUN_USAGE (not an artifact estimate); provider/model identity is preserved or carries a typed unknown reason; input/output/cache-read/cache-write/total token counts are not zero for completed provider runs; known provider routes through the catalog (zhipu subscription token-only; DeepSeek cache pricing; Anthropic full pricing; OpenAI/Codex catalog); unknown provider preserves tokens with an explicit pricing-unknown state and is never zeroed; billingMode/costAttribution.reliability/providerCachePolicy.mode are consistent with the catalog; run.json/metrics/trace do not contradict each other.
+- FAIL: Provider run usage exists but tokens are zeroed; provider/model identity is lost without a typed reason; known provider does not route through the catalog; billingMode is wrong; metrics/trace/run.json are contradictory; an artifact estimate is disguised as provider usage.
+- INVALID: Preflight artifact freshness is not proven; providerProbePathMatchesExpected is false; providerProbeStatus is not passed; no provider run started; provider usage is unavailable without a typed unavailableReason; stale jar; or this gate does not match the executed case.
+- Stop-loss: Stop on provider preflight failure, start/autorun failure, or WAITING_FOR_RECOVERY; do not launch a second benchmark automatically.
+- Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence including expectedRunnerKind, providerProbeRunnerKind, and providerProbePathMatchesExpected.
 EOF
     return
   fi
@@ -258,6 +284,27 @@ run_case() {
   log "Task file: $TASK_FILE"
   log "Variant: $VARIANT, max steps: $MAX_STEPS, max gates: $MAX_GATES"
   log "Prompt language: $PROMPT_LANGUAGE"
+
+  # Derive the workflow's actual runner kind so the preflight probe matches it
+  # (a native claude --print probe must not be the default for an acpx-session workflow).
+  # Java/domain owns this derivation; run-real-case.sh only records + matches it.
+  local runner_jar="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
+  if [[ "$SKIP_BUILD" != true ]]; then
+    log "Building dual-cli to derive expected runner kind..."
+    (cd "$PROJECT_ROOT" && mvn -pl dual-cli -am package -DskipTests -q) || {
+      fail "failed to build dual-cli for runner-kind derivation"
+      exit 1
+    }
+  fi
+  local expected_kind
+  expected_kind="$(java -jar "$runner_jar" runner-kind --variant "$VARIANT" 2>/dev/null | awk '/^runner-kind:/ {print $2; exit}')"
+  if [[ -z "$expected_kind" || "$expected_kind" == "unknown" ]]; then
+    fail "could not derive a known runner kind via 'dualctl runner-kind --variant $VARIANT' (got: '${expected_kind:-<empty>}')"
+    exit 1
+  fi
+  log "Derived expected runner kind: $expected_kind (variant $VARIANT)"
+  args+=(--expected-runner-kind "$expected_kind")
+
   "$PROJECT_ROOT/scripts/run-real-case.sh" "${args[@]}"
 }
 

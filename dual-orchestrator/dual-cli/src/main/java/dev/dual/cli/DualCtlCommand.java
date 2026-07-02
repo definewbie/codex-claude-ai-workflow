@@ -20,6 +20,7 @@ import picocli.CommandLine.Command;
                 EventsCommand.class,
                 RunsCommand.class,
                 InspectCommand.class,
+                InspectRunnerKindCommand.class,
                 ResumeCommand.class,
                 RunCommand.class,
                 AutoRunCommand.class,

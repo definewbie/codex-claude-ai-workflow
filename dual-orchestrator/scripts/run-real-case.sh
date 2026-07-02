@@ -58,6 +58,9 @@ PROVIDER_PROBE_EXIT_CODE=0
 PROVIDER_PROBE_TIMEOUT_SECONDS="${DUAL_REAL_CASE_PROVIDER_PROBE_TIMEOUT_SECONDS:-180}"
 PROVIDER_PROBE_RESULT_PATH=""
 PROVIDER_PROBE_STDERR_PATH=""
+EXPECTED_RUNNER_KIND=""
+PROVIDER_PROBE_RUNNER_KIND=""
+PROVIDER_PROBE_PATH_MATCHES_EXPECTED=false
 
 usage() {
   cat <<'EOF'
@@ -75,6 +78,10 @@ Options:
                             Workflow variant. Default: full.
   --prompt-language <auto|en|zh-CN>
                             Human-readable Agent output language. Default: auto.
+  --expected-runner-kind <native_claude_print|acpx_claude_session|acpx_codex_session>
+                            Actual first agent runner kind, derived by
+                            dualctl runner-kind. Required so provider preflight
+                            matches the workflow execution path.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Do not run Maven package before starting. This is
@@ -141,6 +148,10 @@ parse_args() {
         shift
         PROMPT_LANGUAGE="${1:-}"
         ;;
+      --expected-runner-kind)
+        shift
+        EXPECTED_RUNNER_KIND="${1:-}"
+        ;;
       --max-steps)
         shift
         MAX_STEPS="${1:-}"
@@ -201,6 +212,14 @@ validate_inputs() {
     auto|en|zh-CN|zh|zh-cn) ;;
     *) fail "--prompt-language must be auto, en, or zh-CN"; exit 1 ;;
   esac
+  case "$EXPECTED_RUNNER_KIND" in
+    native_claude_print|acpx_claude_session|acpx_codex_session) ;;
+    *)
+      fail "--expected-runner-kind is required (derive via: dualctl runner-kind --variant $VARIANT). Got: '${EXPECTED_RUNNER_KIND:-<empty>}'."
+      fail "A native probe must not be the default preflight for an acpx-session workflow."
+      exit 1
+      ;;
+  esac
 }
 
 validate_verification_gate() {
@@ -243,6 +262,26 @@ run_provider_probe() {
   PROVIDER_PROBE_RESULT_PATH="$CASE_DIR/provider-probe-result.json"
   PROVIDER_PROBE_STDERR_PATH="$CASE_DIR/provider-probe-stderr.log"
   local prompt_path="$CASE_DIR/provider-probe-prompt.txt"
+
+  # The probe must match the workflow's actual runner kind. Only the native
+  # claude --print probe is implemented today; an acpx-session/codex expected
+  # kind must not silently fall back to the native probe (Task C: acpx session probe).
+  if [[ "$EXPECTED_RUNNER_KIND" != "native_claude_print" ]]; then
+    PROVIDER_PROBE_RUNNER_KIND="none"
+    PROVIDER_PROBE_PATH_MATCHES_EXPECTED=false
+    if [[ "$PROVIDER_PROBE_ENABLED" == "0" || "$PROVIDER_PROBE_ENABLED" == "false" ]]; then
+      PROVIDER_PROBE_STATUS="skipped"
+      PROVIDER_PROBE_REASON="provider_probe_disabled"
+      return 0
+    fi
+    PROVIDER_PROBE_STATUS="failed"
+    PROVIDER_PROBE_REASON="runner_probe_not_implemented_for_${EXPECTED_RUNNER_KIND}"
+    PROVIDER_PROBE_EXIT_CODE=1
+    fail "no probe implemented for expected runner kind '$EXPECTED_RUNNER_KIND'; a native probe would not match an acpx-session workflow"
+    return 1
+  fi
+  PROVIDER_PROBE_RUNNER_KIND="native_claude_print"
+  PROVIDER_PROBE_PATH_MATCHES_EXPECTED=true
 
   if [[ "$PROVIDER_PROBE_ENABLED" == "0" || "$PROVIDER_PROBE_ENABLED" == "false" ]]; then
     PROVIDER_PROBE_STATUS="skipped"
@@ -333,7 +372,10 @@ write_preflight_evidence() {
     echo "  \"providerProbeExitCode\": ${PROVIDER_PROBE_EXIT_CODE:-0},"
     echo "  \"providerProbeTimeoutSeconds\": ${PROVIDER_PROBE_TIMEOUT_SECONDS:-0},"
     echo "  \"providerProbeResultPath\": \"$(json_escape "$PROVIDER_PROBE_RESULT_PATH")\","
-    echo "  \"providerProbeStderrPath\": \"$(json_escape "$PROVIDER_PROBE_STDERR_PATH")\""
+    echo "  \"providerProbeStderrPath\": \"$(json_escape "$PROVIDER_PROBE_STDERR_PATH")\","
+    echo "  \"expectedRunnerKind\": \"$(json_escape "$EXPECTED_RUNNER_KIND")\","
+    echo "  \"providerProbeRunnerKind\": \"$(json_escape "$PROVIDER_PROBE_RUNNER_KIND")\","
+    echo "  \"providerProbePathMatchesExpected\": $PROVIDER_PROBE_PATH_MATCHES_EXPECTED"
     echo "}"
   } >"$preflight"
 

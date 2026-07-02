@@ -8,12 +8,12 @@
 
 `intake` 探索治理已经完成：`intake.claude_brainstorm` 不再发布 direct read / shell 能力，且 bounded cancer-clinic run 已证明 `actualDirectReadFiles=[]`、`explorationPolicyResult.status=pass`。
 
-但这不等于系统整体可稳定跑完整 real-case。当前仍有四条主线未闭环：
+但这不等于系统整体可稳定跑完整 real-case。当前主线状态：
 
-1. runtime 执行事实边界未完全收口；
-2. provider/model/token/cost 经济模型未完全收口；
-3. repo scope / read governance 只覆盖了 intake，后续阶段仍可自由探索；
-4. full real-case 验证链路没有稳定的前置 gate 和 stop-loss。
+1. P0 runtime 执行事实边界已 **Promoted / Closed**：normal completion + recovery real-case、live stale-run reconcile real-case 均通过（exit 0 不再误判 PROCESS_STALLED；transport 未返回时 reconciler 收敛为 typed INTERRUPTED/TIMEOUT outcome，workflow 停 recovery，不误跑新节点；projection consistent）；live-but-no-progress timeout 已可配置（`DUAL_STALE_ATTEMPT_TIMEOUT_MS`，默认 8min）。
+2. P0.5 provider/model/token/cost 经济模型 **未完全收口**：仍缺 GLM 控制台 token 增量对账和 complex real-case 下 provider/model/billingMode/cachedRead 完整复核。
+3. P1/P2 repo scope / read governance 只覆盖了 intake，后续阶段仍可自由探索；token reduction 未证。
+4. full real-case 验证链路：P0.5 promoted 前不能作为治理效果证明；当前已有稳定的前置 gate 和 stop-loss，但未跑完整 complex real-case。
 
 因此，下一步不能直接用 complex real-case 证明整体能力。必须先把执行事实和成本归因做成可靠 source of truth，否则 real-case 结果会继续混杂：
 
@@ -118,6 +118,10 @@ Mainline Decision Gate:
 
 当前允许阶段：P0 / P0.5。P1/P2/P3 全部锁定，直到用户显式解除。
 
+**Phase promotion ledger（2026-07-02）：**
+- P0 execution lifecycle = **Promoted**。Promotion evidence：normal-completion + recovery real-case（exit 0 不再误判 PROCESS_STALLED；run.json 有 terminal executionAttempt+executionOutcome；workflow 停 recovery；projection consistent）+ live stale-run reconcile real-case（transport java 被 kill → reconciler 收敛 typed `INTERRUPTED` outcome；workflow WAITING_FOR_RECOVERY；no new agent run；projection consistent）+ targeted/full module tests（dual-core 96、dual-ledger-file 139、dual-runtime 458、dual-adapter-acpx 260，0 failures）。
+- P0.5 provider/model/token attribution = **Implemented / partially verified，未 Promoted**。已覆盖本地 read-model、DeepSeek 真实账单校准、pricing catalog；仍缺 GLM 控制台 token 增量对账和 complex real-case 下 provider/model/billingMode/cachedRead 完整复核。
+
 阶段晋级规则：
 
 - P0 仍是最高优先级；P0 未 `Promoted` 前，P0.5 只能做直接修复 P0 blocker 或 P0.5 自身 attribution blocker 的工作，不能用来声明整体 token 治理收益。
@@ -142,9 +146,9 @@ Mainline Decision Gate:
 
 | 目标 | 当前状态 | 缺口 | 优先级 |
 | --- | --- | --- | --- |
-| `AgentExecutionAttempt -> AgentExecutionOutcome` | 本地模型已覆盖，历史 replay 已做 | finalizer/resolver/projection 已覆盖 success/failure/stalled/timeout/interrupted 和历史冲突标记；历史 `RECOVERABLE_ADAPTER_FAILURE` replay 已证明 refresh 不改 ledger 且能投影 typed outcome；历史 stale RUNNING replay 已证明 dead pid active node 可投影为 `stale_legacy_running`；仍缺慢点类 problematic replay | P0 |
-| acpx / CC / Codex 执行生命周期 | 本地 timeline read model 已补，历史慢点 replay 已做 | executionTimeline 已投影为 executionLatency，metrics/trace 能显示 process wait / terminal / artifact / contract validation 阶段耗时；历史 `ws-20260630T112054Z-N4YR` replay 已证明样本慢点由 `process_wait` 主导且不改 run SoT；public terminal-event replay 已显示样本 terminal 后 process wait 最高 587ms，但仍缺原始 293s/380s terminal-after-detected 长等待类样本复核 | P0 |
-| stale RUNNING / PROCESS_STALLED | synthetic 覆盖，historical projection replay 已做 | dead pid resume 会进入 recovery 并标记 node execution stale；历史 recoverable failure replay 已验证 projection 不改 ledger；历史 old-ledger stale RUNNING replay 已验证 projection 可暴露 active node dead pid；仍缺真实慢点类复核 | P0 |
+| `AgentExecutionAttempt -> AgentExecutionOutcome` | Promoted / Closed | finalizer/resolver/projection 覆盖 success/failure/stalled/timeout/interrupted + 历史冲突标记；2026-07-02 live stale-run reconcile real-case 已证明 dead pid 收敛为 typed `INTERRUPTED` outcome、workflow 停 recovery、不误跑新 run、projection consistent；live-but-no-progress timeout 已可配置。慢点 latency 拆分转为 P1/P2 性能治理，不再阻塞 P0 lifecycle。 | P0 (Promoted) |
+| acpx / CC / Codex 执行生命周期 | P0 lifecycle closed；latency read model 已补 | executionTimeline 已投影为 executionLatency；P0 lifecycle（prepared 即写非终结态 executionAttempt、`process_started(pid)` + `process_wait_started`、transport 未返回时 reconciler 收敛 typed outcome）已通过 normal-completion + live-stale-run-reconcile real-case 验证 closed。慢点/latency 拆分（terminal-after-detected 长等待、provider 推理慢、session 操作慢、dual 落盘慢）属于 P1/P2 性能治理，不再作为 P0 lifecycle blocker。 | P0 (Promoted, lifecycle); P1/P2 (latency) |
+| stale RUNNING / PROCESS_STALLED | Closed | synthetic + historical projection replay + 2026-07-02 live stale-run reconcile real-case 均已覆盖：transport java 被 kill 后 resume 时 reconciler 收敛为 typed `INTERRUPTED` outcome，node FAILED、workflow WAITING_FOR_RECOVERY、不误跑新 run、projection consistent。 | P0 (Closed) |
 | provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
@@ -154,7 +158,7 @@ Mainline Decision Gate:
 | artifact boundary | 大体完成 | `plan_artifact`、`stage_handoff`、`rereadPolicy` 已类型化，但缺完整 real-case 验证 | P1 |
 | projection consistency | 部分完成 | CLI trace 已补；UI/API/operator 是否同源还未整体 sweep | P1 |
 | full complex real-case | 未完成 | 只有 bounded run，没有完整端到端验收 | P2 |
-| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，历史 replay 已证明一个慢点样本 | metrics/trace 已能展示 execution latency top run、terminalToProcessWaitMs 和 dominant phase；历史 replay 显示 `intake.claude_brainstorm` / `intake.codex_product_review` 均由 `process_wait` 主导；已有 public terminal-event replay 未复现长 terminal wait；仍缺原始 terminal contract 已出现但 transport 继续等待的样本，以及 provider 推理慢、session 操作慢、dual 落盘慢的进一步拆分 | P0/P1 |
+| acpx 慢 / 每节点启动慢 | 本地拆分 read model 已补，历史 replay 已证明一个慢点样本 | metrics/trace 已能展示 execution latency top run、terminalToProcessWaitMs 和 dominant phase；历史 replay 显示 `intake.claude_brainstorm` / `intake.codex_product_review` 均由 `process_wait` 主导。这是 latency/性能治理，不是 P0 lifecycle blocker（lifecycle 已 closed）；继续拆分 terminal-after-detected 长等待、provider 推理慢、session 操作慢、dual 落盘慢属于 P1/P2。 | P1/P2 |
 | session keep-alive | 未来优化 | 需要在 execution attempt 模型稳定后做 | P3 |
 
 ## 4. P0：执行事实边界收口
@@ -872,6 +876,25 @@ P0 必须先于 P0.5 完整收口。
 4. `feat(cost): add provider model identity and billing mode`
 5. `feat(cost): calculate provider cache economics from pricing catalog`
 
+### 5.10 2026-07-02 Provider/Model attribution-model + preflight probe-path rework
+
+P0.5 改名为 **Provider / Model / Usage & Economics Attribution**（不再是 GLM token attribution）。dual 不拥有 Claude Code / Codex 的模型选择；它只负责按 actual runner 返回的 usage/native JSON/acpx stream 识别 provider/model，并按 catalog 路由 usage/cost/cache attribution；真实 token 不允许因 provider/model/pricing unknown 被归零。
+
+**边界修正：preflight probe 必须匹配 actual runner path。** 真实 workflow 混合 runner：`intake.claude_brainstorm`（`permission_profile=contract_discovery`）走 native `claude --print`；`design`/`plan`/`implement`（observe/review/implement）走 acpx Claude session。native probe 只能证明 native runner，不能作为 acpx session workflow 的默认 preflight。已实现：
+- Java 语义类 `AgentRunnerKind`（`dual-adapter-acpx`）+ resolver `from(agent, permissionProfile)`，复用 `AcpxPermissionProfile.requiresNativeClaudeRunner()` 作为唯一 native-vs-session 判定来源（不散落 if-else，不在 bash 复制映射）。
+- 只读命令 `dualctl runner-kind --variant <full|contract>`：load workflow definition → 找第一个 `acpx.agent_run` node → resolver → 打印 kind + node/profile。CLI 只展示，不做语义判断。
+- 一致性测试 `InspectRunnerKindConsistencyTest`：workflow/profile 改动时 runner-kind inspect 会失败或更新，而不是 bash 静默漂移。
+- `run-public-benchmark.sh` 调用 `dualctl runner-kind` 推导 expected runner kind，传给 `run-real-case.sh --expected-runner-kind`；`run-real-case.sh` 不自行推导，只记录 + 选择 matching probe。preflight JSON 记录 `expectedRunnerKind` / `providerProbeRunnerKind` / `providerProbePathMatchesExpected`。absent/unknown → `INVALID_ACTUAL_RUNNER_UNKNOWN`（在 build/probe 前失败）；session/codex kind 在 acpx session probe（Task C）实现前标 `runner_probe_not_implemented_for_<kind>`，不静默回退 native。
+
+**三层 provider-specific gate 模型（不要混用）：**
+- **L1 Usage Attribution**：provider/model identity + input/output/cache-read/cache-write token 保留，`measurementType=PROVIDER_RUN_USAGE`，适用所有 provider（Zhipu/GLM、DeepSeek、Anthropic、OpenAI/Codex …）。DeepSeek 的 token usage 在这一层来自 provider run usage，不是 CSV。
+- **L2 Economics / Pricing**：dual 按 provider/model catalog 计算 billingMode/costAttribution/cache economics。GLM=subscription_token_only（token 保留，金额可 null）；DeepSeek=input cache miss/hit + output 官方价格；**Anthropic=full pricing（input/output/cache-read/cache-write），不是 "cache pricing"**；OpenAI/Codex=catalog priced/token-only；unknown=token 保留 + `pricing_unknown`，不归零。
+- **L3 External Billing / Console Reconciliation**：provider-specific 对账（GLM 控制台 token delta；DeepSeek billing CSV/export；Anthropic usage/cost export；OpenAI org usage API）。不是所有 provider 的统一 P0.5 promotion 阻塞条件；CSV 只是 L3 的一种证据，不是 DeepSeek gate；Anthropic 不简化成 cache pricing。
+
+**P0.5 promotion：** generic promotion 主要依赖 L1+L2；L3 是 provider-specific 强化证据，没有外部导出的 provider 不应阻塞 generic attribution promotion。`zhipu-glm-console-calibration`（原 `glm-token-attribution`）是 provider-specific L3 target，要求 `DUAL_GLM_BASELINE_TOKENS`；generic `provider-model-attribution` target 不预设 GLM、不要求 baseline（target 重命名/rework 为 Task D，pending）。
+
+**本轮失败记录：** `glm-token-attribution` run INVALID —— native `claude --print` probe timed out / `ConnectionRefused`，没创建 workstream/run.json/attribution。根因不是泛化的 "native probe path ≠ actual runner path"——当前 full/contract 的第一个 agent runner 实际是 `native_claude_print`（`intake.claude_brainstorm` = `contract_discovery`），native probe 对它本身是正确的。真正的问题是：旧验证目标把 GLM attribution / console calibration 绑定到 native probe，并且没有把 preflight proof scope 和 actual runner kind 分层表达清楚；后续 session runner（design/plan/implement）也缺少 matching probe，不能用 native probe 代证。已由 runner-kind 边界修正 + `provider-model-attribution` / `zhipu-glm-console-calibration` target 分层修复。
+
 ## 6. P1：Repo Scope 与 Token 治理
 
 ### 6.1 P1A：Stage Scope Governance 扩展
@@ -1166,7 +1189,7 @@ session compaction 或完整 lifecycle 质量。
 ## 10. Boundary Review
 
 ```text
-Boundary Review: WARN
+Boundary Review: P0 Promoted (PASS); P0.5 WARN (pending GLM token attribution validation); P1/P2/P3 locked
 
 Touched boundaries:
 - External adapter / activity boundary
@@ -1190,9 +1213,11 @@ Projection surfaces:
 
 Findings:
 - intake exploration boundary is closed.
-- execution attempt/outcome consistency has local finalizer/resolver/projection coverage;
-  `dualctl projections refresh` now surfaces synthetic stale legacy RUNNING warnings from the metrics read model;
-  problematic real workstream replay is still missing.
+- P0 execution lifecycle: Promoted (PASS). Normal-completion + contract-recovery real-case and live stale-run-reconcile
+  real-case both pass (exit 0 no longer misread as PROCESS_STALLED; transport-kill reconciled to typed INTERRUPTED/TIMEOUT
+  outcome; workflow stops at recovery; no spurious new run; projection `consistent`). Live-but-no-progress timeout is now
+  configurable (`DUAL_STALE_ATTEMPT_TIMEOUT_MS`, default 8min). Latency/slow-point analysis is P1/P2 performance work, not a
+  P0 lifecycle blocker.
 - token economics has local read-model coverage for GLM token-only, DeepSeek pricing,
   OpenAI token-only, and Anthropic cache pricing; real bill calibration and complex
   case validation are still missing.
