@@ -19,18 +19,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 class InspectRunnerKindConsistencyTest {
 
     @Test
-    void fullVariantFirstAgentRunIsNativeClaudePrint() throws Exception {
+    void fullVariantFirstAgentRunIsAcpxClaudeSession() throws Exception {
         var node = firstAgentRun(new WorkflowDefinitionLoader().loadOrDefault(null, "full"));
         assertEquals("intake.claude_brainstorm", node.id());
-        assertEquals(AgentRunnerKind.NATIVE_CLAUDE_PRINT,
+        assertEquals(AgentRunnerKind.ACPX_CLAUDE_SESSION,
                 AgentRunnerKind.from(text(node, "agent"), text(node, "permission_profile")));
     }
 
     @Test
-    void contractVariantFirstAgentRunIsNativeClaudePrint() throws Exception {
+    void contractVariantFirstAgentRunIsAcpxClaudeSession() throws Exception {
         var node = firstAgentRun(new WorkflowDefinitionLoader().loadOrDefault(null, "contract"));
         assertEquals("intake.claude_brainstorm", node.id());
-        assertEquals(AgentRunnerKind.NATIVE_CLAUDE_PRINT,
+        assertEquals(AgentRunnerKind.ACPX_CLAUDE_SESSION,
                 AgentRunnerKind.from(text(node, "agent"), text(node, "permission_profile")));
     }
 

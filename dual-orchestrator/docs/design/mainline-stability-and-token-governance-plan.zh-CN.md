@@ -878,13 +878,13 @@ P0 必须先于 P0.5 完整收口。
 
 ### 5.10 2026-07-02 Provider/Model attribution-model + preflight probe-path rework
 
-P0.5 改名为 **Provider / Model / Usage & Economics Attribution**（不再是 GLM token attribution）。dual 不拥有 Claude Code / Codex 的模型选择；它只负责按 actual runner 返回的 usage/native JSON/acpx stream 识别 provider/model，并按 catalog 路由 usage/cost/cache attribution；真实 token 不允许因 provider/model/pricing unknown 被归零。
+P0.5 改名为 **Provider / Model / Usage & Economics Attribution**（不再是 GLM token attribution）。dual 不拥有 Claude Code / Codex 的模型选择；它只负责按 actual runner 返回的 acpx stream / provider usage 识别 provider/model，并按 catalog 路由 usage/cost/cache attribution；真实 token 不允许因 provider/model/pricing unknown 被归零。
 
-**边界修正：preflight probe 必须匹配 actual runner path。** 真实 workflow 混合 runner：`intake.claude_brainstorm`（`permission_profile=contract_discovery`）走 native `claude --print`；`design`/`plan`/`implement`（observe/review/implement）走 acpx Claude session。native probe 只能证明 native runner，不能作为 acpx session workflow 的默认 preflight。已实现：
-- Java 语义类 `AgentRunnerKind`（`dual-adapter-acpx`）+ resolver `from(agent, permissionProfile)`，复用 `AcpxPermissionProfile.requiresNativeClaudeRunner()` 作为唯一 native-vs-session 判定来源（不散落 if-else，不在 bash 复制映射）。
+**边界修正：preflight probe 必须匹配 actual runner path。** dual workflow 的 Claude/Codex agent run 统一走 acpx session runner；`contract_discovery` 只改变权限/能力边界（deny direct Read、只允许 search），不再切到 native `claude --print` 旁路。native probe 只能证明 Claude CLI 一次性路径，不证明 dual 的 acpx workflow runner，因此不再作为 real-case/provider attribution preflight。已实现：
+- Java 语义类 `AgentRunnerKind`（`dual-adapter-acpx`）+ resolver `from(agent, permissionProfile)`，由 workflow definition 的 agent + permission_profile 推导 acpx runner kind（不散落 if-else，不在 bash 复制映射）。
 - 只读命令 `dualctl runner-kind --variant <full|contract>`：load workflow definition → 找第一个 `acpx.agent_run` node → resolver → 打印 kind + node/profile。CLI 只展示，不做语义判断。
 - 一致性测试 `InspectRunnerKindConsistencyTest`：workflow/profile 改动时 runner-kind inspect 会失败或更新，而不是 bash 静默漂移。
-- `run-public-benchmark.sh` 调用 `dualctl runner-kind` 推导 expected runner kind，传给 `run-real-case.sh --expected-runner-kind`；`run-real-case.sh` 不自行推导，只记录 + 选择 matching probe。preflight JSON 记录 `expectedRunnerKind` / `providerProbeRunnerKind` / `providerProbePathMatchesExpected`。absent/unknown → `INVALID_ACTUAL_RUNNER_UNKNOWN`（在 build/probe 前失败）；session/codex kind 在 acpx session probe（Task C）实现前标 `runner_probe_not_implemented_for_<kind>`，不静默回退 native。
+- `run-public-benchmark.sh` 调用 `dualctl runner-kind` 推导 expected runner kind，传给 `run-real-case.sh --expected-runner-kind`；`run-real-case.sh` 不自行推导，只记录 + 选择 matching acpx probe。preflight JSON 记录 `expectedRunnerKind` / `providerProbeRunnerKind` / `providerProbePathMatchesExpected`。absent/unknown → `INVALID_ACTUAL_RUNNER_UNKNOWN`（在 build/probe 前失败）。
 
 **三层 provider-specific gate 模型（不要混用）：**
 - **L1 Usage Attribution**：provider/model identity + input/output/cache-read/cache-write token 保留，`measurementType=PROVIDER_RUN_USAGE`，适用所有 provider（Zhipu/GLM、DeepSeek、Anthropic、OpenAI/Codex …）。DeepSeek 的 token usage 在这一层来自 provider run usage，不是 CSV。
@@ -893,7 +893,7 @@ P0.5 改名为 **Provider / Model / Usage & Economics Attribution**（不再是 
 
 **P0.5 promotion：** generic promotion 主要依赖 L1+L2；L3 是 provider-specific 强化证据，没有外部导出的 provider 不应阻塞 generic attribution promotion。`zhipu-glm-console-calibration`（原 `glm-token-attribution`）是 provider-specific L3 target，要求 `DUAL_GLM_BASELINE_TOKENS`；generic `provider-model-attribution` target 不预设 GLM、不要求 baseline（target 重命名/rework 为 Task D，pending）。
 
-**本轮失败记录：** `glm-token-attribution` run INVALID —— native `claude --print` probe timed out / `ConnectionRefused`，没创建 workstream/run.json/attribution。根因不是泛化的 "native probe path ≠ actual runner path"——当前 full/contract 的第一个 agent runner 实际是 `native_claude_print`（`intake.claude_brainstorm` = `contract_discovery`），native probe 对它本身是正确的。真正的问题是：旧验证目标把 GLM attribution / console calibration 绑定到 native probe，并且没有把 preflight proof scope 和 actual runner kind 分层表达清楚；后续 session runner（design/plan/implement）也缺少 matching probe，不能用 native probe 代证。已由 runner-kind 边界修正 + `provider-model-attribution` / `zhipu-glm-console-calibration` target 分层修复。
+**本轮失败记录：** `glm-token-attribution` run INVALID —— native `claude --print` probe timed out / `ConnectionRefused`，没创建 workstream/run.json/attribution。根因是旧验证目标把 GLM attribution / console calibration 绑定到 native probe，并且没有把 preflight proof scope 与 dual 实际 acpx runner 分层表达清楚。后续修正是：workflow runner 统一收敛为 acpx session；`provider-model-attribution` / `zhipu-glm-console-calibration` target 分层；real-case preflight 只证明 matching acpx runner，不再用 native probe 代证。
 
 ## 6. P1：Repo Scope 与 Token 治理
 

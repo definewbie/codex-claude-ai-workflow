@@ -149,6 +149,25 @@ real_case_provider_probe_status() {
   printf 'failed'
 }
 
+real_case_acpx_provider_probe_status() {
+  local exit_code="$1"
+  local transcript="$2"
+
+  if [[ "$exit_code" == "124" ]]; then
+    printf 'timeout'
+    return
+  fi
+  if [[ "$exit_code" != "0" ]]; then
+    printf 'failed'
+    return
+  fi
+  if [[ ! -s "$transcript" ]]; then
+    printf 'failed'
+    return
+  fi
+  printf 'passed'
+}
+
 real_case_provider_probe_reason() {
   local status="$1"
   case "$status" in

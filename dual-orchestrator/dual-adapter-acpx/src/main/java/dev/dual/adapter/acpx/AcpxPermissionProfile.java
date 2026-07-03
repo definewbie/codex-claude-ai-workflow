@@ -97,10 +97,6 @@ record AcpxPermissionProfile(
         return simpleClaudeCode;
     }
 
-    boolean requiresNativeClaudeRunner() {
-        return simpleClaudeCode;
-    }
-
     String permissionPolicyJson() {
         if (autoApproveKinds.isEmpty()) {
             return "";

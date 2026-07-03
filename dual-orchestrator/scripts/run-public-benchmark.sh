@@ -285,8 +285,7 @@ run_case() {
   log "Variant: $VARIANT, max steps: $MAX_STEPS, max gates: $MAX_GATES"
   log "Prompt language: $PROMPT_LANGUAGE"
 
-  # Derive the workflow's actual runner kind so the preflight probe matches it
-  # (a native claude --print probe must not be the default for an acpx-session workflow).
+  # Derive the workflow's actual acpx runner kind so the preflight probe matches it.
   # Java/domain owns this derivation; run-real-case.sh only records + matches it.
   local runner_jar="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
   if [[ "$SKIP_BUILD" != true ]]; then

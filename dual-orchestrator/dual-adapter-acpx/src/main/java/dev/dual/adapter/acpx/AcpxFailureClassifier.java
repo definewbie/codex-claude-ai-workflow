@@ -48,22 +48,6 @@ final class AcpxFailureClassifier {
         );
     }
 
-    /**
-     * Failure classification entry point that is aware of the native
-     * {@code claude --print} terminal source. There is no adapter failure only
-     * when the full native terminal contract holds: {@code exitCode == 0} AND the
-     * native result confirmed terminal success (parseable result, is_error false,
-     * end_turn). A non-zero exit with a success-shaped native result still falls
-     * through to the existing classification. The session path passes a null
-     * terminal and keeps the existing stderr/stdout/exit classification unchanged.
-     */
-    AcpxFailure classify(Path stdoutPath, Path stderrPath, int exitCode, NativeClaudeTerminal nativeTerminal) {
-        if (exitCode == 0 && nativeTerminal != null && nativeTerminal.isNativeTerminalSuccess()) {
-            return null;
-        }
-        return classify(stdoutPath, stderrPath, exitCode);
-    }
-
     private String read(Path path) {
         if (path == null || !Files.exists(path)) {
             return "";

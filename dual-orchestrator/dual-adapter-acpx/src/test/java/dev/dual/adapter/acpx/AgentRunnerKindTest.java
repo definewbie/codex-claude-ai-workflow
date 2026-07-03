@@ -4,15 +4,14 @@ import org.junit.jupiter.api.Test;
 
 import static dev.dual.adapter.acpx.AgentRunnerKind.ACPX_CLAUDE_SESSION;
 import static dev.dual.adapter.acpx.AgentRunnerKind.ACPX_CODEX_SESSION;
-import static dev.dual.adapter.acpx.AgentRunnerKind.NATIVE_CLAUDE_PRINT;
 import static dev.dual.adapter.acpx.AgentRunnerKind.UNKNOWN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AgentRunnerKindTest {
 
     @Test
-    void claudeContractDiscoveryIsNativePrint() {
-        assertEquals(NATIVE_CLAUDE_PRINT, AgentRunnerKind.from("claude", "contract_discovery"));
+    void claudeContractDiscoveryIsAcpxSession() {
+        assertEquals(ACPX_CLAUDE_SESSION, AgentRunnerKind.from("claude", "contract_discovery"));
     }
 
     @Test
@@ -47,7 +46,6 @@ class AgentRunnerKindTest {
 
     @Test
     void wireNamesAreStableForBashAndJson() {
-        assertEquals("native_claude_print", NATIVE_CLAUDE_PRINT.wire());
         assertEquals("acpx_claude_session", ACPX_CLAUDE_SESSION.wire());
         assertEquals("acpx_codex_session", ACPX_CODEX_SESSION.wire());
         assertEquals("unknown", UNKNOWN.wire());

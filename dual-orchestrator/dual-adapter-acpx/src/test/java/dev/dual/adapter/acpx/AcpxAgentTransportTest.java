@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTransportTest {
@@ -460,29 +459,25 @@ class AcpxAgentTransportTest {
     }
 
     @Test
-    void runsContractDiscoveryThroughNativeClaudeWithHardToolBoundary() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
-        var fakeClaude = tempDir.resolve("claude-restricted.sh");
+    void runsContractDiscoveryThroughAcpxSessionWithHardToolBoundary() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-contract-discovery.sh");
         var acpxLog = tempDir.resolve("acpx.log");
-        var claudeLog = tempDir.resolve("claude.log");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
                 printf '%s\\n' "$@" >> "__ACPX_LOG__"
-                exit 99
-                """.replace("__ACPX_LOG__", acpxLog.toString()), StandardCharsets.UTF_8);
-        Files.writeString(fakeClaude, """
-                #!/bin/sh
-                printf '%s\\n' "$@" > "__CLAUDE_LOG__"
-                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__CLAUDE_LOG__"
-                printf 'STDIN_START\\n' >> "__CLAUDE_LOG__"
-                cat >> "__CLAUDE_LOG__"
-                cat <<'EOF'
-                {"type":"result","result":"# Intake\\n\\n```dual-control\\ndecision: READY_FOR_PRODUCT_REVIEW\\nsummary: native restricted runner completed\\n```\\n","total_cost_usd":0,"usage":{"input_tokens":11,"output_tokens":7,"cache_read_input_tokens":13,"cache_creation_input_tokens":17}}
-                EOF
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ACPX_LOG__"
+                if [ "$2" = "sessions" ] && [ "$3" = "new" ]; then
+                  exit 0
+                fi
+                echo "# Intake"
+                echo
+                echo '```dual-control'
+                echo 'decision: READY_FOR_PRODUCT_REVIEW'
+                echo 'summary: acpx restricted runner completed'
+                echo '```'
                 exit 0
-                """.replace("__CLAUDE_LOG__", claudeLog.toString()), StandardCharsets.UTF_8);
+                """.replace("__ACPX_LOG__", acpxLog.toString()), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
-        assertTrue(fakeClaude.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
         var stdout = tempDir.resolve("stdout.md");
@@ -491,7 +486,6 @@ class AcpxAgentTransportTest {
 
         var transport = new AcpxAgentTransport(
                 fakeAcpx.toString(),
-                fakeClaude.toString(),
                 Duration.ofSeconds(1)
         );
         var result = transport.runClaudeDesign(new AcpxRunRequest(
@@ -504,202 +498,18 @@ class AcpxAgentTransportTest {
         ));
 
         assertEquals(0, result.exitCode());
-        assertFalse(Files.exists(acpxLog), "contract discovery must not use acpx Claude ACP when hard tool isolation is required");
-        var args = Files.readString(claudeLog);
-        assertTrue(args.contains("--print"), args);
-        assertTrue(args.contains("--output-format\njson"), args);
-        assertTrue(args.contains("--bare"), args);
-        assertTrue(args.contains("--safe-mode"), args);
-        assertTrue(args.contains("--no-session-persistence"), args);
-        assertTrue(args.contains("--tools\nGrep,Glob"), args);
-        assertTrue(args.contains("--allowedTools\nGrep,Glob"), args);
-        assertTrue(args.contains("--disallowedTools\nBash,Read,Edit,Write,NotebookEdit,WebFetch,WebSearch"), args);
-        assertTrue(args.contains("--permission-mode\ndontAsk"), args);
+        var args = Files.readString(acpxLog);
+        assertTrue(args.contains("--deny-all"), args);
+        assertTrue(args.contains("--non-interactive-permissions\nfail"), args);
+        assertTrue(args.contains("--permission-policy"), args);
+        assertTrue(args.contains("\"autoApprove\":[\"search\"]"), args);
+        assertTrue(args.contains("--allowed-tools\nGrep,Glob"), args);
+        assertTrue(args.contains("--no-terminal"), args);
+        assertTrue(args.contains("claude\nsessions\nnew\n--name\nclaude-main-run-001"), args);
+        assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt), args);
         assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"), args);
-        assertTrue(args.contains("STDIN_START\n# Prompt\nUse orchestrator seed only."), args);
         assertTrue(Files.readString(stdout).contains("READY_FOR_PRODUCT_REVIEW"));
-        assertTrue(Files.exists(tempDir.resolve("stdout.md.native-result.json")));
-        assertEquals(AcpxUsage.PROVIDER_RUN_USAGE, result.usage().measurementType());
-        assertEquals(AcpxUsage.ATTR_CLAUDE_JSON_RESULT, result.usage().attribution());
-        assertEquals(11, result.usage().inputTokens());
-        assertEquals(7, result.usage().outputTokens());
-        assertEquals(13, result.usage().cachedReadTokens());
-        assertEquals(17, result.usage().cachedWriteTokens());
-        assertEquals(48, result.usage().totalTokens());
-    }
-
-    @Test
-    void nativeClaudeErrorJsonDoesNotPretendZeroUsageIsMeasuredUsage() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
-        var fakeClaude = tempDir.resolve("claude-error-json.sh");
-        Files.writeString(fakeAcpx, """
-                #!/bin/sh
-                exit 99
-                """, StandardCharsets.UTF_8);
-        Files.writeString(fakeClaude, """
-                #!/bin/sh
-                cat >/dev/null
-                cat <<'EOF'
-                {"type":"result","is_error":true,"result":"API Error: Unable to connect to API (FailedToOpenSocket)","total_cost_usd":0,"usage":{"input_tokens":0,"output_tokens":0,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
-                EOF
-                exit 1
-                """, StandardCharsets.UTF_8);
-        assertTrue(fakeAcpx.toFile().setExecutable(true));
-        assertTrue(fakeClaude.toFile().setExecutable(true));
-
-        var prompt = tempDir.resolve("prompt.md");
-        var stdout = tempDir.resolve("stdout.md");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
-
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
-        var result = transport.runClaudeDesign(new AcpxRunRequest(
-                tempDir,
-                "claude-main-run-001",
-                prompt,
-                stdout,
-                stderr,
-                AcpxPermissionProfile.contractDiscovery()
-        ));
-
-        assertEquals(1, result.exitCode());
-        assertEquals(null, result.usage());
-        assertTrue(Files.readString(stdout).contains("API Error: Unable to connect to API"));
-        assertTrue(Files.exists(tempDir.resolve("stdout.md.native-result.json")));
-    }
-
-    @Test
-    void nativeClaudeSuccessPopulatesNativeTerminalSuccess() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
-        var fakeClaude = tempDir.resolve("claude-success.sh");
-        Files.writeString(fakeAcpx, """
-                #!/bin/sh
-                exit 99
-                """, StandardCharsets.UTF_8);
-        Files.writeString(fakeClaude, """
-                #!/bin/sh
-                cat >/dev/null
-                cat <<'EOF'
-                {"type":"result","subtype":"success","is_error":false,"stop_reason":"end_turn","result":"plain markdown result without a dual-control fence","total_cost_usd":0.104,"usage":{"input_tokens":4062,"output_tokens":3385,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
-                EOF
-                exit 0
-                """, StandardCharsets.UTF_8);
-        assertTrue(fakeAcpx.toFile().setExecutable(true));
-        assertTrue(fakeClaude.toFile().setExecutable(true));
-
-        var prompt = tempDir.resolve("prompt.md");
-        var stdout = tempDir.resolve("stdout.md");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
-
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
-        var result = transport.runClaudeDesign(new AcpxRunRequest(
-                tempDir,
-                "claude-main-run-001",
-                prompt,
-                stdout,
-                stderr,
-                AcpxPermissionProfile.contractDiscovery()
-        ));
-
-        assertEquals(0, result.exitCode());
-        assertNotNull(result.nativeTerminal(), "native claude run must populate terminal evidence from native-result.json");
-        assertTrue(result.nativeTerminal().isNativeTerminalSuccess(),
-                "exit 0 + is_error=false + stop_reason=end_turn is native terminal success");
-        assertEquals(7447, result.usage().totalTokens());
-    }
-
-    @Test
-    void nativeClaudeIsErrorPopulatesNativeTerminalError() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-should-not-run.sh");
-        var fakeClaude = tempDir.resolve("claude-error.sh");
-        Files.writeString(fakeAcpx, """
-                #!/bin/sh
-                exit 99
-                """, StandardCharsets.UTF_8);
-        Files.writeString(fakeClaude, """
-                #!/bin/sh
-                cat >/dev/null
-                cat <<'EOF'
-                {"type":"result","is_error":true,"result":"API Error: Unable to connect to API (FailedToOpenSocket)","total_cost_usd":0,"usage":{"input_tokens":0,"output_tokens":0,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
-                EOF
-                exit 1
-                """, StandardCharsets.UTF_8);
-        assertTrue(fakeAcpx.toFile().setExecutable(true));
-        assertTrue(fakeClaude.toFile().setExecutable(true));
-
-        var prompt = tempDir.resolve("prompt.md");
-        var stdout = tempDir.resolve("stdout.md");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
-
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
-        var result = transport.runClaudeDesign(new AcpxRunRequest(
-                tempDir,
-                "claude-main-run-001",
-                prompt,
-                stdout,
-                stderr,
-                AcpxPermissionProfile.contractDiscovery()
-        ));
-
-        assertEquals(1, result.exitCode());
-        assertNotNull(result.nativeTerminal());
-        assertFalse(result.nativeTerminal().isNativeTerminalSuccess(),
-                "is_error=true is not native terminal success even when native-result.json is parseable");
-        assertTrue(result.nativeTerminal().error());
-    }
-
-    @Test
-    void nativeClaudeTimelineRecordsPidAndWaitStartedBeforeWaitCompleted() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-noop.sh");
-        var fakeClaude = tempDir.resolve("claude-timeline.sh");
-        Files.writeString(fakeAcpx, """
-                #!/bin/sh
-                exit 99
-                """, StandardCharsets.UTF_8);
-        Files.writeString(fakeClaude, """
-                #!/bin/sh
-                cat >/dev/null
-                cat <<'EOF'
-                {"type":"result","subtype":"success","is_error":false,"stop_reason":"end_turn","result":"native timeline","total_cost_usd":0,"usage":{"input_tokens":11,"output_tokens":7,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
-                EOF
-                exit 0
-                """, StandardCharsets.UTF_8);
-        assertTrue(fakeAcpx.toFile().setExecutable(true));
-        assertTrue(fakeClaude.toFile().setExecutable(true));
-
-        var prompt = tempDir.resolve("prompt.md");
-        var stdout = tempDir.resolve("stdout.md");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
-
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), fakeClaude.toString(), Duration.ofSeconds(1));
-        var result = transport.runClaudeDesign(new AcpxRunRequest(
-                tempDir,
-                "claude-main-run-001",
-                prompt,
-                stdout,
-                stderr,
-                AcpxPermissionProfile.contractDiscovery()
-        ));
-
-        var timeline = result.executionTimeline();
-        var kinds = timeline.stream().map(AcpxExecutionEvent::kind).toList();
-        var processStarted = timeline.stream()
-                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_STARTED)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("no process_started event: " + kinds));
-        assertNotNull(processStarted.details().get("pid"),
-                "process_started must carry the external pid so a stale run can be reconciled: " + kinds);
-        var pid = ((Number) processStarted.details().get("pid")).longValue();
-        assertTrue(pid > 0, "pid must be a real external process id: " + pid);
-        int waitStartedIdx = kinds.indexOf(AgentExecutionTimelineEventKind.PROCESS_WAIT_STARTED);
-        int waitCompletedIdx = kinds.indexOf(AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED);
-        assertTrue(waitStartedIdx >= 0, "timeline must record process_wait_started: " + kinds);
-        assertTrue(waitCompletedIdx >= 0, "timeline must record process_wait_completed: " + kinds);
-        assertTrue(waitStartedIdx < waitCompletedIdx,
-                "process_wait_started must precede process_wait_completed: " + kinds);
+        assertFalse(args.contains("--print"), "contract discovery must not use native claude --print");
     }
 
     @Test

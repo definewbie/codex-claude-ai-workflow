@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
 @Component
 @Command(
         name = "runner-kind",
-        description = "Resolve the first agent node's actual runner kind (native_claude_print / acpx_claude_session / acpx_codex_session) for a bundled workflow variant.",
+        description = "Resolve the first agent node's actual runner kind (acpx_claude_session / acpx_codex_session) for a bundled workflow variant.",
         mixinStandardHelpOptions = true
 )
 public final class InspectRunnerKindCommand implements Callable<Integer> {

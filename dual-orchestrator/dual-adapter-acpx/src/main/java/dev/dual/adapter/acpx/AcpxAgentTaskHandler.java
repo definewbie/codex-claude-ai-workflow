@@ -189,7 +189,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     ? result.usage()
                     : usageReader.read(promptPath, stderrPath).orElse(null);
             var transcriptText = readStringIfExists(transcriptPath);
-            var finalArtifact = finalArtifactExtractor.extract(transcriptText, result.nativeTerminal());
+            var finalArtifact = finalArtifactExtractor.extract(transcriptText);
             var resultWithArtifactTimeline = result;
             if (finalArtifact.isPresent()) {
                 Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
@@ -199,7 +199,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         "adapter"
                 );
             }
-            var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode(), result.nativeTerminal());
+                var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
             var outputComplete = completionDetector.isComplete(transcriptPath);
             var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
             var completion = metadataWriter.writeCompleted(

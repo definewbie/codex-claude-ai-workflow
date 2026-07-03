@@ -133,3 +133,28 @@ assert_eq "provider_preflight_skipped" \
 assert_eq "" \
   "$(real_case_provider_probe_invalid_reason passed)" \
   "provider probe passed has no invalid reason"
+
+probe_transcript="$tmp/acpx-probe.log"
+printf 'OK\n' >"$probe_transcript"
+assert_eq "passed" \
+  "$(real_case_acpx_provider_probe_status 0 "$probe_transcript")" \
+  "acpx provider probe passed on successful transcript"
+
+printf 'API Error: unavailable\n' >"$probe_transcript"
+assert_eq "passed" \
+  "$(real_case_acpx_provider_probe_status 0 "$probe_transcript")" \
+  "acpx provider probe does not parse transcript prose"
+
+printf 'OK\n' >"$probe_transcript"
+assert_eq "failed" \
+  "$(real_case_acpx_provider_probe_status 1 "$probe_transcript")" \
+  "acpx provider probe failed on nonzero exit"
+
+assert_eq "timeout" \
+  "$(real_case_acpx_provider_probe_status 124 "$probe_transcript")" \
+  "acpx provider probe timeout"
+
+: >"$probe_transcript"
+assert_eq "failed" \
+  "$(real_case_acpx_provider_probe_status 0 "$probe_transcript")" \
+  "acpx provider probe failed on empty transcript"

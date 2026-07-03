@@ -609,8 +609,8 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        assertTrue(runMetadata.contains("\"source\" : \"claude_json_result\""), runMetadata);
-        assertTrue(runMetadata.contains("\"attribution\" : \"CLAUDE_JSON_RESULT\""), runMetadata);
+        assertTrue(runMetadata.contains("\"source\" : \"acpx_stream\""), runMetadata);
+        assertTrue(runMetadata.contains("\"attribution\" : \"EXACT_PROMPT_MATCH\""), runMetadata);
         assertTrue(runMetadata.contains("\"inputTokens\" : 12"), runMetadata);
         assertTrue(runMetadata.contains("\"cachedReadTokens\" : 34"), runMetadata);
         assertTrue(runMetadata.contains("\"cachedWriteTokens\" : 5"), runMetadata);
@@ -752,128 +752,6 @@ class AcpxAgentTaskHandlerTest {
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
         assertTrue(runMetadata.contains("\"status\" : \"completed\""));
-    }
-
-    @Test
-    void nativeClaudeSuccessIsNotClassifiedAsProcessStalled() throws Exception {
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
-        Files.createDirectories(workstreamDir);
-        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
-
-        var handler = new AcpxAgentTaskHandler(new NativeSuccessExitZeroTransport(), false);
-        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
-                "agent", "claude",
-                "session", "claude-main",
-                "prompt_template", "intake-claude-brainstorm"
-        ));
-        var instance = new NodeInstance(
-                "node-intake",
-                "intake.claude_brainstorm",
-                NodeKind.TASK,
-                "acpx.agent_run",
-                NodeStatus.READY,
-                "stage-intake",
-                "iter-001",
-                List.of(),
-                List.of(),
-                Map.of(),
-                null,
-                null,
-                null
-        );
-
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("completed", result.outcome());
-        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        var root = OBJECT_MAPPER.readTree(runMetadata);
-        assertEquals("completed", root.path("status").asText());
-        assertEquals("EXITED_ZERO", root.path("processResult").path("usability").asText());
-        assertFalse(runMetadata.contains("PROCESS_STALLED"),
-                "native exit-0 provider success must not be classified as PROCESS_STALLED: " + runMetadata);
-        var failureSignal = root.path("executionAttempt").path("failureSignal").asText("");
-        assertTrue(failureSignal.isEmpty() || "null".equals(failureSignal),
-                "native terminal success must carry no adapter failure signal: " + runMetadata);
-    }
-
-    @Test
-    void nativeClaudeIsErrorRemainsAdapterFailure() throws Exception {
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
-        Files.createDirectories(workstreamDir);
-        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
-
-        var handler = new AcpxAgentTaskHandler(new NativeIsErrorTransport(), false);
-        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
-                "agent", "claude",
-                "session", "claude-main",
-                "prompt_template", "intake-claude-brainstorm"
-        ));
-        var instance = new NodeInstance(
-                "node-intake",
-                "intake.claude_brainstorm",
-                NodeKind.TASK,
-                "acpx.agent_run",
-                NodeStatus.READY,
-                "stage-intake",
-                "iter-001",
-                List.of(),
-                List.of(),
-                Map.of(),
-                null,
-                null,
-                null
-        );
-
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
-
-        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        var root = OBJECT_MAPPER.readTree(runMetadata);
-        assertEquals("failed", root.path("status").asText(),
-                "native is_error=true must remain an adapter failure: " + runMetadata);
-        var failureSignal = root.path("executionAttempt").path("failureSignal").asText("");
-        assertFalse(failureSignal.isEmpty() || "null".equals(failureSignal),
-                "native is_error=true must carry an adapter failure signal: " + runMetadata);
-    }
-
-    @Test
-    void nativeClaudeResultTypedArtifactEnvelopeIsExtractedIntoOutput() throws Exception {
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
-        Files.createDirectories(workstreamDir);
-        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
-
-        var handler = new AcpxAgentTaskHandler(new NativeArtifactEnvelopeTransport(), false);
-        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
-                "agent", "claude",
-                "session", "claude-main",
-                "prompt_template", "intake-claude-brainstorm"
-        ));
-        var instance = new NodeInstance(
-                "node-intake",
-                "intake.claude_brainstorm",
-                NodeKind.TASK,
-                "acpx.agent_run",
-                NodeStatus.READY,
-                "stage-intake",
-                "iter-001",
-                List.of(),
-                List.of(),
-                Map.of(),
-                null,
-                null,
-                null
-        );
-
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        var outputRef = result.outputRefs().stream()
-                .filter(ref -> ref.endsWith("intake-claude-brainstorm.md"))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("no output ref: " + result.outputRefs()));
-        var output = Files.readString(tempDir.resolve(outputRef));
-        assertTrue(output.contains("<dual-artifact type=\"task_contract_proposal\""),
-                "native typed artifact envelope must be extracted into the workflow output: " + output);
     }
 
     @Test
@@ -1377,80 +1255,6 @@ class AcpxAgentTaskHandlerTest {
     // Mirrors the live cancer-clinic native `claude --print` path: the provider fully
     // succeeds (exit 0, is_error=false, stop_reason=end_turn) but the result is plain
     // markdown with no dual-control fence and no typed artifact. This must be adapter/
-    // process terminal success, not PROCESS_STALLED.
-    private static final class NativeSuccessExitZeroTransport extends AcpxAgentTransport {
-        @Override
-        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
-            Files.createDirectories(request.stdoutPath().getParent());
-            Files.writeString(request.stdoutPath(), """
-                    # Intake Brainstorm
-
-                    Plain markdown result returned by native claude --print.
-                    No dual-control fence and no typed artifact envelope.
-                    """);
-            Files.writeString(request.stderrPath(), "");
-            var now = Instant.parse("2026-07-01T00:12:08Z");
-            return new AcpxRunResult(
-                    0,
-                    now,
-                    now.plusSeconds(60),
-                    List.of("claude", "--print", "--output-format", "json"),
-                    List.of(),
-                    null,
-                    new NativeClaudeTerminal(true, false, "end_turn", "success")
-            );
-        }
-    }
-
-    private static final class NativeIsErrorTransport extends AcpxAgentTransport {
-        @Override
-        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
-            Files.createDirectories(request.stdoutPath().getParent());
-            Files.writeString(request.stdoutPath(), "API Error: Unable to connect to API (FailedToOpenSocket)\n");
-            Files.writeString(request.stderrPath(), "");
-            var now = Instant.parse("2026-07-01T00:12:08Z");
-            return new AcpxRunResult(
-                    1,
-                    now,
-                    now.plusSeconds(2),
-                    List.of("claude", "--print", "--output-format", "json"),
-                    List.of(),
-                    null,
-                    new NativeClaudeTerminal(true, true, null, null)
-            );
-        }
-    }
-
-    // Native claude --print result that carries only the typed artifact envelope,
-    // without the session dual-control fence. The adapter must still recognize the
-    // typed artifact so it flows into the shared artifact contract.
-    private static final class NativeArtifactEnvelopeTransport extends AcpxAgentTransport {
-        @Override
-        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
-            Files.createDirectories(request.stdoutPath().getParent());
-            Files.writeString(request.stdoutPath(), """
-                    # Intake Brainstorm
-
-                    Plain native claude --print prose around the typed artifact.
-
-                    <dual-artifact type="task_contract_proposal" version="1">
-                    {"artifact_type":"task_contract_proposal","decision":"PROCEED","summary":"ready"}
-                    </dual-artifact>
-                    """);
-            Files.writeString(request.stderrPath(), "");
-            var now = Instant.parse("2026-07-01T00:12:08Z");
-            return new AcpxRunResult(
-                    0,
-                    now,
-                    now.plusSeconds(60),
-                    List.of("claude", "--print", "--output-format", "json"),
-                    List.of(),
-                    null,
-                    new NativeClaudeTerminal(true, false, "end_turn", "success")
-            );
-        }
-    }
-
     private static final class PreparedMetadataObservedTransport extends AcpxAgentTransport {
         private boolean sawPreparedRunJson;
 
@@ -2007,9 +1811,9 @@ class AcpxAgentTaskHandlerTest {
                     57,
                     null,
                     "",
-                    "claude_json_result",
+                    "acpx_stream",
                     AcpxUsage.PROVIDER_RUN_USAGE,
-                    AcpxUsage.ATTR_CLAUDE_JSON_RESULT,
+                    AcpxUsage.ATTR_EXACT_PROMPT_MATCH,
                     false,
                     0,
                     null,

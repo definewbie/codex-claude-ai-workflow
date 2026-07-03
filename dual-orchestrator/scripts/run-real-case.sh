@@ -78,7 +78,7 @@ Options:
                             Workflow variant. Default: full.
   --prompt-language <auto|en|zh-CN>
                             Human-readable Agent output language. Default: auto.
-  --expected-runner-kind <native_claude_print|acpx_claude_session|acpx_codex_session>
+  --expected-runner-kind <acpx_claude_session|acpx_codex_session>
                             Actual first agent runner kind, derived by
                             dualctl runner-kind. Required so provider preflight
                             matches the workflow execution path.
@@ -213,10 +213,10 @@ validate_inputs() {
     *) fail "--prompt-language must be auto, en, or zh-CN"; exit 1 ;;
   esac
   case "$EXPECTED_RUNNER_KIND" in
-    native_claude_print|acpx_claude_session|acpx_codex_session) ;;
+    acpx_claude_session|acpx_codex_session) ;;
     *)
       fail "--expected-runner-kind is required (derive via: dualctl runner-kind --variant $VARIANT). Got: '${EXPECTED_RUNNER_KIND:-<empty>}'."
-      fail "A native probe must not be the default preflight for an acpx-session workflow."
+      fail "Provider preflight must match the workflow's acpx runner path."
       exit 1
       ;;
   esac
@@ -263,24 +263,7 @@ run_provider_probe() {
   PROVIDER_PROBE_STDERR_PATH="$CASE_DIR/provider-probe-stderr.log"
   local prompt_path="$CASE_DIR/provider-probe-prompt.txt"
 
-  # The probe must match the workflow's actual runner kind. Only the native
-  # claude --print probe is implemented today; an acpx-session/codex expected
-  # kind must not silently fall back to the native probe (Task C: acpx session probe).
-  if [[ "$EXPECTED_RUNNER_KIND" != "native_claude_print" ]]; then
-    PROVIDER_PROBE_RUNNER_KIND="none"
-    PROVIDER_PROBE_PATH_MATCHES_EXPECTED=false
-    if [[ "$PROVIDER_PROBE_ENABLED" == "0" || "$PROVIDER_PROBE_ENABLED" == "false" ]]; then
-      PROVIDER_PROBE_STATUS="skipped"
-      PROVIDER_PROBE_REASON="provider_probe_disabled"
-      return 0
-    fi
-    PROVIDER_PROBE_STATUS="failed"
-    PROVIDER_PROBE_REASON="runner_probe_not_implemented_for_${EXPECTED_RUNNER_KIND}"
-    PROVIDER_PROBE_EXIT_CODE=1
-    fail "no probe implemented for expected runner kind '$EXPECTED_RUNNER_KIND'; a native probe would not match an acpx-session workflow"
-    return 1
-  fi
-  PROVIDER_PROBE_RUNNER_KIND="native_claude_print"
+  PROVIDER_PROBE_RUNNER_KIND="$EXPECTED_RUNNER_KIND"
   PROVIDER_PROBE_PATH_MATCHES_EXPECTED=true
 
   if [[ "$PROVIDER_PROBE_ENABLED" == "0" || "$PROVIDER_PROBE_ENABLED" == "false" ]]; then
@@ -289,24 +272,55 @@ run_provider_probe() {
     return 0
   fi
 
-  command -v claude >/dev/null 2>&1 || {
-    PROVIDER_PROBE_STATUS="failed"
-    PROVIDER_PROBE_REASON="claude_cli_not_found"
-    PROVIDER_PROBE_EXIT_CODE=127
-    return 1
-  }
-
   printf 'Provider connectivity probe. Reply exactly: OK. Do not use tools.\n' >"$prompt_path"
+  local agent session_name
+  case "$EXPECTED_RUNNER_KIND" in
+    acpx_claude_session)
+      agent="claude"
+      session_name="dual-preflight-claude-$$"
+      ;;
+    acpx_codex_session)
+      agent="codex"
+      session_name="dual-preflight-codex-$$"
+      ;;
+    *)
+      PROVIDER_PROBE_STATUS="failed"
+      PROVIDER_PROBE_REASON="runner_probe_not_implemented_for_${EXPECTED_RUNNER_KIND}"
+      PROVIDER_PROBE_EXIT_CODE=1
+      return 1
+      ;;
+  esac
+
+  local -a session_command=(
+    acpx
+    "$agent"
+    "sessions"
+    "new"
+    "--name"
+    "$session_name"
+  )
+
+  if ! "${session_command[@]}" >>"$PROVIDER_PROBE_STDERR_PATH" 2>&1; then
+    PROVIDER_PROBE_EXIT_CODE=1
+    PROVIDER_PROBE_STATUS="failed"
+    PROVIDER_PROBE_REASON="$(real_case_provider_probe_reason "$PROVIDER_PROBE_STATUS")"
+    return 1
+  fi
+
   local -a command=(
-    claude
-    --print
-    --input-format text
-    --output-format json
-    --bare
-    --safe-mode
-    --no-session-persistence
-    --permission-mode dontAsk
-    --disallowedTools Bash,Read,Edit,Write,NotebookEdit,WebFetch,WebSearch
+    acpx
+    --timeout
+    "$PROVIDER_PROBE_TIMEOUT_SECONDS"
+    --ttl
+    "300"
+    --deny-all
+    --non-interactive-permissions
+    "fail"
+    "$agent"
+    -s
+    "$session_name"
+    -f
+    "$prompt_path"
   )
 
   "${command[@]}" <"$prompt_path" >"$PROVIDER_PROBE_RESULT_PATH" 2>"$PROVIDER_PROBE_STDERR_PATH" &
@@ -324,14 +338,16 @@ run_provider_probe() {
       PROVIDER_PROBE_EXIT_CODE=124
       PROVIDER_PROBE_STATUS="timeout"
       PROVIDER_PROBE_REASON="$(real_case_provider_probe_reason "$PROVIDER_PROBE_STATUS")"
+      acpx "$agent" sessions close "$session_name" >>"$PROVIDER_PROBE_STDERR_PATH" 2>&1 || true
       return 1
     fi
     sleep 1
   done
   wait "$pid" || PROVIDER_PROBE_EXIT_CODE="$?"
   PROVIDER_PROBE_EXIT_CODE="${PROVIDER_PROBE_EXIT_CODE:-0}"
-  PROVIDER_PROBE_STATUS="$(real_case_provider_probe_status "$PROVIDER_PROBE_EXIT_CODE" "$PROVIDER_PROBE_RESULT_PATH")"
+  PROVIDER_PROBE_STATUS="$(real_case_acpx_provider_probe_status "$PROVIDER_PROBE_EXIT_CODE" "$PROVIDER_PROBE_RESULT_PATH")"
   PROVIDER_PROBE_REASON="$(real_case_provider_probe_reason "$PROVIDER_PROBE_STATUS")"
+  acpx "$agent" sessions close "$session_name" >>"$PROVIDER_PROBE_STDERR_PATH" 2>&1 || true
   real_case_provider_probe_is_valid "$PROVIDER_PROBE_STATUS"
 }
 
