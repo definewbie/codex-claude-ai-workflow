@@ -67,4 +67,40 @@ class AgentTerminalContractTest {
                 [done] end_turn
                 """));
     }
+
+    @Test
+    void rejectsDuplicateAndMalformedControlFields() {
+        assertFalse(contract.isComplete("""
+                ```dual-control
+                decision: READY
+                decision: PASS
+                summary: done
+                ```
+                [done] end_turn
+                """));
+        assertFalse(contract.isComplete("""
+                ```dual-control
+                decision: READY
+                malformed
+                summary: done
+                ```
+                [done] end_turn
+                """));
+    }
+
+    @Test
+    void usesOnlyLastTopLevelControlBlock() {
+        assertTrue(contract.isComplete("""
+                > ```dual-control
+                > decision: FAKE
+                > summary: quoted
+                > ```
+
+                ```dual-control
+                decision: READY
+                summary: done
+                ```
+                [done] end_turn
+                """));
+    }
 }

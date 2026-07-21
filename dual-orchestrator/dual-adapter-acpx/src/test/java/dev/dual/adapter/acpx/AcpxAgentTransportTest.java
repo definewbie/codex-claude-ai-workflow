@@ -819,6 +819,53 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void malformedTerminalControlCannotStopProcessEarly() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-malformed-terminal-contract.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                cat <<'EOF'
+                ```dual-control
+                decision: READY
+                decision: PASS
+                summary: duplicate key must not stop the process
+                ```
+                [done] end_turn
+                EOF
+                sleep 3
+                exit 0
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+        var started = System.nanoTime();
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.fromName("", false)
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(0, result.exitCode());
+        assertTrue(elapsedMs >= 2_500, "invalid control must wait for the real process exit");
+        assertTrue(result.executionTimeline().stream()
+                .noneMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
+    }
+
+    @Test
     void stopsWhenPermissionBlockedSignalPersistsEvenIfOutputKeepsGrowing() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-permission-blocked.sh");
         Files.writeString(fakeAcpx, """

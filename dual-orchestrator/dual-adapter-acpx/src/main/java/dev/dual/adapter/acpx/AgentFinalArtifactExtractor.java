@@ -1,5 +1,7 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.agentoutput.DualControlProtocolParser;
+
 import java.util.Optional;
 
 /**
@@ -12,22 +14,21 @@ import java.util.Optional;
  * fed back into later context packages.
  */
 final class AgentFinalArtifactExtractor {
-    private static final String CONTROL_FENCE = "```dual-control";
     private static final String ARTIFACT_OPEN = "<dual-artifact";
     private static final String ARTIFACT_CLOSE = "</dual-artifact>";
-    private static final String DONE_MARKER = "[done] end_turn";
+    private final DualControlProtocolParser controlParser = new DualControlProtocolParser();
 
     Optional<String> extract(String transcript) {
         if (transcript == null || transcript.isBlank()) {
             return Optional.empty();
         }
-        var normalized = transcript.replace("\r\n", "\n");
-        var controlStart = normalized.lastIndexOf(CONTROL_FENCE);
-        if (controlStart < 0) {
+        var parsed = controlParser.parse(transcript);
+        if (!parsed.valid() || parsed.controlSpan() == null) {
             return Optional.empty();
         }
-        var controlEnd = normalized.indexOf("```", controlStart + CONTROL_FENCE.length());
-        var end = controlEnd < 0 ? normalized.length() : controlEnd + 3;
+        var normalized = parsed.source();
+        var controlStart = parsed.controlSpan().start();
+        var end = parsed.controlSpan().endExclusive();
         var artifactStart = latestCompleteArtifactStartBeforeControl(normalized, controlStart);
         var start = artifactStart >= 0
                 ? formalArtifactStart(normalized, artifactStart)
@@ -35,9 +36,7 @@ final class AgentFinalArtifactExtractor {
         var artifact = artifactStart >= 0
                 ? normalized.substring(start, end)
                 : normalized.substring(controlStart, end);
-        artifact = artifact
-                .replace(DONE_MARKER, "")
-                .strip();
+        artifact = artifact.strip();
         return artifact.isBlank() ? Optional.empty() : Optional.of(artifact + "\n");
     }
 
@@ -49,12 +48,9 @@ final class AgentFinalArtifactExtractor {
 
     private static int latestTranscriptBoundary(String transcript, int artifactStart) {
         var boundary = 0;
-        var previousControl = transcript.lastIndexOf(CONTROL_FENCE, artifactStart - 1);
-        if (previousControl >= 0) {
-            var previousControlEnd = transcript.indexOf("```", previousControl + CONTROL_FENCE.length());
-            if (previousControlEnd >= 0 && previousControlEnd < artifactStart) {
-                boundary = previousControlEnd + 3;
-            }
+        var parsed = new DualControlProtocolParser().parse(transcript.substring(0, artifactStart));
+        if (parsed.controlSpan() != null) {
+            boundary = parsed.controlSpan().endExclusive();
         }
         var cursor = 0;
         while (cursor < artifactStart) {

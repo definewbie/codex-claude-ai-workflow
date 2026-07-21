@@ -1,26 +1,17 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.agentoutput.DualControlProtocolParser;
+import dev.dual.core.agentoutput.DualControlTerminalPolicy;
+
 final class AgentTerminalContract {
-    static final String DONE_MARKER = "[done] end_turn";
-    static final String CONTROL_FENCE = "```dual-control";
+    private final DualControlProtocolParser parser = new DualControlProtocolParser();
+    private final DualControlTerminalPolicy terminalPolicy = new DualControlTerminalPolicy();
 
     boolean isComplete(String stdout) {
-        if (stdout == null || !stdout.contains(DONE_MARKER)) {
-            return false;
-        }
-        var fenceStart = stdout.lastIndexOf(CONTROL_FENCE);
-        if (fenceStart < 0) {
-            return false;
-        }
-        var fenceEnd = stdout.indexOf("```", fenceStart + CONTROL_FENCE.length());
-        if (fenceEnd < 0) {
-            return false;
-        }
-        var doneMarker = stdout.indexOf(DONE_MARKER, fenceEnd + 3);
-        if (doneMarker < 0) {
-            return false;
-        }
-        var body = stdout.substring(fenceStart, fenceEnd);
-        return body.contains("\ndecision:") && body.contains("\nsummary:");
+        var parsed = parser.parse(stdout);
+        return parsed.valid()
+                && !parsed.block().values().getOrDefault("decision", "").isBlank()
+                && !parsed.block().values().getOrDefault("summary", "").isBlank()
+                && terminalPolicy.isComplete(parsed);
     }
 }

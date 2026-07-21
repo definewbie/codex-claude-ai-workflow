@@ -1,5 +1,7 @@
 package dev.dual.runtime.handler;
 
+import dev.dual.core.agentoutput.DualControlProtocolParser;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +47,7 @@ final class StageHandoffMarkdownParser {
     private final List<String> lines;
 
     private StageHandoffMarkdownParser(String markdown) {
-        this.markdown = markdown == null ? "" : markdown;
+        this.markdown = beforeTerminalControl(markdown);
         this.lines = this.markdown.lines().toList();
     }
 
@@ -75,14 +77,7 @@ final class StageHandoffMarkdownParser {
 
     String suggestedPrompt() {
         var content = sectionContent(SUGGESTED_PROMPT_HEADINGS);
-        var builder = new StringBuilder();
-        for (var rawLine : content.lines().toList()) {
-            if (rawLine.trim().equals("```dual-control")) {
-                break;
-            }
-            builder.append(rawLine).append("\n");
-        }
-        return builder.toString().strip();
+        return content.strip();
     }
 
     String recommendedNextStage() {
@@ -151,9 +146,6 @@ final class StageHandoffMarkdownParser {
             if (!inFence) {
                 var heading = heading(line);
                 if (heading.matches() && heading.level() <= startLevel) {
-                    break;
-                }
-                if (line.trim().equals("```dual-control")) {
                     break;
                 }
             }
@@ -231,6 +223,13 @@ final class StageHandoffMarkdownParser {
 
     private static boolean isFenceBoundary(String line) {
         return line.stripLeading().startsWith("```");
+    }
+
+    private static String beforeTerminalControl(String markdown) {
+        var parsed = new DualControlProtocolParser().parse(markdown);
+        return parsed.controlSpan() == null
+                ? parsed.source()
+                : parsed.source().substring(0, parsed.controlSpan().start());
     }
 
     private record Heading(boolean matches, int level, String normalizedTitle) {

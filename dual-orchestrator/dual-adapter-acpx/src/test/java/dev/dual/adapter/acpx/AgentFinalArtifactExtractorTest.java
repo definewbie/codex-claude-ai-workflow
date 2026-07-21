@@ -99,6 +99,22 @@ class AgentFinalArtifactExtractorTest {
     }
 
     @Test
+    void rejectsMalformedOrUnclosedTerminalControlBlock() {
+        assertTrue(extractor.extract("""
+                ```dual-control
+                decision: READY
+                malformed
+                summary: done
+                ```
+                """).isEmpty());
+        assertTrue(extractor.extract("""
+                ```dual-control
+                decision: READY
+                summary: done
+                """).isEmpty());
+    }
+
+    @Test
     void usesLatestCompleteArtifactBeforeLastControlBlock() {
         var result = extractor.extract("""
                 <dual-artifact type="agent_output_contract">

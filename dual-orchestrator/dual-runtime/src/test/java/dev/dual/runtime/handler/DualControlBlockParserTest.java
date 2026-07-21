@@ -9,7 +9,7 @@ class DualControlBlockParserTest {
     private final DualControlBlockParser parser = new DualControlBlockParser();
 
     @Test
-    void acceptsTerminalUnclosedControlBlockWhenDoneMarkerClosesAgentTurn() {
+    void rejectsTerminalUnclosedControlBlockEvenWhenDoneMarkerExists() {
         var result = parser.parse("""
                 Design body.
 
@@ -20,9 +20,7 @@ class DualControlBlockParserTest {
                 [done] end_turn
                 """);
 
-        assertTrue(result.valid());
-        assertEquals("READY_FOR_ARCH_REVIEW", result.block().required("decision"));
-        assertEquals("Design is ready.", result.block().required("summary"));
+        assertEquals("UNCLOSED_DUAL_CONTROL", result.errorCode());
     }
 
     @Test
@@ -36,7 +34,7 @@ class DualControlBlockParserTest {
                 trailing text
                 """);
 
-        assertEquals("MISSING_DUAL_CONTROL", result.errorCode());
+        assertEquals("UNCLOSED_DUAL_CONTROL", result.errorCode());
     }
 
     @Test
