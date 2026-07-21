@@ -19,12 +19,16 @@ import java.util.Optional;
  * repeatedly reading stringly-typed fields from raw maps.
  */
 public record AgentOutputContractDocument(
+        String workstreamId,
+        String runId,
         String nodeId,
+        String nodeInstanceId,
         String stageOutcome,
         String lifecycleStatus,
         String decision,
         String summary,
         String sourceArtifactType,
+        String sourceOutputRef,
         boolean blocking,
         List<String> checks,
         List<String> evidence,
@@ -41,7 +45,8 @@ public record AgentOutputContractDocument(
         Map<String, String> control,
         FailureFields failure,
         List<RereadReason> rereadReasons,
-        ScopeExpansionRequest scopeExpansionRequest
+        ScopeExpansionRequest scopeExpansionRequest,
+        TaskContractProposal taskContractProposal
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -56,12 +61,16 @@ public record AgentOutputContractDocument(
 
     public static AgentOutputContractDocument from(Map<String, Object> document) {
         return new AgentOutputContractDocument(
+                text(document.get("workstream_id")),
+                text(document.get("run_id")),
                 text(document.get("node_id")),
+                text(document.get("node_instance_id")),
                 firstNonBlank(document.get("stage_outcome"), document.get("lifecycle_status")),
                 text(document.get("lifecycle_status")),
                 text(document.get("decision")),
                 text(document.get("summary")),
                 text(document.get("source_artifact_type")),
+                text(document.get("source_output_ref")),
                 booleanValue(document.get("blocking")),
                 firstNonEmptyList(document.get("checks"), document.get("checks_run")),
                 stringList(document.get("evidence")),
@@ -78,8 +87,39 @@ public record AgentOutputContractDocument(
                 stringMap(document.get("control")),
                 FailureFields.from(objectMap(document.get("failure"))),
                 rereadReasonList(document.get("reread_reasons")),
-                ScopeExpansionRequest.from(objectMap(document.get("scope_expansion_request")))
+                ScopeExpansionRequest.from(objectMap(document.get("scope_expansion_request"))),
+                taskContractProposal(objectMap(document.get("task_contract_proposal")))
         );
+    }
+
+    public boolean hasValidatedLineage(String expectedWorkstreamId) {
+        var normalizedSource = sourceOutputRef.replace('\\', '/');
+        return expectedWorkstreamId != null
+                && !expectedWorkstreamId.isBlank()
+                && expectedWorkstreamId.equals(workstreamId)
+                && !runId.isBlank()
+                && !nodeId.isBlank()
+                && !nodeInstanceId.isBlank()
+                && normalizedSource.contains("/runs/" + runId + "/");
+    }
+
+    public boolean hasValidatedLineage(
+            String expectedWorkstreamId,
+            Path workspaceRoot,
+            Path sidecarPath
+    ) {
+        if (!hasValidatedLineage(expectedWorkstreamId)
+                || workspaceRoot == null
+                || sidecarPath == null) {
+            return false;
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var source = root.resolve(sourceOutputRef).normalize();
+        if (!source.startsWith(root)) {
+            return false;
+        }
+        return AgentOutputContractSidecar.pathFor(source)
+                .equals(sidecarPath.toAbsolutePath().normalize());
     }
 
     public boolean hasDecision() {
@@ -88,6 +128,27 @@ public record AgentOutputContractDocument(
 
     public String canonicalStageOutcome() {
         return stageOutcome.isBlank() ? lifecycleStatus : stageOutcome;
+    }
+
+    private static TaskContractProposal taskContractProposal(Map<String, Object> document) {
+        if (document.isEmpty()) {
+            return null;
+        }
+        var scope = objectMap(document.get("scope"));
+        return new TaskContractProposal(
+                text(document.get("artifact_type")),
+                integerValue(document.get("schema_version")),
+                text(document.get("objective")),
+                new TaskContractProposal.Scope(
+                        stringList(scope.get("included")),
+                        stringList(scope.get("excluded"))),
+                stringList(document.get("acceptance_criteria")),
+                stringList(document.get("test_requirements")),
+                stringList(document.get("constraints")),
+                stringList(document.get("non_goals")),
+                stringList(document.get("risk_areas")),
+                stringList(document.get("evidence_refs")),
+                stringList(document.get("open_questions")));
     }
 
     boolean isStageHandoffArtifact() {
@@ -286,6 +347,17 @@ public record AgentOutputContractDocument(
             return bool;
         }
         return Boolean.parseBoolean(text(value));
+    }
+
+    private static int integerValue(Object value) {
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(text(value));
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
     }
 
     private static String text(Object value) {

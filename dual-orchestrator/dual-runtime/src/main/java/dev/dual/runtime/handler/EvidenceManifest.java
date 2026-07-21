@@ -44,10 +44,10 @@ final class EvidenceManifest {
     }
 
     static EvidenceManifest rebuild(Path workspaceRoot, Path workstreamDir, String workstreamId,
-                                    ObjectMapper objectMapper) throws IOException {
+                                    List<String> routedRefs, ObjectMapper objectMapper) throws IOException {
         var items = new ArrayList<EvidenceItem>();
         addFixedArtifacts(workspaceRoot, workstreamDir, objectMapper, items);
-        addAgentContractSidecars(workspaceRoot, workstreamDir, objectMapper, items);
+        addRoutedAgentContracts(workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, items);
         addHumanDecisions(workspaceRoot, workstreamDir, objectMapper, items);
         items.sort(Comparator
                 .comparing(EvidenceItem::stageId)
@@ -123,29 +123,48 @@ final class EvidenceManifest {
         }
     }
 
-    private static void addAgentContractSidecars(Path workspaceRoot, Path workstreamDir, ObjectMapper objectMapper,
-                                                 List<EvidenceItem> items) throws IOException {
-        var runsDir = workstreamDir.resolve("runs");
-        if (!Files.exists(runsDir)) {
-            return;
-        }
-        try (Stream<Path> paths = Files.walk(runsDir)) {
-            var sidecars = paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".contract.json"))
-                    .sorted()
-                    .toList();
-            for (var sidecar : sidecars) {
-                var json = readJson(objectMapper, sidecar).orElse(Map.of());
-                var sourceType = text(json.get("source_artifact_type"));
-                var type = switch (sourceType) {
-                    case "self_test_report" -> "self_test_report";
-                    case "acceptance_review" -> "acceptance_review";
-                    case "stage_handoff" -> "stage_handoff";
-                    default -> "agent_output_contract";
-                };
-                items.add(itemFromJson(workspaceRoot, workstreamDir, sidecar, type, json));
+    private static void addRoutedAgentContracts(
+            Path workspaceRoot,
+            Path workstreamDir,
+            String workstreamId,
+            List<String> routedRefs,
+            ObjectMapper objectMapper,
+            List<EvidenceItem> items
+    ) {
+        for (var entry : AgentEvidenceIndex.fromRefs(
+                workspaceRoot, workstreamId, routedRefs, objectMapper).recent(Integer.MAX_VALUE)) {
+            var document = entry.document();
+            var type = switch (document.sourceArtifactType()) {
+                case "self_test_report" -> "self_test_report";
+                case "acceptance_review" -> "acceptance_review";
+                case "stage_handoff" -> "stage_handoff";
+                default -> "agent_output_contract";
+            };
+            var sourceRef = workspaceRef(workspaceRoot, entry.path());
+            var claims = new ArrayList<String>();
+            claims.addAll(document.completedWork());
+            claims.addAll(document.importantDecisions());
+            if (!document.decision().isBlank()) {
+                claims.add("Decision: " + document.decision());
             }
+            var risks = new ArrayList<String>();
+            risks.addAll(document.openRisks());
+            risks.addAll(document.mustFix());
+            risks.addAll(document.missingEvidence());
+            items.add(new EvidenceItem(
+                    stableId(type, sourceRef),
+                    type,
+                    inferStageFromNode(document.nodeId()),
+                    "",
+                    document.nodeInstanceId(),
+                    "",
+                    sourceRef,
+                    document.summary().isBlank() ? type : document.summary(),
+                    List.copyOf(claims),
+                    document.changedFiles(),
+                    List.copyOf(risks),
+                    "available"
+            ));
         }
     }
 

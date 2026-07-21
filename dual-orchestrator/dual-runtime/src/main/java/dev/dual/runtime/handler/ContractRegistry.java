@@ -40,7 +40,7 @@ public final class ContractRegistry {
             Set.of("decision", "summary"),
             Set.of("READY_FOR_PLAN_REVIEW"),
             Set.of(),
-            Set.of("agent_output_contract", "plan_artifact")
+            Set.of("plan_result")
     );
     private static final NodeOutputContract PLAN_REVIEW = new NodeOutputContract(
             "plan.codex_plan_review",

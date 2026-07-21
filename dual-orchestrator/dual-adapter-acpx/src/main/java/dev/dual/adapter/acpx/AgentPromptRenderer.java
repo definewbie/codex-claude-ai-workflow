@@ -3,6 +3,7 @@ package dev.dual.adapter.acpx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.domain.PromptLanguage;
 import dev.dual.runtime.handler.ContractRegistry;
+import dev.dual.runtime.handler.AgentResultPromptContract;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -20,16 +21,16 @@ final class AgentPromptRenderer {
     private static final String PRINCIPLE_TEMPLATE_ROOT = "dev/dual/adapter/acpx/templates/";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Set<String> KNOWN_VARIABLES = Set.of(
-            "workstream_id", "node_id", "prompt_template",
+            "workstream_id", "run_id", "node_id", "prompt_template",
             "ledger_path", "requirement", "context_package",
             "contract_review_principles", "allowed_decisions",
-            "required_control_keys", "decision_example"
+            "required_control_keys", "decision_example", "agent_result_contract"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
     private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(?<![<\\p{Alnum}._-])(/[^\\s\"'`)]+)");
 
     String render(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
-        return renderWithSections(workspaceRoot, workstreamId, nodeId, promptTemplate, inputRefs).content();
+        return renderWithSections(workspaceRoot, workstreamId, "", nodeId, promptTemplate, inputRefs).content();
     }
 
     /**
@@ -37,6 +38,17 @@ final class AgentPromptRenderer {
      * Provenance records source metadata only and must not change prompt content.
      */
     RenderedPrompt renderWithSections(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
+        return renderWithSections(workspaceRoot, workstreamId, "", nodeId, promptTemplate, inputRefs);
+    }
+
+    RenderedPrompt renderWithSections(
+            Path workspaceRoot,
+            String workstreamId,
+            String runId,
+            String nodeId,
+            String promptTemplate,
+            List<String> inputRefs
+    ) {
         var template = loadTemplate(promptTemplate);
         var workstreamDir = ".agent/workstreams/" + workstreamId;
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
@@ -54,6 +66,7 @@ final class AgentPromptRenderer {
         var content = workspaceGuard + "\n\n" + languagePolicy + "\n\n"
                 + structuredArtifactFieldSemantics + "\n\n" + template
                 .replace("{{workstream_id}}", workstreamId)
+                .replace("{{run_id}}", runId)
                 .replace("{{node_id}}", nodeId)
                 .replace("{{prompt_template}}", promptTemplate)
                 .replace("{{ledger_path}}", workstreamDir)
@@ -63,6 +76,15 @@ final class AgentPromptRenderer {
                 .replace("{{allowed_decisions}}", promptContract.allowedDecisions())
                 .replace("{{required_control_keys}}", promptContract.requiredControlKeys())
                 .replace("{{decision_example}}", promptContract.decisionExample());
+        content = content.replace(
+                "{{agent_result_contract}}",
+                AgentResultPromptContract.render(
+                        workstreamId,
+                        runId,
+                        nodeId,
+                        promptContract.decisionExample(),
+                        promptContract.allowedDecisionValues())
+        );
 
         var sections = new ArrayList<PromptSection>();
         sections.add(new PromptSection("workspace_guard", "static_instruction", "workspace-guard",
@@ -92,15 +114,23 @@ final class AgentPromptRenderer {
         sections.add(new PromptSection("contract_review_principles", "static_instruction",
                 "contract-review-principles.md", contractReviewPrinciples, "review principles", true));
         sections.add(new PromptSection("prompt_contract", "tool_policy", "ContractRegistry:" + nodeId,
-                promptContract.allowedDecisions() + "\n" + promptContract.requiredControlKeys()
-                        + "\n" + promptContract.decisionExample(),
-                "allowed decisions / required control keys", true));
+                AgentResultPromptContract.render(
+                        workstreamId,
+                        runId,
+                        nodeId,
+                        promptContract.decisionExample(),
+                        promptContract.allowedDecisionValues()),
+                "strict agent result envelope", true));
         return new RenderedPrompt(content, sections);
     }
 
     private PromptContract promptContract(String nodeId) {
         if (!ContractRegistry.hasContract(nodeId)) {
-            return new PromptContract("- (no runtime contract registered)", "- decision\n- summary", "<one allowed decision>");
+            return new PromptContract(
+                    "- (no runtime contract registered)",
+                    "- decision\n- summary",
+                    "<one allowed decision>",
+                    Set.of());
         }
         var contract = ContractRegistry.forNode(nodeId);
         return new PromptContract(
@@ -108,7 +138,8 @@ final class AgentPromptRenderer {
                 bulletList(contract.requiredKeys()),
                 contract.allowedDecisions().size() == 1
                         ? contract.allowedDecisions().iterator().next()
-                        : "<one allowed decision>"
+                        : "<one allowed decision>",
+                contract.allowedDecisions()
         );
     }
 
@@ -167,16 +198,16 @@ final class AgentPromptRenderer {
             case "zh-CN" -> """
                     ## Response Language Policy
 
-                    - Write human-readable Markdown prose in Simplified Chinese.
-                    - Keep JSON keys, enum values, XML/Markdown contract markers, file paths, and code identifiers exactly as specified.
-                    - If quoted evidence is in another language, preserve the quote and explain it in Simplified Chinese.
+                    - Use Simplified Chinese for human-readable string values inside the final JSON result.
+                    - Keep JSON keys, enum values, file paths, and code identifiers exactly as specified.
+                    - Do not wrap the final JSON in Markdown.
                     """.stripTrailing();
             case "en" -> """
                     ## Response Language Policy
 
-                    - Write human-readable Markdown prose in English.
-                    - Keep JSON keys, enum values, XML/Markdown contract markers, file paths, and code identifiers exactly as specified.
-                    - If quoted evidence is in another language, preserve the quote and explain it in English.
+                    - Use English for human-readable string values inside the final JSON result.
+                    - Keep JSON keys, enum values, file paths, and code identifiers exactly as specified.
+                    - Do not wrap the final JSON in Markdown.
                     """.stripTrailing();
             default -> throw new IllegalStateException("unexpected prompt language: " + selected);
         };
@@ -195,7 +226,9 @@ final class AgentPromptRenderer {
             return "";
         }
         var contract = ContractRegistry.forNode(nodeId);
-        if (!contract.emitsArtifact("agent_output_contract") && !contract.emitsArtifact("acceptance_review")) {
+        if (!contract.emitsArtifact("agent_output_contract")
+                && !contract.emitsArtifact("plan_result")
+                && !contract.emitsArtifact("acceptance_review")) {
             return "";
         }
         return """
@@ -398,7 +431,12 @@ final class AgentPromptRenderer {
         return result.toString();
     }
 
-    private record PromptContract(String allowedDecisions, String requiredControlKeys, String decisionExample) {}
+    private record PromptContract(
+            String allowedDecisions,
+            String requiredControlKeys,
+            String decisionExample,
+            Set<String> allowedDecisionValues
+    ) {}
 
     /** Source metadata for one prompt section; content is only used to compute bytes/sha. */
     record PromptSection(String name, String sourceType, String sourceRef, String content,

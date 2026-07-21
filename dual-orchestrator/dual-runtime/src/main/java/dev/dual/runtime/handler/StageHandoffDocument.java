@@ -14,7 +14,7 @@ import java.util.Optional;
 /**
  * Typed boundary for artifacts/next-stage/handoff.json.
  *
- * Markdown handoff text is still flexible, but once it becomes JSON the runtime
+ * The final assistant result is strict JSON; once projected to this sidecar the runtime
  * should consume this record instead of spreading hand-written map lookups.
  */
 record StageHandoffDocument(

@@ -14,7 +14,7 @@ class AcpxExecutionEventTest {
     @Test
     void serializesTypedKindToStableWireName() {
         var event = new AcpxExecutionEvent(
-                AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
+                AgentExecutionTimelineEventKind.PROCESS_STARTED,
                 "stdout",
                 3,
                 Instant.parse("2026-06-30T00:00:00Z"),
@@ -23,7 +23,7 @@ class AcpxExecutionEventTest {
 
         var map = event.toMap();
 
-        assertEquals("terminal_control_detected", map.get("kind"));
+        assertEquals("process_started", map.get("kind"));
         assertEquals("stdout", map.get("source"));
         assertEquals(3L, map.get("sequence"));
         assertEquals("2026-06-30T00:00:00Z", map.get("observedAt"));
@@ -33,14 +33,14 @@ class AcpxExecutionEventTest {
     @Test
     void serializesDetailsWhenPresent() {
         var event = new AcpxExecutionEvent(
-                AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED,
+                AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
                 "adapter",
                 4,
                 Instant.parse("2026-06-30T00:00:01Z"),
                 2200,
                 Map.of(
                         "exitCode", 0,
-                        "waitMode", "terminal_control_grace",
+                        "waitMode", "process_exit",
                         "action", "terminate_process_tree"
                 )
         );
@@ -50,7 +50,7 @@ class AcpxExecutionEventTest {
         @SuppressWarnings("unchecked")
         var details = (Map<String, Object>) map.get("details");
         assertEquals(0, details.get("exitCode"));
-        assertEquals("terminal_control_grace", details.get("waitMode"));
+        assertEquals("process_exit", details.get("waitMode"));
         assertEquals("terminate_process_tree", details.get("action"));
     }
 

@@ -123,7 +123,8 @@ public final class FailureClassifyHandler implements TaskHandler {
     }
 
     private java.util.Optional<AgentOutputContractDocument> readReviewMetadata(TaskContext context) throws IOException {
-        return AgentEvidenceIndex.latestFromRefs(context.workspaceRoot(), context.instance().inputRefs(), objectMapper)
+        return AgentEvidenceIndex.latestFromRefs(
+                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
                 .map(AgentEvidenceIndex.Entry::document);
     }
 

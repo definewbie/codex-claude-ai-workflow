@@ -1,5 +1,7 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeResult;
@@ -7,9 +9,6 @@ import dev.dual.core.workflow.NodeStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -19,131 +18,87 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArtifactContractFixtureRegressionTest {
-    private static final String FIXTURE_ROOT = "dev/dual/runtime/handler/artifacts/";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     @TempDir
-    Path tempDir;
+    Path root;
 
     private final ArtifactContractValidator validator = new ArtifactContractValidator();
 
     @Test
-    void acceptsPublicAcceptanceWithNotesFixture() throws Exception {
-        var sidecar = validateFixture(
-                "acceptance-with-notes.md",
-                "acceptance.codex_verifier_review",
-                "acceptance-with-notes.contract.json"
-        );
+    void acceptsAcceptanceWithNotes() throws Exception {
+        var result = new AgentResultEnvelope.AcceptanceReviewResult(
+                "acceptance_review", "ACCEPT_WITH_NOTES", "accepted with notes", "ACCEPTED_WITH_NOTES",
+                false, List.of("reviewed diff"), List.of("tests passed"), List.of(), List.of(),
+                List.of("minor note"), List.of(), List.of("src/A.java"), "verified", emptyFailure());
+
+        var sidecar = validate("acceptance.codex_verifier_review", result);
 
         assertTrue(sidecar.contains("\"decision\" : \"ACCEPT_WITH_NOTES\""));
-        assertTrue(sidecar.contains("\"lifecycle_status\" : \"ACCEPTED_WITH_NOTES\""));
-        assertTrue(sidecar.contains("\"missing_evidence_count\" : 0"));
-        assertTrue(sidecar.contains("\"must_fix_count\" : 0"));
         assertTrue(sidecar.contains("\"acceptance_note_count\" : 1"));
     }
 
     @Test
-    void acceptsPublicRejectedFixtureWithBlockingEvidence() throws Exception {
-        var sidecar = validateFixture(
-                "acceptance-rejected-missing-evidence.md",
-                "acceptance.codex_verifier_review",
-                "acceptance-rejected-missing-evidence.contract.json"
-        );
+    void acceptsRejectedReviewWithBlockingEvidence() throws Exception {
+        var result = new AgentResultEnvelope.AcceptanceReviewResult(
+                "acceptance_review", "REJECT", "evidence missing", "REJECTED", true,
+                List.of("reviewed tests"), List.of(), List.of("test output"), List.of("run tests"),
+                List.of(), List.of("unverified behavior"), List.of(), "not verified", emptyFailure());
 
-        assertTrue(sidecar.contains("\"decision\" : \"REJECT\""));
-        assertTrue(sidecar.contains("\"lifecycle_status\" : \"REJECTED\""));
+        var sidecar = validate("acceptance.codex_verifier_review", result);
+
         assertTrue(sidecar.contains("\"blocking\" : true"));
         assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
         assertTrue(sidecar.contains("\"must_fix_count\" : 1"));
     }
 
     @Test
-    void acceptsPublicSelfTestInsufficientEvidenceFixture() throws Exception {
-        var sidecar = validateFixture(
-                "self-test-insufficient-evidence.md",
-                "implement.claude_self_test_report",
-                "self-test-insufficient-evidence.contract.json"
-        );
+    void acceptsSelfTestResult() throws Exception {
+        var result = new AgentResultEnvelope.SelfTestResult(
+                "self_test_report", "SELF_TEST_COMPLETE", "tests complete", "READY",
+                List.of("mvn test"), List.of(), List.of("all tests passed"), List.of(),
+                List.of("focused suite"), "adequate");
 
-        assertTrue(sidecar.contains("\"decision\" : \"SELF_TEST_INCOMPLETE\""));
-        assertTrue(sidecar.contains("\"lifecycle_status\" : \"INSUFFICIENT_EVIDENCE\""));
-        assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
-    }
-
-    @Test
-    void acceptsRealPublicSelfTestCompleteFixture() throws Exception {
-        var sidecar = validateFixture(
-                "public-real-self-test-complete.md",
-                "implement.claude_self_test_report",
-                "public-real-self-test-complete.contract.json"
-        );
+        var sidecar = validate("implement.claude_self_test_report", result);
 
         assertTrue(sidecar.contains("\"source_artifact_type\" : \"self_test_report\""));
-        assertTrue(sidecar.contains("\"decision\" : \"SELF_TEST_COMPLETE\""));
-        assertTrue(sidecar.contains("\"lifecycle_status\" : \"READY\""));
-        assertTrue(sidecar.contains("\"missing_evidence_count\" : 0"));
-        assertTrue(sidecar.contains("\"acceptance_note_count\" : 1"));
-        assertTrue(sidecar.contains("node --test"));
+        assertTrue(sidecar.contains("mvn test"));
     }
 
     @Test
-    void acceptsRealPublicAcceptanceWithNotesFixture() throws Exception {
-        var sidecar = validateFixture(
-                "public-real-acceptance-with-notes.md",
-                "acceptance.codex_verifier_review",
-                "public-real-acceptance-with-notes.contract.json"
-        );
+    void acceptsStageHandoffResult() throws Exception {
+        var result = new AgentResultEnvelope.StageHandoffResult(
+                "stage_handoff", "HANDOFF_READY", "handoff ready", "READY",
+                List.of("implemented feature"), List.of("kept API stable"), List.of("README.md"),
+                "tests passed", List.of(), "delivery", "review and deliver");
 
-        assertTrue(sidecar.contains("\"source_artifact_type\" : \"acceptance_review\""));
-        assertTrue(sidecar.contains("\"decision\" : \"ACCEPT_WITH_NOTES\""));
-        assertTrue(sidecar.contains("\"lifecycle_status\" : \"ACCEPTED_WITH_NOTES\""));
-        assertTrue(sidecar.contains("\"missing_evidence_count\" : 0"));
-        assertTrue(sidecar.contains("\"must_fix_count\" : 0"));
-        assertTrue(sidecar.contains("\"acceptance_note_count\" : 2"));
-        assertTrue(sidecar.contains("src/issueWorkflow.js"));
-        assertTrue(sidecar.contains("test/issueWorkflow.test.js"));
-    }
-
-    @Test
-    void acceptsRealPublicStageHandoffFixture() throws Exception {
-        var sidecar = validateFixture(
-                "public-real-stage-handoff-ready.md",
-                "stage.claude_handoff",
-                "public-real-stage-handoff-ready.contract.json"
-        );
+        var sidecar = validate("stage.claude_handoff", result);
 
         assertTrue(sidecar.contains("\"source_artifact_type\" : \"stage_handoff\""));
-        assertTrue(sidecar.contains("\"decision\" : \"HANDOFF_READY\""));
-        assertTrue(sidecar.contains("\"lifecycle_status\" : \"READY\""));
-        assertTrue(sidecar.contains("\"completed_work\""));
-        assertTrue(sidecar.contains("\"recommended_next_stage\" : \"Merge/close"));
         assertTrue(sidecar.contains("README.md"));
     }
 
-    private String validateFixture(String fixtureName, String nodeId, String sidecarName) throws Exception {
-        var outputRef = fixtureName;
-        Files.writeString(tempDir.resolve(outputRef), loadFixture(fixtureName), StandardCharsets.UTF_8);
+    private String validate(String nodeId, AgentResultEnvelope.AgentResult result) throws Exception {
+        var output = root.resolve(nodeId.replace('.', '-') + ".json");
+        var envelope = new AgentResultEnvelope(1, "ws-fixture", "run-fixture", nodeId, result);
+        Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
+        var nodeResult = NodeResult.completed("completed", List.of(output.getFileName().toString()),
+                Map.of("run_id", "run-fixture"));
 
-        var result = NodeResult.completed("completed", List.of(outputRef), Map.of("fixture", fixtureName));
-        var validated = validator.validate(tempDir, agentNode(nodeId), result);
+        var validated = validator.validate(root, "ws-fixture", "node-fixture", agentNode(nodeId), nodeResult);
 
-        assertEquals(NodeStatus.COMPLETED, validated.status());
-        assertTrue(validated.outputRefs().contains(sidecarName));
-        return Files.readString(tempDir.resolve(sidecarName), StandardCharsets.UTF_8);
-    }
-
-    private static String loadFixture(String name) {
-        var resource = FIXTURE_ROOT + name;
-        try (var stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource)) {
-            if (stream == null) {
-                throw new IllegalArgumentException("missing fixture: " + resource);
-            }
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        assertTrue(validated.outputRefs().contains(sidecar.getFileName().toString()));
+        return Files.readString(sidecar);
     }
 
     private static NodeDefinition agentNode(String nodeId) {
         return new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of());
+    }
+
+    private static AgentResultEnvelope.Failure emptyFailure() {
+        return new AgentResultEnvelope.Failure("", List.of(), List.of(), List.of(), List.of(), "");
     }
 }

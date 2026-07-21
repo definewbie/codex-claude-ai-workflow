@@ -112,10 +112,12 @@ class FailureClassifyHandlerTest {
         Files.createDirectories(outputDir);
         Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
                 {
+                  "node_id": "acceptance.codex_verifier_review",
                   "decision": "ACCEPT_WITH_NOTES",
                   "summary": "Implementation accepted with notes about contract quality."
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
 
         var handler = new FailureClassifyHandler();
         var result = handler.execute(taskContext(
@@ -139,6 +141,7 @@ class FailureClassifyHandlerTest {
         Files.createDirectories(outputDir);
         Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
                 {
+                  "node_id": "acceptance.codex_verifier_review",
                   "decision": "REJECT",
                   "summary": "Verifier cannot finish acceptance.",
                   "failure": {
@@ -151,6 +154,7 @@ class FailureClassifyHandlerTest {
                   }
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
 
         var handler = new FailureClassifyHandler();
         var result = handler.execute(taskContext(
@@ -251,6 +255,7 @@ class FailureClassifyHandlerTest {
         Files.createDirectories(outputDir);
         Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
                 {
+                  "node_id": "acceptance.codex_verifier_review",
                   "decision": "REJECT",
                   "stage_outcome": "INSUFFICIENT_EVIDENCE",
                   "lifecycle_status": "INSUFFICIENT_EVIDENCE",
@@ -262,6 +267,7 @@ class FailureClassifyHandlerTest {
                   }
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
 
         var handler = new FailureClassifyHandler();
         var result = handler.execute(taskContext(
@@ -374,6 +380,10 @@ class FailureClassifyHandlerTest {
     private void writeGitEvidence(String statusShort, String diffStat, String diffPatch)
             throws Exception {
         fixture.writeGitEvidence(statusShort, diffStat, diffPatch);
+    }
+
+    private void publishSidecar(Path sidecar) throws Exception {
+        AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-fc", sidecar);
     }
 
     private TaskHandler.TaskContext taskContext(Map<String, Object> instanceResult) {

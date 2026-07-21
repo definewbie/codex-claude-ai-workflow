@@ -7,12 +7,10 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
-import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AgentEvidenceIndexTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -21,48 +19,60 @@ class AgentEvidenceIndexTest {
     Path tempDir;
 
     @Test
-    void loadsRecentSidecarsByLastModifiedTime() throws Exception {
-        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-index");
-        var older = workstreamDir.resolve("runs/run-001/outputs/design.contract.json");
-        var newer = workstreamDir.resolve("runs/run-002/outputs/acceptance.contract.json");
-        writeSidecar(older, "design.codex_arch_review", "PASS");
-        writeSidecar(newer, "acceptance.codex_verifier_review", "ACCEPT_WITH_NOTES");
-        Files.setLastModifiedTime(older, FileTime.from(Instant.parse("2026-06-01T00:00:00Z")));
-        Files.setLastModifiedTime(newer, FileTime.from(Instant.parse("2026-06-01T00:01:00Z")));
-
-        var index = AgentEvidenceIndex.load(workstreamDir, objectMapper);
-
-        var recent = index.recent(2);
-        assertEquals("acceptance.codex_verifier_review", recent.get(0).document().nodeId());
-        assertEquals("design.codex_arch_review", recent.get(1).document().nodeId());
-        assertEquals("ACCEPT_WITH_NOTES", index.latest().orElseThrow().document().decision());
-    }
-
-    @Test
-    void latestFromRefsMapsMarkdownOutputToContractSidecar() throws Exception {
+    void latestFromRefsConsumesOnlyLedgerBoundSidecar() throws Exception {
         var workspace = tempDir.resolve("workspace");
-        var output = workspace.resolve(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.md");
+        var output = workspace.resolve(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.json");
         var sidecar = workspace.resolve(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.contract.json");
         Files.createDirectories(output.getParent());
-        Files.writeString(output, "# Acceptance\n", StandardCharsets.UTF_8);
-        writeSidecar(sidecar, "acceptance.codex_verifier_review", "REJECT");
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        writeSidecar(workspace, sidecar, "run-001", "node-acceptance-001",
+                "acceptance.codex_verifier_review", "REJECT");
+        AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
 
         var latest = AgentEvidenceIndex.latestFromRefs(
                 workspace,
-                List.of(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.md"),
+                "ws-index",
+                List.of(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.contract.json"),
                 objectMapper
         );
 
-        assertTrue(latest.isPresent());
         assertEquals("REJECT", latest.orElseThrow().document().decision());
     }
 
-    private static void writeSidecar(Path path, String nodeId, String decision) throws Exception {
+    @Test
+    void forgedSelfConsistentSidecarCannotBypassLedgerOccurrence() throws Exception {
+        var workspace = tempDir.resolve("forged-workspace");
+        var sidecar = workspace.resolve(".agent/workstreams/ws-index/runs/run-forged/outputs/acceptance.contract.json");
+        writeSidecar(workspace, sidecar, "run-forged", "node-forged",
+                "acceptance.codex_verifier_review", "REJECT");
+
+        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(
+                workspace,
+                "ws-index",
+                List.of(workspace.relativize(sidecar).toString()),
+                objectMapper));
+    }
+
+    private static void writeSidecar(
+            Path workspace,
+            Path path,
+            String runId,
+            String nodeInstanceId,
+            String nodeId,
+            String decision
+    ) throws Exception {
         Files.createDirectories(path.getParent());
+        var source = path.resolveSibling("acceptance.json");
+        Files.writeString(source, "{}", StandardCharsets.UTF_8);
         Files.writeString(path, """
                 {
                   "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "workstream_id": "ws-index",
+                  "run_id": "%s",
                   "node_id": "%s",
+                  "node_instance_id": "%s",
+                  "source_output_ref": "%s",
                   "decision": "%s",
                   "summary": "summary",
                   "source_artifact_type": "acceptance_review",
@@ -90,6 +100,12 @@ class AgentEvidenceIndexTest {
                     "reason": ""
                   }
                 }
-                """.formatted(nodeId, decision, decision), StandardCharsets.UTF_8);
+                """.formatted(
+                runId,
+                nodeId,
+                nodeInstanceId,
+                workspace.relativize(source).toString().replace("\\", "\\\\"),
+                decision,
+                decision), StandardCharsets.UTF_8);
     }
 }

@@ -13,10 +13,9 @@ import dev.dual.core.execution.AgentExecutionFinalizer;
 import dev.dual.core.execution.AgentExecutionOutcome;
 import dev.dual.core.execution.AgentExecutionProcessStatus;
 import dev.dual.core.execution.AgentExecutionRetryPolicy;
-import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.ProcessResult;
 import dev.dual.core.execution.ProcessUsability;
-import dev.dual.core.execution.TerminalControlResult;
+import dev.dual.core.execution.AgentResultContractResult;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -269,7 +268,11 @@ final class AgentRunMetadataWriter {
                 relative(workspaceRoot, stderrPath),
                 relativeOrNull(workspaceRoot, transcriptPath)
         );
-        var executionOutcome = executionOutcome(workspaceRoot, result, stdoutPath, stderrPath, failure, attempt);
+        // A completed ACP prompt proves only that a candidate result exists.
+        // Runtime contract validation owns the first trustworthy terminal outcome.
+        var executionOutcome = result.promptCompletion().completed() && failure == null
+                ? null
+                : executionOutcome(workspaceRoot, result, stdoutPath, stderrPath, failure, attempt);
         var effectiveUsage = usage;
         if (failure != null) {
             effectiveUsage = usage == null
@@ -304,7 +307,7 @@ final class AgentRunMetadataWriter {
                         promptTemplate,
                         runId,
                         "output",
-                        "text/markdown",
+                        "application/json",
                         stdoutPath
                 )
         );
@@ -390,7 +393,7 @@ final class AgentRunMetadataWriter {
                 null,
                 List.of(),
                 executionAttemptToMap(attempt),
-                outcomeToMap(executionOutcome),
+                executionOutcome == null ? null : outcomeToMap(executionOutcome),
                 executionTimeline(result)
         ));
         return new CompletionWriteResult(
@@ -641,10 +644,8 @@ final class AgentRunMetadataWriter {
         var process = processResultEvidence(workspaceRoot, result, stdoutPath, stderrPath, failure);
         var evidence = new AgentExecutionEvidence(
                 process,
-                failure == null ? TerminalControlResult.valid("agent_terminal_contract") : TerminalControlResult.missing(),
-                failure == null && hasContent(stdoutPath)
-                        ? List.of(ArtifactContractResult.requiredValid("agent_output_contract"))
-                        : List.of(),
+                AgentResultContractResult.missing(),
+                List.of(),
                 adapterSignalEvidence(failure)
         );
         return new AgentExecutionFinalizer().finalize(attempt, evidence).outcome();
@@ -688,14 +689,6 @@ final class AgentRunMetadataWriter {
                 "",
                 false
         ));
-    }
-
-    private boolean hasContent(Path path) {
-        try {
-            return path != null && Files.isRegularFile(path) && Files.size(path) > 0;
-        } catch (IOException ignored) {
-            return false;
-        }
     }
 
     private AgentExecutionAttemptStatus attemptStatus(

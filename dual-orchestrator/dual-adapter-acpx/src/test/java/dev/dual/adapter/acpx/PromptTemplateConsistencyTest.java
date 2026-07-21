@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PromptTemplateConsistencyTest {
     private static final String TEMPLATE_ROOT = "dev/dual/adapter/acpx/prompts/";
     private static final Set<String> KNOWN_VARIABLES = Set.of(
-            "workstream_id", "node_id", "prompt_template",
+            "workstream_id", "run_id", "node_id", "prompt_template",
             "ledger_path", "requirement", "context_package",
             "contract_review_principles", "allowed_decisions",
-            "required_control_keys", "decision_example"
+            "required_control_keys", "decision_example", "agent_result_contract"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
     private static final Map<String, String> TEMPLATE_NODE_IDS = Map.of(
@@ -69,26 +69,22 @@ class PromptTemplateConsistencyTest {
 
     @ParameterizedTest
     @MethodSource("allTemplates")
-    void allTemplatesDeclareDualControlContract(String templateName) {
+    void allTemplatesDelegateToTheStrictAgentResultContract(String templateName) {
         var content = loadTemplate(templateName);
-        assertTrue(content.contains("```dual-control"),
-                templateName + " missing dual-control block in Output Contract");
-        assertTrue(content.contains("decision:"),
-                templateName + " missing 'decision:' key in dual-control contract");
-        assertTrue(content.contains("summary:"),
-                templateName + " missing 'summary:' key in dual-control contract");
+        assertTrue(content.contains("{{agent_result_contract}}"),
+                templateName + " must inject the strict AgentResultEnvelope contract");
+        assertFalse(content.contains("dual-control"), templateName + " retains the old Markdown protocol");
+        assertFalse(content.contains("<dual-artifact"), templateName + " retains the old artifact envelope");
     }
 
     @ParameterizedTest
     @MethodSource("allTemplates")
-    void templatesUseInjectedDecisionContract(String templateName) {
+    void templatesDoNotDuplicateDecisionOrFieldRules(String templateName) {
         var content = loadTemplate(templateName);
-        assertTrue(content.contains("{{allowed_decisions}}"),
-                templateName + " must render allowed decisions from ContractRegistry");
-        assertTrue(content.contains("{{required_control_keys}}"),
-                templateName + " must render required control keys from ContractRegistry");
-        assertTrue(content.contains("{{decision_example}}"),
-                templateName + " must render its decision example from ContractRegistry");
+        assertTrue(content.contains("{{agent_result_contract}}"));
+        assertFalse(content.contains("{{allowed_decisions}}"));
+        assertFalse(content.contains("{{required_control_keys}}"));
+        assertFalse(content.contains("{{decision_example}}"));
         assertFalse(content.contains("|NEEDS_REVISION|"),
                 templateName + " must not hardcode pipe-delimited decision values");
         assertFalse(content.contains("ACCEPT|ACCEPT_WITH_NOTES|REJECT"),
@@ -96,19 +92,16 @@ class PromptTemplateConsistencyTest {
     }
 
     @Test
-    void reviewerTemplatesKeepLifecycleStatusCanonical() {
+    void reviewerTemplatesDoNotEmbedASecondResultSchema() {
         for (var templateName : List.of(
                 "intake-codex-product-review",
                 "design-codex-review",
                 "plan-codex-review"
         )) {
             var content = loadTemplate(templateName);
-            assertTrue(content.contains("Set `lifecycle_status` from the canonical stage outcome vocabulary"),
-                    templateName + " must explain that lifecycle_status is not a routing decision");
-            assertTrue(content.contains("\"lifecycle_status\": \"READY\""),
-                    templateName + " must show canonical READY lifecycle_status in the JSON example");
-            assertFalse(content.contains("\"lifecycle_status\": \"{{decision_example}}\""),
-                    templateName + " must not reuse routing decision examples as lifecycle_status");
+            assertTrue(content.contains("{{agent_result_contract}}"));
+            assertFalse(content.contains("\"lifecycle_status\""),
+                    templateName + " must not duplicate fields owned by AgentResultPromptContract");
         }
     }
 

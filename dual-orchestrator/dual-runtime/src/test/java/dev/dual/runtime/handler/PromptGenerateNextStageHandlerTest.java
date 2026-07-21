@@ -19,10 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Proves the next-stage handoff is produced from the typed {@code stage_handoff}
- * artifact (via the agent_output_contract sidecar), NOT from Markdown heading
- * parsing. {@code StageHandoffMarkdownParser} is a fallback only; localized or
- * malformed Markdown in the source output must not affect the generated
- * handoff.json when the typed artifact is present.
+ * artifact (via the agent_output_contract sidecar), never from raw agent prose.
  */
 class PromptGenerateNextStageHandlerTest {
     @TempDir
@@ -33,16 +30,7 @@ class PromptGenerateNextStageHandlerTest {
         var wsDir = tempDir.resolve(".agent/workstreams/ws-handoff");
         var outputDir = wsDir.resolve("runs/run-1/outputs");
         Files.createDirectories(outputDir);
-        // Deliberately localized / noisy Markdown — must be ignored when the typed artifact exists.
-        Files.writeString(outputDir.resolve("handoff.md"), """
-                # 阶段交接
-
-                ## 已完成的工作
-                - 这段 Markdown prose 不应进入 handoff.json
-
-                ## 变更文件
-                - 完全无关的文件.md
-                """, StandardCharsets.UTF_8);
+        Files.writeString(outputDir.resolve("handoff.json"), "{\"untrusted\":true}", StandardCharsets.UTF_8);
         // Typed stage_handoff sidecar — the source of truth.
         Files.writeString(outputDir.resolve("handoff.contract.json"), """
                 {
@@ -59,8 +47,10 @@ class PromptGenerateNextStageHandlerTest {
                   "suggested_next_prompt": "Prepare delivery."
                 }
                 """, StandardCharsets.UTF_8);
+        addLineage(outputDir.resolve("handoff.contract.json"), outputDir.resolve("handoff.json"),
+                "stage.claude_handoff");
 
-        var inputRef = ".agent/workstreams/ws-handoff/runs/run-1/outputs/handoff.md";
+        var inputRef = ".agent/workstreams/ws-handoff/runs/run-1/outputs/handoff.json";
         var handler = new PromptGenerateNextStageHandler();
         var definition = new NodeDefinition("prompt.generate_next_stage", NodeKind.TASK,
                 "prompt.generate_next_stage", Map.of());
@@ -80,8 +70,7 @@ class PromptGenerateNextStageHandlerTest {
         assertTrue(handoffJson.contains("src/feature.js"), handoffJson);
         assertTrue(handoffJson.contains("chose approach A"), handoffJson);
         // ...and the localized Markdown prose does NOT leak into the structured handoff.
-        assertFalse(handoffJson.contains("这段 Markdown prose"), handoffJson);
-        assertFalse(handoffJson.contains("完全无关的文件.md"), handoffJson);
+        assertFalse(handoffJson.contains("untrusted"), handoffJson);
     }
 
     @Test
@@ -133,6 +122,14 @@ class PromptGenerateNextStageHandlerTest {
                   "verification_summary": "This unrelated later run must not be selected."
                 }
                 """, StandardCharsets.UTF_8);
+        addLineage(handoffOutputDir.resolve("handoff.contract.json"), handoffOutputDir.resolve("handoff.md"),
+                "stage.claude_handoff");
+        addLineage(selfTestOutputDir.resolve("implement-claude-self-test.contract.json"),
+                selfTestOutputDir.resolve("implement-claude-self-test.json"), "implement.claude_self_test_report");
+        addLineage(acceptanceOutputDir.resolve("acceptance-codex-review.contract.json"),
+                acceptanceOutputDir.resolve("acceptance-codex-review.json"), "acceptance.codex_verifier_review");
+        addLineage(unrelatedOutputDir.resolve("acceptance-codex-review.contract.json"),
+                unrelatedOutputDir.resolve("acceptance-codex-review.json"), "acceptance.codex_verifier_review");
 
         var inputRef = ".agent/workstreams/ws-handoff/runs/run-3/outputs/handoff.md";
         var selfTestRef = ".agent/workstreams/ws-handoff/runs/run-2/outputs/implement-claude-self-test.contract.json";
@@ -182,6 +179,10 @@ class PromptGenerateNextStageHandlerTest {
                   "verification_summary": "Required build/typecheck evidence is still missing."
                 }
                 """, StandardCharsets.UTF_8);
+        addLineage(handoffOutputDir.resolve("handoff.contract.json"), handoffOutputDir.resolve("handoff.md"),
+                "stage.claude_handoff");
+        addLineage(acceptanceOutputDir.resolve("acceptance-codex-review.contract.json"),
+                acceptanceOutputDir.resolve("acceptance-codex-review.json"), "acceptance.codex_verifier_review");
 
         var inputRef = ".agent/workstreams/ws-handoff/runs/run-3/outputs/handoff.md";
         var acceptanceRef = ".agent/workstreams/ws-handoff/runs/run-4/outputs/acceptance-codex-review.contract.json";
@@ -197,5 +198,26 @@ class PromptGenerateNextStageHandlerTest {
         var handoffJson = Files.readString(tempDir.resolve(".agent/workstreams/ws-handoff/artifacts/next-stage/handoff.json"));
         assertTrue(handoffJson.contains("Acceptance (REJECT): Required build/typecheck evidence is still missing."), handoffJson);
         assertFalse(handoffJson.contains("stale handoff verification"), handoffJson);
+    }
+
+    private void addLineage(Path sidecar, Path source, String nodeId) throws Exception {
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var object = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(sidecar.toFile());
+        object.put("workstream_id", "ws-handoff");
+        object.put("run_id", runId(source));
+        object.put("node_id", nodeId);
+        object.put("node_instance_id", "node-" + nodeId.replace('.', '-') + "-" + runId(source));
+        object.put("source_output_ref", tempDir.relativize(source).toString());
+        mapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), object);
+        AgentOutputLineageFixture.publish(tempDir, "ws-handoff", sidecar);
+    }
+
+    private static String runId(Path path) {
+        for (int index = 0; index + 1 < path.getNameCount(); index++) {
+            if ("runs".equals(path.getName(index).toString())) {
+                return path.getName(index + 1).toString();
+            }
+        }
+        throw new IllegalArgumentException("fixture path has no run id: " + path);
     }
 }

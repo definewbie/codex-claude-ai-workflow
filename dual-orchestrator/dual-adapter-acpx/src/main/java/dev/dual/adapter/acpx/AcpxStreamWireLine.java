@@ -38,15 +38,27 @@ record AcpxStreamWireLine(
         }
     }
 
-    record Result(String sessionId, Usage usage) {
+    record Result(String sessionId, String stopReason, Usage usage) {
         Result {
             sessionId = sessionId == null ? "" : sessionId;
+            stopReason = stopReason == null ? "" : stopReason;
         }
     }
 
-    record Notification(String updateKind, UsageUpdate usageUpdate) {
+    record Notification(
+            String sessionId,
+            String updateKind,
+            String messageId,
+            String contentType,
+            String text,
+            UsageUpdate usageUpdate
+    ) {
         Notification {
+            sessionId = sessionId == null ? "" : sessionId;
             updateKind = updateKind == null ? "" : updateKind;
+            messageId = messageId == null ? "" : messageId;
+            contentType = contentType == null ? "" : contentType;
+            text = text == null ? "" : text;
         }
     }
 
@@ -127,7 +139,11 @@ record AcpxStreamWireLine(
                     requestId,
                     method,
                     null,
-                    new Result(text(resultNode.get("sessionId")), usage(resultNode.get("usage"))),
+                    new Result(
+                            text(resultNode.get("sessionId")),
+                            text(resultNode.get("stopReason")),
+                            usage(resultNode.get("usage"))
+                    ),
                     null,
                     null
             );
@@ -154,7 +170,14 @@ record AcpxStreamWireLine(
                     method,
                     null,
                     null,
-                    new Notification(updateKind, usageUpdate(updateKind, update)),
+                    new Notification(
+                            text(node.at("/params/sessionId")),
+                            updateKind,
+                            text(update.get("messageId")),
+                            text(update.at("/content/type")),
+                            text(update.at("/content/text")),
+                            usageUpdate(updateKind, update)
+                    ),
                     null
             );
         }

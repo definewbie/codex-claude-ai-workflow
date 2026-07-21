@@ -1,7 +1,7 @@
 package dev.dual.runtime.handler;
 
 import dev.dual.core.execution.ArtifactContractResult;
-import dev.dual.core.execution.TerminalControlResult;
+import dev.dual.core.execution.AgentResultContractResult;
 import dev.dual.core.workflow.NodeResult;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 final class AgentExecutionResultFacts {
-    static final String TERMINAL_CONTROL_RESULT = "agent_execution_terminal_control_result";
+    static final String AGENT_RESULT_CONTRACT = "agent_execution_result_contract";
     static final String ARTIFACT_CONTRACT_RESULTS = "agent_execution_artifact_contract_results";
     static final String REREAD_REASONS = "reread_reasons";
 
@@ -19,13 +19,13 @@ final class AgentExecutionResultFacts {
 
     static NodeResult attach(
             NodeResult result,
-            TerminalControlResult terminalControlResult,
+            AgentResultContractResult agentResultContract,
             List<ArtifactContractResult> artifactContractResults,
             Object rereadReasons
     ) {
         var facts = new LinkedHashMap<String, Object>();
         facts.putAll(result.result());
-        facts.put(TERMINAL_CONTROL_RESULT, terminalControlToMap(terminalControlResult));
+        facts.put(AGENT_RESULT_CONTRACT, agentResultContractToMap(agentResultContract));
         facts.put(ARTIFACT_CONTRACT_RESULTS, artifactContractResults.stream()
                 .map(AgentExecutionResultFacts::artifactContractToMap)
                 .toList());
@@ -35,18 +35,18 @@ final class AgentExecutionResultFacts {
         return new NodeResult(result.outcome(), result.status(), result.outputRefs(), facts, result.errorMessage());
     }
 
-    static TerminalControlResult terminalControlResult(NodeResult result) {
-        var value = result.result().get(TERMINAL_CONTROL_RESULT);
+    static AgentResultContractResult agentResultContract(NodeResult result) {
+        var value = result.result().get(AGENT_RESULT_CONTRACT);
         if (value instanceof Map<?, ?> map) {
-            return new TerminalControlResult(
+            return new AgentResultContractResult(
                     booleanValue(map.get("present")),
                     booleanValue(map.get("valid")),
                     text(map.get("decision")),
                     text(map.get("summary")),
-                    text(map.get("parseError"))
+                    text(map.get("validationError"))
             );
         }
-        return TerminalControlResult.missing();
+        return AgentResultContractResult.missing();
     }
 
     static List<ArtifactContractResult> artifactContractResults(NodeResult result) {
@@ -76,19 +76,19 @@ final class AgentExecutionResultFacts {
     }
 
     static boolean present(NodeResult result) {
-        return result.result().containsKey(TERMINAL_CONTROL_RESULT)
+        return result.result().containsKey(AGENT_RESULT_CONTRACT)
                 || result.result().containsKey(ARTIFACT_CONTRACT_RESULTS)
                 || (result.result().containsKey("run_metadata")
                 && result.result().containsKey("process_usability"));
     }
 
-    static Map<String, Object> terminalControlToMap(TerminalControlResult terminal) {
+    static Map<String, Object> agentResultContractToMap(AgentResultContractResult result) {
         var map = new LinkedHashMap<String, Object>();
-        map.put("present", terminal.present());
-        map.put("valid", terminal.valid());
-        map.put("decision", terminal.decision());
-        map.put("summary", terminal.summary());
-        map.put("parseError", terminal.parseError());
+        map.put("present", result.present());
+        map.put("valid", result.valid());
+        map.put("decision", result.decision());
+        map.put("summary", result.summary());
+        map.put("validationError", result.validationError());
         return map;
     }
 

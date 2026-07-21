@@ -14,10 +14,10 @@ class AgentExecutionOutcomeResolverTest {
     private final AgentExecutionOutcomeResolver resolver = new AgentExecutionOutcomeResolver();
 
     @Test
-    void processOkTerminalValidArtifactValidSucceeds() {
+    void processOkAgentResultValidArtifactValidSucceeds() {
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
@@ -29,10 +29,10 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void processOkTerminalValidArtifactMissingFailsContract() {
+    void processOkAgentResultValidArtifactMissingFailsContract() {
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
                 List.of()
         );
@@ -45,12 +45,12 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void reconnectWithValidTerminalAndArtifactCannotSucceed() {
+    void reconnectWithValidAgentResultAndArtifactCannotSucceed() {
         var reconnect = AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED);
 
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of(reconnect)
         );
@@ -63,12 +63,12 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void reconnectWithValidTerminalButMissingArtifactKeepsAdapterBoundaryAsPrimary() {
+    void reconnectWithValidAgentResultButMissingArtifactKeepsAdapterBoundaryAsPrimary() {
         var reconnect = AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED);
 
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
                 List.of(reconnect)
         );
@@ -80,16 +80,16 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void missingTerminalControlIsOutputIncomplete() {
+    void missingAgentResultIsOutputIncomplete() {
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.missing(),
+                AgentResultContractResult.missing(),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
 
         assertEquals(AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE, outcome.status());
-        assertEquals("terminal_control_missing_or_invalid", outcome.primaryReason());
+        assertEquals("agent_result_missing_or_invalid", outcome.primaryReason());
         assertEquals(RecoveryCategory.OUTPUT_INCOMPLETE, outcome.recoveryCategory());
     }
 
@@ -97,7 +97,7 @@ class AgentExecutionOutcomeResolverTest {
     void blockingAdapterSignalPreventsSuccess() {
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of(AdapterSignal.of(AdapterSignalType.AUTH_FAILED))
         );
@@ -109,12 +109,12 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void rateLimitWithValidTerminalAndArtifactRemainsRecoverableAdapterFailure() {
+    void rateLimitWithValidAgentResultAndArtifactRemainsRecoverableAdapterFailure() {
         var signal = AdapterSignal.of(AdapterSignalType.RATE_LIMITED);
 
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of(signal)
         );
@@ -132,7 +132,7 @@ class AgentExecutionOutcomeResolverTest {
 
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
                 List.of(signal)
         );
@@ -145,10 +145,10 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void nonZeroIncompleteWithValidTerminalAndArtifactDoesNotSucceed() {
+    void nonZeroIncompleteWithValidAgentResultAndArtifactDoesNotSucceed() {
         var outcome = resolve(
                 ProcessResult.nonZeroIncomplete(5),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
@@ -163,7 +163,7 @@ class AgentExecutionOutcomeResolverTest {
     void timeoutCannotSucceed() {
         var outcome = resolve(
                 ProcessResult.timedOutProcess(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
@@ -177,7 +177,7 @@ class AgentExecutionOutcomeResolverTest {
     void interruptedCannotSucceed() {
         var outcome = resolve(
                 ProcessResult.interruptedProcess(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
@@ -191,7 +191,7 @@ class AgentExecutionOutcomeResolverTest {
     void nonZeroCompleteWithValidEvidenceSucceedsWithWarnings() {
         var outcome = resolve(
                 ProcessResult.nonZeroComplete(5),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
@@ -201,10 +201,10 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void nonZeroIncompleteWithValidTerminalButMissingArtifactFailsContract() {
+    void nonZeroIncompleteWithValidAgentResultButMissingArtifactFailsContract() {
         var outcome = resolve(
                 ProcessResult.nonZeroIncomplete(5),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
                 List.of()
         );
@@ -219,7 +219,7 @@ class AgentExecutionOutcomeResolverTest {
 
         var outcome = resolve(
                 ProcessResult.killedAfterRecoverableSignal(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of(reconnect)
         );
@@ -233,7 +233,7 @@ class AgentExecutionOutcomeResolverTest {
     void agentExecutionOwnsOutcomeAndRuntimeFacts() {
         var outcome = resolve(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         );
@@ -252,7 +252,7 @@ class AgentExecutionOutcomeResolverTest {
                 Instant.parse("2026-06-22T00:00:01Z"),
                 ProcessResult.exitedZero(),
                 List.of(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 null,
                 null,
@@ -279,7 +279,7 @@ class AgentExecutionOutcomeResolverTest {
                 null,
                 ProcessResult.exitedZero(),
                 List.of(),
-                TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(),
                 null,
                 null,
@@ -289,10 +289,10 @@ class AgentExecutionOutcomeResolverTest {
 
     private AgentExecutionOutcome resolve(
             ProcessResult process,
-            TerminalControlResult terminal,
+            AgentResultContractResult agentResult,
             List<ArtifactContractResult> artifacts,
             List<AdapterSignal> signals
     ) {
-        return resolver.resolve(new AgentExecutionEvidence(process, terminal, artifacts, signals));
+        return resolver.resolve(new AgentExecutionEvidence(process, agentResult, artifacts, signals));
     }
 }

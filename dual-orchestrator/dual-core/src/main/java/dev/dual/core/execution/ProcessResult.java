@@ -5,7 +5,7 @@ package dev.dual.core.execution;
  *
  * <p>The process result does not decide workflow state. It only records what
  * happened at the adapter boundary so {@link AgentExecutionOutcomeResolver}
- * can combine it with terminal control and artifact contract results.</p>
+ * can combine it with the agent result and artifact contract results.</p>
  */
 public record ProcessResult(
         String command,

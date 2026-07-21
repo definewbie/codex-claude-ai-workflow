@@ -320,7 +320,8 @@ public final class HumanReviewGateHandler implements GateHandler {
     }
 
     private AgentDecisionSummary latestAgentDecision(GateContext context) {
-        var fromRefs = AgentEvidenceIndex.latestFromRefs(context.workspaceRoot(), context.instance().inputRefs(), objectMapper)
+        var fromRefs = AgentEvidenceIndex.latestFromRefs(
+                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
                 .map(entry -> agentDecisionFromSidecar(context, entry));
         if (fromRefs.isPresent() && !fromRefs.get().isEmpty()) {
             return fromRefs.get();
@@ -392,7 +393,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         var sidecar = sidecarPath(path);
         if (Files.isRegularFile(sidecar)) {
             summary.put("sidecar", displayRef(context.workspaceRoot(), sidecar));
-            appendSidecarSummary(summary, sidecar);
+            appendSidecarSummary(context, summary, sidecar);
         }
         return summary;
     }
@@ -416,23 +417,33 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     private Path sidecarPath(Path artifactPath) {
         var name = artifactPath.getFileName().toString();
+        if (name.endsWith(".contract.json")) {
+            return artifactPath;
+        }
         if (name.endsWith(".md")) {
             return artifactPath.resolveSibling(name.substring(0, name.length() - ".md".length()) + ".contract.json");
         }
-        return artifactPath.resolveSibling(name + ".contract.json");
+        return AgentOutputContractSidecar.pathFor(artifactPath);
     }
 
-    @SuppressWarnings("unchecked")
-    private void appendSidecarSummary(Map<String, Object> summary, Path sidecar) {
-        try {
-            var tree = objectMapper.readValue(sidecar.toFile(), Map.class);
-            summary.put("decision", text(tree.get("decision")));
-            summary.put("summary", text(tree.get("summary")));
-            summary.put("mustFix", stringList(tree.get("must_fix")));
-            summary.put("openRisks", stringList(tree.get("open_risks")));
-        } catch (Exception ignored) {
-            summary.put("sidecarStatus", "unreadable");
+    private void appendSidecarSummary(
+            GateContext context,
+            Map<String, Object> summary,
+            Path sidecar
+    ) {
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper)
+                .orElseThrow(() -> new IllegalStateException(
+                        "routed human review sidecar is unreadable: " + sidecar));
+        var violation = AgentOutputLineageVerifier.violation(
+                context.workspaceRoot(), context.workstreamId(), sidecar, document);
+        if (violation.isPresent()) {
+            throw new IllegalStateException(
+                    "routed human review sidecar lineage is invalid: " + violation.get());
         }
+        summary.put("decision", document.decision());
+        summary.put("summary", document.summary());
+        summary.put("mustFix", document.mustFix());
+        summary.put("openRisks", document.openRisks());
     }
 
     private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions) {

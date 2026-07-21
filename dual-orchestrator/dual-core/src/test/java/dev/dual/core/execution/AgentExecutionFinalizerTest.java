@@ -17,7 +17,7 @@ class AgentExecutionFinalizerTest {
     void validEvidenceProducesConsistentCompletedAttemptAndLegacyFields() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         ));
@@ -34,7 +34,7 @@ class AgentExecutionFinalizerTest {
     void contractFailureProducesContractFailedAttemptAndLegacyFailure() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
                 List.of(ArtifactContractResult.requiredMissing("plan_artifact")),
                 List.of()
         ));
@@ -51,7 +51,7 @@ class AgentExecutionFinalizerTest {
     void reconnectSignalWithCompleteEvidenceBecomesRecoverableFailure() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.exitedZero(),
-                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of(AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED))
         ));
@@ -69,7 +69,7 @@ class AgentExecutionFinalizerTest {
     void killedAfterNonReconnectRecoverableSignalDoesNotBecomeReconnectProcessStatus() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.killedAfterRecoverableSignal(),
-                TerminalControlResult.missing(),
+                AgentResultContractResult.missing(),
                 List.of(),
                 List.of(AdapterSignal.of(AdapterSignalType.MODEL_MISMATCH))
         ));
@@ -84,7 +84,7 @@ class AgentExecutionFinalizerTest {
     void timeoutProducesTimedOutAttemptAndNoSuccessContradiction() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.timedOutProcess(),
-                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         ));
@@ -101,7 +101,7 @@ class AgentExecutionFinalizerTest {
     void stalledProducesStalledAttemptAndNoSuccessContradiction() {
         var stalled = finalizer.finalize(baseAttempt(), evidence(
                 new ProcessResult("", null, null, ProcessUsability.STALLED, 0, "", "", false, false),
-                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         ));
@@ -117,7 +117,7 @@ class AgentExecutionFinalizerTest {
     void interruptedProducesInterruptedAttemptAndNoSuccessContradiction() {
         var finalized = finalizer.finalize(baseAttempt(), evidence(
                 ProcessResult.interruptedProcess(),
-                TerminalControlResult.valid("READY_FOR_PLAN_REVIEW"),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
                 List.of()
         ));
@@ -156,10 +156,10 @@ class AgentExecutionFinalizerTest {
 
     private static AgentExecutionEvidence evidence(
             ProcessResult process,
-            TerminalControlResult terminal,
+            AgentResultContractResult agentResult,
             List<ArtifactContractResult> artifacts,
             List<AdapterSignal> signals
     ) {
-        return new AgentExecutionEvidence(process, terminal, artifacts, signals);
+        return new AgentExecutionEvidence(process, agentResult, artifacts, signals);
     }
 }

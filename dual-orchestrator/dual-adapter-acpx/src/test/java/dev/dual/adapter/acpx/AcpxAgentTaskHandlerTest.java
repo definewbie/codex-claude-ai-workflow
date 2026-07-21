@@ -281,12 +281,12 @@ class AcpxAgentTaskHandlerTest {
     void completedRunWritesArtifactMetadataSidecars() throws Exception {
         var runDir = tempDir.resolve(".agent/workstreams/ws-test/runs/run-001");
         var promptPath = runDir.resolve("prompts/design-claude.md");
-        var outputPath = runDir.resolve("outputs/design-claude.md");
+        var outputPath = runDir.resolve("outputs/design-claude.json");
         var stderrPath = runDir.resolve("outputs/design-claude.stderr.log");
         Files.createDirectories(promptPath.getParent());
         Files.createDirectories(outputPath.getParent());
         Files.writeString(promptPath, "# Prompt\n");
-        Files.writeString(outputPath, "# Output\nDecision text.\n");
+        Files.writeString(outputPath, "{\"schema_version\":1}\n");
         Files.writeString(stderrPath, "");
 
         var startedAt = Instant.parse("2026-05-24T00:00:00Z");
@@ -347,11 +347,12 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("claude", executionAttempt.path("agent").asText());
         assertEquals("2026-05-24T00:00:00Z", executionAttempt.path("startedAt").asText());
         assertEquals("2026-05-24T00:00:03Z", executionAttempt.path("finishedAt").asText());
-        var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.md.meta.json"));
+        var outputMetadata = Files.readString(runDir.resolve("outputs/design-claude.json.meta.json"));
         assertTrue(outputMetadata.contains("\"artifactType\" : \"output\""));
-        assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.md\""));
+        assertTrue(outputMetadata.contains("\"contentType\" : \"application/json\""));
+        assertTrue(outputMetadata.contains("\"artifactPath\" : \".agent/workstreams/ws-test/runs/run-001/outputs/design-claude.json\""));
         assertTrue(outputMetadata.contains("\"estimatedTokens\" :"));
-        assertTrue(outputMetadata.contains("\"lineCount\" : 2"));
+        assertTrue(outputMetadata.contains("\"lineCount\" : 1"));
         assertTrue(outputMetadata.contains("\"sha256\" :"));
     }
 
@@ -516,8 +517,10 @@ class AcpxAgentTaskHandlerTest {
 
         var outputPath = tempDir.resolve(finalArtifactRef);
         var finalArtifact = Files.readString(outputPath);
-        assertTrue(finalArtifact.contains("<dual-artifact type=\"agent_output_contract\">"));
-        assertTrue(finalArtifact.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(finalArtifact.contains("\"artifact_type\" : \"task_contract_proposal\""));
+        assertTrue(finalArtifact.contains("\"decision\" : \"READY_FOR_PRODUCT_REVIEW\""));
+        assertFalse(finalArtifact.contains("dual-control"));
+        assertFalse(finalArtifact.contains("<dual-artifact"));
         assertFalse(finalArtifact.contains("[tool]"));
         assertFalse(finalArtifact.contains("[client]"));
         assertFalse(finalArtifact.contains("\n  input:"));
@@ -748,7 +751,7 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("completed", result.outcome());
         assertEquals(5, result.result().get("exit_code"));
         assertEquals("EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT", result.result().get("process_usability"));
-        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.md")));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.json")));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
         assertTrue(runMetadata.contains("\"status\" : \"completed\""));
@@ -844,6 +847,52 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
         assertTrue(runMetadata.contains("\"explorationPolicyResultPath\" :"), runMetadata);
         assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
+    }
+
+    @Test
+    void unresolvedSessionRequestCannotUseEarlierCompletionToSuppressReconnect() throws Exception {
+        var originalUserHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home");
+        var sessionsDir = fakeHome.resolve(".acpx/sessions");
+        var sessionId = "7db7b7ad-a6f5-418f-b8e0-0465b0a5ea6b";
+        Files.createDirectories(sessionsDir);
+        System.setProperty("user.home", fakeHome.toString());
+        try {
+            var workstreamDir = tempDir.resolve(".agent/workstreams/ws-pending-session");
+            Files.createDirectories(workstreamDir);
+            Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+            var handler = new AcpxAgentTaskHandler(
+                    new UnresolvedSessionReconnectTransport(sessionsDir, sessionId), false);
+            var definition = new NodeDefinition(
+                    "intake.claude_brainstorm",
+                    NodeKind.TASK,
+                    "acpx.agent_run",
+                    Map.of(
+                            "agent", "claude",
+                            "session", "claude-main",
+                            "prompt_template", "intake-claude-brainstorm"
+                    )
+            );
+
+            var result = handler.execute(new TaskHandler.TaskContext(
+                    tempDir,
+                    "ws-pending-session",
+                    definition,
+                    readyInstance("intake.claude_brainstorm")
+            ));
+
+            var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
+            assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_RECONNECT\""), runMetadata);
+            assertTrue(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
+            assertFalse(runMetadata.contains("\"primaryReason\" : \"completed\""), runMetadata);
+        } finally {
+            if (originalUserHome == null) {
+                System.clearProperty("user.home");
+            } else {
+                System.setProperty("user.home", originalUserHome);
+            }
+        }
     }
 
     @Test
@@ -998,7 +1047,7 @@ class AcpxAgentTaskHandlerTest {
                 definition,
                 result
         );
-        assertTrue(validated.result().containsKey("agent_execution_terminal_control_result"), validated.result().toString());
+        assertTrue(validated.result().containsKey("agent_execution_result_contract"), validated.result().toString());
         assertTrue(validated.result().containsKey("agent_execution_artifact_contract_results"), validated.result().toString());
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
 
@@ -1248,7 +1297,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 5, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1279,7 +1328,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1315,7 +1364,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1343,7 +1392,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1366,18 +1415,20 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(
+            return completedResult(
+                    request,
                     0,
                     now,
-                    now.plusSeconds(1),
                     List.of("acpx", "claude"),
                     List.of(new AcpxExecutionEvent(
-                            AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
-                            "stdout",
+                            AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
+                            "acp",
                             7,
                             now.plusMillis(750),
                             750
-                    ))
+                    )),
+                    null,
+                    "READY_FOR_PRODUCT_REVIEW"
             );
         }
     }
@@ -1405,7 +1456,24 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "codex"));
+            var resultJson = completionJson(request, "NEEDS_REVISION");
+            var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(resultJson);
+            var result = (com.fasterxml.jackson.databind.node.ObjectNode) envelope.path("result");
+            result.put("summary", "token refresh missing");
+            result.withArray("must_fix").add("refresh token on expiry");
+            result.withArray("open_risks").add("race on logout");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "codex"),
+                    List.of(),
+                    null,
+                    new AcpxPromptCompletion(
+                            "fixture-prompt",
+                            "end_turn",
+                            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope))
+            );
         }
     }
 
@@ -1492,8 +1560,8 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
 
         var root = OBJECT_MAPPER.readTree(runJson.toFile());
-        assertEquals("SUCCESS", root.path("executionOutcome").path("status").asText(),
-                "policy failure must not rewrite process/artifact success into an adapter failure");
+        assertTrue(root.path("executionOutcome").isMissingNode() || root.path("executionOutcome").isNull(),
+                "adapter completion must not declare the unvalidated assistant candidate successful");
         assertEquals("COMPLETED", root.path("executionAttempt").path("status").asText(),
                 "successful process execution remains completed even when harness policy rejects the node");
         assertEquals(0, root.path("adapterSignals").size(),
@@ -1555,13 +1623,13 @@ class AcpxAgentTaskHandlerTest {
                 .filter(p -> p.getFileName().toString().equals("run.json")).findFirst().orElseThrow();
         var runMetadata = Files.readString(runJson);
         assertTrue(runMetadata.contains("\"executionTimeline\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"kind\" : \"terminal_control_detected\""), runMetadata);
+        assertTrue(runMetadata.contains("\"kind\" : \"process_wait_completed\""), runMetadata);
         assertTrue(runMetadata.contains("\"kind\" : \"artifact_extracted\""), runMetadata);
         assertTrue(runMetadata.contains("\"elapsedMs\" : 750"), runMetadata);
     }
 
     @Test
-    void completedRunWritesSemanticMemoryFromContractEnvelope() throws Exception {
+    void unvalidatedCompletionDoesNotEnterSemanticMemory() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-sem-run");
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("requirement.md"), "Ship token refresh.\n");
@@ -1579,8 +1647,8 @@ class AcpxAgentTaskHandlerTest {
 
         var memory = Files.readString(workstreamDir.resolve("memory/workstream-memory.json"));
         assertTrue(memory.contains("token refresh"), "decidedScope must come from task-contract: " + memory);
-        assertTrue(memory.contains("REJECTED"), "verdict decision must be recorded: " + memory);
-        assertTrue(memory.contains("refresh token on expiry"), "open issue must be recorded: " + memory);
+        assertFalse(memory.contains("NEEDS_REVISION"), "unvalidated decision must not enter memory: " + memory);
+        assertFalse(memory.contains("refresh token on expiry"), "unvalidated issue must not enter memory: " + memory);
     }
 
     private static NodeInstance readyInstance(String definitionId) {
@@ -1652,7 +1720,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
 
         @Override
@@ -1675,7 +1743,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "codex"));
+            return completedResult(request, 0, now, List.of("acpx", "codex"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1698,7 +1766,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(5, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 5, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1714,6 +1782,34 @@ class AcpxAgentTaskHandlerTest {
                     [done] end_turn
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+        }
+    }
+
+    private static final class UnresolvedSessionReconnectTransport extends AcpxAgentTransport {
+        private final Path sessionsDir;
+        private final String sessionId;
+
+        private UnresolvedSessionReconnectTransport(Path sessionsDir, String sessionId) {
+            this.sessionsDir = sessionsDir;
+            this.sessionId = sessionId;
+        }
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.createDirectories(sessionsDir);
+            Files.writeString(request.stdoutPath(), "Agent output stopped before terminal control.\n");
+            Files.writeString(
+                    request.stderrPath(),
+                    "[acpx] session claude-main (" + sessionId + ") · agent needs reconnect\n"
+            );
+            Files.writeString(sessionsDir.resolve(sessionId + ".stream.ndjson"), """
+                    {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"done"}}}}
+                    {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn"}}
+                    {"jsonrpc":"2.0","method":"session/new","id":4,"params":{}}
+                    """);
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
         }
@@ -1780,7 +1876,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 
@@ -1824,13 +1920,14 @@ class AcpxAgentTaskHandlerTest {
                     AcpxProviderMetadata.SOURCE_CLAUDE_SETTINGS_ENV,
                     ""
             );
-            return new AcpxRunResult(
+            return completedResult(
+                    request,
                     0,
                     now,
-                    now.plusSeconds(1),
                     List.of("claude", "--print"),
                     List.of(),
-                    usage
+                    usage,
+                    "READY_FOR_PRODUCT_REVIEW"
             );
         }
     }
@@ -1880,7 +1977,48 @@ class AcpxAgentTaskHandlerTest {
                     {"jsonrpc":"2.0","id":7,"result":{"usage":{"inputTokens":100,"outputTokens":5,"cachedReadTokens":1000,"cachedWriteTokens":2,"totalTokens":1107}}}
                     """.formatted(promptText));
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
+    }
+
+    private static AcpxRunResult completedResult(
+            AcpxRunRequest request,
+            int exitCode,
+            Instant startedAt,
+            List<String> command,
+            String decision
+    ) throws java.io.IOException {
+        return completedResult(request, exitCode, startedAt, command, List.of(), null, decision);
+    }
+
+    private static AcpxRunResult completedResult(
+            AcpxRunRequest request,
+            int exitCode,
+            Instant startedAt,
+            List<String> command,
+            List<AcpxExecutionEvent> timeline,
+            AcpxUsage usage,
+            String decision
+    ) throws java.io.IOException {
+        var resultJson = completionJson(request, decision);
+        return new AcpxRunResult(
+                exitCode,
+                startedAt,
+                startedAt.plusSeconds(1),
+                command,
+                timeline,
+                usage,
+                new AcpxPromptCompletion("fixture-prompt", "end_turn", resultJson)
+        );
+    }
+
+    private static String completionJson(AcpxRunRequest request, String decision) throws java.io.IOException {
+        var prompt = Files.readString(request.promptPath());
+        var start = prompt.lastIndexOf("{\n  \"schema_version\"");
+        if (start < 0) {
+            throw new AssertionError("strict AgentResultEnvelope example missing from prompt");
+        }
+        return prompt.substring(start).strip()
+                .replace("<one allowed decision>", decision);
     }
 }

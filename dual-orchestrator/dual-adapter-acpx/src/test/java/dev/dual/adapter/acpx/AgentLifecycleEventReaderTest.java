@@ -43,6 +43,38 @@ class AgentLifecycleEventReaderTest {
     }
 
     @Test
+    void initialStreamTailCannotReplayHistoricalPromptCompletion() throws Exception {
+        var stdout = tempDir.resolve("stdout-old-prompt.log");
+        var stderr = tempDir.resolve("stderr-old-prompt.log");
+        var sessionsDir = tempDir.resolve("sessions-old-prompt");
+        var sessionId = "11111111-2222-3333-4444-555555555556";
+        var stream = sessionsDir.resolve(sessionId + ".stream.ndjson");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stdout, "");
+        Files.writeString(stderr, "[acpx] session claude-main (" + sessionId + ") · agent connected\n");
+        Files.writeString(stream, """
+                {"jsonrpc":"2.0","id":20,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"old","content":{"type":"text","text":"{\\"run_id\\":\\"old\\"}"}}}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                """);
+
+        var reader = new AgentLifecycleEventReader(stdout, stderr, sessionsDir);
+        reader.readNewEvents();
+        assertFalse(reader.promptCompletion().completed());
+
+        Files.writeString(stream, """
+                {"jsonrpc":"2.0","id":21,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"new","content":{"type":"text","text":"{\\"run_id\\":\\"new\\"}"}}}}
+                {"jsonrpc":"2.0","id":21,"result":{"stopReason":"end_turn"}}
+                """, StandardOpenOption.APPEND);
+
+        reader.readNewEvents();
+        assertTrue(reader.promptCompletion().completed());
+        assertEquals("21", reader.promptCompletion().requestId());
+        assertEquals("{\"run_id\":\"new\"}", reader.promptCompletion().finalAssistantMessage());
+    }
+
+    @Test
     void laterStreamProviderFailureIsCurrentEvidence() throws Exception {
         var stdout = tempDir.resolve("stdout.md");
         var stderr = tempDir.resolve("stderr.log");
@@ -147,8 +179,11 @@ class AgentLifecycleEventReaderTest {
                 StandardOpenOption.APPEND);
         assertTrue(reader.readNewEvents().isEmpty());
 
-        Files.writeString(secondStream, "{\"jsonrpc\":\"2.0\",\"id\":11,\"method\":\"session/prompt\",\"params\":{}}\n");
+        Files.writeString(secondStream, "");
         Files.writeString(stderr, "[acpx] session claude-main (" + secondSession + ")\n",
+                StandardOpenOption.APPEND);
+        reader.readNewEvents();
+        Files.writeString(secondStream, "{\"jsonrpc\":\"2.0\",\"id\":11,\"method\":\"session/prompt\",\"params\":{}}\n",
                 StandardOpenOption.APPEND);
 
         assertTrue(reader.readNewEvents().stream()

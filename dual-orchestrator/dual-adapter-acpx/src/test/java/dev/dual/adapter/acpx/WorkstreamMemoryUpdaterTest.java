@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.runtime.handler.AgentOutputContractSidecar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -121,24 +122,22 @@ class WorkstreamMemoryUpdaterTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void updateMemoryExtractsVerdictAndOpenIssuesFromContractEnvelope() throws Exception {
+    void updateMemoryExtractsVerdictAndOpenIssuesFromValidatedSidecar() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-verdict");
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
                 {"objective":"o","status":"active","scope":{"included":[],"excluded":[]},
                  "nonGoals":[],"acceptanceCriteria":[],"constraints":[],"riskAreas":[]}
                 """, StandardCharsets.UTF_8);
-        var output = workstreamDir.resolve("runs/run-1/outputs/verifier.md");
+        var output = workstreamDir.resolve("runs/run-1/outputs/verifier.json");
         Files.createDirectories(output.getParent());
-        Files.writeString(output, """
-                Some narrative prose that must NOT become memory.
-
-                <dual-artifact type="agent_output_contract" version="1">
-                {"node_id":"acceptance.codex_verifier_review","decision":"REJECTED",
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        Files.writeString(AgentOutputContractSidecar.pathFor(output), """
+                {"artifact_type":"agent_output_contract",
+                 "node_id":"acceptance.codex_verifier_review","decision":"REJECT",
                  "summary":"token refresh missing","stage_outcome":"needs_revision",
                  "must_fix":["refresh token on expiry"],"open_risks":["race on logout"],
                  "changed_files":["src/auth.py"],"verification_summary":"tests red"}
-                </dual-artifact>
                 """, StandardCharsets.UTF_8);
 
         var updater = new WorkstreamMemoryUpdater();
@@ -147,8 +146,8 @@ class WorkstreamMemoryUpdaterTest {
 
         var memory = objectMapper.readValue(updater.memoryPath(tempDir, "ws-verdict").toFile(), Map.class);
         var verdicts = (List<?>) memory.get("priorVerdicts");
-        assertFalse(verdicts.isEmpty(), "REJECTED verdict must be recorded as prior verdict");
-        assertEquals("REJECTED", ((Map<?, ?>) verdicts.get(0)).get("decision"));
+        assertFalse(verdicts.isEmpty(), "REJECT verdict must be recorded as prior verdict");
+        assertEquals("REJECT", ((Map<?, ?>) verdicts.get(0)).get("decision"));
         var openIssues = (List<?>) memory.get("openIssues");
         var descs = new java.util.ArrayList<String>();
         var sourceFields = new java.util.ArrayList<String>();

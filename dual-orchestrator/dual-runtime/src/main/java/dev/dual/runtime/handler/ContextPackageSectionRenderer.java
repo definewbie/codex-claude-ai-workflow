@@ -20,11 +20,9 @@ import java.util.stream.Stream;
 
 final class ContextPackageSectionRenderer {
     private static final int DEFAULT_SNIPPET_CHARS = 4_000;
-    private static final int MAX_EMBEDDED_AGENT_ARTIFACT_CHARS = 4_000;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
-    private static final AgentArtifactEnvelopeParser AGENT_ARTIFACTS = new AgentArtifactEnvelopeParser();
 
     private ContextPackageSectionRenderer() {
     }
@@ -78,6 +76,27 @@ final class ContextPackageSectionRenderer {
             }
             if (isTranscriptArtifact(path)) {
                 builder.append(" (execution transcript; omitted from context)\n");
+                continue;
+            }
+            if (isAgentOutput(path)) {
+                var entry = AgentEvidenceIndex.latestFromRefs(
+                        context.workspaceRoot(), context.workstreamId(), List.of(inputRef), OBJECT_MAPPER);
+                if (entry.isPresent()) {
+                    var contract = entry.get().document();
+                    builder.append(" — ");
+                    if (!contract.decision().isBlank()) {
+                        builder.append(contract.decision());
+                        if (!contract.summary().isBlank()) {
+                            builder.append(": ");
+                        }
+                    }
+                    builder.append(contract.summary().isBlank()
+                            ? "(validated agent result)"
+                            : contract.summary().replace("\n", " / "));
+                    builder.append("\n");
+                } else {
+                    builder.append(" (unvalidated agent result omitted from context)\n");
+                }
                 continue;
             }
             var content = Files.readString(path, StandardCharsets.UTF_8);
@@ -144,28 +163,12 @@ final class ContextPackageSectionRenderer {
         }
     }
 
-    static void appendRecentAgentOutputsLimited(StringBuilder builder, Path workstreamDir, int maxItems) throws IOException {
-        var runsDir = workstreamDir.resolve("runs");
-        if (!Files.exists(runsDir)) {
-            builder.append("(no agent runs)\n\n");
-            return;
-        }
-        try (Stream<Path> paths = Files.walk(runsDir)) {
-            var outputs = paths
-                    .filter(Files::isRegularFile)
-                    .filter(ContextPackageSectionRenderer::isAgentOutput)
-                    .filter(path -> path.getFileName().toString().endsWith(".md"))
-                    .sorted(Comparator.comparing(ContextPackageSectionRenderer::lastModified).reversed())
-                    .limit(maxItems)
-                    .toList();
-            if (outputs.isEmpty()) {
-                builder.append("(no agent outputs)\n\n");
-                return;
-            }
-            for (Path output : outputs) {
-                appendAgentOutputSnippet(builder, output, DEFAULT_SNIPPET_CHARS);
-            }
-        }
+    static void appendRecentAgentOutputsLimited(
+            StringBuilder builder,
+            TaskHandler.TaskContext context,
+            int maxItems
+    ) {
+        appendRoutedAgentOutputs(builder, context, maxItems);
     }
 
     static void appendGitEvidenceDiffStat(StringBuilder builder, Path workstreamDir,
@@ -260,9 +263,14 @@ final class ContextPackageSectionRenderer {
                         .append(")\n\n");
                 continue;
             }
-            if (isAgentOutput(path) && appendAgentContractSummary(builder, path)) {
-                appendEmbeddedAgentArtifacts(builder, path);
-                builder.append("- Raw Output: ").append(toDisplayRef(path)).append("\n\n");
+            if (isAgentOutput(path)) {
+                var entry = AgentEvidenceIndex.latestFromRefs(
+                        context.workspaceRoot(), context.workstreamId(), List.of(inputRef), OBJECT_MAPPER);
+                if (entry.isPresent()) {
+                    appendAgentContractFields(builder, entry.get().document(), entry.get().path());
+                } else {
+                    builder.append("(unvalidated agent result omitted from context)\n\n");
+                }
                 continue;
             }
             builder.append("```text\n");
@@ -355,28 +363,12 @@ final class ContextPackageSectionRenderer {
         }
     }
 
-    static void appendRecentAgentOutputs(StringBuilder builder, Path workstreamDir, int maxSnippetChars, int maxRecentAgentOutputs) throws IOException {
-        var runsDir = workstreamDir.resolve("runs");
-        if (!Files.exists(runsDir)) {
-            builder.append("(no agent runs yet)\n\n");
-            return;
-        }
-        try (Stream<Path> paths = Files.walk(runsDir)) {
-            var outputs = paths
-                    .filter(Files::isRegularFile)
-                    .filter(ContextPackageSectionRenderer::isAgentOutput)
-                    .filter(path -> path.getFileName().toString().endsWith(".md"))
-                    .sorted(Comparator.comparing(ContextPackageSectionRenderer::lastModified).reversed())
-                    .limit(maxRecentAgentOutputs)
-                    .toList();
-            if (outputs.isEmpty()) {
-                builder.append("(no markdown agent outputs yet)\n\n");
-                return;
-            }
-            for (Path output : outputs) {
-                appendAgentOutputSnippet(builder, output, maxSnippetChars);
-            }
-        }
+    static void appendRecentAgentOutputs(
+            StringBuilder builder,
+            TaskHandler.TaskContext context,
+            int maxRecentAgentOutputs
+    ) {
+        appendRoutedAgentOutputs(builder, context, maxRecentAgentOutputs);
     }
 
     private static void appendHumanFeedbackNode(StringBuilder builder, Map<String, Object> node) {
@@ -389,32 +381,40 @@ final class ContextPackageSectionRenderer {
         builder.append("\n```\n\n");
     }
 
-    private static void appendAgentOutputSnippet(StringBuilder builder, Path output, int maxSnippetChars) throws IOException {
-        builder.append("### ").append(toDisplayRef(output)).append("\n\n");
-        if (appendAgentContractSummary(builder, output)) {
-            appendEmbeddedAgentArtifacts(builder, output);
-            builder.append("- Raw Output: ").append(toDisplayRef(output)).append("\n\n");
+    private static void appendRoutedAgentOutputs(
+            StringBuilder builder,
+            TaskHandler.TaskContext context,
+            int maxItems
+    ) {
+        var entries = AgentEvidenceIndex.fromRefs(
+                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
+                .recent(maxItems);
+        if (entries.isEmpty()) {
+            builder.append("(no routed validated agent outputs)\n\n");
             return;
         }
-        builder.append("```text\n");
-        builder.append(snippetWithoutToolLog(output, Math.min(maxSnippetChars, 1_000)));
-        builder.append("\n```\n\n");
+        for (var entry : entries) {
+            appendAgentContractSummary(builder, entry);
+        }
     }
 
-    private static boolean appendAgentContractSummary(StringBuilder builder, Path output) {
-        var sidecar = AgentOutputContractSidecar.pathFor(output);
-        if (!Files.isRegularFile(sidecar)) {
-            return false;
-        }
-        var contract = AgentOutputContractDocument.read(sidecar, OBJECT_MAPPER);
-        if (contract.isEmpty()) {
-            return false;
-        }
-        var nodeId = contract.get().nodeId();
-        var decision = contract.get().decision();
-        var summary = contract.get().summary();
+    private static void appendAgentContractSummary(StringBuilder builder, AgentEvidenceIndex.Entry entry) {
+        var contract = entry.document();
+        builder.append("### ").append(toDisplayRef(entry.path())).append("\n\n");
+        appendAgentContractFields(builder, contract, entry.path());
+    }
+
+    private static void appendAgentContractFields(
+            StringBuilder builder,
+            AgentOutputContractDocument contract,
+            Path sidecar
+    ) {
+        var nodeId = contract.nodeId();
+        var decision = contract.decision();
+        var summary = contract.summary();
         if (nodeId.isBlank() && decision.isBlank() && summary.isBlank()) {
-            return false;
+            builder.append("(validated agent result has no summary fields)\n\n");
+            return;
         }
         if (!nodeId.isBlank()) {
             builder.append("- Contract: ").append(nodeId).append("\n");
@@ -425,48 +425,15 @@ final class ContextPackageSectionRenderer {
         if (!summary.isBlank()) {
             builder.append("- Summary: ").append(summary).append("\n");
         }
-        appendListSummary(builder, "Must Fix", contract.get().mustFix());
-        appendListSummary(builder, "Open Risks", contract.get().openRisks());
-        appendListSummary(builder, "Changed Files", contract.get().changedFiles());
-        var verification = contract.get().verificationSummary();
+        appendListSummary(builder, "Must Fix", contract.mustFix());
+        appendListSummary(builder, "Open Risks", contract.openRisks());
+        appendListSummary(builder, "Changed Files", contract.changedFiles());
+        var verification = contract.verificationSummary();
         if (!verification.isBlank()) {
             builder.append("- Verification: ").append(verification.replace("\n", " / ")).append("\n");
         }
-        builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n\n");
-        return true;
-    }
-
-    private static void appendEmbeddedAgentArtifacts(StringBuilder builder, Path output) {
-        List<AgentArtifactEnvelope> envelopes;
-        try {
-            envelopes = AGENT_ARTIFACTS.all(Files.readString(output, StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            return;
-        }
-        var trustedBusinessArtifacts = envelopes.stream()
-                .filter(envelope -> !"agent_output_contract".equals(envelope.type()))
-                .toList();
-        if (trustedBusinessArtifacts.isEmpty()) {
-            return;
-        }
-        builder.append("**Embedded Structured Artifacts:**\n\n");
-        for (var envelope : trustedBusinessArtifacts) {
-            builder.append("<dual-artifact type=\"")
-                    .append(envelope.type())
-                    .append("\" version=\"")
-                    .append(envelope.version())
-                    .append("\">\n");
-            builder.append(truncatedArtifactJson(envelope.json()));
-            builder.append("\n</dual-artifact>\n\n");
-        }
-    }
-
-    private static String truncatedArtifactJson(String json) {
-        if (json.length() <= MAX_EMBEDDED_AGENT_ARTIFACT_CHARS) {
-            return json.stripTrailing();
-        }
-        return json.substring(0, MAX_EMBEDDED_AGENT_ARTIFACT_CHARS).stripTrailing()
-                + "\n\n[truncated embedded artifact]";
+        builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n");
+        builder.append("- Raw Output: ").append(contract.sourceOutputRef()).append("\n\n");
     }
 
     private static void appendListSummary(StringBuilder builder, String label, Object value) {

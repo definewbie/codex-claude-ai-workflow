@@ -20,101 +20,86 @@ public final class ReviewDecisionHandler implements DecisionHandler {
 
     @Override
     public NodeResult evaluate(DecisionContext context) throws Exception {
-        var parseResult = readLatestDecisionContract(context);
-        if (parseResult.isMissing()) {
-            return failed("MISSING_CONTRACT_SIDECAR", "No agent output contract sidecar found in decision input refs.", context);
+        var read = readLatestDecisionContract(context);
+        if (read.missing()) {
+            return failed("MISSING_CONTRACT_SIDECAR",
+                    "No agent output contract sidecar found in decision input refs.", context, Set.of(), read);
         }
-        if (!parseResult.valid()) {
-            var allowed = allowedDecisions(context.definition().id());
-            return failed("INVALID_CONTRACT_SIDECAR", parseResult.message(), context, allowed, null, parseResult);
+        if (read.document() == null) {
+            return failed("INVALID_CONTRACT_SIDECAR", read.message(), context,
+                    allowedDecisions(context.definition().id()), read);
         }
-        var control = parseResult.block();
+        var document = read.document();
         var allowed = allowedDecisions(context.definition().id());
-        var decision = control.values().getOrDefault("decision", "").trim();
+        var decision = document.decision().trim();
         if (decision.isBlank()) {
-            return failed("INVALID_CONTRACT_SIDECAR", "contract sidecar missing required decision", context, allowed, control);
+            return failed("INVALID_CONTRACT_SIDECAR", "contract sidecar missing required decision",
+                    context, allowed, read);
         }
         if (!allowed.contains(decision)) {
-            return failed("INVALID_DECISION", "Unsupported decision for " + context.definition().id() + ": " + decision, context, allowed, control);
+            return failed("INVALID_DECISION",
+                    "Unsupported decision for " + context.definition().id() + ": " + decision,
+                    context, allowed, read);
         }
-        if ("BLOCKED".equals(decision)) {
-            return new NodeResult(decision, NodeStatus.BLOCKED, context.instance().inputRefs(), Map.of(
-                    "decision", decision,
-                    "source", "contract-sidecar",
-                    "summary", control.values().getOrDefault("summary", "")
-            ), "contract sidecar decision is BLOCKED");
-        }
-        return NodeResult.completed(decision, context.instance().inputRefs(), Map.of(
+        var facts = Map.<String, Object>of(
                 "decision", decision,
                 "source", "contract-sidecar",
-                "summary", control.values().getOrDefault("summary", "")
-        ));
+                "summary", document.summary());
+        if ("BLOCKED".equals(decision)) {
+            return new NodeResult(decision, NodeStatus.BLOCKED, context.instance().inputRefs(), facts,
+                    "contract sidecar decision is BLOCKED");
+        }
+        return NodeResult.completed(decision, context.instance().inputRefs(), facts);
     }
 
-    private DualControlParseResult readLatestDecisionContract(DecisionContext context) throws Exception {
+    private DecisionContractRead readLatestDecisionContract(DecisionContext context) {
+        var root = context.workspaceRoot().toAbsolutePath().normalize();
         var refs = context.instance().inputRefs();
         for (int i = refs.size() - 1; i >= 0; i--) {
             var ref = refs.get(i);
             if (ref.startsWith("artifact://")) {
                 continue;
             }
-            var path = context.workspaceRoot().resolve(ref).normalize();
-            if (!path.startsWith(context.workspaceRoot()) || !Files.exists(path)) {
+            var path = root.resolve(ref).normalize();
+            if (!path.startsWith(root) || !Files.isRegularFile(path)
+                    || !path.getFileName().toString().endsWith(".contract.json")) {
                 continue;
             }
-            if (path.getFileName().toString().endsWith(".contract.json")) {
-                return parseContractSidecar(path);
+            var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
+            if (document.isPresent()) {
+                if (AgentOutputLineageVerifier.violation(
+                        root, context.workstreamId(), path, document.get()).isPresent()) {
+                    return DecisionContractRead.invalid(
+                            "CONTRACT_SIDECAR_LINEAGE_INVALID",
+                            "Contract sidecar lineage does not match the current workstream: " + path.getFileName(),
+                            path.toString());
+                }
+                if (!document.get().hasDecision()) {
+                    return DecisionContractRead.invalid(
+                            "CONTRACT_SIDECAR_MISSING_DECISION",
+                            "Contract sidecar is missing required decision: " + path.getFileName(),
+                            path.toString());
+                }
+                return DecisionContractRead.valid(document.get(), path.toString());
             }
-        }
-        return DualControlParseResult.missing();
-    }
-
-    private DualControlParseResult parseContractSidecar(java.nio.file.Path path) {
-        var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
-        if (document.isEmpty()) {
-            return DualControlParseResult.invalid(
+            return DecisionContractRead.invalid(
                     "CONTRACT_SIDECAR_PARSE_FAILED",
                     "Could not read agent output contract sidecar: " + path.getFileName(),
-                    Map.of("path", path.toString())
-            );
+                    path.toString());
         }
-        var values = new java.util.LinkedHashMap<>(document.get().control());
-        if (!values.containsKey("decision") && document.get().hasDecision()) {
-            values.put("decision", document.get().decision());
-        }
-        if (!values.containsKey("summary") && !document.get().summary().isBlank()) {
-            values.put("summary", document.get().summary());
-        }
-        if (values.containsKey("decision")) {
-            return DualControlParseResult.valid(new DualControlBlock(values));
-        }
-        return DualControlParseResult.invalid(
-                "CONTRACT_SIDECAR_MISSING_DECISION",
-                "Agent output contract sidecar is missing decision.",
-                Map.of("path", path.toString())
-        );
+        return DecisionContractRead.notFound();
     }
 
-    private NodeResult failed(String reason, String message, DecisionContext context) {
-        return failed(reason, message, context, Set.of(), null);
-    }
-
-    private NodeResult failed(String reason, String message, DecisionContext context, Set<String> allowed, DualControlBlock control) {
-        return failed(reason, message, context, allowed, control, null);
-    }
-
-    private NodeResult failed(String reason, String message, DecisionContext context, Set<String> allowed, DualControlBlock control, DualControlParseResult parseResult) {
+    private NodeResult failed(String reason, String message, DecisionContext context,
+                              Set<String> allowed, DecisionContractRead read) {
         return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
                 "reason", reason,
                 "message", message,
                 "input_refs", context.instance().inputRefs(),
                 "allowed_decisions", List.copyOf(allowed),
-                "control_values", control == null ? Map.of() : control.values(),
-                "parse_error", parseResult == null ? Map.of() : Map.of(
-                        "code", parseResult.errorCode(),
-                        "message", parseResult.message(),
-                        "details", parseResult.details()
-                )
+                "contract_values", read.document() == null ? Map.of() : read.document().control(),
+                "parse_error", read.errorCode().isBlank() ? Map.of() : Map.of(
+                        "code", read.errorCode(), "message", read.message(), "path", read.path())
         ), message);
     }
 
@@ -123,5 +108,25 @@ public final class ReviewDecisionHandler implements DecisionHandler {
             return ContractRegistry.forNode(nodeId).allowedDecisions();
         }
         return new LinkedHashSet<>(List.of("PASS", "NEEDS_REVISION", "BLOCKED"));
+    }
+
+    private record DecisionContractRead(
+            AgentOutputContractDocument document,
+            String errorCode,
+            String message,
+            String path,
+            boolean missing
+    ) {
+        static DecisionContractRead valid(AgentOutputContractDocument document, String path) {
+            return new DecisionContractRead(document, "", "", path, false);
+        }
+
+        static DecisionContractRead invalid(String code, String message, String path) {
+            return new DecisionContractRead(null, code, message, path, false);
+        }
+
+        static DecisionContractRead notFound() {
+            return new DecisionContractRead(null, "", "", "", true);
+        }
     }
 }

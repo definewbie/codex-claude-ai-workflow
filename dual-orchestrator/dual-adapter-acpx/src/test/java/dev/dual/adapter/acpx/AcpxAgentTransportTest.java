@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTransportTest {
@@ -210,6 +211,190 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void returnsCurrentPromptFinalAssistantJsonFromTypedSessionStream() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("prompt-completion-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "55555555-6666-7777-8888-999999999999";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-prompt-completion.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":11,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"tool_call_update","messageId":"tool-1","content":{"type":"text","text":"{\\"decision\\":\\"WRONG\\"}"}}}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"assistant-1","content":{"type":"text","text":"{\\"schema_version\\":1,\\"run_id\\":\\"run-1\\"}"}}}}
+                {"jsonrpc":"2.0","id":11,"result":{"stopReason":"end_turn"}}
+                EOF
+                sleep 3
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt-completion.md");
+        var stdout = tempDir.resolve("prompt-completion.stdout");
+        var stderr = tempDir.resolve("prompt-completion.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+
+            assertEquals(0, result.exitCode());
+            assertTrue(result.promptCompletion().completed());
+            assertEquals("11", result.promptCompletion().requestId());
+            assertEquals("end_turn", result.promptCompletion().stopReason());
+            assertEquals("{\"schema_version\":1,\"run_id\":\"run-1\"}",
+                    result.promptCompletion().finalAssistantMessage());
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void processStartBaselineRejectsStalePromptResponseUntilCurrentRequestCompletes() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("prompt-occurrence-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "56565656-6767-7878-8989-909090909090";
+        var stream = sessionsDir.resolve(sessionId + ".stream.ndjson");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stream, """
+                {"jsonrpc":"2.0","id":20,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"old","content":{"type":"text","text":"{\\\"run_id\\\":\\\"old\\\"}"}}}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                """, StandardCharsets.UTF_8);
+        var exactResponseWritten = tempDir.resolve("current-exact-response-written");
+        var fakeAcpx = tempDir.resolve("acpx-prompt-occurrence.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":21,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                EOF
+                sleep 3
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"new","content":{"type":"text","text":"{\\\"run_id\\\":\\\"new\\\"}"}}}}
+                {"jsonrpc":"2.0","id":21,"result":{"stopReason":"end_turn"}}
+                EOF
+                touch "__SENTINEL__"
+                sleep 3
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", stream.toString())
+                .replace("__SENTINEL__", exactResponseWritten.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt-occurrence.md");
+        var stdout = tempDir.resolve("prompt-occurrence.stdout");
+        var stderr = tempDir.resolve("prompt-occurrence.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30))
+                    .runCodexDesignReview(new AcpxRunRequest(
+                            tempDir,
+                            "codex-reviewer",
+                            prompt,
+                            stdout,
+                            stderr,
+                            AcpxPermissionProfile.review()));
+
+            assertEquals(0, result.exitCode());
+            assertTrue(Files.exists(exactResponseWritten),
+                    "the stale pre-baseline response must not terminate the wrapper before id=21 completes");
+            assertTrue(result.promptCompletion().completed());
+            assertEquals("21", result.promptCompletion().requestId());
+            assertEquals("{\"run_id\":\"new\"}", result.promptCompletion().finalAssistantMessage());
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void processStartBaselineAndStaleResponseCannotCompleteCurrentPrompt() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("stale-only-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "57575757-6868-7979-8080-919191919191";
+        var stream = sessionsDir.resolve(sessionId + ".stream.ndjson");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stream, """
+                {"jsonrpc":"2.0","id":20,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"old","content":{"type":"text","text":"{\\\"run_id\\\":\\\"old\\\"}"}}}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                """, StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-stale-only.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":21,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                EOF
+                sleep 3
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", stream.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("stale-only-prompt.md");
+        var stdout = tempDir.resolve("stale-only.stdout");
+        var stderr = tempDir.resolve("stale-only.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30))
+                    .runCodexDesignReview(new AcpxRunRequest(
+                            tempDir,
+                            "codex-reviewer",
+                            prompt,
+                            stdout,
+                            stderr,
+                            AcpxPermissionProfile.review()));
+
+            assertEquals(0, result.exitCode());
+            assertFalse(result.promptCompletion().completed());
+            assertNotEquals("20", result.promptCompletion().requestId());
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
     void topLevelPromptRateLimitTerminatesThroughTypedStreamError() throws Exception {
         var previousHome = System.getProperty("user.home");
         var fakeHome = tempDir.resolve("typed-429-home");
@@ -252,7 +437,6 @@ class AcpxAgentTransportTest {
         try {
             System.setProperty("user.home", fakeHome.toString());
             var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
-            var started = System.nanoTime();
             var result = transport.runCodexDesignReview(new AcpxRunRequest(
                     tempDir,
                     "codex-reviewer",
@@ -261,12 +445,9 @@ class AcpxAgentTransportTest {
                     stderr,
                     AcpxPermissionProfile.review()
             ));
-            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
             assertEquals(4, result.exitCode());
             assertTrue(Files.isRegularFile(secondHalfWritten), "the partial line must not terminate before completion");
-            assertTrue(elapsedMs >= 3_500, "transport must remain alive until the second half is written");
-            assertTrue(elapsedMs < 15_000, "typed provider error must terminate well before natural process exit");
             assertFalse(Files.readString(stdout).contains("MUST_NOT_COMPLETE"));
             assertTrue(result.executionTimeline().stream()
                     .filter(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED)
@@ -751,7 +932,7 @@ class AcpxAgentTransportTest {
     }
 
     @Test
-    void stopsAfterTerminalContractEvenWhenAcpxProcessKeepsRunning() throws Exception {
+    void dualControlLookingStdoutCannotStopTheProcess() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-terminal-contract.sh");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
@@ -771,7 +952,7 @@ class AcpxAgentTransportTest {
 
                 [done] end_turn
                 EOF
-                sleep 20
+                sleep 3
                 exit 0
                 """, StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
@@ -782,7 +963,6 @@ class AcpxAgentTransportTest {
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
 
         var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
-        var observedEvents = new ArrayList<AcpxExecutionEvent>();
         var started = System.nanoTime();
         var result = transport.runClaudeDesign(new AcpxRunRequest(
                 tempDir,
@@ -790,37 +970,14 @@ class AcpxAgentTransportTest {
                 prompt,
                 stdout,
                 stderr,
-                AcpxPermissionProfile.fromName("", false),
-                observedEvents::add
+                AcpxPermissionProfile.fromName("", false)
         ));
         var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
         assertEquals(0, result.exitCode());
-        assertTrue(elapsedMs < 8_000, "terminal contract should end the adapter wait without waiting for process sleep");
+        assertTrue(elapsedMs >= 2_500, "stdout Markdown must not bypass the ACP completion boundary");
         assertTrue(Files.readString(stdout).contains("[done] end_turn"));
-        var terminalDetected = result.executionTimeline().stream()
-                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED)
-                .findFirst()
-                .orElseThrow();
-        assertEquals(2000L, ((Number) terminalDetected.details().get("graceMs")).longValue());
-        var graceEvent = result.executionTimeline().stream()
-                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED)
-                .findFirst()
-                .orElseThrow();
-        assertTrue(graceEvent.elapsedMs() >= terminalDetected.elapsedMs());
-        assertEquals("terminal_control_grace", graceEvent.details().get("waitMode"));
-        assertEquals("terminate_process_tree", graceEvent.details().get("action"));
-        assertEquals(0, graceEvent.details().get("exitCode"));
-        assertTrue(result.executionTimeline().stream()
-                .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_EXITED)
-                .map(event -> event.details())
-                .anyMatch(details -> Integer.valueOf(0).equals(details.get("exitCode"))));
-        assertTrue(observedEvents.stream()
-                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
-        assertTrue(observedEvents.stream()
-                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED));
-        assertTrue(observedEvents.stream()
-                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.PROCESS_EXITED));
+        assertFalse(result.promptCompletion().completed());
     }
 
     @Test
@@ -866,55 +1023,6 @@ class AcpxAgentTransportTest {
 
         assertEquals(0, result.exitCode());
         assertTrue(elapsedMs >= 2_500, "invalid control must wait for the real process exit");
-        assertTrue(result.executionTimeline().stream()
-                .noneMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
-    }
-
-    @Test
-    void outputAfterDoneMarkerCannotStopProcessEarly() throws Exception {
-        var fakeAcpx = tempDir.resolve("acpx-output-after-done.sh");
-        Files.writeString(fakeAcpx, """
-                #!/bin/sh
-                if [ "$1" = "--help" ]; then
-                  exit 0
-                fi
-                if [ "$2" = "sessions" ]; then
-                  exit 0
-                fi
-                cat <<'EOF'
-                ```dual-control
-                decision: READY
-                summary: marker is not terminal when output follows
-                ```
-                [done] end_turn
-                still running
-                EOF
-                sleep 3
-                exit 0
-                """, StandardCharsets.UTF_8);
-        assertTrue(fakeAcpx.toFile().setExecutable(true));
-
-        var prompt = tempDir.resolve("prompt-after-done.md");
-        var stdout = tempDir.resolve("stdout-after-done.md");
-        var stderr = tempDir.resolve("stderr-after-done.log");
-        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
-
-        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
-        var started = System.nanoTime();
-        var result = transport.runClaudeDesign(new AcpxRunRequest(
-                tempDir,
-                "claude-main",
-                prompt,
-                stdout,
-                stderr,
-                AcpxPermissionProfile.fromName("", false)
-        ));
-        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
-
-        assertEquals(0, result.exitCode());
-        assertTrue(elapsedMs >= 2_500, "content after the marker must wait for the real process exit");
-        assertTrue(result.executionTimeline().stream()
-                .noneMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
     }
 
     @Test

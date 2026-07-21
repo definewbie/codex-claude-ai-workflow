@@ -57,14 +57,14 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Workstream: ws-test"));
         assertTrue(prompt.contains("Node: intake.claude_brainstorm"));
         assertTrue(prompt.contains("Build a safer agent workflow."));
-        assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("\"decision\" : \"READY_FOR_PRODUCT_REVIEW\""));
         assertTrue(prompt.contains("This intake run uses restricted contract discovery"));
         assertTrue(prompt.contains("Do not output shell commands or Bash code fences"));
         assertFalse(prompt.contains("Run all shell commands from the effective workspace above."));
         assertTrue(prompt.contains("Do not create, edit, or delete files under .agent/"));
         assertTrue(prompt.contains("Only the orchestrator writes run ledger artifacts"));
         assertTrue(prompt.contains("Do not start an open-ended repository survey"));
-        assertTrue(prompt.contains("still emit the required `task_contract_proposal` plus final `dual-control` block"));
+        assertTrue(prompt.contains("still emit the required strict `task_contract_proposal` result"));
         assertTrue(prompt.contains("This intake stage is seed-only contract drafting"));
         assertTrue(prompt.contains("do not call tools"));
         assertTrue(prompt.contains("do not ask to list directories"));
@@ -73,8 +73,9 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan"));
         assertFalse(prompt.contains("Read the repository"));
         assertFalse(prompt.contains("bounded discovery tools"));
-        assertTrue(prompt.contains("<dual-artifact type=\"task_contract_proposal\" version=\"1\">"));
-        assertTrue(prompt.contains("\"artifact_type\": \"task_contract_proposal\""));
+        assertFalse(prompt.contains("dual-control"));
+        assertFalse(prompt.contains("<dual-artifact"));
+        assertTrue(prompt.contains("\"artifact_type\" : \"task_contract_proposal\""));
     }
 
     @Test
@@ -105,9 +106,9 @@ class AgentPromptRendererTest {
         var prompt = new AgentPromptRenderer()
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
-        assertTrue(prompt.contains("Write human-readable Markdown prose in Simplified Chinese."));
+        assertTrue(prompt.contains("Use Simplified Chinese for human-readable string values inside the final JSON result."));
         assertTrue(prompt.contains("Keep JSON keys, enum values"));
-        assertTrue(prompt.contains("decision: READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("\"decision\" : \"READY_FOR_PRODUCT_REVIEW\""));
     }
 
     @Test
@@ -125,7 +126,7 @@ class AgentPromptRendererTest {
         var prompt = new AgentPromptRenderer()
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
-        assertTrue(prompt.contains("Write human-readable Markdown prose in English."));
+        assertTrue(prompt.contains("Use English for human-readable string values inside the final JSON result."));
         assertTrue(prompt.contains("Keep JSON keys, enum values"));
     }
 
@@ -138,7 +139,7 @@ class AgentPromptRendererTest {
         var prompt = new AgentPromptRenderer()
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
-        assertTrue(prompt.contains("Write human-readable Markdown prose in English."));
+        assertTrue(prompt.contains("Use English for human-readable string values inside the final JSON result."));
     }
 
     @Test
@@ -281,10 +282,10 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
         assertTrue(prompt.contains("task_contract_proposal"));
         assertTrue(prompt.contains("Intent fidelity"));
-        assertTrue(prompt.contains("decision: <one allowed decision>"));
-        assertTrue(prompt.contains("- READY_FOR_PRODUCT_REVIEW"));
-        assertTrue(prompt.contains("- NEEDS_REVISION"));
-        assertTrue(prompt.contains("- BLOCKED"));
+        assertTrue(prompt.contains("\"decision\" : \"<one allowed decision>\""));
+        assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
+        assertTrue(prompt.contains("NEEDS_REVISION"));
+        assertTrue(prompt.contains("BLOCKED"));
         assertTrue(!prompt.contains("READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED"));
     }
 
@@ -345,7 +346,8 @@ class AgentPromptRendererTest {
                 .renderWithSections(tempDir, "ws-test", "intake.claude_brainstorm",
                         "intake-claude-brainstorm", List.of());
 
-        assertTrue(rendered.content().contains("<dual-artifact type=\"task_contract_proposal\""));
+        assertTrue(rendered.content().contains("\"artifact_type\" : \"task_contract_proposal\""));
+        assertFalse(rendered.content().contains("<dual-artifact"));
         assertFalse(rendered.content().contains("Structured Artifact Field Semantics"), rendered.content());
         assertFalse(rendered.content().contains("`must_fix`, `missing_evidence`, `open_risks`"), rendered.content());
         assertFalse(rendered.content().contains("Read Reuse Contract Semantics"), rendered.content());
@@ -445,9 +447,9 @@ class AgentPromptRendererTest {
                 .render(tempDir, "ws-test", "design.codex_arch_review", "design-codex-review", List.of());
 
         assertTrue(prompt.contains("READY_FOR_ARCH_REVIEW"));
-        assertTrue(prompt.contains("- READY_FOR_ARCH_REVIEW"));
-        assertTrue(prompt.contains("- NEEDS_REVISION"));
-        assertTrue(prompt.contains("- BLOCKED"));
+        assertTrue(prompt.contains("READY_FOR_ARCH_REVIEW"));
+        assertTrue(prompt.contains("NEEDS_REVISION"));
+        assertTrue(prompt.contains("BLOCKED"));
         assertTrue(!prompt.contains("READY_FOR_ARCH_REVIEW|NEEDS_REVISION|BLOCKED"));
     }
 
@@ -460,13 +462,12 @@ class AgentPromptRendererTest {
         var prompt = new AgentPromptRenderer()
                 .render(tempDir, "ws-test", "acceptance.codex_verifier_review", "acceptance-codex-review", List.of());
 
-        assertTrue(prompt.contains("Allowed decisions:"));
-        assertTrue(prompt.contains("- ACCEPT"));
-        assertTrue(prompt.contains("- ACCEPT_WITH_NOTES"));
-        assertTrue(prompt.contains("- REJECT"));
-        assertTrue(prompt.contains("Required control keys:"));
-        assertTrue(prompt.contains("- decision"));
-        assertTrue(prompt.contains("- summary"));
+        assertTrue(prompt.contains("Allowed `result.decision` values:"));
+        assertTrue(prompt.contains("ACCEPT"));
+        assertTrue(prompt.contains("ACCEPT_WITH_NOTES"));
+        assertTrue(prompt.contains("REJECT"));
+        assertTrue(prompt.contains("\"decision\""));
+        assertTrue(prompt.contains("\"summary\""));
         assertTrue(!prompt.contains("ACCEPT|ACCEPT_WITH_NOTES|REJECT"));
     }
 
@@ -483,9 +484,9 @@ class AgentPromptRendererTest {
 
         assertTrue(implementPrompt.contains("Clean up self-test byproducts"));
         assertTrue(implementPrompt.contains("__pycache__"));
-        assertFalse(implementPrompt.contains("reread_reasons"),
-                "implement prompt template must not expose read-reuse fields without a context contract");
-        assertTrue(selfTestPrompt.contains("Repository Hygiene"));
+        assertTrue(implementPrompt.contains("reread_reasons"),
+                "implement result schema must always expose its typed optional evidence field");
+        assertTrue(selfTestPrompt.contains("check repository hygiene"));
         assertTrue(selfTestPrompt.contains("generated byproducts"));
         assertFalse(selfTestPrompt.contains("reread_reasons"),
                 "self_test_report prompts must not expose agent_output_contract-only fields");

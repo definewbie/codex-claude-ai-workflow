@@ -6,14 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Read model for validated agent output sidecars.
@@ -32,42 +30,35 @@ final class AgentEvidenceIndex {
         this.entries = List.copyOf(entries);
     }
 
-    static AgentEvidenceIndex load(Path workstreamDir, ObjectMapper objectMapper) throws IOException {
-        var runsDir = workstreamDir.resolve("runs");
-        if (!Files.isDirectory(runsDir)) {
-            return new AgentEvidenceIndex(List.of());
-        }
-        try (Stream<Path> paths = Files.walk(runsDir)) {
-            var entries = paths
-                    .filter(Files::isRegularFile)
-                    .filter(AgentEvidenceIndex::isContractSidecar)
-                    .map(path -> readEntry(path, objectMapper))
-                    .flatMap(Optional::stream)
-                    .sorted(Entry.ORDER.reversed())
-                    .toList();
-            return new AgentEvidenceIndex(entries);
-        }
-    }
-
-    static AgentEvidenceIndex fromRefs(Path workspaceRoot, List<String> refs, ObjectMapper objectMapper) {
+    static AgentEvidenceIndex fromRefs(
+            Path workspaceRoot,
+            String workstreamId,
+            List<String> refs,
+            ObjectMapper objectMapper
+    ) {
         var root = workspaceRoot.toAbsolutePath().normalize();
         var entries = refs.stream()
                 .map(ref -> sidecarPathForRef(root, ref))
                 .flatMap(Optional::stream)
                 .distinct()
-                .map(path -> readEntry(path, objectMapper))
+                .map(path -> readEntry(root, workstreamId, path, objectMapper))
                 .flatMap(Optional::stream)
                 .sorted(Entry.ORDER.reversed())
                 .toList();
         return new AgentEvidenceIndex(entries);
     }
 
-    static Optional<Entry> latestFromRefs(Path workspaceRoot, List<String> refs, ObjectMapper objectMapper) {
+    static Optional<Entry> latestFromRefs(
+            Path workspaceRoot,
+            String workstreamId,
+            List<String> refs,
+            ObjectMapper objectMapper
+    ) {
         var root = workspaceRoot.toAbsolutePath().normalize();
         return refs.stream()
                 .map(ref -> sidecarPathForRef(root, ref))
                 .flatMap(Optional::stream)
-                .map(path -> readEntry(path, objectMapper))
+                .map(path -> readEntry(root, workstreamId, path, objectMapper))
                 .flatMap(Optional::stream)
                 .sorted(Entry.ORDER.reversed())
                 .findFirst();
@@ -88,23 +79,32 @@ final class AgentEvidenceIndex {
         if (ref == null || ref.isBlank() || ref.startsWith("artifact://")) {
             return Optional.empty();
         }
-        var candidate = ref.endsWith(".contract.json")
-                ? ref
-                : ref.replaceFirst("\\.md$", ".contract.json");
-        if (!candidate.endsWith(".contract.json")) {
+        var referenced = workspaceRoot.resolve(ref).normalize();
+        if (!referenced.startsWith(workspaceRoot)) {
             return Optional.empty();
         }
-        var path = workspaceRoot.resolve(candidate).normalize();
+        var path = ref.endsWith(".contract.json")
+                ? referenced
+                : AgentOutputContractSidecar.pathFor(referenced);
         if (!path.startsWith(workspaceRoot) || !Files.isRegularFile(path)) {
             return Optional.empty();
         }
         return Optional.of(path);
     }
 
-    private static Optional<Entry> readEntry(Path path, ObjectMapper objectMapper) {
+    private static Optional<Entry> readEntry(
+            Path workspaceRoot,
+            String workstreamId,
+            Path path,
+            ObjectMapper objectMapper
+    ) {
         var document = AgentOutputContractDocument.read(path, objectMapper);
         if (document.isEmpty()) {
-            return Optional.empty();
+            throw new IllegalStateException("routed agent evidence sidecar is unreadable: " + path);
+        }
+        var violation = AgentOutputLineageVerifier.violation(workspaceRoot, workstreamId, path, document.get());
+        if (violation.isPresent()) {
+            throw new IllegalStateException("routed agent evidence lineage is invalid: " + violation.get());
         }
         try {
             var raw = objectMapper.readValue(path.toFile(), MAP_TYPE);
@@ -114,13 +114,9 @@ final class AgentEvidenceIndex {
         }
     }
 
-    private static boolean isContractSidecar(Path path) {
-        return path.getFileName().toString().endsWith(".contract.json");
-    }
-
     private static Instant lastModified(Path path) {
         try {
-            return Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toInstant();
+            return Files.getLastModifiedTime(path).toInstant();
         } catch (IOException ignored) {
             return Instant.EPOCH;
         }

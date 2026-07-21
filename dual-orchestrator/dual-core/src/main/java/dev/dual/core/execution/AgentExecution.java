@@ -8,7 +8,7 @@ import java.util.List;
  *
  * <p>This object owns runtime facts produced by an agent adapter. Workflow and
  * node state should consume {@link #outcome()} instead of reinterpreting raw
- * process output, adapter text, terminal markdown, or artifact files.</p>
+ * process output, adapter text, assistant prose, or artifact files.</p>
  */
 public record AgentExecution(
         String id,
@@ -24,7 +24,7 @@ public record AgentExecution(
         Instant finishedAt,
         ProcessResult processResult,
         List<AdapterSignal> adapterSignals,
-        TerminalControlResult terminalControlResult,
+        AgentResultContractResult agentResultContractResult,
         List<ArtifactContractResult> artifactContractResults,
         Object toolUsage,
         Object tokenUsage,
@@ -44,8 +44,8 @@ public record AgentExecution(
             throw new IllegalArgumentException("processResult is required");
         }
         adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);
-        if (terminalControlResult == null) {
-            throw new IllegalArgumentException("terminalControlResult is required");
+        if (agentResultContractResult == null) {
+            throw new IllegalArgumentException("agentResultContractResult is required");
         }
         artifactContractResults = artifactContractResults == null ? List.of() : List.copyOf(artifactContractResults);
         if (outcome == null) {

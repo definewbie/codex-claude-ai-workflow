@@ -69,6 +69,131 @@ class AcpxSessionStreamFailureEvidenceReaderTest {
         assertTrue(evidence.isEmpty(), "session/resume error superseded by session/new must not be evidence");
     }
 
+    @Test
+    void recoveredSessionAndCompletedPromptSuppressStaleWrapperReconnect() throws IOException {
+        Files.writeString(tempDir.resolve(SESSION_ID + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","method":"session/resume","id":1,"params":{"sessionId":"old"}}
+                {"jsonrpc":"2.0","id":1,"error":{"code":-32002,"message":"Resource not found"}}
+                {"jsonrpc":"2.0","method":"session/new","id":2,"params":{}}
+                {"jsonrpc":"2.0","id":2,"result":{"sessionId":"fresh"}}
+                {"jsonrpc":"2.0","method":"session/prompt","id":3,"params":{}}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn"}}
+                """);
+        var stderrPath = tempDir.resolve("recovered-stderr.log");
+        Files.writeString(stderrPath, STDERR);
+        var stdoutPath = tempDir.resolve("recovered-stdout.log");
+        Files.writeString(stdoutPath, "complete agent output");
+
+        var failure = new AcpxFailureClassifier(
+                new AcpxFailureSignalCatalog(),
+                new AcpxSessionStreamFailureEvidenceReader(tempDir)
+        ).classify(stdoutPath, stderrPath, 0);
+
+        assertEquals("ACPX_EXIT_0", failure.reason());
+        assertFalse(failure.recoverable());
+    }
+
+    @Test
+    void cancelledPromptDoesNotSuppressWrapperReconnect() throws IOException {
+        Files.writeString(tempDir.resolve(SESSION_ID + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","method":"session/new","id":2,"params":{}}
+                {"jsonrpc":"2.0","id":2,"result":{"sessionId":"fresh"}}
+                {"jsonrpc":"2.0","method":"session/prompt","id":3,"params":{}}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"cancelled"}}
+                """);
+        var stderrPath = tempDir.resolve("cancelled-stderr.log");
+        Files.writeString(stderrPath, STDERR);
+
+        var failure = new AcpxFailureClassifier(
+                new AcpxFailureSignalCatalog(),
+                new AcpxSessionStreamFailureEvidenceReader(tempDir)
+        ).classify(null, stderrPath, 4);
+
+        assertEquals(AcpxFailureReason.AGENT_RECONNECT.code(), failure.reason());
+        assertTrue(failure.recoverable());
+    }
+
+    @Test
+    void boundedTailCannotProvePromptCompletionWithoutMatchingRequest() throws IOException {
+        Files.writeString(tempDir.resolve(SESSION_ID + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"done"}}}}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn","usage":{"totalTokens":9217}}}
+                """);
+        var stderrPath = tempDir.resolve("tail-stderr.log");
+        Files.writeString(stderrPath, STDERR);
+
+        var failure = new AcpxFailureClassifier(
+                new AcpxFailureSignalCatalog(),
+                new AcpxSessionStreamFailureEvidenceReader(tempDir)
+        ).classify(null, stderrPath, 0);
+
+        assertEquals(AcpxFailureReason.AGENT_RECONNECT.code(), failure.reason());
+        assertTrue(failure.recoverable());
+    }
+
+    @Test
+    void boundedTailCancelledPromptDoesNotSuppressReconnect() throws IOException {
+        var evidence = read("""
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"cancel"}}}}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"cancelled"}}
+                """);
+
+        assertFalse(evidence.provesRecoveredPromptCompletion());
+    }
+
+    @Test
+    void typedProviderErrorPreventsCompletionProofEvenWhenEndTurnFollows() throws IOException {
+        var evidence = read("""
+                {"jsonrpc":"2.0","method":"session/prompt","id":3,"params":{}}
+                {"jsonrpc":"2.0","id":3,"error":{"code":-32603,"message":"Request rejected (429): rate limit exceeded"}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"stale"}}}}
+                {"jsonrpc":"2.0","id":4,"result":{"stopReason":"end_turn"}}
+                """);
+
+        assertFalse(evidence.provesRecoveredPromptCompletion());
+        var signal = new AcpxFailureSignalCatalog()
+                .match(new AcpxFailureEvidence("", evidence.normalizedErrorText(), 1))
+                .orElseThrow();
+        assertEquals(AcpxFailureReason.RATE_LIMIT, signal.reason());
+    }
+
+    @Test
+    void bareSessionUpdateCannotContributeReadinessProof() throws IOException {
+        var evidence = read("""
+                {"jsonrpc":"2.0","method":"session/update"}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn"}}
+                """);
+
+        assertFalse(evidence.sessionReady());
+        assertFalse(evidence.provesRecoveredPromptCompletion());
+    }
+
+    @Test
+    void newPromptRequestInvalidatesEarlierCompletionOccurrence() throws IOException {
+        var evidence = read("""
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"done"}}}}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn"}}
+                {"jsonrpc":"2.0","method":"session/prompt","id":4,"params":{}}
+                """);
+
+        assertEquals("", evidence.promptStopReason());
+        assertFalse(evidence.provesRecoveredPromptCompletion());
+    }
+
+    @Test
+    void unresolvedSessionLifecycleRequestInvalidatesEarlierCompletionOccurrence() throws IOException {
+        var evidence = read("""
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"done"}}}}
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn"}}
+                {"jsonrpc":"2.0","method":"session/new","id":4,"params":{}}
+                """);
+
+        assertTrue(evidence.pendingControlRequest());
+        assertFalse(evidence.sessionReady());
+        assertEquals("", evidence.promptStopReason());
+        assertFalse(evidence.provesRecoveredPromptCompletion());
+    }
+
     /** A session/resume error with NO recovery remains a real error. */
     @Test
     void unrecoveredSessionResumeErrorIsKept() throws IOException {

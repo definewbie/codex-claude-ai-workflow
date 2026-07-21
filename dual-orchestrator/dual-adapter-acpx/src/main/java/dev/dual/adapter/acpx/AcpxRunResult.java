@@ -10,10 +10,11 @@ public record AcpxRunResult(
         Instant finishedAt,
         List<String> command,
         List<AcpxExecutionEvent> executionTimeline,
-        AcpxUsage usage
+        AcpxUsage usage,
+        AcpxPromptCompletion promptCompletion
 ) {
     public AcpxRunResult(int exitCode, Instant startedAt, Instant finishedAt, List<String> command) {
-        this(exitCode, startedAt, finishedAt, command, List.of(), null);
+        this(exitCode, startedAt, finishedAt, command, List.of(), null, AcpxPromptCompletion.EMPTY);
     }
 
     public AcpxRunResult(
@@ -23,12 +24,24 @@ public record AcpxRunResult(
             List<String> command,
             List<AcpxExecutionEvent> executionTimeline
     ) {
-        this(exitCode, startedAt, finishedAt, command, executionTimeline, null);
+        this(exitCode, startedAt, finishedAt, command, executionTimeline, null, AcpxPromptCompletion.EMPTY);
+    }
+
+    public AcpxRunResult(
+            int exitCode,
+            Instant startedAt,
+            Instant finishedAt,
+            List<String> command,
+            List<AcpxExecutionEvent> executionTimeline,
+            AcpxUsage usage
+    ) {
+        this(exitCode, startedAt, finishedAt, command, executionTimeline, usage, AcpxPromptCompletion.EMPTY);
     }
 
     public AcpxRunResult {
         command = command == null ? List.of() : List.copyOf(command);
         executionTimeline = executionTimeline == null ? List.of() : List.copyOf(executionTimeline);
+        promptCompletion = promptCompletion == null ? AcpxPromptCompletion.EMPTY : promptCompletion;
     }
 
     public long durationMs() {

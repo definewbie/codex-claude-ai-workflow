@@ -7,7 +7,7 @@ import java.util.List;
  */
 public record AgentExecutionEvidence(
         ProcessResult processResult,
-        TerminalControlResult terminalControl,
+        AgentResultContractResult agentResultContract,
         List<ArtifactContractResult> artifactContracts,
         List<AdapterSignal> adapterSignals
 ) {
@@ -15,8 +15,8 @@ public record AgentExecutionEvidence(
         if (processResult == null) {
             throw new IllegalArgumentException("processResult is required");
         }
-        if (terminalControl == null) {
-            throw new IllegalArgumentException("terminalControl is required");
+        if (agentResultContract == null) {
+            throw new IllegalArgumentException("agentResultContract is required");
         }
         artifactContracts = artifactContracts == null ? List.of() : List.copyOf(artifactContracts);
         adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);

@@ -31,7 +31,6 @@ final class AgentExecutionHealth {
     private Duration lastProgressAt = Duration.ZERO;
     private AcpxFailureSignal currentSignal;
     private Duration currentFailureSince = Duration.ZERO;
-    private boolean terminalSuccess;
 
     AgentExecutionHealth(AcpxFailureSignalCatalog signalCatalog, Duration recoverableSignalGrace) {
         this(signalCatalog, recoverableSignalGrace, recoverableSignalGrace);
@@ -57,11 +56,6 @@ final class AgentExecutionHealth {
         }
         lastConsumedSequence = event.sequence();
         switch (event.kind()) {
-            case TERMINAL_CONTRACT_SEEN -> {
-                terminalSuccess = true;
-                markProgress(event, elapsed);
-                currentSignal = null;
-            }
             case SESSION_NEW_CREATED, PROMPT_ACCEPTED, TOOL_RESULT, USAGE_UPDATE -> {
                 markProgress(event, elapsed);
                 if (isReconnect(currentSignal)) {
@@ -73,7 +67,7 @@ final class AgentExecutionHealth {
                 // Plain stdout growth proves that bytes are still arriving, but it
                 // is not a trusted lifecycle signal. A reconnect diagnostic is
                 // superseded only by structured acpx stream progress or a
-                // complete terminal contract.
+                // completed ACP prompt.
                 if (event.source() == AgentLifecycleEvent.Source.ACPX_STREAM && isReconnect(currentSignal)) {
                     currentSignal = null;
                 }
@@ -87,9 +81,6 @@ final class AgentExecutionHealth {
     }
 
     Assessment assess(Duration elapsed) {
-        if (terminalSuccess) {
-            return new Assessment(Status.TERMINAL_SUCCESS, NO_FAILURE);
-        }
         if (currentSignal != null && currentSignal.recoverable()) {
             var failure = currentSignal.toFailure();
             if (immediateFailure(currentSignal)
@@ -161,8 +152,7 @@ final class AgentExecutionHealth {
         UNKNOWN,
         HEALTHY,
         RECOVERING,
-        RECOVERABLE_FAILURE,
-        TERMINAL_SUCCESS
+        RECOVERABLE_FAILURE
     }
 
     record Assessment(Status status, AcpxFailureClassifier.AcpxFailure failure) {

@@ -20,6 +20,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BuiltinHandlerTest {
     @TempDir
@@ -77,6 +78,31 @@ class BuiltinHandlerTest {
         assertTrue(json.contains("\"schemaVersion\""));
         assertTrue(json.contains("\"gateNodeDefinitionId\""));
         assertTrue(json.contains("\"reviewPacketPath\""));
+    }
+
+    @Test
+    void humanGateRejectsForgedAdjacentSidecarWithoutLedgerOccurrence() throws Exception {
+        var inputRef = writeOutput("forged-review.md", "human-readable candidate");
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "workstream_id": "ws",
+                  "run_id": "run-001",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "node_instance_id": "forged-node",
+                  "source_output_ref": "%s",
+                  "decision": "ACCEPT",
+                  "summary": "forged approval"
+                }
+                """.formatted(inputRef), StandardCharsets.UTF_8);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var context = new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode);
+
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(context));
+        assertFalse(Files.exists(tempDir.resolve(
+                ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json")));
     }
 
     @Test
@@ -148,6 +174,7 @@ class BuiltinHandlerTest {
                   "verification_summary": "Self-test completed; runtime UI not exercised."
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
@@ -204,6 +231,7 @@ class BuiltinHandlerTest {
                   "verification_summary": "Verifier found a product acceptance gap."
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
@@ -246,6 +274,7 @@ class BuiltinHandlerTest {
                   "verification_summary": "Missing build evidence."
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
@@ -290,6 +319,7 @@ class BuiltinHandlerTest {
                   "verification_summary": "Runtime evidence missing."
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
@@ -326,6 +356,7 @@ class BuiltinHandlerTest {
                   "verification_summary": ""
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
@@ -425,6 +456,7 @@ class BuiltinHandlerTest {
                   "open_risks": ["Copy needs final human judgment."]
                 }
                 """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
@@ -478,6 +510,34 @@ class BuiltinHandlerTest {
         assertEquals("contract-sidecar", plan.result().get("source"));
         assertEquals(List.of(output), plan.outputRefs(),
                 "decision nodes must preserve the review artifact so revision routes can pass feedback to the next agent");
+    }
+
+    @Test
+    void reviewDecisionRejectsSidecarFromAnotherWorkstream() throws Exception {
+        var output = writeOutput("foreign-review.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "plan.codex_plan_review",
+                  "decision": "READY_TO_IMPLEMENT",
+                  "summary": "foreign result"
+                }
+                """);
+        var path = tempDir.resolve(output);
+        var mapper = new ObjectMapper();
+        var json = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(path.toFile());
+        json.put("workstream_id", "ws-other");
+        mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
+
+        var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("plan.decision"),
+                node("plan.decision", NodeKind.DECISION, "review.decision", List.of(output))));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
+        var parseError = (Map<?, ?>) result.result().get("parse_error");
+        assertEquals("CONTRACT_SIDECAR_LINEAGE_INVALID", parseError.get("code"));
     }
 
     @Test
@@ -968,7 +1028,7 @@ class BuiltinHandlerTest {
         Files.createDirectories(input.getParent());
         Files.createDirectories(evidence.getParent());
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build context packages.\n");
-        Files.writeString(input, "Claude design output.\n");
+        writeAgentOutputWithSidecar(input, "Claude design output.");
         Files.writeString(evidence, "{\"available\":true}\n");
 
         var handler = new ContextBuildPackageHandler();
@@ -999,16 +1059,17 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("Claude design output."));
         assertTrue(markdown.contains("## Recent Agent Outputs"));
         assertTrue(markdown.contains("git-evidence.json"));
-        assertTrue(markdown.contains("\"available\":true"));
+        assertTrue(markdown.contains("\"available\""));
+        assertTrue(markdown.contains("true"));
     }
 
     @Test
-    void contextPackageIncludesRecentAgentOutputsAfterHumanGateWithNoInputRefs() throws Exception {
+    void contextPackageIncludesRoutedAgentOutputAfterHumanGate() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.md");
+        var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.json");
         Files.createDirectories(planOutput.getParent());
         Files.writeString(workstreamDir.resolve("requirement.md"), "Implement approved plan.\n");
-        Files.writeString(planOutput, "READY_TO_IMPLEMENT with one note.\n");
+        writeAgentOutputWithSidecar(planOutput, "READY_TO_IMPLEMENT with one note.");
 
         var handler = new ContextBuildPackageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1017,25 +1078,27 @@ class BuiltinHandlerTest {
                 new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "implement.claude_implement"
                 )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
+                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of(
+                        workspaceRef(planOutput)))
         ));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Implement approved plan."));
         assertTrue(markdown.contains("READY_TO_IMPLEMENT with one note."));
-        assertTrue(markdown.contains("plan-codex-review.md"));
+        assertTrue(markdown.contains("plan-codex-review.json"));
     }
 
     @Test
     void contextPackageUsesProfileToKeepImplementationContextFocused() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.md");
+        var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.json");
         var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
         Files.createDirectories(planOutput.getParent());
         Files.createDirectories(evidence.getParent());
         Files.writeString(workstreamDir.resolve("requirement.md"), "Implement approved plan.\n");
-        Files.writeString(planOutput, "READY_TO_IMPLEMENT with one note.\n");
+        writeAgentOutputWithSidecar(planOutput, "READY_TO_IMPLEMENT with one note.");
         Files.writeString(evidence, "{\"available\":true}\n");
+        Files.writeString(evidence.getParent().resolve("diff.stat"), "1 file changed\n");
 
         var handler = new ContextBuildPackageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1045,7 +1108,8 @@ class BuiltinHandlerTest {
                         "target_node", "implement.claude_implement",
                         "profile", "implementation"
                 )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
+                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of(
+                        workspaceRef(planOutput)))
         ));
 
         assertEquals("implementation", result.result().get("profile"));
@@ -1056,13 +1120,13 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("Profile: implementation"));
         assertTrue(markdown.contains("READY_TO_IMPLEMENT with one note."));
         assertTrue(markdown.contains("## Git Evidence"));
-        assertTrue(markdown.contains("\"available\":true"));
+        assertTrue(markdown.contains("1 file changed"));
     }
 
     @Test
     void contextPackageAllowsExplicitSectionsAndSnippetLimits() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var output = workstreamDir.resolve("runs/run-003/outputs/long.md");
+        var output = workstreamDir.resolve("artifacts/long.txt");
         Files.createDirectories(output.getParent());
         Files.writeString(workstreamDir.resolve("requirement.md"), "Keep this focused.\n");
         Files.writeString(output, "abcdefghijklmnopqrstuvwxyz\n");
@@ -1074,15 +1138,16 @@ class BuiltinHandlerTest {
                 new NodeDefinition("context.custom", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "custom.agent",
                         "profile", "acceptance",
-                        "include_sections", List.of("requirement", "recent_agent_outputs"),
+                        "include_sections", List.of("requirement", "input_artifacts"),
                         "max_snippet_chars", 10,
                         "max_recent_agent_outputs", 1
                 )),
-                node("context.custom", NodeKind.TASK, "context.build_package", List.of())
+                node("context.custom", NodeKind.TASK, "context.build_package",
+                        List.of(".agent/workstreams/ws/artifacts/long.txt"))
         ));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("Included Sections: requirement, recent_agent_outputs"));
+        assertTrue(markdown.contains("Included Sections: requirement, input_artifacts"));
         assertTrue(markdown.contains("Keep this focused."));
         assertTrue(markdown.contains("abcdefghij"));
         assertTrue(markdown.contains("[truncated"));
@@ -1193,25 +1258,11 @@ class BuiltinHandlerTest {
 
     @Test
     void nextStagePromptHandlerGeneratesPromptFromHandoff() throws Exception {
-        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md");
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json");
         Files.createDirectories(handoff.getParent());
-        Files.writeString(handoff, """
-                # Handoff
-
-                ## Completed Work
-
-                Implemented the accepted batch.
-
-                ## Suggested Next Prompt
-
-                Start the next batch by reviewing A6 before writing code.
-                Keep scope narrow.
-
-                ```dual-control
-                decision: HANDOFF_READY
-                summary: ready
-                ```
-                """);
+        Files.writeString(handoff, "{}");
+        writeHandoffSidecar(handoff, "Implemented the accepted batch.",
+                "Start the next batch by reviewing A6 before writing code. Keep scope narrow.");
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1222,7 +1273,7 @@ class BuiltinHandlerTest {
                         "stage.generate_next_prompt",
                         NodeKind.TASK,
                         "prompt.generate_next_stage",
-                        List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md")
+                        List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json")
                 )
         ));
 
@@ -1242,24 +1293,17 @@ class BuiltinHandlerTest {
     @Test
     @SuppressWarnings("unchecked")
     void nextStagePromptHandlerPrefersStructuredHandoffSidecar() throws Exception {
-        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md");
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json");
         Files.createDirectories(handoff.getParent());
-        Files.writeString(handoff, """
-                # Handoff
-
-                ## Suggested Next Prompt
-
-                This Markdown fallback prompt should not be used.
-
-                ```dual-control
-                decision: HANDOFF_READY
-                summary: ready
-                ```
-                """);
+        Files.writeString(handoff, "{}");
         Files.writeString(handoff.resolveSibling("stage-claude-handoff.contract.json"), """
                 {
                   "artifact_type": "agent_output_contract",
+                  "workstream_id": "ws",
+                  "run_id": "run-004",
                   "node_id": "stage.claude_handoff",
+                  "node_instance_id": "node-stage-claude-handoff",
+                  "source_output_ref": ".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json",
                   "source_artifact_type": "stage_handoff",
                   "decision": "HANDOFF_READY",
                   "summary": "structured handoff ready",
@@ -1272,6 +1316,8 @@ class BuiltinHandlerTest {
                   "suggested_next_prompt": "Use the structured sidecar prompt."
                 }
                 """);
+        AgentOutputLineageFixture.publish(
+                tempDir, "ws", handoff.resolveSibling("stage-claude-handoff.contract.json"));
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1282,7 +1328,7 @@ class BuiltinHandlerTest {
                         "stage.generate_next_prompt",
                         NodeKind.TASK,
                         "prompt.generate_next_stage",
-                        List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.md")
+                        List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json")
                 )
         ));
 
@@ -1292,7 +1338,7 @@ class BuiltinHandlerTest {
 
         var promptMarkdown = Files.readString(tempDir.resolve(".agent/workstreams/ws/artifacts/next-stage/next-stage-prompt.md"));
         assertTrue(promptMarkdown.contains("Use the structured sidecar prompt."));
-        assertFalse(promptMarkdown.contains("This Markdown fallback prompt should not be used."));
+        assertFalse(promptMarkdown.contains("unvalidated raw output"));
 
         var handoffJson = new ObjectMapper().readValue(
                 tempDir.resolve(".agent/workstreams/ws/artifacts/next-stage/handoff.json").toFile(),
@@ -1308,37 +1354,12 @@ class BuiltinHandlerTest {
     @Test
     @SuppressWarnings("unchecked")
     void nextStagePromptHandlerExtractsNumberedHandoffSections() throws Exception {
-        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.md");
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.json");
         Files.createDirectories(handoff.getParent());
-        Files.writeString(handoff, """
-                # Handoff
-
-                ## 1. Completed Work
-
-                Added `calculate(a, b)` to `main.py` and documented it in `README.md`.
-
-                ## 3. Changed Files
-
-                - main.py
-                - README.md
-
-                ## 4. Verification
-
-                `python main.py` still prints `world`; calculate returns expected sums.
-
-                ## 5. Open Risks
-
-                None.
-
-                ## 7. Suggested Next Prompt
-
-                Merge this completed smoke fixture change.
-
-                ```dual-control
-                decision: HANDOFF_READY
-                summary: ready
-                ```
-                """);
+        Files.writeString(handoff, "{}");
+        writeHandoffSidecar(handoff,
+                "Added calculate(a, b) to main.py and documented it in README.md.",
+                "Merge this completed smoke fixture change.");
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1349,7 +1370,7 @@ class BuiltinHandlerTest {
                         "stage.generate_next_prompt",
                         NodeKind.TASK,
                         "prompt.generate_next_stage",
-                        List.of(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.md")
+                        List.of(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.json")
                 )
         ));
 
@@ -1693,7 +1714,7 @@ class BuiltinHandlerTest {
     @Test
     void contextPackageTruncatesLongInputArtifact() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var longOutput = workstreamDir.resolve("runs/run-100/outputs/big.md");
+        var longOutput = workstreamDir.resolve("artifacts/big.txt");
         Files.createDirectories(longOutput.getParent());
         Files.writeString(workstreamDir.resolve("requirement.md"), "Truncate test.\n");
         Files.writeString(longOutput, "x".repeat(5000));
@@ -1708,7 +1729,7 @@ class BuiltinHandlerTest {
                         "include_sections", List.of("requirement", "input_artifacts", "recent_agent_outputs")
                 )),
                 node("ctx.trunc", NodeKind.TASK, "context.build_package",
-                        List.of(".agent/workstreams/ws/runs/run-100/outputs/big.md"))
+                        List.of(".agent/workstreams/ws/artifacts/big.txt"))
         ));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -1760,9 +1781,10 @@ class BuiltinHandlerTest {
 
     @Test
     void nextStagePromptWithoutSuggestedSectionUsesDefaultPrompt() throws Exception {
-        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-050/outputs/handoff.md");
+        var handoff = tempDir.resolve(".agent/workstreams/ws/runs/run-050/outputs/handoff.json");
         Files.createDirectories(handoff.getParent());
-        Files.writeString(handoff, "# Handoff\n\nDone with this batch.\n");
+        Files.writeString(handoff, "{}");
+        writeHandoffSidecar(handoff, "Done with this batch.", "");
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1770,7 +1792,7 @@ class BuiltinHandlerTest {
                 "ws",
                 taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
                 node("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage",
-                        List.of(".agent/workstreams/ws/runs/run-050/outputs/handoff.md"))
+                        List.of(".agent/workstreams/ws/runs/run-050/outputs/handoff.json"))
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -1784,6 +1806,91 @@ class BuiltinHandlerTest {
         return new NodeDefinition("gate.human_design_approval", NodeKind.GATE, "human.review", Map.of(
                 "allowed_actions", List.of("approve", "revise")
         ));
+    }
+
+    private void writeAgentOutputWithSidecar(Path output, String summary) throws Exception {
+        Files.writeString(output, "{}");
+        Files.writeString(AgentOutputContractSidecar.pathFor(output), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "workstream_id": "ws",
+                  "run_id": "%s",
+                  "node_id": "fixture.agent",
+                  "node_instance_id": "node-fixture-%s",
+                  "source_output_ref": "%s",
+                  "decision": "READY",
+                  "summary": "%s",
+                  "must_fix": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": "fixture verified"
+                }
+                """.formatted(
+                runId(output),
+                output.getFileName().toString().replaceAll("[^A-Za-z0-9._-]", "-"),
+                workspaceRef(output), summary));
+        AgentOutputLineageFixture.publish(tempDir, "ws", AgentOutputContractSidecar.pathFor(output));
+    }
+
+    private void writeHandoffSidecar(Path output, String completedWork, String suggestedPrompt) throws Exception {
+        Files.writeString(AgentOutputContractSidecar.pathFor(output), """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "workstream_id": "ws",
+                  "run_id": "%s",
+                  "node_id": "stage.claude_handoff",
+                  "node_instance_id": "node-stage-claude-handoff",
+                  "source_output_ref": "%s",
+                  "source_artifact_type": "stage_handoff",
+                  "decision": "HANDOFF_READY",
+                  "summary": "handoff ready",
+                  "completed_work": ["%s"],
+                  "important_decisions": ["Keep scope narrow"],
+                  "changed_files": ["main.py", "README.md"],
+                  "open_risks": ["None."],
+                  "verification_summary": "python main.py passed",
+                  "recommended_next_stage": "delivery",
+                  "suggested_next_prompt": "%s"
+                }
+                """.formatted(runId(output), workspaceRef(output), completedWork, suggestedPrompt));
+        AgentOutputLineageFixture.publish(tempDir, "ws", AgentOutputContractSidecar.pathFor(output));
+    }
+
+    private void publishSidecar(Path sidecar) throws Exception {
+        var mapper = new ObjectMapper();
+        var object = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(sidecar.toFile());
+        var baseName = sidecar.getFileName().toString().replace(".contract.json", "");
+        var markdownSource = sidecar.resolveSibling(baseName + ".md");
+        var source = Files.exists(markdownSource) ? markdownSource : sidecar.resolveSibling(baseName + ".json");
+        object.put("artifact_type", "agent_output_contract");
+        object.put("schema_version", 1);
+        object.put("workstream_id", "ws");
+        object.put("run_id", runId(sidecar));
+        object.put("node_instance_id", "node-fixture-" + baseName + "-" + runId(sidecar));
+        object.put("source_output_ref", workspaceRef(source));
+        if (!object.has("source_artifact_type")) {
+            object.put("source_artifact_type", "agent_output_contract");
+        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), object);
+        AgentOutputLineageFixture.publish(tempDir, "ws", sidecar);
+    }
+
+    private static String runId(Path path) {
+        for (int index = 0; index + 1 < path.getNameCount(); index++) {
+            if ("runs".equals(path.getName(index).toString())) {
+                return path.getName(index + 1).toString();
+            }
+        }
+        return "run-fixture";
+    }
+
+    private static String workspaceRef(Path path) {
+        for (int index = 0; index < path.getNameCount(); index++) {
+            if (".agent".equals(path.getName(index).toString())) {
+                return path.subpath(index, path.getNameCount()).toString();
+            }
+        }
+        return path.getFileName().toString();
     }
 
     private static NodeDefinition decisionDefinition(String id) {
@@ -1819,7 +1926,29 @@ class BuiltinHandlerTest {
     private String writeOutput(String name, String content) throws Exception {
         var path = tempDir.resolve(".agent").resolve("workstreams").resolve("ws").resolve("runs").resolve("run-001").resolve("outputs").resolve(name);
         Files.createDirectories(path.getParent());
+        var publishLineage = false;
+        if (name.endsWith(".contract.json")) {
+            try {
+                var mapper = new ObjectMapper();
+                var json = mapper.readTree(content);
+                if (json instanceof com.fasterxml.jackson.databind.node.ObjectNode object) {
+                    var sourceName = name.substring(0, name.length() - ".contract.json".length()) + ".json";
+                    var sourcePath = path.resolveSibling(sourceName);
+                    object.put("workstream_id", "ws");
+                    object.put("run_id", "run-001");
+                    object.put("node_instance_id", "node-fixture-" + sourceName.replaceAll("[^A-Za-z0-9._-]", "-"));
+                    object.put("source_output_ref", tempDir.relativize(sourcePath).toString());
+                    content = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+                    publishLineage = true;
+                }
+            } catch (Exception ignored) {
+                // Malformed sidecars are intentional fixtures in rejection tests.
+            }
+        }
         Files.writeString(path, content);
+        if (publishLineage) {
+            AgentOutputLineageFixture.publish(tempDir, "ws", path);
+        }
         return tempDir.relativize(path).toString();
     }
 

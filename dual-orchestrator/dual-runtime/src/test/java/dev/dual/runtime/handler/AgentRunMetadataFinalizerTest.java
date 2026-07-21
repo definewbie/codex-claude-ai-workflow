@@ -2,7 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.execution.ArtifactContractResult;
-import dev.dual.core.execution.TerminalControlResult;
+import dev.dual.core.execution.AgentResultContractResult;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ class AgentRunMetadataFinalizerTest {
                 List.of(),
                 facts,
                 "model mismatch"
-        ), TerminalControlResult.missing(), List.of(ArtifactContractResult.requiredMissing("agent_output_contract")), null);
+        ), AgentResultContractResult.missing(), List.of(ArtifactContractResult.requiredMissing("agent_output_contract")), null);
 
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
 
@@ -90,7 +90,7 @@ class AgentRunMetadataFinalizerTest {
                 List.of(),
                 facts,
                 "agent needs reconnect"
-        ), TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+        ), AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
 
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
@@ -142,15 +142,15 @@ class AgentRunMetadataFinalizerTest {
                 List.of(),
                 facts,
                 ""
-        ), TerminalControlResult.valid("IMPLEMENTED"), List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+        ), AgentResultContractResult.valid("IMPLEMENTED"), List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
 
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
 
         var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
         assertEquals(3, json.get("schemaVersion"));
         assertEquals("completed", json.get("status"));
-        var terminal = map(json.get("terminalControlResult"));
-        assertEquals(true, terminal.get("present"));
+        var agentResult = map(json.get("agentResultContract"));
+        assertEquals(true, agentResult.get("present"));
         var contracts = list(json.get("artifactContractResults"));
         assertEquals(1, contracts.size());
         var outcome = map(json.get("executionOutcome"));
@@ -196,7 +196,7 @@ class AgentRunMetadataFinalizerTest {
                 List.of(),
                 facts,
                 ""
-        ), TerminalControlResult.valid("IMPLEMENTED"), List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+        ), AgentResultContractResult.valid("IMPLEMENTED"), List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
 
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
 
@@ -256,7 +256,7 @@ class AgentRunMetadataFinalizerTest {
                 List.of(),
                 facts,
                 ""
-        ), TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+        ), AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
 
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
@@ -323,7 +323,7 @@ class AgentRunMetadataFinalizerTest {
                 List.of(),
                 facts,
                 "legacy reconnect fallback"
-        ), TerminalControlResult.valid("READY_FOR_PRODUCT_REVIEW"),
+        ), AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
 
         new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);

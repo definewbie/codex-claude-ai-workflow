@@ -95,18 +95,6 @@ class AgentExecutionHealthTest {
     }
 
     @Test
-    void completeTerminalContractWinsOverReconnect() {
-        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(1));
-
-        health.observe(AgentLifecycleEvent.stderrLine(0, "[acpx] session claude-main · agent needs reconnect"));
-        health.observe(AgentLifecycleEvent.terminalContractSeen(1));
-
-        var assessment = health.assess(Duration.ofSeconds(10));
-
-        assertEquals(AgentExecutionHealth.Status.TERMINAL_SUCCESS, assessment.status());
-    }
-
-    @Test
     void promptAcceptedWithoutTrustedProgressBecomesRecoverableOutputInterrupted() {
         var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(30), Duration.ofSeconds(5));
 

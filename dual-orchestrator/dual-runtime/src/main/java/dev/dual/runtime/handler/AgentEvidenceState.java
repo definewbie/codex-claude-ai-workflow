@@ -12,17 +12,6 @@ record AgentEvidenceState(
         int acceptanceNoteCount,
         int openRiskCount
 ) {
-    static AgentEvidenceState from(AgentStructuredArtifactDocument document) {
-        return new AgentEvidenceState(
-                document.blocking(),
-                document.evidence().size(),
-                document.missingEvidence().size(),
-                document.mustFix().size(),
-                document.acceptanceNotes().size(),
-                document.openRisks().size()
-        );
-    }
-
     static AgentEvidenceState from(AgentOutputContractDocument document) {
         return new AgentEvidenceState(
                 document.blocking(),

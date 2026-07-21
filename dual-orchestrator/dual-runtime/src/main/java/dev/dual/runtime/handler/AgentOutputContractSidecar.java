@@ -11,9 +11,12 @@ public final class AgentOutputContractSidecar {
 
     public static Path pathFor(Path outputPath) {
         var fileName = outputPath.getFileName().toString();
-        var sidecarName = fileName.endsWith(".md")
-                ? fileName.substring(0, fileName.length() - 3) + ".contract.json"
-                : fileName + ".contract.json";
+        var baseName = fileName.endsWith(".md")
+                ? fileName.substring(0, fileName.length() - 3)
+                : fileName.endsWith(".json")
+                ? fileName.substring(0, fileName.length() - 5)
+                : fileName;
+        var sidecarName = baseName + ".contract.json";
         return outputPath.resolveSibling(sidecarName);
     }
 

@@ -36,7 +36,7 @@ class ContextBudgetOverrideTest {
         // product_review profile has max_snippet_chars=2000 override, default is 4000
         Files.writeString(wsDir.resolve("requirement.md"), "Short req.", StandardCharsets.UTF_8);
 
-        var input = wsDir.resolve("runs/run-001/outputs/agent.md");
+        var input = wsDir.resolve("artifacts/input.txt");
         Files.createDirectories(input.getParent());
         // Write content longer than 2000 but shorter than 4000
         Files.writeString(input, "X".repeat(3_000), StandardCharsets.UTF_8);
@@ -44,7 +44,7 @@ class ContextBudgetOverrideTest {
         Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
 
         var result = handler.execute(ctx("product_review", List.of(
-                ".agent/workstreams/ws-ctx/runs/run-001/outputs/agent.md")));
+                ".agent/workstreams/ws-ctx/artifacts/input.txt")));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -59,7 +59,7 @@ class ContextBudgetOverrideTest {
         // "full" profile has no max_snippet_chars override — falls to node config
         Files.writeString(wsDir.resolve("requirement.md"), "Short req.", StandardCharsets.UTF_8);
 
-        var input = wsDir.resolve("runs/run-001/outputs/agent.md");
+        var input = wsDir.resolve("artifacts/input.txt");
         Files.createDirectories(input.getParent());
         Files.writeString(input, "Y".repeat(3_000), StandardCharsets.UTF_8);
 
@@ -79,7 +79,7 @@ class ContextBudgetOverrideTest {
         ));
         var instance = new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
                 NodeStatus.READY, "stage-test", "iter-001",
-                List.of(".agent/workstreams/ws-ctx/runs/run-001/outputs/agent.md"),
+                List.of(".agent/workstreams/ws-ctx/artifacts/input.txt"),
                 List.of(), Map.of(), null, null, null);
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance));
@@ -96,7 +96,7 @@ class ContextBudgetOverrideTest {
         // product_review has max_snippet_chars=2000 in profile configOverrides
         Files.writeString(wsDir.resolve("requirement.md"), "Override priority test.", StandardCharsets.UTF_8);
 
-        var input = wsDir.resolve("runs/run-001/outputs/agent.md");
+        var input = wsDir.resolve("artifacts/input.txt");
         Files.createDirectories(input.getParent());
         Files.writeString(input, "Z".repeat(2_500), StandardCharsets.UTF_8);
         Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
@@ -110,7 +110,7 @@ class ContextBudgetOverrideTest {
         ));
         var instance = new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
                 NodeStatus.READY, "stage-test", "iter-001",
-                List.of(".agent/workstreams/ws-ctx/runs/run-001/outputs/agent.md"),
+                List.of(".agent/workstreams/ws-ctx/artifacts/input.txt"),
                 List.of(), Map.of(), null, null, null);
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance));

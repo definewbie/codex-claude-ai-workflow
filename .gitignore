@@ -18,6 +18,7 @@ dual-orchestrator/**/target/
 dual-orchestrator/docs/testing/real-case-reports/
 dual-orchestrator/todo.md
 dual-orchestrator/.understand-anything
+dual-orchestrator/graphify-out/
 note.md
 todo.md
 smoke-test-full.md

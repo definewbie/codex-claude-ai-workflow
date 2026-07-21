@@ -31,7 +31,8 @@ final class ContextStateEvidenceBoundaryRenderer {
         builder.append("This package separates deterministic harness facts from agent proposals.\n\n");
 
         appendTrustedFacts(builder, workstreamDir, objectMapper);
-        var routedEvidence = AgentEvidenceIndex.fromRefs(context.workspaceRoot(), context.instance().inputRefs(), objectMapper);
+        var routedEvidence = AgentEvidenceIndex.fromRefs(
+                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper);
         appendCurrentRepairObjective(builder, workstreamDir, objectMapper, routedEvidence);
         appendHumanDecisions(builder, workstreamDir, objectMapper);
         appendAgentProposedStates(builder, routedEvidence);

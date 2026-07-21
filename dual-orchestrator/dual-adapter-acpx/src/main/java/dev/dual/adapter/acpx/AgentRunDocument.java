@@ -49,7 +49,7 @@ record AgentRunDocument(
         Map<String, Object> explorationPolicyResult,
         Map<String, Object> processResult,
         List<Map<String, Object>> adapterSignals,
-        Map<String, Object> terminalControlResult,
+        Map<String, Object> agentResultContract,
         List<Map<String, Object>> artifactContractResults,
         Map<String, Object> executionAttempt,
         Map<String, Object> executionOutcome,

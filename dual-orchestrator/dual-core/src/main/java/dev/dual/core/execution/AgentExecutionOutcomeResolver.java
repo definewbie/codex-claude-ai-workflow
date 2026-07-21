@@ -6,7 +6,7 @@ import java.util.List;
  * Resolves one agent execution into a workflow-consumable outcome.
  *
  * <p>The rule order is deliberate: blocking adapter failures and unusable
- * process states cannot be hidden by a partial terminal control block; artifact
+ * process states cannot be hidden by a partial agent result; artifact
  * contract failures remain primary when the process is otherwise usable.</p>
  */
 public final class AgentExecutionOutcomeResolver {
@@ -50,15 +50,15 @@ public final class AgentExecutionOutcomeResolver {
                     "The agent process was interrupted before a trustworthy completion boundary."
             );
         }
-        if (!evidence.terminalControl().present() || !evidence.terminalControl().valid()) {
+        if (!evidence.agentResultContract().present() || !evidence.agentResultContract().valid()) {
             return new AgentExecutionOutcome(
                     AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE,
-                    "terminal_control_missing_or_invalid",
+                    "agent_result_missing_or_invalid",
                     signals,
                     false,
                     AgentExecutionRetryPolicy.MANUAL_ONLY,
                     RecoveryCategory.OUTPUT_INCOMPLETE,
-                    "The agent output did not contain a valid terminal control block."
+                    "The final ACP assistant message did not contain a valid AgentResultEnvelope."
             );
         }
         var unsatisfiedArtifacts = evidence.artifactContracts().stream()
@@ -72,7 +72,7 @@ public final class AgentExecutionOutcomeResolver {
                     false,
                     AgentExecutionRetryPolicy.MANUAL_ONLY,
                     RecoveryCategory.ARTIFACT_CONTRACT_FAILURE,
-                    "The agent terminal control was present, but one or more required structured artifacts failed validation."
+                    "The agent result was valid, but one or more required artifact projections failed validation."
             );
         }
         if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT
@@ -102,7 +102,7 @@ public final class AgentExecutionOutcomeResolver {
                     true,
                     AgentExecutionRetryPolicy.NONE,
                     RecoveryCategory.NONE,
-                    "The agent produced valid terminal and artifact evidence, but adapter/process warnings were recorded."
+                "The agent produced valid result and artifact evidence, but adapter/process warnings were recorded."
             );
         }
         return new AgentExecutionOutcome(
@@ -112,7 +112,7 @@ public final class AgentExecutionOutcomeResolver {
                 true,
                 AgentExecutionRetryPolicy.NONE,
                 RecoveryCategory.NONE,
-                "The agent produced valid terminal and artifact evidence."
+                "The agent produced valid result and artifact evidence."
         );
     }
 

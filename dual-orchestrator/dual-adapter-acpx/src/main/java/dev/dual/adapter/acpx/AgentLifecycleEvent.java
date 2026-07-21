@@ -51,10 +51,6 @@ record AgentLifecycleEvent(
         return streamEvent(sequence, Kind.PROVIDER_FAILURE, error);
     }
 
-    static AgentLifecycleEvent terminalContractSeen(long sequence) {
-        return new AgentLifecycleEvent(sequence, Source.STDOUT, Kind.TERMINAL_CONTRACT_SEEN, "", null);
-    }
-
     private static AgentLifecycleEvent textLine(long sequence, Source source, String text) {
         return new AgentLifecycleEvent(sequence, source, classifyText(source, text), text == null ? "" : text, null);
     }
@@ -113,7 +109,6 @@ record AgentLifecycleEvent(
         TOOL_RESULT,
         USAGE_UPDATE,
         RECONNECT_SIGNAL,
-        PROVIDER_FAILURE,
-        TERMINAL_CONTRACT_SEEN
+        PROVIDER_FAILURE
     }
 }

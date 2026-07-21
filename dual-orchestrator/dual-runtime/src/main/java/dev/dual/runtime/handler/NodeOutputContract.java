@@ -40,27 +40,6 @@ public record NodeOutputContract(
         supportedArtifactFields = supportedArtifactFields == null ? Set.of() : Set.copyOf(supportedArtifactFields);
     }
 
-    public void validate(DualControlBlock block) {
-        var missing = new LinkedHashSet<String>();
-        for (var key : requiredKeys) {
-            if (!block.values().containsKey(key) || block.values().get(key).isBlank()) {
-                missing.add(key);
-            }
-        }
-        if (!missing.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "node " + nodeId + ": dual-control missing required keys: " + missing
-                            + ". Required: " + requiredKeys);
-        }
-
-        var decision = block.values().get("decision");
-        if (decision != null && !allowedDecisions.contains(decision.trim())) {
-            throw new IllegalArgumentException(
-                    "node " + nodeId + ": decision '" + decision.trim() + "' not allowed."
-                            + " Allowed: " + allowedDecisions);
-        }
-    }
-
     public Set<String> allKnownKeys() {
         var keys = new LinkedHashSet<String>();
         keys.addAll(requiredKeys);

@@ -17,7 +17,7 @@ import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.ProcessResult;
 import dev.dual.core.execution.ProcessUsability;
-import dev.dual.core.execution.TerminalControlResult;
+import dev.dual.core.execution.AgentResultContractResult;
 import dev.dual.core.workflow.NodeResult;
 
 import java.nio.file.Files;
@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Owns the run.json execution finalization projection.
  *
- * <p>Artifact validators provide terminal/artifact facts. This class is the
+ * <p>Artifact validators provide result/artifact facts. This class is the
  * single runtime writer that combines those facts with process evidence and
  * persists terminal attempt/outcome fields into the agent run read model.</p>
  */
@@ -61,7 +61,7 @@ public final class AgentRunMetadataFinalizer {
         var outcome = finalizeRunMetadata(
                 workspaceRoot,
                 result,
-                AgentExecutionResultFacts.terminalControlResult(result),
+                AgentExecutionResultFacts.agentResultContract(result),
                 AgentExecutionResultFacts.artifactContractResults(result),
                 AgentExecutionResultFacts.rereadReasons(result)
         );
@@ -80,7 +80,7 @@ public final class AgentRunMetadataFinalizer {
     AgentExecutionOutcome finalizeRunMetadata(
             Path workspaceRoot,
             NodeResult result,
-            TerminalControlResult terminalControlResult,
+            AgentResultContractResult agentResultContract,
             List<ArtifactContractResult> artifactContractResults,
             Object rereadReasons
     ) {
@@ -88,7 +88,7 @@ public final class AgentRunMetadataFinalizer {
         if (runMetadataRef.isBlank()) {
             var evidence = new AgentExecutionEvidence(
                     processResult(result),
-                    terminalControlResult,
+                    agentResultContract,
                     artifactContractResults,
                     adapterSignals(result)
             );
@@ -99,7 +99,7 @@ public final class AgentRunMetadataFinalizer {
         if (!path.startsWith(root) || !Files.isRegularFile(path)) {
             var evidence = new AgentExecutionEvidence(
                     processResult(result),
-                    terminalControlResult,
+                    agentResultContract,
                     artifactContractResults,
                     adapterSignals(result)
             );
@@ -111,7 +111,7 @@ public final class AgentRunMetadataFinalizer {
             var signals = adapterSignalsFromRunMetadata(json, adapterSignals(result));
             var evidence = new AgentExecutionEvidence(
                     process,
-                    terminalControlResult,
+                    agentResultContract,
                     artifactContractResults,
                     signals
             );
@@ -125,8 +125,8 @@ public final class AgentRunMetadataFinalizer {
             json.set("adapterSignals", OBJECT_MAPPER.valueToTree(signals.stream()
                     .map(AgentRunMetadataFinalizer::adapterSignalToMap)
                     .toList()));
-            json.set("terminalControlResult", OBJECT_MAPPER.valueToTree(
-                    AgentExecutionResultFacts.terminalControlToMap(terminalControlResult)));
+            json.set("agentResultContract", OBJECT_MAPPER.valueToTree(
+                    AgentExecutionResultFacts.agentResultContractToMap(agentResultContract)));
             json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
                     .map(AgentExecutionResultFacts::artifactContractToMap)
                     .toList()));
@@ -141,7 +141,7 @@ public final class AgentRunMetadataFinalizer {
         } catch (Exception failure) {
             var evidence = new AgentExecutionEvidence(
                     processResult(result),
-                    terminalControlResult,
+                    agentResultContract,
                     artifactContractResults,
                     adapterSignals(result)
             );

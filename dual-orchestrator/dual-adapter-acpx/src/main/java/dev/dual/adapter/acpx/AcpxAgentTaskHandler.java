@@ -19,9 +19,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AgentPromptRenderer promptRenderer;
     private final AcpxFailureClassifier failureClassifier;
     private final AgentRunMetadataWriter metadataWriter;
-    private final AgentOutputCompletionDetector completionDetector;
     private final AcpxUsageReader usageReader;
-    private final AgentFinalArtifactExtractor finalArtifactExtractor;
     private final PromptManifestWriter promptManifestWriter = new PromptManifestWriter();
     private final SessionCompactionPolicy sessionCompactionPolicy = new SessionCompactionPolicy();
     private final SessionCompactionSeedWriter sessionCompactionSeedWriter = new SessionCompactionSeedWriter();
@@ -42,9 +40,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.promptRenderer = new AgentPromptRenderer();
         this.failureClassifier = new AcpxFailureClassifier();
         this.metadataWriter = new AgentRunMetadataWriter();
-        this.completionDetector = new AgentOutputCompletionDetector();
         this.usageReader = usageReader;
-        this.finalArtifactExtractor = new AgentFinalArtifactExtractor();
     }
 
     @Override
@@ -94,7 +90,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 .resolve("runs")
                 .resolve(runId);
         var promptPath = runDir.resolve("prompts").resolve(promptTemplate + ".md");
-        var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".md");
+        var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".json");
         var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
         var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
         Files.createDirectories(promptPath.getParent());
@@ -114,6 +110,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var rendered = promptRenderer.renderWithSections(
                 context.workspaceRoot(),
                 context.workstreamId(),
+                runId,
                 context.definition().id(),
                 promptTemplate,
                 inputRefs
@@ -188,19 +185,18 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             var usage = result.usage() != null
                     ? result.usage()
                     : usageReader.read(promptPath, stderrPath).orElse(null);
-            var transcriptText = readStringIfExists(transcriptPath);
-            var finalArtifact = finalArtifactExtractor.extract(transcriptText);
+            var finalArtifact = result.promptCompletion().finalAssistantMessage();
             var resultWithArtifactTimeline = result;
-            if (finalArtifact.isPresent()) {
-                Files.writeString(outputPath, finalArtifact.get(), StandardCharsets.UTF_8);
+            if (result.promptCompletion().completed()) {
+                Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
                 resultWithArtifactTimeline = appendTimelineEvent(
                         result,
                         AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
                         "adapter"
                 );
             }
-                var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
-            var outputComplete = completionDetector.isComplete(transcriptPath);
+            var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
+            var outputComplete = result.promptCompletion().completed();
             var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
             var completion = metadataWriter.writeCompleted(
                     context.workspaceRoot(),
@@ -384,7 +380,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 result.finishedAt(),
                 result.command(),
                 timeline,
-                result.usage()
+                result.usage(),
+                result.promptCompletion()
         );
     }
 

@@ -95,8 +95,7 @@ class ContractRegistryTest {
     @MethodSource("validDecisionCases")
     void contractAcceptsValidDecision(String nodeId, String decisionValue) {
         var contract = ContractRegistry.forNode(nodeId);
-        var block = new DualControlBlock(Map.of("decision", decisionValue, "summary", "test"));
-        assertDoesNotThrow(() -> contract.validate(block));
+        assertTrue(contract.allowedDecisions().contains(decisionValue));
     }
 
     static Stream<Object[]> invalidDecisionCases() {
@@ -124,44 +123,19 @@ class ContractRegistryTest {
         var contract = ContractRegistry.forNode(nodeId);
         assertFalse(contract.allowedDecisions().contains(badValue),
                 nodeId + " should not accept '" + badValue + "'");
-        var block = new DualControlBlock(Map.of("decision", badValue, "summary", "test"));
-        assertThrows(IllegalArgumentException.class, () -> contract.validate(block));
-    }
-
-    @Test
-    void contractRejectsMissingSummary() {
-        var contract = ContractRegistry.forNode("design.decision");
-        var block = new DualControlBlock(Map.of("decision", "READY_FOR_ARCH_REVIEW"));
-        assertThrows(IllegalArgumentException.class, () -> contract.validate(block));
-    }
-
-    @Test
-    void contractRejectsBlankSummary() {
-        var contract = ContractRegistry.forNode("design.decision");
-        var block = new DualControlBlock(Map.of("decision", "READY_FOR_ARCH_REVIEW", "summary", "  "));
-        assertThrows(IllegalArgumentException.class, () -> contract.validate(block));
     }
 
     @Test
     void intakeBrainstormAcceptsOptionalNeedsHumanInput() {
         var contract = ContractRegistry.forNode("intake.claude_brainstorm");
         assertTrue(contract.optionalKeys().contains("needs_human_input"));
-        var block = new DualControlBlock(Map.of(
-                "decision", "READY_FOR_PRODUCT_REVIEW",
-                "summary", "done",
-                "needs_human_input", "true"
-        ));
-        assertDoesNotThrow(() -> contract.validate(block));
+        assertTrue(contract.allowedDecisions().contains("READY_FOR_PRODUCT_REVIEW"));
     }
 
     @Test
     void intakeBrainstormDoesNotRequireNeedsHumanInput() {
         var contract = ContractRegistry.forNode("intake.claude_brainstorm");
-        var block = new DualControlBlock(Map.of(
-                "decision", "READY_FOR_PRODUCT_REVIEW",
-                "summary", "done"
-        ));
-        assertDoesNotThrow(() -> contract.validate(block));
+        assertFalse(contract.requiredKeys().contains("needs_human_input"));
     }
 
     @Test
@@ -213,7 +187,7 @@ class ContractRegistryTest {
                 "intake.codex_product_review", "agent_output_contract",
                 "design.claude_design", "agent_output_contract",
                 "design.codex_arch_review", "agent_output_contract",
-                "plan.claude_plan", "agent_output_contract",
+                "plan.claude_plan", "plan_result",
                 "plan.codex_plan_review", "agent_output_contract",
                 "implement.claude_implement", "agent_output_contract",
                 "implement.claude_self_test_report", "self_test_report",
@@ -240,12 +214,10 @@ class ContractRegistryTest {
     }
 
     @Test
-    void planClaudeDeclaresBothControlAndPlanArtifacts() {
+    void planClaudeDeclaresSinglePlanResultEnvelope() {
         var contract = ContractRegistry.forNode("plan.claude_plan");
-        assertTrue(contract.emitsArtifact("agent_output_contract"),
-                "plan.claude_plan still emits the control contract");
-        assertTrue(contract.emitsArtifact("plan_artifact"),
-                "plan.claude_plan must declare the typed plan body artifact so prompt injection can follow artifact contracts");
+        assertEquals(Set.of("plan_result"), contract.outputArtifactTypes(),
+                "plan decision and plan body must share one strict result envelope");
     }
 
     @Test

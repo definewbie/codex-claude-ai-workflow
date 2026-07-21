@@ -197,10 +197,17 @@ class WorkflowRuntimeTest {
     void decisionRoutesUsingContractSidecarOutcome() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-decision-runtime"));
         Files.createDirectories(paths.workstreamDir());
+        var source = writeOutput("ws-decision-runtime", "review.json", "{}");
         var output = writeOutput("ws-decision-runtime", "review.contract.json", """
                 {
                   "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "workstream_id": "ws-decision-runtime",
+                  "run_id": "run-001",
                   "node_id": "acceptance.codex_verifier_review",
+                  "node_instance_id": "node-acceptance-review-001",
+                  "source_output_ref": "%s",
+                  "source_artifact_type": "acceptance_review",
                   "decision": "REJECT",
                   "summary": "acceptance failed",
                   "control": {
@@ -208,7 +215,9 @@ class WorkflowRuntimeTest {
                     "summary": "acceptance failed"
                   }
                 }
-                """);
+                """.formatted(source.replace("\\", "\\\\")));
+        dev.dual.runtime.handler.AgentOutputLineageFixture.publish(
+                tempDir, "ws-decision-runtime", tempDir.resolve(output));
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
@@ -241,12 +250,17 @@ class WorkflowRuntimeTest {
     void invalidAgentOutputContractStopsBeforeRouting() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-agent-contract"));
         Files.createDirectories(paths.workstreamDir());
-        var invalidOutput = writeOutput("ws-agent-contract", "design-codex-review.md", """
-                Looks good.
-
-                ```dual-control
-                decision: READY_FOR_ARCH_REVIEW
-                ```
+        var invalidOutput = writeOutput("ws-agent-contract", "design-codex-review.json", """
+                {
+                  "schema_version": 1,
+                  "workstream_id": "ws-agent-contract",
+                  "run_id": "run-001",
+                  "node_id": "design.codex_arch_review",
+                  "result": {
+                    "artifact_type": "agent_output_contract",
+                    "decision": "READY_FOR_ARCH_REVIEW"
+                  }
+                }
                 """);
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
@@ -346,7 +360,8 @@ class WorkflowRuntimeTest {
             return NodeResult.completed("completed", List.of((String) context.definition().config().get("output_ref")), Map.of(
                     "agent", "codex",
                     "session", "codex-reviewer",
-                    "exit_code", 0
+                    "exit_code", 0,
+                    "run_id", "run-001"
             ));
         }
     }

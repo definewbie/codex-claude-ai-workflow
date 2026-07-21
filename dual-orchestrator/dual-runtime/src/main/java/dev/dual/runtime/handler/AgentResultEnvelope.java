@@ -1,0 +1,183 @@
+package dev.dual.runtime.handler;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import java.util.List;
+
+/** Strict, lineage-bound workflow result emitted as the final ACP assistant message. */
+public record AgentResultEnvelope(
+        int schemaVersion,
+        String workstreamId,
+        String runId,
+        String nodeId,
+        AgentResult result
+) {
+    @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "artifact_type",
+            visible = true
+    )
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = TaskContractProposalResult.class, name = "task_contract_proposal"),
+            @JsonSubTypes.Type(value = AgentOutputResult.class, name = "agent_output_contract"),
+            @JsonSubTypes.Type(value = PlanResult.class, name = "plan_result"),
+            @JsonSubTypes.Type(value = SelfTestResult.class, name = "self_test_report"),
+            @JsonSubTypes.Type(value = AcceptanceReviewResult.class, name = "acceptance_review"),
+            @JsonSubTypes.Type(value = StageHandoffResult.class, name = "stage_handoff")
+    })
+    public sealed interface AgentResult permits
+            TaskContractProposalResult,
+            AgentOutputResult,
+            PlanResult,
+            SelfTestResult,
+            AcceptanceReviewResult,
+            StageHandoffResult {
+        String artifactType();
+
+        String decision();
+
+        String summary();
+    }
+
+    public record TaskContractProposalResult(
+            String artifactType,
+            String decision,
+            String summary,
+            boolean needsHumanInput,
+            String objective,
+            ProposalScope scope,
+            List<String> acceptanceCriteria,
+            List<String> testRequirements,
+            List<String> constraints,
+            List<String> nonGoals,
+            List<String> riskAreas,
+            List<String> evidenceRefs,
+            List<String> openQuestions
+    ) implements AgentResult {
+    }
+
+    public record ProposalScope(List<String> included, List<String> excluded) {
+    }
+
+    public record AgentOutputResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String lifecycleStatus,
+            boolean blocking,
+            List<String> checks,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> mustFix,
+            List<String> acceptanceNotes,
+            List<String> openRisks,
+            List<String> changedFiles,
+            String verificationSummary,
+            Failure failure,
+            List<RereadReason> rereadReasons,
+            ScopeExpansionRequest scopeExpansionRequest
+    ) implements AgentResult {
+    }
+
+    public record PlanResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String lifecycleStatus,
+            boolean blocking,
+            List<String> checks,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> mustFix,
+            List<String> acceptanceNotes,
+            List<String> openRisks,
+            List<String> changedFiles,
+            String verificationSummary,
+            Failure failure,
+            Plan plan
+    ) implements AgentResult {
+    }
+
+    public record Plan(
+            List<String> implementationSteps,
+            List<String> editFiles,
+            List<String> referenceFiles,
+            List<String> fileLevelChanges,
+            List<String> validationPlan,
+            String rollbackNotes,
+            List<String> knownRisks,
+            List<String> humanReviewChecklist
+    ) {
+    }
+
+    public record SelfTestResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String lifecycleStatus,
+            List<String> checksRun,
+            List<String> checksSkipped,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> acceptanceNotes,
+            String verificationSummary
+    ) implements AgentResult {
+    }
+
+    public record AcceptanceReviewResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String lifecycleStatus,
+            boolean blocking,
+            List<String> checks,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> mustFix,
+            List<String> acceptanceNotes,
+            List<String> openRisks,
+            List<String> changedFiles,
+            String verificationSummary,
+            Failure failure
+    ) implements AgentResult {
+    }
+
+    public record StageHandoffResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String lifecycleStatus,
+            List<String> completedWork,
+            List<String> importantDecisions,
+            List<String> changedFiles,
+            String verificationState,
+            List<String> openRisks,
+            String recommendedNextStage,
+            String suggestedNextPrompt
+    ) implements AgentResult {
+    }
+
+    public record Failure(
+            String categoryHint,
+            List<String> contractGaps,
+            List<String> outOfScopeFiles,
+            List<String> missingTests,
+            List<String> contextGaps,
+            String reason
+    ) {
+    }
+
+    public record RereadReason(String path, String reason, String stage, String evidence) {
+    }
+
+    public record ScopeExpansionRequest(
+            List<String> requestedFiles,
+            List<String> readFiles,
+            List<String> files,
+            String reason,
+            String evidence
+    ) {
+    }
+}

@@ -40,7 +40,7 @@ class WorkflowRuntimeEventTest {
         Files.writeString(paths.workstreamDir().resolve("requirement.md"),
                 "Add user authentication\n", StandardCharsets.UTF_8);
         Files.writeString(tempDir.resolve("README.md"), "# Fixture\n", StandardCharsets.UTF_8);
-        writeTaskContractProposal(paths.workstreamDir(), """
+        var proposalRef = writeTaskContractProposal(tempDir, paths.workstreamDir(), """
                 {
                   "artifact_type": "task_contract_proposal",
                   "schema_version": 1,
@@ -63,9 +63,12 @@ class WorkflowRuntimeEventTest {
                 """);
 
         var definition = new WorkflowDefinition(
-                "test-events", 1, "contract.compile",
-                List.of(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())),
-                List.of()
+                "test-events", 1, "proposal.seed",
+                List.of(
+                        new NodeDefinition("proposal.seed", NodeKind.TASK, "proposal.seed", Map.of("proposal_ref", proposalRef)),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(new EdgeDefinition("proposal.seed", "completed", "contract.compile"))
         );
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-evt-compile", definition);
@@ -73,9 +76,10 @@ class WorkflowRuntimeEventTest {
         var runtime = new WorkflowRuntime(
                 ledger,
                 new HandlerRegistry(
-                        List.of(new dev.dual.runtime.handler.ContractCompileHandler()),
+                        List.of(new ProposalSeedHandler(), new dev.dual.runtime.handler.ContractCompileHandler()),
                         List.of(), List.of())
         );
+        runtime.resume(new WorkflowCommand(tempDir, "ws-evt-compile"));
         runtime.resume(new WorkflowCommand(tempDir, "ws-evt-compile"));
 
         var events = Files.readString(paths.eventsJsonl(), StandardCharsets.UTF_8);
@@ -215,14 +219,45 @@ class WorkflowRuntimeEventTest {
         }
     }
 
-    private static void writeTaskContractProposal(Path workstreamDir, String json) throws Exception {
+    private static String writeTaskContractProposal(Path workspaceRoot, Path workstreamDir, String json) throws Exception {
         var outputDir = workstreamDir.resolve("runs/run-001/outputs");
         Files.createDirectories(outputDir);
-        Files.writeString(outputDir.resolve("intake-claude-brainstorm.md"), """
-                <dual-artifact type="task_contract_proposal" version="1">
-                %s
-                </dual-artifact>
-                """.formatted(json), StandardCharsets.UTF_8);
+        var mapper = new ObjectMapper();
+        var proposal = mapper.readValue(json, Map.class);
+        var output = outputDir.resolve("intake-claude-brainstorm.json");
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        var sidecar = dev.dual.runtime.handler.AgentOutputContractSidecar.pathFor(output);
+        Files.writeString(sidecar, mapper.writeValueAsString(Map.ofEntries(
+                Map.entry("artifact_type", "agent_output_contract"),
+                Map.entry("schema_version", 1),
+                Map.entry("workstream_id", workstreamDir.getFileName().toString()),
+                Map.entry("run_id", "run-001"),
+                Map.entry("node_id", "intake.claude_brainstorm"),
+                Map.entry("node_instance_id", "node-intake-001"),
+                Map.entry("source_output_ref", workspaceRoot.relativize(output).toString()),
+                Map.entry("source_artifact_type", "task_contract_proposal"),
+                Map.entry("decision", "READY_FOR_PRODUCT_REVIEW"),
+                Map.entry("summary", "proposal ready"),
+                Map.entry("task_contract_proposal", proposal)
+        )), StandardCharsets.UTF_8);
+        dev.dual.runtime.handler.AgentOutputLineageFixture.publish(
+                workspaceRoot, workstreamDir.getFileName().toString(), sidecar);
+        return workspaceRoot.relativize(sidecar).toString();
+    }
+
+    private static final class ProposalSeedHandler implements TaskHandler {
+        @Override
+        public String type() {
+            return "proposal.seed";
+        }
+
+        @Override
+        public NodeResult execute(TaskContext context) {
+            return NodeResult.completed(
+                    "completed",
+                    List.of((String) context.definition().config().get("proposal_ref")),
+                    Map.of());
+        }
     }
 
     private static final class FailingContractCompile implements TaskHandler {

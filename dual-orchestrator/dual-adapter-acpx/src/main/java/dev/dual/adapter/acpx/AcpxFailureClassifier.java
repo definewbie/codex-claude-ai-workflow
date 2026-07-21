@@ -30,20 +30,31 @@ final class AcpxFailureClassifier {
 
     AcpxFailure classify(Path stdoutPath, Path stderrPath, int exitCode) {
         var stderr = read(stderrPath);
-        var providerEvidence = sessionStreamReader.readFromStderr(stderr).orElse(AcpxStreamEvidence.EMPTY);
+        var streamEvidence = sessionStreamReader.readFromStderr(stderr).orElse(AcpxStreamEvidence.EMPTY);
         var runtimeStdoutEvidence = runtimeStdoutEvidence(read(stdoutPath));
-        // providerEvidence carries only typed top-level JSON-RPC errors from the
-        // session stream — never agent prose, usage metadata, or tool results —
-        // so a stray quota/rate-limit word in agent output cannot be matched as a
-        // provider failure here.
-        var signal = signalCatalog.match(new AcpxFailureEvidence(
-                runtimeStdoutEvidence,
-                stderr + "\n" + providerEvidence.normalizedErrorText(),
-                exitCode
-        ));
-        if (signal.isPresent()) {
-            return signal.get().toFailure();
+        // streamEvidence carries typed top-level JSON-RPC errors and ordered
+        // session outcome facts, never agent prose, usage metadata, or tool
+        // results. Typed provider errors are classified before wrapper
+        // diagnostics; a stale reconnect diagnostic can be superseded only by a
+        // proven session-ready + prompt-completed outcome.
+        var providerSignal = signalCatalog.match(new AcpxFailureEvidence(
+                "", streamEvidence.normalizedErrorText(), exitCode));
+        if (providerSignal.isPresent()) {
+            return providerSignal.get().toFailure();
         }
+        var wrapperSignal = signalCatalog.match(new AcpxFailureEvidence(
+                runtimeStdoutEvidence, stderr, exitCode));
+        if (wrapperSignal.isPresent()) {
+            if (wrapperSignal.get().reason() == AcpxFailureReason.AGENT_RECONNECT
+                    && streamEvidence.provesRecoveredPromptCompletion()) {
+                return noTypedFailure(exitCode);
+            }
+            return wrapperSignal.get().toFailure();
+        }
+        return noTypedFailure(exitCode);
+    }
+
+    private static AcpxFailure noTypedFailure(int exitCode) {
         return new AcpxFailure(
                 "ACPX_EXIT_" + exitCode,
                 "acpx exited with " + exitCode,

@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -31,6 +32,8 @@ final class AgentLifecycleEventReader {
     private final Path stdoutPath;
     private final Path stderrPath;
     private final Path sessionsDir;
+    private final Map<String, Long> streamStartOffsets;
+    private final boolean streamBaselineCaptured;
     private long stdoutOffset;
     private long stderrOffset;
     private long streamOffset = -1;
@@ -45,9 +48,20 @@ final class AgentLifecycleEventReader {
     }
 
     AgentLifecycleEventReader(Path stdoutPath, Path stderrPath, Path sessionsDir) {
+        this(stdoutPath, stderrPath, sessionsDir, null);
+    }
+
+    AgentLifecycleEventReader(
+            Path stdoutPath,
+            Path stderrPath,
+            Path sessionsDir,
+            Map<String, Long> streamStartOffsets
+    ) {
         this.stdoutPath = stdoutPath;
         this.stderrPath = stderrPath;
         this.sessionsDir = sessionsDir;
+        this.streamBaselineCaptured = streamStartOffsets != null;
+        this.streamStartOffsets = streamStartOffsets == null ? Map.of() : Map.copyOf(streamStartOffsets);
     }
 
     List<AgentLifecycleEvent> readNewEvents() {
@@ -72,7 +86,8 @@ final class AgentLifecycleEventReader {
                 initialStreamTail = false;
                 streamOffset += chunk.bytesRead();
                 for (var line : completeStreamLines(chunk.bytes())) {
-                    var event = streamProjector.accept(sequence++, AcpxStreamWireLine.parse(line));
+                    var event = streamProjector.accept(
+                            sequence++, AcpxStreamWireLine.parse(line), !initialTail);
                     event.filter(value -> !initialTail || value.kind() != AgentLifecycleEvent.Kind.PROVIDER_FAILURE)
                             .ifPresent(events::add);
                 }
@@ -83,6 +98,10 @@ final class AgentLifecycleEventReader {
 
     long nextSequence() {
         return sequence++;
+    }
+
+    AcpxPromptCompletion promptCompletion() {
+        return streamProjector.promptCompletion();
     }
 
     private void updateSessionId(String text) {
@@ -113,6 +132,11 @@ final class AgentLifecycleEventReader {
         }
         try {
             var size = Files.size(path);
+            if (streamBaselineCaptured) {
+                streamOffset = Math.min(size, Math.max(0, streamStartOffsets.getOrDefault(sessionId, 0L)));
+                initialStreamTail = false;
+                return;
+            }
             streamOffset = Math.max(0, size - INITIAL_STREAM_TAIL_BYTES);
             initialStreamTail = streamOffset < size;
         } catch (IOException ignored) {

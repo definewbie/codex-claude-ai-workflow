@@ -54,7 +54,7 @@ final class StageOutcomeCompiler {
         sidecar.put("evidence_state", evidenceState.toMap());
     }
 
-    static Optional<DualControlParseResult> validateEvidenceContract(
+    static Optional<ContractViolation> validateEvidenceContract(
             String expectedType,
             String decision,
             String declaredStatus,
@@ -105,12 +105,12 @@ final class StageOutcomeCompiler {
         return Optional.empty();
     }
 
-    private static Optional<DualControlParseResult> violation(
+    private static Optional<ContractViolation> violation(
             String expectedType,
             String code,
             String message
     ) {
-        return Optional.of(DualControlParseResult.invalid(
+        return Optional.of(ContractViolation.of(
                 "STRUCTURED_ARTIFACT_SEMANTIC_VIOLATION",
                 code + ": " + message,
                 Map.of("required_artifact_type", expectedType, "semantic_code", code)

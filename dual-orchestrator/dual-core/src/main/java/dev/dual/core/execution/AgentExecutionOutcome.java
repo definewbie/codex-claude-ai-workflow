@@ -6,7 +6,7 @@ import java.util.List;
  * The single semantic outcome for one agent execution.
  *
  * <p>Workflow runtime and projections should consume this object instead of
- * reinterpreting stderr, exit codes, terminal markdown, or artifact files.</p>
+ * reinterpreting stderr, exit codes, raw assistant text, or artifact files.</p>
  */
 public record AgentExecutionOutcome(
         AgentExecutionOutcomeStatus status,

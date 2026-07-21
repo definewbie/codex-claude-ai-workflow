@@ -107,12 +107,8 @@ final class ContractFailureDiagnosticWriter {
 
     private static String category(String reason) {
         return switch (reason == null ? "" : reason) {
-            case "MISSING_DUAL_CONTROL" -> "missing_control";
-            case "NON_TERMINAL_CONTROL_BLOCK", "MALFORMED_DUAL_CONTROL", "CONTRACT_VALIDATION_FAILED" -> "malformed_control";
-            case "STRUCTURED_ARTIFACT_MISSING" -> "missing_structured_artifact";
-            case "STRUCTURED_ARTIFACT_PARSE_FAILED" -> "structured_artifact_parse_failed";
-            case "CONTROL_ARTIFACT_DECISION_MISMATCH" -> "decision_mismatch";
-            case "STRUCTURED_ARTIFACT_CONTRACT_VIOLATION" -> "structured_artifact_contract_violation";
+            case "AGENT_RESULT_MISSING" -> "missing_agent_result";
+            case "AGENT_RESULT_PARSE_FAILED", "AGENT_RESULT_CONTRACT_VIOLATION" -> "malformed_agent_result";
             case "STRUCTURED_ARTIFACT_SEMANTIC_VIOLATION" -> "semantic_conflict";
             default -> "contract_violation";
         };
@@ -120,19 +116,15 @@ final class ContractFailureDiagnosticWriter {
 
     private static String recommendedOwner(String category) {
         return switch (category) {
-            case "missing_control", "malformed_control", "missing_structured_artifact",
-                 "structured_artifact_parse_failed", "decision_mismatch", "semantic_conflict" -> "agent_or_prompt";
+            case "missing_agent_result", "malformed_agent_result", "semantic_conflict" -> "agent_or_prompt";
             default -> "harness_or_prompt";
         };
     }
 
     private static String recoveryHint(String category, String nodeId) {
         return switch (category) {
-            case "missing_control" -> "Ask the agent step to emit the required terminal dual-control block for " + nodeId + ".";
-            case "malformed_control" -> "Repair the terminal dual-control block so it is top-level, last, and contains all required keys.";
-            case "missing_structured_artifact" -> "Ask the agent to emit the required typed <dual-artifact> block before the terminal dual-control block.";
-            case "structured_artifact_parse_failed" -> "Fix the JSON inside the typed <dual-artifact>; do not recover by parsing Markdown sections.";
-            case "decision_mismatch" -> "Align the typed artifact decision with the terminal dual-control decision.";
+            case "missing_agent_result" -> "Ask the agent step to emit one strict AgentResultEnvelope JSON object as its final assistant message for " + nodeId + ".";
+            case "malformed_agent_result" -> "Repair the final AgentResultEnvelope JSON so it matches the node contract and contains no Markdown or trailing prose.";
             case "semantic_conflict" -> "Resolve the contradiction between lifecycle status, decision, and evidence fields.";
             default -> "Inspect the diagnostic details, prompt contract, and source output before retrying the node.";
         };

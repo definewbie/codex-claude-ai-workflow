@@ -83,40 +83,15 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain2_handoffToNextStageAndJson() throws Exception {
-        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.md";
-        fixture.writeHandoff("""
-                # Claude Stage Handoff
-
-                ## Completed Work
-
-                - Designed the API schema
-                - Created component architecture
-                - Wrote unit tests for auth module
-
-                ## Changed Files
-
-                - src/main/java/dev/dual/auth/AuthService.java
-                - src/main/java/dev/dual/auth/AuthController.java
-                - src/test/java/dev/dual/auth/AuthServiceTest.java
-
-                ## Open Risks
-
-                - Rate limit behavior under load
-                - Token refresh edge case on midnight UTC
-
-                ## Verification State
-
-                All self-tests passed. 47/47 green.
-
-                ## Suggested Next Prompt
-
-                Continue with integration testing for auth endpoints.
-
-                ```dual-control
-                decision: HANDOFF_READY
-                summary: Auth module implementation complete
-                ```
-                """);
+        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.json";
+        fixture.writeHandoffContract(
+                List.of("Designed the API schema", "Created component architecture", "Wrote unit tests for auth module"),
+                List.of("src/main/java/dev/dual/auth/AuthService.java",
+                        "src/main/java/dev/dual/auth/AuthController.java",
+                        "src/test/java/dev/dual/auth/AuthServiceTest.java"),
+                List.of("Rate limit behavior under load", "Token refresh edge case on midnight UTC"),
+                "All self-tests passed. 47/47 green.",
+                "Continue with integration testing for auth endpoints.");
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(taskContext(
@@ -169,48 +144,14 @@ class WorkflowIntegrationTest {
     }
 
     @Test
-    void chain2b_handoffJsonExtractsChineseHeadingsAndTables() throws Exception {
-        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.md";
-        fixture.writeHandoff("""
-                # Claude Stage Handoff
-
-                ## 1. 已完成的工作
-
-                B4 新用户引导卡片已在 `miniprogram/src/pages/record/index.vue` 中实现。
-
-                **实现细节：**
-                - `hasNoRecords` 计算属性：`!currentCycle && historyGroups.length === 0`
-                - `goToRetro()` 函数：带上 `planId`
-
-                ## 3. 变更的文件
-
-                | 文件 | 变更 | Diff |
-                |------|------|------|
-                | `miniprogram/src/pages/record/index.vue` | 新增 B4 引导卡片 | +27 行 |
-
-                ## 4. 验证状态
-
-                | 检查 | 结果 |
-                |------|------|
-                | grep B4 文案 | 通过 |
-                | npm run build | 跳过，缺少 node_modules |
-
-                ## 5. 开放风险
-
-                | 风险 | 影响 | 缓解措施 |
-                |------|------|----------|
-                | 未执行构建检查 | 语法错误可能仍未被发现 | 在集成环境运行 |
-                | 未进行运行时 UI 测试 | 视觉渲染和触摸交互未经验证 | 微信开发者工具验证 |
-
-                ## 7. 建议的下一步提示
-
-                没有特定的下一个提示。
-
-                ```dual-control
-                decision: HANDOFF_READY
-                summary: B4 引导卡片已实现
-                ```
-                """);
+    void chain2b_handoffJsonPreservesTypedMultilingualFields() throws Exception {
+        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.json";
+        fixture.writeHandoffContract(
+                List.of("B4 新用户引导卡片已实现", "hasNoRecords 计算属性已添加"),
+                List.of("miniprogram/src/pages/record/index.vue"),
+                List.of("未执行构建检查", "未进行运行时 UI 测试"),
+                "grep B4 文案通过；npm run build 跳过，缺少 node_modules",
+                "没有特定的下一个提示。");
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(taskContext(
@@ -563,18 +504,9 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain8_handoffJsonFromEmptyHandoff() throws Exception {
-        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.md";
+        var handoffRef = ".agent/workstreams/ws-int/runs/run-010/outputs/stage-claude-handoff.json";
         fixture.writeGitEvidence("M miniprogram/src/pages/record/index.vue", "1 file changed, 5 insertions(+)", null);
-        fixture.writeHandoff("""
-                # Minimal Handoff
-
-                Done with this batch.
-
-                ```dual-control
-                decision: HANDOFF_READY
-                summary: Minimal completion
-                ```
-                """);
+        fixture.writeHandoffContract(List.of(), List.of(), List.of(), "", "");
 
         var handler = new PromptGenerateNextStageHandler();
         var result = handler.execute(taskContext(

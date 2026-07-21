@@ -1,0 +1,143 @@
+package dev.dual.runtime.handler;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class AgentResultEnvelopeParserTest {
+    private final AgentResultEnvelopeParser parser = new AgentResultEnvelopeParser();
+    private final AgentResultEnvelopeValidator validator = new AgentResultEnvelopeValidator();
+    private final NodeOutputContract contract = new NodeOutputContract(
+            "design.claude_design",
+            Set.of("decision", "summary"),
+            Set.of("READY_FOR_ARCH_REVIEW"),
+            Set.of(),
+            Set.of("agent_output_contract")
+    );
+
+    @Test
+    void parsesAndValidatesStrictTypedEnvelope() {
+        var parsed = parser.parse(validEnvelope());
+
+        assertTrue(parsed.valid());
+        assertTrue(parsed.envelope().result() instanceof AgentResultEnvelope.AgentOutputResult);
+        assertTrue(validator.validate(parsed.envelope(), "ws-1", "run-1", contract).valid());
+    }
+
+    @Test
+    void rejectsDuplicateKeys() {
+        var parsed = parser.parse(validEnvelope().replace(
+                "\"schema_version\": 1,",
+                "\"schema_version\": 1,\"schema_version\": 1,"));
+
+        assertFalse(parsed.valid());
+        assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
+    }
+
+    @Test
+    void rejectsTrailingProseAndMarkdownFence() {
+        assertFalse(parser.parse(validEnvelope() + "\nDone.").valid());
+        assertFalse(parser.parse("```json\n" + validEnvelope() + "\n```").valid());
+    }
+
+    @Test
+    void rejectsUnknownFields() {
+        var parsed = parser.parse(validEnvelope().replace(
+                "\"summary\": \"ready\",",
+                "\"summary\": \"ready\",\"unexpected\": true,"));
+
+        assertFalse(parsed.valid());
+    }
+
+    @Test
+    void rejectsStaleLineageAndInvalidDecision() {
+        var parsed = parser.parse(validEnvelope()
+                .replace("\"run_id\": \"run-1\"", "\"run_id\": \"old-run\"")
+                .replace("READY_FOR_ARCH_REVIEW", "BLOCKED"));
+
+        var result = validator.validate(parsed.envelope(), "ws-1", "run-1", contract);
+        assertFalse(result.valid());
+        assertTrue(result.errors().stream().anyMatch(value -> value.contains("run_id")));
+        assertTrue(result.errors().stream().anyMatch(value -> value.contains("decision")));
+    }
+
+    @Test
+    void rejectsBlankLineageEvenWhenCurrentExecutionIdentityIsAlsoBlank() {
+        var parsed = parser.parse(validEnvelope()
+                .replace("\"workstream_id\": \"ws-1\"", "\"workstream_id\": \"\"")
+                .replace("\"run_id\": \"run-1\"", "\"run_id\": \"\""));
+
+        var result = validator.validate(parsed.envelope(), "", "", contract);
+
+        assertFalse(result.valid());
+        assertTrue(result.errors().contains("workstream_id is required"));
+        assertTrue(result.errors().contains("run_id is required"));
+    }
+
+    @Test
+    void rejectsMissingTypedPayloadFieldWithoutRelaxingJsonParser() {
+        var parsed = parser.parse(validEnvelope().replace("\"checks\": [],", ""));
+
+        assertTrue(parsed.valid(), "syntax parser should return the typed candidate");
+        var result = validator.validate(parsed.envelope(), "ws-1", "run-1", contract);
+        assertFalse(result.valid());
+        assertTrue(result.errors().contains("result.checks is required"));
+    }
+
+    @Test
+    void rejectsBlankSummaryAtTheTypedContractBoundary() {
+        var parsed = parser.parse(validEnvelope().replace("\"summary\": \"ready\"", "\"summary\": \"  \""));
+
+        assertTrue(parsed.valid());
+        var result = validator.validate(parsed.envelope(), "ws-1", "run-1", contract);
+        assertFalse(result.valid());
+        assertTrue(result.errors().contains("result.summary is required"));
+    }
+
+    @Test
+    void rejectsWrongPrimitiveType() {
+        var parsed = parser.parse(validEnvelope().replace("\"blocking\": false", "\"blocking\": \"false\""));
+
+        assertFalse(parsed.valid());
+    }
+
+    private static String validEnvelope() {
+        return """
+                {
+                  "schema_version": 1,
+                  "workstream_id": "ws-1",
+                  "run_id": "run-1",
+                  "node_id": "design.claude_design",
+                  "result": {
+                    "artifact_type": "agent_output_contract",
+                    "decision": "READY_FOR_ARCH_REVIEW",
+                    "summary": "ready",
+                    "lifecycle_status": "READY",
+                    "blocking": false,
+                    "checks": [],
+                    "evidence": [],
+                    "missing_evidence": [],
+                    "must_fix": [],
+                    "acceptance_notes": [],
+                    "open_risks": [],
+                    "changed_files": [],
+                    "verification_summary": "not run",
+                    "failure": {
+                      "category_hint": "",
+                      "contract_gaps": [],
+                      "out_of_scope_files": [],
+                      "missing_tests": [],
+                      "context_gaps": [],
+                      "reason": ""
+                    },
+                    "reread_reasons": [],
+                    "scope_expansion_request": null
+                  }
+                }
+                """;
+    }
+}

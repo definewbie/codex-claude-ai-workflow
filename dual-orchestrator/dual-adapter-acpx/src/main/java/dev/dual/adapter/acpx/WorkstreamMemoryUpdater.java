@@ -3,8 +3,8 @@ package dev.dual.adapter.acpx;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import dev.dual.runtime.handler.AgentArtifactEnvelopeParser;
 import dev.dual.runtime.handler.AgentOutputContractDocument;
+import dev.dual.runtime.handler.AgentOutputContractSidecar;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,9 +31,7 @@ import java.util.function.Function;
  * <p>This is the single writer for orchestrator-owned semantic memory. It
  * consumes only typed sources: {@link AcpxToolUsage#readFiles()} for reads,
  * {@code artifacts/task-contract.json} for decided scope / non-goals, and the
- * run's {@code agent_output_contract} envelope (extracted via
- * {@link AgentArtifactEnvelopeParser}, parsed via
- * {@link AgentOutputContractDocument#from}) for decisions / verdicts / open
+ * run's validated {@code agent_output_contract} sidecar for decisions / verdicts / open
  * issues / stage outcome, plus the classified failure for prior failures. It
  * does not parse agent prose, stdout, or markdown summaries as fact. The memory
  * file is a durable artifact owned by the workstream; prompt manifests, context
@@ -42,7 +40,6 @@ import java.util.function.Function;
 final class WorkstreamMemoryUpdater {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
-    private static final AgentArtifactEnvelopeParser ENVELOPES = new AgentArtifactEnvelopeParser();
     private static final int MAX_DECISIONS = 12;
     private static final int MAX_PRIOR_VERDICTS = 8;
     private static final int MAX_OPEN_ISSUES = 24;
@@ -197,14 +194,8 @@ final class WorkstreamMemoryUpdater {
             return Optional.empty();
         }
         try {
-            var markdown = Files.readString(outputPath, StandardCharsets.UTF_8);
-            var envelope = ENVELOPES.latest(markdown, "agent_output_contract");
-            if (envelope.isEmpty()) {
-                return Optional.empty();
-            }
-            var map = objectMapper.readValue(envelope.get().json(), MAP_TYPE);
-            return Optional.of(AgentOutputContractDocument.from(map));
-        } catch (IOException | RuntimeException ignored) {
+            return AgentOutputContractSidecar.read(outputPath, objectMapper);
+        } catch (RuntimeException ignored) {
             return Optional.empty();
         }
     }
@@ -471,7 +462,8 @@ final class WorkstreamMemoryUpdater {
 
     private static boolean isOpenVerdict(AgentOutputContractDocument contract) {
         var d = contract.decision();
-        return "REJECTED".equals(d) || "NEEDS_REVISION".equals(d) || "BLOCKED".equals(d)
+        return "REJECT".equals(d) || "REJECTED".equals(d)
+                || "NEEDS_REVISION".equals(d) || "BLOCKED".equals(d)
                 || "NEEDS_CLARIFICATION".equals(d) || "NEEDS_SCOPE_REDUCTION".equals(d);
     }
 
@@ -480,7 +472,9 @@ final class WorkstreamMemoryUpdater {
         if (d.isBlank() || contract.blocking() || !contract.mustFix().isEmpty()) {
             return false;
         }
-        return d.startsWith("READY_") || d.equals("HANDOFF_READY") || d.equals("ACCEPTED");
+        return d.startsWith("READY_") || d.equals("HANDOFF_READY")
+                || d.equals("ACCEPT") || d.equals("ACCEPT_WITH_NOTES")
+                || d.equals("ACCEPTED") || d.equals("ACCEPTED_WITH_NOTES");
     }
 
     private static List<String> normalizedRepoFiles(List<String> files) {

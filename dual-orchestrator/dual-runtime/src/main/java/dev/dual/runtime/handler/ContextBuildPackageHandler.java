@@ -58,7 +58,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         var requestedSections = effectiveSections(context);
         var manifest = requestedSections.stream().anyMatch(ContextBuildPackageHandler::requiresEvidenceManifest)
-                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(), OBJECT_MAPPER)
+                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(),
+                        context.instance().inputRefs(), OBJECT_MAPPER)
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = governanceEnabled()
@@ -116,7 +117,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var budget = effectiveBudget(rawBudget);
         var handoff = loadHandoff(workstreamDir);
         var manifest = budget.sections().stream().anyMatch(req -> requiresEvidenceManifest(req.section()))
-                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(), OBJECT_MAPPER)
+                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(),
+                        context.instance().inputRefs(), OBJECT_MAPPER)
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = governanceEnabled()
@@ -504,7 +506,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 ContextPackageSectionRenderer.appendRecommendedNextStage(builder, handoff);
             }
             case "recent_agent_outputs" -> {
-                ContextPackageSectionRenderer.appendRecentAgentOutputsLimited(builder, workstreamDir, maxItems > 0 ? maxItems : 2);
+                ContextPackageSectionRenderer.appendRecentAgentOutputsLimited(
+                        builder, context, maxItems > 0 ? maxItems : 2);
             }
             case "working_memory" -> {
                 ContextPackageSectionRenderer.appendWorkingMemory(builder, workstreamDir, context.workspaceRoot());
@@ -633,7 +636,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         if (sections.contains("recent_agent_outputs")) {
             builder.append("## Recent Agent Outputs\n\n");
-            ContextPackageSectionRenderer.appendRecentAgentOutputs(builder, workstreamDir, maxSnippetChars, maxRecentAgentOutputs);
+            ContextPackageSectionRenderer.appendRecentAgentOutputs(
+                    builder, context, maxRecentAgentOutputs);
         }
 
         if (sections.contains("working_memory")) {

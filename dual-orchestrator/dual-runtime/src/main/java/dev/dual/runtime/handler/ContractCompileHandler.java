@@ -9,9 +9,9 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,7 +23,6 @@ import java.util.Optional;
 public final class ContractCompileHandler implements TaskHandler {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
-    private final AgentArtifactEnvelopeParser artifactParser = new AgentArtifactEnvelopeParser();
     private final TaskContractProposalValidator proposalValidator = new TaskContractProposalValidator();
 
     @Override
@@ -48,7 +47,7 @@ public final class ContractCompileHandler implements TaskHandler {
             );
         }
 
-        var proposalResult = compileFromProposal(buildTrustedProposalSourceText(context), context);
+        var proposalResult = compileFromProposal(latestTrustedProposalSidecar(context), context);
         if (proposalResult.failed() != null) {
             return proposalResult.failed();
         }
@@ -56,7 +55,7 @@ public final class ContractCompileHandler implements TaskHandler {
             return proposalFailure(
                     "TASK_CONTRACT_PROPOSAL_MISSING",
                     "task_contract_proposal is required; strict mode does not compile canonical TaskContract from Markdown",
-                    List.of("No trusted <dual-artifact type=\"task_contract_proposal\" version=\"1\"> found in Claude intake output")
+                    List.of("No validated intake.claude_brainstorm AgentResultEnvelope JSON was found")
             );
         }
         var contract = proposalResult.contract();
@@ -103,13 +102,35 @@ public final class ContractCompileHandler implements TaskHandler {
         return NodeResult.completed("completed", List.copyOf(outputRefs), result);
     }
 
-    private ProposalCompileResult compileFromProposal(String sourceText, TaskContext context) {
-        var envelope = artifactParser.latest(sourceText, "task_contract_proposal");
-        if (envelope.isEmpty()) {
+    private ProposalCompileResult compileFromProposal(Optional<Path> sourcePath, TaskContext context) {
+        if (sourcePath.isEmpty()) {
             return new ProposalCompileResult(null, null, null);
         }
         try {
-            var proposal = OBJECT_MAPPER.readValue(envelope.get().json(), TaskContractProposal.class);
+            var document = AgentOutputContractDocument.read(sourcePath.get(), OBJECT_MAPPER);
+            if (document.isEmpty()) {
+                return new ProposalCompileResult(null, null, proposalFailure(
+                        "TASK_CONTRACT_PROPOSAL_PARSE_FAILED",
+                        "validated task_contract_proposal sidecar could not be parsed",
+                        List.of(sourcePath.get().toString())));
+            }
+            var validated = document.get();
+            if (AgentOutputLineageVerifier.violation(
+                        context.workspaceRoot(), context.workstreamId(), sourcePath.get(), validated).isPresent()
+                    || !"intake.claude_brainstorm".equals(validated.nodeId())
+                    || !"task_contract_proposal".equals(validated.sourceArtifactType())) {
+                return new ProposalCompileResult(null, null, proposalFailure(
+                        "TASK_CONTRACT_PROPOSAL_INVALID",
+                        "validated task_contract_proposal sidecar lineage is invalid",
+                        List.of(sourcePath.get().toString())));
+            }
+            var proposal = validated.taskContractProposal();
+            if (proposal == null) {
+                return new ProposalCompileResult(null, null, proposalFailure(
+                        "TASK_CONTRACT_PROPOSAL_INVALID",
+                        "validated sidecar does not contain task_contract_proposal",
+                        List.of(sourcePath.get().toString())));
+            }
             var errors = proposalValidator.validate(proposal, context.workspaceRoot().toAbsolutePath().normalize());
             if (!errors.isEmpty()) {
                 return new ProposalCompileResult(null, proposal, proposalFailure(
@@ -329,59 +350,26 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private record ResolvedGate(String gateRef, String action, String note) {}
 
-    private String buildTrustedProposalSourceText(TaskContext context) throws IOException {
-        var builder = new StringBuilder();
-        for (var inputRef : context.instance().inputRefs()) {
+    private Optional<Path> latestTrustedProposalSidecar(TaskContext context) {
+        var refs = context.instance().inputRefs();
+        for (int index = refs.size() - 1; index >= 0; index--) {
+            var inputRef = refs.get(index);
             if (!isClaudeIntakeOutputRef(inputRef)) {
                 continue;
             }
-            appendMarkdownRef(context, builder, "Trusted Proposal Input", inputRef);
-        }
-        appendLatestClaudeIntakeArtifacts(context, builder);
-        return builder.toString();
-    }
-
-    private void appendMarkdownRef(
-            TaskContext context,
-            StringBuilder builder,
-            String label,
-            String inputRef
-    ) throws IOException {
-        var path = context.workspaceRoot().resolve(inputRef).normalize();
-        if (Files.isRegularFile(path) && path.toString().endsWith(".md")) {
-            builder.append("\n\n## ").append(label).append(": ").append(inputRef).append("\n\n");
-            builder.append(Files.readString(path, StandardCharsets.UTF_8));
-        }
-    }
-
-    private void appendLatestClaudeIntakeArtifacts(TaskContext context, StringBuilder builder) throws IOException {
-        var runsDir = context.workspaceRoot()
-                .resolve(".agent")
-                .resolve("workstreams")
-                .resolve(context.workstreamId())
-                .resolve("runs");
-        if (!Files.isDirectory(runsDir)) {
-            return;
-        }
-        try (var paths = Files.walk(runsDir)) {
-            var artifacts = paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> isClaudeIntakeOutputRef(context.workspaceRoot().relativize(path).toString()))
-                    .sorted()
-                    .toList();
-            for (var artifact : artifacts) {
-                builder.append("\n\n## Trusted Claude Intake Artifact: ")
-                        .append(context.workspaceRoot().relativize(artifact))
-                        .append("\n\n");
-                builder.append(Files.readString(artifact, StandardCharsets.UTF_8));
+            var root = context.workspaceRoot().toAbsolutePath().normalize();
+            var path = root.resolve(inputRef).normalize();
+            if (path.startsWith(root) && Files.isRegularFile(path)) {
+                return Optional.of(path);
             }
         }
+        return Optional.empty();
     }
 
     private static boolean isClaudeIntakeOutputRef(String ref) {
         var normalized = ref.replace('\\', '/');
-        return normalized.contains("/outputs/intake-claude-brainstorm.md")
-                || normalized.endsWith("outputs/intake-claude-brainstorm.md");
+        return normalized.contains("/outputs/intake-claude-brainstorm.contract.json")
+                || normalized.endsWith("outputs/intake-claude-brainstorm.contract.json");
     }
 
 }

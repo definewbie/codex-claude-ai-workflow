@@ -29,12 +29,19 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         Files.createDirectories(outputDir);
 
         var sourceRefs = readableInputRefs(context);
-        var handoffText = combinedInputText(context, sourceRefs);
-        var handoffSource = structuredHandoff(context, sourceRefs)
-                .map(handoff -> new HandoffSource(handoff, renderStructuredHandoffContext(handoff), true))
-                .orElseGet(() -> new HandoffSource(markdownHandoff(context, sourceRefs, handoffText), handoffText, false));
+        var structured = structuredHandoff(context, sourceRefs);
+        if (structured.isEmpty()) {
+            return new NodeResult(
+                    "STAGE_HANDOFF_CONTRACT_MISSING",
+                    dev.dual.core.workflow.NodeStatus.FAILED,
+                    sourceRefs,
+                    java.util.Map.of("reason", "validated stage_handoff sidecar is required"),
+                    "validated stage_handoff sidecar is required; Markdown fallback is not a workflow fact"
+            );
+        }
+        var handoffSource = new HandoffSource(structured.get(), renderStructuredHandoffContext(structured.get()));
         var handoff = withLatestVerificationState(sourceRefs, context, handoffSource.document());
-        var handoffContextText = handoffSource.structured() ? renderStructuredHandoffContext(handoff) : handoffSource.contextText();
+        var handoffContextText = renderStructuredHandoffContext(handoff);
         var suggestedPrompt = handoff.suggestedNextPrompt();
         var promptPath = outputDir.resolve("next-stage-prompt.md");
         Files.writeString(promptPath, renderPrompt(context, sourceRefs, suggestedPrompt, handoffContextText), StandardCharsets.UTF_8);
@@ -46,7 +53,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         var handoffJsonRef = toWorkspaceRef(context.workspaceRoot(), handoffJsonPath);
         var result = new LinkedHashMap<String, Object>();
         result.put("generated", true);
-        result.put("mode", handoffSource.structured() ? "structured-handoff" : "handoff-derived");
+        result.put("mode", "structured-handoff");
         result.put("prompt_path", promptRef);
         result.put("handoff_json_path", handoffJsonRef);
         result.put("source_refs", sourceRefs);
@@ -114,16 +121,6 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
                 .toList();
     }
 
-    private static String combinedInputText(TaskContext context, List<String> refs) throws IOException {
-        var builder = new StringBuilder();
-        for (String ref : refs) {
-            var path = context.workspaceRoot().resolve(ref).normalize();
-            builder.append("### ").append(ref).append("\n\n");
-            builder.append(Files.readString(path, StandardCharsets.UTF_8).stripTrailing()).append("\n\n");
-        }
-        return builder.toString().stripTrailing();
-    }
-
     private static String toWorkspaceRef(Path workspaceRoot, Path path) {
         return workspaceRoot.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
     }
@@ -181,7 +178,8 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
             }
             var path = context.workspaceRoot().resolve(ref).normalize();
             var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
-            if (document.isPresent()) {
+            if (document.isPresent() && AgentOutputLineageVerifier.violation(
+                    context.workspaceRoot(), context.workstreamId(), path, document.get()).isEmpty()) {
                 return document;
             }
         }
@@ -193,7 +191,10 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
             var outputPath = context.workspaceRoot().resolve(sourceRef).normalize();
             var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
             var sidecar = AgentOutputContractDocument.read(sidecarPath, OBJECT_MAPPER);
-            if (sidecar.isEmpty() || !sidecar.get().isStageHandoffArtifact()) {
+            if (sidecar.isEmpty()
+                    || AgentOutputLineageVerifier.violation(
+                            context.workspaceRoot(), context.workstreamId(), sidecarPath, sidecar.get()).isPresent()
+                    || !sidecar.get().isStageHandoffArtifact()) {
                 continue;
             }
             var changedFiles = sidecar.get().changedFiles();
@@ -219,34 +220,6 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
         return java.util.Optional.empty();
     }
 
-    private static StageHandoffDocument markdownHandoff(TaskContext context, List<String> sourceRefs, String handoffText) {
-        var handoff = StageHandoffMarkdownParser.parse(handoffText);
-        var completedWork = handoff.completedWork();
-        var changedFiles = handoff.changedFiles();
-        if (changedFiles.isEmpty()) {
-            try {
-                changedFiles = changedFilesFromGitEvidence(context);
-            } catch (IOException ignored) {
-                changedFiles = List.of();
-            }
-        }
-        return new StageHandoffDocument(
-                1,
-                context.workstreamId(),
-                context.instance().stageId(),
-                context.instance().iterationId(),
-                sourceRefs.isEmpty() ? "" : sourceRefs.get(0),
-                completedWork,
-                handoff.importantDecisions(),
-                changedFiles,
-                handoff.openRisks(),
-                handoff.verificationState(),
-                handoff.recommendedNextStage(),
-                handoff.suggestedPrompt(),
-                Instant.now().toString()
-        );
-    }
-
     private static List<String> changedFilesFromGitEvidence(TaskContext context) throws IOException {
         var path = context.workspaceRoot()
                 .resolve(".agent")
@@ -264,7 +237,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
                 .toList();
     }
 
-    private record HandoffSource(StageHandoffDocument document, String contextText, boolean structured) {
+    private record HandoffSource(StageHandoffDocument document, String contextText) {
     }
 
 }

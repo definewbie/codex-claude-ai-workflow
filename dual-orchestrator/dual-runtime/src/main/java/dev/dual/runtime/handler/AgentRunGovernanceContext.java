@@ -35,7 +35,8 @@ public final class AgentRunGovernanceContext {
         var contextDir = workstreamDir.resolve("context");
         Files.createDirectories(contextDir);
 
-        var manifest = EvidenceManifest.rebuild(workspaceRoot, workstreamDir, context.workstreamId(), OBJECT_MAPPER);
+        var manifest = EvidenceManifest.rebuild(workspaceRoot, workstreamDir, context.workstreamId(),
+                context.instance().inputRefs(), OBJECT_MAPPER);
         manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = RepoScopeGovernance.build(workspaceRoot, workstreamDir, context, manifest, OBJECT_MAPPER);
 

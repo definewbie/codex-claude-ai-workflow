@@ -24,7 +24,6 @@ public class AcpxAgentTransport {
     private static final long DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS = 600;
     private static final long DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS = DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS;
     private static final long DEFAULT_QUEUE_TTL_SECONDS = 1800;
-    private static final long TERMINAL_OUTPUT_GRACE_SECONDS = 2;
     private static final long DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS = 45;
     private static final String RECOVERABLE_SIGNAL_GRACE_ENV = "DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS";
     private static final String AGENT_PROGRESS_TIMEOUT_ENV = "DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS";
@@ -33,7 +32,6 @@ public class AcpxAgentTransport {
     private static final String API_TIMEOUT_MS_ENV = "API_TIMEOUT_MS";
 
     private final AcpxFailureClassifier failureClassifier = new AcpxFailureClassifier();
-    private final AgentTerminalContract terminalContract = new AgentTerminalContract();
     private final String acpxExecutable;
     private final Duration recoverableSignalGrace;
     private final Duration agentProgressTimeout;
@@ -184,6 +182,7 @@ public class AcpxAgentTransport {
         command.add(request.promptPath().toString());
 
         var managedProcessBaseline = managedToolPids();
+        var sessionStreamBaseline = sessionStreamBaseline();
         var startedAt = Instant.now();
         var processBuilder = new ProcessBuilder(command)
                 .directory(request.workdir().toFile())
@@ -202,7 +201,7 @@ public class AcpxAgentTransport {
                     startedAt,
                     Map.of("pid", process.pid())
             ));
-            var waitResult = waitForExitOrRecoverableSignal(process, request);
+            var waitResult = waitForExitOrRecoverableSignal(process, request, sessionStreamBaseline);
             timeline.addAll(waitResult.executionTimeline());
             recordEvent(timeline, request, AcpxExecutionEvent.now(
                     AgentExecutionTimelineEventKind.PROCESS_EXITED,
@@ -211,7 +210,15 @@ public class AcpxAgentTransport {
                     startedAt,
                     Map.of("exitCode", waitResult.exitCode())
             ));
-            return new AcpxRunResult(waitResult.exitCode(), startedAt, Instant.now(), List.copyOf(command), timeline);
+            return new AcpxRunResult(
+                    waitResult.exitCode(),
+                    startedAt,
+                    Instant.now(),
+                    List.copyOf(command),
+                    timeline,
+                    null,
+                    waitResult.promptCompletion()
+            );
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
@@ -402,8 +409,11 @@ public class AcpxAgentTransport {
         }
     }
 
-    private ProcessWaitResult waitForExitOrRecoverableSignal(Process process, AcpxRunRequest request) throws InterruptedException {
-        Instant terminalOutputSince = null;
+    private ProcessWaitResult waitForExitOrRecoverableSignal(
+            Process process,
+            AcpxRunRequest request,
+            Map<String, Long> sessionStreamBaseline
+    ) throws InterruptedException {
         var startedAt = Instant.now();
         var timeline = new ArrayList<AcpxExecutionEvent>();
         recordEvent(timeline, request, AcpxExecutionEvent.now(
@@ -413,10 +423,18 @@ public class AcpxAgentTransport {
                 startedAt,
                 Map.of("pid", process.pid())
         ));
-        var eventReader = new AgentLifecycleEventReader(request.stdoutPath(), request.stderrPath());
+        var eventReader = new AgentLifecycleEventReader(
+                request.stdoutPath(),
+                request.stderrPath(),
+                Path.of(System.getProperty("user.home"), ".acpx", "sessions"),
+                sessionStreamBaseline);
         var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
         while (true) {
             if (process.waitFor(STDERR_SIGNAL_POLL_SECONDS, TimeUnit.SECONDS)) {
+                var elapsed = Duration.between(startedAt, Instant.now());
+                for (var event : eventReader.readNewEvents()) {
+                    health.observe(event, elapsed);
+                }
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
                         "adapter",
@@ -424,44 +442,11 @@ public class AcpxAgentTransport {
                         startedAt,
                         Map.of("exitCode", process.exitValue(), "waitMode", "process_exit")
                 ));
-                return new ProcessWaitResult(process.exitValue(), List.copyOf(timeline));
+                return new ProcessWaitResult(process.exitValue(), List.copyOf(timeline), eventReader.promptCompletion());
             }
             var elapsed = Duration.between(startedAt, Instant.now());
             for (var event : eventReader.readNewEvents()) {
                 health.observe(event, elapsed);
-            }
-            if (terminalContract.isComplete(readFile(request.stdoutPath()))) {
-                if (terminalOutputSince == null) {
-                    terminalOutputSince = Instant.now();
-                    recordEvent(timeline, request, AcpxExecutionEvent.now(
-                            AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED,
-                            "stdout",
-                            eventReader.nextSequence(),
-                            startedAt,
-                            Map.of("graceMs", Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS).toMillis())
-                    ));
-                    continue;
-                }
-                if (Duration.between(terminalOutputSince, Instant.now())
-                        .compareTo(Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS)) >= 0) {
-                    health.observe(AgentLifecycleEvent.terminalContractSeen(eventReader.nextSequence()), elapsed);
-                    recordEvent(timeline, request, AcpxExecutionEvent.now(
-                            AgentExecutionTimelineEventKind.TERMINAL_CONTROL_GRACE_ELAPSED,
-                            "adapter",
-                            eventReader.nextSequence(),
-                            startedAt,
-                            Map.of(
-                                    "exitCode", 0,
-                                    "waitMode", "terminal_control_grace",
-                                    "action", "terminate_process_tree",
-                                    "graceMs", Duration.ofSeconds(TERMINAL_OUTPUT_GRACE_SECONDS).toMillis()
-                            )
-                    ));
-                    terminateProcessTree(process.toHandle());
-                    return new ProcessWaitResult(0, List.copyOf(timeline));
-                }
-            } else {
-                terminalOutputSince = null;
             }
             var assessment = health.assess(elapsed);
             if (assessment.status() == AgentExecutionHealth.Status.RECOVERABLE_FAILURE) {
@@ -479,7 +464,11 @@ public class AcpxAgentTransport {
                         )
                 ));
                 terminateProcessTree(process.toHandle());
-                return new ProcessWaitResult(RECOVERABLE_SIGNAL_EXIT_CODE, List.copyOf(timeline));
+                return new ProcessWaitResult(
+                        RECOVERABLE_SIGNAL_EXIT_CODE,
+                        List.copyOf(timeline),
+                        eventReader.promptCompletion()
+                );
             }
         }
     }
@@ -509,7 +498,7 @@ public class AcpxAgentTransport {
         }
         var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
         return AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())
-                && !terminalContract.isComplete(readFile(request.stdoutPath()));
+                && !result.promptCompletion().completed();
     }
 
     private Set<Long> managedToolPids() {
@@ -522,6 +511,30 @@ public class AcpxAgentTransport {
         } catch (RuntimeException ignored) {
             return Set.of();
         }
+    }
+
+    private Map<String, Long> sessionStreamBaseline() {
+        var sessionsDir = Path.of(System.getProperty("user.home"), ".acpx", "sessions");
+        if (!Files.isDirectory(sessionsDir)) {
+            return Map.of();
+        }
+        var baseline = new java.util.LinkedHashMap<String, Long>();
+        try (var paths = Files.list(sessionsDir)) {
+            paths.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".stream.ndjson"))
+                    .forEach(path -> {
+                        var name = path.getFileName().toString();
+                        var sessionId = name.substring(0, name.length() - ".stream.ndjson".length());
+                        try {
+                            baseline.put(sessionId, Files.size(path));
+                        } catch (IOException ignored) {
+                            baseline.put(sessionId, 0L);
+                        }
+                    });
+        } catch (IOException ignored) {
+            return Map.of();
+        }
+        return Map.copyOf(baseline);
     }
 
     private void cleanupManagedToolsStartedByRun(Set<Long> knownBefore) {
@@ -689,6 +702,10 @@ public class AcpxAgentTransport {
         }
     }
 
-    private record ProcessWaitResult(int exitCode, List<AcpxExecutionEvent> executionTimeline) {
+    private record ProcessWaitResult(
+            int exitCode,
+            List<AcpxExecutionEvent> executionTimeline,
+            AcpxPromptCompletion promptCompletion
+    ) {
     }
 }

@@ -15,7 +15,7 @@ import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.FinalizedAgentExecution;
 import dev.dual.core.execution.ProcessResult;
-import dev.dual.core.execution.TerminalControlResult;
+import dev.dual.core.execution.AgentResultContractResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -77,7 +77,7 @@ public final class AgentExecutionAttemptReconciler {
         }
         var evidence = new AgentExecutionEvidence(
                 classification.get().process(),
-                TerminalControlResult.missing(),
+                AgentResultContractResult.missing(),
                 List.of(),
                 List.of()
         );

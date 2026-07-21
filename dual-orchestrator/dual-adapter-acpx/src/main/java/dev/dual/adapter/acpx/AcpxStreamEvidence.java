@@ -3,19 +3,33 @@ package dev.dual.adapter.acpx;
 import java.util.List;
 
 /**
- * Normalized, typed failure evidence derived from an acpx session stream.
+ * Normalized, typed evidence derived from an acpx session stream.
  *
  * <p>This is the second layer of the adapter boundary: it carries only real
- * top-level JSON-RPC errors (correlated to their request method), never agent
- * prose, usage metadata, tool results, or recovered {@code session/resume}
- * errors. The {@link #normalizedErrorText()} projection is the only stream
- * content that reaches {@link AcpxFailureSignalCatalog} matching, so a stray
- * {@code quota}/{@code rate limit} word in agent output cannot be mistaken for
- * a provider rate-limit failure.
+ * top-level JSON-RPC errors (correlated to their request method) plus the
+ * ordered session-ready and prompt-stop facts needed to arbitrate wrapper
+ * diagnostics. It never carries agent prose, usage metadata, tool results, or
+ * recovered {@code session/resume} errors. The
+ * {@link #normalizedErrorText()} projection is the only stream content that
+ * reaches provider-error matching.
  */
-record AcpxStreamEvidence(List<TypedError> errors) {
+record AcpxStreamEvidence(
+        List<TypedError> errors,
+        boolean sessionReady,
+        String promptStopReason,
+        boolean pendingControlRequest
+) {
 
-    static final AcpxStreamEvidence EMPTY = new AcpxStreamEvidence(List.of());
+    static final AcpxStreamEvidence EMPTY = new AcpxStreamEvidence(List.of(), false, "", false);
+
+    AcpxStreamEvidence {
+        errors = errors == null ? List.of() : List.copyOf(errors);
+        promptStopReason = promptStopReason == null ? "" : promptStopReason;
+    }
+
+    AcpxStreamEvidence(List<TypedError> errors) {
+        this(errors, false, "", false);
+    }
 
     /**
      * One real JSON-RPC error: the method it answered (when correlatable via
@@ -34,6 +48,17 @@ record AcpxStreamEvidence(List<TypedError> errors) {
 
     boolean isEmpty() {
         return errors.isEmpty();
+    }
+
+    boolean hasFacts() {
+        return !errors.isEmpty() || sessionReady || !promptStopReason.isEmpty() || pendingControlRequest;
+    }
+
+    boolean provesRecoveredPromptCompletion() {
+        return errors.isEmpty()
+                && sessionReady
+                && !pendingControlRequest
+                && ("end_turn".equals(promptStopReason) || "completed".equals(promptStopReason));
     }
 
     /**

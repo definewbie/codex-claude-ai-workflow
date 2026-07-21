@@ -56,7 +56,7 @@ final class AcpxSessionStreamFailureEvidenceReader {
         }
         try {
             var evidence = normalize(readTail(streamPath));
-            return evidence.isEmpty() ? Optional.empty() : Optional.of(evidence);
+            return evidence.hasFacts() ? Optional.of(evidence) : Optional.empty();
         } catch (IOException ignored) {
             return Optional.empty();
         }
