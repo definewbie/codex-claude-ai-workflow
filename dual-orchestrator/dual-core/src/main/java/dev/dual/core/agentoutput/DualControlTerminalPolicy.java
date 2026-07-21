@@ -10,6 +10,7 @@ public final class DualControlTerminalPolicy {
         var control = result.controlSpan();
         var marker = result.terminalMarkerSpan();
         return marker.start() >= control.endExclusive()
-                && source.substring(control.endExclusive(), marker.start()).isBlank();
+                && source.substring(control.endExclusive(), marker.start()).isBlank()
+                && source.substring(marker.endExclusive()).isBlank();
     }
 }

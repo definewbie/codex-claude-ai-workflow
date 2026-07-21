@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -36,7 +37,8 @@ final class AgentLifecycleEventReader {
     private long sequence;
     private String sessionId;
     private boolean initialStreamTail;
-    private final AcpxSessionStreamProjector streamProjector = new AcpxSessionStreamProjector();
+    private byte[] pendingStreamBytes = new byte[0];
+    private AcpxSessionStreamProjector streamProjector = new AcpxSessionStreamProjector();
 
     AgentLifecycleEventReader(Path stdoutPath, Path stderrPath) {
         this(stdoutPath, stderrPath, Path.of(System.getProperty("user.home"), ".acpx", "sessions"));
@@ -65,11 +67,11 @@ final class AgentLifecycleEventReader {
         });
         streamPath().ifPresent(path -> {
             initializeStreamOffset(path);
-            readNewText(path, streamOffset).ifPresent(chunk -> {
+            readNewBytes(path, streamOffset).ifPresent(chunk -> {
                 var initialTail = initialStreamTail;
                 initialStreamTail = false;
                 streamOffset += chunk.bytesRead();
-                for (var line : chunk.text().lines().toList()) {
+                for (var line : completeStreamLines(chunk.bytes())) {
                     var event = streamProjector.accept(sequence++, AcpxStreamWireLine.parse(line));
                     event.filter(value -> !initialTail || value.kind() != AgentLifecycleEvent.Kind.PROVIDER_FAILURE)
                             .ifPresent(events::add);
@@ -86,8 +88,14 @@ final class AgentLifecycleEventReader {
     private void updateSessionId(String text) {
         var matcher = SESSION_ID_PATTERN.matcher(text == null ? "" : text);
         while (matcher.find()) {
-            sessionId = matcher.group(1);
-            streamOffset = -1;
+            var discovered = matcher.group(1);
+            if (!discovered.equals(sessionId)) {
+                sessionId = discovered;
+                streamOffset = -1;
+                initialStreamTail = false;
+                pendingStreamBytes = new byte[0];
+                streamProjector = new AcpxSessionStreamProjector();
+            }
         }
     }
 
@@ -114,6 +122,11 @@ final class AgentLifecycleEventReader {
     }
 
     private Optional<Chunk> readNewText(Path path, long offset) {
+        return readNewBytes(path, offset)
+                .map(chunk -> new Chunk(new String(chunk.bytes(), StandardCharsets.UTF_8), chunk.bytesRead()));
+    }
+
+    private Optional<ByteChunk> readNewBytes(Path path, long offset) {
         if (path == null || !Files.isRegularFile(path)) {
             return Optional.empty();
         }
@@ -128,17 +141,57 @@ final class AgentLifecycleEventReader {
                 bytesToRead = Integer.MAX_VALUE;
             }
             var buffer = ByteBuffer.allocate((int) bytesToRead);
+            var bytesRead = 0;
             try (var channel = Files.newByteChannel(path, StandardOpenOption.READ)) {
                 channel.position(offset);
-                channel.read(buffer);
+                while (buffer.hasRemaining()) {
+                    var count = channel.read(buffer);
+                    if (count <= 0) {
+                        break;
+                    }
+                    bytesRead += count;
+                }
             }
-            buffer.flip();
-            return Optional.of(new Chunk(StandardCharsets.UTF_8.decode(buffer).toString(), bytesToRead));
+            return bytesRead == 0
+                    ? Optional.empty()
+                    : Optional.of(new ByteChunk(Arrays.copyOf(buffer.array(), bytesRead), bytesRead));
         } catch (IOException ignored) {
             return Optional.empty();
         }
     }
 
+    private List<String> completeStreamLines(byte[] chunk) {
+        var incoming = chunk == null ? new byte[0] : chunk;
+        var combined = Arrays.copyOf(pendingStreamBytes, pendingStreamBytes.length + incoming.length);
+        System.arraycopy(incoming, 0, combined, pendingStreamBytes.length, incoming.length);
+        var lastNewline = -1;
+        for (int index = combined.length - 1; index >= 0; index--) {
+            if (combined[index] == '\n') {
+                lastNewline = index;
+                break;
+            }
+        }
+        if (lastNewline < 0) {
+            pendingStreamBytes = combined;
+            return List.of();
+        }
+        pendingStreamBytes = Arrays.copyOfRange(combined, lastNewline + 1, combined.length);
+        var lines = new ArrayList<String>();
+        var lineStart = 0;
+        for (int index = 0; index <= lastNewline; index++) {
+            if (combined[index] != '\n') {
+                continue;
+            }
+            var lineEnd = index > lineStart && combined[index - 1] == '\r' ? index - 1 : index;
+            lines.add(new String(combined, lineStart, lineEnd - lineStart, StandardCharsets.UTF_8));
+            lineStart = index + 1;
+        }
+        return List.copyOf(lines);
+    }
+
     private record Chunk(String text, long bytesRead) {
+    }
+
+    private record ByteChunk(byte[] bytes, long bytesRead) {
     }
 }

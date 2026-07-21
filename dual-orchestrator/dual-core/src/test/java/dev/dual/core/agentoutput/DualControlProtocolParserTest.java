@@ -153,7 +153,7 @@ class DualControlProtocolParserTest {
     }
 
     @Test
-    void wrapperDiagnosticsAfterMarkerDoNotUndoTerminalCompletion() {
+    void contentAfterMarkerPreventsTerminalCompletion() {
         var result = parser.parse("""
                 ```dual-control
                 decision: READY
@@ -164,6 +164,20 @@ class DualControlProtocolParserTest {
                 """);
 
         assertTrue(result.valid());
-        assertTrue(terminalPolicy.isComplete(result));
+        assertFalse(terminalPolicy.isComplete(result));
+    }
+
+    @Test
+    void indentedMarkerIsNotCanonical() {
+        var result = parser.parse("""
+                ```dual-control
+                decision: READY
+                summary: done
+                ```
+                  [done] end_turn
+                """);
+
+        assertTrue(result.valid());
+        assertFalse(terminalPolicy.isComplete(result));
     }
 }

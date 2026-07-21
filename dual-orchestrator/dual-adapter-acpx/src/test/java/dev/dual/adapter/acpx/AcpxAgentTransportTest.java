@@ -217,6 +217,7 @@ class AcpxAgentTransportTest {
         var sessionId = "44444444-5555-6666-7777-888888888888";
         Files.createDirectories(sessionsDir);
         var fakeAcpx = tempDir.resolve("acpx-typed-429.sh");
+        var secondHalfWritten = tempDir.resolve("typed-429-second-half-written");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
                 if [ "$1" = "--help" ]; then
@@ -230,14 +231,16 @@ class AcpxAgentTransportTest {
                 {"jsonrpc":"2.0","id":9,"method":"session/prompt","params":{}}
                 EOF
                 sleep 2
-                cat >> "__STREAM__" <<'EOF'
-                {"jsonrpc":"2.0","id":9,"error":{"code":-32603,"message":"Internal error","data":{"message":"status=429 rate_limit_exceeded: too many requests"}}}
-                EOF
+                printf '%s' '{"jsonrpc":"2.0","id":9,"error":{"code":-32603,"message":"Internal error","data":{"message":"status=429 rate_' >> "__STREAM__"
+                sleep 2
+                printf '%s\n' 'limit_exceeded: too many requests"}}}' >> "__STREAM__"
+                : > "__SECOND_HALF_WRITTEN__"
                 sleep 20
                 echo "MUST_NOT_COMPLETE"
                 exit 0
                 """
                 .replace("__SESSION_ID__", sessionId)
+                .replace("__SECOND_HALF_WRITTEN__", secondHalfWritten.toString())
                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
@@ -261,7 +264,9 @@ class AcpxAgentTransportTest {
             var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
             assertEquals(4, result.exitCode());
-            assertTrue(elapsedMs < 8_000, "typed provider error should terminate after the configured grace");
+            assertTrue(Files.isRegularFile(secondHalfWritten), "the partial line must not terminate before completion");
+            assertTrue(elapsedMs >= 3_500, "transport must remain alive until the second half is written");
+            assertTrue(elapsedMs < 15_000, "typed provider error must terminate well before natural process exit");
             assertFalse(Files.readString(stdout).contains("MUST_NOT_COMPLETE"));
             assertTrue(result.executionTimeline().stream()
                     .filter(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED)
@@ -861,6 +866,53 @@ class AcpxAgentTransportTest {
 
         assertEquals(0, result.exitCode());
         assertTrue(elapsedMs >= 2_500, "invalid control must wait for the real process exit");
+        assertTrue(result.executionTimeline().stream()
+                .noneMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
+    }
+
+    @Test
+    void outputAfterDoneMarkerCannotStopProcessEarly() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-output-after-done.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                cat <<'EOF'
+                ```dual-control
+                decision: READY
+                summary: marker is not terminal when output follows
+                ```
+                [done] end_turn
+                still running
+                EOF
+                sleep 3
+                exit 0
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt-after-done.md");
+        var stdout = tempDir.resolve("stdout-after-done.md");
+        var stderr = tempDir.resolve("stderr-after-done.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+        var started = System.nanoTime();
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.fromName("", false)
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(0, result.exitCode());
+        assertTrue(elapsedMs >= 2_500, "content after the marker must wait for the real process exit");
         assertTrue(result.executionTimeline().stream()
                 .noneMatch(event -> event.kind() == AgentExecutionTimelineEventKind.TERMINAL_CONTROL_DETECTED));
     }

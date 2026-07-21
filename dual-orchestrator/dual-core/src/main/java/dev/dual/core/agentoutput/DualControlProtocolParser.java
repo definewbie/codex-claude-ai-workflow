@@ -157,7 +157,7 @@ public final class DualControlProtocolParser {
 
     private static DualControlProtocolResult.SourceSpan findTerminalMarker(List<Line> lines, int after) {
         for (var line : lines) {
-            if (line.start() >= after && DONE_MARKER.equals(line.text().strip())) {
+            if (line.start() >= after && DONE_MARKER.equals(line.text())) {
                 return new DualControlProtocolResult.SourceSpan(line.start(), line.end());
             }
         }
