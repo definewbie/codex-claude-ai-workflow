@@ -1,8 +1,5 @@
 package dev.dual.adapter.acpx;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -52,7 +49,6 @@ final class AcpxUsageReader {
     private final int retryAttempts;
     private final long retryDelayMs;
     private final AcpxProviderMetadata fallbackMetadata;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     AcpxUsageReader() {
         this(Path.of(System.getProperty("user.home"), ".acpx", "sessions"));
@@ -172,27 +168,27 @@ final class AcpxUsageReader {
             if (line == null || line.isBlank()) {
                 continue;
             }
-            var node = parse(line);
-            if (node == null) {
+            var wire = AcpxStreamWireLine.parse(line);
+            if (wire.kind() == AcpxStreamWireLine.Kind.MALFORMED) {
                 continue;
             }
-            if (isPrompt(node)) {
+            if (isPrompt(wire)) {
                 var firstPrompt = latestPromptRequestId == null;
-                latestPromptRequestId = text(node.get("id"));
+                latestPromptRequestId = wire.requestId();
                 latestPromptStartingCost = startingCostForPrompt(costAmount, firstPrompt);
-                if (matchedRequestId == null && isMatchingPrompt(node, promptText)) {
+                if (matchedRequestId == null && isMatchingPrompt(wire, promptText)) {
                     matchedRequestId = latestPromptRequestId;
                     matchedPromptStartingCost = latestPromptStartingCost;
                 }
                 continue;
             }
-            if (isUsageUpdate(node)) {
-                var cost = node.at("/params/update/cost");
-                if (!cost.isMissingNode()) {
-                    costAmount = decimal(cost.get("amount"));
-                    costCurrency = text(cost.get("currency"));
+            if (isUsageUpdate(wire)) {
+                var update = wire.notification().usageUpdate();
+                if (update.costAmount() != null) {
+                    costAmount = update.costAmount();
+                    costCurrency = update.costCurrency();
                 }
-                var used = number(node.at("/params/update/used"));
+                var used = update.used();
                 if (used > 0) {
                     usageUpdateFallback = new AcpxUsage(
                             0,
@@ -217,11 +213,13 @@ final class AcpxUsageReader {
                     );
                 }
             }
-            if (node.at("/result/usage").isObject()) {
-                var requestId = text(node.get("id"));
+            if (wire.kind() == AcpxStreamWireLine.Kind.JSONRPC_OK
+                    && wire.result() != null
+                    && wire.result().usage() != null) {
+                var requestId = wire.requestId();
                 if (matchedRequestId != null && matchedRequestId.equals(requestId)) {
                     exactUsage = usageFrom(
-                            node,
+                            wire.result().usage(),
                             matchedPromptStartingCost,
                             costAmount,
                             costCurrency,
@@ -230,7 +228,7 @@ final class AcpxUsageReader {
                 }
                 if (latestPromptRequestId != null && latestPromptRequestId.equals(requestId)) {
                     fallbackUsage = usageFrom(
-                            node,
+                            wire.result().usage(),
                             latestPromptStartingCost,
                             costAmount,
                             costCurrency,
@@ -249,30 +247,31 @@ final class AcpxUsageReader {
         return firstPrompt ? BigDecimal.ZERO : null;
     }
 
-    private boolean isPrompt(JsonNode node) {
-        return "session/prompt".equals(text(node.get("method")));
+    private boolean isPrompt(AcpxStreamWireLine wire) {
+        return wire.kind() == AcpxStreamWireLine.Kind.JSONRPC_REQUEST
+                && "session/prompt".equals(wire.method());
     }
 
-    private boolean isMatchingPrompt(JsonNode node, String promptText) {
-        return "session/prompt".equals(text(node.get("method")))
-                && promptText.equals(text(node.at("/params/prompt/0/text")));
+    private boolean isMatchingPrompt(AcpxStreamWireLine wire, String promptText) {
+        return isPrompt(wire)
+                && wire.request() != null
+                && promptText.equals(wire.request().promptText());
     }
 
     private AcpxUsage usageFrom(
-            JsonNode node,
+            AcpxStreamWireLine.Usage usage,
             BigDecimal startingCostAmount,
             BigDecimal sessionCostAmount,
             String sessionCostCurrency,
             String attribution
     ) {
-        var usage = node.at("/result/usage");
         var runCostAmount = costDelta(startingCostAmount, sessionCostAmount);
         return new AcpxUsage(
-                number(usage.get("inputTokens")),
-                number(usage.get("outputTokens")),
-                number(usage.get("cachedReadTokens")),
-                number(usage.get("cachedWriteTokens")),
-                number(usage.get("totalTokens")),
+                usage.inputTokens(),
+                usage.outputTokens(),
+                usage.cachedReadTokens(),
+                usage.cachedWriteTokens(),
+                usage.totalTokens(),
                 runCostAmount,
                 sessionCostCurrency,
                 "acpx_stream",
@@ -298,9 +297,11 @@ final class AcpxUsageReader {
         return delta.signum() < 0 ? null : delta;
     }
 
-    private boolean isUsageUpdate(JsonNode node) {
-        return "session/update".equals(text(node.get("method")))
-                && "usage_update".equals(text(node.at("/params/update/sessionUpdate")));
+    private boolean isUsageUpdate(AcpxStreamWireLine wire) {
+        return wire.kind() == AcpxStreamWireLine.Kind.NOTIFICATION
+                && "session/update".equals(wire.method())
+                && wire.notification() != null
+                && wire.notification().usageUpdate() != null;
     }
 
     private Optional<String> sessionIdFrom(String stderr) {
@@ -313,26 +314,6 @@ final class AcpxUsageReader {
             latest = matcher.group(1);
         }
         return Optional.ofNullable(latest);
-    }
-
-    private JsonNode parse(String line) {
-        try {
-            return objectMapper.readTree(line);
-        } catch (IOException ignored) {
-            return null;
-        }
-    }
-
-    private static String text(JsonNode node) {
-        return node == null || node.isMissingNode() || node.isNull() ? "" : node.asText();
-    }
-
-    private static long number(JsonNode node) {
-        return node == null || !node.isNumber() ? 0 : node.asLong();
-    }
-
-    private static BigDecimal decimal(JsonNode node) {
-        return node == null || !node.isNumber() ? null : node.decimalValue();
     }
 
     private void sleepBeforeRetry() {

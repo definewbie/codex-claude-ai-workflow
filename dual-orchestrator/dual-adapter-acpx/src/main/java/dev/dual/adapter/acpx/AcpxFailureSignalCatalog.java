@@ -121,13 +121,15 @@ final class AcpxFailureSignalCatalog {
                         "rate_limit",
                         AcpxFailureReason.RATE_LIMIT,
                         70,
-                        "agent quota or rate limit was hit; wait for quota recovery and run dualctl retry, then dualctl resume",
+                        "agent quota or rate limit was hit (HTTP 429 / provider throttle); wait for quota recovery and run dualctl retry, then dualctl resume",
                         true,
                         false,
                         "rate limit",
-                        "quota",
+                        "rate_limit_exceeded",
                         "request rejected (429)",
-                        "usage limit",
+                        "429",
+                        "too many requests",
+                        "quota exceeded",
                         "使用上限"
                 ),
                 signal(

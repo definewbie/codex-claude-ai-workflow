@@ -36,6 +36,7 @@ final class AgentLifecycleEventReader {
     private long sequence;
     private String sessionId;
     private boolean initialStreamTail;
+    private final AcpxSessionStreamProjector streamProjector = new AcpxSessionStreamProjector();
 
     AgentLifecycleEventReader(Path stdoutPath, Path stderrPath) {
         this(stdoutPath, stderrPath, Path.of(System.getProperty("user.home"), ".acpx", "sessions"));
@@ -69,10 +70,9 @@ final class AgentLifecycleEventReader {
                 initialStreamTail = false;
                 streamOffset += chunk.bytesRead();
                 for (var line : chunk.text().lines().toList()) {
-                    var event = AgentLifecycleEvent.streamLine(sequence++, line);
-                    if (!initialTail || event.kind() != AgentLifecycleEvent.Kind.PROVIDER_FAILURE) {
-                        events.add(event);
-                    }
+                    var event = streamProjector.accept(sequence++, AcpxStreamWireLine.parse(line));
+                    event.filter(value -> !initialTail || value.kind() != AgentLifecycleEvent.Kind.PROVIDER_FAILURE)
+                            .ifPresent(events::add);
                 }
             });
         });

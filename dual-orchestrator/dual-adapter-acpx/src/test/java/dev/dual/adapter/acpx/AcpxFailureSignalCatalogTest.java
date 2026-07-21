@@ -181,4 +181,29 @@ class AcpxFailureSignalCatalogTest {
 
         assertTrue(catalog.match(evidence).isEmpty());
     }
+
+    @Test
+    void bareQuotaWordIsNotRateLimit() {
+        // "quota" appearing without an explicit rate-limit indicator (e.g. in an
+        // unrelated error message or agent prose that reached the catalog) must
+        // not classify as RATE_LIMIT.
+        var evidence = new AcpxFailureEvidence("", "billing quota update failed", 1);
+
+        var match = catalog.match(evidence);
+        assertTrue(match.isEmpty() || match.get().reason() != AcpxFailureReason.RATE_LIMIT);
+    }
+
+    @Test
+    void explicitRateLimitIndicatorsClassifyAsRateLimit() {
+        for (var text : new String[]{
+                "Request rejected (429): too many requests",
+                "rate_limit_exceeded",
+                "Rate limit exceeded, please retry",
+                "已达到 5 小时的使用上限"
+        }) {
+            var evidence = new AcpxFailureEvidence("", text, 1);
+            var signal = catalog.match(evidence).orElseThrow();
+            assertEquals(AcpxFailureReason.RATE_LIMIT, signal.reason(), "expected RATE_LIMIT for: " + text);
+        }
+    }
 }

@@ -109,7 +109,13 @@ final class AgentExecutionHealth {
     }
 
     private void observeFailure(AgentLifecycleEvent event, Duration elapsed) {
-        var signal = signalCatalog.match(new AcpxFailureEvidence("", event.text(), 4));
+        var evidenceText = event.source() == AgentLifecycleEvent.Source.ACPX_STREAM
+                ? typedStreamErrorText(event.streamError())
+                : event.text();
+        if (evidenceText.isBlank()) {
+            return;
+        }
+        var signal = signalCatalog.match(new AcpxFailureEvidence("", evidenceText, 4));
         if (signal.isEmpty()) {
             return;
         }
@@ -120,6 +126,12 @@ final class AgentExecutionHealth {
             currentSignal = nextSignal;
             currentFailureSince = elapsed;
         }
+    }
+
+    private String typedStreamErrorText(AcpxStreamEvidence.TypedError error) {
+        return error == null
+                ? ""
+                : new AcpxStreamEvidence(java.util.List.of(error)).normalizedErrorText();
     }
 
     private void markProgress(AgentLifecycleEvent event, Duration elapsed) {

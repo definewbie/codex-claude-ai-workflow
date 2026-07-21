@@ -152,6 +152,127 @@ class AcpxAgentTransportTest {
     }
 
     @Test
+    void sessionUpdateBodyWithFailureWordsCannotTerminateTransport() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("body-words-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "33333333-4444-5555-6666-777777777777";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-body-words.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"Discuss quota, rate limit, agent needs reconnect, api error: 429 and tool_use_error as plain review text."}}}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"tool_call_update","rawOutput":{"is_error":false,"text":"Request rejected (429) was only a fixture."}}}}
+                EOF
+                sleep 3
+                echo "ACPX_BODY_WORDS_COMPLETED"
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("body-words-prompt.md");
+        var stdout = tempDir.resolve("body-words-stdout.md");
+        var stderr = tempDir.resolve("body-words-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+            var started = System.nanoTime();
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+            assertEquals(0, result.exitCode());
+            assertTrue(elapsedMs >= 2_500, "payload words must not terminate the process early");
+            assertTrue(Files.readString(stdout).contains("ACPX_BODY_WORDS_COMPLETED"));
+            assertFalse(result.executionTimeline().stream()
+                    .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void topLevelPromptRateLimitTerminatesThroughTypedStreamError() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("typed-429-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "44444444-5555-6666-7777-888888888888";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-typed-429.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if [ "$2" = "sessions" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":9,"method":"session/prompt","params":{}}
+                EOF
+                sleep 2
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":9,"error":{"code":-32603,"message":"Internal error","data":{"message":"status=429 rate_limit_exceeded: too many requests"}}}
+                EOF
+                sleep 20
+                echo "MUST_NOT_COMPLETE"
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("typed-429-prompt.md");
+        var stdout = tempDir.resolve("typed-429-stdout.md");
+        var stderr = tempDir.resolve("typed-429-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+            var started = System.nanoTime();
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+            assertEquals(4, result.exitCode());
+            assertTrue(elapsedMs < 8_000, "typed provider error should terminate after the configured grace");
+            assertFalse(Files.readString(stdout).contains("MUST_NOT_COMPLETE"));
+            assertTrue(result.executionTimeline().stream()
+                    .filter(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED)
+                    .map(event -> event.details().get("failureReason"))
+                    .anyMatch(AcpxFailureReason.RATE_LIMIT.code()::equals));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
     void stopsWhenSessionPromptStallsAfterReconnectRecovery() throws Exception {
         var previousHome = System.getProperty("user.home");
         var fakeHome = tempDir.resolve("home");
