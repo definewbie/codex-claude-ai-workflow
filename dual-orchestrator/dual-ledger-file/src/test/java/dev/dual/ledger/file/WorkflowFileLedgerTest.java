@@ -139,6 +139,7 @@ class WorkflowFileLedgerTest {
         assertTrue(gateJson.contains("\"status\" : \"resolved\""));
         assertTrue(gateJson.contains("\"human_action\" : \"approved\""));
         assertTrue(gateJson.contains("\"note\" : \"mandatory review confirmed\""));
+        assertTrue(gateJson.contains("\"subject_input_refs\" : [ \"first-output.md\" ]"));
         assertTrue(gateJson.contains("\"resolvedAt\""));
     }
 

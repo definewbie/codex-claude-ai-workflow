@@ -81,6 +81,39 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void requirementGateProjectsExactTaskContractProposalSubject() throws Exception {
+        var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, "ws", """
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "schema_version": 1,
+                  "objective": "Review an exact proposal",
+                  "scope": {"included": ["README.md"], "excluded": []},
+                  "acceptance_criteria": ["The approved proposal is unambiguous"],
+                  "constraints": ["Keep the change bounded"],
+                  "non_goals": [],
+                  "risk_areas": [],
+                  "test_requirements": ["Run focused tests"],
+                  "evidence_refs": ["README.md"],
+                  "open_questions": []
+                }
+                """);
+        var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(reviewRef));
+
+        new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                tempDir, "ws", gateDefinition(), gateNode));
+
+        var packetDir = tempDir.resolve(".agent/workstreams/ws/reviews");
+        var markdown = Files.readString(packetDir.resolve(gateNode.nodeInstanceId() + ".md"));
+        var json = Files.readString(packetDir.resolve(gateNode.nodeInstanceId() + ".json"));
+        assertTrue(markdown.contains("## Review Subject"));
+        assertTrue(markdown.contains("node-intake-proposal:"));
+        assertTrue(markdown.contains("SHA-256"));
+        assertTrue(json.contains("\"reviewSubject\""));
+        assertTrue(json.contains("\"proposal_id\""));
+        assertTrue(json.contains("\"sha256\""));
+    }
+
+    @Test
     void humanGateRejectsForgedAdjacentSidecarWithoutLedgerOccurrence() throws Exception {
         var inputRef = writeOutput("forged-review.md", "human-readable candidate");
         var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));

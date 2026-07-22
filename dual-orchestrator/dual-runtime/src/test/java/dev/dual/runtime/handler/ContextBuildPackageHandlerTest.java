@@ -677,6 +677,48 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void contextPackageCarriesOnlyValidatedProposalReferenceAcrossProjectionBoundary() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Review the proposal.", StandardCharsets.UTF_8);
+        var sidecar = wsDir.resolve("runs/run-proposal/outputs/intake-claude-brainstorm.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.claude_brainstorm",
+                  "source_artifact_type": "task_contract_proposal",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Proposal ready",
+                  "task_contract_proposal": {
+                    "artifact_type": "task_contract_proposal",
+                    "schema_version": 1,
+                    "objective": "Review it",
+                    "scope": {"included": ["README.md"], "excluded": []},
+                    "acceptance_criteria": ["Reviewed"],
+                    "test_requirements": ["Inspect"],
+                    "constraints": [],
+                    "non_goals": [],
+                    "risk_areas": [],
+                    "evidence_refs": ["README.md"],
+                    "open_questions": []
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
+        var published = TaskContractProposalReference.publish(
+                tempDir, "ws-ctx", sidecar, document, objectMapper);
+
+        var result = handler.execute(ctx("product_review", List.of(
+                relative(tempDir, sidecar), published.referenceRef())));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertTrue(result.outputRefs().contains(published.referenceRef()));
+        assertFalse(result.outputRefs().contains(relative(tempDir, sidecar)));
+        assertEquals(2, result.outputRefs().size(), "only context package and typed proposal ref may cross");
+    }
+
+    @Test
     void transcriptInputRefIsNeverExpandedIntoContextPackage() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Transcript guard test.", StandardCharsets.UTF_8);
@@ -1632,6 +1674,10 @@ class ContextBuildPackageHandlerTest {
 
     private void publishSidecar(Path sidecar) throws Exception {
         AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-ctx", sidecar);
+    }
+
+    private static String relative(Path root, Path path) {
+        return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
     }
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {

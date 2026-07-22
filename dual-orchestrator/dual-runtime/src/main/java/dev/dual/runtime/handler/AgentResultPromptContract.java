@@ -34,15 +34,30 @@ public final class AgentResultPromptContract {
                     Do not use Markdown fences, XML tags, headings, commentary, or text before/after the JSON.
                     Preserve the exact key names and JSON primitive types shown below. Replace example values with factual values.
                     Allowed `result.decision` values: %s
+                    %s
 
                     %s
                     """.formatted(
                             allowedDecisions.stream().sorted().toList(),
+                            rereadReasonInstruction(nodeId),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
         } catch (Exception failure) {
             throw new IllegalStateException("failed to render AgentResultEnvelope prompt contract", failure);
         }
+    }
+
+    private static String rereadReasonInstruction(String nodeId) {
+        var contract = ContractRegistry.forNode(nodeId);
+        if (!contract.emitsArtifact("agent_output_contract")) {
+            return "";
+        }
+        if (!ContractRegistry.supportsRereadReasonField(nodeId)) {
+            return "For this node, `result.reread_reasons` must remain exactly `[]`.";
+        }
+        return "Each `result.reread_reasons` entry must be an object with string fields "
+                + "`path`, `reason`, `stage`, and `evidence`; `reason` must be one of "
+                + ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS + ".";
     }
 
     private static AgentResultEnvelope.AgentResult exampleResult(String nodeId, String decision) {

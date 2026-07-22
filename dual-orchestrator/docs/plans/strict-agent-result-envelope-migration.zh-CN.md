@@ -1,4 +1,6 @@
-# __ACTIVE__ Strict AgentResultEnvelope Migration
+# Strict AgentResultEnvelope Migration
+
+Status: `COMPLETED — ENFORCED + PROVEN`.
 
 ## Objective
 

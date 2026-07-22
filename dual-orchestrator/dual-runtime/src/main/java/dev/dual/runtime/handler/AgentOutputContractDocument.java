@@ -46,6 +46,7 @@ public record AgentOutputContractDocument(
         FailureFields failure,
         List<RereadReason> rereadReasons,
         ScopeExpansionRequest scopeExpansionRequest,
+        TaskContractProposalReference reviewSubject,
         TaskContractProposal taskContractProposal
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
@@ -88,6 +89,7 @@ public record AgentOutputContractDocument(
                 FailureFields.from(objectMap(document.get("failure"))),
                 rereadReasonList(document.get("reread_reasons")),
                 ScopeExpansionRequest.from(objectMap(document.get("scope_expansion_request"))),
+                TaskContractProposalReference.fromMap(objectMap(document.get("review_subject"))).orElse(null),
                 taskContractProposal(objectMap(document.get("task_contract_proposal")))
         );
     }

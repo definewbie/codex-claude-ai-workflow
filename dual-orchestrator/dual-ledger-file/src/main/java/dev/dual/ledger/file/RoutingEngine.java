@@ -187,7 +187,7 @@ final class RoutingEngine {
                         LedgerUtils.allowedActions(nextDefinition),
                         Instant.now(),
                         null,
-                        Map.of()
+                        Map.of("subject_input_refs", List.copyOf(outputRefs))
                     ));
             }
 

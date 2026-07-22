@@ -49,6 +49,7 @@
         "session": "codex-reviewer",
         "permission_profile": "review",
         "prompt_template": "intake-codex-product-review",
+        "review_subject_artifact": "task_contract_proposal",
         "expected_artifact": "agent_output_contract",
         "artifact_compiler": "agent_output_contract_compiler",
         "allowed_stage_outcomes": [
@@ -84,7 +85,9 @@
       "id": "contract.compile",
       "kind": "TASK",
       "handlerType": "contract.compile",
-      "config": {}
+      "config": {
+        "required_subject": "approved_task_contract_proposal"
+      }
     },
     {
       "id": "gate.contract_review",

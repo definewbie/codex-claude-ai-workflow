@@ -118,6 +118,7 @@ public final class AgentWorker {
                     command.workstreamId(),
                     node.nodeInstanceId(),
                     nodeDefinition,
+                    node.inputRefs(),
                     result
             );
             result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);

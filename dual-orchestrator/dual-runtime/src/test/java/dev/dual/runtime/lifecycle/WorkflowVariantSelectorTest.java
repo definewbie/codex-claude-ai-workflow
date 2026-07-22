@@ -48,6 +48,17 @@ class WorkflowVariantSelectorTest {
     }
 
     @Test
+    void contractVariantsDeclareProposalReviewAndCompileSubjectBoundary() {
+        for (var variant : java.util.List.of("full", "contract")) {
+            var workflow = factory.forVariant(variant);
+            assertEquals("task_contract_proposal",
+                    workflow.node("intake.codex_product_review").config().get("review_subject_artifact"));
+            assertEquals("approved_task_contract_proposal",
+                    workflow.node("contract.compile").config().get("required_subject"));
+        }
+    }
+
+    @Test
     void forVariant_professionalAliases_returnExpectedVariants() {
         assertEquals("agent-lifecycle-contract", factory.forVariant("contract").workflowId());
         assertEquals("agent-lifecycle-full", factory.forVariant("full").workflowId());

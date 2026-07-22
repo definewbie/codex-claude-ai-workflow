@@ -38,4 +38,18 @@ class AgentResultPromptContractTest {
             assertTrue(validation.valid(), () -> nodeId + ": " + validation.errors());
         });
     }
+
+    @Test
+    void promptMakesNodeSpecificRereadReasonShapeUnambiguous() {
+        var productReview = AgentResultPromptContract.render(
+                "ws-1", "run-1", "intake.codex_product_review",
+                "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"));
+        var implementation = AgentResultPromptContract.render(
+                "ws-1", "run-1", "implement.claude_implement", "IMPLEMENTED", Set.of("IMPLEMENTED"));
+
+        assertTrue(productReview.contains("reread_reasons` must remain exactly `[]`"));
+        assertTrue(implementation.contains("reread_reasons` entry must be an object"));
+        ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS.forEach(
+                reason -> assertTrue(implementation.contains(reason)));
+    }
 }

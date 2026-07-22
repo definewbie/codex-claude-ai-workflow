@@ -7,6 +7,8 @@ import dev.dual.core.contract.TaskContract;
 import dev.dual.core.contract.TaskContractValidator;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.ledger.file.GateDocument;
+import dev.dual.ledger.file.NodeInstanceDocument;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,6 +34,14 @@ public final class ContractCompileHandler implements TaskHandler {
 
     @Override
     public NodeResult execute(TaskContext context) throws IOException {
+        if (!"approved_task_contract_proposal".equals(
+                String.valueOf(context.definition().config().getOrDefault("required_subject", "")))) {
+            return proposalFailure(
+                    "TASK_CONTRACT_SUBJECT_CONTRACT_MISSING",
+                    "contract.compile requires required_subject=approved_task_contract_proposal",
+                    List.of(context.definition().id())
+            );
+        }
         var workstreamDir = context.workspaceRoot()
                 .resolve(".agent")
                 .resolve("workstreams")
@@ -47,7 +57,11 @@ public final class ContractCompileHandler implements TaskHandler {
             );
         }
 
-        var proposalResult = compileFromProposal(latestTrustedProposalSidecar(context), context);
+        var approvedProposal = resolveApprovedProposal(context);
+        if (approvedProposal.failed() != null) {
+            return approvedProposal.failed();
+        }
+        var proposalResult = compileFromProposal(Optional.of(approvedProposal.sidecarPath()), context);
         if (proposalResult.failed() != null) {
             return proposalResult.failed();
         }
@@ -59,7 +73,7 @@ public final class ContractCompileHandler implements TaskHandler {
             );
         }
         var contract = proposalResult.contract();
-        var resolutionResult = resolveContractNegotiation(context, proposalResult.proposal());
+        var resolutionResult = resolveContractNegotiation(proposalResult.proposal(), approvedProposal.gate());
         if (resolutionResult.failed() != null) {
             return resolutionResult.failed();
         }
@@ -186,21 +200,65 @@ public final class ContractCompileHandler implements TaskHandler {
                 .toList();
     }
 
-    private ContractResolutionResult resolveContractNegotiation(TaskContext context, TaskContractProposal proposal) throws IOException {
-        var openQuestions = cleanList(proposal.openQuestions());
-        var gate = latestResolvedRequirementGate(context);
-        if (!openQuestions.isEmpty() && gate.isEmpty()) {
-            return new ContractResolutionResult(null, proposalFailure(
-                    "CONTRACT_RESOLUTION_REQUIRED",
-                    "task_contract_proposal contains open_questions but no resolved requirement gate was found",
-                    openQuestions
+    private ApprovedProposalResult resolveApprovedProposal(TaskContext context) throws IOException {
+        var reviewed = reviewedProposalFromInputs(context);
+        if (reviewed.size() != 1) {
+            return new ApprovedProposalResult(null, null, proposalFailure(
+                    "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING",
+                    "exactly one Codex review bound to a task_contract_proposal is required",
+                    List.of("review_subject_count=" + reviewed.size())
             ));
         }
+        var subject = reviewed.get(0);
+        var gate = latestResolvedRequirementGate(context, subject.reviewRef());
         if (gate.isEmpty()) {
-            return new ContractResolutionResult(null, null);
+            return new ApprovedProposalResult(null, null, proposalFailure(
+                    "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING",
+                    "the current Codex review was not approved by the requirement gate",
+                    List.of(subject.reviewRef())
+            ));
         }
+        var sidecarPath = subject.reference().resolveArtifact(
+                context.workspaceRoot(), context.workstreamId(), OBJECT_MAPPER);
+        if (sidecarPath.isEmpty()) {
+            return new ApprovedProposalResult(null, null, proposalFailure(
+                    "TASK_CONTRACT_PROPOSAL_INVALID",
+                    "the approved task_contract_proposal reference is stale or tampered",
+                    List.of(subject.reference().artifactRef())
+            ));
+        }
+        return new ApprovedProposalResult(sidecarPath.get(), gate.get(), null);
+    }
 
-        var gateResolution = gate.get();
+    private List<ReviewedProposal> reviewedProposalFromInputs(TaskContext context) {
+        var root = context.workspaceRoot().toAbsolutePath().normalize();
+        var reviewed = new ArrayList<ReviewedProposal>();
+        for (var inputRef : context.instance().inputRefs()) {
+            if (inputRef == null || !inputRef.endsWith(".contract.json")) {
+                continue;
+            }
+            var path = root.resolve(inputRef).normalize();
+            if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+                continue;
+            }
+            var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
+            if (document.isEmpty()
+                    || AgentOutputLineageVerifier.violation(
+                            root, context.workstreamId(), path, document.get()).isPresent()
+                    || !"intake.codex_product_review".equals(document.get().nodeId())
+                    || document.get().reviewSubject() == null) {
+                continue;
+            }
+            reviewed.add(new ReviewedProposal(inputRef, document.get().reviewSubject()));
+        }
+        return List.copyOf(reviewed);
+    }
+
+    private ContractResolutionResult resolveContractNegotiation(
+            TaskContractProposal proposal,
+            ResolvedGate gateResolution
+    ) {
+        var openQuestions = cleanList(proposal.openQuestions());
         var resolvedQuestions = new ArrayList<ContractResolutionDocument.ResolvedQuestion>();
         for (var question : openQuestions) {
             resolvedQuestions.add(new ContractResolutionDocument.ResolvedQuestion(
@@ -230,7 +288,7 @@ public final class ContractCompileHandler implements TaskHandler {
         return new ContractResolutionResult(resolution, null);
     }
 
-    private Optional<ResolvedGate> latestResolvedRequirementGate(TaskContext context) throws IOException {
+    private Optional<ResolvedGate> latestResolvedRequirementGate(TaskContext context, String reviewRef) throws IOException {
         var workstreamDir = context.workspaceRoot()
                 .resolve(".agent")
                 .resolve("workstreams")
@@ -246,7 +304,7 @@ public final class ContractCompileHandler implements TaskHandler {
                     .sorted(Comparator.comparing(path -> path.toAbsolutePath().normalize().toString()))
                     .toList();
             for (int i = gates.size() - 1; i >= 0; i--) {
-                var gate = readResolvedGate(context, workstreamDir, gates.get(i));
+                var gate = readResolvedGate(context, workstreamDir, gates.get(i), reviewRef);
                 if (gate.isPresent()) {
                     return gate;
                 }
@@ -255,26 +313,36 @@ public final class ContractCompileHandler implements TaskHandler {
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
-    private Optional<ResolvedGate> readResolvedGate(TaskContext context, Path workstreamDir, Path gatePath) {
+    private Optional<ResolvedGate> readResolvedGate(
+            TaskContext context,
+            Path workstreamDir,
+            Path gatePath,
+        String reviewRef
+    ) {
         try {
-            var gate = OBJECT_MAPPER.readValue(gatePath.toFile(), Map.class);
-            if (!"resolved".equals(String.valueOf(gate.get("status")))) {
+            var gate = OBJECT_MAPPER.readValue(gatePath.toFile(), GateDocument.class);
+            if (!"resolved".equals(gate.status())) {
                 return Optional.empty();
             }
-            var nodeInstanceId = String.valueOf(gate.get("nodeInstanceId"));
+            var nodeInstanceId = gate.nodeInstanceId();
             var nodePath = workstreamDir.resolve("nodes").resolve(nodeInstanceId + ".json");
             if (!Files.isRegularFile(nodePath)) {
                 return Optional.empty();
             }
-            var node = OBJECT_MAPPER.readValue(nodePath.toFile(), Map.class);
-            if (!"gate.human_requirement_review".equals(String.valueOf(node.get("nodeDefinitionId")))) {
+            var node = OBJECT_MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
+            if (!"gate.human_requirement_review".equals(node.nodeDefinitionId())) {
                 return Optional.empty();
             }
-            var result = gate.get("result") instanceof Map<?, ?> map ? map : Map.of();
+            var result = gate.result();
+            var subjectRefs = result.get("subject_input_refs") instanceof List<?> values
+                    ? values.stream().map(String::valueOf).toList()
+                    : List.<String>of();
+            if (!subjectRefs.contains(reviewRef)) {
+                return Optional.empty();
+            }
             var actionValue = result.get("human_action");
             var action = actionValue == null ? "" : String.valueOf(actionValue);
-            if (!"approved".equals(action) && !"approve".equals(action)) {
+            if (!"approved".equals(action)) {
                 return Optional.empty();
             }
             var noteValue = result.get("note");
@@ -346,30 +414,12 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private record ProposalCompileResult(TaskContract contract, TaskContractProposal proposal, NodeResult failed) {}
 
+    private record ReviewedProposal(String reviewRef, TaskContractProposalReference reference) {}
+
+    private record ApprovedProposalResult(Path sidecarPath, ResolvedGate gate, NodeResult failed) {}
+
     private record ContractResolutionResult(ContractResolutionDocument resolution, NodeResult failed) {}
 
     private record ResolvedGate(String gateRef, String action, String note) {}
-
-    private Optional<Path> latestTrustedProposalSidecar(TaskContext context) {
-        var refs = context.instance().inputRefs();
-        for (int index = refs.size() - 1; index >= 0; index--) {
-            var inputRef = refs.get(index);
-            if (!isClaudeIntakeOutputRef(inputRef)) {
-                continue;
-            }
-            var root = context.workspaceRoot().toAbsolutePath().normalize();
-            var path = root.resolve(inputRef).normalize();
-            if (path.startsWith(root) && Files.isRegularFile(path)) {
-                return Optional.of(path);
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static boolean isClaudeIntakeOutputRef(String ref) {
-        var normalized = ref.replace('\\', '/');
-        return normalized.contains("/outputs/intake-claude-brainstorm.contract.json")
-                || normalized.endsWith("outputs/intake-claude-brainstorm.contract.json");
-    }
 
 }

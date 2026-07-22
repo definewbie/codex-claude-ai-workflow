@@ -89,6 +89,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("taskContract", taskContractSummary(context));
         packet.put("contractResolution", contractResolutionSummary(context));
         packet.put("latestAgentDecision", latestAgentDecision(context).toReviewPacketMap());
+        packet.put("reviewSubject", latestReviewSubject(context));
         packet.put("gitEvidence", gitEvidenceSummary(context));
         packet.put("delivery", deliverySummary(context));
         packet.put("operatorGuidance", operatorGuidance(context, allowedActions));
@@ -119,6 +120,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendTaskContract(builder, context);
         appendContractResolution(builder, context);
         appendLatestAgentDecision(builder, context);
+        appendReviewSubject(builder, context);
         appendGitEvidence(builder, context);
         appendDelivery(builder, context);
 
@@ -327,6 +329,27 @@ public final class HumanReviewGateHandler implements GateHandler {
             return fromRefs.get();
         }
         return AgentDecisionSummary.empty();
+    }
+
+    private Map<String, Object> latestReviewSubject(GateContext context) {
+        return AgentEvidenceIndex.latestFromRefs(
+                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
+                .map(entry -> entry.document().reviewSubject())
+                .filter(java.util.Objects::nonNull)
+                .map(TaskContractProposalReference::toMap)
+                .orElse(Map.of());
+    }
+
+    private void appendReviewSubject(StringBuilder builder, GateContext context) {
+        var subject = latestReviewSubject(context);
+        if (subject.isEmpty()) {
+            return;
+        }
+        builder.append("## Review Subject\n\n");
+        appendField(builder, "Proposal ID", text(subject.get("proposal_id")));
+        appendField(builder, "Artifact Ref", text(subject.get("artifact_ref")));
+        appendField(builder, "SHA-256", text(subject.get("sha256")));
+        builder.append("\n");
     }
 
     private AgentDecisionSummary agentDecisionFromSidecar(GateContext context, AgentEvidenceIndex.Entry entry) {

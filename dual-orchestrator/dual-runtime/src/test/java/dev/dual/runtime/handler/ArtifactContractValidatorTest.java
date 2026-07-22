@@ -106,11 +106,99 @@ class ArtifactContractValidatorTest {
                 "Update documentation.", new AgentResultEnvelope.ProposalScope(List.of("README.md"), List.of("application code")),
                 List.of("README is updated", "No source files are changed"), List.of("inspect diff"), List.of("documentation only"),
                 List.of("no source changes"), List.of("scope creep"), List.of("README.md"), List.of());
-        var ref = write("intake.json", envelope("intake.claude_brainstorm", proposal));
+        var ref = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
+                envelope("intake.claude_brainstorm", proposal));
         var validated = validate("intake.claude_brainstorm", ref, "run-1");
 
         assertEquals(NodeStatus.COMPLETED, validated.status());
-        assertTrue(validated.outputRefs().contains("intake.contract.json"));
+        assertTrue(validated.outputRefs().contains(
+                ".agent/workstreams/ws-1/runs/run-1/outputs/intake.contract.json"));
+        assertTrue(validated.outputRefs().stream().anyMatch(value -> value.endsWith(".ref.json")));
+    }
+
+    @Test
+    void proposalRetriesPublishDistinctImmutableReferences() throws Exception {
+        Files.writeString(tempDir.resolve("README.md"), "# sample\n");
+        var first = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "First proposal.", false,
+                "Update documentation.", new AgentResultEnvelope.ProposalScope(List.of("README.md"), List.of()),
+                List.of("README is updated", "No source files are changed"), List.of("inspect diff"), List.of("documentation only"),
+                List.of(), List.of(), List.of("README.md"), List.of());
+        var second = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Revised proposal.", false,
+                "Update documentation safely.", new AgentResultEnvelope.ProposalScope(List.of("README.md"), List.of()),
+                List.of("README is updated safely", "No source files are changed"), List.of("inspect diff"), List.of("documentation only"),
+                List.of(), List.of(), List.of("README.md"), List.of());
+
+        var firstOutput = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
+                envelope("intake.claude_brainstorm", first));
+        var firstResult = validate("intake.claude_brainstorm", firstOutput, "run-1");
+        var secondOutput = write(".agent/workstreams/ws-1/runs/run-2/outputs/intake.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-2", "intake.claude_brainstorm", second)));
+        var secondResult = validate("intake.claude_brainstorm", secondOutput, "run-2");
+
+        var firstRef = firstResult.outputRefs().stream().filter(value -> value.endsWith(".ref.json")).findFirst().orElseThrow();
+        var secondRef = secondResult.outputRefs().stream().filter(value -> value.endsWith(".ref.json")).findFirst().orElseThrow();
+        assertFalse(firstRef.equals(secondRef));
+        assertTrue(Files.isRegularFile(tempDir.resolve(firstRef)));
+        assertTrue(Files.isRegularFile(tempDir.resolve(secondRef)));
+    }
+
+    @Test
+    void codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs() throws Exception {
+        Files.writeString(tempDir.resolve("README.md"), "# sample\n");
+        var proposal = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
+                "Update documentation.", new AgentResultEnvelope.ProposalScope(List.of("README.md"), List.of()),
+                List.of("README is updated", "No source files are changed"), List.of("inspect diff"),
+                List.of("documentation only"), List.of("no source changes"), List.of(),
+                List.of("README.md"), List.of());
+        var proposalOutput = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
+                envelope("intake.claude_brainstorm", proposal));
+        var proposalResult = validate("intake.claude_brainstorm", proposalOutput, "run-1");
+        assertEquals(NodeStatus.COMPLETED, proposalResult.status(), proposalResult.result().toString());
+        var proposalRef = proposalResult.outputRefs().stream()
+                .filter(value -> value.endsWith(".ref.json"))
+                .findFirst()
+                .orElseThrow();
+
+        var reviewOutput = write(".agent/workstreams/ws-1/runs/run-2/outputs/review.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-2", "intake.codex_product_review", productReviewResult())));
+        var reviewNode = new NodeDefinition(
+                "intake.codex_product_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                        "expected_artifact", "agent_output_contract",
+                        "review_subject_artifact", "task_contract_proposal"));
+        var validated = validator.validate(
+                tempDir, "ws-1", "node-review", reviewNode, List.of(proposalRef),
+                NodeResult.completed("completed", List.of(reviewOutput), Map.of("run_id", "run-2")));
+
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var sidecar = AgentOutputContractDocument.read(
+                tempDir.resolve(reviewOutput.replace(".json", ".contract.json")), JSON).orElseThrow();
+        var expectedSubject = TaskContractProposalReference.readVerified(
+                tempDir, "ws-1", proposalRef, JSON).orElseThrow();
+        assertEquals(expectedSubject.proposalId(), sidecar.reviewSubject().proposalId());
+        assertEquals(expectedSubject.sha256(), sidecar.reviewSubject().sha256());
+    }
+
+    @Test
+    void codexReviewCannotPublishWithoutRequiredProposalSubject() throws Exception {
+        var reviewOutput = write(".agent/workstreams/ws-1/runs/run-2/outputs/review.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-2", "intake.codex_product_review", productReviewResult())));
+        var reviewNode = new NodeDefinition(
+                "intake.codex_product_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                        "expected_artifact", "agent_output_contract",
+                        "review_subject_artifact", "task_contract_proposal"));
+
+        var validated = validator.validate(
+                tempDir, "ws-1", "node-review", reviewNode, List.of(),
+                NodeResult.completed("completed", List.of(reviewOutput), Map.of("run_id", "run-2")));
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertTrue(validated.result().toString().contains("REVIEW_SUBJECT_MISSING"), validated.result().toString());
     }
 
     @Test
@@ -158,7 +246,11 @@ class ArtifactContractValidatorTest {
     }
 
     private String write(String ref, String content) throws Exception {
-        Files.writeString(tempDir.resolve(ref), content);
+        var path = tempDir.resolve(ref);
+        if (path.getParent() != null) {
+            Files.createDirectories(path.getParent());
+        }
+        Files.writeString(path, content);
         return ref;
     }
 
@@ -171,6 +263,13 @@ class ArtifactContractValidatorTest {
         return new AgentResultEnvelope.AgentOutputResult(
                 "agent_output_contract", "READY_FOR_ARCH_REVIEW", "Architecture is ready.", "READY", false,
                 List.of("reviewed design"), List.of("design matches contract"), List.of(), List.of(),
+                List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of(), null);
+    }
+
+    private static AgentResultEnvelope.AgentOutputResult productReviewResult() {
+        return new AgentResultEnvelope.AgentOutputResult(
+                "agent_output_contract", "READY_FOR_PRODUCT_REVIEW", "Product review is ready.", "READY", false,
+                List.of("reviewed proposal"), List.of("proposal matches requirement"), List.of(), List.of(),
                 List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of(), null);
     }
 

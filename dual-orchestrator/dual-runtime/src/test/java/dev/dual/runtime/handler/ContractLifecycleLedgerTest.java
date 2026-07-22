@@ -1,6 +1,5 @@
 package dev.dual.runtime.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -39,7 +38,7 @@ class ContractLifecycleLedgerTest {
                 """;
         Files.writeString(workstreamDir.resolve("requirement.md"), requirementText, StandardCharsets.UTF_8);
         Files.writeString(tempDir.resolve("README.md"), "# Fixture\n", StandardCharsets.UTF_8);
-        var proposalRef = writeTaskContractProposal(tempDir, workstreamDir, """
+        var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, WORKSTREAM_ID, """
                 {
                   "artifact_type": "task_contract_proposal",
                   "schema_version": 1,
@@ -64,11 +63,12 @@ class ContractLifecycleLedgerTest {
         var context = new TaskHandler.TaskContext(
                 tempDir,
                 WORKSTREAM_ID,
-                new NodeDefinition("node-1", NodeKind.TASK, "contract.compile", Map.of()),
+                new NodeDefinition("node-1", NodeKind.TASK, "contract.compile",
+                        Map.of("required_subject", "approved_task_contract_proposal")),
                 new NodeInstance(
                         "inst-1", "node-1", NodeKind.TASK, "contract.compile",
                         NodeStatus.READY, "stage-1", "iter-1",
-                        List.of(proposalRef), List.of(), Map.of(), "run-1",
+                        List.of(reviewRef), List.of(), Map.of(), "run-1",
                         Instant.now(), null
                 )
         );
@@ -98,28 +98,4 @@ class ContractLifecycleLedgerTest {
         assertEquals("contract_rejected", ContractEventTypes.REJECTED);
     }
 
-    private static String writeTaskContractProposal(Path workspaceRoot, Path workstreamDir, String json) throws Exception {
-        var outputDir = workstreamDir.resolve("runs/run-001/outputs");
-        Files.createDirectories(outputDir);
-        var mapper = new ObjectMapper();
-        var proposal = mapper.readValue(json, Map.class);
-        var output = outputDir.resolve("intake-claude-brainstorm.json");
-        Files.writeString(output, "{}", StandardCharsets.UTF_8);
-        var sidecar = AgentOutputContractSidecar.pathFor(output);
-        Files.writeString(sidecar, mapper.writeValueAsString(Map.ofEntries(
-                Map.entry("artifact_type", "agent_output_contract"),
-                Map.entry("schema_version", 1),
-                Map.entry("workstream_id", WORKSTREAM_ID),
-                Map.entry("run_id", "run-001"),
-                Map.entry("node_id", "intake.claude_brainstorm"),
-                Map.entry("node_instance_id", "node-intake-001"),
-                Map.entry("source_output_ref", workspaceRoot.relativize(output).toString()),
-                Map.entry("source_artifact_type", "task_contract_proposal"),
-                Map.entry("decision", "READY_FOR_PRODUCT_REVIEW"),
-                Map.entry("summary", "proposal ready"),
-                Map.entry("task_contract_proposal", proposal)
-        )), StandardCharsets.UTF_8);
-        AgentOutputLineageFixture.publish(workspaceRoot, WORKSTREAM_ID, sidecar);
-        return workspaceRoot.relativize(sidecar).toString();
-    }
 }

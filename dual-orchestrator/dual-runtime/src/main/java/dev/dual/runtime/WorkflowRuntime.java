@@ -320,6 +320,7 @@ public final class WorkflowRuntime {
                     command.workstreamId(),
                     node.nodeInstanceId(),
                     nodeDefinition,
+                    node.inputRefs(),
                     result
             );
             result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);

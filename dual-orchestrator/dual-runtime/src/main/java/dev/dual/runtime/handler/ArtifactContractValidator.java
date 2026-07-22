@@ -32,7 +32,7 @@ public final class ArtifactContractValidator {
     private final AgentResultDocumentProjector resultProjector = new AgentResultDocumentProjector();
 
     public NodeResult validate(Path workspaceRoot, NodeDefinition nodeDefinition, NodeResult result) throws Exception {
-        return validate(workspaceRoot, "", "", nodeDefinition, result);
+        return validate(workspaceRoot, "", "", nodeDefinition, List.of(), result);
     }
 
     public NodeResult validate(
@@ -40,6 +40,17 @@ public final class ArtifactContractValidator {
             String workstreamId,
             String nodeInstanceId,
             NodeDefinition nodeDefinition,
+            NodeResult result
+    ) throws Exception {
+        return validate(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, List.of(), result);
+    }
+
+    public NodeResult validate(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeInstanceId,
+            NodeDefinition nodeDefinition,
+            List<String> inputRefs,
             NodeResult result
     ) throws Exception {
         if (!"acpx.agent_run".equals(nodeDefinition.handlerType())) {
@@ -51,7 +62,7 @@ public final class ArtifactContractValidator {
         if (Boolean.TRUE.equals(result.result().get("prepared"))) {
             return result;
         }
-        return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result);
+        return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result);
     }
 
     private NodeResult validateAgentOutput(
@@ -59,6 +70,7 @@ public final class ArtifactContractValidator {
             String workstreamId,
             String nodeInstanceId,
             NodeDefinition nodeDefinition,
+            List<String> inputRefs,
             NodeResult result
     ) throws Exception {
         var root = workspaceRoot.toAbsolutePath().normalize();
@@ -101,7 +113,7 @@ public final class ArtifactContractValidator {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, rereadCoverageFailure);
             }
             return withResultSidecars(
-                    root, workstreamId, nodeInstanceId, nodeDefinition, result, contract,
+                    root, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result, contract,
                     parsed.envelope(), ref, path
             );
         }
@@ -128,6 +140,7 @@ public final class ArtifactContractValidator {
             String workstreamId,
             String nodeInstanceId,
             NodeDefinition nodeDefinition,
+            List<String> inputRefs,
             NodeResult result,
             NodeOutputContract contract,
             AgentResultEnvelope envelope,
@@ -136,6 +149,24 @@ public final class ArtifactContractValidator {
     ) throws Exception {
         var document = resultProjector.outputContract(
                 envelope, contract, nodeDefinition.handlerType(), nodeInstanceId, outputRef);
+        var requiredReviewSubject = text(nodeDefinition.config().get("review_subject_artifact"));
+        if (!requiredReviewSubject.isBlank()) {
+            if (!"task_contract_proposal".equals(requiredReviewSubject)) {
+                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                        ContractViolation.of("REVIEW_SUBJECT_UNSUPPORTED",
+                                "unsupported review_subject_artifact: " + requiredReviewSubject,
+                                Map.of("review_subject_artifact", requiredReviewSubject)));
+            }
+            var reviewSubject = TaskContractProposalReference.resolveFromRefs(
+                    root, workstreamId, inputRefs, OBJECT_MAPPER);
+            if (reviewSubject.isEmpty()) {
+                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                        ContractViolation.of("REVIEW_SUBJECT_MISSING",
+                                "exactly one validated task_contract_proposal reference is required",
+                                Map.of("review_subject_artifact", requiredReviewSubject)));
+            }
+            document.put("review_subject", reviewSubject.get().reference().toMap());
+        }
         AgentContractSemantics.addSidecarFields(document);
         var validatedDocument = AgentOutputContractDocument.from(document);
         var semanticFailure = AgentContractSemantics.validateOutputContract(validatedDocument);
@@ -152,6 +183,15 @@ public final class ArtifactContractValidator {
         var outputRefs = new ArrayList<>(result.outputRefs());
         if (!outputRefs.contains(sidecarRef)) {
             outputRefs.add(sidecarRef);
+        }
+
+        Optional<TaskContractProposalReference.Published> proposalReference = Optional.empty();
+        if (envelope.result() instanceof AgentResultEnvelope.TaskContractProposalResult) {
+            proposalReference = Optional.of(TaskContractProposalReference.publish(
+                    root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER));
+            if (!outputRefs.contains(proposalReference.get().referenceRef())) {
+                outputRefs.add(proposalReference.get().referenceRef());
+            }
         }
 
         var planArtifactRef = writePlanArtifactSidecars(
@@ -173,6 +213,10 @@ public final class ArtifactContractValidator {
         augmented.put("decision", envelope.result().decision());
         augmented.put("summary", envelope.result().summary());
         augmented.put("contract_sidecar_ref", sidecarRef);
+        proposalReference.ifPresent(reference -> {
+            augmented.put("task_contract_proposal_ref", reference.referenceRef());
+            augmented.put("task_contract_proposal_id", reference.reference().proposalId());
+        });
         planArtifactRef.ifPresent(ref -> augmented.put("plan_artifact_ref", ref));
         return AgentExecutionResultFacts.attach(new NodeResult(
                         result.outcome(), result.status(), outputRefs, augmented, result.errorMessage()),

@@ -109,7 +109,15 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         result.put("sections", includedSections);
         result.put("input_ref_count", context.instance().inputRefs().size());
         result.put("generated_at", Instant.now().toString());
-        return NodeResult.completed("completed", List.of(packageRef), result);
+        var outputRefs = new ArrayList<String>();
+        outputRefs.add(packageRef);
+        for (var inputRef : context.instance().inputRefs()) {
+            if (TaskContractProposalReference.readVerified(
+                    context.workspaceRoot(), context.workstreamId(), inputRef, OBJECT_MAPPER).isPresent()) {
+                outputRefs.add(inputRef);
+            }
+        }
+        return NodeResult.completed("completed", List.copyOf(outputRefs), result);
     }
 
     private static NodeResult executeGoverned(TaskContext context, Path workstreamDir, Path packagePath, String profileName) throws IOException {
