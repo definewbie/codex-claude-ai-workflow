@@ -98,9 +98,13 @@ Cannot-bypass：
 - evidence 缺失在 reviewer 前产生 typed `REQUIRED_AGENT_EVIDENCE_MISSING`；显式缺测优先分类为 `VERIFICATION_INSUFFICIENT` 并路由回 self-test。
 - targeted tests、`dual-runtime` full suite、`dual-adapter-acpx` full suite、`git diff --check` 均通过；第二次独立架构 review 为 `PASS`。
 
-### A2 小 Bug（BLOCKED by A1.1）
+### A2 小 Bug（ACTIVE）
 
-仅在 A1 PASS 后激活。证明代码修改、定向测试和 acceptance 闭环。
+目标：证明 source-code 修改、定向测试、A1.1 self-test evidence lineage 和 acceptance 闭环。
+
+当前 case：`issue-flow-app` 的 `summarizeIssues` 对非数组输入泄漏迭代器 `TypeError`。限定只修改 `src/dashboard.js` 与 `test/issueWorkflow.test.js`，要求在函数边界抛出精确的 `issues must be an array`，并保持现有行为与 `node --test` 全绿。
+
+Readiness：A1.1 为 `ENFORCED + PROVEN` 且已提交为 `16fe713`；目标仓库干净、现有测试通过、缺陷由失败的精确断言复现；Verification Gate 已锁定 source of truth、PASS/FAIL/INVALID 与 stop-loss。允许启动一次 controlled `full` real-case。
 
 ### A3 简单 API
 
