@@ -245,6 +245,19 @@ final class ContextPackageSectionRenderer {
         WorkstreamMemoryProjection.appendReviewEvidenceBrief(builder, workstreamDir, workspaceRoot);
     }
 
+    static void appendRequiredReviewSubject(
+            StringBuilder builder,
+            TaskContractProposalReference.ResolvedProposal subject
+    ) throws IOException {
+        builder.append("## Required Review Subject\n\n");
+        builder.append("- Proposal ID: ").append(subject.reference().proposalId()).append("\n");
+        builder.append("- Proposal Reference: ").append(subject.referenceRef()).append("\n");
+        builder.append("- Proposal SHA-256: ").append(subject.reference().sha256()).append("\n\n");
+        builder.append("```json\n");
+        builder.append(OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(subject.proposal()));
+        builder.append("\n```\n\n");
+    }
+
     static void appendInputArtifacts(StringBuilder builder, TaskHandler.TaskContext context, int maxSnippetChars) throws IOException {
         if (context.instance().inputRefs().isEmpty()) {
             builder.append("(no direct input refs)\n\n");

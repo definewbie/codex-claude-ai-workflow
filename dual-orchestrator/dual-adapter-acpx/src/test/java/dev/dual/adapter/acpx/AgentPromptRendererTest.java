@@ -514,6 +514,49 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Implement the approved follow-up."));
     }
 
+    @Test
+    void completeContextPackageKeepsRequiredReviewSubjectBeyondLegacyPreviewLimit() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review the typed proposal.\n");
+        Files.writeString(contextPath, """
+                # Context Package
+
+                ## Large Optional Context
+
+                %s
+
+                ## Required Review Subject
+
+                ```json
+                {
+                  "artifact_type": "task_contract_proposal",
+                  "objective": "KEEP_THIS_COMPLETE_REQUIRED_OBJECTIVE",
+                  "scope": {"included": ["README.md"], "excluded": []}
+                }
+                ```
+                """.formatted("x".repeat(7_000)));
+
+        var rendered = new AgentPromptRenderer().renderWithSections(
+                tempDir,
+                "ws-test",
+                "run-review",
+                "intake.codex_product_review",
+                "intake-codex-product-review",
+                List.of(".agent/workstreams/ws-test/context/node-context.md"));
+
+        assertFalse(rendered.content().contains("[truncated; read the full context package at"));
+        assertTrue(rendered.content().contains("KEEP_THIS_COMPLETE_REQUIRED_OBJECTIVE"));
+        var required = rendered.sections().stream()
+                .filter(section -> "context_package".equals(section.name()))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(required.required());
+        assertEquals("context_package", required.sourceType());
+        assertTrue(required.content().contains("\"included\": [\"README.md\"]"));
+    }
+
 
     @Test
     void failsClearlyWhenTemplateIsMissing() {

@@ -20,6 +20,13 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
+    void contractVariantDeclaresTypedProposalAsProductReviewContextRequirement() {
+        var contextNode = factory.forVariant("contract").node("context.intake_codex_product_review");
+
+        assertEquals("task_contract_proposal", contextNode.config().get("required_input_artifact"));
+    }
+
+    @Test
     void contractVariantRoutesContractReviewToDesign() {
         WorkflowDefinition wf = factory.forVariant("contract");
 

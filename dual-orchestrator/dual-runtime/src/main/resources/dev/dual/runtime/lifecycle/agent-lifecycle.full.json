@@ -31,6 +31,7 @@
     "config" : {
       "target_node" : "intake.codex_product_review",
       "profile" : "product_review",
+      "required_input_artifact" : "task_contract_proposal",
       "purpose" : "Package Claude intake output for Codex product review."
     }
   }, {

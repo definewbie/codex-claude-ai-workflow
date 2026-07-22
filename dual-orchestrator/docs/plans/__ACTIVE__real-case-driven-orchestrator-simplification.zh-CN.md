@@ -51,6 +51,12 @@ INVALID：provider、配置、旧 jar、探针或外部运行时导致本轮无�
 
 Stop-loss：首次出现 recovery 即停止；不调预算、不切模型、不顺手修 Scope/Context/handler。
 
+当前证据：
+
+- `20260722T075423Z` 首次 A1 运行在 `intake.codex_product_review` 连续两次返回 `NEEDS_REVISION`，随后 Claude session reconnect；主因是 review context 只携带 proposal reference/summary，完整 typed proposal 未进入 prompt。
+- 直接边界修复：workflow context 节点声明 `required_input_artifact=task_contract_proposal`；context builder 在 reviewer 启动前验证 reference/hash/lineage，并投影完整 proposal；完整 context package 不再被 adapter 的 6000 字符 preview 截断。
+- deterministic closure：篡改 reference/sidecar 时 context 节点失败且 reviewer 启动数为零；`full`/`contract` sibling definitions 一致；full reactor 绿色。A1 real-case 重跑待执行。
+
 ### A2 小 Bug
 
 仅在 A1 PASS 后激活。证明代码修改、定向测试和 acceptance 闭环。

@@ -20,6 +20,13 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
+    void fullVariantDeclaresTypedProposalAsProductReviewContextRequirement() {
+        var contextNode = factory.forVariant("full").node("context.intake_codex_product_review");
+
+        assertEquals("task_contract_proposal", contextNode.config().get("required_input_artifact"));
+    }
+
+    @Test
     void fullVariantLimitsWriteAccessToImplementationOwnedAgentNodes() {
         WorkflowDefinition wf = factory.forVariant("full");
 

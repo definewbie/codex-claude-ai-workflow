@@ -119,6 +119,32 @@ public record TaskContractProposalReference(
         return Optional.ofNullable(resolved);
     }
 
+    static Optional<ResolvedProposal> resolveProposalFromRefs(
+            Path workspaceRoot,
+            String expectedWorkstreamId,
+            Iterable<String> refs,
+            ObjectMapper objectMapper
+    ) {
+        var resolved = resolveFromRefs(workspaceRoot, expectedWorkstreamId, refs, objectMapper);
+        if (resolved.isEmpty()) {
+            return Optional.empty();
+        }
+        var reference = resolved.get().reference();
+        var artifactPath = reference.resolveArtifact(workspaceRoot, expectedWorkstreamId, objectMapper);
+        if (artifactPath.isEmpty()) {
+            return Optional.empty();
+        }
+        var document = AgentOutputContractDocument.read(artifactPath.get(), objectMapper);
+        if (document.isEmpty() || document.get().taskContractProposal() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new ResolvedProposal(
+                reference,
+                resolved.get().referenceRef(),
+                artifactPath.get(),
+                document.get().taskContractProposal()));
+    }
+
     Optional<Path> resolveArtifact(Path workspaceRoot, String expectedWorkstreamId, ObjectMapper objectMapper) {
         try {
             var root = workspaceRoot.toAbsolutePath().normalize();
@@ -198,4 +224,11 @@ public record TaskContractProposalReference(
     record Published(TaskContractProposalReference reference, String referenceRef) {}
 
     record Resolved(TaskContractProposalReference reference, String referenceRef) {}
+
+    record ResolvedProposal(
+            TaskContractProposalReference reference,
+            String referenceRef,
+            Path artifactPath,
+            TaskContractProposal proposal
+    ) {}
 }

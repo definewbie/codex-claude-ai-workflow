@@ -14,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -677,7 +678,7 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void contextPackageCarriesOnlyValidatedProposalReferenceAcrossProjectionBoundary() throws Exception {
+    void productReviewContextProjectsCompleteProposalFromValidatedReference() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Review the proposal.", StandardCharsets.UTF_8);
         var sidecar = wsDir.resolve("runs/run-proposal/outputs/intake-claude-brainstorm.contract.json");
@@ -710,12 +711,64 @@ class ContextBuildPackageHandlerTest {
                 tempDir, "ws-ctx", sidecar, document, objectMapper);
 
         var result = handler.execute(ctx("product_review", List.of(
-                relative(tempDir, sidecar), published.referenceRef())));
+                relative(tempDir, sidecar), published.referenceRef()), "intake.codex_product_review"));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertTrue(result.outputRefs().contains(published.referenceRef()));
         assertFalse(result.outputRefs().contains(relative(tempDir, sidecar)));
         assertEquals(2, result.outputRefs().size(), "only context package and typed proposal ref may cross");
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("## Required Review Subject"));
+        assertTrue(markdown.contains("\"objective\" : \"Review it\""));
+        assertTrue(markdown.contains("\"included\" : [ \"README.md\" ]"));
+        assertTrue(markdown.contains("\"acceptance_criteria\" : [ \"Reviewed\" ]"));
+        assertTrue(markdown.contains(published.reference().sha256()));
+    }
+
+    @Test
+    void productReviewContextRejectsTamperedProposalBeforeReviewerCanStart() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Review the proposal.", StandardCharsets.UTF_8);
+        var sidecar = wsDir.resolve("runs/run-proposal/outputs/intake-claude-brainstorm.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.claude_brainstorm",
+                  "source_artifact_type": "task_contract_proposal",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Proposal ready",
+                  "task_contract_proposal": {
+                    "artifact_type": "task_contract_proposal",
+                    "schema_version": 1,
+                    "objective": "Original objective",
+                    "scope": {"included": ["README.md"], "excluded": []},
+                    "acceptance_criteria": ["Reviewed", "Approved"],
+                    "test_requirements": ["Inspect"],
+                    "constraints": [],
+                    "non_goals": ["No source changes"],
+                    "risk_areas": [],
+                    "evidence_refs": ["README.md"],
+                    "open_questions": []
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
+        var published = TaskContractProposalReference.publish(
+                tempDir, "ws-ctx", sidecar, document, objectMapper);
+        Files.writeString(sidecar, Files.readString(sidecar).replace("Original objective", "Tampered objective"));
+
+        var result = handler.execute(ctx(
+                "product_review",
+                List.of(relative(tempDir, sidecar), published.referenceRef()),
+                "intake.codex_product_review"));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(
+                "verified task-contract proposal reference is required for product review",
+                result.result().get("error"));
+        assertFalse(Files.exists(wsDir.resolve("context/node-001.md")));
     }
 
     @Test
@@ -1594,7 +1647,9 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
 
-        var result = handler.execute(ctx("product_review", List.of(), "intake.codex_product_review"));
+        var proposalRef = publishProposalReference("run-review-allowance", "Review source evidence");
+        var result = handler.execute(ctx(
+                "product_review", List.of(proposalRef), "intake.codex_product_review"));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
@@ -1676,6 +1731,38 @@ class ContextBuildPackageHandlerTest {
         AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-ctx", sidecar);
     }
 
+    private String publishProposalReference(String runId, String objective) throws Exception {
+        var sidecar = wsDir.resolve("runs").resolve(runId)
+                .resolve("outputs/intake-claude-brainstorm.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.claude_brainstorm",
+                  "source_artifact_type": "task_contract_proposal",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Proposal ready",
+                  "task_contract_proposal": {
+                    "artifact_type": "task_contract_proposal",
+                    "schema_version": 1,
+                    "objective": "%s",
+                    "scope": {"included": ["README.md"], "excluded": []},
+                    "acceptance_criteria": ["Review the proposal", "Record a decision"],
+                    "test_requirements": ["Inspect README.md"],
+                    "constraints": [],
+                    "non_goals": ["No source changes"],
+                    "risk_areas": [],
+                    "evidence_refs": ["README.md"],
+                    "open_questions": []
+                  }
+                }
+                """.formatted(objective), StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
+        return TaskContractProposalReference.publish(
+                tempDir, "ws-ctx", sidecar, document, objectMapper).referenceRef();
+    }
+
     private static String relative(Path root, Path path) {
         return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
     }
@@ -1685,12 +1772,15 @@ class ContextBuildPackageHandlerTest {
     }
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs, String targetNode) {
+        var config = new LinkedHashMap<String, Object>();
+        config.put("target_node", targetNode);
+        config.put("profile", profile);
+        if ("intake.codex_product_review".equals(targetNode)) {
+            config.put("required_input_artifact", "task_contract_proposal");
+        }
         return new TaskHandler.TaskContext(
                 tempDir, "ws-ctx",
-                new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", targetNode,
-                        "profile", profile
-                )),
+                new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.copyOf(config)),
                 new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
                         NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
         );

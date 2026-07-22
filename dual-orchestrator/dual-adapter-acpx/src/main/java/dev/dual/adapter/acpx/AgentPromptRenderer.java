@@ -364,11 +364,21 @@ final class AgentPromptRenderer {
             builder.append("- ").append(contextRef).append("\n");
             if (Files.exists(path)) {
                 builder.append("\n```text\n");
-                builder.append(readContextPreview(workspaceRoot, path));
+                builder.append(readCompleteContextPackage(workspaceRoot, path));
                 builder.append("\n```\n\n");
             }
         }
         return builder.toString().stripTrailing();
+    }
+
+    private String readCompleteContextPackage(Path workspaceRoot, Path path) {
+        try {
+            return sanitizeOutsideWorkspacePaths(
+                    workspaceRoot,
+                    Files.readString(path, StandardCharsets.UTF_8)).stripTrailing();
+        } catch (IOException e) {
+            throw new UncheckedIOException("failed to read context package: " + path, e);
+        }
     }
 
     private String readContextPreview(Path workspaceRoot, Path path) {
