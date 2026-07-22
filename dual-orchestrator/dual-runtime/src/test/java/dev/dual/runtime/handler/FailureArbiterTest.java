@@ -129,7 +129,7 @@ class FailureArbiterTest {
                 3, "REJECT"
         );
         assertEquals(FailureCategory.CONTEXT_INSUFFICIENT, result.category());
-        assertEquals(4, result.matchedRule());
+        assertEquals(5, result.matchedRule());
     }
 
     @Test
@@ -166,7 +166,7 @@ class FailureArbiterTest {
                 3, "REJECT"
         );
         assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
-        assertEquals(5, result.matchedRule());
+        assertEquals(4, result.matchedRule());
     }
 
     @Test
@@ -184,7 +184,43 @@ class FailureArbiterTest {
                 3, "REJECT", "insufficient_verification"
         );
         assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
-        assertEquals(5, result.matchedRule());
+        assertEquals(4, result.matchedRule());
+    }
+
+    @Test
+    void verificationEvidenceOutranksGenericContextGap() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null,
+                List.of("node --test"),
+                List.of("self-test report is absent from review context"),
+                "Verification evidence is incomplete", contract,
+                3, "REJECT", "MISSING_TEST_EVIDENCE"
+        );
+
+        assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
+        assertEquals(4, result.matchedRule());
+    }
+
+    @Test
+    void missingTestEvidenceIsAnExactVerificationAlias() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+        var result = arbiter.classify(
+                null, null, null, null,
+                "No summary inference", contract,
+                3, "REJECT", "MISSING_TEST_EVIDENCE"
+        );
+
+        assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
+        assertEquals(4, result.matchedRule());
     }
 
     @Test

@@ -39,6 +39,9 @@ public final class ArtifactValidateHandler implements TaskHandler {
         writeEvidenceJson(evidenceDir.resolve("git-evidence.json"), evidence);
 
         var outputRefs = new ArrayList<String>();
+        outputRefs.addAll(AgentEvidenceIndex.fromRefs(
+                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
+                .validatedSidecarRefs(context.workspaceRoot()));
         for (String fileName : List.of(
                 "git-evidence.json",
                 "base-commit.txt",

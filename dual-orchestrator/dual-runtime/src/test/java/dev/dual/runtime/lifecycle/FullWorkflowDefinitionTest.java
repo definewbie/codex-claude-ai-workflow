@@ -4,6 +4,7 @@ import dev.dual.core.workflow.WorkflowDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -193,6 +194,17 @@ class FullWorkflowDefinitionTest {
         assertEquals("implement.claude_self_test_report", edges.get(0).to(),
                 "Verification evidence gaps should rerun self-test evidence collection, not implementation repair");
         assertEquals("loop", edges.get(0).metadata().transitionType());
+    }
+
+    @Test
+    void acceptanceContextRequiresCompletedSelfTestEvidence() {
+        WorkflowDefinition wf = factory.forVariant("full");
+
+        var contextNode = wf.node("context.acceptance_codex_verifier_review");
+        assertEquals(Map.of(
+                "node_id", "implement.claude_self_test_report",
+                "source_artifact_type", "self_test_report",
+                "decision", "SELF_TEST_COMPLETE"), contextNode.config().get("required_agent_evidence"));
     }
 
 }

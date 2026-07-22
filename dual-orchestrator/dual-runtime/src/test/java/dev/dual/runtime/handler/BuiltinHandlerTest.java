@@ -914,6 +914,35 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void artifactValidationPreservesValidatedAgentEvidenceForAcceptance() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+
+        var selfTestOutput = tempDir.resolve(
+                ".agent/workstreams/ws/runs/run-self-test/outputs/implement-claude-self-test.json");
+        Files.createDirectories(selfTestOutput.getParent());
+        writeAgentOutputWithSidecar(selfTestOutput, "SELF_TEST_COMPLETE: node --test passed.");
+        var selfTestSidecarRef = workspaceRef(AgentOutputContractSidecar.pathFor(selfTestOutput));
+
+        var handler = new ArtifactValidateHandler();
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate", List.of(
+                        workspaceRef(selfTestOutput), selfTestSidecarRef))
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertTrue(result.outputRefs().contains(selfTestSidecarRef),
+                "artifact validation must preserve validated agent evidence for the acceptance context");
+    }
+
+    @Test
     void artifactValidationUsesWorkspaceBaseCommitWhenImplementationWasCommitted() throws Exception {
         git(tempDir, "init");
         git(tempDir, "config", "user.email", "dual@example.test");

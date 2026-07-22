@@ -86,23 +86,24 @@ public final class FailureArbiter {
                     outOfScopeFiles, reviewDecision);
         }
 
-        // Rule 4: CONTEXT_INSUFFICIENT
-        if (contextGaps != null && !contextGaps.isEmpty()) {
-            return build(FailureCategory.CONTEXT_INSUFFICIENT, 4,
-                    "Review identified context gaps: " + String.join(", ", contextGaps),
-                    "Enrich context package and re-submit",
-                    contextGaps, reviewDecision);
-        }
-
-        // Rule 5: VERIFICATION_INSUFFICIENT
+        // Rule 4: VERIFICATION_INSUFFICIENT. Explicit missing verification evidence
+        // outranks a generic context gap so recovery returns to self-test collection.
         if ((missingTests != null && !missingTests.isEmpty()) || isVerificationInsufficient(categoryHint)) {
             var evidence = missingTests == null ? List.<String>of() : missingTests;
             var detail = evidence.isEmpty() ? "typed review category_hint indicates insufficient verification evidence"
                     : "Review identified missing verification evidence: " + String.join(", ", evidence);
-            return build(FailureCategory.VERIFICATION_INSUFFICIENT, 5,
+            return build(FailureCategory.VERIFICATION_INSUFFICIENT, 4,
                     detail,
                     "Re-run self-test/evidence collection before implementation repair",
                     evidence, reviewDecision);
+        }
+
+        // Rule 5: CONTEXT_INSUFFICIENT
+        if (contextGaps != null && !contextGaps.isEmpty()) {
+            return build(FailureCategory.CONTEXT_INSUFFICIENT, 5,
+                    "Review identified context gaps: " + String.join(", ", contextGaps),
+                    "Enrich context package and re-submit",
+                    contextGaps, reviewDecision);
         }
 
         // Rule 6: TOOL_LIMITATION
@@ -149,7 +150,8 @@ public final class FailureArbiter {
                 || normalized.equals("INSUFFICIENT_VERIFICATION")
                 || normalized.equals("INSUFFICIENT_EVIDENCE")
                 || normalized.equals("MISSING_VERIFICATION")
-                || normalized.equals("MISSING_TEST");
+                || normalized.equals("MISSING_TEST")
+                || normalized.equals("MISSING_TEST_EVIDENCE");
     }
 
     private boolean isReviewNoise(String categoryHint) {

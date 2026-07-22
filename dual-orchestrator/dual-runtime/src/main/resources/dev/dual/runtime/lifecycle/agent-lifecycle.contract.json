@@ -300,6 +300,11 @@
       "config": {
         "target_node": "acceptance.codex_verifier_review",
         "profile": "acceptance",
+        "required_agent_evidence": {
+          "node_id": "implement.claude_self_test_report",
+          "source_artifact_type": "self_test_report",
+          "decision": "SELF_TEST_COMPLETE"
+        },
         "purpose": "Package implementation output, self-test report, and Git evidence for Codex acceptance."
       }
     },

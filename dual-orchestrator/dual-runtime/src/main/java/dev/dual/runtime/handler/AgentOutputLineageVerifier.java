@@ -41,6 +41,9 @@ final class AgentOutputLineageVerifier {
             if (!document.runId().equals(text(node.result().get("run_id")))) {
                 return Optional.of("sidecar run_id does not match the ledger node result");
             }
+            if (!document.decision().equals(text(node.result().get("decision")))) {
+                return Optional.of("sidecar decision does not match the ledger node result");
+            }
             var execution = ledger.latestNodeExecution(paths, node);
             if (execution.isEmpty()) {
                 return Optional.of("sidecar node occurrence has no execution fact");
@@ -55,6 +58,9 @@ final class AgentOutputLineageVerifier {
             if (!containsRef(actual.outputRefs(), document.sourceOutputRef())
                     || !containsRef(actual.outputRefs(), sidecarRef)) {
                 return Optional.of("sidecar source is not published by the node execution");
+            }
+            if (!document.decision().equals(text(actual.result().get("decision")))) {
+                return Optional.of("sidecar decision does not match the node execution result");
             }
             return Optional.empty();
         } catch (Exception e) {

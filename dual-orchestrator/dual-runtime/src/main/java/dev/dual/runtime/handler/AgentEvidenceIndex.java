@@ -75,6 +75,22 @@ final class AgentEvidenceIndex {
         return entries.stream().findFirst();
     }
 
+    List<String> validatedSidecarRefs(Path workspaceRoot) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        return entries.stream()
+                .map(Entry::path)
+                .map(root::relativize)
+                .map(Path::toString)
+                .toList();
+    }
+
+    boolean contains(String nodeId, String sourceArtifactType, String decision) {
+        return entries.stream().map(Entry::document).anyMatch(document ->
+                nodeId.equals(document.nodeId())
+                        && sourceArtifactType.equals(document.sourceArtifactType())
+                        && decision.equals(document.decision()));
+    }
+
     private static Optional<Path> sidecarPathForRef(Path workspaceRoot, String ref) {
         if (ref == null || ref.isBlank() || ref.startsWith("artifact://")) {
             return Optional.empty();

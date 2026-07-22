@@ -127,6 +127,121 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
+
+        var config = Map.<String, Object>of(
+                "target_node", "acceptance.codex_verifier_review",
+                "profile", "acceptance",
+                "required_agent_evidence", Map.of(
+                        "node_id", "implement.claude_self_test_report",
+                        "source_artifact_type", "self_test_report",
+                        "decision", "SELF_TEST_COMPLETE")
+        );
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-ctx",
+                new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config),
+                new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
+                        "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
+                        List.of(), List.of(), Map.of(), null, null, null)
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
+        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.result().get("failure_code"));
+        assertTrue(result.result().get("error").toString().contains("SELF_TEST_COMPLETE"));
+        assertTrue(result.outputRefs().isEmpty(),
+                "a missing required verification fact must not publish a reviewer context package");
+    }
+
+    @Test
+    void acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-self-test/outputs/implement-claude-self-test.json");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "implement.claude_self_test_report",
+                  "source_artifact_type": "self_test_report",
+                  "decision": "SELF_TEST_COMPLETE",
+                  "summary": "node --test passed",
+                  "checks_run": ["node --test"],
+                  "evidence": ["4 tests passed"],
+                  "verification_summary": "All targeted tests passed."
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+
+        var config = Map.<String, Object>of(
+                "target_node", "acceptance.codex_verifier_review",
+                "profile", "acceptance",
+                "required_agent_evidence", Map.of(
+                        "node_id", "implement.claude_self_test_report",
+                        "source_artifact_type", "self_test_report",
+                        "decision", "SELF_TEST_COMPLETE")
+        );
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-ctx",
+                new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config),
+                new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
+                        "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
+                        List.of(relative(tempDir, sidecar)), List.of(), Map.of(), null, null, null)
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("SELF_TEST_COMPLETE"));
+        assertTrue(markdown.contains("All targeted tests passed."));
+    }
+
+    @Test
+    void acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-other/outputs/other-agent.json");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "implement.claude_implement",
+                  "source_artifact_type": "agent_output_contract",
+                  "decision": "SELF_TEST_COMPLETE",
+                  "summary": "not a self-test"
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+
+        var config = Map.<String, Object>of(
+                "target_node", "acceptance.codex_verifier_review",
+                "profile", "acceptance",
+                "required_agent_evidence", Map.of(
+                        "node_id", "implement.claude_self_test_report",
+                        "source_artifact_type", "self_test_report",
+                        "decision", "SELF_TEST_COMPLETE")
+        );
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-ctx",
+                new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config),
+                new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
+                        "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
+                        List.of(relative(tempDir, sidecar)), List.of(), Map.of(), null, null, null)
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
+    }
+
+    @Test
     void governedBudgetOverflowWithAdaptive_completesWithCompression() throws Exception {
         Files.createDirectories(wsDir);
         // Write a very large requirement — ADAPTIVE policy now compresses instead of failing

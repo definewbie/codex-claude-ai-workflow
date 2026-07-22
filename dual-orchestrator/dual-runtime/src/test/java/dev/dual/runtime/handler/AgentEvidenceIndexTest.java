@@ -53,6 +53,26 @@ class AgentEvidenceIndexTest {
                 objectMapper));
     }
 
+    @Test
+    void publishedSidecarDecisionCannotBeChangedAfterLedgerCompletion() throws Exception {
+        var workspace = tempDir.resolve("tampered-workspace");
+        var sidecar = workspace.resolve(
+                ".agent/workstreams/ws-index/runs/run-tampered/outputs/self-test.contract.json");
+        writeSidecar(workspace, sidecar, "run-tampered", "node-self-test-001",
+                "implement.claude_self_test_report", "SELF_TEST_INCOMPLETE");
+        AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
+
+        var json = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(sidecar.toFile());
+        json.put("decision", "SELF_TEST_COMPLETE");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), json);
+
+        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(
+                workspace,
+                "ws-index",
+                List.of(workspace.relativize(sidecar).toString()),
+                objectMapper));
+    }
+
     private static void writeSidecar(
             Path workspace,
             Path path,

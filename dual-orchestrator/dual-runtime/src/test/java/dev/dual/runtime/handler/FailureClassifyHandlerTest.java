@@ -282,6 +282,39 @@ class FailureClassifyHandlerTest {
     }
 
     @Test
+    void explicitMissingTestsRouteToSelfTestEvenWhenReviewerAlsoReportsContextGap() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "Self-test evidence is not visible.",
+                  "failure": {
+                    "category_hint": "MISSING_TEST_EVIDENCE",
+                    "missing_tests": ["node --test"],
+                    "context_gaps": ["self-test report is absent from review context"],
+                    "reason": "Verification evidence is incomplete."
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of(),
+                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
+        ));
+
+        assertEquals("REJECT_VERIFICATION_INSUFFICIENT", result.outcome());
+        assertEquals("VERIFICATION_INSUFFICIENT", result.result().get("category"));
+        assertEquals(4, result.result().get("matched_rule"));
+    }
+
+    @Test
     void rejectContractGapWritesCalibrationCandidate() throws Exception {
         writeMinimalContract();
         writeGitEvidence("M src/A.java\n", null, null);

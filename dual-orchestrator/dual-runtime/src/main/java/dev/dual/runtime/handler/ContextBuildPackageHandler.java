@@ -70,6 +70,19 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     Map.of("error", "verified task-contract proposal reference is required for product review"),
                     null);
         }
+        var missingAgentEvidence = missingRequiredAgentEvidence(context);
+        if (missingAgentEvidence.isPresent()) {
+            return new NodeResult(
+                    "REQUIRED_AGENT_EVIDENCE_MISSING",
+                    NodeStatus.FAILED,
+                    List.of(),
+                    Map.of(
+                            "failure_code", "REQUIRED_AGENT_EVIDENCE_MISSING",
+                            "required_agent_evidence", missingAgentEvidence.get().toMap(),
+                            "error", "required validated agent evidence is missing: "
+                                    + missingAgentEvidence.get().description()),
+                    null);
+        }
 
         if (ContextProfiles.hasProfile(profileName) && !hasSectionOverride) {
             return executeGoverned(context, workstreamDir, packagePath, profileName, reviewSubject);
@@ -734,6 +747,51 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static boolean requiresTaskContractProposal(TaskContext context) {
         return "task_contract_proposal".equals(configText(context, "required_input_artifact", ""));
+    }
+
+    private static Optional<RequiredAgentEvidence> missingRequiredAgentEvidence(TaskContext context) {
+        var configured = context.definition().config().get("required_agent_evidence");
+        if (configured == null) {
+            return Optional.empty();
+        }
+        var required = RequiredAgentEvidence.from(configured);
+        var evidence = AgentEvidenceIndex.fromRefs(
+                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
+        return evidence.contains(required.nodeId(), required.sourceArtifactType(), required.decision())
+                ? Optional.empty()
+                : Optional.of(required);
+    }
+
+    private record RequiredAgentEvidence(String nodeId, String sourceArtifactType, String decision) {
+        static RequiredAgentEvidence from(Object configured) {
+            if (!(configured instanceof Map<?, ?> values)) {
+                throw new IllegalArgumentException("required_agent_evidence must be an object");
+            }
+            var requirement = new RequiredAgentEvidence(
+                    requiredText(values, "node_id"),
+                    requiredText(values, "source_artifact_type"),
+                    requiredText(values, "decision"));
+            return requirement;
+        }
+
+        String description() {
+            return nodeId + "/" + sourceArtifactType + "/" + decision;
+        }
+
+        Map<String, Object> toMap() {
+            return Map.of(
+                    "node_id", nodeId,
+                    "source_artifact_type", sourceArtifactType,
+                    "decision", decision);
+        }
+
+        private static String requiredText(Map<?, ?> values, String key) {
+            var value = values.get(key);
+            if (!(value instanceof String text) || text.isBlank()) {
+                throw new IllegalArgumentException("required_agent_evidence." + key + " is required");
+            }
+            return text;
+        }
     }
 
     private static String snippetToTokens(String content, int maxTokens, Path path) {
