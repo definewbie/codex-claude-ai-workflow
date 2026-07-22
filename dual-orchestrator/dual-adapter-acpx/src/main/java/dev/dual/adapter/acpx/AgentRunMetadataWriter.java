@@ -115,6 +115,7 @@ final class AgentRunMetadataWriter {
                 null,
                 null,
                 null,
+                null,
                 Map.of(),
                 null,
                 null,
@@ -223,6 +224,48 @@ final class AgentRunMetadataWriter {
             AcpxUsage usage,
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta
+    ) throws IOException {
+        return writeCompleted(
+                workspaceRoot,
+                workstreamId,
+                nodeId,
+                agent,
+                session,
+                promptTemplate,
+                runId,
+                runDir,
+                promptPath,
+                stdoutPath,
+                stderrPath,
+                transcriptPath,
+                result,
+                failure,
+                usage,
+                sessionMeta,
+                compactionMeta,
+                null
+        );
+    }
+
+    CompletionWriteResult writeCompleted(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            Path runDir,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            Path transcriptPath,
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxUsage usage,
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta,
+            AgentResultAcquisitionDocument agentResultAcquisition
     ) throws IOException {
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
@@ -382,6 +425,7 @@ final class AgentRunMetadataWriter {
                 topLevelFailure == null ? null : topLevelFailure.reason(),
                 topLevelFailure == null ? null : topLevelFailure.recoverable(),
                 effectiveUsage,
+                agentResultAcquisition,
                 providerModelIdentity(effectiveUsage),
                 toolUsage,
                 relativeOrNull(workspaceRoot, agentExplorationPlanPath),

@@ -170,4 +170,22 @@ class AgentExecutionHealthTest {
         assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, assessment.status());
         assertEquals(AcpxFailureReason.RATE_LIMIT.code(), assessment.failure().reason());
     }
+
+    @Test
+    void missingResumeSessionWhoseIdentifierContainsFourTwentyNineIsNotRateLimit() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(1), Duration.ofSeconds(60));
+        var stream = new AcpxSessionStreamProjector();
+        stream.accept(0, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":1,"method":"session/resume","params":{}}
+                """));
+
+        health.observe(stream.accept(1, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":1,"error":{"code":-32002,"message":"Resource not found: 0bf2d846-4e3e-429b-8f6d-86483c3e9326"}}
+                """)).orElseThrow());
+
+        var assessment = health.assess(Duration.ofSeconds(2));
+        assertTrue(assessment.status() != AgentExecutionHealth.Status.RECOVERABLE_FAILURE);
+        assertTrue(assessment.failure().reason() == null
+                || !assessment.failure().reason().equals(AcpxFailureReason.RATE_LIMIT.code()));
+    }
 }

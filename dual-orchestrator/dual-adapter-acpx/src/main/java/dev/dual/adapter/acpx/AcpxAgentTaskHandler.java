@@ -4,6 +4,8 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.ProcessUsability;
 import dev.dual.runtime.handler.AgentRunGovernanceContext;
+import dev.dual.runtime.handler.AgentResultPromptContract;
+import dev.dual.runtime.handler.ContractRegistry;
 import dev.dual.runtime.handler.TaskHandler;
 
 import java.nio.charset.StandardCharsets;
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class AcpxAgentTaskHandler implements TaskHandler {
-    private final AcpxAgentTransport transport;
+    private final AcpxAgentResultAcquirer resultAcquirer;
     private final boolean prepareOnly;
     private final AgentPromptRenderer promptRenderer;
     private final AcpxFailureClassifier failureClassifier;
@@ -35,7 +37,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         if (usageReader == null) {
             throw new IllegalArgumentException("usageReader is required");
         }
-        this.transport = transport;
+        this.resultAcquirer = new AcpxAgentResultAcquirer(transport);
         this.prepareOnly = prepareOnly;
         this.promptRenderer = new AgentPromptRenderer();
         this.failureClassifier = new AcpxFailureClassifier();
@@ -93,6 +95,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".json");
         var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
         var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
+        var initialOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".attempt-1.json");
+        var correctionPromptPath = runDir.resolve("prompts").resolve(promptTemplate + ".contract-correction.md");
+        var correctionOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.json");
+        var correctionTranscriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.transcript.log");
+        var correctionStderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.stderr.log");
         Files.createDirectories(promptPath.getParent());
         Files.createDirectories(outputPath.getParent());
         var seedPath = sessionCompactionSeedWriter.write(
@@ -178,15 +185,41 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 permissionProfile(context),
                 event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
         );
+        var correctionRequest = new AcpxRunRequest(
+                context.workspaceRoot(),
+                session,
+                correctionPromptPath,
+                correctionTranscriptPath,
+                correctionStderrPath,
+                AcpxPermissionProfile.contractCorrection(),
+                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
+        );
         try {
-            var result = "claude".equals(agent)
-                    ? transport.runClaudeDesign(request)
-                    : transport.runCodexDesignReview(request);
-            var usage = result.usage() != null
-                    ? result.usage()
-                    : usageReader.read(promptPath, stderrPath).orElse(null);
-            var finalArtifact = result.promptCompletion().finalAssistantMessage();
+            var acquisition = resultAcquirer.acquire(
+                    agent,
+                    request,
+                    correctionRequest,
+                    correctionPrompt(context, runId)
+            );
+            var finalResult = acquisition.finalResult();
+            var result = acquisition.executionResult();
+            var initialUsage = usageFor(acquisition.initialResult(), promptPath, stderrPath);
+            var correctionUsage = acquisition.correctionAttempted()
+                    ? usageFor(acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
+                    : null;
+            var usage = acquisition.correctionAttempted()
+                    ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
+                    : initialUsage;
+            var finalArtifact = finalResult.promptCompletion().finalAssistantMessage();
             var resultWithArtifactTimeline = result;
+            if (acquisition.correctionAttempted()) {
+                Files.writeString(
+                        initialOutputPath,
+                        acquisition.initialResult().promptCompletion().finalAssistantMessage(),
+                        StandardCharsets.UTF_8
+                );
+                Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);
+            }
             if (result.promptCompletion().completed()) {
                 Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
                 resultWithArtifactTimeline = appendTimelineEvent(
@@ -195,9 +228,22 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         "adapter"
                 );
             }
-            var failure = failureClassifier.classify(transcriptPath, stderrPath, result.exitCode());
-            var outputComplete = result.promptCompletion().completed();
-            var interrupted = interruptedOutputFailure(resultWithArtifactTimeline, outputComplete);
+            var effectiveTranscriptPath = acquisition.correctionAttempted() ? correctionTranscriptPath : transcriptPath;
+            var effectiveStderrPath = acquisition.correctionAttempted() ? correctionStderrPath : stderrPath;
+            var failure = failureClassifier.classify(
+                    effectiveTranscriptPath,
+                    effectiveStderrPath,
+                    finalResult.exitCode()
+            );
+            var outputComplete = finalResult.promptCompletion().completed();
+            var interrupted = interruptedOutputFailure(finalResult, outputComplete);
+            var acquisitionDocument = acquisition.toDocument(
+                    context.workspaceRoot(),
+                    acquisition.correctionAttempted() ? initialOutputPath : outputPath,
+                    correctionOutputPath,
+                    initialUsage,
+                    correctionUsage
+            );
             var completion = metadataWriter.writeCompleted(
                     context.workspaceRoot(),
                     context.workstreamId(),
@@ -209,13 +255,14 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runDir,
                     promptPath,
                     outputPath,
-                    stderrPath,
+                    effectiveStderrPath,
                     transcriptPath,
                     resultWithArtifactTimeline,
                     metadataFailure(failure, interrupted, outputComplete),
                     usage,
                     sessionMeta,
-                    compactionMeta
+                    compactionMeta,
+                    acquisitionDocument
             );
             if (completion.explorationPolicyFailed()) {
                 return new NodeResult(
@@ -268,6 +315,34 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     failure
             );
         }
+    }
+
+    private AcpxUsage usageFor(AcpxRunResult result, java.nio.file.Path promptPath, java.nio.file.Path stderrPath) {
+        return result.usage() != null
+                ? result.usage()
+                : usageReader.read(promptPath, stderrPath).orElse(null);
+    }
+
+    private static String correctionPrompt(TaskContext context, String runId) {
+        if (!ContractRegistry.hasContract(context.definition().id())) {
+            return "";
+        }
+        var contract = ContractRegistry.forNode(context.definition().id());
+        var decisionExample = contract.allowedDecisions().stream().sorted().findFirst().orElse("");
+        return """
+                Your preceding final assistant message could not be decoded as the required AgentResultEnvelope.
+                Re-serialize that same result without changing its decision, evidence, or conclusion.
+                Do not re-run the task, use tools, explain, or use Markdown.
+                This is the only contract-correction attempt. Return exactly the JSON object required below.
+
+                %s
+                """.formatted(AgentResultPromptContract.render(
+                context.workstreamId(),
+                runId,
+                context.definition().id(),
+                decisionExample,
+                contract.allowedDecisions()
+        )).stripTrailing();
     }
 
     private NodeResult transportFailureResult(

@@ -194,9 +194,25 @@ class AcpxFailureSignalCatalogTest {
     }
 
     @Test
+    void sessionIdentifierContainingFourTwentyNineIsNotRateLimit() {
+        var evidence = new AcpxFailureEvidence(
+                "",
+                "Resource not found: 0bf2d846-4e3e-429b-8f6d-86483c3e9326",
+                4
+        );
+
+        var match = catalog.match(evidence);
+
+        assertTrue(match.isEmpty() || match.get().reason() != AcpxFailureReason.RATE_LIMIT);
+    }
+
+    @Test
     void explicitRateLimitIndicatorsClassifyAsRateLimit() {
         for (var text : new String[]{
                 "Request rejected (429): too many requests",
+                "HTTP 429 from provider",
+                "API error: 429",
+                "status code 429",
                 "rate_limit_exceeded",
                 "Rate limit exceeded, please retry",
                 "已达到 5 小时的使用上限"

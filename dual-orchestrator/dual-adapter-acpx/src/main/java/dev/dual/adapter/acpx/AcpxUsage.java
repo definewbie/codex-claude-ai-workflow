@@ -49,6 +49,7 @@ record AcpxUsage(
     static final String ATTR_LATEST_PROMPT_IN_SESSION = "LATEST_PROMPT_IN_SESSION";
     /** 只有 usage_update，没有 result.usage，记录为会话累计快照。 */
     static final String ATTR_SESSION_USAGE_UPDATE = "SESSION_USAGE_UPDATE";
+    static final String ATTR_MULTI_PROMPT_SUM = "MULTI_PROMPT_SUM";
     AcpxUsage {
         if (measurementType == null || measurementType.isBlank()) {
             measurementType = PROVIDER_RUN_USAGE;
@@ -155,6 +156,49 @@ record AcpxUsage(
                 billingMode,
                 providerMetadataSource,
                 reason == null ? "" : reason
+        );
+    }
+
+    static AcpxUsage aggregatePromptOccurrences(AcpxUsage first, AcpxUsage second) {
+        if (first == null) {
+            return second;
+        }
+        if (second == null) {
+            return first;
+        }
+        if (!PROVIDER_RUN_USAGE.equals(first.measurementType)
+                || !PROVIDER_RUN_USAGE.equals(second.measurementType)
+                || first.cumulative
+                || second.cumulative
+                || !first.providerId.equals(second.providerId)
+                || !first.model.equals(second.model)
+                || !first.billingMode.equals(second.billingMode)) {
+            return second.withUnavailableReason("MULTI_PROMPT_USAGE_REQUIRES_OCCURRENCE_SUM");
+        }
+        var currency = first.costCurrency.equals(second.costCurrency) ? first.costCurrency : "";
+        var cost = currency.isBlank() || first.costAmount == null || second.costAmount == null
+                ? null
+                : first.costAmount.add(second.costAmount);
+        return new AcpxUsage(
+                first.inputTokens + second.inputTokens,
+                first.outputTokens + second.outputTokens,
+                first.cachedReadTokens + second.cachedReadTokens,
+                first.cachedWriteTokens + second.cachedWriteTokens,
+                first.totalTokens + second.totalTokens,
+                cost,
+                currency,
+                "agent_result_acquisition",
+                PROVIDER_RUN_USAGE,
+                ATTR_MULTI_PROMPT_SUM,
+                false,
+                second.contextUsedTokens,
+                second.sessionCostAmount,
+                second.sessionCostCurrency,
+                second.providerId,
+                second.model,
+                second.billingMode,
+                second.providerMetadataSource,
+                ""
         );
     }
 

@@ -20,6 +20,42 @@ class AcpxAgentTransportTest {
     Path tempDir;
 
     @Test
+    void contractCorrectionUsesExistingSessionWithoutBootstrapCommand() throws Exception {
+        var invocationLog = tempDir.resolve("invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-correction.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("correction.md");
+        var stdout = tempDir.resolve("correction.stdout");
+        var stderr = tempDir.resolve("correction.stderr");
+        Files.writeString(prompt, "Return strict JSON only.\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir,
+                "existing-session",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractCorrection()
+        );
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString())
+                .runAgentResultCorrection("claude", request);
+
+        assertEquals(0, result.exitCode());
+        var invocation = Files.readString(invocationLog);
+        assertTrue(invocation.contains("claude -s existing-session -f"));
+        assertTrue(invocation.contains("--deny-all"));
+        assertTrue(invocation.contains("--no-terminal"));
+        assertFalse(invocation.contains("sessions new"));
+        assertFalse(invocation.contains("sessions ensure"));
+    }
+
+    @Test
     void doesNotExitEarlyWhenReconnectSignalAppearsBeforeProcessExit() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-fake.sh");
         Files.writeString(fakeAcpx, """

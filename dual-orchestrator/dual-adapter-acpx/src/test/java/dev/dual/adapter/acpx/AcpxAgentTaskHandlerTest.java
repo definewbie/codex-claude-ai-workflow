@@ -116,6 +116,72 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(transport.sawPreparedRunJson);
     }
 
+    @Test
+    void prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-correction");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Document the existing transition validation.\n");
+
+        var transport = new ContractCorrectionTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "design-claude"
+        ));
+        var instance = readyInstance("design.claude_design");
+
+        var candidate = handler.execute(new TaskHandler.TaskContext(
+                tempDir, "ws-correction", definition, instance));
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-correction",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+        validated = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals("READY_FOR_ARCH_REVIEW", validated.result().get("decision"));
+        assertEquals(2, transport.calls);
+        assertEquals(List.of(
+                "claude-main-ws-correction",
+                "claude-main-ws-correction"
+        ), transport.sessions);
+        assertTrue(transport.correctionProfile.denyAll());
+        assertFalse(transport.correctionProfile.terminalEnabled());
+        assertFalse(transport.correctionProfile.approveAll());
+
+        var runMetadataPath = tempDir.resolve((String) validated.result().get("run_metadata"));
+        var runDir = runMetadataPath.getParent();
+        var authoritativeOutput = Files.readString(runDir.resolve("outputs/design-claude.json"));
+        assertTrue(authoritativeOutput.startsWith("{"));
+        assertFalse(authoritativeOutput.contains("I have completed the design"));
+        assertTrue(Files.readString(runDir.resolve("outputs/design-claude.attempt-1.json"))
+                .startsWith("I have completed the design"));
+        assertTrue(Files.exists(runDir.resolve("outputs/design-claude.contract-correction.json")));
+
+        var metadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+        var acquisition = metadata.path("agentResultAcquisition");
+        assertTrue(acquisition.path("correctionAttempted").asBoolean());
+        assertEquals(1, acquisition.path("maxCorrectionAttempts").asInt());
+        assertEquals(2, acquisition.path("selectedCandidateOccurrence").asInt());
+        assertEquals(2, acquisition.path("occurrences").size());
+        assertEquals("fixture-initial", acquisition.path("occurrences").get(0).path("requestId").asText());
+        assertFalse(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
+        assertEquals("AGENT_RESULT_PARSE_FAILED",
+                acquisition.path("occurrences").get(0).path("parseErrorCode").asText());
+        assertEquals(101, acquisition.path("occurrences").get(0).path("usage").path("totalTokens").asInt());
+        assertEquals("fixture-correction", acquisition.path("occurrences").get(1).path("requestId").asText());
+        assertTrue(acquisition.path("occurrences").get(1).path("contractDecodable").asBoolean());
+        assertEquals(23, acquisition.path("occurrences").get(1).path("usage").path("totalTokens").asInt());
+        assertEquals(124, metadata.path("usage").path("totalTokens").asInt());
+        assertEquals(AcpxUsage.ATTR_MULTI_PROMPT_SUM, metadata.path("usage").path("attribution").asText());
+        assertEquals(3000, metadata.path("durationMs").asLong());
+    }
+
 
     @Test
     void prepareOnlyRunWritesSessionCompactionSeedWhenExperimentEnabled() throws Exception {
@@ -1329,6 +1395,85 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+        }
+    }
+
+    private static final class ContractCorrectionTransport extends AcpxAgentTransport {
+        private final java.util.ArrayList<String> sessions = new java.util.ArrayList<>();
+        private int calls;
+        private AcpxPermissionProfile correctionProfile;
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            calls++;
+            sessions.add(request.sessionName());
+            prepareLogs(request);
+            var now = Instant.parse("2026-07-22T00:00:00Z");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude", "initial"),
+                    List.of(),
+                    usage(101),
+                    new AcpxPromptCompletion(
+                            "fixture-initial",
+                            "end_turn",
+                            "I have completed the design.\n" + completionJson(request, "READY_FOR_ARCH_REVIEW")
+                    )
+            );
+        }
+
+        @Override
+        AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) throws java.io.IOException {
+            calls++;
+            sessions.add(request.sessionName());
+            correctionProfile = request.permissionProfile();
+            prepareLogs(request);
+            var now = Instant.parse("2026-07-22T00:00:02Z");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude", "correction"),
+                    List.of(),
+                    usage(23),
+                    new AcpxPromptCompletion(
+                            "fixture-correction",
+                            "end_turn",
+                            completionJson(request, "READY_FOR_ARCH_REVIEW")
+                    )
+            );
+        }
+
+        private static void prepareLogs(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "");
+            Files.writeString(request.stderrPath(), "");
+        }
+
+        private static AcpxUsage usage(long totalTokens) {
+            return new AcpxUsage(
+                    totalTokens - 1,
+                    1,
+                    0,
+                    0,
+                    totalTokens,
+                    null,
+                    "",
+                    "fixture",
+                    AcpxUsage.PROVIDER_RUN_USAGE,
+                    AcpxUsage.ATTR_EXACT_PROMPT_MATCH,
+                    false,
+                    0,
+                    null,
+                    "",
+                    "fixture-provider",
+                    "fixture-model",
+                    "token_only",
+                    "fixture",
+                    ""
+            );
         }
     }
 

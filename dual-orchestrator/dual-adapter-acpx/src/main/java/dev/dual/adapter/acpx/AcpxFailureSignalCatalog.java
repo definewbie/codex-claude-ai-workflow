@@ -127,7 +127,10 @@ final class AcpxFailureSignalCatalog {
                         "rate limit",
                         "rate_limit_exceeded",
                         "request rejected (429)",
-                        "429",
+                        "http 429",
+                        "api error: 429",
+                        "status code 429",
+                        "status=429",
                         "too many requests",
                         "quota exceeded",
                         "使用上限"

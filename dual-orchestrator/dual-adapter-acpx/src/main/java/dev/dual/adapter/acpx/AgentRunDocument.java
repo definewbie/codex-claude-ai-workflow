@@ -41,6 +41,7 @@ record AgentRunDocument(
         String failureReason,
         Boolean recoverable,
         AcpxUsage usage,
+        AgentResultAcquisitionDocument agentResultAcquisition,
         Map<String, Object> providerModelIdentity,
         AcpxToolUsage toolUsage,
         String agentExplorationPlanPath,

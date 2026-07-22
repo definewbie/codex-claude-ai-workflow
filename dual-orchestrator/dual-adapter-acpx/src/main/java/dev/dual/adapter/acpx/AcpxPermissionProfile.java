@@ -85,6 +85,19 @@ record AcpxPermissionProfile(
         return new AcpxPermissionProfile("implement", true, false, true, false, List.of(), List.of(), 0);
     }
 
+    static AcpxPermissionProfile contractCorrection() {
+        return new AcpxPermissionProfile(
+                "contract_correction",
+                false,
+                true,
+                false,
+                false,
+                List.of(),
+                List.of(),
+                0
+        );
+    }
+
     String allowedToolsArgument() {
         return String.join(",", allowedTools);
     }

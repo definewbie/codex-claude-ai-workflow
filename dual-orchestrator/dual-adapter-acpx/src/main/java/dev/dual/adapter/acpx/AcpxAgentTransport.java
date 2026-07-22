@@ -167,6 +167,15 @@ public class AcpxAgentTransport {
         return result;
     }
 
+    /** Sends a bounded contract-correction turn to the already established session. */
+    AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request)
+            throws IOException, InterruptedException {
+        if (!"claude".equals(agent) && !"codex".equals(agent)) {
+            throw new IllegalArgumentException("unsupported agent: " + agent);
+        }
+        return run(agent, request);
+    }
+
     private AcpxRunResult run(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
         var command = new ArrayList<String>();
         command.add(acpxExecutable);

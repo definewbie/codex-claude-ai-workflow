@@ -59,6 +59,7 @@ final class AcpxFailureClassifier {
                 "ACPX_EXIT_" + exitCode,
                 "acpx exited with " + exitCode,
                 false,
+                false,
                 false
         );
     }
@@ -95,9 +96,19 @@ final class AcpxFailureClassifier {
         return result.toString();
     }
 
-    record AcpxFailure(String reason, String message, boolean recoverable, boolean interruptRunningProcess) {
+    record AcpxFailure(
+            String reason,
+            String message,
+            boolean recoverable,
+            boolean interruptRunningProcess,
+            boolean signalPresent
+    ) {
+        AcpxFailure(String reason, String message, boolean recoverable, boolean interruptRunningProcess) {
+            this(reason, message, recoverable, interruptRunningProcess, true);
+        }
+
         AcpxFailure(String reason, String message, boolean recoverable) {
-            this(reason, message, recoverable, false);
+            this(reason, message, recoverable, false, true);
         }
     }
 }
