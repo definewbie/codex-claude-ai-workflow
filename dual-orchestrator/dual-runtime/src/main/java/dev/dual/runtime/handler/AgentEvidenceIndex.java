@@ -75,6 +75,25 @@ final class AgentEvidenceIndex {
         return entries.stream().findFirst();
     }
 
+    Optional<Entry> entryForRef(Path workspaceRoot, String ref) {
+        var normalizedRef = normalizeRef(ref);
+        return entries.stream()
+                .filter(entry -> normalizedRef.equals(normalizeRef(entry.document().sourceOutputRef()))
+                        || normalizedRef.equals(normalizeRef(relativeRef(workspaceRoot, entry.path()))))
+                .findFirst();
+    }
+
+    boolean isValidatedPlanProjectionRef(Path workspaceRoot, String ref) {
+        var normalizedRef = normalizeRef(ref);
+        return entries.stream()
+                .filter(entry -> entry.document().planArtifact() != null)
+                .map(entry -> workspaceRoot.resolve(entry.document().sourceOutputRef()).normalize())
+                .map(PlanArtifactSidecar::pathFor)
+                .map(path -> relativeRef(workspaceRoot, path))
+                .map(AgentEvidenceIndex::normalizeRef)
+                .anyMatch(normalizedRef::equals);
+    }
+
     List<String> validatedSidecarRefs(Path workspaceRoot) {
         var root = workspaceRoot.toAbsolutePath().normalize();
         return entries.stream()
@@ -88,7 +107,8 @@ final class AgentEvidenceIndex {
         return entries.stream().map(Entry::document).anyMatch(document ->
                 nodeId.equals(document.nodeId())
                         && sourceArtifactType.equals(document.sourceArtifactType())
-                        && decision.equals(document.decision()));
+                        && decision.equals(document.decision())
+                        && document.hasRequiredTypedPayload());
     }
 
     private static Optional<Path> sidecarPathForRef(Path workspaceRoot, String ref) {
@@ -136,6 +156,16 @@ final class AgentEvidenceIndex {
         } catch (IOException ignored) {
             return Instant.EPOCH;
         }
+    }
+
+    private static String relativeRef(Path workspaceRoot, Path path) {
+        return workspaceRoot.toAbsolutePath().normalize()
+                .relativize(path.toAbsolutePath().normalize())
+                .toString();
+    }
+
+    private static String normalizeRef(String value) {
+        return value == null ? "" : value.replace('\\', '/');
     }
 
     record Entry(

@@ -242,6 +242,85 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void planReviewRendersTypedPlanFromValidatedAgentEvidence() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Add a small application API.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-plan/outputs/plan-claude.json");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "plan.claude_plan",
+                  "source_artifact_type": "plan_result",
+                  "decision": "READY_FOR_PLAN_REVIEW",
+                  "summary": "Plan ready",
+                  "plan_artifact": {
+                    "artifact_type": "plan_artifact",
+                    "schema_version": 1,
+                    "implementation_steps": ["Create src/issueApi.js from the approved transition policy."],
+                    "edit_files": ["src/issueApi.js"],
+                    "reference_files": ["src/issueWorkflow.js"],
+                    "file_level_changes": ["src/issueApi.js: add getIssueState."],
+                    "validation_plan": ["Run npm test and verify no duplicate transition table."],
+                    "rollback_notes": "Delete src/issueApi.js.",
+                    "known_risks": ["Keep the transition policy single-sourced."],
+                    "human_review_checklist": ["Confirm getIssueState calls availableTransitions."]
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+        var derivedPlan = PlanArtifactSidecar.pathFor(output);
+        Files.writeString(derivedPlan, """
+                {
+                  "artifact_type": "plan_artifact",
+                  "schema_version": 1,
+                  "implementation_steps": ["FORGED_DERIVED_PLAN_MUST_NOT_WIN"]
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(planReviewContext(List.of(
+                relative(tempDir, output),
+                relative(tempDir, sidecar),
+                relative(tempDir, derivedPlan))));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("Create src/issueApi.js from the approved transition policy."));
+        assertTrue(markdown.contains("Run npm test and verify no duplicate transition table."));
+        assertFalse(markdown.contains("FORGED_DERIVED_PLAN_MUST_NOT_WIN"));
+        assertFalse(markdown.contains("unvalidated agent result omitted from context"));
+    }
+
+    @Test
+    void planReviewRequiresTypedPlanPayloadBeforeReviewerStarts() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Add a small application API.", StandardCharsets.UTF_8);
+        var output = wsDir.resolve("runs/run-plan/outputs/plan-claude.json");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "plan.claude_plan",
+                  "source_artifact_type": "plan_result",
+                  "decision": "READY_FOR_PLAN_REVIEW",
+                  "summary": "Summary without the typed plan body"
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+
+        var result = handler.execute(planReviewContext(List.of(relative(tempDir, sidecar))));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
+        assertTrue(result.outputRefs().isEmpty(),
+                "a reviewer context must not be published without the complete typed plan body");
+    }
+
+    @Test
     void governedBudgetOverflowWithAdaptive_completesWithCompression() throws Exception {
         Files.createDirectories(wsDir);
         // Write a very large requirement — ADAPTIVE policy now compresses instead of failing
@@ -1922,6 +2001,25 @@ class ContextBuildPackageHandlerTest {
                 new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.copyOf(config)),
                 new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
                         NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
+        );
+    }
+
+    private TaskHandler.TaskContext planReviewContext(List<String> inputRefs) {
+        var config = Map.<String, Object>of(
+                "target_node", "plan.codex_plan_review",
+                "profile", "plan_review",
+                "required_agent_evidence", Map.of(
+                        "node_id", "plan.claude_plan",
+                        "source_artifact_type", "plan_result",
+                        "decision", "READY_FOR_PLAN_REVIEW")
+        );
+        return new TaskHandler.TaskContext(
+                tempDir,
+                "ws-ctx",
+                new NodeDefinition("ctx.plan-review", NodeKind.TASK, "context.build_package", config),
+                new NodeInstance("node-plan-review-context", "ctx.plan-review", NodeKind.TASK,
+                        "context.build_package", NodeStatus.READY, "stage-plan", "iter-001",
+                        inputRefs, List.of(), Map.of(), null, null, null)
         );
     }
 

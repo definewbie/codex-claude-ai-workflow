@@ -47,10 +47,13 @@ final class AgentResultDocumentProjector {
                     document.put("scope_expansion_request", scopeExpansion(output.scopeExpansionRequest()));
                 }
             }
-            case AgentResultEnvelope.PlanResult plan -> evidenceFields(
-                    document, plan.lifecycleStatus(), plan.blocking(), plan.checks(), plan.evidence(),
-                    plan.missingEvidence(), plan.mustFix(), plan.acceptanceNotes(), plan.openRisks(),
-                    plan.changedFiles(), plan.verificationSummary(), plan.failure());
+            case AgentResultEnvelope.PlanResult plan -> {
+                evidenceFields(
+                        document, plan.lifecycleStatus(), plan.blocking(), plan.checks(), plan.evidence(),
+                        plan.missingEvidence(), plan.mustFix(), plan.acceptanceNotes(), plan.openRisks(),
+                        plan.changedFiles(), plan.verificationSummary(), plan.failure());
+                document.put("plan_artifact", planArtifact(plan));
+            }
             case AgentResultEnvelope.SelfTestResult selfTest -> {
                 document.put("lifecycle_status", selfTest.lifecycleStatus());
                 document.put("blocking", false);

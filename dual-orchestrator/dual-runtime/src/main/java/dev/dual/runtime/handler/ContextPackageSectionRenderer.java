@@ -13,6 +13,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +68,34 @@ final class ContextPackageSectionRenderer {
             builder.append("(no direct input refs)\n\n");
             return;
         }
+        var evidence = AgentEvidenceIndex.fromRefs(
+                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
+        var renderedSidecars = new HashSet<Path>();
         for (String inputRef : context.instance().inputRefs()) {
             var path = context.workspaceRoot().resolve(inputRef).normalize();
+            if (evidence.isValidatedPlanProjectionRef(context.workspaceRoot(), inputRef)) {
+                continue;
+            }
+            var entry = evidence.entryForRef(context.workspaceRoot(), inputRef);
+            if (entry.isPresent()) {
+                if (!renderedSidecars.add(entry.get().path())) {
+                    continue;
+                }
+                var contract = entry.get().document();
+                builder.append("- ").append(inputRef).append(" — ");
+                if (!contract.decision().isBlank()) {
+                    builder.append(contract.decision());
+                    if (!contract.summary().isBlank()) {
+                        builder.append(": ");
+                    }
+                }
+                builder.append(contract.summary().isBlank()
+                        ? "(validated agent result)"
+                        : contract.summary().replace("\n", " / "));
+                builder.append("\n");
+                appendTypedPlanArtifact(builder, contract.planArtifact());
+                continue;
+            }
             builder.append("- ").append(inputRef);
             if (!Files.exists(path) || Files.isDirectory(path)) {
                 builder.append(" (unavailable)\n");
@@ -78,25 +105,12 @@ final class ContextPackageSectionRenderer {
                 builder.append(" (execution transcript; omitted from context)\n");
                 continue;
             }
-            if (isAgentOutput(path)) {
-                var entry = AgentEvidenceIndex.latestFromRefs(
-                        context.workspaceRoot(), context.workstreamId(), List.of(inputRef), OBJECT_MAPPER);
-                if (entry.isPresent()) {
-                    var contract = entry.get().document();
-                    builder.append(" — ");
-                    if (!contract.decision().isBlank()) {
-                        builder.append(contract.decision());
-                        if (!contract.summary().isBlank()) {
-                            builder.append(": ");
-                        }
-                    }
-                    builder.append(contract.summary().isBlank()
-                            ? "(validated agent result)"
-                            : contract.summary().replace("\n", " / "));
-                    builder.append("\n");
-                } else {
-                    builder.append(" (unvalidated agent result omitted from context)\n");
-                }
+            if (isExecutionDiagnostic(path)) {
+                builder.append(" (execution diagnostic; omitted from context)\n");
+                continue;
+            }
+            if (isAgentResultCandidate(path)) {
+                builder.append(" (unvalidated agent result omitted from context)\n");
                 continue;
             }
             var content = Files.readString(path, StandardCharsets.UTF_8);
@@ -263,8 +277,23 @@ final class ContextPackageSectionRenderer {
             builder.append("(no direct input refs)\n\n");
             return;
         }
+        var evidence = AgentEvidenceIndex.fromRefs(
+                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
+        var renderedSidecars = new HashSet<Path>();
         for (String inputRef : context.instance().inputRefs()) {
             var path = context.workspaceRoot().resolve(inputRef).normalize();
+            if (evidence.isValidatedPlanProjectionRef(context.workspaceRoot(), inputRef)) {
+                continue;
+            }
+            var entry = evidence.entryForRef(context.workspaceRoot(), inputRef);
+            if (entry.isPresent()) {
+                if (!renderedSidecars.add(entry.get().path())) {
+                    continue;
+                }
+                builder.append("### ").append(inputRef).append("\n\n");
+                appendAgentContractFields(builder, entry.get().document(), entry.get().path());
+                continue;
+            }
             builder.append("### ").append(inputRef).append("\n\n");
             if (!Files.exists(path) || Files.isDirectory(path)) {
                 builder.append("(artifact unavailable or not a file)\n\n");
@@ -276,14 +305,12 @@ final class ContextPackageSectionRenderer {
                         .append(")\n\n");
                 continue;
             }
-            if (isAgentOutput(path)) {
-                var entry = AgentEvidenceIndex.latestFromRefs(
-                        context.workspaceRoot(), context.workstreamId(), List.of(inputRef), OBJECT_MAPPER);
-                if (entry.isPresent()) {
-                    appendAgentContractFields(builder, entry.get().document(), entry.get().path());
-                } else {
-                    builder.append("(unvalidated agent result omitted from context)\n\n");
-                }
+            if (isExecutionDiagnostic(path)) {
+                builder.append("(execution diagnostic omitted from context)\n\n");
+                continue;
+            }
+            if (isAgentResultCandidate(path)) {
+                builder.append("(unvalidated agent result omitted from context)\n\n");
                 continue;
             }
             builder.append("```text\n");
@@ -447,6 +474,24 @@ final class ContextPackageSectionRenderer {
         }
         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n");
         builder.append("- Raw Output: ").append(contract.sourceOutputRef()).append("\n\n");
+        appendTypedPlanArtifact(builder, contract.planArtifact());
+    }
+
+    private static void appendTypedPlanArtifact(StringBuilder builder, PlanArtifactDocument plan) {
+        if (plan == null) {
+            return;
+        }
+        builder.append("**Typed Plan Evidence:**\n\n");
+        appendListSection(builder, "Implementation Steps", plan.implementationSteps());
+        appendListSection(builder, "Edit Files", plan.editFiles());
+        appendListSection(builder, "Reference Files", plan.referenceFiles());
+        appendListSection(builder, "File-Level Changes", plan.fileLevelChanges());
+        appendListSection(builder, "Validation Plan", plan.validationPlan());
+        if (!plan.rollbackNotes().isBlank()) {
+            builder.append("**Rollback Notes:** ").append(plan.rollbackNotes()).append("\n\n");
+        }
+        appendListSection(builder, "Known Risks", plan.knownRisks());
+        appendListSection(builder, "Human Review Checklist", plan.humanReviewChecklist());
     }
 
     private static void appendListSummary(StringBuilder builder, String label, Object value) {
@@ -535,9 +580,19 @@ final class ContextPackageSectionRenderer {
         return Map.of();
     }
 
-    private static boolean isAgentOutput(Path path) {
+    private static boolean isAgentResultCandidate(Path path) {
         var parent = path.getParent();
-        return parent != null && "outputs".equals(parent.getFileName().toString());
+        return parent != null
+                && "outputs".equals(parent.getFileName().toString())
+                && path.getFileName().toString().endsWith(".json");
+    }
+
+    private static boolean isExecutionDiagnostic(Path path) {
+        var fileName = path.getFileName().toString();
+        return fileName.endsWith(".stderr.log")
+                || fileName.endsWith(".stdout.log")
+                || fileName.endsWith(".transcript.log")
+                || fileName.endsWith(".meta.json");
     }
 
     private static boolean isTranscriptArtifact(Path path) {

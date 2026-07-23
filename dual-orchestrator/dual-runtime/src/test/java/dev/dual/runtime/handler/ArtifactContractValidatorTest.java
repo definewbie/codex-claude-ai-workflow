@@ -96,6 +96,10 @@ class ArtifactContractValidatorTest {
         assertEquals(NodeStatus.COMPLETED, validated.status());
         assertEquals("plan_result", artifactContractType(validated));
         assertTrue(validated.outputRefs().contains("plan.plan.json"));
+        var contract = AgentOutputContractDocument.read(tempDir.resolve("plan.contract.json"), JSON).orElseThrow();
+        assertTrue(contract.planArtifact() != null);
+        assertEquals(List.of("edit the target"), contract.planArtifact().implementationSteps());
+        assertTrue(contract.hasRequiredTypedPayload());
         assertTrue(Files.isRegularFile(tempDir.resolve(".agent/workstreams/ws-1/artifacts/plan/plan_artifact.json")));
     }
 

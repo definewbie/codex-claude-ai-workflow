@@ -48,7 +48,8 @@ public record AgentOutputContractDocument(
         List<RereadReason> rereadReasons,
         ScopeExpansionRequest scopeExpansionRequest,
         TaskContractProposalReference reviewSubject,
-        TaskContractProposal taskContractProposal
+        TaskContractProposal taskContractProposal,
+        PlanArtifactDocument planArtifact
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -91,7 +92,8 @@ public record AgentOutputContractDocument(
                 rereadReasonList(document.get("reread_reasons")),
                 ScopeExpansionRequest.from(objectMap(document.get("scope_expansion_request"))),
                 TaskContractProposalReference.fromMap(objectMap(document.get("review_subject"))).orElse(null),
-                taskContractProposal(objectMap(document.get("task_contract_proposal")))
+                taskContractProposal(objectMap(document.get("task_contract_proposal"))),
+                planArtifact(objectMap(document.get("plan_artifact")))
         );
     }
 
@@ -131,6 +133,20 @@ public record AgentOutputContractDocument(
 
     public String canonicalStageOutcome() {
         return stageOutcome.isBlank() ? lifecycleStatus : stageOutcome;
+    }
+
+    public boolean hasRequiredTypedPayload() {
+        if (!"plan_result".equals(sourceArtifactType)) {
+            return true;
+        }
+        return planArtifact != null
+                && "plan_artifact".equals(planArtifact.artifactType())
+                && planArtifact.schemaVersion() == 1
+                && planArtifact.missingRequiredField().isEmpty();
+    }
+
+    private static PlanArtifactDocument planArtifact(Map<String, Object> document) {
+        return document.isEmpty() ? null : PlanArtifactDocument.from(document);
     }
 
     private static TaskContractProposal taskContractProposal(Map<String, Object> document) {
