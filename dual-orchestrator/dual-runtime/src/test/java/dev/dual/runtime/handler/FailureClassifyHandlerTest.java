@@ -378,7 +378,10 @@ class FailureClassifyHandlerTest {
         var contract = new TaskContract(
                 "tc-test", 1, Instant.parse("2026-05-30T10:00:00Z"),
                 "Test objective",
-                new TaskContract.Scope(List.of("src/"), List.of()),
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry(
+                                "src/", TaskContract.ScopeOperation.MODIFY)),
+                        List.of()),
                 List.of("AC1"),  // Only 1 AC → triggers CONTRACT_AMBIGUITY (Rule 2) when no gaps
                 List.of(), List.of(), List.of(), List.of(),
                 List.of("ambiguous requirement"),  // ambiguity notes → also Rule 2
@@ -393,7 +396,10 @@ class FailureClassifyHandlerTest {
         var contract = new TaskContract(
                 "tc-clean", 1, Instant.parse("2026-05-30T10:00:00Z"),
                 "Clean objective",
-                new TaskContract.Scope(List.of("src/"), List.of()),
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry(
+                                "src/", TaskContract.ScopeOperation.MODIFY)),
+                        List.of()),
                 List.of("AC1: must work", "AC2: no regressions"),  // 2 AC items — no ambiguity
                 List.of(), List.of(), List.of(), List.of(),
                 List.of(),  // no ambiguity notes

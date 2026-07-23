@@ -533,7 +533,10 @@ class AgentPromptRendererTest {
                 {
                   "artifact_type": "task_contract_proposal",
                   "objective": "KEEP_THIS_COMPLETE_REQUIRED_OBJECTIVE",
-                  "scope": {"included": ["README.md"], "excluded": []}
+                  "scope": {
+                    "included": [{"path": "README.md", "operation": "MODIFY"}],
+                    "excluded": []
+                  }
                 }
                 ```
                 """.formatted("x".repeat(7_000)));
@@ -554,7 +557,8 @@ class AgentPromptRendererTest {
                 .orElseThrow();
         assertTrue(required.required());
         assertEquals("context_package", required.sourceType());
-        assertTrue(required.content().contains("\"included\": [\"README.md\"]"));
+        assertTrue(required.content().contains(
+                "\"included\": [{\"path\": \"README.md\", \"operation\": \"MODIFY\"}]"));
     }
 
 

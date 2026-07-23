@@ -85,9 +85,12 @@ class BuiltinHandlerTest {
         var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, "ws", """
                 {
                   "artifact_type": "task_contract_proposal",
-                  "schema_version": 1,
+                  "schema_version": 2,
                   "objective": "Review an exact proposal",
-                  "scope": {"included": ["README.md"], "excluded": []},
+                  "scope": {
+                    "included": [{"path": "README.md", "operation": "MODIFY"}],
+                    "excluded": []
+                  },
                   "acceptance_criteria": ["The approved proposal is unambiguous"],
                   "constraints": ["Keep the change bounded"],
                   "non_goals": [],
@@ -153,7 +156,10 @@ class BuiltinHandlerTest {
                   "created_at": "2026-06-03T00:00:00Z",
                   "objective": "Improve treatment record empty state",
                   "scope": {
-                    "included": ["miniprogram/src/pages/record/index.vue"],
+                    "included": [{
+                      "path": "miniprogram/src/pages/record/index.vue",
+                      "operation": "MODIFY"
+                    }],
                     "excluded": ["backend/"]
                   },
                   "acceptance_criteria": ["Shows an empty state", "Does not change backend"],

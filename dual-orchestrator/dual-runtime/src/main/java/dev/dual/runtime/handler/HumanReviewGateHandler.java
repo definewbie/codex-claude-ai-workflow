@@ -262,7 +262,13 @@ public final class HumanReviewGateHandler implements GateHandler {
         var document = contract.get();
         summary.put("objective", document.objective());
         summary.put("status", text(document.status()));
-        summary.put("includedScope", document.scope() == null ? List.of() : document.scope().included());
+        summary.put("includedScope", document.scope() == null
+                ? List.of()
+                : document.scope().included().stream()
+                        .map(entry -> Map.of(
+                                "path", entry.path(),
+                                "operation", entry.operation().name()))
+                        .toList());
         summary.put("excludedScope", document.scope() == null ? List.of() : document.scope().excluded());
         summary.put("acceptanceCriteria", document.acceptanceCriteria());
         summary.put("testRequirements", document.testRequirements());

@@ -106,18 +106,21 @@ public final class ArtifactContractValidator {
             }
             var semanticFailure = validateAgentResult(root, parsed.envelope());
             if (semanticFailure != null) {
-                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, semanticFailure);
+                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
+                        parsed.envelope(), semanticFailure);
             }
             var rereadCoverageFailure = validateRereadCoverage(root, workstreamId, nodeDefinition, result, parsed.envelope());
             if (rereadCoverageFailure != null) {
-                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref, rereadCoverageFailure);
+                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
+                        parsed.envelope(), rereadCoverageFailure);
             }
             return withResultSidecars(
                     root, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result, contract,
                     parsed.envelope(), ref, path
             );
         }
-        return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract, lastSourceRef, lastInvalid);
+        return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result, contract,
+                lastSourceRef, null, lastInvalid);
     }
 
     private ContractViolation validateAgentResult(Path root, AgentResultEnvelope envelope) {
@@ -126,7 +129,7 @@ public final class ArtifactContractValidator {
             var errors = new TaskContractProposalValidator().validate(proposal, root);
             if (!errors.isEmpty()) {
                 return ContractViolation.of(
-                        "AGENT_RESULT_CONTRACT_VIOLATION",
+                        "TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED",
                         "task_contract_proposal failed mechanical validation: " + errors,
                         Map.of("errors", errors)
                 );
@@ -153,6 +156,7 @@ public final class ArtifactContractValidator {
         if (!requiredReviewSubject.isBlank()) {
             if (!"task_contract_proposal".equals(requiredReviewSubject)) {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                        envelope,
                         ContractViolation.of("REVIEW_SUBJECT_UNSUPPORTED",
                                 "unsupported review_subject_artifact: " + requiredReviewSubject,
                                 Map.of("review_subject_artifact", requiredReviewSubject)));
@@ -161,6 +165,7 @@ public final class ArtifactContractValidator {
                     root, workstreamId, inputRefs, OBJECT_MAPPER);
             if (reviewSubject.isEmpty()) {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                        envelope,
                         ContractViolation.of("REVIEW_SUBJECT_MISSING",
                                 "exactly one validated task_contract_proposal reference is required",
                                 Map.of("review_subject_artifact", requiredReviewSubject)));
@@ -172,6 +177,7 @@ public final class ArtifactContractValidator {
         var semanticFailure = AgentContractSemantics.validateOutputContract(validatedDocument);
         if (semanticFailure.isPresent()) {
             return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                    envelope,
                     semanticFailure.get());
         }
 
@@ -205,6 +211,7 @@ public final class ArtifactContractValidator {
         var explorationFailure = refreshExplorationPolicyProjection(root, result, validatedDocument);
         if (explorationFailure.isPresent()) {
             return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                    envelope,
                     explorationFailure.get());
         }
 
@@ -440,6 +447,7 @@ public final class ArtifactContractValidator {
             NodeResult result,
             NodeOutputContract contract,
             String sourceOutputRef,
+            AgentResultEnvelope validatedEnvelope,
             ContractViolation lastInvalid
     ) throws Exception {
         var reason = lastInvalid == null
@@ -489,10 +497,18 @@ public final class ArtifactContractValidator {
                 outputRefs,
                 failed,
                 message
-        ), terminalResultFor(reason, message), List.of(artifactResultFor(nodeDefinition, reason, message)), null);
+        ), terminalResultFor(reason, message, validatedEnvelope),
+                List.of(artifactResultFor(nodeDefinition, reason, message, validatedEnvelope)), null);
     }
 
-    private static AgentResultContractResult terminalResultFor(String reason, String message) {
+    private static AgentResultContractResult terminalResultFor(
+            String reason,
+            String message,
+            AgentResultEnvelope validatedEnvelope
+    ) {
+        if (validatedEnvelope != null) {
+            return AgentResultContractResult.valid(validatedEnvelope.result().decision());
+        }
         if (reason == null || reason.isBlank() || "AGENT_RESULT_MISSING".equals(reason)) {
             return AgentResultContractResult.missing();
         }
@@ -502,8 +518,20 @@ public final class ArtifactContractValidator {
     private static ArtifactContractResult artifactResultFor(
             NodeDefinition nodeDefinition,
             String reason,
-            String message
+            String message,
+            AgentResultEnvelope validatedEnvelope
     ) {
+        if (validatedEnvelope != null) {
+            return new ArtifactContractResult(
+                    requiredArtifactTypeOrDefault(nodeDefinition),
+                    true,
+                    true,
+                    false,
+                    "",
+                    reason,
+                    message
+            );
+        }
         if (reason != null && (reason.startsWith("AGENT_RESULT_") && !"AGENT_RESULT_MISSING".equals(reason))) {
             return new ArtifactContractResult(
                     requiredArtifactTypeOrDefault(nodeDefinition),

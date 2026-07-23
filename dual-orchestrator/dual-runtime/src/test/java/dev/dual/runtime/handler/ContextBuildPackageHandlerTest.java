@@ -807,9 +807,12 @@ class ContextBuildPackageHandlerTest {
                   "summary": "Proposal ready",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "objective": "Review it",
-                    "scope": {"included": ["README.md"], "excluded": []},
+                    "scope": {
+                      "included": [{"path": "README.md", "operation": "MODIFY"}],
+                      "excluded": []
+                    },
                     "acceptance_criteria": ["Reviewed"],
                     "test_requirements": ["Inspect"],
                     "constraints": [],
@@ -835,7 +838,8 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("## Required Review Subject"));
         assertTrue(markdown.contains("\"objective\" : \"Review it\""));
-        assertTrue(markdown.contains("\"included\" : [ \"README.md\" ]"));
+        assertTrue(markdown.contains("\"path\" : \"README.md\""));
+        assertTrue(markdown.contains("\"operation\" : \"MODIFY\""));
         assertTrue(markdown.contains("\"acceptance_criteria\" : [ \"Reviewed\" ]"));
         assertTrue(markdown.contains(published.reference().sha256()));
     }
@@ -855,9 +859,12 @@ class ContextBuildPackageHandlerTest {
                   "summary": "Proposal ready",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "objective": "Original objective",
-                    "scope": {"included": ["README.md"], "excluded": []},
+                    "scope": {
+                      "included": [{"path": "README.md", "operation": "MODIFY"}],
+                      "excluded": []
+                    },
                     "acceptance_criteria": ["Reviewed", "Approved"],
                     "test_requirements": ["Inspect"],
                     "constraints": [],
@@ -1113,7 +1120,7 @@ class ContextBuildPackageHandlerTest {
                   "created_at": "2026-06-03T00:00:00Z",
                   "objective": "Add review status",
                   "scope": {
-                    "included": ["src/issueWorkflow.js"],
+                    "included": [{"path": "src/issueWorkflow.js", "operation": "MODIFY"}],
                     "excluded": ["No external dependencies"]
                   },
                   "acceptance_criteria": ["Criterion one", "Criterion two"],
@@ -1433,7 +1440,10 @@ class ContextBuildPackageHandlerTest {
                   "created_at": "2026-06-21T00:00:00Z",
                   "objective": "Keep review evidence scoped.",
                   "status": "READY_FOR_REVIEW",
-                  "scope": {"included": ["docs/design.md"], "excluded": []},
+                  "scope": {
+                    "included": [{"path": "docs/design.md", "operation": "MODIFY"}],
+                    "excluded": []
+                  },
                   "acceptance_criteria": ["Reviewer sees evidence brief"],
                   "test_requirements": [],
                   "non_goals": [],
@@ -1510,7 +1520,16 @@ class ContextBuildPackageHandlerTest {
                   "objective": "Update treatment record upload flow.",
                   "status": "READY_FOR_REVIEW",
                   "scope": {
-                    "included": ["miniprogram/src/pages/treatment-record/index.vue"],
+                    "included": [
+                      {
+                        "path": "miniprogram/src/pages/treatment-record/index.vue",
+                        "operation": "MODIFY"
+                      },
+                      {
+                        "path": "miniprogram/src/api/treatmentRecord.ts",
+                        "operation": "CREATE"
+                      }
+                    ],
                     "excluded": ["backend API changes"]
                   },
                   "acceptance_criteria": ["Upload entry remains visible"],
@@ -1585,7 +1604,8 @@ class ContextBuildPackageHandlerTest {
         assertEquals("ctx.test", plan.get("builderNodeDefinitionId"));
         assertEquals("next.node", plan.get("targetNodeDefinitionId"));
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
-                        && candidates.contains("miniprogram/src/pages/treatment-record/index.vue"),
+                        && candidates.contains("miniprogram/src/pages/treatment-record/index.vue")
+                        && candidates.contains("miniprogram/src/api/treatmentRecord.ts"),
                 "file relevance plan should preserve task-contract file scope");
         assertTrue(plan.get("previouslyReadFiles") instanceof List<?> previousReads
                         && previousReads.contains("miniprogram/src/pages/treatment-record/index.vue"),
@@ -1600,7 +1620,8 @@ class ContextBuildPackageHandlerTest {
         assertEquals("ctx.test", policy.get("builderNodeDefinitionId"));
         assertEquals("next.node", policy.get("targetNodeDefinitionId"));
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
-                        && writeScope.contains("miniprogram/src/pages/treatment-record/index.vue"),
+                        && writeScope.contains("miniprogram/src/pages/treatment-record/index.vue")
+                        && writeScope.contains("miniprogram/src/api/treatmentRecord.ts"),
                 "implementation policy should expose scoped writable files");
         assertTrue(policy.get("readReusePolicy") instanceof Map<?, ?> reusePolicy
                         && Boolean.TRUE.equals(reusePolicy.get("preferExistingEvidence")),
@@ -1859,9 +1880,12 @@ class ContextBuildPackageHandlerTest {
                   "summary": "Proposal ready",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "objective": "%s",
-                    "scope": {"included": ["README.md"], "excluded": []},
+                    "scope": {
+                      "included": [{"path": "README.md", "operation": "MODIFY"}],
+                      "excluded": []
+                    },
                     "acceptance_criteria": ["Review the proposal", "Record a decision"],
                     "test_requirements": ["Inspect README.md"],
                     "constraints": [],

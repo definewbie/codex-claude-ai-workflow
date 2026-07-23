@@ -106,9 +106,17 @@ class WorkstreamMemoryUpdaterTest {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-scope");
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
-                {"objective":"o","status":"active",
-                 "scope":{"included":["add login","refresh token"],"excluded":["billing"]},
-                 "non_goals":["SSO"],"acceptance_criteria":[],"constraints":[],"risk_areas":[]}
+                {
+                  "id":"task-ws-scope","version":1,"created_at":"2026-07-23T00:00:00Z",
+                  "objective":"o","status":"READY_FOR_REVIEW",
+                  "scope":{"included":[
+                    {"path":"src/login.js","operation":"MODIFY"},
+                    {"path":"src/refreshToken.js","operation":"CREATE"}
+                  ],"excluded":["billing"]},
+                  "non_goals":["SSO"],"acceptance_criteria":[],"test_requirements":[],
+                  "constraints":[],"risk_areas":[],"ambiguity_notes":[],"human_questions":[],
+                  "compilation_pass":1
+                }
                 """, StandardCharsets.UTF_8);
 
         var updater = new WorkstreamMemoryUpdater();
@@ -116,7 +124,7 @@ class WorkstreamMemoryUpdaterTest {
                 "implement", "claude", null, AcpxToolUsage.empty(), null);
 
         var memory = objectMapper.readValue(updater.memoryPath(tempDir, "ws-scope").toFile(), Map.class);
-        assertEquals(List.of("add login", "refresh token"), memory.get("decidedScope"));
+        assertEquals(List.of("src/login.js", "src/refreshToken.js"), memory.get("decidedScope"));
         assertEquals(List.of("SSO"), memory.get("nonGoals"));
     }
 
@@ -220,8 +228,14 @@ class WorkstreamMemoryUpdaterTest {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-summary");
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
-                {"objective":"o","status":"READY_FOR_REVIEW","scope":{"included":["refresh token on expiry"]},
-                 "non_goals":[],"acceptance_criteria":["tokens must refresh"],"constraints":[],"risk_areas":[]}
+                {
+                  "id":"task-ws-summary","version":1,"created_at":"2026-07-23T00:00:00Z",
+                  "objective":"o","status":"READY_FOR_REVIEW",
+                  "scope":{"included":[{"path":"src/auth.js","operation":"MODIFY"}],"excluded":[]},
+                  "non_goals":[],"acceptance_criteria":["refresh token on expiry"],
+                  "test_requirements":[],"constraints":[],"risk_areas":[],
+                  "ambiguity_notes":[],"human_questions":[],"compilation_pass":1
+                }
                 """);
         Files.createDirectories(tempDir.resolve("src"));
         Files.createDirectories(tempDir.resolve("docs"));

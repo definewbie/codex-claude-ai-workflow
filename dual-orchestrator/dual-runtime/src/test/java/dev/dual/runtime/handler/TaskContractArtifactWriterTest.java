@@ -23,7 +23,10 @@ class TaskContractArtifactWriterTest {
                 1,
                 Instant.parse("2026-05-30T12:00:00Z"),
                 "Implement user login feature",
-                new TaskContract.Scope(List.of("src/auth/Login.java"), List.of("legacy/")),
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry(
+                                "src/auth/Login.java", TaskContract.ScopeOperation.MODIFY)),
+                        List.of("legacy/")),
                 List.of("Login page renders", "Authentication works"),
                 List.of(),
                 List.of("Max 200 lines per file"),

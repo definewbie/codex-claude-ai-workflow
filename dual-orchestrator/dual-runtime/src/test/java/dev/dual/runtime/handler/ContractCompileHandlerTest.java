@@ -3,6 +3,7 @@ package dev.dual.runtime.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -60,16 +61,81 @@ class ContractCompileHandlerTest {
         prepare(root);
         Files.createDirectories(root.resolve("src"));
         Files.writeString(root.resolve("src/issueWorkflow.js"), "export {}\n");
-        var proposalRef = writeProposal(root, "run-001", "Add mandatory READY_FOR_REVIEW status",
-                List.of("src/issueWorkflow.js"), List.of());
+        var proposalRef = writeTypedProposal(
+                root,
+                "run-001",
+                "Add mandatory READY_FOR_REVIEW status",
+                List.of(
+                        new TaskContract.ScopeEntry(
+                                "src/issueWorkflow.js", TaskContract.ScopeOperation.MODIFY),
+                        new TaskContract.ScopeEntry(
+                                "src/issueApi.js", TaskContract.ScopeOperation.CREATE)),
+                List.of(),
+                TaskContractProposal.SCHEMA_VERSION);
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review", true);
 
         var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
-        var json = Files.readString(contractPath(root));
-        assertTrue(json.contains("Add mandatory READY_FOR_REVIEW status"));
-        assertTrue(json.contains("src/issueWorkflow.js"));
+        var contract = OBJECT_MAPPER.readValue(contractPath(root).toFile(), TaskContract.class);
+        assertEquals("Add mandatory READY_FOR_REVIEW status", contract.objective());
+        assertEquals(List.of(
+                new TaskContract.ScopeEntry(
+                        "src/issueWorkflow.js", TaskContract.ScopeOperation.MODIFY),
+                new TaskContract.ScopeEntry(
+                        "src/issueApi.js", TaskContract.ScopeOperation.CREATE)), contract.scope().included());
+    }
+
+    @Test
+    void legacyV1ProposalSidecarIsExplicitlyRejected(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeTypedProposal(
+                root,
+                "run-v1",
+                "Legacy proposal",
+                List.of(new TaskContract.ScopeEntry(
+                        "README.md", TaskContract.ScopeOperation.MODIFY)),
+                List.of(),
+                1);
+        var reviewRef = writeApprovedReview(root, proposalRef, "run-review-v1", true);
+
+        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
+        assertTrue(String.valueOf(result.result().get("validation_errors"))
+                .contains("schema_version must be 2"));
+        assertFalse(Files.exists(contractPath(root)));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void v2ProposalWithLegacyStringScopeIsExplicitlyRejected(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeTypedProposal(
+                root,
+                "run-v2-string-scope",
+                "Malformed v2 proposal",
+                List.of(new TaskContract.ScopeEntry(
+                        "README.md", TaskContract.ScopeOperation.MODIFY)),
+                List.of(),
+                TaskContractProposal.SCHEMA_VERSION);
+        var proposalPath = root.resolve(proposalRef);
+        var proposalDocument = OBJECT_MAPPER.readValue(proposalPath.toFile(), Map.class);
+        var proposal = (Map<String, Object>) proposalDocument.get("task_contract_proposal");
+        var scope = (Map<String, Object>) proposal.get("scope");
+        scope.put("included", List.of("README.md"));
+        OBJECT_MAPPER.writeValue(proposalPath.toFile(), proposalDocument);
+        AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, proposalPath);
+        var reviewRef = writeApprovedReview(root, proposalRef, "run-review-v2-string-scope", true);
+
+        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
+        var validationErrors = String.valueOf(result.result().get("validation_errors"));
+        assertTrue(validationErrors.contains("scope.included contains blank path"), validationErrors);
+        assertFalse(Files.exists(contractPath(root)));
     }
 
     @Test
@@ -152,21 +218,47 @@ class ContractCompileHandlerTest {
             List<String> included,
             List<String> questions
     ) throws Exception {
+        return writeTypedProposal(
+                root,
+                runId,
+                objective,
+                included.stream()
+                        .map(path -> new TaskContract.ScopeEntry(
+                                path, TaskContract.ScopeOperation.MODIFY))
+                        .toList(),
+                questions,
+                TaskContractProposal.SCHEMA_VERSION);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String writeTypedProposal(
+            Path root,
+            String runId,
+            String objective,
+            List<TaskContract.ScopeEntry> included,
+            List<String> questions,
+            int proposalSchemaVersion
+    ) throws Exception {
         var directory = outputDir(root, runId);
         var envelope = new AgentResultEnvelope(
                 1, WORKSTREAM_ID, runId, "intake.claude_brainstorm",
                 new AgentResultEnvelope.TaskContractProposalResult(
                         "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "proposal ready", false,
-                        objective, new AgentResultEnvelope.ProposalScope(included, List.of("No unrelated changes")),
+                        objective, new AgentResultEnvelope.ProposalScope(
+                                included,
+                                List.of("No unrelated changes")),
                         List.of("The requested behavior is observable", "Focused verification passes"),
                         List.of("Run focused verification"), List.of("Keep the change scoped"),
-                        List.of("No unrelated refactor"), List.of("Regression risk"), included, questions));
+                        List.of("No unrelated refactor"), List.of("Regression risk"),
+                        included.stream().map(TaskContract.ScopeEntry::path).toList(), questions));
         var output = directory.resolve("intake-claude-brainstorm.json");
         var outputRef = relative(root, output);
         Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
         var document = new AgentResultDocumentProjector().outputContract(
                 envelope, ContractRegistry.forNode("intake.claude_brainstorm"), "acpx.agent_run",
                 "inst-intake-" + runId, outputRef);
+        ((Map<String, Object>) document.get("task_contract_proposal"))
+                .put("schema_version", proposalSchemaVersion);
         AgentContractSemantics.addSidecarFields(document);
         var sidecar = AgentOutputContractSidecar.pathFor(output);
         Files.writeString(sidecar, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document));

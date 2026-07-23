@@ -41,10 +41,10 @@ class ContractLifecycleLedgerTest {
         var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, WORKSTREAM_ID, """
                 {
                   "artifact_type": "task_contract_proposal",
-                  "schema_version": 1,
+                  "schema_version": 2,
                   "objective": "Add user authentication with JWT tokens",
                   "scope": {
-                    "included": ["README.md"],
+                    "included": [{"path": "README.md", "operation": "MODIFY"}],
                     "excluded": ["No external dependencies"]
                   },
                   "acceptance_criteria": [

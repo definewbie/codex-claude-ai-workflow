@@ -50,13 +50,23 @@ public record TaskContract(
     }
 
     public record Scope(
-            List<String> included,
+            List<ScopeEntry> included,
             List<String> excluded
     ) {
         public Scope {
             included = included == null ? List.of() : List.copyOf(included);
             excluded = excluded == null ? List.of() : List.copyOf(excluded);
         }
+    }
+
+    public record ScopeEntry(
+            String path,
+            ScopeOperation operation
+    ) {}
+
+    public enum ScopeOperation {
+        MODIFY,
+        CREATE
     }
 
     public record Source(

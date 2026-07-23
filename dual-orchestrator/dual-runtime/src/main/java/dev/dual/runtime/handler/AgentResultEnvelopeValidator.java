@@ -66,6 +66,7 @@ public final class AgentResultEnvelopeValidator {
                 } else {
                     requiredList(proposal.scope().included(), "result.scope.included", true, errors);
                     requiredList(proposal.scope().excluded(), "result.scope.excluded", false, errors);
+                    validateScopeEntries(proposal.scope().included(), errors);
                 }
                 requiredList(proposal.acceptanceCriteria(), "result.acceptance_criteria", true, errors);
                 requiredList(proposal.testRequirements(), "result.test_requirements", true, errors);
@@ -124,6 +125,25 @@ public final class AgentResultEnvelopeValidator {
                 requiredList(handoff.openRisks(), "result.open_risks", false, errors);
                 requiredText(handoff.recommendedNextStage(), "result.recommended_next_stage", errors);
                 requiredText(handoff.suggestedNextPrompt(), "result.suggested_next_prompt", errors);
+            }
+        }
+    }
+
+    private static void validateScopeEntries(
+            List<dev.dual.core.contract.TaskContract.ScopeEntry> entries,
+            List<String> errors
+    ) {
+        if (entries == null) {
+            return;
+        }
+        for (var entry : entries) {
+            if (entry == null) {
+                errors.add("result.scope.included contains null entry");
+                continue;
+            }
+            requiredText(entry.path(), "result.scope.included.path", errors);
+            if (entry.operation() == null) {
+                errors.add("result.scope.included.operation is required");
             }
         }
     }

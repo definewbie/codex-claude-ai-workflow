@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import dev.dual.core.contract.TaskContract;
+
 final class TaskContractProposalValidator {
     private static final Pattern SUPPORTED_FILE_REF = Pattern.compile("(?i).+\\.(md|txt|json|ya?ml|vue|ts|js|java|py|sh)$");
 
@@ -15,8 +17,8 @@ final class TaskContractProposalValidator {
         if (!"task_contract_proposal".equals(proposal.artifactType())) {
             errors.add("artifact_type must be task_contract_proposal");
         }
-        if (proposal.schemaVersion() != 1) {
-            errors.add("schema_version must be 1");
+        if (proposal.schemaVersion() != TaskContractProposal.SCHEMA_VERSION) {
+            errors.add("schema_version must be " + TaskContractProposal.SCHEMA_VERSION);
         }
         if (isBlank(proposal.objective())) {
             errors.add("objective must not be blank");
@@ -24,7 +26,7 @@ final class TaskContractProposalValidator {
         if (proposal.scope() == null) {
             errors.add("scope must not be null");
         } else {
-            validateList("scope.included", proposal.scope().included(), true, errors);
+            validateScopeEntries(proposal.scope().included(), errors);
             validateList("scope.excluded", proposal.scope().excluded(), false, errors);
             if (proposal.scope().included() != null) {
                 for (var ref : proposal.scope().included()) {
@@ -81,8 +83,37 @@ final class TaskContractProposalValidator {
             }
         }
         for (var included : scope.included()) {
-            if (!isBlank(included) && excluded.contains(included.trim().toLowerCase())) {
-                errors.add("scope.included overlaps scope.excluded: " + included);
+            if (included != null
+                    && !isBlank(included.path())
+                    && excluded.contains(included.path().trim().toLowerCase())) {
+                errors.add("scope.included overlaps scope.excluded: " + included.path());
+            }
+        }
+    }
+
+    private static void validateScopeEntries(
+            List<TaskContract.ScopeEntry> entries,
+            List<String> errors
+    ) {
+        if (entries == null || entries.isEmpty()) {
+            errors.add("scope.included must not be empty");
+            return;
+        }
+        var seen = new HashSet<String>();
+        for (var entry : entries) {
+            if (entry == null) {
+                errors.add("scope.included contains null entry");
+                continue;
+            }
+            if (isBlank(entry.path())) {
+                errors.add("scope.included contains blank path");
+                continue;
+            }
+            if (entry.operation() == null) {
+                errors.add("scope.included operation is required: " + entry.path());
+            }
+            if (!seen.add(entry.path().trim().toLowerCase())) {
+                errors.add("scope.included contains duplicate path: " + entry.path());
             }
         }
     }
@@ -94,36 +125,42 @@ final class TaskContractProposalValidator {
         return (int) values.stream().filter(value -> !isBlank(value)).count();
     }
 
-    private static void validateWorkspacePathRef(String ref, Path workspaceRoot, List<String> errors) {
-        if (isBlank(ref)) {
+    private static void validateWorkspacePathRef(
+            TaskContract.ScopeEntry ref,
+            Path workspaceRoot,
+            List<String> errors
+    ) {
+        if (ref == null || isBlank(ref.path())) {
             errors.add("scope.included contains blank file ref");
             return;
         }
-        if (containsMetadataNoise(ref)) {
-            errors.add("scope.included contains ledger/context metadata: " + ref);
+        if (containsMetadataNoise(ref.path())) {
+            errors.add("scope.included contains ledger/context metadata: " + ref.path());
             return;
         }
-        var normalizedRef = normalizeNewRef(ref);
+        if (ref.path().startsWith("new:")) {
+            errors.add("scope.included legacy new: prefix is not allowed: " + ref.path());
+            return;
+        }
+        var normalizedRef = ref.path().trim();
         var path = workspaceRoot.resolve(normalizedRef).normalize();
         if (!path.startsWith(workspaceRoot.toAbsolutePath().normalize()) && workspaceRoot.isAbsolute()) {
-            errors.add("scope.included escapes workspace root: " + ref);
+            errors.add("scope.included escapes workspace root: " + ref.path());
             return;
         }
-        if (Files.isDirectory(path)) {
+        if (ref.operation() == TaskContract.ScopeOperation.MODIFY && Files.isDirectory(path)) {
             return;
         }
         if (!SUPPORTED_FILE_REF.matcher(normalizedRef).matches()) {
-            errors.add("scope.included is not a supported workspace path: " + ref);
+            errors.add("scope.included is not a supported workspace path: " + ref.path());
             return;
         }
-        if (!Files.exists(path) && !ref.startsWith("new:")) {
-            errors.add("scope.included file does not exist and is not marked as new: " + ref);
+        if (ref.operation() == TaskContract.ScopeOperation.MODIFY && !Files.exists(path)) {
+            errors.add("scope.included MODIFY path does not exist: " + ref.path());
         }
-    }
-
-    private static String normalizeNewRef(String ref) {
-        var trimmed = ref.trim();
-        return trimmed.startsWith("new:") ? trimmed.substring("new:".length()).trim() : trimmed;
+        if (ref.operation() == TaskContract.ScopeOperation.CREATE && Files.exists(path)) {
+            errors.add("scope.included CREATE path already exists: " + ref.path());
+        }
     }
 
     private static boolean isBlank(String value) {

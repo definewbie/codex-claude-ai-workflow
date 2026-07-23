@@ -1779,8 +1779,14 @@ class AcpxAgentTaskHandlerTest {
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("requirement.md"), "Ship token refresh.\n");
         Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
-                {"objective":"o","status":"active","scope":{"included":["token refresh"],"excluded":[]},
-                 "nonGoals":["SSO"],"acceptanceCriteria":["tokens refresh"],"constraints":[],"riskAreas":[]}
+                {
+                  "id":"task-ws-sem-run","version":1,"created_at":"2026-07-23T00:00:00Z",
+                  "objective":"o","status":"READY_FOR_REVIEW",
+                  "scope":{"included":[{"path":"src/tokenRefresh.js","operation":"CREATE"}],"excluded":[]},
+                  "non_goals":["SSO"],"acceptance_criteria":["tokens refresh"],
+                  "test_requirements":[],"constraints":[],"risk_areas":[],
+                  "ambiguity_notes":[],"human_questions":[],"compilation_pass":1
+                }
                 """);
 
         var handler = new AcpxAgentTaskHandler(new RejectionEnvelopeTransport(), false);
@@ -1791,7 +1797,7 @@ class AcpxAgentTaskHandlerTest {
                 readyInstance("design.codex_arch_review")));
 
         var memory = Files.readString(workstreamDir.resolve("memory/workstream-memory.json"));
-        assertTrue(memory.contains("token refresh"), "decidedScope must come from task-contract: " + memory);
+        assertTrue(memory.contains("src/tokenRefresh.js"), "decidedScope must come from task-contract: " + memory);
         assertFalse(memory.contains("NEEDS_REVISION"), "unvalidated decision must not enter memory: " + memory);
         assertFalse(memory.contains("refresh token on expiry"), "unvalidated issue must not enter memory: " + memory);
     }

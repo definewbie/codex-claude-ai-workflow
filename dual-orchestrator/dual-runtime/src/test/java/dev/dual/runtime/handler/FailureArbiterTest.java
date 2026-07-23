@@ -359,7 +359,12 @@ class FailureArbiterTest {
         return new TaskContract(
                 "tc-test", 1, Instant.parse("2026-05-30T10:00:00Z"),
                 "Test objective",
-                new TaskContract.Scope(included, List.of()),
+                new TaskContract.Scope(
+                        included.stream()
+                                .map(path -> new TaskContract.ScopeEntry(
+                                        path, TaskContract.ScopeOperation.MODIFY))
+                                .toList(),
+                        List.of()),
                 acceptanceCriteria, List.of(), List.of(), List.of(), List.of(),
                 ambiguityNotes, List.of(),
                 ContractStatus.READY_FOR_REVIEW, 1,

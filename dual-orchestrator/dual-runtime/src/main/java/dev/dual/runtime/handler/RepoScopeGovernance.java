@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.runtime.governance.AgentCapabilityCatalog;
 import dev.dual.runtime.governance.ExplorationPlan;
 
@@ -640,12 +641,13 @@ final class RepoScopeGovernance {
         if (!Files.isRegularFile(contractPath)) {
             return;
         }
-        var json = objectMapper.readValue(contractPath.toFile(), MAP_TYPE);
-        var scope = mapValue(json.get("scope"));
-        for (var item : textList(scope.get("included"))) {
-            addPathCandidate(candidates, item);
+        var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
+        if (contract.scope() != null) {
+            for (var item : contract.scope().included()) {
+                addPathCandidate(candidates, item.path());
+            }
         }
-        for (var item : textList(json.get("acceptance_criteria"))) {
+        for (var item : contract.acceptanceCriteria()) {
             addPathCandidate(candidates, item);
         }
     }

@@ -34,7 +34,7 @@ final class ContextPackageSectionRenderer {
         if (contract.scope() != null) {
             builder.append("**Scope Included:**\n");
             for (var item : contract.scope().included()) {
-                builder.append("- ").append(item).append("\n");
+                builder.append("- ").append(item.operation()).append(": ").append(item.path()).append("\n");
             }
             builder.append("\n**Scope Excluded:**\n");
             for (var item : contract.scope().excluded()) {

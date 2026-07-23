@@ -23,9 +23,8 @@ public final class TaskContractValidator {
         if (contract.scope() == null) {
             errors.add("scope must not be null");
         } else {
-            validateList("scope.included", contract.scope().included(), errors);
-            validateList("scope.excluded", contract.scope().excluded(), errors);
             validateIncludedRefs(contract.scope().included(), errors);
+            validateList("scope.excluded", contract.scope().excluded(), errors);
             validateScopeOverlap(contract.scope(), errors);
         }
 
@@ -63,13 +62,31 @@ public final class TaskContractValidator {
         return errors;
     }
 
-    private static void validateIncludedRefs(List<String> refs, List<String> errors) {
+    private static void validateIncludedRefs(List<TaskContract.ScopeEntry> refs, List<String> errors) {
+        var seen = new HashSet<String>();
         for (var ref : refs) {
-            if (ref == null || ref.isBlank()) {
+            if (ref == null) {
+                errors.add("scope.included contains null entry");
                 continue;
             }
-            if (!ref.startsWith("new:") && !FILE_REF.matcher(ref).matches()) {
-                errors.add("scope.included is not a supported file path: " + ref);
+            if (ref.path() == null || ref.path().isBlank()) {
+                errors.add("scope.included contains blank path");
+                continue;
+            }
+            if (ref.operation() == null) {
+                errors.add("scope.included operation is required: " + ref.path());
+            }
+            if (ref.path().startsWith("new:")) {
+                errors.add("scope.included legacy new: prefix is not allowed: " + ref.path());
+            }
+            if (!FILE_REF.matcher(ref.path()).matches()) {
+                errors.add("scope.included is not a supported file path: " + ref.path());
+            }
+            if (containsMetadataNoise(ref.path())) {
+                errors.add("scope.included contains ledger/context metadata: " + ref.path());
+            }
+            if (!seen.add(normalized(ref.path()))) {
+                errors.add("scope.included contains duplicate path: " + ref.path());
             }
         }
     }
@@ -80,8 +97,8 @@ public final class TaskContractValidator {
             excluded.add(normalized(value));
         }
         for (var included : scope.included()) {
-            if (excluded.contains(normalized(included))) {
-                errors.add("scope.included overlaps scope.excluded: " + included);
+            if (included != null && excluded.contains(normalized(included.path()))) {
+                errors.add("scope.included overlaps scope.excluded: " + included.path());
             }
         }
     }

@@ -82,7 +82,10 @@ class ContextTaskContractSectionTest {
 
         var contract = new TaskContract(
                 "tc-001", 1, Instant.now(), "Test objective",
-                new TaskContract.Scope(List.of("file1.java"), List.of("file2.java")),
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry(
+                                "file1.java", TaskContract.ScopeOperation.MODIFY)),
+                        List.of("file2.java")),
                 List.of("AC1", "AC2"),
                 List.of("TR1"),
                 List.of("Use Java"),

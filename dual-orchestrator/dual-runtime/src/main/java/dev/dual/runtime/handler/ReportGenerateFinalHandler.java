@@ -106,7 +106,11 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
             builder.append("- **Contract ID:** ").append(contract.id()).append("\n");
             builder.append("- **Objective:** ").append(contract.objective()).append("\n");
             builder.append("- **Status:** ").append(contract.status()).append("\n");
-            builder.append("- **Scope Included:** ").append(contract.scope().included().isEmpty() ? "(none)" : String.join(", ", contract.scope().included())).append("\n");
+            builder.append("- **Scope Included:** ").append(contract.scope().included().isEmpty()
+                    ? "(none)"
+                    : contract.scope().included().stream()
+                            .map(item -> item.operation() + ": " + item.path())
+                            .collect(java.util.stream.Collectors.joining(", "))).append("\n");
             builder.append("- **Scope Excluded:** ").append(contract.scope().excluded().isEmpty() ? "(none)" : String.join(", ", contract.scope().excluded())).append("\n");
             builder.append("- **Acceptance Criteria:** ").append(contract.acceptanceCriteria().size()).append(" items").append("\n");
             builder.append("- **Non-Goals:** ").append(contract.nonGoals().isEmpty() ? "(none)" : String.join(", ", contract.nonGoals())).append("\n");

@@ -455,7 +455,10 @@ class WorkflowIntegrationTest {
                   "version": 1,
                   "created_at": "2026-05-28T09:00:00Z",
                   "objective": "Test objective",
-                  "scope": { "included": ["src/"], "excluded": [] },
+                  "scope": {
+                    "included": [{"path": "src/", "operation": "MODIFY"}],
+                    "excluded": []
+                  },
                   "acceptance_criteria": ["AC1"],
                   "test_requirements": [],
                   "constraints": [],

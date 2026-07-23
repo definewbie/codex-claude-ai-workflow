@@ -342,7 +342,7 @@ class ReportGenerateFinalHandlerTest {
                   "created_at": "2026-06-03T00:00:00Z",
                   "objective": "%s",
                   "scope": {
-                    "included": ["src/issueWorkflow.js"],
+                    "included": [{"path": "src/issueWorkflow.js", "operation": "MODIFY"}],
                     "excluded": ["No external dependencies"]
                   },
                   "acceptance_criteria": ["Criterion one", "Criterion two"],

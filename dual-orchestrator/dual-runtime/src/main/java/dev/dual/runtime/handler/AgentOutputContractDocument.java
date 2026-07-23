@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.contract.TaskContract;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -142,7 +143,7 @@ public record AgentOutputContractDocument(
                 integerValue(document.get("schema_version")),
                 text(document.get("objective")),
                 new TaskContractProposal.Scope(
-                        stringList(scope.get("included")),
+                        scopeEntries(scope.get("included")),
                         stringList(scope.get("excluded"))),
                 stringList(document.get("acceptance_criteria")),
                 stringList(document.get("test_requirements")),
@@ -151,6 +152,25 @@ public record AgentOutputContractDocument(
                 stringList(document.get("risk_areas")),
                 stringList(document.get("evidence_refs")),
                 stringList(document.get("open_questions")));
+    }
+
+    private static List<TaskContract.ScopeEntry> scopeEntries(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var entries = new ArrayList<TaskContract.ScopeEntry>();
+        for (var item : items) {
+            var entry = objectMap(item);
+            var path = text(entry.get("path"));
+            TaskContract.ScopeOperation operation = null;
+            try {
+                operation = TaskContract.ScopeOperation.valueOf(text(entry.get("operation")));
+            } catch (IllegalArgumentException ignored) {
+                // The proposal validator reports the missing/invalid operation.
+            }
+            entries.add(new TaskContract.ScopeEntry(path, operation));
+        }
+        return List.copyOf(entries);
     }
 
     boolean isStageHandoffArtifact() {

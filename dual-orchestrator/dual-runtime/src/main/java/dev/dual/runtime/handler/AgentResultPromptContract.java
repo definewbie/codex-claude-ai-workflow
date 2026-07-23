@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import dev.dual.core.contract.TaskContract;
 
 import java.util.List;
 import java.util.Set;
@@ -69,7 +70,14 @@ public final class AgentResultPromptContract {
                     false,
                     "one clear objective",
                     new AgentResultEnvelope.ProposalScope(
-                            List.of("repo/relative/path.ext"),
+                            List.of(
+                                    new TaskContract.ScopeEntry(
+                                            "repo/relative/existing.ext",
+                                            TaskContract.ScopeOperation.MODIFY),
+                                    new TaskContract.ScopeEntry(
+                                            "repo/relative/new.ext",
+                                            TaskContract.ScopeOperation.CREATE)
+                            ),
                             List.of("explicit non-goal")
                     ),
                     List.of("observable acceptance criterion"),

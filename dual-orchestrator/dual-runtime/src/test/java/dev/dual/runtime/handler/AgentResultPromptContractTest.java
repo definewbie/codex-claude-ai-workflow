@@ -52,4 +52,15 @@ class AgentResultPromptContractTest {
         ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS.forEach(
                 reason -> assertTrue(implementation.contains(reason)));
     }
+
+    @Test
+    void intakePromptUsesTypedScopeEntriesForModifyAndCreate() {
+        var intake = AgentResultPromptContract.render(
+                "ws-1", "run-1", "intake.claude_brainstorm",
+                "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"));
+
+        assertTrue(intake.contains("\"operation\" : \"MODIFY\""));
+        assertTrue(intake.contains("\"operation\" : \"CREATE\""));
+        assertFalse(intake.contains("new:repo/"));
+    }
 }

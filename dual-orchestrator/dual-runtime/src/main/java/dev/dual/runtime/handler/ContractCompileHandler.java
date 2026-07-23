@@ -170,7 +170,7 @@ public final class ContractCompileHandler implements TaskHandler {
                 Instant.now(),
                 proposal.objective().trim(),
                 new TaskContract.Scope(
-                        cleanList(proposal.scope().included()),
+                        List.copyOf(proposal.scope().included()),
                         cleanList(proposal.scope().excluded())
                 ),
                 cleanList(proposal.acceptanceCriteria()),

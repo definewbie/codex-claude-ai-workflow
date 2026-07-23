@@ -3,6 +3,8 @@ package dev.dual.adapter.acpx;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.runtime.handler.AgentOutputContractDocument;
 import dev.dual.runtime.handler.AgentOutputContractSidecar;
 
@@ -47,6 +49,7 @@ final class WorkstreamMemoryUpdater {
     private static final int MAX_READ_FILES = 64;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     Path memoryPath(Path workspaceRoot, String workstreamId) {
@@ -78,9 +81,9 @@ final class WorkstreamMemoryUpdater {
         var memory = readExisting(memoryPath, workstreamId);
         var workstreamDir = workspaceRoot.resolve(".agent").resolve("workstreams").resolve(workstreamId);
 
-        var contractMap = readContractMap(workstreamDir);
-        mergeContractScope(memory, contractMap);
-        var keywords = contractKeywords(contractMap);
+        var taskContract = readContract(workstreamDir);
+        mergeContractScope(memory, taskContract);
+        var keywords = contractKeywords(taskContract);
 
         var readFiles = byPath(memory.get("readFiles"));
         refreshInvalidation(workspaceRoot, readFiles);
@@ -110,34 +113,44 @@ final class WorkstreamMemoryUpdater {
         updateMemory(workspaceRoot, workstreamId, runId, nodeId, stage, "", null, toolUsage, null);
     }
 
-    private void mergeContractScope(Map<String, Object> memory, Map<String, Object> contract) {
+    private void mergeContractScope(Map<String, Object> memory, Optional<TaskContract> contract) {
         if (contract.isEmpty()) {
             memory.putIfAbsent("decidedScope", List.of());
             memory.putIfAbsent("nonGoals", List.of());
             return;
         }
-        var scope = mapValue(contract.get("scope"));
-        memory.put("decidedScope", stringList(scope.get("included")));
-        memory.put("nonGoals", stringList(contract.get("non_goals")));
+        var document = contract.orElseThrow();
+        var decidedScope = document.scope() == null
+                ? List.<String>of()
+                : document.scope().included().stream()
+                        .map(TaskContract.ScopeEntry::path)
+                        .toList();
+        memory.put("decidedScope", decidedScope);
+        memory.put("nonGoals", document.nonGoals());
     }
 
-    private Map<String, Object> readContractMap(Path workstreamDir) {
+    private Optional<TaskContract> readContract(Path workstreamDir) {
         var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
         if (!Files.isRegularFile(contractPath)) {
-            return Map.of();
+            return Optional.empty();
         }
         try {
-            return objectMapper.readValue(contractPath.toFile(), MAP_TYPE);
+            return Optional.of(objectMapper.readValue(contractPath.toFile(), TaskContract.class));
         } catch (IOException ignored) {
-            return Map.of();
+            return Optional.empty();
         }
     }
 
-    private static Set<String> contractKeywords(Map<String, Object> contract) {
+    private static Set<String> contractKeywords(Optional<TaskContract> contract) {
         var phrases = new ArrayList<String>();
-        var scope = mapValue(contract.get("scope"));
-        stringList(scope.get("included")).forEach(phrases::add);
-        stringList(contract.get("acceptance_criteria")).forEach(phrases::add);
+        contract.ifPresent(document -> {
+            if (document.scope() != null) {
+                document.scope().included().stream()
+                        .map(TaskContract.ScopeEntry::path)
+                        .forEach(phrases::add);
+            }
+            phrases.addAll(document.acceptanceCriteria());
+        });
         var tokens = new LinkedHashSet<String>();
         for (var phrase : phrases) {
             for (var token : phrase.toLowerCase(Locale.ROOT).split("[^\\p{IsAlphabetic}\\p{IsDigit}_/-]+")) {

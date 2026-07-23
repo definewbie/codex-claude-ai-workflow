@@ -39,7 +39,10 @@ class ReportTaskContractTest {
                 1,
                 Instant.now(),
                 "Add project description to README",
-                new TaskContract.Scope(List.of("README.md"), List.of("code")),
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry(
+                                "README.md", TaskContract.ScopeOperation.MODIFY)),
+                        List.of("code")),
                 List.of("AC1", "AC2", "AC3"),
                 List.of(),
                 List.of(),

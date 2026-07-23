@@ -85,7 +85,7 @@ final class AgentResultDocumentProjector {
     TaskContractProposal taskContractProposal(AgentResultEnvelope.TaskContractProposalResult result) {
         return new TaskContractProposal(
                 result.artifactType(),
-                1,
+                TaskContractProposal.SCHEMA_VERSION,
                 result.objective(),
                 new TaskContractProposal.Scope(result.scope().included(), result.scope().excluded()),
                 result.acceptanceCriteria(),
@@ -103,10 +103,14 @@ final class AgentResultDocumentProjector {
     ) {
         var proposal = new LinkedHashMap<String, Object>();
         proposal.put("artifact_type", result.artifactType());
-        proposal.put("schema_version", 1);
+        proposal.put("schema_version", TaskContractProposal.SCHEMA_VERSION);
         proposal.put("objective", result.objective());
         proposal.put("scope", Map.of(
-                "included", result.scope().included(),
+                "included", result.scope().included().stream()
+                        .map(entry -> Map.of(
+                                "path", entry.path(),
+                                "operation", entry.operation().name()))
+                        .toList(),
                 "excluded", result.scope().excluded()));
         proposal.put("acceptance_criteria", result.acceptanceCriteria());
         proposal.put("test_requirements", result.testRequirements());

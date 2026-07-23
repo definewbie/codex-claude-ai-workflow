@@ -2,6 +2,7 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export DUAL_AGENT_RESULT_EMITTER="$PROJECT_ROOT/scripts/fixtures/emit-strict-agent-result.py"
 JAR_PATH="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
 CASE_NAME="${1:-all}"
 SKIP_BUILD="${SKIP_BUILD:-false}"
@@ -51,54 +52,8 @@ if [[ "${1:-}" == "--version" ]]; then
   exit 0
 fi
 
-case_name="${DUAL_SEMANTIC_CASE:-}"
-
-tool_read_readme() {
-  cat <<'EOF'
-[tool] Read README.md (completed)
-  input: {"file_path":"README.md"}
-EOF
-}
-
-tool_read_notes() {
-  cat <<'EOF'
-[tool] Read NOTES.md (completed)
-  input: {"file_path":"NOTES.md"}
-EOF
-}
-
-task_contract_proposal() {
-  cat <<'EOF'
-<dual-artifact type="task_contract_proposal" version="1">
-{
-  "artifact_type": "task_contract_proposal",
-  "schema_version": 1,
-  "objective": "Add goodbye() and document it.",
-  "scope": {
-    "included": ["main.py", "README.md"],
-    "excluded": ["Do not change __main__ output"]
-  },
-  "acceptance_criteria": [
-    "main.py defines goodbye() returning goodbye",
-    "README.md documents goodbye()"
-  ],
-  "constraints": ["Keep changes scoped"],
-  "non_goals": ["No dependencies"],
-  "risk_areas": ["Missing docs"],
-  "test_requirements": ["Import main and check goodbye"],
-  "evidence_refs": ["main.py", "README.md"],
-  "open_questions": []
-}
-</dual-artifact>
-
-```dual-control
-decision: READY_FOR_PRODUCT_REVIEW
-summary: Requirement is clear.
-```
-EOF
-}
-
-task_contract_proposal
+echo "semantic fake direct agent invocation requires acpx" >&2
+exit 1
 FAKE_CLAUDE
   chmod +x "$bin_dir/claude"
 
@@ -113,28 +68,45 @@ fi
 
 agent=""
 prompt=""
+session_name=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    claude|codex) agent="$1"; shift ;;
+    claude|codex)
+      agent="$1"
+      if [[ "${2:-}" == "sessions" ]]; then
+        exit 0
+      fi
+      shift
+      ;;
     -f) shift; prompt="${1:-}"; shift ;;
+    -s) shift; session_name="${1:-semantic-session}"; shift ;;
     *) shift ;;
   esac
 done
 
 template="$(basename "${prompt:-unknown.md}")"
 case_name="${DUAL_SEMANTIC_CASE:-}"
+session_id="$(python3 - "$session_name" <<'PY'
+import sys
+import uuid
+print(uuid.uuid5(uuid.NAMESPACE_URL, "dual-semantic-smoke:" + sys.argv[1]))
+PY
+)"
+echo "[acpx] session ${session_name} (${session_id}) · agent connected" >&2
 
-tool_read_readme() {
-  cat <<'EOF'
-[tool] Read README.md (completed)
-  input: {"file_path":"README.md"}
-EOF
+emit_result() {
+  python3 "${DUAL_AGENT_RESULT_EMITTER:?}" \
+    --prompt "$prompt" \
+    --template "$template" \
+    --profile semantic \
+    --scenario "$case_name" \
+    --session-id "$session_id"
 }
 
-tool_read_notes() {
+tool_read_main() {
   cat <<'EOF'
-[tool] Read NOTES.md (completed)
-  input: {"file_path":"NOTES.md"}
+[tool] Read main.py (completed)
+  input: {"file_path":"main.py"}
 EOF
 }
 
@@ -142,132 +114,26 @@ agent_contract() {
   local decision="$1"
   local summary="$2"
   local category_hint="${3:-}"
-  cat <<EOF
-<dual-artifact type="agent_output_contract" version="1">
-{
-  "artifact_type": "agent_output_contract",
-  "schema_version": 1,
-  "decision": "${decision}",
-  "summary": "${summary}",
-  "blocking": false,
-  "checks": ["controlled semantic smoke"],
-  "evidence": ["controlled output"],
-  "missing_evidence": [],
-  "must_fix": [],
-  "open_risks": [],
-  "verification_summary": "controlled semantic smoke",
-  "reread_reasons": [],
-  "failure": {
-    "category_hint": "${category_hint}",
-    "contract_gaps": [],
-    "out_of_scope_files": [],
-    "missing_tests": [],
-    "context_gaps": [],
-    "reason": ""
-  }
-}
-</dual-artifact>
-
-\`\`\`dual-control
-decision: ${decision}
-summary: ${summary}
-\`\`\`
-EOF
-}
-
-task_contract_proposal() {
-  cat <<'EOF'
-<dual-artifact type="task_contract_proposal" version="1">
-{
-  "artifact_type": "task_contract_proposal",
-  "schema_version": 1,
-  "objective": "Add goodbye() and document it.",
-  "scope": {
-    "included": ["main.py", "README.md"],
-    "excluded": ["Do not change __main__ output"]
-  },
-  "acceptance_criteria": [
-    "main.py defines goodbye() returning goodbye",
-    "README.md documents goodbye()"
-  ],
-  "constraints": ["Keep changes scoped"],
-  "non_goals": ["No dependencies"],
-  "risk_areas": ["Missing docs"],
-  "test_requirements": ["Import main and check goodbye"],
-  "evidence_refs": ["main.py", "README.md"],
-  "open_questions": []
-}
-</dual-artifact>
-
-```dual-control
-decision: READY_FOR_PRODUCT_REVIEW
-summary: Requirement is clear.
-```
-EOF
+  DUAL_FIXTURE_DECISION="$decision" \
+    DUAL_FIXTURE_SUMMARY="$summary" \
+    DUAL_FIXTURE_CATEGORY_HINT="$category_hint" \
+    emit_result
 }
 
 valid_plan() {
-  cat <<'EOF'
-# Plan
-
-## Implementation Steps
-
-1. Update main.py with goodbye().
-
-## File-Level Changes
-
-- main.py
-- README.md
-
-## Validation Plan
-
-- Import main and assert goodbye().
-
-## Rollback Notes
-
-- Revert main.py and README.md.
-
-## Known Risks
-
-- Missing documentation.
-
-## Human Review Checklist
-
-- Confirm function and docs.
-
-<dual-artifact type="plan_artifact" version="1">
-{
-  "artifact_type": "plan_artifact",
-  "schema_version": 1,
-  "implementation_steps": ["Update main.py with goodbye().", "Document goodbye() in README.md."],
-  "edit_files": ["main.py", "README.md"],
-  "reference_files": [],
-  "file_level_changes": ["main.py", "README.md"],
-  "validation_plan": ["Import main and assert goodbye()."],
-  "rollback_notes": "Revert main.py and README.md.",
-  "known_risks": ["Missing documentation."],
-  "human_review_checklist": ["Confirm function and docs."]
-}
-</dual-artifact>
-
-EOF
-  agent_contract "READY_FOR_PLAN_REVIEW" "Plan body is complete."
+  emit_result
 }
 
 case "$template" in
   intake-claude-brainstorm.md)
-    tool_read_readme
-    if [[ "$case_name" == "reread-reason" ]]; then
-      tool_read_notes
-    fi
-    task_contract_proposal
+    emit_result
     ;;
   intake-codex-product-review.md)
     agent_contract "READY_FOR_PRODUCT_REVIEW" "Product review passed."
     ;;
   design-claude.md)
     if [[ "$case_name" == "reread-reason" ]]; then
-      tool_read_notes
+      tool_read_main
     fi
     agent_contract "READY_FOR_ARCH_REVIEW" "Design passed."
     ;;
@@ -275,18 +141,14 @@ case "$template" in
     agent_contract "READY_FOR_ARCH_REVIEW" "Architecture review passed."
     ;;
   plan-claude.md)
-    if [[ "$case_name" == "plan-body" ]]; then
-      agent_contract "READY_FOR_PLAN_REVIEW" "Plan only exists in transcript prose, not formal artifact body."
-    else
-      valid_plan
-    fi
+    valid_plan
     ;;
   plan-codex-review.md)
     agent_contract "READY_TO_IMPLEMENT" "Plan review passed."
     ;;
   implement-claude.md)
     if [[ "$case_name" == "reread-reason" ]]; then
-      tool_read_notes
+      tool_read_main
     fi
     if [[ -f main.py ]] && ! grep -q "def goodbye" main.py; then
       cat >> main.py <<'PY'
@@ -306,145 +168,13 @@ README
     agent_contract "IMPLEMENTED" "Implemented goodbye without declaring reread reasons."
     ;;
   implement-claude-self-test.md)
-    cat <<'EOF'
-## Verification Summary
-
-Self-test passed.
-
-## Checks Run
-
-- Import main and assert goodbye.
-
-## Checks Skipped
-
-- None.
-
-## Evidence
-
-- Controlled smoke.
-
-## Repository Hygiene
-
-- Clean.
-
-## Missing Evidence
-
-- None.
-
-## Residual Risk
-
-- Controlled smoke only.
-
-<dual-artifact type="self_test_report" version="1">
-{
-  "artifact_type": "self_test_report",
-  "schema_version": 1,
-  "decision": "SELF_TEST_COMPLETE",
-  "summary": "Self-test passed.",
-  "checks_run": ["controlled self-test"],
-  "checks_skipped": [],
-  "evidence": ["controlled smoke"],
-  "missing_evidence": [],
-  "verification_summary": "controlled smoke"
-}
-</dual-artifact>
-
-```dual-control
-decision: SELF_TEST_COMPLETE
-summary: Self-test passed.
-```
-EOF
+    emit_result
     ;;
   acceptance-codex-review.md)
-    if [[ "$case_name" == "review-noise" ]]; then
-      cat <<'EOF'
-<dual-artifact type="acceptance_review" version="1">
-{
-  "artifact_type": "acceptance_review",
-  "schema_version": 1,
-  "decision": "REJECT",
-  "summary": "minor stylistic issue only; should not block",
-  "blocking": true,
-  "checks": ["controlled acceptance"],
-  "evidence": ["controlled acceptance"],
-  "missing_evidence": [],
-  "must_fix": [],
-  "open_risks": [],
-  "changed_files": ["main.py", "README.md"],
-  "verification_summary": "minor stylistic issue only; should not block",
-  "failure": {
-    "category_hint": "",
-    "contract_gaps": [],
-    "out_of_scope_files": [],
-    "missing_tests": [],
-    "context_gaps": [],
-    "reason": ""
-  }
-}
-</dual-artifact>
-
-```dual-control
-decision: REJECT
-summary: minor stylistic issue only; should not block
-```
-EOF
-    else
-      cat <<'EOF'
-<dual-artifact type="acceptance_review" version="1">
-{
-  "artifact_type": "acceptance_review",
-  "schema_version": 1,
-  "decision": "ACCEPT",
-  "summary": "Accepted.",
-  "blocking": false,
-  "checks": ["controlled acceptance"],
-  "evidence": ["controlled acceptance"],
-  "missing_evidence": [],
-  "must_fix": [],
-  "open_risks": [],
-  "changed_files": ["main.py", "README.md"],
-  "verification_summary": "Accepted.",
-  "failure": {
-    "category_hint": "",
-    "contract_gaps": [],
-    "out_of_scope_files": [],
-    "missing_tests": [],
-    "context_gaps": [],
-    "reason": ""
-  }
-}
-</dual-artifact>
-
-```dual-control
-decision: ACCEPT
-summary: Accepted.
-```
-EOF
-    fi
+    emit_result
     ;;
   stage-claude-handoff.md)
-    cat <<'EOF'
-<dual-artifact type="stage_handoff" version="1">
-{
-  "artifact_type": "stage_handoff",
-  "schema_version": 1,
-  "decision": "HANDOFF_READY",
-  "summary": "Handoff ready.",
-  "completed_work": ["goodbye"],
-  "important_decisions": [],
-  "changed_files": ["main.py", "README.md"],
-  "verification_state": "accepted",
-  "open_risks": [],
-  "recommended_next_stage": "none",
-  "suggested_next_prompt": "none"
-}
-</dual-artifact>
-
-```dual-control
-decision: HANDOFF_READY
-summary: Handoff ready.
-```
-EOF
+    emit_result
     ;;
   *)
     agent_contract "PASS" "Default controlled response."
@@ -517,9 +247,11 @@ run_until_boundary() {
 assert_plan_body() {
   local workdir="$1" ws="$2"
   dualctl recovery show --workdir "$workdir" "$ws" > "$workdir/recovery-show.txt" 2>&1 || true
-  grep -R "PLAN_ARTIFACT_MISSING" "$workdir/.agent/workstreams/$ws" >/dev/null \
-    || fail "plan-body: expected PLAN_ARTIFACT_MISSING"
-  pass "plan-body: missing typed plan_artifact is blocked"
+  grep -R "AGENT_RESULT_CONTRACT_VIOLATION" "$workdir/.agent/workstreams/$ws" >/dev/null \
+    || fail "plan-body: expected AGENT_RESULT_CONTRACT_VIOLATION"
+  grep -R "result.plan is required" "$workdir/.agent/workstreams/$ws" >/dev/null \
+    || fail "plan-body: expected typed missing-plan diagnostic"
+  pass "plan-body: missing typed plan body is blocked"
 }
 
 assert_review_noise() {

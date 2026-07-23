@@ -38,7 +38,7 @@ final class TaskContractArtifactWriter {
             if (!contract.scope().included().isEmpty()) {
                 md.append("**Included:**\n");
                 for (var item : contract.scope().included()) {
-                    md.append("- ").append(item).append("\n");
+                    md.append("- ").append(item.operation()).append(": ").append(item.path()).append("\n");
                 }
                 md.append("\n");
             }

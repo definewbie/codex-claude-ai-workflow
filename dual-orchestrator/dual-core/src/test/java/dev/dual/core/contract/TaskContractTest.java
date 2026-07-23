@@ -24,7 +24,9 @@ class TaskContractTest {
                 Instant.parse("2026-05-30T12:00:00Z"),
                 "Implement the foo feature",
                 new TaskContract.Scope(
-                        List.of("src/main/java/FooApi.java", "src/main/java/FooService.java"),
+                        List.of(
+                                entry("src/main/java/FooApi.java", TaskContract.ScopeOperation.MODIFY),
+                                entry("src/main/java/FooService.java", TaskContract.ScopeOperation.CREATE)),
                         List.of("src/main/java/BarModule.java")
                 ),
                 acceptanceCriteria,
@@ -153,7 +155,9 @@ class TaskContractTest {
                 1,
                 Instant.now(),
                 "Implement feature",
-                new TaskContract.Scope(List.of("not-a-file-ref"), List.of("not-a-file-ref")),
+                new TaskContract.Scope(
+                        List.of(entry("not-a-file-ref", TaskContract.ScopeOperation.MODIFY)),
+                        List.of("not-a-file-ref")),
                 List.of("Only one criterion"),
                 List.of(),
                 List.of(),
@@ -186,5 +190,37 @@ class TaskContractTest {
         var errors = TaskContractValidator.validate(contract);
 
         assertTrue(errors.stream().anyMatch(error -> error.contains("ledger/context metadata")));
+    }
+
+    @Test
+    void validateRequiresTypedScopeOperationAndRejectsLegacyNewPrefix() {
+        var missingOperation = new TaskContract.ScopeEntry("src/NewFile.java", null);
+        var legacyPrefix = entry("new:src/NewFile.java", TaskContract.ScopeOperation.CREATE);
+        var contract = new TaskContract(
+                "tc-004",
+                1,
+                Instant.now(),
+                "Create a file",
+                new TaskContract.Scope(List.of(missingOperation, legacyPrefix), List.of()),
+                List.of("File exists", "Tests pass"),
+                List.of("Run tests"),
+                List.of("Keep scope bounded"),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("req-1", "agent-1")
+        );
+
+        var errors = TaskContractValidator.validate(contract);
+
+        assertTrue(errors.stream().anyMatch(error -> error.contains("operation is required")));
+        assertTrue(errors.stream().anyMatch(error -> error.contains("legacy new: prefix")));
+    }
+
+    private static TaskContract.ScopeEntry entry(String path, TaskContract.ScopeOperation operation) {
+        return new TaskContract.ScopeEntry(path, operation);
     }
 }

@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import dev.dual.core.contract.TaskContract;
 
 import java.util.List;
 
@@ -58,7 +59,7 @@ public record AgentResultEnvelope(
     ) implements AgentResult {
     }
 
-    public record ProposalScope(List<String> included, List<String> excluded) {
+    public record ProposalScope(List<TaskContract.ScopeEntry> included, List<String> excluded) {
     }
 
     public record AgentOutputResult(

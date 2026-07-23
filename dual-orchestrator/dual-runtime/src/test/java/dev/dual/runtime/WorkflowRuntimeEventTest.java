@@ -44,10 +44,10 @@ class WorkflowRuntimeEventTest {
         var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, "ws-evt-compile", """
                 {
                   "artifact_type": "task_contract_proposal",
-                  "schema_version": 1,
+                  "schema_version": 2,
                   "objective": "Add user authentication",
                   "scope": {
-                    "included": ["README.md"],
+                    "included": [{"path": "README.md", "operation": "MODIFY"}],
                     "excluded": ["No external dependencies"]
                   },
                   "acceptance_criteria": [
@@ -108,7 +108,10 @@ class WorkflowRuntimeEventTest {
         var contract = new dev.dual.core.contract.TaskContract(
                 "tc-test", 1, java.time.Instant.parse("2026-05-30T10:00:00Z"),
                 "Test objective",
-                new dev.dual.core.contract.TaskContract.Scope(List.of("src/"), List.of()),
+                new dev.dual.core.contract.TaskContract.Scope(
+                        List.of(new dev.dual.core.contract.TaskContract.ScopeEntry(
+                                "src/", dev.dual.core.contract.TaskContract.ScopeOperation.MODIFY)),
+                        List.of()),
                 List.of("AC1", "AC2"), List.of(), List.of(), List.of(), List.of(),
                 List.of(), List.of(),
                 dev.dual.core.contract.ContractStatus.READY_FOR_REVIEW, 1,
