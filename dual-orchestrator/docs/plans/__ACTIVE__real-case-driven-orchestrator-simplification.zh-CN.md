@@ -6,7 +6,7 @@
 2. 让 node executor/handler 只负责编排，领域规则归属唯一 domain owner。
 3. LLM workflow 结果只通过 strict `AgentResultEnvelope` 进入状态流转；Markdown 仅供人阅读，不参与控制。
 
-当前成熟度：strict agent-result boundary 已达到 `ENFORCED + PROVEN`；typed proposal lineage 已通过 controlled contract slice。Orchestrator 简化和 handler 瘦身尚未闭环。
+当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B0 scope boundary characterization 已完成。Orchestrator 简化和 handler 瘦身尚未闭环。
 
 ## 执行纪律
 
@@ -114,7 +114,7 @@ Readiness：A1.1 为 `ENFORCED + PROVEN` 且已提交为 `16fe713`；目标仓�
 - 目标 worktree 只修改 `src/dashboard.js` 和 `test/issueWorkflow.test.js`；新增边界校验与 focused test，`node --test` 5/5 通过。
 - 未触发 `REQUIRED_AGENT_EVIDENCE_MISSING`、自然语言控制 fallback、manual ledger/worktree repair 或范围外修改。
 
-### A3 简单应用 API（ACTIVE）
+### A3 简单应用 API（PASS）
 
 目标：使用外部 `issue-flow-app` JavaScript 测试项目，证明 Dual 能组织 Claude Code 与 Codex 完成一个有限多文件、跨模块的应用 API 任务，并守住 contract、scope、self-test evidence 和 acceptance 闭环。该 JavaScript 项目只是受控 real-case 目标，不是 Dual 的运行时组件或依赖。
 
@@ -137,8 +137,11 @@ Readiness：A2 controlled real-case 已达到 `COMPLETED + ACCEPT + PASS`；目�
 - intake producer 与 Codex reviewer 现共享同一保真语义：所有用户明确的业务目标、scope、行为、验收和验证要求必须进入 binding proposal fields；`risk_areas`、`open_questions`、`evidence_refs` 不能代替绑定要求；agent 不得基于语言边界或保守偏好擅自扩大/收紧可观察行为。旧的“choose the conservative default”冲突规则已删除。
 - `AgentResultEnvelope`、JSON-only output 与 workflow routing 是 harness node Output Contract 的职责，不属于业务 task proposal。它们由 prompt contract、strict parser 与 validator 独立强制；producer 不复制、reviewer 不因 proposal 未重复这些协议而拒绝，避免形成第二个协议 SoT。
 - `20260723T112922Z-8P57` 进一步暴露确定性 projection bug：absolute-path sanitizer 的 ASCII `\p{Alnum}` 负向判断把“缺失/非对象”“修改/新增”等中文 slash phrase 当作 POSIX 绝对路径，导致 reviewer context 出现 `[outside-workspace path removed]`。sanitizer 改为 Unicode character class；真实外部绝对路径仍脱敏，中文合同原文保持不变。
-- 该边界不新增 requirement registry、evidence registry 或状态机。机械 schema validator 继续负责 shape；独立 Codex review 负责语义保真并 fail closed。prompt contract tests、adapter full suite 与 sibling rule sweep 已通过；同一 A3 首轮 proposal 尚需 real-case 证明。
-- A3 provider real-case 仍需使用同一 Verification Gate 重跑，因此 A3 保持 `ACTIVE`，不得标记 `PASS`。
+- 该边界不新增 requirement registry、evidence registry 或状态机。机械 schema validator 继续负责 shape；独立 Codex review 负责语义保真并 fail closed。prompt contract tests、adapter full suite 与 sibling rule sweep 已通过。
+- `20260723T114300Z-TMHV` 使用同一 A3 Verification Gate 完整通过：workflow=`COMPLETED`、final acceptance=`ACCEPT`、acceptance reject=0、repair loop=0、benchmark grade=`PASS`。fresh Maven build、provider probe 与 runner-kind 检查均通过。
+- A3 目标 worktree 仅修改 `src/issueWorkflow.js`、`src/issueApi.js` 与 `test/issueApi.test.js`；`ALLOWED_TRANSITIONS` 保持唯一迁移规则，`issueApi.js` 复用 `availableTransitions`，`npm test` 通过。
+- intake review 只发现并收敛了 proposal 内真实的字段拼写冲突；此前错误的 harness protocol 重复要求与中文 slash phrase 脱敏污染均未复现。self-test 以 typed `SELF_TEST_COMPLETE` sidecar 进入 acceptance context，Codex 一次返回 `ACCEPT`。
+- 关闭报告：`docs/testing/real-case-reports/20260723T114021Z/report.md`。
 
 Phase A 完成条件：A1/A2/A3 各有一个可复现的 `COMPLETED + ACCEPT` real-case，且失败修复没有引入自然语言控制 fallback。
 
@@ -146,20 +149,57 @@ Phase A 完成条件：A1/A2/A3 各有一个可复现的 `COMPLETED + ACCEPT` re
 
 仅在 Phase A 暴露 scope owner 缺口或 A3 PASS 后显式激活。
 
+### B0 Scope Boundary Characterization（COMPLETE）
+
+目标：不修改 production，先证明当前 `RepoScopeGovernance` 中每一类 scope 规则的来源、owner、消费者和准入影响，建立 Phase B 的删除基线。
+
+本 checkpoint 只允许：
+
+- 区分 typed `TaskContract.scope`、通用路径安全规则、语言/框架 convention、文件名或目录结构猜测；
+- 追踪哪些规则真正影响 read admission、scope expansion 或 agent 启动；
+- 固化现有越界读取 cannot-bypass 测试及其命令；
+- 给出保留清单、删除清单、目标 owner 和 B1 readiness 结论。
+
+本 checkpoint 禁止：
+
+- 修改 `RepoScopeGovernance` 或其他 production 代码；
+- 新增 Scope Engine、policy DSL、repository index framework 或通用 capability framework；
+- 运行 provider / real-case；
+- 提前启动 Phase C Context Boundary 或 Phase D Handler Convergence。
+
+关闭结论：
+
+- canonical `TaskContract.scope` 是业务 scope SoT，但当前 effective read scope 还混入 input refs、evidence、git changed-files、requirement tokenization 和 repo-map filename scoring；
+- heuristic/observed candidates 会进入 `ExplorationPlan.allowedDirectReadFiles`，因此会影响运行后节点验收，不只是 prompt 建议；
+- 当前 enforcement 能阻止违规 run 成为成功节点，不能在 tool call 前物理阻止读取；
+- fixed extension allowlist、acceptance prose path extraction、filename scoring 和重复 stage policy owner 均进入 B1 删除清单；
+- deterministic baseline：runtime scope tests 30/0、adapter boundary tests 9/0、heuristic characterization 1/0；
+- 完整分析、删除清单、目标 owner 与 B1 tests：`docs/plans/phase-b0-scope-boundary-characterization.zh-CN.md`。
+
+### B1 Typed Scope Subtraction（READY，NOT ACTIVE）
+
+只允许在显式激活后修改 production。建议一次完成以下有界减法：
+
+- canonical `TaskContract.scope.included.path` 成为唯一 base read scope；
+- typed `scope_expansion_request` 保持唯一 expansion 输入；
+- candidate、evidence、git 和 repo-map 只用于 context/observation，不再扩大 effective scope；
+- `ExplorationPlan` 成为唯一 stage read-policy projection，`ExplorationPolicyEvaluator` 保持唯一 decision owner；
+- 删除固定文件扩展名白名单与重复 stage policy；
+- 不新增 Scope Engine、policy framework、运行中 tool broker 或 write-scope lifecycle。
+
 目标结构：
 
 ```text
 TaskContract.scope
-+ typed proposal evidence refs
 + typed scope expansion
-+ repository capability/index result
--> ScopePolicy
 -> ExplorationPlan
+-> ExplorationPolicyEvaluator
+-> node success / EXPLORATION_POLICY_VIOLATION
 ```
 
-删除 requirement prose 到 execution scope 的 keyword、filename guessing 和 regex inference。路径规范化、安全校验、明确文件类型匹配可以保留；不得以“消灭所有 contains/regex”为目标。
+删除 requirement prose 到 execution scope 的 keyword、filename guessing 和 regex inference。保留 project-neutral 路径规范化、安全校验和 exact path/declared-directory matching；不得以“消灭所有 contains/regex”为目标。
 
-验收：`RepoScopeGovernance` 变成薄协调器或被唯一 ScopePolicy owner 替代；越界读取 cannot-bypass tests 继续成立。
+验收：`RepoScopeGovernance` 变成薄协调器；不得新增另一个 ScopePolicy 模型；越界读取 cannot-bypass tests 继续成立。
 
 ## Phase C：Context Boundary
 
@@ -189,6 +229,6 @@ filesystem 只验证已知 artifact 的存在和 hash，不通过目录扫描猜
 
 ## 当前锁定范围
 
-允许：运行 A3 简单应用 API controlled `full` real-case；仅修复 A3 直接证明的 contract、scope、typed evidence 或 acceptance 边界缺陷。
+允许：审查并提交 B0 文档 checkpoint；在用户显式激活前不修改 scope production。
 
-禁止：提前启动 Phase B Scope Engine、Phase C Context Engine、Phase D handler 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider 优化或 HTTP/runtime 扩张。
+禁止：提前启动 B1、Phase C Context Engine、Phase D handler 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider 优化或 HTTP/runtime 扩张。
