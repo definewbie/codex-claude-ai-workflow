@@ -17,6 +17,8 @@ Do not modify files. Do not perform line-by-line code review. Focus on product c
 
 Treat the typed `task_contract_proposal` result in the intake context as the candidate shared task contract. Review it by principles, not by formatting nitpicks.
 
+The current node's `AgentResultEnvelope`, JSON-only output, and workflow-routing protocol are enforced independently by the orchestrator's Output Contract. Do not require the task proposal to duplicate those harness protocols, and do not return `NEEDS_REVISION` solely because they are absent from proposal fields.
+
 ## Contract Review Principles
 
 {{contract_review_principles}}

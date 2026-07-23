@@ -72,10 +72,11 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Explicitly address each Must Fix"));
         assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan"));
         assertTrue(prompt.contains("account for every explicit user objective"));
-        assertTrue(prompt.contains("execution/output protocol"));
         assertTrue(prompt.contains("A requirement mentioned only in `risk_areas`, `open_questions`, or `evidence_refs` is not preserved"));
         assertTrue(prompt.contains("Do not broaden or narrow behavior"));
         assertTrue(prompt.contains("preserve the literal user requirement"));
+        assertTrue(prompt.contains("Do not copy the current node's `AgentResultEnvelope`"));
+        assertTrue(prompt.contains("enforced independently by the orchestrator's Output Contract"));
         assertFalse(prompt.contains("Read the repository"));
         assertFalse(prompt.contains("bounded discovery tools"));
         assertFalse(prompt.contains("dual-control"));
@@ -227,6 +228,33 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void preservesChineseSlashPhrasesWhileSanitizingAbsolutePaths() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
+        Files.writeString(contextPath, """
+                - 缺失/非对象输入必须被拒绝。
+                - 仅允许修改/新增三个明确文件。
+                External file: /private/projects/internal-product/src/main.py
+                """);
+
+        var prompt = new AgentPromptRenderer()
+                .render(
+                        tempDir,
+                        "ws-test",
+                        "intake.codex_product_review",
+                        "intake-codex-product-review",
+                        List.of(".agent/workstreams/ws-test/context/node-context.md")
+                );
+
+        assertTrue(prompt.contains("缺失/非对象输入必须被拒绝"));
+        assertTrue(prompt.contains("仅允许修改/新增三个明确文件"));
+        assertTrue(prompt.contains("[outside-workspace path removed]"));
+        assertFalse(prompt.contains("/private/projects/internal-product"));
+    }
+
+    @Test
     void keepsArtifactEnvelopeClosingTagsWhenSanitizingContextPreview() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
@@ -289,8 +317,10 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Intent fidelity"));
         assertTrue(prompt.contains("Explicit-requirement coverage"));
         assertTrue(prompt.contains("Semantic neutrality"));
-        assertTrue(prompt.contains("execution/output protocol"));
+        assertTrue(prompt.contains("Protocol ownership"));
         assertTrue(prompt.contains("must not broaden or narrow accepted input"));
+        assertTrue(prompt.contains("Do not require the task proposal to duplicate those harness protocols"));
+        assertTrue(prompt.contains("do not return `NEEDS_REVISION` solely because they are absent"));
         assertTrue(prompt.contains("\"decision\" : \"<one allowed decision>\""));
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
         assertTrue(prompt.contains("NEEDS_REVISION"));

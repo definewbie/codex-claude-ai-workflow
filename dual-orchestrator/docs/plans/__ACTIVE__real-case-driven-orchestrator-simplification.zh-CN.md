@@ -134,7 +134,9 @@ Readiness：A2 controlled real-case 已达到 `COMPLETED + ACCEPT + PASS`；目�
 - 修复不新增 evidence module 或 artifact state machine：`AgentResultDocumentProjector` 将已经由 `AgentResultEnvelopeValidator` 验证的 typed plan body 写入现有 `agent_output_contract` sidecar；`AgentEvidenceIndex` 将 payload 完整性纳入 required-evidence 判断；summary/full context renderer 从同一 validated entry 渲染并去重，伪造 derived plan 不能覆盖它。
 - reviewer 启动门禁已收口：`source_artifact_type=plan_result` 但 typed plan body 缺失或不完整时，context build 返回 `REQUIRED_AGENT_EVIDENCE_MISSING` 且不发布 reviewer context。characterization/cannot-bypass tests、full Maven reactor（9/9 模块）与 `git diff --check` 均通过。
 - `20260723T100647Z` A3 重跑证明 typed proposal -> Codex review lineage 正常，但首轮 proposal 被 typed `NEEDS_REVISION` 拒绝：它遗漏了用户明确要求的 strict `AgentResultEnvelope` 执行协议，并把 JavaScript `object` 的数组边界自行收紧为“必须拒绝”。该结果是有效的合同质量拒绝，不是 evidence 丢失；运行按零 revision-loop stop-loss 中止。
-- intake producer 与 Codex reviewer 现共享同一保真语义：所有用户明确的目标、scope、行为、验收、验证和执行协议必须进入 binding proposal fields；`risk_areas`、`open_questions`、`evidence_refs` 不能代替绑定要求；agent 不得基于语言边界或保守偏好擅自扩大/收紧可观察行为。旧的“choose the conservative default”冲突规则已删除。
+- intake producer 与 Codex reviewer 现共享同一保真语义：所有用户明确的业务目标、scope、行为、验收和验证要求必须进入 binding proposal fields；`risk_areas`、`open_questions`、`evidence_refs` 不能代替绑定要求；agent 不得基于语言边界或保守偏好擅自扩大/收紧可观察行为。旧的“choose the conservative default”冲突规则已删除。
+- `AgentResultEnvelope`、JSON-only output 与 workflow routing 是 harness node Output Contract 的职责，不属于业务 task proposal。它们由 prompt contract、strict parser 与 validator 独立强制；producer 不复制、reviewer 不因 proposal 未重复这些协议而拒绝，避免形成第二个协议 SoT。
+- `20260723T112922Z-8P57` 进一步暴露确定性 projection bug：absolute-path sanitizer 的 ASCII `\p{Alnum}` 负向判断把“缺失/非对象”“修改/新增”等中文 slash phrase 当作 POSIX 绝对路径，导致 reviewer context 出现 `[outside-workspace path removed]`。sanitizer 改为 Unicode character class；真实外部绝对路径仍脱敏，中文合同原文保持不变。
 - 该边界不新增 requirement registry、evidence registry 或状态机。机械 schema validator 继续负责 shape；独立 Codex review 负责语义保真并 fail closed。prompt contract tests、adapter full suite 与 sibling rule sweep 已通过；同一 A3 首轮 proposal 尚需 real-case 证明。
 - A3 provider real-case 仍需使用同一 Verification Gate 重跑，因此 A3 保持 `ACTIVE`，不得标记 `PASS`。
 

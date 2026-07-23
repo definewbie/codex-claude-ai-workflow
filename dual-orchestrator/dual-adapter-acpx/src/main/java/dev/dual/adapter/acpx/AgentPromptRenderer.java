@@ -27,7 +27,9 @@ final class AgentPromptRenderer {
             "required_control_keys", "decision_example", "agent_result_contract"
     );
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([a-z_]+)}}");
-    private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile("(?<![<\\p{Alnum}._-])(/[^\\s\"'`)]+)");
+    private static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile(
+            "(?<![<\\p{Alnum}._-])(/[^\\s\"'`)]+)",
+            Pattern.UNICODE_CHARACTER_CLASS);
 
     String render(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
         return renderWithSections(workspaceRoot, workstreamId, "", nodeId, promptTemplate, inputRefs).content();
