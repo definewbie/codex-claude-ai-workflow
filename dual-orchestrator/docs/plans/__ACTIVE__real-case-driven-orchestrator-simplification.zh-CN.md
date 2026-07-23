@@ -114,9 +114,13 @@ Readiness：A1.1 为 `ENFORCED + PROVEN` 且已提交为 `16fe713`；目标仓�
 - 目标 worktree 只修改 `src/dashboard.js` 和 `test/issueWorkflow.test.js`；新增边界校验与 focused test，`node --test` 5/5 通过。
 - 未触发 `REQUIRED_AGENT_EVIDENCE_MISSING`、自然语言控制 fallback、manual ledger/worktree repair 或范围外修改。
 
-### A3 简单 API
+### A3 简单应用 API（ACTIVE）
 
-仅在 A2 PASS 后激活。证明有限多文件、跨层 contract/scope 和测试闭环。
+目标：使用外部 `issue-flow-app` JavaScript 测试项目，证明 Dual 能组织 Claude Code 与 Codex 完成一个有限多文件、跨模块的应用 API 任务，并守住 contract、scope、self-test evidence 和 acceptance 闭环。该 JavaScript 项目只是受控 real-case 目标，不是 Dual 的运行时组件或依赖。
+
+当前 case：保持 `src/issueWorkflow.js` 中的 `ALLOWED_TRANSITIONS` 为唯一状态迁移 SoT；新增 `availableTransitions(status)` 查询和 `src/issueApi.js` 的 `getIssueState(issue)` 稳定 DTO projection，并在独立测试中验证各状态、非法状态及返回数组隔离。限定只修改 `src/issueWorkflow.js`、`src/issueApi.js` 与 `test/issueApi.test.js`；不引入 HTTP server、网络、第三方依赖或第二份迁移规则。
+
+Readiness：A2 controlled real-case 已达到 `COMPLETED + ACCEPT + PASS`；目标仓库干净、基线测试通过，且 precheck 已证明 `issueApi.js` 与 `availableTransitions` 尚不存在。允许使用固化的 Verification Gate 启动一次 controlled `full` real-case。
 
 Phase A 完成条件：A1/A2/A3 各有一个可复现的 `COMPLETED + ACCEPT` real-case，且失败修复没有引入自然语言控制 fallback。
 
@@ -167,6 +171,6 @@ filesystem 只验证已知 artifact 的存在和 hash，不通过目录扫描猜
 
 ## 当前锁定范围
 
-允许：提交 typed proposal lineage checkpoint；运行 A1 README full real-case；只修复 A1 证明的直接边界缺陷。
+允许：运行 A3 简单应用 API controlled `full` real-case；仅修复 A3 直接证明的 contract、scope、typed evidence 或 acceptance 边界缺陷。
 
-禁止：提前启动 Scope Engine、Context Engine、handler 重构、多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider 优化。
+禁止：提前启动 Phase B Scope Engine、Phase C Context Engine、Phase D handler 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider 优化或 HTTP/runtime 扩张。
