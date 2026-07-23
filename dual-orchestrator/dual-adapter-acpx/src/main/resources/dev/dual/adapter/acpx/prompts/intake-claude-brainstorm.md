@@ -15,8 +15,10 @@ Revision convergence policy:
 
 - Must Fix feedback is stronger than the previous draft. The revised proposal must change the contract enough that each Must Fix is satisfied by construction.
 - Do not move an already-specified user constraint into `open_questions`. If the user request or Codex Must Fix already states the rule, encode the rule directly into `acceptance_criteria`, `constraints`, and `test_requirements`.
+- Before returning `READY_FOR_PRODUCT_REVIEW`, account for every explicit user objective, allowed/excluded file, behavior constraint, acceptance criterion, verification requirement, and execution/output protocol in a binding proposal field: `objective`, `scope`, `acceptance_criteria`, `test_requirements`, `constraints`, or `non_goals`. A requirement mentioned only in `risk_areas`, `open_questions`, or `evidence_refs` is not preserved.
+- Preserve the user's semantic boundary exactly. Do not broaden or narrow behavior based on language-specific edge cases, inferred product preferences, or a conservative implementation choice that the user did not request.
 - Use `open_questions` only for real product ambiguity that cannot be resolved from the user request, repository evidence, or prior Codex feedback.
-- If an implementation tradeoff exists but the user constraints already imply a safe default, choose the conservative default and record the tradeoff in `risk_areas`; do not block the workflow on that tradeoff.
+- If an implementation tradeoff does not change user-visible semantics, choose the simplest compliant implementation and record material risk in `risk_areas`. If it would change the accepted input, output, scope, or observable behavior, preserve the literal user requirement and record the unresolved choice without turning it into a constraint or test.
 - When revising after a Codex Must Fix, include at least one acceptance criterion or test requirement for each Must Fix. Do not claim readiness while leaving a Must Fix as a future human decision.
 
 Ledger write policy:

@@ -71,6 +71,11 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("A prose-only response is a contract failure"));
         assertTrue(prompt.contains("Explicitly address each Must Fix"));
         assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan"));
+        assertTrue(prompt.contains("account for every explicit user objective"));
+        assertTrue(prompt.contains("execution/output protocol"));
+        assertTrue(prompt.contains("A requirement mentioned only in `risk_areas`, `open_questions`, or `evidence_refs` is not preserved"));
+        assertTrue(prompt.contains("Do not broaden or narrow behavior"));
+        assertTrue(prompt.contains("preserve the literal user requirement"));
         assertFalse(prompt.contains("Read the repository"));
         assertFalse(prompt.contains("bounded discovery tools"));
         assertFalse(prompt.contains("dual-control"));
@@ -282,6 +287,10 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
         assertTrue(prompt.contains("task_contract_proposal"));
         assertTrue(prompt.contains("Intent fidelity"));
+        assertTrue(prompt.contains("Explicit-requirement coverage"));
+        assertTrue(prompt.contains("Semantic neutrality"));
+        assertTrue(prompt.contains("execution/output protocol"));
+        assertTrue(prompt.contains("must not broaden or narrow accepted input"));
         assertTrue(prompt.contains("\"decision\" : \"<one allowed decision>\""));
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
         assertTrue(prompt.contains("NEEDS_REVISION"));
