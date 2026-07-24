@@ -8,6 +8,20 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B0 scope boundary characterization 已完成。Orchestrator 简化和 handler 瘦身尚未闭环。
 
+## Current Active Step: Direction B / B0 Rebase Assessment
+
+> Objective: 从当前 worktree（`codex/recovery-origin-requirements`, HEAD `3fe084cc`）审计 read observation → NodeResult authority 路径，产出 B0 处置矩阵和 B1-first 判定。
+>
+> Checkpoint: `docs/plans/__CHECKPOINT__direction-b-b0-rebase-assessment.md`
+>
+> Threat model: 默认开发 profile 控制最终代码变更（write boundary），不把 post-run read policy 描述为安全隔离。
+>
+> **B1 尚未启动。** B0 review PASS 前禁止任何 production 修改。
+>
+> 下面的旧 Phase B（B1 Typed Scope Subtraction 等）描述的是 read-authorization 语义，已被 Direction B **SUPERSEDED**。其历史内容保留作为审计参考，不再作为执行目标。
+>
+> **不提交、不进入 B1，等待 review。**
+
 ## 执行纪律
 
 每个 real-case 失败都先按以下顺序处理：
@@ -176,30 +190,19 @@ Phase A 完成条件：A1/A2/A3 各有一个可复现的 `COMPLETED + ACCEPT` re
 - deterministic baseline：runtime scope tests 30/0、adapter boundary tests 9/0、heuristic characterization 1/0；
 - 完整分析、删除清单、目标 owner 与 B1 tests：`docs/plans/phase-b0-scope-boundary-characterization.zh-CN.md`。
 
-### B1 Typed Scope Subtraction（READY，NOT ACTIVE）
+### B1 Typed Scope Subtraction — **SUPERSEDED**
 
-只允许在显式激活后修改 production。建议一次完成以下有界减法：
-
-- canonical `TaskContract.scope.included.path` 成为唯一 base read scope；
-- typed `scope_expansion_request` 保持唯一 expansion 输入；
-- candidate、evidence、git 和 repo-map 只用于 context/observation，不再扩大 effective scope；
-- `ExplorationPlan` 成为唯一 stage read-policy projection，`ExplorationPolicyEvaluator` 保持唯一 decision owner；
-- 删除固定文件扩展名白名单与重复 stage policy；
-- 不新增 Scope Engine、policy framework、运行中 tool broker 或 write-scope lifecycle。
-
-目标结构：
-
-```text
-TaskContract.scope
-+ typed scope expansion
--> ExplorationPlan
--> ExplorationPolicyEvaluator
--> node success / EXPLORATION_POLICY_VIOLATION
-```
-
-删除 requirement prose 到 execution scope 的 keyword、filename guessing 和 regex inference。保留 project-neutral 路径规范化、安全校验和 exact path/declared-directory matching；不得以“消灭所有 contains/regex”为目标。
-
-验收：`RepoScopeGovernance` 变成薄协调器；不得新增另一个 ScopePolicy 模型；越界读取 cannot-bypass tests 继续成立。
+> ⚠️ **SUPERSEDED by Direction B.** 旧 B1 描述的是 read-authorization 语义
+> （canonical scope 作为 read authorization，ExplorationPolicyEvaluator 作为 read
+> decision owner）。Direction B 已决定 read governance 降级为 telemetry。
+>
+> - 旧 B1 的 PASS / `ENFORCED + PROVEN` 结论**已失效**。
+> - 旧 B1 的目标结构、测试数字、验收条件和”允许提交 checkpoint”许可**均不再有效**。
+> - 历史内容（实施细节、关闭证据、cannot-bypass test 清单）见：
+>   `docs/plans/phase-b0-scope-boundary-characterization.zh-CN.md`、
+>   `docs/plans/__CHECKPOINT__direction-b-b0-rebase-assessment.md`、
+>   Git history（branch `codex/recovery-origin-requirements`）。
+> - **不得作为 Direction B / B1 的实现或验收依据。**
 
 ## Phase C：Context Boundary
 
@@ -227,8 +230,16 @@ filesystem 只验证已知 artifact 的存在和 hash，不通过目录扫描猜
 - 删除的旧逻辑多于新增 glue code；
 - workflow/contract/handler consistency tests 和 full reactor 保持绿色。
 
-## 当前锁定范围
+## 历史锁定范围（旧 B1 checkpoint 时代的许可，现已失效）
 
-允许：审查并提交 B0 文档 checkpoint；在用户显式激活前不修改 scope production。
-
-禁止：提前启动 B1、Phase C Context Engine、Phase D handler 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider 优化或 HTTP/runtime 扩张。
+> ⚠️ **SUPERSEDED**: 以下内容是旧 B1 checkpoint（read-authorization 语义）时代的
+> 许可范围。**该许可现已全部失效。** 不得据此启动或提交 Direction B/B1。
+>
+> 当时的许可：审查并提交旧 B1 checkpoint（read-authorization 语义下的）；独立评估下一 phase readiness。
+>
+> 当时的禁止：在独立 readiness assessment 前启动 Phase C Context Boundary 或 Phase D handler
+> 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider
+> 优化、HTTP/runtime 扩张、tool-call 前 broker 或 write-scope lifecycle。
+>
+> **当前唯一 active objective：Direction B / B0 Rebase Assessment。** B1 尚未启动。
+> B0 review PASS 前禁止任何 production 修改。
