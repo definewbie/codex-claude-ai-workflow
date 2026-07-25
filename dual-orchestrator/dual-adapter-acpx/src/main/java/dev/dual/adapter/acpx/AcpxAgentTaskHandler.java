@@ -264,24 +264,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     compactionMeta,
                     acquisitionDocument
             );
-            if (completion.explorationPolicyFailed()) {
-                return new NodeResult(
-                        "EXPLORATION_POLICY_VIOLATION",
-                        dev.dual.core.workflow.NodeStatus.FAILED,
-                        evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
-                        explorationPolicyFailureFacts(
-                                context,
-                                runDir,
-                                transcriptPath,
-                                resultWithArtifactTimeline,
-                                agent,
-                                session,
-                                runId,
-                                completion
-                        ),
-                        "agent exploration policy failed"
-                );
-            }
             return NodeResult.completed(
                     "completed",
                     evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
@@ -411,35 +393,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         false
                 )
         );
-    }
-
-    private static Map<String, Object> explorationPolicyFailureFacts(
-            TaskContext context,
-            java.nio.file.Path runDir,
-            java.nio.file.Path transcriptPath,
-            AcpxRunResult result,
-            String agent,
-            String session,
-            String runId,
-            AgentRunMetadataWriter.CompletionWriteResult completion
-    ) {
-        var facts = resultFacts(
-                context,
-                runDir,
-                transcriptPath,
-                result,
-                agent,
-                session,
-                runId,
-                null,
-                null,
-                true
-        );
-        facts.put("harness_failure.reason", "EXPLORATION_POLICY_VIOLATION");
-        facts.put("harness_failure.recoverable", false);
-        facts.put("exploration_policy_result", completion.explorationPolicyResult());
-        facts.put("exploration_policy_result_path", completion.explorationPolicyResultPath());
-        return facts;
     }
 
     private static AcpxRunResult appendTimelineEvent(

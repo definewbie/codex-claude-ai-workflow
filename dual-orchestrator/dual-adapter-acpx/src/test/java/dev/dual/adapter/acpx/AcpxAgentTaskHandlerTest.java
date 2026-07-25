@@ -1688,29 +1688,51 @@ class AcpxAgentTaskHandlerTest {
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-explore", definition,
                 readyInstance("intake.claude_brainstorm")));
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("EXPLORATION_POLICY_VIOLATION", result.outcome());
+
+        // Direction B: reads are observation, not authority. The node completes even when
+        // exploration policy detects out-of-scope reads — policy result is telemetry only.
+        assertEquals(NodeStatus.COMPLETED, result.status(),
+                "node must not fail solely for exploration read policy violation (Direction B)");
+        assertFalse("EXPLORATION_POLICY_VIOLATION".equals(result.outcome()),
+                "outcome must not be EXPLORATION_POLICY_VIOLATION (Direction B: reads are not authority)");
 
         var runJson = Files.walk(workstreamDir.resolve("runs"))
                 .filter(path -> path.getFileName().toString().equals("run.json"))
                 .findFirst()
                 .orElseThrow();
         var runMetadata = Files.readString(runJson);
-        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"status\" : \"failed\""), runMetadata);
-        assertTrue(runMetadata.contains("\"failureReason\" : \"EXPLORATION_POLICY_VIOLATION\""), runMetadata);
-        assertTrue(runMetadata.contains("\"DIRECT_READ_FORBIDDEN\""), runMetadata);
+        assertTrue(runMetadata.contains("\"explorationPolicyResult\""),
+                "exploration policy result must still be recorded as telemetry");
         assertTrue(runMetadata.contains("\"agentExplorationPlanPath\" :"), runMetadata);
         assertTrue(runMetadata.contains("exploration-plan-node-intake-claude_brainstorm.json"), runMetadata);
         assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
 
         var root = OBJECT_MAPPER.readTree(runJson.toFile());
-        assertTrue(root.path("executionOutcome").isMissingNode() || root.path("executionOutcome").isNull(),
-                "adapter completion must not declare the unvalidated assistant candidate successful");
+        // Telemetry: the policy violation IS detected and recorded — but does not fail the node.
+        assertEquals("failed", root.path("explorationPolicyResult").path("status").asText(),
+                "explorationPolicyResult.status must be failed (telemetry records the violation)");
+        var polViolations = root.path("explorationPolicyResult").path("violations");
+        assertTrue(polViolations.isArray() && polViolations.size() > 0,
+                "explorationPolicyResult must contain blocking violations (telemetry)");
+        // Authority boundary: the node completes regardless of the read policy violation.
+        assertEquals("completed", root.path("status").asText(),
+                "run.json top-level status must be completed, not failed by exploration policy");
         assertEquals("COMPLETED", root.path("executionAttempt").path("status").asText(),
-                "successful process execution remains completed even when harness policy rejects the node");
+                "successful process execution remains completed");
+        assertTrue(root.path("failureReason").isMissingNode()
+                        || root.path("failureReason").isNull()
+                        || root.path("failureReason").asText().isBlank(),
+                "failureReason must not be set by exploration policy");
+        assertTrue(root.path("recoverable").isMissingNode()
+                        || root.path("recoverable").isNull()
+                        || !root.path("recoverable").asBoolean(),
+                "recoverable must not be triggered by exploration policy");
+        assertFalse(runMetadata.contains("EXPLORATION_POLICY_VIOLATION"),
+                "no EXPLORATION_POLICY_VIOLATION must appear anywhere in run.json");
+        assertFalse(runMetadata.contains("EXPLORATION_POLICY_DENIED"),
+                "no EXPLORATION_POLICY_DENIED must appear anywhere in run.json");
         assertEquals(0, root.path("adapterSignals").size(),
-                "policy failure must not synthesize PROCESS_STALLED or another adapter signal");
+                "no adapter signals from exploration policy");
     }
 
     @Test

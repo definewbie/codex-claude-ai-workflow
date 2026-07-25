@@ -297,8 +297,7 @@ final class AgentRunMetadataWriter {
         var explorationPolicyResult = explorationPolicyResult(governanceReportPath);
         var explorationPolicyResultPath = explorationPolicyResultPath(workspaceRoot, governanceReportPath);
         var agentExplorationPlanPath = agentExplorationPlanPath(workspaceRoot, governanceReportPath);
-        var policyFailure = explorationPolicyFailure(explorationPolicyResult);
-        var topLevelFailure = failure == null ? policyFailure : failure;
+        var topLevelFailure = failure;
         var attempt = executionAttempt(
                 runId,
                 workstreamId,
@@ -442,15 +441,13 @@ final class AgentRunMetadataWriter {
         ));
         return new CompletionWriteResult(
                 explorationPolicyResult,
-                relativeOrNull(workspaceRoot, explorationPolicyResultPath),
-                policyFailure != null
+                relativeOrNull(workspaceRoot, explorationPolicyResultPath)
         );
     }
 
     record CompletionWriteResult(
             Map<String, Object> explorationPolicyResult,
-            String explorationPolicyResultPath,
-            boolean explorationPolicyFailed
+            String explorationPolicyResultPath
     ) {
     }
 
@@ -575,18 +572,6 @@ final class AgentRunMetadataWriter {
         } catch (IOException | RuntimeException ignored) {
             return null;
         }
-    }
-
-    private AcpxFailureClassifier.AcpxFailure explorationPolicyFailure(Map<String, Object> explorationPolicyResult) {
-        if (explorationPolicyResult == null || !"failed".equals(text(explorationPolicyResult.get("status")))) {
-            return null;
-        }
-        return new AcpxFailureClassifier.AcpxFailure(
-                "EXPLORATION_POLICY_VIOLATION",
-                "agent exploration policy failed; inspect explorationPolicyResult for violations",
-                false,
-                false
-        );
     }
 
     private Path explorationPolicyResultPath(Path workspaceRoot, Path governanceReportPath) {

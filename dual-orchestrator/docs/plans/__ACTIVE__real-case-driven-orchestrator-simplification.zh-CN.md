@@ -8,19 +8,23 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B0 scope boundary characterization 已完成。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Direction B / B0 Rebase Assessment
+## Current Active Step: Direction B / B1 Subtraction — PASS (ENFORCED + PROVEN)
 
-> Objective: 从当前 worktree（`codex/recovery-origin-requirements`, HEAD `3fe084cc`）审计 read observation → NodeResult authority 路径，产出 B0 处置矩阵和 B1-first 判定。
+> B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 >
-> Checkpoint: `docs/plans/__CHECKPOINT__direction-b-b0-rebase-assessment.md`
+> B1 objective: 删除 read observation → NodeResult failure 的全部 authority path。
+> 保留 exploration telemetry。保留 provider/artifact/transport failure boundaries。
 >
-> Threat model: 默认开发 profile 控制最终代码变更（write boundary），不把 post-run read policy 描述为安全隔离。
+> **B1 = PASS / ENFORCED + PROVEN。**
+> - 删除了 handler + validator + metadata writer 三条 read→FAILED authority path。
+> - explorationPolicyResult 仍完整记录为 telemetry。
+> - provider/artifact/transport failure boundaries 不受影响。
+> - cannot-bypass tests: agent 读越界文件 + valid artifact → COMPLETED;
+>   governance report + run.json byte-for-byte 不变。
+> - dual-runtime 442/0; dual-adapter-acpx 295/0; git diff --check clean。
+> - production sweep: 0 EXPLORATION_POLICY authority paths。
 >
-> **B1 尚未启动。** B0 review PASS 前禁止任何 production 修改。
->
-> 下面的旧 Phase B（B1 Typed Scope Subtraction 等）描述的是 read-authorization 语义，已被 Direction B **SUPERSEDED**。其历史内容保留作为审计参考，不再作为执行目标。
->
-> **不提交、不进入 B1，等待 review。**
+> **B2 = NOT ACTIVE。** 等待独立 readiness assessment。
 
 ## 执行纪律
 

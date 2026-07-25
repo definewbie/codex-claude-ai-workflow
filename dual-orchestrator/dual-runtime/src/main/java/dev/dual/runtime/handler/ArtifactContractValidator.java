@@ -208,13 +208,6 @@ public final class ArtifactContractValidator {
             }
         });
 
-        var explorationFailure = refreshExplorationPolicyProjection(root, result, validatedDocument);
-        if (explorationFailure.isPresent()) {
-            return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
-                    envelope,
-                    explorationFailure.get());
-        }
-
         var augmented = new LinkedHashMap<String, Object>();
         augmented.putAll(result.result());
         augmented.put("decision", envelope.result().decision());
@@ -560,80 +553,6 @@ public final class ArtifactContractValidator {
     private static String requiredArtifactTypeOrDefault(NodeDefinition nodeDefinition) {
         var required = requiredArtifactType(nodeDefinition);
         return required == null || required.isBlank() ? "agent_output_contract" : required;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Optional<ContractViolation> refreshExplorationPolicyProjection(
-            Path workspaceRoot,
-            NodeResult result,
-            AgentOutputContractDocument validatedContract
-    ) {
-        var runMetadataRef = text(result.result().get("run_metadata"));
-        if (runMetadataRef.isBlank()) {
-            return Optional.empty();
-        }
-        var root = workspaceRoot.toAbsolutePath().normalize();
-        var runMetadataPath = root.resolve(runMetadataRef).normalize();
-        if (!runMetadataPath.startsWith(root) || !Files.isRegularFile(runMetadataPath)) {
-            return Optional.empty();
-        }
-        try {
-            var runJson = (ObjectNode) OBJECT_MAPPER.readTree(runMetadataPath.toFile());
-            var governanceReportPath = resolveWorkspaceRef(
-                    root,
-                    firstNonBlank(
-                            runJson.path("contextGovernanceActualReportPath").asText(""),
-                            runJson.path("contextGovernanceReportPath").asText("")
-                    )
-            );
-            if (governanceReportPath.isEmpty() || !Files.isRegularFile(governanceReportPath.get())) {
-                return Optional.empty();
-            }
-            var report = (ObjectNode) OBJECT_MAPPER.readTree(governanceReportPath.get().toFile());
-            var explorationPlanPath = resolveWorkspaceRef(root, report.path("agentExplorationPlanPath").asText(""));
-            var explorationPlan = explorationPlanPath
-                    .filter(Files::isRegularFile)
-                    .map(path -> readMap(path).orElse(Map.<String, Object>of()))
-                    .orElse(Map.of());
-            var actualDirectReads = stringList(fieldOrLegacy(report, "actualDirectReadFiles", "actualReadFiles"));
-            var actualCapabilities = capabilityKinds(report);
-            var actualDirectReadKinds = stringMap(fieldOrLegacy(report, "actualDirectReadFileKinds", "actualReadFileKinds"));
-            var actualCapabilityUsages = mapList(OBJECT_MAPPER.convertValue(report.path("actualCapabilityUsages"), Object.class));
-            var refreshed = ExplorationPolicyEvaluator.evaluate(
-                    explorationPlan,
-                    actualDirectReads,
-                    actualCapabilities,
-                    validatedContract.scopeExpansionRequest().requestedPaths(),
-                    actualDirectReadKinds,
-                    actualCapabilityUsages
-            );
-            report.set("explorationPolicyResult", OBJECT_MAPPER.valueToTree(refreshed));
-            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(governanceReportPath.get().toFile(), report);
-
-            var resultPath = resolveWorkspaceRef(root, report.path("explorationPolicyResultPath").asText(""));
-            if (resultPath.isPresent()) {
-                Files.createDirectories(resultPath.get().getParent());
-                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(resultPath.get().toFile(), refreshed);
-            }
-            runJson.set("explorationPolicyResult", OBJECT_MAPPER.valueToTree(refreshed));
-            resultPath.ifPresent(path -> runJson.put("explorationPolicyResultPath", root.relativize(path).toString()));
-            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(runMetadataPath.toFile(), runJson);
-            if (explorationPolicyFailed(refreshed)) {
-            return Optional.of(ContractViolation.of(
-                        "EXPLORATION_POLICY_DENIED",
-                        "Agent exploration exceeded the typed exploration plan boundary.",
-                        Map.of("explorationPolicyResult", refreshed)
-                ));
-            }
-        } catch (Exception ignored) {
-            // Contract validation remains authoritative. Exploration projection is
-            // refreshed opportunistically after the validated sidecar exists.
-        }
-        return Optional.empty();
-    }
-
-    private static boolean explorationPolicyFailed(Map<String, Object> result) {
-        return "failed".equals(text(result.get("status")));
     }
 
     private static Optional<Path> resolveWorkspaceRef(Path root, String ref) {

@@ -63,6 +63,56 @@ class ExplorationPolicyEvaluatorTest {
     }
 
     @Test
+    void emptyCanonicalScopeDoesNotFlagReadsWhenNoAllowedScope() {
+        // Direction B: reads are observation, not authority. When allowedDirectReadFiles is empty,
+        // the out-of-scope check is not entered — reads are not flagged as violations.
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "design",
+                "design.claude_design",
+                "node-001",
+                "iter-001",
+                List.of(),
+                List.of(),
+                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "design.claude_design", List.of())
+        );
+
+        var result = ExplorationPolicyEvaluator.evaluate(
+                plan.toDocument(),
+                List.of("src/unapproved.java")
+        );
+
+        assertEquals("pass", result.get("status"),
+                "empty allowedDirectReadFiles skips the out-of-scope check (Direction B: reads are observation)");
+    }
+
+    @Test
+    void emptyCanonicalScopeExpansionNotCheckedWhenNoAllowedScope() {
+        // Direction B: when allowedDirectReadFiles is empty, the out-of-scope check is skipped
+        // entirely (reads are observation). Scope expansion requests have no effect on read authority.
+        var plan = ExplorationPlan.fromScope(
+                "ws-001",
+                "design",
+                "design.claude_design",
+                "node-001",
+                "iter-001",
+                List.of(),
+                List.of(),
+                AgentCapabilityCatalog.fromAvailableCommands("ws-001", "design.claude_design", List.of())
+        );
+
+        var result = ExplorationPolicyEvaluator.evaluate(
+                plan.toDocument(),
+                List.of("src/requested.java", "src/sibling.java"),
+                List.of("direct_file_read"),
+                List.of("src/requested.java")
+        );
+
+        assertEquals("pass", result.get("status"),
+                "empty allowedDirectReadFiles skips out-of-scope check (Direction B: reads are observation)");
+    }
+
+    @Test
     void intakeScopeExpansionDoesNotPermitDirectReadWhenRunnerForbidsIt() {
         var plan = ExplorationPlan.fromScope(
                 "ws-001",
