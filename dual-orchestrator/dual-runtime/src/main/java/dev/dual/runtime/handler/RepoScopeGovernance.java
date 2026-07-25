@@ -154,7 +154,7 @@ final class RepoScopeGovernance {
         builder.append("## Repo Scope Guidance\n\n");
         builder.append("This section is a passive harness guardrail. It guides repository exploration but does not replace task contract, artifact validation, or human approval.\n\n");
         builder.append("- Stage: ").append(text(documents.policy().get("stageId"))).append("\n");
-        builder.append("- Scope policy: ").append(text(documents.policy().get("scopeExceedPolicy"))).append("\n");
+        builder.append("- Scope policy: ").append(text(documents.agentExplorationPlan().get("failureMode"))).append("\n");
         if (compact) {
             appendCompactMarkdownGuidance(builder, documents, workspaceRoot);
             return;
@@ -264,9 +264,10 @@ final class RepoScopeGovernance {
             String stageId,
             String targetNodeDefinitionId
     ) throws IOException {
+        var contractScope = contractScopePaths(workstreamDir, objectMapper);
         var candidates = new LinkedHashSet<String>();
         addInputRefs(candidates, context);
-        addContractPaths(candidates, workstreamDir, objectMapper);
+        candidates.addAll(contractScope);
         addEvidenceFiles(candidates, manifest);
         addGitChangedFiles(candidates, workstreamDir);
         var requirement = readRequirement(workstreamDir);
@@ -274,7 +275,7 @@ final class RepoScopeGovernance {
         addRepoMapMatches(candidates, repoMap, requirementTerms);
         var readCandidates = bounded(candidates, MAX_SCOPE_FILES);
         var writeCandidates = stageAllowsBusinessWrites(stageId)
-                ? readCandidates.stream().filter(RepoScopeGovernance::looksEditable).limit(MAX_SCOPE_FILES).toList()
+                ? contractScope
                 : List.<String>of();
         var previousReads = previousReadCounts(workstreamDir, "", objectMapper);
         var evidenceFiles = evidenceFiles(workstreamDir, objectMapper);
@@ -290,9 +291,9 @@ final class RepoScopeGovernance {
         document.put("builderNodeDefinitionId", context.definition().id());
         document.put("targetNodeDefinitionId", targetNodeDefinitionId);
         document.put("iterationId", context.instance().iterationId());
-        document.put("source", "task_contract+evidence_manifest+git_evidence+repo_map");
+        document.put("source", "task_contract_scope+context_recommendations");
         document.put("readCandidates", readCandidates);
-        document.put("contractScopeCandidates", contractScopeCandidates(readCandidates));
+        document.put("contractScopeCandidates", contractScope);
         document.put("seedEvidenceDigests", seedEvidenceDigests(workspaceRoot, readCandidates, requirementTerms));
         document.put("writeCandidates", writeCandidates);
         document.put("previouslyReadFiles", previousReads.keySet().stream().limit(MAX_SCOPE_FILES).toList());
@@ -313,7 +314,6 @@ final class RepoScopeGovernance {
             Map<String, Object> plan,
             String targetNodeDefinitionId
     ) {
-        var readCandidates = textList(plan.get("readCandidates"));
         var writeCandidates = textList(plan.get("writeCandidates"));
         var previouslyReadFiles = textList(plan.get("previouslyReadFiles"));
         var policy = new LinkedHashMap<String, Object>();
@@ -326,7 +326,7 @@ final class RepoScopeGovernance {
         policy.put("builderNodeDefinitionId", context.definition().id());
         policy.put("targetNodeDefinitionId", targetNodeDefinitionId);
         policy.put("iterationId", context.instance().iterationId());
-        policy.put("readScope", readCandidates);
+        policy.put("readScope", textList(plan.get("readCandidates")));
         policy.put("writeScope", writeCandidates);
         policy.put("previouslyReadFiles", previouslyReadFiles);
         policy.put("readReusePolicy", Map.of(
@@ -342,7 +342,6 @@ final class RepoScopeGovernance {
                 "extraReadFiles", stageAllowsBroadExploration(stageId) ? 12 : 6,
                 "extraWriteFiles", stageAllowsBusinessWrites(stageId) ? 3 : 0
         ));
-        policy.put("scopeExceedPolicy", scopeExceedPolicy(stageId));
         policy.put("generatedAt", Instant.now().toString());
         return policy;
     }
@@ -636,20 +635,22 @@ final class RepoScopeGovernance {
         }
     }
 
-    private static void addContractPaths(Set<String> candidates, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+    private static List<String> contractScopePaths(Path workstreamDir, ObjectMapper objectMapper) throws IOException {
         var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
         if (!Files.isRegularFile(contractPath)) {
-            return;
+            return List.of();
         }
+        var paths = new LinkedHashSet<String>();
         var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
         if (contract.scope() != null) {
             for (var item : contract.scope().included()) {
-                addPathCandidate(candidates, item.path());
+                var path = text(item.path());
+                if (!path.isBlank()) {
+                    paths.add(path);
+                }
             }
         }
-        for (var item : contract.acceptanceCriteria()) {
-            addPathCandidate(candidates, item);
-        }
+        return List.copyOf(paths);
     }
 
     private static void addEvidenceFiles(Set<String> candidates, EvidenceManifest manifest) {
@@ -712,9 +713,6 @@ final class RepoScopeGovernance {
         if (normalizedPath.startsWith("docs/")) {
             score += 1;
         }
-        if (looksEditable(normalizedPath)) {
-            score += 1;
-        }
         return score;
     }
 
@@ -731,7 +729,7 @@ final class RepoScopeGovernance {
         return terms.stream().toList();
     }
 
-    private static List<String> contractScopeCandidates(List<String> readCandidates) {
+    private static List<String> seedDigestCandidates(List<String> readCandidates) {
         if (readCandidates == null || readCandidates.isEmpty()) {
             return List.of();
         }
@@ -745,10 +743,10 @@ final class RepoScopeGovernance {
     private static List<Map<String, Object>> seedEvidenceDigests(
             Path workspaceRoot,
             List<String> readCandidates,
-            List<String> requirementTerms
+        List<String> requirementTerms
     ) throws IOException {
         var digests = new ArrayList<Map<String, Object>>();
-        for (var path : contractScopeCandidates(readCandidates)) {
+        for (var path : seedDigestCandidates(readCandidates)) {
             if (digests.size() >= MAX_SEED_DIGEST_FILES) {
                 break;
             }
@@ -852,13 +850,6 @@ final class RepoScopeGovernance {
         return "source";
     }
 
-    private static boolean looksEditable(String path) {
-        return !path.startsWith("docs/")
-                && !path.endsWith(".md")
-                && !path.endsWith(".lock")
-                && !path.contains("/generated/");
-    }
-
     private static boolean stageAllowsBusinessWrites(String stageId) {
         return "implement".equals(stageId) || "self_test".equals(stageId);
     }
@@ -873,15 +864,6 @@ final class RepoScopeGovernance {
             base.add("business source writes");
         }
         return List.copyOf(base);
-    }
-
-    private static String scopeExceedPolicy(String stageId) {
-        return switch (stageId) {
-            case "intake", "acceptance" -> "block";
-            case "delivery" -> "block_business_code_edits";
-            case "design", "plan", "implement", "self_test" -> "warn";
-            default -> "record_only";
-        };
     }
 
     private static String stageId(TaskHandler.TaskContext context) {

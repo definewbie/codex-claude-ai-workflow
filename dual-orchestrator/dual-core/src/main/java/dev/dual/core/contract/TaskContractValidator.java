@@ -1,14 +1,14 @@
 package dev.dual.core.contract;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
+import java.util.StringJoiner;
 
 public final class TaskContractValidator {
-    private static final Pattern FILE_REF = Pattern.compile("(?i).+\\.(md|txt|json|ya?ml|vue|ts|js|java|py|sh)$");
-
     private TaskContractValidator() {}
 
     public static List<String> validate(TaskContract contract) {
@@ -79,13 +79,13 @@ public final class TaskContractValidator {
             if (ref.path().startsWith("new:")) {
                 errors.add("scope.included legacy new: prefix is not allowed: " + ref.path());
             }
-            if (!FILE_REF.matcher(ref.path()).matches()) {
-                errors.add("scope.included is not a supported file path: " + ref.path());
+            if (!isCanonicalPath(ref.path())) {
+                errors.add("scope.included is not a canonical relative file path: " + ref.path());
             }
             if (containsMetadataNoise(ref.path())) {
                 errors.add("scope.included contains ledger/context metadata: " + ref.path());
             }
-            if (!seen.add(normalized(ref.path()))) {
+            if (!seen.add(ref.path())) {
                 errors.add("scope.included contains duplicate path: " + ref.path());
             }
         }
@@ -94,10 +94,11 @@ public final class TaskContractValidator {
     private static void validateScopeOverlap(TaskContract.Scope scope, List<String> errors) {
         var excluded = new HashSet<String>();
         for (var value : scope.excluded()) {
-            excluded.add(normalized(value));
+            excluded.add(value == null ? "" : value.trim());
         }
         for (var included : scope.included()) {
-            if (included != null && excluded.contains(normalized(included.path()))) {
+            if (included != null && included.path() != null
+                    && excluded.contains(included.path().trim())) {
                 errors.add("scope.included overlaps scope.excluded: " + included.path());
             }
         }
@@ -130,6 +131,53 @@ public final class TaskContractValidator {
                 || lower.startsWith("total:")
                 || lower.contains("context package")
                 || lower.contains("context governance");
+    }
+
+    /**
+     * Strict canonical path check for scope.included entries. Uses canonical
+     * representation equality: the input must equal its own normalized Path form.
+     * Rejects non-canonical input rather than silently normalizing — B2 comparison
+     * requires byte-identical path identity between TaskContract scope and Git
+     * changed-files.
+     *
+     * Accepted: {@code src/a.py}, {@code Dockerfile}, {@code docs/API contract.md}
+     * Rejected: {@code ./src/a.py}, {@code src/./a.py}, {@code src//a.py},
+     *           {@code src/a/} (trailing slash), {@code src/a.py } (whitespace),
+     *           absolute, traversal, backslash.
+     */
+    public static boolean isCanonicalPath(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        if (value.indexOf('\0') >= 0 || value.contains("\\")) {
+            return false;
+        }
+        if (value.trim().length() != value.length()) {
+            return false;
+        }
+        if (value.endsWith("/") || value.matches("^[A-Za-z]:/.*")) {
+            return false;
+        }
+        try {
+            var path = Path.of(value);
+            if (path.isAbsolute()) {
+                return false;
+            }
+            for (var segment : path) {
+                var name = segment.toString();
+                if ("..".equals(name) || ".".equals(name)
+                        || ".agent".equals(name) || ".git".equals(name)) {
+                    return false;
+                }
+            }
+            var canonical = new StringJoiner("/");
+            for (var segment : path.normalize()) {
+                canonical.add(segment.toString());
+            }
+            return path.getNameCount() > 0 && canonical.toString().equals(value);
+        } catch (InvalidPathException ignored) {
+            return false;
+        }
     }
 
     private static String normalized(String value) {

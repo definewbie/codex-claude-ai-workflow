@@ -5,13 +5,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import dev.dual.core.contract.TaskContract;
+import dev.dual.core.contract.TaskContractValidator;
 
 final class TaskContractProposalValidator {
-    private static final Pattern SUPPORTED_FILE_REF = Pattern.compile("(?i).+\\.(md|txt|json|ya?ml|vue|ts|js|java|py|sh)$");
-
     List<String> validate(TaskContractProposal proposal, Path workspaceRoot) {
         var errors = new ArrayList<String>();
         if (!"task_contract_proposal".equals(proposal.artifactType())) {
@@ -79,13 +77,13 @@ final class TaskContractProposalValidator {
         var excluded = new HashSet<String>();
         for (var value : scope.excluded()) {
             if (!isBlank(value)) {
-                excluded.add(value.trim().toLowerCase());
+                excluded.add(value.trim());
             }
         }
         for (var included : scope.included()) {
             if (included != null
                     && !isBlank(included.path())
-                    && excluded.contains(included.path().trim().toLowerCase())) {
+                    && excluded.contains(included.path())) {
                 errors.add("scope.included overlaps scope.excluded: " + included.path());
             }
         }
@@ -112,7 +110,7 @@ final class TaskContractProposalValidator {
             if (entry.operation() == null) {
                 errors.add("scope.included operation is required: " + entry.path());
             }
-            if (!seen.add(entry.path().trim().toLowerCase())) {
+            if (!seen.add(entry.path())) {
                 errors.add("scope.included contains duplicate path: " + entry.path());
             }
         }
@@ -142,17 +140,17 @@ final class TaskContractProposalValidator {
             errors.add("scope.included legacy new: prefix is not allowed: " + ref.path());
             return;
         }
-        var normalizedRef = ref.path().trim();
-        var path = workspaceRoot.resolve(normalizedRef).normalize();
+        if (!TaskContractValidator.isCanonicalPath(ref.path())) {
+            errors.add("scope.included is not a canonical relative file path: " + ref.path());
+            return;
+        }
+        var path = workspaceRoot.resolve(ref.path()).normalize();
         if (!path.startsWith(workspaceRoot.toAbsolutePath().normalize()) && workspaceRoot.isAbsolute()) {
             errors.add("scope.included escapes workspace root: " + ref.path());
             return;
         }
-        if (ref.operation() == TaskContract.ScopeOperation.MODIFY && Files.isDirectory(path)) {
-            return;
-        }
-        if (!SUPPORTED_FILE_REF.matcher(normalizedRef).matches()) {
-            errors.add("scope.included is not a supported workspace path: " + ref.path());
+        if (Files.isDirectory(path)) {
+            errors.add("scope.included must be an exact file path, not a directory: " + ref.path());
             return;
         }
         if (ref.operation() == TaskContract.ScopeOperation.MODIFY && !Files.exists(path)) {

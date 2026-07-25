@@ -716,10 +716,14 @@ class ContextBuildPackageHandlerTest {
                 wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("src/routed-change.java"),
-                "routed, ledger-bound evidence should contribute changed files");
+                "routed, ledger-bound evidence should contribute changed files as recommendations");
         assertFalse(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("secrets/unrouted-scope.txt"),
-                "unrouted historical sidecars must not expand exploration scope");
+                "unrouted historical sidecars must not contribute to any scope");
+        var scopeCandidates = plan.get("contractScopeCandidates");
+        assertTrue(scopeCandidates instanceof List<?> scopeList
+                        && !scopeList.contains("secrets/unrouted-scope.txt"),
+                "unrouted evidence must not appear in contract scope candidates");
     }
 
     @Test
@@ -1695,7 +1699,8 @@ class ContextBuildPackageHandlerTest {
 
         var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertEquals("implement", policy.get("stageId"));
-        assertEquals("warn", policy.get("scopeExceedPolicy"));
+        assertFalse(policy.containsKey("scopeExceedPolicy"),
+                "stage scope guidance must not duplicate the exploration plan failure-mode owner");
         assertEquals("ctx.test", policy.get("builderNodeDefinitionId"));
         assertEquals("next.node", policy.get("targetNodeDefinitionId"));
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
@@ -1745,6 +1750,8 @@ class ContextBuildPackageHandlerTest {
         assertEquals("agent_exploration_plan", explorationPlan.get("artifactType"));
         assertEquals("edit_execution", explorationPlan.get("explorationIntent"));
         assertEquals("warn", explorationPlan.get("failureMode"));
+        assertTrue(explorationPlan.get("allowedDirectReadFiles") instanceof List<?> allowedReads,
+                "allowedDirectReadFiles telemetry must be present");
         assertTrue(explorationPlan.get("expectedEditFiles") instanceof List<?> edits
                         && edits.contains("miniprogram/src/pages/treatment-record/index.vue"),
                 "exploration plan should carry expected edit files for post-run evaluation");
@@ -1774,8 +1781,8 @@ class ContextBuildPackageHandlerTest {
 
         Map<String, String> expected = Map.of(
                 "product_review", "block",
-                "architecture_review", "warn",
-                "plan_review", "warn",
+                "architecture_review", "block",
+                "plan_review", "block",
                 "implementation", "warn",
                 "acceptance", "block"
         );
@@ -1784,12 +1791,15 @@ class ContextBuildPackageHandlerTest {
 
             assertEquals(NodeStatus.COMPLETED, result.status(), entry.getKey());
             var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
-            assertEquals(entry.getValue(), policy.get("scopeExceedPolicy"), entry.getKey());
+            assertFalse(policy.containsKey("scopeExceedPolicy"), entry.getKey());
+            var explorationPlan = objectMapper.readValue(
+                    wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
+            assertEquals(entry.getValue(), explorationPlan.get("failureMode"), entry.getKey());
         }
     }
 
     @Test
-    void governedIntakePackageDerivesConcreteScopeCandidatesFromRepoMap() throws Exception {
+    void governedIntakePackageKeepsRepoMapMatchesAsRecommendationsOnly() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), """
                 # 复诊准备清单与缺失资料提醒闭环
@@ -1822,12 +1832,118 @@ class ContextBuildPackageHandlerTest {
                         && candidates.contains("miniprogram/src/pages/follow-up-summary/index.vue"),
                 "Chinese requirements with English domain anchors should produce concrete repo-map candidates");
         assertTrue(plan.get("contractScopeCandidates") instanceof List<?> scopeCandidates
-                        && scopeCandidates.contains("backend/app/api/treatment_events.py")
-                        && scopeCandidates.contains("miniprogram/src/pages/follow-up-summary/index.vue"),
-                "contract scope candidates should be typed paths the intake artifact can legally cite");
+                        && scopeCandidates.isEmpty(),
+                "repo-map recommendations must not masquerade as canonical contract scope");
+        var explorationPlan = objectMapper.readValue(
+                wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
+        assertTrue(explorationPlan.get("allowedDirectReadFiles") instanceof List<?> allowed,
+                "allowedDirectReadFiles telemetry must be present");
         assertTrue(plan.get("seedEvidenceDigests") instanceof List<?> digests
                         && !digests.isEmpty(),
                 "intake should receive bounded seed evidence instead of needing direct Read");
+    }
+
+    @Test
+    void observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts/git-evidence"));
+        Files.writeString(wsDir.resolve("requirement.md"),
+                "Inspect src/recommended.rs and src/observed.go.", StandardCharsets.UTF_8);
+        writeFile("src/allowed.java", "class Allowed {}\n");
+        writeFile("src/recommended.rs", "pub fn recommended() {}\n");
+        writeFile("src/observed.go", "package observed\n");
+        Files.writeString(wsDir.resolve("artifacts/git-evidence/changed-files.txt"),
+                "src/observed.go\n", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id": "task-scope",
+                  "version": 1,
+                  "created_at": "2026-07-23T00:00:00Z",
+                  "objective": "Keep change intent contract-owned.",
+                  "status": "READY_FOR_REVIEW",
+                  "scope": {
+                    "included": [
+                      {"path": "src/allowed.java", "operation": "MODIFY"},
+                      {"path": "docs/API contract.md", "operation": "CREATE"}
+                    ],
+                    "excluded": []
+                  },
+                  "acceptance_criteria": ["Allowed file remains in change boundary", "Observed files do not expand change intent"],
+                  "test_requirements": ["Run scope tests"],
+                  "non_goals": [],
+                  "constraints": ["Do not widen scope"],
+                  "risk_areas": [],
+                  "ambiguity_notes": [],
+                  "human_questions": [],
+                  "compilation_pass": 1,
+                  "source": {"raw_request_ref": "requirement.md", "created_by": "test"}
+                }
+                """, StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var relevancePlan = objectMapper.readValue(
+                wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertTrue(relevancePlan.get("readCandidates") instanceof List<?> candidates
+                        && candidates.contains("src/recommended.rs")
+                        && candidates.contains("src/observed.go"),
+                "heuristic and observed files may remain visible as recommendations");
+        assertEquals(
+                List.of("src/allowed.java", "docs/API contract.md"),
+                relevancePlan.get("contractScopeCandidates"));
+
+        var explorationPlan = objectMapper.readValue(
+                wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
+        var policy = objectMapper.readValue(
+                wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+        assertEquals(
+                List.of("src/allowed.java", "docs/API contract.md"),
+                policy.get("writeScope"),
+                "only canonical TaskContract.scope may define write candidates");
+        assertTrue(explorationPlan.get("allowedDirectReadFiles") instanceof List<?> allowed,
+                "allowedDirectReadFiles telemetry must be present");
+    }
+
+    @Test
+    void canonicalScopeIsNotTruncatedByRecommendationLimit() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Use the declared scope.", StandardCharsets.UTF_8);
+        var included = new java.util.ArrayList<Map<String, Object>>();
+        for (var index = 0; index < 30; index++) {
+            included.add(Map.of("path", "src/file-" + index + ".go", "operation", "CREATE"));
+        }
+        var contract = new LinkedHashMap<String, Object>();
+        contract.put("id", "task-many-paths");
+        contract.put("version", 1);
+        contract.put("created_at", "2026-07-23T00:00:00Z");
+        contract.put("objective", "Keep every declared path.");
+        contract.put("status", "READY_FOR_REVIEW");
+        contract.put("scope", Map.of("included", included, "excluded", List.of()));
+        contract.put("acceptance_criteria", List.of("All paths remain in change boundary", "No recommendation truncation"));
+        contract.put("test_requirements", List.of("Run scope tests"));
+        contract.put("non_goals", List.of());
+        contract.put("constraints", List.of("Do not truncate canonical scope"));
+        contract.put("risk_areas", List.of());
+        contract.put("ambiguity_notes", List.of());
+        contract.put("human_questions", List.of());
+        contract.put("compilation_pass", 1);
+        contract.put("source", Map.of("raw_request_ref", "requirement.md", "created_by", "test"));
+        objectMapper.writeValue(wsDir.resolve("artifacts/task-contract.json").toFile(), contract);
+
+        var result = handler.execute(ctx("implementation", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var relevancePlan = objectMapper.readValue(
+                wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertTrue(relevancePlan.get("contractScopeCandidates") instanceof List<?> scope
+                        && scope.size() == 30
+                        && scope.contains("src/file-29.go"),
+                "canonical contract scope must not inherit the 24-file recommendation limit");
+        var policy = objectMapper.readValue(
+                wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+        assertTrue(policy.get("writeScope") instanceof List<?> writeScope
+                        && writeScope.size() == 30,
+                "writeScope must carry all contract scope entries");
     }
 
     @Test

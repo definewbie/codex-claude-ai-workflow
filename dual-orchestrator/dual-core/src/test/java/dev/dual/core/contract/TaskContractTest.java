@@ -156,8 +156,8 @@ class TaskContractTest {
                 Instant.now(),
                 "Implement feature",
                 new TaskContract.Scope(
-                        List.of(entry("not-a-file-ref", TaskContract.ScopeOperation.MODIFY)),
-                        List.of("not-a-file-ref")),
+                        List.of(entry("../outside", TaskContract.ScopeOperation.MODIFY)),
+                        List.of("../outside")),
                 List.of("Only one criterion"),
                 List.of(),
                 List.of(),
@@ -175,8 +175,24 @@ class TaskContractTest {
         assertTrue(errors.stream().anyMatch(error -> error.contains("at least two acceptance criteria")));
         assertTrue(errors.stream().anyMatch(error -> error.contains("testRequirements")));
         assertTrue(errors.stream().anyMatch(error -> error.contains("constraints or nonGoals")));
-        assertTrue(errors.stream().anyMatch(error -> error.contains("not a supported file path")));
+        assertTrue(errors.stream().anyMatch(error -> error.contains("not a canonical relative file path")));
         assertTrue(errors.stream().anyMatch(error -> error.contains("overlaps")));
+    }
+
+    @Test
+    void validateAcceptsProjectNeutralPathsAndRejectsInternalOrEscapingPaths() {
+        assertTrue(TaskContractValidator.isCanonicalPath("src/lib.rs"));
+        assertTrue(TaskContractValidator.isCanonicalPath("cmd/server/main.go"));
+        assertTrue(TaskContractValidator.isCanonicalPath("Dockerfile"));
+        assertTrue(TaskContractValidator.isCanonicalPath("docs/API contract.md"));
+
+        assertFalse(TaskContractValidator.isCanonicalPath("/etc/passwd"));
+        assertFalse(TaskContractValidator.isCanonicalPath("C:/Windows/System32"));
+        assertFalse(TaskContractValidator.isCanonicalPath("."));
+        assertFalse(TaskContractValidator.isCanonicalPath("../outside"));
+        assertFalse(TaskContractValidator.isCanonicalPath("src/../../outside"));
+        assertFalse(TaskContractValidator.isCanonicalPath(".agent/workstreams/ws/run.json"));
+        assertFalse(TaskContractValidator.isCanonicalPath(".git/config"));
     }
 
     @Test
@@ -222,5 +238,62 @@ class TaskContractTest {
 
     private static TaskContract.ScopeEntry entry(String path, TaskContract.ScopeOperation operation) {
         return new TaskContract.ScopeEntry(path, operation);
+    }
+
+    @Test
+    void caseDifferentPathsAreNotDuplicates() {
+        var contract = new TaskContract(
+                "tc-1", 1, java.time.Instant.parse("2026-07-24T00:00:00Z"),
+                "Case sensitivity test",
+                new TaskContract.Scope(
+                        List.of(
+                                entry("src/Foo.java", TaskContract.ScopeOperation.MODIFY),
+                                entry("src/foo.java", TaskContract.ScopeOperation.MODIFY)
+                        ),
+                        List.of()
+                ),
+                List.of("criterion"), List.of("test"),
+                List.of(), List.of(),
+                List.of(), List.of(), List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("req-1", "agent-1")
+        );
+
+        var errors = TaskContractValidator.validate(contract);
+        assertFalse(errors.stream().anyMatch(e -> e.contains("duplicate")),
+                "case-sensitive filesystems must treat src/Foo.java and src/foo.java as distinct: " + errors);
+    }
+
+    @Test
+    void nonCanonicalPathsAreRejected() {
+        assertFalse(TaskContractValidator.isCanonicalPath("./src/a.py"),
+                "leading ./ must be rejected");
+        assertFalse(TaskContractValidator.isCanonicalPath("src/./a.py"),
+                "interleaved . segment must be rejected");
+        assertFalse(TaskContractValidator.isCanonicalPath("src//a.py"),
+                "double slash must be rejected");
+        assertFalse(TaskContractValidator.isCanonicalPath("src/a/"),
+                "trailing slash must be rejected");
+        assertFalse(TaskContractValidator.isCanonicalPath(" src/a.py"),
+                "leading whitespace must be rejected");
+        assertFalse(TaskContractValidator.isCanonicalPath("src/a.py "),
+                "trailing whitespace must be rejected");
+        assertTrue(TaskContractValidator.isCanonicalPath("src/a.py"),
+                "simple relative path accepted");
+        assertTrue(TaskContractValidator.isCanonicalPath("Dockerfile"),
+                "extensionless path accepted");
+        assertTrue(TaskContractValidator.isCanonicalPath("docs/API contract.md"),
+                "path with space in filename accepted");
+    }
+
+    @Test
+    void extensionlessAndUnusualPathsAccepted() {
+        assertTrue(TaskContractValidator.isCanonicalPath("Dockerfile"),
+                "no-extension accepted");
+        assertTrue(TaskContractValidator.isCanonicalPath("Makefile"),
+                "no-extension accepted");
+        assertTrue(TaskContractValidator.isCanonicalPath("src/go.mod"),
+                "non-whitelisted extension accepted");
     }
 }
