@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase C Controlled Verification — README READY / A3 LOCKED
+## Current Active Step: Phase C Controlled Verification — README PASS / A3 READY
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -63,7 +63,7 @@
 >
 > **Phase B = PASS / ENFORCED + PROVEN。Checkpoint `e1c094b`。**
 >
-> **Phase C subtraction = COMMITTED (`0902ed9`) + DETERMINISTIC PASS；README controlled real-case = FAIL。**
+> **Phase C subtraction = COMMITTED (`0902ed9`) + DETERMINISTIC PASS；README controlled real-case = PASS。**
 > - full reactor：9/9 modules PASS（runtime 439、adapter 300、CLI 68、server 53）；
 > - independent boundary review：PASS；
 > - workspace scan、requirement/filename scoring、seed content digest 与 raw input-ref
@@ -91,8 +91,17 @@
 >   Strict parser 未放宽；validator 返回 typed correction targets；acquirer 最多执行一次
 >   same-session、deny-all correction；第二份结果改变 decision/summary/evidence 或其他
 >   非 target 字段时直接拒绝。Targeted tests 与完整 reactor 均通过。
-> - 下一步仅允许提交本 checkpoint 并重跑同一个 README controlled real-case；A3
->   继续锁定到 README PASS。
+> - schema-correction checkpoint：`542187a7`；
+> - README rerun 报告：
+>   `docs/testing/real-case-reports/20260726T143936Z/report.md`；workstream：
+>   `ws-20260726T144218Z-SP43`；
+> - rerun 达到 `COMPLETED + ACCEPT + benchmark PASS`，10 次 Agent run、0 repair
+>   loop；目标 worktree 仅修改 `README.md`，`npm test` 4/4；
+> - `implement.claude_self_test_report` 首份 occurrence 为
+>   `contractDecodable=true + contractSchemaValid=true`，因此本次未触发 correction；
+>   缺字段 correction 的 cannot-bypass 证据仍来自 deterministic integration tests；
+> - Phase C README 边界达到 `ENFORCED + PROVEN`。允许按既定顺序启动一次 A3
+>   controlled real-case，验证多文件 typed context 完整性。
 > 评估结论与单次减法范围见
 > `docs/plans/__CHECKPOINT__phase-c-context-boundary-assessment.zh-CN.md`。
 
