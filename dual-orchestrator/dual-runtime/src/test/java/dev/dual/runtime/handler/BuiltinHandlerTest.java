@@ -1350,7 +1350,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void contextPackageAllowsExplicitSectionsAndSnippetLimits() throws Exception {
+    void contextPackageAllowsExplicitSectionsButDoesNotExpandUnknownArtifacts() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var output = workstreamDir.resolve("artifacts/long.txt");
         Files.createDirectories(output.getParent());
@@ -1375,8 +1375,9 @@ class BuiltinHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Included Sections: requirement, input_artifacts"));
         assertTrue(markdown.contains("Keep this focused."));
-        assertTrue(markdown.contains("abcdefghij"));
-        assertTrue(markdown.contains("[truncated"));
+        assertTrue(markdown.contains(".agent/workstreams/ws/artifacts/long.txt"));
+        assertTrue(markdown.contains("content omitted"));
+        assertFalse(markdown.contains("abcdefghij"));
         assertFalse(markdown.contains("## Git Evidence"));
         assertFalse(markdown.contains("## Ledger Pointers"));
     }
@@ -1938,7 +1939,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void contextPackageTruncatesLongInputArtifact() throws Exception {
+    void contextPackageDoesNotExpandLongUnknownInputArtifact() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var longOutput = workstreamDir.resolve("artifacts/big.txt");
         Files.createDirectories(longOutput.getParent());
@@ -1959,7 +1960,8 @@ class BuiltinHandlerTest {
         ));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("[truncated; read full artifact"));
+        assertTrue(markdown.contains(".agent/workstreams/ws/artifacts/big.txt"));
+        assertTrue(markdown.contains("content omitted"));
         assertFalse(markdown.contains("x".repeat(200)));
     }
 

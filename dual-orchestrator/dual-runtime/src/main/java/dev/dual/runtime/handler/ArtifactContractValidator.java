@@ -212,6 +212,7 @@ public final class ArtifactContractValidator {
         augmented.put("decision", envelope.result().decision());
         augmented.put("summary", envelope.result().summary());
         augmented.put("contract_sidecar_ref", sidecarRef);
+        augmented.put("contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecarPath));
         proposalReference.ifPresent(reference -> {
             augmented.put("task_contract_proposal_ref", reference.referenceRef());
             augmented.put("task_contract_proposal_id", reference.reference().proposalId());

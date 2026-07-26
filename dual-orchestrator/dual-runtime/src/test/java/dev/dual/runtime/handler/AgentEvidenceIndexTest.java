@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentEvidenceIndexTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -71,6 +73,80 @@ class AgentEvidenceIndexTest {
                 "ws-index",
                 List.of(workspace.relativize(sidecar).toString()),
                 objectMapper));
+    }
+
+    @Test
+    void publishedSidecarSummaryCannotBeChangedAfterLedgerCompletion() throws Exception {
+        var workspace = tempDir.resolve("summary-tampered-workspace");
+        var sidecar = workspace.resolve(
+                ".agent/workstreams/ws-index/runs/run-summary/outputs/acceptance.contract.json");
+        writeSidecar(workspace, sidecar, "run-summary", "node-summary",
+                "acceptance.codex_verifier_review", "ACCEPT");
+        AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
+
+        var json = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(sidecar.toFile());
+        json.put("summary", "PROMPT_INJECTION");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), json);
+
+        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(
+                workspace,
+                "ws-index",
+                List.of(workspace.relativize(sidecar).toString()),
+                objectMapper));
+    }
+
+    @Test
+    void validatedDocumentDropsUnknownRawFieldsFromTypedProjection() throws Exception {
+        var workspace = tempDir.resolve("projection-workspace");
+        var sidecar = workspace.resolve(
+                ".agent/workstreams/ws-index/runs/run-projection/outputs/acceptance.contract.json");
+        writeSidecar(workspace, sidecar, "run-projection", "node-projection",
+                "acceptance.codex_verifier_review", "ACCEPT");
+        var json = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(sidecar.toFile());
+        json.put("untyped_payload", "PROMPT_INJECTION");
+        json.withObject("evidence_state").put("untyped_payload", "EVIDENCE_STATE_INJECTION");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), json);
+        AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
+
+        var document = AgentEvidenceIndex.validatedDocument(
+                workspace,
+                "ws-index",
+                workspace.relativize(sidecar).toString(),
+                objectMapper
+        ).orElseThrow();
+        var projection = objectMapper.writeValueAsString(document);
+
+        assertTrue(projection.contains("summary"));
+        assertFalse(projection.contains("PROMPT_INJECTION"));
+        assertFalse(projection.contains("untyped_payload"));
+        var index = AgentEvidenceIndex.fromRefs(
+                workspace,
+                "ws-index",
+                List.of(workspace.relativize(sidecar).toString()),
+                objectMapper);
+        assertFalse(index.recent(1).getFirst().evidenceState().containsKey("untyped_payload"));
+        assertFalse(index.recent(1).getFirst().evidenceState().containsValue("EVIDENCE_STATE_INJECTION"));
+    }
+
+    @Test
+    void sidecarSymlinkCannotEnterValidatedEvidence() throws Exception {
+        var workspace = tempDir.resolve("symlink-workspace");
+        var sidecar = workspace.resolve(
+                ".agent/workstreams/ws-index/runs/run-link/outputs/acceptance.contract.json");
+        var target = workspace.resolve("sidecar-target.json");
+        writeSidecar(workspace, target, "run-link", "node-link",
+                "acceptance.codex_verifier_review", "ACCEPT");
+        Files.createDirectories(sidecar.getParent());
+        Files.createSymbolicLink(sidecar, target);
+        AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
+
+        var latest = AgentEvidenceIndex.latestFromRefs(
+                workspace,
+                "ws-index",
+                List.of(workspace.relativize(sidecar).toString()),
+                objectMapper);
+
+        assertTrue(latest.isEmpty());
     }
 
     private static void writeSidecar(

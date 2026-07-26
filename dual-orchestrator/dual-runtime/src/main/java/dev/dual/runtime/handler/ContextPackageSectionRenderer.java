@@ -113,12 +113,7 @@ final class ContextPackageSectionRenderer {
                 builder.append(" (unvalidated agent result omitted from context)\n");
                 continue;
             }
-            var content = Files.readString(path, StandardCharsets.UTF_8);
-            var firstLine = content.lines()
-                    .findFirst()
-                    .map(s -> s.length() > 80 ? s.substring(0, 80) + "..." : s)
-                    .orElse("(empty)");
-            builder.append(" — ").append(firstLine).append("\n");
+            builder.append(" (routed artifact has no typed context projection; content omitted)\n");
         }
         builder.append("\n");
     }
@@ -313,9 +308,7 @@ final class ContextPackageSectionRenderer {
                 builder.append("(unvalidated agent result omitted from context)\n\n");
                 continue;
             }
-            builder.append("```text\n");
-            builder.append(snippet(path, maxSnippetChars));
-            builder.append("\n```\n\n");
+            builder.append("(routed artifact has no typed context projection; content omitted)\n\n");
         }
     }
 

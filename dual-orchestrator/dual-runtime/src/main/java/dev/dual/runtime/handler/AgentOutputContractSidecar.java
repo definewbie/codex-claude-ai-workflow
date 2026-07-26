@@ -2,7 +2,10 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.Optional;
 
 public final class AgentOutputContractSidecar {
@@ -25,5 +28,14 @@ public final class AgentOutputContractSidecar {
             return Optional.empty();
         }
         return AgentOutputContractDocument.read(pathFor(outputPath), objectMapper);
+    }
+
+    public static String sha256(Path sidecarPath) {
+        try {
+            return HexFormat.of().formatHex(
+                    MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(sidecarPath)));
+        } catch (Exception e) {
+            throw new IllegalStateException("failed to hash agent output sidecar: " + sidecarPath, e);
+        }
     }
 }

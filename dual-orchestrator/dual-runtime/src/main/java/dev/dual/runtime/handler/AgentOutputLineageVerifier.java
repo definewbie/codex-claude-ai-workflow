@@ -44,6 +44,11 @@ final class AgentOutputLineageVerifier {
             if (!document.decision().equals(text(node.result().get("decision")))) {
                 return Optional.of("sidecar decision does not match the ledger node result");
             }
+            var expectedHash = text(node.result().get("contract_sidecar_sha256"));
+            if (expectedHash.isBlank()
+                    || !expectedHash.equals(AgentOutputContractSidecar.sha256(sidecarPath))) {
+                return Optional.of("sidecar content hash does not match the ledger node result");
+            }
             var execution = ledger.latestNodeExecution(paths, node);
             if (execution.isEmpty()) {
                 return Optional.of("sidecar node occurrence has no execution fact");
@@ -61,6 +66,9 @@ final class AgentOutputLineageVerifier {
             }
             if (!document.decision().equals(text(actual.result().get("decision")))) {
                 return Optional.of("sidecar decision does not match the node execution result");
+            }
+            if (!expectedHash.equals(text(actual.result().get("contract_sidecar_sha256")))) {
+                return Optional.of("sidecar content hash does not match the node execution result");
             }
             return Optional.empty();
         } catch (Exception e) {

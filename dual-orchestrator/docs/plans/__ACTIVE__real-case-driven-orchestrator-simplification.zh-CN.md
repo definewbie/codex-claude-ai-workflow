@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase C Context Boundary Assessment — COMPLETE
+## Current Active Step: Phase C Controlled Verification — README READY
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -63,7 +63,15 @@
 >
 > **Phase B = PASS / ENFORCED + PROVEN。Checkpoint `e1c094b`。**
 >
-> **Phase C assessment = COMPLETE；subtraction implementation = READY, NOT ACTIVE。**
+> **Phase C subtraction = IMPLEMENTED + DETERMINISTIC PASS；README controlled real-case = READY。**
+> - full reactor：9/9 modules PASS（runtime 439、adapter 300、CLI 68、server 53）；
+> - independent boundary review：PASS；
+> - workspace scan、requirement/filename scoring、seed content digest 与 raw input-ref
+>   expansion 已删除；
+> - validated agent sidecar 内容由 node + execution ledger 中的 SHA-256 绑定；
+> - unknown refs 仅保留 pointer，canonical context/direct artifact 在读取前执行
+>   exact path、real-path containment 与 symlink 检查；
+> - provider 尚未启动；必须先提交本 checkpoint，再运行 README，README PASS 后才可运行 A3。
 > 评估结论与单次减法范围见
 > `docs/plans/__CHECKPOINT__phase-c-context-boundary-assessment.zh-CN.md`。
 
@@ -273,7 +281,9 @@ Assessment 结论：
   收紧 generic raw ref 展开，同时保留 ledger facts、typed artifacts、actual telemetry
   与 read-reuse contract；
 - 不新增 Artifact Graph、Evidence Registry、Context Engine 模块、query DSL 或状态机；
-- implementation 未激活，必须先 review assessment checkpoint。
+- implementation 已完成，deterministic gates 与独立 review 均 PASS；
+- 下一步按 verification gate 运行 README controlled real-case；只有 README PASS
+  才允许顺序运行 A3。
 
 ## Phase D：Handler 收敛
 

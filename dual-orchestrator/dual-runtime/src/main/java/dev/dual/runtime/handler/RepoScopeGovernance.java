@@ -17,8 +17,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Builds passive repository-scope governance artifacts for one context package.
@@ -33,15 +31,7 @@ final class RepoScopeGovernance {
     static final String REPO_MAP_REF = "memory/repo-map.json";
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
-    private static final int MAX_REPO_FILES = 300;
     private static final int MAX_SCOPE_FILES = 24;
-    private static final int MAX_SEED_DIGEST_FILES = 8;
-    private static final int MAX_SEED_DIGEST_CHARS = 1200;
-    private static final Pattern PATHISH = Pattern.compile("^[\\w./@+\\-]+\\.[\\w+\\-]+$|^[\\w./@+\\-]+/.*$");
-    private static final Set<String> IGNORED_DIRS = Set.of(
-            ".git", ".agent", "node_modules", "target", "build", "dist", ".next", ".nuxt",
-            ".venv", "venv", "__pycache__", ".idea", ".vscode", ".gradle", ".mvn"
-    );
 
     private RepoScopeGovernance() {
     }
@@ -50,7 +40,6 @@ final class RepoScopeGovernance {
             Path workspaceRoot,
             Path workstreamDir,
             TaskHandler.TaskContext context,
-            EvidenceManifest manifest,
             ObjectMapper objectMapper
     ) throws IOException {
         var stageId = stageId(context);
@@ -58,8 +47,14 @@ final class RepoScopeGovernance {
         var memoryDir = workstreamDir.resolve("memory");
         var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
         var existingMemory = readWorkstreamMemory(workstreamMemoryPath, objectMapper);
-        var repoMap = buildRepoMap(workspaceRoot, workstreamDir, context, objectMapper);
-        var plan = buildFileRelevancePlan(workspaceRoot, workstreamDir, context, manifest, repoMap, objectMapper, stageId, targetNodeDefinitionId);
+        var plan = buildFileRelevancePlan(workstreamDir, context, objectMapper, stageId, targetNodeDefinitionId);
+        var repoMap = buildRepoMap(
+                workspaceRoot,
+                workstreamDir,
+                context,
+                objectMapper,
+                textList(plan.get("readCandidates"))
+        );
         var policy = buildStageScopePolicy(context, stageId, plan, targetNodeDefinitionId);
         var report = buildInitialReport(context, stageId, plan, policy, targetNodeDefinitionId);
         var workingSet = buildWorkingSet(context, stageId, plan, policy, targetNodeDefinitionId);
@@ -153,7 +148,6 @@ final class RepoScopeGovernance {
         builder.append("- Governance report: ").append(ref(workspaceRoot, documents.governanceReportPath())).append("\n\n");
         appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 8);
         appendPathList(builder, "Contract scope candidates", textList(documents.plan().get("contractScopeCandidates")), 12);
-        appendSeedEvidenceDigests(builder, documents);
         appendPathList(builder, "Allowed write files", textList(documents.policy().get("writeScope")), 8);
         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
         appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
@@ -174,43 +168,27 @@ final class RepoScopeGovernance {
         appendPathList(builder, "Expected edit files", textList(documents.policy().get("writeScope")), 4);
     }
 
-    private static void appendSeedEvidenceDigests(StringBuilder builder, Documents documents) {
-        var digests = mapList(documents.plan().get("seedEvidenceDigests"));
-        if (digests.isEmpty()) {
-            return;
-        }
-        builder.append("## Seed Evidence Digests\n\n");
-        builder.append("Use these orchestrator-prepared digests before direct file reads. They are bounded projections from recommended files, not a license for broad repository exploration.\n\n");
-        for (var item : digests.stream().limit(MAX_SEED_DIGEST_FILES).toList()) {
-            builder.append("- ").append(text(item.get("path"))).append(": ")
-                    .append(text(item.get("digest")).replace("\n", " / "))
-                    .append("\n");
-        }
-        builder.append("\n");
-    }
-
     private static Map<String, Object> buildRepoMap(
             Path workspaceRoot,
             Path workstreamDir,
             TaskHandler.TaskContext context,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            List<String> knownPaths
     ) throws IOException {
         var files = new ArrayList<Map<String, Object>>();
-        try (Stream<Path> stream = Files.walk(workspaceRoot, 8)) {
-            for (var path : stream
-                    .filter(Files::isRegularFile)
-                    .filter(path -> includeRepoFile(workspaceRoot, path))
-                    .sorted(Comparator.comparing(Path::toString))
-                    .limit(MAX_REPO_FILES)
-                    .toList()) {
-                var relative = workspaceRoot.relativize(path.toAbsolutePath().normalize()).toString();
-                var item = new LinkedHashMap<String, Object>();
-                item.put("path", relative);
-                item.put("kind", fileKind(relative));
-                item.put("sizeBytes", safeSize(path));
-                files.add(item);
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        for (var relative : new LinkedHashSet<>(knownPaths)) {
+            var path = root.resolve(relative).normalize();
+            if (!path.startsWith(root) || !Files.isRegularFile(path) || ignoredPath(relative)) {
+                continue;
             }
+            var item = new LinkedHashMap<String, Object>();
+            item.put("path", relative);
+            item.put("kind", fileKind(relative));
+            item.put("sizeBytes", safeSize(path));
+            files.add(item);
         }
+        files.sort(Comparator.comparing(item -> text(item.get("path"))));
         var document = new LinkedHashMap<String, Object>();
         document.put("schemaVersion", 1);
         document.put("artifactType", "repo_map");
@@ -218,32 +196,24 @@ final class RepoScopeGovernance {
         document.put("generatedAt", Instant.now().toString());
         document.put("effectiveWorkdir", workspaceRoot.toAbsolutePath().normalize().toString());
         document.put("baseCommit", readBaseCommit(workstreamDir, objectMapper));
-        document.put("fileLimit", MAX_REPO_FILES);
+        document.put("source", "task_contract_scope+git_evidence");
         document.put("files", files);
         document.put("fileCount", files.size());
-        document.put("truncated", files.size() >= MAX_REPO_FILES);
+        document.put("truncated", false);
         return document;
     }
 
     private static Map<String, Object> buildFileRelevancePlan(
-            Path workspaceRoot,
             Path workstreamDir,
             TaskHandler.TaskContext context,
-            EvidenceManifest manifest,
-            Map<String, Object> repoMap,
             ObjectMapper objectMapper,
             String stageId,
             String targetNodeDefinitionId
     ) throws IOException {
         var contractScope = contractScopePaths(workstreamDir, objectMapper);
         var candidates = new LinkedHashSet<String>();
-        addInputRefs(candidates, context);
         candidates.addAll(contractScope);
-        addEvidenceFiles(candidates, manifest);
         addGitChangedFiles(candidates, workstreamDir);
-        var requirement = readRequirement(workstreamDir);
-        var requirementTerms = requirementTerms(requirement);
-        addRepoMapMatches(candidates, repoMap, requirementTerms);
         var readCandidates = bounded(candidates, MAX_SCOPE_FILES);
         var writeCandidates = stageAllowsBusinessWrites(stageId)
                 ? contractScope
@@ -262,18 +232,16 @@ final class RepoScopeGovernance {
         document.put("builderNodeDefinitionId", context.definition().id());
         document.put("targetNodeDefinitionId", targetNodeDefinitionId);
         document.put("iterationId", context.instance().iterationId());
-        document.put("source", "task_contract_scope+context_recommendations");
+        document.put("source", "task_contract_scope+git_evidence");
         document.put("readCandidates", readCandidates);
         document.put("contractScopeCandidates", contractScope);
-        document.put("seedEvidenceDigests", seedEvidenceDigests(workspaceRoot, readCandidates, requirementTerms));
         document.put("writeCandidates", writeCandidates);
         document.put("previouslyReadFiles", previousReads.keySet().stream().limit(MAX_SCOPE_FILES).toList());
         document.put("repeatedReadAvoidance", repeatedReadAvoidance);
         document.put("expansionRules", List.of(
-                "Prefer files in readCandidates before broad repository search.",
+                "Use only routed artifacts and canonical task-contract or Git facts as prepared context.",
                 "Do not re-read previously inspected files unless this stage needs fresh file contents.",
-                "When a candidate calls an API or imports a nearby module, read that direct dependency before editing.",
-                "If reading outside readCandidates is necessary, explain the reason in the structured artifact."
+                "Do not infer task relevance from filenames, directory layout, or requirement prose."
         ));
         document.put("generatedAt", Instant.now().toString());
         return document;
@@ -593,12 +561,6 @@ final class RepoScopeGovernance {
         return summary;
     }
 
-    private static void addInputRefs(Set<String> candidates, TaskHandler.TaskContext context) {
-        for (var ref : context.instance().inputRefs()) {
-            addPathCandidate(candidates, ref);
-        }
-    }
-
     private static List<String> contractScopePaths(Path workstreamDir, ObjectMapper objectMapper) throws IOException {
         var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
         if (!Files.isRegularFile(contractPath)) {
@@ -617,178 +579,20 @@ final class RepoScopeGovernance {
         return List.copyOf(paths);
     }
 
-    private static void addEvidenceFiles(Set<String> candidates, EvidenceManifest manifest) {
-        if (manifest == null) {
-            return;
-        }
-        for (var item : manifest.items()) {
-            item.files().forEach(file -> addPathCandidate(candidates, file));
-        }
-    }
-
     private static void addGitChangedFiles(Set<String> candidates, Path workstreamDir) throws IOException {
         var path = workstreamDir.resolve("artifacts/git-evidence/changed-files.txt");
         if (!Files.isRegularFile(path)) {
             return;
         }
         for (var line : Files.readAllLines(path, StandardCharsets.UTF_8)) {
-            addPathCandidate(candidates, line);
-        }
-    }
-
-    private static void addRepoMapMatches(Set<String> candidates, Map<String, Object> repoMap, List<String> terms) {
-        var scored = new ArrayList<Map.Entry<String, Integer>>();
-        for (var item : mapList(repoMap.get("files"))) {
-            var path = text(item.get("path"));
-            if (path.isBlank()) {
-                continue;
-            }
-            var score = repoPathScore(path, terms);
-            if (score > 0) {
-                scored.add(Map.entry(path, score));
+            var changedPath = line.strip();
+            if (!changedPath.isBlank()
+                    && !changedPath.startsWith("/")
+                    && !changedPath.startsWith(".agent/")
+                    && !ignoredPath(changedPath)) {
+                candidates.add(changedPath);
             }
         }
-        scored.stream()
-                .sorted((left, right) -> {
-                    var byScore = Integer.compare(right.getValue(), left.getValue());
-                    return byScore != 0 ? byScore : left.getKey().compareTo(right.getKey());
-                })
-                .limit(MAX_SCOPE_FILES)
-                .forEach(entry -> addPathCandidate(candidates, entry.getKey()));
-    }
-
-    private static int repoPathScore(String path, List<String> terms) {
-        if (terms == null || terms.isEmpty()) {
-            return 0;
-        }
-        var normalizedPath = path.toLowerCase(java.util.Locale.ROOT);
-        var searchablePath = normalizedPath.replace('_', '-');
-        var score = 0;
-        for (var term : terms) {
-            var normalizedTerm = term.toLowerCase(java.util.Locale.ROOT);
-            if (normalizedTerm.isBlank()) {
-                continue;
-            }
-            var searchableTerm = normalizedTerm.replace('_', '-');
-            if (searchablePath.contains(searchableTerm)) {
-                score += searchableTerm.length() >= 7 ? 2 : 1;
-            }
-        }
-        if (normalizedPath.startsWith("docs/")) {
-            score += 1;
-        }
-        return score;
-    }
-
-    private static List<String> requirementTerms(String requirement) {
-        if (requirement == null || requirement.isBlank()) {
-            return List.of();
-        }
-        var terms = new LinkedHashSet<String>();
-        for (var token : requirement.toLowerCase(java.util.Locale.ROOT).split("[^\\p{IsAlphabetic}\\p{IsDigit}_/-]+")) {
-            if (token.length() >= 4) {
-                terms.add(token);
-            }
-        }
-        return terms.stream().toList();
-    }
-
-    private static List<String> seedDigestCandidates(List<String> readCandidates) {
-        if (readCandidates == null || readCandidates.isEmpty()) {
-            return List.of();
-        }
-        return readCandidates.stream()
-                .filter(path -> !path.isBlank())
-                .filter(path -> !path.startsWith(".agent/"))
-                .limit(MAX_SCOPE_FILES)
-                .toList();
-    }
-
-    private static List<Map<String, Object>> seedEvidenceDigests(
-            Path workspaceRoot,
-            List<String> readCandidates,
-        List<String> requirementTerms
-    ) throws IOException {
-        var digests = new ArrayList<Map<String, Object>>();
-        for (var path : seedDigestCandidates(readCandidates)) {
-            if (digests.size() >= MAX_SEED_DIGEST_FILES) {
-                break;
-            }
-            var absolute = workspaceRoot.resolve(path).normalize();
-            if (!absolute.startsWith(workspaceRoot.toAbsolutePath().normalize()) || !Files.isRegularFile(absolute)) {
-                continue;
-            }
-            var digest = seedDigest(absolute, requirementTerms);
-            if (digest.isBlank()) {
-                continue;
-            }
-            var item = new LinkedHashMap<String, Object>();
-            item.put("path", path);
-            item.put("digest", digest);
-            item.put("source", "orchestrator_seed_projection");
-            digests.add(item);
-        }
-        return digests;
-    }
-
-    private static String seedDigest(Path file, List<String> requirementTerms) throws IOException {
-        var lines = Files.readAllLines(file, StandardCharsets.UTF_8);
-        var selected = new ArrayList<String>();
-        var terms = requirementTerms == null ? List.<String>of() : requirementTerms.stream()
-                .map(term -> term.toLowerCase(java.util.Locale.ROOT).replace('_', '-'))
-                .filter(term -> !term.isBlank())
-                .toList();
-        for (var line : lines) {
-            var trimmed = line.strip();
-            if (trimmed.isBlank()) {
-                continue;
-            }
-            var lower = trimmed.toLowerCase(java.util.Locale.ROOT).replace('_', '-');
-            if (trimmed.startsWith("#") || terms.stream().anyMatch(lower::contains)) {
-                selected.add(trimmed);
-            }
-            if (selected.size() >= 8) {
-                break;
-            }
-        }
-        if (selected.isEmpty()) {
-            selected.addAll(lines.stream()
-                    .map(String::strip)
-                    .filter(line -> !line.isBlank())
-                    .limit(4)
-                    .toList());
-        }
-        var digest = String.join(" / ", selected);
-        return digest.length() <= MAX_SEED_DIGEST_CHARS ? digest : digest.substring(0, MAX_SEED_DIGEST_CHARS);
-    }
-
-    private static void addPathCandidate(Set<String> candidates, String raw) {
-        if (raw == null || raw.isBlank()) {
-            return;
-        }
-        for (var token : raw.split("[\\s,;:()\\[\\]\"'`]+")) {
-            var cleaned = token.strip();
-            if (cleaned.startsWith(".agent/") || cleaned.startsWith("/")) {
-                continue;
-            }
-            if (PATHISH.matcher(cleaned).matches() && !ignoredPath(cleaned)) {
-                candidates.add(cleaned);
-            }
-        }
-    }
-
-    private static boolean includeRepoFile(Path workspaceRoot, Path path) {
-        var relative = workspaceRoot.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize());
-        for (var part : relative) {
-            if (IGNORED_DIRS.contains(part.toString())) {
-                return false;
-            }
-        }
-        var ref = relative.toString();
-        if (ignoredPath(ref)) {
-            return false;
-        }
-        return safeSize(path) <= 512_000;
     }
 
     private static boolean ignoredPath(String ref) {
@@ -871,11 +675,6 @@ final class RepoScopeGovernance {
         } catch (IOException ignored) {
             return "";
         }
-    }
-
-    private static String readRequirement(Path workstreamDir) throws IOException {
-        var path = workstreamDir.resolve("requirement.md");
-        return Files.isRegularFile(path) ? Files.readString(path, StandardCharsets.UTF_8) : "";
     }
 
     private static long safeSize(Path path) {

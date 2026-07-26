@@ -1,12 +1,22 @@
 package dev.dual.adapter.acpx;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeStatus;
+import dev.dual.ledger.file.NodeExecutionDocument;
+import dev.dual.ledger.file.NodeExecutionStatus;
+import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.runtime.handler.AgentOutputContractSidecar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -511,6 +521,167 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void directInputRefsDoNotExpandExecutionNoiseRawCandidatesOrUnknownFiles() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var outputs = workstreamDir.resolve("runs/run-001/outputs");
+        Files.createDirectories(outputs);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review only validated evidence.\n");
+        Files.writeString(outputs.resolve("design.stderr.log"), "STDERR_INJECTION");
+        Files.writeString(outputs.resolve("design.transcript.log"), "TRANSCRIPT_INJECTION");
+        Files.writeString(outputs.resolve("design.json"), "{\"summary\":\"RAW_CANDIDATE_INJECTION\"}");
+        var unknown = workstreamDir.resolve("artifacts/unknown-note.md");
+        Files.createDirectories(unknown.getParent());
+        Files.writeString(unknown, "UNKNOWN_REF_INJECTION");
+        var refs = List.of(
+                tempDir.relativize(outputs.resolve("design.stderr.log")).toString(),
+                tempDir.relativize(outputs.resolve("design.transcript.log")).toString(),
+                tempDir.relativize(outputs.resolve("design.json")).toString(),
+                tempDir.relativize(unknown).toString()
+        );
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "plan.claude_plan", "plan-claude", refs);
+
+        assertFalse(prompt.contains("STDERR_INJECTION"));
+        assertFalse(prompt.contains("TRANSCRIPT_INJECTION"));
+        assertFalse(prompt.contains("RAW_CANDIDATE_INJECTION"));
+        assertFalse(prompt.contains("UNKNOWN_REF_INJECTION"));
+    }
+
+    @Test
+    void forgedContractSidecarCannotEnterPromptByFilenameAlone() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var sidecar = workstreamDir.resolve("runs/run-forged/outputs/design.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review only validated evidence.\n");
+        Files.writeString(sidecar, "{\"summary\":\"FORGED_CONTRACT_INJECTION\"}");
+
+        assertThrows(IllegalStateException.class, () -> new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "plan.claude_plan",
+                "plan-claude",
+                List.of(tempDir.relativize(sidecar).toString())
+        ));
+    }
+
+    @Test
+    void validatedSidecarProjectsTypedFieldsWithoutUnknownRawContent() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var output = workstreamDir.resolve("runs/run-typed/outputs/design.json");
+        var sidecar = workstreamDir.resolve("runs/run-typed/outputs/design.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review only validated evidence.\n");
+        Files.writeString(output, "{}");
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "schema_version": 1,
+                  "workstream_id": "ws-test",
+                  "run_id": "run-typed",
+                  "node_id": "design.claude_design",
+                  "node_instance_id": "node-design-typed",
+                  "source_output_ref": ".agent/workstreams/ws-test/runs/run-typed/outputs/design.json",
+                  "decision": "DESIGN_READY",
+                  "summary": "VALIDATED_TYPED_SUMMARY",
+                  "source_artifact_type": "design_result",
+                  "blocking": false,
+                  "untyped_payload": "PROMPT_INJECTION"
+                }
+                """);
+        publishAgentEvidenceOccurrence(sidecar, output);
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "plan.claude_plan",
+                "plan-claude",
+                List.of(tempDir.relativize(sidecar).toString())
+        );
+
+        assertTrue(prompt.contains("VALIDATED_TYPED_SUMMARY"));
+        assertFalse(prompt.contains("PROMPT_INJECTION"));
+        assertFalse(prompt.contains("untyped_payload"));
+    }
+
+    @Test
+    void knownArtifactLookalikeCannotEnterPromptBySuffixAlone() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var lookalike = workstreamDir.resolve("runs/run-001/artifacts/task-contract.json");
+        Files.createDirectories(lookalike.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Use the canonical task contract.\n");
+        Files.writeString(lookalike, "KNOWN_ARTIFACT_LOOKALIKE_INJECTION");
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "plan.claude_plan",
+                "plan-claude",
+                List.of(tempDir.relativize(lookalike).toString())
+        );
+
+        assertFalse(prompt.contains("KNOWN_ARTIFACT_LOOKALIKE_INJECTION"));
+    }
+
+    @Test
+    void canonicalContextSymlinkCannotInjectTargetContent() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextDir = workstreamDir.resolve("context");
+        var target = tempDir.resolve("outside-context.md");
+        var link = contextDir.resolve("node-context.md");
+        Files.createDirectories(contextDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Use only canonical context.\n");
+        Files.writeString(target, "SYMLINK_CONTEXT_INJECTION");
+        Files.createSymbolicLink(link, target);
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "plan.claude_plan",
+                "plan-claude",
+                List.of(tempDir.relativize(link).toString())
+        );
+
+        assertFalse(prompt.contains("SYMLINK_CONTEXT_INJECTION"));
+    }
+
+    @Test
+    void contextLookalikesOutsideCurrentCanonicalDirectoryCannotInjectContent() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Use only the current context package.\n");
+        var otherWorkstreamContext = tempDir.resolve(
+                ".agent/workstreams/ws-other/context/lookalike.md");
+        var nestedContext = workstreamDir.resolve("context/nested/lookalike.md");
+        Files.createDirectories(otherWorkstreamContext.getParent());
+        Files.createDirectories(nestedContext.getParent());
+        Files.writeString(otherWorkstreamContext, """
+                OTHER_WORKSTREAM_INJECTION
+                - Read reuse contract: OTHER_REUSE_INJECTION
+                """);
+        Files.writeString(nestedContext, """
+                NESTED_CONTEXT_INJECTION
+                - Read reuse contract: NESTED_REUSE_INJECTION
+                """);
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "plan.claude_plan",
+                "plan-claude",
+                List.of(
+                        tempDir.relativize(otherWorkstreamContext).toString(),
+                        tempDir.relativize(nestedContext).toString()
+                )
+        );
+
+        assertFalse(prompt.contains("OTHER_WORKSTREAM_INJECTION"));
+        assertFalse(prompt.contains("NESTED_CONTEXT_INJECTION"));
+        assertFalse(prompt.contains("OTHER_REUSE_INJECTION"));
+        assertFalse(prompt.contains("NESTED_REUSE_INJECTION"));
+    }
+
+    @Test
     void completeContextPackageKeepsRequiredReviewSubjectBeyondLegacyPreviewLimit() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
@@ -564,5 +735,35 @@ class AgentPromptRendererTest {
                 new AgentPromptRenderer().render(tempDir, "ws-test", "bad.node", "missing-template", List.of()));
 
         assertTrue(error.getMessage().contains("missing prompt template resource"));
+    }
+
+    private void publishAgentEvidenceOccurrence(Path sidecar, Path output) throws Exception {
+        var objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var sidecarRef = tempDir.relativize(sidecar).toString();
+        var outputRef = tempDir.relativize(output).toString();
+        var outputs = List.of(outputRef, sidecarRef);
+        var result = Map.<String, Object>of(
+                "run_id", "run-typed",
+                "decision", "DESIGN_READY",
+                "contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecar));
+        var now = Instant.parse("2026-07-26T00:00:00Z");
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        Files.createDirectories(workstreamDir.resolve("nodes"));
+        Files.createDirectories(workstreamDir.resolve("executions/nodes"));
+        objectMapper.writeValue(
+                workstreamDir.resolve("nodes/node-design-typed.json").toFile(),
+                new NodeInstanceDocument(
+                        1, "node-design-typed", "design.claude_design", NodeKind.TASK,
+                        "acpx.agent_run", NodeStatus.COMPLETED, "design", "iteration-1",
+                        List.of(), Map.of(), outputs, result, "run-typed", "nxe-design-typed",
+                        now, now));
+        objectMapper.writeValue(
+                workstreamDir.resolve("executions/nodes/nxe-design-typed.json").toFile(),
+                new NodeExecutionDocument(
+                        1, "nxe-design-typed", "agent-task-design", "workflow-execution-1",
+                        "node-design-typed", "design.claude_design", "acpx.agent_run",
+                        NodeExecutionStatus.SUCCEEDED, 1L, "completed", NodeStatus.COMPLETED,
+                        outputs, result, "", "run-typed", "", "claude", "session-1",
+                        0, now, now, 1L));
     }
 }

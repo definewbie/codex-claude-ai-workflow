@@ -714,9 +714,9 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var plan = objectMapper.readValue(
                 wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
-        assertTrue(plan.get("readCandidates") instanceof List<?> candidates
+        assertFalse(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("src/routed-change.java"),
-                "routed, ledger-bound evidence should contribute changed files as recommendations");
+                "validated agent claims must not be converted into repository-read recommendations");
         assertFalse(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("secrets/unrouted-scope.txt"),
                 "unrouted historical sidecars must not contribute to any scope");
@@ -1445,7 +1445,8 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("Working Memory"));
         assertTrue(markdown.contains("Mapped the existing upload flow"));
         assertTrue(markdown.contains("Reuse the existing API"));
-        assertTrue(markdown.contains("miniprogram/src/pages/record/index.vue"));
+        assertFalse(markdown.contains("miniprogram/src/pages/record/index.vue"),
+                "unverified handoff change claims must not be projected as repository facts");
 
         var manifestPath = wsDir.resolve("memory/evidence-manifest.json");
         assertTrue(Files.exists(manifestPath), "context build should write rebuildable evidence manifest");
@@ -1786,7 +1787,7 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void governedIntakePackageKeepsRepoMapMatchesAsRecommendationsOnly() throws Exception {
+    void unroutedWorkspaceFilesCannotEnterContextThroughRepoHeuristics() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), """
                 # 复诊准备清单与缺失资料提醒闭环
@@ -1809,25 +1810,44 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Contract scope candidates"));
-        assertTrue(markdown.contains("Seed Evidence Digests"));
-        assertTrue(markdown.contains("backend/app/api/treatment_events.py"));
-        assertTrue(markdown.contains("miniprogram/src/pages/follow-up-summary/index.vue"));
+        assertFalse(markdown.contains("Seed Evidence Digests"));
+        assertFalse(markdown.contains("backend/app/api/treatment_events.py"));
+        assertFalse(markdown.contains("miniprogram/src/pages/follow-up-summary/index.vue"));
+        assertFalse(markdown.contains("Treatment Event Chain API Usage"));
 
         var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
-                        && candidates.contains("backend/app/api/treatment_events.py")
-                        && candidates.contains("miniprogram/src/pages/follow-up-summary/index.vue"),
-                "Chinese requirements with English domain anchors should produce concrete repo-map candidates");
+                        && candidates.isEmpty(),
+                "unrouted workspace files must not become context candidates");
         assertTrue(plan.get("contractScopeCandidates") instanceof List<?> scopeCandidates
                         && scopeCandidates.isEmpty(),
-                "repo-map recommendations must not masquerade as canonical contract scope");
+                "context discovery must not invent canonical contract scope");
         var policy = objectMapper.readValue(
                 wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope && writeScope.isEmpty(),
-                "repo-map recommendations must not become change intent");
-        assertTrue(plan.get("seedEvidenceDigests") instanceof List<?> digests
-                        && !digests.isEmpty(),
-                "intake should receive bounded seed evidence instead of needing direct Read");
+                "unrouted workspace files must not become change intent");
+        assertFalse(plan.containsKey("seedEvidenceDigests"),
+                "context plans must not carry workspace-derived seed content");
+    }
+
+    @Test
+    void unknownRoutedFileIsPointerOnlyAndCannotInjectContextContent() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Use only typed routed evidence.", StandardCharsets.UTF_8);
+        var unknown = wsDir.resolve("artifacts/unknown-note.md");
+        Files.createDirectories(unknown.getParent());
+        Files.writeString(unknown, "UNTRUSTED_CONTEXT_PAYLOAD", StandardCharsets.UTF_8);
+        var ref = tempDir.relativize(unknown).toString();
+
+        var result = handler.execute(ctx("implementation", List.of(ref)));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains(ref));
+        assertFalse(markdown.contains("UNTRUSTED_CONTEXT_PAYLOAD"));
+        var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertFalse(plan.get("readCandidates") instanceof List<?> candidates && candidates.contains(ref),
+                "an unknown routed ref must not become a repository-read candidate");
     }
 
     @Test
@@ -1871,10 +1891,12 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var relevancePlan = objectMapper.readValue(
                 wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        assertFalse(relevancePlan.get("readCandidates") instanceof List<?> candidates
+                        && candidates.contains("src/recommended.rs"),
+                "filename and requirement heuristics must not enter prepared context");
         assertTrue(relevancePlan.get("readCandidates") instanceof List<?> candidates
-                        && candidates.contains("src/recommended.rs")
                         && candidates.contains("src/observed.go"),
-                "heuristic and observed files may remain visible as recommendations");
+                "typed Git evidence remains an authoritative observation");
         assertEquals(
                 List.of("src/allowed.java", "docs/API contract.md"),
                 relevancePlan.get("contractScopeCandidates"));

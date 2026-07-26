@@ -95,7 +95,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = governanceEnabled()
-                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, manifest, OBJECT_MAPPER)
+                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, OBJECT_MAPPER)
                 : null;
         var markdown = renderPackage(context, workstreamDir, manifest, governance, reviewSubject);
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
@@ -168,7 +168,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = governanceEnabled()
-                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, manifest, OBJECT_MAPPER)
+                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, OBJECT_MAPPER)
                 : null;
 
         // Phase 2: Resolve section availability

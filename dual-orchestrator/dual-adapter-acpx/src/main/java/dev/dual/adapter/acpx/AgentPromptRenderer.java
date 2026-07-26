@@ -2,6 +2,7 @@ package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.domain.PromptLanguage;
+import dev.dual.runtime.handler.AgentEvidenceIndex;
 import dev.dual.runtime.handler.ContractRegistry;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 
@@ -56,12 +57,12 @@ final class AgentPromptRenderer {
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
         var languagePolicy = languagePolicy(workspaceRoot.resolve(workstreamDir), requirement);
-        var contextPackage = contextPackageSection(workspaceRoot, inputRefs);
+        var contextPackage = contextPackageSection(workspaceRoot, workstreamId, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
         var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics(nodeId);
-        var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
+        var readReuseContractSection = readReuseContractSection(workspaceRoot, workstreamId, inputRefs);
         var hasInputs = inputRefs != null && !inputRefs.isEmpty();
 
         var content = workspaceGuard + "\n\n" + languagePolicy + "\n\n"
@@ -237,16 +238,21 @@ final class AgentPromptRenderer {
                 """.stripTrailing();
     }
 
-    private String readReuseContractSection(Path workspaceRoot, List<String> inputRefs) {
-        return contextPackageSubsection(workspaceRoot, inputRefs, "Read reuse contract:");
+    private String readReuseContractSection(Path workspaceRoot, String workstreamId, List<String> inputRefs) {
+        return contextPackageSubsection(workspaceRoot, workstreamId, inputRefs, "Read reuse contract:");
     }
 
-    private String contextPackageSubsection(Path workspaceRoot, List<String> inputRefs, String marker) {
+    private String contextPackageSubsection(
+            Path workspaceRoot,
+            String workstreamId,
+            List<String> inputRefs,
+            String marker
+    ) {
         if (inputRefs == null || inputRefs.isEmpty()) {
             return "";
         }
         for (String inputRef : inputRefs) {
-            if (!inputRef.contains("/context/") || !inputRef.endsWith(".md")) {
+            if (!isCanonicalContextPackageRef(workspaceRoot, workstreamId, inputRef)) {
                 continue;
             }
             var path = workspaceRoot.resolve(inputRef).normalize();
@@ -326,12 +332,12 @@ final class AgentPromptRenderer {
                 .append(readIfExists(path).stripTrailing());
     }
 
-    private String contextPackageSection(Path workspaceRoot, List<String> inputRefs) {
+    private String contextPackageSection(Path workspaceRoot, String workstreamId, List<String> inputRefs) {
         if (inputRefs == null || inputRefs.isEmpty()) {
             return "(no context package provided)";
         }
         var contextRefs = inputRefs.stream()
-                .filter(ref -> ref.contains("/context/") && ref.endsWith(".md"))
+                .filter(ref -> isCanonicalContextPackageRef(workspaceRoot, workstreamId, ref))
                 .toList();
         var directInputRefs = inputRefs.stream()
                 .filter(ref -> !contextRefs.contains(ref))
@@ -342,13 +348,30 @@ final class AgentPromptRenderer {
         var builder = new StringBuilder();
         if (!directInputRefs.isEmpty()) {
             builder.append("### Direct Input Artifacts\n\n");
+            var renderedEvidence = new LinkedHashSet<String>();
             for (String inputRef : directInputRefs) {
                 var path = workspaceRoot.resolve(inputRef).normalize();
                 builder.append("- ").append(inputRef).append("\n");
-                if (Files.exists(path) && Files.isRegularFile(path)) {
+                var validatedDocument = AgentEvidenceIndex.validatedDocument(
+                        workspaceRoot, workstreamId, inputRef, OBJECT_MAPPER);
+                if (validatedDocument.isPresent()) {
+                    var document = validatedDocument.get();
+                    var evidenceKey = document.runId() + "\n"
+                            + document.nodeInstanceId() + "\n"
+                            + document.sourceOutputRef();
+                    if (!renderedEvidence.add(evidenceKey)) {
+                        builder.append("  (validated typed evidence already projected)\n\n");
+                        continue;
+                    }
+                    builder.append("\n```json\n");
+                    builder.append(renderTypedAgentEvidence(document));
+                    builder.append("\n```\n\n");
+                } else if (isCanonicalDirectInputRef(workspaceRoot, workstreamId, inputRef)) {
                     builder.append("\n```text\n");
                     builder.append(readContextPreview(workspaceRoot, path));
                     builder.append("\n```\n\n");
+                } else if (Files.exists(path) && Files.isRegularFile(path)) {
+                    builder.append("  (content omitted; no typed context projection)\n\n");
                 }
             }
         }
@@ -362,6 +385,80 @@ final class AgentPromptRenderer {
             }
         }
         return builder.toString().stripTrailing();
+    }
+
+    private boolean isCanonicalDirectInputRef(Path workspaceRoot, String workstreamId, String inputRef) {
+        if (workstreamId == null || workstreamId.isBlank() || inputRef == null || inputRef.isBlank()) {
+            return false;
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var workstreamDir = root.resolve(".agent/workstreams").resolve(workstreamId).normalize();
+        var path = root.resolve(inputRef).normalize();
+        if (!workstreamDir.startsWith(root)
+                || !isRegularFileWithin(root, path, workstreamDir, false)) {
+            return false;
+        }
+        var relative = workstreamDir.relativize(path).toString().replace('\\', '/');
+        if (Set.of(
+                "artifacts/task-contract.json",
+                "artifacts/task-contract.md",
+                "artifacts/contract-resolution.json",
+                "artifacts/contract-resolution.md",
+                "artifacts/next-stage/next-stage-prompt.md",
+                "artifacts/next-stage/handoff.json",
+                "delivery/commit-message.txt",
+                "delivery/pr-body.md"
+        ).contains(relative)) {
+            return true;
+        }
+        var segments = relative.split("/");
+        return segments.length == 4
+                && "runs".equals(segments[0])
+                && !segments[1].isBlank()
+                && "prompts".equals(segments[2])
+                && "session-compaction-seed.md".equals(segments[3]);
+    }
+
+    private boolean isCanonicalContextPackageRef(Path workspaceRoot, String workstreamId, String inputRef) {
+        if (workstreamId == null || workstreamId.isBlank() || inputRef == null || inputRef.isBlank()) {
+            return false;
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var contextDir = root.resolve(".agent/workstreams").resolve(workstreamId).resolve("context").normalize();
+        var path = root.resolve(inputRef).normalize();
+        return contextDir.startsWith(root)
+                && contextDir.equals(path.getParent())
+                && path.getFileName().toString().endsWith(".md")
+                && isRegularFileWithin(root, path, contextDir, true);
+    }
+
+    private boolean isRegularFileWithin(
+            Path workspaceRoot,
+            Path path,
+            Path expectedDirectory,
+            boolean directChild
+    ) {
+        if (!Files.isRegularFile(path) || Files.isSymbolicLink(path)) {
+            return false;
+        }
+        try {
+            var realRoot = workspaceRoot.toRealPath();
+            var realPath = path.toRealPath();
+            var realDirectory = expectedDirectory.toRealPath();
+            return realDirectory.startsWith(realRoot)
+                    && realPath.startsWith(realDirectory)
+                    && (!directChild || realDirectory.equals(realPath.getParent()));
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private String renderTypedAgentEvidence(Object document) {
+        try {
+            return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document);
+        } catch (IOException e) {
+            throw new UncheckedIOException("failed to render validated agent evidence", e);
+        }
     }
 
     private String readCompleteContextPackage(Path workspaceRoot, Path path) {

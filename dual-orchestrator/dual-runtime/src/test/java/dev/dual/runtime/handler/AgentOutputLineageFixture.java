@@ -57,6 +57,10 @@ public final class AgentOutputLineageFixture {
         var sidecarRef = relative(workspaceRoot, sidecarPath);
         var decision = text(sidecar.get("decision"));
         var outputs = List.of(sourceRef, sidecarRef);
+        var result = Map.<String, Object>of(
+                "run_id", runId,
+                "decision", decision,
+                "contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecarPath));
         var executionId = "nxe-" + nodeInstanceId.replaceAll("[^A-Za-z0-9._-]", "-");
         var workstreamDir = workspaceRoot.resolve(".agent/workstreams").resolve(workstreamId);
         var nodesDir = workstreamDir.resolve("nodes");
@@ -67,12 +71,12 @@ public final class AgentOutputLineageFixture {
         MAPPER.writeValue(nodesDir.resolve(nodeInstanceId + ".json").toFile(), new NodeInstanceDocument(
                 1, nodeInstanceId, nodeId, NodeKind.TASK, "acpx.agent_run", NodeStatus.COMPLETED,
                 "stage-fixture", "iteration-fixture", List.of(), Map.of(), outputs,
-                Map.of("run_id", runId, "decision", decision), runId, executionId, now, now));
+                result, runId, executionId, now, now));
         MAPPER.writeValue(executionsDir.resolve(executionId + ".json").toFile(), new NodeExecutionDocument(
                 1, executionId, "agent-task-fixture", "workflow-execution-fixture",
                 nodeInstanceId, nodeId, "acpx.agent_run", NodeExecutionStatus.SUCCEEDED,
                 1L, "completed", NodeStatus.COMPLETED, outputs,
-                Map.of("run_id", runId, "decision", decision), "",
+                result, "",
                 runId, "", "fixture-agent", "fixture-session", 0, now, now, 1L));
     }
 

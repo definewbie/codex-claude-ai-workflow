@@ -36,6 +36,9 @@ class ArtifactContractValidatorTest {
         assertEquals(NodeStatus.COMPLETED, validated.status());
         assertEquals("READY_FOR_ARCH_REVIEW", validated.result().get("decision"));
         assertTrue(validated.outputRefs().contains("review.contract.json"));
+        assertEquals(
+                AgentOutputContractSidecar.sha256(tempDir.resolve("review.contract.json")),
+                validated.result().get("contract_sidecar_sha256"));
         var sidecar = AgentOutputContractDocument.read(tempDir.resolve("review.contract.json"), new ObjectMapper()).orElseThrow();
         assertEquals("ws-1", sidecar.workstreamId());
         assertEquals("run-1", sidecar.runId());
