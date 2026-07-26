@@ -1,68 +1,116 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /** Node and execution lineage validation after strict JSON deserialization. */
 public final class AgentResultEnvelopeValidator {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+
     public ValidationResult validate(
             AgentResultEnvelope envelope,
             String expectedWorkstreamId,
             String expectedRunId,
             NodeOutputContract contract
     ) {
-        var errors = new ArrayList<String>();
+        var errors = new ValidationErrors();
         if (envelope == null) {
-            errors.add("envelope is required");
-            return ValidationResult.failed(errors);
+            errors.reject("envelope is required");
+            return errors.result();
         }
-        if (envelope.schemaVersion() != 1) {
-            errors.add("schema_version must be 1");
+        if (envelope.schemaVersion() == 0) {
+            errors.repairable("schema_version", CorrectionValue.SCHEMA_VERSION, "schema_version must be 1");
+        } else if (envelope.schemaVersion() != 1) {
+            errors.reject("schema_version must be 1");
         }
         if (envelope.workstreamId() == null || envelope.workstreamId().isBlank()) {
-            errors.add("workstream_id is required");
+            errors.repairable("workstream_id", CorrectionValue.WORKSTREAM_ID, "workstream_id is required");
         } else if (expectedWorkstreamId == null || expectedWorkstreamId.isBlank()
                 || !expectedWorkstreamId.equals(envelope.workstreamId())) {
-            errors.add("workstream_id does not match current workstream");
+            errors.reject("workstream_id does not match current workstream");
         }
         if (envelope.runId() == null || envelope.runId().isBlank()) {
-            errors.add("run_id is required");
+            errors.repairable("run_id", CorrectionValue.RUN_ID, "run_id is required");
         } else if (expectedRunId == null || expectedRunId.isBlank()
                 || !expectedRunId.equals(envelope.runId())) {
-            errors.add("run_id does not match current execution");
+            errors.reject("run_id does not match current execution");
         }
         if (envelope.nodeId() == null || envelope.nodeId().isBlank()) {
-            errors.add("node_id is required");
+            errors.repairable("node_id", CorrectionValue.NODE_ID, "node_id is required");
         } else if (!contract.nodeId().equals(envelope.nodeId())) {
-            errors.add("node_id does not match current node");
+            errors.reject("node_id does not match current node");
         }
         if (envelope.result() == null) {
-            errors.add("result is required");
+            errors.reject("result is required");
         } else {
             if (envelope.result().artifactType() == null || envelope.result().artifactType().isBlank()) {
-                errors.add("result.artifact_type is required");
+                errors.reject("result.artifact_type is required");
             } else if (!contract.emitsArtifact(envelope.result().artifactType())) {
-                errors.add("result.artifact_type is not allowed for node " + contract.nodeId());
+                errors.reject("result.artifact_type is not allowed for node " + contract.nodeId());
             }
             if (envelope.result().decision() == null || envelope.result().decision().isBlank()) {
-                errors.add("result.decision is required");
+                errors.reject("result.decision is required");
             } else if (!contract.allowedDecisions().contains(envelope.result().decision())) {
-                errors.add("result.decision is not allowed for node " + contract.nodeId());
+                errors.reject("result.decision is not allowed for node " + contract.nodeId());
             }
             if (envelope.result().summary() == null || envelope.result().summary().isBlank()) {
-                errors.add("result.summary is required");
+                errors.reject("result.summary is required");
             }
             validatePayload(envelope.result(), errors);
         }
-        return errors.isEmpty() ? ValidationResult.pass() : ValidationResult.failed(errors);
+        return errors.result();
     }
 
-    private static void validatePayload(AgentResultEnvelope.AgentResult result, List<String> errors) {
+    public ValidationResult validateCorrection(
+            AgentResultEnvelope original,
+            AgentResultEnvelope corrected,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract,
+            ValidationResult originalValidation
+    ) {
+        var correctedValidation = validate(corrected, expectedWorkstreamId, expectedRunId, contract);
+        if (!correctedValidation.valid()) {
+            return correctedValidation;
+        }
+        if (original == null || originalValidation == null || !originalValidation.schemaCorrectionAllowed()) {
+            return ValidationResult.rejected("schema correction has no repairable original candidate");
+        }
+        var expected = OBJECT_MAPPER.valueToTree(original);
+        if (!(expected instanceof ObjectNode expectedObject)) {
+            return ValidationResult.rejected("schema correction baseline is not an object");
+        }
+        for (var target : originalValidation.correctionTargets()) {
+            if (!applyExpectedValue(
+                    expectedObject,
+                    target,
+                    expectedWorkstreamId,
+                    expectedRunId,
+                    contract.nodeId()
+            )) {
+                return ValidationResult.rejected("schema correction target is invalid: " + target.path());
+            }
+        }
+        if (!expectedObject.equals(OBJECT_MAPPER.valueToTree(corrected))) {
+            return ValidationResult.rejected("schema correction changed fields outside the repairable schema targets");
+        }
+        return correctedValidation;
+    }
+
+    private static void validatePayload(AgentResultEnvelope.AgentResult result, ValidationErrors errors) {
         switch (result) {
             case AgentResultEnvelope.TaskContractProposalResult proposal -> {
                 requiredText(proposal.objective(), "result.objective", errors);
                 if (proposal.scope() == null) {
-                    errors.add("result.scope is required");
+                    errors.reject("result.scope is required");
                 } else {
                     requiredList(proposal.scope().included(), "result.scope.included", true, errors);
                     requiredList(proposal.scope().excluded(), "result.scope.excluded", false, errors);
@@ -90,7 +138,7 @@ public final class AgentResultEnvelopeValidator {
                         plan.mustFix(), plan.acceptanceNotes(), plan.openRisks(), plan.changedFiles(),
                         plan.verificationSummary(), plan.failure(), errors);
                 if (plan.plan() == null) {
-                    errors.add("result.plan is required");
+                    errors.reject("result.plan is required");
                 } else {
                     requiredList(plan.plan().implementationSteps(), "result.plan.implementation_steps", true, errors);
                     requiredList(plan.plan().editFiles(), "result.plan.edit_files", true, errors);
@@ -130,19 +178,19 @@ public final class AgentResultEnvelopeValidator {
 
     private static void validateScopeEntries(
             List<dev.dual.core.contract.TaskContract.ScopeEntry> entries,
-            List<String> errors
+            ValidationErrors errors
     ) {
         if (entries == null) {
             return;
         }
         for (var entry : entries) {
             if (entry == null) {
-                errors.add("result.scope.included contains null entry");
+                errors.reject("result.scope.included contains null entry");
                 continue;
             }
             requiredText(entry.path(), "result.scope.included.path", errors);
             if (entry.operation() == null) {
-                errors.add("result.scope.included.operation is required");
+                errors.reject("result.scope.included.operation is required");
             }
         }
     }
@@ -158,7 +206,7 @@ public final class AgentResultEnvelopeValidator {
             List<String> changedFiles,
             String verificationSummary,
             AgentResultEnvelope.Failure failure,
-            List<String> errors
+            ValidationErrors errors
     ) {
         requiredText(lifecycleStatus, "result.lifecycle_status", errors);
         requiredList(checks, "result.checks", false, errors);
@@ -170,7 +218,7 @@ public final class AgentResultEnvelopeValidator {
         requiredList(changedFiles, "result.changed_files", false, errors);
         requiredText(verificationSummary, "result.verification_summary", errors);
         if (failure == null) {
-            errors.add("result.failure is required");
+            errors.reject("result.failure is required");
             return;
         }
         requiredList(failure.contractGaps(), "result.failure.contract_gaps", false, errors);
@@ -181,7 +229,7 @@ public final class AgentResultEnvelopeValidator {
 
     private static void validateRereadReasons(
             List<AgentResultEnvelope.RereadReason> reasons,
-            List<String> errors
+            ValidationErrors errors
     ) {
         if (reasons == null) {
             return;
@@ -189,37 +237,130 @@ public final class AgentResultEnvelopeValidator {
         for (int index = 0; index < reasons.size(); index++) {
             var reason = reasons.get(index);
             if (reason == null) {
-                errors.add("result.reread_reasons[" + index + "] is required");
+                errors.reject("result.reread_reasons[" + index + "] is required");
                 continue;
             }
             requiredText(reason.path(), "result.reread_reasons[" + index + "].path", errors);
             if (!ReadReuseContractReasons.isAllowed(reason.reason())) {
-                errors.add("result.reread_reasons[" + index + "].reason is not allowed");
+                errors.reject("result.reread_reasons[" + index + "].reason is not allowed");
             }
         }
     }
 
-    private static void requiredText(String value, String field, List<String> errors) {
+    private static void requiredText(String value, String field, ValidationErrors errors) {
         if (value == null || value.isBlank()) {
-            errors.add(field + " is required");
+            errors.reject(field + " is required");
         }
     }
 
-    private static void requiredList(List<?> value, String field, boolean nonEmpty, List<String> errors) {
+    private static void requiredList(List<?> value, String field, boolean nonEmpty, ValidationErrors errors) {
         if (value == null) {
-            errors.add(field + " is required");
+            if (nonEmpty) {
+                errors.reject(field + " is required");
+            } else {
+                errors.repairable(field, CorrectionValue.EMPTY_LIST, field + " is required");
+            }
         } else if (nonEmpty && value.isEmpty()) {
-            errors.add(field + " must not be empty");
+            errors.reject(field + " must not be empty");
         }
     }
 
-    public record ValidationResult(boolean valid, List<String> errors) {
+    private static boolean applyExpectedValue(
+            ObjectNode root,
+            CorrectionTarget target,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            String expectedNodeId
+    ) {
+        var value = switch (target.value()) {
+            case SCHEMA_VERSION -> IntNode.valueOf(1);
+            case WORKSTREAM_ID -> TextNode.valueOf(expectedWorkstreamId);
+            case RUN_ID -> TextNode.valueOf(expectedRunId);
+            case NODE_ID -> TextNode.valueOf(expectedNodeId);
+            case EMPTY_LIST -> new ArrayNode(OBJECT_MAPPER.getNodeFactory());
+        };
+        var segments = target.path().split("\\.");
+        ObjectNode parent = root;
+        for (int index = 0; index < segments.length - 1; index++) {
+            var child = parent.get(segments[index]);
+            if (!(child instanceof ObjectNode childObject)) {
+                return false;
+            }
+            parent = childObject;
+        }
+        parent.set(segments[segments.length - 1], value);
+        return true;
+    }
+
+    public enum CorrectionDisposition {
+        NONE,
+        SCHEMA_REPAIRABLE,
+        NOT_REPAIRABLE
+    }
+
+    public enum CorrectionValue {
+        SCHEMA_VERSION,
+        WORKSTREAM_ID,
+        RUN_ID,
+        NODE_ID,
+        EMPTY_LIST
+    }
+
+    public record CorrectionTarget(String path, CorrectionValue value) {
+    }
+
+    public record ValidationResult(
+            boolean valid,
+            List<String> errors,
+            CorrectionDisposition correctionDisposition,
+            List<CorrectionTarget> correctionTargets
+    ) {
         static ValidationResult pass() {
-            return new ValidationResult(true, List.of());
+            return new ValidationResult(true, List.of(), CorrectionDisposition.NONE, List.of());
         }
 
-        static ValidationResult failed(List<String> errors) {
-            return new ValidationResult(false, List.copyOf(errors));
+        static ValidationResult rejected(String error) {
+            return new ValidationResult(
+                    false,
+                    List.of(error),
+                    CorrectionDisposition.NOT_REPAIRABLE,
+                    List.of()
+            );
+        }
+
+        public boolean schemaCorrectionAllowed() {
+            return correctionDisposition == CorrectionDisposition.SCHEMA_REPAIRABLE;
+        }
+    }
+
+    private static final class ValidationErrors {
+        private final List<String> messages = new ArrayList<>();
+        private final List<CorrectionTarget> correctionTargets = new ArrayList<>();
+        private boolean rejected;
+
+        void repairable(String field, CorrectionValue value, String message) {
+            messages.add(message);
+            correctionTargets.add(new CorrectionTarget(field, value));
+        }
+
+        void reject(String message) {
+            messages.add(message);
+            rejected = true;
+        }
+
+        ValidationResult result() {
+            if (messages.isEmpty()) {
+                return ValidationResult.pass();
+            }
+            var disposition = !correctionTargets.isEmpty() && !rejected
+                    ? CorrectionDisposition.SCHEMA_REPAIRABLE
+                    : CorrectionDisposition.NOT_REPAIRABLE;
+            return new ValidationResult(
+                    false,
+                    List.copyOf(messages),
+                    disposition,
+                    List.copyOf(correctionTargets)
+            );
         }
     }
 }

@@ -168,18 +168,130 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(acquisition.path("correctionAttempted").asBoolean());
         assertEquals(1, acquisition.path("maxCorrectionAttempts").asInt());
         assertEquals(2, acquisition.path("selectedCandidateOccurrence").asInt());
+        assertEquals("PARSE_FAILURE", acquisition.path("correctionReason").asText());
         assertEquals(2, acquisition.path("occurrences").size());
         assertEquals("fixture-initial", acquisition.path("occurrences").get(0).path("requestId").asText());
         assertFalse(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
         assertEquals("AGENT_RESULT_PARSE_FAILED",
                 acquisition.path("occurrences").get(0).path("parseErrorCode").asText());
+        assertEquals("NOT_EVALUATED",
+                acquisition.path("occurrences").get(0).path("contractCorrectionDisposition").asText());
         assertEquals(101, acquisition.path("occurrences").get(0).path("usage").path("totalTokens").asInt());
         assertEquals("fixture-correction", acquisition.path("occurrences").get(1).path("requestId").asText());
         assertTrue(acquisition.path("occurrences").get(1).path("contractDecodable").asBoolean());
+        assertTrue(acquisition.path("occurrences").get(1).path("contractSchemaValid").asBoolean());
+        assertEquals("NONE",
+                acquisition.path("occurrences").get(1).path("contractCorrectionDisposition").asText());
         assertEquals(23, acquisition.path("occurrences").get(1).path("usage").path("totalTokens").asInt());
         assertEquals(124, metadata.path("usage").path("totalTokens").asInt());
         assertEquals(AcpxUsage.ATTR_MULTI_PROMPT_SUM, metadata.path("usage").path("attribution").asText());
         assertEquals(3000, metadata.path("durationMs").asLong());
+    }
+
+    @Test
+    void schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-schema-correction");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Verify the completed README change.\n");
+
+        var transport = new SchemaContractCorrectionTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition(
+                "implement.claude_self_test_report",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                Map.of(
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "prompt_template", "implement-claude-self-test"
+                )
+        );
+        var instance = readyInstance("implement.claude_self_test_report");
+
+        var candidate = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-schema-correction",
+                definition,
+                instance
+        ));
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-schema-correction",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+        validated = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals("SELF_TEST_COMPLETE", validated.result().get("decision"));
+        assertEquals(2, transport.calls);
+        assertEquals(List.of(
+                "claude-main-ws-schema-correction",
+                "claude-main-ws-schema-correction"
+        ), transport.sessions);
+        assertTrue(transport.correctionProfile.denyAll());
+        assertFalse(transport.correctionProfile.terminalEnabled());
+        assertFalse(transport.correctionProfile.approveAll());
+
+        var runMetadataPath = tempDir.resolve((String) validated.result().get("run_metadata"));
+        var metadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+        var acquisition = metadata.path("agentResultAcquisition");
+        assertTrue(acquisition.path("correctionAttempted").asBoolean());
+        assertEquals("SCHEMA_FAILURE", acquisition.path("correctionReason").asText());
+        assertEquals(2, acquisition.path("occurrences").size());
+        assertTrue(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
+        assertFalse(acquisition.path("occurrences").get(0).path("contractSchemaValid").asBoolean());
+        assertEquals("SCHEMA_REPAIRABLE",
+                acquisition.path("occurrences").get(0).path("contractCorrectionDisposition").asText());
+        assertEquals("result.missing_evidence is required",
+                acquisition.path("occurrences").get(0).path("contractValidationErrors").get(0).asText());
+        assertTrue(acquisition.path("occurrences").get(1).path("contractSchemaValid").asBoolean());
+        assertEquals("NONE",
+                acquisition.path("occurrences").get(1).path("contractCorrectionDisposition").asText());
+    }
+
+    @Test
+    void schemaCorrectionStillInvalidCannotRouteAndDoesNotStartThirdPrompt() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-schema-correction-fails");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Verify the completed README change.\n");
+
+        var transport = new SchemaContractCorrectionTransport(false);
+        var definition = new NodeDefinition(
+                "implement.claude_self_test_report",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                Map.of(
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "prompt_template", "implement-claude-self-test"
+                )
+        );
+        var instance = readyInstance("implement.claude_self_test_report");
+
+        var candidate = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-schema-correction-fails",
+                definition,
+                instance
+        ));
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-schema-correction-fails",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals(2, transport.calls);
+        var runMetadataPath = tempDir.resolve((String) candidate.result().get("run_metadata"));
+        var acquisition = OBJECT_MAPPER.readTree(runMetadataPath.toFile()).path("agentResultAcquisition");
+        assertTrue(acquisition.path("correctionAttempted").asBoolean());
+        assertFalse(acquisition.path("occurrences").get(1).path("contractSchemaValid").asBoolean());
     }
 
 
@@ -1555,6 +1667,74 @@ class AcpxAgentTaskHandlerTest {
                     "fixture",
                     ""
             );
+        }
+    }
+
+    private static final class SchemaContractCorrectionTransport extends AcpxAgentTransport {
+        private final java.util.ArrayList<String> sessions = new java.util.ArrayList<>();
+        private final boolean repairSecondOccurrence;
+        private int calls;
+        private AcpxPermissionProfile correctionProfile;
+        private String initialArtifact;
+
+        private SchemaContractCorrectionTransport() {
+            this(true);
+        }
+
+        private SchemaContractCorrectionTransport(boolean repairSecondOccurrence) {
+            this.repairSecondOccurrence = repairSecondOccurrence;
+        }
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            calls++;
+            sessions.add(request.sessionName());
+            prepareLogs(request);
+            initialArtifact = completionJson(request, "SELF_TEST_COMPLETE")
+                    .replace("    \"missing_evidence\" : [ ],\n", "");
+            var now = Instant.parse("2026-07-26T00:00:00Z");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude", "initial"),
+                    List.of(),
+                    null,
+                    new AcpxPromptCompletion("fixture-schema-initial", "end_turn", initialArtifact)
+            );
+        }
+
+        @Override
+        AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) throws java.io.IOException {
+            calls++;
+            sessions.add(request.sessionName());
+            correctionProfile = request.permissionProfile();
+            prepareLogs(request);
+            var corrected = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(initialArtifact);
+            if (repairSecondOccurrence) {
+                ((com.fasterxml.jackson.databind.node.ObjectNode) corrected.path("result"))
+                        .putArray("missing_evidence");
+            }
+            var now = Instant.parse("2026-07-26T00:00:02Z");
+            return new AcpxRunResult(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude", "correction"),
+                    List.of(),
+                    null,
+                    new AcpxPromptCompletion(
+                            "fixture-schema-correction",
+                            "end_turn",
+                            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(corrected)
+                    )
+            );
+        }
+
+        private static void prepareLogs(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "");
+            Files.writeString(request.stderrPath(), "");
         }
     }
 

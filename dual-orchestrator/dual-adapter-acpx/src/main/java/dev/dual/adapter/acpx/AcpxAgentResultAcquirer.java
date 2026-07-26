@@ -1,6 +1,8 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.runtime.handler.AgentResultEnvelopeParser;
+import dev.dual.runtime.handler.AgentResultEnvelopeValidator;
+import dev.dual.runtime.handler.NodeOutputContract;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,19 +12,27 @@ import java.nio.file.Files;
 final class AcpxAgentResultAcquirer {
     private final AcpxAgentTransport transport;
     private final AgentResultEnvelopeParser parser;
+    private final AgentResultEnvelopeValidator validator;
     private final AcpxFailureClassifier failureClassifier;
 
     AcpxAgentResultAcquirer(AcpxAgentTransport transport) {
-        this(transport, new AgentResultEnvelopeParser(), new AcpxFailureClassifier());
+        this(
+                transport,
+                new AgentResultEnvelopeParser(),
+                new AgentResultEnvelopeValidator(),
+                new AcpxFailureClassifier()
+        );
     }
 
     AcpxAgentResultAcquirer(
             AcpxAgentTransport transport,
             AgentResultEnvelopeParser parser,
+            AgentResultEnvelopeValidator validator,
             AcpxFailureClassifier failureClassifier
     ) {
         this.transport = transport;
         this.parser = parser;
+        this.validator = validator;
         this.failureClassifier = failureClassifier;
     }
 
@@ -30,25 +40,56 @@ final class AcpxAgentResultAcquirer {
             String agent,
             AcpxRunRequest initialRequest,
             AcpxRunRequest correctionRequest,
-            String correctionPrompt
+            String correctionPrompt,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract
     ) throws IOException, InterruptedException {
         var initialResult = executeInitial(agent, initialRequest);
         var initialParse = parser.parse(initialResult.promptCompletion().finalAssistantMessage());
-        if (!mayCorrect(initialRequest, initialResult, initialParse, correctionPrompt)) {
-            return new Acquisition(initialResult, initialParse, null, null, initialRequest, null);
+        var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract);
+        var correctionReason = correctionReason(initialParse, initialValidation);
+        if (!mayCorrect(initialRequest, initialResult, correctionReason, correctionPrompt)) {
+            return new Acquisition(
+                    initialResult,
+                    initialParse,
+                    initialValidation,
+                    null,
+                    null,
+                    null,
+                    initialRequest,
+                    null,
+                    CorrectionReason.NONE
+            );
         }
 
         Files.createDirectories(correctionRequest.promptPath().getParent());
-        Files.writeString(correctionRequest.promptPath(), correctionPrompt, StandardCharsets.UTF_8);
+        Files.writeString(
+                correctionRequest.promptPath(),
+                renderCorrectionPrompt(correctionPrompt, correctionReason, initialParse, initialValidation),
+                StandardCharsets.UTF_8
+        );
         var correctionResult = transport.runAgentResultCorrection(agent, correctionRequest);
         var correctionParse = parser.parse(correctionResult.promptCompletion().finalAssistantMessage());
+        var correctionValidation = validateCorrection(
+                correctionReason,
+                initialParse,
+                initialValidation,
+                correctionParse,
+                expectedWorkstreamId,
+                expectedRunId,
+                contract
+        );
         return new Acquisition(
                 initialResult,
                 initialParse,
+                initialValidation,
                 correctionResult,
                 correctionParse,
+                correctionValidation,
                 initialRequest,
-                correctionRequest
+                correctionRequest,
+                correctionReason
         );
     }
 
@@ -63,26 +104,107 @@ final class AcpxAgentResultAcquirer {
     private boolean mayCorrect(
             AcpxRunRequest request,
             AcpxRunResult result,
-            AgentResultEnvelopeParser.ParseResult parsed,
+            CorrectionReason correctionReason,
             String correctionPrompt
     ) {
         if (correctionPrompt == null || correctionPrompt.isBlank()
                 || result.exitCode() != 0
                 || !result.promptCompletion().completed()
-                || !"AGENT_RESULT_PARSE_FAILED".equals(parsed.errorCode())) {
+                || correctionReason == CorrectionReason.NONE) {
             return false;
         }
         var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
         return !failure.signalPresent();
     }
 
+    private AgentResultEnvelopeValidator.ValidationResult validate(
+            AgentResultEnvelopeParser.ParseResult parsed,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract
+    ) {
+        if (!parsed.valid() || contract == null) {
+            return null;
+        }
+        return validator.validate(parsed.envelope(), expectedWorkstreamId, expectedRunId, contract);
+    }
+
+    private AgentResultEnvelopeValidator.ValidationResult validateCorrection(
+            CorrectionReason reason,
+            AgentResultEnvelopeParser.ParseResult initialParse,
+            AgentResultEnvelopeValidator.ValidationResult initialValidation,
+            AgentResultEnvelopeParser.ParseResult correctionParse,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract
+    ) {
+        if (!correctionParse.valid() || contract == null) {
+            return null;
+        }
+        if (reason != CorrectionReason.SCHEMA_FAILURE) {
+            return validator.validate(
+                    correctionParse.envelope(),
+                    expectedWorkstreamId,
+                    expectedRunId,
+                    contract
+            );
+        }
+        return validator.validateCorrection(
+                initialParse.envelope(),
+                correctionParse.envelope(),
+                expectedWorkstreamId,
+                expectedRunId,
+                contract,
+                initialValidation
+        );
+    }
+
+    private static CorrectionReason correctionReason(
+            AgentResultEnvelopeParser.ParseResult parsed,
+            AgentResultEnvelopeValidator.ValidationResult validation
+    ) {
+        if ("AGENT_RESULT_PARSE_FAILED".equals(parsed.errorCode())) {
+            return CorrectionReason.PARSE_FAILURE;
+        }
+        if (parsed.valid() && validation != null && validation.schemaCorrectionAllowed()) {
+            return CorrectionReason.SCHEMA_FAILURE;
+        }
+        return CorrectionReason.NONE;
+    }
+
+    private static String renderCorrectionPrompt(
+            String contractPrompt,
+            CorrectionReason reason,
+            AgentResultEnvelopeParser.ParseResult parsed,
+            AgentResultEnvelopeValidator.ValidationResult validation
+    ) {
+        var evidence = reason == CorrectionReason.SCHEMA_FAILURE && validation != null
+                ? validation.errors()
+                : java.util.List.of(parsed.errorCode());
+        return """
+                Typed correction reason: %s
+                Validation errors: %s
+
+                %s
+                """.formatted(reason, evidence, contractPrompt).stripTrailing();
+    }
+
+    enum CorrectionReason {
+        NONE,
+        PARSE_FAILURE,
+        SCHEMA_FAILURE
+    }
+
     record Acquisition(
             AcpxRunResult initialResult,
             AgentResultEnvelopeParser.ParseResult initialParse,
+            AgentResultEnvelopeValidator.ValidationResult initialValidation,
             AcpxRunResult correctionResult,
             AgentResultEnvelopeParser.ParseResult correctionParse,
+            AgentResultEnvelopeValidator.ValidationResult correctionValidation,
             AcpxRunRequest initialRequest,
-            AcpxRunRequest correctionRequest
+            AcpxRunRequest correctionRequest,
+            CorrectionReason correctionReason
     ) {
         boolean correctionAttempted() {
             return correctionResult != null;
@@ -125,13 +247,15 @@ final class AcpxAgentResultAcquirer {
                     correctionAttempted(),
                     1,
                     correctionAttempted() ? 2 : 1,
+                    correctionReason.name(),
                     correctionAttempted() ? java.util.List.of(
-                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse,
+                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse, initialValidation,
                                     initialOutputPath, initialUsage),
                             occurrence(workspaceRoot, 2, correctionRequest, correctionResult, correctionParse,
+                                    correctionValidation,
                                     correctionOutputPath, correctionUsage))
                     : java.util.List.of(
-                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse,
+                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse, initialValidation,
                                     initialOutputPath, initialUsage))
             );
         }
@@ -142,6 +266,7 @@ final class AcpxAgentResultAcquirer {
                 AcpxRunRequest request,
                 AcpxRunResult result,
                 AgentResultEnvelopeParser.ParseResult parsed,
+                AgentResultEnvelopeValidator.ValidationResult validation,
                 java.nio.file.Path outputPath,
                 AcpxUsage usage
         ) {
@@ -160,6 +285,9 @@ final class AcpxAgentResultAcquirer {
                     result.promptCompletion().stopReason(),
                     parsed.valid(),
                     parsed.errorCode(),
+                    validation != null && validation.valid(),
+                    validation == null ? "NOT_EVALUATED" : validation.correctionDisposition().name(),
+                    validation == null ? java.util.List.of() : validation.errors(),
                     usage
             );
         }

@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.runtime.handler.AgentResultPromptContract;
+import dev.dual.runtime.handler.AgentResultEnvelopeValidator;
 import dev.dual.runtime.handler.ContractRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -26,7 +27,8 @@ class AcpxAgentResultAcquirerTest {
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"));
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertFalse(acquisition.correctionAttempted());
         assertTrue(acquisition.finalParse().valid());
@@ -43,7 +45,8 @@ class AcpxAgentResultAcquirerTest {
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"));
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertTrue(acquisition.correctionAttempted());
         assertFalse(acquisition.initialParse().valid());
@@ -63,7 +66,8 @@ class AcpxAgentResultAcquirerTest {
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"));
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertTrue(acquisition.correctionAttempted());
         assertFalse(acquisition.finalParse().valid());
@@ -77,7 +81,8 @@ class AcpxAgentResultAcquirerTest {
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"));
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertTrue(acquisition.finalParse().valid());
         assertFalse(acquisition.correctionAttempted());
@@ -91,7 +96,8 @@ class AcpxAgentResultAcquirerTest {
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"));
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertFalse(acquisition.correctionAttempted());
         assertEquals(1, transport.calls);
@@ -105,9 +111,140 @@ class AcpxAgentResultAcquirerTest {
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"));
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertFalse(acquisition.correctionAttempted());
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
+    void parseableSelfTestMissingNullableSchemaFieldGetsOneSameSessionCorrection() throws Exception {
+        var valid = strictEnvelope("implement.claude_self_test_report", "run-1");
+        var invalid = valid.replace("    \"missing_evidence\" : [ ],\n", "");
+        assertFalse(invalid.equals(valid), "fixture must remove missing_evidence");
+        var transport = new ScriptedTransport(
+                validResult("request-1", invalid, 0),
+                validResult("request-2", valid, 0)
+        );
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude",
+                requests.initial(),
+                requests.correction(),
+                correctionPrompt("implement.claude_self_test_report", "run-1"),
+                "ws-test",
+                "run-1",
+                ContractRegistry.forNode("implement.claude_self_test_report")
+        );
+
+        assertTrue(acquisition.initialParse().valid());
+        assertEquals(
+                AgentResultEnvelopeValidator.CorrectionDisposition.SCHEMA_REPAIRABLE,
+                acquisition.initialValidation().correctionDisposition()
+        );
+        assertTrue(acquisition.correctionAttempted());
+        assertTrue(acquisition.finalParse().valid());
+        assertTrue(acquisition.correctionValidation().valid());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.SCHEMA_FAILURE, acquisition.correctionReason());
+        assertEquals(2, transport.calls);
+        assertEquals(List.of("same-session", "same-session"), transport.sessions);
+        var prompt = Files.readString(requests.correction().promptPath());
+        assertTrue(prompt.contains("Typed correction reason: SCHEMA_FAILURE"));
+        assertTrue(prompt.contains("result.missing_evidence is required"));
+    }
+
+    @Test
+    void schemaCorrectionFailureDoesNotStartThirdPrompt() throws Exception {
+        var valid = strictEnvelope("implement.claude_self_test_report", "run-1");
+        var invalid = valid.replace("    \"missing_evidence\" : [ ],\n", "");
+        var transport = new ScriptedTransport(
+                validResult("request-1", invalid, 0),
+                validResult("request-2", invalid, 0)
+        );
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude",
+                requests.initial(),
+                requests.correction(),
+                correctionPrompt("implement.claude_self_test_report", "run-1"),
+                "ws-test",
+                "run-1",
+                ContractRegistry.forNode("implement.claude_self_test_report")
+        );
+
+        assertTrue(acquisition.correctionAttempted());
+        assertFalse(acquisition.correctionValidation().valid());
+        assertEquals(2, transport.calls);
+    }
+
+    @Test
+    void schemaCorrectionCannotChangeExistingSemanticFields() throws Exception {
+        var valid = strictEnvelope("design.claude_design", "run-1");
+        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var invalidNode = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(valid);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) invalidNode.path("result")).remove("checks");
+        var invalid = objectMapper.writeValueAsString(invalidNode);
+        var correctedNode = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(valid);
+        var correctedResult = (com.fasterxml.jackson.databind.node.ObjectNode) correctedNode.path("result");
+        correctedResult.putArray("checks");
+        correctedResult.put("summary", "a different conclusion");
+        var correctedWithChangedSummary = objectMapper.writeValueAsString(correctedNode);
+        var transport = new ScriptedTransport(
+                validResult("request-1", invalid, 0),
+                validResult("request-2", correctedWithChangedSummary, 0)
+        );
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertTrue(acquisition.correctionAttempted());
+        assertFalse(acquisition.correctionValidation().valid());
+        assertTrue(acquisition.correctionValidation().errors().contains(
+                "schema correction changed fields outside the repairable schema targets"
+        ));
+        assertEquals(2, transport.calls);
+    }
+
+    @Test
+    void illegalDecisionDoesNotStartSchemaCorrection() throws Exception {
+        var invalid = strictEnvelope("design.claude_design", "run-1")
+                .replace("READY_FOR_ARCH_REVIEW", "BLOCKED");
+        var transport = new ScriptedTransport(validResult("request-1", invalid, 0));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals(
+                AgentResultEnvelopeValidator.CorrectionDisposition.NOT_REPAIRABLE,
+                acquisition.initialValidation().correctionDisposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
+    void explicitUnsupportedSchemaVersionDoesNotStartCorrection() throws Exception {
+        var invalid = strictEnvelope("design.claude_design", "run-1")
+                .replace("\"schema_version\" : 1", "\"schema_version\" : 2");
+        var transport = new ScriptedTransport(validResult("request-1", invalid, 0));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals(
+                AgentResultEnvelopeValidator.CorrectionDisposition.NOT_REPAIRABLE,
+                acquisition.initialValidation().correctionDisposition()
+        );
         assertEquals(1, transport.calls);
     }
 
@@ -134,18 +271,26 @@ class AcpxAgentResultAcquirerTest {
     }
 
     private static String correctionPrompt(String runId) {
-        var contract = ContractRegistry.forNode("design.claude_design");
+        return correctionPrompt("design.claude_design", runId);
+    }
+
+    private static String correctionPrompt(String nodeId, String runId) {
+        var contract = ContractRegistry.forNode(nodeId);
         return AgentResultPromptContract.render(
                 "ws-test",
                 runId,
-                "design.claude_design",
-                "READY_FOR_ARCH_REVIEW",
+                nodeId,
+                contract.allowedDecisions().stream().sorted().findFirst().orElseThrow(),
                 contract.allowedDecisions()
         );
     }
 
     private static String strictEnvelope(String runId) {
-        var rendered = correctionPrompt(runId);
+        return strictEnvelope("design.claude_design", runId);
+    }
+
+    private static String strictEnvelope(String nodeId, String runId) {
+        var rendered = correctionPrompt(nodeId, runId);
         var start = rendered.lastIndexOf("{\n  \"schema_version\"");
         if (start < 0) {
             throw new AssertionError("strict AgentResultEnvelope example missing");

@@ -86,6 +86,24 @@ class AgentResultEnvelopeParserTest {
         var result = validator.validate(parsed.envelope(), "ws-1", "run-1", contract);
         assertFalse(result.valid());
         assertTrue(result.errors().contains("result.checks is required"));
+        assertTrue(result.schemaCorrectionAllowed());
+    }
+
+    @Test
+    void distinguishesMissingSchemaVersionFromExplicitUnsupportedVersion() {
+        var missing = parser.parse(validEnvelope().replace("\"schema_version\": 1,", ""));
+        var unsupported = parser.parse(validEnvelope().replace("\"schema_version\": 1", "\"schema_version\": 2"));
+
+        var missingResult = validator.validate(missing.envelope(), "ws-1", "run-1", contract);
+        var unsupportedResult = validator.validate(unsupported.envelope(), "ws-1", "run-1", contract);
+
+        assertTrue(missing.valid());
+        assertTrue(missingResult.schemaCorrectionAllowed());
+        assertTrue(unsupported.valid());
+        assertEquals(
+                AgentResultEnvelopeValidator.CorrectionDisposition.NOT_REPAIRABLE,
+                unsupportedResult.correctionDisposition()
+        );
     }
 
     @Test
@@ -96,6 +114,27 @@ class AgentResultEnvelopeParserTest {
         var result = validator.validate(parsed.envelope(), "ws-1", "run-1", contract);
         assertFalse(result.valid());
         assertTrue(result.errors().contains("result.summary is required"));
+        assertEquals(
+                AgentResultEnvelopeValidator.CorrectionDisposition.NOT_REPAIRABLE,
+                result.correctionDisposition()
+        );
+    }
+
+    @Test
+    void mixedSchemaAndIdentityFailureIsNotRepairable() {
+        var parsed = parser.parse(validEnvelope()
+                .replace("\"checks\": [],", "")
+                .replace("\"run_id\": \"run-1\"", "\"run_id\": \"stale-run\""));
+
+        var result = validator.validate(parsed.envelope(), "ws-1", "run-1", contract);
+
+        assertFalse(result.valid());
+        assertTrue(result.errors().contains("result.checks is required"));
+        assertTrue(result.errors().contains("run_id does not match current execution"));
+        assertEquals(
+                AgentResultEnvelopeValidator.CorrectionDisposition.NOT_REPAIRABLE,
+                result.correctionDisposition()
+        );
     }
 
     @Test

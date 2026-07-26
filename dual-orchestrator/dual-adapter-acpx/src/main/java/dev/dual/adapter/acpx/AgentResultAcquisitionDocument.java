@@ -8,6 +8,7 @@ record AgentResultAcquisitionDocument(
         boolean correctionAttempted,
         int maxCorrectionAttempts,
         int selectedCandidateOccurrence,
+        String correctionReason,
         List<AgentResultOccurrenceDocument> occurrences
 ) {
     AgentResultAcquisitionDocument {
@@ -30,6 +31,14 @@ record AgentResultOccurrenceDocument(
         String stopReason,
         boolean contractDecodable,
         String parseErrorCode,
+        boolean contractSchemaValid,
+        String contractCorrectionDisposition,
+        List<String> contractValidationErrors,
         AcpxUsage usage
 ) {
+    AgentResultOccurrenceDocument {
+        contractValidationErrors = contractValidationErrors == null
+                ? List.of()
+                : List.copyOf(contractValidationErrors);
+    }
 }
