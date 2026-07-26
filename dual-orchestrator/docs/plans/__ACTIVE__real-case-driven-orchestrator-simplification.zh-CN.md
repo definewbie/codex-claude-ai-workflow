@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Direction B / Phase B Closure — PASS, CHECKPOINT PENDING
+## Current Active Step: Phase C Context Boundary Assessment — COMPLETE
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -61,7 +61,11 @@
 >   `actualWriteFiles=[README.md]` 及 typed tool usage；workstream 中不存在
 >   legacy exploration plan/policy artifact。
 >
-> **Phase B = PASS / ENFORCED + PROVEN。Phase C assessment 尚未激活。**
+> **Phase B = PASS / ENFORCED + PROVEN。Checkpoint `e1c094b`。**
+>
+> **Phase C assessment = COMPLETE；subtraction implementation = READY, NOT ACTIVE。**
+> 评估结论与单次减法范围见
+> `docs/plans/__CHECKPOINT__phase-c-context-boundary-assessment.zh-CN.md`。
 
 ## 执行纪律
 
@@ -247,7 +251,8 @@ Phase A 完成条件：A1/A2/A3 各有一个可复现的 `COMPLETED + ACCEPT` re
 
 ## Phase C：Context Boundary
 
-仅在 Phase B PASS 后显式激活。
+Assessment 已完成。Phase B checkpoint `e1c094b` 与 controlled README real-case
+均为 PASS；production 尚未修改。
 
 目标结构：
 
@@ -258,6 +263,17 @@ ledger facts + typed artifact refs + verified lineage
 ```
 
 filesystem 只验证已知 artifact 的存在和 hash，不通过目录扫描猜测业务 evidence。不得建设通用 graph platform。
+
+Assessment 结论：
+
+- `AgentEvidenceIndex` + `AgentOutputLineageVerifier` 已是 routed typed evidence 的正确内核；
+- 当前缺口是 `RepoScopeGovernance` 在 context build 中扫描 workspace、按 requirement
+  与文件名猜测候选、读取 seed content 并注入 prompt；
+- 下一步只允许一次 subtraction implementation：删除这条未路由 context source，
+  收紧 generic raw ref 展开，同时保留 ledger facts、typed artifacts、actual telemetry
+  与 read-reuse contract；
+- 不新增 Artifact Graph、Evidence Registry、Context Engine 模块、query DSL 或状态机；
+- implementation 未激活，必须先 review assessment checkpoint。
 
 ## Phase D：Handler 收敛
 
@@ -282,5 +298,5 @@ filesystem 只验证已知 artifact 的存在和 hash，不通过目录扫描猜
 > 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider
 > 优化、HTTP/runtime 扩张、tool-call 前 broker 或 write-scope lifecycle。
 >
-> 以上仅为历史许可记录；当前 objective 以本文顶部的 Phase B closure
+> 以上仅为历史许可记录；当前 objective 以本文顶部的 Phase C assessment
 > 状态为准。
