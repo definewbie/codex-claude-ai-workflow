@@ -143,44 +143,8 @@ final class AgentRunMetadataWriter {
             Path stdoutPath,
             Path stderrPath,
             AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure
-    ) throws IOException {
-        writeCompleted(
-                workspaceRoot,
-                workstreamId,
-                nodeId,
-                agent,
-                session,
-                promptTemplate,
-                runId,
-                runDir,
-                promptPath,
-                stdoutPath,
-                stderrPath,
-                null,
-                result,
-                failure,
-                null,
-                null,
-                null
-        );
-    }
-
-    void writeCompleted(
-            Path workspaceRoot,
-            String workstreamId,
-            String nodeId,
-            String agent,
-            String session,
-            String promptTemplate,
-            String runId,
-            Path runDir,
-            Path promptPath,
-            Path stdoutPath,
-            Path stderrPath,
-            AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure,
-            AcpxUsage usage
+            ProcessUsability processUsability
     ) throws IOException {
         writeCompleted(
                 workspaceRoot,
@@ -197,9 +161,10 @@ final class AgentRunMetadataWriter {
                 null,
                 result,
                 failure,
-                usage,
                 null,
-                null
+                null,
+                null,
+                processUsability
         );
     }
 
@@ -215,12 +180,10 @@ final class AgentRunMetadataWriter {
             Path promptPath,
             Path stdoutPath,
             Path stderrPath,
-            Path transcriptPath,
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure,
             AcpxUsage usage,
-            SessionMeta sessionMeta,
-            SessionCompactionMeta compactionMeta
+            ProcessUsability processUsability
     ) throws IOException {
         writeCompleted(
                 workspaceRoot,
@@ -234,13 +197,13 @@ final class AgentRunMetadataWriter {
                 promptPath,
                 stdoutPath,
                 stderrPath,
-                transcriptPath,
+                null,
                 result,
                 failure,
                 usage,
-                sessionMeta,
-                compactionMeta,
-                null
+                null,
+                null,
+                processUsability
         );
     }
 
@@ -262,8 +225,55 @@ final class AgentRunMetadataWriter {
             AcpxUsage usage,
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta,
-            AgentResultAcquisitionDocument agentResultAcquisition
+            ProcessUsability processUsability
     ) throws IOException {
+        writeCompleted(
+                workspaceRoot,
+                workstreamId,
+                nodeId,
+                agent,
+                session,
+                promptTemplate,
+                runId,
+                runDir,
+                promptPath,
+                stdoutPath,
+                stderrPath,
+                transcriptPath,
+                result,
+                failure,
+                usage,
+                sessionMeta,
+                compactionMeta,
+                null,
+                processUsability
+        );
+    }
+
+    void writeCompleted(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            Path runDir,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            Path transcriptPath,
+            AcpxRunResult result,
+            AcpxFailureClassifier.AcpxFailure failure,
+            AcpxUsage usage,
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta,
+            AgentResultAcquisitionDocument agentResultAcquisition,
+            ProcessUsability processUsability
+    ) throws IOException {
+        if (processUsability == null) {
+            throw new IllegalArgumentException("processUsability is required");
+        }
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
         var outputMetadataPath = metadataPath(stdoutPath);
@@ -301,6 +311,7 @@ final class AgentRunMetadataWriter {
                 sessionMeta,
                 result,
                 failure,
+                processUsability,
                 relative(workspaceRoot, stderrPath),
                 relativeOrNull(workspaceRoot, transcriptPath)
         );
@@ -308,7 +319,15 @@ final class AgentRunMetadataWriter {
         // Runtime contract validation owns the first trustworthy terminal outcome.
         var executionOutcome = result.promptCompletion().completed() && failure == null
                 ? null
-                : executionOutcome(workspaceRoot, result, stdoutPath, stderrPath, failure, attempt);
+                : executionOutcome(
+                        workspaceRoot,
+                        result,
+                        stdoutPath,
+                        stderrPath,
+                        failure,
+                        processUsability,
+                        attempt
+                );
         var effectiveUsage = usage;
         if (failure != null) {
             effectiveUsage = usage == null
@@ -422,7 +441,7 @@ final class AgentRunMetadataWriter {
                 providerModelIdentity(effectiveUsage),
                 toolUsage,
                 relativeOrNull(workspaceRoot, governanceReportPath),
-                processResult(workspaceRoot, result, stdoutPath, stderrPath, failure),
+                processResult(workspaceRoot, result, stdoutPath, stderrPath, processUsability),
                 adapterSignals(failure),
                 null,
                 List.of(),
@@ -527,34 +546,18 @@ final class AgentRunMetadataWriter {
             AcpxRunResult result,
             Path stdoutPath,
             Path stderrPath,
-            AcpxFailureClassifier.AcpxFailure failure
+            ProcessUsability processUsability
     ) {
         return Map.of(
                 "command", String.join(" ", result.command()),
                 "exitCode", result.exitCode(),
-                "usability", usability(result, failure).name(),
+                "usability", processUsability.name(),
                 "durationMs", result.durationMs(),
                 "stdoutPath", relative(workspaceRoot, stdoutPath),
                 "stderrPath", relative(workspaceRoot, stderrPath),
-                "interrupted", false,
-                "timedOut", false
+                "interrupted", processUsability == ProcessUsability.INTERRUPTED,
+                "timedOut", processUsability == ProcessUsability.TIMED_OUT
         );
-    }
-
-    private dev.dual.core.execution.ProcessUsability usability(
-            AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure
-    ) {
-        if (failure != null && AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code().equals(failure.reason())) {
-            return dev.dual.core.execution.ProcessUsability.INTERRUPTED;
-        }
-        if (result.exitCode() == 0) {
-            return dev.dual.core.execution.ProcessUsability.EXITED_ZERO;
-        }
-        if (failure != null && failure.recoverable()) {
-            return dev.dual.core.execution.ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
-        }
-        return dev.dual.core.execution.ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
     }
 
     private AgentExecutionAttempt executionAttempt(
@@ -566,10 +569,11 @@ final class AgentRunMetadataWriter {
             SessionMeta sessionMeta,
             AcpxRunResult result,
             AcpxFailureClassifier.AcpxFailure failure,
+            ProcessUsability processUsability,
             String stderrPath,
             String transcriptPath
     ) {
-        var processStatus = processStatus(result, failure);
+        var processStatus = processStatus(result, failure, processUsability);
         var failureSignal = failureSignal(failure);
         var status = attemptStatus(processStatus, failure);
         var recoverable = failure != null && failure.recoverable();
@@ -603,9 +607,10 @@ final class AgentRunMetadataWriter {
             Path stdoutPath,
             Path stderrPath,
             AcpxFailureClassifier.AcpxFailure failure,
+            ProcessUsability processUsability,
             AgentExecutionAttempt attempt
     ) {
-        var process = processResultEvidence(workspaceRoot, result, stdoutPath, stderrPath, failure);
+        var process = processResultEvidence(workspaceRoot, result, stdoutPath, stderrPath, processUsability);
         var evidence = new AgentExecutionEvidence(
                 process,
                 AgentResultContractResult.missing(),
@@ -620,20 +625,19 @@ final class AgentRunMetadataWriter {
             AcpxRunResult result,
             Path stdoutPath,
             Path stderrPath,
-            AcpxFailureClassifier.AcpxFailure failure
+            ProcessUsability processUsability
     ) {
-        var usability = usability(result, failure);
         var durationMs = Duration.between(result.startedAt(), result.finishedAt()).toMillis();
         return new ProcessResult(
                 String.join(" ", result.command()),
                 null,
                 result.exitCode(),
-                usability,
+                processUsability,
                 Math.max(0, durationMs),
                 relative(workspaceRoot, stdoutPath),
                 relative(workspaceRoot, stderrPath),
-                usability == ProcessUsability.INTERRUPTED,
-                usability == ProcessUsability.TIMED_OUT
+                processUsability == ProcessUsability.INTERRUPTED,
+                processUsability == ProcessUsability.TIMED_OUT
         );
     }
 
@@ -678,8 +682,18 @@ final class AgentRunMetadataWriter {
 
     private AgentExecutionProcessStatus processStatus(
             AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure
+            AcpxFailureClassifier.AcpxFailure failure,
+            ProcessUsability processUsability
     ) {
+        if (processUsability == ProcessUsability.INTERRUPTED) {
+            return AgentExecutionProcessStatus.INTERRUPTED;
+        }
+        if (processUsability == ProcessUsability.TIMED_OUT) {
+            return AgentExecutionProcessStatus.TIMED_OUT;
+        }
+        if (processUsability == ProcessUsability.STALLED) {
+            return AgentExecutionProcessStatus.STALLED;
+        }
         if (failure == null) {
             return AgentExecutionProcessStatus.EXITED;
         }

@@ -253,6 +253,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             );
             var outputComplete = finalResult.promptCompletion().completed();
             var interrupted = interruptedOutputFailure(finalResult, outputComplete);
+            var processUsability = processUsability(
+                    resultWithArtifactTimeline,
+                    failure,
+                    interrupted,
+                    outputComplete
+            );
             var acquisitionDocument = acquisition.toDocument(
                     context.workspaceRoot(),
                     acquisition.correctionAttempted() ? initialOutputPath : outputPath,
@@ -278,7 +284,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     usage,
                     sessionMeta,
                     compactionMeta,
-                    acquisitionDocument
+                    acquisitionDocument,
+                    processUsability
             );
             return authoritySnapshot.enforce(NodeResult.completed(
                     "completed",
@@ -293,7 +300,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             runId,
                             metadataFailure(failure, interrupted, outputComplete),
                             interrupted,
-                            outputComplete
+                            outputComplete,
+                            processUsability
                     )
             ));
         } catch (Exception failure) {
@@ -460,6 +468,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 true,
                 false
         );
+        var processUsability = processUsability(result, failure, null, false);
         metadataWriter.writeCompleted(
                 context.workspaceRoot(),
                 context.workstreamId(),
@@ -477,7 +486,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 failure,
                 null,
                 sessionMeta,
-                compactionMeta
+                compactionMeta,
+                processUsability
         );
         return NodeResult.completed(
                 "completed",
@@ -492,7 +502,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         runId,
                         failure,
                         null,
-                        false
+                        false,
+                        processUsability
                 )
         );
     }
@@ -559,7 +570,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             String runId,
             AcpxFailureClassifier.AcpxFailure failure,
             AcpxFailureClassifier.AcpxFailure interrupted,
-            boolean outputComplete
+            boolean outputComplete,
+            ProcessUsability processUsability
     ) {
         var facts = new LinkedHashMap<String, Object>();
         facts.put("run_id", runId);
@@ -569,7 +581,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         facts.put("exit_code", result.exitCode());
         facts.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
         facts.put("output_complete", outputComplete);
-        facts.put("process_usability", processUsability(result, failure, interrupted, outputComplete).name());
+        facts.put("process_usability", processUsability.name());
         if (interrupted != null) {
             facts.put("acpx_failure.reason", interrupted.reason());
             facts.put("acpx_failure.recoverable", interrupted.recoverable());

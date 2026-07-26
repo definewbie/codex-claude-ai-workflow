@@ -2,6 +2,7 @@ package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+import dev.dual.core.execution.ProcessUsability;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -503,7 +504,8 @@ class AcpxAgentTaskHandlerTest {
                         AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS,
                         AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON,
                         ""
-                )
+                ),
+                ProcessUsability.EXITED_ZERO
         );
 
         var runMetadata = Files.readString(runDir.resolve("run.json"));
@@ -985,18 +987,18 @@ class AcpxAgentTaskHandlerTest {
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
 
         var handler = new AcpxAgentTaskHandler(new CompletingExitFiveTransport(), false);
-        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+        var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
-                "prompt_template", "intake-claude-brainstorm"
+                "prompt_template", "design-claude"
         ));
         var instance = new NodeInstance(
-                "node-intake",
-                "intake.claude_brainstorm",
+                "node-design",
+                "design.claude_design",
                 NodeKind.TASK,
                 "acpx.agent_run",
                 NodeStatus.READY,
-                "stage-intake",
+                "stage-design",
                 "iter-001",
                 List.of(),
                 List.of(),
@@ -1006,16 +1008,33 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var candidate = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-test",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+        var result = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(NodeStatus.COMPLETED, result.status(), result.result() + " / " + result.errorMessage());
         assertEquals("completed", result.outcome());
         assertEquals(5, result.result().get("exit_code"));
         assertEquals("EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT", result.result().get("process_usability"));
-        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.json")));
-        var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        assertTrue(runMetadata.contains("\"exitCode\" : 5"));
-        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("design-claude.json")));
+        var runMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) result.result().get("run_metadata")).toFile()
+        );
+        assertEquals(5, runMetadata.path("processResult").path("exitCode").asInt());
+        assertEquals(
+                "EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT",
+                runMetadata.path("processResult").path("usability").asText()
+        );
+        assertEquals("SUCCESS_WITH_WARNINGS", runMetadata.path("executionOutcome").path("status").asText());
+        assertEquals("completed", runMetadata.path("status").asText());
+        assertTrue(runMetadata.path("failureReason").asText("").isBlank());
     }
 
     @Test
@@ -1556,7 +1575,7 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return completedResult(request, 5, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+            return completedResult(request, 5, now, List.of("acpx", "claude"), "READY_FOR_ARCH_REVIEW");
         }
     }
 
