@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase C Controlled Verification — README READY
+## Current Active Step: Phase C Controlled Verification — README FAIL / A3 LOCKED
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -63,7 +63,7 @@
 >
 > **Phase B = PASS / ENFORCED + PROVEN。Checkpoint `e1c094b`。**
 >
-> **Phase C subtraction = IMPLEMENTED + DETERMINISTIC PASS；README controlled real-case = READY。**
+> **Phase C subtraction = COMMITTED (`0902ed9`) + DETERMINISTIC PASS；README controlled real-case = FAIL。**
 > - full reactor：9/9 modules PASS（runtime 439、adapter 300、CLI 68、server 53）；
 > - independent boundary review：PASS；
 > - workspace scan、requirement/filename scoring、seed content digest 与 raw input-ref
@@ -71,7 +71,17 @@
 > - validated agent sidecar 内容由 node + execution ledger 中的 SHA-256 绑定；
 > - unknown refs 仅保留 pointer，canonical context/direct artifact 在读取前执行
 >   exact path、real-path containment 与 symlink 检查；
-> - provider 尚未启动；必须先提交本 checkpoint，再运行 README，README PASS 后才可运行 A3。
+> - README 报告：`docs/testing/real-case-reports/20260726T111504Z/report.md`；
+>   workstream：`ws-20260726T111801Z-CM6B`；
+> - 失败前 7 个 Agent 节点的 sidecar 当前 hash、node occurrence hash 与
+>   node execution hash 全部一致；prompt 中未发现 workspace/filename heuristic
+>   或 seed content digest，未知 transcript/stderr 仅保留 pointer；
+> - workflow 在 `implement.claude_self_test_report` 停止：Claude 返回可解码的纯 JSON，
+>   ACP `end_turn` 且 exit code=0，但缺少必需字段 `result.missing_evidence`；
+> - 当前 bounded correction 仅接受 `AGENT_RESULT_PARSE_FAILED`，因此
+>   `contractDecodable=true` 的 schema contract violation 未触发 correction；
+> - Phase C context boundary 尚不能声明 real-case `PROVEN`；A3 不得启动，必须先独立决定
+>   schema-level bounded correction 是否属于既有 output-contract owner。
 > 评估结论与单次减法范围见
 > `docs/plans/__CHECKPOINT__phase-c-context-boundary-assessment.zh-CN.md`。
 
@@ -282,8 +292,9 @@ Assessment 结论：
   与 read-reuse contract；
 - 不新增 Artifact Graph、Evidence Registry、Context Engine 模块、query DSL 或状态机；
 - implementation 已完成，deterministic gates 与独立 review 均 PASS；
-- 下一步按 verification gate 运行 README controlled real-case；只有 README PASS
-  才允许顺序运行 A3。
+- README controlled real-case 已运行并因 `result.missing_evidence` 缺失而 FAIL；
+  Phase C context/lineage 证据未发现旁路，但完整 real-case 尚未闭环；
+- A3 保持锁定。不得通过放宽 strict parser、默认补字段或自然语言提取绕过失败。
 
 ## Phase D：Handler 收敛
 
