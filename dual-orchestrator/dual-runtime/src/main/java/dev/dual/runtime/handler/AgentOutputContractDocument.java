@@ -46,7 +46,6 @@ public record AgentOutputContractDocument(
         Map<String, String> control,
         FailureFields failure,
         List<RereadReason> rereadReasons,
-        ScopeExpansionRequest scopeExpansionRequest,
         TaskContractProposalReference reviewSubject,
         TaskContractProposal taskContractProposal,
         PlanArtifactDocument planArtifact
@@ -90,7 +89,6 @@ public record AgentOutputContractDocument(
                 stringMap(document.get("control")),
                 FailureFields.from(objectMap(document.get("failure"))),
                 rereadReasonList(document.get("reread_reasons")),
-                ScopeExpansionRequest.from(objectMap(document.get("scope_expansion_request"))),
                 TaskContractProposalReference.fromMap(objectMap(document.get("review_subject"))).orElse(null),
                 taskContractProposal(objectMap(document.get("task_contract_proposal"))),
                 planArtifact(objectMap(document.get("plan_artifact")))
@@ -256,61 +254,6 @@ public record AgentOutputContractDocument(
             map.put("path", path);
             map.put("reason", reason);
             map.put("stage", stage);
-            map.put("evidence", evidence);
-            return map;
-        }
-    }
-
-    /**
-     * Typed request for exploration beyond the current plan. This is the only
-     * artifact field the harness may use to waive outside-plan reads during
-     * exploration-policy evaluation; free-form prose is not a proof.
-     */
-    public record ScopeExpansionRequest(
-            List<String> requestedFiles,
-            List<String> readFiles,
-            List<String> files,
-            String reason,
-            String evidence
-    ) {
-        static ScopeExpansionRequest from(Map<String, Object> document) {
-            if (document.isEmpty()) {
-                return empty();
-            }
-            return new ScopeExpansionRequest(
-                    stringList(document.get("requested_files")),
-                    stringList(document.get("read_files")),
-                    stringList(document.get("files")),
-                    text(document.get("reason")),
-                    text(document.get("evidence")));
-        }
-
-        static ScopeExpansionRequest empty() {
-            return new ScopeExpansionRequest(List.of(), List.of(), List.of(), "", "");
-        }
-
-        public List<String> requestedPaths() {
-            var values = new ArrayList<String>();
-            values.addAll(requestedFiles);
-            values.addAll(readFiles);
-            values.addAll(files);
-            return List.copyOf(new java.util.LinkedHashSet<>(values));
-        }
-
-        public boolean isEmpty() {
-            return requestedFiles.isEmpty()
-                    && readFiles.isEmpty()
-                    && files.isEmpty()
-                    && reason.isBlank()
-                    && evidence.isBlank();
-        }
-
-        public Map<String, Object> toMap() {
-            var map = new LinkedHashMap<String, Object>();
-            map.put("requested_files", requestedFiles);
-            map.put("read_files", readFiles);
-            map.put("files", files);
-            map.put("reason", reason);
             map.put("evidence", evidence);
             return map;
         }

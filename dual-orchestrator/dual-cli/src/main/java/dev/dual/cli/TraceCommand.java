@@ -144,7 +144,6 @@ public final class TraceCommand implements Callable<Integer> {
                         + run.durationMs() + "ms  "
                         + sessionScopeLabel(run)
                         + sessionCompactionLabel(run)
-                        + explorationPolicyLabel(run)
                         + promptProvenanceLabel(paths, run)
                         + tokenLabel(paths, run));
             }
@@ -250,22 +249,7 @@ public final class TraceCommand implements Callable<Integer> {
         System.out.println("  toolCalls=" + longValue(toolMetrics.get("toolCallCount"))
                 + " reads=" + longValue(toolMetrics.get("readCount"))
                 + " bash=" + longValue(toolMetrics.get("bashCount"))
-                + " missingRereadReasons=" + longValue(toolMetrics.get("missingRereadReasonCount"))
-                + " explorationWarnings=" + longValue(map(toolMetrics.get("explorationPolicy")).get("warnCount"))
-                + " explorationFailures=" + longValue(map(toolMetrics.get("explorationPolicy")).get("failCount")));
-        var explorationViolations = mapList(map(toolMetrics.get("explorationPolicy")).get("violations"));
-        if (!explorationViolations.isEmpty()) {
-            System.out.println("  exploration violations:");
-            for (var item : explorationViolations.stream().limit(5).toList()) {
-                System.out.println("    " + text(item.get("nodeId"))
-                        + " " + text(item.get("runId"))
-                        + " " + text(item.get("severity"))
-                        + " " + text(item.get("type"))
-                        + " " + text(item.get("message"))
-                        + capabilityUsageLabel(item)
-                        + " plan=" + text(item.get("agentExplorationPlanPath")));
-            }
-        }
+                + " missingRereadReasons=" + longValue(toolMetrics.get("missingRereadReasonCount")));
         var repeatedReads = mapList(toolMetrics.get("repeatedReadFiles"));
         if (repeatedReads.isEmpty()) {
             System.out.println("  repeated reads: -");
@@ -598,20 +582,6 @@ public final class TraceCommand implements Callable<Integer> {
                 ? ""
                 : " seed=" + run.sessionCompactionSeedPath();
         return "compact=" + run.sessionCompactionMode() + seed + "  ";
-    }
-
-    private String explorationPolicyLabel(RunMetadata run) {
-        var result = map(run.explorationPolicyResult());
-        var status = text(result.get("status"));
-        var plan = run.agentExplorationPlanPath() == null ? "" : run.agentExplorationPlanPath();
-        if (status.isBlank() && plan.isBlank()) {
-            return "";
-        }
-        var violations = mapList(result.get("violations")).size();
-        return "exploration=" + (status.isBlank() ? "-" : status)
-                + (violations == 0 ? "" : " violations=" + violations)
-                + (plan.isBlank() ? "" : " plan=" + plan)
-                + "  ";
     }
 
     private String tokenLabel(WorkstreamPaths paths, RunMetadata run) {

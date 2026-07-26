@@ -1,5 +1,10 @@
 package dev.dual.runtime;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.ContractStatus;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
@@ -13,6 +18,7 @@ import dev.dual.ledger.file.NodeExecutionStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.handler.DecisionHandler;
+import dev.dual.runtime.handler.ArtifactValidateHandler;
 import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
 import dev.dual.runtime.handler.TaskHandler;
@@ -22,6 +28,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +39,7 @@ class WorkflowRuntimeTest {
     @TempDir
     Path tempDir;
     private int fakeTaskExecutions;
+    private int acceptanceContextExecutions;
 
     @Test
     void executesActiveTaskAndRoutesToHumanGate() throws Exception {
@@ -191,6 +199,66 @@ class WorkflowRuntimeTest {
         assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, recoveryResult.status());
         assertEquals("task.one", recoveryResult.activeNode());
         assertTrue(recoveryResult.message().contains("not recoverable"));
+    }
+
+    @Test
+    void changeScopeViolationStopsBeforeAcceptanceContext() throws Exception {
+        var workstreamId = "ws-change-scope-runtime";
+        git("init");
+        git("config", "user.email", "dual@example.test");
+        git("config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git("add", "README.md");
+        git("commit", "-m", "init");
+        var baseCommit = gitOutput("rev-parse", "HEAD").trim();
+        writeChangeScopeControlFacts(workstreamId, baseCommit);
+        Files.writeString(tempDir.resolve("unexpected.txt"), "outside contract\n");
+
+        var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
+        var definition = new WorkflowDefinition(
+                "change-scope-cannot-bypass",
+                1,
+                "implement.artifact_validation",
+                List.of(
+                        new NodeDefinition(
+                                "implement.artifact_validation",
+                                NodeKind.TASK,
+                                "artifact.validate",
+                                Map.of()
+                        ),
+                        new NodeDefinition(
+                                "context.acceptance_codex_verifier_review",
+                                NodeKind.TASK,
+                                "acceptance.context",
+                                Map.of()
+                        )
+                ),
+                List.of(new EdgeDefinition(
+                        "implement.artifact_validation",
+                        "completed",
+                        "context.acceptance_codex_verifier_review"
+                ))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-change-scope-runtime", definition);
+        var runtime = new WorkflowRuntime(
+                ledger,
+                new HandlerRegistry(
+                        List.of(new ArtifactValidateHandler(), new AcceptanceContextTask()),
+                        List.of(),
+                        List.of()
+                )
+        );
+
+        var result = runtime.resume(new WorkflowCommand(tempDir, workstreamId));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+        assertEquals("implement.artifact_validation", result.activeNode());
+        assertEquals(0, acceptanceContextExecutions);
+        var node = ledger.loadNode(paths, "node-implement-artifact_validation-001");
+        assertEquals(NodeStatus.FAILED, node.status());
+        assertEquals("FAIL", node.result().get("change_scope_status"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_failed"));
     }
 
     @Test
@@ -366,6 +434,19 @@ class WorkflowRuntimeTest {
         }
     }
 
+    private final class AcceptanceContextTask implements TaskHandler {
+        @Override
+        public String type() {
+            return "acceptance.context";
+        }
+
+        @Override
+        public NodeResult execute(TaskContext context) {
+            acceptanceContextExecutions++;
+            return NodeResult.completed("completed", List.of(), Map.of());
+        }
+    }
+
     private static final class UnusedDecision implements DecisionHandler {
         @Override
         public String type() {
@@ -383,5 +464,83 @@ class WorkflowRuntimeTest {
         Files.createDirectories(path.getParent());
         Files.writeString(path, content);
         return tempDir.relativize(path).toString();
+    }
+
+    private void writeChangeScopeControlFacts(String workstreamId, String baseCommit) throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams").resolve(workstreamId);
+        var artifactsDir = workstreamDir.resolve("artifacts");
+        var workspacesDir = workstreamDir.resolve("workspaces");
+        Files.createDirectories(artifactsDir);
+        Files.createDirectories(workspacesDir);
+        var contract = new TaskContract(
+                "task-" + workstreamId,
+                1,
+                Instant.parse("2026-07-26T00:00:00Z"),
+                "Modify README only",
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry(
+                                "README.md",
+                                TaskContract.ScopeOperation.MODIFY
+                        )),
+                        List.of()
+                ),
+                List.of("README is updated", "No undeclared files are changed"),
+                List.of("Run focused tests"),
+                List.of("Keep the change bounded"),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("requirement.md", "test")
+        );
+        new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .writerWithDefaultPrettyPrinter()
+                .writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
+        Files.writeString(workstreamDir.resolve("workstream.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "%s",
+                  "primaryWorkspaceId": "wsp-test"
+                }
+                """.formatted(workstreamId));
+        Files.writeString(workspacesDir.resolve("wsp-test.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workspaceId": "wsp-test",
+                  "workstreamId": "%s",
+                  "branch": "test",
+                  "baseBranch": "main",
+                  "baseCommit": "%s"
+                }
+                """.formatted(workstreamId, baseCommit));
+    }
+
+    private void git(String... args) throws Exception {
+        var command = new java.util.ArrayList<String>();
+        command.add("git");
+        command.addAll(List.of(args));
+        var process = new ProcessBuilder(command)
+                .directory(tempDir.toFile())
+                .redirectErrorStream(true)
+                .start();
+        var output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
+    }
+
+    private String gitOutput(String... args) throws Exception {
+        var command = new java.util.ArrayList<String>();
+        command.add("git");
+        command.addAll(List.of(args));
+        var process = new ProcessBuilder(command)
+                .directory(tempDir.toFile())
+                .redirectErrorStream(true)
+                .start();
+        var output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
+        return output;
     }
 }

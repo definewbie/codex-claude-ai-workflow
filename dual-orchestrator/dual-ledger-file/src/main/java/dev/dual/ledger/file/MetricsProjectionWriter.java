@@ -392,7 +392,6 @@ final class MetricsProjectionWriter {
                 .filter(ReadFileMetric::isRepeated)
                 .filter(ReadFileMetric::rereadReasonMissing)
                 .count());
-        result.put("explorationPolicy", explorationPolicyMetrics(paths));
         result.put("allowedRepeatedReadReasons", readReusePolicy.allowedReasons());
         result.put("topReadFiles", readFiles.values().stream()
                 .sorted(Comparator
@@ -960,96 +959,6 @@ final class MetricsProjectionWriter {
         }
     }
 
-    private Map<String, Object> explorationPolicyMetrics(WorkstreamPaths paths) throws IOException {
-        var governanceDir = paths.workstreamDir().resolve("artifacts").resolve("context-governance");
-        var warnings = new ArrayList<Map<String, Object>>();
-        var failures = new ArrayList<Map<String, Object>>();
-        var violations = new ArrayList<Map<String, Object>>();
-        long passCount = 0;
-        long warnCount = 0;
-        long failCount = 0;
-        if (Files.isDirectory(governanceDir)) {
-            try (var stream = Files.list(governanceDir)) {
-                for (var path : stream
-                        .filter(Files::isRegularFile)
-                        .filter(file -> file.getFileName().toString().endsWith(".json"))
-                        .sorted(Comparator.comparing(file -> file.getFileName().toString()))
-                        .toList()) {
-                    var report = objectMapper.readValue(path.toFile(), MAP_TYPE);
-                    if (!"actual".equals(text(report.get("reportPhase")))) {
-                        continue;
-                    }
-                    var result = map(report.get("explorationPolicyResult"));
-                    var status = text(result.get("status"));
-                    if ("pass".equals(status)) {
-                        passCount++;
-                    } else if ("warn".equals(status)) {
-                        warnCount++;
-                        var item = explorationPolicyItem(report, result, path);
-                        warnings.add(item);
-                        violations.addAll(explorationViolations(item));
-                    } else if ("failed".equals(status)) {
-                        failCount++;
-                        var item = explorationPolicyItem(report, result, path);
-                        failures.add(item);
-                        violations.addAll(explorationViolations(item));
-                    }
-                }
-            }
-        }
-        var document = new LinkedHashMap<String, Object>();
-        document.put("schemaVersion", 1);
-        document.put("mode", "warn");
-        document.put("passCount", passCount);
-        document.put("warnCount", warnCount);
-        document.put("failCount", failCount);
-        document.put("warnings", warnings);
-        document.put("failures", failures);
-        document.put("violations", violations);
-        return document;
-    }
-
-    private Map<String, Object> explorationPolicyItem(Map<String, Object> report, Map<String, Object> result, Path reportPath) {
-        var item = new LinkedHashMap<String, Object>();
-        item.put("runId", text(report.get("runId")));
-        item.put("nodeId", text(report.get("nodeDefinitionId")));
-        item.put("targetNodeId", text(report.get("targetNodeDefinitionId")));
-        item.put("stageId", text(report.get("stageId")));
-        item.put("iterationId", text(report.get("iterationId")));
-        item.put("status", text(result.get("status")));
-        item.put("mode", text(result.get("mode")));
-        item.put("reportPath", reportPath.toString());
-        item.put("agentExplorationPlanPath", text(report.get("agentExplorationPlanPath")));
-        item.put("explorationPolicyResultPath", text(report.get("explorationPolicyResultPath")));
-        item.put("actualReadFiles", textList(report.get("actualReadFiles")));
-        item.put("actualCapabilityKinds", textList(result.get("actualCapabilityKinds")));
-        item.put("actualCapabilityUsages", mapList(result.get("actualCapabilityUsages")));
-        item.put("scopeExpansionFiles", textList(result.get("scopeExpansionFiles")));
-        item.put("violations", mapList(result.get("violations")));
-        return item;
-    }
-
-    private List<Map<String, Object>> explorationViolations(Map<String, Object> item) {
-        var out = new ArrayList<Map<String, Object>>();
-        for (var violation : mapList(item.get("violations"))) {
-            var flattened = new LinkedHashMap<String, Object>();
-            flattened.put("runId", text(item.get("runId")));
-            flattened.put("nodeId", text(item.get("nodeId")));
-            flattened.put("targetNodeId", text(item.get("targetNodeId")));
-            flattened.put("stageId", text(item.get("stageId")));
-            flattened.put("status", text(item.get("status")));
-            flattened.put("type", text(violation.get("type")));
-            flattened.put("severity", text(violation.get("severity")));
-            flattened.put("message", text(violation.get("message")));
-            flattened.put("details", map(violation.get("details")));
-            flattened.put("actualCapabilityUsages", mapList(item.get("actualCapabilityUsages")));
-            flattened.put("agentExplorationPlanPath", text(item.get("agentExplorationPlanPath")));
-            flattened.put("explorationPolicyResultPath", text(item.get("explorationPolicyResultPath")));
-            out.add(flattened);
-        }
-        return out;
-    }
-
     private ReadReusePolicy readReusePolicy(WorkstreamPaths paths) throws IOException {
         var contract = paths.workstreamDir().resolve("memory").resolve("read-reuse-contract.json");
         if (!Files.isRegularFile(contract)) {
@@ -1452,31 +1361,7 @@ final class MetricsProjectionWriter {
         builder.append("- Reads: ").append(longValue(toolMetrics.get("readCount"))).append("\n");
         builder.append("- Writes: ").append(longValue(toolMetrics.get("writeCount"))).append("\n");
         builder.append("- Bash Commands: ").append(longValue(toolMetrics.get("bashCount"))).append("\n");
-        var explorationPolicy = map(toolMetrics.get("explorationPolicy"));
-        builder.append("- Exploration Policy Warnings: ")
-                .append(longValue(explorationPolicy.get("warnCount")))
-                .append("\n");
-        builder.append("- Exploration Policy Failures: ")
-                .append(longValue(explorationPolicy.get("failCount")))
-                .append("\n");
         builder.append("- Evidence Files: ").append(longValue(toolMetrics.get("evidenceFileCount"))).append("\n\n");
-        builder.append("### Exploration Policy Violations\n\n");
-        builder.append("| Node | Run | Severity | Type | Message |\n");
-        builder.append("| --- | --- | --- | --- | --- |\n");
-        var explorationViolations = mapList(explorationPolicy.get("violations"));
-        if (explorationViolations.isEmpty()) {
-            builder.append("| N/A | N/A | N/A | N/A | N/A |\n");
-        } else {
-            for (var item : explorationViolations) {
-                builder.append("| ").append(item.get("nodeId"))
-                        .append(" | ").append(item.get("runId"))
-                        .append(" | ").append(item.get("severity"))
-                        .append(" | ").append(item.get("type"))
-                        .append(" | ").append(item.get("message"))
-                        .append(" |\n");
-            }
-        }
-        builder.append("\n");
         builder.append("### Repeated Read Files\n\n");
         builder.append("| File | Reads | Agents | Nodes | Evidence Known | Reread Reason |\n");
         builder.append("| --- | --- | --- | --- | --- | --- |\n");

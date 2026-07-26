@@ -134,8 +134,7 @@ class AgentResultEnvelopeParserTest {
                       "context_gaps": [],
                       "reason": ""
                     },
-                    "reread_reasons": [],
-                    "scope_expansion_request": null
+                    "reread_reasons": []
                   }
                 }
                 """;

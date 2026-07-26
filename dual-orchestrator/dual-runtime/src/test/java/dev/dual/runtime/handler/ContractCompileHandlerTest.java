@@ -285,7 +285,7 @@ class ContractCompileHandlerTest {
                         List.of("reviewed proposal"), List.of("proposal is coherent"), List.of(), List.of(),
                         List.of(), List.of(), List.of(), "review complete",
                         new AgentResultEnvelope.Failure("", List.of(), List.of(), List.of(), List.of(), ""),
-                        List.of(), null));
+                        List.of()));
         var reviewOutput = reviewDirectory.resolve("intake-codex-product-review.json");
         var reviewOutputRef = relative(root, reviewOutput);
         Files.writeString(reviewOutput, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(reviewEnvelope));

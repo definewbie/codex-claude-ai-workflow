@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.ProcessUsability;
 import dev.dual.runtime.handler.AgentRunGovernanceContext;
@@ -10,7 +11,12 @@ import dev.dual.runtime.handler.TaskHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,6 +200,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 AcpxPermissionProfile.contractCorrection(),
                 event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
         );
+        var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                request.permissionProfile().approveAll()
+        );
         try {
             var acquisition = resultAcquirer.acquire(
                     agent,
@@ -244,7 +255,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     initialUsage,
                     correctionUsage
             );
-            var completion = metadataWriter.writeCompleted(
+            metadataWriter.writeCompleted(
                     context.workspaceRoot(),
                     context.workstreamId(),
                     context.definition().id(),
@@ -264,7 +275,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     compactionMeta,
                     acquisitionDocument
             );
-            return NodeResult.completed(
+            return authoritySnapshot.enforce(NodeResult.completed(
                     "completed",
                     evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
                     resultFacts(
@@ -279,9 +290,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             interrupted,
                             outputComplete
                     )
-            );
+            ));
         } catch (Exception failure) {
-            return transportFailureResult(
+            return authoritySnapshot.enforce(transportFailureResult(
                     context,
                     runDir,
                     promptPath,
@@ -295,7 +306,93 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     sessionMeta,
                     compactionMeta,
                     failure
+            ));
+        }
+    }
+
+    private record ChangeBoundaryAuthoritySnapshot(
+            Path workspaceRoot,
+            Map<String, String> fingerprints
+    ) {
+        static ChangeBoundaryAuthoritySnapshot capture(
+                Path workspaceRoot,
+                String workstreamId,
+                boolean protect
+        ) throws Exception {
+            var root = workspaceRoot.toAbsolutePath().normalize();
+            if (!protect) {
+                return new ChangeBoundaryAuthoritySnapshot(root, Map.of());
+            }
+            var workstreamDir = root.resolve(".agent/workstreams").resolve(workstreamId).normalize();
+            var protectedPaths = new ArrayList<Path>();
+            protectedPaths.add(workstreamDir.resolve("artifacts/task-contract.json"));
+            protectedPaths.add(workstreamDir.resolve("workstream.json"));
+            var workspacesDir = workstreamDir.resolve("workspaces");
+            protectedPaths.add(workspacesDir);
+            if (Files.isDirectory(workspacesDir)) {
+                try (var files = Files.list(workspacesDir)) {
+                    files.filter(Files::isRegularFile)
+                            .sorted(Comparator.comparing(Path::toString))
+                            .forEach(protectedPaths::add);
+                }
+            }
+            var fingerprints = new LinkedHashMap<String, String>();
+            for (var path : protectedPaths) {
+                fingerprints.put(root.relativize(path).toString(), fingerprint(path));
+            }
+            return new ChangeBoundaryAuthoritySnapshot(root, Map.copyOf(fingerprints));
+        }
+
+        NodeResult enforce(NodeResult result) {
+            if (fingerprints.isEmpty()) {
+                return result;
+            }
+            var changed = fingerprints.entrySet().stream()
+                    .filter(entry -> !entry.getValue().equals(currentFingerprint(workspaceRoot.resolve(entry.getKey()))))
+                    .map(Map.Entry::getKey)
+                    .sorted()
+                    .toList();
+            if (changed.isEmpty()) {
+                return result;
+            }
+            var facts = new LinkedHashMap<String, Object>(result.result());
+            facts.put("change_boundary_authority_tampered", true);
+            facts.put("changed_control_facts", changed);
+            return new NodeResult(
+                    "CHANGE_BOUNDARY_AUTHORITY_TAMPERED",
+                    NodeStatus.FAILED,
+                    result.outputRefs(),
+                    facts,
+                    "implementation agent modified protected change-boundary facts: " + String.join(", ", changed)
             );
+        }
+
+        private static String fingerprint(Path path) throws Exception {
+            if (Files.isDirectory(path)) {
+                var digest = MessageDigest.getInstance("SHA-256");
+                try (var files = Files.walk(path)) {
+                    for (var file : files.filter(Files::isRegularFile)
+                            .sorted(Comparator.comparing(Path::toString))
+                            .toList()) {
+                        digest.update(path.relativize(file).toString().getBytes(StandardCharsets.UTF_8));
+                        digest.update((byte) 0);
+                        digest.update(Files.readAllBytes(file));
+                    }
+                }
+                return HexFormat.of().formatHex(digest.digest());
+            }
+            if (!Files.isRegularFile(path)) {
+                return "<missing>";
+            }
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(path)));
+        }
+
+        private static String currentFingerprint(Path path) {
+            try {
+                return fingerprint(path);
+            } catch (Exception ignored) {
+                return "<unreadable>";
+            }
         }
     }
 

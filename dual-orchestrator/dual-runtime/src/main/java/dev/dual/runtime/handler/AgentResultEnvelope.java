@@ -77,8 +77,7 @@ public record AgentResultEnvelope(
             List<String> changedFiles,
             String verificationSummary,
             Failure failure,
-            List<RereadReason> rereadReasons,
-            ScopeExpansionRequest scopeExpansionRequest
+            List<RereadReason> rereadReasons
     ) implements AgentResult {
     }
 
@@ -173,12 +172,4 @@ public record AgentResultEnvelope(
     public record RereadReason(String path, String reason, String stage, String evidence) {
     }
 
-    public record ScopeExpansionRequest(
-            List<String> requestedFiles,
-            List<String> readFiles,
-            List<String> files,
-            String reason,
-            String evidence
-    ) {
-    }
 }

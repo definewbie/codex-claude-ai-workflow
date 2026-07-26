@@ -381,7 +381,6 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             metadata.put("fileSummaries", toWorkspaceRef(context.workspaceRoot(), governance.fileSummariesPath()));
             metadata.put("readReuseContract", toWorkspaceRef(context.workspaceRoot(), governance.readReuseContractPath()));
             metadata.put("agentCapabilityCatalog", toWorkspaceRef(context.workspaceRoot(), governance.agentCapabilityCatalogPath()));
-            metadata.put("agentExplorationPlan", toWorkspaceRef(context.workspaceRoot(), governance.agentExplorationPlanPath()));
         }
         OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(metadataPath.toFile(), metadata);
         return metadataPath;

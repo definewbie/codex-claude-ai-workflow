@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.runtime.governance.AgentCapabilityCatalog;
-import dev.dual.runtime.governance.ExplorationPlan;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -71,17 +70,6 @@ final class RepoScopeGovernance {
                 targetNodeDefinitionId,
                 context.definition().config()
         );
-        var explorationPlan = ExplorationPlan.fromScope(
-                context.workstreamId(),
-                stageId,
-                targetNodeDefinitionId,
-                context.instance().nodeInstanceId(),
-                context.instance().iterationId(),
-                textList(policy.get("readScope")),
-                textList(policy.get("writeScope")),
-                capabilityCatalog
-        ).toDocument();
-
         var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
         Files.createDirectories(memoryDir);
         Files.createDirectories(governanceDir);
@@ -94,7 +82,6 @@ final class RepoScopeGovernance {
         var fileSummariesPath = memoryDir.resolve("file-summaries.json");
         var readReuseContractPath = memoryDir.resolve("read-reuse-contract.json");
         var capabilityCatalogPath = memoryDir.resolve("agent-capability-catalog-" + nodeKey + ".json");
-        var explorationPlanPath = memoryDir.resolve("exploration-plan-" + nodeKey + ".json");
         var reportPath = governanceDir.resolve(nodeKey + ".json");
         var workstreamMemory = buildWorkstreamMemory(
                 context,
@@ -116,7 +103,6 @@ final class RepoScopeGovernance {
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(fileSummariesPath.toFile(), fileSummaries);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(readReuseContractPath.toFile(), readReuseContract);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(capabilityCatalogPath.toFile(), capabilityCatalog.toDocument());
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(explorationPlanPath.toFile(), explorationPlan);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(workstreamMemoryPath.toFile(), workstreamMemory);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(reportPath.toFile(), report);
 
@@ -129,7 +115,6 @@ final class RepoScopeGovernance {
                 fileSummaries,
                 readReuseContract,
                 capabilityCatalog.toDocument(),
-                explorationPlan,
                 repoMapPath,
                 planPath,
                 policyPath,
@@ -138,7 +123,6 @@ final class RepoScopeGovernance {
                 fileSummariesPath,
                 readReuseContractPath,
                 capabilityCatalogPath,
-                explorationPlanPath,
                 workstreamMemoryPath
         );
     }
@@ -154,7 +138,6 @@ final class RepoScopeGovernance {
         builder.append("## Repo Scope Guidance\n\n");
         builder.append("This section is a passive harness guardrail. It guides repository exploration but does not replace task contract, artifact validation, or human approval.\n\n");
         builder.append("- Stage: ").append(text(documents.policy().get("stageId"))).append("\n");
-        builder.append("- Scope policy: ").append(text(documents.agentExplorationPlan().get("failureMode"))).append("\n");
         if (compact) {
             appendCompactMarkdownGuidance(builder, documents, workspaceRoot);
             return;
@@ -167,9 +150,7 @@ final class RepoScopeGovernance {
         builder.append("- File summaries: ").append(ref(workspaceRoot, documents.fileSummariesPath())).append("\n");
         builder.append("- Read reuse contract: ").append(ref(workspaceRoot, documents.readReuseContractPath())).append("\n");
         builder.append("- Agent capability catalog: ").append(ref(workspaceRoot, documents.agentCapabilityCatalogPath())).append("\n");
-        builder.append("- Agent exploration plan: ").append(ref(workspaceRoot, documents.agentExplorationPlanPath())).append("\n");
         builder.append("- Governance report: ").append(ref(workspaceRoot, documents.governanceReportPath())).append("\n\n");
-        appendExplorationPlan(builder, documents);
         appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 8);
         appendPathList(builder, "Contract scope candidates", textList(documents.plan().get("contractScopeCandidates")), 12);
         appendSeedEvidenceDigests(builder, documents);
@@ -177,30 +158,20 @@ final class RepoScopeGovernance {
         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
         appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
         appendReadAvoidanceRules(builder, documents);
-        builder.append("If the task requires reading or editing outside this scope, explain why in the structured artifact so Codex and the human gate can review the scope expansion.\n\n");
+        builder.append("Read recommendations are context only. Declared edits must match TaskContract.scope and are verified from Git evidence.\n\n");
     }
 
     private static void appendCompactMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot) {
-        builder.append("- Governance refs: explorationPlan=")
-                .append(ref(workspaceRoot, documents.agentExplorationPlanPath()))
-                .append("; capabilityCatalog=")
+        builder.append("- Governance refs: capabilityCatalog=")
                 .append(ref(workspaceRoot, documents.agentCapabilityCatalogPath()))
                 .append("; readReuseContract=")
                 .append(ref(workspaceRoot, documents.readReuseContractPath()))
                 .append("\n\n");
-        appendExplorationPlan(builder, documents);
-    }
-
-    private static void appendExplorationPlan(StringBuilder builder, Documents documents) {
-        builder.append("## Exploration Plan\n\n");
-        builder.append("- intent=").append(text(documents.agentExplorationPlan().get("explorationIntent")))
-                .append("; mode=").append(text(documents.agentExplorationPlan().get("failureMode")))
-                .append("; directReadBudget=").append(text(documents.agentExplorationPlan().get("maxDirectReadFiles")))
-                .append("; prefer=").append(inlineList(textList(documents.agentExplorationPlan().get("preferredCapabilityKinds")), 3))
-                .append("; capabilities=").append(inlineList(capabilitySummaries(documents.agentCapabilityCatalog()), 4))
-                .append("; allowedReads=").append(inlineList(textList(documents.agentExplorationPlan().get("allowedDirectReadFiles")), 3))
-                .append("\n");
-        builder.append("- Missing evidence: use agent_output_contract.scope_expansion_request; do not broad-read.\n\n");
+        builder.append("- Available context capabilities: ")
+                .append(inlineList(capabilitySummaries(documents.agentCapabilityCatalog()), 4))
+                .append("\n\n");
+        appendPathList(builder, "Recommended read files", textList(documents.plan().get("readCandidates")), 4);
+        appendPathList(builder, "Expected edit files", textList(documents.policy().get("writeScope")), 4);
     }
 
     private static void appendSeedEvidenceDigests(StringBuilder builder, Documents documents) {
@@ -326,7 +297,6 @@ final class RepoScopeGovernance {
         policy.put("builderNodeDefinitionId", context.definition().id());
         policy.put("targetNodeDefinitionId", targetNodeDefinitionId);
         policy.put("iterationId", context.instance().iterationId());
-        policy.put("readScope", textList(plan.get("readCandidates")));
         policy.put("writeScope", writeCandidates);
         policy.put("previouslyReadFiles", previouslyReadFiles);
         policy.put("readReusePolicy", Map.of(
@@ -338,10 +308,6 @@ final class RepoScopeGovernance {
                         : ""
         ));
         policy.put("forbiddenScope", forbiddenScope(stageId));
-        policy.put("explorationBudget", Map.of(
-                "extraReadFiles", stageAllowsBroadExploration(stageId) ? 12 : 6,
-                "extraWriteFiles", stageAllowsBusinessWrites(stageId) ? 3 : 0
-        ));
         policy.put("generatedAt", Instant.now().toString());
         return policy;
     }
@@ -370,8 +336,6 @@ final class RepoScopeGovernance {
         report.put("plannedRepeatedReadAvoidance", mapList(plan.get("repeatedReadAvoidance")));
         report.put("actualReadFiles", List.of());
         report.put("actualWriteFiles", List.of());
-        report.put("outsideScopeReads", List.of());
-        report.put("outsideScopeWrites", List.of());
         report.put("telemetryPending", true);
         report.put("generatedAt", Instant.now().toString());
         return report;
@@ -1185,7 +1149,6 @@ final class RepoScopeGovernance {
             Map<String, Object> fileSummaries,
             Map<String, Object> readReuseContract,
             Map<String, Object> agentCapabilityCatalog,
-            Map<String, Object> agentExplorationPlan,
             Path repoMapPath,
             Path fileRelevancePlanPath,
             Path stageScopePolicyPath,
@@ -1194,7 +1157,6 @@ final class RepoScopeGovernance {
             Path fileSummariesPath,
             Path readReuseContractPath,
             Path agentCapabilityCatalogPath,
-            Path agentExplorationPlanPath,
             Path workstreamMemoryPath
     ) {
     }

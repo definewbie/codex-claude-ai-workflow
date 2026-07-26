@@ -70,7 +70,7 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("do not ask to list directories"));
         assertTrue(prompt.contains("A prose-only response is a contract failure"));
         assertTrue(prompt.contains("Explicitly address each Must Fix"));
-        assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and Exploration Plan"));
+        assertTrue(prompt.contains("Use the orchestrator-provided seed, memory, contract scope, and context recommendations"));
         assertTrue(prompt.contains("account for every explicit user objective"));
         assertTrue(prompt.contains("A requirement mentioned only in `risk_areas`, `open_questions`, or `evidence_refs` is not preserved"));
         assertTrue(prompt.contains("Do not broaden or narrow behavior"));
@@ -431,49 +431,6 @@ class AgentPromptRendererTest {
         assertEquals("read_reuse_contract", section.sourceType());
         assertTrue(section.content().contains("src/app.js"));
         assertTrue(!section.content().contains("## User Requirement"));
-    }
-
-    @Test
-    void exposesExplorationPlanAsPromptSectionWhenContextContainsIt() throws Exception {
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
-        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
-        Files.createDirectories(contextPath.getParent());
-        Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
-        Files.writeString(contextPath, """
-                # Context Package
-
-                ## Exploration Plan
-
-                - Intent: contract_discovery
-                - Preferred capabilities:
-                  - symbol_index
-                  - token_filtered_shell
-                - Direct read budget: 3
-                - Agent capability catalog: .agent/workstreams/ws-test/memory/agent-capability-catalog.json
-                - Exploration plan: .agent/workstreams/ws-test/memory/exploration-plan-node-001.json
-
-                ## User Requirement
-
-                Do the task.
-                """);
-
-        var rendered = new AgentPromptRenderer()
-                .renderWithSections(
-                        tempDir,
-                        "ws-test",
-                        "intake.claude_brainstorm",
-                        "intake-claude-brainstorm",
-                        List.of(".agent/workstreams/ws-test/context/node-context.md")
-                );
-
-        var section = rendered.sections().stream()
-                .filter(item -> "exploration_plan".equals(item.name()))
-                .findFirst()
-                .orElseThrow();
-        assertEquals("exploration_plan", section.sourceType());
-        assertTrue(section.content().contains("contract_discovery"));
-        assertTrue(section.content().contains("symbol_index"));
-        assertFalse(section.content().contains("## User Requirement"));
     }
 
     @Test

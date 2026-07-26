@@ -1,6 +1,10 @@
 package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.ContractStatus;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -13,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -891,9 +896,11 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve("README.md"), "before\n");
         git(tempDir, "add", "README.md");
         git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
         Files.writeString(tempDir.resolve("README.md"), "after\n");
         Files.createDirectories(tempDir.resolve(".agent"));
         Files.writeString(tempDir.resolve(".agent/noise.log"), "ledger noise\n");
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
 
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -920,6 +927,34 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void artifactValidationPreservesSpecialPathFromNulFramedGitEvidence() throws Exception {
+        var path = "docs/变更\t说明\n补充.md";
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.createDirectories(tempDir.resolve("docs"));
+        Files.writeString(tempDir.resolve(path), "before\n");
+        git(tempDir, "add", path);
+        git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
+        Files.writeString(tempDir.resolve(path), "after\n");
+        writeTaskContract(new TaskContract.ScopeEntry(path, TaskContract.ScopeOperation.MODIFY));
+
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("PASS", result.result().get("change_scope_status"));
+        var evaluation = new ObjectMapper().readTree(tempDir.resolve(
+                ".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json").toFile());
+        assertEquals(path, evaluation.path("actualChanges").get(0).path("path").asText());
+    }
+
+    @Test
     void artifactValidationPreservesValidatedAgentEvidenceForAcceptance() throws Exception {
         git(tempDir, "init");
         git(tempDir, "config", "user.email", "dual@example.test");
@@ -927,12 +962,14 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve("README.md"), "before\n");
         git(tempDir, "add", "README.md");
         git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
 
         var selfTestOutput = tempDir.resolve(
                 ".agent/workstreams/ws/runs/run-self-test/outputs/implement-claude-self-test.json");
         Files.createDirectories(selfTestOutput.getParent());
         writeAgentOutputWithSidecar(selfTestOutput, "SELF_TEST_COMPLETE: node --test passed.");
         var selfTestSidecarRef = workspaceRef(AgentOutputContractSidecar.pathFor(selfTestOutput));
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
 
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -983,6 +1020,10 @@ class BuiltinHandlerTest {
                   "baseCommit": "%s"
                 }
                 """.formatted(baseCommit), StandardCharsets.UTF_8);
+        writeTaskContract(
+                new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY),
+                new TaskContract.ScopeEntry("src.txt", TaskContract.ScopeOperation.CREATE)
+        );
 
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1017,7 +1058,9 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve(".gitkeep"), "init\n");
         git(tempDir, "add", ".gitkeep");
         git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
         Files.writeString(tempDir.resolve("README.md"), "new file\n");
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.CREATE));
 
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1045,8 +1088,13 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve(".gitkeep"), "init\n");
         git(tempDir, "add", ".gitkeep");
         git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
         Files.createDirectories(tempDir.resolve("__pycache__"));
         Files.writeString(tempDir.resolve("__pycache__/main.cpython-313.pyc"), "compiled\n");
+        writeTaskContract(new TaskContract.ScopeEntry(
+                "__pycache__/main.cpython-313.pyc",
+                TaskContract.ScopeOperation.CREATE
+        ));
 
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1068,7 +1116,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void artifactValidationMarksGitUnavailableWithoutFailingWorkflow() throws Exception {
+    void artifactValidationFailsClosedWhenGitEvidenceIsUnavailable() throws Exception {
         var handler = new ArtifactValidateHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
@@ -1077,15 +1125,125 @@ class BuiltinHandlerTest {
                 node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
         ));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("completed", result.outcome());
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
         assertEquals(false, result.result().get("git_available"));
         assertEquals(false, result.result().get("has_changes"));
         assertEquals(0, result.result().get("changed_file_count"));
+        assertEquals("UNAVAILABLE", result.result().get("change_scope_status"));
         assertTrue(result.outputRefs().contains(".agent/workstreams/ws/artifacts/git-evidence/git-evidence.json"));
+        assertTrue(result.outputRefs().contains(
+                ".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json"));
         assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence/diff.patch")));
         assertTrue(Files.readString(tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence/git-evidence.json"))
                 .contains("\"available\" : false"));
+    }
+
+    @Test
+    void artifactValidationFailsClosedWithoutWorkspaceBaseCommit() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+        Files.writeString(tempDir.resolve("README.md"), "after\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "implementation");
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
+
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
+        assertEquals("UNAVAILABLE", result.result().get("change_scope_status"));
+        assertTrue(result.errorMessage().contains("Workspace base commit is unavailable"));
+    }
+
+    @Test
+    void artifactValidationFailsClosedWithoutTaskContract() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
+        Files.writeString(tempDir.resolve("README.md"), "after\n");
+
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
+        assertEquals("UNAVAILABLE", result.result().get("change_scope_status"));
+        assertTrue(result.errorMessage().contains("TaskContract artifact is missing"));
+    }
+
+    @Test
+    void artifactValidationRejectsUnexpectedActualChange() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
+        Files.writeString(tempDir.resolve("README.md"), "after\n");
+        Files.writeString(tempDir.resolve("unexpected.txt"), "outside contract\n");
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
+
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_SCOPE_VIOLATION", result.outcome());
+        assertEquals("FAIL", result.result().get("change_scope_status"));
+        var evaluation = Files.readString(tempDir.resolve(
+                ".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json"));
+        assertTrue(evaluation.contains("\"code\" : \"UNEXPECTED_ACTUAL_CHANGE\""));
+        assertTrue(evaluation.contains("\"path\" : \"unexpected.txt\""));
+    }
+
+    @Test
+    void artifactValidationRejectsDeclaredOperationMismatch() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
+        Files.writeString(tempDir.resolve("README.md"), "after\n");
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.CREATE));
+
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws",
+                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_SCOPE_VIOLATION", result.outcome());
+        var evaluation = Files.readString(tempDir.resolve(
+                ".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json"));
+        assertTrue(evaluation.contains("\"code\" : \"OPERATION_MISMATCH\""));
+        assertTrue(evaluation.contains("\"declaredOperation\" : \"CREATE\""));
+        assertTrue(evaluation.contains("\"actualOperation\" : \"MODIFY\""));
     }
 
     @Test
@@ -1989,6 +2147,56 @@ class BuiltinHandlerTest {
                 null,
                 null
         );
+    }
+
+    private void writeTaskContract(TaskContract.ScopeEntry... entries) throws Exception {
+        var artifactsDir = tempDir.resolve(".agent/workstreams/ws/artifacts");
+        Files.createDirectories(artifactsDir);
+        var contract = new TaskContract(
+                "task-ws",
+                1,
+                Instant.parse("2026-07-26T00:00:00Z"),
+                "Validate implementation changes",
+                new TaskContract.Scope(List.of(entries), List.of()),
+                List.of("The requested change is implemented", "No undeclared files are changed"),
+                List.of("Run focused tests"),
+                List.of("Keep the change bounded"),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("requirement.md", "test")
+        );
+        new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .writerWithDefaultPrettyPrinter()
+                .writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
+    }
+
+    private void writeWorkspaceBase(String baseCommit) throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
+        var workspacesDir = workstreamDir.resolve("workspaces");
+        Files.createDirectories(workspacesDir);
+        Files.writeString(workstreamDir.resolve("workstream.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws",
+                  "primaryWorkspaceId": "wsp-test"
+                }
+                """);
+        Files.writeString(workspacesDir.resolve("wsp-test.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workspaceId": "wsp-test",
+                  "workstreamId": "ws",
+                  "branch": "test",
+                  "baseBranch": "main",
+                  "baseCommit": "%s"
+                }
+                """.formatted(baseCommit));
     }
 
     private String writeOutput(String name, String content) throws Exception {

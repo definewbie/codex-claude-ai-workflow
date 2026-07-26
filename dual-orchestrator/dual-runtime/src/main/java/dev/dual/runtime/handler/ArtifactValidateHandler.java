@@ -2,7 +2,11 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
+import dev.dual.core.contract.TaskContractValidator;
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.WorkstreamPaths;
 
 import java.io.IOException;
@@ -11,13 +15,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 public final class ArtifactValidateHandler implements TaskHandler {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
@@ -37,6 +40,9 @@ public final class ArtifactValidateHandler implements TaskHandler {
 
         var evidence = collectEvidence(context.workspaceRoot(), context.workstreamId(), evidenceDir);
         writeEvidenceJson(evidenceDir.resolve("git-evidence.json"), evidence);
+        var evaluation = evaluateChangeScope(context.workspaceRoot(), context.workstreamId(), evidence);
+        var evaluationPath = evidenceDir.resolve("change-scope-evaluation.json");
+        OBJECT_MAPPER.writeValue(evaluationPath.toFile(), evaluation);
 
         var outputRefs = new ArrayList<String>();
         outputRefs.addAll(AgentEvidenceIndex.fromRefs(
@@ -49,10 +55,12 @@ public final class ArtifactValidateHandler implements TaskHandler {
                 "branch.txt",
                 "git-root.txt",
                 "git-status-short.txt",
+                "git-name-status.txt",
                 "diff.stat",
                 "diff.patch",
                 "changed-files.txt",
-                "hygiene-warnings.txt"
+                "hygiene-warnings.txt",
+                "change-scope-evaluation.json"
         )) {
             var path = evidenceDir.resolve(fileName);
             if (Files.exists(path)) {
@@ -67,12 +75,25 @@ public final class ArtifactValidateHandler implements TaskHandler {
         result.put("has_changes", evidence.hasChanges());
         result.put("changed_file_count", evidence.changedFileCount());
         result.put("hygiene_warning_count", evidence.hygieneWarningCount());
+        result.put("change_scope_status", evaluation.status().name());
+        result.put("change_scope_violation_count", evaluation.violations().size());
+        result.put("change_scope_missing_declared_count", evaluation.missingDeclared().size());
         result.put("evidence_path", toWorkspaceRef(
                 context.workspaceRoot(),
                 evidenceDir.resolve("git-evidence.json")
         ));
+        result.put("change_scope_evaluation_path", toWorkspaceRef(context.workspaceRoot(), evaluationPath));
         result.put("error", evidence.error());
 
+        if (!evaluation.passed()) {
+            var outcome = evaluation.status() == ChangeScopeEvaluation.Status.UNAVAILABLE
+                    ? "CHANGE_SCOPE_EVIDENCE_UNAVAILABLE"
+                    : "CHANGE_SCOPE_VIOLATION";
+            var error = evaluation.error() == null
+                    ? "actual Git changes do not satisfy TaskContract.scope"
+                    : evaluation.error();
+            return new NodeResult(outcome, NodeStatus.FAILED, outputRefs, result, error);
+        }
         return NodeResult.completed("completed", outputRefs, result);
     }
 
@@ -95,23 +116,120 @@ public final class ArtifactValidateHandler implements TaskHandler {
                     0,
                     0,
                     generatedAt,
-                    "git repository unavailable: " + gitRoot.output().trim()
+                    "git repository unavailable: " + gitRoot.output().trim(),
+                    List.of()
             );
         }
 
-        var branch = git(workdir, "branch", "--show-current").output().trim();
-        var headCommit = git(workdir, "rev-parse", "HEAD").output().trim();
+        var branchResult = git(workdir, "branch", "--show-current");
+        var headResult = git(workdir, "rev-parse", "HEAD");
+        var statusResult = git(workdir, "status", "--short", "--untracked-files=all", "--", ".", ":!.agent");
+        if (branchResult.exitCode() != 0 || headResult.exitCode() != 0 || statusResult.exitCode() != 0) {
+            return new GitEvidence(
+                    "1",
+                    false,
+                    workdir.toAbsolutePath().normalize().toString(),
+                    gitRoot.output().trim(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    0,
+                    0,
+                    generatedAt,
+                    "required Git evidence command failed",
+                    List.of()
+            );
+        }
+        var branch = branchResult.output().trim();
+        var headCommit = headResult.output().trim();
         var base = readWorkspaceBase(workdir, workstreamId);
-        var statusShort = git(workdir, "status", "--short", "--", ".", ":!.agent").output();
+        var statusShort = statusResult.output();
+        var untrackedResult = git(
+                workdir,
+                "ls-files",
+                "--others",
+                "--exclude-standard",
+                "-z",
+                "--",
+                ".",
+                ":!.agent"
+        );
+        if (untrackedResult.exitCode() != 0) {
+            return unavailableGitEvidence(
+                    workdir,
+                    gitRoot.output().trim(),
+                    branch,
+                    base,
+                    headCommit,
+                    generatedAt,
+                    "git ls-files --others failed: " + untrackedResult.output().trim()
+            );
+        }
+        final List<String> untrackedFiles;
+        try {
+            untrackedFiles = parseNulPaths(untrackedResult.output());
+        } catch (IllegalArgumentException exception) {
+            return unavailableGitEvidence(
+                    workdir,
+                    gitRoot.output().trim(),
+                    branch,
+                    base,
+                    headCommit,
+                    generatedAt,
+                    "git ls-files --others returned malformed NUL framing: " + exception.getMessage()
+            );
+        }
         var branchRange = base.baseCommit() == null || base.baseCommit().isBlank()
                 ? null
                 : base.baseCommit() + "...HEAD";
         if (branchRange != null && !commitExists(workdir, base.baseCommit())) {
             branchRange = null;
         }
-        var diffStat = buildDiffStat(workdir, statusShort, branchRange);
-        var diffPatch = buildDiffPatch(workdir, statusShort, branchRange);
-        var changedFiles = changedFiles(workdir, statusShort, branchRange);
+        var diffStat = buildDiffStat(workdir, untrackedFiles, branchRange);
+        var diffPatch = buildDiffPatch(workdir, untrackedFiles, branchRange);
+        var nameStatus = buildNameStatus(workdir, untrackedFiles, base.baseCommit());
+        if (nameStatus.exitCode() != 0) {
+            return new GitEvidence(
+                    "1",
+                    false,
+                    workdir.toAbsolutePath().normalize().toString(),
+                    gitRoot.output().trim(),
+                    branch,
+                    base.baseBranch(),
+                    base.baseCommit(),
+                    headCommit,
+                    base.source(),
+                    branchRange,
+                    false,
+                    0,
+                    0,
+                    generatedAt,
+                    "git diff --name-status failed: " + nameStatus.output().trim(),
+                    List.of()
+            );
+        }
+        final List<ChangeScopeEvaluation.ActualChange> actualChanges;
+        try {
+            actualChanges = ChangeScopeEvaluator.parseNameStatus(nameStatus.exitCode(), nameStatus.output());
+        } catch (IllegalArgumentException exception) {
+            return unavailableGitEvidence(
+                    workdir,
+                    gitRoot.output().trim(),
+                    branch,
+                    base,
+                    headCommit,
+                    generatedAt,
+                    "git diff --name-status returned malformed NUL framing: " + exception.getMessage()
+            );
+        }
+        var changedFiles = actualChanges.stream()
+                .map(ChangeScopeEvaluation.ActualChange::path)
+                .distinct()
+                .toList();
         var hygieneWarnings = hygieneWarnings(changedFiles);
 
         write(evidenceDir.resolve("git-root.txt"), gitRoot.output().trim() + "\n");
@@ -119,6 +237,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
         write(evidenceDir.resolve("base-commit.txt"), textOrEmpty(base.baseCommit()) + "\n");
         write(evidenceDir.resolve("head-commit.txt"), headCommit + "\n");
         write(evidenceDir.resolve("git-status-short.txt"), statusShort);
+        write(evidenceDir.resolve("git-name-status.txt"), nameStatus.output());
         write(evidenceDir.resolve("diff.stat"), diffStat);
         write(evidenceDir.resolve("diff.patch"), diffPatch);
         var changedFilesText = String.join("\n", changedFiles) + (changedFiles.isEmpty() ? "" : "\n");
@@ -142,48 +261,77 @@ public final class ArtifactValidateHandler implements TaskHandler {
                 changedFiles.size(),
                 hygieneWarnings.size(),
                 generatedAt,
-                null
+                null,
+                actualChanges
         );
     }
 
-    private static List<String> changedFiles(Path workdir, String statusShort, String branchRange)
+    private static GitEvidence unavailableGitEvidence(
+            Path workdir,
+            String gitRoot,
+            String branch,
+            WorkspaceBase base,
+            String headCommit,
+            String generatedAt,
+            String error
+    ) {
+        return new GitEvidence(
+                "1",
+                false,
+                workdir.toAbsolutePath().normalize().toString(),
+                gitRoot,
+                branch,
+                base.baseBranch(),
+                base.baseCommit(),
+                headCommit,
+                base.source(),
+                null,
+                false,
+                0,
+                0,
+                generatedAt,
+                error,
+                List.of()
+        );
+    }
+
+    private static CommandResult buildNameStatus(Path workdir, List<String> untrackedFiles, String baseCommit)
             throws IOException, InterruptedException {
-        var changedFiles = new LinkedHashSet<String>();
-        if (branchRange != null) {
-            addNameOnly(changedFiles, git(workdir, "diff", "--name-only", branchRange, "--", ".", ":!.agent").output());
+        var comparisonBase = baseCommit != null && !baseCommit.isBlank() && commitExists(workdir, baseCommit)
+                ? baseCommit
+                : "HEAD";
+        var result = git(
+                workdir,
+                "diff",
+                "--name-status",
+                "-z",
+                "--find-renames",
+                comparisonBase,
+                "--",
+                ".",
+                ":!.agent"
+        );
+        if (result.exitCode() != 0) {
+            return result;
         }
-        addNameOnly(changedFiles, git(workdir, "diff", "--name-only", "--", ".", ":!.agent").output());
-        addNameOnly(changedFiles, git(workdir, "diff", "--cached", "--name-only", "--", ".", ":!.agent").output());
-        for (String line : statusShort.split("\\R")) {
-            if (line.isBlank()) {
-                continue;
+        var builder = new StringBuilder(result.output());
+        for (var file : untrackedFiles) {
+            if (!Files.isDirectory(workdir.resolve(file))) {
+                builder.append("A").append('\0').append(file).append('\0');
             }
-            if (line.length() <= 3) {
-                changedFiles.add(line.trim());
-                continue;
-            }
-            changedFiles.add(line.substring(3).trim());
         }
-        changedFiles.removeIf(file -> file.isBlank() || file.startsWith(".agent/"));
-        return new ArrayList<>(changedFiles);
+        return new CommandResult(0, builder.toString());
     }
 
-    private static void addNameOnly(Set<String> changedFiles, String output) {
-        for (String line : output.split("\\R")) {
-            if (!line.isBlank()) {
-                changedFiles.add(line.trim());
-            }
-        }
-    }
-
-    private static String buildDiffStat(Path workdir, String statusShort, String branchRange) throws IOException, InterruptedException {
+    private static String buildDiffStat(Path workdir, List<String> untrackedFiles, String branchRange)
+            throws IOException, InterruptedException {
         var builder = new StringBuilder();
         if (branchRange != null) {
             builder.append(git(workdir, "diff", "--stat", branchRange, "--", ".", ":!.agent").output());
         }
         builder.append(git(workdir, "diff", "--cached", "--stat", "--", ".", ":!.agent").output());
         builder.append(git(workdir, "diff", "--stat", "--", ".", ":!.agent").output());
-        for (String file : untrackedFilesFromStatus(statusShort)) {
+        for (String file : untrackedFiles) {
             if (Files.isDirectory(workdir.resolve(file))) {
                 continue;
             }
@@ -195,14 +343,15 @@ public final class ArtifactValidateHandler implements TaskHandler {
         return builder.toString();
     }
 
-    private static String buildDiffPatch(Path workdir, String statusShort, String branchRange) throws IOException, InterruptedException {
+    private static String buildDiffPatch(Path workdir, List<String> untrackedFiles, String branchRange)
+            throws IOException, InterruptedException {
         var builder = new StringBuilder();
         if (branchRange != null) {
             builder.append(git(workdir, "diff", branchRange, "--", ".", ":!.agent").output());
         }
         builder.append(git(workdir, "diff", "--cached", "--", ".", ":!.agent").output());
         builder.append(git(workdir, "diff", "--", ".", ":!.agent").output());
-        for (String file : untrackedFilesFromStatus(statusShort)) {
+        for (String file : untrackedFiles) {
             if (Files.isDirectory(workdir.resolve(file))) {
                 continue;
             }
@@ -243,17 +392,22 @@ public final class ArtifactValidateHandler implements TaskHandler {
         return git(workdir, "cat-file", "-e", commit + "^{commit}").exitCode() == 0;
     }
 
-    private static List<String> untrackedFilesFromStatus(String statusShort) {
-        var files = new ArrayList<String>();
-        for (String line : statusShort.split("\\R")) {
-            if (line.startsWith("?? ") && line.length() > 3) {
-                var file = line.substring(3).trim();
-                if (!file.startsWith(".agent/")) {
-                    files.add(file);
-                }
-            }
+    private static List<String> parseNulPaths(String framedPaths) {
+        if (framedPaths == null || framedPaths.isEmpty()) {
+            return List.of();
         }
-        return files;
+        var fields = framedPaths.split(String.valueOf('\0'), -1);
+        if (fields.length < 2 || !fields[fields.length - 1].isEmpty()) {
+            throw new IllegalArgumentException("git path output is not NUL terminated");
+        }
+        var paths = new ArrayList<String>(fields.length - 1);
+        for (var index = 0; index < fields.length - 1; index++) {
+            if (fields[index].isEmpty()) {
+                throw new IllegalArgumentException("git path output contains an empty path");
+            }
+            paths.add(fields[index]);
+        }
+        return List.copyOf(paths);
     }
 
     private static List<String> hygieneWarnings(List<String> changedFiles) {
@@ -303,7 +457,39 @@ public final class ArtifactValidateHandler implements TaskHandler {
         json.put("hygieneWarningCount", evidence.hygieneWarningCount());
         json.put("generatedAt", evidence.generatedAt());
         json.put("error", evidence.error());
+        json.put("actualChanges", evidence.actualChanges());
         OBJECT_MAPPER.writeValue(path.toFile(), json);
+    }
+
+    private static ChangeScopeEvaluation evaluateChangeScope(
+            Path workspaceRoot,
+            String workstreamId,
+            GitEvidence evidence
+    ) {
+        if (!evidence.available()) {
+            return ChangeScopeEvaluation.unavailable("Git evidence is unavailable");
+        }
+        if (evidence.comparisonRange() == null || evidence.comparisonRange().isBlank()) {
+            return ChangeScopeEvaluation.unavailable("Workspace base commit is unavailable");
+        }
+        var contractPath = workspaceRoot.resolve(".agent")
+                .resolve("workstreams")
+                .resolve(workstreamId)
+                .resolve("artifacts")
+                .resolve("task-contract.json");
+        if (!Files.isRegularFile(contractPath)) {
+            return ChangeScopeEvaluation.unavailable("TaskContract artifact is missing");
+        }
+        try {
+            var contract = OBJECT_MAPPER.readValue(contractPath.toFile(), TaskContract.class);
+            var errors = TaskContractValidator.validate(contract);
+            if (!errors.isEmpty()) {
+                return ChangeScopeEvaluation.unavailable("TaskContract is invalid: " + String.join("; ", errors));
+            }
+            return ChangeScopeEvaluator.evaluate(contract, evidence.actualChanges());
+        } catch (Exception exception) {
+            return ChangeScopeEvaluation.unavailable("TaskContract cannot be read: " + exception.getMessage());
+        }
     }
 
     private static String toWorkspaceRef(Path workspaceRoot, Path path) {
@@ -355,7 +541,11 @@ public final class ArtifactValidateHandler implements TaskHandler {
             int changedFileCount,
             int hygieneWarningCount,
             String generatedAt,
-            String error
+            String error,
+            List<ChangeScopeEvaluation.ActualChange> actualChanges
     ) {
+        GitEvidence {
+            actualChanges = List.copyOf(actualChanges == null ? List.of() : actualChanges);
+        }
     }
 }

@@ -44,7 +44,6 @@ def agent_output(decision: str, summary: str, category_hint: str = "") -> dict:
         "verification_summary": "Controlled smoke emitted a strict AgentResultEnvelope.",
         "failure": failure(category_hint),
         "reread_reasons": [],
-        "scope_expansion_request": None,
     }
 
 

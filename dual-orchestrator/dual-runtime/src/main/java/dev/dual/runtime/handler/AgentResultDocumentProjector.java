@@ -43,9 +43,6 @@ final class AgentResultDocumentProjector {
                         output.missingEvidence(), output.mustFix(), output.acceptanceNotes(), output.openRisks(),
                         output.changedFiles(), output.verificationSummary(), output.failure());
                 document.put("reread_reasons", output.rereadReasons().stream().map(this::rereadReason).toList());
-                if (output.scopeExpansionRequest() != null) {
-                    document.put("scope_expansion_request", scopeExpansion(output.scopeExpansionRequest()));
-                }
             }
             case AgentResultEnvelope.PlanResult plan -> {
                 evidenceFields(
@@ -220,13 +217,4 @@ final class AgentResultDocumentProjector {
         return reason;
     }
 
-    private Map<String, Object> scopeExpansion(AgentResultEnvelope.ScopeExpansionRequest value) {
-        var request = new LinkedHashMap<String, Object>();
-        request.put("requested_files", value.requestedFiles());
-        request.put("read_files", value.readFiles());
-        request.put("files", value.files());
-        request.put("reason", value.reason());
-        request.put("evidence", value.evidence());
-        return request;
-    }
 }

@@ -784,6 +784,89 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void implementationAgentCannotRewriteTaskContractAuthority() throws Exception {
+        writeChangeBoundaryControlFacts("ws-test");
+        var handler = new AcpxAgentTaskHandler(
+                new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.TASK_CONTRACT),
+                false
+        );
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implement-claude",
+                "approve_all", true
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("implement.claude_implement")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_BOUNDARY_AUTHORITY_TAMPERED", result.outcome());
+        assertEquals(true, result.result().get("change_boundary_authority_tampered"));
+        assertTrue(((List<?>) result.result().get("changed_control_facts")).stream()
+                .anyMatch(path -> path.toString().endsWith("artifacts/task-contract.json")));
+    }
+
+    @Test
+    void implementationAgentCannotRewriteWorkspaceBaseAuthority() throws Exception {
+        writeChangeBoundaryControlFacts("ws-test");
+        var handler = new AcpxAgentTaskHandler(
+                new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.WORKSPACE),
+                false
+        );
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implement-claude",
+                "approve_all", true
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("implement.claude_implement")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_BOUNDARY_AUTHORITY_TAMPERED", result.outcome());
+        assertTrue(((List<?>) result.result().get("changed_control_facts")).stream()
+                .anyMatch(path -> path.toString().endsWith("workspaces/wsp-test.json")));
+    }
+
+    @Test
+    void implementationAgentCannotCreateWorkspaceAuthority() throws Exception {
+        writeChangeBoundaryControlFacts("ws-test");
+        Files.delete(tempDir.resolve(".agent/workstreams/ws-test/workspaces/wsp-test.json"));
+        var handler = new AcpxAgentTaskHandler(
+                new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.WORKSPACE),
+                false
+        );
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implement-claude",
+                "approve_all", true
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("implement.claude_implement")
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("CHANGE_BOUNDARY_AUTHORITY_TAMPERED", result.outcome());
+        assertTrue(((List<?>) result.result().get("changed_control_facts")).stream()
+                .anyMatch(path -> path.toString().endsWith("workspaces")));
+    }
+
+    @Test
     void treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -911,8 +994,7 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"message\" : \"agent needs reconnect"), runMetadata);
         assertTrue(runMetadata.contains("\"measurementType\" : \"UNAVAILABLE\""), runMetadata);
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
-        assertTrue(runMetadata.contains("\"explorationPolicyResultPath\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
+        assertFalse(runMetadata.contains("\"explorationPolicyResult\""), runMetadata);
     }
 
     @Test
@@ -1065,8 +1147,7 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertTrue(runMetadata.contains("\"failureSignal\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
-        assertTrue(runMetadata.contains("\"explorationPolicyResultPath\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
+        assertFalse(runMetadata.contains("\"explorationPolicyResult\""), runMetadata);
     }
 
     @Test
@@ -1650,34 +1731,15 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"semanticIteration\" : \"iter-001\""), runMetadata);
         // session name 恒含 workstreamId，永不裸名
         assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-sess\""), runMetadata);
-        // Even without a prebuilt exploration plan, run metadata must expose the
-        // governance result instead of silently omitting the boundary evidence.
-        assertTrue(runMetadata.contains("\"explorationPolicyResult\" :"), runMetadata);
         assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
+        assertFalse(runMetadata.contains("\"explorationPolicyResult\""), runMetadata);
     }
 
     @Test
-    void completedRunEmbedsExplorationPolicyResultInRunMetadata() throws Exception {
+    void completedRunRecordsActualReadTelemetryWithoutReadPolicyFields() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-explore");
         Files.createDirectories(workstreamDir.resolve("memory"));
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
-        Files.writeString(workstreamDir.resolve("memory/exploration-plan-node-intake.json"), """
-                {
-                  "schemaVersion": 1,
-                  "artifactType": "agent_exploration_plan",
-                  "workstreamId": "ws-explore",
-                  "stageId": "intake",
-                  "nodeDefinitionId": "intake.claude_brainstorm",
-                  "targetNodeDefinitionId": "intake.claude_brainstorm",
-                  "nodeInstanceId": "node-intake",
-                  "iterationId": "iter-001",
-                  "explorationIntent": "contract_discovery",
-                  "preferredCapabilityKinds": ["symbol_index", "direct_file_read"],
-                  "allowedDirectReadFiles": ["README.md"],
-                  "maxDirectReadFiles": 1,
-                  "failureMode": "block"
-                }
-                """);
 
         var handler = new AcpxAgentTaskHandler(new DirectReadCompletingTransport(), false);
         var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
@@ -1689,50 +1751,40 @@ class AcpxAgentTaskHandlerTest {
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-explore", definition,
                 readyInstance("intake.claude_brainstorm")));
 
-        // Direction B: reads are observation, not authority. The node completes even when
-        // exploration policy detects out-of-scope reads — policy result is telemetry only.
         assertEquals(NodeStatus.COMPLETED, result.status(),
-                "node must not fail solely for exploration read policy violation (Direction B)");
-        assertFalse("EXPLORATION_POLICY_VIOLATION".equals(result.outcome()),
-                "outcome must not be EXPLORATION_POLICY_VIOLATION (Direction B: reads are not authority)");
+                "read telemetry must not replace the change-boundary decision");
 
         var runJson = Files.walk(workstreamDir.resolve("runs"))
                 .filter(path -> path.getFileName().toString().equals("run.json"))
                 .findFirst()
                 .orElseThrow();
         var runMetadata = Files.readString(runJson);
-        assertTrue(runMetadata.contains("\"explorationPolicyResult\""),
-                "exploration policy result must still be recorded as telemetry");
-        assertTrue(runMetadata.contains("\"agentExplorationPlanPath\" :"), runMetadata);
-        assertTrue(runMetadata.contains("exploration-plan-node-intake-claude_brainstorm.json"), runMetadata);
         assertTrue(runMetadata.contains("\"contextGovernanceActualReportPath\" :"), runMetadata);
+        assertFalse(runMetadata.contains("\"explorationPolicyResult\""), runMetadata);
+        assertFalse(runMetadata.contains("\"agentExplorationPlanPath\""), runMetadata);
 
         var root = OBJECT_MAPPER.readTree(runJson.toFile());
-        // Telemetry: the policy violation IS detected and recorded — but does not fail the node.
-        assertEquals("failed", root.path("explorationPolicyResult").path("status").asText(),
-                "explorationPolicyResult.status must be failed (telemetry records the violation)");
-        var polViolations = root.path("explorationPolicyResult").path("violations");
-        assertTrue(polViolations.isArray() && polViolations.size() > 0,
-                "explorationPolicyResult must contain blocking violations (telemetry)");
-        // Authority boundary: the node completes regardless of the read policy violation.
         assertEquals("completed", root.path("status").asText(),
-                "run.json top-level status must be completed, not failed by exploration policy");
+                "run.json top-level status must reflect execution");
         assertEquals("COMPLETED", root.path("executionAttempt").path("status").asText(),
                 "successful process execution remains completed");
         assertTrue(root.path("failureReason").isMissingNode()
                         || root.path("failureReason").isNull()
                         || root.path("failureReason").asText().isBlank(),
-                "failureReason must not be set by exploration policy");
+                "read telemetry must not set failureReason");
         assertTrue(root.path("recoverable").isMissingNode()
                         || root.path("recoverable").isNull()
                         || !root.path("recoverable").asBoolean(),
-                "recoverable must not be triggered by exploration policy");
-        assertFalse(runMetadata.contains("EXPLORATION_POLICY_VIOLATION"),
-                "no EXPLORATION_POLICY_VIOLATION must appear anywhere in run.json");
-        assertFalse(runMetadata.contains("EXPLORATION_POLICY_DENIED"),
-                "no EXPLORATION_POLICY_DENIED must appear anywhere in run.json");
+                "read telemetry must not trigger recovery");
         assertEquals(0, root.path("adapterSignals").size(),
-                "no adapter signals from exploration policy");
+                "read telemetry must not become an adapter failure");
+
+        var reportPath = tempDir.resolve(root.path("contextGovernanceActualReportPath").asText());
+        var report = OBJECT_MAPPER.readTree(reportPath.toFile());
+        assertTrue(report.path("actualReadFiles").isArray());
+        assertTrue(report.path("actualDirectReadFiles").isArray());
+        assertFalse(report.has("explorationPolicyResult"));
+        assertFalse(report.has("outsideScopeReads"));
     }
 
     @Test
@@ -1761,12 +1813,12 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(manifestText.contains("\"sourceType\""), manifestText);
         assertTrue(manifestText.contains("\"requirement\""), manifestText);
         var manifestJson = OBJECT_MAPPER.readTree(manifest.toFile());
-        var explorationSection = java.util.stream.StreamSupport.stream(manifestJson.path("sections").spliterator(), false)
-                .filter(section -> "exploration_plan".equals(section.path("name").asText()))
+        var contractSection = java.util.stream.StreamSupport.stream(manifestJson.path("sections").spliterator(), false)
+                .filter(section -> "prompt_contract".equals(section.path("name").asText()))
                 .findFirst()
                 .orElseThrow();
-        assertTrue(explorationSection.path("bytes").asInt() > 0, explorationSection.toPrettyString());
-        assertTrue(explorationSection.path("estimatedTokens").asInt() > 0, explorationSection.toPrettyString());
+        assertTrue(contractSection.path("bytes").asInt() > 0, contractSection.toPrettyString());
+        assertTrue(contractSection.path("estimatedTokens").asInt() > 0, contractSection.toPrettyString());
 
         // DUAL_AGENT_PROMPT_DEBUG unset -> NO full-content debug dump (manifest ≠ content dump)
         var debugDump = Files.walk(workstreamDir.resolve("runs"))
@@ -1869,6 +1921,29 @@ class AcpxAgentTaskHandlerTest {
                 """.formatted(claudeCachedReadTokens + codexCachedReadTokens, claudeCachedReadTokens, codexCachedReadTokens));
     }
 
+    private void writeChangeBoundaryControlFacts(String workstreamId) throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams").resolve(workstreamId);
+        Files.createDirectories(workstreamDir.resolve("artifacts"));
+        Files.createDirectories(workstreamDir.resolve("workspaces"));
+        Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
+                {
+                  "id":"task-test","version":1,"created_at":"2026-07-26T00:00:00Z",
+                  "objective":"Implement the approved change.","status":"READY_FOR_REVIEW",
+                  "scope":{"included":[{"path":"README.md","operation":"MODIFY"}],"excluded":[]},
+                  "acceptance_criteria":[],"test_requirements":[],"constraints":[],
+                  "non_goals":[],"risk_areas":[],"ambiguity_notes":[],"human_questions":[],
+                  "compilation_pass":1
+                }
+                """);
+        Files.writeString(workstreamDir.resolve("workstream.json"), """
+                {"primaryWorkspaceId":"wsp-test"}
+                """);
+        Files.writeString(workstreamDir.resolve("workspaces/wsp-test.json"), """
+                {"baseCommit":"1111111111111111111111111111111111111111"}
+                """);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved change.\n");
+    }
+
     private static final class CapturingApprovalTransport extends AcpxAgentTransport {
         Boolean lastApproveAll;
         AcpxPermissionProfile lastPermissionProfile;
@@ -1917,6 +1992,39 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return completedResult(request, 0, now, List.of("acpx", "codex"), "READY_FOR_PRODUCT_REVIEW");
+        }
+    }
+
+    private static final class ControlFactTamperingTransport extends AcpxAgentTransport {
+        enum Target {
+            TASK_CONTRACT,
+            WORKSPACE
+        }
+
+        private final Target target;
+
+        private ControlFactTamperingTransport(Target target) {
+            this.target = target;
+        }
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            var workstreamDir = request.workdir().resolve(".agent/workstreams/ws-test");
+            var targetPath = target == Target.TASK_CONTRACT
+                    ? workstreamDir.resolve("artifacts/task-contract.json")
+                    : workstreamDir.resolve("workspaces/wsp-test.json");
+            Files.writeString(targetPath, "{\"tampered\":true}\n");
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "");
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-07-26T00:00:00Z");
+            return completedResult(
+                    request,
+                    0,
+                    now,
+                    List.of("acpx", "claude"),
+                    "READY_FOR_SELF_TEST"
+            );
         }
     }
 

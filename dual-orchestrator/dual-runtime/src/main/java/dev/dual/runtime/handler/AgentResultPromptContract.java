@@ -170,8 +170,7 @@ public final class AgentResultPromptContract {
                     List.of(),
                     "short verification summary",
                     emptyFailure(),
-                    List.of(),
-                    null
+                    List.of()
             );
         };
     }

@@ -6,25 +6,62 @@
 2. 让 node executor/handler 只负责编排，领域规则归属唯一 domain owner。
 3. LLM workflow 结果只通过 strict `AgentResultEnvelope` 进入状态流转；Markdown 仅供人阅读，不参与控制。
 
-当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B0 scope boundary characterization 已完成。Orchestrator 简化和 handler 瘦身尚未闭环。
+当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Direction B / B1 Subtraction — PASS (ENFORCED + PROVEN)
+## Current Active Step: Direction B / Phase B Closure — PASS, CHECKPOINT PENDING
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
+> B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
+> Strict change-scope paths: **COMMITTED** (`f2410e97`)。
 >
-> B1 objective: 删除 read observation → NodeResult failure 的全部 authority path。
-> 保留 exploration telemetry。保留 provider/artifact/transport failure boundaries。
+> **B1 subtraction checkpoint 已完成；B4 删除收敛的 deterministic 验收已通过。**
+> - handler、validator 与 metadata writer 不再把 path-level read policy 映射为
+>   node failure、contract violation、recovery 或 workflow status。
+> - `ExplorationPlan`、`ExplorationPolicyEvaluator`、`ExplorationReadKindPolicy`
+>   及其 production projection/protocol 已删除，不再保留
+>   `explorationPolicyResult` 或 `scope_expansion_request` 兼容字段。
+> - production sibling sweep 对 `readScope`、`allowedDirectReadFiles`、
+>   `ExplorationPlan`、`ExplorationPolicy`、`scope_expansion_request`、
+>   `READ_OUTSIDE_EXPLORATION_SCOPE` 与 `DIRECT_READ_BUDGET_EXCEEDED` 为 0。
+> - recommendation、actual read/write/tool-usage telemetry 与 read-reuse policy
+>   保留；`REREAD_POLICY_DENIED` 是独立 token/read-reuse contract，不是 path
+>   read authority。
 >
-> **B1 = PASS / ENFORCED + PROVEN。**
-> - 删除了 handler + validator + metadata writer 三条 read→FAILED authority path。
-> - explorationPolicyResult 仍完整记录为 telemetry。
-> - provider/artifact/transport failure boundaries 不受影响。
-> - cannot-bypass tests: agent 读越界文件 + valid artifact → COMPLETED;
->   governance report + run.json byte-for-byte 不变。
-> - dual-runtime 442/0; dual-adapter-acpx 295/0; git diff --check clean。
-> - production sweep: 0 EXPLORATION_POLICY authority paths。
+> **B2 small slice = ENFORCED + PROVEN，尚未提交。**
+> - `TaskContract.scope` 声明 `CREATE` / `MODIFY` 变更意图。
+> - workspace `baseCommit` 到当前 worktree 的 Git `--name-status -z` 产生 typed
+>   actual changes；NUL framing 保留 Unicode、Tab 与换行路径。
+> - `artifact.validate` 在返回成功前执行唯一的 change-boundary comparison。
+> - unexpected change、operation mismatch、DELETE/RENAME/UNKNOWN、缺失 contract、
+>   Git 不可用或缺失可信 base commit 均 fail closed。
+> - `approve_all` implementation agent 运行前以内存 fingerprint 固定当前
+>   `task-contract.json`、`workstream.json` 与 `workspaces/`；运行中篡改或新增这些
+>   change-boundary control facts 会在 node success 前失败。
+> - 声明但未发生的变更仅记录为 observation，不导致失败。
+> - ignored files 不属于 Git deliverable change set，因此不进入 B2 actual changes；
+>   B2 是 workflow change governance，不声明 OS/filesystem containment。
+> - 未新增 phase、module、registry、state machine 或 policy engine。
+> - handler cannot-bypass 与 workflow/ledger cannot-bypass 均证明 violation
+>   无法激活 acceptance context；strict fixture sibling smoke 通过。
 >
-> **B2 = NOT ACTIVE。** 等待独立 readiness assessment。
+> **Controlled README real-case = PASS。**
+> - 报告：`docs/testing/real-case-reports/20260726T032753Z/report.md`；
+>   workstream：`ws-20260726T033037Z-YW6K`。
+> - fresh Maven package 与 provider probe 均通过；full workflow 最终状态
+>   `COMPLETED`，acceptance=`ACCEPT`，benchmark grade=`PASS`，
+>   acceptance reject=0，repair loop=0。
+> - 12 个 agent run 均产生 strict `.contract.json` sidecar；最终 report、
+>   handoff、next-stage prompt 与 delivery PR body 完整。
+> - `change-scope-evaluation.json` 为 `PASS`；typed actual change 只有
+>   `README.md/MODIFY`，missing declared 与 violations 均为空；
+>   `artifact.validate` ledger result 消费同一事实并记录
+>   `change_scope_status=PASS`。
+> - 目标 worktree 仅修改 `README.md`，`node --test` 通过。
+> - implementation actual report 仍记录 `actualReadFiles=[README.md]`、
+>   `actualWriteFiles=[README.md]` 及 typed tool usage；workstream 中不存在
+>   legacy exploration plan/policy artifact。
+>
+> **Phase B = PASS / ENFORCED + PROVEN。Phase C assessment 尚未激活。**
 
 ## 执行纪律
 
@@ -245,5 +282,5 @@ filesystem 只验证已知 artifact 的存在和 hash，不通过目录扫描猜
 > 重构，以及多轮 review、多 Agent proposal merge、自动 rollback、policy engine、预算/provider
 > 优化、HTTP/runtime 扩张、tool-call 前 broker 或 write-scope lifecycle。
 >
-> **当前唯一 active objective：Direction B / B0 Rebase Assessment。** B1 尚未启动。
-> B0 review PASS 前禁止任何 production 修改。
+> 以上仅为历史许可记录；当前 objective 以本文顶部的 Phase B closure
+> 状态为准。

@@ -83,7 +83,6 @@ public final class AgentResultEnvelopeValidator {
                         output.verificationSummary(), output.failure(), errors);
                 requiredList(output.rereadReasons(), "result.reread_reasons", false, errors);
                 validateRereadReasons(output.rereadReasons(), errors);
-                validateScopeExpansionRequest(output.scopeExpansionRequest(), errors);
             }
             case AgentResultEnvelope.PlanResult plan -> {
                 validateEvidencePayload(
@@ -198,26 +197,6 @@ public final class AgentResultEnvelopeValidator {
                 errors.add("result.reread_reasons[" + index + "].reason is not allowed");
             }
         }
-    }
-
-    private static void validateScopeExpansionRequest(
-            AgentResultEnvelope.ScopeExpansionRequest request,
-            List<String> errors
-    ) {
-        if (request == null) {
-            return;
-        }
-        requiredList(request.requestedFiles(), "result.scope_expansion_request.requested_files", false, errors);
-        requiredList(request.readFiles(), "result.scope_expansion_request.read_files", false, errors);
-        requiredList(request.files(), "result.scope_expansion_request.files", false, errors);
-        var count = size(request.requestedFiles()) + size(request.readFiles()) + size(request.files());
-        if (count == 0) {
-            errors.add("result.scope_expansion_request requires at least one file");
-        }
-    }
-
-    private static int size(List<?> values) {
-        return values == null ? 0 : values.size();
     }
 
     private static void requiredText(String value, String field, List<String> errors) {

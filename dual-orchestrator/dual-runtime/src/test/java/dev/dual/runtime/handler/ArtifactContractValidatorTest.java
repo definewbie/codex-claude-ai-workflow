@@ -47,74 +47,6 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void explorationPolicyFailedDoesNotCauseContractViolationOrRewriteArtifacts() throws Exception {
-        var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()));
-
-        // Create the exploration plan file that agentExplorationPlanPath references.
-        // Non-empty allowedDirectReadFiles + failureMode=block: this plan is self-consistent
-        // with actualDirectReadFiles=["src/unplanned.java"] → evaluator WOULD produce status=failed.
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-1");
-        var memoryDir = wsDir.resolve("memory");
-        Files.createDirectories(memoryDir);
-        var planContent = """
-                {
-                  "allowedDirectReadFiles": ["README.md"],
-                  "maxDirectReadFiles": 6,
-                  "failureMode": "block",
-                  "stageId": "design"
-                }
-                """;
-        Files.writeString(memoryDir.resolve("exploration-plan.json"), planContent);
-
-        // Set up governance report: the plan allows only README.md, but actualDirectReadFiles
-        // contains src/unplanned.java — definitely out-of-scope. The evaluator with these
-        // inputs would produce explorationPolicyResult.status=failed.
-        var governanceDir = wsDir.resolve("artifacts/context-governance");
-        Files.createDirectories(governanceDir);
-        var governanceReport = governanceDir.resolve("report.json");
-        var governanceContent = """
-                {
-                  "explorationPolicyResult": {"status": "failed", "violations": [{"type": "READ_OUTSIDE_EXPLORATION_SCOPE", "severity": "block"}]},
-                  "agentExplorationPlanPath": ".agent/workstreams/ws-1/memory/exploration-plan.json",
-                  "actualDirectReadFiles": ["src/unplanned.java"]
-                }
-                """;
-        Files.writeString(governanceReport, governanceContent);
-        var governanceBefore = Files.readString(governanceReport);
-
-        // Set up run.json referencing the governance report
-        var runDir = tempDir.resolve("run-1");
-        Files.createDirectories(runDir);
-        var runJsonPath = runDir.resolve("run.json");
-        var runJsonContent = """
-                {
-                  "runId": "run-1",
-                  "status": "completed",
-                  "contextGovernanceActualReportPath": ".agent/workstreams/ws-1/artifacts/context-governance/report.json",
-                  "explorationPolicyResult": {"status": "failed", "violations": [{"type": "READ_OUTSIDE_EXPLORATION_SCOPE", "severity": "block"}]}
-                }
-                """;
-        Files.writeString(runJsonPath, runJsonContent);
-        var runJsonBefore = Files.readString(runJsonPath);
-
-        // Validate with a NodeResult that references run_metadata (the deleted
-        // refreshExplorationPolicyProjection would have read this to find the governance report).
-        var result = NodeResult.completed("completed", List.of(ref),
-                Map.of("run_id", "run-1", "agent", "test", "run_metadata", "run-1/run.json"));
-        var validated = validator.validate(tempDir, "ws-1", "node-instance-1",
-                node("design.codex_arch_review"), result);
-
-        assertEquals(NodeStatus.COMPLETED, validated.status(),
-                "valid envelope must pass even when explorationPolicyResult.status=failed");
-        assertFalse(String.valueOf(validated.result()).contains("EXPLORATION_POLICY_DENIED"),
-                "validator must not produce EXPLORATION_POLICY_DENIED (Direction B: reads are not authority)");
-        assertEquals(governanceBefore, Files.readString(governanceReport),
-                "governance report must be byte-for-byte unchanged (refreshExplorationPolicyProjection deleted)");
-        assertEquals(runJsonBefore, Files.readString(runJsonPath),
-                "run.json must be byte-for-byte unchanged (refreshExplorationPolicyProjection deleted)");
-    }
-
-    @Test
     void trailingMarkdownCannotBypassStrictJsonParser() throws Exception {
         var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()) + "\nDone.");
         var validated = validate("design.codex_arch_review", ref, "run-1");
@@ -140,7 +72,7 @@ class ArtifactContractValidatorTest {
         var wrong = new AgentResultEnvelope.AgentOutputResult(
                 "agent_output_contract", "READY_FOR_PLAN_REVIEW", "wrong type", "READY", false,
                 List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), "checked",
-                emptyFailure(), List.of(), null);
+                emptyFailure(), List.of());
         var ref = write("plan.json", envelope("plan.claude_plan", wrong));
         var validated = validate("plan.claude_plan", ref, "run-1");
 
@@ -351,21 +283,6 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void typedScopeExpansionFlowsToValidatedSidecar() throws Exception {
-        var output = new AgentResultEnvelope.AgentOutputResult(
-                "agent_output_contract", "IMPLEMENTED", "Implementation complete.", "READY", false,
-                List.of("tests"), List.of("passed"), List.of(), List.of(), List.of(), List.of(), List.of(),
-                "verified", emptyFailure(), List.of(),
-                new AgentResultEnvelope.ScopeExpansionRequest(List.of("src/Extra.java"), List.of(), List.of(), "needed", "reference"));
-        var ref = write("implement.json", envelope("implement.claude_implement", output));
-        var validated = validate("implement.claude_implement", ref, "run-1");
-
-        assertEquals(NodeStatus.COMPLETED, validated.status());
-        var sidecar = AgentOutputContractDocument.read(tempDir.resolve("implement.contract.json"), new ObjectMapper()).orElseThrow();
-        assertEquals(List.of("src/Extra.java"), sidecar.scopeExpansionRequest().requestedPaths());
-    }
-
-    @Test
     void missingJsonResultFailsClosed() throws Exception {
         var validated = validator.validate(
                 tempDir, "ws-1", "node-1", node("design.codex_arch_review"),
@@ -412,14 +329,14 @@ class ArtifactContractValidatorTest {
         return new AgentResultEnvelope.AgentOutputResult(
                 "agent_output_contract", "READY_FOR_ARCH_REVIEW", "Architecture is ready.", "READY", false,
                 List.of("reviewed design"), List.of("design matches contract"), List.of(), List.of(),
-                List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of(), null);
+                List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of());
     }
 
     private static AgentResultEnvelope.AgentOutputResult productReviewResult() {
         return new AgentResultEnvelope.AgentOutputResult(
                 "agent_output_contract", "READY_FOR_PRODUCT_REVIEW", "Product review is ready.", "READY", false,
                 List.of("reviewed proposal"), List.of("proposal matches requirement"), List.of(), List.of(),
-                List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of(), null);
+                List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of());
     }
 
     private static AgentResultEnvelope.Failure emptyFailure() {

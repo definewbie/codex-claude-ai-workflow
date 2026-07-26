@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.dual.runtime.handler.AgentOutputContractSidecar;
-import dev.dual.runtime.governance.ExplorationPolicyEvaluator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,15 +63,12 @@ final class ContextGovernanceActualReportWriter {
         var memoryDir = workstreamDir.resolve(MEMORY_DIR);
         var plan = latestDocument(memoryDir, "file-relevance-plan-", nodeDefinitionId);
         var policy = latestDocument(memoryDir, "stage-scope-policy-", nodeDefinitionId);
-        var explorationPlanPath = latestDocumentPath(memoryDir, "exploration-plan-", nodeDefinitionId);
-        var explorationPlan = latestDocument(memoryDir, "exploration-plan-", nodeDefinitionId);
         var capabilityCatalog = latestDocument(memoryDir, "agent-capability-catalog-", nodeDefinitionId);
         if (capabilityCatalog.isEmpty()) {
             capabilityCatalog = document(memoryDir.resolve("agent-capability-catalog.json"));
         }
         var repoMap = document(memoryDir.resolve("repo-map.json"));
-        var plannedRead = firstNonEmpty(textList(plan.map(doc -> doc.get("readCandidates")).orElse(null)),
-                textList(policy.map(doc -> doc.get("readScope")).orElse(null)));
+        var plannedRead = textList(plan.map(doc -> doc.get("readCandidates")).orElse(null));
         var plannedWrite = firstNonEmpty(textList(plan.map(doc -> doc.get("writeCandidates")).orElse(null)),
                 textList(policy.map(doc -> doc.get("writeScope")).orElse(null)));
         var actualRead = filterRepoFiles(toolUsage.readFiles());
@@ -87,17 +82,8 @@ final class ContextGovernanceActualReportWriter {
                 .filter(kind -> !kind.isBlank())
                 .distinct()
                 .toList();
-        var scopeExpansionFiles = scopeExpansionFiles(outputPath);
         var evidenceFiles = evidenceFiles(workstreamDir);
         var repeatedReadFiles = repeatedReads(workstreamDir, runId, actualRead, evidenceFiles);
-        var explorationPolicyResult = ExplorationPolicyEvaluator.evaluate(
-                map(explorationPlan.orElse(null)),
-                actualDirectRead,
-                actualCapabilities,
-                scopeExpansionFiles,
-                actualDirectReadKinds,
-                actualCapabilityUsages
-        );
         var report = new LinkedHashMap<String, Object>();
         report.put("schemaVersion", 1);
         report.put("artifactType", "context_governance_report");
@@ -115,19 +101,15 @@ final class ContextGovernanceActualReportWriter {
         report.put("runId", runId);
         report.put("reportPhase", "actual");
         report.put("planningAvailable", plan.isPresent() || policy.isPresent());
-        report.put("plannedReadFiles", plannedRead);
-        report.put("plannedWriteFiles", plannedWrite);
-        report.put("agentExplorationPlanPath", relativeOrNull(workspaceRoot, explorationPlanPath.orElse(null)));
+        report.put("recommendedReadFiles", plannedRead);
+        report.put("expectedWriteFiles", plannedWrite);
         report.put("actualReadFiles", actualRead);
         report.put("actualDirectReadFiles", actualDirectRead);
         report.put("actualReadFileKinds", actualReadKinds);
         report.put("actualDirectReadFileKinds", actualDirectReadKinds);
         report.put("actualCapabilityUsages", actualCapabilityUsages);
         report.put("actualWriteFiles", actualWrite);
-        report.put("outsideScopeReads", outsideScope(actualRead, plannedRead));
-        report.put("outsideScopeWrites", outsideScope(actualWrite, plannedWrite));
         report.put("repeatedReadFiles", repeatedReadFiles);
-        report.put("explorationPolicyResult", explorationPolicyResult);
         report.put("toolUsage", toolUsage);
         report.put("transcriptPath", relativeOrNull(workspaceRoot, transcriptPath));
         report.put("telemetryPending", false);
@@ -137,23 +119,9 @@ final class ContextGovernanceActualReportWriter {
         Files.createDirectories(outputDir);
         var fileName = safeFileName(nodeDefinitionId) + "-actual-" + safeFileName(runId) + ".json";
         var reportPath = outputDir.resolve(fileName);
-        var resultPath = outputDir.resolve("exploration-policy-result-" + safeFileName(nodeDefinitionId)
-                + "-" + safeFileName(runId) + ".json");
-        report.put("explorationPolicyResultPath", relativeOrNull(workspaceRoot, resultPath));
-        OBJECT_MAPPER.writeValue(resultPath.toFile(), explorationPolicyResult);
         OBJECT_MAPPER.writeValue(reportPath.toFile(), report);
         writeMemoryMetrics(memoryDir, workstreamId, nodeDefinitionId, runId, plannedRead, actualRead, repeatedReadFiles);
         return Optional.of(reportPath);
-    }
-
-    private static List<String> scopeExpansionFiles(Path outputPath) {
-        try {
-            return AgentOutputContractSidecar.read(outputPath, OBJECT_MAPPER)
-                    .map(document -> document.scopeExpansionRequest().requestedPaths())
-                    .orElse(List.of());
-        } catch (RuntimeException ignored) {
-            return List.of();
-        }
     }
 
     private static void writeMemoryMetrics(
@@ -314,19 +282,6 @@ final class ContextGovernanceActualReportWriter {
         return List.copyOf(values);
     }
 
-    private static List<String> outsideScope(List<String> actual, List<String> planned) {
-        if (actual.isEmpty()) {
-            return List.of();
-        }
-        var values = new ArrayList<String>();
-        for (var path : actual) {
-            if (!allowed(path, planned)) {
-                values.add(path);
-            }
-        }
-        return List.copyOf(values);
-    }
-
     private List<Map<String, Object>> repeatedReads(
             Path workstreamDir,
             String currentRunId,
@@ -404,19 +359,6 @@ final class ContextGovernanceActualReportWriter {
                 && !normalized.startsWith(".git/")
                 && !normalized.startsWith("/Users/")
                 && !normalized.startsWith("/private/");
-    }
-
-    private static boolean allowed(String path, List<String> planned) {
-        if (planned == null || planned.isEmpty()) {
-            return false;
-        }
-        for (var allowed : planned) {
-            var normalized = normalize(allowed);
-            if (path.equals(normalized) || path.startsWith(normalized + "/")) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static String normalize(String value) {

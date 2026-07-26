@@ -43,15 +43,10 @@ class TraceCommandTest {
         assertTrue(printed.contains("topSections="));
         assertTrue(printed.contains("[loop] repair: REJECT_IMPLEMENTATION_BUG"));
         assertTrue(printed.contains("[ok] delivery.prepare_pr"));
-        assertTrue(printed.contains("exploration=pass plan=.agent/workstreams/ws-trace/memory/exploration-plan-run-1.json"));
         assertTrue(printed.contains("Tool Governance:"));
         assertTrue(printed.contains("missingRereadReasons=1"));
-        assertTrue(printed.contains("explorationWarnings=1"));
-        assertTrue(printed.contains("explorationFailures=0"));
-        assertTrue(printed.contains("exploration violations:"));
-        assertTrue(printed.contains("design.claude_design run-1 warn DIRECT_READ_BUDGET_EXCEEDED"));
-        assertTrue(printed.contains("capabilities=symbol_index:codegraph/command_executable"));
-        assertTrue(printed.contains("plan=.agent/workstreams/ws-trace/memory/exploration-plan-run-1.json"));
+        assertFalse(printed.contains("explorationWarnings="));
+        assertFalse(printed.contains("exploration violations:"));
         assertTrue(printed.contains("README.md x2 evidenceKnown=true rereadReason=missing"));
         assertTrue(printed.contains("Token Attribution:"));
         assertTrue(printed.contains("top node: design.claude_design"));
@@ -285,13 +280,6 @@ class TraceCommandTest {
                   "durationMs": 123,
                   "exitCode": 0,
                   "status": "completed",
-                  "agentExplorationPlanPath": ".agent/workstreams/ws-trace/memory/exploration-plan-run-1.json",
-                  "explorationPolicyResultPath": ".agent/workstreams/ws-trace/artifacts/context-governance/exploration-policy-result-run-1.json",
-                  "explorationPolicyResult": {
-                    "status": "pass",
-                    "mode": "warn",
-                    "violations": []
-                  },
                   "usage": {
                     "inputTokens": 10,
                     "outputTokens": 2,
@@ -314,32 +302,6 @@ class TraceCommandTest {
                     "toolCallCount": 5,
                     "readCount": 4,
                     "bashCount": 1,
-                    "explorationPolicy": {
-                      "warnCount": 1,
-                      "failCount": 0,
-                      "violations": [
-                        {
-                          "runId": "run-1",
-                          "nodeId": "design.claude_design",
-                          "severity": "warn",
-                          "type": "DIRECT_READ_BUDGET_EXCEEDED",
-                          "message": "Actual direct Read count exceeds the exploration plan budget.",
-                          "actualCapabilityUsages": [
-                            {"kind": "symbol_index", "provider": "codegraph", "source": "command_executable"}
-                          ],
-                          "agentExplorationPlanPath": ".agent/workstreams/ws-trace/memory/exploration-plan-run-1.json"
-                        }
-                      ],
-                      "warnings": [
-                        {
-                          "runId": "run-1",
-                          "nodeId": "design.claude_design",
-                          "violations": [
-                            {"type": "DIRECT_READ_BUDGET_EXCEEDED", "severity": "warn"}
-                          ]
-                        }
-                      ]
-                    },
                     "repeatedReadFiles": [
                       {
                         "path": "README.md",

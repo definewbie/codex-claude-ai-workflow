@@ -62,7 +62,6 @@ final class AgentPromptRenderer {
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
         var structuredArtifactFieldSemantics = structuredArtifactFieldSemantics(nodeId);
         var readReuseContractSection = readReuseContractSection(workspaceRoot, inputRefs);
-        var explorationPlanSection = explorationPlanSection(workspaceRoot, inputRefs);
         var hasInputs = inputRefs != null && !inputRefs.isEmpty();
 
         var content = workspaceGuard + "\n\n" + languagePolicy + "\n\n"
@@ -109,10 +108,6 @@ final class AgentPromptRenderer {
                 hasInputs ? String.join(",", inputRefs) : "(none)",
                 readReuseContractSection, "typed memory read-reuse projection",
                 !readReuseContractSection.isBlank()));
-        sections.add(new PromptSection("exploration_plan", "exploration_plan",
-                hasInputs ? String.join(",", inputRefs) : "(none)",
-                explorationPlanSection, "typed exploration plan projection",
-                !explorationPlanSection.isBlank()));
         sections.add(new PromptSection("contract_review_principles", "static_instruction",
                 "contract-review-principles.md", contractReviewPrinciples, "review principles", true));
         sections.add(new PromptSection("prompt_contract", "tool_policy", "ContractRegistry:" + nodeId,
@@ -244,10 +239,6 @@ final class AgentPromptRenderer {
 
     private String readReuseContractSection(Path workspaceRoot, List<String> inputRefs) {
         return contextPackageSubsection(workspaceRoot, inputRefs, "Read reuse contract:");
-    }
-
-    private String explorationPlanSection(Path workspaceRoot, List<String> inputRefs) {
-        return contextPackageSubsection(workspaceRoot, inputRefs, "## Exploration Plan");
     }
 
     private String contextPackageSubsection(Path workspaceRoot, List<String> inputRefs, String marker) {

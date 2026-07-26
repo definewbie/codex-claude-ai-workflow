@@ -364,7 +364,7 @@ class ContextBuildPackageHandlerTest {
                 "oversized recent output must not be expanded into the review package");
         assertFalse(markdown.contains("11.0k / 4.0k"),
                 "governance must not report an over-budget package as successful");
-        assertTrue(markdown.contains("capabilities=direct_file_read:Read"),
+        assertTrue(markdown.contains("Available context capabilities: direct_file_read:Read"),
                 "compact governance must keep available capability providers agent-facing");
     }
 
@@ -1659,10 +1659,8 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Repo Scope Guidance"));
-        assertTrue(markdown.contains("Exploration Plan"));
-        assertTrue(markdown.contains("edit_execution"));
         assertTrue(markdown.contains("agent-capability-catalog-node-001.json"));
-        assertTrue(markdown.contains("exploration-plan-node-001.json"));
+        assertFalse(markdown.contains("exploration-plan-node-001.json"));
         assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
         assertTrue(markdown.contains("Already inspected files"));
         assertTrue(markdown.contains("Read reuse rule"));
@@ -1681,7 +1679,7 @@ class ContextBuildPackageHandlerTest {
         assertEquals(".agent/workstreams/ws-ctx/memory/file-summaries.json", metadata.get("fileSummaries"));
         assertEquals(".agent/workstreams/ws-ctx/memory/read-reuse-contract.json", metadata.get("readReuseContract"));
         assertEquals(".agent/workstreams/ws-ctx/memory/agent-capability-catalog-node-001.json", metadata.get("agentCapabilityCatalog"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/exploration-plan-node-001.json", metadata.get("agentExplorationPlan"));
+        assertFalse(metadata.containsKey("agentExplorationPlan"));
 
         var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
         assertEquals("ctx.test", plan.get("builderNodeDefinitionId"));
@@ -1700,7 +1698,9 @@ class ContextBuildPackageHandlerTest {
         var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertEquals("implement", policy.get("stageId"));
         assertFalse(policy.containsKey("scopeExceedPolicy"),
-                "stage scope guidance must not duplicate the exploration plan failure-mode owner");
+                "stage scope guidance must not own a change-boundary failure mode");
+        assertFalse(policy.containsKey("readScope"));
+        assertFalse(policy.containsKey("explorationBudget"));
         assertEquals("ctx.test", policy.get("builderNodeDefinitionId"));
         assertEquals("next.node", policy.get("targetNodeDefinitionId"));
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
@@ -1746,15 +1746,9 @@ class ContextBuildPackageHandlerTest {
                         && !capabilities.isEmpty(),
                 "context governance should expose available exploration capabilities as typed data");
 
-        var explorationPlan = objectMapper.readValue(wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
-        assertEquals("agent_exploration_plan", explorationPlan.get("artifactType"));
-        assertEquals("edit_execution", explorationPlan.get("explorationIntent"));
-        assertEquals("warn", explorationPlan.get("failureMode"));
-        assertTrue(explorationPlan.get("allowedDirectReadFiles") instanceof List<?> allowedReads,
-                "allowedDirectReadFiles telemetry must be present");
-        assertTrue(explorationPlan.get("expectedEditFiles") instanceof List<?> edits
+        assertTrue(policy.get("writeScope") instanceof List<?> edits
                         && edits.contains("miniprogram/src/pages/treatment-record/index.vue"),
-                "exploration plan should carry expected edit files for post-run evaluation");
+                "stage guidance should project the contract change intent without read authority");
         var workstreamMemory = objectMapper.readValue(wsDir.resolve("memory/workstream-memory.json").toFile(), Map.class);
         assertEquals("workstream_memory", workstreamMemory.get("artifactType"));
         assertTrue(workstreamMemory.get("readFiles") instanceof List<?> remembered
@@ -1775,26 +1769,19 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void governedStageScopePoliciesMatchStageBoundaries() throws Exception {
+    void governedStageGuidanceContainsNoReadAuthority() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Keep stage governance explicit.", StandardCharsets.UTF_8);
 
-        Map<String, String> expected = Map.of(
-                "product_review", "block",
-                "architecture_review", "block",
-                "plan_review", "block",
-                "implementation", "warn",
-                "acceptance", "block"
-        );
-        for (var entry : expected.entrySet()) {
-            var result = handler.execute(ctx(entry.getKey(), List.of()));
+        for (var stage : List.of("product_review", "architecture_review", "plan_review", "implementation", "acceptance")) {
+            var result = handler.execute(ctx(stage, List.of()));
 
-            assertEquals(NodeStatus.COMPLETED, result.status(), entry.getKey());
+            assertEquals(NodeStatus.COMPLETED, result.status(), stage);
             var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
-            assertFalse(policy.containsKey("scopeExceedPolicy"), entry.getKey());
-            var explorationPlan = objectMapper.readValue(
-                    wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
-            assertEquals(entry.getValue(), explorationPlan.get("failureMode"), entry.getKey());
+            assertFalse(policy.containsKey("scopeExceedPolicy"), stage);
+            assertFalse(policy.containsKey("readScope"), stage);
+            assertFalse(policy.containsKey("explorationBudget"), stage);
+            assertFalse(Files.exists(wsDir.resolve("memory/exploration-plan-node-001.json")), stage);
         }
     }
 
@@ -1834,10 +1821,10 @@ class ContextBuildPackageHandlerTest {
         assertTrue(plan.get("contractScopeCandidates") instanceof List<?> scopeCandidates
                         && scopeCandidates.isEmpty(),
                 "repo-map recommendations must not masquerade as canonical contract scope");
-        var explorationPlan = objectMapper.readValue(
-                wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
-        assertTrue(explorationPlan.get("allowedDirectReadFiles") instanceof List<?> allowed,
-                "allowedDirectReadFiles telemetry must be present");
+        var policy = objectMapper.readValue(
+                wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+        assertTrue(policy.get("writeScope") instanceof List<?> writeScope && writeScope.isEmpty(),
+                "repo-map recommendations must not become change intent");
         assertTrue(plan.get("seedEvidenceDigests") instanceof List<?> digests
                         && !digests.isEmpty(),
                 "intake should receive bounded seed evidence instead of needing direct Read");
@@ -1892,16 +1879,13 @@ class ContextBuildPackageHandlerTest {
                 List.of("src/allowed.java", "docs/API contract.md"),
                 relevancePlan.get("contractScopeCandidates"));
 
-        var explorationPlan = objectMapper.readValue(
-                wsDir.resolve("memory/exploration-plan-node-001.json").toFile(), Map.class);
         var policy = objectMapper.readValue(
                 wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
         assertEquals(
                 List.of("src/allowed.java", "docs/API contract.md"),
                 policy.get("writeScope"),
                 "only canonical TaskContract.scope may define write candidates");
-        assertTrue(explorationPlan.get("allowedDirectReadFiles") instanceof List<?> allowed,
-                "allowedDirectReadFiles telemetry must be present");
+        assertFalse(policy.containsKey("readScope"));
     }
 
     @Test
