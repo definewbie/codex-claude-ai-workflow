@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SchedulerServiceTest {
@@ -128,6 +129,45 @@ class SchedulerServiceTest {
         var workstreams = (List<Map<String, Object>>) response.get("workstreams");
         assertEquals("skipped", workstreams.get(0).get("result"));
         assertEquals("recovery:artifact_contract_failure/RETRY_AFTER_OUTPUT_CONTRACT_FIX", workstreams.get(0).get("reason"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void tickDoesNotAutoRecoverTypedReconnectFailure() throws Exception {
+        createWaitingForRecoveryWorkstream("ws-reconnect", Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "agent_reconnect_required",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "The ACP session needs reconnect."
+                )
+        ));
+        var calls = new AtomicInteger();
+        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            calls.incrementAndGet();
+            return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
+        });
+        var scheduler = new SchedulerService(queryService(), actionService);
+
+        var response = scheduler.tick(tempDir, 10, 1, true);
+
+        assertEquals(0, response.get("autoRecovered"));
+        assertEquals(1, response.get("skipped"));
+        assertEquals(0, calls.get(), "typed reconnect must not invoke resume");
+        var workstreams = (List<Map<String, Object>>) response.get("workstreams");
+        assertEquals("skipped", workstreams.get(0).get("result"));
+        assertEquals(
+                "recovery:agent_session_recovery/REBUILD_ACPX_SESSION_THEN_RETRY",
+                workstreams.get(0).get("reason")
+        );
+        var recoveryPaths = new WorkstreamPaths(tempDir, new DualId("ws-reconnect"));
+        assertFalse(
+                Files.readString(recoveryPaths.eventsJsonl()).contains("node_retry_requested"),
+                "typed reconnect must not request retry"
+        );
     }
 
     private void createRunningWorkstream(String workstreamId) throws Exception {

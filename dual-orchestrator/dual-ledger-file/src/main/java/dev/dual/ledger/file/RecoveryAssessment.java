@@ -40,9 +40,13 @@ public record RecoveryAssessment(
         var diagnosticJsonRef = text(result.get("contract_failure_diagnostic_ref"));
         var diagnosticMarkdownRef = text(result.get("contract_failure_diagnostic_markdown_ref"));
         var diagnostic = readDiagnostic(root, diagnosticJsonRef);
+        var agent = blankDefault(text(result.get("agent")), "claude");
+        var session = blankDefault(text(result.get("session")), agent + "-main");
         var outcomeAssessment = fromAgentExecutionOutcome(
                 result.get("agent_execution_outcome"),
                 retry,
+                agent,
+                session,
                 diagnosticJsonRef,
                 diagnosticMarkdownRef,
                 diagnostic
@@ -86,8 +90,6 @@ public record RecoveryAssessment(
             );
         }
         if ("RECOVERABLE_AGENT_MODEL_MISMATCH".equals(failureReason)) {
-            var agent = blankDefault(text(result.get("agent")), "claude");
-            var session = blankDefault(text(result.get("session")), agent + "-main");
             return new RecoveryAssessment(
                     "agent_model_mismatch",
                     "REBUILD_ACPX_SESSION_THEN_RETRY",
@@ -127,8 +129,6 @@ public record RecoveryAssessment(
                 || "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)
                 || "RECOVERABLE_SESSION_MISSING".equals(failureReason)
                 || "RECOVERABLE_CONTEXT_WINDOW".equals(failureReason)) {
-            var agent = blankDefault(text(result.get("agent")), "claude");
-            var session = blankDefault(text(result.get("session")), agent + "-main");
             var classification = "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(failureReason)
                     ? "agent_output_interrupted"
                     : "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)
@@ -194,6 +194,8 @@ public record RecoveryAssessment(
     private static RecoveryAssessment fromAgentExecutionOutcome(
             Object value,
             String retry,
+            String agent,
+            String session,
             String diagnosticJsonRef,
             String diagnosticMarkdownRef,
             Map<String, Object> diagnostic
@@ -257,7 +259,7 @@ public record RecoveryAssessment(
                     adapterClassification(primaryReason),
                     adapterRetryReadiness(primaryReason),
                     blankDefault(operatorMessage, "The adapter reported a recoverable execution failure."),
-                    retry,
+                    adapterSuggestedCommand(primaryReason, agent, session, retry),
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
                     diagnostic
@@ -294,7 +296,8 @@ public record RecoveryAssessment(
             case "provider_connection_failed" -> "provider_connection_failed";
             case "context_window_exceeded" -> "agent_context_window";
             case "rate_limited" -> "agent_capacity_recovery";
-            default -> "recoverable_agent_runtime";
+            case "agent_reconnect_required" -> "agent_session_recovery";
+            default -> "manual_recovery_required";
         };
     }
 
@@ -303,7 +306,30 @@ public record RecoveryAssessment(
             case "auth_failed" -> "FIX_AGENT_AUTH_THEN_RETRY";
             case "rate_limited" -> "WAIT_THEN_RETRY";
             case "provider_connection_failed" -> "WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY";
-            default -> "RETRY_AFTER_EXTERNAL_FIX";
+            case "agent_reconnect_required" -> "REBUILD_ACPX_SESSION_THEN_RETRY";
+            case "permission_blocked",
+                 "context_window_exceeded" -> "RETRY_AFTER_EXTERNAL_FIX";
+            default -> "INSPECT_BEFORE_RETRY";
+        };
+    }
+
+    private static String adapterSuggestedCommand(
+            String primaryReason,
+            String agent,
+            String session,
+            String retry
+    ) {
+        return switch (primaryReason) {
+            case "agent_reconnect_required" ->
+                    "acpx " + agent + " sessions close " + session
+                            + " && acpx " + agent + " sessions new --name " + session
+                            + " && " + retry;
+            case "auth_failed",
+                 "permission_blocked",
+                 "provider_connection_failed",
+                 "context_window_exceeded",
+                 "rate_limited" -> retry;
+            default -> retry + "  # only after inspecting the typed adapter failure";
         };
     }
 

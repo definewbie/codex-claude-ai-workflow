@@ -196,6 +196,51 @@ class RecoveryAssessmentTest {
         assertEquals("Provider socket was unavailable.", assessment.reason());
     }
 
+    @Test
+    void typedReconnectMatchesLegacySessionRecovery() {
+        var typed = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "agent_reconnect_required",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "The ACP session needs reconnect."
+                )
+        )), tempDir, "ws-recovery");
+        var legacy = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT",
+                "acpx_failure.recoverable", true
+        )), tempDir, "ws-recovery");
+
+        assertEquals("agent_session_recovery", typed.classification());
+        assertEquals("REBUILD_ACPX_SESSION_THEN_RETRY", typed.retryReadiness());
+        assertEquals(legacy.classification(), typed.classification());
+        assertEquals(legacy.retryReadiness(), typed.retryReadiness());
+        assertTrue(typed.suggestedCommand().contains("acpx codex sessions close codex-reviewer"));
+        assertTrue(typed.suggestedCommand().contains("acpx codex sessions new --name codex-reviewer"));
+    }
+
+    @Test
+    void unknownTypedAdapterReasonFailsClosed() {
+        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "future_provider_signal",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "An unknown typed adapter failure occurred."
+                )
+        )), tempDir, "ws-recovery");
+
+        assertEquals("manual_recovery_required", assessment.classification());
+        assertEquals("INSPECT_BEFORE_RETRY", assessment.retryReadiness());
+        assertTrue(assessment.suggestedCommand().contains("only after inspecting"));
+    }
+
     private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {
         return new NodeInstanceDocument(
                 1,
