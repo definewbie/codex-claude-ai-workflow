@@ -2,7 +2,7 @@
 
 日期：2026-07-27
 
-状态：`PASS / TWO SUBTRACTION SLICES DETERMINISTICALLY PROVEN`
+状态：`PASS / TWO SUBTRACTION SLICES ENFORCED + PROVEN`
 
 ## 1. 目标和边界
 
@@ -148,5 +148,18 @@ node input refs
   `AgentOutputLineageVerifier.violation` 搜索为 0；
 - targeted routing tests 75/0；
 - full reactor 9/9 modules、1,132 tests、0 failures；
-- 该 slice 影响 workflow decision routing，必须在 committed clean SHA 上运行
-  README controlled real-case，PASS 前不得启动第三个 slice。
+- committed clean SHA：`2f26cf5`；
+- README controlled real-case：
+  `docs/testing/real-case-reports/20260727T140143Z/report.md`，
+  workstream `ws-20260727T140433Z-K8F9`；
+- fresh Maven build、provider probe 与 artifact freshness 均通过；
+- workflow 为 `COMPLETED`，final acceptance 为 `ACCEPT`，benchmark 为 `PASS`；
+- `design.decision` 从 strict sidecar 路由为 `READY_FOR_ARCH_REVIEW`；
+- 三次 `plan.decision` 分别从 strict sidecar 路由为
+  `NEEDS_REVISION`、`NEEDS_REVISION`、`READY_TO_IMPLEMENT`，证明 revision 与
+  approval 两类 edge 均消费同一个 typed owner；
+- `acceptance.decision` 从 strict sidecar 路由为 `ACCEPT`；
+- 所有 decision result 均为 `source=contract-sidecar`，ledger 中无
+  `CONTRACT_SIDECAR_*` failure；
+- target diff 仅 `README.md`，独立复验 `npm test` 通过；
+- 第二个 slice 达到 `ENFORCED + PROVEN`，第三个 slice 尚未激活。

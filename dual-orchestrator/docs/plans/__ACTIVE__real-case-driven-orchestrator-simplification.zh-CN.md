@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase D Second Handler Subtraction — DETERMINISTIC PASS / REAL-CASE REQUIRED
+## Current Active Step: Phase D Two Handler Subtractions — ENFORCED + PROVEN / NEXT SLICE NOT ACTIVE
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -335,8 +335,8 @@ Assessment 结论：
 
 ## Phase D：Handler 收敛
 
-Phase C 已 PASS，Phase D 已完成只读 assessment 和第一个 bounded subtraction
-slice。当前修改尚未提交，不授权自动开始第二个 slice。
+Phase C 已 PASS，Phase D 已完成只读 assessment 和两个 bounded subtraction
+slice。两个 slice 均已提交并通过各自控制边界所需的验证；第三个 slice 尚未激活。
 
 目标不是机械地把“68 个类”改成固定数量 executor，而是：
 
@@ -371,8 +371,17 @@ Assessment 与首切片：
 - `ReviewDecisionHandler` production LOC 减少 53 行；
 - targeted routing tests 75/0，full reactor 9/9 modules /
   1,132 tests / 0 failures；
-- 因该 slice 位于 workflow decision routing 控制链，提交干净 SHA 后必须运行
-  README controlled real-case；PASS 前不得启动第三个 slice。
+- 第二个 slice 已提交为 `2f26cf5`；
+- README controlled real-case
+  `docs/testing/real-case-reports/20260727T140143Z/report.md`
+  在干净 SHA 上达到 `COMPLETED + ACCEPT + benchmark PASS`；
+- real-case 中 `design.decision` 从 strict sidecar 路由为
+  `READY_FOR_ARCH_REVIEW`，`plan.decision` 实际覆盖
+  `NEEDS_REVISION -> NEEDS_REVISION -> READY_TO_IMPLEMENT`，
+  `acceptance.decision` 为 `ACCEPT`；所有结果均记录
+  `source=contract-sidecar`，无 `CONTRACT_SIDECAR_*` failure；
+- target diff 仅 `README.md`，复验 `npm test` 通过；
+- 第二个 slice 达到 `ENFORCED + PROVEN`。不得据此自动启动第三个 slice。
 
 ## 历史锁定范围（旧 B1 checkpoint 时代的许可，现已失效）
 
