@@ -59,6 +59,34 @@ public final class AgentEvidenceIndex {
                 .findFirst();
     }
 
+    static DecisionRead latestDecisionFromRefs(
+            Path workspaceRoot,
+            String workstreamId,
+            List<String> refs,
+            ObjectMapper objectMapper
+    ) {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        for (int i = refs.size() - 1; i >= 0; i--) {
+            var path = sidecarPathForRef(root, refs.get(i));
+            if (path.isEmpty()) {
+                continue;
+            }
+            var read = readValidatedEntry(root, workstreamId, path.get(), objectMapper);
+            if (read.entry() == null) {
+                return DecisionRead.invalid(read.errorCode(), read.message(), path.get().toString());
+            }
+            if (!read.entry().document().hasDecision()) {
+                return DecisionRead.invalid(
+                        "CONTRACT_SIDECAR_MISSING_DECISION",
+                        "Contract sidecar is missing required decision: " + path.get().getFileName(),
+                        path.get().toString()
+                );
+            }
+            return DecisionRead.valid(read.entry(), path.get().toString());
+        }
+        return DecisionRead.notFound();
+    }
+
     public static Optional<AgentOutputContractDocument> validatedDocument(
             Path workspaceRoot,
             String workstreamId,
@@ -148,15 +176,34 @@ public final class AgentEvidenceIndex {
             Path path,
             ObjectMapper objectMapper
     ) {
+        var read = readValidatedEntry(workspaceRoot, workstreamId, path, objectMapper);
+        if (read.entry() == null) {
+            throw new IllegalStateException(read.message());
+        }
+        return Optional.of(read.entry());
+    }
+
+    private static EntryRead readValidatedEntry(
+            Path workspaceRoot,
+            String workstreamId,
+            Path path,
+            ObjectMapper objectMapper
+    ) {
         var document = AgentOutputContractDocument.read(path, objectMapper);
         if (document.isEmpty()) {
-            throw new IllegalStateException("routed agent evidence sidecar is unreadable: " + path);
+            return EntryRead.invalid(
+                    "CONTRACT_SIDECAR_PARSE_FAILED",
+                    "routed agent evidence sidecar is unreadable: " + path
+            );
         }
         var violation = AgentOutputLineageVerifier.violation(workspaceRoot, workstreamId, path, document.get());
         if (violation.isPresent()) {
-            throw new IllegalStateException("routed agent evidence lineage is invalid: " + violation.get());
+            return EntryRead.invalid(
+                    "CONTRACT_SIDECAR_LINEAGE_INVALID",
+                    "routed agent evidence lineage is invalid: " + violation.get()
+            );
         }
-        return Optional.of(new Entry(path.toAbsolutePath().normalize(), document.get(), lastModified(path)));
+        return EntryRead.valid(new Entry(path.toAbsolutePath().normalize(), document.get(), lastModified(path)));
     }
 
     private static Instant lastModified(Path path) {
@@ -188,6 +235,36 @@ public final class AgentEvidenceIndex {
 
         Map<String, Object> evidenceState() {
             return AgentEvidenceState.from(document).toMap();
+        }
+    }
+
+    record DecisionRead(
+            Entry entry,
+            String errorCode,
+            String message,
+            String path,
+            boolean missing
+    ) {
+        static DecisionRead valid(Entry entry, String path) {
+            return new DecisionRead(entry, "", "", path, false);
+        }
+
+        static DecisionRead invalid(String code, String message, String path) {
+            return new DecisionRead(null, code, message, path, false);
+        }
+
+        static DecisionRead notFound() {
+            return new DecisionRead(null, "", "", "", true);
+        }
+    }
+
+    private record EntryRead(Entry entry, String errorCode, String message) {
+        static EntryRead valid(Entry entry) {
+            return new EntryRead(entry, "", "");
+        }
+
+        static EntryRead invalid(String code, String message) {
+            return new EntryRead(null, code, message);
         }
     }
 }

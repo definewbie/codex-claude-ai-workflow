@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase D First Handler Subtraction Slice — PASS / UNCOMMITTED
+## Current Active Step: Phase D Second Handler Subtraction — DETERMINISTIC PASS / REAL-CASE REQUIRED
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -360,7 +360,19 @@ Assessment 与首切片：
 - targeted tests 63/0、`dual-runtime` 443/0、full reactor 9/9 modules /
   1,131 tests / 0 failures；
 - production 净减少 4 LOC；
-- 在当前 diff review/commit 前，不得启动第二个 handler convergence slice。
+- 首个 slice 已提交为 `437b6e2`。
+
+第二个 bounded subtraction slice：
+
+- `ReviewDecisionHandler` 不再自行扫描、解析和校验 routed contract sidecar；
+- `AgentEvidenceIndex.latestDecisionFromRefs` 成为 routed decision evidence 的唯一
+  read owner，并返回 typed missing/parse/lineage/missing-decision failure；
+- invalid latest routed sidecar fail closed，不回退较旧 sidecar；
+- `ReviewDecisionHandler` production LOC 减少 53 行；
+- targeted routing tests 75/0，full reactor 9/9 modules /
+  1,132 tests / 0 failures；
+- 因该 slice 位于 workflow decision routing 控制链，提交干净 SHA 后必须运行
+  README controlled real-case；PASS 前不得启动第三个 slice。
 
 ## 历史锁定范围（旧 B1 checkpoint 时代的许可，现已失效）
 

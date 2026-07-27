@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
-import java.nio.file.Files;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,16 +19,21 @@ public final class ReviewDecisionHandler implements DecisionHandler {
 
     @Override
     public NodeResult evaluate(DecisionContext context) throws Exception {
-        var read = readLatestDecisionContract(context);
+        var read = AgentEvidenceIndex.latestDecisionFromRefs(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                context.instance().inputRefs(),
+                OBJECT_MAPPER
+        );
         if (read.missing()) {
             return failed("MISSING_CONTRACT_SIDECAR",
                     "No agent output contract sidecar found in decision input refs.", context, Set.of(), read);
         }
-        if (read.document() == null) {
+        if (read.entry() == null) {
             return failed("INVALID_CONTRACT_SIDECAR", read.message(), context,
                     allowedDecisions(context.definition().id()), read);
         }
-        var document = read.document();
+        var document = read.entry().document();
         var allowed = allowedDecisions(context.definition().id());
         var decision = document.decision().trim();
         if (decision.isBlank()) {
@@ -52,52 +56,14 @@ public final class ReviewDecisionHandler implements DecisionHandler {
         return NodeResult.completed(decision, context.instance().inputRefs(), facts);
     }
 
-    private DecisionContractRead readLatestDecisionContract(DecisionContext context) {
-        var root = context.workspaceRoot().toAbsolutePath().normalize();
-        var refs = context.instance().inputRefs();
-        for (int i = refs.size() - 1; i >= 0; i--) {
-            var ref = refs.get(i);
-            if (ref.startsWith("artifact://")) {
-                continue;
-            }
-            var path = root.resolve(ref).normalize();
-            if (!path.startsWith(root) || !Files.isRegularFile(path)
-                    || !path.getFileName().toString().endsWith(".contract.json")) {
-                continue;
-            }
-            var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
-            if (document.isPresent()) {
-                if (AgentOutputLineageVerifier.violation(
-                        root, context.workstreamId(), path, document.get()).isPresent()) {
-                    return DecisionContractRead.invalid(
-                            "CONTRACT_SIDECAR_LINEAGE_INVALID",
-                            "Contract sidecar lineage does not match the current workstream: " + path.getFileName(),
-                            path.toString());
-                }
-                if (!document.get().hasDecision()) {
-                    return DecisionContractRead.invalid(
-                            "CONTRACT_SIDECAR_MISSING_DECISION",
-                            "Contract sidecar is missing required decision: " + path.getFileName(),
-                            path.toString());
-                }
-                return DecisionContractRead.valid(document.get(), path.toString());
-            }
-            return DecisionContractRead.invalid(
-                    "CONTRACT_SIDECAR_PARSE_FAILED",
-                    "Could not read agent output contract sidecar: " + path.getFileName(),
-                    path.toString());
-        }
-        return DecisionContractRead.notFound();
-    }
-
     private NodeResult failed(String reason, String message, DecisionContext context,
-                              Set<String> allowed, DecisionContractRead read) {
+                              Set<String> allowed, AgentEvidenceIndex.DecisionRead read) {
         return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
                 "reason", reason,
                 "message", message,
                 "input_refs", context.instance().inputRefs(),
                 "allowed_decisions", List.copyOf(allowed),
-                "contract_values", read.document() == null ? Map.of() : read.document().control(),
+                "contract_values", read.entry() == null ? Map.of() : read.entry().document().control(),
                 "parse_error", read.errorCode().isBlank() ? Map.of() : Map.of(
                         "code", read.errorCode(), "message", read.message(), "path", read.path())
         ), message);
@@ -110,23 +76,4 @@ public final class ReviewDecisionHandler implements DecisionHandler {
         return new LinkedHashSet<>(List.of("PASS", "NEEDS_REVISION", "BLOCKED"));
     }
 
-    private record DecisionContractRead(
-            AgentOutputContractDocument document,
-            String errorCode,
-            String message,
-            String path,
-            boolean missing
-    ) {
-        static DecisionContractRead valid(AgentOutputContractDocument document, String path) {
-            return new DecisionContractRead(document, "", "", path, false);
-        }
-
-        static DecisionContractRead invalid(String code, String message, String path) {
-            return new DecisionContractRead(null, code, message, path, false);
-        }
-
-        static DecisionContractRead notFound() {
-            return new DecisionContractRead(null, "", "", "", true);
-        }
-    }
 }

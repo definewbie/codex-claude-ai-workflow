@@ -42,6 +42,38 @@ class AgentEvidenceIndexTest {
     }
 
     @Test
+    void latestDecisionDoesNotFallBackWhenLastRoutedSidecarIsInvalid() throws Exception {
+        var workspace = tempDir.resolve("decision-workspace");
+        var older = workspace.resolve(
+                ".agent/workstreams/ws-index/runs/run-older/outputs/acceptance.contract.json");
+        var latest = workspace.resolve(
+                ".agent/workstreams/ws-index/runs/run-latest/outputs/acceptance.contract.json");
+        writeSidecar(workspace, older, "run-older", "node-older",
+                "design.codex_arch_review", "READY_FOR_ARCH_REVIEW");
+        AgentOutputLineageFixture.publish(workspace, "ws-index", older);
+        writeSidecar(workspace, latest, "run-latest", "node-latest",
+                "design.codex_arch_review", "READY_FOR_ARCH_REVIEW");
+        var json = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(latest.toFile());
+        json.remove("decision");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(latest.toFile(), json);
+        AgentOutputLineageFixture.publish(workspace, "ws-index", latest);
+
+        var read = AgentEvidenceIndex.latestDecisionFromRefs(
+                workspace,
+                "ws-index",
+                List.of(
+                        workspace.relativize(older).toString(),
+                        workspace.relativize(latest).toString()
+                ),
+                objectMapper
+        );
+
+        assertTrue(!read.missing());
+        assertEquals("CONTRACT_SIDECAR_MISSING_DECISION", read.errorCode());
+        assertTrue(read.entry() == null);
+    }
+
+    @Test
     void forgedSelfConsistentSidecarCannotBypassLedgerOccurrence() throws Exception {
         var workspace = tempDir.resolve("forged-workspace");
         var sidecar = workspace.resolve(".agent/workstreams/ws-index/runs/run-forged/outputs/acceptance.contract.json");

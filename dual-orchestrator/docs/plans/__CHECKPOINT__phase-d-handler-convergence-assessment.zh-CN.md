@@ -2,7 +2,7 @@
 
 日期：2026-07-27
 
-状态：`PASS / FIRST SUBTRACTION SLICE ENFORCED + DETERMINISTICALLY PROVEN`
+状态：`PASS / TWO SUBTRACTION SLICES DETERMINISTICALLY PROVEN`
 
 ## 1. 目标和边界
 
@@ -100,8 +100,6 @@ gate allowed actions 和真正的 gate transition 仍由 workflow/ledger boundar
 
 以下仅登记，不属于首切片：
 
-- `ReviewDecisionHandler` 改用 `AgentEvidenceIndex`：必须先统一 missing、unreadable
-  和 lineage-invalid 的 typed failure 语义；
 - `ContextBuildPackageHandler` 继续委托 context section owner：必须先证明具体
   规则在两个以上消费者重复；
 - Git evidence collection 从 `ArtifactValidateHandler` 移出：只有出现第二消费者
@@ -110,3 +108,45 @@ gate allowed actions 和真正的 gate transition 仍由 workflow/ledger boundar
   一次只处理一个已证明分歧。
 
 不得因为类较大就拆类，也不得以 Phase D 名义新增 handler framework。
+
+## 6. 第二个不可再拆的 subtraction slice
+
+发现：
+
+`ReviewDecisionHandler` 是 workflow decision routing 的控制 handler，但原实现自己
+完成 routed ref 选择、sidecar JSON 解析、lineage 校验和 typed read failure 构造。
+这与 Phase C 已确立的 `AgentEvidenceIndex` 重复。
+
+收敛后：
+
+```text
+node input refs
+  -> AgentEvidenceIndex.latestDecisionFromRefs
+  -> validated AgentOutputContractDocument / typed DecisionRead failure
+  -> ReviewDecisionHandler validates allowed decision
+  -> NodeResult
+  -> workflow routing
+```
+
+边界证明：
+
+- Declared by：node instance `inputRefs` 与 ledger-bound sidecar；
+- Proven by：`AgentOutputLineageVerifier`；
+- Consumed by：`ReviewDecisionHandler`；
+- Enforced before：decision `NodeResult` 和 outgoing workflow edge；
+- Failure route：missing sidecar、unreadable JSON、lineage mismatch、missing decision
+  均 fail closed；
+- Cannot-bypass：最后一个 routed sidecar 无效时，不得回退较旧的有效 sidecar。
+
+实施结果：
+
+- `ReviewDecisionHandler` 删除私有 sidecar scanner/parser/lineage verifier 和
+  `DecisionContractRead`，减少 53 production LOC；
+- `AgentEvidenceIndex` 增加有界 `DecisionRead`，保留原有输入 ref 顺序与 typed
+  failure code；未新增文件、模块、registry 或 framework；
+- handler 中直接 `AgentOutputContractDocument.read` /
+  `AgentOutputLineageVerifier.violation` 搜索为 0；
+- targeted routing tests 75/0；
+- full reactor 9/9 modules、1,132 tests、0 failures；
+- 该 slice 影响 workflow decision routing，必须在 committed clean SHA 上运行
+  README controlled real-case，PASS 前不得启动第三个 slice。
