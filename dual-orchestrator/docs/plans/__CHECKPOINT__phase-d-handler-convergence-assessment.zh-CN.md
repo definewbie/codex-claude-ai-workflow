@@ -163,3 +163,65 @@ node input refs
   `CONTRACT_SIDECAR_*` failure；
 - target diff 仅 `README.md`，独立复验 `npm test` 通过；
 - 第二个 slice 达到 `ENFORCED + PROVEN`，第三个 slice 尚未激活。
+
+## 7. 第三个不可再拆的 subtraction slice（DETERMINISTIC PASS / REAL-CASE REQUIRED）
+
+发现：
+
+`FailureClassifyHandler` 已通过 `AgentEvidenceIndex` 读取 ledger-routed acceptance
+sidecar，但仍把自身 `NodeInstance.result` 的任意 `Map<String,Object>` 当作更高优先级
+来源，并在两者都缺失时默认 `decision=REJECT`。这使同一组 acceptance failure facts
+存在两个 authority，且未发布 sidecar 也能驱动 workflow classification。
+
+目标路径：
+
+```text
+acceptance review strict sidecar
+  -> ledger publication + inputRefs
+  -> AgentEvidenceIndex.latestDecisionFromRefs
+  -> AgentOutputContractDocument
+  -> FailureClassifyHandler orchestration
+  -> FailureArbiter
+  -> typed FailureClassification / workflow route
+```
+
+允许的修改：
+
+1. handler 只消费 `AgentOutputContractDocument` 的 decision、summary、
+   canonical stage outcome 和 typed failure fields；
+2. 删除 instance result map 的字段提取、覆盖和默认 `REJECT`；
+3. routed sidecar 缺失或无效时返回 typed failed `NodeResult`；
+4. 将 map-only 测试迁移到 ledger-published sidecar fixture；
+5. cannot-bypass 证明 legacy map 既不能替代 sidecar，也不能覆盖有效 sidecar。
+
+禁止修改 `FailureArbiter`、workflow definition、classification 规则、artifact
+格式或其他 handler；禁止新增 module、registry、framework 或通用 evidence 层。
+
+确定性验收：
+
+- authoritative fact：ledger-published strict acceptance contract sidecar；
+- owner：`AgentEvidenceIndex.latestDecisionFromRefs` 负责 routed sidecar 的
+  选择、strict parse 与 lineage validation；
+- 唯一消费链：`AgentOutputContractDocument -> FailureClassifyHandler ->
+  FailureArbiter -> FailureClassification`；
+- enforced before：缺失或无效 sidecar 在 `FailureArbiter` 调用和
+  `failure-classification.json` 写入之前返回 failed `NodeResult`；
+- failure route：`MISSING_CONTRACT_SIDECAR` 或
+  `INVALID_CONTRACT_SIDECAR`；
+- cannot-bypass：
+  - legacy `NodeInstance.result` 不能替代缺失 sidecar；
+  - legacy `NodeInstance.result` 不能覆盖有效 sidecar；
+  - 缺少 decision 的 sidecar 不能产生 classification artifact；
+- sibling sweep：handler production 中
+  `context.instance().result`、`readReviewMetadata`、`extractString` 与
+  `extractStringList` 为 0；
+- production 净减少 11 LOC；未新增 module、registry、framework 或文件；
+- targeted tests 43/0；full reactor 9/9 modules、1,135 tests、0 failures。
+
+成熟度：
+
+- deterministic `ENFORCED`：PASS；
+- controlled real-case `PROVEN`：未完成。现有 README happy path 最终
+  acceptance 为 `ACCEPT`，没有执行本 slice 修改的 failure-classification
+  route。只有在 Verification Gate 能在运行前证明会触发真实 acceptance
+  `REJECT` 时才允许启动 provider run。

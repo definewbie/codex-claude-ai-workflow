@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,69 @@ class FailureClassifyHandlerTest {
     }
 
     @Test
+    void legacyInstanceResultCannotReplaceMissingAcceptanceSidecar() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of(
+                        "decision", "REJECT",
+                        "summary", "Legacy result must not classify.",
+                        "contract_gaps", List.of("legacy gap")
+                ),
+                List.of()
+        ));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
+        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
+    }
+
+    @Test
+    void invalidAcceptanceSidecarFailsClosedBeforeClassification() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+        var sidecarRef = writeAcceptanceSidecar(Map.of(
+                "summary", "A decision is required before failure classification."
+        ));
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(Map.of(), List.of(sidecarRef)));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
+        assertEquals("CONTRACT_SIDECAR_MISSING_DECISION",
+                ((Map<?, ?>) result.result().get("parse_error")).get("code"));
+        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
+    }
+
+    @Test
+    void legacyInstanceResultCannotOverridePublishedAcceptanceSidecar() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M src/A.java\n", null, null);
+        var sidecarRef = writeAcceptanceSidecar(Map.of(
+                "decision", "ACCEPT_WITH_NOTES",
+                "summary", "Published review contains only non-blocking notes.",
+                "failure", Map.of("category_hint", "REVIEW_NOISE")
+        ));
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(
+                Map.of(
+                        "decision", "REJECT",
+                        "summary", "Legacy result tries to override the review.",
+                        "contract_gaps", List.of("legacy gap")
+                ),
+                List.of(sidecarRef)
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("NOTED_REVIEW_NOISE", result.outcome());
+        assertEquals("ACCEPT_WITH_NOTES", result.result().get("review_decision"));
+    }
+
+    @Test
     void classifyReject_producesRejectOutcome() throws Exception {
         writeMinimalContract();
         writeGitEvidence("M src/A.java\nM src/B.java\n", null, null);
@@ -56,7 +120,8 @@ class FailureClassifyHandlerTest {
         var result = handler.execute(taskContext(
                 Map.of("decision", "REJECT",
                         "summary", "Bad implementation",
-                        "contract_gaps", List.of("missing scope definition"))
+                        "failure", Map.of(
+                                "contract_gaps", List.of("missing scope definition")))
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -75,7 +140,8 @@ class FailureClassifyHandlerTest {
         var result = handler.execute(taskContext(
                 Map.of("decision", "ACCEPT_WITH_NOTES",
                         "summary", "Mostly good but unclear tests",
-                        "out_of_scope_files", List.of("src/extra/File.java"))
+                        "failure", Map.of(
+                                "out_of_scope_files", List.of("src/extra/File.java")))
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -92,7 +158,8 @@ class FailureClassifyHandlerTest {
         var result = handler.execute(taskContext(
                 Map.of("decision", "ACCEPT_WITH_NOTES",
                         "summary", "Accepted with only manual runtime verification notes.",
-                        "category_hint", "REVIEW_NOISE")
+                        "failure", Map.of(
+                                "category_hint", "REVIEW_NOISE"))
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -197,7 +264,8 @@ class FailureClassifyHandlerTest {
         var result = handler.execute(taskContext(
                 Map.of("decision", "REJECT",
                         "summary", "minor stylistic issue",
-                        "category_hint", "REVIEW_NOISE")
+                        "failure", Map.of(
+                                "category_hint", "REVIEW_NOISE"))
         ));
 
         // REVIEW_NOISE is now reserved for explicit non-blocking review noise signals.
@@ -229,7 +297,8 @@ class FailureClassifyHandlerTest {
         var result = handler.execute(taskContext(
                 Map.of("decision", "REJECT",
                         "summary", "Has issues",
-                        "contract_gaps", List.of("gap-1"))
+                        "failure", Map.of(
+                                "contract_gaps", List.of("gap-1")))
         ));
 
         assertNotNull(result.result().get("category"));
@@ -323,7 +392,9 @@ class FailureClassifyHandlerTest {
         var result = handler.execute(taskContext(
                 Map.of("decision", "REJECT",
                         "summary", "Missing acceptance coverage",
-                        "contract_gaps", List.of("A6 source/status preservation was not explicit"))
+                        "failure", Map.of(
+                                "contract_gaps",
+                                List.of("A6 source/status preservation was not explicit")))
         ));
 
         var candidatesDir = tempDir.resolve(".agent/workstreams/ws-fc/calibration/candidates");
@@ -425,8 +496,20 @@ class FailureClassifyHandlerTest {
         AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-fc", sidecar);
     }
 
-    private TaskHandler.TaskContext taskContext(Map<String, Object> instanceResult) {
-        return taskContext(instanceResult, List.of());
+    private TaskHandler.TaskContext taskContext(Map<String, Object> reviewDocument) throws Exception {
+        return taskContext(Map.of(), List.of(writeAcceptanceSidecar(reviewDocument)));
+    }
+
+    private String writeAcceptanceSidecar(Map<String, Object> reviewDocument) throws Exception {
+        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
+        Files.createDirectories(outputDir);
+        var sidecar = outputDir.resolve("acceptance-codex-review.contract.json");
+        var document = new LinkedHashMap<String, Object>(reviewDocument);
+        document.putIfAbsent("node_id", "acceptance.codex_verifier_review");
+        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), document);
+        publishSidecar(sidecar);
+        return ".agent/workstreams/ws-fc/runs/run-acceptance/outputs/"
+                + sidecar.getFileName();
     }
 
     private TaskHandler.TaskContext taskContext(Map<String, Object> instanceResult, List<String> inputRefs) {

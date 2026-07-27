@@ -6,6 +6,7 @@ import dev.dual.core.arbitration.FailureClassification;
 import dev.dual.core.arbitration.FailureCategory;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.NodeStatus;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,8 +21,8 @@ import java.util.Map;
  * TaskHandler that classifies acceptance review failures using FailureArbiter.
  * Type: "acceptance.failure_classify"
  *
- * Reads TaskContract artifact and review metadata from instance result map,
- * runs FailureArbiter, writes failure-classification.json artifact.
+ * Reads TaskContract and ledger-routed acceptance evidence,
+ * runs FailureArbiter, and writes failure-classification.json.
  * Produces compound outcome strings: REJECT_{CATEGORY} or NOTED_{CATEGORY}.
  */
 public final class FailureClassifyHandler implements TaskHandler {
@@ -37,58 +38,51 @@ public final class FailureClassifyHandler implements TaskHandler {
     @Override
     public NodeResult execute(TaskContext context) throws IOException {
         var workstreamDir = context.workspaceRoot()
-                .resolve(".agent")
-                .resolve("workstreams")
-                .resolve(context.workstreamId());
+                .resolve(".agent/workstreams").resolve(context.workstreamId());
 
         // Read TaskContract artifact
-        var contractPath = workstreamDir.resolve("artifacts").resolve("task-contract.json");
+        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
         TaskContract taskContract = null;
         if (Files.exists(contractPath)) {
             taskContract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
         }
 
-        // Extract review decision and metadata from instance result map or upstream
-        // acceptance output sidecar. The classify node result is often empty
-        // because routing comes from the previous decision node.
-        var instanceResult = context.instance().result();
-        var reviewMetadata = readReviewMetadata(context);
-        String reviewDecision = extractString(instanceResult, "decision",
-                reviewMetadata.map(AgentOutputContractDocument::decision).filter(value -> !value.isBlank()).orElse("REJECT"));
-        String reviewSummary = extractString(instanceResult, "summary",
-                reviewMetadata.map(AgentOutputContractDocument::summary).orElse(""));
-        String stageOutcome = reviewMetadata
-                .map(AgentOutputContractDocument::canonicalStageOutcome)
-                .filter(value -> !value.isBlank())
-                .orElse(StageOutcome.fromDecision(reviewDecision).name());
+        var evidenceRead = AgentEvidenceIndex.latestDecisionFromRefs(context.workspaceRoot(),
+                context.workstreamId(), context.instance().inputRefs(), objectMapper);
+        if (evidenceRead.entry() == null) {
+            var missing = evidenceRead.missing();
+            return failedEvidence(
+                    missing ? "MISSING_CONTRACT_SIDECAR" : "INVALID_CONTRACT_SIDECAR",
+                    missing
+                            ? "No acceptance contract sidecar found in failure-classification input refs."
+                            : evidenceRead.message(),
+                    context,
+                    evidenceRead
+            );
+        }
 
-        List<String> contractGaps = extractStringList(instanceResult, "contract_gaps",
-                reviewMetadata.map(metadata -> metadata.failure().contractGaps()).orElse(List.of()));
-        List<String> outOfScopeFiles = extractStringList(instanceResult, "out_of_scope_files",
-                reviewMetadata.map(metadata -> metadata.failure().outOfScopeFiles()).orElse(List.of()));
-        List<String> missingTests = extractStringList(instanceResult, "missing_tests",
-                reviewMetadata.map(metadata -> metadata.failure().missingTests()).orElse(List.of()));
-        List<String> contextGaps = extractStringList(instanceResult, "context_gaps",
-                reviewMetadata.map(metadata -> metadata.failure().contextGaps()).orElse(List.of()));
-        String categoryHint = extractString(instanceResult, "category_hint",
-                reviewMetadata.map(metadata -> metadata.failure().categoryHint()).orElse(""));
+        var reviewMetadata = evidenceRead.entry().document();
+        var reviewDecision = reviewMetadata.decision();
+        var reviewSummary = reviewMetadata.summary();
+        var stageOutcome = reviewMetadata.canonicalStageOutcome().isBlank()
+                ? StageOutcome.fromDecision(reviewDecision).name()
+                : reviewMetadata.canonicalStageOutcome();
+        var failure = reviewMetadata.failure();
 
-        // Read git evidence for changed file count
         int changedFileCount = readChangedFileCount(workstreamDir);
 
-        // Classify
         var classification = arbiter.classify(
-                contractGaps, outOfScopeFiles, missingTests, contextGaps,
-                reviewSummary, taskContract, changedFileCount, reviewDecision, categoryHint
+                failure.contractGaps(), failure.outOfScopeFiles(),
+                failure.missingTests(), failure.contextGaps(),
+                reviewSummary, taskContract, changedFileCount, reviewDecision,
+                failure.categoryHint()
         );
 
-        // Write artifact
         var artifactsDir = workstreamDir.resolve("artifacts");
         Files.createDirectories(artifactsDir);
         var classificationPath = artifactsDir.resolve("failure-classification.json");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(classificationPath.toFile(), classification);
 
-        // Build compound outcome
         var prefix = "REJECT".equals(reviewDecision) ? "REJECT_" : "NOTED_";
         var outcome = prefix + classification.category().name();
 
@@ -122,26 +116,21 @@ public final class FailureClassifyHandler implements TaskHandler {
         return NodeResult.completed(outcome, outputRefs, result);
     }
 
-    private java.util.Optional<AgentOutputContractDocument> readReviewMetadata(TaskContext context) throws IOException {
-        return AgentEvidenceIndex.latestFromRefs(
-                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
-                .map(AgentEvidenceIndex.Entry::document);
-    }
-
-    private String extractString(Map<String, Object> map, String key, String defaultValue) {
-        var value = map.get(key);
-        return value == null ? defaultValue : String.valueOf(value);
-    }
-
-    private List<String> extractStringList(Map<String, Object> map, String key, List<String> defaultValue) {
-        var value = map.get(key);
-        if (!(value instanceof List<?> list)) {
-            return defaultValue;
-        }
-        return list.stream()
-                .filter(item -> item != null && !String.valueOf(item).isBlank())
-                .map(item -> String.valueOf(item).trim())
-                .toList();
+    private NodeResult failedEvidence(String outcome, String message, TaskContext context,
+                                      AgentEvidenceIndex.DecisionRead read) {
+        var parseError = read.errorCode().isBlank()
+                ? Map.of()
+                : Map.of(
+                    "code", read.errorCode(),
+                    "message", read.message(),
+                    "path", read.path()
+                );
+        return new NodeResult(outcome, NodeStatus.FAILED, List.of(), Map.of(
+                "reason", outcome,
+                "message", message,
+                "input_refs", context.instance().inputRefs(),
+                "parse_error", parseError
+        ), message);
     }
 
     private int readChangedFileCount(Path workstreamDir) throws IOException {

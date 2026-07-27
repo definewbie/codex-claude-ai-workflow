@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase D Two Handler Subtractions — ENFORCED + PROVEN / NEXT SLICE NOT ACTIVE
+## Current Active Step: Phase D Third Handler Subtraction — DETERMINISTIC PASS / REAL-CASE REQUIRED
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -335,8 +335,9 @@ Assessment 结论：
 
 ## Phase D：Handler 收敛
 
-Phase C 已 PASS，Phase D 已完成只读 assessment 和两个 bounded subtraction
-slice。两个 slice 均已提交并通过各自控制边界所需的验证；第三个 slice 尚未激活。
+Phase C 已 PASS，Phase D 已完成只读 assessment 和三个 bounded subtraction
+slice。前两个 slice 已提交并完成各自控制边界所需的验证；第三个 slice 已通过
+deterministic gates，尚未完成真实 `REJECT -> acceptance.classify_failure` 证明。
 
 目标不是机械地把“68 个类”改成固定数量 executor，而是：
 
@@ -382,6 +383,31 @@ Assessment 与首切片：
   `source=contract-sidecar`，无 `CONTRACT_SIDECAR_*` failure；
 - target diff 仅 `README.md`，复验 `npm test` 通过；
 - 第二个 slice 达到 `ENFORCED + PROVEN`。不得据此自动启动第三个 slice。
+
+第三个 bounded subtraction slice 已达到 deterministic PASS：
+
+- 目标 handler：`FailureClassifyHandler`；
+- acceptance failure facts 的唯一来源必须是 ledger-routed strict contract
+  sidecar，经 `AgentEvidenceIndex.latestDecisionFromRefs` 解析和 lineage 校验；
+- 删除 `NodeInstance.result` 中 `decision`、`summary`、`contract_gaps`、
+  `out_of_scope_files`、`missing_tests`、`context_gaps` 与 `category_hint`
+  对分类的 authority；
+- 缺失或无效 sidecar 必须 fail closed，不能默认成 `REJECT`；
+- `FailureArbiter`、workflow definition、classification 规则和 artifact
+  writer 均不修改；
+- cannot-bypass tests 已证明：
+  - legacy result map 不能在缺少 sidecar 时驱动 classification；
+  - legacy result map 不能覆盖有效 sidecar；
+  - sidecar 缺少 decision 时返回 `INVALID_CONTRACT_SIDECAR`，且不会调用
+    classification artifact writer；
+- `FailureClassifyHandler` production LOC 从 308 降至 297；
+- targeted tests 43/0，full reactor 9/9 modules / 1,135 tests / 0 failures；
+- deterministic maturity 为 `ENFORCED`：缺失或无效 typed evidence 会在
+  `FailureArbiter` 与 workflow classification route 前失败；
+- 尚未达到 `PROVEN`：第二个 slice 的 README happy path 只产生最终 `ACCEPT`，
+  没有触发 `acceptance.classify_failure`。提交干净 SHA 后，必须用可证明会产生
+  acceptance `REJECT` 的 controlled real-case 覆盖该控制链；无法证明触发前提时
+  不得消耗 provider token，也不得用 happy-path 结果替代。
 
 ## 历史锁定范围（旧 B1 checkpoint 时代的许可，现已失效）
 
