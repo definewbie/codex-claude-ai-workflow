@@ -21,7 +21,8 @@ enum StageOutcome {
 
     static StageOutcome fromDecision(String decision) {
         return switch (normalized(decision)) {
-            case "READY_FOR_PRODUCT_REVIEW",
+            case "PASS",
+                 "READY_FOR_PRODUCT_REVIEW",
                  "READY_FOR_ARCH_REVIEW",
                  "READY_FOR_PLAN_REVIEW",
                  "READY_TO_IMPLEMENT",

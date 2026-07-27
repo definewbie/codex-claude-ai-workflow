@@ -15,19 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public final class HumanReviewGateHandler implements GateHandler {
-    private static final Set<String> POSITIVE_DECISIONS = Set.of(
-            "ACCEPT", "ACCEPT_WITH_NOTES", "PASS",
-            "READY_FOR_PRODUCT_REVIEW", "READY_FOR_ARCH_REVIEW",
-            "READY_FOR_PLAN_REVIEW", "READY_TO_IMPLEMENT",
-            "IMPLEMENTED", "SELF_TEST_COMPLETE", "HANDOFF_READY"
-    );
-    private static final Set<String> NEGATIVE_DECISIONS = Set.of(
-            "REJECT", "NEEDS_REVISION", "BLOCKED",
-            "SELF_TEST_INCOMPLETE"
-    );
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -548,11 +537,17 @@ public final class HumanReviewGateHandler implements GateHandler {
     }
 
     private boolean isPositiveDecision(String decision) {
-        return POSITIVE_DECISIONS.contains(decision);
+        return switch (StageOutcome.fromDecision(decision)) {
+            case READY, ACCEPTED, ACCEPTED_WITH_NOTES -> true;
+            default -> false;
+        };
     }
 
     private boolean isNegativeDecision(String decision) {
-        return NEGATIVE_DECISIONS.contains(decision);
+        return switch (StageOutcome.fromDecision(decision)) {
+            case NEEDS_REVISION, BLOCKED, REJECTED, INSUFFICIENT_EVIDENCE -> true;
+            default -> false;
+        };
     }
 
     private Path workstreamDir(GateContext context) {

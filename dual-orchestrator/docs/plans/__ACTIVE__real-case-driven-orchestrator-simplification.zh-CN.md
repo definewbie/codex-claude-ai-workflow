@@ -6,9 +6,9 @@
 2. 让 node executor/handler 只负责编排，领域规则归属唯一 domain owner。
 3. LLM workflow 结果只通过 strict `AgentResultEnvelope` 进入状态流转；Markdown 仅供人阅读，不参与控制。
 
-当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
+当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
 
-## Current Active Step: Phase C Controlled Verification — README PASS / A3 READY
+## Current Active Step: Phase D First Handler Subtraction Slice — PASS / UNCOMMITTED
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -63,7 +63,7 @@
 >
 > **Phase B = PASS / ENFORCED + PROVEN。Checkpoint `e1c094b`。**
 >
-> **Phase C subtraction = COMMITTED (`0902ed9`) + DETERMINISTIC PASS；README controlled real-case = PASS。**
+> **Phase C = PASS / ENFORCED + PROVEN。**
 > - full reactor：9/9 modules PASS（runtime 439、adapter 300、CLI 68、server 53）；
 > - independent boundary review：PASS；
 > - workspace scan、requirement/filename scoring、seed content digest 与 raw input-ref
@@ -100,8 +100,23 @@
 > - `implement.claude_self_test_report` 首份 occurrence 为
 >   `contractDecodable=true + contractSchemaValid=true`，因此本次未触发 correction；
 >   缺字段 correction 的 cannot-bypass 证据仍来自 deterministic integration tests；
-> - Phase C README 边界达到 `ENFORCED + PROVEN`。允许按既定顺序启动一次 A3
->   controlled real-case，验证多文件 typed context 完整性。
+> - Phase C README 边界达到 `ENFORCED + PROVEN`；
+> - A3 首次运行报告：
+>   `docs/testing/real-case-reports/20260726T144933Z/report.md`；workstream：
+>   `ws-20260726T145216Z-QKJJ`。该运行暴露 `ProcessUsability` 在 handler 与
+>   metadata writer 间重复推断，属于 execution fact owner 漂移；
+> - `bacd51dd` 收敛 authoritative `ProcessUsability` 后，同一 A3 重跑报告：
+>   `docs/testing/real-case-reports/20260726T153645Z/report.md`；workstream：
+>   `ws-20260726T153926Z-2H4Q`；
+> - A3 重跑达到 `COMPLETED + ACCEPT + benchmark PASS`，20 次 Agent run，
+>   目标 worktree 只修改声明的三个文件，最终 report、handoff 与 delivery
+>   artifacts 完整；
+> - A3 证明多文件 typed context、lineage、strict result、change boundary 与
+>   workflow routing 可以完整闭环。该运行没有实际触发“非零 ACP process exit
+>   但 strict typed result 完整”的特殊分支，因此该特殊分支只达到
+>   `ENFORCED + DETERMINISTICALLY PROVEN`，不得描述为 real-case proven；
+> - Phase D 仅激活只读 assessment。完成 assessment review 前，不得修改
+>   production handler。
 > 评估结论与单次减法范围见
 > `docs/plans/__CHECKPOINT__phase-c-context-boundary-assessment.zh-CN.md`。
 
@@ -289,8 +304,8 @@ Phase A 完成条件：A1/A2/A3 各有一个可复现的 `COMPLETED + ACCEPT` re
 
 ## Phase C：Context Boundary
 
-Assessment 已完成。Phase B checkpoint `e1c094b` 与 controlled README real-case
-均为 PASS；production 尚未修改。
+Assessment、subtraction implementation、deterministic gates、README 与 A3
+controlled real-case 均已完成并通过。
 
 目标结构：
 
@@ -312,13 +327,16 @@ Assessment 结论：
   与 read-reuse contract；
 - 不新增 Artifact Graph、Evidence Registry、Context Engine 模块、query DSL 或状态机；
 - implementation 已完成，deterministic gates 与独立 review 均 PASS；
-- README controlled real-case 已运行并因 `result.missing_evidence` 缺失而 FAIL；
-  Phase C context/lineage 证据未发现旁路，但完整 real-case 尚未闭环；
-- A3 保持锁定。不得通过放宽 strict parser、默认补字段或自然语言提取绕过失败。
+- README 首次运行暴露 schema-level result 缺口；bounded correction 保持 strict
+  parser、禁止默认补字段和语义 retry，并已由 deterministic tests 证明；
+- README 重跑与 A3 多文件 controlled real-case 均达到
+  `COMPLETED + ACCEPT + benchmark PASS`；
+- Phase C context boundary 为 `PASS / ENFORCED + PROVEN`。
 
 ## Phase D：Handler 收敛
 
-仅在 Phase C PASS 后显式激活。
+Phase C 已 PASS，Phase D 已完成只读 assessment 和第一个 bounded subtraction
+slice。当前修改尚未提交，不授权自动开始第二个 slice。
 
 目标不是机械地把“68 个类”改成固定数量 executor，而是：
 
@@ -327,6 +345,22 @@ Assessment 结论：
 - handler package 不再承载大块 policy、filesystem discovery 或 projection；
 - 删除的旧逻辑多于新增 glue code；
 - workflow/contract/handler consistency tests 和 full reactor 保持绿色。
+
+Assessment 与首切片：
+
+- checkpoint：
+  `docs/plans/__CHECKPOINT__phase-d-handler-convergence-assessment.zh-CN.md`；
+- 当前有 12 个 concrete handler；assessment 不预设最终数量；
+- 首个已证明重复 owner 是 `HumanReviewGateHandler` 的本地 decision polarity
+  集合与既有 `StageOutcome`；
+- 本地 positive/negative 集合已删除，handler 只消费
+  `StageOutcome.fromDecision`；
+- `PASS -> READY` 与详细拒绝 `REJECT_CONTEXT_INSUFFICIENT -> revise`
+  均有 regression/cannot-bypass test；
+- targeted tests 63/0、`dual-runtime` 443/0、full reactor 9/9 modules /
+  1,131 tests / 0 failures；
+- production 净减少 4 LOC；
+- 在当前 diff review/commit 前，不得启动第二个 handler convergence slice。
 
 ## 历史锁定范围（旧 B1 checkpoint 时代的许可，现已失效）
 

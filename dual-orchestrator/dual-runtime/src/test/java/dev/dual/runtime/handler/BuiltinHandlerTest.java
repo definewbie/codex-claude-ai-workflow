@@ -382,6 +382,44 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateUsesCanonicalStageOutcomeForDetailedRejection() throws Exception {
+        var inputRef = writeOutput("acceptance-codex-review.md", """
+                # Codex Acceptance
+
+                Decision: REJECT_CONTEXT_INSUFFICIENT
+                """);
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT_CONTEXT_INSUFFICIENT",
+                  "summary": "The routed context is insufficient.",
+                  "blocking": false,
+                  "must_fix": [],
+                  "missing_evidence": [],
+                  "open_risks": [],
+                  "changed_files": [],
+                  "verification_summary": ""
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var handler = new HumanReviewGateHandler();
+        handler.openOrInspect(new GateHandler.GateContext(
+                tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode
+        ));
+
+        var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
+        var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("Recommended Action: revise"));
+        assertTrue(markdown.contains("The latest agent decision indicates the work is not ready to continue."));
+    }
+
+    @Test
     void humanGateReviewPacketTreatsAnyMustFixAsBlockingReviewEvidence() throws Exception {
         var inputRef = writeOutput("intake-codex-product-review.md", """
                 # Codex Review

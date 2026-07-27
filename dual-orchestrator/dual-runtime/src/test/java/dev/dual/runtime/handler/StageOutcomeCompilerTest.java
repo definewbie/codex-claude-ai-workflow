@@ -11,6 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class StageOutcomeCompilerTest {
 
     @Test
+    void passUsesTheCanonicalReadyOutcome() {
+        var result = StageOutcomeCompiler.compile("PASS", "");
+
+        assertTrue(result.valid());
+        assertEquals(StageOutcome.READY, result.outcome());
+        assertEquals("decision", result.source());
+    }
+
+    @Test
     void preservesDeclaredInsufficientEvidenceForRejectedDecision() {
         var result = StageOutcomeCompiler.compile("REJECT", "INSUFFICIENT_EVIDENCE");
 
