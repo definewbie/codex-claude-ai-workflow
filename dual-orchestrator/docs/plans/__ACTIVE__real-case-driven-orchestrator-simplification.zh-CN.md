@@ -8,7 +8,22 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Phase D CLOSED — NO FOLLOW-ON PHASE ACTIVE
+## Current Active Step: Post-Phase-D T1 Latest-SHA Integration Verification — READY
+
+> Phase A-D 已关闭，不再继续建模或拆 handler。
+>
+> 当前唯一 active objective 是：在最新 clean checkpoint 上运行一次既有 A3 full
+> real-case，证明 Phase A-D 组合版本可运行。之后才允许从现有
+> `metrics/workstream-metrics.json` 建立效率 baseline。
+>
+> 当前架构：
+> `docs/design/dual-orchestrator-current-architecture.zh-CN.md`。
+>
+> 后续优化计划与任务门：
+> `docs/plans/post-phase-d-integrated-verification-and-efficiency-plan.zh-CN.md`。
+>
+> 禁止新增 workflow/policy/context/artifact/evidence/capability/metrics 平台；
+> 禁止因 handler LOC 较大继续拆分；禁止在 T1 前启动 token/session/cache 优化。
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -76,12 +91,12 @@
 > - 失败前 7 个 Agent 节点的 sidecar 当前 hash、node occurrence hash 与
 >   node execution hash 全部一致；prompt 中未发现 workspace/filename heuristic
 >   或 seed content digest，未知 transcript/stderr 仅保留 pointer；
-> - workflow 在 `implement.claude_self_test_report` 停止：Claude 返回可解码的纯 JSON，
+> - 历史首次 README 运行在 `implement.claude_self_test_report` 停止：Claude 返回可解码的纯 JSON，
 >   ACP `end_turn` 且 exit code=0，但缺少必需字段 `result.missing_evidence`；
-> - 当前 bounded correction 仅接受 `AGENT_RESULT_PARSE_FAILED`，因此
+> - 当时 bounded correction 仅接受 `AGENT_RESULT_PARSE_FAILED`，因此
 >   `contractDecodable=true` 的 schema contract violation 未触发 correction；
-> - Phase C context boundary 尚不能声明 real-case `PROVEN`；A3 不得启动，必须先独立决定
->   schema-level bounded correction 是否属于既有 output-contract owner。
+> - 该次失败当时不能作为 Phase C `PROVEN`；此中间状态已由后续
+>   schema-level bounded correction、README rerun 和 A3 PASS 取代，不是当前限制。
 > - 独立 owner assessment：**PASS / IMPLEMENTATION READY**。Schema truth 保持在
 >   `AgentResultEnvelopeValidator`；`AcpxAgentResultAcquirer` 只执行最多一次同 session
 >   correction；`ArtifactContractValidator` / `AgentWorker` 保持最终唯一准入。
