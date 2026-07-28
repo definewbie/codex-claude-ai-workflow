@@ -10,6 +10,10 @@
 > Dual 的结构化控制主链已经基本稳定；当前最大的未完成目标不是继续建模，而是
 > 证明最新组合版本可运行，并开始用数据减少 Agent 调用、token、revision 和总耗时。
 
+当前 full workflow 复杂度的价值裁决口径见：
+`docs/plans/full-workflow-complexity-value-proof.zh-CN.md`。该文档不新增 phase 或任务，
+只把本文 T1-T5 转换成“哪些复杂度值得保留、哪些应被删除”的可证伪问题。
+
 因此：
 
 - 不创建 Phase E 平台；
@@ -137,7 +141,9 @@ Trigger precondition:
 
 PASS:
   COMPLETED；
-  final acceptance=ACCEPT/ACCEPT_WITH_NOTES；
+  final acceptance=ACCEPT，或 ACCEPT_WITH_NOTES 且 notes 不得表示 Phase A-D
+  boundary、target acceptance、change scope、lineage、routing 或 required
+  verification 退化；
   Claude/Codex 均有 execution 与 usage evidence；
   所有 decision 来自 ledger-published strict sidecar；
   无 Markdown/prose control fallback；
@@ -246,6 +252,11 @@ hotspots:
 如果没有候选同时满足，T3 结论必须是 `NO_SAFE_OPTIMIZATION`，不得为了保持进度制造
 重构任务。
 
+候选进入 T4 前，还必须完成
+`full-workflow-complexity-value-proof.zh-CN.md` 定义的 producer、全部 consumer、
+subtraction 后 fact owner、blocked side effect、counterfactual 与候选专属
+cannot-bypass test。任一项无法回答，不得修改 production。
+
 ## 7. T4：单个 subtraction optimization
 
 状态：`BLOCKED BY T3`
@@ -291,6 +302,11 @@ PASS 必须同时满足：
 - 未通过减少 required review、放宽 contract 或跳过 gate 换取速度。
 
 如果 provider 导致数据不可比，结论为 `INVALID`，不允许解释为优化成功。
+
+Agent occurrence、node traversal、gate/revision count 属于可直接归因的结构性指标。
+Token、duration、cache 属于 provider-sensitive 指标；单次前后结果只有在 usage
+reliability 可比且结构性变化能够解释差异时才可作为支持证据。质量结论只覆盖该
+A3 case，不外推为整个 full workflow。
 
 ## 9. T6：中等复杂度 real-case
 
@@ -342,7 +358,8 @@ handler-local if/else。
 
 1. 最新组合 SHA 有一个完整 A3 PASS；
 2. 有一个可复现、可信度明确的效率 baseline；
-3. 至少一个由数据选择的 subtraction 优化被同 case 证明；
+3. 至少一个由数据选择的 subtraction 优化被同 case 证明，或 T3 得到有证据的
+   `NO_SAFE_OPTIMIZATION`；
 4. token/cache/cost attribution 没有被第二套计算污染；
 5. 中等复杂度 case 有 PASS，或有证据充分的 `NOT_READY`；
 6. 全程没有新增多余平台能力。
@@ -350,18 +367,18 @@ handler-local if/else。
 ## 13. Boundary Review
 
 ```text
-Boundary Review: PASS
+Boundary Review: PASS（仅表示计划边界一致；T1-T5 execution 尚未证明）
 
 Touched boundaries:
   文档、Verification Gate、metrics projection handoff。
 
-Source of truth:
+Authoritative source:
   workflow/node/execution ledger；
   strict sidecars；
-  runs/*/run.json；
-  metrics/workstream-metrics.json。
+  runs/*/run.json。
 
 Projection surfaces:
+  metrics/workstream-metrics.json；
   real-case summary/report 与后续 baseline 文档。
 
 New concept needed:

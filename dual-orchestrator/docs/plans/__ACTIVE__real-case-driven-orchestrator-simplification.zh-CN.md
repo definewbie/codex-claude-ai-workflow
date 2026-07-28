@@ -22,6 +22,9 @@
 > 后续优化计划与任务门：
 > `docs/plans/post-phase-d-integrated-verification-and-efficiency-plan.zh-CN.md`。
 >
+> Full workflow 的节点、Agent 调用、gate、context 与 revision 价值证明：
+> `docs/plans/full-workflow-complexity-value-proof.zh-CN.md`。
+>
 > 禁止新增 workflow/policy/context/artifact/evidence/capability/metrics 平台；
 > 禁止因 handler LOC 较大继续拆分；禁止在 T1 前启动 token/session/cache 优化。
 
