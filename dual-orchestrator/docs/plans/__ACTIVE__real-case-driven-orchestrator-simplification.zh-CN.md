@@ -6,9 +6,9 @@
 2. 让 node executor/handler 只负责编排，领域规则归属唯一 domain owner。
 3. LLM workflow 结果只通过 strict `AgentResultEnvelope` 进入状态流转；Markdown 仅供人阅读，不参与控制。
 
-当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`。Orchestrator 简化和 handler 瘦身尚未闭环。
+当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Phase D Third Handler Subtraction — DETERMINISTIC PASS / REAL-CASE REQUIRED
+## Current Active Step: Phase D CLOSED — NO FOLLOW-ON PHASE ACTIVE
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
@@ -335,9 +335,8 @@ Assessment 结论：
 
 ## Phase D：Handler 收敛
 
-Phase C 已 PASS，Phase D 已完成只读 assessment 和三个 bounded subtraction
-slice。前两个 slice 已提交并完成各自控制边界所需的验证；第三个 slice 已通过
-deterministic gates，尚未完成真实 `REJECT -> acceptance.classify_failure` 证明。
+Phase C 已 PASS。Phase D 已完成只读 assessment、四个 bounded subtraction slice、
+历史真实 REJECT sidecar replay 和全部 12 个 concrete handler 复核。
 
 目标不是机械地把“68 个类”改成固定数量 executor，而是：
 
@@ -404,10 +403,31 @@ Assessment 与首切片：
 - targeted tests 43/0，full reactor 9/9 modules / 1,135 tests / 0 failures；
 - deterministic maturity 为 `ENFORCED`：缺失或无效 typed evidence 会在
   `FailureArbiter` 与 workflow classification route 前失败；
-- 尚未达到 `PROVEN`：第二个 slice 的 README happy path 只产生最终 `ACCEPT`，
-  没有触发 `acceptance.classify_failure`。提交干净 SHA 后，必须用可证明会产生
-  acceptance `REJECT` 的 controlled real-case 覆盖该控制链；无法证明触发前提时
-  不得消耗 provider token，也不得用 happy-path 结果替代。
+- 历史真实 REJECT sidecar
+  `acceptance-reject-20260709.contract.json` 已通过当前 ledger publication、
+  `ReviewDecisionHandler`、`FailureClassifyHandler` 与 workflow edge 重放；
+- replay 产生 typed `VERIFICATION_INSUFFICIENT`，激活
+  `implement.claude_self_test_report` / `iter-002`，第三个 slice 达到
+  `ENFORCED + PROVEN`；未为概率制造 REJECT 消耗 provider token。
+
+第四个也是最后一个 bounded subtraction slice：
+
+- `HumanReviewGateHandler` 的 input artifact summary 不再直接 parse 和验证
+  routed sidecar，而是消费 `AgentEvidenceIndex.validatedDocument`；
+- tampered published sidecar 在 review packet/recommendation 写入前 fail closed；
+- targeted tests 93/0，full reactor 9/9 modules / 1,137 tests / 0 failures；
+- production 净减少 5 LOC，未新增 module、registry、engine 或 framework。
+
+最终 12-handler 复核：
+
+- `ArtifactValidateHandler`、三个 delivery handler、`FailureClassifyHandler`、
+  `HumanReviewGateHandler`、`ReviewDecisionHandler` 未发现残余重复 authority；
+- `ContextBuildPackageHandler`、`ContractCompileHandler`、
+  `PromptGenerateNextStageHandler`、`ReportGenerateFinalHandler` 与
+  `AcpxAgentTaskHandler` 仍有规模或专用读取复杂度，但没有证据证明存在第二控制
+  owner，不因 LOC 或“可以统一”继续拆分；
+- handler 数量保持 12。Phase D 的目标是 owner 和职责收敛，不是达到预设数量；
+- Phase D 状态：`PASS / ENFORCED + PROVEN`。当前未激活新的 phase。
 
 ## 历史锁定范围（旧 B1 checkpoint 时代的许可，现已失效）
 

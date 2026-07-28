@@ -411,7 +411,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         var sidecar = sidecarPath(path);
         if (Files.isRegularFile(sidecar)) {
             summary.put("sidecar", displayRef(context.workspaceRoot(), sidecar));
-            appendSidecarSummary(context, summary, sidecar);
+            appendSidecarSummary(context, summary, inputRef);
         }
         return summary;
     }
@@ -447,17 +447,12 @@ public final class HumanReviewGateHandler implements GateHandler {
     private void appendSidecarSummary(
             GateContext context,
             Map<String, Object> summary,
-            Path sidecar
+            String inputRef
     ) {
-        var document = AgentOutputContractDocument.read(sidecar, objectMapper)
+        var document = AgentEvidenceIndex.validatedDocument(
+                        context.workspaceRoot(), context.workstreamId(), inputRef, objectMapper)
                 .orElseThrow(() -> new IllegalStateException(
-                        "routed human review sidecar is unreadable: " + sidecar));
-        var violation = AgentOutputLineageVerifier.violation(
-                context.workspaceRoot(), context.workstreamId(), sidecar, document);
-        if (violation.isPresent()) {
-            throw new IllegalStateException(
-                    "routed human review sidecar lineage is invalid: " + violation.get());
-        }
+                        "routed human review sidecar is unavailable: " + inputRef));
         summary.put("decision", document.decision());
         summary.put("summary", document.summary());
         summary.put("mustFix", document.mustFix());

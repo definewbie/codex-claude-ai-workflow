@@ -17,10 +17,13 @@ import dev.dual.ledger.file.AgentTaskStatus;
 import dev.dual.ledger.file.NodeExecutionStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.AgentOutputLineageFixture;
 import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.ArtifactValidateHandler;
+import dev.dual.runtime.handler.FailureClassifyHandler;
 import dev.dual.runtime.handler.GateHandler;
 import dev.dual.runtime.handler.HandlerRegistry;
+import dev.dual.runtime.handler.ReviewDecisionHandler;
 import dev.dual.runtime.handler.TaskHandler;
 
 import org.junit.jupiter.api.Test;
@@ -69,6 +72,108 @@ class WorkflowRuntimeTest {
         assertEquals("gate.review", result.activeNode());
         assertTrue(result.message().contains("resumed"));
         assertEquals(1, gate.openCount());
+    }
+
+    @Test
+    void historicalRejectSidecarRoutesCurrentClassificationWorkflowToVerificationRepair() throws Exception {
+        var workstreamId = "ws-replay-acceptance-reject";
+        var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
+        Files.createDirectories(paths.workstreamDir());
+        var sidecar = paths.workstreamDir()
+                .resolve("runs/run-historical-reject/outputs/acceptance-codex-review.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        try (var source = WorkflowRuntimeTest.class.getResourceAsStream(
+                "/fixtures/real-case/acceptance-reject-20260709.contract.json")) {
+            if (source == null) {
+                throw new IllegalStateException("historical acceptance REJECT fixture is missing");
+            }
+            Files.copy(source, sidecar);
+        }
+        AgentOutputLineageFixture.completeAndPublish(tempDir, workstreamId, sidecar);
+        var sidecarRef = tempDir.relativize(sidecar).toString();
+
+        var artifactsDir = paths.workstreamDir().resolve("artifacts");
+        Files.createDirectories(artifactsDir);
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        mapper.writerWithDefaultPrettyPrinter().writeValue(
+                artifactsDir.resolve("task-contract.json").toFile(),
+                new TaskContract(
+                        "tc-replay", 1, Instant.parse("2026-07-09T00:00:00Z"),
+                        "Verify structured preparation items",
+                        new TaskContract.Scope(
+                                List.of(new TaskContract.ScopeEntry(
+                                        "backend/app/api/summaries.py",
+                                        TaskContract.ScopeOperation.MODIFY)),
+                                List.of()),
+                        List.of("Backend tests pass", "Frontend type check passes"),
+                        List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                        ContractStatus.READY_FOR_REVIEW, 1,
+                        new TaskContract.Source("historical-real-case", "replay")
+                ));
+
+        var definition = new WorkflowDefinition(
+                "acceptance-reject-replay", 1, "replay.seed",
+                List.of(
+                        new NodeDefinition("replay.seed", NodeKind.TASK, "replay.seed", Map.of()),
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION,
+                                "review.decision", Map.of()),
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK,
+                                "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("implement.claude_self_test_report", NodeKind.TASK,
+                                "replay.stop", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("replay.seed", "completed", "acceptance.decision"),
+                        new EdgeDefinition("acceptance.decision", "REJECT",
+                                "acceptance.classify_failure"),
+                        new EdgeDefinition("acceptance.classify_failure",
+                                "REJECT_VERIFICATION_INSUFFICIENT",
+                                "implement.claude_self_test_report")
+                )
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-acceptance-reject-replay", definition);
+        var seed = new TaskHandler() {
+            @Override
+            public String type() {
+                return "replay.seed";
+            }
+
+            @Override
+            public NodeResult execute(TaskContext context) {
+                return NodeResult.completed("completed", List.of(sidecarRef),
+                        Map.of("fixture", "historical-real-case"));
+            }
+        };
+        var runtime = new WorkflowRuntime(
+                ledger,
+                new HandlerRegistry(
+                        List.of(seed, new FailureClassifyHandler()),
+                        List.of(new ReviewDecisionHandler()),
+                        List.of())
+        );
+
+        runtime.resume(new WorkflowCommand(tempDir, workstreamId));
+        var decisionCurrent = ledger.loadCurrent(paths);
+        assertEquals("acceptance.decision", ledger.loadNode(
+                paths, decisionCurrent.activeNodeInstanceIds().get(0)).nodeDefinitionId());
+
+        runtime.resume(new WorkflowCommand(tempDir, workstreamId));
+        var classifierCurrent = ledger.loadCurrent(paths);
+        assertEquals("acceptance.classify_failure", ledger.loadNode(
+                paths, classifierCurrent.activeNodeInstanceIds().get(0)).nodeDefinitionId());
+
+        runtime.resume(new WorkflowCommand(tempDir, workstreamId));
+        var current = ledger.loadCurrent(paths);
+        var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("implement.claude_self_test_report", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertTrue(Files.exists(paths.iterationJson("iter-002")));
+
+        var classification = mapper.readTree(
+                artifactsDir.resolve("failure-classification.json").toFile());
+        assertEquals("VERIFICATION_INSUFFICIENT", classification.path("category").asText());
+        assertEquals("REJECT", classification.path("review_decision").asText());
     }
 
     @Test

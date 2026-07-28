@@ -298,6 +298,38 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateRejectsTamperedRoutedSidecarBeforeWritingRecommendation() throws Exception {
+        var inputRef = writeOutput("acceptance-codex-review.md", "# Codex Acceptance\n");
+        var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
+        Files.writeString(sidecar, """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "ACCEPT",
+                  "summary": "Published acceptance."
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+
+        var mapper = new ObjectMapper();
+        var tampered = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(sidecar.toFile());
+        tampered.put("decision", "REJECT");
+        mapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), tampered);
+
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var failure = assertThrows(IllegalStateException.class, () ->
+                new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                        tempDir,
+                        "ws",
+                        gateDefinition(),
+                        gateNode
+                )));
+
+        assertTrue(failure.getMessage().contains("lineage"));
+        assertFalse(Files.exists(tempDir.resolve(
+                ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json")));
+    }
+
+    @Test
     void humanGateReviewPacketRecommendsReviseWhenStructuredReviewIsBlocking() throws Exception {
         var inputRef = writeOutput("acceptance-codex-review.md", """
                 # Codex Acceptance

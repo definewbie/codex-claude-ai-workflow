@@ -2,7 +2,7 @@
 
 日期：2026-07-27
 
-状态：`PASS / TWO SUBTRACTION SLICES ENFORCED + PROVEN`
+状态：`PASS / PHASE D CLOSED / FOUR SUBTRACTION SLICES ENFORCED + PROVEN`
 
 ## 1. 目标和边界
 
@@ -162,9 +162,10 @@ node input refs
 - 所有 decision result 均为 `source=contract-sidecar`，ledger 中无
   `CONTRACT_SIDECAR_*` failure；
 - target diff 仅 `README.md`，独立复验 `npm test` 通过；
-- 第二个 slice 达到 `ENFORCED + PROVEN`，第三个 slice 尚未激活。
+- 第二个 slice 达到 `ENFORCED + PROVEN`；第三个 slice 随后经独立授权实施，
+  关闭证据见下一节。
 
-## 7. 第三个不可再拆的 subtraction slice（DETERMINISTIC PASS / REAL-CASE REQUIRED）
+## 7. 第三个不可再拆的 subtraction slice（ENFORCED + PROVEN）
 
 发现：
 
@@ -221,7 +222,71 @@ acceptance review strict sidecar
 成熟度：
 
 - deterministic `ENFORCED`：PASS；
-- controlled real-case `PROVEN`：未完成。现有 README happy path 最终
-  acceptance 为 `ACCEPT`，没有执行本 slice 修改的 failure-classification
-  route。只有在 Verification Gate 能在运行前证明会触发真实 acceptance
-  `REJECT` 时才允许启动 provider run。
+- historical real-case replay `PROVEN`：PASS。使用 2026-07-09 的真实
+  `acceptance-codex-review.contract.json` REJECT sidecar，经当前 ledger publication、
+  `ReviewDecisionHandler`、`FailureClassifyHandler` 与 workflow edge 完整重放；
+- 重放结果为 `VERIFICATION_INSUFFICIENT`，并激活
+  `implement.claude_self_test_report` / `iter-002`，证明当前 classification 与
+  revision route 消费同一 typed authority；
+- replay 不调用 provider，不依赖概率产生 REJECT，也不以 synthetic map 替代真实
+  agent sidecar。
+
+## 8. 第四个也是最后一个 subtraction slice
+
+12-handler 复核发现一个明确重复 owner：
+
+`HumanReviewGateHandler` 已经通过 `AgentEvidenceIndex.latestFromRefs` 获取 latest
+decision 和 review subject，但在生成 input artifact summary 时仍直接调用
+`AgentOutputContractDocument.read` 与 `AgentOutputLineageVerifier.violation`。同一个
+routed sidecar 因而在同一 handler 中存在两条 parse/lineage 路径；任一路径失败都会
+阻止 gate packet 与 operator recommendation 写入。
+
+收敛后：
+
+```text
+gate input refs
+  -> AgentEvidenceIndex.validatedDocument
+  -> validated AgentOutputContractDocument
+  -> HumanReviewGateHandler summary projection
+  -> review packet / operator recommendation
+```
+
+实施与证明：
+
+- 删除 `HumanReviewGateHandler` 内直接 sidecar parser 和 lineage verifier；
+- 不新增 production class、module、registry、engine 或 framework；
+- published sidecar 被篡改后，统一 owner 在 review packet 写入前 fail closed；
+- cannot-bypass test 证明 tampered decision 不能产生 recommendation packet；
+- handler 内直接 `AgentOutputContractDocument.read` /
+  `AgentOutputLineageVerifier.violation` sibling sweep 为 0；
+- targeted tests 93/0；
+- full reactor 9/9 modules、1,137 tests、0 failures；
+- production 净减少 5 LOC。
+
+## 9. 12 个 concrete handler 最终复核
+
+| Handler | 最终判定 | Authority / 职责结论 |
+| --- | --- | --- |
+| `ArtifactValidateHandler` | PASS | 编排 Git evidence 与 `ChangeScopeEvaluator`；change decision owner 不在 handler |
+| `ContextBuildPackageHandler` | PASS-WARN | 体量较大，但 section、budget、rendering 已有具名 owner；未证明第二控制 owner |
+| `ContractCompileHandler` | PASS-WARN | proposal/gate resolution 与 contract compile 是本 handler 的专用边界；未证明与通用 evidence owner 冲突 |
+| `DeliveryPrepareHandler` | PASS | 只准备 delivery artifacts |
+| `DeliveryCommitHandler` | PASS | 独立 Git commit 外部副作用 |
+| `DeliveryPrCreateHandler` | PASS | 独立 PR 外部副作用 |
+| `FailureClassifyHandler` | PASS | sidecar facts 由 `AgentEvidenceIndex` 拥有，分类委托 `FailureArbiter` |
+| `HumanReviewGateHandler` | PASS | polarity 委托 `StageOutcome`，sidecar parse/lineage 委托 `AgentEvidenceIndex` |
+| `PromptGenerateNextStageHandler` | PASS-WARN | handoff/next-stage projection；现有专用读取尚未证明形成第二控制 authority |
+| `ReportGenerateFinalHandler` | PASS-WARN | 只生成最终 projection；不因 LOC 或 JSON read 单独拆分 |
+| `ReviewDecisionHandler` | PASS | routed decision evidence 委托 `AgentEvidenceIndex` |
+| `AcpxAgentTaskHandler` | PASS-WARN | ACP adapter orchestration；execution/process facts 已委托既有 authoritative owners |
+
+`PASS-WARN` 表示存在规模或专用读取复杂度，但没有达到“两个 owner 对同一控制事实
+作出可能分歧的决定”的修改门槛。它们不是下一轮默认任务。
+
+最终结论：
+
+- 四个已证明重复 owner 均已通过删除式 slice 收敛；
+- 复核未发现第五个可证明的重复控制 owner；
+- handler 数量保持 12，不以合并类或新增 executor framework 制造表面收敛；
+- Phase D 达到 `PASS / ENFORCED + PROVEN`，在新的真实 failure 或 ownership
+  divergence 出现前不继续拆 handler。
