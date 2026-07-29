@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-Phase-D T6 READINESS NOT_READY
+## Current Active Step: Post-Phase-D T6 READY, REAL-CASE NOT ACTIVE
 
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >
@@ -82,11 +82,15 @@
 > 自动重跑。T6 只解锁只读 readiness assessment，尚未激活中等复杂度 real-case。
 >
 > T6 readiness assessment 已选择 pinned cancer-clinic medium case
-> `ed82f57`。Detached baseline clean，miniprogram build PASS，7 文件 change
-> boundary 可固定；但当前机器缺少 pinned Python test environment，无法在
-> provider run 前执行 backend pytest。T6 因此为 `NOT_READY`，不是 Dual
-> production `FAIL`。唯一解除阻塞动作是建立 ephemeral backend test environment
-> 并证明 baseline pytest PASS；在此之前禁止 provider run。
+> `ed82f57`。Detached baseline clean，7 文件 change boundary 已固定；ephemeral
+> Python 3.13.1 环境、独立 `cancer_clinic_test` PostgreSQL、full backend pytest
+> `191 passed` 与 miniprogram build 均已通过，验证后 target 仍 clean。
+>
+> Target `backend/requirements.txt` 漏声明 FastAPI `File/Form` 所需的
+> `python-multipart`。本次只在临时环境显式固定为 `0.0.32`，没有修改 target，
+> 也不允许隐式 fallback。T6 现在是
+> `READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN / REAL-CASE NOT ACTIVE`；必须先固化
+> executable gate、fresh build、probes，并重新获得一次 provider 授权。
 >
 > T6 assessment：
 > `docs/plans/post-phase-d-t6-medium-case-readiness-20260729.zh-CN.md`。
@@ -114,9 +118,9 @@
 >
 > 禁止新增 workflow/policy/context/artifact/evidence/capability/metrics 平台；
 > 禁止因 handler LOC 较大继续拆分；禁止自动重跑 T5、调
-> prompt/model/timeout，或在 T6 readiness assessment 通过前运行中等复杂度
-> real-case；禁止把 deferred monetary cost 或单次 A3 observed benefit 外推为
-> 普遍收益。
+> prompt/model/timeout，或在 T6 executable gate、freshness、probes 与一次性授权
+> 完成前运行中等复杂度 real-case；禁止把 deferred monetary cost 或单次 A3
+> observed benefit 外推为普遍收益。
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。

@@ -1,7 +1,7 @@
 # Phase D 后集成验证与效率优化计划
 
 日期：2026-07-28
-状态：`T1-T5 PASS / T6 READINESS NOT_READY`
+状态：`T1-T5 PASS / T6 READINESS READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN`
 
 ## 1. 保护的结论
 
@@ -85,7 +85,7 @@ real-case `summary.json` 缺少这些字段是报告交接缺口，不是新建 
 | T3 | P1 readiness assessment | `PASS / ONE CANDIDATE SELECTED` |
 | T4 | P1 单点优化 | `DETERMINISTIC PASS` |
 | T5 | P1 同 case 收益证明 | V3 `PASS`；单次 A3 observed benefit proven |
-| T6 | P2 中等复杂度验证 | `NOT_READY`；backend baseline preflight blocked |
+| T6 | P2 中等复杂度验证 | `READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN`；real-case not active |
 
 本文只定义后续依赖，不提前解除
 `mainline-stability-and-token-governance-plan.zh-CN.md` 的 phase lock。T1/T2 未
@@ -444,7 +444,7 @@ V3 已按上述口径完成一次且仅一次 A3 full real-case：
 
 ## 9. T6：中等复杂度 real-case
 
-状态：`READINESS NOT_READY / REAL-CASE NOT ACTIVE`
+状态：`READINESS READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN / REAL-CASE NOT ACTIVE`
 
 ### 目标
 
@@ -463,9 +463,11 @@ V3 已按上述口径完成一次且仅一次 A3 full real-case：
 Readiness assessment 已完成：
 `docs/plans/post-phase-d-t6-medium-case-readiness-20260729.zh-CN.md`。
 
-候选 pinned cancer-clinic baseline 与前端 build 可用，但当前机器缺少可执行的
-pinned Python test environment，无法在 provider 前证明 full backend pytest。
-因此不创建 workstream，不运行 probes，不消耗 provider。
+候选 pinned cancer-clinic baseline 已在 ephemeral Python 3.13.1 环境与独立
+`cancer_clinic_test` PostgreSQL 上通过 full backend pytest（191 passed），前端
+build 也再次通过，target 保持 clean。Target requirements 漏声明
+`python-multipart`；readiness 只接受显式、固定并记录的 `0.0.32` supplemental
+pin。Real-case 仍需 executable gate、fresh Dual、probes 与一次性 provider 授权。
 
 ## 10. 任务拆分与依赖
 
@@ -476,7 +478,7 @@ pinned Python test environment，无法在 provider 前证明 full backend pytes
 | T3 bottleneck selection | 只读 assessment | 否 | 否 | T2 token/cache/latency baseline PASS |
 | T4 subtraction | 实现 | 可能，单 slice | 否 | T3 选出安全候选 |
 | T5 same-case comparison | 验证 | 否 | 三次授权样本；v3 PASS | T4 deterministic PASS |
-| T6 medium case | readiness + 验证 | 否 | 否 | NOT_READY：backend baseline preflight blocked |
+| T6 medium case | readiness + 验证 | 否 | 否 | READY：需 executable gate、freshness、probes 与一次性授权 |
 
 ## 11. 非主问题处理规则
 

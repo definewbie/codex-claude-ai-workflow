@@ -1,7 +1,7 @@
 # Full Workflow 复杂度价值证明
 
 日期：2026-07-28
-状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 NOT_READY`
+状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 READINESS READY`
 
 ## 1. 决策问题
 
@@ -472,6 +472,8 @@ Residual risk:
   provider input/cache 构成存在波动，不能把全部差额归因于 context subtraction；
   T1-T5 只裁决了一个候选在 A3 中的 bounded value，不能一次证明整个 full
   workflow 的普遍经济合理性；
-  T6 assessment 已完成，但 pinned backend baseline test environment 尚不可执行，
-  因此中等复杂度 case 为 NOT_READY。
+  T6 pinned backend baseline 已在 ephemeral environment 与独立 test database
+  上达到 191 tests PASS，frontend build 也通过；target requirements 的
+  python-multipart manifest gap 仅通过显式 `0.0.32` supplemental pin 接受。
+  T6 real-case 尚未激活，仍需 executable gate、freshness、probes 与一次性授权。
 ```
