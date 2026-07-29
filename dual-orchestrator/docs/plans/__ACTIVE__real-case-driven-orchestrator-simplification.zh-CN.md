@@ -8,13 +8,68 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-Phase-D T1 Latest-SHA Integration Verification — READY
+## Current Active Step: Post-Phase-D T5 v3 — AUTHORIZED FOR ONE RUN
 
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >
-> 当前唯一 active objective 是：在最新 clean checkpoint 上运行一次既有 A3 full
-> real-case，证明 Phase A-D 组合版本可运行。之后才允许从现有
-> `metrics/workstream-metrics.json` 建立效率 baseline。
+> T1 已在 clean SHA `0e0d77ee` 上通过 A3 full real-case：
+> `COMPLETED / ACCEPT`、10 Agent runs、0 revisions、0 protocol corrections、
+> change scope PASS、target tests 9/9 PASS。
+>
+> T2 已从该运行的 `runs/*/run.json` 与
+> `metrics/workstream-metrics.json` 提取只读效率 baseline。调用、token、cache、
+> context 与 latency baseline 已成立；whole-run monetary cost 因 OpenAI cost
+> reason 缺失及 GLM `subscription_token_only` 的金额可靠性未闭合而保持
+> `NOT_PROVEN`。
+>
+> 2026-07-29 优先级决策：金额计算延后。T2 的调用、token、cache 与 latency
+> attribution 已足以支持 T3 只读瓶颈选择；monetary cost 继续保持
+> `DEFERRED / NOT_PROVEN`，不得用于成本节省或 ROI 声明。
+>
+> T3 已完成只读价值审查，唯一候选是从 full workflow 的 6 个 active context
+> profile 中删除重复的 `requirement` section，保留 `AgentPromptRenderer` 对
+> authoritative `requirement.md` 的唯一注入。self-test、stage handoff 和 6 个
+> context-build 节点本身均保留。
+>
+> T4 已按显式授权完成唯一 subtraction：6 个 active context profile 不再重复投影
+> `requirement.md`；`AgentPromptRenderer` 继续作为 full-workflow 唯一 requirement
+> 注入 owner。显式 `full` profile 与自定义 section 仍保留 requirement 能力。
+>
+> Focused tests、sibling integration tests 与 9/9 module full reactor 已通过，
+> T4 deterministic boundary 保持 `PASS`。
+>
+> T5 已使用同一 A3 case 启动一次 full real-case。fresh build、runner kind 以及
+> Claude Code/GLM-5.2、Codex/OpenAI 最小 probe 均通过；运行在
+> `design.claude_design` 首次出现 protocol correction。Strict parser 正确拒绝
+> “自然语言前缀 + JSON”，bounded correction 成功，但 T5 Verification Gate
+> 明确要求 correction=0，因此按 stop-loss 中断。T5=`FAIL`，不是 provider
+> `INVALID`；T4 的真实 token、cache 与 latency 收益仍为 `NOT PROVEN`。
+> T6 保持 `BLOCKED`。
+>
+> 随后的只读 gate 复核确认 bounded correction 是已有的、最多一次的 same-session
+> 可靠性机制，不应被等同为功能质量失败。修订 gate 允许最多一次 correction，
+> 但要求额外 prompt occurrence 的 token、cache 与 duration 全部计入；primary
+> benefit metric 是六个 generated context package 的 estimated tokens。修订 gate
+> 已通过结构校验，并在明确授权后执行一次。
+>
+> Attempt 2 的 fresh build 与 probes 均通过，前两个 Agent node correction=0；
+> 但 Codex 发现 Claude proposal 把“非对象”擅自扩成“数组也必须拒绝”，返回 typed
+> `NEEDS_REVISION`。ledger 记录 `revisionCount=1` 后，v2 stop-loss 中断运行。
+> 该 revision 有真实 contract evidence，但与 T4 没有已证明的因果关系。两次 T5
+> 均未形成可比较的完整样本，因此 T4 实际 token/cache/latency benefit 仍为
+> `NOT PROVEN`，禁止第三次自动重跑，T6 继续 `BLOCKED`。
+>
+> Attempt 2 暴露的 interruption-report projection gap 已由 `f04cdedb` 修复。
+> 中断路径现在先复用既有 `parse_started_workstream()` 恢复 captured start
+> identity，再收集 ledger evidence 和生成 report；synthetic interruption test
+> 证明不再错误投影 `workstream=unknown / 0 runs`。
+>
+> 下一次 A3 的 v3 gate 已固化：semantic revision 是合法质量机制，允许最多一次，
+> 第一次 revision 不再触发 stop-loss；protocol correction 仍最多一次。所有额外
+> calls/token/cache/duration 必须计入 after 样本。唯一收益 PASS 口径是完整 A3
+> 质量闭环且全部 provider-reported total tokens 低于 T1 的 `577,528`。Gate
+> 已通过结构校验，用户已明确授权一次 A3 full real-case；workstream 创建后授权
+> 即消耗，禁止自动重跑。
 >
 > 当前架构：
 > `docs/design/dual-orchestrator-current-architecture.zh-CN.md`。
@@ -22,11 +77,25 @@
 > 后续优化计划与任务门：
 > `docs/plans/post-phase-d-integrated-verification-and-efficiency-plan.zh-CN.md`。
 >
+> T2 baseline：
+> `docs/plans/post-phase-d-t2-efficiency-baseline-20260728.zh-CN.md`。
+>
+> T3 value review：
+> `docs/plans/post-phase-d-t3-bottleneck-selection-20260729.zh-CN.md`。
+>
+> T4 deterministic closure：
+> `docs/plans/post-phase-d-t4-context-requirement-subtraction-20260729.zh-CN.md`。
+>
+> T5 comparison：
+> `docs/plans/post-phase-d-t5-a3-comparison-20260729.zh-CN.md`。
+>
 > Full workflow 的节点、Agent 调用、gate、context 与 revision 价值证明：
 > `docs/plans/full-workflow-complexity-value-proof.zh-CN.md`。
 >
 > 禁止新增 workflow/policy/context/artifact/evidence/capability/metrics 平台；
-> 禁止因 handler LOC 较大继续拆分；禁止在 T1 前启动 token/session/cache 优化。
+> 禁止因 handler LOC 较大继续拆分；禁止未获一次性显式授权就运行 T5 v3、
+> 调 prompt/model/timeout 或提前启动 T6；禁止把 deferred monetary cost 或
+> T4 实际收益解释为已证明。
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。

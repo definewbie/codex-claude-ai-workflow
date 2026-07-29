@@ -1,7 +1,7 @@
 # Phase D 后集成验证与效率优化计划
 
 日期：2026-07-28
-状态：`PLAN / TASKS DEFINED / IMPLEMENTATION NOT STARTED`
+状态：`T1 PASS / T2 COMPLETE / TOKEN ATTRIBUTION PROMOTED / T3 PASS / T4 DETERMINISTIC PASS / T5 BENEFIT NOT PROVEN`
 
 ## 1. 保护的结论
 
@@ -37,8 +37,19 @@
 
 | Case | Duration | Agent runs | Gate rounds | Revisions | Result |
 | --- | ---: | ---: | ---: | ---: | --- |
-| README | 13m19s | 14 | 6 | 2 | COMPLETED / ACCEPT |
-| A3 API | 22m22s | 20 | 6 | 5 | COMPLETED / ACCEPT |
+| README（历史 revision path） | 13m19s | 14 | 6 | 2 | COMPLETED / ACCEPT |
+| A3 API（历史 revision path） | 22m22s | 20 | 6 | 5 | COMPLETED / ACCEPT |
+| A3 API（最新 clean SHA） | 10m42s | 10 | 6 | 0 | COMPLETED / ACCEPT |
+
+最新可信 baseline：
+
+- clean SHA：`0e0d77ee3a7a1b78cca69e64e1c46623c4f6cd5d`；
+- workstream：`ws-20260728T153012Z-JH74`；
+- report：`docs/testing/real-case-reports/20260728T152730Z/report.md`；
+- baseline：`docs/plans/post-phase-d-t2-efficiency-baseline-20260728.zh-CN.md`。
+
+历史 20 次调用和 5 次 revision 不能再描述为健康路径固定成本。当前结构性 baseline 是
+10 次 Agent 调用、0 revision。
 
 ### 2.3 已有 metrics source
 
@@ -69,11 +80,12 @@ real-case `summary.json` 缺少这些字段是报告交接缺口，不是新建 
 
 | Task | Mainline phase | 当前许可 |
 | --- | --- | --- |
-| T1 | P0：最新主链稳定性 | `ACTIVE / READY` |
-| T2 | P0.5：token/cache/cost/latency attribution | T1 PASS 后允许 |
-| T3 | P1 readiness assessment | P0 与 P0.5 均 promoted 后允许 |
-| T4-T5 | P1 单点优化与同 case 证明 | T3 PASS 且 phase lock 显式解除后允许 |
-| T6 | P2 中等复杂度验证 | T5 PASS 后另行确认 |
+| T1 | P0：最新主链稳定性 | `PASS` |
+| T2 | P0.5：token/cache/cost/latency attribution | `COMPLETE；token/cache/latency promoted；money deferred` |
+| T3 | P1 readiness assessment | `PASS / ONE CANDIDATE SELECTED` |
+| T4 | P1 单点优化 | `DETERMINISTIC PASS` |
+| T5 | P1 同 case 收益证明 | Attempts 1+2 `FAIL`；benefit `NOT PROVEN` |
+| T6 | P2 中等复杂度验证 | `BLOCKED`，T5 未 PASS |
 
 本文只定义后续依赖，不提前解除
 `mainline-stability-and-token-governance-plan.zh-CN.md` 的 phase lock。T1/T2 未
@@ -92,7 +104,7 @@ T1 最新 SHA A3 integration proof
 
 ## 4. T1：最新组合版本完整验证
 
-状态：`READY`
+状态：`PASS`
 
 ### 目标
 
@@ -177,9 +189,19 @@ Run artifact freshness:
 - 运行的 `workstream-metrics.json` 路径；
 - 不修改 production。
 
+### 结果
+
+- `COMPLETED / ACCEPT`；
+- 10 Agent runs，0 revision，0 protocol correction；
+- 10/10 strict sidecar valid；
+- 4/4 decision node 使用 `source=contract-sidecar`；
+- change scope PASS；
+- target tests 9/9 PASS；
+- Dual 与原始 target repo 均 clean。
+
 ## 5. T2：效率 baseline 提取
 
-状态：`BLOCKED BY T1`
+状态：`COMPLETE / TOKEN ATTRIBUTION PROMOTED / MONEY DEFERRED`
 
 ### 目标
 
@@ -223,9 +245,29 @@ hotspots:
 - cache 不可计算时必须保留 typed reason，不能写 0%；
 - pricing unknown/subscription token-only 不能伪装为金额 0。
 
+### 结果
+
+`docs/plans/post-phase-d-t2-efficiency-baseline-20260728.zh-CN.md` 已记录：
+
+- 10/10 measured provider runs；
+- input 77,000、output 22,768、cached read 477,760、total 577,528；
+- descriptive cache ratio 86.12%；
+- 6 context packages，estimated context 17,348 tokens；
+- per-node duration/token baseline；
+- 10 个 `run.json` 与 metrics totals 一致。
+
+金额 baseline 保持 `NOT_PROVEN`：
+
+- OpenAI `costAmount=null` 且 typed unavailable reason 为空；
+- GLM `subscription_token_only` 同时存在 USD projection，但可靠性语义不完整。
+
+这不否定 T2 的结构/token/cache/latency baseline。根据 2026-07-29 的优先级决策，
+金额计算延后，不再阻塞 T3 只读瓶颈选择；但 monetary cost 继续保持
+`DEFERRED / NOT_PROVEN`，不得支持美元节省或 ROI 声明。
+
 ## 6. T3：只读瓶颈选择
 
-状态：`BLOCKED BY T2`
+状态：`PASS / ONE CANDIDATE SELECTED`
 
 ### 目标
 
@@ -249,8 +291,17 @@ hotspots:
 - 不改变业务质量、strict contract、lineage 或 gate semantics；
 - 不需要新 module/framework/platform。
 
-如果没有候选同时满足，T3 结论必须是 `NO_SAFE_OPTIMIZATION`，不得为了保持进度制造
-重构任务。
+本次选择结果：
+
+```text
+6 个 active ContextProfiles 的 requirement section
+  -> 删除候选
+  -> requirement.md 仍由现有 AgentPromptRenderer 唯一注入
+```
+
+`implement.claude_self_test_report`、`stage.claude_handoff` 和 6 个 context-build
+节点本身保留。完整 producer、consumer、counterfactual 和 cannot-bypass gate 见
+`docs/plans/post-phase-d-t3-bottleneck-selection-20260729.zh-CN.md`。
 
 候选进入 T4 前，还必须完成
 `full-workflow-complexity-value-proof.zh-CN.md` 定义的 producer、全部 consumer、
@@ -259,7 +310,7 @@ cannot-bypass test。任一项无法回答，不得修改 production。
 
 ## 7. T4：单个 subtraction optimization
 
-状态：`BLOCKED BY T3`
+状态：`DETERMINISTIC PASS`
 
 ### 目标
 
@@ -287,9 +338,25 @@ Out of scope:
 - commit clean；
 - 尚不宣称收益，等待 T5 同 case 证明。
 
+### 实施结果
+
+- 从 `intake`、`product_review`、`architecture_review`、`plan_review`、
+  `implementation`、`acceptance` 六个 active profile 删除默认 `requirement`
+  section；
+- `requirement.md` 的 full-workflow 注入 owner 保持为 `AgentPromptRenderer`；
+- `full` profile 与显式/custom section 仍可投影 requirement；
+- active context package 缺少 requirement 不再失败；
+- populated implementation context 不再因重复 requirement 预算压力而无谓降级
+  typed recent-agent output；
+- focused tests、sibling integration tests 与 9/9 module full reactor 通过；
+- 未运行 provider，未声明实际 token、cache、duration 或金额收益。
+
+详细证据：
+`docs/plans/post-phase-d-t4-context-requirement-subtraction-20260729.zh-CN.md`。
+
 ## 8. T5：同 case 前后对比
 
-状态：`BLOCKED BY T4`
+状态：`FAIL / STOP-LOSS ENFORCED`
 
 使用与 T1 完全相同的 A3 task、target baseline、provider/model 和 Verification Gate。
 
@@ -307,6 +374,65 @@ Agent occurrence、node traversal、gate/revision count 属于可直接归因的
 Token、duration、cache 属于 provider-sensitive 指标；单次前后结果只有在 usage
 reliability 可比且结构性变化能够解释差异时才可作为支持证据。质量结论只覆盖该
 A3 case，不外推为整个 full workflow。
+
+### 运行结果
+
+- 报告：
+  `docs/testing/real-case-reports/20260729T062639Z/report.md`；
+- workstream：`ws-20260729T062937Z-G2XF`；
+- fresh Maven package、runner-kind check、Claude Code/GLM-5.2 probe 与
+  Codex/OpenAI probe 均通过；
+- `design.claude_design` 第一次 occurrence 返回“自然语言前缀 + JSON”，strict
+  parser 以 `AGENT_RESULT_PARSE_FAILED` 拒绝；
+- 同 session bounded correction 成功，节点最终为 `COMPLETED / SUCCESS`；
+- Verification Gate 要求 protocol corrections 保持 0，因此首次 correction
+  触发 stop-loss；
+- workflow 在第 5 个 Agent run 期间主动中断，没有继续消耗 provider token；
+- T5 分类为 `FAIL`，不是 provider/configuration `INVALID`；
+- 因 full comparison 未完成，T4 的真实 context/input-token/cache/latency 收益
+  仍为 `NOT PROVEN`。
+
+完整分类与边界：
+`docs/plans/post-phase-d-t5-a3-comparison-20260729.zh-CN.md`。
+
+### Gate 复核
+
+只读复核将原 gate 评为 `WARN`：bounded correction 是现有可靠性机制，不是功能
+质量失败；但它产生的额外 occurrence 必须完整计入效率指标。修订 gate 因此：
+
+- 允许最多一次 correction，最终结果仍须通过 unchanged strict contract；
+- Agent node runs 与 prompt occurrences 分开统计；
+- correction 的全部 provider usage 与 duration 必须计入；
+- primary metric 是 generated context-package estimated tokens；
+- provider input/cache/duration 是 supporting measured metrics；
+- 第二次 correction、语义漂移或 usage 无法按 occurrence 归因仍触发 stop-loss。
+
+修订 gate 位于：
+`/tmp/dual-t5-a3-verification-gate-v2.md`。
+
+### Attempt 2
+
+- 报告目录：
+  `docs/testing/real-case-reports/20260729T072220Z/`；
+- workstream：`ws-20260729T072508Z-NHNK`；
+- fresh build 与 Claude/Codex probes PASS；
+- correction=0；
+- Codex 对 Claude proposal 的额外数组拒绝语义返回 typed `NEEDS_REVISION`；
+- `revisionCount=1` 触发 v2 stop-loss；
+- Attempt 2=`FAIL / STOP-LOSS ENFORCED`，不是 provider `INVALID`；
+- full comparison 未完成，不能声明 context/input/cache/duration 实际收益。
+
+中断发生在 start 子进程返回前，real-case report 未捕获 workstream id；报告里的
+0 runs 是 projection gap，真实 execution facts 位于上述 workstream ledger。
+该 gap 已由 `f04cdedb` 修复：中断路径在收集 evidence 前复用既有
+`parse_started_workstream()`，synthetic test 证明 report/summary 可恢复真实
+workstream/workspace/ledger identity 与 run count。
+
+下一次 A3 使用 T5 文档第 8 节 v3 gate。Semantic revision 最多允许一次且全部计费，
+第一次 revision 不再中断；完整质量闭环且包含 correction/revision 的全部
+provider-reported total tokens 低于 T1 `577,528` 才算 PASS。Gate 当前 READY，
+用户已明确授权一次 real-case；workstream 创建后授权即消耗。禁止自动重跑或继续
+修改 gate 追求零波动样本。
 
 ## 9. T6：中等复杂度 real-case
 
@@ -332,10 +458,10 @@ A3 case，不外推为整个 full workflow。
 | --- | --- | ---: | ---: | --- |
 | T1 latest integration | 验证 | 否 | 是，一次 | 当前文档 checkpoint |
 | T2 efficiency baseline | projection/report | 默认否 | 否 | T1 PASS |
-| T3 bottleneck selection | 只读 assessment | 否 | 否 | T2 PASS |
+| T3 bottleneck selection | 只读 assessment | 否 | 否 | T2 token/cache/latency baseline PASS |
 | T4 subtraction | 实现 | 可能，单 slice | 否 | T3 选出安全候选 |
-| T5 same-case comparison | 验证 | 否 | 是，一次 | T4 deterministic PASS |
-| T6 medium case | readiness + 验证 | 否 | 是，一次 | T5 PASS |
+| T5 same-case comparison | 验证 | 否 | 已运行两次，均 FAIL | T4 deterministic PASS |
+| T6 medium case | readiness + 验证 | 否 | 否 | BLOCKED：T5 未 PASS |
 
 ## 11. 非主问题处理规则
 
@@ -367,7 +493,8 @@ handler-local if/else。
 ## 13. Boundary Review
 
 ```text
-Boundary Review: PASS（仅表示计划边界一致；T1-T5 execution 尚未证明）
+Boundary Review: PASS for T1/T2 and T3 read-only activation;
+WARN for deferred monetary attribution
 
 Touched boundaries:
   文档、Verification Gate、metrics projection handoff。
@@ -385,10 +512,14 @@ New concept needed:
   No。T1-T6 是有序任务，不是新的 domain phase 或 runtime model。
 
 Residual risks:
-  最新组合 SHA 尚未经过 T1；
-  provider usage 的 measurement reliability 可能导致某次对比 INVALID；
+  whole-run monetary cost 尚未证明；
+  OpenAI cost unavailable reason 缺失；
+  GLM subscription token-only 金额可靠性尚未校准；
   中等复杂度 case 尚未完成 readiness。
 
 Edit decision:
-  只允许启动 T1；其他任务保持 blocked。
+  T1 已 PASS，T2 已完成；
+  T3 只读 assessment 已激活；
+  T4-T6 仍受各自 selection/deterministic/real-case gate 约束；
+  monetary cost savings claim 保持 blocked。
 ```

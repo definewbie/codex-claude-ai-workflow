@@ -11,9 +11,13 @@
 但这不等于系统整体可稳定跑完整 real-case。当前主线状态：
 
 1. P0 runtime 执行事实边界已 **Promoted / Closed**：normal completion + recovery real-case、live stale-run reconcile real-case 均通过（exit 0 不再误判 PROCESS_STALLED；transport 未返回时 reconciler 收敛为 typed INTERRUPTED/TIMEOUT outcome，workflow 停 recovery，不误跑新节点；projection consistent）；live-but-no-progress timeout 已可配置（`DUAL_STALE_ATTEMPT_TIMEOUT_MS`，默认 8min）。
-2. P0.5 provider/model/token/cost 经济模型 **未完全收口**：仍缺 GLM 控制台 token 增量对账和 complex real-case 下 provider/model/billingMode/cachedRead 完整复核。
+2. P0.5 provider/model/token/cache/latency attribution 已由最新 A3 full workflow
+   **Promoted for efficiency work**；monetary cost attribution 继续
+   **Deferred / Not Proven**。
 3. P1/P2 repo scope / read governance 只覆盖了 intake，后续阶段仍可自由探索；token reduction 未证。
-4. full real-case 验证链路：P0.5 promoted 前不能作为治理效果证明；当前已有稳定的前置 gate 和 stop-loss，但未跑完整 complex real-case。
+4. full real-case 验证链路：最新 clean SHA 的 A3 full workflow 已
+   `COMPLETED / ACCEPT`，可作为当前调用/token/latency baseline；它不证明美元成本，
+   也不替代后续同 case before/after 验证。
 
 因此，下一步不能直接用 complex real-case 证明整体能力。必须先把执行事实和成本归因做成可靠 source of truth，否则 real-case 结果会继续混杂：
 
@@ -122,11 +126,40 @@ Mainline Decision Gate:
 - P0 execution lifecycle = **Promoted**。Promotion evidence：normal-completion + recovery real-case（exit 0 不再误判 PROCESS_STALLED；run.json 有 terminal executionAttempt+executionOutcome；workflow 停 recovery；projection consistent）+ live stale-run reconcile real-case（transport java 被 kill → reconciler 收敛 typed `INTERRUPTED` outcome；workflow WAITING_FOR_RECOVERY；no new agent run；projection consistent）+ targeted/full module tests（dual-core 96、dual-ledger-file 139、dual-runtime 458、dual-adapter-acpx 260，0 failures）。
 - P0.5 provider/model/token attribution = **Implemented / partially verified，未 Promoted**。已覆盖本地 read-model、DeepSeek 真实账单校准、pricing catalog；仍缺 GLM 控制台 token 增量对账和 complex real-case 下 provider/model/billingMode/cachedRead 完整复核。
 
+**2026-07-29 promotion update：**
+
+- 最新 clean SHA 的 A3 full workflow 已完成 10/10 measured provider runs；
+  provider、model、billing mode、input/output/cached-read/total 与 duration 均可从
+  `runs/*/run.json` 归因，并与 `workstream-metrics.json` 一致。
+- provider/model/token/cache/latency attribution 因此
+  **Promoted for efficiency work**，允许进入只读 bottleneck selection，并在后续
+  deterministic gate 后验证调用数、token 或 duration 优化。
+- monetary cost attribution 单独保持 **Deferred / Not Proven**。OpenAI cost reason
+  和 GLM subscription 金额可靠性尚未闭合；在闭合前禁止美元成本下降或 ROI 声明，
+  但不再阻塞调用数、token 和主流程耗时优化。
+
+该更新只解除以下范围的门禁：
+
+- T3 只读 bottleneck selection；
+- T4 已完成由 T3 证明的单个重复 context subtraction，当前仅达到 deterministic
+  `PASS`；
+- T5 已运行两次同一 A3 case；Attempt 1 因首次 protocol correction、Attempt 2
+  因首次 semantic revision 按各自预定义 stop-loss 中断，真实 token 或 duration
+  收益仍为 `NOT_PROVEN`。Attempt 2 的 interruption-report identity gap 已由
+  `f04cdedb` 修复。
+
+它不解除 provider-cache-aware、session compaction、keep-alive、通用 token engine、
+complex real-case 或金额收益的原有 phase lock。
+
 阶段晋级规则：
 
 - P0 仍是最高优先级；P0 未 `Promoted` 前，P0.5 只能做直接修复 P0 blocker 或 P0.5 自身 attribution blocker 的工作，不能用来声明整体 token 治理收益。
 - P0.5 只能围绕 provider/model/token/cost/cache attribution、GLM token-only 对账、DeepSeek/OpenAI/Claude pricing catalog 和相关 read-model 校准。
-- P1/P2/P3 禁止启动、禁止实现、禁止真实验证、禁止收益归因；即使某个 P1/P2 功能已有本地代码或历史测试，也不得继续扩大。
+- 除已显式授权并完成 deterministic gate 的 T4 单点 subtraction 外，P1/P2/P3
+  继续禁止启动、实现或收益归因。T5 v3 gate 已定义并获得一次性显式授权；
+  workstream 创建后授权即消耗。Semantic revision/correction 的全部 usage 必须
+  计入，不能据此扩大范围。任何已有本地代码或历史测试都不得被用于替代 T5
+  收益证明。
 - P1/P2/P3 的唯一允许动作是：把已发现的问题记录为 P0/P0.5 的 blocker 或 visible gap，不写功能代码。
 
 在 P0 和 P0.5 同时 `Promoted` 前，禁止：
@@ -149,7 +182,7 @@ Mainline Decision Gate:
 | `AgentExecutionAttempt -> AgentExecutionOutcome` | Promoted / Closed | finalizer/resolver/projection 覆盖 success/failure/stalled/timeout/interrupted + 历史冲突标记；2026-07-02 live stale-run reconcile real-case 已证明 dead pid 收敛为 typed `INTERRUPTED` outcome、workflow 停 recovery、不误跑新 run、projection consistent；live-but-no-progress timeout 已可配置。慢点 latency 拆分转为 P1/P2 性能治理，不再阻塞 P0 lifecycle。 | P0 (Promoted) |
 | acpx / CC / Codex 执行生命周期 | P0 lifecycle closed；latency read model 已补 | executionTimeline 已投影为 executionLatency；P0 lifecycle（prepared 即写非终结态 executionAttempt、`process_started(pid)` + `process_wait_started`、transport 未返回时 reconciler 收敛 typed outcome）已通过 normal-completion + live-stale-run-reconcile real-case 验证 closed。慢点/latency 拆分（terminal-after-detected 长等待、provider 推理慢、session 操作慢、dual 落盘慢）属于 P1/P2 性能治理，不再作为 P0 lifecycle blocker。 | P0 (Promoted, lifecycle); P1/P2 (latency) |
 | stale RUNNING / PROCESS_STALLED | Closed | synthetic + historical projection replay + 2026-07-02 live stale-run reconcile real-case 均已覆盖：transport java 被 kill 后 resume 时 reconciler 收敛为 typed `INTERRUPTED` outcome，node FAILED、workflow WAITING_FOR_RECOVERY、不误跑新 run、projection consistent。 | P0 (Closed) |
-| provider/model/token attribution | 本地读模型、CSV fixture 和 DeepSeek 真实账单校准已覆盖 | GLM token-only、DeepSeek、OpenAI/Codex token-only、Claude/Anthropic cache pricing 已进入统一 catalog + metrics projection；CSV parser/fixture 与 2026-06 DeepSeek amount/cost 真实账单均已校准；仍缺 GLM 控制台 token 增量对账和真实复杂 case 复测 | P0.5 |
+| provider/model/token attribution | Promoted for efficiency work | 最新 A3 full workflow 的 10/10 provider runs 已证明 provider/model/billingMode/input/output/cachedRead/total/duration 可归因并与 metrics 一致；monetary cost 仍 deferred，不得用于美元收益声明 | P0.5 |
 | provider-cache-aware | 本地决策矩阵已覆盖，真实触发待证 | 已有 token-only / priced / pricing unavailable / node applicability 的 policy 测试；仍缺 same real-case 下 active 触发、cachedRead 降低和质量不退化证明 | P1 |
 | session transcript compaction | 部分实现 | 没有证明 same real-case 下 implement cachedRead 降低且质量不退化 | P1 |
 | intake exploration governance | 已完成 | 只覆盖 intake，不代表整体 readCount/token 下降 | Done |
