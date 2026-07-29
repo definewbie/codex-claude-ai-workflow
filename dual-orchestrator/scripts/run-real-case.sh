@@ -106,6 +106,7 @@ dualctl() {
 handle_interrupt() {
   FINAL_STATUS="INTERRUPTED"
   log "Interrupted. Collecting current evidence before exit..."
+  parse_started_workstream || true
   collect_evidence || true
   write_report || true
   update_benchmark_index || true

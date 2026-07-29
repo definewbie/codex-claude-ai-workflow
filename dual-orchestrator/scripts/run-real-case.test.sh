@@ -45,3 +45,64 @@ grep -q "verification gate has weak proof fields" "$tmp/stderr.log" || {
   cat "$tmp/stderr.log" >&2
   exit 1
 }
+
+interrupted_case="$tmp/interrupted-case"
+interrupted_workspace="$tmp/interrupted-workspace"
+interrupted_workstream="ws-interrupted-test"
+mkdir -p "$interrupted_case/logs"
+mkdir -p "$interrupted_workspace/.agent/workstreams/$interrupted_workstream/runs"
+cat >"$interrupted_case/logs/start.log" <<EOF
+Workstream: $interrupted_workstream
+Workspace: $interrupted_workspace
+Ledger: $interrupted_workspace/.agent/workstreams/$interrupted_workstream
+EOF
+: >"$interrupted_case/logs/original-git-status-short.log"
+
+CASE_DIR="$interrupted_case"
+WORKSTREAM_ID=""
+WORKSPACE_DIR=""
+WS_DIR=""
+STARTED_AT="2026-07-29T00:00:00Z"
+FINAL_STATUS="UNKNOWN"
+REPO="$tmp/original-repo"
+TASK_FILE="$tmp/task.md"
+VARIANT="full"
+PROMPT_LANGUAGE="en"
+UPDATE_BENCHMARK_INDEX=false
+
+collect_evidence() {
+  [[ "$WORKSTREAM_ID" == "$interrupted_workstream" ]]
+  [[ "$WORKSPACE_DIR" == "$interrupted_workspace" ]]
+  [[ "$WS_DIR" == "$interrupted_workspace/.agent/workstreams/$interrupted_workstream" ]]
+  cat >"$CASE_DIR/logs/runs.log" <<'EOF'
+RUN STATUS
+run-1 COMPLETED
+EOF
+}
+
+set +e
+( handle_interrupt ) >"$tmp/interrupted-stdout.log" 2>"$tmp/interrupted-stderr.log"
+interrupt_exit="$?"
+set -e
+
+assert_eq "130" "$interrupt_exit" "interrupt handler exit code"
+grep -q "\"workstream\": \"$interrupted_workstream\"" "$interrupted_case/summary.json" || {
+  printf '[FAIL] interrupted summary did not recover workstream identity\n' >&2
+  cat "$interrupted_case/summary.json" >&2
+  exit 1
+}
+grep -q "\"effective_workdir\": \"$interrupted_workspace\"" "$interrupted_case/summary.json" || {
+  printf '[FAIL] interrupted summary did not recover workspace identity\n' >&2
+  cat "$interrupted_case/summary.json" >&2
+  exit 1
+}
+grep -q '"agent_run_count": 1' "$interrupted_case/summary.json" || {
+  printf '[FAIL] interrupted summary did not project collected run evidence\n' >&2
+  cat "$interrupted_case/summary.json" >&2
+  exit 1
+}
+grep -q -- "- Workstream: $interrupted_workstream" "$interrupted_case/report.md" || {
+  printf '[FAIL] interrupted report did not recover workstream identity\n' >&2
+  cat "$interrupted_case/report.md" >&2
+  exit 1
+}
