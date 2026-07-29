@@ -45,7 +45,7 @@ class ContextBuildPackageHandlerTest {
     // --- Governed pipeline ---
 
     @Test
-    void governedHappyPathRendersAllSections() throws Exception {
+    void governedHappyPathRendersProfileSectionsWithoutRequirement() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
         var input = wsDir.resolve("runs/run-001/outputs/design.json");
@@ -65,7 +65,7 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("Build the feature."));
+        assertFalse(markdown.contains("Build the feature."));
         assertTrue(markdown.contains("Design output."));
         assertTrue(markdown.contains("Git Evidence"));
         assertTrue(markdown.contains("Context Governance"));
@@ -111,19 +111,20 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("Minimal data."));
+        assertFalse(markdown.contains("Minimal data."));
         assertTrue(markdown.contains("Context Governance"));
     }
 
     @Test
-    void governedMissingRequiredSectionFails() throws Exception {
+    void governedActiveProfileDoesNotRequireRequirementSection() throws Exception {
         Files.createDirectories(wsDir);
-        // No requirement.md → requirement section has MissingPolicy.FAIL in implementation profile
+        // AgentPromptRenderer owns the full-workflow requirement projection.
 
         var result = handler.execute(ctx("implementation", List.of()));
 
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertTrue(result.result().get("error").toString().contains("requirement"));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertFalse(markdown.contains("User Requirement"));
     }
 
     @Test
@@ -321,15 +322,12 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void governedBudgetOverflowWithAdaptive_completesWithCompression() throws Exception {
+    void explicitFullProfileRequirementStillSupportsAdaptiveCompression() throws Exception {
         Files.createDirectories(wsDir);
-        // Write a very large requirement — ADAPTIVE policy now compresses instead of failing
         var bigRequirement = "X".repeat(20_000);
         Files.writeString(wsDir.resolve("requirement.md"), bigRequirement, StandardCharsets.UTF_8);
 
-        // product_review has 4000 token budget, requirement softBudget=2000 tokens
-        // ADAPTIVE policy compresses the oversized requirement instead of failing
-        var result = handler.execute(ctx("product_review", List.of()));
+        var result = handler.execute(ctx("full", List.of()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -378,8 +376,31 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("No git."));
+        assertFalse(markdown.contains("No git."),
+                "active Agent profiles must leave requirement injection to AgentPromptRenderer");
         assertTrue(markdown.contains("architecture_review"));
+    }
+
+    @Test
+    void activeAgentProfilesOmitDuplicateRequirementProjection() {
+        for (var profile : List.of(
+                "intake",
+                "product_review",
+                "architecture_review",
+                "plan_review",
+                "implementation",
+                "acceptance")) {
+            var sections = ContextProfiles.budgetFor(profile).sections().stream()
+                    .map(SectionRequirement::section)
+                    .toList();
+            assertFalse(sections.contains("requirement"),
+                    () -> profile + " must leave requirement injection to AgentPromptRenderer");
+        }
+
+        assertTrue(ContextProfiles.budgetFor("full").sections().stream()
+                        .map(SectionRequirement::section)
+                        .anyMatch("requirement"::equals),
+                "the explicit full/custom context capability must remain available");
     }
 
     // --- Legacy path ---
@@ -618,7 +639,7 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        assertTrue(markdown.contains("Malformed handoff test."));
+        assertFalse(markdown.contains("Malformed handoff test."));
         assertFalse(markdown.contains("Completed Work"));
         assertFalse(markdown.contains("Open Risks"));
     }
@@ -1071,7 +1092,7 @@ class ContextBuildPackageHandlerTest {
         Files.createDirectories(wsDir.resolve("events.jsonl").getParent());
         Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
 
-        var result = handler.execute(ctx("implementation", List.of(
+        var result = handler.execute(ctx("full", List.of(
                 ".agent/workstreams/ws-ctx/runs/run-001/outputs/design.md")));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -1086,22 +1107,22 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void budgetOverflowDegradesRecentAgentOutputsToLatest() throws Exception {
+    void activeProfileKeepsRecentAgentOutputsWithoutDuplicateRequirementPressure() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Short req.", StandardCharsets.UTF_8);
 
-        // Make input_artifacts available so its 6k softBudget is allocated,
-        // pushing git_evidence + recent_agent_outputs into degraded territory
+        // Keep the same populated implementation profile that previously overflowed
+        // after requirement was projected a second time by the context builder.
         var input = wsDir.resolve("runs/run-001/outputs/design.md");
         Files.createDirectories(input.getParent());
-        Files.writeString(input, "Design output.", StandardCharsets.UTF_8);
+        writeAgentOutputWithSidecar(input, "Design output.");
 
-        // Create multiple agent outputs — recent_agent_outputs is LOW priority,
-        // DegradationPolicy(LATEST, 2), degraded when budget overflows
         Files.createDirectories(wsDir.resolve("runs/run-002/outputs"));
         Files.createDirectories(wsDir.resolve("runs/run-003/outputs"));
-        Files.writeString(wsDir.resolve("runs/run-002/outputs/agent.md"), "Output from run 2.", StandardCharsets.UTF_8);
-        Files.writeString(wsDir.resolve("runs/run-003/outputs/agent.md"), "Output from run 3.", StandardCharsets.UTF_8);
+        writeAgentOutputWithSidecar(
+                wsDir.resolve("runs/run-002/outputs/agent.md"), "Output from run 2.");
+        writeAgentOutputWithSidecar(
+                wsDir.resolve("runs/run-003/outputs/agent.md"), "Output from run 3.");
 
         Files.createDirectories(wsDir.resolve("iterations"));
         Files.createDirectories(wsDir.resolve("nodes"));
@@ -1117,11 +1138,12 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
-        // Governance table should show recent_agent_outputs as degraded with "latest" level
         assertTrue(markdown.contains("recent_agent_outputs"),
                 "recent_agent_outputs should appear in governance table, got: " + markdown);
-        assertTrue(markdown.contains("latest"),
-                "recent_agent_outputs should show degraded level 'latest', got: " + markdown);
+        assertTrue(markdown.contains("| recent_agent_outputs | full | no |"),
+                "duplicate requirement removal should preserve full recent outputs, got: " + markdown);
+        assertFalse(markdown.contains("Short req."),
+                "active profile must not project the requirement into the context package");
     }
 
     @Test

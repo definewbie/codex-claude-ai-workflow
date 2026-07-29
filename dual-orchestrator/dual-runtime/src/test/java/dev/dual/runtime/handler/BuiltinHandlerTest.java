@@ -1416,7 +1416,9 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("Profile: implementation"));
         assertTrue(markdown.contains("READY_TO_IMPLEMENT with one note."));
         assertTrue(markdown.contains("## Git Evidence"));
-        assertTrue(markdown.contains("1 file changed"));
+        assertTrue(markdown.contains("\"available\":true"));
+        assertFalse(markdown.contains("Implement approved plan."),
+                "active context profiles must leave requirement injection to AgentPromptRenderer");
     }
 
     @Test

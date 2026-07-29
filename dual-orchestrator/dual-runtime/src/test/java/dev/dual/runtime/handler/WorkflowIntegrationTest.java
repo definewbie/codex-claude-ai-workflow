@@ -188,7 +188,7 @@ class WorkflowIntegrationTest {
     }
 
     @Test
-    void chain3_budgetGovernanceUnderOversizedInputs() throws Exception {
+    void chain3_activeProfileBudgetExcludesDuplicateRequirement() throws Exception {
         var largeRequirement = "A".repeat(8_000) + "\n";
         fixture.writeRequirement(largeRequirement);
         fixture.writeGitEvidence("M src/Foo.java\nM src/Bar.java", "2 files changed, 400 insertions(+)", null);
@@ -214,10 +214,10 @@ class WorkflowIntegrationTest {
         var markdown = Files.readString(tempDir.resolve(packagePath), StandardCharsets.UTF_8);
 
         assertTrue(markdown.contains("## Context Governance"), "Should have governance summary");
-        assertTrue(markdown.contains("User Requirement"), "Requirement section should be present");
-
-        assertTrue(markdown.contains(largeRequirement.stripTrailing()),
-                "Requirement content must be preserved in full");
+        assertFalse(markdown.contains("User Requirement"),
+                "active context profiles must leave requirement injection to AgentPromptRenderer");
+        assertFalse(markdown.contains(largeRequirement.stripTrailing()),
+                "duplicate requirement content must not consume context-package budget");
 
         var budget = ContextProfiles.implementation();
         // Budget is now token-based; verify estimated tokens within budget
@@ -232,7 +232,7 @@ class WorkflowIntegrationTest {
     }
 
     @Test
-    void chain4_oversizedRequirement_compressedByAdaptive() throws Exception {
+    void chain4_explicitFullProfileCompressesOversizedRequirement() throws Exception {
         var oversizedRequirement = "R".repeat(25_000) + "\n";
         fixture.writeRequirement(oversizedRequirement);
 
@@ -242,7 +242,7 @@ class WorkflowIntegrationTest {
                 "ws-int",
                 new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "implement.claude_implement",
-                        "profile", "implementation"
+                        "profile", "full"
                 )),
                 node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
         ));
@@ -476,7 +476,7 @@ class WorkflowIntegrationTest {
         var productResult = buildContextPackage("product_review");
         var productMd = readPackageMarkdown(productResult);
         assertTrue(productMd.contains("## Context Governance"), "product_review should have governance");
-        assertTrue(productMd.contains("User Requirement"));
+        assertFalse(productMd.contains("User Requirement"));
         assertTrue(productMd.contains("Recent Agent Outputs"));
         assertFalse(productMd.contains("## Human Feedback"), "product_review should NOT have human_feedback");
         assertFalse(productMd.contains("## Git Evidence"), "product_review should NOT have git_evidence");
@@ -485,7 +485,7 @@ class WorkflowIntegrationTest {
         // acceptance: should have EVERYTHING including git_evidence
         var acceptanceResult = buildContextPackage("acceptance");
         var acceptanceMd = readPackageMarkdown(acceptanceResult);
-        assertTrue(acceptanceMd.contains("User Requirement"));
+        assertFalse(acceptanceMd.contains("User Requirement"));
         assertTrue(acceptanceMd.contains("## Git Evidence"), "acceptance should have git_evidence");
         assertTrue(acceptanceMd.contains("## Human Feedback"), "acceptance should have human_feedback");
 
@@ -493,6 +493,7 @@ class WorkflowIntegrationTest {
         var fullResult = buildContextPackage("full");
         var fullMd = readPackageMarkdown(fullResult);
         assertTrue(fullMd.contains("## Context Governance"));
+        assertTrue(fullMd.contains("User Requirement"));
         assertTrue(fullMd.contains("User Requirement"));
 
         // Verify profile-specific budget enforcement

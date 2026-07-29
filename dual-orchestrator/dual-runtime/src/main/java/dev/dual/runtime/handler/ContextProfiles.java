@@ -30,10 +30,6 @@ final class ContextProfiles {
 
     static ContextBudget intake() {
         return new ContextBudget(3_000, List.of(
-                new SectionRequirement("requirement",
-                        MissingPolicy.FAIL, Priority.CRITICAL,
-                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
-                        OverflowPolicy.FAIL, 1_800),
                 new SectionRequirement("task_contract",
                         MissingPolicy.PLACEHOLDER, Priority.HIGH,
                         new DegradationPolicy(Degradation.SUMMARY, 0),
@@ -47,10 +43,6 @@ final class ContextProfiles {
 
     static ContextBudget implementation() {
         return new ContextBudget(6_000, List.of(
-                new SectionRequirement("requirement",
-                        MissingPolicy.FAIL, Priority.CRITICAL,
-                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
-                        OverflowPolicy.FAIL, 2_500),
                 new SectionRequirement("input_artifacts",
                         MissingPolicy.PLACEHOLDER, Priority.HIGH,
                         new DegradationPolicy(Degradation.SUMMARY, 0),
@@ -84,10 +76,6 @@ final class ContextProfiles {
 
     static ContextBudget productReview() {
         return new ContextBudget(4_000, List.of(
-                new SectionRequirement("requirement",
-                        MissingPolicy.FAIL, Priority.CRITICAL,
-                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
-                        OverflowPolicy.FAIL, 2_000),
                 new SectionRequirement("input_artifacts",
                         MissingPolicy.PLACEHOLDER, Priority.HIGH,
                         new DegradationPolicy(Degradation.SUMMARY, 0),
@@ -109,10 +97,6 @@ final class ContextProfiles {
 
     static ContextBudget architectureReview() {
         return new ContextBudget(5_000, List.of(
-                new SectionRequirement("requirement",
-                        MissingPolicy.FAIL, Priority.CRITICAL,
-                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
-                        OverflowPolicy.FAIL, 2_000),
                 new SectionRequirement("input_artifacts",
                         MissingPolicy.PLACEHOLDER, Priority.HIGH,
                         new DegradationPolicy(Degradation.SUMMARY, 0),
@@ -138,10 +122,6 @@ final class ContextProfiles {
 
     static ContextBudget planReview() {
         return new ContextBudget(5_500, List.of(
-                new SectionRequirement("requirement",
-                        MissingPolicy.FAIL, Priority.CRITICAL,
-                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
-                        OverflowPolicy.FAIL, 2_000),
                 new SectionRequirement("input_artifacts",
                         MissingPolicy.PLACEHOLDER, Priority.HIGH,
                         new DegradationPolicy(Degradation.SUMMARY, 0),
@@ -171,10 +151,6 @@ final class ContextProfiles {
 
     static ContextBudget acceptance() {
         return new ContextBudget(6_500, List.of(
-                new SectionRequirement("requirement",
-                        MissingPolicy.FAIL, Priority.CRITICAL,
-                        new DegradationPolicy(Degradation.ADAPTIVE, 0),
-                        OverflowPolicy.FAIL, 2_000),
                 new SectionRequirement("input_artifacts",
                         MissingPolicy.PLACEHOLDER, Priority.HIGH,
                         new DegradationPolicy(Degradation.FULL, 0),

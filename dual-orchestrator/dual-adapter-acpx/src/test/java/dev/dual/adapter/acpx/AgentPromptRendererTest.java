@@ -159,25 +159,41 @@ class AgentPromptRendererTest {
     }
 
     @Test
-    void includesContextPackageWhenProvidedByInputRefs() throws Exception {
+    void activeContextTargetsInjectRequirementExactlyOnce() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
         Files.createDirectories(contextPath.getParent());
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
         Files.writeString(contextPath, "# Context Package\n\nImportant prior review.\n");
 
-        var prompt = new AgentPromptRenderer()
-                .render(
-                        tempDir,
-                        "ws-test",
-                        "design.codex_arch_review",
-                        "design-codex-review",
-                        List.of(".agent/workstreams/ws-test/context/node-context.md")
-                );
+        var targets = Map.of(
+                "intake.claude_brainstorm", "intake-claude-brainstorm",
+                "intake.codex_product_review", "intake-codex-product-review",
+                "design.codex_arch_review", "design-codex-review",
+                "plan.codex_plan_review", "plan-codex-review",
+                "implement.claude_implement", "implement-claude",
+                "acceptance.codex_verifier_review", "acceptance-codex-review"
+        );
 
-        assertTrue(prompt.contains("## Context Package"));
-        assertTrue(prompt.contains(".agent/workstreams/ws-test/context/node-context.md"));
-        assertTrue(prompt.contains("Important prior review."));
+        for (var target : targets.entrySet()) {
+            var prompt = new AgentPromptRenderer().render(
+                    tempDir,
+                    "ws-test",
+                    target.getKey(),
+                    target.getValue(),
+                    List.of(".agent/workstreams/ws-test/context/node-context.md")
+            );
+
+            assertTrue(prompt.contains("## Context Package"));
+            assertTrue(prompt.contains(".agent/workstreams/ws-test/context/node-context.md"));
+            assertTrue(prompt.contains("Important prior review."));
+            assertTrue(prompt.contains("Build a safer agent workflow."));
+            assertEquals(
+                    prompt.indexOf("Build a safer agent workflow."),
+                    prompt.lastIndexOf("Build a safer agent workflow."),
+                    target.getKey() + " must inject requirement.md exactly once"
+            );
+        }
     }
 
     @Test
