@@ -308,5 +308,6 @@ end-to-end benefit。它不单独证明跨任务、跨时段或跨 provider 的�
 构成存在波动；不能把全部 token 差额机械归因于删除 1,766 estimated context
 tokens。金额仍为 `DEFERRED / NOT_PROVEN`。
 
-T6 从 `BLOCKED` 更新为 `READINESS ASSESSMENT READY`，但中等复杂度 provider
-real-case 尚未激活。
+T6 从 `BLOCKED` 解锁了 readiness assessment。Assessment 随后确认 pinned
+cancer-clinic candidate 的 backend baseline test environment 当前不可执行，因此
+T6=`NOT_READY`，中等复杂度 provider real-case 未激活。

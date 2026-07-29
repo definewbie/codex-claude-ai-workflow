@@ -1,7 +1,7 @@
 # Full Workflow 复杂度价值证明
 
 日期：2026-07-28
-状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 ASSESSMENT READY`
+状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 NOT_READY`
 
 ## 1. 决策问题
 
@@ -472,5 +472,6 @@ Residual risk:
   provider input/cache 构成存在波动，不能把全部差额归因于 context subtraction；
   T1-T5 只裁决了一个候选在 A3 中的 bounded value，不能一次证明整个 full
   workflow 的普遍经济合理性；
-  T6 仅解锁 readiness assessment，尚未运行中等复杂度 case。
+  T6 assessment 已完成，但 pinned backend baseline test environment 尚不可执行，
+  因此中等复杂度 case 为 NOT_READY。
 ```

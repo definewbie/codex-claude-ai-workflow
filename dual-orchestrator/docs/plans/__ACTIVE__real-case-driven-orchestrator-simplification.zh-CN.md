@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-Phase-D T5 v3 PASS / T6 ASSESSMENT READY
+## Current Active Step: Post-Phase-D T6 READINESS NOT_READY
 
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >
@@ -80,6 +80,16 @@
 > 该结论只覆盖这一次同 baseline A3 样本，不外推为跨任务、跨时段或跨 provider
 > 的普遍因果收益；金额继续 `DEFERRED / NOT_PROVEN`。一次性授权已消耗，禁止
 > 自动重跑。T6 只解锁只读 readiness assessment，尚未激活中等复杂度 real-case。
+>
+> T6 readiness assessment 已选择 pinned cancer-clinic medium case
+> `ed82f57`。Detached baseline clean，miniprogram build PASS，7 文件 change
+> boundary 可固定；但当前机器缺少 pinned Python test environment，无法在
+> provider run 前执行 backend pytest。T6 因此为 `NOT_READY`，不是 Dual
+> production `FAIL`。唯一解除阻塞动作是建立 ephemeral backend test environment
+> 并证明 baseline pytest PASS；在此之前禁止 provider run。
+>
+> T6 assessment：
+> `docs/plans/post-phase-d-t6-medium-case-readiness-20260729.zh-CN.md`。
 >
 > 当前架构：
 > `docs/design/dual-orchestrator-current-architecture.zh-CN.md`。
