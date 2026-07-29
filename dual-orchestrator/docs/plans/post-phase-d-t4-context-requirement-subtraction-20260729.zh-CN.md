@@ -1,7 +1,7 @@
 # T4 Context Requirement Subtraction
 
 日期：2026-07-29
-状态：`DETERMINISTIC PASS / T5 ATTEMPTED, BENEFIT NOT PROVEN`
+状态：`DETERMINISTIC PASS / T5 V3 PASS FOR ONE A3 SAMPLE`
 
 ## 1. 唯一目标
 
@@ -97,8 +97,12 @@ Residual raw path:
   but no active profile selects it
 ```
 
-T4 可以声明 deterministic boundary `PASS`。它不能声明真实 token、cache、duration
-或金额收益。T5 已使用与 T1 相同的 A3 controlled real-case 启动验证，但在首次
-protocol correction 时按预先定义的 stop-loss 中断，因此收益仍为
-`NOT PROVEN`。详见
+T4 可以声明 deterministic boundary `PASS`。T5 v3 随后使用与 T1 相同的 A3
+controlled real-case 完成一次可比较验证：workflow `COMPLETED`、acceptance
+`ACCEPT`、target tests 9/9 PASS、change scope PASS，provider-reported total
+tokens 从 `577,528` 降至 `533,404`（-7.64%），Agent duration 从 `462.467s`
+降至 `398.284s`（-13.88%）。
+
+因此 T4 的同一 A3 observed benefit 已证明，但该结论不外推为跨任务、跨时段或
+跨 provider 的普遍因果收益；金额仍为 `DEFERRED / NOT_PROVEN`。详见
 `docs/plans/post-phase-d-t5-a3-comparison-20260729.zh-CN.md`。

@@ -1,7 +1,7 @@
 # Full Workflow 复杂度价值证明
 
 日期：2026-07-28
-状态：`ASSESSMENT DEFINED / T1 ACTIVE / NO OPTIMIZATION ACTIVE`
+状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 ASSESSMENT READY`
 
 ## 1. 决策问题
 
@@ -431,7 +431,7 @@ PASS 必须同时满足：
 ## 9. Boundary Review
 
 ```text
-Boundary Review: WARN / ASSESSMENT DEFINED
+Boundary Review: PASS FOR ONE BOUNDED A3 OPTIMIZATION
 
 Declared by:
   WorkflowDefinition；
@@ -439,11 +439,11 @@ Declared by:
   strict sidecars；
   runs/*/run.json。
 
-To be proven by:
+Proven by:
   T1 latest-SHA real-case；
   T2 read-only attribution；
   T4 deterministic/cannot-bypass tests；
-  T5 same-case comparison。
+  T5 v3 same-case comparison。
 
 Consumed by:
   MetricsProjectionWriter -> metrics/workstream-metrics.json（projection）；
@@ -453,7 +453,7 @@ Consumed by:
 Enforced before:
   T4 production change activation；
   T5 provider comparison；
-  any claim that full workflow is lightweight or economically justified。
+  the bounded claim that T4 preserved quality and reduced observed A3 usage。
 
 Failure route:
   evidence missing/not comparable -> INVALID；
@@ -468,8 +468,9 @@ Cannot-bypass:
 
 Residual risk:
   当前样本主要是 README 与 A3；
-  T1 尚未执行；
-  provider usage reliability 可能令单次对比 INVALID；
-  T1-T5 最多裁决一个候选在 A3 中的 bounded value，不能一次证明整个 full
-  workflow 的经济合理性。
+  T5 v3 只证明一个同 baseline A3 样本的 observed benefit；
+  provider input/cache 构成存在波动，不能把全部差额归因于 context subtraction；
+  T1-T5 只裁决了一个候选在 A3 中的 bounded value，不能一次证明整个 full
+  workflow 的普遍经济合理性；
+  T6 仅解锁 readiness assessment，尚未运行中等复杂度 case。
 ```

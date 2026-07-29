@@ -1,7 +1,7 @@
 # T5 A3 Same-Case Comparison
 
 日期：2026-07-29
-状态：`ATTEMPT 1+2 FAIL / BENEFIT NOT PROVEN / V3 AUTHORIZED FOR ONE RUN`
+状态：`ATTEMPT 1+2 FAIL / V3 PASS / OBSERVED BENEFIT PROVEN FOR ONE A3 SAMPLE`
 
 ## 1. 目标
 
@@ -194,7 +194,8 @@ handle_interrupt
 - identity 恢复发生在 evidence collection 之前；
 - 已收集的 Agent run 不再错误投影为 0。
 
-T5 当前为 `BENEFIT NOT PROVEN`，T6 保持 `BLOCKED`。在新的显式决策前：
+在 v3 gate 获得授权并执行前，T5 为 `BENEFIT NOT PROVEN`，T6 保持
+`BLOCKED`。当时的约束是：
 
 - 不重跑 A3；
 - 不修改 parser 或放宽 strict contract；
@@ -250,10 +251,62 @@ after 的全部真实开销 < before 的全部真实开销
 ### 授权状态
 
 ```text
-V3 GATE READY
-REAL-CASE AUTHORIZED ONCE
+V3 GATE CONSUMED
+REAL-CASE COMPLETED
 ```
 
-用户已在 2026-07-29 明确授权一次 A3 full real-case。授权在 workstream 创建后即
-消耗；不得自动重跑、修改 prompt/parser/model/timeout，或在失败后继续调 gate
-追求 PASS。
+用户在 2026-07-29 明确授权的一次 A3 full real-case 已在 workstream 创建时消耗。
+不得自动重跑、修改 prompt/parser/model/timeout，或继续调 gate 追求更优样本。
+
+## 9. V3 运行结果
+
+报告：
+`docs/testing/real-case-reports/20260729T131141Z/report.md`。
+
+Workstream：
+`ws-20260729T131421Z-BX54`。
+
+运行基于包含 T4 与 interruption projection 修复的 clean SHA `1b235288`。Fresh
+9-module reactor、runner-kind check、Claude Code/GLM-5.2 probe、Codex/OpenAI
+probe、target baseline 与 artifact freshness 均通过。
+
+质量与边界结果：
+
+| Gate | 结果 |
+| --- | --- |
+| Workflow | `COMPLETED`，31/31 nodes |
+| Human gates | 6/6 completed |
+| Final acceptance | `ACCEPT` |
+| Change scope | `PASS`，3/3 changes matched |
+| Target tests | 独立 `npm test` 9/9 PASS |
+| Strict results | 10/10 valid |
+| Usage reconciliation | 10/10 measured，无 gap |
+| Protocol corrections | 0 |
+| Semantic revisions | 0 |
+| Context boundary | 6/6 active packages 无 requirement |
+| Prompt boundary | 10/10 final prompt manifests 恰有 1 个 authoritative requirement |
+
+与 T1 的同 case observed 对比：
+
+| Metric | T1 | T5 v3 | Delta |
+| --- | ---: | ---: | ---: |
+| Agent runs | 10 | 10 | 0 |
+| Estimated context tokens | 17,348 | 15,582 | -1,766 (-10.18%) |
+| Provider input tokens | 77,000 | 115,173 | +38,173 (+49.58%) |
+| Provider output tokens | 22,768 | 22,199 | -569 (-2.50%) |
+| Provider cached-read tokens | 477,760 | 396,032 | -81,728 (-17.11%) |
+| Provider-reported total tokens | 577,528 | 533,404 | -44,124 (-7.64%) |
+| Agent duration | 462.467s | 398.284s | -64.183s (-13.88%) |
+| Total node duration | 472.447s | 409.255s | -63.192s (-13.38%) |
+
+V3 gate 的唯一端到端收益条件是完整质量闭环且全部 provider-reported total tokens
+低于 `577,528`。本次为 `533,404`，因此 T5 v3=`PASS`。
+
+该结果证明 T4 在这一份同 baseline A3 样本中保留质量并取得 observed
+end-to-end benefit。它不单独证明跨任务、跨时段或跨 provider 的普遍因果收益。
+尤其 input tokens 上升、cached-read tokens 下降，说明单次 provider cache
+构成存在波动；不能把全部 token 差额机械归因于删除 1,766 estimated context
+tokens。金额仍为 `DEFERRED / NOT_PROVEN`。
+
+T6 从 `BLOCKED` 更新为 `READINESS ASSESSMENT READY`，但中等复杂度 provider
+real-case 尚未激活。

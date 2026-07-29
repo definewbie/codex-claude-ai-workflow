@@ -1,7 +1,7 @@
 # Phase D 后集成验证与效率优化计划
 
 日期：2026-07-28
-状态：`T1 PASS / T2 COMPLETE / TOKEN ATTRIBUTION PROMOTED / T3 PASS / T4 DETERMINISTIC PASS / T5 BENEFIT NOT PROVEN`
+状态：`T1 PASS / T2 COMPLETE / T3 PASS / T4 DETERMINISTIC PASS / T5 V3 PASS / T6 ASSESSMENT READY`
 
 ## 1. 保护的结论
 
@@ -84,8 +84,8 @@ real-case `summary.json` 缺少这些字段是报告交接缺口，不是新建 
 | T2 | P0.5：token/cache/cost/latency attribution | `COMPLETE；token/cache/latency promoted；money deferred` |
 | T3 | P1 readiness assessment | `PASS / ONE CANDIDATE SELECTED` |
 | T4 | P1 单点优化 | `DETERMINISTIC PASS` |
-| T5 | P1 同 case 收益证明 | Attempts 1+2 `FAIL`；benefit `NOT PROVEN` |
-| T6 | P2 中等复杂度验证 | `BLOCKED`，T5 未 PASS |
+| T5 | P1 同 case 收益证明 | V3 `PASS`；单次 A3 observed benefit proven |
+| T6 | P2 中等复杂度验证 | `ASSESSMENT READY`；real-case 未激活 |
 
 本文只定义后续依赖，不提前解除
 `mainline-stability-and-token-governance-plan.zh-CN.md` 的 phase lock。T1/T2 未
@@ -336,7 +336,7 @@ Out of scope:
 - 无新 module/engine/registry；
 - deterministic tests + full reactor PASS；
 - commit clean；
-- 尚不宣称收益，等待 T5 同 case 证明。
+- 在 T5 同 case 完成前不宣称实际收益。
 
 ### 实施结果
 
@@ -349,14 +349,14 @@ Out of scope:
 - populated implementation context 不再因重复 requirement 预算压力而无谓降级
   typed recent-agent output；
 - focused tests、sibling integration tests 与 9/9 module full reactor 通过；
-- 未运行 provider，未声明实际 token、cache、duration 或金额收益。
+- T4 实施 checkpoint 本身未运行 provider；后续 T5 v3 已独立完成实际收益验证。
 
 详细证据：
 `docs/plans/post-phase-d-t4-context-requirement-subtraction-20260729.zh-CN.md`。
 
 ## 8. T5：同 case 前后对比
 
-状态：`FAIL / STOP-LOSS ENFORCED`
+状态：`V3 PASS / OBSERVED BENEFIT PROVEN FOR ONE A3 SAMPLE`
 
 使用与 T1 完全相同的 A3 task、target baseline、provider/model 和 Verification Gate。
 
@@ -428,15 +428,23 @@ A3 case，不外推为整个 full workflow。
 `parse_started_workstream()`，synthetic test 证明 report/summary 可恢复真实
 workstream/workspace/ledger identity 与 run count。
 
-下一次 A3 使用 T5 文档第 8 节 v3 gate。Semantic revision 最多允许一次且全部计费，
-第一次 revision 不再中断；完整质量闭环且包含 correction/revision 的全部
-provider-reported total tokens 低于 T1 `577,528` 才算 PASS。Gate 当前 READY，
-用户已明确授权一次 real-case；workstream 创建后授权即消耗。禁止自动重跑或继续
-修改 gate 追求零波动样本。
+V3 已按上述口径完成一次且仅一次 A3 full real-case：
+
+- report：`docs/testing/real-case-reports/20260729T131141Z/report.md`；
+- workstream：`ws-20260729T131421Z-BX54`；
+- workflow `COMPLETED`，acceptance `ACCEPT`，change scope `PASS`；
+- target tests 9/9 PASS，strict results 10/10 valid；
+- 0 correction，0 semantic revision，usage 10/10 reconciled；
+- estimated context `17,348 -> 15,582`（-10.18%）；
+- provider-reported total `577,528 -> 533,404`（-7.64%）；
+- Agent duration `462.467s -> 398.284s`（-13.88%）。
+
+因此 T5 v3=`PASS`。该收益只覆盖这一份同 baseline A3 样本，不外推为普遍因果
+收益；金额继续 `DEFERRED / NOT_PROVEN`。一次性授权已消耗，禁止自动重跑。
 
 ## 9. T6：中等复杂度 real-case
 
-状态：`BLOCKED BY T5`
+状态：`READINESS ASSESSMENT READY / REAL-CASE NOT ACTIVE`
 
 ### 目标
 
@@ -460,8 +468,8 @@ provider-reported total tokens 低于 T1 `577,528` 才算 PASS。Gate 当前 REA
 | T2 efficiency baseline | projection/report | 默认否 | 否 | T1 PASS |
 | T3 bottleneck selection | 只读 assessment | 否 | 否 | T2 token/cache/latency baseline PASS |
 | T4 subtraction | 实现 | 可能，单 slice | 否 | T3 选出安全候选 |
-| T5 same-case comparison | 验证 | 否 | 已运行两次，均 FAIL | T4 deterministic PASS |
-| T6 medium case | readiness + 验证 | 否 | 否 | BLOCKED：T5 未 PASS |
+| T5 same-case comparison | 验证 | 否 | 三次授权样本；v3 PASS | T4 deterministic PASS |
+| T6 medium case | readiness + 验证 | 否 | 否 | readiness assessment READY；real-case 未激活 |
 
 ## 11. 非主问题处理规则
 

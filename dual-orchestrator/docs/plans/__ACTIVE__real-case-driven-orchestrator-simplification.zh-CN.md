@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-Phase-D T5 v3 — AUTHORIZED FOR ONE RUN
+## Current Active Step: Post-Phase-D T5 v3 PASS / T6 ASSESSMENT READY
 
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >
@@ -64,12 +64,22 @@
 > identity，再收集 ledger evidence 和生成 report；synthetic interruption test
 > 证明不再错误投影 `workstream=unknown / 0 runs`。
 >
-> 下一次 A3 的 v3 gate 已固化：semantic revision 是合法质量机制，允许最多一次，
-> 第一次 revision 不再触发 stop-loss；protocol correction 仍最多一次。所有额外
-> calls/token/cache/duration 必须计入 after 样本。唯一收益 PASS 口径是完整 A3
-> 质量闭环且全部 provider-reported total tokens 低于 T1 的 `577,528`。Gate
-> 已通过结构校验，用户已明确授权一次 A3 full real-case；workstream 创建后授权
-> 即消耗，禁止自动重跑。
+> T5 v3 已在 clean SHA `1b235288` 上按一次性授权完成。报告：
+> `docs/testing/real-case-reports/20260729T131141Z/report.md`；workstream：
+> `ws-20260729T131421Z-BX54`。结果为 `COMPLETED / ACCEPT`、10 Agent runs、
+> 0 revisions、0 protocol corrections、change scope PASS、独立 `npm test`
+> 9/9 PASS。10/10 strict result 与 usage 均有效并完成对账。
+>
+> 六个 active context package 均不含 requirement，10 个最终 Agent prompt
+> manifest 均只含一个 authoritative requirement section。Estimated context
+> 从 T1 的 `17,348` 降至 `15,582`，下降 `1,766`（10.18%）；全部
+> provider-reported total tokens 从 `577,528` 降至 `533,404`，下降 `44,124`
+> （7.64%）；Agent duration 从 `462.467s` 降至 `398.284s`，下降 13.88%。
+> 因此 T5 v3=`PASS`，T4 的同一 A3 observed benefit 已证明。
+>
+> 该结论只覆盖这一次同 baseline A3 样本，不外推为跨任务、跨时段或跨 provider
+> 的普遍因果收益；金额继续 `DEFERRED / NOT_PROVEN`。一次性授权已消耗，禁止
+> 自动重跑。T6 只解锁只读 readiness assessment，尚未激活中等复杂度 real-case。
 >
 > 当前架构：
 > `docs/design/dual-orchestrator-current-architecture.zh-CN.md`。
@@ -93,9 +103,10 @@
 > `docs/plans/full-workflow-complexity-value-proof.zh-CN.md`。
 >
 > 禁止新增 workflow/policy/context/artifact/evidence/capability/metrics 平台；
-> 禁止因 handler LOC 较大继续拆分；禁止未获一次性显式授权就运行 T5 v3、
-> 调 prompt/model/timeout 或提前启动 T6；禁止把 deferred monetary cost 或
-> T4 实际收益解释为已证明。
+> 禁止因 handler LOC 较大继续拆分；禁止自动重跑 T5、调
+> prompt/model/timeout，或在 T6 readiness assessment 通过前运行中等复杂度
+> real-case；禁止把 deferred monetary cost 或单次 A3 observed benefit 外推为
+> 普遍收益。
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。
 > B1 Subtraction: **COMMITTED** (`3f2ee81f`)。
