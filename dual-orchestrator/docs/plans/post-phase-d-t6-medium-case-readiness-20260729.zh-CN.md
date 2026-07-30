@@ -1,7 +1,7 @@
 # T6 中等复杂度 Case Readiness Assessment
 
-日期：2026-07-29
-状态：`READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN / REAL-CASE NOT ACTIVE`
+日期：2026-07-29（2026-07-30 执行收口）
+状态：`REAL-CASE FAIL / STOP-LOSS ENFORCED / NO RETRY AUTHORIZED`
 
 ## 1. 唯一目标
 
@@ -10,7 +10,7 @@
 
 ```text
 Target phase: P2
-Current status: readiness assessed, real-case not active
+Current status: one authorized real-case completed with FAIL and stop-loss
 Upstream evidence: T5 v3 PASS at d0bae639
 ```
 
@@ -107,10 +107,10 @@ repo，也没有把缺失依赖静默当作 transitive dependency。未来 T6 pr
 同一个 exact supplemental pin 并记录实际 `pip freeze`；缺失、版本不同或未记录时
 本轮必须判为 `INVALID`。
 
-## 5. Verification Gate Draft
+## 5. Verification Gate
 
-backend baseline blocker 已解除。以下 gate 可以在 provider 授权前固化为独立可执行
-gate；当前尚未授权或创建 T6 workstream。
+backend baseline blocker 解除后，以下 gate 已固化并通过结构校验，并用于
+2026-07-30 的唯一一次授权运行。
 
 ```text
 Verification Gate:
@@ -186,20 +186,49 @@ Residual raw path:
   recorded ephemeral preflight pin, never as an implicit dependency
 ```
 
-## 7. Decision
+## 7. Real-Case Result
 
-T6 backend/frontend baseline readiness 已通过。当前状态是
-`READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN / REAL-CASE NOT ACTIVE`，不是 provider
-real-case 已获授权。
+执行证据：
 
-进入一次 T6 provider run 前仍必须：
+- report：
+  `docs/testing/real-case-reports/20260730T000136Z/report.md`；
+- workstream：`ws-20260730T000417Z-5PXU`；
+- Dual SHA：`3c23a8fd5893199f31fa2e3ef5114643ac55d551`；
+- target SHA：`ed82f5789a2e54ea3ccdb983d40b3fe64e9a4927`；
+- 结果：`WAITING_FOR_RECOVERY / FAIL`，不是 `INVALID`；
+- elapsed：12 分 03 秒；Agent runs：7；gate rounds：2；
+- semantic revisions：2；protocol corrections：1；
+- provider usage：7/7 有 `PROVIDER_RUN_USAGE`，总 token 414,430，其中
+  Claude 269,967、Codex 144,463、cached read 322,816；
+- target detached worktree 与 Agent worktree 均保持 clean，实际变更为 0。
 
-1. 固化 executable Verification Gate；
-2. 记录 target HEAD、requirements hash、完整 `pip freeze`、数据库 identity、
-   191-test PASS 与 frontend build PASS；
-3. fresh build Dual，并通过 Claude/Codex probes；
-4. 重新获得一次明确 provider 授权；
-5. 只创建一个 T6 workstream，严格执行 stop-loss。
+两次 semantic revision 均有 typed review evidence：
 
-不得用跳过 backend tests、复用历史 test count、隐式安装未固定依赖或只跑 frontend
-build 的方式重新证明 readiness。
+1. intake review 要求把“用户确认后再导航”收敛为可测试约束；
+2. design review 要求 backend `found/none` 返回由 FastAPI response model 或等价
+   runtime validator 强制，不能只靠 inline dict 约定状态组合。
+
+第一次 design 的 prose+JSON 已使用同 session bounded correction 修复，因而唯一
+correction allowance 已被消耗。第二次 design revision 再次返回 prose+JSON，
+strict parser 正确拒绝；继续 correction 将成为第 2 次 correction。同时
+`revisionCount=2` 已独立触发 gate 的第二次 semantic revision stop-loss。因此没有
+重试，也没有进入实现、测试或 acceptance。
+
+## 8. Decision
+
+T6 readiness 证明有效：baseline、freshness、provider/model、runner、usage 与 target
+cleanliness 均可比较。本次是有效的 workflow `FAIL`：
+
+```text
+preflight PASS
+  -> two evidence-backed semantic revisions
+  -> one bounded correction consumed
+  -> second revision / further correction prohibited
+  -> stop-loss
+```
+
+它证明 stop-loss 能守住边界，但没有证明中等复杂度 full workflow 可以完成。当前
+状态为 `REAL-CASE FAIL / STOP-LOSS ENFORCED / NO RETRY AUTHORIZED`。不得自动重跑，
+也不得据此直接修改 prompt、parser 或 production；下一步只能先只读判断两次 revision
+是否暴露了 workflow review 成本过高或 task contract 不充分，再决定是否提出新的
+有界改动与全新授权。

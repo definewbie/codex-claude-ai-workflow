@@ -1,0 +1,8 @@
+Run ID	Status	Agent	Node	Exit	Duration(ms)	Source	InputTok	OutputTok	TotalTok	Cost	Failure
+run-1785369858271	completed	claude	intake.claude_brainstorm	0	66329	acpx_stream	3730	5659	10285	0.160573 USD
+run-1785369927176	completed	codex	intake.codex_product_review	0	76076	acpx_stream	2597	1472	36581
+run-1785370008932	completed	claude	intake.claude_brainstorm	0	51123	acpx_stream	6052	3539	15351	0.12161500000000001 USD
+run-1785370062790	completed	codex	intake.codex_product_review	0	60061	acpx_stream	42223	2657	46672
+run-1785370125334	completed	claude	design.claude_design	0	157316	agent_result_acquisition	4526	3302	115476	0.159004 USD
+run-1785370282970	completed	codex	design.codex_arch_review	0	74319	acpx_stream	1564	2558	61210
+run-1785370357484	failed	claude	design.claude_design	5	56256	acpx_stream	7525	4210	128855	0.201435 USD	agent_result_missing_or_invalid

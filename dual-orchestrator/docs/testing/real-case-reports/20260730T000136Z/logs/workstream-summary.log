@@ -1,0 +1,75 @@
+# Workstream Summary
+
+- Workstream: ws-20260730T000417Z-5PXU
+- Workspace: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU
+- Ledger: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU
+- Generated At: 2026-07-30T00:13:38.576092Z
+
+## Workflow
+
+- Definition: agent-lifecycle-full@6
+- Status: WAITING_FOR_RECOVERY
+- Active Nodes: node-design-claude_design-018
+- Open Gates: recovery-node-design-claude_design-018
+- Updated At: 2026-07-30T00:13:33.892542Z
+
+## Metrics
+
+- Nodes: 17
+- Agent Runs: 7
+- Gates: 2
+- Decisions: 3
+- Iterations: 3
+- Revisions: 2
+- Total Node Duration(ms): 553371
+- Token Runs: 7 / 7
+- Total Tokens: 414430 (input 68217, output 23397)
+- Metrics: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU/metrics/workstream-metrics.md
+
+## Recommended Next Action
+
+Workflow needs inspection
+
+The final ACP assistant message did not contain a valid AgentResultEnvelope.
+
+Inspect recovery evidence before deciding whether retry is safe.
+
+```bash
+dualctl recovery show --workdir '/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU' ws-20260730T000417Z-5PXU
+dualctl retry --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+```
+
+## Recent Timeline
+
+| Node | Kind | Status | Iteration | Duration |
+| --- | --- | --- | --- | --- |
+| intake.claude_brainstorm | TASK | COMPLETED | iter-002 | 53802 |
+| context.intake_codex_product_review | TASK | COMPLETED | iter-002 | 17 |
+| intake.codex_product_review | TASK | COMPLETED | iter-002 | 60469 |
+| intake.decision | DECISION | COMPLETED | iter-002 | 10 |
+| gate.human_requirement_review | GATE | COMPLETED | iter-002 |  |
+| contract.compile | TASK | COMPLETED | iter-002 | 40 |
+| gate.contract_review | GATE | COMPLETED | iter-002 |  |
+| design.claude_design | TASK | COMPLETED | iter-002 | 157552 |
+| context.design_codex_arch_review | TASK | COMPLETED | iter-002 | 30 |
+| design.codex_arch_review | TASK | COMPLETED | iter-002 | 74442 |
+| design.decision | DECISION | COMPLETED | iter-002 | 14 |
+| design.claude_design | TASK | FAILED | iter-003 | 56410 |
+
+## Artifacts
+
+- Final Report: missing
+- Current Failure Summary: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU/recovery/current-failure.md
+- Delivery: unavailable
+- Delivery Merge: not applied
+- Calibration Candidates: 0
+- Calibration Apply Plans: 0
+
+## Useful Commands
+
+```bash
+dualctl status --workdir '/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU' ws-20260730T000417Z-5PXU
+dualctl timeline --workdir '/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU' ws-20260730T000417Z-5PXU
+dualctl review show --workdir '/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU' ws-20260730T000417Z-5PXU
+dualctl recovery show --workdir '/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU' ws-20260730T000417Z-5PXU
+```

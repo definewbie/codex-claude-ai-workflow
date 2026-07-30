@@ -1,7 +1,7 @@
 # Phase D 后集成验证与效率优化计划
 
 日期：2026-07-28
-状态：`T1-T5 PASS / T6 READINESS READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN`
+状态：`T1-T5 PASS / T6 REAL-CASE FAIL / STOP-LOSS ENFORCED`
 
 ## 1. 保护的结论
 
@@ -85,7 +85,7 @@ real-case `summary.json` 缺少这些字段是报告交接缺口，不是新建 
 | T3 | P1 readiness assessment | `PASS / ONE CANDIDATE SELECTED` |
 | T4 | P1 单点优化 | `DETERMINISTIC PASS` |
 | T5 | P1 同 case 收益证明 | V3 `PASS`；单次 A3 observed benefit proven |
-| T6 | P2 中等复杂度验证 | `READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN`；real-case not active |
+| T6 | P2 中等复杂度验证 | `FAIL`；第二次 semantic revision 触发 stop-loss，禁止自动重跑 |
 
 本文只定义后续依赖，不提前解除
 `mainline-stability-and-token-governance-plan.zh-CN.md` 的 phase lock。T1/T2 未
@@ -444,7 +444,7 @@ V3 已按上述口径完成一次且仅一次 A3 full real-case：
 
 ## 9. T6：中等复杂度 real-case
 
-状态：`READINESS READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN / REAL-CASE NOT ACTIVE`
+状态：`REAL-CASE FAIL / STOP-LOSS ENFORCED / NO RETRY AUTHORIZED`
 
 ### 目标
 
@@ -467,7 +467,15 @@ Readiness assessment 已完成：
 `cancer_clinic_test` PostgreSQL 上通过 full backend pytest（191 passed），前端
 build 也再次通过，target 保持 clean。Target requirements 漏声明
 `python-multipart`；readiness 只接受显式、固定并记录的 `0.0.32` supplemental
-pin。Real-case 仍需 executable gate、fresh Dual、probes 与一次性 provider 授权。
+pin。
+
+一次性 real-case 已执行，报告为
+`docs/testing/real-case-reports/20260730T000136Z/report.md`，workstream 为
+`ws-20260730T000417Z-5PXU`。Preflight、probes、freshness、usage 与 target
+cleanliness 均通过；workflow 在 7 Agent runs、2 次 semantic revision、1 次已消费
+的 bounded correction 后进入 `WAITING_FOR_RECOVERY`。第二次 revision 已命中
+stop-loss，结果为有效 `FAIL`，不是 `INVALID`。没有 target 写入，禁止自动重跑或
+直接修 prompt/parser。
 
 ## 10. 任务拆分与依赖
 
@@ -478,7 +486,7 @@ pin。Real-case 仍需 executable gate、fresh Dual、probes 与一次性 provid
 | T3 bottleneck selection | 只读 assessment | 否 | 否 | T2 token/cache/latency baseline PASS |
 | T4 subtraction | 实现 | 可能，单 slice | 否 | T3 选出安全候选 |
 | T5 same-case comparison | 验证 | 否 | 三次授权样本；v3 PASS | T4 deterministic PASS |
-| T6 medium case | readiness + 验证 | 否 | 否 | READY：需 executable gate、freshness、probes 与一次性授权 |
+| T6 medium case | readiness + 验证 | 否 | 一次授权已消耗 | FAIL：stop-loss enforced；需只读归因后另行决策 |
 
 ## 11. 非主问题处理规则
 

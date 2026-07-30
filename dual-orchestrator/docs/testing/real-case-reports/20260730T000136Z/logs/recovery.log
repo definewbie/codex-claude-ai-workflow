@@ -1,0 +1,50 @@
+Current Failure
+Path: .agent/workstreams/ws-20260730T000417Z-5PXU/recovery/current-failure.md
+
+Recovery Assessment
+- Classification: agent_output_incomplete
+- Retry Readiness: RETRY_AFTER_OUTPUT_CONTRACT_FIX
+- Reason: The final ACP assistant message did not contain a valid AgentResultEnvelope.
+- Diagnostic JSON: .agent/workstreams/ws-20260730T000417Z-5PXU/artifacts/contract-failures/node-design-claude_design-018.json
+- Diagnostic Markdown: .agent/workstreams/ws-20260730T000417Z-5PXU/artifacts/contract-failures/node-design-claude_design-018.md
+- Suggested Command: dualctl retry --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+
+# Current Failure
+
+## Summary
+
+- Workflow Status: WAITING_FOR_RECOVERY
+- Node: design.claude_design
+- Node Instance: node-design-claude_design-018
+- Node Status: FAILED
+- Handler: acpx.agent_run
+- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION
+- Recoverable: N/A
+- Exit Code: 5
+- Run ID: run-1785370357484
+- Agent: claude
+- Session: claude-main-ws-20260730T000417Z-5PXU
+- Attention Category: FAILED
+- Retry Safe: false
+
+## Contract Failure Diagnostic
+
+- Diagnostic JSON: .agent/workstreams/ws-20260730T000417Z-5PXU/artifacts/contract-failures/node-design-claude_design-018.json
+- Diagnostic Markdown: .agent/workstreams/ws-20260730T000417Z-5PXU/artifacts/contract-failures/node-design-claude_design-018.md
+- Error Code: AGENT_RESULT_PARSE_FAILED
+- Error Message: Unrecognized token '我将基于现有的工作记忆进行': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 14]
+
+## Evidence
+
+- .agent/workstreams/ws-20260730T000417Z-5PXU/runs/run-1785370357484/outputs/design-claude.stderr.log
+- .agent/workstreams/ws-20260730T000417Z-5PXU/runs/run-1785370357484/outputs/design-claude.transcript.log
+- .agent/workstreams/ws-20260730T000417Z-5PXU/runs/run-1785370357484/outputs/design-claude.json
+- .agent/workstreams/ws-20260730T000417Z-5PXU/artifacts/contract-failures/node-design-claude_design-018.json
+- .agent/workstreams/ws-20260730T000417Z-5PXU/artifacts/contract-failures/node-design-claude_design-018.md
+
+## Suggested Action
+
+- The final ACP assistant message did not contain a valid AgentResultEnvelope.
+- Inspect recovery evidence before deciding whether retry is safe.
+- Command: `dualctl retry --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU`.

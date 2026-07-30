@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-Phase-D T6 READY, REAL-CASE NOT ACTIVE
+## Current Active Step: Post-Phase-D T6 FAIL / STOP-LOSS ENFORCED
 
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >
@@ -88,12 +88,29 @@
 >
 > Target `backend/requirements.txt` 漏声明 FastAPI `File/Form` 所需的
 > `python-multipart`。本次只在临时环境显式固定为 `0.0.32`，没有修改 target，
-> 也不允许隐式 fallback。T6 现在是
+> 也不允许隐式 fallback。T6 在 provider 运行前的 readiness 状态是
 > `READY_WITH_EXPLICIT_SUPPLEMENTAL_PIN / REAL-CASE NOT ACTIVE`；必须先固化
 > executable gate、fresh build、probes，并重新获得一次 provider 授权。
 >
 > T6 assessment：
 > `docs/plans/post-phase-d-t6-medium-case-readiness-20260729.zh-CN.md`。
+>
+> T6 已在一次性授权下执行。报告：
+> `docs/testing/real-case-reports/20260730T000136Z/report.md`；workstream：
+> `ws-20260730T000417Z-5PXU`。Fresh build、191-test backend baseline、
+> miniprogram build、Claude/Codex probes、runner 与 usage reconciliation 均通过，
+> 因此结果是有效 `FAIL`，不是 provider `INVALID`。
+>
+> 运行在 7 个 Agent runs、12 分 03 秒时停止。intake 与 design review 各产生一次
+> 有 evidence 的 semantic revision，`revisionCount=2` 触发 stop-loss。第一次
+> design 已消费唯一 bounded correction；第二次 design revision 再次输出
+> prose+JSON，strict parser 拒绝，且不得再发起第 2 次 correction。workflow 最终为
+> `WAITING_FOR_RECOVERY`，尚未进入 implementation；target 与 Agent worktree 均
+> clean。
+>
+> T6 当前状态：
+> `REAL-CASE FAIL / STOP-LOSS ENFORCED / NO RETRY AUTHORIZED`。禁止自动重跑，
+> 禁止未经独立只读归因就修改 prompt、parser、workflow 或 production。
 >
 > 当前架构：
 > `docs/design/dual-orchestrator-current-architecture.zh-CN.md`。
@@ -118,8 +135,7 @@
 >
 > 禁止新增 workflow/policy/context/artifact/evidence/capability/metrics 平台；
 > 禁止因 handler LOC 较大继续拆分；禁止自动重跑 T5、调
-> prompt/model/timeout，或在 T6 executable gate、freshness、probes 与一次性授权
-> 完成前运行中等复杂度 real-case；禁止把 deferred monetary cost 或单次 A3
+> prompt/model/timeout，或自动重跑 T6；禁止把 deferred monetary cost 或单次 A3
 > observed benefit 外推为普遍收益。
 
 > B0 Rebase Assessment: **COMMITTED** (`86af5ddb`)。

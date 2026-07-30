@@ -1,0 +1,1 @@
+Provider connectivity probe. Reply exactly: OK. Do not use tools.

@@ -1,0 +1,24 @@
+Timeline
+Workstream: ws-20260730T000417Z-5PXU
+Workflow: agent-lifecycle-full@6
+Status: WAITING_FOR_RECOVERY
+Projection: .agent/workstreams/ws-20260730T000417Z-5PXU/timeline.json
+
+Nodes:
+  COMPLETED  context.intake_claude_brainstorm  [TASK]  iter-001
+  COMPLETED  intake.claude_brainstorm  [TASK]  iter-001
+  COMPLETED  context.intake_codex_product_review  [TASK]  iter-001
+  COMPLETED  intake.codex_product_review  [TASK]  iter-001
+  COMPLETED  intake.decision  [DECISION]  iter-001
+  COMPLETED  intake.claude_brainstorm  [TASK]  iter-002
+  COMPLETED  context.intake_codex_product_review  [TASK]  iter-002
+  COMPLETED  intake.codex_product_review  [TASK]  iter-002
+  COMPLETED  intake.decision  [DECISION]  iter-002
+  COMPLETED  gate.human_requirement_review  [GATE]  iter-002
+  COMPLETED  contract.compile  [TASK]  iter-002
+  COMPLETED  gate.contract_review  [GATE]  iter-002
+  COMPLETED  design.claude_design  [TASK]  iter-002
+  COMPLETED  context.design_codex_arch_review  [TASK]  iter-002
+  COMPLETED  design.codex_arch_review  [TASK]  iter-002
+  COMPLETED  design.decision  [DECISION]  iter-002
+  FAILED  design.claude_design  [TASK]  iter-003

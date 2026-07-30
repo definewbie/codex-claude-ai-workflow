@@ -1,7 +1,7 @@
 # Full Workflow 复杂度价值证明
 
 日期：2026-07-28
-状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 READINESS READY`
+状态：`T1-T5 COMPLETE / ONE A3 OBSERVED BENEFIT PROVEN / T6 REAL-CASE FAIL`
 
 ## 1. 决策问题
 
@@ -474,6 +474,9 @@ Residual risk:
   workflow 的普遍经济合理性；
   T6 pinned backend baseline 已在 ephemeral environment 与独立 test database
   上达到 191 tests PASS，frontend build 也通过；target requirements 的
-  python-multipart manifest gap 仅通过显式 `0.0.32` supplemental pin 接受。
-  T6 real-case 尚未激活，仍需 executable gate、freshness、probes 与一次性授权。
+  python-multipart manifest gap 仅通过显式 `0.0.32` supplemental pin 接受；
+  T6 real-case 的 preflight、freshness、probes 与 usage reconciliation 均通过，
+  但 7 个 Agent runs 内出现 2 次 semantic revision，并在已消费 1 次 bounded
+  correction 后再次产生 prose+JSON；stop-loss 正确阻止继续执行。该样本为有效
+  FAIL，未证明当前 full workflow 能完成中等复杂度任务。
 ```

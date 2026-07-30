@@ -1,0 +1,17 @@
+Workstream: ws-20260730T000417Z-5PXU
+Workspace: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU
+Branch: ai/ws-20260730T000417Z-5PXU
+Ledger: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU
+
+Workflow:
+  Definition: agent-lifecycle-full@6
+  Status: WAITING_FOR_RECOVERY
+  Active nodes: [node-design-claude_design-018]
+  Open gates: [recovery-node-design-claude_design-018]
+  Active node definition: design.claude_design
+  Active node status: FAILED
+  Active iteration: iter-003
+  Recovery: Workflow needs inspection
+  Recovery detail: The final ACP assistant message did not contain a valid AgentResultEnvelope.
+  Next action: Inspect recovery evidence before deciding whether retry is safe.
+  Command: dualctl retry --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU

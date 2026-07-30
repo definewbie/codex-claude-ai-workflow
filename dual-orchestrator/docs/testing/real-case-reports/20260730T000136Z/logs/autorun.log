@@ -1,0 +1,51 @@
+Autorun started
+Workstream: ws-20260730T000417Z-5PXU
+Workspace: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU
+Status: WAITING_FOR_HUMAN; active=gate.human_requirement_review; open gates=[gate-node-gate-human_requirement_review-011]
+Gate 1: gate.human_requirement_review -> approve
+Status: RUNNING; active=contract.compile; open gates=[]
+Running workflow until next pause...
+Step 1: gate.contract_review -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+     packet: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU/reviews/node-gate-contract_review-013.md
+  2. Choose one action after review:
+     dualctl approve --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU --run ws-20260730T000417Z-5PXU
+     dualctl revise --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU --run --feedback-file feedback.md ws-20260730T000417Z-5PXU
+Status: WAITING_FOR_HUMAN; active=gate.contract_review; open gates=[gate-node-gate-contract_review-013]
+Gate 2: gate.contract_review -> approve
+Status: RUNNING; active=design.claude_design; open gates=[]
+Running workflow until next pause...
+Still running (30s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Still running (60s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Still running (90s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Still running (120s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Still running (150s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Step 1: context.design_codex_arch_review -> RUNNING (resumed workflow)
+Step 2: design.codex_arch_review -> RUNNING (resumed workflow)
+Still running (180s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Still running (210s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Step 3: design.decision -> RUNNING (resumed workflow)
+Step 4: design.claude_design -> RUNNING (resumed workflow)
+Still running (240s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Still running (270s). Trace: dualctl trace --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Step 5: design.claude_design -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+     summary: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU/recovery/current-failure.md
+  2. Inspect recovery evidence before deciding whether retry is safe.
+     dualctl retry --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+Status: WAITING_FOR_RECOVERY; active=design.claude_design; open gates=[recovery-node-design-claude_design-018]
+Running workflow until next pause...
+Step 1: design.claude_design -> WAITING_FOR_RECOVERY (node design.claude_design FAILED (agent_result_missing_or_invalid), manual recovery or retry required)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU
+     summary: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU/recovery/current-failure.md
+  2. Inspect recovery evidence before deciding whether retry is safe.
+     dualctl retry --workdir /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU ws-20260730T000417Z-5PXU

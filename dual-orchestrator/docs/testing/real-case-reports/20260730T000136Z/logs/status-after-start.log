@@ -1,0 +1,13 @@
+Workstream: ws-20260730T000417Z-5PXU
+Workspace: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU
+Branch: ai/ws-20260730T000417Z-5PXU
+Ledger: /private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU/.agent/workstreams/ws-20260730T000417Z-5PXU
+
+Workflow:
+  Definition: agent-lifecycle-full@6
+  Status: WAITING_FOR_HUMAN
+  Active nodes: [node-gate-human_requirement_review-011]
+  Open gates: [gate-node-gate-human_requirement_review-011]
+  Active node definition: gate.human_requirement_review
+  Active node status: WAITING
+  Active iteration: iter-002
