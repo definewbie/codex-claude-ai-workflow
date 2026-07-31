@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Optional;
  * never parses raw JSON and never applies workflow or retry policy.</p>
  */
 final class AcpxSessionStreamProjector {
-    private final Map<String, String> pendingRequests = new HashMap<>();
+    private final Map<String, ArrayDeque<String>> pendingRequests = new HashMap<>();
     private final List<AcpxStreamEvidence.TypedError> errors = new ArrayList<>();
     private boolean sessionReady;
     private String promptStopReason = "";
@@ -68,7 +69,8 @@ final class AcpxSessionStreamProjector {
         if ("session/prompt".equals(wire.method()) && !currentObservation) {
             return Optional.empty();
         }
-        pendingRequests.put(wire.requestId(), wire.method());
+        pendingRequests.computeIfAbsent(wire.requestId(), ignored -> new ArrayDeque<>())
+                .addLast(wire.method());
         if (isControlRequest(wire.method())) {
             promptStopReason = "";
         }
@@ -194,7 +196,11 @@ final class AcpxSessionStreamProjector {
     }
 
     private String completedMethodFor(AcpxStreamWireLine wire) {
-        var correlated = pendingRequests.remove(wire.requestId());
+        var requests = pendingRequests.get(wire.requestId());
+        var correlated = requests == null ? null : requests.pollLast();
+        if (requests != null && requests.isEmpty()) {
+            pendingRequests.remove(wire.requestId());
+        }
         if (correlated != null && !correlated.isBlank()) {
             return correlated;
         }
@@ -208,7 +214,9 @@ final class AcpxSessionStreamProjector {
     }
 
     private boolean hasPendingControlRequest() {
-        return pendingRequests.values().stream().anyMatch(this::isControlRequest);
+        return pendingRequests.values().stream()
+                .flatMap(java.util.Collection::stream)
+                .anyMatch(this::isControlRequest);
     }
 
     private boolean isControlRequest(String method) {

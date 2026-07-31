@@ -115,12 +115,6 @@ final class AcpxAgentResultAcquirer {
             CorrectionReason correctionReason,
             String correctionPrompt
     ) {
-        if (correctionReason == CorrectionReason.NONE) {
-            return CorrectionDisposition.NOT_NEEDED;
-        }
-        if (correctionPrompt == null || correctionPrompt.isBlank()) {
-            return CorrectionDisposition.SKIPPED_CORRECTION_UNAVAILABLE;
-        }
         if (result.exitCode() != 0) {
             return CorrectionDisposition.SKIPPED_PROCESS_NON_ZERO;
         }
@@ -128,9 +122,16 @@ final class AcpxAgentResultAcquirer {
             return CorrectionDisposition.SKIPPED_NOT_COMPLETED;
         }
         var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
-        return failure.signalPresent()
-                ? CorrectionDisposition.SKIPPED_PROVIDER_FAILURE
-                : CorrectionDisposition.ATTEMPTED;
+        if (failure.signalPresent()) {
+            return CorrectionDisposition.SKIPPED_PROVIDER_FAILURE;
+        }
+        if (correctionReason == CorrectionReason.NONE) {
+            return CorrectionDisposition.NOT_NEEDED;
+        }
+        if (correctionPrompt == null || correctionPrompt.isBlank()) {
+            return CorrectionDisposition.SKIPPED_CORRECTION_UNAVAILABLE;
+        }
+        return CorrectionDisposition.ATTEMPTED;
     }
 
     private AgentResultEnvelopeValidator.ValidationResult validate(

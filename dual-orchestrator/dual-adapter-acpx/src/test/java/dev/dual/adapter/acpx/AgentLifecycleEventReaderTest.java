@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,6 +17,41 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AgentLifecycleEventReaderTest {
     @TempDir
     Path tempDir;
+
+    @Test
+    void capturedT6NestedPermissionRequestPreservesFinalPromptCompletion() throws Exception {
+        var stdout = tempDir.resolve("stdout-t6.log");
+        var stderr = tempDir.resolve("stderr-t6.log");
+        var sessionsDir = tempDir.resolve("sessions-t6");
+        var sessionId = "b01cbdae-7c03-4bb7-be0c-6e2101402a1e";
+        var stream = sessionsDir.resolve(sessionId + ".stream.ndjson");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stdout, "");
+        Files.writeString(stderr, "[acpx] session claude-main (" + sessionId + ")\n");
+        try (var captured = getClass().getResourceAsStream(
+                "/acpx/t6-20260731-nested-request-id.ndjson")) {
+            if (captured == null) {
+                throw new AssertionError("captured T6 stream fixture is missing");
+            }
+            Files.write(stream, captured.readAllBytes());
+        }
+
+        var reader = new AgentLifecycleEventReader(
+                stdout,
+                stderr,
+                sessionsDir,
+                Map.of(sessionId, 0L)
+        );
+        reader.readNewEvents();
+
+        assertTrue(reader.promptCompletion().completed());
+        assertEquals("8", reader.promptCompletion().requestId());
+        assertEquals("end_turn", reader.promptCompletion().stopReason());
+        assertEquals(
+                "{\"schema_version\":1,\"result\":{\"decision\":\"IMPLEMENTED\"}}",
+                reader.promptCompletion().finalAssistantMessage()
+        );
+    }
 
     @Test
     void initialStreamTailIgnoresHistoricalProviderFailuresButKeepsLifecycleRecoveryEvents() throws Exception {

@@ -143,6 +143,43 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void missingResultFromIncompletePromptRecordsSkippedNotCompleted() throws Exception {
+        var transport = new ScriptedTransport(result("", "", 0, ""));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals("AGENT_RESULT_MISSING", acquisition.initialParse().errorCode());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.NONE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.SKIPPED_NOT_COMPLETED,
+                acquisition.correctionDisposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
+    void nonzeroProcessWithOtherwiseValidResultRecordsSkippedProcessNonZero() throws Exception {
+        var transport = new ScriptedTransport(validResult("request-1", strictEnvelope("run-1"), 1));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.NONE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.SKIPPED_PROCESS_NON_ZERO,
+                acquisition.correctionDisposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
     void missingCorrectionPromptRecordsUnavailableWithoutStartingCorrection() throws Exception {
         var transport = new ScriptedTransport(
                 validResult("request-1", "prefix\n" + strictEnvelope("run-1"), 0));
