@@ -170,6 +170,7 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(1, acquisition.path("maxCorrectionAttempts").asInt());
         assertEquals(2, acquisition.path("selectedCandidateOccurrence").asInt());
         assertEquals("PARSE_FAILURE", acquisition.path("correctionReason").asText());
+        assertEquals("ATTEMPTED", acquisition.path("correctionDisposition").asText());
         assertEquals(2, acquisition.path("occurrences").size());
         assertEquals("fixture-initial", acquisition.path("occurrences").get(0).path("requestId").asText());
         assertFalse(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
@@ -241,6 +242,7 @@ class AcpxAgentTaskHandlerTest {
         var acquisition = metadata.path("agentResultAcquisition");
         assertTrue(acquisition.path("correctionAttempted").asBoolean());
         assertEquals("SCHEMA_FAILURE", acquisition.path("correctionReason").asText());
+        assertEquals("ATTEMPTED", acquisition.path("correctionDisposition").asText());
         assertEquals(2, acquisition.path("occurrences").size());
         assertTrue(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
         assertFalse(acquisition.path("occurrences").get(0).path("contractSchemaValid").asBoolean());
@@ -1038,6 +1040,46 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void nonZeroProcessCannotReachCorrectionAndRecordsSkippedDisposition() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-non-zero-correction");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var transport = new NonZeroProsePrefixedTransport();
+        var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "design-claude"
+        ));
+        var instance = readyInstance("design.claude_design");
+
+        var candidate = new AcpxAgentTaskHandler(transport, false).execute(
+                new TaskHandler.TaskContext(tempDir, "ws-non-zero-correction", definition, instance)
+        );
+        var result = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-non-zero-correction",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(1, transport.initialCalls);
+        assertEquals(0, transport.correctionCalls);
+        var runMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) candidate.result().get("run_metadata")).toFile()
+        );
+        var acquisition = runMetadata.path("agentResultAcquisition");
+        assertFalse(acquisition.path("correctionAttempted").asBoolean());
+        assertEquals("PARSE_FAILURE", acquisition.path("correctionReason").asText());
+        assertEquals("SKIPPED_PROCESS_NON_ZERO", acquisition.path("correctionDisposition").asText());
+        assertEquals(1, acquisition.path("occurrences").size());
+        assertEquals(5, acquisition.path("occurrences").get(0).path("exitCode").asInt());
+    }
+
+    @Test
     void completesReconnectExitWhenStdoutHasCompleteTerminalArtifact() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -1576,6 +1618,40 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return completedResult(request, 5, now, List.of("acpx", "claude"), "READY_FOR_ARCH_REVIEW");
+        }
+    }
+
+    private static final class NonZeroProsePrefixedTransport extends AcpxAgentTransport {
+        private int initialCalls;
+        private int correctionCalls;
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            initialCalls++;
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "");
+            Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            var resultJson = completionJson(request, "READY_FOR_ARCH_REVIEW");
+            return new AcpxRunResult(
+                    5,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude"),
+                    List.of(),
+                    null,
+                    new AcpxPromptCompletion(
+                            "fixture-non-zero",
+                            "end_turn",
+                            "I completed the design.\n" + resultJson
+                    )
+            );
+        }
+
+        @Override
+        AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) {
+            correctionCalls++;
+            throw new AssertionError("non-zero process must not start correction");
         }
     }
 

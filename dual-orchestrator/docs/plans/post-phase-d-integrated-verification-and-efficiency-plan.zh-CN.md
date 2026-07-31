@@ -472,10 +472,12 @@ pin。
 一次性 real-case 已执行，报告为
 `docs/testing/real-case-reports/20260730T000136Z/report.md`，workstream 为
 `ws-20260730T000417Z-5PXU`。Preflight、probes、freshness、usage 与 target
-cleanliness 均通过；workflow 在 7 Agent runs、2 次 semantic revision、1 次已消费
-的 bounded correction 后进入 `WAITING_FOR_RECOVERY`。第二次 revision 已命中
-stop-loss，结果为有效 `FAIL`，不是 `INVALID`。没有 target 写入，禁止自动重跑或
-直接修 prompt/parser。
+cleanliness 均通过；workflow 在 7 Agent runs、2 次 semantic revision 后进入
+`WAITING_FOR_RECOVERY`。第一次 design Agent run 内完成一次 bounded correction；
+第二次 design revision 因 permission denial 导致进程非零退出，按既有规则跳过
+correction，而不是因为跨 run allowance 被耗尽。第二次 revision 已命中当时 gate
+的 stop-loss，结果为有效 `FAIL`，不是 `INVALID`。没有 target 写入，禁止自动重跑
+或直接修 prompt/parser。
 
 ## 10. 任务拆分与依赖
 

@@ -476,7 +476,9 @@ Residual risk:
   上达到 191 tests PASS，frontend build 也通过；target requirements 的
   python-multipart manifest gap 仅通过显式 `0.0.32` supplemental pin 接受；
   T6 real-case 的 preflight、freshness、probes 与 usage reconciliation 均通过，
-  但 7 个 Agent runs 内出现 2 次 semantic revision，并在已消费 1 次 bounded
-  correction 后再次产生 prose+JSON；stop-loss 正确阻止继续执行。该样本为有效
-  FAIL，未证明当前 full workflow 能完成中等复杂度任务。
+  但 7 个 Agent runs 内出现 2 次 semantic revision。第一次 design Agent run
+  完成 1 次 bounded correction；第二次 design revision 遭 permission denial 并
+  以非零进程状态结束，因而 correction 被 fail-closed 跳过，不存在跨 run allowance
+  耗尽。stop-loss 正确阻止继续执行。该样本为有效 FAIL，未证明当前 full workflow
+  能完成中等复杂度任务。
 ```

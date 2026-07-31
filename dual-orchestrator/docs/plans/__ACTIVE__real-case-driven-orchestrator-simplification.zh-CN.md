@@ -102,15 +102,19 @@
 > 因此结果是有效 `FAIL`，不是 provider `INVALID`。
 >
 > 运行在 7 个 Agent runs、12 分 03 秒时停止。intake 与 design review 各产生一次
-> 有 evidence 的 semantic revision，`revisionCount=2` 触发 stop-loss。第一次
-> design 已消费唯一 bounded correction；第二次 design revision 再次输出
-> prose+JSON，strict parser 拒绝，且不得再发起第 2 次 correction。workflow 最终为
-> `WAITING_FOR_RECOVERY`，尚未进入 implementation；target 与 Agent worktree 均
-> clean。
+> 有 evidence 的 semantic revision，`revisionCount=2` 触发当时 gate 的
+> stop-loss。第一次 design 在该 Agent run 内执行一次 bounded correction。第二次
+> design revision 遭 Terminal permission denial，ACP 进程非零退出，因此按既有
+> fail-closed 规则跳过 correction；这不是跨 Agent run 的 correction allowance
+> 被耗尽。workflow 最终为 `WAITING_FOR_RECOVERY`，尚未进入 implementation；
+> target 与 Agent worktree 均 clean。
 >
 > T6 当前状态：
 > `REAL-CASE FAIL / STOP-LOSS ENFORCED / NO RETRY AUTHORIZED`。禁止自动重跑，
 > 禁止未经独立只读归因就修改 prompt、parser、workflow 或 production。
+> 下一版 gate：
+> `docs/testing/verification-gates/20260730-t6-medium-case-v2.md`，状态为
+> `READY_AFTER_CHECKPOINT / NOT AUTHORIZED`。
 >
 > 当前架构：
 > `docs/design/dual-orchestrator-current-architecture.zh-CN.md`。

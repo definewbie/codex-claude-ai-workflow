@@ -32,6 +32,11 @@ class AcpxAgentResultAcquirerTest {
 
         assertFalse(acquisition.correctionAttempted());
         assertTrue(acquisition.finalParse().valid());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.NONE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.NOT_NEEDED,
+                acquisition.correctionDisposition()
+        );
         assertEquals(1, transport.calls);
         assertFalse(Files.exists(requests.correction().promptPath()));
     }
@@ -51,6 +56,11 @@ class AcpxAgentResultAcquirerTest {
         assertTrue(acquisition.correctionAttempted());
         assertFalse(acquisition.initialParse().valid());
         assertTrue(acquisition.finalParse().valid());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.PARSE_FAILURE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.ATTEMPTED,
+                acquisition.correctionDisposition()
+        );
         assertEquals(2, transport.calls);
         assertEquals(List.of("same-session", "same-session"), transport.sessions);
         assertTrue(Files.readString(requests.correction().promptPath())
@@ -86,6 +96,11 @@ class AcpxAgentResultAcquirerTest {
 
         assertTrue(acquisition.finalParse().valid());
         assertFalse(acquisition.correctionAttempted());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.NONE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.NOT_NEEDED,
+                acquisition.correctionDisposition()
+        );
         assertEquals(1, transport.calls);
     }
 
@@ -100,6 +115,49 @@ class AcpxAgentResultAcquirerTest {
                 "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertFalse(acquisition.correctionAttempted());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.PARSE_FAILURE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.SKIPPED_PROCESS_NON_ZERO,
+                acquisition.correctionDisposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
+    void incompletePromptDoesNotStartCorrection() throws Exception {
+        var transport = new ScriptedTransport(
+                result("request-1", "prefix\n" + strictEnvelope("run-1"), 0, "cancelled"));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.PARSE_FAILURE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.SKIPPED_NOT_COMPLETED,
+                acquisition.correctionDisposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
+    void missingCorrectionPromptRecordsUnavailableWithoutStartingCorrection() throws Exception {
+        var transport = new ScriptedTransport(
+                validResult("request-1", "prefix\n" + strictEnvelope("run-1"), 0));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), "",
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.PARSE_FAILURE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.SKIPPED_CORRECTION_UNAVAILABLE,
+                acquisition.correctionDisposition()
+        );
         assertEquals(1, transport.calls);
     }
 
@@ -115,6 +173,11 @@ class AcpxAgentResultAcquirerTest {
                 "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertFalse(acquisition.correctionAttempted());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.PARSE_FAILURE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.CorrectionDisposition.SKIPPED_PROVIDER_FAILURE,
+                acquisition.correctionDisposition()
+        );
         assertEquals(1, transport.calls);
     }
 
@@ -299,6 +362,10 @@ class AcpxAgentResultAcquirerTest {
     }
 
     private static AcpxRunResult validResult(String requestId, String message, int exitCode) {
+        return result(requestId, message, exitCode, "end_turn");
+    }
+
+    private static AcpxRunResult result(String requestId, String message, int exitCode, String stopReason) {
         var now = Instant.parse("2026-07-22T00:00:00Z");
         return new AcpxRunResult(
                 exitCode,
@@ -307,7 +374,7 @@ class AcpxAgentResultAcquirerTest {
                 List.of("acpx", "claude"),
                 List.of(),
                 null,
-                new AcpxPromptCompletion(requestId, "end_turn", message)
+                new AcpxPromptCompletion(requestId, stopReason, message)
         );
     }
 

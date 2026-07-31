@@ -9,6 +9,7 @@ record AgentResultAcquisitionDocument(
         int maxCorrectionAttempts,
         int selectedCandidateOccurrence,
         String correctionReason,
+        AcpxAgentResultAcquirer.CorrectionDisposition correctionDisposition,
         List<AgentResultOccurrenceDocument> occurrences
 ) {
     AgentResultAcquisitionDocument {

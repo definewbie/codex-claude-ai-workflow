@@ -49,7 +49,13 @@ final class AcpxAgentResultAcquirer {
         var initialParse = parser.parse(initialResult.promptCompletion().finalAssistantMessage());
         var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract);
         var correctionReason = correctionReason(initialParse, initialValidation);
-        if (!mayCorrect(initialRequest, initialResult, correctionReason, correctionPrompt)) {
+        var correctionDisposition = correctionDisposition(
+                initialRequest,
+                initialResult,
+                correctionReason,
+                correctionPrompt
+        );
+        if (correctionDisposition != CorrectionDisposition.ATTEMPTED) {
             return new Acquisition(
                     initialResult,
                     initialParse,
@@ -59,7 +65,8 @@ final class AcpxAgentResultAcquirer {
                     null,
                     initialRequest,
                     null,
-                    CorrectionReason.NONE
+                    correctionReason,
+                    correctionDisposition
             );
         }
 
@@ -89,7 +96,8 @@ final class AcpxAgentResultAcquirer {
                 correctionValidation,
                 initialRequest,
                 correctionRequest,
-                correctionReason
+                correctionReason,
+                CorrectionDisposition.ATTEMPTED
         );
     }
 
@@ -101,20 +109,28 @@ final class AcpxAgentResultAcquirer {
         };
     }
 
-    private boolean mayCorrect(
+    private CorrectionDisposition correctionDisposition(
             AcpxRunRequest request,
             AcpxRunResult result,
             CorrectionReason correctionReason,
             String correctionPrompt
     ) {
-        if (correctionPrompt == null || correctionPrompt.isBlank()
-                || result.exitCode() != 0
-                || !result.promptCompletion().completed()
-                || correctionReason == CorrectionReason.NONE) {
-            return false;
+        if (correctionReason == CorrectionReason.NONE) {
+            return CorrectionDisposition.NOT_NEEDED;
+        }
+        if (correctionPrompt == null || correctionPrompt.isBlank()) {
+            return CorrectionDisposition.SKIPPED_CORRECTION_UNAVAILABLE;
+        }
+        if (result.exitCode() != 0) {
+            return CorrectionDisposition.SKIPPED_PROCESS_NON_ZERO;
+        }
+        if (!result.promptCompletion().completed()) {
+            return CorrectionDisposition.SKIPPED_NOT_COMPLETED;
         }
         var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
-        return !failure.signalPresent();
+        return failure.signalPresent()
+                ? CorrectionDisposition.SKIPPED_PROVIDER_FAILURE
+                : CorrectionDisposition.ATTEMPTED;
     }
 
     private AgentResultEnvelopeValidator.ValidationResult validate(
@@ -195,6 +211,15 @@ final class AcpxAgentResultAcquirer {
         SCHEMA_FAILURE
     }
 
+    enum CorrectionDisposition {
+        NOT_NEEDED,
+        ATTEMPTED,
+        SKIPPED_PROCESS_NON_ZERO,
+        SKIPPED_PROVIDER_FAILURE,
+        SKIPPED_NOT_COMPLETED,
+        SKIPPED_CORRECTION_UNAVAILABLE
+    }
+
     record Acquisition(
             AcpxRunResult initialResult,
             AgentResultEnvelopeParser.ParseResult initialParse,
@@ -204,7 +229,8 @@ final class AcpxAgentResultAcquirer {
             AgentResultEnvelopeValidator.ValidationResult correctionValidation,
             AcpxRunRequest initialRequest,
             AcpxRunRequest correctionRequest,
-            CorrectionReason correctionReason
+            CorrectionReason correctionReason,
+            CorrectionDisposition correctionDisposition
     ) {
         boolean correctionAttempted() {
             return correctionResult != null;
@@ -248,6 +274,7 @@ final class AcpxAgentResultAcquirer {
                     1,
                     correctionAttempted() ? 2 : 1,
                     correctionReason.name(),
+                    correctionDisposition,
                     correctionAttempted() ? java.util.List.of(
                             occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse, initialValidation,
                                     initialOutputPath, initialUsage),

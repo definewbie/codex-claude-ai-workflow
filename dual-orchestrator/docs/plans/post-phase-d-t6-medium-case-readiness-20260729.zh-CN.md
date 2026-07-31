@@ -208,11 +208,13 @@ Residual raw path:
 2. design review 要求 backend `found/none` 返回由 FastAPI response model 或等价
    runtime validator 强制，不能只靠 inline dict 约定状态组合。
 
-第一次 design 的 prose+JSON 已使用同 session bounded correction 修复，因而唯一
-correction allowance 已被消耗。第二次 design revision 再次返回 prose+JSON，
-strict parser 正确拒绝；继续 correction 将成为第 2 次 correction。同时
-`revisionCount=2` 已独立触发 gate 的第二次 semantic revision stop-loss。因此没有
-重试，也没有进入实现、测试或 acceptance。
+第一次 design 的 prose+JSON 在该次 Agent run 内使用一次 same-session bounded
+correction 修复。第二次 design revision 尝试执行 Terminal 验证时遭 permission
+denial，ACP 进程以非零状态退出；虽然 final assistant message 含 prose+JSON，
+既有 fail-closed 规则明确禁止对非零进程启动 correction。它不是因为前一次 Agent
+run 已经“消耗”了跨 run correction allowance。与此同时，`revisionCount=2`
+独立触发当时 gate 的第二次 semantic revision stop-loss。因此没有重试，也没有进入
+实现、测试或 acceptance。
 
 ## 8. Decision
 
@@ -222,8 +224,9 @@ cleanliness 均可比较。本次是有效的 workflow `FAIL`：
 ```text
 preflight PASS
   -> two evidence-backed semantic revisions
-  -> one bounded correction consumed
-  -> second revision / further correction prohibited
+  -> one bounded correction in the first design Agent run
+  -> second design Agent run exits non-zero after permission denial
+  -> correction skipped fail-closed; second revision prohibited by the gate
   -> stop-loss
 ```
 
@@ -232,3 +235,22 @@ preflight PASS
 也不得据此直接修改 prompt、parser 或 production；下一步只能先只读判断两次 revision
 是否暴露了 workflow review 成本过高或 task contract 不充分，再决定是否提出新的
 有界改动与全新授权。
+
+## 9. 下一版 T6 Verification Gate
+
+Executable gate：
+`docs/testing/verification-gates/20260730-t6-medium-case-v2.md`。
+
+- semantic revision 按 stage 计数；同一 stage 内最多一次，不能把不同 stage 的
+  review revision 合并成全局共享额度。
+- bounded correction 仍由每个 Agent run 独立拥有，且每个 run 最多一次；不存在
+  跨 run 的“前一次已消耗”语义。
+- 任一非零 process exit、permission denial、typed provider failure 或 failed
+  correction 立即 `FAIL`，不得通过 correction、retry 或 resume 恢复。
+- `run.json.agentResultAcquisition.correctionDisposition` 必须明确记录
+  `NOT_NEEDED`、`ATTEMPTED`、`SKIPPED_PROCESS_NON_ZERO`、
+  `SKIPPED_PROVIDER_FAILURE`、`SKIPPED_NOT_COMPLETED` 或
+  `SKIPPED_CORRECTION_UNAVAILABLE`；没有 correction 不能自动解释成 budget
+  exhaustion。
+- 下一次 real-case 仍须满足完整 Verification Gate、fresh artifact、provider
+  probes 与新的显式授权；本次文档修正不构成重跑授权。
