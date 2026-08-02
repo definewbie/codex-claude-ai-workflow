@@ -8,7 +8,21 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: P0 ACP Execution Fact Ownership Convergence / ENFORCED
+## Current Active Step: T6 Session/Projection Ownership Real-Case Proof / AUTHORIZED ONCE
+
+> ACP session 与 recovery projection ownership convergence 已作为单一 checkpoint
+> 提交为 `dc08cf2e`。Full reactor `1138/0`、独立代码审查与 deterministic
+> cannot-bypass 均为 PASS，当前成熟度为
+> `ENFORCED + DETERMINISTICALLY PROVEN / T6 REAL-CASE PROOF PENDING`。
+>
+> 新的一次性 T6 授权已由用户明确给出。唯一有效 gate 为
+> `docs/testing/verification-gates/20260802-t6-session-projection-ownership-v4.md`。
+> 必须先在 gate-only clean SHA 上重新完成 target/backend/frontend/database、fresh
+> Dual package 与 Claude/Codex probes；任一前置条件不满足时不得创建 workstream。
+> 全部通过后只运行一次 pinned cancer-clinic full workflow，并严格执行 stop-loss。
+> 本授权不得用于 retry、resume 或第二个样本。
+
+### Superseded Active Step: P0 ACP Execution Fact Ownership Convergence / ENFORCED
 
 > T6 stop-loss 暴露的 `SUCCESS + SKIPPED_PROVIDER_FAILURE` 矛盾已确认不是局部
 > tail bug，而是 ACP execution control facts 的 architecture ownership failure。
