@@ -1,6 +1,20 @@
 # Verification Gate: T6 Session and Projection Ownership v4
 
-Status: `AUTHORIZED_ONCE / NOT YET CONSUMED`
+Status: `CONSUMED / FAIL / STOP-LOSS ENFORCED`
+
+Execution result (2026-08-02): The one authorized sample created workstream
+`ws-20260802T101230Z-DLRW`. All deterministic and provider preconditions passed,
+and the first four ledger-completed Agent runs preserved the
+session/process/outcome ownership invariants. The second
+`intake.codex_product_review` nevertheless returned a second `NEEDS_REVISION`
+in the `intake` stage. A later audit of acpx record
+`84d2f90c-1315-4fa6-8f53-cc8838185b50` proved that the prepared third Claude
+intake did execute a provider prompt and produce an assistant response before
+the external stop completed, while its `run.json` remained `prepared` without
+process, usage or outcome facts. This is an execution-fact ownership
+contradiction, so the ownership checkpoint is not real-case proven. No retry,
+resume or second sample is authorized. See
+`docs/testing/real-case-reports/20260802T100848Z/report.md`.
 
 - Target: Prove the clean `dc08cf2e` session/projection ownership checkpoint
   completes one full pinned cancer-clinic workflow. Claude and Codex named

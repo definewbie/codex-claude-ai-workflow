@@ -8,19 +8,42 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: T6 Session/Projection Ownership Real-Case Proof / AUTHORIZED ONCE
+## Current Active Step: T6 Interruption Ledger Ownership v5 / AUTHORIZED ONCE
 
 > ACP session 与 recovery projection ownership convergence 已作为单一 checkpoint
 > 提交为 `dc08cf2e`。Full reactor `1138/0`、独立代码审查与 deterministic
 > cannot-bypass 均为 PASS，当前成熟度为
 > `ENFORCED + DETERMINISTICALLY PROVEN / T6 REAL-CASE PROOF PENDING`。
 >
-> 新的一次性 T6 授权已由用户明确给出。唯一有效 gate 为
+> 新的一次性 T6 授权已经消耗。唯一有效 gate 为
 > `docs/testing/verification-gates/20260802-t6-session-projection-ownership-v4.md`。
-> 必须先在 gate-only clean SHA 上重新完成 target/backend/frontend/database、fresh
-> Dual package 与 Claude/Codex probes；任一前置条件不满足时不得创建 workstream。
-> 全部通过后只运行一次 pinned cancer-clinic full workflow，并严格执行 stop-loss。
-> 本授权不得用于 retry、resume 或第二个样本。
+> target/backend/frontend/database、fresh Dual package 与 Claude/Codex probes
+> 全部通过，workstream `ws-20260802T101230Z-DLRW` 已运行。前四个完成的 Agent
+> ledger-completed run 均为零退出、typed outcome 一致、无 active bootstrap failure、无
+> outcome-level `retrySafe`，且 Claude/GLM-5.2 与 Codex/OpenAI provider identity
+> 未串线；这些正常完成路径的 ownership 投影成立。
+>
+> 但 `intake.codex_product_review` 第二次返回 `NEEDS_REVISION`，超过本 gate
+> “每 stage 最多一次 semantic revision”的 stop-loss。重启后从 acpx 持久化记录
+> `84d2f90c-1315-4fa6-8f53-cc8838185b50` 恢复出的证据进一步证明：第三轮 Claude
+> 实际已收到 prompt 并生成 assistant response，但对应 `run.json` 仍停在
+> `prepared`，没有 process/usage/outcome。这是 interruption window 中的
+> execution-fact ownership 缺口。完整 workflow 未到 `COMPLETED/ACCEPT`，且
+> ownership 不变量被绕过，故 v4 结论为 `FAIL / STOP-LOSS ENFORCED`，不能把
+> checkpoint 整体升级为 `PROVEN`。报告：
+> `docs/testing/real-case-reports/20260802T100848Z/report.md`。不授权 retry、resume
+> 或第二个 T6 样本；下一步必须同时处理 ledger interruption ownership 缺口，并
+> 将模型保真比较保持为独立 qualification，不得修改 prompt/parser 来追求通过。
+>
+> 该 interruption ownership 缺口已由 checkpoint `0c81fbc8` 修复：typed ACP
+> lifecycle 在运行中持久化，in-flight run 从 `prepared` 推进到 `running`，异常和
+> resume 路径通过同一 reconciler/finalizer 闭合；reconciler 不再伪造 occurrence、
+> candidate、usage 或 correction。Full reactor `1145/0`，独立同行复审 PASS。
+> 用户已明确授权一次且仅一次新的 T6。唯一有效 gate 为
+> `docs/testing/verification-gates/20260802-t6-interruption-ledger-ownership-v5.md`。
+> 必须先提交 gate、获得 clean SHA，并完成 target/backend/frontend/database、fresh
+> package 与 Claude/Codex probes；全部 PASS 后才能创建 workstream。不得 retry、
+> resume、修改 prompt/parser/model 或运行第二个样本。
 
 ### Superseded Active Step: P0 ACP Execution Fact Ownership Convergence / ENFORCED
 
