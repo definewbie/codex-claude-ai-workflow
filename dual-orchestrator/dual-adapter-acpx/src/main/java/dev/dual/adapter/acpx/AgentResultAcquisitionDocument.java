@@ -1,5 +1,8 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.ProcessResult;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -35,11 +38,17 @@ record AgentResultOccurrenceDocument(
         boolean contractSchemaValid,
         String contractCorrectionDisposition,
         List<String> contractValidationErrors,
-        AcpxUsage usage
+        AcpxUsage usage,
+        ProcessResult processResult,
+        List<AdapterSignal> adapterSignals
 ) {
     AgentResultOccurrenceDocument {
         contractValidationErrors = contractValidationErrors == null
                 ? List.of()
                 : List.copyOf(contractValidationErrors);
+        if (processResult == null) {
+            throw new IllegalArgumentException("processResult is required");
+        }
+        adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);
     }
 }

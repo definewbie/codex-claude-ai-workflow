@@ -8,7 +8,24 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-Phase-D T6 FAIL / STOP-LOSS ENFORCED
+## Current Active Step: P0 ACP Execution Fact Ownership Convergence / ENFORCED
+
+> T6 stop-loss 暴露的 `SUCCESS + SKIPPED_PROVIDER_FAILURE` 矛盾已确认不是局部
+> tail bug，而是 ACP execution control facts 的 architecture ownership failure。
+> 当前唯一 active objective 是：按
+> `docs/plans/__CHECKPOINT__acpx-execution-fact-ownership-convergence.zh-CN.md`
+> 完成修复性设计同行评审。首次 CC review 为 `WARN`；W1-W7 已写入 checkpoint，
+> CC re-review 已确认 W1-W7 全部闭合并给出 `PASS`。单一 convergence
+> change-set 已完成 deterministic implementation：关键矩阵 `122/0`、source
+> architecture gate `3/0`、full reactor `1130/0`（9/9 modules）。此前独立架构
+> review 为 `PASS`；最新 CC final-diff 复审确认 F1 已闭合并给出 `PASS`。当前成熟度为
+> `ENFORCED / NOT YET PROVEN`；T6 继续冻结，只有 clean checkpoint 与新的
+> Verification Gate 获得显式授权后，才允许用一次 T6 real-case 升级为 `PROVEN`。
+>
+> 本轮不再拆分新的 phase 或小 slice。CC review PASS 后，整个 ownership migration、
+> 旧路径删除、deterministic matrix、cannot-bypass、full reactor 与独立架构复核必须
+> 作为一个 checkpoint 整体完成。T6 在 clean implementation checkpoint 和新 gate
+> 获得显式授权前继续冻结。
 
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >

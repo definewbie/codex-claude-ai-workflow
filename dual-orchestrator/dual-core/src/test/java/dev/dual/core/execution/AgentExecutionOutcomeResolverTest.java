@@ -63,6 +63,29 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
+    void supersededReconnectCannotBlockAValidOccurrence() {
+        var reconnect = new AdapterSignal(
+                AdapterSignalType.AGENT_RECONNECT_REQUIRED,
+                "stale reconnect",
+                1,
+                "stderr",
+                "session-1",
+                true
+        );
+
+        var outcome = resolve(
+                ProcessResult.exitedZero(),
+                AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of(reconnect)
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.SUCCESS, outcome.status());
+        assertTrue(outcome.nodeMaySucceed());
+        assertTrue(outcome.secondarySignals().isEmpty());
+    }
+
+    @Test
     void reconnectWithValidAgentResultButMissingArtifactKeepsAdapterBoundaryAsPrimary() {
         var reconnect = AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED);
 

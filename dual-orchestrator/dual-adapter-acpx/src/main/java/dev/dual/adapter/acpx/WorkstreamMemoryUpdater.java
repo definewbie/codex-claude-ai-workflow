@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
+import dev.dual.core.execution.AdapterSignal;
 import dev.dual.runtime.handler.AgentOutputContractDocument;
 import dev.dual.runtime.handler.AgentOutputContractSidecar;
 
@@ -72,7 +73,7 @@ final class WorkstreamMemoryUpdater {
             String agent,
             Path outputPath,
             AcpxToolUsage toolUsage,
-            AcpxFailureClassifier.AcpxFailure failure
+            List<AdapterSignal> adapterSignals
     ) throws IOException {
         if (workspaceRoot == null || workstreamId == null || workstreamId.isBlank()) {
             return;
@@ -91,8 +92,12 @@ final class WorkstreamMemoryUpdater {
 
         extractContract(outputPath).ifPresent(
                 contract -> mergeRunOutcome(memory, contract, runId, nodeId, stage, agent));
-        if (failure != null && !text(failure.reason()).isBlank()) {
-            mergeFailure(memory, failure, runId, nodeId);
+        var activeSignal = adapterSignals == null ? null : adapterSignals.stream()
+                .filter(signal -> !signal.superseded() && signal.type().blocksSuccess())
+                .findFirst()
+                .orElse(null);
+        if (activeSignal != null) {
+            mergeFailure(memory, activeSignal, runId, nodeId);
         }
 
         writeMemory(memoryPath, workstreamId, memory);
@@ -331,14 +336,14 @@ final class WorkstreamMemoryUpdater {
 
     private void mergeFailure(
             Map<String, Object> memory,
-            AcpxFailureClassifier.AcpxFailure failure,
+            AdapterSignal signal,
             String runId,
             String nodeId
     ) {
         var entry = new LinkedHashMap<String, Object>();
         entry.put("node", text(nodeId));
         entry.put("runId", text(runId));
-        entry.put("reason", text(failure.reason()));
+        entry.put("reason", signal.type().name());
         entry.put("resolved", false);
         appendDedup(memory, "priorFailures", entry,
                 f -> text(f.get("node")) + "|" + text(f.get("reason")),

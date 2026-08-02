@@ -1,6 +1,11 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.AdapterSignalType;
+
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Per-run health tracker for an acpx Agent execution.
@@ -12,15 +17,8 @@ import java.time.Duration;
  * polling must not repeatedly consume historical diagnostics as current state.
  */
 final class AgentExecutionHealth {
-    private static final AcpxFailureClassifier.AcpxFailure NO_FAILURE =
-            new AcpxFailureClassifier.AcpxFailure("NONE", "", false, false);
-    private static final AcpxFailureClassifier.AcpxFailure STALLED_AGENT_OUTPUT =
-            new AcpxFailureClassifier.AcpxFailure(
-                    AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code(),
-                    "agent accepted the prompt but produced no trusted progress before the progress timeout",
-                    true,
-                    true
-            );
+    private static final String STALLED_AGENT_OUTPUT =
+            "agent accepted the prompt but produced no trusted progress before the progress timeout";
 
     private final AcpxFailureSignalCatalog signalCatalog;
     private final Duration recoverableSignalGrace;
@@ -30,7 +28,9 @@ final class AgentExecutionHealth {
     private long lastProgressSequence = -1;
     private Duration lastProgressAt = Duration.ZERO;
     private AcpxFailureSignal currentSignal;
+    private AdapterSignal currentAdapterSignal;
     private Duration currentFailureSince = Duration.ZERO;
+    private final List<AdapterSignal> observedSignals = new ArrayList<>();
 
     AgentExecutionHealth(AcpxFailureSignalCatalog signalCatalog, Duration recoverableSignalGrace) {
         this(signalCatalog, recoverableSignalGrace, recoverableSignalGrace);
@@ -56,10 +56,10 @@ final class AgentExecutionHealth {
         }
         lastConsumedSequence = event.sequence();
         switch (event.kind()) {
-            case SESSION_NEW_CREATED, PROMPT_ACCEPTED, TOOL_RESULT, USAGE_UPDATE -> {
+            case SESSION_NEW_CREATED, PROMPT_ACCEPTED, PROMPT_COMPLETED, TOOL_RESULT, USAGE_UPDATE -> {
                 markProgress(event, elapsed);
                 if (isReconnect(currentSignal)) {
-                    currentSignal = null;
+                    supersedeCurrentSignal();
                 }
             }
             case AGENT_ACTIVITY -> {
@@ -69,7 +69,7 @@ final class AgentExecutionHealth {
                 // superseded only by structured acpx stream progress or a
                 // completed ACP prompt.
                 if (event.source() == AgentLifecycleEvent.Source.ACPX_STREAM && isReconnect(currentSignal)) {
-                    currentSignal = null;
+                    supersedeCurrentSignal();
                 }
             }
             case SESSION_NEW_REQUESTED -> markProgress(event, elapsed);
@@ -82,21 +82,28 @@ final class AgentExecutionHealth {
 
     Assessment assess(Duration elapsed) {
         if (currentSignal != null && currentSignal.recoverable()) {
-            var failure = currentSignal.toFailure();
             if (immediateFailure(currentSignal)
                     || elapsed.minus(currentFailureSince).compareTo(recoverableSignalGrace) >= 0) {
-                return new Assessment(Status.RECOVERABLE_FAILURE, failure);
+                return new Assessment(Status.RECOVERABLE_FAILURE, currentAdapterSignal, signals());
             }
-            return new Assessment(Status.RECOVERING, failure);
+            return new Assessment(Status.RECOVERING, currentAdapterSignal, signals());
         }
         if (lastProgressSequence >= 0
                 && elapsed.minus(lastProgressAt).compareTo(progressStallTimeout) >= 0) {
-            return new Assessment(Status.RECOVERABLE_FAILURE, STALLED_AGENT_OUTPUT);
+            var stalled = new AdapterSignal(
+                    AdapterSignalType.PROCESS_STALLED,
+                    STALLED_AGENT_OUTPUT,
+                    Math.max(0, lastConsumedSequence + 1),
+                    "health",
+                    "",
+                    false
+            );
+            return new Assessment(Status.RECOVERABLE_FAILURE, stalled, appendSignal(stalled));
         }
         if (lastProgressSequence >= 0) {
-            return new Assessment(Status.HEALTHY, NO_FAILURE);
+            return new Assessment(Status.HEALTHY, null, signals());
         }
-        return new Assessment(Status.UNKNOWN, NO_FAILURE);
+        return new Assessment(Status.UNKNOWN, null, signals());
     }
 
     private void observeFailure(AgentLifecycleEvent event, Duration elapsed) {
@@ -115,8 +122,44 @@ final class AgentExecutionHealth {
                 || nextSignal.priority() >= currentSignal.priority()
                 || !sameReason(nextSignal, currentSignal)) {
             currentSignal = nextSignal;
+            currentAdapterSignal = nextSignal.toAdapterSignal(event.sequence(), event.source().name().toLowerCase());
+            observedSignals.add(currentAdapterSignal);
             currentFailureSince = elapsed;
         }
+    }
+
+    private void supersedeCurrentSignal() {
+        if (currentAdapterSignal != null) {
+            var superseded = new AdapterSignal(
+                    currentAdapterSignal.type(),
+                    currentAdapterSignal.message(),
+                    currentAdapterSignal.observedSequence(),
+                    currentAdapterSignal.source(),
+                    currentAdapterSignal.sessionId(),
+                    true
+            );
+            for (int index = observedSignals.size() - 1; index >= 0; index--) {
+                if (observedSignals.get(index) == currentAdapterSignal) {
+                    observedSignals.set(index, superseded);
+                    break;
+                }
+            }
+        }
+        currentSignal = null;
+        currentAdapterSignal = null;
+    }
+
+    private List<AdapterSignal> signals() {
+        return List.copyOf(observedSignals);
+    }
+
+    private List<AdapterSignal> appendSignal(AdapterSignal signal) {
+        var signals = new ArrayList<>(observedSignals);
+        if (signals.stream().noneMatch(existing -> existing.type() == signal.type()
+                && existing.observedSequence() == signal.observedSequence())) {
+            signals.add(signal);
+        }
+        return List.copyOf(signals);
     }
 
     private String typedStreamErrorText(AcpxStreamEvidence.TypedError error) {
@@ -155,6 +198,9 @@ final class AgentExecutionHealth {
         RECOVERABLE_FAILURE
     }
 
-    record Assessment(Status status, AcpxFailureClassifier.AcpxFailure failure) {
+    record Assessment(Status status, AdapterSignal signal, List<AdapterSignal> signals) {
+        Assessment {
+            signals = signals == null ? List.of() : List.copyOf(signals);
+        }
     }
 }

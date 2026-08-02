@@ -1,6 +1,8 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignalType;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+import dev.dual.core.execution.ProcessUsability;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -18,6 +20,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AcpxAgentTransportTest {
     @TempDir
     Path tempDir;
+
+    @Test
+    void processStartFailureReturnsTransportOwnedTypedFacts() throws Exception {
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(tempDir.resolve("missing-acpx").toString())
+                .runClaudeDesign(new AcpxRunRequest(
+                        tempDir,
+                        "claude-main",
+                        prompt,
+                        stdout,
+                        stderr,
+                        AcpxPermissionProfile.implement()
+                ));
+
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                result.processResult().usability());
+        assertEquals(1, result.exitCode());
+        assertEquals(1, result.activeAdapterSignals().size());
+        assertEquals(AdapterSignalType.PROCESS_STALLED, result.activeAdapterSignals().get(0).type());
+        assertTrue(Files.readString(stderr).contains("acpx transport failed"));
+    }
 
     @Test
     void contractCorrectionUsesExistingSessionWithoutBootstrapCommand() throws Exception {
@@ -488,7 +515,9 @@ class AcpxAgentTransportTest {
             assertTrue(result.executionTimeline().stream()
                     .filter(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED)
                     .map(event -> event.details().get("failureReason"))
-                    .anyMatch(AcpxFailureReason.RATE_LIMIT.code()::equals));
+                    .anyMatch(AdapterSignalType.RATE_LIMITED.name()::equals));
+            assertTrue(result.activeAdapterSignals().stream()
+                    .anyMatch(signal -> signal.type() == AdapterSignalType.RATE_LIMITED));
         } finally {
             System.setProperty("user.home", previousHome);
         }
@@ -553,8 +582,11 @@ class AcpxAgentTransportTest {
             assertEquals(4, result.exitCode());
             assertTrue(elapsedMs < 8_000, "prompt accepted without trusted progress must enter recovery");
             var stderrText = Files.readString(stderr);
-            assertTrue(stderrText.contains("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED"), stderrText);
+            assertTrue(stderrText.contains("reason=PROCESS_STALLED"), stderrText);
             assertTrue(stderrText.contains("progress_timeout_ms=1000"), stderrText);
+            assertEquals(ProcessUsability.STALLED, result.processResult().usability());
+            assertTrue(result.activeAdapterSignals().stream()
+                    .anyMatch(signal -> signal.type() == AdapterSignalType.PROCESS_STALLED));
         } finally {
             System.setProperty("user.home", previousHome);
         }

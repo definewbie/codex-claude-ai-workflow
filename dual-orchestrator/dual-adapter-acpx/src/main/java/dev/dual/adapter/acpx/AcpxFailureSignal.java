@@ -1,5 +1,7 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignal;
+
 import java.util.List;
 
 record AcpxFailureSignal(
@@ -16,8 +18,8 @@ record AcpxFailureSignal(
         return matchers.stream().anyMatch(matcher -> matcher.matches(text));
     }
 
-    AcpxFailureClassifier.AcpxFailure toFailure() {
-        return new AcpxFailureClassifier.AcpxFailure(reason.code(), message, recoverable, interruptRunningProcess);
+    AdapterSignal toAdapterSignal(long sequence, String source) {
+        return new AdapterSignal(reason.adapterSignalType(), message, sequence, source, "", false);
     }
 
     static Matcher contains(String text) {

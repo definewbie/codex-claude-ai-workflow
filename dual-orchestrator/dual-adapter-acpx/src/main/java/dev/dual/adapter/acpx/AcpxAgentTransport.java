@@ -1,6 +1,10 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.ProcessUsability;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +35,6 @@ public class AcpxAgentTransport {
     private static final String SESSION_COMMAND_TIMEOUT_ENV = "DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS";
     private static final String API_TIMEOUT_MS_ENV = "API_TIMEOUT_MS";
 
-    private final AcpxFailureClassifier failureClassifier = new AcpxFailureClassifier();
     private final String acpxExecutable;
     private final Duration recoverableSignalGrace;
     private final Duration agentProgressTimeout;
@@ -122,49 +125,59 @@ public class AcpxAgentTransport {
     }
 
     public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws IOException, InterruptedException {
-        if (request.permissionProfile().requiresFreshSession()) {
-            var bootstrap = ensureSession("claude", request);
-            if (!bootstrap.success()) {
-                return bootstrap.toRunResult();
+        try {
+            if (request.permissionProfile().requiresFreshSession()) {
+                var bootstrap = ensureSession("claude", request);
+                if (!bootstrap.success()) {
+                    return bootstrap.toRunResult();
+                }
             }
+            var result = run("claude", request);
+            if (isMissingSession(request, result)) {
+                var bootstrap = ensureSession("claude", request);
+                if (bootstrap.success()) {
+                    result = run("claude", request);
+                } else {
+                    return bootstrap.toRunResult();
+                }
+            } else if (isReconnectRequired(request, result)) {
+                var bootstrap = rebuildSession("claude", request);
+                if (bootstrap.success()) {
+                    result = run("claude", request);
+                } else {
+                    return bootstrap.toRunResult();
+                }
+            }
+            return result;
+        } catch (InterruptedException failure) {
+            Thread.currentThread().interrupt();
+            return transportExceptionResult("claude", request, Instant.now(), null, failure, true);
         }
-        var result = run("claude", request);
-        if (isMissingSession(request, result)) {
-            var bootstrap = ensureSession("claude", request);
-            if (bootstrap.success()) {
-                result = run("claude", request);
-            } else {
-                return bootstrap.toRunResult();
-            }
-        } else if (isReconnectRequired(request, result)) {
-            var bootstrap = rebuildSession("claude", request);
-            if (bootstrap.success()) {
-                result = run("claude", request);
-            } else {
-                return bootstrap.toRunResult();
-            }
-        }
-        return result;
     }
 
     public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws IOException, InterruptedException {
-        var result = run("codex", request);
-        if (isMissingSession(request, result)) {
-            var bootstrap = ensureSession("codex", request);
-            if (bootstrap.success()) {
-                result = run("codex", request);
-            } else {
-                return bootstrap.toRunResult();
+        try {
+            var result = run("codex", request);
+            if (isMissingSession(request, result)) {
+                var bootstrap = ensureSession("codex", request);
+                if (bootstrap.success()) {
+                    result = run("codex", request);
+                } else {
+                    return bootstrap.toRunResult();
+                }
+            } else if (isReconnectRequired(request, result)) {
+                var bootstrap = rebuildSession("codex", request);
+                if (bootstrap.success()) {
+                    result = run("codex", request);
+                } else {
+                    return bootstrap.toRunResult();
+                }
             }
-        } else if (isReconnectRequired(request, result)) {
-            var bootstrap = rebuildSession("codex", request);
-            if (bootstrap.success()) {
-                result = run("codex", request);
-            } else {
-                return bootstrap.toRunResult();
-            }
+            return result;
+        } catch (InterruptedException failure) {
+            Thread.currentThread().interrupt();
+            return transportExceptionResult("codex", request, Instant.now(), null, failure, true);
         }
-        return result;
     }
 
     /** Sends a bounded contract-correction turn to the already established session. */
@@ -200,7 +213,12 @@ public class AcpxAgentTransport {
         if (request.permissionProfile().simpleClaudeCode()) {
             processBuilder.environment().put("CLAUDE_CODE_SIMPLE", "1");
         }
-        var process = processBuilder.start();
+        Process process;
+        try {
+            process = processBuilder.start();
+        } catch (IOException failure) {
+            return transportExceptionResult(agent, request, startedAt, null, failure, false);
+        }
         try {
             var timeline = new ArrayList<AcpxExecutionEvent>();
             recordEvent(timeline, request, AcpxExecutionEvent.now(
@@ -219,21 +237,105 @@ public class AcpxAgentTransport {
                     startedAt,
                     Map.of("exitCode", waitResult.exitCode())
             ));
-            return new AcpxRunResult(
+            var finishedAt = Instant.now();
+            var usability = waitResult.terminatedByHealth()
+                    ? terminatedUsability(waitResult.signal())
+                    : exitedUsability(
+                            waitResult.exitCode(),
+                            waitResult.promptCompletion(),
+                            command,
+                            startedAt,
+                            finishedAt
+                    );
+            var processResult = new ProcessResult(
+                    String.join(" ", command),
+                    process.pid(),
                     waitResult.exitCode(),
+                    usability,
+                    Math.max(0, Duration.between(startedAt, finishedAt).toMillis()),
+                    relative(request.workdir(), request.stdoutPath()),
+                    relative(request.workdir(), request.stderrPath()),
+                    usability == ProcessUsability.INTERRUPTED,
+                    usability == ProcessUsability.TIMED_OUT
+            );
+            return new AcpxRunResult(
                     startedAt,
-                    Instant.now(),
+                    finishedAt,
                     List.copyOf(command),
                     timeline,
                     null,
-                    waitResult.promptCompletion()
+                    waitResult.promptCompletion(),
+                    processResult,
+                    waitResult.signals()
             );
+        } catch (InterruptedException failure) {
+            Thread.currentThread().interrupt();
+            return transportExceptionResult(agent, request, startedAt, process.pid(), failure, true);
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
             }
             cleanupManagedToolsStartedByRun(managedProcessBaseline);
         }
+    }
+
+    private AcpxRunResult transportExceptionResult(
+            String agent,
+            AcpxRunRequest request,
+            Instant startedAt,
+            Long pid,
+            Exception failure,
+            boolean interrupted
+    ) {
+        var finishedAt = Instant.now();
+        var command = List.of(acpxExecutable, agent, "transport");
+        var message = "acpx transport failed: " + (failure.getMessage() == null
+                ? failure.getClass().getSimpleName()
+                : failure.getMessage());
+        try {
+            Files.createDirectories(request.stderrPath().getParent());
+            Files.writeString(
+                    request.stderrPath(),
+                    message + System.lineSeparator(),
+                    StandardCharsets.UTF_8,
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.APPEND
+            );
+        } catch (IOException ignored) {
+            // The typed result remains authoritative when diagnostic persistence fails.
+        }
+        var signals = interrupted
+                ? List.<AdapterSignal>of()
+                : List.of(new AdapterSignal(
+                        AdapterSignalType.PROCESS_STALLED,
+                        message,
+                        0,
+                        "transport",
+                        "",
+                        false
+                ));
+        return new AcpxRunResult(
+                startedAt,
+                finishedAt,
+                command,
+                List.of(),
+                null,
+                AcpxPromptCompletion.EMPTY,
+                new ProcessResult(
+                        String.join(" ", command),
+                        pid,
+                        interrupted ? null : 1,
+                        interrupted
+                                ? ProcessUsability.INTERRUPTED
+                                : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                        Math.max(0, Duration.between(startedAt, finishedAt).toMillis()),
+                        relative(request.workdir(), request.stdoutPath()),
+                        relative(request.workdir(), request.stderrPath()),
+                        interrupted,
+                        false
+                ),
+                signals
+        );
     }
 
     private void addPermissionArguments(ArrayList<String> command, AcpxRunRequest request) {
@@ -444,6 +546,7 @@ public class AcpxAgentTransport {
                 for (var event : eventReader.readNewEvents()) {
                     health.observe(event, elapsed);
                 }
+                var assessment = health.assess(elapsed);
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
                         "adapter",
@@ -451,7 +554,14 @@ public class AcpxAgentTransport {
                         startedAt,
                         Map.of("exitCode", process.exitValue(), "waitMode", "process_exit")
                 ));
-                return new ProcessWaitResult(process.exitValue(), List.copyOf(timeline), eventReader.promptCompletion());
+                return new ProcessWaitResult(
+                        process.exitValue(),
+                        List.copyOf(timeline),
+                        eventReader.promptCompletion(),
+                        assessment.signals(),
+                        assessment.signal(),
+                        false
+                );
             }
             var elapsed = Duration.between(startedAt, Instant.now());
             for (var event : eventReader.readNewEvents()) {
@@ -459,7 +569,7 @@ public class AcpxAgentTransport {
             }
             var assessment = health.assess(elapsed);
             if (assessment.status() == AgentExecutionHealth.Status.RECOVERABLE_FAILURE) {
-                appendAdapterDiagnostic(request.stderrPath(), assessment.failure(), startedAt, assessment.failure().interruptRunningProcess());
+                appendAdapterDiagnostic(request.stderrPath(), assessment.signal(), startedAt, true);
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED,
                         "adapter",
@@ -469,14 +579,17 @@ public class AcpxAgentTransport {
                                 "exitCode", RECOVERABLE_SIGNAL_EXIT_CODE,
                                 "waitMode", "recoverable_signal",
                                 "action", "terminate_process_tree",
-                                "failureReason", assessment.failure().reason()
+                                "failureReason", assessment.signal().type().name()
                         )
                 ));
                 terminateProcessTree(process.toHandle());
                 return new ProcessWaitResult(
                         RECOVERABLE_SIGNAL_EXIT_CODE,
                         List.copyOf(timeline),
-                        eventReader.promptCompletion()
+                        eventReader.promptCompletion(),
+                        assessment.signals(),
+                        assessment.signal(),
+                        true
                 );
             }
         }
@@ -494,8 +607,7 @@ public class AcpxAgentTransport {
         if (result.exitCode() != 4) {
             return false;
         }
-        var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
-        return "RECOVERABLE_SESSION_MISSING".equals(failure.reason());
+        return hasActiveSignal(result, AdapterSignalType.SESSION_RESUME_FAILED);
     }
 
     private boolean isReconnectRequired(AcpxRunRequest request, AcpxRunResult result) {
@@ -505,8 +617,7 @@ public class AcpxAgentTransport {
         if (request.permissionProfile().promptRetries() <= 0) {
             return false;
         }
-        var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
-        return AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())
+        return hasActiveSignal(result, AdapterSignalType.AGENT_RECONNECT_REQUIRED)
                 && !result.promptCompletion().completed();
     }
 
@@ -597,7 +708,7 @@ public class AcpxAgentTransport {
 
     private void appendAdapterDiagnostic(
             Path stderrPath,
-            AcpxFailureClassifier.AcpxFailure failure,
+            AdapterSignal signal,
             Instant signalSince,
             boolean interrupted
     ) {
@@ -606,7 +717,7 @@ public class AcpxAgentTransport {
                 .append(System.lineSeparator())
                 .append("[dual] acpx recoverable signal persisted")
                 .append(" reason=")
-                .append(failure.reason())
+                .append(signal == null ? "UNKNOWN" : signal.type().name())
                 .append(" interrupt_process=")
                 .append(interrupted)
                 .append(" grace_ms=")
@@ -707,14 +818,104 @@ public class AcpxAgentTransport {
             Instant finishedAt
     ) {
         AcpxRunResult toRunResult() {
-            return new AcpxRunResult(RECOVERABLE_SIGNAL_EXIT_CODE, startedAt, finishedAt, command);
+            var signal = new AdapterSignal(
+                    AdapterSignalType.SESSION_BOOTSTRAP_FAILED,
+                    output,
+                    0,
+                    "session_command",
+                    "",
+                    false
+            );
+            return new AcpxRunResult(
+                    startedAt,
+                    finishedAt,
+                    command,
+                    List.of(),
+                    null,
+                    AcpxPromptCompletion.EMPTY,
+                    new ProcessResult(
+                            String.join(" ", command),
+                            null,
+                            RECOVERABLE_SIGNAL_EXIT_CODE,
+                            timedOut ? ProcessUsability.TIMED_OUT : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                            Math.max(0, Duration.between(startedAt, finishedAt).toMillis()),
+                            "",
+                            "",
+                            false,
+                            timedOut
+                    ),
+                    List.of(signal)
+            );
         }
     }
 
     private record ProcessWaitResult(
             int exitCode,
             List<AcpxExecutionEvent> executionTimeline,
-            AcpxPromptCompletion promptCompletion
+            AcpxPromptCompletion promptCompletion,
+            List<AdapterSignal> signals,
+            AdapterSignal signal,
+            boolean terminatedByHealth
     ) {
+        ProcessWaitResult {
+            signals = signals == null ? List.of() : List.copyOf(signals);
+        }
+    }
+
+    private static boolean hasActiveSignal(AcpxRunResult result, AdapterSignalType type) {
+        return result.activeAdapterSignals().stream().anyMatch(signal -> signal.type() == type);
+    }
+
+    private static ProcessUsability terminatedUsability(AdapterSignal signal) {
+        return signal != null && signal.type() == AdapterSignalType.PROCESS_STALLED
+                ? ProcessUsability.STALLED
+                : ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
+    }
+
+    private static ProcessUsability exitedUsability(
+            int exitCode,
+            AcpxPromptCompletion completion,
+            List<String> command,
+            Instant startedAt,
+            Instant finishedAt
+    ) {
+        if (exitCode == 0) {
+            return ProcessUsability.EXITED_ZERO;
+        }
+        if (completion != null && completion.completed()) {
+            return ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT;
+        }
+        return reachedDeclaredTimeout(command, startedAt, finishedAt, Duration.ofSeconds(5))
+                ? ProcessUsability.INTERRUPTED
+                : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+    }
+
+    private static boolean reachedDeclaredTimeout(
+            List<String> command,
+            Instant startedAt,
+            Instant finishedAt,
+            Duration grace
+    ) {
+        for (int index = 0; index < command.size() - 1; index++) {
+            if (!"--timeout".equals(command.get(index))) {
+                continue;
+            }
+            try {
+                var timeout = Duration.ofSeconds(Long.parseLong(command.get(index + 1)));
+                var threshold = Math.max(0, timeout.minus(grace).toMillis());
+                return Duration.between(startedAt, finishedAt).toMillis() >= threshold;
+            } catch (NumberFormatException ignored) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private static String relative(Path root, Path path) {
+        try {
+            return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
+        } catch (RuntimeException ignored) {
+            return path == null ? "" : path.toString();
+        }
     }
 }

@@ -8,14 +8,8 @@ import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AdapterSignalType;
 import dev.dual.core.execution.AgentExecutionAttempt;
 import dev.dual.core.execution.AgentExecutionAttemptStatus;
-import dev.dual.core.execution.AgentExecutionEvidence;
-import dev.dual.core.execution.AgentExecutionFinalizer;
-import dev.dual.core.execution.AgentExecutionOutcome;
 import dev.dual.core.execution.AgentExecutionProcessStatus;
-import dev.dual.core.execution.AgentExecutionRetryPolicy;
 import dev.dual.core.execution.ProcessResult;
-import dev.dual.core.execution.ProcessUsability;
-import dev.dual.core.execution.AgentResultContractResult;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -142,138 +136,14 @@ final class AgentRunMetadataWriter {
             Path promptPath,
             Path stdoutPath,
             Path stderrPath,
-            AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
-            ProcessUsability processUsability
-    ) throws IOException {
-        writeCompleted(
-                workspaceRoot,
-                workstreamId,
-                nodeId,
-                agent,
-                session,
-                promptTemplate,
-                runId,
-                runDir,
-                promptPath,
-                stdoutPath,
-                stderrPath,
-                null,
-                result,
-                failure,
-                null,
-                null,
-                null,
-                processUsability
-        );
-    }
-
-    void writeCompleted(
-            Path workspaceRoot,
-            String workstreamId,
-            String nodeId,
-            String agent,
-            String session,
-            String promptTemplate,
-            String runId,
-            Path runDir,
-            Path promptPath,
-            Path stdoutPath,
-            Path stderrPath,
-            AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
-            AcpxUsage usage,
-            ProcessUsability processUsability
-    ) throws IOException {
-        writeCompleted(
-                workspaceRoot,
-                workstreamId,
-                nodeId,
-                agent,
-                session,
-                promptTemplate,
-                runId,
-                runDir,
-                promptPath,
-                stdoutPath,
-                stderrPath,
-                null,
-                result,
-                failure,
-                usage,
-                null,
-                null,
-                processUsability
-        );
-    }
-
-    void writeCompleted(
-            Path workspaceRoot,
-            String workstreamId,
-            String nodeId,
-            String agent,
-            String session,
-            String promptTemplate,
-            String runId,
-            Path runDir,
-            Path promptPath,
-            Path stdoutPath,
-            Path stderrPath,
             Path transcriptPath,
             AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
+            List<AcpxExecutionEvent> runTimeline,
             AcpxUsage usage,
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta,
-            ProcessUsability processUsability
+            AgentResultAcquisitionDocument agentResultAcquisition
     ) throws IOException {
-        writeCompleted(
-                workspaceRoot,
-                workstreamId,
-                nodeId,
-                agent,
-                session,
-                promptTemplate,
-                runId,
-                runDir,
-                promptPath,
-                stdoutPath,
-                stderrPath,
-                transcriptPath,
-                result,
-                failure,
-                usage,
-                sessionMeta,
-                compactionMeta,
-                null,
-                processUsability
-        );
-    }
-
-    void writeCompleted(
-            Path workspaceRoot,
-            String workstreamId,
-            String nodeId,
-            String agent,
-            String session,
-            String promptTemplate,
-            String runId,
-            Path runDir,
-            Path promptPath,
-            Path stdoutPath,
-            Path stderrPath,
-            Path transcriptPath,
-            AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
-            AcpxUsage usage,
-            SessionMeta sessionMeta,
-            SessionCompactionMeta compactionMeta,
-            AgentResultAcquisitionDocument agentResultAcquisition,
-            ProcessUsability processUsability
-    ) throws IOException {
-        if (processUsability == null) {
-            throw new IllegalArgumentException("processUsability is required");
-        }
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
         var outputMetadataPath = metadataPath(stdoutPath);
@@ -289,7 +159,7 @@ final class AgentRunMetadataWriter {
                 agent,
                 stdoutPath,
                 toolUsage,
-                failure
+                result.adapterSignals()
         );
         writePromptDebugIfEnabled(promptPath);
         var governanceReportPath = governanceActualReportWriter.write(
@@ -301,7 +171,6 @@ final class AgentRunMetadataWriter {
                 transcriptPath,
                 toolUsage
         ).orElse(null);
-        var topLevelFailure = failure;
         var attempt = executionAttempt(
                 runId,
                 workstreamId,
@@ -310,30 +179,17 @@ final class AgentRunMetadataWriter {
                 session,
                 sessionMeta,
                 result,
-                failure,
-                processUsability,
                 relative(workspaceRoot, stderrPath),
                 relativeOrNull(workspaceRoot, transcriptPath)
         );
-        // A completed ACP prompt proves only that a candidate result exists.
-        // Runtime contract validation owns the first trustworthy terminal outcome.
-        var executionOutcome = result.promptCompletion().completed() && failure == null
-                ? null
-                : executionOutcome(
-                        workspaceRoot,
-                        result,
-                        stdoutPath,
-                        stderrPath,
-                        failure,
-                        processUsability,
-                        attempt
-                );
         var effectiveUsage = usage;
-        if (failure != null) {
+        if (hasActiveBlockingSignal(result)) {
             effectiveUsage = usage == null
                     ? AcpxUsage.unavailable(unavailableReason(attempt))
                     : usage.withUnavailableReason(unavailableReason(attempt));
         }
+        var runStartedAt = runStartedAt(result, agentResultAcquisition);
+        var runFinishedAt = runFinishedAt(result, agentResultAcquisition);
         writeArtifactMetadata(
                 workspaceRoot,
                 promptMetadataPath,
@@ -429,25 +285,25 @@ final class AgentRunMetadataWriter {
                 relativeOrNull(workspaceRoot, transcriptMetadataPath),
                 relative(workspaceRoot, stderrMetadataPath),
                 result.command(),
-                result.startedAt(),
-                result.finishedAt(),
-                Duration.between(result.startedAt(), result.finishedAt()).toMillis(),
+                runStartedAt,
+                runFinishedAt,
+                Math.max(0, Duration.between(runStartedAt, runFinishedAt).toMillis()),
                 result.exitCode(),
-                topLevelFailure == null ? "completed" : "failed",
-                topLevelFailure == null ? null : topLevelFailure.reason(),
-                topLevelFailure == null ? null : topLevelFailure.recoverable(),
+                "process_exited",
+                null,
+                null,
                 effectiveUsage,
                 agentResultAcquisition,
                 providerModelIdentity(effectiveUsage),
                 toolUsage,
                 relativeOrNull(workspaceRoot, governanceReportPath),
-                processResult(workspaceRoot, result, stdoutPath, stderrPath, processUsability),
-                adapterSignals(failure),
+                processResult(result.processResult()),
+                adapterSignals(result.adapterSignals()),
                 null,
                 List.of(),
                 executionAttemptToMap(attempt),
-                executionOutcome == null ? null : outcomeToMap(executionOutcome),
-                executionTimeline(result)
+                null,
+                executionTimeline(runTimeline)
         ));
     }
 
@@ -532,32 +388,27 @@ final class AgentRunMetadataWriter {
         return billingMode == null ? "" : billingMode;
     }
 
-    private List<Map<String, Object>> executionTimeline(AcpxRunResult result) {
-        if (result == null || result.executionTimeline().isEmpty()) {
+    private List<Map<String, Object>> executionTimeline(List<AcpxExecutionEvent> timeline) {
+        if (timeline == null || timeline.isEmpty()) {
             return List.of();
         }
-        return result.executionTimeline().stream()
+        return timeline.stream()
                 .map(AcpxExecutionEvent::toMap)
                 .toList();
     }
 
-    private Map<String, Object> processResult(
-            Path workspaceRoot,
-            AcpxRunResult result,
-            Path stdoutPath,
-            Path stderrPath,
-            ProcessUsability processUsability
-    ) {
-        return Map.of(
-                "command", String.join(" ", result.command()),
-                "exitCode", result.exitCode(),
-                "usability", processUsability.name(),
-                "durationMs", result.durationMs(),
-                "stdoutPath", relative(workspaceRoot, stdoutPath),
-                "stderrPath", relative(workspaceRoot, stderrPath),
-                "interrupted", processUsability == ProcessUsability.INTERRUPTED,
-                "timedOut", processUsability == ProcessUsability.TIMED_OUT
-        );
+    private Map<String, Object> processResult(ProcessResult process) {
+        var map = new LinkedHashMap<String, Object>();
+        map.put("command", process.command());
+        map.put("pid", process.pid());
+        map.put("exitCode", process.exitCode());
+        map.put("usability", process.usability().name());
+        map.put("durationMs", process.durationMs());
+        map.put("stdoutPath", process.stdoutPath());
+        map.put("stderrPath", process.stderrPath());
+        map.put("interrupted", process.interrupted());
+        map.put("timedOut", process.timedOut());
+        return map;
     }
 
     private AgentExecutionAttempt executionAttempt(
@@ -568,28 +419,29 @@ final class AgentRunMetadataWriter {
             String session,
             SessionMeta sessionMeta,
             AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
-            ProcessUsability processUsability,
             String stderrPath,
             String transcriptPath
     ) {
-        var processStatus = processStatus(result, failure, processUsability);
-        var failureSignal = failureSignal(failure);
-        var status = attemptStatus(processStatus, failure);
-        var recoverable = failure != null && failure.recoverable();
-        var message = failure == null ? "completed" : attemptMessage(failure);
+        var processStatus = processStatus(result.processResult(), result.activeAdapterSignals());
+        var failureSignal = result.activeAdapterSignals().stream().findFirst().map(AdapterSignal::type).orElse(null);
+        var attemptStatus = attemptStatus(result.processResult());
         return new AgentExecutionAttempt(
                 "att-" + runId,
                 runId,
                 workstreamId,
                 nodeId,
                 agent,
-                status,
+                attemptStatus,
                 processStatus,
                 failureSignal,
-                recoverable,
+                attemptStatus == AgentExecutionAttemptStatus.TIMED_OUT
+                        || attemptStatus == AgentExecutionAttemptStatus.INTERRUPTED
+                        || attemptStatus == AgentExecutionAttemptStatus.STALLED
+                        || attemptStatus == AgentExecutionAttemptStatus.RECOVERABLE_FAILED
+                        || failureSignal != null
+                        && failureSignal.severity() != dev.dual.core.execution.AdapterSignalSeverity.BLOCKING,
                 false,
-                message,
+                "process exited",
                 stderrPath,
                 transcriptPath,
                 session,
@@ -601,157 +453,50 @@ final class AgentRunMetadataWriter {
         );
     }
 
-    private AgentExecutionOutcome executionOutcome(
-            Path workspaceRoot,
-            AcpxRunResult result,
-            Path stdoutPath,
-            Path stderrPath,
-            AcpxFailureClassifier.AcpxFailure failure,
-            ProcessUsability processUsability,
-            AgentExecutionAttempt attempt
-    ) {
-        var process = processResultEvidence(workspaceRoot, result, stdoutPath, stderrPath, processUsability);
-        var evidence = new AgentExecutionEvidence(
-                process,
-                AgentResultContractResult.missing(),
-                List.of(),
-                adapterSignalEvidence(failure)
-        );
-        return new AgentExecutionFinalizer().finalize(attempt, evidence).outcome();
-    }
-
-    private ProcessResult processResultEvidence(
-            Path workspaceRoot,
-            AcpxRunResult result,
-            Path stdoutPath,
-            Path stderrPath,
-            ProcessUsability processUsability
-    ) {
-        var durationMs = Duration.between(result.startedAt(), result.finishedAt()).toMillis();
-        return new ProcessResult(
-                String.join(" ", result.command()),
-                null,
-                result.exitCode(),
-                processUsability,
-                Math.max(0, durationMs),
-                relative(workspaceRoot, stdoutPath),
-                relative(workspaceRoot, stderrPath),
-                processUsability == ProcessUsability.INTERRUPTED,
-                processUsability == ProcessUsability.TIMED_OUT
-        );
-    }
-
-    private List<AdapterSignal> adapterSignalEvidence(AcpxFailureClassifier.AcpxFailure failure) {
-        if (failure == null || failure.reason() == null || failure.reason().isBlank()) {
-            return List.of();
-        }
-        var type = failureSignal(failure);
-        if (type == null) {
-            return List.of();
-        }
-        return List.of(new AdapterSignal(
-                type,
-                failure.message(),
-                0,
-                "acpx",
-                "",
-                false
-        ));
-    }
-
-    private AgentExecutionAttemptStatus attemptStatus(
-            AgentExecutionProcessStatus processStatus,
-            AcpxFailureClassifier.AcpxFailure failure
-    ) {
-        if (failure == null) {
-            return AgentExecutionAttemptStatus.COMPLETED;
-        }
-        if (processStatus == AgentExecutionProcessStatus.TIMED_OUT) {
-            return AgentExecutionAttemptStatus.TIMED_OUT;
-        }
-        if (processStatus == AgentExecutionProcessStatus.STALLED) {
-            return AgentExecutionAttemptStatus.STALLED;
-        }
-        if (processStatus == AgentExecutionProcessStatus.INTERRUPTED) {
-            return AgentExecutionAttemptStatus.INTERRUPTED;
-        }
-        return failure.recoverable()
-                ? AgentExecutionAttemptStatus.RECOVERABLE_FAILED
-                : AgentExecutionAttemptStatus.RUNTIME_FAILED;
+    private AgentExecutionAttemptStatus attemptStatus(ProcessResult process) {
+        return switch (process.usability()) {
+            case TIMED_OUT -> AgentExecutionAttemptStatus.TIMED_OUT;
+            case INTERRUPTED -> AgentExecutionAttemptStatus.INTERRUPTED;
+            case STALLED -> AgentExecutionAttemptStatus.STALLED;
+            case KILLED_AFTER_RECOVERABLE_SIGNAL -> AgentExecutionAttemptStatus.RECOVERABLE_FAILED;
+            case EXITED_ZERO, EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT, EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT ->
+                    AgentExecutionAttemptStatus.PROCESS_EXITED;
+        };
     }
 
     private AgentExecutionProcessStatus processStatus(
-            AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
-            ProcessUsability processUsability
+            ProcessResult process,
+            List<AdapterSignal> activeSignals
     ) {
-        if (processUsability == ProcessUsability.INTERRUPTED) {
-            return AgentExecutionProcessStatus.INTERRUPTED;
-        }
-        if (processUsability == ProcessUsability.TIMED_OUT) {
-            return AgentExecutionProcessStatus.TIMED_OUT;
-        }
-        if (processUsability == ProcessUsability.STALLED) {
-            return AgentExecutionProcessStatus.STALLED;
-        }
-        if (failure == null) {
-            return AgentExecutionProcessStatus.EXITED;
-        }
-        if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
-            return AgentExecutionProcessStatus.RECONNECT_REQUIRED;
-        }
-        if (AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code().equals(failure.reason())) {
-            return AgentExecutionProcessStatus.INTERRUPTED;
-        }
-        if (result.reachedDeclaredTimeout(java.time.Duration.ZERO)) {
-            return AgentExecutionProcessStatus.TIMED_OUT;
-        }
-        return AgentExecutionProcessStatus.FAILED;
+        return switch (process.usability()) {
+            case TIMED_OUT -> AgentExecutionProcessStatus.TIMED_OUT;
+            case INTERRUPTED -> AgentExecutionProcessStatus.INTERRUPTED;
+            case STALLED -> AgentExecutionProcessStatus.STALLED;
+            case KILLED_AFTER_RECOVERABLE_SIGNAL -> activeSignals.stream()
+                    .anyMatch(signal -> signal.type() == AdapterSignalType.AGENT_RECONNECT_REQUIRED)
+                    ? AgentExecutionProcessStatus.RECONNECT_REQUIRED
+                    : AgentExecutionProcessStatus.FAILED;
+            case EXITED_ZERO, EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT, EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT ->
+                    AgentExecutionProcessStatus.EXITED;
+        };
     }
 
-    private AdapterSignalType failureSignal(AcpxFailureClassifier.AcpxFailure failure) {
-        if (failure == null) {
-            return null;
-        }
-        if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
-            return AdapterSignalType.AGENT_RECONNECT_REQUIRED;
-        }
-        if (AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code().equals(failure.reason())) {
-            return null;
-        }
-        if (AcpxFailureReason.AGENT_MODEL_MISMATCH.code().equals(failure.reason())) {
-            return AdapterSignalType.MODEL_MISMATCH;
-        }
-        if (AcpxFailureReason.SESSION_BOOTSTRAP_FAILED.code().equals(failure.reason())
-                || AcpxFailureReason.SESSION_MISSING.code().equals(failure.reason())) {
-            return AdapterSignalType.SESSION_BOOTSTRAP_FAILED;
-        }
-        if (AcpxFailureReason.RATE_LIMIT.code().equals(failure.reason())) {
-            return AdapterSignalType.RATE_LIMITED;
-        }
-        if (AcpxFailureReason.CONTEXT_WINDOW.code().equals(failure.reason())) {
-            return AdapterSignalType.CONTEXT_WINDOW_EXCEEDED;
-        }
-        if (AcpxFailureReason.AGENT_PERMISSION_BLOCKED.code().equals(failure.reason())) {
-            return AdapterSignalType.PERMISSION_BLOCKED;
-        }
-        if (AcpxFailureReason.AGENT_AUTH_FAILED.code().equals(failure.reason())) {
-            return AdapterSignalType.AUTH_FAILED;
-        }
-        if (AcpxFailureReason.PROVIDER_CONNECTION_FAILED.code().equals(failure.reason())) {
-            return AdapterSignalType.PROVIDER_CONNECTION_FAILED;
-        }
-        if (AcpxFailureReason.TRANSPORT_FAILED.code().equals(failure.reason())) {
-            return AdapterSignalType.PROCESS_STALLED;
-        }
-        return AdapterSignalType.PROCESS_STALLED;
+    private boolean hasActiveBlockingSignal(AcpxRunResult result) {
+        return result.activeAdapterSignals().stream().anyMatch(signal -> signal.type().blocksSuccess());
     }
 
-    private String attemptMessage(AcpxFailureClassifier.AcpxFailure failure) {
-        if (AcpxFailureReason.AGENT_RECONNECT.code().equals(failure.reason())) {
-            return "agent needs reconnect: " + failure.message();
+    private Instant runStartedAt(AcpxRunResult result, AgentResultAcquisitionDocument acquisition) {
+        if (acquisition == null || acquisition.occurrences().isEmpty()) {
+            return result.startedAt();
         }
-        return failure.message();
+        return acquisition.occurrences().get(0).startedAt();
+    }
+
+    private Instant runFinishedAt(AcpxRunResult result, AgentResultAcquisitionDocument acquisition) {
+        if (acquisition == null || acquisition.occurrences().isEmpty()) {
+            return result.finishedAt();
+        }
+        return acquisition.occurrences().get(acquisition.occurrences().size() - 1).finishedAt();
     }
 
     private String unavailableReason(AgentExecutionAttempt attempt) {
@@ -826,52 +571,21 @@ final class AgentRunMetadataWriter {
         );
     }
 
-    private Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {
-        if (outcome == null) {
-            return null;
-        }
-        var map = new java.util.LinkedHashMap<String, Object>();
-        map.put("status", outcome.status().name());
-        map.put("primaryReason", outcome.primaryReason());
-        map.put("nodeMaySucceed", outcome.nodeMaySucceed());
-        map.put("retryPolicy", outcome.retryPolicy().name());
-        map.put("retrySafe", outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
-        map.put("recoveryCategory", outcome.recoveryCategory().name());
-        map.put("operatorMessage", outcome.operatorMessage());
-        map.put("secondarySignals", outcome.secondarySignals().stream()
-                .map(this::signalToMap)
-                .toList());
-        return map;
-    }
-
-    private Map<String, Object> signalToMap(AdapterSignal signal) {
-        var map = new java.util.LinkedHashMap<String, Object>();
-        map.put("type", signal.type().name());
-        map.put("severity", signal.type().severity().name());
-        map.put("message", signal.message());
-        map.put("observedSequence", signal.observedSequence());
-        map.put("source", signal.source());
-        map.put("sessionId", signal.sessionId());
-        map.put("superseded", signal.superseded());
-        return map;
-    }
-
-    private List<Map<String, Object>> adapterSignals(AcpxFailureClassifier.AcpxFailure failure) {
-        if (failure == null || failure.reason() == null || failure.reason().isBlank()) {
+    private List<Map<String, Object>> adapterSignals(List<AdapterSignal> signals) {
+        if (signals == null || signals.isEmpty()) {
             return List.of();
         }
-        var type = failureSignal(failure);
-        if (type == null) {
-            return List.of();
-        }
-        var map = new java.util.LinkedHashMap<String, Object>();
-        map.put("type", type.name());
-        map.put("reason", failure.reason());
-        map.put("severity", failure.recoverable() ? "RECOVERABLE" : "FATAL");
-        map.put("source", "acpx");
-        map.put("message", failure.message());
-        map.put("superseded", false);
-        return List.of(map);
+        return signals.stream().map(signal -> {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("type", signal.type().name());
+            map.put("severity", signal.type().severity().name());
+            map.put("source", signal.source());
+            map.put("message", signal.message());
+            map.put("sessionId", signal.sessionId());
+            map.put("observedSequence", signal.observedSequence());
+            map.put("superseded", signal.superseded());
+            return Map.copyOf(map);
+        }).toList();
     }
 
     private void write(Path workspaceRoot, Path runDir, AgentRunDocument document) throws IOException {

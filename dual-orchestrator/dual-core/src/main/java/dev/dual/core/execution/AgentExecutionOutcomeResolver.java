@@ -15,7 +15,9 @@ public final class AgentExecutionOutcomeResolver {
             throw new IllegalArgumentException("evidence is required");
         }
         var process = evidence.processResult();
-        var signals = evidence.adapterSignals();
+        var signals = evidence.adapterSignals().stream()
+                .filter(signal -> !signal.superseded())
+                .toList();
         var blockingSignal = signals.stream()
                 .filter(signal -> signal.type().blocksSuccess())
                 .findFirst();

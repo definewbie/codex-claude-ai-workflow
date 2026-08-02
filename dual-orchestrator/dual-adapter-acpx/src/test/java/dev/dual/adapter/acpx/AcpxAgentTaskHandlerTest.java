@@ -1,11 +1,15 @@
 package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.AdapterSignalType;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+import dev.dual.core.execution.ProcessResult;
 import dev.dual.core.execution.ProcessUsability;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -484,8 +489,17 @@ class AcpxAgentTaskHandlerTest {
                 promptPath,
                 outputPath,
                 stderrPath,
-                new AcpxRunResult(0, startedAt, finishedAt, List.of("acpx", "claude")),
                 null,
+                fixtureResult(
+                        0,
+                        startedAt,
+                        finishedAt,
+                        List.of("acpx", "claude"),
+                        List.of(),
+                        null,
+                        AcpxPromptCompletion.EMPTY
+                ),
+                List.of(),
                 new AcpxUsage(
                         100,
                         5,
@@ -507,7 +521,9 @@ class AcpxAgentTaskHandlerTest {
                         AcpxProviderMetadata.SOURCE_ACPX_SESSION_JSON,
                         ""
                 ),
-                ProcessUsability.EXITED_ZERO
+                null,
+                null,
+                null
         );
 
         var runMetadata = Files.readString(runDir.resolve("run.json"));
@@ -1116,7 +1132,7 @@ class AcpxAgentTaskHandlerTest {
         assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 5"));
-        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+        assertTrue(runMetadata.contains("\"status\" : \"process_exited\""));
         assertFalse(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
     }
 
@@ -1159,12 +1175,12 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.stderr.log")));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
-        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_RECONNECT\""));
+        assertFalse(runMetadata.contains("RECOVERABLE_AGENT_RECONNECT"), runMetadata);
         assertTrue(runMetadata.contains("\"executionAttempt\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"status\" : \"RECOVERABLE_FAILED\""), runMetadata);
-        assertTrue(runMetadata.contains("\"processStatus\" : \"RECONNECT_REQUIRED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"status\" : \"PROCESS_EXITED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"processStatus\" : \"EXITED\""), runMetadata);
         assertTrue(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
-        assertTrue(runMetadata.contains("\"message\" : \"agent needs reconnect"), runMetadata);
+        assertTrue(runMetadata.contains("\"message\" : \"process exited\""), runMetadata);
         assertTrue(runMetadata.contains("\"measurementType\" : \"UNAVAILABLE\""), runMetadata);
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
         assertFalse(runMetadata.contains("\"explorationPolicyResult\""), runMetadata);
@@ -1204,9 +1220,9 @@ class AcpxAgentTaskHandlerTest {
             ));
 
             var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-            assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_AGENT_RECONNECT\""), runMetadata);
+            assertFalse(runMetadata.contains("RECOVERABLE_AGENT_RECONNECT"), runMetadata);
             assertTrue(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
-            assertFalse(runMetadata.contains("\"primaryReason\" : \"completed\""), runMetadata);
+            assertTrue(runMetadata.contains("\"type\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
         } finally {
             if (originalUserHome == null) {
                 System.clearProperty("user.home");
@@ -1217,7 +1233,7 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void treatsTimeoutShapedIncompleteOutputAsRecoverableFailure() throws Exception {
+    void recordsTypedInterruptedProcessFactWithoutPosthocInference() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved plan.\n");
@@ -1245,19 +1261,21 @@ class AcpxAgentTaskHandlerTest {
         );
 
         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var diagnosticMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) result.result().get("run_metadata")).toFile());
+        var diagnostic = Files.readString(tempDir.resolve(diagnosticMetadata.path("stderrPath").asText()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
-        assertEquals(0, result.result().get("exit_code"));
+        assertEquals(0, result.result().get("exit_code"), diagnostic);
         assertEquals("INTERRUPTED", result.result().get("process_usability"));
-        assertEquals(true, result.result().get("acpx_failure.recoverable"));
-        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", result.result().get("acpx_failure.reason"));
+        assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = OBJECT_MAPPER.readTree(tempDir.resolve((String) result.result().get("run_metadata")).toFile());
         assertEquals(0, runMetadata.path("exitCode").asInt());
-        assertEquals("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED", runMetadata.path("failureReason").asText());
+        assertEquals("process_exited", runMetadata.path("status").asText());
         assertEquals("INTERRUPTED", runMetadata.path("executionAttempt").path("status").asText());
         assertEquals("INTERRUPTED", runMetadata.path("executionAttempt").path("processStatus").asText());
-        assertEquals("INTERRUPTED", runMetadata.path("executionOutcome").path("status").asText());
+        assertTrue(runMetadata.path("executionOutcome").isMissingNode() || runMetadata.path("executionOutcome").isNull());
         assertEquals(0, runMetadata.path("adapterSignals").size());
     }
 
@@ -1280,14 +1298,17 @@ class AcpxAgentTaskHandlerTest {
                 definition,
                 readyInstance("intake.claude_brainstorm")
         ));
+        var diagnosticMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) result.result().get("run_metadata")).toFile());
+        var diagnostic = Files.readString(tempDir.resolve(diagnosticMetadata.path("stderrPath").asText()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals(4, result.result().get("exit_code"));
-        assertEquals("KILLED_AFTER_RECOVERABLE_SIGNAL", result.result().get("process_usability"));
-        assertEquals(true, result.result().get("acpx_failure.recoverable"));
-        assertEquals("RECOVERABLE_SESSION_BOOTSTRAP_FAILED", result.result().get("acpx_failure.reason"));
+        assertEquals(4, result.result().get("exit_code"), diagnostic);
+        assertEquals("TIMED_OUT", result.result().get("process_usability"));
+        assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_SESSION_BOOTSTRAP_FAILED\""));
+        assertTrue(runMetadata.contains("\"type\" : \"SESSION_BOOTSTRAP_FAILED\""));
+        assertTrue(runMetadata.contains("\"status\" : \"TIMED_OUT\""));
         assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-test\""));
     }
 
@@ -1313,18 +1334,17 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(1, result.result().get("exit_code"));
-        assertEquals("KILLED_AFTER_RECOVERABLE_SIGNAL", result.result().get("process_usability"));
-        assertEquals(true, result.result().get("acpx_failure.recoverable"));
-        assertEquals("RECOVERABLE_PROVIDER_CONNECTION_FAILED", result.result().get("acpx_failure.reason"));
+        assertEquals("EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT", result.result().get("process_usability"));
+        assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
-        assertTrue(runMetadata.contains("\"failureReason\" : \"RECOVERABLE_PROVIDER_CONNECTION_FAILED\""), runMetadata);
+        assertTrue(runMetadata.contains("\"type\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertTrue(runMetadata.contains("\"failureSignal\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertTrue(runMetadata.contains("\"unavailableReason\" : \"PROVIDER_CONNECTION_FAILED\""), runMetadata);
         assertFalse(runMetadata.contains("\"explorationPolicyResult\""), runMetadata);
     }
 
     @Test
-    void recordsTransportExceptionAsTerminalAdapterBoundaryFailure() throws Exception {
+    void handlerCannotFabricateExecutionFactsWhenTransportContractThrows() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1336,48 +1356,26 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        assertThrows(java.io.IOException.class, () -> handler.execute(new TaskHandler.TaskContext(
                 tempDir,
                 "ws-test",
                 definition,
                 readyInstance("intake.claude_brainstorm")
-        ));
+        )));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals(1, result.result().get("exit_code"));
-        assertEquals("KILLED_AFTER_RECOVERABLE_SIGNAL", result.result().get("process_usability"));
-        assertEquals(true, result.result().get("acpx_failure.recoverable"));
-        assertEquals("RECOVERABLE_TRANSPORT_FAILED", result.result().get("acpx_failure.reason"));
-        var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+        var runMetadataPath = Files.walk(workstreamDir.resolve("runs"))
+                .filter(path -> path.getFileName().toString().equals("run.json"))
+                .findFirst()
+                .orElseThrow();
         var runMetadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
-        assertEquals("failed", runMetadata.path("status").asText());
-        assertEquals("RECOVERABLE_TRANSPORT_FAILED", runMetadata.path("failureReason").asText());
-        assertEquals("PROCESS_STALLED", runMetadata.path("executionAttempt").path("failureSignal").asText());
-        assertEquals("RECOVERABLE_ADAPTER_FAILURE", runMetadata.path("executionOutcome").path("status").asText(),
-                runMetadata.toPrettyString());
-        assertEquals("process_stalled", runMetadata.path("executionOutcome").path("primaryReason").asText(),
-                runMetadata.toPrettyString());
-        assertEquals("PROCESS_STALLED", runMetadata.path("adapterSignals").get(0).path("type").asText());
-        assertEquals("RECOVERABLE_TRANSPORT_FAILED", runMetadata.path("adapterSignals").get(0).path("reason").asText());
-
-        var validated = new ArtifactContractValidator().validate(
-                tempDir,
-                "ws-test",
-                "node-intake",
-                definition,
-                result
-        );
-        assertTrue(validated.result().containsKey("agent_execution_result_contract"), validated.result().toString());
-        assertTrue(validated.result().containsKey("agent_execution_artifact_contract_results"), validated.result().toString());
-        new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
-
-        runMetadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
-        assertEquals("failed", runMetadata.path("status").asText());
-        assertEquals("process_stalled", runMetadata.path("failureReason").asText());
-        assertEquals("PROCESS_STALLED", runMetadata.path("executionAttempt").path("failureSignal").asText());
-        assertEquals("RECOVERABLE_ADAPTER_FAILURE", runMetadata.path("executionOutcome").path("status").asText());
-        assertEquals("UNAVAILABLE", runMetadata.path("usage").path("measurementType").asText());
-        assertEquals("PROCESS_STALLED", runMetadata.path("usage").path("unavailableReason").asText());
+        assertEquals("prepared", runMetadata.path("status").asText());
+        assertTrue(runMetadata.path("processResult").isMissingNode()
+                || runMetadata.path("processResult").isNull());
+        assertTrue(runMetadata.path("adapterSignals").isMissingNode()
+                || runMetadata.path("adapterSignals").isNull()
+                || runMetadata.path("adapterSignals").isEmpty());
+        assertTrue(runMetadata.path("executionOutcome").isMissingNode()
+                || runMetadata.path("executionOutcome").isNull());
     }
 
     @Test
@@ -1416,8 +1414,107 @@ class AcpxAgentTaskHandlerTest {
         assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
-        assertTrue(runMetadata.contains("\"status\" : \"completed\""));
+        assertTrue(runMetadata.contains("\"status\" : \"process_exited\""));
         assertFalse(runMetadata.contains("\"failureSignal\" : \"AGENT_RECONNECT_REQUIRED\""), runMetadata);
+    }
+
+    @Test
+    void capturedLargeStreamKeepsOccurrenceFactsConsistentThroughFinalization() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-large-stream");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+        var existingFile = tempDir.resolve("repo/relative/existing.ext");
+        Files.createDirectories(existingFile.getParent());
+        Files.writeString(existingFile, "existing\n");
+        Files.writeString(tempDir.resolve("main.py"), "def hello(): return 'hello'\n");
+        Files.writeString(tempDir.resolve("README.md"), "# Fixture\n");
+        var sessionsDir = tempDir.resolve(".acpx/sessions");
+        var fakeAcpx = tempDir.resolve("captured-large-acpx.sh");
+        var strictResultFixture = Path.of("..", "scripts/fixtures/emit-strict-agent-result.py")
+                .toAbsolutePath()
+                .normalize();
+        assertTrue(Files.isRegularFile(strictResultFixture));
+        writeCapturedLargeStreamAcpx(fakeAcpx, sessionsDir, strictResultFixture);
+
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+        var instance = readyInstance("intake.claude_brainstorm");
+        var originalUserHome = System.getProperty("user.home");
+        NodeResult candidate;
+        try {
+            System.setProperty("user.home", tempDir.toString());
+            candidate = new AcpxAgentTaskHandler(
+                    new AcpxAgentTransport(fakeAcpx.toString(), java.time.Duration.ofSeconds(30)),
+                    false
+            ).execute(new TaskHandler.TaskContext(tempDir, "ws-large-stream", definition, instance));
+        } finally {
+            System.setProperty("user.home", originalUserHome);
+        }
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-large-stream",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
+
+        assertEquals(NodeStatus.COMPLETED, finalized.status(), finalized.toString());
+        var runMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) finalized.result().get("run_metadata")).toFile());
+        assertEquals("completed", runMetadata.path("status").asText());
+        assertEquals("EXITED_ZERO", runMetadata.path("processResult").path("usability").asText());
+        assertEquals("SUCCESS", runMetadata.path("executionOutcome").path("status").asText());
+        assertTrue(runMetadata.path("executionAttempt").path("failureSignal").isNull());
+        assertEquals("AGENT_RECONNECT_REQUIRED", runMetadata.path("adapterSignals").get(0).path("type").asText());
+        assertTrue(runMetadata.path("adapterSignals").get(0).path("superseded").asBoolean());
+        assertEquals(1, runMetadata.path("agentResultAcquisition").path("occurrences").size());
+        assertEquals("EXITED_ZERO", runMetadata.path("agentResultAcquisition").path("occurrences")
+                .get(0).path("processResult").path("usability").asText());
+    }
+
+    private static void writeCapturedLargeStreamAcpx(
+            Path fakeAcpx,
+            Path sessionsDir,
+            Path strictResultFixture
+    ) throws Exception {
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                case " $* " in
+                  *" sessions "*) exit 0 ;;
+                esac
+                prompt=""
+                while [ "$#" -gt 0 ]; do
+                  if [ "$1" = "-f" ]; then
+                    shift
+                    prompt="$1"
+                  fi
+                  shift
+                done
+                echo "[acpx] session claude-main (123e4567-e89b-12d3-a456-426614174106) · agent needs reconnect" >&2
+                mkdir -p "__SESSIONS__"
+                HOME="__TEST_HOME__" python3 "__STRICT_FIXTURE__" \
+                  --prompt "$prompt" \
+                  --template intake-claude-brainstorm.md \
+                  --profile controlled \
+                  --session-id 123e4567-e89b-12d3-a456-426614174106
+                padding=$(awk 'BEGIN{for(i=0;i<140000;i++) printf "x"}')
+                stream="__SESSIONS__/123e4567-e89b-12d3-a456-426614174106.stream.ndjson"
+                captured="$stream.captured"
+                head -n 1 "$stream" > "$captured"
+                printf '{"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"fresh","update":{"sessionUpdate":"tool_call_update","rawOutput":{"formatted_output":"%s"}}}}\\n' "$padding" >> "$captured"
+                tail -n +2 "$stream" >> "$captured"
+                mv "$captured" "$stream"
+                exit 0
+                """
+                .replace("__SESSIONS__", sessionsDir.toString())
+                .replace("__TEST_HOME__", sessionsDir.getParent().getParent().toString())
+                .replace("__STRICT_FIXTURE__", strictResultFixture.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
     }
 
     @Test
@@ -1447,155 +1544,6 @@ class AcpxAgentTaskHandlerTest {
         var error = assertThrows(IllegalArgumentException.class, () ->
                 handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance)));
         assertTrue(error.getMessage().contains("unsupported agent"));
-    }
-
-    @Test
-    void classifiesReconnectFailureAsRecoverable() throws Exception {
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(stderr, "[acpx] session claude-main · agent needs reconnect\n");
-
-        var failure = new AcpxFailureClassifier().classify(stderr, 5);
-
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
-        assertEquals(true, failure.recoverable());
-        assertTrue(failure.message().contains("dualctl retry"));
-    }
-
-    @Test
-    void classifiesRateLimitFromStdoutAsRecoverable() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(stdout, "[error] RUNTIME: API Error: Request rejected (429) 已达到 5 小时的使用上限\n");
-        Files.writeString(stderr, "[acpx] session claude-main · agent connected\n");
-
-        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 1);
-
-        assertEquals("RECOVERABLE_RATE_LIMIT", failure.reason());
-        assertEquals(true, failure.recoverable());
-        assertTrue(failure.message().contains("quota"));
-    }
-
-    @Test
-    void classifiesAuthFailureFromRuntimeStdoutBeforeReconnectWrapper() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(stdout, """
-                [client] session/new (running)
-                Failed to authenticate. API Error: 401 Invalid authentication credentials
-                [error] RUNTIME: Internal error: Failed to authenticate. API Error: 401 Invalid authentication credentials
-                """);
-        Files.writeString(stderr, "[acpx] session claude-main · agent needs reconnect\n");
-
-        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 1);
-
-        assertEquals("RECOVERABLE_AGENT_AUTH_FAILED", failure.reason());
-        assertEquals(true, failure.recoverable());
-        assertTrue(failure.message().contains("authentication"));
-    }
-
-    @Test
-    void classifiesProviderConnectionFailureFromRuntimeStdout() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(stdout, "[error] RUNTIME: API Error: Unable to connect to API (FailedToOpenSocket)\n");
-        Files.writeString(stderr, "");
-
-        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 1);
-
-        assertEquals("RECOVERABLE_PROVIDER_CONNECTION_FAILED", failure.reason());
-        assertEquals(true, failure.recoverable());
-        assertTrue(failure.message().contains("provider connection"));
-    }
-
-    @Test
-    void ignoresBusinessTextRateLimitMentionsWhenReconnectWrapperIsPresent() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        Files.writeString(stdout, "Product risk: bulk validation could hit rate limit for validators.\n");
-        Files.writeString(stderr, "[acpx] session codex-reviewer · agent needs reconnect\n");
-
-        var failure = new AcpxFailureClassifier().classify(stdout, stderr, 4);
-
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
-        assertEquals(true, failure.recoverable());
-    }
-
-    @Test
-    void classifiesProviderOverloadFromAcpxSessionStreamBeforeReconnectWrapper() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        var sessionsDir = tempDir.resolve("sessions");
-        var sessionId = "ff545b54-96a8-4bf0-84e4-96f8789700c8";
-        Files.createDirectories(sessionsDir);
-        Files.writeString(stdout, "");
-        Files.writeString(stderr, "[acpx] session claude-main (" + sessionId + ") · agent needs reconnect\n");
-        Files.writeString(
-                sessionsDir.resolve(sessionId + ".stream.ndjson"),
-                """
-                {"type":"session/prompt/failed","error":"Internal error: API Error: 529 [1305][该模型当前访问量过大，请您稍后再试]"}
-                """
-        );
-
-        var failure = new AcpxFailureClassifier(
-                new AcpxFailureSignalCatalog(),
-                new AcpxSessionStreamFailureEvidenceReader(sessionsDir)
-        ).classify(stdout, stderr, 1);
-
-        assertEquals("RECOVERABLE_AGENT_OVERLOADED", failure.reason());
-        assertEquals(true, failure.recoverable());
-        assertTrue(failure.message().contains("529"));
-    }
-
-    @Test
-    void classifiesModelMismatchFromAcpxSessionStreamBeforeReconnectWrapper() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        var sessionsDir = tempDir.resolve("sessions");
-        var sessionId = "cd0caac4-0c68-423a-a448-60a58353ad7c";
-        Files.createDirectories(sessionsDir);
-        Files.writeString(stdout, "");
-        Files.writeString(stderr, "[acpx] session claude-main (" + sessionId + ") · agent needs reconnect\n");
-        Files.writeString(
-                sessionsDir.resolve(sessionId + ".stream.ndjson"),
-                """
-                {"type":"session/prompt/failed","error":"Internal error: API Error: 400 {\\"error\\":{\\"message\\":\\"The supported API model names are deepseek-v4-pro or deepseek-v4-flash, but you passed glm-5.2.\\",\\"type\\":\\"invalid_request_error\\"}}"}
-                """
-        );
-
-        var failure = new AcpxFailureClassifier(
-                new AcpxFailureSignalCatalog(),
-                new AcpxSessionStreamFailureEvidenceReader(sessionsDir)
-        ).classify(stdout, stderr, 1);
-
-        assertEquals("RECOVERABLE_AGENT_MODEL_MISMATCH", failure.reason());
-        assertEquals(true, failure.recoverable());
-        assertTrue(failure.message().contains("rebuild"));
-    }
-
-    @Test
-    void ignoresPromptPayloadTextFromSessionStreamWhenClassifyingProviderFailure() throws Exception {
-        var stdout = tempDir.resolve("stdout.log");
-        var stderr = tempDir.resolve("stderr.log");
-        var sessionsDir = tempDir.resolve("sessions");
-        var sessionId = "edab1e36-b5c5-42c6-a50d-cbb88d74651d";
-        Files.createDirectories(sessionsDir);
-        Files.writeString(stdout, "[client] initialize (running)\n[error] RUNTIME: Interrupted\n");
-        Files.writeString(stderr, "[acpx] session codex-reviewer (" + sessionId + ") · agent needs reconnect\n");
-        Files.writeString(
-                sessionsDir.resolve(sessionId + ".stream.ndjson"),
-                """
-                {"jsonrpc":"2.0","id":3,"method":"session/prompt","params":{"prompt":[{"type":"text","text":"Product risk: could hit rate limit for validators."}]}}
-                {"jsonrpc":"2.0","result":{"stopReason":"cancelled"},"id":3}
-                """
-        );
-
-        var failure = new AcpxFailureClassifier(
-                new AcpxFailureSignalCatalog(),
-                new AcpxSessionStreamFailureEvidenceReader(sessionsDir)
-        ).classify(stdout, stderr, 4);
-
-        assertEquals("RECOVERABLE_AGENT_RECONNECT", failure.reason());
-        assertEquals(true, failure.recoverable());
     }
 
     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
@@ -1633,7 +1581,7 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             var resultJson = completionJson(request, "READY_FOR_ARCH_REVIEW");
-            return new AcpxRunResult(
+            return fixtureResult(
                     5,
                     now,
                     now.plusSeconds(1),
@@ -1697,7 +1645,7 @@ class AcpxAgentTaskHandlerTest {
             sessions.add(request.sessionName());
             prepareLogs(request);
             var now = Instant.parse("2026-07-22T00:00:00Z");
-            return new AcpxRunResult(
+            return fixtureResult(
                     0,
                     now,
                     now.plusSeconds(1),
@@ -1719,7 +1667,7 @@ class AcpxAgentTaskHandlerTest {
             correctionProfile = request.permissionProfile();
             prepareLogs(request);
             var now = Instant.parse("2026-07-22T00:00:02Z");
-            return new AcpxRunResult(
+            return fixtureResult(
                     0,
                     now,
                     now.plusSeconds(1),
@@ -1788,7 +1736,7 @@ class AcpxAgentTaskHandlerTest {
             initialArtifact = completionJson(request, "SELF_TEST_COMPLETE")
                     .replace("    \"missing_evidence\" : [ ],\n", "");
             var now = Instant.parse("2026-07-26T00:00:00Z");
-            return new AcpxRunResult(
+            return fixtureResult(
                     0,
                     now,
                     now.plusSeconds(1),
@@ -1811,7 +1759,7 @@ class AcpxAgentTaskHandlerTest {
                         .putArray("missing_evidence");
             }
             var now = Instant.parse("2026-07-26T00:00:02Z");
-            return new AcpxRunResult(
+            return fixtureResult(
                     0,
                     now,
                     now.plusSeconds(1),
@@ -1963,7 +1911,7 @@ class AcpxAgentTaskHandlerTest {
             result.put("summary", "token refresh missing");
             result.withArray("must_fix").add("refresh token on expiry");
             result.withArray("open_risks").add("race on logout");
-            return new AcpxRunResult(
+            return fixtureResult(
                     0,
                     now,
                     now.plusSeconds(1),
@@ -2039,10 +1987,10 @@ class AcpxAgentTaskHandlerTest {
         assertFalse(runMetadata.contains("\"agentExplorationPlanPath\""), runMetadata);
 
         var root = OBJECT_MAPPER.readTree(runJson.toFile());
-        assertEquals("completed", root.path("status").asText(),
-                "run.json top-level status must reflect execution");
-        assertEquals("COMPLETED", root.path("executionAttempt").path("status").asText(),
-                "successful process execution remains completed");
+        assertEquals("process_exited", root.path("status").asText(),
+                "handler persistence stops at process facts; runtime finalizer owns terminal status");
+        assertEquals("PROCESS_EXITED", root.path("executionAttempt").path("status").asText(),
+                "handler persistence must not invent a terminal execution outcome");
         assertTrue(root.path("failureReason").isMissingNode()
                         || root.path("failureReason").isNull()
                         || root.path("failureReason").asText().isBlank(),
@@ -2339,7 +2287,14 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent needs reconnect\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return resultWithFacts(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude"),
+                    ProcessUsability.EXITED_ZERO,
+                    AdapterSignalType.AGENT_RECONNECT_REQUIRED
+            );
         }
     }
 
@@ -2367,7 +2322,14 @@ class AcpxAgentTaskHandlerTest {
                     {"jsonrpc":"2.0","method":"session/new","id":4,"params":{}}
                     """);
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"));
+            return resultWithFacts(
+                    0,
+                    now,
+                    now.plusSeconds(1),
+                    List.of("acpx", "claude"),
+                    ProcessUsability.EXITED_ZERO,
+                    AdapterSignalType.AGENT_RECONNECT_REQUIRED
+            );
         }
     }
 
@@ -2382,7 +2344,14 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(0, now, now.plusSeconds(605), List.of("acpx", "--timeout", "600", "claude"));
+            return resultWithFacts(
+                    0,
+                    now,
+                    now.plusSeconds(605),
+                    List.of("acpx", "--timeout", "600", "claude"),
+                    ProcessUsability.INTERRUPTED,
+                    null
+            );
         }
     }
 
@@ -2396,9 +2365,14 @@ class AcpxAgentTaskHandlerTest {
                     [dual] acpx session ensure failed agent=claude session=claude-main-ws-test timed_out=true exit_code=-1
                     """);
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(4, now, now.plusSeconds(45), List.of(
-                    "acpx", "claude", "sessions", "ensure", "--name", request.sessionName()
-            ));
+            return resultWithFacts(
+                    4,
+                    now,
+                    now.plusSeconds(45),
+                    List.of("acpx", "claude", "sessions", "ensure", "--name", request.sessionName()),
+                    ProcessUsability.TIMED_OUT,
+                    AdapterSignalType.SESSION_BOOTSTRAP_FAILED
+            );
         }
     }
 
@@ -2409,7 +2383,14 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stdoutPath(), "[error] RUNTIME: API Error: Unable to connect to API (FailedToOpenSocket)\n");
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return new AcpxRunResult(1, now, now.plusSeconds(188), List.of("acpx", "claude"));
+            return resultWithFacts(
+                    1,
+                    now,
+                    now.plusSeconds(188),
+                    List.of("acpx", "claude"),
+                    ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                    AdapterSignalType.PROVIDER_CONNECTION_FAILED
+            );
         }
     }
 
@@ -2557,7 +2538,7 @@ class AcpxAgentTaskHandlerTest {
             String decision
     ) throws java.io.IOException {
         var resultJson = completionJson(request, decision);
-        return new AcpxRunResult(
+        return fixtureResult(
                 exitCode,
                 startedAt,
                 startedAt.plusSeconds(1),
@@ -2565,6 +2546,76 @@ class AcpxAgentTaskHandlerTest {
                 timeline,
                 usage,
                 new AcpxPromptCompletion("fixture-prompt", "end_turn", resultJson)
+        );
+    }
+
+    private static AcpxRunResult resultWithFacts(
+            int exitCode,
+            Instant startedAt,
+            Instant finishedAt,
+            List<String> command,
+            ProcessUsability usability,
+            AdapterSignalType signalType
+    ) {
+        var process = new ProcessResult(
+                String.join(" ", command),
+                null,
+                exitCode,
+                usability,
+                Math.max(0, java.time.Duration.between(startedAt, finishedAt).toMillis()),
+                "",
+                "",
+                usability == ProcessUsability.INTERRUPTED,
+                usability == ProcessUsability.TIMED_OUT
+        );
+        var signals = signalType == null
+                ? List.<AdapterSignal>of()
+                : List.of(new AdapterSignal(signalType, signalType.name(), 0, "fixture", "", false));
+        return new AcpxRunResult(
+                startedAt,
+                finishedAt,
+                command,
+                List.of(),
+                null,
+                AcpxPromptCompletion.EMPTY,
+                process,
+                signals
+        );
+    }
+
+    private static AcpxRunResult fixtureResult(
+            int exitCode,
+            Instant startedAt,
+            Instant finishedAt,
+            List<String> command,
+            List<AcpxExecutionEvent> timeline,
+            AcpxUsage usage,
+            AcpxPromptCompletion completion
+    ) {
+        var usability = exitCode == 0
+                ? ProcessUsability.EXITED_ZERO
+                : completion.completed()
+                        ? ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+                        : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+        return new AcpxRunResult(
+                startedAt,
+                finishedAt,
+                command,
+                timeline,
+                usage,
+                completion,
+                new ProcessResult(
+                        String.join(" ", command),
+                        null,
+                        exitCode,
+                        usability,
+                        Math.max(0, java.time.Duration.between(startedAt, finishedAt).toMillis()),
+                        "",
+                        "",
+                        false,
+                        false
+                ),
+                List.of()
         );
     }
 

@@ -2,8 +2,8 @@ package dev.dual.adapter.acpx;
 
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
-import dev.dual.core.execution.ProcessUsability;
 import dev.dual.runtime.handler.AgentRunGovernanceContext;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.ContractRegistry;
@@ -25,7 +25,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AcpxAgentResultAcquirer resultAcquirer;
     private final boolean prepareOnly;
     private final AgentPromptRenderer promptRenderer;
-    private final AcpxFailureClassifier failureClassifier;
     private final AgentRunMetadataWriter metadataWriter;
     private final AcpxUsageReader usageReader;
     private final PromptManifestWriter promptManifestWriter = new PromptManifestWriter();
@@ -46,7 +45,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.resultAcquirer = new AcpxAgentResultAcquirer(transport);
         this.prepareOnly = prepareOnly;
         this.promptRenderer = new AgentPromptRenderer();
-        this.failureClassifier = new AcpxFailureClassifier();
         this.metadataWriter = new AgentRunMetadataWriter();
         this.usageReader = usageReader;
     }
@@ -218,7 +216,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             : null
             );
             var finalResult = acquisition.finalResult();
-            var result = acquisition.executionResult();
+            var runTimeline = new ArrayList<>(acquisition.executionTimeline());
             var initialUsage = usageFor(acquisition.initialResult(), promptPath, stderrPath);
             var correctionUsage = acquisition.correctionAttempted()
                     ? usageFor(acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
@@ -227,7 +225,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
                     : initialUsage;
             var finalArtifact = finalResult.promptCompletion().finalAssistantMessage();
-            var resultWithArtifactTimeline = result;
             if (acquisition.correctionAttempted()) {
                 Files.writeString(
                         initialOutputPath,
@@ -236,29 +233,18 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 );
                 Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);
             }
-            if (result.promptCompletion().completed()) {
+            if (finalResult.promptCompletion().completed()) {
                 Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
-                resultWithArtifactTimeline = appendTimelineEvent(
-                        result,
+                appendTimelineEvent(
+                        runTimeline,
+                        finalResult.startedAt(),
                         AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
                         "adapter"
                 );
             }
             var effectiveTranscriptPath = acquisition.correctionAttempted() ? correctionTranscriptPath : transcriptPath;
             var effectiveStderrPath = acquisition.correctionAttempted() ? correctionStderrPath : stderrPath;
-            var failure = failureClassifier.classify(
-                    effectiveTranscriptPath,
-                    effectiveStderrPath,
-                    finalResult.exitCode()
-            );
             var outputComplete = finalResult.promptCompletion().completed();
-            var interrupted = interruptedOutputFailure(finalResult, outputComplete);
-            var processUsability = processUsability(
-                    resultWithArtifactTimeline,
-                    failure,
-                    interrupted,
-                    outputComplete
-            );
             var acquisitionDocument = acquisition.toDocument(
                     context.workspaceRoot(),
                     acquisition.correctionAttempted() ? initialOutputPath : outputPath,
@@ -279,13 +265,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     outputPath,
                     effectiveStderrPath,
                     transcriptPath,
-                    resultWithArtifactTimeline,
-                    metadataFailure(failure, interrupted, outputComplete),
+                    finalResult,
+                    runTimeline,
                     usage,
                     sessionMeta,
                     compactionMeta,
-                    acquisitionDocument,
-                    processUsability
+                    acquisitionDocument
             );
             return authoritySnapshot.enforce(NodeResult.completed(
                     "completed",
@@ -294,32 +279,25 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             context,
                             runDir,
                             transcriptPath,
-                            resultWithArtifactTimeline,
+                            finalResult,
                             agent,
                             session,
                             runId,
-                            metadataFailure(failure, interrupted, outputComplete),
-                            interrupted,
-                            outputComplete,
-                            processUsability
+                            outputComplete
                     )
             ));
         } catch (Exception failure) {
-            return authoritySnapshot.enforce(transportFailureResult(
-                    context,
-                    runDir,
-                    promptPath,
-                    outputPath,
-                    stderrPath,
-                    transcriptPath,
-                    agent,
-                    session,
-                    promptTemplate,
-                    runId,
-                    sessionMeta,
-                    compactionMeta,
-                    failure
+            var guarded = authoritySnapshot.enforce(new NodeResult(
+                    "AGENT_HANDLER_FAILED",
+                    NodeStatus.FAILED,
+                    List.of(),
+                    Map.of(),
+                    failure.getMessage()
             ));
+            if (Boolean.TRUE.equals(guarded.result().get("change_boundary_authority_tampered"))) {
+                return guarded;
+            }
+            throw failure;
         }
     }
 
@@ -437,93 +415,13 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         )).stripTrailing();
     }
 
-    private NodeResult transportFailureResult(
-            TaskContext context,
-            java.nio.file.Path runDir,
-            java.nio.file.Path promptPath,
-            java.nio.file.Path outputPath,
-            java.nio.file.Path stderrPath,
-            java.nio.file.Path transcriptPath,
-            String agent,
-            String session,
-            String promptTemplate,
-            String runId,
-            SessionMeta sessionMeta,
-            SessionCompactionMeta compactionMeta,
-            Exception cause
-    ) throws java.io.IOException {
-        if (cause instanceof InterruptedException) {
-            Thread.currentThread().interrupt();
-        }
-        Files.createDirectories(stderrPath.getParent());
-        Files.writeString(stderrPath, "acpx transport failed: " + cause.getMessage() + "\n", StandardCharsets.UTF_8);
-        if (!Files.exists(transcriptPath)) {
-            Files.writeString(transcriptPath, "", StandardCharsets.UTF_8);
-        }
-        var now = Instant.now();
-        var result = new AcpxRunResult(1, now, now, List.of("acpx", agent, "transport"));
-        var failure = new AcpxFailureClassifier.AcpxFailure(
-                AcpxFailureReason.TRANSPORT_FAILED.code(),
-                "acpx transport failed: " + cause.getMessage(),
-                true,
-                false
-        );
-        var processUsability = processUsability(result, failure, null, false);
-        metadataWriter.writeCompleted(
-                context.workspaceRoot(),
-                context.workstreamId(),
-                context.definition().id(),
-                agent,
-                session,
-                promptTemplate,
-                runId,
-                runDir,
-                promptPath,
-                outputPath,
-                stderrPath,
-                transcriptPath,
-                result,
-                failure,
-                null,
-                sessionMeta,
-                compactionMeta,
-                processUsability
-        );
-        return NodeResult.completed(
-                "completed",
-                evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
-                resultFacts(
-                        context,
-                        runDir,
-                        transcriptPath,
-                        result,
-                        agent,
-                        session,
-                        runId,
-                        failure,
-                        null,
-                        false,
-                        processUsability
-                )
-        );
-    }
-
-    private static AcpxRunResult appendTimelineEvent(
-            AcpxRunResult result,
+    private static void appendTimelineEvent(
+            List<AcpxExecutionEvent> timeline,
+            Instant startedAt,
             AgentExecutionTimelineEventKind kind,
             String source
     ) {
-        var timeline = new java.util.ArrayList<>(result.executionTimeline());
-        timeline.add(AcpxExecutionEvent.now(kind, source, timeline.size() + 1L, result.startedAt()));
-        return new AcpxRunResult(
-                result.exitCode(),
-                result.startedAt(),
-                result.finishedAt(),
-                result.command(),
-                timeline,
-                result.usage(),
-                result.promptCompletion()
-        );
+        timeline.add(AcpxExecutionEvent.now(kind, source, timeline.size() + 1L, startedAt));
     }
 
     private static String configText(TaskContext context, String key) {
@@ -568,10 +466,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             String agent,
             String session,
             String runId,
-            AcpxFailureClassifier.AcpxFailure failure,
-            AcpxFailureClassifier.AcpxFailure interrupted,
-            boolean outputComplete,
-            ProcessUsability processUsability
+            boolean outputComplete
     ) {
         var facts = new LinkedHashMap<String, Object>();
         facts.put("run_id", runId);
@@ -581,64 +476,25 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         facts.put("exit_code", result.exitCode());
         facts.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
         facts.put("output_complete", outputComplete);
-        facts.put("process_usability", processUsability.name());
-        if (interrupted != null) {
-            facts.put("acpx_failure.reason", interrupted.reason());
-            facts.put("acpx_failure.recoverable", interrupted.recoverable());
-        } else if (failure != null && failure.recoverable()) {
-            facts.put("acpx_failure.reason", failure.reason());
-            facts.put("acpx_failure.recoverable", true);
-        }
+        facts.put("process_usability", result.processResult().usability().name());
+        facts.put("adapter_signals", result.adapterSignals().stream()
+                .map(AcpxAgentTaskHandler::adapterSignalFact)
+                .toList());
         return facts;
     }
 
-    private static AcpxFailureClassifier.AcpxFailure metadataFailure(
-            AcpxFailureClassifier.AcpxFailure failure,
-            AcpxFailureClassifier.AcpxFailure interrupted,
-            boolean outputComplete
-    ) {
-        if (interrupted != null) {
-            return interrupted;
-        }
-        return outputComplete ? null : failure;
+    private static Map<String, Object> adapterSignalFact(AdapterSignal signal) {
+        var fact = new LinkedHashMap<String, Object>();
+        fact.put("type", signal.type().name());
+        fact.put("message", signal.message());
+        fact.put("observedSequence", signal.observedSequence());
+        fact.put("source", signal.source());
+        fact.put("sessionId", signal.sessionId());
+        fact.put("superseded", signal.superseded());
+        return Map.copyOf(fact);
     }
 
-    private static ProcessUsability processUsability(
-            AcpxRunResult result,
-            AcpxFailureClassifier.AcpxFailure failure,
-            AcpxFailureClassifier.AcpxFailure interrupted,
-            boolean outputComplete
-    ) {
-        if (interrupted != null) {
-            return ProcessUsability.INTERRUPTED;
-        }
-        if (result.exitCode() == 0) {
-            return ProcessUsability.EXITED_ZERO;
-        }
-        if (outputComplete) {
-            return ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT;
-        }
-        if (failure != null && failure.recoverable()) {
-            return ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
-        }
-        return ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
-    }
-
-    private static String readStringIfExists(java.nio.file.Path path) throws java.io.IOException {
-        if (!Files.exists(path)) {
-            return "";
-        }
-        return Files.readString(path, StandardCharsets.UTF_8);
-    }
-
-    private static AcpxFailureClassifier.AcpxFailure interruptedOutputFailure(AcpxRunResult result, boolean outputComplete) {
-        if (outputComplete || !result.reachedDeclaredTimeout(java.time.Duration.ofSeconds(5))) {
-            return null;
-        }
-        return new AcpxFailureClassifier.AcpxFailure(
-                AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code(),
-                "agent output ended before the terminal contract after reaching the acpx timeout",
-                true
-        );
+    private static String relative(Path root, Path path) {
+        return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
     }
 }

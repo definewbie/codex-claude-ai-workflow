@@ -1,5 +1,9 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.ProcessUsability;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.AgentResultEnvelopeValidator;
 import dev.dual.runtime.handler.ContractRegistry;
@@ -200,9 +204,24 @@ class AcpxAgentResultAcquirerTest {
 
     @Test
     void typedProviderFailureDoesNotStartCorrectionEvenWhenProcessExitedZero() throws Exception {
-        var transport = new ScriptedTransport(
-                validResult("request-1", "prefix\n" + strictEnvelope("run-1"), 0));
-        transport.stderrText = "[error] RUNTIME: HTTP 429 rate limit exceeded\n";
+        var completed = validResult("request-1", "prefix\n" + strictEnvelope("run-1"), 0);
+        var transport = new ScriptedTransport(new AcpxRunResult(
+                completed.startedAt(),
+                completed.finishedAt(),
+                completed.command(),
+                completed.executionTimeline(),
+                completed.usage(),
+                completed.promptCompletion(),
+                completed.processResult(),
+                List.of(new AdapterSignal(
+                        AdapterSignalType.RATE_LIMITED,
+                        "HTTP 429 rate limit exceeded",
+                        1,
+                        "acpx_stream",
+                        "",
+                        false
+                ))
+        ));
         var requests = requests("same-session");
 
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
@@ -404,14 +423,30 @@ class AcpxAgentResultAcquirerTest {
 
     private static AcpxRunResult result(String requestId, String message, int exitCode, String stopReason) {
         var now = Instant.parse("2026-07-22T00:00:00Z");
+        var completion = new AcpxPromptCompletion(requestId, stopReason, message);
         return new AcpxRunResult(
-                exitCode,
                 now,
                 now.plusSeconds(1),
                 List.of("acpx", "claude"),
                 List.of(),
                 null,
-                new AcpxPromptCompletion(requestId, stopReason, message)
+                completion,
+                new ProcessResult(
+                        "acpx claude",
+                        null,
+                        exitCode,
+                        exitCode == 0
+                                ? ProcessUsability.EXITED_ZERO
+                                : completion.completed()
+                                        ? ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+                                        : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                        1000,
+                        "",
+                        "",
+                        false,
+                        false
+                ),
+                List.of()
         );
     }
 

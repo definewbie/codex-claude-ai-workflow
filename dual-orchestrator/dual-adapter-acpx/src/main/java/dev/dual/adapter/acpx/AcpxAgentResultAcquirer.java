@@ -13,27 +13,19 @@ final class AcpxAgentResultAcquirer {
     private final AcpxAgentTransport transport;
     private final AgentResultEnvelopeParser parser;
     private final AgentResultEnvelopeValidator validator;
-    private final AcpxFailureClassifier failureClassifier;
 
     AcpxAgentResultAcquirer(AcpxAgentTransport transport) {
-        this(
-                transport,
-                new AgentResultEnvelopeParser(),
-                new AgentResultEnvelopeValidator(),
-                new AcpxFailureClassifier()
-        );
+        this(transport, new AgentResultEnvelopeParser(), new AgentResultEnvelopeValidator());
     }
 
     AcpxAgentResultAcquirer(
             AcpxAgentTransport transport,
             AgentResultEnvelopeParser parser,
-            AgentResultEnvelopeValidator validator,
-            AcpxFailureClassifier failureClassifier
+            AgentResultEnvelopeValidator validator
     ) {
         this.transport = transport;
         this.parser = parser;
         this.validator = validator;
-        this.failureClassifier = failureClassifier;
     }
 
     Acquisition acquire(
@@ -50,7 +42,6 @@ final class AcpxAgentResultAcquirer {
         var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract);
         var correctionReason = correctionReason(initialParse, initialValidation);
         var correctionDisposition = correctionDisposition(
-                initialRequest,
                 initialResult,
                 correctionReason,
                 correctionPrompt
@@ -110,7 +101,6 @@ final class AcpxAgentResultAcquirer {
     }
 
     private CorrectionDisposition correctionDisposition(
-            AcpxRunRequest request,
             AcpxRunResult result,
             CorrectionReason correctionReason,
             String correctionPrompt
@@ -121,8 +111,7 @@ final class AcpxAgentResultAcquirer {
         if (!result.promptCompletion().completed()) {
             return CorrectionDisposition.SKIPPED_NOT_COMPLETED;
         }
-        var failure = failureClassifier.classify(request.stdoutPath(), request.stderrPath(), result.exitCode());
-        if (failure.signalPresent()) {
+        if (result.activeAdapterSignals().stream().anyMatch(signal -> signal.type().blocksSuccess())) {
             return CorrectionDisposition.SKIPPED_PROVIDER_FAILURE;
         }
         if (correctionReason == CorrectionReason.NONE) {
@@ -241,21 +230,12 @@ final class AcpxAgentResultAcquirer {
             return correctionAttempted() ? correctionResult : initialResult;
         }
 
-        AcpxRunResult executionResult() {
-            if (!correctionAttempted()) {
-                return initialResult;
-            }
+        java.util.List<AcpxExecutionEvent> executionTimeline() {
             var timeline = new java.util.ArrayList<>(initialResult.executionTimeline());
-            timeline.addAll(correctionResult.executionTimeline());
-            return new AcpxRunResult(
-                    correctionResult.exitCode(),
-                    initialResult.startedAt(),
-                    correctionResult.finishedAt(),
-                    correctionResult.command(),
-                    timeline,
-                    correctionResult.usage(),
-                    correctionResult.promptCompletion()
-            );
+            if (correctionAttempted()) {
+                timeline.addAll(correctionResult.executionTimeline());
+            }
+            return java.util.List.copyOf(timeline);
         }
 
         AgentResultEnvelopeParser.ParseResult finalParse() {
@@ -316,7 +296,9 @@ final class AcpxAgentResultAcquirer {
                     validation != null && validation.valid(),
                     validation == null ? "NOT_EVALUATED" : validation.correctionDisposition().name(),
                     validation == null ? java.util.List.of() : validation.errors(),
-                    usage
+                    usage,
+                    result.processResult(),
+                    result.adapterSignals()
             );
         }
 

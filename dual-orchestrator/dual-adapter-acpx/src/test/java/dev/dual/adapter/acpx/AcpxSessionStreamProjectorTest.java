@@ -95,6 +95,66 @@ class AcpxSessionStreamProjectorTest {
         assertFalse(projector.promptCompletion().completed());
     }
 
+    @Test
+    void proseToolResultsAndUsageCannotBecomeProviderFailure() {
+        var projector = project("""
+                {"jsonrpc":"2.0","id":3,"method":"session/prompt","params":{"prompt":[{"type":"text","text":"quota rate limit 429"}]}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"s","update":{"sessionUpdate":"tool_call_update","rawOutput":{"formatted_output":"rate_limit_exceeded is_error=false"}}}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"s","update":{"sessionUpdate":"usage_update","used":100,"size":200000}}}
+                """);
+        accept(projector, 3, update("", "{\"decision\":\"PASS\"}"));
+        accept(projector, 4, """
+                {"jsonrpc":"2.0","id":3,"result":{"stopReason":"end_turn","_meta":{"quota":{"totalTokens":100}}}}
+                """);
+
+        assertTrue(projector.evidence().errors().isEmpty());
+        assertTrue(projector.promptCompletion().completed());
+    }
+
+    @Test
+    void sessionResumeErrorIsRemovedOnlyByLaterSessionCreation() {
+        var recovered = project("""
+                {"jsonrpc":"2.0","id":1,"method":"session/resume","params":{"sessionId":"old"}}
+                {"jsonrpc":"2.0","id":1,"error":{"code":-32002,"message":"session not found"}}
+                {"jsonrpc":"2.0","id":2,"method":"session/new","params":{}}
+                {"jsonrpc":"2.0","id":2,"result":{"sessionId":"fresh"}}
+                """);
+        var unrecovered = project("""
+                {"jsonrpc":"2.0","id":2,"method":"session/new","params":{}}
+                {"jsonrpc":"2.0","id":2,"result":{"sessionId":"fresh"}}
+                {"jsonrpc":"2.0","id":1,"method":"session/resume","params":{"sessionId":"old"}}
+                {"jsonrpc":"2.0","id":1,"error":{"code":-32002,"message":"session not found"}}
+                """);
+
+        assertTrue(recovered.evidence().errors().isEmpty());
+        assertEquals(1, unrecovered.evidence().errors().size());
+        assertEquals("session/resume", unrecovered.evidence().errors().get(0).method());
+    }
+
+    @Test
+    void nestedProviderErrorFieldsRemainTyped() {
+        var projector = project("""
+                {"jsonrpc":"2.0","id":3,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","id":3,"error":{"code":-32603,"message":"Internal error","data":{"message":"status=429 rate_limit_exceeded","details":"provider detail"}}}
+                """);
+
+        var error = projector.evidence().errors().get(0);
+        assertEquals("session/prompt", error.method());
+        assertEquals("status=429 rate_limit_exceeded", error.dataMessage());
+        assertEquals("provider detail", error.dataDetails());
+    }
+
+    @Test
+    void malformedLinesCannotCreateControlFacts() {
+        var projector = project("""
+                not-json
+                {"jsonrpc":"2.0","id":3,"error":{"code":-32603,"message":"rate lim
+                """);
+
+        assertTrue(projector.evidence().errors().isEmpty());
+        assertFalse(projector.promptCompletion().completed());
+    }
+
     private static String update(String messageId, String text) {
         var messageField = messageId.isBlank() ? "" : "\"messageId\":\"" + messageId + "\",";
         return "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"update\":{"
@@ -109,5 +169,14 @@ class AcpxSessionStreamProjectorTest {
 
     private static void accept(AcpxSessionStreamProjector projector, long sequence, String line) {
         projector.accept(sequence, AcpxStreamWireLine.parse(line));
+    }
+
+    private static AcpxSessionStreamProjector project(String ndjson) {
+        var projector = new AcpxSessionStreamProjector();
+        long sequence = 0;
+        for (var line : ndjson.lines().toList()) {
+            accept(projector, sequence++, line);
+        }
+        return projector;
     }
 }

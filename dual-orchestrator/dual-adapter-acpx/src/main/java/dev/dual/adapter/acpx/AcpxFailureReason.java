@@ -1,5 +1,7 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignalType;
+
 /**
  * acpx adapter 输出的稳定失败语义。
  *
@@ -29,5 +31,20 @@ enum AcpxFailureReason {
 
     String code() {
         return code;
+    }
+
+    AdapterSignalType adapterSignalType() {
+        return switch (this) {
+            case AGENT_MODEL_MISMATCH -> AdapterSignalType.MODEL_MISMATCH;
+            case AGENT_OVERLOADED, RATE_LIMIT -> AdapterSignalType.RATE_LIMITED;
+            case AGENT_RECONNECT -> AdapterSignalType.AGENT_RECONNECT_REQUIRED;
+            case AGENT_OUTPUT_INTERRUPTED, TRANSPORT_FAILED -> AdapterSignalType.PROCESS_STALLED;
+            case AGENT_PERMISSION_BLOCKED -> AdapterSignalType.PERMISSION_BLOCKED;
+            case AGENT_AUTH_FAILED -> AdapterSignalType.AUTH_FAILED;
+            case PROVIDER_CONNECTION_FAILED -> AdapterSignalType.PROVIDER_CONNECTION_FAILED;
+            case SESSION_BOOTSTRAP_FAILED -> AdapterSignalType.SESSION_BOOTSTRAP_FAILED;
+            case SESSION_MISSING -> AdapterSignalType.SESSION_RESUME_FAILED;
+            case CONTEXT_WINDOW -> AdapterSignalType.CONTEXT_WINDOW_EXCEEDED;
+        };
     }
 }

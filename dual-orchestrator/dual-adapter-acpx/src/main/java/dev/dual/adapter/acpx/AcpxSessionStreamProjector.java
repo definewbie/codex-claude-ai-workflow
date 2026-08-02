@@ -111,6 +111,7 @@ final class AcpxSessionStreamProjector {
                     promptStopReason,
                     finalAssistantMessage()
             );
+            return Optional.of(AgentLifecycleEvent.promptCompleted(sequence));
         }
         if (wire.result() != null && wire.result().usage() != null) {
             return Optional.of(AgentLifecycleEvent.usageUpdate(sequence));

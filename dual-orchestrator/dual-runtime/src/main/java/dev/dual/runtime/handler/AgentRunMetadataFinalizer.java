@@ -87,10 +87,10 @@ public final class AgentRunMetadataFinalizer {
         var runMetadataRef = text(result.result().get("run_metadata"));
         if (runMetadataRef.isBlank()) {
             var evidence = new AgentExecutionEvidence(
-                    processResult(result),
+                    legacyProcessResult(result),
                     agentResultContract,
                     artifactContractResults,
-                    adapterSignals(result)
+                    resultAdapterSignals(result)
             );
             return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
         }
@@ -98,17 +98,22 @@ public final class AgentRunMetadataFinalizer {
         var path = root.resolve(runMetadataRef).normalize();
         if (!path.startsWith(root) || !Files.isRegularFile(path)) {
             var evidence = new AgentExecutionEvidence(
-                    processResult(result),
+                    legacyProcessResult(result),
                     agentResultContract,
                     artifactContractResults,
-                    adapterSignals(result)
+                    resultAdapterSignals(result)
             );
             return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
         }
         try {
             var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
-            var process = processResultFromRunMetadata(json, processResult(result));
-            var signals = adapterSignalsFromRunMetadata(json, adapterSignals(result));
+            var process = processResultFromRunMetadata(json);
+            if (process == null) {
+                process = legacyProcessResult(result);
+            }
+            var signals = json.path("adapterSignals").isMissingNode()
+                    ? resultAdapterSignals(result)
+                    : adapterSignalsFromRunMetadata(json);
             var evidence = new AgentExecutionEvidence(
                     process,
                     agentResultContract,
@@ -139,18 +144,18 @@ public final class AgentRunMetadataFinalizer {
             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
             return finalized.outcome();
         } catch (Exception failure) {
-            var evidence = new AgentExecutionEvidence(
-                    processResult(result),
-                    agentResultContract,
-                    artifactContractResults,
-                    adapterSignals(result)
-            );
-            var outcome = executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
-            throw new IllegalStateException("failed to finalize agent run metadata for outcome " + outcome.status(), failure);
+            throw new IllegalStateException("failed to finalize typed agent run metadata", failure);
         }
     }
 
-    private static List<AdapterSignal> adapterSignals(NodeResult result) {
+    private static List<AdapterSignal> resultAdapterSignals(NodeResult result) {
+        if (result.result().containsKey("adapter_signals")) {
+            return adapterSignalsFromValue(result.result().get("adapter_signals"));
+        }
+        return legacyAdapterSignals(result);
+    }
+
+    private static List<AdapterSignal> legacyAdapterSignals(NodeResult result) {
         var reason = text(result.result().get("acpx_failure.reason"));
         if (reason.isBlank()) {
             return List.of();
@@ -172,39 +177,58 @@ public final class AgentRunMetadataFinalizer {
         return type == null ? List.of() : List.of(new AdapterSignal(type, reason, 0));
     }
 
-    private static List<AdapterSignal> adapterSignalsFromRunMetadata(ObjectNode json, List<AdapterSignal> fallback) {
-        var merged = new ArrayList<AdapterSignal>();
+    private static List<AdapterSignal> adapterSignalsFromRunMetadata(ObjectNode json) {
         var existing = json.path("adapterSignals");
-        if (existing.isArray()) {
-            for (var item : existing) {
-                var type = enumValue(AdapterSignalType.class, item.path("type").asText(""), null);
-                if (type == null) {
-                    continue;
-                }
-                merged.add(new AdapterSignal(
-                        type,
-                        item.path("message").asText(""),
-                        item.path("observedSequence").isNumber() ? Math.max(0L, item.path("observedSequence").asLong()) : 0L,
-                        item.path("source").asText(""),
-                        item.path("sessionId").asText(""),
-                        item.path("superseded").isBoolean() && item.path("superseded").asBoolean()
-                ));
-            }
+        if (!existing.isArray()) {
+            throw new IllegalArgumentException("typed adapterSignals must be an array");
         }
-        for (var signal : fallback) {
-            if (merged.stream().noneMatch(existingSignal -> sameAdapterSignal(existingSignal, signal))) {
-                merged.add(signal);
+        var signals = new ArrayList<AdapterSignal>();
+        for (var item : existing) {
+            if (!item.isObject()) {
+                throw new IllegalArgumentException("typed adapterSignals entries must be objects");
             }
+            var type = enumValue(AdapterSignalType.class, item.path("type").asText(""), null);
+            if (type == null) {
+                throw new IllegalArgumentException("typed adapterSignals.type is missing or invalid");
+            }
+            signals.add(new AdapterSignal(
+                    type,
+                    item.path("message").asText(""),
+                    item.path("observedSequence").isNumber() ? Math.max(0L, item.path("observedSequence").asLong()) : 0L,
+                    item.path("source").asText(""),
+                    item.path("sessionId").asText(""),
+                    item.path("superseded").isBoolean() && item.path("superseded").asBoolean()
+            ));
         }
-        return List.copyOf(merged);
+        return List.copyOf(signals);
     }
 
-    private static boolean sameAdapterSignal(AdapterSignal first, AdapterSignal second) {
-        return first.type() == second.type()
-                && first.observedSequence() == second.observedSequence()
-                && first.message().equals(second.message())
-                && first.source().equals(second.source())
-                && first.sessionId().equals(second.sessionId());
+    private static List<AdapterSignal> adapterSignalsFromValue(Object value) {
+        if (!(value instanceof List<?> list)) {
+            throw new IllegalArgumentException("typed adapter_signals must be a list");
+        }
+        var signals = new ArrayList<AdapterSignal>();
+        for (var item : list) {
+            if (!(item instanceof Map<?, ?> map)) {
+                throw new IllegalArgumentException("typed adapter_signals entries must be maps");
+            }
+            var type = enumValue(AdapterSignalType.class, text(map.get("type")), null);
+            if (type == null) {
+                throw new IllegalArgumentException("typed adapter_signals.type is missing or invalid");
+            }
+            var sequence = map.get("observedSequence") instanceof Number number
+                    ? Math.max(0L, number.longValue())
+                    : 0L;
+            signals.add(new AdapterSignal(
+                    type,
+                    text(map.get("message")),
+                    sequence,
+                    text(map.get("source")),
+                    text(map.get("sessionId")),
+                    Boolean.TRUE.equals(map.get("superseded"))
+            ));
+        }
+        return List.copyOf(signals);
     }
 
     static Map<String, Object> outcomeToMap(AgentExecutionOutcome outcome) {
@@ -234,7 +258,7 @@ public final class AgentRunMetadataFinalizer {
         return map;
     }
 
-    private static ProcessResult processResult(NodeResult result) {
+    private static ProcessResult legacyProcessResult(NodeResult result) {
         var usability = processUsability(result);
         var exitCode = result.result().get("exit_code");
         if (exitCode instanceof Number number && number.intValue() != 0) {
@@ -358,33 +382,30 @@ public final class AgentRunMetadataFinalizer {
         return merged;
     }
 
-    private static ProcessResult processResultFromRunMetadata(ObjectNode json, ProcessResult fallback) {
+    private static ProcessResult processResultFromRunMetadata(ObjectNode json) {
         var existing = json.path("processResult");
+        if (existing.isMissingNode()) {
+            return null;
+        }
         if (!existing.isObject()) {
-            return fallback;
+            throw new IllegalArgumentException("typed processResult must be an object");
         }
         var usability = enumValue(ProcessUsability.class, existing.path("usability").asText(""), null);
         if (usability == null) {
-            return fallback;
+            throw new IllegalArgumentException("typed processResult.usability is missing or invalid");
         }
-        Long pid = fallback.pid();
-        if (existing.path("pid").isNumber()) {
-            pid = existing.path("pid").asLong();
-        }
-        Integer exitCode = fallback.exitCode();
-        if (existing.path("exitCode").isNumber()) {
-            exitCode = existing.path("exitCode").asInt();
-        }
+        Long pid = existing.path("pid").isNumber() ? existing.path("pid").asLong() : null;
+        Integer exitCode = existing.path("exitCode").isNumber() ? existing.path("exitCode").asInt() : null;
         return new ProcessResult(
-                existing.path("command").asText(fallback.command()),
+                existing.path("command").asText(""),
                 pid,
                 exitCode,
                 usability,
-                existing.path("durationMs").isNumber() ? Math.max(0L, existing.path("durationMs").asLong()) : fallback.durationMs(),
-                existing.path("stdoutPath").asText(fallback.stdoutPath()),
-                existing.path("stderrPath").asText(fallback.stderrPath()),
-                existing.path("interrupted").isBoolean() ? existing.path("interrupted").asBoolean() : fallback.interrupted(),
-                existing.path("timedOut").isBoolean() ? existing.path("timedOut").asBoolean() : fallback.timedOut()
+                existing.path("durationMs").isNumber() ? Math.max(0L, existing.path("durationMs").asLong()) : 0L,
+                existing.path("stdoutPath").asText(""),
+                existing.path("stderrPath").asText(""),
+                existing.path("interrupted").asBoolean(false),
+                existing.path("timedOut").asBoolean(false)
         );
     }
 

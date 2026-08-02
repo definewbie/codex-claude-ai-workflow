@@ -1,11 +1,13 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignalType;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentExecutionHealthTest {
@@ -31,7 +33,8 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(5));
 
         assertEquals(AgentExecutionHealth.Status.HEALTHY, assessment.status());
-        assertFalse(assessment.failure().recoverable());
+        assertNull(assessment.signal());
+        assertTrue(assessment.signals().stream().allMatch(signal -> signal.superseded()));
     }
 
     @Test
@@ -48,7 +51,7 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(60));
 
         assertEquals(AgentExecutionHealth.Status.HEALTHY, assessment.status());
-        assertFalse(assessment.failure().recoverable());
+        assertNull(assessment.signal());
     }
 
     @Test
@@ -60,8 +63,8 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(11));
 
         assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, assessment.status());
-        assertEquals(AcpxFailureReason.AGENT_RECONNECT.code(), assessment.failure().reason());
-        assertTrue(assessment.failure().interruptRunningProcess());
+        assertEquals(AdapterSignalType.AGENT_RECONNECT_REQUIRED, assessment.signal().type());
+        assertFalse(assessment.signal().superseded());
     }
 
     @Test
@@ -74,7 +77,7 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(20));
 
         assertEquals(AgentExecutionHealth.Status.HEALTHY, assessment.status());
-        assertFalse(assessment.failure().recoverable());
+        assertNull(assessment.signal());
     }
 
     @Test
@@ -90,8 +93,7 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ZERO);
 
         assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, assessment.status());
-        assertEquals(AcpxFailureReason.AGENT_OVERLOADED.code(), assessment.failure().reason());
-        assertFalse(assessment.failure().interruptRunningProcess());
+        assertEquals(AdapterSignalType.RATE_LIMITED, assessment.signal().type());
     }
 
     @Test
@@ -103,8 +105,7 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(7));
 
         assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, assessment.status());
-        assertEquals(AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED.code(), assessment.failure().reason());
-        assertTrue(assessment.failure().recoverable());
+        assertEquals(AdapterSignalType.PROCESS_STALLED, assessment.signal().type());
     }
 
     @Test
@@ -117,7 +118,7 @@ class AgentExecutionHealthTest {
         var assessment = health.assess(Duration.ofSeconds(8));
 
         assertEquals(AgentExecutionHealth.Status.HEALTHY, assessment.status());
-        assertFalse(assessment.failure().recoverable());
+        assertNull(assessment.signal());
     }
 
     /** Transport-level cannot-bypass: ordinary ongoing output that mentions
@@ -145,9 +146,8 @@ class AgentExecutionHealthTest {
                     assessment.status() == AgentExecutionHealth.Status.HEALTHY
                             || assessment.status() == AgentExecutionHealth.Status.UNKNOWN,
                     "ongoing output must not raise a recoverable failure at t=" + t + "; got " + assessment.status());
-            assertFalse(
-                    assessment.failure().reason().startsWith("RECOVERABLE_"),
-                    "ongoing output must not raise any recoverable signal at t=" + t + "; got " + assessment.failure().reason());
+            assertNull(assessment.signal(),
+                    "ongoing output must not raise any recoverable signal at t=" + t);
         }
     }
 
@@ -168,7 +168,7 @@ class AgentExecutionHealthTest {
 
         var assessment = health.assess(Duration.ofSeconds(2));
         assertEquals(AgentExecutionHealth.Status.RECOVERABLE_FAILURE, assessment.status());
-        assertEquals(AcpxFailureReason.RATE_LIMIT.code(), assessment.failure().reason());
+        assertEquals(AdapterSignalType.RATE_LIMITED, assessment.signal().type());
     }
 
     @Test
@@ -185,7 +185,6 @@ class AgentExecutionHealthTest {
 
         var assessment = health.assess(Duration.ofSeconds(2));
         assertTrue(assessment.status() != AgentExecutionHealth.Status.RECOVERABLE_FAILURE);
-        assertTrue(assessment.failure().reason() == null
-                || !assessment.failure().reason().equals(AcpxFailureReason.RATE_LIMIT.code()));
+        assertTrue(assessment.signal() == null || assessment.signal().type() != AdapterSignalType.RATE_LIMITED);
     }
 }

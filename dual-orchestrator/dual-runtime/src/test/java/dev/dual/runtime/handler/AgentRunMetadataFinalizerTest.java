@@ -15,12 +15,76 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AgentRunMetadataFinalizerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @TempDir
     Path tempDir;
+
+    @Test
+    void invalidTypedProcessResultCannotFallBackToLegacyNodeFacts() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-invalid/runs/run-invalid/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-invalid",
+                  "workstreamId": "ws-invalid",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "status": "process_exited",
+                  "processResult": {
+                    "exitCode": 0,
+                    "usability": "NOT_A_PROCESS_USABILITY"
+                  },
+                  "adapterSignals": []
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", ".agent/workstreams/ws-invalid/runs/run-invalid/run.json");
+        facts.put("exit_code", 0);
+        facts.put("process_usability", "EXITED_ZERO");
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), AgentResultContractResult.valid("IMPLEMENTED"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        assertThrows(IllegalStateException.class,
+                () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult));
+    }
+
+    @Test
+    void typedProcessResultWithWrongShapeCannotFallBackToLegacyNodeFacts() throws Exception {
+        assertInvalidTypedMetadataRejected("wrong-process-shape", """
+                "processResult": null,
+                "adapterSignals": []
+                """);
+    }
+
+    @Test
+    void unknownTypedAdapterSignalCannotBeSilentlyDropped() throws Exception {
+        assertInvalidTypedMetadataRejected("unknown-signal", """
+                "processResult": {
+                  "exitCode": 0,
+                  "usability": "EXITED_ZERO",
+                  "durationMs": 1
+                },
+                "adapterSignals": [ { "type": "NOT_AN_ADAPTER_SIGNAL" } ]
+                """);
+    }
+
+    @Test
+    void malformedNodeResultAdapterSignalsCannotBecomeNoSignal() {
+        assertMalformedNodeResultSignalsRejected(null);
+        assertMalformedNodeResultSignalsRejected(List.of(Map.of("type", "NOT_AN_ADAPTER_SIGNAL")));
+    }
 
     @Test
     void mapsModelMismatchFailureReasonToTypedAdapterSignal() throws Exception {
@@ -338,6 +402,104 @@ class AgentRunMetadataFinalizerTest {
         assertEquals("PROVIDER_CONNECTION_FAILED", firstSignal.get("type"));
         assertEquals("native_result", firstSignal.get("source"));
         assertEquals("provider-session", firstSignal.get("sessionId"));
+    }
+
+    @Test
+    void persistedEmptyAdapterSignalsPreventLegacyReasonFallback() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-empty-signals/runs/run-empty-signals/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-empty-signals",
+                  "workstreamId": "ws-empty-signals",
+                  "nodeId": "intake.claude_brainstorm",
+                  "agent": "claude",
+                  "status": "process_exited",
+                  "processResult": {
+                    "command": "acpx claude",
+                    "exitCode": 0,
+                    "usability": "EXITED_ZERO",
+                    "durationMs": 12,
+                    "interrupted": false,
+                    "timedOut": false
+                  },
+                  "adapterSignals": []
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", ".agent/workstreams/ws-empty-signals/runs/run-empty-signals/run.json");
+        facts.put("exit_code", 0);
+        facts.put("process_usability", "EXITED_ZERO");
+        facts.put("acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT");
+        facts.put("adapter_signals", null);
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        assertEquals(NodeStatus.COMPLETED, finalized.status());
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        assertEquals("SUCCESS", map(json.get("executionOutcome")).get("status"));
+        assertEquals(0, list(json.get("adapterSignals")).size());
+    }
+
+    private void assertInvalidTypedMetadataRejected(String suffix, String typedFields) throws Exception {
+        var relative = ".agent/workstreams/ws-" + suffix + "/runs/run-" + suffix + "/run.json";
+        var runJson = tempDir.resolve(relative);
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-%s",
+                  "workstreamId": "ws-%s",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "status": "process_exited",
+                  %s
+                }
+                """.formatted(suffix, suffix, typedFields));
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", relative);
+        facts.put("exit_code", 0);
+        facts.put("process_usability", "EXITED_ZERO");
+        facts.put("acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT");
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), AgentResultContractResult.valid("IMPLEMENTED"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        assertThrows(IllegalStateException.class,
+                () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult));
+    }
+
+    private void assertMalformedNodeResultSignalsRejected(Object signals) {
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("exit_code", 0);
+        facts.put("process_usability", "EXITED_ZERO");
+        facts.put("adapter_signals", signals);
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), AgentResultContractResult.valid("IMPLEMENTED"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult));
     }
 
     @SuppressWarnings("unchecked")

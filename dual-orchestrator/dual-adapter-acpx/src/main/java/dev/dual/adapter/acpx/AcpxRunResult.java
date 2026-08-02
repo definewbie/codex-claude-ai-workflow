@@ -1,47 +1,38 @@
 package dev.dual.adapter.acpx;
 
+import dev.dual.core.execution.AdapterSignal;
+import dev.dual.core.execution.ProcessResult;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
 public record AcpxRunResult(
-        int exitCode,
         Instant startedAt,
         Instant finishedAt,
         List<String> command,
         List<AcpxExecutionEvent> executionTimeline,
         AcpxUsage usage,
-        AcpxPromptCompletion promptCompletion
+        AcpxPromptCompletion promptCompletion,
+        ProcessResult processResult,
+        List<AdapterSignal> adapterSignals
 ) {
-    public AcpxRunResult(int exitCode, Instant startedAt, Instant finishedAt, List<String> command) {
-        this(exitCode, startedAt, finishedAt, command, List.of(), null, AcpxPromptCompletion.EMPTY);
-    }
-
-    public AcpxRunResult(
-            int exitCode,
-            Instant startedAt,
-            Instant finishedAt,
-            List<String> command,
-            List<AcpxExecutionEvent> executionTimeline
-    ) {
-        this(exitCode, startedAt, finishedAt, command, executionTimeline, null, AcpxPromptCompletion.EMPTY);
-    }
-
-    public AcpxRunResult(
-            int exitCode,
-            Instant startedAt,
-            Instant finishedAt,
-            List<String> command,
-            List<AcpxExecutionEvent> executionTimeline,
-            AcpxUsage usage
-    ) {
-        this(exitCode, startedAt, finishedAt, command, executionTimeline, usage, AcpxPromptCompletion.EMPTY);
-    }
-
     public AcpxRunResult {
         command = command == null ? List.of() : List.copyOf(command);
         executionTimeline = executionTimeline == null ? List.of() : List.copyOf(executionTimeline);
         promptCompletion = promptCompletion == null ? AcpxPromptCompletion.EMPTY : promptCompletion;
+        if (processResult == null) {
+            throw new IllegalArgumentException("processResult is required");
+        }
+        adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);
+    }
+
+    public int exitCode() {
+        return processResult.exitCode() == null ? -1 : processResult.exitCode();
+    }
+
+    public List<AdapterSignal> activeAdapterSignals() {
+        return adapterSignals.stream().filter(signal -> !signal.superseded()).toList();
     }
 
     public long durationMs() {
@@ -73,4 +64,5 @@ public record AcpxRunResult(
         }
         return 0;
     }
+
 }

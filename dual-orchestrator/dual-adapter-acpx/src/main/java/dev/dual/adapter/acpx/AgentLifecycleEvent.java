@@ -35,6 +35,10 @@ record AgentLifecycleEvent(
         return streamEvent(sequence, Kind.PROMPT_ACCEPTED, null);
     }
 
+    static AgentLifecycleEvent promptCompleted(long sequence) {
+        return streamEvent(sequence, Kind.PROMPT_COMPLETED, null);
+    }
+
     static AgentLifecycleEvent usageUpdate(long sequence) {
         return streamEvent(sequence, Kind.USAGE_UPDATE, null);
     }
@@ -75,8 +79,9 @@ record AgentLifecycleEvent(
                 || lower.contains("unable to connect to api"))) {
             return Kind.PROVIDER_FAILURE;
         }
-        if (source == Source.STDOUT && (trimmed.startsWith("[error]")
+        if ((source == Source.STDOUT || source == Source.STDERR) && (trimmed.startsWith("[error]")
                 || trimmed.startsWith("runtime:")
+                || trimmed.startsWith("no acpx session found")
                 || trimmed.startsWith("tool permission request failed")
                 || trimmed.startsWith("tool use aborted"))) {
             return Kind.PROVIDER_FAILURE;
@@ -106,6 +111,7 @@ record AgentLifecycleEvent(
         SESSION_NEW_REQUESTED,
         SESSION_NEW_CREATED,
         PROMPT_ACCEPTED,
+        PROMPT_COMPLETED,
         TOOL_RESULT,
         USAGE_UPDATE,
         RECONNECT_SIGNAL,
