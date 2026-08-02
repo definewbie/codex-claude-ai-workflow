@@ -27,6 +27,24 @@
 > 作为一个 checkpoint 整体完成。T6 在 clean implementation checkpoint 和新 gate
 > 获得显式授权前继续冻结。
 
+> Convergence checkpoint 已提交为 `909317a2`，T6 v3 gate-only clean SHA 为
+> `d9426990`。v3 一次性授权已消耗：报告
+> `docs/testing/real-case-reports/20260802T001704Z/report.md`，workstream
+> `ws-20260802T002001Z-36TY`。Fresh build `1130/0`、target backend
+> `191/191`、miniprogram build、Claude/Codex minimal probes 与 artifact freshness
+> 均通过，因此本次不是 preflight `INVALID`。
+>
+> 运行在第二个 Agent run `intake.codex_product_review` 停止：acpx 在 ACP session
+> 建立前报告 named Codex session 不存在，进程 117 ms 内以 exit `4` 退出，0 token。
+> ownership 链一致记录 `EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT`、
+> `SKIPPED_PROCESS_NON_ZERO`、`OUTPUT_INCOMPLETE` 并进入
+> `WAITING_FOR_RECOVERY`，没有再次出现 success/failure contradiction；但
+> `AcpxAgentTransport.runCodexDesignReview()` 的 lazy bootstrap 只消费 typed
+> `SESSION_RESUME_FAILED`，无法处理 ACP wire 建立前的 session-missing CLI failure。
+> 因此 v3=`FAIL / STOP-LOSS ENFORCED / NO RETRY AUTHORIZED`，checkpoint 仍为
+> `ENFORCED / NOT YET PROVEN`。下一步只允许先收敛 transport session bootstrap
+> ownership；禁止恢复 post-hoc log classifier、修改 prompt/parser 或直接重跑 T6。
+
 > Phase A-D 已关闭，不再继续建模或拆 handler。
 >
 > T1 已在 clean SHA `0e0d77ee` 上通过 A3 full real-case：

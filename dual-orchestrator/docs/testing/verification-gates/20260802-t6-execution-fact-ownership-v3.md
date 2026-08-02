@@ -1,6 +1,6 @@
 # Verification Gate: T6 ACP Execution Fact Ownership v3
 
-Status: `AUTHORIZED_ONCE / NOT YET CONSUMED`
+Status: `CONSUMED / FAIL / NO RETRY AUTHORIZED`
 
 - Target: Prove the clean ACP execution-fact ownership checkpoint completes one
   full pinned cancer-clinic workflow without any contradiction between the
@@ -72,3 +72,25 @@ This gate consumes exactly one T6 authorization. Deterministic failure-path
 proof remains authoritative for branches that a successful provider run does
 not trigger; this real-case proves their composition with the full workflow,
 not every synthetic failure branch again.
+
+## Result
+
+- Dual SHA: `d9426990d515810a0430e510efd946cbc29baf06`;
+- report: `docs/testing/real-case-reports/20260802T001704Z/report.md`;
+- workstream: `ws-20260802T002001Z-36TY`;
+- result: `FAIL`, stopped at `intake.codex_product_review` with no retry;
+- trigger: the first Codex prompt process exited `4` in 117 ms because the
+  named acpx session did not exist; no provider request or token usage occurred;
+- ownership evidence: `ProcessResult` recorded
+  `EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT`, correction disposition was
+  `SKIPPED_PROCESS_NON_ZERO`, execution outcome was `OUTPUT_INCOMPLETE`, and
+  workflow entered `WAITING_FOR_RECOVERY`; no successful terminal outcome or
+  process/signal/outcome contradiction was produced;
+- residual gap: `runCodexDesignReview()` can only enter its lazy session
+  bootstrap through typed `SESSION_RESUME_FAILED`, but acpx may fail before an
+  ACP wire session exists and emit only the CLI diagnostic `No acpx session
+  found`. Session bootstrap ownership must be closed at the transport boundary
+  without restoring a post-hoc log classifier.
+
+The checkpoint remains `ENFORCED / NOT YET PROVEN`. This authorization is
+consumed; the failed workstream must not be retried or resumed.

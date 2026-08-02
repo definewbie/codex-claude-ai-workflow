@@ -547,6 +547,22 @@ convergence checkpoint 整体实施。
    最新 CC final-diff 复审确认第 4 项 source architecture gate 已闭合 F1，并给出 `PASS`；
 7. `git diff --check`：PASS。
 
-因此本 checkpoint 当前可标记 `ENFORCED / NOT YET PROVEN`。本轮未运行 real-case，
-也未提交；T6
-通过前不得标记 `PROVEN`，不得声称最新 full workflow 组合已由 provider 真实运行证明。
+因此 implementation checkpoint 可标记 `ENFORCED / NOT YET PROVEN`。提交与后续
+T6 v3 结果记录于下一节；T6 通过前不得标记 `PROVEN`，不得声称最新 full workflow
+组合已由 provider 真实运行证明。
+
+## 18. T6 v3 结果
+
+实现 checkpoint 已提交为 `909317a2`，gate-only clean SHA 为 `d9426990`。一次 T6
+v3 于 workstream `ws-20260802T002001Z-36TY` 执行并按 stop-loss 停止，报告为
+`docs/testing/real-case-reports/20260802T001704Z/report.md`。
+
+结果为 `FAIL / NO RETRY AUTHORIZED`：首个 Codex review 在 ACP wire session 建立前
+因 named acpx session 不存在而 exit `4`。新的 owner 链正确记录 non-zero process、
+`SKIPPED_PROCESS_NON_ZERO`、`OUTPUT_INCOMPLETE` 和 `WAITING_FOR_RECOVERY`，未产生
+success/failure contradiction；但 lazy session bootstrap 依赖 typed
+`SESSION_RESUME_FAILED`，对 wire 建立前的 CLI session-missing failure 不可达。
+
+因此 deterministic `ENFORCED` 结论保留，`PROVEN` 仍未达到。下一步必须在 transport
+session bootstrap 边界完成设计收敛，且不得恢复已删除的 Path-based post-hoc classifier；
+本次 workstream 不得 retry/resume，也不得自动发起第二次 T6。
