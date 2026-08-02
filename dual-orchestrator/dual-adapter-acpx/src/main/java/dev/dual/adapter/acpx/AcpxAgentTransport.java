@@ -262,6 +262,8 @@ public class AcpxAgentTransport {
         } catch (InterruptedException failure) {
             Thread.currentThread().interrupt();
             return transportExceptionResult(agent, request, startedAt, process.pid(), failure, true);
+        } catch (ExecutionEventPersistenceException failure) {
+            return transportExceptionResult(agent, request, startedAt, process.pid(), failure, false);
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
@@ -363,10 +365,41 @@ public class AcpxAgentTransport {
         timeline.add(event);
         try {
             request.executionEventSink().accept(event);
-        } catch (RuntimeException ignored) {
-            // Timeline persistence is a read-model aid. Adapter execution facts still
-            // return in the final AcpxRunResult and must not be corrupted by a sink failure.
+        } catch (RuntimeException failure) {
+            var detail = failure.getMessage() == null
+                    ? failure.getClass().getSimpleName()
+                    : failure.getMessage();
+            throw new ExecutionEventPersistenceException(
+                    "failed to persist " + event.kind().wireName() + ": " + detail,
+                    failure
+            );
         }
+    }
+
+    private void recordLifecycleBoundary(
+            List<AcpxExecutionEvent> timeline,
+            AcpxRunRequest request,
+            AgentLifecycleEvent event,
+            Instant startedAt
+    ) {
+        if (event.source() != AgentLifecycleEvent.Source.ACPX_STREAM) {
+            return;
+        }
+        var kind = switch (event.kind()) {
+            case PROMPT_ACCEPTED -> AgentExecutionTimelineEventKind.PROMPT_ACCEPTED;
+            case PROMPT_COMPLETED -> AgentExecutionTimelineEventKind.PROMPT_COMPLETED;
+            default -> null;
+        };
+        if (kind == null) {
+            return;
+        }
+        recordEvent(timeline, request, AcpxExecutionEvent.now(
+                kind,
+                "acpx_stream",
+                event.sequence(),
+                startedAt,
+                Map.of("lifecycleSequence", event.sequence())
+        ));
     }
 
     private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
@@ -538,6 +571,7 @@ public class AcpxAgentTransport {
                 var elapsed = Duration.between(startedAt, Instant.now());
                 for (var event : eventReader.readNewEvents()) {
                     health.observe(event, elapsed);
+                    recordLifecycleBoundary(timeline, request, event, startedAt);
                 }
                 var assessment = health.assess(elapsed);
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
@@ -559,6 +593,7 @@ public class AcpxAgentTransport {
             var elapsed = Duration.between(startedAt, Instant.now());
             for (var event : eventReader.readNewEvents()) {
                 health.observe(event, elapsed);
+                recordLifecycleBoundary(timeline, request, event, startedAt);
             }
             var assessment = health.assess(elapsed);
             if (assessment.status() == AgentExecutionHealth.Status.RECOVERABLE_FAILURE) {
@@ -909,6 +944,12 @@ public class AcpxAgentTransport {
             return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
         } catch (RuntimeException ignored) {
             return path == null ? "" : path.toString();
+        }
+    }
+
+    private static final class ExecutionEventPersistenceException extends RuntimeException {
+        private ExecutionEventPersistenceException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

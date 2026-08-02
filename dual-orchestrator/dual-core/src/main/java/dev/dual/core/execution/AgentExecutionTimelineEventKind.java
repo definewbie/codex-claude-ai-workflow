@@ -3,6 +3,8 @@ package dev.dual.core.execution;
 public enum AgentExecutionTimelineEventKind {
     PROCESS_STARTED("process_started"),
     PROCESS_WAIT_STARTED("process_wait_started"),
+    PROMPT_ACCEPTED("prompt_accepted"),
+    PROMPT_COMPLETED("prompt_completed"),
     PROCESS_WAIT_COMPLETED("process_wait_completed"),
     RECOVERABLE_SIGNAL_DETECTED("recoverable_signal_detected"),
     PROCESS_EXITED("process_exited"),

@@ -309,7 +309,7 @@ final class AgentRunMetadataWriter {
 
     void appendExecutionEvent(Path runJsonPath, AcpxExecutionEvent event) {
         if (runJsonPath == null || event == null || !Files.isRegularFile(runJsonPath)) {
-            return;
+            throw new IllegalStateException("run metadata must exist before execution events are persisted");
         }
         try {
             var root = objectMapper.readValue(
@@ -324,11 +324,41 @@ final class AgentRunMetadataWriter {
                 timeline.add(eventMap);
             }
             root.put("executionTimeline", timeline);
+            projectInFlightAttempt(root, event);
             writeJsonAtomically(runJsonPath, root);
-        } catch (IOException | RuntimeException ignored) {
-            // In-flight timeline persistence is best-effort. The terminal writeCompleted
-            // path still writes the authoritative final event list from AcpxRunResult.
+        } catch (IOException | RuntimeException failure) {
+            throw new IllegalStateException("failed to persist authoritative execution event", failure);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void projectInFlightAttempt(Map<String, Object> root, AcpxExecutionEvent event) {
+        var value = root.get("executionAttempt");
+        if (!(value instanceof Map<?, ?> existing)) {
+            throw new IllegalStateException("executionAttempt must exist before execution events are persisted");
+        }
+        var attempt = new LinkedHashMap<String, Object>((Map<String, Object>) existing);
+        switch (event.kind()) {
+            case PROCESS_STARTED -> {
+                root.put("status", "running");
+                attempt.put("status", AgentExecutionAttemptStatus.PROCESS_STARTED.name());
+                attempt.put("processStatus", AgentExecutionProcessStatus.RUNNING.name());
+            }
+            case PROMPT_ACCEPTED, PROMPT_COMPLETED -> {
+                root.put("status", "running");
+                attempt.put("status", AgentExecutionAttemptStatus.STREAMING.name());
+                attempt.put("processStatus", AgentExecutionProcessStatus.RUNNING.name());
+            }
+            case PROCESS_WAIT_COMPLETED, PROCESS_EXITED -> {
+                root.put("status", "running");
+                attempt.put("status", AgentExecutionAttemptStatus.PROCESS_EXITED.name());
+                attempt.put("processStatus", AgentExecutionProcessStatus.EXITED.name());
+            }
+            default -> {
+                return;
+            }
+        }
+        root.put("executionAttempt", attempt);
     }
 
     private void writeJsonAtomically(Path target, Object value) throws IOException {

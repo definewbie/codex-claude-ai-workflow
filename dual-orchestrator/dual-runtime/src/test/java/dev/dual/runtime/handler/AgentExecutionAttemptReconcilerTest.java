@@ -11,9 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentExecutionAttemptReconcilerTest {
@@ -58,6 +60,54 @@ class AgentExecutionAttemptReconcilerTest {
         if (terminalOutcome != null) {
             node.set("executionOutcome", terminalOutcome);
         }
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), node);
+        return runJson;
+    }
+
+    /**
+     * Realistic in-flight fixture: the exact state left by {@code writePrepared} +
+     * a {@code process_started} timeline event (pid persisted by the transport's
+     * event sink) when {@code writeCompleted} never ran. No top-level
+     * {@code processResult}, no occurrence, no usage, no outcome — a bare
+     * "prepared" with only a non-terminal attempt and a pid in the timeline.
+     */
+    private Path writeStartedInFlightRun(String runId, long pid, Instant startedAt) throws Exception {
+        var runJson = tempDir.resolve("runs/" + runId + "/run.json");
+        Files.createDirectories(runJson.getParent());
+        var node = MAPPER.createObjectNode();
+        node.put("schemaVersion", 3);
+        node.put("status", "prepared");
+        node.put("runId", runId);
+        node.put("workstreamId", "ws-test");
+        node.put("nodeId", "intake.claude_brainstorm");
+        node.put("agent", "claude");
+        node.put("promptPath", ".agent/workstreams/ws-test/runs/" + runId + "/prompts/intake-claude.md");
+        node.put("stdoutPath", ".agent/workstreams/ws-test/runs/" + runId + "/outputs/intake-claude.md");
+        node.put("stderrPath", ".agent/workstreams/ws-test/runs/" + runId + "/outputs/intake-claude.stderr.log");
+        node.put("transcriptPath", ".agent/workstreams/ws-test/runs/" + runId + "/outputs/intake-claude.transcript.log");
+        var attempt = MAPPER.createObjectNode();
+        attempt.put("attemptId", "att-" + runId);
+        attempt.put("runId", runId);
+        attempt.put("workstreamId", "ws-test");
+        attempt.put("nodeId", "intake.claude_brainstorm");
+        attempt.put("agent", "claude");
+        attempt.put("status", "RUNNING");
+        attempt.put("processStatus", "RUNNING");
+        attempt.put("startedAt", startedAt.toString());
+        attempt.put("transcriptPath", ".agent/workstreams/ws-test/runs/" + runId + "/outputs/intake-claude.transcript.log");
+        node.set("executionAttempt", attempt);
+        var timeline = MAPPER.createArrayNode();
+        var processStarted = MAPPER.createObjectNode();
+        processStarted.put("kind", "process_started");
+        processStarted.put("source", "adapter");
+        processStarted.put("sequence", 1);
+        processStarted.put("observedAt", startedAt.toString());
+        processStarted.put("elapsedMs", 0);
+        var details = MAPPER.createObjectNode();
+        details.put("pid", pid);
+        processStarted.set("details", details);
+        timeline.add(processStarted);
+        node.set("executionTimeline", timeline);
         MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), node);
         return runJson;
     }
@@ -197,5 +247,151 @@ class AgentExecutionAttemptReconcilerTest {
         var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10)).reconcile(runJson);
 
         assertFalse(result.reconciled(), "an in-flight run with no dead pid and within timeout must not be force-closed");
+    }
+
+    /** Cannot-bypass: a started process with no captured exit must close without inventing provider facts. */
+    @Test
+    void startedRunInterruptedBeforeFinalizerIsClosedWithAuthoritativeFacts() throws Exception {
+        var deadPid = 99_999_990L; // not alive, so the closer proves the process ended
+        var runJson = writeStartedInFlightRun("run-interrupted", deadPid, Instant.now().minusSeconds(30));
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10)).reconcile(runJson);
+
+        assertTrue(result.reconciled(), "a started run whose process is gone must be closed, not left prepared");
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+
+        // run.json must not still masquerade as "prepared".
+        assertNotEquals("prepared", node.path("status").asText(),
+                "an interrupted started run must not be left at status=prepared");
+
+        // terminal disposition is typed.
+        var outcome = node.path("executionOutcome");
+        assertNotEquals("", outcome.path("status").asText(), "terminal executionOutcome.status must be present");
+        assertEquals("INTERRUPTED", outcome.path("status").asText(),
+                "a dead-pid started run must close to INTERRUPTED");
+        assertFalse(outcome.path("primaryReason").asText().isBlank(),
+                "terminal disposition must carry a typed primaryReason");
+
+        // process result carries the real pid and the strongest fact available: interrupted.
+        var processResult = node.path("processResult");
+        assertTrue(processResult.isObject(), "the closer must persist a processResult");
+        assertEquals(deadPid, processResult.path("pid").asLong(),
+                "processResult must carry the real pid of the started process");
+        assertEquals("INTERRUPTED", processResult.path("usability").asText(),
+                "processResult.usability must be typed INTERRUPTED");
+
+        // typed signal: the terminal attempt carries a typed status/failureSignal.
+        var attempt = node.path("executionAttempt");
+        assertNotEquals("RUNNING", attempt.path("status").asText(),
+                "executionAttempt must be advanced past RUNNING to a typed terminal status");
+        assertEquals("INTERRUPTED", attempt.path("status").asText());
+
+        assertTrue(node.path("agentResultAcquisition").isMissingNode(),
+                "process_started does not prove a provider result occurrence");
+        assertTrue(node.path("usage").isMissingNode(),
+                "reconciliation must not synthesize provider usage");
+    }
+
+    @Test
+    void closerDoesNotFabricateUsageForStaleTimeoutClose() throws Exception {
+        // No dead pid, but well past the stale boundary: closed as TIMEOUT, still no fabricated usage.
+        var runJson = writeStartedInFlightRun("run-stale-no-pid", 0L, Instant.now().minus(Duration.ofHours(1)));
+        // remove the process_started timeline so there is no pid at all (only staleness proves it ended)
+        var raw = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        raw.remove("executionTimeline");
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), raw);
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(1)).reconcile(runJson);
+
+        assertTrue(result.reconciled());
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        assertEquals("TIMEOUT", node.path("executionOutcome").path("status").asText());
+        assertTrue(node.path("usage").isMissingNode(),
+                "a timeout close must not create a zero-token provider observation");
+    }
+
+    @Test
+    void capturedPromptCompletionAndProcessExitWinOverDeadPidWithoutInventingAcquisition() throws Exception {
+        var deadPid = 99_999_988L;
+        var startedAt = Instant.parse("2026-08-02T10:17:52Z");
+        var runJson = writeStartedInFlightRun("run-captured-completion", deadPid, startedAt);
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        var timeline = node.withArray("executionTimeline");
+        timeline.add(event("prompt_accepted", startedAt.plusSeconds(1), Map.of()));
+        timeline.add(event("prompt_completed", startedAt.plusSeconds(40), Map.of()));
+        timeline.add(event("process_wait_completed", startedAt.plusSeconds(41), Map.of("exitCode", 0)));
+        timeline.add(event("process_exited", startedAt.plusSeconds(41), Map.of("exitCode", 0)));
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), node);
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10)).reconcile(runJson);
+
+        assertTrue(result.reconciled());
+        var reconciled = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        assertEquals("EXITED_ZERO", reconciled.path("processResult").path("usability").asText());
+        assertEquals(0, reconciled.path("processResult").path("exitCode").asInt());
+        assertFalse(reconciled.path("processResult").path("interrupted").asBoolean());
+        assertEquals("OUTPUT_INCOMPLETE", reconciled.path("executionOutcome").path("status").asText(),
+                "the process exit is known, but the unpersisted AgentResultEnvelope remains unavailable");
+        assertTrue(reconciled.path("agentResultAcquisition").isMissingNode(),
+                "prompt completion alone does not authorize a fabricated parsed candidate");
+        assertTrue(reconciled.path("usage").isMissingNode(),
+                "captured lifecycle events do not contain provider token usage");
+    }
+
+    @Test
+    void processWaitCompletionAloneClosesFromDurableExitInsteadOfDeadPid() throws Exception {
+        var deadPid = 99_999_987L;
+        var startedAt = Instant.parse("2026-08-02T10:17:52Z");
+        var runJson = writeStartedInFlightRun("run-wait-completed", deadPid, startedAt);
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        node.withArray("executionTimeline").add(event(
+                "process_wait_completed",
+                startedAt.plusSeconds(20),
+                Map.of("exitCode", 0)
+        ));
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), node);
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10)).reconcile(runJson);
+
+        assertTrue(result.reconciled());
+        var reconciled = MAPPER.readTree(runJson.toFile());
+        assertEquals("EXITED_ZERO", reconciled.path("processResult").path("usability").asText(),
+                "durable wait completion must win over the later dead-pid observation");
+        assertEquals(0, reconciled.path("processResult").path("exitCode").asInt());
+        assertFalse(reconciled.path("processResult").path("interrupted").asBoolean());
+    }
+
+    @Test
+    void durableNonZeroExitKeepsTypedNonZeroUsability() throws Exception {
+        var startedAt = Instant.parse("2026-08-02T10:17:52Z");
+        var runJson = writeStartedInFlightRun("run-non-zero-exit", 99_999_986L, startedAt);
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        node.withArray("executionTimeline").add(event(
+                "process_exited",
+                startedAt.plusSeconds(20),
+                Map.of("exitCode", 17)
+        ));
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), node);
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10)).reconcile(runJson);
+
+        assertTrue(result.reconciled());
+        var reconciled = MAPPER.readTree(runJson.toFile());
+        assertEquals("EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT",
+                reconciled.path("processResult").path("usability").asText());
+        assertEquals(17, reconciled.path("processResult").path("exitCode").asInt());
+        assertNotEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText(),
+                "a durable non-zero exit must not collapse into dead-pid interruption");
+    }
+
+    private static ObjectNode event(String kind, Instant observedAt, Map<String, Object> details) {
+        var event = MAPPER.createObjectNode();
+        event.put("kind", kind);
+        event.put("source", "adapter");
+        event.put("sequence", 1);
+        event.put("observedAt", observedAt.toString());
+        event.put("elapsedMs", 0);
+        event.set("details", MAPPER.valueToTree(details));
+        return event;
     }
 }

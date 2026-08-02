@@ -15,6 +15,7 @@ import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.FinalizedAgentExecution;
 import dev.dual.core.execution.ProcessResult;
+import dev.dual.core.execution.ProcessUsability;
 import dev.dual.core.execution.AgentResultContractResult;
 
 import java.io.IOException;
@@ -134,10 +135,49 @@ public final class AgentExecutionAttemptReconciler {
 
     private Optional<Classification> classify(ObjectNode json) {
         var now = Instant.now();
+        var exited = readProcessExit(json);
+        if (exited.isPresent()) {
+            var exit = exited.get();
+            var startedAt = readStartedAt(json);
+            var durationMs = startedAt == null
+                    ? 0L
+                    : Math.max(0L, Duration.between(startedAt, exit.observedAt()).toMillis());
+            var pid = readPid(json);
+            var usability = exit.exitCode() == 0
+                    ? ProcessUsability.EXITED_ZERO
+                    : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
+            return Optional.of(new Classification(
+                    new ProcessResult(
+                            json.path("command").asText(""),
+                            pid > 0 ? pid : null,
+                            exit.exitCode(),
+                            usability,
+                            durationMs,
+                            json.path("stdoutPath").asText(""),
+                            json.path("stderrPath").asText(""),
+                            false,
+                            false
+                    ),
+                    AgentExecutionTimelineEventKind.ATTEMPT_RECONCILED,
+                    "process_exited_before_finalization",
+                    null));
+        }
         var pid = readPid(json);
         if (pid > 0 && !ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)) {
+            var startedAt = readStartedAt(json);
+            var durationMs = startedAt == null ? 0L : Math.max(0L, Duration.between(startedAt, now).toMillis());
             return Optional.of(new Classification(
-                    ProcessResult.interruptedProcess(),
+                    new ProcessResult(
+                            json.path("command").asText(""),
+                            pid,
+                            null,
+                            ProcessUsability.INTERRUPTED,
+                            durationMs,
+                            json.path("stdoutPath").asText(""),
+                            json.path("stderrPath").asText(""),
+                            true,
+                            false
+                    ),
                     AgentExecutionTimelineEventKind.PROCESS_INTERRUPTED,
                     "process_interrupted",
                     null));
@@ -151,6 +191,32 @@ public final class AgentExecutionAttemptReconciler {
                     staleTimeout.toMillis()));
         }
         return Optional.empty();
+    }
+
+    private static Optional<ProcessExitEvidence> readProcessExit(ObjectNode json) {
+        ProcessExitEvidence waitCompleted = null;
+        var timeline = json.path("executionTimeline");
+        if (!timeline.isArray()) {
+            return Optional.empty();
+        }
+        for (var event : timeline) {
+            var kind = event.path("kind").asText("");
+            if (!AgentExecutionTimelineEventKind.PROCESS_EXITED.wireName().equals(kind)
+                    && !AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED.wireName().equals(kind)) {
+                continue;
+            }
+            var exitCode = event.path("details").path("exitCode");
+            var observedAt = parseInstant(event.path("observedAt").asText(""));
+            if (!exitCode.isInt() || observedAt == null) {
+                continue;
+            }
+            var evidence = new ProcessExitEvidence(exitCode.asInt(), observedAt);
+            if (AgentExecutionTimelineEventKind.PROCESS_EXITED.wireName().equals(kind)) {
+                return Optional.of(evidence);
+            }
+            waitCompleted = evidence;
+        }
+        return Optional.ofNullable(waitCompleted);
     }
 
     private static long readPid(ObjectNode json) {
@@ -236,6 +302,10 @@ public final class AgentExecutionAttemptReconciler {
         json.put("recoverable", finalized.legacyRecoverable());
         json.set("executionAttempt", OBJECT_MAPPER.valueToTree(attemptToMap(finalized.attempt())));
         json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(finalized.outcome())));
+        // Reconciliation only projects facts proven by the durable execution timeline. It
+        // must not invent an agent-result occurrence, selected candidate, correction result,
+        // or provider usage merely because a local acpx process started.
+        json.set("processResult", OBJECT_MAPPER.valueToTree(classification.process()));
         appendTimelineEvent(json, classification);
         writeJsonAtomically(runJson, json);
     }
@@ -359,6 +429,9 @@ public final class AgentExecutionAttemptReconciler {
             String reason,
             Long timeoutMs
     ) {
+    }
+
+    private record ProcessExitEvidence(int exitCode, Instant observedAt) {
     }
 
     public record Reconciliation(boolean reconciled, AgentExecutionOutcome outcome) {

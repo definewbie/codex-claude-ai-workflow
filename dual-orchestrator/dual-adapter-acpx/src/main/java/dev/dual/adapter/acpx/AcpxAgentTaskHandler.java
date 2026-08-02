@@ -4,6 +4,8 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+import dev.dual.runtime.handler.AgentExecutionAttemptReconciler;
+import dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicy;
 import dev.dual.runtime.handler.AgentRunGovernanceContext;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.ContractRegistry;
@@ -27,6 +29,10 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AgentPromptRenderer promptRenderer;
     private final AgentRunMetadataWriter metadataWriter;
     private final AcpxUsageReader usageReader;
+    // Closes a started execution that never reached the completion finalizer. This is the same
+    // closer used by workflow recovery, so both paths replay the same durable execution facts.
+    private final AgentExecutionAttemptReconciler attemptReconciler =
+            new AgentExecutionAttemptReconciler(new AgentExecutionAttemptTimeoutPolicy().timeout());
     private final PromptManifestWriter promptManifestWriter = new PromptManifestWriter();
     private final SessionCompactionPolicy sessionCompactionPolicy = new SessionCompactionPolicy();
     private final SessionCompactionSeedWriter sessionCompactionSeedWriter = new SessionCompactionSeedWriter();
@@ -287,6 +293,13 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     )
             ));
         } catch (Exception failure) {
+            // If the transport persisted evidence and completion writing failed, replay that
+            // evidence to a typed terminal disposition before propagating the handler failure.
+            try {
+                closeInFlightExecutionIfStarted(runDir.resolve("run.json"));
+            } catch (Exception reconciliationFailure) {
+                failure.addSuppressed(reconciliationFailure);
+            }
             var guarded = authoritySnapshot.enforce(new NodeResult(
                     "AGENT_HANDLER_FAILED",
                     NodeStatus.FAILED,
@@ -299,6 +312,16 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             }
             throw failure;
         }
+    }
+
+    private void closeInFlightExecutionIfStarted(Path runJson) throws Exception {
+        // A run that never started a process is correctly left untouched. If durable closure
+        // itself fails, attach that failure to the original exception instead of hiding a
+        // second ledger contradiction.
+        if (runJson == null || !Files.isRegularFile(runJson)) {
+            return;
+        }
+        attemptReconciler.reconcile(runJson);
     }
 
     private record ChangeBoundaryAuthoritySnapshot(

@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -407,13 +409,15 @@ class AcpxAgentTransportTest {
         try {
             System.setProperty("user.home", fakeHome.toString());
             var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+            var durableEvents = new ArrayList<AcpxExecutionEvent>();
             var result = transport.runCodexDesignReview(new AcpxRunRequest(
                     tempDir,
                     "codex-reviewer",
                     prompt,
                     stdout,
                     stderr,
-                    AcpxPermissionProfile.review()
+                    AcpxPermissionProfile.review(),
+                    durableEvents::add
             ));
 
             assertEquals(0, result.exitCode());
@@ -422,9 +426,56 @@ class AcpxAgentTransportTest {
             assertEquals("end_turn", result.promptCompletion().stopReason());
             assertEquals("{\"schema_version\":1,\"run_id\":\"run-1\"}",
                     result.promptCompletion().finalAssistantMessage());
+            assertTrue(durableEvents.stream()
+                    .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.PROMPT_ACCEPTED));
+            assertTrue(durableEvents.stream()
+                    .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.PROMPT_COMPLETED));
         } finally {
             System.setProperty("user.home", previousHome);
         }
+    }
+
+    @Test
+    void executionEventPersistenceFailureStopsTheRunAsTypedTransportFailure() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-event-persistence-failure.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                sleep 30
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("event-failure-prompt.md");
+        var stdout = tempDir.resolve("event-failure.stdout");
+        var stderr = tempDir.resolve("event-failure.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.observe(),
+                event -> {
+                    if (event.kind() == AgentExecutionTimelineEventKind.PROCESS_STARTED) {
+                        throw new IllegalStateException("simulated durable event write failure");
+                    }
+                }
+        ));
+
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                result.processResult().usability());
+        assertTrue(result.processResult().pid() != null && result.processResult().pid() > 0,
+                "the typed transport failure must retain the launched process pid");
+        assertEquals(AdapterSignalType.PROCESS_STALLED, result.activeAdapterSignals().get(0).type());
+        assertTrue(result.activeAdapterSignals().get(0).message().contains("durable event write failure"));
+        var pid = result.processResult().pid();
+        ProcessHandle.of(pid).ifPresent(handle -> assertDoesNotThrow(
+                () -> handle.onExit().get(2, TimeUnit.SECONDS),
+                "event persistence failure must terminate the launched provider process"
+        ));
+        assertFalse(ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false),
+                "the launched provider process must not survive an execution-event persistence failure");
     }
 
     @Test

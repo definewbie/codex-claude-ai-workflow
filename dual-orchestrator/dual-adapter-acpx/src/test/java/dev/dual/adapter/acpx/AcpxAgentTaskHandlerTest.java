@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -612,8 +613,8 @@ class AcpxAgentTaskHandlerTest {
         );
 
         var finalized = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
-        assertEquals("prepared", finalized.path("status").asText(),
-                "in-flight timeline append must not change run status");
+        assertEquals("running", finalized.path("status").asText(),
+                "a durable process-start event must move the run out of prepared without finalizing it");
         var timeline = finalized.path("executionTimeline");
         var kinds = new java.util.ArrayList<String>();
         timeline.forEach(node -> kinds.add(node.path("kind").asText()));
@@ -621,13 +622,30 @@ class AcpxAgentTaskHandlerTest {
         var attemptAfterAppend = finalized.path("executionAttempt");
         assertFalse(attemptAfterAppend.isMissingNode() || attemptAfterAppend.isNull(),
                 "in-flight timeline append must not drop the executionAttempt");
-        assertEquals("RUNNING", attemptAfterAppend.path("status").asText(),
-                "in-flight timeline append must not finalize or terminalize the attempt");
+        assertEquals("PROCESS_STARTED", attemptAfterAppend.path("status").asText(),
+                "the same writer must project the durable process-start fact onto the attempt");
         assertEquals("RUNNING", attemptAfterAppend.path("processStatus").asText());
         assertTrue(finalized.path("executionOutcome").isMissingNode() || finalized.path("executionOutcome").isNull(),
                 "in-flight timeline append must not synthesize an executionOutcome");
         assertTrue(finalized.path("failureReason").isMissingNode() || finalized.path("failureReason").isNull(),
                 "in-flight timeline append must not write a terminal failureReason");
+
+        writer.appendExecutionEvent(
+                runDir.resolve("run.json"),
+                new AcpxExecutionEvent(
+                        AgentExecutionTimelineEventKind.PROMPT_ACCEPTED,
+                        "acpx_stream",
+                        2,
+                        Instant.parse("2026-07-01T00:00:01Z"),
+                        1_000
+                )
+        );
+        var streaming = OBJECT_MAPPER.readTree(runDir.resolve("run.json").toFile());
+        assertEquals("STREAMING", streaming.path("executionAttempt").path("status").asText(),
+                "a durable prompt occurrence must be visible without waiting for finalization");
+        assertTrue(streaming.path("agentResultAcquisition").isNull()
+                        || streaming.path("agentResultAcquisition").isMissingNode(),
+                "prompt acceptance is not a parsed AgentResult candidate");
     }
 
     @Test
@@ -1379,6 +1397,47 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        // The transport launches the process (emits the transport-owned process_started
+        // fact with a now-dead pid) and then fails before the completion finalizer runs.
+        var handler = new AcpxAgentTaskHandler(new StartedThenFailingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        assertThrows(java.io.IOException.class, () -> handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-test",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        )));
+
+        var runMetadataPath = Files.walk(workstreamDir.resolve("runs"))
+                .filter(path -> path.getFileName().toString().equals("run.json"))
+                .findFirst()
+                .orElseThrow();
+        var runMetadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+        // The started execution must NOT be left as a bare "prepared" illusion.
+        assertNotEquals("prepared", runMetadata.path("status").asText(),
+                "a started execution whose handler failed before the finalizer must be closed, not left prepared");
+        assertEquals("INTERRUPTED", runMetadata.path("executionOutcome").path("status").asText(),
+                "the closer must converge a dead-pid started run to INTERRUPTED");
+        assertEquals(99_999_989L, runMetadata.path("processResult").path("pid").asLong(),
+                "the closer must persist the transport-owned process pid of the started execution");
+        assertTrue(runMetadata.path("usage").isMissingNode() || runMetadata.path("usage").isNull(),
+                "the closer must not fabricate provider usage");
+        assertTrue(runMetadata.path("agentResultAcquisition").isMissingNode()
+                        || runMetadata.path("agentResultAcquisition").isNull(),
+                "process_started alone must not fabricate a provider result occurrence");
+    }
+
+    @Test
     void completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
@@ -1785,6 +1844,23 @@ class AcpxAgentTaskHandlerTest {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
             throw new java.io.IOException("simulated transport failure");
+        }
+    }
+
+    private static final class StartedThenFailingTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            // The process launched: persist the transport-owned process_started fact (with a
+            // now-dead pid) exactly as the real transport does, then fail before the finalizer.
+            request.executionEventSink().accept(new AcpxExecutionEvent(
+                    AgentExecutionTimelineEventKind.PROCESS_STARTED,
+                    "adapter",
+                    1,
+                    Instant.now(),
+                    0,
+                    java.util.Map.of("pid", 99_999_989L)
+            ));
+            throw new java.io.IOException("simulated failure after process started");
         }
     }
 
