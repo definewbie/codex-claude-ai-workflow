@@ -125,58 +125,49 @@ public class AcpxAgentTransport {
     }
 
     public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws IOException, InterruptedException {
-        try {
-            if (request.permissionProfile().requiresFreshSession()) {
-                var bootstrap = ensureSession("claude", request);
-                if (!bootstrap.success()) {
-                    return bootstrap.toRunResult();
-                }
-            }
-            var result = run("claude", request);
-            if (isMissingSession(request, result)) {
-                var bootstrap = ensureSession("claude", request);
-                if (bootstrap.success()) {
-                    result = run("claude", request);
-                } else {
-                    return bootstrap.toRunResult();
-                }
-            } else if (isReconnectRequired(request, result)) {
-                var bootstrap = rebuildSession("claude", request);
-                if (bootstrap.success()) {
-                    result = run("claude", request);
-                } else {
-                    return bootstrap.toRunResult();
-                }
-            }
-            return result;
-        } catch (InterruptedException failure) {
-            Thread.currentThread().interrupt();
-            return transportExceptionResult("claude", request, Instant.now(), null, failure, true);
-        }
+        return runWithSession("claude", request);
     }
 
     public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws IOException, InterruptedException {
+        return runWithSession("codex", request);
+    }
+
+    /**
+     * Agent-neutral session-aware run path. The named session is ensured before the
+     * prompt process starts, so first-run session creation is owned by transport and
+     * never depends on a reactive signal or stderr text. A bootstrap failure forms a
+     * typed {@code SESSION_BOOTSTRAP_FAILED} (via {@code SessionCommandResult.toRunResult()})
+     * before any prompt side effect. After the run, the typed {@code isMissingSession} and
+     * {@code isReconnectRequired} judgments remain the only reconnect triggers: a missing
+     * session is re-ensured (idempotent {@code sessions ensure}) and a reconnect signal
+     * rebuilds the session once. Bounded correction turns bypass this path and reuse the
+     * already established session (see {@link #runAgentResultCorrection(String, AcpxRunRequest)}).
+     */
+    private AcpxRunResult runWithSession(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
         try {
-            var result = run("codex", request);
+            var bootstrap = ensureSession(agent, request);
+            if (!bootstrap.success()) {
+                return bootstrap.toRunResult();
+            }
+            var result = run(agent, request);
             if (isMissingSession(request, result)) {
-                var bootstrap = ensureSession("codex", request);
-                if (bootstrap.success()) {
-                    result = run("codex", request);
-                } else {
-                    return bootstrap.toRunResult();
+                var reensure = ensureSession(agent, request);
+                if (reensure.success()) {
+                    return run(agent, request);
                 }
-            } else if (isReconnectRequired(request, result)) {
-                var bootstrap = rebuildSession("codex", request);
-                if (bootstrap.success()) {
-                    result = run("codex", request);
-                } else {
-                    return bootstrap.toRunResult();
+                return reensure.toRunResult();
+            }
+            if (isReconnectRequired(request, result)) {
+                var rebuild = rebuildSession(agent, request);
+                if (rebuild.success()) {
+                    return run(agent, request);
                 }
+                return rebuild.toRunResult();
             }
             return result;
         } catch (InterruptedException failure) {
             Thread.currentThread().interrupt();
-            return transportExceptionResult("codex", request, Instant.now(), null, failure, true);
+            return transportExceptionResult(agent, request, Instant.now(), null, failure, true);
         }
     }
 
@@ -381,9 +372,11 @@ public class AcpxAgentTransport {
     private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
         var command = new ArrayList<String>();
         command.add(acpxExecutable);
-        if (request.permissionProfile().requiresFreshSession()) {
-            addPermissionArguments(command, request);
-        }
+        // Both `sessions new` and the idempotent `sessions ensure` carry the current
+        // request's permission/profile args. acpx 0.11.0 applies these only when a
+        // fresh session is created (createClient); an existing persistent record is
+        // returned unchanged on reuse, so reusing a session never alters its policy.
+        addPermissionArguments(command, request);
         command.add(agent);
         command.add("sessions");
         command.add(request.permissionProfile().requiresFreshSession() ? "new" : "ensure");

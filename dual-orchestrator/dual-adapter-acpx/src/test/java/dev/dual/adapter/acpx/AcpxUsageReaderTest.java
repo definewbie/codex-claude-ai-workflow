@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -37,7 +38,7 @@ class AcpxUsageReaderTest {
                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":100,"outputTokens":5,"cachedReadTokens":1000,"cachedWriteTokens":2,"totalTokens":1107}}}
                 """);
 
-        var usage = new AcpxUsageReader(sessionsDir).read(promptPath, stderrPath);
+        var usage = new AcpxUsageReader(sessionsDir).read("claude", promptPath, stderrPath);
 
         assertTrue(usage.isPresent());
         assertEquals(100, usage.get().inputTokens());
@@ -76,7 +77,7 @@ class AcpxUsageReaderTest {
                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":6799,"outputTokens":2653,"cachedReadTokens":242880,"cachedWriteTokens":0,"totalTokens":252332}}}
                 """);
 
-        var usage = new AcpxUsageReader(sessionsDir).read(promptPath, stderrPath);
+        var usage = new AcpxUsageReader(sessionsDir).read("claude", promptPath, stderrPath);
 
         assertTrue(usage.isPresent());
         assertEquals(6799, usage.get().inputTokens());
@@ -107,7 +108,7 @@ class AcpxUsageReaderTest {
                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":6799,"outputTokens":2653,"cachedReadTokens":242880,"cachedWriteTokens":0,"totalTokens":252332}}}
                 """);
 
-        var usage = new AcpxUsageReader(sessionsDir).read(promptPath, stderrPath);
+        var usage = new AcpxUsageReader(sessionsDir).read("claude", promptPath, stderrPath);
 
         assertTrue(usage.isPresent());
         assertNull(usage.get().costAmount());
@@ -130,7 +131,7 @@ class AcpxUsageReaderTest {
                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":6799,"outputTokens":2653,"cachedReadTokens":242880,"cachedWriteTokens":0,"totalTokens":252332}}}
                 """);
 
-        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read(promptPath, stderrPath);
+        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read("claude", promptPath, stderrPath);
 
         assertTrue(usage.isPresent());
         // 有 result.usage 就必须用 provider run usage，不能被 usage_update snapshot 短路。
@@ -166,7 +167,7 @@ class AcpxUsageReaderTest {
         });
         appender.start();
         // 10 attempts × 30ms = 300ms 窗口，足以等到 60ms 后才落盘的 result.usage。
-        var usage = new AcpxUsageReader(sessionsDir, 10, 30).read(promptPath, stderrPath);
+        var usage = new AcpxUsageReader(sessionsDir, 10, 30).read("claude", promptPath, stderrPath);
         appender.join();
 
         assertTrue(usage.isPresent());
@@ -191,7 +192,7 @@ class AcpxUsageReaderTest {
                 """);
 
         // 单次重试即可：fixture 里没有 provider result.usage 可等，应直接回落到 session snapshot。
-        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read(promptPath, stderrPath);
+        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read("codex", promptPath, stderrPath);
 
         assertTrue(usage.isPresent());
         assertEquals(0, usage.get().inputTokens());
@@ -218,7 +219,7 @@ class AcpxUsageReaderTest {
         );
 
         var usage = new AcpxUsageReader(tempDir.resolve("sessions-direct"), 1, 0, metadata)
-                .read(promptPath, stderrPath);
+                .read("claude", promptPath, stderrPath);
 
         assertTrue(usage.isPresent());
         assertEquals(AcpxUsage.UNAVAILABLE, usage.get().measurementType());
@@ -227,5 +228,22 @@ class AcpxUsageReaderTest {
         assertEquals("glm-5.2", usage.get().model());
         assertEquals(AcpxProviderMetadata.BILLING_SUBSCRIPTION_TOKENS, usage.get().billingMode());
         assertEquals(AcpxProviderMetadata.SOURCE_CLAUDE_SETTINGS_ENV, usage.get().providerMetadataSource());
+    }
+
+    @Test
+    void codexRunWithoutSessionMetadataStaysUnknownAndDoesNotInheritClaudeConfig() throws Exception {
+        var promptPath = tempDir.resolve("prompt-codex-identity.md");
+        var stderrPath = tempDir.resolve("stderr-codex-identity.log");
+        Files.writeString(promptPath, "real prompt");
+        Files.writeString(stderrPath, ""); // no acpx session id resolvable
+
+        // No explicit fallback: Codex must not fall back to Claude settings/env identity.
+        // When no current-agent session metadata exists, the result stays absent (unknown)
+        // rather than being projected through AcpxProviderMetadata.runtimeDefault().
+        var usage = new AcpxUsageReader(tempDir.resolve("sessions-codex-identity"), 1, 0)
+                .read("codex", promptPath, stderrPath);
+
+        assertFalse(usage.isPresent(),
+                "Codex without current-agent session metadata must stay unknown identity");
     }
 }

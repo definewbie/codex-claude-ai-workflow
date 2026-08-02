@@ -217,9 +217,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             );
             var finalResult = acquisition.finalResult();
             var runTimeline = new ArrayList<>(acquisition.executionTimeline());
-            var initialUsage = usageFor(acquisition.initialResult(), promptPath, stderrPath);
+            var initialUsage = usageFor(agent, acquisition.initialResult(), promptPath, stderrPath);
             var correctionUsage = acquisition.correctionAttempted()
-                    ? usageFor(acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
+                    ? usageFor(agent, acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
                     : null;
             var usage = acquisition.correctionAttempted()
                     ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
@@ -387,10 +387,10 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         }
     }
 
-    private AcpxUsage usageFor(AcpxRunResult result, java.nio.file.Path promptPath, java.nio.file.Path stderrPath) {
+    private AcpxUsage usageFor(String agent, AcpxRunResult result, java.nio.file.Path promptPath, java.nio.file.Path stderrPath) {
         return result.usage() != null
                 ? result.usage()
-                : usageReader.read(promptPath, stderrPath).orElse(null);
+                : usageReader.read(agent, promptPath, stderrPath).orElse(null);
     }
 
     private static String correctionPrompt(TaskContext context, String runId) {

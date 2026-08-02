@@ -103,12 +103,12 @@ final class AcpxUsageReader {
         }
     }
 
-    Optional<AcpxUsage> read(Path promptPath, Path stderrPath) {
+    Optional<AcpxUsage> read(String agent, Path promptPath, Path stderrPath) {
         try {
             var stderr = Files.exists(stderrPath) ? Files.readString(stderrPath) : "";
             var sessionId = sessionIdFrom(stderr);
             if (sessionId.isEmpty() || !Files.isRegularFile(promptPath)) {
-                var metadata = fallbackMetadata == null ? AcpxProviderMetadata.runtimeDefault() : fallbackMetadata;
+                var metadata = fallbackMetadata != null ? fallbackMetadata : agentFallbackMetadata(agent);
                 return metadata.isEmpty()
                         ? Optional.empty()
                         : Optional.of(AcpxUsage.unavailable("NO_ACPX_SESSION_ID", metadata));
@@ -122,6 +122,16 @@ final class AcpxUsageReader {
         } catch (IOException ignored) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Identity fallback when no current-agent session metadata is observable. Only
+     * Claude may reuse Claude settings/env as a labelled fallback; any other agent
+     * (e.g. Codex) must remain {@code unknown} rather than be projected through a
+     * Claude-specific config. This affects metrics/metadata projection only.
+     */
+    private static AcpxProviderMetadata agentFallbackMetadata(String agent) {
+        return "claude".equals(agent) ? AcpxProviderMetadata.runtimeDefault() : AcpxProviderMetadata.empty();
     }
 
     private Optional<AcpxUsage> readMatchingUsageWithRetry(

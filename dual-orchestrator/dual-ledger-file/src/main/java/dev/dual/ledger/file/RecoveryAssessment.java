@@ -14,6 +14,12 @@ import java.util.Map;
  * Runtime handlers write the raw node result and optional contract diagnostic.
  * This class does not decide workflow transitions; it only explains why the
  * current node stopped and what an operator should inspect next.
+ *
+ * <p>{@code retrySafe} is the authoritative operator recovery fact: whether the
+ * operator may continue recovery by running {@code suggestedCommand}. It is
+ * declared at construction for every recovery result; downstream renderers
+ * (WorkstreamAttention, CLI, API, reports) must copy it and never re-derive it
+ * from {@code classification} or {@code retryReadiness}.
  */
 public record RecoveryAssessment(
         String classification,
@@ -22,7 +28,8 @@ public record RecoveryAssessment(
         String suggestedCommand,
         String diagnosticJsonRef,
         String diagnosticMarkdownRef,
-        Map<String, Object> contractDiagnostic
+        Map<String, Object> contractDiagnostic,
+        boolean retrySafe
 ) {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
@@ -73,7 +80,8 @@ public record RecoveryAssessment(
                     "Inspect evidence, adjust the task/contract, then run `" + retry + "`; or stop with `" + abort + "`.",
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if (!diagnosticCategory.isBlank() || FailureReasonSemantics.isArtifactContractFailure(failureReason)) {
@@ -86,7 +94,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("RECOVERABLE_AGENT_MODEL_MISMATCH".equals(failureReason)) {
@@ -99,7 +108,8 @@ public record RecoveryAssessment(
                             + " && " + retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    true
             );
         }
         if ("RECOVERABLE_AGENT_AUTH_FAILED".equals(failureReason)) {
@@ -110,7 +120,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("RECOVERABLE_PROVIDER_CONNECTION_FAILED".equals(failureReason)) {
@@ -121,7 +132,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("RECOVERABLE_AGENT_RECONNECT".equals(failureReason)
@@ -134,6 +146,9 @@ public record RecoveryAssessment(
                     : "RECOVERABLE_AGENT_PERMISSION_BLOCKED".equals(failureReason)
                     ? "agent_permission_blocked"
                     : "agent_session_recovery";
+            // A blocked permission is not safe to retry blindly; session/output
+            // recovery rebuilds the session first, so the suggested command is safe.
+            var branchRetrySafe = !"agent_permission_blocked".equals(classification);
             return new RecoveryAssessment(
                     classification,
                     "REBUILD_ACPX_SESSION_THEN_RETRY",
@@ -143,7 +158,8 @@ public record RecoveryAssessment(
                             + " && " + retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    branchRetrySafe
             );
         }
         if ("RECOVERABLE_RATE_LIMIT".equals(failureReason)
@@ -155,7 +171,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    true
             );
         }
         if (recoverable) {
@@ -166,7 +183,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    true
             );
         }
         if (FailureReasonSemantics.isArtifactContractFailure(failureReason)) {
@@ -177,7 +195,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         return new RecoveryAssessment(
@@ -187,7 +206,8 @@ public record RecoveryAssessment(
                 retry + "  # only after fixing the cause",
                 diagnosticJsonRef,
                 diagnosticMarkdownRef,
-                diagnostic
+                diagnostic,
+                false
         );
     }
 
@@ -218,7 +238,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("OUTPUT_INCOMPLETE".equals(recoveryCategory)) {
@@ -229,7 +250,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("TIMEOUT_OR_STALLED".equals(recoveryCategory)) {
@@ -240,7 +262,8 @@ public record RecoveryAssessment(
                     retry,
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("INTERRUPTED".equals(recoveryCategory)) {
@@ -251,7 +274,8 @@ public record RecoveryAssessment(
                     retry + "  # only after confirming the interruption cause",
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         if ("RECOVERABLE_ADAPTER_FAILURE".equals(recoveryCategory)) {
@@ -262,7 +286,8 @@ public record RecoveryAssessment(
                     adapterSuggestedCommand(primaryReason, agent, session, retry),
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    adapterRetrySafe(primaryReason)
             );
         }
         if ("NON_RECOVERABLE_ADAPTER_FAILURE".equals(recoveryCategory)) {
@@ -273,7 +298,8 @@ public record RecoveryAssessment(
                     retry + "  # only after changing adapter configuration or task boundary",
                     diagnosticJsonRef,
                     diagnosticMarkdownRef,
-                    diagnostic
+                    diagnostic,
+                    false
             );
         }
         return null;
@@ -296,7 +322,7 @@ public record RecoveryAssessment(
             case "provider_connection_failed" -> "provider_connection_failed";
             case "context_window_exceeded" -> "agent_context_window";
             case "rate_limited" -> "agent_capacity_recovery";
-            case "agent_reconnect_required" -> "agent_session_recovery";
+            case "agent_reconnect_required", "session_bootstrap_failed" -> "agent_session_recovery";
             default -> "manual_recovery_required";
         };
     }
@@ -307,9 +333,25 @@ public record RecoveryAssessment(
             case "rate_limited" -> "WAIT_THEN_RETRY";
             case "provider_connection_failed" -> "WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY";
             case "agent_reconnect_required" -> "REBUILD_ACPX_SESSION_THEN_RETRY";
+            // session_bootstrap_failed is generic: it may be a command timeout, spawn
+            // failure, config error or any non-zero exit, not necessarily a missing
+            // session. Do not assume `sessions new` recovers it; inspect before retry.
+            case "session_bootstrap_failed" -> "INSPECT_BEFORE_RETRY";
             case "permission_blocked",
                  "context_window_exceeded" -> "RETRY_AFTER_EXTERNAL_FIX";
             default -> "INSPECT_BEFORE_RETRY";
+        };
+    }
+
+    private static boolean adapterRetrySafe(String primaryReason) {
+        // Only adapter failures whose suggested action rebuilds the session or
+        // waits for capacity are safe to continue without a human decision.
+        return switch (primaryReason) {
+            case "rate_limited", "agent_reconnect_required" -> true;
+            // A generic bootstrap failure is not blindly retry-safe: its cause is
+            // unknown, so retrySafe must match the inspect-then-retry command.
+            case "session_bootstrap_failed" -> false;
+            default -> false;
         };
     }
 
@@ -324,6 +366,11 @@ public record RecoveryAssessment(
                     "acpx " + agent + " sessions close " + session
                             + " && acpx " + agent + " sessions new --name " + session
                             + " && " + retry;
+            // Bootstrap failure is generic (timeout/spawn/config/nonzero); do not assume
+            // `sessions new` recovers it. retrySafe is false and the command asks for
+            // inspection before a manual retry.
+            case "session_bootstrap_failed" ->
+                    retry + "  # only after inspecting the session bootstrap failure";
             case "auth_failed",
                  "permission_blocked",
                  "provider_connection_failed",
@@ -337,6 +384,7 @@ public record RecoveryAssessment(
         var map = new LinkedHashMap<String, Object>();
         map.put("classification", classification);
         map.put("retryReadiness", retryReadiness);
+        map.put("retrySafe", retrySafe);
         map.put("reason", reason);
         map.put("suggestedCommand", suggestedCommand);
         map.put("diagnosticJsonRef", diagnosticJsonRef);

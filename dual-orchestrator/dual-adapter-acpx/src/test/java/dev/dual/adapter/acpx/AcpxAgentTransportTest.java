@@ -38,12 +38,108 @@ class AcpxAgentTransportTest {
                         AcpxPermissionProfile.implement()
                 ));
 
+        // Proactive ensure runs before the prompt: a missing acpx executable fails
+        // session bootstrap first, forming a typed SESSION_BOOTSTRAP_FAILED result
+        // rather than a process-stall guess. The prompt process never starts.
         assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
                 result.processResult().usability());
-        assertEquals(1, result.exitCode());
+        assertEquals(4, result.exitCode());
         assertEquals(1, result.activeAdapterSignals().size());
-        assertEquals(AdapterSignalType.PROCESS_STALLED, result.activeAdapterSignals().get(0).type());
-        assertTrue(Files.readString(stderr).contains("acpx transport failed"));
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED, result.activeAdapterSignals().get(0).type());
+        assertTrue(Files.readString(stderr).contains("[dual] acpx session ensure failed"));
+    }
+
+    @Test
+    void codexEnsuresNamedSessionBeforePromptRun() throws Exception {
+        var invocationLog = tempDir.resolve("codex-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-codex-ensure.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                if [ "$1" = "--help" ]; then exit 0; fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("codex-prompt.md");
+        var stdout = tempDir.resolve("codex-stdout.md");
+        var stderr = tempDir.resolve("codex-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(fakeAcpx.toString()).runCodexDesignReview(new AcpxRunRequest(
+                tempDir, "codex-reviewer", prompt, stdout, stderr, AcpxPermissionProfile.implement()
+        ));
+
+        var log = Files.readString(invocationLog);
+        var ensureIdx = log.indexOf("codex sessions ensure --name codex-reviewer");
+        var promptIdx = log.indexOf(" -f ");
+        assertTrue(ensureIdx >= 0, "Codex must ensure the named session before the prompt: " + log);
+        assertTrue(promptIdx > ensureIdx, "session ensure must precede the prompt run: " + log);
+    }
+
+    @Test
+    void observeProfileEnsureCommandCarriesScopedPermissions() throws Exception {
+        var invocationLog = tempDir.resolve("observe-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-observe.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("observe-prompt.md");
+        var stdout = tempDir.resolve("observe-stdout.md");
+        var stderr = tempDir.resolve("observe-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir, "claude-observe", prompt, stdout, stderr, AcpxPermissionProfile.observe()
+        ));
+
+        var log = Files.readString(invocationLog);
+        // Command-boundary assertion only: observe uses `sessions ensure` (not `new`) and
+        // carries its scoped permission args. This fake does NOT prove acpx reuses an
+        // existing session — that reuse-ignore semantics is established from the acpx
+        // 0.11.0 source (ensureSession returns the existing record unchanged), not here.
+        var ensureLine = log.lines().filter(line -> line.contains(" sessions ensure ")).findFirst().orElse("");
+        assertTrue(ensureLine.contains("sessions ensure --name claude-observe"),
+                "observe must use sessions ensure: " + log);
+        assertFalse(ensureLine.contains(" sessions new "), "observe must not force a fresh session: " + log);
+        assertTrue(ensureLine.contains("--approve-reads"), "observe ensure must carry read approval: " + ensureLine);
+        assertTrue(ensureLine.contains("--allowed-tools"), "observe ensure must carry allowed-tools: " + ensureLine);
+        assertTrue(ensureLine.contains("--permission-policy"), "observe ensure must carry permission policy: " + ensureLine);
+    }
+
+    @Test
+    void implementProfileEnsureCommandCarriesImplementationPermissions() throws Exception {
+        var invocationLog = tempDir.resolve("implement-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-implement.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("implement-prompt.md");
+        var stdout = tempDir.resolve("implement-stdout.md");
+        var stderr = tempDir.resolve("implement-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(fakeAcpx.toString()).runCodexDesignReview(new AcpxRunRequest(
+                tempDir, "codex-implement", prompt, stdout, stderr, AcpxPermissionProfile.implement()
+        ));
+
+        var log = Files.readString(invocationLog);
+        // Command-boundary assertion only (see observe test): reuse-ignore semantics is
+        // proven from acpx 0.11.0 source, not from this fake.
+        var ensureLine = log.lines().filter(line -> line.contains(" sessions ensure ")).findFirst().orElse("");
+        assertTrue(ensureLine.contains("sessions ensure --name codex-implement"),
+                "implement must use sessions ensure: " + log);
+        assertFalse(ensureLine.contains(" sessions new "), "implement must not force a fresh session: " + log);
+        assertTrue(ensureLine.contains("--approve-all"), "implement ensure must carry approve-all: " + ensureLine);
     }
 
     @Test
@@ -126,7 +222,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "agent needs reconnect" >&2
@@ -228,7 +324,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
@@ -286,7 +382,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
@@ -351,7 +447,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
@@ -419,7 +515,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
@@ -471,7 +567,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
@@ -536,7 +632,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent needs reconnect" >&2
@@ -603,11 +699,11 @@ class AcpxAgentTransportTest {
                   exit 0
                 fi
                 printf '%s\\n' "$*" >> "__ARGS_LOG__"
-                if [ "$2" = "sessions" ] && [ "$3" = "close" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions close '; then
                   echo "closed" >> "__STATE__"
                   exit 0
                 fi
-                if [ "$2" = "sessions" ] && [ "$3" = "ensure" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions ensure '; then
                   echo "ensured" >> "__STATE__"
                   exit 0
                 fi
@@ -658,7 +754,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ] && [ "$3" = "ensure" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions ensure '; then
                   echo "ensuring session"
                   sleep 20
                   exit 0
@@ -695,9 +791,13 @@ class AcpxAgentTransportTest {
         var elapsedMs = (System.nanoTime() - started) / 1_000_000;
 
         assertEquals(4, result.exitCode());
-        assertTrue(elapsedMs < 8_000, "session bootstrap must be bounded");
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED,
+                result.activeAdapterSignals().get(0).type());
+        assertTrue(elapsedMs < 8_000, "proactive session bootstrap must be bounded");
+        assertFalse(Files.exists(state), "prompt side effect must not occur when bootstrap fails");
         var stderrText = Files.readString(stderr);
-        assertTrue(stderrText.contains("No acpx session found"), stderrText);
+        assertFalse(stderrText.contains("No acpx session found"),
+                "ensure is proactive; the prompt-run session-missing stderr must not appear");
         assertFalse(stderrText.contains("SECOND_MAIN_AGENT_SHOULD_NOT_RUN"), stderrText);
         assertTrue(stderrText.contains("[dual] acpx session ensure failed"));
         assertTrue(stderrText.contains("timed_out=true"));
@@ -712,7 +812,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 if [ ! -f "__STATE__" ]; then
@@ -841,7 +941,7 @@ class AcpxAgentTransportTest {
                 #!/bin/sh
                 printf '%s\\n' "$@" >> "__ACPX_LOG__"
                 printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ACPX_LOG__"
-                if [ "$2" = "sessions" ] && [ "$3" = "new" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions new '; then
                   exit 0
                 fi
                 echo "# Intake"
@@ -1007,7 +1107,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 cat <<'EOF'
@@ -1056,7 +1156,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                if [ "$2" = "sessions" ]; then
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
                   exit 0
                 fi
                 cat <<'EOF'

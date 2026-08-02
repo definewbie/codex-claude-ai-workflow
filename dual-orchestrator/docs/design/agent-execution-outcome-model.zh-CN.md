@@ -258,7 +258,7 @@ AgentExecutionOutcome
   primaryReason
   secondarySignals[]
   nodeMaySucceed
-  retrySafe
+  retryPolicy
   recoveryCategory
   operatorMessage
 ```
@@ -375,7 +375,7 @@ NodeExecution 不允许直接解释：
     "primaryReason": "STRUCTURED_ARTIFACT_MISSING",
     "secondarySignals": ["AGENT_RECONNECT_REQUIRED"],
     "nodeMaySucceed": false,
-    "retrySafe": false,
+    "retryPolicy": "MANUAL_ONLY",
     "recoveryCategory": "artifact_contract_failure",
     "operatorMessage": "Required structured artifact missing; adapter also reported reconnect."
   },
@@ -415,7 +415,7 @@ NodeExecution 不允许直接解释：
 
 - `run.status` 由 `executionOutcome.status` 派生；
 - `failureReason` 由 `executionOutcome.primaryReason` 派生；
-- `recoverable` 由 `executionOutcome.retrySafe` 或 recovery category 派生；
+- `recoverable` 由 `executionOutcome.retryPolicy`（`!= NONE`）或 recovery category 派生；`executionOutcome` 只持久化 `retryPolicy`，不再派生同名含混的 `retrySafe` boolean；operator 侧的 retry 安全性只由 `RecoveryAssessment.retrySafe` 唯一拥有；
 - projection 优先读 `executionOutcome`，旧 ledger 没有时才使用 legacy fallback。
 
 ## Recovery 语义

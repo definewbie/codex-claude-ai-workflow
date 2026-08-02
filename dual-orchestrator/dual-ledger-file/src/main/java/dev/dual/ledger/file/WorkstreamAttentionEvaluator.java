@@ -289,7 +289,7 @@ public final class WorkstreamAttentionEvaluator {
                     assessment.reason(),
                     "Inspect the contract diagnostic and fix the output contract before retrying.",
                     assessment.suggestedCommand(),
-                    false,
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -305,7 +305,7 @@ public final class WorkstreamAttentionEvaluator {
                     assessment.reason(),
                     "Fix the external runtime cause, then retry the same active node.",
                     assessment.suggestedCommand(),
-                    true,
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -314,14 +314,20 @@ public final class WorkstreamAttentionEvaluator {
             );
         }
         if ("agent_session_recovery".equals(classification)) {
+            // agent_session_recovery maps to two readiness values: REBUILD (reconnect)
+            // and INSPECT_BEFORE_RETRY (generic bootstrap failure). Project the assessment's
+            // authoritative readiness into the next action; do not hardcode "Rebuild".
+            var nextAction = "REBUILD_ACPX_SESSION_THEN_RETRY".equals(assessment.retryReadiness())
+                    ? "Rebuild the acpx agent session, then retry the same active node."
+                    : "Inspect the session bootstrap failure before retrying the same active node.";
             return new WorkstreamAttention(
                     WorkstreamAttentionCategory.RUNTIME_RECOVERY,
                     "critical",
                     "Agent session recovery required",
                     assessment.reason(),
-                    "Rebuild the acpx agent session, then retry the same active node.",
+                    nextAction,
                     assessment.suggestedCommand(),
-                    true,
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -337,7 +343,23 @@ public final class WorkstreamAttentionEvaluator {
                     assessment.reason(),
                     "Rebuild the acpx agent session, then retry the same active node.",
                     assessment.suggestedCommand(),
-                    true,
+                    assessment.retrySafe(),
+                    current.status().name(),
+                    activeNode.nodeDefinitionId(),
+                    activeNode.nodeInstanceId(),
+                    domainOutcome,
+                    evidenceRefs
+            );
+        }
+        if ("agent_output_incomplete".equals(classification)) {
+            return new WorkstreamAttention(
+                    WorkstreamAttentionCategory.RUNTIME_RECOVERY,
+                    "critical",
+                    "Agent output incomplete",
+                    assessment.reason(),
+                    "Inspect the agent output contract, then retry the same active node.",
+                    assessment.suggestedCommand(),
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -353,7 +375,7 @@ public final class WorkstreamAttentionEvaluator {
                     assessment.reason(),
                     "Wait for quota or provider capacity to recover, then retry the same active node.",
                     assessment.suggestedCommand(),
-                    true,
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -369,7 +391,7 @@ public final class WorkstreamAttentionEvaluator {
                     assessment.reason(),
                     "Rebuild the acpx agent session, then retry the same active node.",
                     assessment.suggestedCommand(),
-                    true,
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -385,7 +407,7 @@ public final class WorkstreamAttentionEvaluator {
                     assessment.reason(),
                     "Inspect the review evidence and revise the task contract, scope, or test policy before continuing.",
                     "dualctl recovery show " + base,
-                    false,
+                    assessment.retrySafe(),
                     current.status().name(),
                     activeNode.nodeDefinitionId(),
                     activeNode.nodeInstanceId(),
@@ -400,7 +422,7 @@ public final class WorkstreamAttentionEvaluator {
                 assessment.reason(),
                 "Inspect recovery evidence before deciding whether retry is safe.",
                 assessment.suggestedCommand(),
-                false,
+                assessment.retrySafe(),
                 current.status().name(),
                 activeNode.nodeDefinitionId(),
                 activeNode.nodeInstanceId(),

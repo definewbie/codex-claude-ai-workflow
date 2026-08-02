@@ -3,8 +3,17 @@ package dev.dual.runtime.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.AgentResultContractResult;
+import dev.dual.core.id.DualId;
+import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.ledger.file.RecoveryAssessment;
+import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkstreamAttentionCategory;
+import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
+import dev.dual.ledger.file.WorkstreamPaths;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,6 +25,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentRunMetadataFinalizerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -167,7 +178,8 @@ class AgentRunMetadataFinalizerTest {
         var outcome = map(json.get("executionOutcome"));
         assertEquals("RECOVERABLE_ADAPTER_FAILURE", outcome.get("status"));
         assertEquals("MANUAL_ONLY", outcome.get("retryPolicy"));
-        assertEquals(true, outcome.get("retrySafe"));
+        assertFalse(outcome.containsKey("retrySafe"),
+                "outcome must not project a derived retrySafe; consume retryPolicy / RecoveryAssessment.retrySafe instead");
     }
 
     @Test
@@ -500,6 +512,175 @@ class AgentRunMetadataFinalizerTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult));
+    }
+
+    @Test
+    void sessionBootstrapFailureProjectsFailClosedThroughFinalizerRunJsonAndAttention() throws Exception {
+        var ws = "ws-bootstrap-chain";
+        var runJson = tempDir.resolve(".agent/workstreams/" + ws + "/runs/run-bootstrap/run.json");
+        Files.createDirectories(runJson.getParent());
+        // run.json carries the transport's typed facts (processResult + adapterSignals). The
+        // executionOutcome below is NOT hand-copied — it is produced by AgentRunMetadataFinalizer.
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-bootstrap",
+                  "workstreamId": "%s",
+                  "nodeId": "intake.codex_review",
+                  "agent": "codex",
+                  "session": "codex-reviewer",
+                  "status": "process_exited",
+                  "processResult": {
+                    "command": "acpx codex sessions ensure",
+                    "exitCode": 4,
+                    "usability": "EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT",
+                    "durationMs": 117,
+                    "stdoutPath": "stdout.log",
+                    "stderrPath": "stderr.log",
+                    "interrupted": false,
+                    "timedOut": false
+                  },
+                  "adapterSignals": [
+                    {
+                      "type": "SESSION_BOOTSTRAP_FAILED",
+                      "message": "session ensure exited non-zero",
+                      "observedSequence": 0,
+                      "source": "session_command",
+                      "sessionId": "",
+                      "superseded": false
+                    }
+                  ]
+                }
+                """.formatted(ws));
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", ".agent/workstreams/" + ws + "/runs/run-bootstrap/run.json");
+        facts.put("exit_code", 4);
+        facts.put("process_usability", "EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT");
+        facts.put("agent", "codex");
+        facts.put("session", "codex-reviewer");
+        // Contradictory legacy reason: the typed outcome must take priority over raw/legacy text.
+        facts.put("acpx_failure.reason", "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED");
+        facts.put("acpx_failure.recoverable", true);
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "SESSION_BOOTSTRAP_FAILED",
+                NodeStatus.FAILED,
+                List.of(),
+                facts,
+                "session bootstrap failed"
+        ), AgentResultContractResult.missing(),
+                List.of(ArtifactContractResult.requiredMissing("agent_output_contract")), null);
+
+        // Production path: AgentRunMetadataFinalizer reads run.json, resolves the typed
+        // outcome via the embedded core resolver, and writes executionOutcome to run.json.
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        var runMetadata = map(OBJECT_MAPPER.readValue(runJson.toFile(), Map.class).get("executionOutcome"));
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", runMetadata.get("status"));
+        assertEquals("session_bootstrap_failed", runMetadata.get("primaryReason"));
+        assertFalse(runMetadata.containsKey("retrySafe"),
+                "outcome projection must not emit a derived retrySafe");
+
+        // Production path: ledger stores the finalized node result; RecoveryAssessment consumes
+        // the typed executionOutcome; WorkstreamAttention renders it.
+        var paths = new WorkstreamPaths(tempDir, new DualId(ws));
+        var ledger = new WorkflowFileLedger();
+        var definition = new WorkflowDefinition("wf-bootstrap-chain", 1, "intake.codex_review",
+                List.of(new NodeDefinition("intake.codex_review", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of());
+        ledger.initialize(paths, "wf-bootstrap-chain", definition);
+        var initial = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, initial.nodeInstanceId(), NodeStatus.FAILED,
+                "session_bootstrap_failed", List.of(), finalized.result());
+        var failed = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        var assessment = RecoveryAssessment.from(failed, paths.workspaceRoot(), paths.workstreamId().value());
+        assertEquals("agent_session_recovery", assessment.classification());
+        assertEquals("INSPECT_BEFORE_RETRY", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe(), "generic bootstrap failure must not be retry-safe");
+        assertFalse(assessment.suggestedCommand().contains("sessions new"),
+                "must not assume sessions new recovers an unknown bootstrap cause");
+
+        var attention = WorkstreamAttentionEvaluator.evaluate(paths);
+        assertEquals(assessment.retrySafe(), attention.retrySafe(),
+                "WorkstreamAttention must copy RecoveryAssessment.retrySafe");
+        assertFalse(attention.retrySafe());
+        assertEquals(WorkstreamAttentionCategory.RUNTIME_RECOVERY, attention.category());
+        assertFalse(attention.nextAction().contains("Rebuild"), "bootstrap must not suggest rebuild");
+        assertTrue(attention.nextAction().contains("Inspect"), "bootstrap must direct inspection");
+        assertFalse(attention.command().contains("dualctl resume"), "no auto-resume suggestion");
+    }
+
+    @Test
+    void reconnectFailureKeepsRebuildSemanticsThroughChain() throws Exception {
+        var ws = "ws-reconnect-chain";
+        var runJson = tempDir.resolve(".agent/workstreams/" + ws + "/runs/run-reconnect/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-reconnect",
+                  "workstreamId": "%s",
+                  "nodeId": "intake.codex_review",
+                  "agent": "codex",
+                  "session": "codex-reviewer",
+                  "status": "process_exited",
+                  "processResult": {
+                    "command": "acpx codex -s codex-reviewer",
+                    "exitCode": 4,
+                    "usability": "KILLED_AFTER_RECOVERABLE_SIGNAL",
+                    "durationMs": 2000,
+                    "stdoutPath": "stdout.log",
+                    "stderrPath": "stderr.log",
+                    "interrupted": false,
+                    "timedOut": false
+                  },
+                  "adapterSignals": [
+                    {
+                      "type": "AGENT_RECONNECT_REQUIRED",
+                      "message": "agent needs reconnect",
+                      "observedSequence": 0,
+                      "source": "acpx",
+                      "sessionId": "",
+                      "superseded": false
+                    }
+                  ]
+                }
+                """.formatted(ws));
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", ".agent/workstreams/" + ws + "/runs/run-reconnect/run.json");
+        facts.put("exit_code", 4);
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "RECOVERABLE_AGENT_RECONNECT", NodeStatus.FAILED, List.of(), facts, "reconnect"
+        ), AgentResultContractResult.missing(),
+                List.of(ArtifactContractResult.requiredMissing("agent_output_contract")), null);
+
+        // Same production path as the bootstrap test: finalizer -> run.json -> ledger.
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+        var paths = new WorkstreamPaths(tempDir, new DualId(ws));
+        var ledger = new WorkflowFileLedger();
+        var definition = new WorkflowDefinition("wf-reconnect-chain", 1, "intake.codex_review",
+                List.of(new NodeDefinition("intake.codex_review", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of());
+        ledger.initialize(paths, "wf-reconnect-chain", definition);
+        var initial = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, initial.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_AGENT_RECONNECT", List.of(), finalized.result());
+        var failed = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        // Reconnect must keep its REBUILD readiness + retrySafe=true (no regression from the
+        // bootstrap fail-closed change, which only touched session_bootstrap_failed).
+        var assessment = RecoveryAssessment.from(failed, paths.workspaceRoot(), paths.workstreamId().value());
+        assertEquals("agent_session_recovery", assessment.classification());
+        assertEquals("REBUILD_ACPX_SESSION_THEN_RETRY", assessment.retryReadiness());
+        assertTrue(assessment.retrySafe(), "reconnect must remain retry-safe");
+
+        var attention = WorkstreamAttentionEvaluator.evaluate(paths);
+        assertTrue(attention.retrySafe());
+        assertTrue(attention.nextAction().contains("Rebuild"),
+                "reconnect must keep the rebuild next action");
+        assertTrue(assessment.suggestedCommand().contains("sessions new --name"));
     }
 
     @SuppressWarnings("unchecked")

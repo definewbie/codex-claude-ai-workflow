@@ -286,7 +286,6 @@ public final class AgentExecutionAttemptReconciler {
         map.put("primaryReason", outcome.primaryReason());
         map.put("nodeMaySucceed", outcome.nodeMaySucceed());
         map.put("retryPolicy", outcome.retryPolicy().name());
-        map.put("retrySafe", outcome.retryPolicy() != AgentExecutionRetryPolicy.NONE);
         map.put("recoveryCategory", outcome.recoveryCategory().name());
         map.put("operatorMessage", outcome.operatorMessage());
         map.put("secondarySignals", outcome.secondarySignals().stream()

@@ -154,6 +154,7 @@ class RecoveryAssessmentTest {
 
         assertEquals("agent_auth_failed", assessment.classification());
         assertEquals("FIX_AGENT_AUTH_THEN_RETRY", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe());
         assertTrue(assessment.reason().contains("credentials"));
         assertFalse(assessment.suggestedCommand().contains("sessions close"));
         assertTrue(assessment.suggestedCommand().contains("dualctl retry"));
@@ -222,6 +223,8 @@ class RecoveryAssessmentTest {
         assertEquals(legacy.retryReadiness(), typed.retryReadiness());
         assertTrue(typed.suggestedCommand().contains("acpx codex sessions close codex-reviewer"));
         assertTrue(typed.suggestedCommand().contains("acpx codex sessions new --name codex-reviewer"));
+        assertTrue(typed.retrySafe());
+        assertTrue(legacy.retrySafe());
     }
 
     @Test
@@ -239,6 +242,53 @@ class RecoveryAssessmentTest {
         assertEquals("manual_recovery_required", assessment.classification());
         assertEquals("INSPECT_BEFORE_RETRY", assessment.retryReadiness());
         assertTrue(assessment.suggestedCommand().contains("only after inspecting"));
+        assertFalse(assessment.retrySafe(),
+                "unknown typed classification must fail closed without auto-retry readiness");
+    }
+
+    @Test
+    void sessionBootstrapFailureIsGenericFailClosedSessionRecovery() {
+        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "session_bootstrap_failed",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "The acpx session could not be bootstrapped before the prompt."
+                )
+        )), tempDir, "ws-recovery");
+
+        // SESSION_BOOTSTRAP_FAILED is generic (timeout/spawn/config/nonzero), so it must
+        // stay fail-closed: classify as session recovery, but inspect before retry and do
+        // not assume `sessions new` recovers an unknown cause.
+        assertEquals("agent_session_recovery", assessment.classification());
+        assertEquals("INSPECT_BEFORE_RETRY", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe(),
+                "generic bootstrap failure must not be blindly retry-safe");
+        assertFalse(assessment.suggestedCommand().contains("sessions new"),
+                "must not assume sessions new recovers an unknown bootstrap cause");
+        assertFalse(assessment.suggestedCommand().contains("sessions close"));
+        assertEquals(false, assessment.toMap().get("retrySafe"));
+    }
+
+    @Test
+    void agentOutputIncompleteHasExplicitProjectionAndIsNotRetrySafe() {
+        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                "agent_execution_outcome", Map.of(
+                        "status", "OUTPUT_INCOMPLETE",
+                        "primaryReason", "process_output_incomplete",
+                        "recoveryCategory", "OUTPUT_INCOMPLETE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "The agent output stopped before a valid boundary."
+                )
+        )), tempDir, "ws-recovery");
+
+        assertEquals("agent_output_incomplete", assessment.classification());
+        assertEquals("RETRY_AFTER_OUTPUT_CONTRACT_FIX", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe(),
+                "output-incomplete is not blindly retry-safe; the output contract must be inspected first");
     }
 
     private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {
