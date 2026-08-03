@@ -8,7 +8,25 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: T6 Interruption Ledger Ownership v5 / AUTHORIZED ONCE
+## Current Active Step: T6 Typed EOF Correction v6 / AUTHORIZED ONCE
+
+> Typed EOF diagnostic checkpoint 已提交为 `3786a3ca`，独立最终 diff review
+> 为 PASS，targeted tests 为 `12/0 + 16/0`，full reactor 为 `1147/0`。
+> 当前成熟度是 `ENFORCED / MODEL-FACING CORRECTION NOT YET PROVEN`。
+>
+> 用户已授权一次且仅一次完整 T6 real-case。唯一有效 gate 为
+> `docs/testing/verification-gates/20260803-t6-typed-eof-correction-v6.md`。
+> 本轮主目标是完整 workflow 达到 `COMPLETED` 与最终 `ACCEPT` 或非退化的
+> `ACCEPT_WITH_NOTES`。EOF correction 是独立子结论：若实际出现
+> `UNEXPECTED_END_OF_INPUT`，必须由 typed diagnostic 约束唯一一次 correction
+> 并成功通过 strict parser 才能标 `PROVEN`；若未触发，只能标
+> `NOT_TRIGGERED`，不得伪称已证明。
+>
+> 必须先提交 gate、获得 clean SHA，再完成 fresh package、target/backend/
+> frontend/PostgreSQL baseline 与 Claude/Codex probes。任一前置失败都不得创建
+> workstream。运行后禁止 retry、resume、调 prompt/parser/model 或启动第二样本。
+
+### Historical Result: T6 Interruption Ledger Ownership v5 / FAIL
 
 > ACP session 与 recovery projection ownership convergence 已作为单一 checkpoint
 > 提交为 `dc08cf2e`。Full reactor `1138/0`、独立代码审查与 deterministic
@@ -44,6 +62,22 @@
 > 必须先提交 gate、获得 clean SHA，并完成 target/backend/frontend/database、fresh
 > package 与 Claude/Codex probes；全部 PASS 后才能创建 workstream。不得 retry、
 > resume、修改 prompt/parser/model 或运行第二个样本。
+>
+> v5 一次性授权已消耗。运行使用 clean Dual SHA `c2340654`、target SHA
+> `ed82f578`，workstream 为 `ws-20260802T152626Z-QN2R`，报告为
+> `docs/testing/real-case-reports/20260802T152244Z/report.md`。Fresh build、
+> backend `191/191`、miniprogram build、PostgreSQL 与 provider probe 均通过。
+> 七个 Agent run 的 execution facts 均闭合，没有 run 留在 `prepared`，也没有
+> reconciler 伪造 occurrence/usage/candidate/correction；因此本次观察到的
+> execution-ledger ownership 路径成立。
+>
+> 但 `plan.claude_plan` 的首次输出与唯一一次 bounded correction 均为 exit 0
+> 且缺少根对象最后一个 `}`，strict parser 正确返回
+> `AGENT_RESULT_PARSE_FAILED`，workflow 停在 `WAITING_FOR_RECOVERY`。按 v5 gate，
+> failed correction 直接判定 `FAIL / STOP-LOSS ENFORCED`；没有 retry、resume 或
+> 第二样本。实际 Claude provider metadata 仍为 `zhipu / glm-5.2`，并非 Claude
+> Code UI 当前默认模型。checkpoint 保持
+> `ENFORCED + DETERMINISTICALLY PROVEN / FULL-WORKFLOW PROOF FAILED`。
 
 ### Superseded Active Step: P0 ACP Execution Fact Ownership Convergence / ENFORCED
 

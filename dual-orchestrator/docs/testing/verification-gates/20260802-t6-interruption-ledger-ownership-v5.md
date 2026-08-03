@@ -1,6 +1,31 @@
 # Verification Gate: T6 Interruption Ledger Ownership v5
 
-Status: `AUTHORIZED ONCE / NOT YET CONSUMED`
+Status: `CONSUMED / FAIL / STOP-LOSS ENFORCED`
+
+## Result
+
+- Executed from clean Dual SHA `c2340654e2322f3d3cd335a49e001de44fc09251`
+  against pinned target SHA `ed82f5789a2e54ea3ccdb983d40b3fe64e9a4927`.
+- Workstream: `ws-20260802T152626Z-QN2R`.
+- Report: `docs/testing/real-case-reports/20260802T152244Z/report.md`.
+- Fresh Maven package, provider probe, pinned PostgreSQL/backend baseline, and
+  miniprogram build preconditions passed. The run created seven Agent runs and
+  stopped at `plan.claude_plan` in `WAITING_FOR_RECOVERY`.
+- The execution-ledger ownership target held for all seven runs: no run remained
+  `prepared`; every occurrence had its observed process facts; terminal status,
+  attempt, process result, and outcome did not contradict; no occurrence, usage,
+  candidate, or correction was fabricated by reconciliation.
+- The full gate failed because `plan.claude_plan` produced malformed JSON in its
+  first occurrence and again in its single bounded correction. Both exit codes
+  were zero, both outputs ended one root-closing brace early, and strict parsing
+  correctly returned `AGENT_RESULT_PARSE_FAILED`. The workflow stopped without
+  retry or resume.
+- Actual Claude provider metadata was `zhipu / glm-5.2`; the current Claude Code
+  UI default did not change the existing acpx workstream session provider.
+
+No second v5 sample is authorized. This result proves the new execution-fact
+ownership behavior on the observed normal and contract-failure paths, but the
+checkpoint cannot be promoted as a complete full-workflow `PROVEN` result.
 
 - Target: Prove clean Dual checkpoint `0c81fbc8` composes with one full pinned
   cancer-clinic workflow without losing or fabricating execution facts across
