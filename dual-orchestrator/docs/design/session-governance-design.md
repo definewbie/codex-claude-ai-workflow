@@ -164,7 +164,7 @@ P0 已实现并测试通过。**它只做 acpx session 生命周期止损，不�
 已落地：
 - **P0.1** 移除 `ResumeCommand` 的死选项 `--claude-session` / `--codex-session`（裸名 `claude-main` / `codex-reviewer`，从未真正传入 runtime，且易误导成跨 task 共享 session）。CLI resume 路径不再暴露任何裸 session 名；真实 session 名始终在 `AcpxAgentTaskHandler` 内按 workstream 作用域生成。
 - **P0.2** `WorkstreamActionService` 在每个 action 之后，若 workstream 处于终态（COMPLETED / FAILED），best-effort 关闭其 acpx session（`AcpxSessionLifecycle`）。close 失败/异常被吞掉，**绝不影响 workflow 主状态**；结果追加写入 `.agent/workstreams/<ws>/session-cleanup.log`。
-- **P0.3** 新增 `dualctl sessions-reap --workdir <path>`：扫描 workdir 下所有 workstream，**只对终态的** close 残留 session；RUNNING / WAITING_FOR_HUMAN / WAITING_FOR_RECOVERY 一律跳过。非 daemon、不删 `~/.acpx/sessions` 文件、只调 `acpx sessions close`。
+- **P0.3** 新增 `dualctl sessions-reap --workdir <path>`：未指定 workstream 时扫描 workdir，**只对终态的** workstream close 残留 session；RUNNING / WAITING_FOR_HUMAN / WAITING_FOR_RECOVERY 一律跳过。real-case stop-loss 可显式使用 `--workstream <id>` 关闭该次已停止运行的 session，且不改写 workflow 状态。非 daemon、不删 `~/.acpx/sessions` 文件、只调 `acpx sessions close`。
 
 明确不在 P0（留 P1/P2）：
 - 默认 `session_scope` **仍是 workstream**，未改。
@@ -174,7 +174,7 @@ P0 已实现并测试通过。**它只做 acpx session 生命周期止损，不�
 Troubleshooting：
 - 终态 workstream 的 session 仍残留在 `~/.acpx/sessions/`：跑 `dualctl sessions-reap --workdir <agent-worktree>`；查 `.agent/workstreams/<ws>/session-cleanup.log` 的 closed/failed。
 - `failed > 0`：通常是 acpx 不可用或 session 已不存在；不影响 workflow 终态，可幂等重跑 reap。
-- WAITING_FOR_RECOVERY 长期 abandoned 的 workstream：P0 暂不自动 close（"abandoned" 难定义）；`sessions-reap` 只在它转为 FAILED 时处理。如需清理，先 retry / close-mistaken-iteration 转终态再 reap。
+- WAITING_FOR_RECOVERY 长期 abandoned 的 workstream：P0 不做自动扫描式 close（"abandoned" 难定义）；操作员或 real-case stop-loss 明确决定停止本次运行后，可执行 `dualctl sessions-reap --workdir <agent-worktree> --workstream <id>`。该命令只关闭 ledger 中记录的 session，不修改 WAITING_FOR_RECOVERY 状态。
 
 ---
 

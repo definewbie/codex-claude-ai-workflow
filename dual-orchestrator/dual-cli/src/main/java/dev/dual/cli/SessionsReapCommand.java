@@ -37,6 +37,10 @@ public final class SessionsReapCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
+    @Option(names = "--workstream",
+            description = "Explicitly close sessions for one workstream, including a recoverable stop-loss state.")
+    String workstreamId;
+
     @Override
     public Integer call() throws Exception {
         return reap(new AcpxSessionLifecycle());
@@ -48,6 +52,9 @@ public final class SessionsReapCommand implements Callable<Integer> {
         if (!Files.isDirectory(workstreamsDir)) {
             System.out.println("No workstreams found at " + workstreamsDir);
             return 0;
+        }
+        if (workstreamId != null && !workstreamId.isBlank()) {
+            return reapSelected(root, closer, workstreamId.trim());
         }
         var ledger = CliLedgerFactory.create();
         int reaped = 0;
@@ -85,5 +92,28 @@ public final class SessionsReapCommand implements Callable<Integer> {
         System.out.println("reaped=" + reaped + " skipped=" + skipped
                 + " statusFailed=" + statusFailed + " closeFailed=" + closeFailed);
         return 0;
+    }
+
+    private int reapSelected(Path root, WorkstreamSessionCloser closer, String selectedWorkstreamId) {
+        var ledger = CliLedgerFactory.create();
+        WorkflowStatus status;
+        try {
+            status = ledger.loadCurrent(new WorkstreamPaths(root, new DualId(selectedWorkstreamId))).status();
+        } catch (Exception failure) {
+            System.out.println("skip ws=" + selectedWorkstreamId + " reason=unreadable_status");
+            return 1;
+        }
+        if (status != WorkflowStatus.COMPLETED
+                && status != WorkflowStatus.FAILED
+                && status != WorkflowStatus.WAITING_FOR_RECOVERY) {
+            System.out.println("skip ws=" + selectedWorkstreamId + " status=" + status
+                    + " (not stopped or recoverable)");
+            return 1;
+        }
+        var summary = closer.closeWorkstreamSessions(root, selectedWorkstreamId);
+        System.out.println("reap ws=" + selectedWorkstreamId + " status=" + status
+                + " explicit=true distinct=" + summary.distinctSessions()
+                + " closed=" + summary.closed() + " failed=" + summary.failed());
+        return summary.failed() == 0 ? 0 : 1;
     }
 }

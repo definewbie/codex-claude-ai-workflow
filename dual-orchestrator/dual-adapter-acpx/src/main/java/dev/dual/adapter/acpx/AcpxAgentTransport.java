@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 public class AcpxAgentTransport {
     private static final int RECOVERABLE_SIGNAL_EXIT_CODE = 4;
+    private static final int ACPX_PERMISSION_DENIED_EXIT_CODE = 5;
     private static final long STDERR_SIGNAL_POLL_SECONDS = 2;
     private static final long DEFAULT_RECOVERABLE_SIGNAL_GRACE_SECONDS = 30;
     private static final long DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS = 600;
@@ -574,19 +575,35 @@ public class AcpxAgentTransport {
                     recordLifecycleBoundary(timeline, request, event, startedAt);
                 }
                 var assessment = health.assess(elapsed);
+                var exitCode = process.exitValue();
+                var signals = new ArrayList<>(assessment.signals());
+                var terminalSignal = assessment.signal();
+                if (exitCode == ACPX_PERMISSION_DENIED_EXIT_CODE
+                        && signals.stream().noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED
+                                && !signal.superseded())) {
+                    terminalSignal = new AdapterSignal(
+                            AdapterSignalType.PERMISSION_BLOCKED,
+                            "acpx exited with PERMISSION_DENIED (5)",
+                            eventReader.nextSequence(),
+                            "acpx_exit",
+                            request.sessionName(),
+                            false
+                    );
+                    signals.add(terminalSignal);
+                }
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
                         "adapter",
                         eventReader.nextSequence(),
                         startedAt,
-                        Map.of("exitCode", process.exitValue(), "waitMode", "process_exit")
+                        Map.of("exitCode", exitCode, "waitMode", "process_exit")
                 ));
                 return new ProcessWaitResult(
-                        process.exitValue(),
+                        exitCode,
                         List.copyOf(timeline),
                         eventReader.promptCompletion(),
-                        assessment.signals(),
-                        assessment.signal(),
+                        signals,
+                        terminalSignal,
                         false
                 );
             }

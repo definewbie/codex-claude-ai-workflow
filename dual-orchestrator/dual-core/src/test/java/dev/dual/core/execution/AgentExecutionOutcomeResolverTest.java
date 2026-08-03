@@ -132,6 +132,22 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
+    void permissionBlockedRemainsPrimaryWhenAgentResultIsInvalid() {
+        var outcome = resolve(
+                ProcessResult.nonZeroComplete(5),
+                AgentResultContractResult.invalid("AGENT_RESULT_PARSE_FAILED"),
+                List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
+                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED))
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
+        assertEquals("permission_blocked", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+        assertEquals(AgentExecutionRetryPolicy.MANUAL_ONLY, outcome.retryPolicy());
+        assertEquals(RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE, outcome.recoveryCategory());
+    }
+
+    @Test
     void rateLimitWithValidAgentResultAndArtifactRemainsRecoverableAdapterFailure() {
         var signal = AdapterSignal.of(AdapterSignalType.RATE_LIMITED);
 

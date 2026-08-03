@@ -98,6 +98,81 @@ class SessionsReapCommandTest {
         assertTrue(printed.contains("statusFailed=0"), printed);
     }
 
+    @Test
+    void explicitlySelectedRecoverableWorkstreamCanBeQuiesced() throws Exception {
+        var recoverablePaths = createWorkstream("ws-recoverable", simpleDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(recoverablePaths);
+        var active = ledger.loadCurrent(recoverablePaths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(
+                recoverablePaths,
+                definition,
+                active,
+                NodeStatus.FAILED,
+                "failed",
+                List.of(),
+                Map.of("reason", "permission_blocked")
+        );
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, ledger.loadCurrent(recoverablePaths).status());
+
+        var reaped = new ArrayList<String>();
+        var cmd = new SessionsReapCommand();
+        cmd.workdir = tempDir;
+        cmd.workstreamId = "ws-recoverable";
+
+        var exitCode = cmd.reap((root, workstreamId) -> {
+            reaped.add(workstreamId);
+            return new WorkstreamSessionCloser.CloseSummary(workstreamId, 1, 1, 0);
+        });
+
+        assertEquals(0, exitCode);
+        assertEquals(List.of("ws-recoverable"), reaped);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, ledger.loadCurrent(recoverablePaths).status(),
+                "session quiescence must not rewrite workflow state");
+    }
+
+    @Test
+    void explicitlySelectedCloseFailureReturnsNonZero() throws Exception {
+        var recoverablePaths = createWorkstream("ws-close-failed", simpleDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(recoverablePaths);
+        var active = ledger.loadCurrent(recoverablePaths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(
+                recoverablePaths,
+                definition,
+                active,
+                NodeStatus.FAILED,
+                "failed",
+                List.of(),
+                Map.of("reason", "permission_blocked")
+        );
+        var cmd = new SessionsReapCommand();
+        cmd.workdir = tempDir;
+        cmd.workstreamId = "ws-close-failed";
+
+        var exitCode = cmd.reap((root, workstreamId) ->
+                new WorkstreamSessionCloser.CloseSummary(workstreamId, 1, 0, 1));
+
+        assertEquals(1, exitCode);
+    }
+
+    @Test
+    void explicitlySelectedRunningWorkstreamCannotBeQuiesced() throws Exception {
+        createWorkstream("ws-running-selected", simpleDefinition());
+        var reaped = new ArrayList<String>();
+        var cmd = new SessionsReapCommand();
+        cmd.workdir = tempDir;
+        cmd.workstreamId = "ws-running-selected";
+
+        var exitCode = cmd.reap((root, workstreamId) -> {
+            reaped.add(workstreamId);
+            return new WorkstreamSessionCloser.CloseSummary(workstreamId, 1, 1, 0);
+        });
+
+        assertEquals(1, exitCode);
+        assertTrue(reaped.isEmpty(), "explicit selection must not close an active workstream session");
+    }
+
     private WorkstreamPaths paths(String workstreamId) {
         return new WorkstreamPaths(tempDir, new DualId(workstreamId));
     }

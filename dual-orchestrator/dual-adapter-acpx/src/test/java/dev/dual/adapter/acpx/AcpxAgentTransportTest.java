@@ -1281,4 +1281,45 @@ class AcpxAgentTransportTest {
         assertEquals(4, result.exitCode());
         assertTrue(Files.readString(stdout).contains("Tool permission request failed"));
     }
+
+    @Test
+    void acpxPermissionDeniedExitProjectsTypedBlockingSignal() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-permission-denied-exit.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                printf '%s\n' '{"incomplete":"candidate"}'
+                exit 5
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("permission-prompt.md");
+        var stdout = tempDir.resolve("permission-stdout.md");
+        var stderr = tempDir.resolve("permission-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-permission",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.observe()
+        ));
+
+        assertEquals(5, result.exitCode());
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT, result.processResult().usability());
+        var signal = result.activeAdapterSignals().stream()
+                .filter(candidate -> candidate.type() == AdapterSignalType.PERMISSION_BLOCKED)
+                .findFirst()
+                .orElseThrow();
+        assertEquals("acpx_exit", signal.source());
+        assertEquals("claude-permission", signal.sessionId());
+        assertFalse(signal.superseded());
+    }
 }

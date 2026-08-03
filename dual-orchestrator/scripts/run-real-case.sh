@@ -144,11 +144,27 @@ quiesce_interrupted_workstream() {
     fail "Cannot close interrupted provider execution without a durable workspace and workstream id."
     return 1
   }
+  local recovery_failed=false
+  local session_failed=false
   dualctl recovery stale \
     --workdir "$WORKSPACE_DIR" \
     --terminate-process \
     --note "real-case runner interrupted by stop-loss" \
-    "$WORKSTREAM_ID" >"$CASE_DIR/logs/interruption-recovery.log" 2>&1
+    "$WORKSTREAM_ID" >"$CASE_DIR/logs/interruption-recovery.log" 2>&1 || recovery_failed=true
+  quiesce_workstream_sessions "interruption" || session_failed=true
+  [[ "$recovery_failed" == false && "$session_failed" == false ]]
+}
+
+quiesce_workstream_sessions() {
+  local reason="$1"
+  [[ -n "$WORKSPACE_DIR" && -n "$WORKSTREAM_ID" ]] || {
+    fail "Cannot close provider sessions without a durable workspace and workstream id."
+    return 1
+  }
+  dualctl sessions-reap \
+    --workdir "$WORKSPACE_DIR" \
+    --workstream "$WORKSTREAM_ID" \
+    >"$CASE_DIR/logs/session-quiescence-${reason}.log" 2>&1
 }
 
 abs_path() {
@@ -569,6 +585,10 @@ run_autorun() {
   printf '%s\n' "$status_output" >"$CASE_DIR/logs/status-after-autorun-failure.log"
   FINAL_STATUS="$(workflow_status "$status_output")"
   [[ -n "$FINAL_STATUS" ]] || FINAL_STATUS="AUTORUN_FAILED"
+  if ! quiesce_workstream_sessions "autorun-stop-loss"; then
+    FINAL_STATUS="SESSION_QUIESCENCE_FAILED"
+    fail "Stopped workflow provider sessions could not be closed."
+  fi
   return 1
 }
 

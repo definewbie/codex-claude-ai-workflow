@@ -1111,6 +1111,14 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("SKIPPED_PROCESS_NON_ZERO", acquisition.path("correctionDisposition").asText());
         assertEquals(1, acquisition.path("occurrences").size());
         assertEquals(5, acquisition.path("occurrences").get(0).path("exitCode").asInt());
+
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, result);
+        assertEquals(NodeStatus.FAILED, finalized.status());
+        var finalizedMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
+        );
+        assertEquals("permission_blocked",
+                finalizedMetadata.path("executionOutcome").path("primaryReason").asText());
     }
 
     @Test
@@ -1651,7 +1659,15 @@ class AcpxAgentTaskHandlerTest {
                             "fixture-non-zero",
                             "end_turn",
                             "I completed the design.\n" + resultJson
-                    )
+                    ),
+                    List.of(new AdapterSignal(
+                            AdapterSignalType.PERMISSION_BLOCKED,
+                            "acpx exited with PERMISSION_DENIED (5)",
+                            1,
+                            "acpx_exit",
+                            request.sessionName(),
+                            false
+                    ))
             );
         }
 
@@ -2668,6 +2684,19 @@ class AcpxAgentTaskHandlerTest {
             AcpxUsage usage,
             AcpxPromptCompletion completion
     ) {
+        return fixtureResult(exitCode, startedAt, finishedAt, command, timeline, usage, completion, List.of());
+    }
+
+    private static AcpxRunResult fixtureResult(
+            int exitCode,
+            Instant startedAt,
+            Instant finishedAt,
+            List<String> command,
+            List<AcpxExecutionEvent> timeline,
+            AcpxUsage usage,
+            AcpxPromptCompletion completion,
+            List<AdapterSignal> signals
+    ) {
         var usability = exitCode == 0
                 ? ProcessUsability.EXITED_ZERO
                 : completion.completed()
@@ -2691,7 +2720,7 @@ class AcpxAgentTaskHandlerTest {
                         false,
                         false
                 ),
-                List.of()
+                signals
         );
     }
 

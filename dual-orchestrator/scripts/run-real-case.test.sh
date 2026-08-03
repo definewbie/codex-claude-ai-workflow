@@ -138,6 +138,12 @@ grep -q "recovery stale --workdir $interrupted_workspace --terminate-process" \
   cat "$interrupted_case/logs/interruption-recovery.log" >&2
   exit 1
 }
+grep -q "sessions-reap --workdir $interrupted_workspace --workstream $interrupted_workstream" \
+  "$interrupted_case/logs/session-quiescence-interruption.log" || {
+  printf '[FAIL] interruption did not close durable workstream sessions\n' >&2
+  cat "$interrupted_case/logs/session-quiescence-interruption.log" >&2
+  exit 1
+}
 
 WORKSPACE_DIR=""
 WORKSTREAM_ID=""
@@ -145,3 +151,76 @@ if quiesce_interrupted_workstream >/dev/null 2>&1; then
   printf '[FAIL] interruption quiescence succeeded without durable workstream identity\n' >&2
   exit 1
 fi
+
+CASE_DIR="$interrupted_case"
+WORKSPACE_DIR="$interrupted_workspace"
+WORKSTREAM_ID="$interrupted_workstream"
+dualctl() {
+  if [[ "$1" == "recovery" ]]; then
+    return 9
+  fi
+  printf '%s\n' "$*"
+}
+if quiesce_interrupted_workstream; then
+  printf '[FAIL] interruption quiescence hid stale recovery failure\n' >&2
+  exit 1
+fi
+grep -q "sessions-reap --workdir $interrupted_workspace --workstream $interrupted_workstream" \
+  "$interrupted_case/logs/session-quiescence-interruption.log" || {
+  printf '[FAIL] stale recovery failure bypassed session close\n' >&2
+  cat "$interrupted_case/logs/session-quiescence-interruption.log" >&2
+  exit 1
+}
+
+natural_case="$tmp/natural-stop-loss-case"
+natural_workspace="$tmp/natural-stop-loss-workspace"
+natural_workstream="ws-natural-stop-loss"
+mkdir -p "$natural_case/logs"
+CASE_DIR="$natural_case"
+WORKSPACE_DIR="$natural_workspace"
+WORKSTREAM_ID="$natural_workstream"
+MAX_STEPS=1
+MAX_GATES=1
+
+dualctl() {
+  if [[ "$1" == "autorun" ]]; then
+    return 7
+  fi
+  if [[ "$1" == "status" ]]; then
+    printf '  Status: WAITING_FOR_RECOVERY\n'
+    return 0
+  fi
+  printf '%s\n' "$*"
+}
+
+if run_autorun; then
+  printf '[FAIL] natural autorun stop-loss unexpectedly succeeded\n' >&2
+  exit 1
+fi
+assert_eq "WAITING_FOR_RECOVERY" "$FINAL_STATUS" "natural stop-loss preserves workflow status"
+grep -q "sessions-reap --workdir $natural_workspace --workstream $natural_workstream" \
+  "$natural_case/logs/session-quiescence-autorun-stop-loss.log" || {
+  printf '[FAIL] natural stop-loss did not close durable workstream sessions\n' >&2
+  cat "$natural_case/logs/session-quiescence-autorun-stop-loss.log" >&2
+  exit 1
+}
+
+dualctl() {
+  if [[ "$1" == "autorun" ]]; then
+    return 7
+  fi
+  if [[ "$1" == "status" ]]; then
+    printf '  Status: WAITING_FOR_RECOVERY\n'
+    return 0
+  fi
+  if [[ "$1" == "sessions-reap" ]]; then
+    return 8
+  fi
+  printf '%s\n' "$*"
+}
+if run_autorun; then
+  printf '[FAIL] session-close failure unexpectedly succeeded\n' >&2
+  exit 1
+fi
+assert_eq "SESSION_QUIESCENCE_FAILED" "$FINAL_STATUS" \
+  "natural stop-loss surfaces session quiescence failure"
