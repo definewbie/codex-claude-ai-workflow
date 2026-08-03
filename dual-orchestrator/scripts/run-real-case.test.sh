@@ -19,6 +19,16 @@ assert_eq() {
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
+(trap - EXIT; exec sleep 30) &
+AUTORUN_PID="$!"
+stopped_autorun_pid="$AUTORUN_PID"
+stop_autorun_process
+assert_eq "" "$AUTORUN_PID" "autorun pid cleared after explicit stop"
+if kill -0 "$stopped_autorun_pid" >/dev/null 2>&1; then
+  printf '[FAIL] explicit autorun process was not stopped before recovery\n' >&2
+  exit 1
+fi
+
 weak_gate="$tmp/weak-verification-gate.md"
 cat >"$weak_gate" <<'EOF'
 # Verification Gate
@@ -74,18 +84,34 @@ collect_evidence() {
   [[ "$WORKSTREAM_ID" == "$interrupted_workstream" ]]
   [[ "$WORKSPACE_DIR" == "$interrupted_workspace" ]]
   [[ "$WS_DIR" == "$interrupted_workspace/.agent/workstreams/$interrupted_workstream" ]]
+  [[ -f "$CASE_DIR/logs/interruption-recovery.log" ]]
   cat >"$CASE_DIR/logs/runs.log" <<'EOF'
 RUN STATUS
 run-1 COMPLETED
 EOF
 }
 
+dualctl() {
+  if [[ -n "${interrupt_autorun_pid:-}" ]] && kill -0 "$interrupt_autorun_pid" >/dev/null 2>&1; then
+    printf '[FAIL] interruption recovery started before the autorun process stopped\n' >&2
+    return 1
+  fi
+  printf '%s\n' "$*"
+}
+
+(trap - EXIT; exec sleep 30) &
+AUTORUN_PID="$!"
+interrupt_autorun_pid="$AUTORUN_PID"
 set +e
 ( handle_interrupt ) >"$tmp/interrupted-stdout.log" 2>"$tmp/interrupted-stderr.log"
 interrupt_exit="$?"
 set -e
 
 assert_eq "130" "$interrupt_exit" "interrupt handler exit code"
+if kill -0 "$interrupt_autorun_pid" >/dev/null 2>&1; then
+  printf '[FAIL] interrupt handler left the autorun process alive\n' >&2
+  exit 1
+fi
 grep -q "\"workstream\": \"$interrupted_workstream\"" "$interrupted_case/summary.json" || {
   printf '[FAIL] interrupted summary did not recover workstream identity\n' >&2
   cat "$interrupted_case/summary.json" >&2
@@ -106,3 +132,16 @@ grep -q -- "- Workstream: $interrupted_workstream" "$interrupted_case/report.md"
   cat "$interrupted_case/report.md" >&2
   exit 1
 }
+grep -q "recovery stale --workdir $interrupted_workspace --terminate-process" \
+  "$interrupted_case/logs/interruption-recovery.log" || {
+  printf '[FAIL] interruption did not invoke quiescent stale recovery before evidence collection\n' >&2
+  cat "$interrupted_case/logs/interruption-recovery.log" >&2
+  exit 1
+}
+
+WORKSPACE_DIR=""
+WORKSTREAM_ID=""
+if quiesce_interrupted_workstream >/dev/null 2>&1; then
+  printf '[FAIL] interruption quiescence succeeded without durable workstream identity\n' >&2
+  exit 1
+fi

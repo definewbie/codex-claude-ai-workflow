@@ -61,6 +61,7 @@ PROVIDER_PROBE_STDERR_PATH=""
 EXPECTED_RUNNER_KIND=""
 PROVIDER_PROBE_RUNNER_KIND=""
 PROVIDER_PROBE_PATH_MATCHES_EXPECTED=false
+AUTORUN_PID=""
 
 usage() {
   cat <<'EOF'
@@ -105,8 +106,13 @@ dualctl() {
 
 handle_interrupt() {
   FINAL_STATUS="INTERRUPTED"
-  log "Interrupted. Collecting current evidence before exit..."
+  log "Interrupted. Quiescing the active provider execution before collecting evidence..."
+  stop_autorun_process
   parse_started_workstream || true
+  if ! quiesce_interrupted_workstream; then
+    FINAL_STATUS="INTERRUPTION_RECOVERY_FAILED"
+    fail "Interrupted provider execution could not be closed to recovery."
+  fi
   collect_evidence || true
   write_report || true
   update_benchmark_index || true
@@ -115,6 +121,34 @@ handle_interrupt() {
     log "Resume:  java -jar \"$JAR_PATH\" resume --workdir \"$WORKSPACE_DIR\" \"$WORKSTREAM_ID\""
   fi
   exit 130
+}
+
+stop_autorun_process() {
+  [[ -n "$AUTORUN_PID" ]] || return 0
+  if kill -0 "$AUTORUN_PID" >/dev/null 2>&1; then
+    kill "$AUTORUN_PID" >/dev/null 2>&1 || true
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+      kill -0 "$AUTORUN_PID" >/dev/null 2>&1 || break
+      sleep 0.1
+    done
+    if kill -0 "$AUTORUN_PID" >/dev/null 2>&1; then
+      kill -9 "$AUTORUN_PID" >/dev/null 2>&1 || true
+    fi
+  fi
+  wait "$AUTORUN_PID" >/dev/null 2>&1 || true
+  AUTORUN_PID=""
+}
+
+quiesce_interrupted_workstream() {
+  [[ -n "$WORKSPACE_DIR" && -n "$WORKSTREAM_ID" ]] || {
+    fail "Cannot close interrupted provider execution without a durable workspace and workstream id."
+    return 1
+  }
+  dualctl recovery stale \
+    --workdir "$WORKSPACE_DIR" \
+    --terminate-process \
+    --note "real-case runner interrupted by stop-loss" \
+    "$WORKSTREAM_ID" >"$CASE_DIR/logs/interruption-recovery.log" 2>&1
 }
 
 abs_path() {
@@ -513,11 +547,16 @@ print_step_lines() {
 
 run_autorun() {
   log "Autorunning workflow across gates..."
-  if dualctl autorun \
+  dualctl autorun \
     --workdir "$WORKSPACE_DIR" \
     --max-steps "$MAX_STEPS" \
     --max-gates "$MAX_GATES" \
-    "$WORKSTREAM_ID" >"$CASE_DIR/logs/autorun.log" 2>&1; then
+    "$WORKSTREAM_ID" >"$CASE_DIR/logs/autorun.log" 2>&1 &
+  AUTORUN_PID="$!"
+  local autorun_exit=0
+  wait "$AUTORUN_PID" || autorun_exit="$?"
+  AUTORUN_PID=""
+  if [[ "$autorun_exit" -eq 0 ]]; then
     print_step_lines "$(cat "$CASE_DIR/logs/autorun.log")"
     FINAL_STATUS="COMPLETED"
     return 0

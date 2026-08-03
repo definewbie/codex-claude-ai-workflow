@@ -1,5 +1,6 @@
 package dev.dual.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.adapter.acpx.WorkstreamSessionCloser;
 import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.EdgeDefinition;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorkstreamActionServiceTest {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     @TempDir
     Path tempDir;
 
@@ -107,6 +110,7 @@ class WorkstreamActionServiceTest {
         var ledger = new WorkflowFileLedger();
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.markRunning(paths, entry, Long.MAX_VALUE);
+        var runJson = writeDeadRun(paths);
 
         var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
@@ -119,6 +123,8 @@ class WorkstreamActionServiceTest {
         var node = ledger.loadNode(paths, entry);
         assertEquals(NodeStatus.FAILED, node.status());
         assertEquals("STALE_RUNNING_PROCESS", node.result().get("reason"));
+        assertEquals("INTERRUPTED", MAPPER.readTree(runJson.toFile())
+                .path("executionOutcome").path("status").asText());
     }
 
 
@@ -209,6 +215,39 @@ class WorkstreamActionServiceTest {
         Files.createDirectories(paths.workstreamDir());
         new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, definition);
         return paths;
+    }
+
+    private Path writeDeadRun(WorkstreamPaths paths) throws Exception {
+        var runJson = paths.runsDir().resolve("run-dead/run.json");
+        Files.createDirectories(runJson.getParent());
+        var startedAt = Instant.now().minusSeconds(30);
+        var run = MAPPER.createObjectNode();
+        run.put("schemaVersion", 3);
+        run.put("status", "running");
+        run.put("runId", "run-dead");
+        run.put("workstreamId", paths.workstreamId().value());
+        run.put("nodeId", "first");
+        run.put("agent", "claude");
+        run.put("startedAt", startedAt.toString());
+        var attempt = run.putObject("executionAttempt");
+        attempt.put("attemptId", "att-dead");
+        attempt.put("runId", "run-dead");
+        attempt.put("workstreamId", paths.workstreamId().value());
+        attempt.put("nodeId", "first");
+        attempt.put("agent", "claude");
+        attempt.put("status", "RUNNING");
+        attempt.put("processStatus", "RUNNING");
+        attempt.put("startedAt", startedAt.toString());
+        var event = MAPPER.createObjectNode();
+        event.put("kind", "process_started");
+        event.put("source", "adapter");
+        event.put("sequence", 1);
+        event.put("observedAt", startedAt.toString());
+        event.put("elapsedMs", 0);
+        event.putObject("details").put("pid", Long.MAX_VALUE);
+        run.putArray("executionTimeline").add(event);
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), run);
+        return runJson;
     }
 
     private static WorkflowDefinition simpleDefinition() {

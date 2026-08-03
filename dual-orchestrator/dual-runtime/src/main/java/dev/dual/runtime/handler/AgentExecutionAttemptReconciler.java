@@ -29,6 +29,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Closes agent run executions that never reached a typed terminal outcome.
@@ -118,6 +121,103 @@ public final class AgentExecutionAttemptReconciler {
             }
         }
         return reconciled;
+    }
+
+    /**
+     * Terminates process trees referenced by durable, non-terminal run evidence.
+     * This is used only by explicit stop-loss recovery before reconciliation.
+     */
+    public int terminateInFlightProcesses(Path runsDir) throws IOException {
+        if (runsDir == null || !Files.isDirectory(runsDir)) {
+            return 0;
+        }
+        var handles = new LinkedHashMap<Long, ProcessHandle>();
+        try (var stream = Files.list(runsDir)) {
+            for (var runDir : stream.sorted().toList()) {
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                var json = (ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());
+                if (hasTerminalOutcome(json)) {
+                    continue;
+                }
+                var pid = readPid(json);
+                if (pid > 0 && pid != ProcessHandle.current().pid()) {
+                    ProcessHandle.of(pid).filter(ProcessHandle::isAlive)
+                            .ifPresent(handle -> handles.putIfAbsent(pid, handle));
+                }
+            }
+        }
+        for (var handle : handles.values()) {
+            terminateProcessTree(handle);
+        }
+        return handles.size();
+    }
+
+    public int countInFlightRuns(Path runsDir) throws IOException {
+        if (runsDir == null || !Files.isDirectory(runsDir)) {
+            return 0;
+        }
+        int count = 0;
+        try (var stream = Files.list(runsDir)) {
+            for (var runDir : stream.toList()) {
+                var runJson = runDir.resolve("run.json");
+                if (!Files.isRegularFile(runJson)) {
+                    continue;
+                }
+                var json = (ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());
+                if (!hasTerminalOutcome(json)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private static void terminateProcessTree(ProcessHandle root) throws IOException {
+        List<ProcessHandle> descendants;
+        try {
+            descendants = root.descendants().toList();
+        } catch (RuntimeException failure) {
+            throw new IOException(
+                    "failed to enumerate provider process descendants for pid " + root.pid(),
+                    failure);
+        }
+        for (int index = descendants.size() - 1; index >= 0; index--) {
+            descendants.get(index).destroy();
+        }
+        root.destroy();
+        awaitTermination(descendants);
+        awaitTermination(List.of(root));
+    }
+
+    private static void awaitTermination(List<ProcessHandle> handles) throws IOException {
+        for (var handle : handles) {
+            if (!handle.isAlive()) {
+                continue;
+            }
+            try {
+                handle.onExit().get(2, TimeUnit.SECONDS);
+            } catch (TimeoutException ignored) {
+                handle.destroyForcibly();
+                try {
+                    handle.onExit().get(2, TimeUnit.SECONDS);
+                } catch (TimeoutException timeout) {
+                    throw new IOException("provider process did not terminate: " + handle.pid(), timeout);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("interrupted while terminating provider process: " + handle.pid(), interrupted);
+                } catch (ExecutionException failure) {
+                    throw new IOException("failed waiting for provider process: " + handle.pid(), failure);
+                }
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                throw new IOException("interrupted while terminating provider process: " + handle.pid(), interrupted);
+            } catch (ExecutionException failure) {
+                throw new IOException("failed waiting for provider process: " + handle.pid(), failure);
+            }
+        }
     }
 
     private boolean matchesNode(Path runJson, String nodeId) throws IOException {

@@ -12,11 +12,13 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class AgentExecutionAttemptReconcilerTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -382,6 +384,42 @@ class AgentExecutionAttemptReconcilerTest {
         assertEquals(17, reconciled.path("processResult").path("exitCode").asInt());
         assertNotEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText(),
                 "a durable non-zero exit must not collapse into dead-pid interruption");
+    }
+
+    @Test
+    void stopLossTerminatesDurableInFlightProcessTreeBeforeReconciliation() throws Exception {
+        var process = new ProcessBuilder("sh", "-c", "sleep 30 & wait").start();
+        var root = process.toHandle();
+        var child = awaitDescendant(root);
+        var runJson = writeStartedInFlightRun("run-live-stop-loss", process.pid(), Instant.now());
+        var reconciler = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10));
+        try {
+            assertEquals(1, reconciler.terminateInFlightProcesses(tempDir.resolve("runs")));
+            assertDoesNotThrow(() -> root.onExit().get(2, TimeUnit.SECONDS));
+            assertFalse(root.isAlive());
+            assertDoesNotThrow(() -> child.onExit().get(2, TimeUnit.SECONDS));
+            assertFalse(child.isAlive());
+
+            var result = reconciler.reconcile(runJson);
+            assertTrue(result.reconciled());
+            var reconciled = MAPPER.readTree(runJson.toFile());
+            assertEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText());
+            assertTrue(reconciled.path("agentResultAcquisition").isMissingNode());
+            assertTrue(reconciled.path("usage").isMissingNode());
+        } finally {
+            root.destroyForcibly();
+        }
+    }
+
+    private static ProcessHandle awaitDescendant(ProcessHandle root) throws Exception {
+        for (int attempt = 0; attempt < 100; attempt++) {
+            var descendant = root.descendants().findFirst();
+            if (descendant.isPresent()) {
+                return descendant.get();
+            }
+            Thread.sleep(10);
+        }
+        throw new AssertionError("provider child process did not start");
     }
 
     private static ObjectNode event(String kind, Instant observedAt, Map<String, Object> details) {

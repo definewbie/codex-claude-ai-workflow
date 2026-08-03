@@ -4,6 +4,7 @@ import dev.dual.core.id.DualId;
 import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.StaleRunningRecovery;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -25,6 +26,9 @@ public final class RecoveryStaleCommand implements Callable<Integer> {
     @Option(names = "--note", description = "Short reason for stale-running recovery.")
     String note = "";
 
+    @Option(names = "--terminate-process", description = "Terminate durable in-flight provider process trees before recovery.")
+    boolean terminateProcess;
+
     @Parameters(index = "0")
     String workstreamId;
 
@@ -34,7 +38,12 @@ public final class RecoveryStaleCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(),
                 LockOwner.currentProcess(workstreamId, "recovery stale"))) {
-            CliLedgerFactory.create().recoverStaleRunningNode(paths, note);
+            var recovery = new StaleRunningRecovery(CliLedgerFactory.create());
+            if (terminateProcess) {
+                recovery.terminateAndRecover(paths, note);
+            } else {
+                recovery.recover(paths, note);
+            }
         }
         System.out.println("Stale running node moved to recovery");
         System.out.println("Workstream: " + workstreamId);

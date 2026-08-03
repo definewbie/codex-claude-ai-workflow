@@ -43,6 +43,7 @@ public final class WorkflowRuntime {
     private final ArtifactContractValidator artifactContractValidator;
     private final AgentRunMetadataFinalizer runMetadataFinalizer;
     private final AgentExecutionAttemptReconciler attemptReconciler;
+    private final StaleRunningRecovery staleRunningRecovery;
     private final AgentTaskDispatchMode dispatchMode;
 
     public WorkflowRuntime(WorkflowFileLedger ledger, HandlerRegistry handlers) {
@@ -62,6 +63,7 @@ public final class WorkflowRuntime {
         this.artifactContractValidator = new ArtifactContractValidator();
         this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
         this.attemptReconciler = new AgentExecutionAttemptReconciler(new AgentExecutionAttemptTimeoutPolicy().timeout());
+        this.staleRunningRecovery = new StaleRunningRecovery(ledger, attemptReconciler);
     }
 
     /**
@@ -517,7 +519,6 @@ public final class WorkflowRuntime {
     private void recoverStaleRunningNode(WorkstreamPaths paths, NodeInstanceDocument node, Object pid) throws Exception {
         // Close any in-flight agent run.json (transport never returned / process killed) to a
         // typed terminal executionAttempt+executionOutcome before the node/workflow transition.
-        attemptReconciler.reconcileRuns(paths.runsDir());
         ledger.appendEvent(paths, "stale-running-" + node.nodeInstanceId() + "-" + System.currentTimeMillis(),
                 "node_stale_running_detected", Map.of(
                         "node", node.nodeDefinitionId(),
@@ -525,7 +526,7 @@ public final class WorkflowRuntime {
                         "previous_running_pid", pid,
                         "action", "move_to_recovery"
                 ));
-        ledger.recoverStaleRunningNode(paths, "detected by runtime resume");
+        staleRunningRecovery.recover(paths, "detected by runtime resume");
     }
 
 }

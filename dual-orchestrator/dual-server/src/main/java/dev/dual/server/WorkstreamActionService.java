@@ -10,6 +10,7 @@ import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.WorkflowCommand;
 import dev.dual.runtime.WorkflowRuntimeResult;
+import dev.dual.runtime.StaleRunningRecovery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,7 @@ public class WorkstreamActionService {
     private final WorkflowFileLedger ledger;
     private final Supplier<WorkflowResumer> resumerFactory;
     private final WorkstreamSessionCloser sessionCloser;
+    private final StaleRunningRecovery staleRunningRecovery;
 
     @Autowired
     public WorkstreamActionService(ServerWorkflowRuntimeFactory runtimeFactory) {
@@ -48,6 +50,7 @@ public class WorkstreamActionService {
         this.ledger = ledger;
         this.resumerFactory = resumerFactory;
         this.sessionCloser = sessionCloser == null ? WorkstreamSessionCloser.noop() : sessionCloser;
+        this.staleRunningRecovery = new StaleRunningRecovery(ledger);
     }
 
     /**
@@ -92,7 +95,7 @@ public class WorkstreamActionService {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery stale"))) {
-            ledger.recoverStaleRunningNode(paths, note);
+            staleRunningRecovery.recover(paths, note);
         }
         maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("recovery.stale", workstreamId, "stale running node moved to recovery");
