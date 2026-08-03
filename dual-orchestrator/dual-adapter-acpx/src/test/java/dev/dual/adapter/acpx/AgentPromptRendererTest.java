@@ -2,12 +2,14 @@ package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.runtime.handler.TypedContextPayloadBoundary;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.NodeExecutionDocument;
 import dev.dual.ledger.file.NodeExecutionStatus;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.runtime.handler.AgentOutputContractSidecar;
+import dev.dual.runtime.handler.TaskContractProposalReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -744,6 +746,82 @@ class AgentPromptRendererTest {
                 "\"included\": [{\"path\": \"README.md\", \"operation\": \"MODIFY\"}]"));
     }
 
+    @Test
+    void verifiedTypedReviewSubjectBypassesOnlyFreeTextPathRedaction() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        var contextPath = workstreamDir.resolve("context").resolve("node-context.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review the typed proposal.\n");
+        var output = workstreamDir.resolve("runs/run-typed/outputs/intake-claude-brainstorm.json");
+        var sidecar = workstreamDir.resolve("runs/run-typed/outputs/intake-claude-brainstorm.contract.json");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, "{}\n");
+        Files.writeString(sidecar, """
+                {
+                  "workstream_id": "ws-test",
+                  "run_id": "run-typed",
+                  "node_id": "intake.claude_brainstorm",
+                  "node_instance_id": "node-intake-typed",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "source_artifact_type": "task_contract_proposal",
+                  "source_output_ref": "%s",
+                  "task_contract_proposal": {
+                    "artifact_type": "task_contract_proposal",
+                    "schema_version": 2,
+                    "objective": "Keep /pages/treatment-record/index",
+                    "scope": {"included": [{"path": "README.md", "operation": "MODIFY"}], "excluded": []},
+                    "acceptance_criteria": ["Route preserved"],
+                    "test_requirements": ["Review typed proposal"],
+                    "constraints": [], "non_goals": [], "risk_areas": [], "evidence_refs": [], "open_questions": []
+                  }
+                }
+                """.formatted(tempDir.relativize(output).toString().replace('\\', '/')));
+        publishAgentEvidenceOccurrence(
+                sidecar, output, "intake.claude_brainstorm", "node-intake-typed", "READY_FOR_PRODUCT_REVIEW");
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var reference = workstreamDir.resolve("artifacts/task-contract-proposals/intake.ref.json");
+        Files.createDirectories(reference.getParent());
+        mapper.writeValue(reference.toFile(), Map.of(
+                "schema_version", 1,
+                "proposal_id", "node-intake-typed:test",
+                "workstream_id", "ws-test",
+                "producer_node_id", "intake.claude_brainstorm",
+                "producer_node_instance_id", "node-intake-typed",
+                "artifact_ref", tempDir.relativize(sidecar).toString().replace('\\', '/'),
+                "sha256", AgentOutputContractSidecar.sha256(sidecar)));
+        var referenceRef = tempDir.relativize(reference).toString().replace('\\', '/');
+        var proposal = TaskContractProposalReference.resolveProposalFromRefs(
+                tempDir, "ws-test", List.of(referenceRef), mapper).orElseThrow().proposal();
+        var typedProposal = "```json\n"
+                + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(proposal)
+                + "\n```";
+        Files.writeString(contextPath, """
+                # Context Package
+
+                ## Free Text
+
+                Inspect /private/tmp/untrusted-context.txt.
+
+                ## Required Review Subject
+
+                %s
+                """.formatted(TypedContextPayloadBoundary.wrap(typedProposal)));
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "intake.codex_product_review",
+                "intake-codex-product-review",
+                List.of(
+                        ".agent/workstreams/ws-test/context/node-context.md",
+                        referenceRef));
+
+        assertTrue(prompt.contains(typedProposal));
+        assertEquals(1, occurrences(prompt, "\"artifact_type\" : \"task_contract_proposal\""));
+        assertFalse(prompt.contains("/private/tmp/untrusted-context.txt"));
+        assertTrue(prompt.contains("[outside-workspace path removed]"));
+    }
+
 
     @Test
     void failsClearlyWhenTemplateIsMissing() {
@@ -754,32 +832,53 @@ class AgentPromptRendererTest {
     }
 
     private void publishAgentEvidenceOccurrence(Path sidecar, Path output) throws Exception {
+        publishAgentEvidenceOccurrence(sidecar, output, "design.claude_design", "node-design-typed", "DESIGN_READY");
+    }
+
+    private void publishAgentEvidenceOccurrence(
+            Path sidecar,
+            Path output,
+            String nodeId,
+            String nodeInstanceId,
+            String decision
+    ) throws Exception {
         var objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         var sidecarRef = tempDir.relativize(sidecar).toString();
         var outputRef = tempDir.relativize(output).toString();
         var outputs = List.of(outputRef, sidecarRef);
         var result = Map.<String, Object>of(
                 "run_id", "run-typed",
-                "decision", "DESIGN_READY",
+                "decision", decision,
                 "contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecar));
         var now = Instant.parse("2026-07-26T00:00:00Z");
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var executionId = "nxe-" + nodeInstanceId;
         Files.createDirectories(workstreamDir.resolve("nodes"));
         Files.createDirectories(workstreamDir.resolve("executions/nodes"));
         objectMapper.writeValue(
-                workstreamDir.resolve("nodes/node-design-typed.json").toFile(),
+                workstreamDir.resolve("nodes/" + nodeInstanceId + ".json").toFile(),
                 new NodeInstanceDocument(
-                        1, "node-design-typed", "design.claude_design", NodeKind.TASK,
+                        1, nodeInstanceId, nodeId, NodeKind.TASK,
                         "acpx.agent_run", NodeStatus.COMPLETED, "design", "iteration-1",
-                        List.of(), Map.of(), outputs, result, "run-typed", "nxe-design-typed",
+                        List.of(), Map.of(), outputs, result, "run-typed", executionId,
                         now, now));
         objectMapper.writeValue(
-                workstreamDir.resolve("executions/nodes/nxe-design-typed.json").toFile(),
+                workstreamDir.resolve("executions/nodes/" + executionId + ".json").toFile(),
                 new NodeExecutionDocument(
-                        1, "nxe-design-typed", "agent-task-design", "workflow-execution-1",
-                        "node-design-typed", "design.claude_design", "acpx.agent_run",
+                        1, executionId, "agent-task-design", "workflow-execution-1",
+                        nodeInstanceId, nodeId, "acpx.agent_run",
                         NodeExecutionStatus.SUCCEEDED, 1L, "completed", NodeStatus.COMPLETED,
                         outputs, result, "", "run-typed", "", "claude", "session-1",
                         0, now, now, 1L));
+    }
+
+    private static int occurrences(String value, String needle) {
+        int count = 0;
+        int cursor = 0;
+        while ((cursor = value.indexOf(needle, cursor)) >= 0) {
+            count++;
+            cursor += needle.length();
+        }
+        return count;
     }
 }

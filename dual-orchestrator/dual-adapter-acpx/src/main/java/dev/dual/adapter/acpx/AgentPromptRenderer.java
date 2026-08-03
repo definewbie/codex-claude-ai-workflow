@@ -5,6 +5,8 @@ import dev.dual.core.domain.PromptLanguage;
 import dev.dual.runtime.handler.AgentEvidenceIndex;
 import dev.dual.runtime.handler.ContractRegistry;
 import dev.dual.runtime.handler.AgentResultPromptContract;
+import dev.dual.runtime.handler.TypedContextPayloadBoundary;
+import dev.dual.runtime.handler.TaskContractProposalReference;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -346,6 +348,8 @@ final class AgentPromptRenderer {
             return "(no context package provided)";
         }
         var builder = new StringBuilder();
+        var trustedTypedPayloads = TypedContextPayloadBoundary.trustOnce(
+                trustedTypedPayloads(workspaceRoot, workstreamId, inputRefs));
         if (!directInputRefs.isEmpty()) {
             builder.append("### Direct Input Artifacts\n\n");
             var renderedEvidence = new LinkedHashSet<String>();
@@ -380,7 +384,7 @@ final class AgentPromptRenderer {
             builder.append("- ").append(contextRef).append("\n");
             if (Files.exists(path)) {
                 builder.append("\n```text\n");
-                builder.append(readCompleteContextPackage(workspaceRoot, path));
+                builder.append(readCompleteContextPackage(workspaceRoot, path, trustedTypedPayloads));
                 builder.append("\n```\n\n");
             }
         }
@@ -461,11 +465,23 @@ final class AgentPromptRenderer {
         }
     }
 
-    private String readCompleteContextPackage(Path workspaceRoot, Path path) {
+    private Set<String> trustedTypedPayloads(Path workspaceRoot, String workstreamId, List<String> inputRefs) {
+        return TaskContractProposalReference.resolveProposalFromRefs(
+                        workspaceRoot, workstreamId, inputRefs, OBJECT_MAPPER)
+                .map(subject -> Set.of(TypedContextPayloadBoundary.wrapJson(subject.proposal())))
+                .orElseGet(Set::of);
+    }
+
+    private String readCompleteContextPackage(
+            Path workspaceRoot,
+            Path path,
+            TypedContextPayloadBoundary.TrustedPayloads trustedTypedPayloads
+    ) {
         try {
             return sanitizeOutsideWorkspacePaths(
                     workspaceRoot,
-                    Files.readString(path, StandardCharsets.UTF_8)).stripTrailing();
+                    Files.readString(path, StandardCharsets.UTF_8),
+                    trustedTypedPayloads).stripTrailing();
         } catch (IOException e) {
             throw new UncheckedIOException("failed to read context package: " + path, e);
         }
@@ -474,7 +490,8 @@ final class AgentPromptRenderer {
     private String readContextPreview(Path workspaceRoot, Path path) {
         try {
             var content = Files.readString(path, StandardCharsets.UTF_8);
-            content = sanitizeOutsideWorkspacePaths(workspaceRoot, content);
+            content = sanitizeOutsideWorkspacePaths(
+                    workspaceRoot, content, TypedContextPayloadBoundary.trustOnce(Set.of()));
             if (content.length() <= 6_000) {
                 return content.stripTrailing();
             }
@@ -511,6 +528,22 @@ final class AgentPromptRenderer {
     }
 
     private String sanitizeOutsideWorkspacePaths(Path workspaceRoot, String content) {
+        return sanitizeOutsideWorkspacePaths(
+                workspaceRoot, content, TypedContextPayloadBoundary.trustOnce(Set.of()));
+    }
+
+    private String sanitizeOutsideWorkspacePaths(
+            Path workspaceRoot,
+            String content,
+            TypedContextPayloadBoundary.TrustedPayloads trustedTypedPayloads
+    ) {
+        return TypedContextPayloadBoundary.transformUntyped(
+                content,
+                trustedTypedPayloads,
+                segment -> sanitizeUntypedOutsideWorkspacePaths(workspaceRoot, segment));
+    }
+
+    private String sanitizeUntypedOutsideWorkspacePaths(Path workspaceRoot, String content) {
         var root = workspaceRoot.toAbsolutePath().normalize();
         var matcher = ABSOLUTE_PATH_PATTERN.matcher(content);
         var result = new StringBuilder();

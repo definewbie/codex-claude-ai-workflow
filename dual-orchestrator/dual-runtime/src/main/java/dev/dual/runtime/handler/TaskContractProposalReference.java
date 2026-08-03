@@ -119,7 +119,7 @@ public record TaskContractProposalReference(
         return Optional.ofNullable(resolved);
     }
 
-    static Optional<ResolvedProposal> resolveProposalFromRefs(
+    public static Optional<ResolvedProposal> resolveProposalFromRefs(
             Path workspaceRoot,
             String expectedWorkstreamId,
             Iterable<String> refs,
@@ -225,7 +225,7 @@ public record TaskContractProposalReference(
 
     record Resolved(TaskContractProposalReference reference, String referenceRef) {}
 
-    record ResolvedProposal(
+    public record ResolvedProposal(
             TaskContractProposalReference reference,
             String referenceRef,
             Path artifactPath,

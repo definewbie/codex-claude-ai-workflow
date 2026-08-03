@@ -941,6 +941,8 @@ class ContextBuildPackageHandlerTest {
         assertEquals(2, result.outputRefs().size(), "only context package and typed proposal ref may cross");
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("## Required Review Subject"));
+        assertTrue(markdown.contains("<!-- dual:typed-payload:start -->"));
+        assertTrue(markdown.contains("<!-- dual:typed-payload:end -->"));
         assertTrue(markdown.contains("\"objective\" : \"Review it\""));
         assertTrue(markdown.contains("\"path\" : \"README.md\""));
         assertTrue(markdown.contains("\"operation\" : \"MODIFY\""));
