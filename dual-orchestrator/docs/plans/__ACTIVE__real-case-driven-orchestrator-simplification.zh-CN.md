@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: T6 A+C Convergence v7 / GATE READY, NOT AUTHORIZED
+## Current Active Step: T6 Full Lifecycle v8 / GATE READY, NOT AUTHORIZED
 
 > v6 已以 `FAIL / STOP-LOSS ENFORCED` 收口，历史结果和已消费授权保留在
 > `docs/testing/verification-gates/20260803-t6-typed-eof-correction-v6.md`，不得
@@ -22,21 +22,24 @@
 > `StaleRunningRecovery` 终止 durable provider tree、reconcile run 并进入
 > `WAITING_FOR_RECOVERY`；失败时 fail closed。
 >
-> 独立代码复审 PASS，full reactor `1158/0`、真实 process-tree tests 与
-> `run-real-case.test.sh` 均 PASS。A/C 当前成熟度为 `ENFORCED`，未经新 T6
+> 后续 checkpoint `39ef0299` 收敛两条 stop-loss 边界：acpx exit `5` 由 transport
+> 唯一映射为 typed `PERMISSION_BLOCKED`，且 explicit `sessions-reap --workstream`
+> 只允许终态或 `WAITING_FOR_RECOVERY` 的已停止 workstream，不得关闭 `RUNNING` /
+> `WAITING_FOR_HUMAN` 会话。完整 reactor、真实 process-tree tests 与
+> `run-real-case.test.sh` 均 PASS。A/C/权限分支当前均为 `ENFORCED`，未经新 T6
 > real-case 不得标 `PROVEN`。
 >
 > 唯一有效的新 gate 为
-> `docs/testing/verification-gates/20260803-t6-projection-stop-loss-convergence-v7.md`。
+> `docs/testing/verification-gates/20260804-t6-full-lifecycle-v8.md`。
 > 当前只允许提交 gate、获得 clean SHA、执行 deterministic/target/backend/
-> frontend/PostgreSQL preflight，并在单独授权后执行 Claude/Codex probes。所有
-> 前置 PASS 且用户再次明确授权一次样本之前，禁止创建 workstream。
+> frontend/PostgreSQL preflight，并执行 Claude/Codex probes。用户已授权：所有前置
+> PASS 后直接运行一次且仅一次 v8 样本；任一前置失败则不得创建 workstream。
 >
-> v7 主目标是完整 workflow 达到 `COMPLETED + ACCEPT`（或非退化
-> `ACCEPT_WITH_NOTES`）。A 是本样本必须触发并证明的子目标；C 只有真实 stop-loss
-> 发生时才可标 `PROVEN`，否则记 `NOT_TRIGGERED`，不得为了证明 C 人为中断可完成
-> 的样本。EOF correction 同样只按实际触发记 `PROVEN/NOT_TRIGGERED`。禁止放宽
-> parser/review、修改 prompt/model、retry/resume 或运行第二样本。
+> v8 主目标是完整 workflow 达到 `COMPLETED + ACCEPT`（或非退化
+> `ACCEPT_WITH_NOTES`）。A 是本样本必须触发并证明的子目标；权限拒绝与 C session
+> quiescence 仅在真实触发时判为 `PROVEN`，否则记 `NOT_TRIGGERED`，不得为了证明它们
+> 人为破坏可完成样本。EOF correction 同样只按实际触发记 `PROVEN/NOT_TRIGGERED`。
+> 禁止放宽 parser/review、修改 prompt/model、retry/resume 或运行第二样本。
 
 ### Historical Result: T6 Interruption Ledger Ownership v5 / FAIL
 
