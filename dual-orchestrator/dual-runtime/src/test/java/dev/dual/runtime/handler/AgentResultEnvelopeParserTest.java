@@ -6,6 +6,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentResultEnvelopeParserTest {
@@ -36,12 +37,45 @@ class AgentResultEnvelopeParserTest {
 
         assertFalse(parsed.valid());
         assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
+        assertNotEquals(
+                AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT,
+                parsed.diagnostic().kind()
+        );
+    }
+
+    @Test
+    void classifiesUnclosedRootAsUnexpectedEndOfInputWithoutRelaxingParser() {
+        var complete = validEnvelope().stripTrailing();
+        var missingRootClose = complete.substring(0, complete.length() - 1);
+
+        var parsed = parser.parse(missingRootClose);
+
+        assertFalse(parsed.valid());
+        assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
+        assertEquals(
+                AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT,
+                parsed.diagnostic().kind()
+        );
+        assertTrue(parsed.diagnostic().line() > 0);
+        assertTrue(parsed.diagnostic().column() > 0);
+        assertTrue(parser.parse(missingRootClose + "}").valid(), "strict parser must accept the complete original object");
     }
 
     @Test
     void rejectsTrailingProseAndMarkdownFence() {
-        assertFalse(parser.parse(validEnvelope() + "\nDone.").valid());
-        assertFalse(parser.parse("```json\n" + validEnvelope() + "\n```").valid());
+        var trailing = parser.parse(validEnvelope() + "\nDone.");
+        var fenced = parser.parse("```json\n" + validEnvelope() + "\n```");
+
+        assertFalse(trailing.valid());
+        assertFalse(fenced.valid());
+        assertNotEquals(
+                AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT,
+                trailing.diagnostic().kind()
+        );
+        assertNotEquals(
+                AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT,
+                fenced.diagnostic().kind()
+        );
     }
 
     @Test
@@ -51,6 +85,10 @@ class AgentResultEnvelopeParserTest {
                 "\"summary\": \"ready\",\"unexpected\": true,"));
 
         assertFalse(parsed.valid());
+        assertNotEquals(
+                AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT,
+                parsed.diagnostic().kind()
+        );
     }
 
     @Test

@@ -73,9 +73,12 @@ class AcpxAgentResultAcquirerTest {
 
     @Test
     void failedCorrectionDoesNotStartAThirdPrompt() throws Exception {
+        var rawOnlySentinel = "UNIQUE_RAW_PAYLOAD_SENTINEL";
+        var complete = strictEnvelope("run-1").replace("one short sentence", rawOnlySentinel);
+        var missingRootClose = complete.substring(0, complete.length() - 1);
         var transport = new ScriptedTransport(
-                validResult("request-1", "prefix\n" + strictEnvelope("run-1"), 0),
-                validResult("request-2", "still not json", 0)
+                validResult("request-1", missingRootClose, 0),
+                validResult("request-2", missingRootClose, 0)
         );
         var requests = requests("same-session");
 
@@ -87,6 +90,32 @@ class AcpxAgentResultAcquirerTest {
         assertFalse(acquisition.finalParse().valid());
         assertEquals("AGENT_RESULT_PARSE_FAILED", acquisition.finalParse().errorCode());
         assertEquals(2, transport.calls);
+        var prompt = Files.readString(requests.correction().promptPath());
+        assertTrue(prompt.contains("kind: UNEXPECTED_END_OF_INPUT"));
+        assertTrue(prompt.contains("- line: "));
+        assertTrue(prompt.contains("- column: "));
+        assertTrue(prompt.contains("root JSON object was closed"));
+        assertFalse(prompt.contains(rawOnlySentinel), "correction prompt must not duplicate malformed raw output");
+    }
+
+    @Test
+    void genericInvalidJsonCorrectionDoesNotClaimUnexpectedEndOfInput() throws Exception {
+        var transport = new ScriptedTransport(
+                validResult("request-1", "not-json", 0),
+                validResult("request-2", strictEnvelope("run-1"), 0)
+        );
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertTrue(acquisition.correctionAttempted());
+        assertTrue(acquisition.finalParse().valid());
+        var prompt = Files.readString(requests.correction().promptPath());
+        assertTrue(prompt.contains("kind: INVALID_JSON"));
+        assertFalse(prompt.contains("UNEXPECTED_END_OF_INPUT"));
+        assertFalse(prompt.contains("root JSON object was closed"));
     }
 
     @Test

@@ -184,6 +184,22 @@ final class AcpxAgentResultAcquirer {
             AgentResultEnvelopeParser.ParseResult parsed,
             AgentResultEnvelopeValidator.ValidationResult validation
     ) {
+        if (reason == CorrectionReason.PARSE_FAILURE) {
+            return """
+                    Typed correction reason: %s
+                    Syntax diagnostic:
+                    %s
+
+                    %s
+
+                    %s
+                    """.formatted(
+                    reason,
+                    renderParseDiagnostic(parsed.diagnostic()),
+                    parseCorrectionInstruction(parsed.diagnostic()),
+                    contractPrompt
+            ).stripTrailing();
+        }
         var evidence = reason == CorrectionReason.SCHEMA_FAILURE && validation != null
                 ? validation.errors()
                 : java.util.List.of(parsed.errorCode());
@@ -193,6 +209,27 @@ final class AcpxAgentResultAcquirer {
 
                 %s
                 """.formatted(reason, evidence, contractPrompt).stripTrailing();
+    }
+
+    private static String renderParseDiagnostic(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
+        if (diagnostic == null) {
+            return "- kind: INVALID_JSON";
+        }
+        var location = diagnostic.line() > 0 && diagnostic.column() > 0
+                ? "\n- line: " + diagnostic.line() + "\n- column: " + diagnostic.column()
+                : "";
+        return "- kind: " + diagnostic.kind() + location;
+    }
+
+    private static String parseCorrectionInstruction(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
+        if (diagnostic != null
+                && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT) {
+            return """
+                    The previous response ended before the root JSON object was closed.
+                    Re-emit the complete AgentResultEnvelope and verify that every object and array is closed before ending the response.
+                    """.stripTrailing();
+        }
+        return "Re-emit the complete AgentResultEnvelope as one strictly valid JSON object.";
     }
 
     enum CorrectionReason {
