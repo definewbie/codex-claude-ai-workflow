@@ -1,6 +1,6 @@
 # Verification Gate: T6 Typed EOF Correction v6
 
-Status: `AUTHORIZED ONCE / NOT YET CONSUMED`
+Status: `CONSUMED / FAIL / STOP-LOSS ENFORCED`
 
 - Target: Run one full pinned cancer-clinic workflow from a clean Dual SHA
   containing `3786a3ca`. The primary target is full workflow completion with
@@ -69,3 +69,41 @@ This gate consumes exactly one user-authorized real-case sample. Deterministic
 evidence proves the typed EOF diagnostic boundary is `ENFORCED`; only an actual
 EOF followed by a successful correction can promote that model-facing behavior
 to `PROVEN`.
+
+## Result
+
+- Verdict: `FAIL / STOP-LOSS ENFORCED`.
+- EOF sub-verdict: `NOT_TRIGGERED`; no completed Agent run attempted bounded
+  correction, so this sample neither proves nor disproves model-facing EOF
+  correction.
+- Gate SHA: `d7de368f8cbcc97f98e7379e07b7234747532d38`.
+- Target SHA: `ed82f5789a2e54ea3ccdb983d40b3fe64e9a4927`.
+- Workstream: `ws-20260803T092510Z-UAXP`.
+- Report: `docs/testing/real-case-reports/20260803T092130Z/report.md`.
+- Preflight: backend `191/0`, miniprogram build PASS, isolated PostgreSQL PASS,
+  fresh reactor `1147/0`, Claude probe PASS, Codex probe PASS.
+- Stop-loss: after two completed Claude proposals and two completed Codex
+  reviews, workflow started a second Claude semantic revision in the intake
+  stage. The run was interrupted immediately; no retry, resume, prompt/model
+  tuning or second sample was performed.
+- First revision cause: the persisted typed proposal contained the literal app
+  route `/pages/treatment-record/index`, but the Codex review prompt projected it
+  as `[outside-workspace path removed]`. Codex therefore rejected a projection
+  defect rather than a missing contract value.
+- Second revision cause: the revised proposal restored the route but omitted the
+  self-test report requirement that the original proposal had already preserved.
+  Codex correctly rejected that semantic loss.
+- Execution facts: the first four Agent runs exited zero, produced strict valid
+  contracts and `SUCCESS`, with no correction. The fifth run was stopped by the
+  gate after it had started; provider subprocesses were explicitly terminated.
+  It had durably reached `executionAttempt.status=PROCESS_EXITED`, but the outer
+  runner termination prevented finalizer/reconciler completion. Because this gate
+  forbids resume, `workflow/current.json` and the fifth run remain non-terminal
+  `RUNNING`. This is the documented abandoned-run boundary, not a closed ledger.
+
+This authorization is consumed. Do not retry or resume this workstream and do
+not run a second v6 sample. The next change, if authorized, must address the two
+proven preservation boundaries without weakening strict parsing or review:
+route-like literal projection and revision contract preservation. Separately,
+assess whether the stop-loss runner should invoke the existing reconciler before
+exit; do not introduce a new recovery framework.

@@ -8,23 +8,35 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: T6 Typed EOF Correction v6 / AUTHORIZED ONCE
+## Current Active Step: T6 A+C Convergence v7 / GATE READY, NOT AUTHORIZED
 
-> Typed EOF diagnostic checkpoint 已提交为 `3786a3ca`，独立最终 diff review
-> 为 PASS，targeted tests 为 `12/0 + 16/0`，full reactor 为 `1147/0`。
-> 当前成熟度是 `ENFORCED / MODEL-FACING CORRECTION NOT YET PROVEN`。
+> v6 已以 `FAIL / STOP-LOSS ENFORCED` 收口，历史结果和已消费授权保留在
+> `docs/testing/verification-gates/20260803-t6-typed-eof-correction-v6.md`，不得
+> retry、resume 或重新解释为 EOF correction 失败。
 >
-> 用户已授权一次且仅一次完整 T6 real-case。唯一有效 gate 为
-> `docs/testing/verification-gates/20260803-t6-typed-eof-correction-v6.md`。
-> 本轮主目标是完整 workflow 达到 `COMPLETED` 与最终 `ACCEPT` 或非退化的
-> `ACCEPT_WITH_NOTES`。EOF correction 是独立子结论：若实际出现
-> `UNEXPECTED_END_OF_INPUT`，必须由 typed diagnostic 约束唯一一次 correction
-> 并成功通过 strict parser 才能标 `PROVEN`；若未触发，只能标
-> `NOT_TRIGGERED`，不得伪称已证明。
+> A（typed contract projection preservation）已提交为 `7f75509b`：verified
+> `TaskContractProposalReference` 是唯一 trust 来源，typed proposal 的生产与消费
+> 共用 `TypedContextPayloadBoundary.wrapJson`，合法 route-like literal 逐字投影，
+> untyped workspace 外路径继续清洗。C（stop-loss quiescent closure）已提交为
+> `331df2f7`：runner 中断时先终止并等待 autorun Java 进程，再通过统一
+> `StaleRunningRecovery` 终止 durable provider tree、reconcile run 并进入
+> `WAITING_FOR_RECOVERY`；失败时 fail closed。
 >
-> 必须先提交 gate、获得 clean SHA，再完成 fresh package、target/backend/
-> frontend/PostgreSQL baseline 与 Claude/Codex probes。任一前置失败都不得创建
-> workstream。运行后禁止 retry、resume、调 prompt/parser/model 或启动第二样本。
+> 独立代码复审 PASS，full reactor `1158/0`、真实 process-tree tests 与
+> `run-real-case.test.sh` 均 PASS。A/C 当前成熟度为 `ENFORCED`，未经新 T6
+> real-case 不得标 `PROVEN`。
+>
+> 唯一有效的新 gate 为
+> `docs/testing/verification-gates/20260803-t6-projection-stop-loss-convergence-v7.md`。
+> 当前只允许提交 gate、获得 clean SHA、执行 deterministic/target/backend/
+> frontend/PostgreSQL preflight，并在单独授权后执行 Claude/Codex probes。所有
+> 前置 PASS 且用户再次明确授权一次样本之前，禁止创建 workstream。
+>
+> v7 主目标是完整 workflow 达到 `COMPLETED + ACCEPT`（或非退化
+> `ACCEPT_WITH_NOTES`）。A 是本样本必须触发并证明的子目标；C 只有真实 stop-loss
+> 发生时才可标 `PROVEN`，否则记 `NOT_TRIGGERED`，不得为了证明 C 人为中断可完成
+> 的样本。EOF correction 同样只按实际触发记 `PROVEN/NOT_TRIGGERED`。禁止放宽
+> parser/review、修改 prompt/model、retry/resume 或运行第二样本。
 
 ### Historical Result: T6 Interruption Ledger Ownership v5 / FAIL
 
