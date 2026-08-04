@@ -8,7 +8,23 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: T6 Full Lifecycle v8 / GATE READY, NOT AUTHORIZED
+## Current Active Step: TaskContractProposal v3 Revision Chain / GATE AUTHORIZED
+
+> TaskContractProposal v3 已选择性提交为 `83b01da`。该 checkpoint 将 contract
+> clause、Codex contract obligation 与 Claude revision response 类型化，并要求
+> `ContractCompileHandler` 只消费当前 iteration、由 `intake.decision` 精确路由的
+> rejected review 与当前 human gate。Deterministic/full-reactor 状态为
+> `ENFORCED`，尚未由真实 `NEEDS_REVISION -> revision -> READY -> compile` 证明。
+>
+> 唯一有效 gate 为
+> `docs/testing/verification-gates/20260804-task-contract-v3-revision-chain.md`。
+> 用户授权一次样本：clean SHA、target/task identity、focused/full tests、fresh
+> package 与 Claude/Codex probes 全部 PASS 后执行。首轮 review 若未触发
+> `NEEDS_REVISION`，本轮只能记 `INVALID/NOT_TRIGGERED`；触发后任何 obligation
+> coverage、lineage、iteration、gate 或 compile 缺口立即 FAIL。禁止第二样本、
+> retry/resume、prompt/parser/model 调整或 validation 放宽。
+
+## Superseded Active Step: T6 Full Lifecycle v8 / GATE CONSUMED
 
 > v6 已以 `FAIL / STOP-LOSS ENFORCED` 收口，历史结果和已消费授权保留在
 > `docs/testing/verification-gates/20260803-t6-typed-eof-correction-v6.md`，不得
