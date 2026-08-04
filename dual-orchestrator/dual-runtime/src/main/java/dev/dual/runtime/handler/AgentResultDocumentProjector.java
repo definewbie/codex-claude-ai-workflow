@@ -236,6 +236,8 @@ final class AgentResultDocumentProjector {
         }
         var failure = new LinkedHashMap<String, Object>();
         failure.put("category_hint", value.categoryHint());
+        failure.put("verification_remediation", value.verificationRemediation() == null
+                ? "" : value.verificationRemediation().name());
         failure.put("contract_gaps", value.contractGaps());
         failure.put("out_of_scope_files", value.outOfScopeFiles());
         failure.put("missing_tests", value.missingTests());

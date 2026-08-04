@@ -182,6 +182,71 @@ class AgentResultEnvelopeParserTest {
         assertFalse(parsed.valid());
     }
 
+    @Test
+    void rejectWithMissingTestsRequiresTypedVerificationRemediation() {
+        var acceptanceContract = new NodeOutputContract(
+                "acceptance.codex_verifier_review",
+                Set.of("decision", "summary"),
+                Set.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT"),
+                Set.of(),
+                Set.of("acceptance_review")
+        );
+        var missingRemediation = parser.parse(acceptanceRejectEnvelope("NONE"));
+        var codeChange = parser.parse(acceptanceRejectEnvelope("TEST_CODE_CHANGE"));
+        var unsupportedCodeChange = parser.parse(acceptanceRejectEnvelope("TEST_CODE_CHANGE")
+                .replace("\"missing_tests\": [\"equal-date cycle-number tie-breaker\"]", "\"missing_tests\": []"));
+
+        var rejected = validator.validate(
+                missingRemediation.envelope(), "ws-1", "run-1", acceptanceContract);
+        var accepted = validator.validate(
+                codeChange.envelope(), "ws-1", "run-1", acceptanceContract);
+        var unsupported = validator.validate(
+                unsupportedCodeChange.envelope(), "ws-1", "run-1", acceptanceContract);
+
+        assertFalse(rejected.valid());
+        assertTrue(rejected.errors().contains(
+                "result.failure.verification_remediation is required when REJECT lists missing_tests"));
+        assertTrue(accepted.valid());
+        assertFalse(unsupported.valid());
+        assertTrue(unsupported.errors().contains(
+                "result.failure.verification_remediation is only allowed when REJECT lists missing_tests"));
+    }
+
+    private static String acceptanceRejectEnvelope(String remediation) {
+        return """
+                {
+                  "schema_version": 1,
+                  "workstream_id": "ws-1",
+                  "run_id": "run-1",
+                  "node_id": "acceptance.codex_verifier_review",
+                  "result": {
+                    "artifact_type": "acceptance_review",
+                    "decision": "REJECT",
+                    "summary": "A regression test is missing.",
+                    "lifecycle_status": "REJECTED",
+                    "blocking": true,
+                    "checks": ["reviewed implementation"],
+                    "evidence": ["implementation behavior is correct"],
+                    "missing_evidence": [],
+                    "must_fix": ["add the regression test"],
+                    "acceptance_notes": [],
+                    "open_risks": [],
+                    "changed_files": ["backend/tests/test_chemo.py"],
+                    "verification_summary": "A test source change is required.",
+                    "failure": {
+                      "category_hint": "VERIFICATION_INSUFFICIENT",
+                      "verification_remediation": "%s",
+                      "contract_gaps": [],
+                      "out_of_scope_files": [],
+                      "missing_tests": ["equal-date cycle-number tie-breaker"],
+                      "context_gaps": [],
+                      "reason": "Missing regression test"
+                    }
+                  }
+                }
+                """.formatted(remediation);
+    }
+
     private static String validEnvelope() {
         return """
                 {

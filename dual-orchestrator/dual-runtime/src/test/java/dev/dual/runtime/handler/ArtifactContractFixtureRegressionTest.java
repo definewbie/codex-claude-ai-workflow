@@ -99,6 +99,7 @@ class ArtifactContractFixtureRegressionTest {
     }
 
     private static AgentResultEnvelope.Failure emptyFailure() {
-        return new AgentResultEnvelope.Failure("", List.of(), List.of(), List.of(), List.of(), "");
+        return new AgentResultEnvelope.Failure("", AgentResultEnvelope.VerificationRemediation.NONE,
+                List.of(), List.of(), List.of(), List.of(), "");
     }
 }

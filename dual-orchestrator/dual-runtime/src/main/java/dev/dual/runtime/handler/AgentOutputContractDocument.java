@@ -196,6 +196,7 @@ public record AgentOutputContractDocument(
 
     record FailureFields(
             String categoryHint,
+            AgentResultEnvelope.VerificationRemediation verificationRemediation,
             List<String> contractGaps,
             List<String> outOfScopeFiles,
             List<String> missingTests,
@@ -205,6 +206,7 @@ public record AgentOutputContractDocument(
         static FailureFields from(Map<String, Object> document) {
             return new FailureFields(
                     text(document.get("category_hint")),
+                    verificationRemediation(document.get("verification_remediation")),
                     stringList(document.get("contract_gaps")),
                     stringList(document.get("out_of_scope_files")),
                     stringList(document.get("missing_tests")),
@@ -214,12 +216,15 @@ public record AgentOutputContractDocument(
         }
 
         static FailureFields empty() {
-            return new FailureFields("", List.of(), List.of(), List.of(), List.of(), "");
+            return new FailureFields("", AgentResultEnvelope.VerificationRemediation.NONE,
+                    List.of(), List.of(), List.of(), List.of(), "");
         }
 
         Map<String, Object> toMap() {
             var document = new LinkedHashMap<String, Object>();
             document.put("category_hint", categoryHint);
+            document.put("verification_remediation", verificationRemediation == null
+                    ? "" : verificationRemediation.name());
             document.put("contract_gaps", contractGaps);
             document.put("out_of_scope_files", outOfScopeFiles);
             document.put("missing_tests", missingTests);
@@ -230,6 +235,8 @@ public record AgentOutputContractDocument(
 
         boolean isEmpty() {
             return categoryHint.isBlank()
+                    && (verificationRemediation == null
+                    || verificationRemediation == AgentResultEnvelope.VerificationRemediation.NONE)
                     && contractGaps.isEmpty()
                     && outOfScopeFiles.isEmpty()
                     && missingTests.isEmpty()
@@ -237,6 +244,17 @@ public record AgentOutputContractDocument(
                     && reason.isBlank();
         }
 
+        private static AgentResultEnvelope.VerificationRemediation verificationRemediation(Object value) {
+            var text = text(value);
+            if (text.isBlank()) {
+                return null;
+            }
+            try {
+                return AgentResultEnvelope.VerificationRemediation.valueOf(text);
+            } catch (IllegalArgumentException ignored) {
+                return null;
+            }
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FailureArbiterTest {
 
@@ -165,6 +166,49 @@ class FailureArbiterTest {
                 "Verification evidence is incomplete", contract,
                 3, "REJECT"
         );
+        assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
+        assertEquals(4, result.matchedRule());
+    }
+
+    @Test
+    void testCodeChangeRemediationRoutesToImplementationInsteadOfSelfTest() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+
+        var result = arbiter.classify(
+                null, null,
+                List.of("add the equal-date cycle-number tie-breaker regression test"),
+                null,
+                "A regression test must be added.", contract,
+                3, "REJECT", "VERIFICATION_INSUFFICIENT",
+                AgentResultEnvelope.VerificationRemediation.TEST_CODE_CHANGE
+        );
+
+        assertEquals(FailureCategory.IMPLEMENTATION_BUG, result.category());
+        assertEquals(4, result.matchedRule());
+        assertTrue(result.suggestedAction().contains("test changes"));
+    }
+
+    @Test
+    void evidenceCollectionRemediationStaysOnSelfTestRoute() {
+        var contract = minimalContract(
+                List.of(),
+                List.of("file1.java"),
+                List.of("must pass tests", "must compile")
+        );
+
+        var result = arbiter.classify(
+                null, null,
+                List.of("attach the existing backend test output"),
+                null,
+                "The existing test evidence is absent.", contract,
+                3, "REJECT", "VERIFICATION_INSUFFICIENT",
+                AgentResultEnvelope.VerificationRemediation.EVIDENCE_COLLECTION
+        );
+
         assertEquals(FailureCategory.VERIFICATION_INSUFFICIENT, result.category());
         assertEquals(4, result.matchedRule());
     }

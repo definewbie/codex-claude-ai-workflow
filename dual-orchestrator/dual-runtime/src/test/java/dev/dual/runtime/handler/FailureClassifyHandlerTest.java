@@ -384,6 +384,41 @@ class FailureClassifyHandlerTest {
     }
 
     @Test
+    void typedTestCodeChangeRoutesToImplementationAndPreservesValidatedReviewSidecar() throws Exception {
+        writeCleanContract();
+        writeGitEvidence("M backend/tests/test_chemo.py\n", null, null);
+
+        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
+                {
+                  "node_id": "acceptance.codex_verifier_review",
+                  "decision": "REJECT",
+                  "summary": "Implementation is correct except for one missing regression test.",
+                  "failure": {
+                    "category_hint": "VERIFICATION_INSUFFICIENT",
+                    "verification_remediation": "TEST_CODE_CHANGE",
+                    "missing_tests": ["Add the equal-date cycle-number tie-breaker test in backend/tests/test_chemo.py"],
+                    "reason": "The test source must change; collecting existing evidence is insufficient."
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        var sidecarRef = ".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json";
+        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
+
+        var handler = new FailureClassifyHandler();
+        var result = handler.execute(taskContext(Map.of(), List.of(sidecarRef)));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("REJECT_IMPLEMENTATION_BUG", result.outcome());
+        assertEquals("IMPLEMENTATION_BUG", result.result().get("category"));
+        assertEquals(4, result.result().get("matched_rule"));
+        assertTrue(result.outputRefs().contains(sidecarRef),
+                "the code-repair context must retain the validated acceptance review, not only its classification");
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("failure-classification.json")));
+    }
+
+    @Test
     void rejectContractGapWritesCalibrationCandidate() throws Exception {
         writeMinimalContract();
         writeGitEvidence("M src/A.java\n", null, null);

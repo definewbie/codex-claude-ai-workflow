@@ -63,4 +63,15 @@ class AgentResultPromptContractTest {
         assertTrue(intake.contains("\"operation\" : \"CREATE\""));
         assertFalse(intake.contains("new:repo/"));
     }
+
+    @Test
+    void acceptancePromptExplainsTypedVerificationRemediation() {
+        var acceptance = AgentResultPromptContract.render(
+                "ws-1", "run-1", "acceptance.codex_verifier_review",
+                "REJECT", Set.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT"));
+
+        assertTrue(acceptance.contains("verification_remediation"));
+        assertTrue(acceptance.contains("EVIDENCE_COLLECTION"));
+        assertTrue(acceptance.contains("TEST_CODE_CHANGE"));
+    }
 }

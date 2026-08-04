@@ -44,10 +44,6 @@ real_case_artifact_freshness_status() {
   local latest_input_epoch="${4:-}"
   local mtime
 
-  if [[ "$skip_build" == "true" ]]; then
-    printf 'unproven_skip_build'
-    return
-  fi
   if [[ ! -f "$jar_path" ]]; then
     printf 'jar_missing'
     return
@@ -55,6 +51,14 @@ real_case_artifact_freshness_status() {
   mtime="$(real_case_file_mtime_epoch "$jar_path")"
   if [[ -z "$mtime" || -z "$build_started_epoch" ]]; then
     printf 'jar_mtime_unavailable'
+    return
+  fi
+  if [[ "$skip_build" == "true" ]]; then
+    if [[ -n "$latest_input_epoch" && "$mtime" -ge "$latest_input_epoch" ]]; then
+      printf 'fresh_existing_artifact'
+    else
+      printf 'unproven_skip_build'
+    fi
     return
   fi
   if [[ "$mtime" -ge "$build_started_epoch" ]]; then

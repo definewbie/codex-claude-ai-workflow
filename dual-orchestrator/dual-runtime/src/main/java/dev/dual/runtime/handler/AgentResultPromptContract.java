@@ -37,11 +37,13 @@ public final class AgentResultPromptContract {
                     Allowed `result.decision` values: %s
                     %s
                     %s
+                    %s
 
                     %s
                     """.formatted(
                             allowedDecisions.stream().sorted().toList(),
                             rereadReasonInstruction(nodeId),
+                            verificationRemediationInstruction(nodeId),
                             contractRevisionInstruction(nodeId),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
@@ -76,6 +78,16 @@ public final class AgentResultPromptContract {
         return "Each `result.reread_reasons` entry must be an object with string fields "
                 + "`path`, `reason`, `stage`, and `evidence`; `reason` must be one of "
                 + ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS + ".";
+    }
+
+    private static String verificationRemediationInstruction(String nodeId) {
+        if (!"acceptance.codex_verifier_review".equals(nodeId)) {
+            return "";
+        }
+        return "For a REJECT with non-empty `result.failure.missing_tests`, set "
+                + "`result.failure.verification_remediation` to `EVIDENCE_COLLECTION` only when "
+                + "existing test/verification evidence must be collected, or `TEST_CODE_CHANGE` when "
+                + "a test source change is required. Do not infer this from prose in downstream nodes.";
     }
 
     private static AgentResultEnvelope.AgentResult exampleResult(String nodeId, String decision) {
@@ -196,6 +208,7 @@ public final class AgentResultPromptContract {
     }
 
     private static AgentResultEnvelope.Failure emptyFailure() {
-        return new AgentResultEnvelope.Failure("", List.of(), List.of(), List.of(), List.of(), "");
+        return new AgentResultEnvelope.Failure("", AgentResultEnvelope.VerificationRemediation.NONE,
+                List.of(), List.of(), List.of(), List.of(), "");
     }
 }

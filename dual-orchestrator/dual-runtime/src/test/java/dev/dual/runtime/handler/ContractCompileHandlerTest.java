@@ -479,7 +479,7 @@ class ContractCompileHandlerTest {
                         "agent_output_contract", decision, "review ready", "READY", false,
                         List.of("reviewed proposal"), List.of("proposal is coherent"), List.of(), List.of(),
                         obligations, List.of(), List.of(), List.of(), "review complete",
-                        new AgentResultEnvelope.Failure("",
+                        new AgentResultEnvelope.Failure("", AgentResultEnvelope.VerificationRemediation.NONE,
                                 "NEEDS_REVISION".equals(decision) ? List.of("contract revision required") : List.of(),
                                 List.of(), List.of(), List.of(), ""),
                         List.of()));

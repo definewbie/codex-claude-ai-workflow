@@ -75,7 +75,7 @@ public final class FailureClassifyHandler implements TaskHandler {
                 failure.contractGaps(), failure.outOfScopeFiles(),
                 failure.missingTests(), failure.contextGaps(),
                 reviewSummary, taskContract, changedFileCount, reviewDecision,
-                failure.categoryHint()
+                failure.categoryHint(), failure.verificationRemediation()
         );
 
         var artifactsDir = workstreamDir.resolve("artifacts");
@@ -89,6 +89,8 @@ public final class FailureClassifyHandler implements TaskHandler {
         var classificationRef = ".agent/workstreams/" + context.workstreamId()
                 + "/artifacts/failure-classification.json";
         var outputRefs = new ArrayList<String>();
+        outputRefs.add(context.workspaceRoot().toAbsolutePath().normalize()
+                .relativize(evidenceRead.entry().path()).toString());
         outputRefs.add(classificationRef);
         var result = new LinkedHashMap<String, Object>();
         result.put("category", classification.category().name());

@@ -193,12 +193,19 @@ public record AgentResultEnvelope(
 
     public record Failure(
             String categoryHint,
+            VerificationRemediation verificationRemediation,
             List<String> contractGaps,
             List<String> outOfScopeFiles,
             List<String> missingTests,
             List<String> contextGaps,
             String reason
     ) {
+    }
+
+    public enum VerificationRemediation {
+        NONE,
+        EVIDENCE_COLLECTION,
+        TEST_CODE_CHANGE
     }
 
     public record RereadReason(String path, String reason, String stage, String evidence) {

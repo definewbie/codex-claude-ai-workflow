@@ -173,6 +173,7 @@ public final class AgentResultEnvelopeValidator {
                         review.lifecycleStatus(), review.checks(), review.evidence(), review.missingEvidence(),
                         review.mustFix(), review.acceptanceNotes(), review.openRisks(), review.changedFiles(),
                         review.verificationSummary(), review.failure(), errors);
+                validateVerificationRemediation(review, errors);
             }
             case AgentResultEnvelope.StageHandoffResult handoff -> {
                 requiredText(handoff.lifecycleStatus(), "result.lifecycle_status", errors);
@@ -335,6 +336,27 @@ public final class AgentResultEnvelopeValidator {
         requiredList(failure.outOfScopeFiles(), "result.failure.out_of_scope_files", false, errors);
         requiredList(failure.missingTests(), "result.failure.missing_tests", false, errors);
         requiredList(failure.contextGaps(), "result.failure.context_gaps", false, errors);
+    }
+
+    private static void validateVerificationRemediation(
+            AgentResultEnvelope.AcceptanceReviewResult review,
+            ValidationErrors errors
+    ) {
+        if (review.failure() == null) {
+            return;
+        }
+        var remediation = review.failure().verificationRemediation();
+        var rejectWithMissingTests = "REJECT".equals(review.decision())
+                && review.failure().missingTests() != null
+                && !review.failure().missingTests().isEmpty();
+        if (rejectWithMissingTests
+                && (remediation == null || remediation == AgentResultEnvelope.VerificationRemediation.NONE)) {
+            errors.reject("result.failure.verification_remediation is required when REJECT lists missing_tests");
+        }
+        if (!rejectWithMissingTests && remediation != null
+                && remediation != AgentResultEnvelope.VerificationRemediation.NONE) {
+            errors.reject("result.failure.verification_remediation is only allowed when REJECT lists missing_tests");
+        }
     }
 
     private static void validateRereadReasons(

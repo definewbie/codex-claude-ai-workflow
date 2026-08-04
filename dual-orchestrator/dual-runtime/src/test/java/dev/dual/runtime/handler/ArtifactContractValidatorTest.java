@@ -419,13 +419,15 @@ class ArtifactContractValidatorTest {
                 List.of(), List.of("add acceptance coverage"), obligations,
                 List.of(), List.of("contract gap"), List.of(), "review complete",
                 new AgentResultEnvelope.Failure(
-                        "CONTRACT_GAP", List.of("acceptance coverage is missing"), List.of(), List.of(), List.of(),
+                        "CONTRACT_GAP", AgentResultEnvelope.VerificationRemediation.NONE,
+                        List.of("acceptance coverage is missing"), List.of(), List.of(), List.of(),
                         "proposal omits required behavior"),
                 List.of());
     }
 
     private static AgentResultEnvelope.Failure emptyFailure() {
-        return new AgentResultEnvelope.Failure("", List.of(), List.of(), List.of(), List.of(), "");
+        return new AgentResultEnvelope.Failure("", AgentResultEnvelope.VerificationRemediation.NONE,
+                List.of(), List.of(), List.of(), List.of(), "");
     }
 
     private static AgentResultEnvelope.ProposalScope modifyScope(
