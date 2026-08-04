@@ -87,4 +87,19 @@ class ContractWorkflowDefinitionTest {
                 "classified repair should start a semantic iteration");
     }
 
+    @Test
+    void contractVariantAcceptWithNotesBypassesFailureClassifier() {
+        WorkflowDefinition wf = factory.forVariant("contract");
+
+        var acceptedEdges = wf.edgesFrom("acceptance.decision").stream()
+                .filter(edge -> "ACCEPT_WITH_NOTES".equals(edge.on()))
+                .toList();
+
+        assertEquals(1, acceptedEdges.size());
+        assertEquals("acceptance.generate_final_report", acceptedEdges.get(0).to());
+        assertTrue(wf.edgesFrom("acceptance.classify_failure").stream()
+                        .noneMatch(edge -> edge.on().startsWith("NOTED_")),
+                "accepted decisions must bypass failure classification");
+    }
+
 }

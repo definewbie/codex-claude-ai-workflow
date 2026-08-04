@@ -748,7 +748,7 @@
   }, {
     "from" : "acceptance.decision",
     "on" : "ACCEPT_WITH_NOTES",
-    "to" : "acceptance.classify_failure",
+    "to" : "acceptance.generate_final_report",
     "condition" : null,
     "metadata" : {
       "transitionType" : "normal",
@@ -861,97 +861,6 @@
       "purpose" : "",
       "joinStrategy" : "",
       "loopReason" : "Acceptance rejection appears to be review noise and needs re-review"
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_CONTRACT_GAP",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_CONTRACT_AMBIGUITY",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_IMPLEMENTATION_BUG",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_CONTEXT_INSUFFICIENT",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_VERIFICATION_INSUFFICIENT",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_TOOL_LIMITATION",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
-    }
-  }, {
-    "from" : "acceptance.classify_failure",
-    "on" : "NOTED_REVIEW_NOISE",
-    "to" : "acceptance.generate_final_report",
-    "condition" : null,
-    "metadata" : {
-      "transitionType" : "normal",
-      "branchGroupId" : "",
-      "required" : true,
-      "purpose" : "",
-      "joinStrategy" : "",
-      "loopReason" : ""
     }
   }, {
     "from" : "acceptance.generate_final_report",

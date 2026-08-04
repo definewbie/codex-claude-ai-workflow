@@ -24,15 +24,8 @@ class FailureClassifyRegistryTest {
         assertTrue(allowed.contains("REJECT_VERIFICATION_INSUFFICIENT"));
         assertTrue(allowed.contains("REJECT_TOOL_LIMITATION"));
         assertTrue(allowed.contains("REJECT_REVIEW_NOISE"));
-        // 7 NOTED_* outcomes
-        assertTrue(allowed.contains("NOTED_CONTRACT_GAP"));
-        assertTrue(allowed.contains("NOTED_CONTRACT_AMBIGUITY"));
-        assertTrue(allowed.contains("NOTED_IMPLEMENTATION_BUG"));
-        assertTrue(allowed.contains("NOTED_CONTEXT_INSUFFICIENT"));
-        assertTrue(allowed.contains("NOTED_VERIFICATION_INSUFFICIENT"));
-        assertTrue(allowed.contains("NOTED_TOOL_LIMITATION"));
-        assertTrue(allowed.contains("NOTED_REVIEW_NOISE"));
-        assertEquals(14, allowed.size());
+        assertTrue(allowed.stream().noneMatch(outcome -> outcome.startsWith("NOTED_")));
+        assertEquals(7, allowed.size());
     }
 
     @Test

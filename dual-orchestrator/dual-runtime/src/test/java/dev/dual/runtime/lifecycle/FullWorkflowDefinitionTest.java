@@ -78,7 +78,7 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullVariantAcceptWithNotesRoutesToClassify() {
+    void fullVariantAcceptWithNotesRoutesDirectlyToReport() {
         WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.decision").stream()
@@ -87,7 +87,7 @@ class FullWorkflowDefinitionTest {
 
         assertEquals(1, edges.size(),
                 "Expected exactly one edge from acceptance.decision on 'ACCEPT_WITH_NOTES'");
-        assertEquals("acceptance.classify_failure", edges.get(0).to());
+        assertEquals("acceptance.generate_final_report", edges.get(0).to());
     }
 
     @Test
@@ -130,29 +130,12 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullVariantNotedEdgesRouteToReport() {
+    void fullVariantFailureClassifierHasNoNotedOutcomes() {
         WorkflowDefinition wf = factory.forVariant("full");
 
-        List<String> notedOutcomes = List.of(
-                "NOTED_CONTRACT_GAP",
-                "NOTED_CONTRACT_AMBIGUITY",
-                "NOTED_IMPLEMENTATION_BUG",
-                "NOTED_CONTEXT_INSUFFICIENT",
-                "NOTED_VERIFICATION_INSUFFICIENT",
-                "NOTED_TOOL_LIMITATION",
-                "NOTED_REVIEW_NOISE"
-        );
-
-        for (String outcome : notedOutcomes) {
-            var edges = wf.edgesFrom("acceptance.classify_failure").stream()
-                    .filter(e -> outcome.equals(e.on()))
-                    .toList();
-
-            assertEquals(1, edges.size(),
-                    "Expected exactly one edge from acceptance.classify_failure on '" + outcome + "'");
-            assertEquals("acceptance.generate_final_report", edges.get(0).to(),
-                    "NOTED edge '" + outcome + "' should route to acceptance.generate_final_report");
-        }
+        assertTrue(wf.edgesFrom("acceptance.classify_failure").stream()
+                        .noneMatch(edge -> edge.on().startsWith("NOTED_")),
+                "accepted decisions must bypass failure classification");
     }
 
     @Test

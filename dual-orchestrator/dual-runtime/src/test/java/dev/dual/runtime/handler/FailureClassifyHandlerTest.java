@@ -87,7 +87,7 @@ class FailureClassifyHandlerTest {
     }
 
     @Test
-    void legacyInstanceResultCannotOverridePublishedAcceptanceSidecar() throws Exception {
+    void acceptedSidecarCannotBeReclassifiedByLegacyRejectResult() throws Exception {
         writeCleanContract();
         writeGitEvidence("M src/A.java\n", null, null);
         var sidecarRef = writeAcceptanceSidecar(Map.of(
@@ -106,9 +106,11 @@ class FailureClassifyHandlerTest {
                 List.of(sidecarRef)
         ));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("NOTED_REVIEW_NOISE", result.outcome());
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", result.outcome());
         assertEquals("ACCEPT_WITH_NOTES", result.result().get("review_decision"));
+        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")));
     }
 
     @Test
@@ -132,7 +134,7 @@ class FailureClassifyHandlerTest {
     }
 
     @Test
-    void classifyAcceptWithNotes_producesNotedOutcome() throws Exception {
+    void acceptWithNotesCannotProduceFailureClassificationArtifacts() throws Exception {
         writeCleanContract();
         writeGitEvidence("M src/A.java\n", null, null);
 
@@ -144,59 +146,11 @@ class FailureClassifyHandlerTest {
                                 "out_of_scope_files", List.of("src/extra/File.java")))
         ));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertTrue(result.outcome().startsWith("NOTED_"));
-        assertEquals("NOTED_IMPLEMENTATION_BUG", result.outcome());
-    }
-
-    @Test
-    void classifyAcceptWithNotesReviewNoiseUsesNonBlockingAction() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "ACCEPT_WITH_NOTES",
-                        "summary", "Accepted with only manual runtime verification notes.",
-                        "failure", Map.of(
-                                "category_hint", "REVIEW_NOISE"))
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("NOTED_REVIEW_NOISE", result.outcome());
-        assertEquals("REVIEW_NOISE", result.result().get("category"));
-        assertEquals("Record non-blocking acceptance notes and continue", result.result().get("suggested_action"));
-        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")),
-                "ACCEPT_WITH_NOTES review noise should not create a current failure summary");
-    }
-
-    @Test
-    void classifyReadsAcceptWithNotesDecisionFromInputContractSidecar() throws Exception {
-        writeMinimalContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
-        Files.createDirectories(outputDir);
-        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "ACCEPT_WITH_NOTES",
-                  "summary": "Implementation accepted with notes about contract quality."
-                }
-                """, StandardCharsets.UTF_8);
-        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of(),
-                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("NOTED_CONTRACT_AMBIGUITY", result.outcome());
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", result.outcome());
         assertEquals("ACCEPT_WITH_NOTES", result.result().get("review_decision"));
-        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")),
-                "ACCEPT_WITH_NOTES classification should not create a current failure summary");
+        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")));
     }
 
     @Test

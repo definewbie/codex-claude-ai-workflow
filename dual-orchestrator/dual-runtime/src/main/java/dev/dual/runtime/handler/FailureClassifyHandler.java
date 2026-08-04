@@ -23,7 +23,7 @@ import java.util.Map;
  *
  * Reads TaskContract and ledger-routed acceptance evidence,
  * runs FailureArbiter, and writes failure-classification.json.
- * Produces compound outcome strings: REJECT_{CATEGORY} or NOTED_{CATEGORY}.
+ * Produces compound outcome strings: REJECT_{CATEGORY}.
  */
 public final class FailureClassifyHandler implements TaskHandler {
 
@@ -63,6 +63,9 @@ public final class FailureClassifyHandler implements TaskHandler {
 
         var reviewMetadata = evidenceRead.entry().document();
         var reviewDecision = reviewMetadata.decision();
+        if (!"REJECT".equals(reviewDecision)) {
+            return failedDecision(reviewDecision, context, evidenceRead.entry().path());
+        }
         var reviewSummary = reviewMetadata.summary();
         var stageOutcome = reviewMetadata.canonicalStageOutcome().isBlank()
                 ? StageOutcome.fromDecision(reviewDecision).name()
@@ -83,8 +86,7 @@ public final class FailureClassifyHandler implements TaskHandler {
         var classificationPath = artifactsDir.resolve("failure-classification.json");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(classificationPath.toFile(), classification);
 
-        var prefix = "REJECT".equals(reviewDecision) ? "REJECT_" : "NOTED_";
-        var outcome = prefix + classification.category().name();
+        var outcome = "REJECT_" + classification.category().name();
 
         var classificationRef = ".agent/workstreams/" + context.workstreamId()
                 + "/artifacts/failure-classification.json";
@@ -108,12 +110,10 @@ public final class FailureClassifyHandler implements TaskHandler {
             result.put("calibration_candidate_ref", candidateRef);
         }
 
-        if ("REJECT".equals(reviewDecision)) {
-            var summaryRef = writeCurrentFailureSummary(
-                    context, workstreamDir, classification, classificationRef, candidateRef, stageOutcome);
-            outputRefs.add(summaryRef);
-            result.put("failure_summary_ref", summaryRef);
-        }
+        var summaryRef = writeCurrentFailureSummary(
+                context, workstreamDir, classification, classificationRef, candidateRef, stageOutcome);
+        outputRefs.add(summaryRef);
+        result.put("failure_summary_ref", summaryRef);
 
         return NodeResult.completed(outcome, outputRefs, result);
     }
@@ -132,6 +132,19 @@ public final class FailureClassifyHandler implements TaskHandler {
                 "message", message,
                 "input_refs", context.instance().inputRefs(),
                 "parse_error", parseError
+        ), message);
+    }
+
+    private NodeResult failedDecision(String decision, TaskContext context, Path sidecarPath) {
+        var outcome = "ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED";
+        var message = "Failure classification requires a REJECT acceptance decision, but received: " + decision;
+        return new NodeResult(outcome, NodeStatus.FAILED, List.of(), Map.of(
+                "reason", outcome,
+                "message", message,
+                "review_decision", decision,
+                "input_refs", context.instance().inputRefs(),
+                "acceptance_sidecar", context.workspaceRoot().toAbsolutePath().normalize()
+                        .relativize(sidecarPath).toString()
         ), message);
     }
 
