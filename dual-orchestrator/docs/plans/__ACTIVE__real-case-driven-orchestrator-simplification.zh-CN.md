@@ -8,33 +8,48 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: TaskContractProposal v3 Revision Chain / SAMPLE CONSUMED
+## Current Active Step: Post-T6 Efficiency Attribution / COMPLETE
 
-> TaskContractProposal v3 已选择性提交为 `83b01da`。该 checkpoint 将 contract
-> clause、Codex contract obligation 与 Claude revision response 类型化，并要求
-> `ContractCompileHandler` 只消费当前 iteration、由 `intake.decision` 精确路由的
-> rejected review 与当前 human gate。Deterministic/full-reactor 状态为
-> `ENFORCED`，尚未由真实 `NEEDS_REVISION -> revision -> READY -> compile` 证明。
+> 当前 production baseline 为 `72ae925a`。最新完整 T6 workstream
+> `ws-20260804T092758Z-73XJ` 已达到 `COMPLETED / ACCEPT_WITH_NOTES`：14 个 Agent
+> runs、2 次 semantic revision、6 个 gate rounds，全部 execution outcome 一致，
+> change-scope PASS，最终产物与 delivery artifacts 完整。报告：
+> `docs/testing/real-case-reports/20260804T092743Z/report.md`。
 >
-> 唯一有效 gate 为
-> `docs/testing/verification-gates/20260804-task-contract-v3-revision-chain.md`。
-> 用户授权一次样本：clean SHA、target/task identity、focused/full tests、fresh
-> package 与 Claude/Codex probes 全部 PASS 后执行。首轮 review 若未触发
-> `NEEDS_REVISION`，本轮只能记 `INVALID/NOT_TRIGGERED`；触发后任何 obligation
-> coverage、lineage、iteration、gate 或 compile 缺口立即 FAIL。禁止第二样本、
-> retry/resume、prompt/parser/model 调整或 validation 放宽。
+> 该运行同时暴露 `ACCEPT_WITH_NOTES` 被错误送入 failure classifier、生成
+> `NOTED_IMPLEMENTATION_BUG` 的语义矛盾。checkpoint `72ae925a` 已删除该旁路：full
+> 与 contract variant 的 accepted-with-notes 均直接进入 final report，classifier
+> 只接受 `REJECT_*`，错误直调 fail closed。Full reactor `1182/0/0`。这条边界当前
+> 为 `ENFORCED`；最新 T6 运行早于该提交，因此当前精确组合 SHA 尚未再次做 provider
+> real-case，不据此重复消耗样本。
 >
-> 实际 workstream `ws-20260804T051509Z-CUVU` 已真实完成目标链：iter-001
-> Codex 产出 `CO-1/CO-2`，iter-002 Claude 逐项映射到现存 clause，第二次 Codex
-> 返回 READY，当前 iteration human gate 与 `contract.compile` 均 COMPLETED，且
-> canonical contract 对 revised proposal 的 objective/scope/clause text/evidence
-> refs 保真。四个目标 Agent run 均 strict SUCCESS、零 correction。
+> 当前优化结论必须保持分层：可靠性主链与已发现 owner 冲突基本收敛；T4/T5 已在
+> 同一 A3 样本证明 context estimated tokens 下降 10.18%、provider-reported total
+> tokens 下降 7.64%、Agent duration 下降 13.88%；但 full workflow 仍有 32 个
+> definition nodes、10 个 Agent nodes、6 个 context nodes、6 个 human gates。删除
+> `NOTED_*` 后 edge 数为 49。最新中等复杂度 T6 仍消耗 14 次 Agent 调用和 2 次
+> revision，因此总体简化与效率优化尚未完成。
 >
-> 但目标完成后，operator 错误依据 active design 进程判断“未触发 revision”并
-> 中断 runner，导致 design FAILED / workflow WAITING_FOR_RECOVERY，生成报告还记录
-> 了双 trap 的旧 `INTERRUPTION_RECOVERY_FAILED` 快照。按 gate 原文，只有整体 PASS
-> 样本才能升级 `PROVEN`，所以当前保持 `ENFORCED + REAL PATH OBSERVED / PROMOTION
-> WITHHELD`。一次授权已消费；不得 retry、resume 或运行第二样本。
+> 只读归因已完成，见
+> `docs/plans/post-t6-v9-revision-value-attribution-20260804.zh-CN.md`。两次 revision
+> 额外产生 4 个 Agent runs、402,846 ms Agent duration 和 335,843
+> provider-reported total tokens。唯一按成本选中的候选是 plan revision pair，但它
+> 发现并阻止了 `cycle_number NULLS LAST`、受限响应状态和 invalid-response 分支三个
+> 会进入实现的真实偏差；intake revision 同样补齐最终实现实际依赖的排序和权威
+> cycleId 义务。因此裁决为 `READ-ONLY PASS / NO_SAFE_SUBTRACTION`，不修改
+> production，也不转选第二候选凑进度。
+>
+> 后续没有 active production optimization。新的 subtraction 只有在另一份真实
+> ledger 证明同一固定节点或投影持续无独特产出时才能重新激活。禁止新增 phase、
+> module、engine、registry、graph、DSL、state machine、event store 或 metrics store；
+> 禁止自动启动新 real-case。
+
+## Historical Step: TaskContractProposal v3 Revision Chain / SAMPLE CONSUMED
+
+> TaskContractProposal v3 checkpoint `83b01da` 的真实
+> `NEEDS_REVISION -> revision -> READY -> compile` 路径已由 workstream
+> `ws-20260804T051509Z-CUVU` 观察并保留为历史证据。该样本后续因 operator stop-loss
+> 误判而未形成完整 workflow PASS；其历史 gate 与结论不得作为当前 active objective。
 
 ## Superseded Active Step: T6 Full Lifecycle v8 / GATE CONSUMED
 

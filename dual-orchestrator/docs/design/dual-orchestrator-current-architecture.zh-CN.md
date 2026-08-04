@@ -1,8 +1,8 @@
 # Dual Orchestrator 当前架构
 
-日期：2026-07-28
-基线：`cf7d4e1a` 之后的文档 checkpoint
-状态：`CURRENT / PHASE A-D CLOSED`
+日期：2026-08-04
+基线：`72ae925a`
+状态：`CURRENT / PHASE A-D CLOSED / T6 FULL WORKFLOW PROVEN`
 
 ## 1. 文档目的
 
@@ -528,29 +528,52 @@ artifact freshness
 
 ## 13. 当前真实不足
 
-### 13.1 最新组合 SHA 尚无完整 provider real-case
+### 13.1 最新完整运行与当前精确 SHA
 
-Phase A-D 的切片分别有 deterministic、replay 或 real-case 证据，但最新组合 checkpoint
-仍需一次 A3 full integration run。
+最新完整中等复杂度运行是 workstream `ws-20260804T092758Z-73XJ`：
 
-### 13.2 效率尚未闭环
-
-最近已知完整运行：
-
-| Case | 总时间 | Agent runs | Gate rounds | Revisions |
+| 结果 | 总时间 | Agent runs | Gate rounds | Revisions |
 | --- | ---: | ---: | ---: | ---: |
-| README | 13m19s | 14 | 6 | 2 |
-| A3 API | 22m22s | 20 | 6 | 5 |
+| `COMPLETED / ACCEPT_WITH_NOTES` | 29m09s | 14 | 6 | 2 |
 
-这些数据说明主链正确，但不能证明 orchestrator 已经轻量。必须先从现有 metrics 提取
-逐节点 token/cache/duration，再决定删哪一次调用或哪一段重复 context。
+该运行证明 full workflow、strict sidecar/lineage、typed contract、change scope、execution
+facts 和 delivery 主链能够完成。运行后 `72ae925a` 又删除了
+`ACCEPT_WITH_NOTES -> failure classifier` 的矛盾路径，并通过 full reactor
+`1182/0/0`；当前精确 SHA 的这项改动为 `ENFORCED`，没有为了重复证明确定性路由而
+再次消耗 provider 样本。
 
-### 13.3 复杂项目泛化尚未证明
+### 13.2 效率只完成一个已证明优化
 
-当前真实案例集中在 README、小 Bug 和三文件 JavaScript API。它们不能替代中等规模、
-多模块真实项目验证。
+T4/T5 删除六个 active context profile 中重复的 requirement 投影，并在同一 A3
+前后样本中观察到：estimated context 下降 10.18%、provider-reported total token
+下降 7.64%、Agent duration 下降 13.88%。该结论只覆盖一个 A3 样本。
 
-### 13.4 部分 handler 仍为 PASS-WARN
+当前 full definition 仍有：
+
+| 项目 | 数量 |
+| --- | ---: |
+| definition nodes | 32 |
+| edges | 49 |
+| Agent nodes | 10 |
+| context-build nodes | 6 |
+| human gates | 6 |
+
+最新 T6 的 14 次 Agent 调用和 2 次 revision 说明整体效率尚未闭环。下一步必须从
+ledger 和现有 metrics 逐次归因质量贡献与成本，只允许选择一个有证据的删除候选。
+
+该归因已完成：4 个 revision runs 占 402,846 ms Agent duration 和 335,843
+provider-reported total tokens。成本最高的 plan revision pair 实际阻止了三个会进入
+实现的 contract-to-plan 偏差，intake revision 也补齐了最终实现依赖的业务义务。
+因此本样本结论为 `NO_SAFE_SUBTRACTION`；不能把“有成本”直接解释为“应删除”。详见
+`docs/plans/post-t6-v9-revision-value-attribution-20260804.zh-CN.md`。
+
+### 13.3 中等复杂度已证明一次，跨任务泛化未证明
+
+T6 已覆盖 Python backend、PostgreSQL、miniprogram frontend 与 5 个实际变更文件，
+因此“只验证过 README/简单 API”不再成立。但一次 medium case 不能证明跨任务、
+跨时段或跨 provider/model 的稳定收益。
+
+### 13.4 部分 handler 仍需证据驱动审查
 
 `ContextBuildPackageHandler`、`ContractCompileHandler`、
 `PromptGenerateNextStageHandler`、`ReportGenerateFinalHandler` 与
