@@ -49,17 +49,27 @@ public record AgentResultEnvelope(
             boolean needsHumanInput,
             String objective,
             ProposalScope scope,
-            List<String> acceptanceCriteria,
-            List<String> testRequirements,
-            List<String> constraints,
-            List<String> nonGoals,
-            List<String> riskAreas,
+            List<ContractClause> acceptanceCriteria,
+            List<ContractClause> testRequirements,
+            List<ContractClause> constraints,
+            List<ContractClause> nonGoals,
+            List<ContractClause> riskAreas,
             List<String> evidenceRefs,
-            List<String> openQuestions
+            List<String> openQuestions,
+            List<RevisionResponse> revisionResponses
     ) implements AgentResult {
     }
 
     public record ProposalScope(List<TaskContract.ScopeEntry> included, List<String> excluded) {
+    }
+
+    public record ContractClause(String id, String text) {
+    }
+
+    public record ReviewObligation(String id, String text) {
+    }
+
+    public record RevisionResponse(String reviewObligationId, List<String> resolvedByClauseIds) {
     }
 
     public record AgentOutputResult(
@@ -72,6 +82,7 @@ public record AgentResultEnvelope(
             List<String> evidence,
             List<String> missingEvidence,
             List<String> mustFix,
+            List<ReviewObligation> contractObligations,
             List<String> acceptanceNotes,
             List<String> openRisks,
             List<String> changedFiles,
@@ -79,6 +90,27 @@ public record AgentResultEnvelope(
             Failure failure,
             List<RereadReason> rereadReasons
     ) implements AgentResult {
+        public AgentOutputResult(
+                String artifactType,
+                String decision,
+                String summary,
+                String lifecycleStatus,
+                boolean blocking,
+                List<String> checks,
+                List<String> evidence,
+                List<String> missingEvidence,
+                List<String> mustFix,
+                List<String> acceptanceNotes,
+                List<String> openRisks,
+                List<String> changedFiles,
+                String verificationSummary,
+                Failure failure,
+                List<RereadReason> rereadReasons
+        ) {
+            this(artifactType, decision, summary, lifecycleStatus, blocking,
+                    checks, evidence, missingEvidence, mustFix, List.of(), acceptanceNotes,
+                    openRisks, changedFiles, verificationSummary, failure, rereadReasons);
+        }
     }
 
     public record PlanResult(

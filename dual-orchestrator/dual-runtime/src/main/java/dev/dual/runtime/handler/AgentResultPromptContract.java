@@ -36,16 +36,33 @@ public final class AgentResultPromptContract {
                     Preserve the exact key names and JSON primitive types shown below. Replace example values with factual values.
                     Allowed `result.decision` values: %s
                     %s
+                    %s
 
                     %s
                     """.formatted(
                             allowedDecisions.stream().sorted().toList(),
                             rereadReasonInstruction(nodeId),
+                            contractRevisionInstruction(nodeId),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
         } catch (Exception failure) {
             throw new IllegalStateException("failed to render AgentResultEnvelope prompt contract", failure);
         }
+    }
+
+    private static String contractRevisionInstruction(String nodeId) {
+        if ("intake.claude_brainstorm".equals(nodeId)) {
+            return "Each task-contract clause must contain stable string fields `id` and `text`. "
+                    + "On an initial intake, `result.revision_responses` must be `[]`. "
+                    + "On a revision, copy every routed Contract Obligation ID exactly once into "
+                    + "`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`.";
+        }
+        if ("intake.codex_product_review".equals(nodeId)) {
+            return "For NEEDS_REVISION with non-empty `result.failure.contract_gaps`, "
+                    + "`result.contract_obligations` must contain one object per contract obligation "
+                    + "with stable string fields `id` and `text`. Otherwise it must be `[]`.";
+        }
+        return "";
     }
 
     private static String rereadReasonInstruction(String nodeId) {
@@ -80,12 +97,15 @@ public final class AgentResultPromptContract {
                             ),
                             List.of("explicit non-goal")
                     ),
-                    List.of("observable acceptance criterion"),
-                    List.of("required verification"),
-                    List.of("technical or product constraint"),
-                    List.of("explicit non-goal"),
-                    List.of("risk for review"),
+                    List.of(
+                            new AgentResultEnvelope.ContractClause("AC-1", "observable acceptance criterion"),
+                            new AgentResultEnvelope.ContractClause("AC-2", "second observable criterion")),
+                    List.of(new AgentResultEnvelope.ContractClause("TR-1", "required verification")),
+                    List.of(new AgentResultEnvelope.ContractClause("C-1", "technical or product constraint")),
+                    List.of(new AgentResultEnvelope.ContractClause("NG-1", "explicit non-goal")),
+                    List.of(new AgentResultEnvelope.ContractClause("R-1", "risk for review")),
                     List.of("repo/relative/evidence.ext"),
+                    List.of(),
                     List.of()
             );
             case "plan.claude_plan" -> new AgentResultEnvelope.PlanResult(

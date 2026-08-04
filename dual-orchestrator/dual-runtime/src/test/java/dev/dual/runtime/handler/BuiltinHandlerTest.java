@@ -90,19 +90,23 @@ class BuiltinHandlerTest {
         var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, "ws", """
                 {
                   "artifact_type": "task_contract_proposal",
-                  "schema_version": 2,
+                  "schema_version": 3,
                   "objective": "Review an exact proposal",
                   "scope": {
                     "included": [{"path": "README.md", "operation": "MODIFY"}],
                     "excluded": []
                   },
-                  "acceptance_criteria": ["The approved proposal is unambiguous"],
-                  "constraints": ["Keep the change bounded"],
+                  "acceptance_criteria": [
+                    {"id": "AC-1", "text": "The approved proposal is unambiguous"},
+                    {"id": "AC-2", "text": "The approved proposal is actionable"}
+                  ],
+                  "constraints": [{"id": "CONSTRAINT-1", "text": "Keep the change bounded"}],
                   "non_goals": [],
                   "risk_areas": [],
-                  "test_requirements": ["Run focused tests"],
+                  "test_requirements": [{"id": "TEST-1", "text": "Run focused tests"}],
                   "evidence_refs": ["README.md"],
-                  "open_questions": []
+                  "open_questions": [],
+                  "revision_responses": []
                 }
                 """);
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(reviewRef));

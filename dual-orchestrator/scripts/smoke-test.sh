@@ -530,12 +530,12 @@ matches = glob.glob(os.path.join(
 assert len(matches) == 1, matches
 with open(matches[0], encoding="utf-8") as source:
     sidecar = json.load(source)
-assert sidecar["task_contract_proposal"]["schema_version"] == 2
+assert sidecar["task_contract_proposal"]["schema_version"] == 3
 PY
   then
-    ok "Intake sidecar carries task_contract_proposal schema v2"
+    ok "Intake sidecar carries task_contract_proposal schema v3"
   else
-    fail "Intake sidecar task_contract_proposal schema is not v2"
+    fail "Intake sidecar task_contract_proposal schema is not v3"
   fi
 
   # task-contract.md exists and has content

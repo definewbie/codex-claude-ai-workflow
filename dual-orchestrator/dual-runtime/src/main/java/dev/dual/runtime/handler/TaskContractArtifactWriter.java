@@ -61,6 +61,7 @@ final class TaskContractArtifactWriter {
         appendListSection(md, "Constraints", contract.constraints());
         appendListSection(md, "Non-Goals", contract.nonGoals());
         appendListSection(md, "Risk Areas", contract.riskAreas());
+        appendListSection(md, "Evidence References", contract.evidenceRefs());
         appendListSection(md, "Ambiguity Notes", contract.ambiguityNotes());
         appendListSection(md, "Human Questions", contract.humanQuestions());
 

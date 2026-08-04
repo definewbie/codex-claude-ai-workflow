@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /** Node and execution lineage validation after strict JSON deserialization. */
@@ -64,7 +65,7 @@ public final class AgentResultEnvelopeValidator {
             if (envelope.result().summary() == null || envelope.result().summary().isBlank()) {
                 errors.reject("result.summary is required");
             }
-            validatePayload(envelope.result(), errors);
+            validatePayload(envelope.result(), contract.nodeId(), errors);
         }
         return errors.result();
     }
@@ -105,7 +106,11 @@ public final class AgentResultEnvelopeValidator {
         return correctedValidation;
     }
 
-    private static void validatePayload(AgentResultEnvelope.AgentResult result, ValidationErrors errors) {
+    private static void validatePayload(
+            AgentResultEnvelope.AgentResult result,
+            String nodeId,
+            ValidationErrors errors
+    ) {
         switch (result) {
             case AgentResultEnvelope.TaskContractProposalResult proposal -> {
                 requiredText(proposal.objective(), "result.objective", errors);
@@ -123,6 +128,9 @@ public final class AgentResultEnvelopeValidator {
                 requiredList(proposal.riskAreas(), "result.risk_areas", false, errors);
                 requiredList(proposal.evidenceRefs(), "result.evidence_refs", false, errors);
                 requiredList(proposal.openQuestions(), "result.open_questions", false, errors);
+                requiredList(proposal.revisionResponses(), "result.revision_responses", false, errors);
+                validateContractClauses(proposal, errors);
+                validateRevisionResponses(proposal.revisionResponses(), errors);
             }
             case AgentResultEnvelope.AgentOutputResult output -> {
                 validateEvidencePayload(
@@ -131,6 +139,7 @@ public final class AgentResultEnvelopeValidator {
                         output.verificationSummary(), output.failure(), errors);
                 requiredList(output.rereadReasons(), "result.reread_reasons", false, errors);
                 validateRereadReasons(output.rereadReasons(), errors);
+                validateReviewObligations(nodeId, output, errors);
             }
             case AgentResultEnvelope.PlanResult plan -> {
                 validateEvidencePayload(
@@ -159,10 +168,12 @@ public final class AgentResultEnvelopeValidator {
                 requiredList(selfTest.acceptanceNotes(), "result.acceptance_notes", false, errors);
                 requiredText(selfTest.verificationSummary(), "result.verification_summary", errors);
             }
-            case AgentResultEnvelope.AcceptanceReviewResult review -> validateEvidencePayload(
-                    review.lifecycleStatus(), review.checks(), review.evidence(), review.missingEvidence(),
-                    review.mustFix(), review.acceptanceNotes(), review.openRisks(), review.changedFiles(),
-                    review.verificationSummary(), review.failure(), errors);
+            case AgentResultEnvelope.AcceptanceReviewResult review -> {
+                validateEvidencePayload(
+                        review.lifecycleStatus(), review.checks(), review.evidence(), review.missingEvidence(),
+                        review.mustFix(), review.acceptanceNotes(), review.openRisks(), review.changedFiles(),
+                        review.verificationSummary(), review.failure(), errors);
+            }
             case AgentResultEnvelope.StageHandoffResult handoff -> {
                 requiredText(handoff.lifecycleStatus(), "result.lifecycle_status", errors);
                 requiredList(handoff.completedWork(), "result.completed_work", true, errors);
@@ -172,6 +183,105 @@ public final class AgentResultEnvelopeValidator {
                 requiredList(handoff.openRisks(), "result.open_risks", false, errors);
                 requiredText(handoff.recommendedNextStage(), "result.recommended_next_stage", errors);
                 requiredText(handoff.suggestedNextPrompt(), "result.suggested_next_prompt", errors);
+            }
+        }
+    }
+
+    private static void validateContractClauses(
+            AgentResultEnvelope.TaskContractProposalResult proposal,
+            ValidationErrors errors
+    ) {
+        var ids = new HashSet<String>();
+        validateContractClauses(proposal.acceptanceCriteria(), "result.acceptance_criteria", ids, errors);
+        validateContractClauses(proposal.testRequirements(), "result.test_requirements", ids, errors);
+        validateContractClauses(proposal.constraints(), "result.constraints", ids, errors);
+        validateContractClauses(proposal.nonGoals(), "result.non_goals", ids, errors);
+        validateContractClauses(proposal.riskAreas(), "result.risk_areas", ids, errors);
+    }
+
+    private static void validateContractClauses(
+            List<AgentResultEnvelope.ContractClause> clauses,
+            String field,
+            HashSet<String> ids,
+            ValidationErrors errors
+    ) {
+        if (clauses == null) {
+            return;
+        }
+        for (int index = 0; index < clauses.size(); index++) {
+            var clause = clauses.get(index);
+            var item = field + "[" + index + "]";
+            if (clause == null) {
+                errors.reject(item + " is required");
+                continue;
+            }
+            requiredText(clause.id(), item + ".id", errors);
+            requiredText(clause.text(), item + ".text", errors);
+            if (clause.id() != null && !clause.id().isBlank() && !ids.add(clause.id().trim())) {
+                errors.reject("result contract clause id is duplicated: " + clause.id().trim());
+            }
+        }
+    }
+
+    private static void validateRevisionResponses(
+            List<AgentResultEnvelope.RevisionResponse> responses,
+            ValidationErrors errors
+    ) {
+        if (responses == null) {
+            return;
+        }
+        var obligationIds = new HashSet<String>();
+        for (int index = 0; index < responses.size(); index++) {
+            var response = responses.get(index);
+            var item = "result.revision_responses[" + index + "]";
+            if (response == null) {
+                errors.reject(item + " is required");
+                continue;
+            }
+            requiredText(response.reviewObligationId(), item + ".review_obligation_id", errors);
+            requiredList(response.resolvedByClauseIds(), item + ".resolved_by_clause_ids", true, errors);
+            if (response.reviewObligationId() != null
+                    && !response.reviewObligationId().isBlank()
+                    && !obligationIds.add(response.reviewObligationId().trim())) {
+                errors.reject("result.revision_responses contains duplicate obligation id: "
+                        + response.reviewObligationId().trim());
+            }
+        }
+    }
+
+    private static void validateReviewObligations(
+            String nodeId,
+            AgentResultEnvelope.AgentOutputResult output,
+            ValidationErrors errors
+    ) {
+        var obligations = output.contractObligations();
+        var contractRevision = "intake.codex_product_review".equals(nodeId)
+                && "NEEDS_REVISION".equals(output.decision())
+                && output.failure() != null
+                && output.failure().contractGaps() != null
+                && !output.failure().contractGaps().isEmpty();
+        if (contractRevision) {
+            requiredList(obligations, "result.contract_obligations", true, errors);
+        } else if (obligations != null && !obligations.isEmpty()) {
+            errors.reject("result.contract_obligations is only allowed for intake contract revisions");
+        }
+        if (obligations == null) {
+            return;
+        }
+        var ids = new HashSet<String>();
+        for (int index = 0; index < obligations.size(); index++) {
+            var obligation = obligations.get(index);
+            var item = "result.contract_obligations[" + index + "]";
+            if (obligation == null) {
+                errors.reject(item + " is required");
+                continue;
+            }
+            requiredText(obligation.id(), item + ".id", errors);
+            requiredText(obligation.text(), item + ".text", errors);
+            if (obligation.id() != null && !obligation.id().isBlank()
+                    && !ids.add(obligation.id().trim())) {
+                errors.reject("result.contract_obligations contains duplicate id: "
+                        + obligation.id().trim());
             }
         }
     }

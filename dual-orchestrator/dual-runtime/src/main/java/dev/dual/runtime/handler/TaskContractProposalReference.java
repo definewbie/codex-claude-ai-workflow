@@ -135,7 +135,9 @@ public record TaskContractProposalReference(
             return Optional.empty();
         }
         var document = AgentOutputContractDocument.read(artifactPath.get(), objectMapper);
-        if (document.isEmpty() || document.get().taskContractProposal() == null) {
+        if (document.isEmpty()
+                || document.get().taskContractProposal() == null
+                || document.get().taskContractProposal().schemaVersion() != TaskContractProposal.SCHEMA_VERSION) {
             return Optional.empty();
         }
         return Optional.of(new ResolvedProposal(

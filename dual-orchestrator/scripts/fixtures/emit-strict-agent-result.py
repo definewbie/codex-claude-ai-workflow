@@ -38,6 +38,7 @@ def agent_output(decision: str, summary: str, category_hint: str = "") -> dict:
         "evidence": ["controlled typed result"],
         "missing_evidence": [],
         "must_fix": [],
+        "contract_obligations": [],
         "acceptance_notes": [],
         "open_risks": [],
         "changed_files": [],
@@ -66,19 +67,26 @@ def task_proposal() -> dict:
             ],
         },
         "acceptance_criteria": [
-            "main.py defines goodbye() returning the exact string goodbye",
-            "README.md documents goodbye()",
-            "Running python main.py still prints only the existing hello output",
+            {"id": "AC-1", "text": "main.py defines goodbye() returning the exact string goodbye"},
+            {"id": "AC-2", "text": "README.md documents goodbye()"},
+            {"id": "AC-3", "text": "Running python main.py still prints only the existing hello output"},
         ],
         "test_requirements": [
-            "Import main and assert goodbye() returns goodbye",
-            "Run or inspect __main__ behavior",
+            {"id": "TEST-1", "text": "Import main and assert goodbye() returns goodbye"},
+            {"id": "TEST-2", "text": "Run or inspect __main__ behavior"},
         ],
-        "constraints": ["Keep the change scoped to the fixture files"],
-        "non_goals": ["No package manager changes", "No unrelated refactor"],
-        "risk_areas": ["Accidentally changing __main__ output", "Missing documentation"],
+        "constraints": [{"id": "CONSTRAINT-1", "text": "Keep the change scoped to the fixture files"}],
+        "non_goals": [
+            {"id": "NON_GOAL-1", "text": "No package manager changes"},
+            {"id": "NON_GOAL-2", "text": "No unrelated refactor"},
+        ],
+        "risk_areas": [
+            {"id": "RISK-1", "text": "Accidentally changing __main__ output"},
+            {"id": "RISK-2", "text": "Missing documentation"},
+        ],
         "evidence_refs": ["main.py", "README.md"],
         "open_questions": [],
+        "revision_responses": [],
     }
 
 

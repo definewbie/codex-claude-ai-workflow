@@ -17,6 +17,7 @@ public record TaskContract(
         List<String> constraints,
         @JsonProperty("non_goals") List<String> nonGoals,
         @JsonProperty("risk_areas") List<String> riskAreas,
+        @JsonProperty("evidence_refs") List<String> evidenceRefs,
         @JsonProperty("ambiguity_notes") List<String> ambiguityNotes,
         @JsonProperty("human_questions") List<String> humanQuestions,
         ContractStatus status,
@@ -45,8 +46,31 @@ public record TaskContract(
         constraints = constraints == null ? List.of() : List.copyOf(constraints);
         nonGoals = nonGoals == null ? List.of() : List.copyOf(nonGoals);
         riskAreas = riskAreas == null ? List.of() : List.copyOf(riskAreas);
+        evidenceRefs = evidenceRefs == null ? List.of() : List.copyOf(evidenceRefs);
         ambiguityNotes = ambiguityNotes == null ? List.of() : List.copyOf(ambiguityNotes);
         humanQuestions = humanQuestions == null ? List.of() : List.copyOf(humanQuestions);
+    }
+
+    public TaskContract(
+            String id,
+            int version,
+            Instant createdAt,
+            String objective,
+            Scope scope,
+            List<String> acceptanceCriteria,
+            List<String> testRequirements,
+            List<String> constraints,
+            List<String> nonGoals,
+            List<String> riskAreas,
+            List<String> ambiguityNotes,
+            List<String> humanQuestions,
+            ContractStatus status,
+            int compilationPass,
+            Source source
+    ) {
+        this(id, version, createdAt, objective, scope, acceptanceCriteria, testRequirements,
+                constraints, nonGoals, riskAreas, List.of(), ambiguityNotes, humanQuestions,
+                status, compilationPass, source);
     }
 
     public record Scope(

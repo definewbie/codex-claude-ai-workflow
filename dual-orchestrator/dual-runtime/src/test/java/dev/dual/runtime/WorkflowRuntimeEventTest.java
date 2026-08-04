@@ -44,22 +44,23 @@ class WorkflowRuntimeEventTest {
         var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, "ws-evt-compile", """
                 {
                   "artifact_type": "task_contract_proposal",
-                  "schema_version": 2,
+                  "schema_version": 3,
                   "objective": "Add user authentication",
                   "scope": {
                     "included": [{"path": "README.md", "operation": "MODIFY"}],
                     "excluded": ["No external dependencies"]
                   },
                   "acceptance_criteria": [
-                    "Authentication behavior is described",
-                    "Scope remains narrow"
+                    {"id": "AC-1", "text": "Authentication behavior is described"},
+                    {"id": "AC-2", "text": "Scope remains narrow"}
                   ],
-                  "constraints": ["Keep implementation focused"],
-                  "non_goals": ["No external dependencies"],
-                  "risk_areas": ["Authentication flow correctness"],
-                  "test_requirements": ["Run relevant tests"],
+                  "constraints": [{"id": "CONSTRAINT-1", "text": "Keep implementation focused"}],
+                  "non_goals": [{"id": "NON_GOAL-1", "text": "No external dependencies"}],
+                  "risk_areas": [{"id": "RISK-1", "text": "Authentication flow correctness"}],
+                  "test_requirements": [{"id": "TEST-1", "text": "Run relevant tests"}],
                   "evidence_refs": ["README.md"],
-                  "open_questions": []
+                  "open_questions": [],
+                  "revision_responses": []
                 }
                 """);
 

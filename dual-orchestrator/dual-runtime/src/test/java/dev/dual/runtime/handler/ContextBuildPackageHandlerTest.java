@@ -535,6 +535,7 @@ class ContextBuildPackageHandlerTest {
                   "non_goals": [],
                   "constraints": [],
                   "risk_areas": [],
+                  "evidence_refs": ["evidence/task-contract-proof.json"],
                   "ambiguity_notes": [],
                   "human_questions": [],
                   "compilation_pass": 1
@@ -552,6 +553,8 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("REJECTED"));
         assertTrue(markdown.contains("src/auth.py"));
         assertTrue(markdown.contains("tokens refreshed"));
+        assertTrue(markdown.contains("Evidence References"));
+        assertTrue(markdown.contains("evidence/task-contract-proof.json"));
         assertTrue(markdown.toLowerCase().contains("incremental"));
     }
 
@@ -911,19 +914,23 @@ class ContextBuildPackageHandlerTest {
                   "summary": "Proposal ready",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 2,
+                    "schema_version": 3,
                     "objective": "Review it",
                     "scope": {
                       "included": [{"path": "README.md", "operation": "MODIFY"}],
                       "excluded": []
                     },
-                    "acceptance_criteria": ["Reviewed"],
-                    "test_requirements": ["Inspect"],
+                    "acceptance_criteria": [
+                      {"id": "AC-1", "text": "Reviewed"},
+                      {"id": "AC-2", "text": "Approved"}
+                    ],
+                    "test_requirements": [{"id": "TEST-1", "text": "Inspect"}],
                     "constraints": [],
                     "non_goals": [],
                     "risk_areas": [],
                     "evidence_refs": ["README.md"],
-                    "open_questions": []
+                    "open_questions": [],
+                    "revision_responses": []
                   }
                 }
                 """, StandardCharsets.UTF_8);
@@ -946,7 +953,9 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("\"objective\" : \"Review it\""));
         assertTrue(markdown.contains("\"path\" : \"README.md\""));
         assertTrue(markdown.contains("\"operation\" : \"MODIFY\""));
-        assertTrue(markdown.contains("\"acceptance_criteria\" : [ \"Reviewed\" ]"));
+        assertTrue(markdown.contains("\"id\" : \"AC-1\""));
+        assertTrue(markdown.contains("\"text\" : \"Reviewed\""));
+        assertTrue(markdown.contains("\"evidence_refs\" : [ \"README.md\" ]"));
         assertTrue(markdown.contains(published.reference().sha256()));
     }
 
@@ -965,19 +974,23 @@ class ContextBuildPackageHandlerTest {
                   "summary": "Proposal ready",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 2,
+                    "schema_version": 3,
                     "objective": "Original objective",
                     "scope": {
                       "included": [{"path": "README.md", "operation": "MODIFY"}],
                       "excluded": []
                     },
-                    "acceptance_criteria": ["Reviewed", "Approved"],
-                    "test_requirements": ["Inspect"],
+                    "acceptance_criteria": [
+                      {"id": "AC-1", "text": "Reviewed"},
+                      {"id": "AC-2", "text": "Approved"}
+                    ],
+                    "test_requirements": [{"id": "TEST-1", "text": "Inspect"}],
                     "constraints": [],
-                    "non_goals": ["No source changes"],
+                    "non_goals": [{"id": "NON_GOAL-1", "text": "No source changes"}],
                     "risk_areas": [],
                     "evidence_refs": ["README.md"],
-                    "open_questions": []
+                    "open_questions": [],
+                    "revision_responses": []
                   }
                 }
                 """, StandardCharsets.UTF_8);
@@ -995,6 +1008,48 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals(
                 "verified task-contract proposal reference is required for product review",
+                result.result().get("error"));
+        assertFalse(Files.exists(wsDir.resolve("context/node-001.md")));
+    }
+
+    @Test
+    void productReviewContextRejectsVerifiedReferenceToUnsupportedProposalVersion() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Review the proposal.", StandardCharsets.UTF_8);
+        var sidecar = wsDir.resolve("runs/run-v2/outputs/intake-claude-brainstorm.contract.json");
+        Files.createDirectories(sidecar.getParent());
+        Files.writeString(sidecar, """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "intake.claude_brainstorm",
+                  "source_artifact_type": "task_contract_proposal",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "summary": "Legacy proposal",
+                  "task_contract_proposal": {
+                    "artifact_type": "task_contract_proposal",
+                    "schema_version": 2,
+                    "objective": "Legacy objective",
+                    "scope": {"included": [{"path": "README.md", "operation": "MODIFY"}], "excluded": []},
+                    "acceptance_criteria": [
+                      {"id": "AC-1", "text": "Reviewed"},
+                      {"id": "AC-2", "text": "Approved"}
+                    ],
+                    "test_requirements": [{"id": "TEST-1", "text": "Inspect"}],
+                    "constraints": [], "non_goals": [], "risk_areas": [],
+                    "evidence_refs": [], "open_questions": [], "revision_responses": []
+                  }
+                }
+                """, StandardCharsets.UTF_8);
+        publishSidecar(sidecar);
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
+        var published = TaskContractProposalReference.publish(
+                tempDir, "ws-ctx", sidecar, document, objectMapper);
+
+        var result = handler.execute(ctx(
+                "product_review", List.of(published.referenceRef()), "intake.codex_product_review"));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("verified task-contract proposal reference is required for product review",
                 result.result().get("error"));
         assertFalse(Files.exists(wsDir.resolve("context/node-001.md")));
     }
@@ -2105,19 +2160,23 @@ class ContextBuildPackageHandlerTest {
                   "summary": "Proposal ready",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 2,
+                    "schema_version": 3,
                     "objective": "%s",
                     "scope": {
                       "included": [{"path": "README.md", "operation": "MODIFY"}],
                       "excluded": []
                     },
-                    "acceptance_criteria": ["Review the proposal", "Record a decision"],
-                    "test_requirements": ["Inspect README.md"],
+                    "acceptance_criteria": [
+                      {"id": "AC-1", "text": "Review the proposal"},
+                      {"id": "AC-2", "text": "Record a decision"}
+                    ],
+                    "test_requirements": [{"id": "TEST-1", "text": "Inspect README.md"}],
                     "constraints": [],
-                    "non_goals": ["No source changes"],
+                    "non_goals": [{"id": "NON_GOAL-1", "text": "No source changes"}],
                     "risk_areas": [],
                     "evidence_refs": ["README.md"],
-                    "open_questions": []
+                    "open_questions": [],
+                    "revision_responses": []
                   }
                 }
                 """.formatted(objective), StandardCharsets.UTF_8);

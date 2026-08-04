@@ -57,9 +57,10 @@ class TaskContractProposalValidatorTest {
                 TaskContractProposal.SCHEMA_VERSION,
                 "Keep path validation project-neutral.",
                 new TaskContractProposal.Scope(included, excluded),
-                List.of("Declared files are handled", "Unsafe paths are rejected"),
-                List.of("Run contract tests"),
-                List.of("Keep workspace containment"),
+                clauses("AC", "Declared files are handled", "Unsafe paths are rejected"),
+                clauses("TEST", "Run contract tests"),
+                clauses("CONSTRAINT", "Keep workspace containment"),
+                List.of(),
                 List.of(),
                 List.of(),
                 List.of(),
@@ -69,6 +70,88 @@ class TaskContractProposalValidatorTest {
 
     private static TaskContract.ScopeEntry entry(String path, TaskContract.ScopeOperation operation) {
         return new TaskContract.ScopeEntry(path, operation);
+    }
+
+    private static List<TaskContractProposal.ContractClause> clauses(String prefix, String... values) {
+        var clauses = new java.util.ArrayList<TaskContractProposal.ContractClause>();
+        for (int index = 0; index < values.length; index++) {
+            clauses.add(new TaskContractProposal.ContractClause(prefix + "-" + (index + 1), values[index]));
+        }
+        return List.copyOf(clauses);
+    }
+
+    @Test
+    void rejectsDuplicateClauseIdsAcrossSections() throws Exception {
+        Files.writeString(workspace.resolve("README.md"), "# fixture\n");
+        var proposal = new TaskContractProposal(
+                "task_contract_proposal",
+                TaskContractProposal.SCHEMA_VERSION,
+                "Keep clauses traceable.",
+                new TaskContractProposal.Scope(
+                        List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of()),
+                List.of(
+                        new TaskContractProposal.ContractClause("CLAUSE-1", "First criterion"),
+                        new TaskContractProposal.ContractClause("CLAUSE-2", "Second criterion")),
+                List.of(new TaskContractProposal.ContractClause("CLAUSE-1", "Run tests")),
+                clauses("CONSTRAINT", "Keep scope bounded"),
+                List.of(), List.of(), List.of(), List.of(), List.of());
+
+        var errors = validator.validate(proposal, workspace);
+
+        assertTrue(errors.stream().anyMatch(error -> error.contains("clause id is duplicated: CLAUSE-1")),
+                errors.toString());
+    }
+
+    @Test
+    void revisionCoverageRequiresEveryObligation() throws Exception {
+        Files.writeString(workspace.resolve("README.md"), "# fixture\n");
+        var proposal = new TaskContractProposal(
+                "task_contract_proposal",
+                TaskContractProposal.SCHEMA_VERSION,
+                "Resolve the rejected review.",
+                new TaskContractProposal.Scope(
+                        List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of()),
+                clauses("AC", "First criterion", "Second criterion"),
+                clauses("TEST", "Run tests"),
+                clauses("CONSTRAINT", "Keep scope bounded"),
+                List.of(), List.of(), List.of(), List.of(),
+                List.of(new TaskContractProposal.RevisionResponse("OB-1", List.of("AC-1"))));
+        var obligations = List.of(
+                new AgentResultEnvelope.ReviewObligation("OB-1", "Add the missing behavior"),
+                new AgentResultEnvelope.ReviewObligation("OB-2", "Preserve its evidence"));
+
+        var errors = validator.validateRevisionCoverage(proposal, obligations);
+
+        assertTrue(errors.contains("revision_responses does not cover obligation: OB-2"), errors.toString());
+        assertTrue(validator.validateInitialIteration(proposal).stream()
+                .anyMatch(error -> error.contains("must be empty")));
+    }
+
+    @Test
+    void revisionResponsesRejectUnknownObligationsAndClauseTargets() throws Exception {
+        Files.writeString(workspace.resolve("README.md"), "# fixture\n");
+        var proposal = new TaskContractProposal(
+                "task_contract_proposal",
+                TaskContractProposal.SCHEMA_VERSION,
+                "Reject invented mappings.",
+                new TaskContractProposal.Scope(
+                        List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of()),
+                clauses("AC", "First criterion", "Second criterion"),
+                clauses("TEST", "Run tests"),
+                clauses("CONSTRAINT", "Keep scope bounded"),
+                List.of(), List.of(), List.of(), List.of(),
+                List.of(new TaskContractProposal.RevisionResponse("OB-X", List.of("AC-404"))));
+
+        var shapeErrors = validator.validate(proposal, workspace);
+        var coverageErrors = validator.validateRevisionCoverage(
+                proposal, List.of(new AgentResultEnvelope.ReviewObligation("OB-1", "Real gap")));
+
+        assertTrue(shapeErrors.stream().anyMatch(error -> error.contains("unknown clause id: AC-404")),
+                shapeErrors.toString());
+        assertTrue(coverageErrors.contains("revision_responses refers to unknown obligation: OB-X"),
+                coverageErrors.toString());
+        assertTrue(coverageErrors.contains("revision_responses does not cover obligation: OB-1"),
+                coverageErrors.toString());
     }
 
     @Test

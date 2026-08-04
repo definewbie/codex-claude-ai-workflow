@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.ledger.file.WorkflowIterationDocument;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +22,11 @@ public final class ApprovedTaskContractProposalFixture {
 
     public static String publish(Path workspaceRoot, String workstreamId, String proposalJson) throws Exception {
         var workstreamDir = workspaceRoot.resolve(".agent/workstreams").resolve(workstreamId);
+        var iterationId = "iter-001";
+        var iterationsDir = workstreamDir.resolve("iterations");
+        Files.createDirectories(iterationsDir);
+        MAPPER.writeValue(iterationsDir.resolve(iterationId + ".json").toFile(),
+                WorkflowIterationDocument.initial("intake.claude_brainstorm", Instant.now()));
         var proposalOutput = outputDir(workstreamDir, "run-proposal").resolve("intake-claude-brainstorm.json");
         Files.writeString(proposalOutput, "{}");
         var proposalSidecar = AgentOutputContractSidecar.pathFor(proposalOutput);
@@ -38,7 +44,7 @@ public final class ApprovedTaskContractProposalFixture {
                 Map.entry("summary", "proposal ready"),
                 Map.entry("task_contract_proposal", proposal)
         ));
-        AgentOutputLineageFixture.publish(workspaceRoot, workstreamId, proposalSidecar);
+        AgentOutputLineageFixture.publish(workspaceRoot, workstreamId, proposalSidecar, iterationId);
         var proposalDocument = AgentOutputContractDocument.read(proposalSidecar, MAPPER).orElseThrow();
         var proposalReference = TaskContractProposalReference.publish(
                 workspaceRoot, workstreamId, proposalSidecar, proposalDocument, MAPPER).reference();
@@ -59,7 +65,7 @@ public final class ApprovedTaskContractProposalFixture {
                 Map.entry("summary", "review ready"),
                 Map.entry("review_subject", proposalReference.toMap())
         ));
-        AgentOutputLineageFixture.publish(workspaceRoot, workstreamId, reviewSidecar);
+        AgentOutputLineageFixture.publish(workspaceRoot, workstreamId, reviewSidecar, iterationId);
         var reviewRef = relative(workspaceRoot, reviewSidecar);
 
         var nodeInstanceId = "node-gate-human_requirement_review-fixture";
@@ -70,7 +76,7 @@ public final class ApprovedTaskContractProposalFixture {
         var nowInstant = Instant.parse("2026-07-21T00:00:00Z");
         MAPPER.writeValue(nodesDir.resolve(nodeInstanceId + ".json").toFile(), new NodeInstanceDocument(
                 1, nodeInstanceId, "gate.human_requirement_review", NodeKind.GATE, "human.review",
-                NodeStatus.COMPLETED, "stage-requirement", "iteration-fixture", List.of(reviewRef), Map.of(),
+                NodeStatus.COMPLETED, "stage-requirement", iterationId, List.of(reviewRef), Map.of(),
                 List.of(reviewRef), Map.of("human_action", "approved"), "", "", nowInstant, nowInstant));
         var now = nowInstant.toString();
         MAPPER.writeValue(gatesDir.resolve("gate-requirement-fixture.json").toFile(), Map.of(

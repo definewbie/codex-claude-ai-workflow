@@ -42,6 +42,9 @@ final class AgentResultDocumentProjector {
                 evidenceFields(document, output.lifecycleStatus(), output.blocking(), output.checks(), output.evidence(),
                         output.missingEvidence(), output.mustFix(), output.acceptanceNotes(), output.openRisks(),
                         output.changedFiles(), output.verificationSummary(), output.failure());
+                document.put("contract_obligations", safeList(output.contractObligations()).stream()
+                        .map(obligation -> Map.of("id", obligation.id(), "text", obligation.text()))
+                        .toList());
                 document.put("reread_reasons", output.rereadReasons().stream().map(this::rereadReason).toList());
             }
             case AgentResultEnvelope.PlanResult plan -> {
@@ -88,13 +91,14 @@ final class AgentResultDocumentProjector {
                 TaskContractProposal.SCHEMA_VERSION,
                 result.objective(),
                 new TaskContractProposal.Scope(result.scope().included(), result.scope().excluded()),
-                result.acceptanceCriteria(),
-                result.testRequirements(),
-                result.constraints(),
-                result.nonGoals(),
-                result.riskAreas(),
+                proposalClauses(result.acceptanceCriteria()),
+                proposalClauses(result.testRequirements()),
+                proposalClauses(result.constraints()),
+                proposalClauses(result.nonGoals()),
+                proposalClauses(result.riskAreas()),
                 result.evidenceRefs(),
-                result.openQuestions()
+                result.openQuestions(),
+                revisionResponses(result.revisionResponses())
         );
     }
 
@@ -112,14 +116,46 @@ final class AgentResultDocumentProjector {
                                 "operation", entry.operation().name()))
                         .toList(),
                 "excluded", result.scope().excluded()));
-        proposal.put("acceptance_criteria", result.acceptanceCriteria());
-        proposal.put("test_requirements", result.testRequirements());
-        proposal.put("constraints", result.constraints());
-        proposal.put("non_goals", result.nonGoals());
-        proposal.put("risk_areas", result.riskAreas());
+        proposal.put("acceptance_criteria", clauseMaps(result.acceptanceCriteria()));
+        proposal.put("test_requirements", clauseMaps(result.testRequirements()));
+        proposal.put("constraints", clauseMaps(result.constraints()));
+        proposal.put("non_goals", clauseMaps(result.nonGoals()));
+        proposal.put("risk_areas", clauseMaps(result.riskAreas()));
         proposal.put("evidence_refs", result.evidenceRefs());
         proposal.put("open_questions", result.openQuestions());
+        proposal.put("revision_responses", result.revisionResponses().stream()
+                .map(response -> Map.of(
+                        "review_obligation_id", response.reviewObligationId(),
+                        "resolved_by_clause_ids", response.resolvedByClauseIds()))
+                .toList());
         return proposal;
+    }
+
+    private static List<TaskContractProposal.ContractClause> proposalClauses(
+            List<AgentResultEnvelope.ContractClause> clauses
+    ) {
+        return safeList(clauses).stream()
+                .map(clause -> new TaskContractProposal.ContractClause(clause.id(), clause.text()))
+                .toList();
+    }
+
+    private static List<TaskContractProposal.RevisionResponse> revisionResponses(
+            List<AgentResultEnvelope.RevisionResponse> responses
+    ) {
+        return safeList(responses).stream()
+                .map(response -> new TaskContractProposal.RevisionResponse(
+                        response.reviewObligationId(), response.resolvedByClauseIds()))
+                .toList();
+    }
+
+    private static List<Map<String, String>> clauseMaps(List<AgentResultEnvelope.ContractClause> clauses) {
+        return safeList(clauses).stream()
+                .map(clause -> Map.of("id", clause.id(), "text", clause.text()))
+                .toList();
+    }
+
+    private static <T> List<T> safeList(List<T> values) {
+        return values == null ? List.of() : values;
     }
 
     Map<String, Object> planArtifact(AgentResultEnvelope.PlanResult result) {

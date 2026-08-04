@@ -767,12 +767,16 @@ class AgentPromptRendererTest {
                   "source_output_ref": "%s",
                   "task_contract_proposal": {
                     "artifact_type": "task_contract_proposal",
-                    "schema_version": 2,
+                    "schema_version": 3,
                     "objective": "Keep /pages/treatment-record/index",
                     "scope": {"included": [{"path": "README.md", "operation": "MODIFY"}], "excluded": []},
-                    "acceptance_criteria": ["Route preserved"],
-                    "test_requirements": ["Review typed proposal"],
-                    "constraints": [], "non_goals": [], "risk_areas": [], "evidence_refs": [], "open_questions": []
+                    "acceptance_criteria": [
+                      {"id": "AC-1", "text": "Route preserved"},
+                      {"id": "AC-2", "text": "Review remains actionable"}
+                    ],
+                    "test_requirements": [{"id": "TEST-1", "text": "Review typed proposal"}],
+                    "constraints": [], "non_goals": [], "risk_areas": [], "evidence_refs": [],
+                    "open_questions": [], "revision_responses": []
                   }
                 }
                 """.formatted(tempDir.relativize(output).toString().replace('\\', '/')));

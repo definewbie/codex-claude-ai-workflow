@@ -34,6 +34,7 @@ public record AgentOutputContractDocument(
         List<String> checks,
         List<String> evidence,
         List<String> mustFix,
+        List<AgentResultEnvelope.ReviewObligation> contractObligations,
         List<String> missingEvidence,
         List<String> acceptanceNotes,
         List<String> openRisks,
@@ -77,6 +78,7 @@ public record AgentOutputContractDocument(
                 firstNonEmptyList(document.get("checks"), document.get("checks_run")),
                 stringList(document.get("evidence")),
                 stringList(document.get("must_fix")),
+                reviewObligationList(document.get("contract_obligations")),
                 stringList(document.get("missing_evidence")),
                 stringList(document.get("acceptance_notes")),
                 stringList(document.get("open_risks")),
@@ -159,13 +161,14 @@ public record AgentOutputContractDocument(
                 new TaskContractProposal.Scope(
                         scopeEntries(scope.get("included")),
                         stringList(scope.get("excluded"))),
-                stringList(document.get("acceptance_criteria")),
-                stringList(document.get("test_requirements")),
-                stringList(document.get("constraints")),
-                stringList(document.get("non_goals")),
-                stringList(document.get("risk_areas")),
+                contractClauseList(document.get("acceptance_criteria")),
+                contractClauseList(document.get("test_requirements")),
+                contractClauseList(document.get("constraints")),
+                contractClauseList(document.get("non_goals")),
+                contractClauseList(document.get("risk_areas")),
                 stringList(document.get("evidence_refs")),
-                stringList(document.get("open_questions")));
+                stringList(document.get("open_questions")),
+                revisionResponseList(document.get("revision_responses")));
     }
 
     private static List<TaskContract.ScopeEntry> scopeEntries(Object value) {
@@ -233,6 +236,7 @@ public record AgentOutputContractDocument(
                     && contextGaps.isEmpty()
                     && reason.isBlank();
         }
+
     }
 
     /**
@@ -276,6 +280,52 @@ public record AgentOutputContractDocument(
             }
         }
         return List.copyOf(out);
+    }
+
+    private static List<TaskContractProposal.ContractClause> contractClauseList(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var clauses = new ArrayList<TaskContractProposal.ContractClause>();
+        for (var item : items) {
+            var document = objectMap(item);
+            if (!document.isEmpty()) {
+                clauses.add(new TaskContractProposal.ContractClause(
+                        text(document.get("id")), text(document.get("text"))));
+            }
+        }
+        return List.copyOf(clauses);
+    }
+
+    private static List<TaskContractProposal.RevisionResponse> revisionResponseList(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var responses = new ArrayList<TaskContractProposal.RevisionResponse>();
+        for (var item : items) {
+            var document = objectMap(item);
+            if (!document.isEmpty()) {
+                responses.add(new TaskContractProposal.RevisionResponse(
+                        text(document.get("review_obligation_id")),
+                        stringList(document.get("resolved_by_clause_ids"))));
+            }
+        }
+        return List.copyOf(responses);
+    }
+
+    private static List<AgentResultEnvelope.ReviewObligation> reviewObligationList(Object value) {
+        if (!(value instanceof List<?> items)) {
+            return List.of();
+        }
+        var obligations = new ArrayList<AgentResultEnvelope.ReviewObligation>();
+        for (var item : items) {
+            var document = objectMap(item);
+            if (!document.isEmpty()) {
+                obligations.add(new AgentResultEnvelope.ReviewObligation(
+                        text(document.get("id")), text(document.get("text"))));
+            }
+        }
+        return List.copyOf(obligations);
     }
 
     private static List<String> stringList(Object value) {

@@ -9,6 +9,7 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.GateDocument;
 import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.ledger.file.WorkflowIterationDocument;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,7 +62,12 @@ public final class ContractCompileHandler implements TaskHandler {
         if (approvedProposal.failed() != null) {
             return approvedProposal.failed();
         }
-        var proposalResult = compileFromProposal(Optional.of(approvedProposal.sidecarPath()), context);
+        var revisionContext = resolveRevisionContext(context, approvedProposal.reviewedProposal());
+        if (revisionContext.failed() != null) {
+            return revisionContext.failed();
+        }
+        var proposalResult = compileFromProposal(
+                Optional.of(approvedProposal.sidecarPath()), context, revisionContext.context());
         if (proposalResult.failed() != null) {
             return proposalResult.failed();
         }
@@ -88,7 +94,7 @@ public final class ContractCompileHandler implements TaskHandler {
                     contract.id(), contract.version(), contract.createdAt(),
                     contract.objective(), contract.scope(), contract.acceptanceCriteria(),
                     contract.testRequirements(), contract.constraints(),
-                    contract.nonGoals(), contract.riskAreas(),
+                    contract.nonGoals(), contract.riskAreas(), contract.evidenceRefs(),
                     ambiguityNotes, humanQuestions,
                     ContractStatus.NEEDS_CLARIFICATION, contract.compilationPass(), contract.source()
             );
@@ -116,7 +122,11 @@ public final class ContractCompileHandler implements TaskHandler {
         return NodeResult.completed("completed", List.copyOf(outputRefs), result);
     }
 
-    private ProposalCompileResult compileFromProposal(Optional<Path> sourcePath, TaskContext context) {
+    private ProposalCompileResult compileFromProposal(
+            Optional<Path> sourcePath,
+            TaskContext context,
+            RevisionContext revisionContext
+    ) {
         if (sourcePath.isEmpty()) {
             return new ProposalCompileResult(null, null, null);
         }
@@ -153,6 +163,16 @@ public final class ContractCompileHandler implements TaskHandler {
                         errors
                 ));
             }
+            var coverageErrors = revisionContext.revision()
+                    ? proposalValidator.validateRevisionCoverage(proposal, revisionContext.obligations())
+                    : proposalValidator.validateInitialIteration(proposal);
+            if (!coverageErrors.isEmpty()) {
+                return new ProposalCompileResult(null, proposal, proposalFailure(
+                        "TASK_CONTRACT_PROPOSAL_INVALID",
+                        "task_contract_proposal failed revision obligation coverage",
+                        coverageErrors
+                ));
+            }
             return new ProposalCompileResult(toTaskContract(proposal, context.workstreamId()), proposal, null);
         } catch (Exception e) {
             return new ProposalCompileResult(null, null, proposalFailure(
@@ -173,11 +193,12 @@ public final class ContractCompileHandler implements TaskHandler {
                         List.copyOf(proposal.scope().included()),
                         cleanList(proposal.scope().excluded())
                 ),
-                cleanList(proposal.acceptanceCriteria()),
-                cleanList(proposal.testRequirements()),
-                cleanList(proposal.constraints()),
-                cleanList(proposal.nonGoals()),
-                cleanList(proposal.riskAreas()),
+                cleanClauseTexts(proposal.acceptanceCriteria()),
+                cleanClauseTexts(proposal.testRequirements()),
+                cleanClauseTexts(proposal.constraints()),
+                cleanClauseTexts(proposal.nonGoals()),
+                cleanClauseTexts(proposal.riskAreas()),
+                cleanList(proposal.evidenceRefs()),
                 List.of(),
                 List.of(),
                 ContractStatus.READY_FOR_REVIEW,
@@ -187,6 +208,17 @@ public final class ContractCompileHandler implements TaskHandler {
                         "task_contract_proposal"
                 )
         );
+    }
+
+    private static List<String> cleanClauseTexts(List<TaskContractProposal.ContractClause> values) {
+        if (values == null) {
+            return List.of();
+        }
+        return values.stream()
+                .filter(value -> value != null && value.text() != null && !value.text().isBlank())
+                .map(value -> value.text().trim())
+                .distinct()
+                .toList();
     }
 
     private static List<String> cleanList(List<String> values) {
@@ -203,7 +235,7 @@ public final class ContractCompileHandler implements TaskHandler {
     private ApprovedProposalResult resolveApprovedProposal(TaskContext context) throws IOException {
         var reviewed = reviewedProposalFromInputs(context);
         if (reviewed.size() != 1) {
-            return new ApprovedProposalResult(null, null, proposalFailure(
+            return new ApprovedProposalResult(null, null, null, proposalFailure(
                     "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING",
                     "exactly one Codex review bound to a task_contract_proposal is required",
                     List.of("review_subject_count=" + reviewed.size())
@@ -212,7 +244,7 @@ public final class ContractCompileHandler implements TaskHandler {
         var subject = reviewed.get(0);
         var gate = latestResolvedRequirementGate(context, subject.reviewRef());
         if (gate.isEmpty()) {
-            return new ApprovedProposalResult(null, null, proposalFailure(
+            return new ApprovedProposalResult(null, null, null, proposalFailure(
                     "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING",
                     "the current Codex review was not approved by the requirement gate",
                     List.of(subject.reviewRef())
@@ -221,13 +253,159 @@ public final class ContractCompileHandler implements TaskHandler {
         var sidecarPath = subject.reference().resolveArtifact(
                 context.workspaceRoot(), context.workstreamId(), OBJECT_MAPPER);
         if (sidecarPath.isEmpty()) {
-            return new ApprovedProposalResult(null, null, proposalFailure(
+            return new ApprovedProposalResult(null, null, null, proposalFailure(
                     "TASK_CONTRACT_PROPOSAL_INVALID",
                     "the approved task_contract_proposal reference is stale or tampered",
                     List.of(subject.reference().artifactRef())
             ));
         }
-        return new ApprovedProposalResult(sidecarPath.get(), gate.get(), null);
+        return new ApprovedProposalResult(sidecarPath.get(), gate.get(), subject, null);
+    }
+
+    private RevisionContextResult resolveRevisionContext(
+            TaskContext context,
+            ReviewedProposal approvedReview
+    ) {
+        var workstreamDir = context.workspaceRoot().resolve(".agent/workstreams").resolve(context.workstreamId());
+        try {
+            var iterationPath = workstreamDir.resolve("iterations")
+                    .resolve(context.instance().iterationId() + ".json");
+            if (!Files.isRegularFile(iterationPath)) {
+                return revisionContextFailure("current workflow iteration is missing", List.of(iterationPath.toString()));
+            }
+            var iteration = OBJECT_MAPPER.readValue(iterationPath.toFile(), WorkflowIterationDocument.class);
+            if (!context.instance().iterationId().equals(iteration.iterationId())) {
+                return revisionContextFailure("current workflow iteration identity is inconsistent",
+                        List.of(context.instance().iterationId(), iteration.iterationId()));
+            }
+            var currentLineageErrors = validateCurrentApprovedLineage(workstreamDir, iteration, approvedReview);
+            if (!currentLineageErrors.isEmpty()) {
+                return revisionContextFailure("approved review and proposal are outside the current iteration",
+                        currentLineageErrors);
+            }
+            if ("workflow_started".equals(iteration.triggerAction())) {
+                return new RevisionContextResult(new RevisionContext(false, List.of()), null);
+            }
+            if (!"NEEDS_REVISION".equals(iteration.triggerAction())) {
+                return revisionContextFailure("contract.compile reached an unsupported iteration trigger",
+                        List.of("trigger_action=" + iteration.triggerAction()));
+            }
+            if (iteration.triggerNodeInstanceId().isBlank() || iteration.parentIterationId().isBlank()) {
+                return revisionContextFailure("revision iteration trigger lineage is incomplete",
+                        List.of(iteration.iterationId()));
+            }
+            var triggerPath = workstreamDir.resolve("nodes")
+                    .resolve(iteration.triggerNodeInstanceId() + ".json");
+            if (!Files.isRegularFile(triggerPath)) {
+                return revisionContextFailure("revision trigger decision node is missing",
+                        List.of(triggerPath.toString()));
+            }
+            var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);
+            if (!"intake.decision".equals(trigger.nodeDefinitionId())
+                    || !iteration.parentIterationId().equals(trigger.iterationId())
+                    || trigger.status() != NodeStatus.COMPLETED
+                    || !"NEEDS_REVISION".equals(text(trigger.result().get("decision")))) {
+                return revisionContextFailure("revision trigger is not the completed intake decision",
+                        List.of(iteration.triggerNodeInstanceId()));
+            }
+            var rejectedReviews = verifiedRejectedReviews(
+                    context, workstreamDir, trigger.inputRefs(), iteration.parentIterationId());
+            if (rejectedReviews.size() != 1) {
+                return revisionContextFailure(
+                        "revision trigger must reference exactly one verified rejected intake review",
+                        List.of("review_count=" + rejectedReviews.size()));
+            }
+            return new RevisionContextResult(
+                    new RevisionContext(true, rejectedReviews.get(0).document().contractObligations()), null);
+        } catch (Exception failure) {
+            return revisionContextFailure("revision iteration lineage could not be resolved",
+                    List.of(failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage()));
+        }
+    }
+
+    private List<String> validateCurrentApprovedLineage(
+            Path workstreamDir,
+            WorkflowIterationDocument iteration,
+            ReviewedProposal approvedReview
+    ) throws IOException {
+        var errors = new ArrayList<String>();
+        if (!"intake.codex_product_review".equals(approvedReview.document().nodeId())
+                || !"READY_FOR_PRODUCT_REVIEW".equals(approvedReview.document().decision())) {
+            errors.add("current review is not an approved intake product review");
+        }
+        if (!nodeBelongsToIteration(
+                workstreamDir, approvedReview.document().nodeInstanceId(), iteration.iterationId())) {
+            errors.add("current review node does not belong to " + iteration.iterationId());
+        }
+        if (!nodeBelongsToIteration(
+                workstreamDir, approvedReview.reference().producerNodeInstanceId(), iteration.iterationId())) {
+            errors.add("approved proposal node does not belong to " + iteration.iterationId());
+        }
+        return List.copyOf(errors);
+    }
+
+    private List<RejectedReview> verifiedRejectedReviews(
+            TaskContext context,
+            Path workstreamDir,
+            List<String> refs,
+            String expectedIterationId
+    ) throws IOException {
+        var root = context.workspaceRoot().toAbsolutePath().normalize();
+        var reviews = new ArrayList<RejectedReview>();
+        for (var ref : refs) {
+            if (ref == null || !ref.endsWith(".contract.json")) {
+                continue;
+            }
+            var path = root.resolve(ref).normalize();
+            if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+                continue;
+            }
+            var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
+            if (document.isEmpty()
+                    || AgentOutputLineageVerifier.violation(
+                            root, context.workstreamId(), path, document.get()).isPresent()
+                    || !"intake.codex_product_review".equals(document.get().nodeId())
+                    || !"agent_output_contract".equals(document.get().sourceArtifactType())
+                    || !"NEEDS_REVISION".equals(document.get().decision())
+                    || document.get().reviewSubject() == null
+                    || document.get().reviewSubject().resolveArtifact(
+                            root, context.workstreamId(), OBJECT_MAPPER).isEmpty()
+                    || document.get().contractObligations().isEmpty()
+                    || !nodeBelongsToIteration(workstreamDir, document.get().nodeInstanceId(), expectedIterationId)
+                    || !nodeBelongsToIteration(
+                            workstreamDir,
+                            document.get().reviewSubject().producerNodeInstanceId(),
+                            expectedIterationId)) {
+                continue;
+            }
+            reviews.add(new RejectedReview(ref, path, document.get()));
+        }
+        return List.copyOf(reviews);
+    }
+
+    private boolean nodeBelongsToIteration(
+            Path workstreamDir,
+            String nodeInstanceId,
+            String expectedIterationId
+    ) throws IOException {
+        if (nodeInstanceId == null || nodeInstanceId.isBlank()) {
+            return false;
+        }
+        var nodePath = workstreamDir.resolve("nodes").resolve(nodeInstanceId + ".json");
+        if (!Files.isRegularFile(nodePath)) {
+            return false;
+        }
+        var node = OBJECT_MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
+        return expectedIterationId.equals(node.iterationId());
+    }
+
+    private static RevisionContextResult revisionContextFailure(String message, List<String> errors) {
+        return new RevisionContextResult(null, proposalFailure(
+                "TASK_CONTRACT_PROPOSAL_INVALID", message, errors));
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : String.valueOf(value).trim();
     }
 
     private List<ReviewedProposal> reviewedProposalFromInputs(TaskContext context) {
@@ -249,7 +427,8 @@ public final class ContractCompileHandler implements TaskHandler {
                     || document.get().reviewSubject() == null) {
                 continue;
             }
-            reviewed.add(new ReviewedProposal(inputRef, document.get().reviewSubject()));
+            reviewed.add(new ReviewedProposal(
+                    inputRef, path, document.get(), document.get().reviewSubject()));
         }
         return List.copyOf(reviewed);
     }
@@ -330,7 +509,8 @@ public final class ContractCompileHandler implements TaskHandler {
                 return Optional.empty();
             }
             var node = OBJECT_MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
-            if (!"gate.human_requirement_review".equals(node.nodeDefinitionId())) {
+            if (!"gate.human_requirement_review".equals(node.nodeDefinitionId())
+                    || !context.instance().iterationId().equals(node.iterationId())) {
                 return Optional.empty();
             }
             var result = gate.result();
@@ -414,9 +594,29 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private record ProposalCompileResult(TaskContract contract, TaskContractProposal proposal, NodeResult failed) {}
 
-    private record ReviewedProposal(String reviewRef, TaskContractProposalReference reference) {}
+    private record ReviewedProposal(
+            String reviewRef,
+            Path reviewPath,
+            AgentOutputContractDocument document,
+            TaskContractProposalReference reference
+    ) {}
 
-    private record ApprovedProposalResult(Path sidecarPath, ResolvedGate gate, NodeResult failed) {}
+    private record ApprovedProposalResult(
+            Path sidecarPath,
+            ResolvedGate gate,
+            ReviewedProposal reviewedProposal,
+            NodeResult failed
+    ) {}
+
+    private record RevisionContext(boolean revision, List<AgentResultEnvelope.ReviewObligation> obligations) {}
+
+    private record RevisionContextResult(RevisionContext context, NodeResult failed) {}
+
+    private record RejectedReview(
+            String reviewRef,
+            Path reviewPath,
+            AgentOutputContractDocument document
+    ) {}
 
     private record ContractResolutionResult(ContractResolutionDocument resolution, NodeResult failed) {}
 

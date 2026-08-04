@@ -50,6 +50,22 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void nonIntakeReviewMayOmitContractObligationsWithoutProjectionFailure() throws Exception {
+        var candidate = (com.fasterxml.jackson.databind.node.ObjectNode) JSON.readTree(
+                envelope("design.codex_arch_review", reviewResult()));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) candidate.path("result"))
+                .remove("contract_obligations");
+        var ref = write("review-without-obligations.json", JSON.writeValueAsString(candidate));
+
+        var validated = validate("design.codex_arch_review", ref, "run-1");
+
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var sidecar = AgentOutputContractDocument.read(
+                tempDir.resolve("review-without-obligations.contract.json"), JSON).orElseThrow();
+        assertTrue(sidecar.contractObligations().isEmpty());
+    }
+
+    @Test
     void trailingMarkdownCannotBypassStrictJsonParser() throws Exception {
         var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()) + "\nDone.");
         var validated = validate("design.codex_arch_review", ref, "run-1");
@@ -112,8 +128,10 @@ class ArtifactContractValidatorTest {
         var proposal = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
                 "Update documentation.", modifyScope("README.md", List.of("application code")),
-                List.of("README is updated", "No source files are changed"), List.of("inspect diff"), List.of("documentation only"),
-                List.of("no source changes"), List.of("scope creep"), List.of("README.md"), List.of());
+                clauses("AC", "README is updated", "No source files are changed"),
+                clauses("TEST", "inspect diff"), clauses("CONSTRAINT", "documentation only"),
+                clauses("NON_GOAL", "no source changes"), clauses("RISK", "scope creep"),
+                List.of("README.md"), List.of(), List.of());
         var ref = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", proposal));
         var validated = validate("intake.claude_brainstorm", ref, "run-1");
@@ -136,8 +154,9 @@ class ArtifactContractValidatorTest {
                                 new TaskContract.ScopeEntry(
                                         "src/issueApi.js", TaskContract.ScopeOperation.CREATE)),
                         List.of("package.json")),
-                List.of("API exists", "Tests pass"), List.of("run tests"), List.of("keep scope bounded"),
-                List.of("no dependencies"), List.of(), List.of("README.md"), List.of());
+                clauses("AC", "API exists", "Tests pass"), clauses("TEST", "run tests"),
+                clauses("CONSTRAINT", "keep scope bounded"), clauses("NON_GOAL", "no dependencies"),
+                List.of(), List.of("README.md"), List.of(), List.of());
         var ref = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", proposal));
 
@@ -161,8 +180,8 @@ class ArtifactContractValidatorTest {
                         List.of(new TaskContract.ScopeEntry(
                                 "src/missing.js", TaskContract.ScopeOperation.MODIFY)),
                         List.of()),
-                List.of("Change is visible", "Tests pass"), List.of("run tests"), List.of("keep scope bounded"),
-                List.of(), List.of(), List.of(), List.of());
+                clauses("AC", "Change is visible", "Tests pass"), clauses("TEST", "run tests"),
+                clauses("CONSTRAINT", "keep scope bounded"), List.of(), List.of(), List.of(), List.of(), List.of());
         var ref = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", proposal));
 
@@ -185,8 +204,8 @@ class ArtifactContractValidatorTest {
                         List.of(new TaskContract.ScopeEntry(
                                 "README.md", TaskContract.ScopeOperation.CREATE)),
                         List.of()),
-                List.of("Change is visible", "Tests pass"), List.of("run tests"), List.of("keep scope bounded"),
-                List.of(), List.of(), List.of(), List.of());
+                clauses("AC", "Change is visible", "Tests pass"), clauses("TEST", "run tests"),
+                clauses("CONSTRAINT", "keep scope bounded"), List.of(), List.of(), List.of(), List.of(), List.of());
         var ref = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", proposal));
 
@@ -206,13 +225,15 @@ class ArtifactContractValidatorTest {
         var first = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "First proposal.", false,
                 "Update documentation.", modifyScope("README.md", List.of()),
-                List.of("README is updated", "No source files are changed"), List.of("inspect diff"), List.of("documentation only"),
-                List.of(), List.of(), List.of("README.md"), List.of());
+                clauses("AC", "README is updated", "No source files are changed"),
+                clauses("TEST", "inspect diff"), clauses("CONSTRAINT", "documentation only"),
+                List.of(), List.of(), List.of("README.md"), List.of(), List.of());
         var second = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Revised proposal.", false,
                 "Update documentation safely.", modifyScope("README.md", List.of()),
-                List.of("README is updated safely", "No source files are changed"), List.of("inspect diff"), List.of("documentation only"),
-                List.of(), List.of(), List.of("README.md"), List.of());
+                clauses("AC", "README is updated safely", "No source files are changed"),
+                clauses("TEST", "inspect diff"), clauses("CONSTRAINT", "documentation only"),
+                List.of(), List.of(), List.of("README.md"), List.of(), List.of());
 
         var firstOutput = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", first));
@@ -235,9 +256,9 @@ class ArtifactContractValidatorTest {
         var proposal = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
                 "Update documentation.", modifyScope("README.md", List.of()),
-                List.of("README is updated", "No source files are changed"), List.of("inspect diff"),
-                List.of("documentation only"), List.of("no source changes"), List.of(),
-                List.of("README.md"), List.of());
+                clauses("AC", "README is updated", "No source files are changed"), clauses("TEST", "inspect diff"),
+                clauses("CONSTRAINT", "documentation only"), clauses("NON_GOAL", "no source changes"), List.of(),
+                List.of("README.md"), List.of(), List.of());
         var proposalOutput = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", proposal));
         var proposalResult = validate("intake.claude_brainstorm", proposalOutput, "run-1");
@@ -283,6 +304,53 @@ class ArtifactContractValidatorTest {
 
         assertEquals(NodeStatus.FAILED, validated.status());
         assertTrue(validated.result().toString().contains("REVIEW_SUBJECT_MISSING"), validated.result().toString());
+    }
+
+    @Test
+    void intakeContractRevisionRequiresTypedObligationsAndPublishesThem() throws Exception {
+        Files.writeString(tempDir.resolve("README.md"), "# sample\n");
+        var proposal = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
+                "Update documentation.", modifyScope("README.md", List.of()),
+                clauses("AC", "README is updated", "No source files are changed"),
+                clauses("TEST", "inspect diff"), clauses("CONSTRAINT", "documentation only"),
+                List.of(), List.of(), List.of("README.md"), List.of(), List.of());
+        var proposalOutput = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
+                envelope("intake.claude_brainstorm", proposal));
+        var proposalResult = validate("intake.claude_brainstorm", proposalOutput, "run-1");
+        var proposalRef = proposalResult.outputRefs().stream()
+                .filter(value -> value.endsWith(".ref.json"))
+                .findFirst()
+                .orElseThrow();
+        var reviewNode = new NodeDefinition(
+                "intake.codex_product_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                        "expected_artifact", "agent_output_contract",
+                        "review_subject_artifact", "task_contract_proposal"));
+
+        var missingOutput = write(".agent/workstreams/ws-1/runs/run-2/outputs/review.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-2", "intake.codex_product_review",
+                        contractRevisionReview(List.of()))));
+        var missing = validator.validate(
+                tempDir, "ws-1", "node-review", reviewNode, List.of(proposalRef),
+                NodeResult.completed("completed", List.of(missingOutput), Map.of("run_id", "run-2")));
+
+        assertEquals(NodeStatus.FAILED, missing.status());
+        assertTrue(missing.result().toString().contains("contract_obligations"), missing.result().toString());
+
+        var obligation = new AgentResultEnvelope.ReviewObligation("OB-1", "Add observable acceptance coverage");
+        var validOutput = write(".agent/workstreams/ws-1/runs/run-3/outputs/review.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-3", "intake.codex_product_review",
+                        contractRevisionReview(List.of(obligation)))));
+        var valid = validator.validate(
+                tempDir, "ws-1", "node-review-valid", reviewNode, List.of(proposalRef),
+                NodeResult.completed("completed", List.of(validOutput), Map.of("run_id", "run-3")));
+
+        assertEquals(NodeStatus.COMPLETED, valid.status(), valid.result().toString());
+        var sidecar = AgentOutputContractDocument.read(
+                tempDir.resolve(validOutput.replace(".json", ".contract.json")), JSON).orElseThrow();
+        assertEquals(List.of(obligation), sidecar.contractObligations());
     }
 
     @Test
@@ -342,6 +410,20 @@ class ArtifactContractValidatorTest {
                 List.of(), List.of(), List.of(), "review complete", emptyFailure(), List.of());
     }
 
+    private static AgentResultEnvelope.AgentOutputResult contractRevisionReview(
+            List<AgentResultEnvelope.ReviewObligation> obligations
+    ) {
+        return new AgentResultEnvelope.AgentOutputResult(
+                "agent_output_contract", "NEEDS_REVISION", "Contract revision is required.", "READY", true,
+                List.of("reviewed proposal"), List.of("proposal misses an acceptance obligation"),
+                List.of(), List.of("add acceptance coverage"), obligations,
+                List.of(), List.of("contract gap"), List.of(), "review complete",
+                new AgentResultEnvelope.Failure(
+                        "CONTRACT_GAP", List.of("acceptance coverage is missing"), List.of(), List.of(), List.of(),
+                        "proposal omits required behavior"),
+                List.of());
+    }
+
     private static AgentResultEnvelope.Failure emptyFailure() {
         return new AgentResultEnvelope.Failure("", List.of(), List.of(), List.of(), List.of(), "");
     }
@@ -353,6 +435,14 @@ class ArtifactContractValidatorTest {
         return new AgentResultEnvelope.ProposalScope(
                 List.of(new TaskContract.ScopeEntry(path, TaskContract.ScopeOperation.MODIFY)),
                 excluded);
+    }
+
+    private static List<AgentResultEnvelope.ContractClause> clauses(String prefix, String... values) {
+        var clauses = new java.util.ArrayList<AgentResultEnvelope.ContractClause>();
+        for (int index = 0; index < values.length; index++) {
+            clauses.add(new AgentResultEnvelope.ContractClause(prefix + "-" + (index + 1), values[index]));
+        }
+        return List.copyOf(clauses);
     }
 
     @SuppressWarnings("unchecked")

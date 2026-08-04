@@ -41,22 +41,23 @@ class ContractLifecycleLedgerTest {
         var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, WORKSTREAM_ID, """
                 {
                   "artifact_type": "task_contract_proposal",
-                  "schema_version": 2,
+                  "schema_version": 3,
                   "objective": "Add user authentication with JWT tokens",
                   "scope": {
                     "included": [{"path": "README.md", "operation": "MODIFY"}],
                     "excluded": ["No external dependencies"]
                   },
                   "acceptance_criteria": [
-                    "Authentication behavior is described",
-                    "Scope remains narrow"
+                    {"id": "AC-1", "text": "Authentication behavior is described"},
+                    {"id": "AC-2", "text": "Scope remains narrow"}
                   ],
-                  "constraints": ["Max 200 lines per file"],
-                  "non_goals": ["No external dependencies"],
-                  "risk_areas": ["Authentication flow correctness"],
-                  "test_requirements": ["Run relevant tests"],
+                  "constraints": [{"id": "CONSTRAINT-1", "text": "Max 200 lines per file"}],
+                  "non_goals": [{"id": "NON_GOAL-1", "text": "No external dependencies"}],
+                  "risk_areas": [{"id": "RISK-1", "text": "Authentication flow correctness"}],
+                  "test_requirements": [{"id": "TEST-1", "text": "Run relevant tests"}],
                   "evidence_refs": ["README.md"],
-                  "open_questions": []
+                  "open_questions": [],
+                  "revision_responses": []
                 }
                 """);
 
@@ -67,7 +68,7 @@ class ContractLifecycleLedgerTest {
                         Map.of("required_subject", "approved_task_contract_proposal")),
                 new NodeInstance(
                         "inst-1", "node-1", NodeKind.TASK, "contract.compile",
-                        NodeStatus.READY, "stage-1", "iter-1",
+                        NodeStatus.READY, "stage-1", "iter-001",
                         List.of(reviewRef), List.of(), Map.of(), "run-1",
                         Instant.now(), null
                 )

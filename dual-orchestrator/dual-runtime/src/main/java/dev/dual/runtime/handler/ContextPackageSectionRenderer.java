@@ -47,6 +47,7 @@ final class ContextPackageSectionRenderer {
         appendListSection(builder, "Non-Goals", contract.nonGoals());
         appendListSection(builder, "Constraints", contract.constraints());
         appendListSection(builder, "Risk Areas", contract.riskAreas());
+        appendListSection(builder, "Evidence References", contract.evidenceRefs());
     }
 
     static void appendContractResolution(StringBuilder builder, Path resolutionPath) throws IOException {
@@ -457,6 +458,7 @@ final class ContextPackageSectionRenderer {
             builder.append("- Summary: ").append(summary).append("\n");
         }
         appendListSummary(builder, "Must Fix", contract.mustFix());
+        appendReviewObligations(builder, contract.contractObligations());
         appendListSummary(builder, "Open Risks", contract.openRisks());
         appendListSummary(builder, "Changed Files", contract.changedFiles());
         var verification = contract.verificationSummary();
@@ -466,6 +468,20 @@ final class ContextPackageSectionRenderer {
         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n");
         builder.append("- Raw Output: ").append(contract.sourceOutputRef()).append("\n\n");
         appendTypedPlanArtifact(builder, contract.planArtifact());
+    }
+
+    private static void appendReviewObligations(
+            StringBuilder builder,
+            List<AgentResultEnvelope.ReviewObligation> obligations
+    ) {
+        if (obligations == null || obligations.isEmpty()) {
+            return;
+        }
+        builder.append("- Contract Obligations:\n");
+        for (var obligation : obligations) {
+            builder.append("  - [").append(obligation.id()).append("] ")
+                    .append(obligation.text()).append("\n");
+        }
     }
 
     private static void appendTypedPlanArtifact(StringBuilder builder, PlanArtifactDocument plan) {
