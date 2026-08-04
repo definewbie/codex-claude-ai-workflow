@@ -1,6 +1,6 @@
 # Verification Gate: TaskContractProposal v3 Revision Chain
 
-Status: `AUTHORIZED AFTER PREFLIGHT / ONE SAMPLE ONLY`
+Status: `SAMPLE CONSUMED / TARGET CHAIN OBSERVED / PROMOTION WITHHELD`
 
 - Target: Prove one real provider-driven intake chain executes
   `NEEDS_REVISION -> revised proposal -> READY -> human approval -> contract.compile`
@@ -52,3 +52,31 @@ Status: `AUTHORIZED AFTER PREFLIGHT / ONE SAMPLE ONLY`
 
 Maturity before this run is `ENFORCED` by deterministic cannot-bypass tests. Only
 a PASS sample under this gate may promote the real revision chain to `PROVEN`.
+
+## Actual Result
+
+- Clean Gate SHA: `d446125`; v3 checkpoint: `83b01da`.
+- Workstream: `ws-20260804T051509Z-CUVU`.
+- Freshness build: 9/9 modules, 1175 tests, 0 failures/errors. Claude and Codex
+  probes passed before workstream creation.
+- The target chain was genuinely exercised. Iteration 1 Codex returned
+  `NEEDS_REVISION` with exactly `CO-1` and `CO-2`. Iteration 2 Claude emitted
+  schema v3 with exactly one response for each obligation (`CO-1 -> NG-5`,
+  `CO-2 -> C-1,C-9`). The second Codex review returned
+  `READY_FOR_PRODUCT_REVIEW`; the iter-002 requirement gate was approved; and
+  iter-002 `contract.compile` completed.
+- The compiled contract equals the revised proposal for objective, scope, all
+  five narrative clause collections and `evidence_refs`. All four target Agent
+  runs exited zero, decoded strict contracts, required no bounded correction and
+  ended with typed `SUCCESS`.
+- The overall runner sample is not Gate PASS. After the target chain had already
+  completed, the operator incorrectly inferred that revision had not occurred
+  from the active design process and interrupted the runner. The design node was
+  subsequently closed as `FAILED` and the workflow reached
+  `WAITING_FOR_RECOVERY`; the generated report also captured an earlier double-
+  trap `INTERRUPTION_RECOVERY_FAILED` snapshot.
+
+Verdict: the v3 path has strong real execution evidence, but this gate does not
+promote it to `PROVEN`, because its own rule permits promotion only from an
+overall PASS sample. The one-sample authorization is consumed. No retry, resume
+or second sample is authorized.

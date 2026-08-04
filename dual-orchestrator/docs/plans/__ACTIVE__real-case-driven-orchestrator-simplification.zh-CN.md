@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: TaskContractProposal v3 Revision Chain / GATE AUTHORIZED
+## Current Active Step: TaskContractProposal v3 Revision Chain / SAMPLE CONSUMED
 
 > TaskContractProposal v3 已选择性提交为 `83b01da`。该 checkpoint 将 contract
 > clause、Codex contract obligation 与 Claude revision response 类型化，并要求
@@ -23,6 +23,18 @@
 > `NEEDS_REVISION`，本轮只能记 `INVALID/NOT_TRIGGERED`；触发后任何 obligation
 > coverage、lineage、iteration、gate 或 compile 缺口立即 FAIL。禁止第二样本、
 > retry/resume、prompt/parser/model 调整或 validation 放宽。
+>
+> 实际 workstream `ws-20260804T051509Z-CUVU` 已真实完成目标链：iter-001
+> Codex 产出 `CO-1/CO-2`，iter-002 Claude 逐项映射到现存 clause，第二次 Codex
+> 返回 READY，当前 iteration human gate 与 `contract.compile` 均 COMPLETED，且
+> canonical contract 对 revised proposal 的 objective/scope/clause text/evidence
+> refs 保真。四个目标 Agent run 均 strict SUCCESS、零 correction。
+>
+> 但目标完成后，operator 错误依据 active design 进程判断“未触发 revision”并
+> 中断 runner，导致 design FAILED / workflow WAITING_FOR_RECOVERY，生成报告还记录
+> 了双 trap 的旧 `INTERRUPTION_RECOVERY_FAILED` 快照。按 gate 原文，只有整体 PASS
+> 样本才能升级 `PROVEN`，所以当前保持 `ENFORCED + REAL PATH OBSERVED / PROMOTION
+> WITHHELD`。一次授权已消费；不得 retry、resume 或运行第二样本。
 
 ## Superseded Active Step: T6 Full Lifecycle v8 / GATE CONSUMED
 
