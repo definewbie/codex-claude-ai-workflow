@@ -99,6 +99,50 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void sequentialSyntaxAndUnknownFieldDefectsStillUseOnlyOneClosedContractCorrection() throws Exception {
+        var complete = strictEnvelope("intake.claude_brainstorm", "run-1");
+        var missingColon = complete.replaceFirst("\"text\" :", "\"text\" ");
+        assertFalse(missingColon.equals(complete), "fixture must remove one clause text colon");
+
+        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var corrected = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(complete);
+        var responses = ((com.fasterxml.jackson.databind.node.ObjectNode) corrected.path("result"))
+                .putArray("revision_responses");
+        var response = responses.addObject();
+        response.put("review_obligation_id", "CO-1");
+        response.putArray("resolved_by_clause_ids").add("AC-1");
+        response.put("note", "undeclared rationale");
+
+        var transport = new ScriptedTransport(
+                validResult("request-1", missingColon, 0),
+                validResult("request-2", objectMapper.writeValueAsString(corrected), 0)
+        );
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude",
+                requests.initial(),
+                requests.correction(),
+                correctionPrompt("intake.claude_brainstorm", "run-1"),
+                "ws-test",
+                "run-1",
+                ContractRegistry.forNode("intake.claude_brainstorm")
+        );
+
+        assertTrue(acquisition.correctionAttempted());
+        assertFalse(acquisition.initialParse().valid());
+        assertFalse(acquisition.finalParse().valid());
+        assertTrue(acquisition.finalParse().message().contains("note"));
+        assertEquals(2, transport.calls, "a second defect must not open a third ACP turn");
+        var prompt = Files.readString(requests.correction().promptPath());
+        assertTrue(prompt.contains("Remove every unsupported key"));
+        assertTrue(prompt.contains(
+                "result.revision_responses` item is a closed object with exactly these fields: "
+                        + "[review_obligation_id, resolved_by_clause_ids]"));
+        assertFalse(prompt.contains("undeclared rationale"), "correction prompt must not copy malformed output");
+    }
+
+    @Test
     void genericInvalidJsonCorrectionDoesNotClaimUnexpectedEndOfInput() throws Exception {
         var transport = new ScriptedTransport(
                 validResult("request-1", "not-json", 0),

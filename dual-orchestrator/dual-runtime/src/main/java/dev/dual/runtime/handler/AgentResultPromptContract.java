@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import dev.dual.core.contract.TaskContract;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ public final class AgentResultPromptContract {
                     Return exactly one JSON object as the final assistant message.
                     Do not use Markdown fences, XML tags, headings, commentary, or text before/after the JSON.
                     Preserve the exact key names and JSON primitive types shown below. Replace example values with factual values.
+                    Every JSON object is closed. Do not add keys that are not declared for that object.
                     Allowed `result.decision` values: %s
                     %s
                     %s
@@ -57,12 +59,18 @@ public final class AgentResultPromptContract {
             return "Each task-contract clause must contain stable string fields `id` and `text`. "
                     + "On an initial intake, `result.revision_responses` must be `[]`. "
                     + "On a revision, copy every routed Contract Obligation ID exactly once into "
-                    + "`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`.";
+                    + "`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`. "
+                    + closedItemFields(
+                    "result.revision_responses",
+                    new AgentResultEnvelope.RevisionResponse("CO-1", List.of("AC-1")));
         }
         if ("intake.codex_product_review".equals(nodeId)) {
             return "For NEEDS_REVISION with non-empty `result.failure.contract_gaps`, "
                     + "`result.contract_obligations` must contain one object per contract obligation "
-                    + "with stable string fields `id` and `text`. Otherwise it must be `[]`.";
+                    + "with stable string fields `id` and `text`. Otherwise it must be `[]`. "
+                    + closedItemFields(
+                    "result.contract_obligations",
+                    new AgentResultEnvelope.ReviewObligation("CO-1", "binding contract obligation"));
         }
         return "";
     }
@@ -75,9 +83,26 @@ public final class AgentResultPromptContract {
         if (!ContractRegistry.supportsRereadReasonField(nodeId)) {
             return "For this node, `result.reread_reasons` must remain exactly `[]`.";
         }
-        return "Each `result.reread_reasons` entry must be an object with string fields "
-                + "`path`, `reason`, `stage`, and `evidence`; `reason` must be one of "
-                + ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS + ".";
+        return "Each `result.reread_reasons` entry must use string fields; `reason` must be one of "
+                + ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS + ". "
+                + closedItemFields(
+                "result.reread_reasons",
+                new AgentResultEnvelope.RereadReason(
+                        "repo/file.ext",
+                        ReadReuseContractReasons.ALLOWED_REPEATED_READ_REASONS.stream().sorted().findFirst().orElseThrow(),
+                        "design",
+                        "specific evidence"));
+    }
+
+    private static String closedItemFields(String fieldPath, Object sample) {
+        var tree = OBJECT_MAPPER.valueToTree(sample);
+        if (!tree.isObject()) {
+            throw new IllegalArgumentException("closed item sample must serialize as an object: " + fieldPath);
+        }
+        var fields = new ArrayList<String>();
+        tree.fieldNames().forEachRemaining(fields::add);
+        return "Each `" + fieldPath + "` item is a closed object with exactly these fields: "
+                + fields + ". No other keys are permitted.";
     }
 
     private static String verificationRemediationInstruction(String nodeId) {

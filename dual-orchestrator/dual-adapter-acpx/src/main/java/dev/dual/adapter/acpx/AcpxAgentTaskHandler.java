@@ -214,7 +214,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     agent,
                     request,
                     correctionRequest,
-                    correctionPrompt(context, runId),
+                    agentResultContractPrompt(context, runId),
                     context.workstreamId(),
                     runId,
                     ContractRegistry.hasContract(context.definition().id())
@@ -416,26 +416,19 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 : usageReader.read(agent, promptPath, stderrPath).orElse(null);
     }
 
-    private static String correctionPrompt(TaskContext context, String runId) {
+    private static String agentResultContractPrompt(TaskContext context, String runId) {
         if (!ContractRegistry.hasContract(context.definition().id())) {
             return "";
         }
         var contract = ContractRegistry.forNode(context.definition().id());
         var decisionExample = contract.allowedDecisions().stream().sorted().findFirst().orElse("");
-        return """
-                Your preceding final assistant message failed strict AgentResultEnvelope validation.
-                Re-serialize that same result without changing its decision, evidence, or conclusion.
-                Do not re-run the task, use tools, explain, or use Markdown.
-                This is the only contract-correction attempt. Return exactly the JSON object required below.
-
-                %s
-                """.formatted(AgentResultPromptContract.render(
+        return AgentResultPromptContract.render(
                 context.workstreamId(),
                 runId,
                 context.definition().id(),
                 decisionExample,
                 contract.allowedDecisions()
-        )).stripTrailing();
+        );
     }
 
     private static void appendTimelineEvent(

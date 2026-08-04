@@ -32,7 +32,7 @@ final class AcpxAgentResultAcquirer {
             String agent,
             AcpxRunRequest initialRequest,
             AcpxRunRequest correctionRequest,
-            String correctionPrompt,
+            String contractPrompt,
             String expectedWorkstreamId,
             String expectedRunId,
             NodeOutputContract contract
@@ -44,7 +44,7 @@ final class AcpxAgentResultAcquirer {
         var correctionDisposition = correctionDisposition(
                 initialResult,
                 correctionReason,
-                correctionPrompt
+                contractPrompt
         );
         if (correctionDisposition != CorrectionDisposition.ATTEMPTED) {
             return new Acquisition(
@@ -64,7 +64,7 @@ final class AcpxAgentResultAcquirer {
         Files.createDirectories(correctionRequest.promptPath().getParent());
         Files.writeString(
                 correctionRequest.promptPath(),
-                renderCorrectionPrompt(correctionPrompt, correctionReason, initialParse, initialValidation),
+                renderCorrectionPrompt(contractPrompt, correctionReason, initialParse, initialValidation),
                 StandardCharsets.UTF_8
         );
         var correctionResult = transport.runAgentResultCorrection(agent, correctionRequest);
@@ -103,7 +103,7 @@ final class AcpxAgentResultAcquirer {
     private CorrectionDisposition correctionDisposition(
             AcpxRunResult result,
             CorrectionReason correctionReason,
-            String correctionPrompt
+            String contractPrompt
     ) {
         if (result.exitCode() != 0) {
             return CorrectionDisposition.SKIPPED_PROCESS_NON_ZERO;
@@ -117,7 +117,7 @@ final class AcpxAgentResultAcquirer {
         if (correctionReason == CorrectionReason.NONE) {
             return CorrectionDisposition.NOT_NEEDED;
         }
-        if (correctionPrompt == null || correctionPrompt.isBlank()) {
+        if (contractPrompt == null || contractPrompt.isBlank()) {
             return CorrectionDisposition.SKIPPED_CORRECTION_UNAVAILABLE;
         }
         return CorrectionDisposition.ATTEMPTED;
@@ -184,6 +184,13 @@ final class AcpxAgentResultAcquirer {
             AgentResultEnvelopeParser.ParseResult parsed,
             AgentResultEnvelopeValidator.ValidationResult validation
     ) {
+        var correctionPolicy = """
+                Your preceding final assistant message failed strict AgentResultEnvelope validation.
+                Preserve its semantic decision, evidence, and conclusion using only fields declared by the contract.
+                Remove every unsupported key. Do not preserve invalid object structure.
+                Do not re-run the task, use tools, explain, or use Markdown.
+                This is the only contract-correction attempt. Return exactly the JSON object required below.
+                """.stripTrailing();
         if (reason == CorrectionReason.PARSE_FAILURE) {
             return """
                     Typed correction reason: %s
@@ -193,10 +200,13 @@ final class AcpxAgentResultAcquirer {
                     %s
 
                     %s
+
+                    %s
                     """.formatted(
                     reason,
                     renderParseDiagnostic(parsed.diagnostic()),
                     parseCorrectionInstruction(parsed.diagnostic()),
+                    correctionPolicy,
                     contractPrompt
             ).stripTrailing();
         }
@@ -208,7 +218,9 @@ final class AcpxAgentResultAcquirer {
                 Validation errors: %s
 
                 %s
-                """.formatted(reason, evidence, contractPrompt).stripTrailing();
+
+                %s
+                """.formatted(reason, evidence, correctionPolicy, contractPrompt).stripTrailing();
     }
 
     private static String renderParseDiagnostic(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
