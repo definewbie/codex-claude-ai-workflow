@@ -24,13 +24,13 @@ workflow id/version。real-case 结果仍未知，不得提前标记 `PASS` 或 
 
 ## Verification Gate
 
-- **Target:** 使用与 T5 v3 相同的 A3 task 和 target baseline，证明 terminal-delivery
+- Target: 使用与 T5 v3 相同的 A3 task 和 target baseline，证明 terminal-delivery
   external definition 将实际 Agent node runs 与 provider occurrences 从 `10` 同时降为
   `9`，workflow 仍 `COMPLETED`，final acceptance 仍为 `ACCEPT`，target tests、typed
   change scope、strict sidecar lineage 均不退化，并证明 handoff/next-stage 对该 definition
   为 `NOT_APPLICABLE`。
 
-- **Source of truth:** persisted `workflow/definition.json` 及其 hash；`nodes/*.json`；
+- Source of truth: persisted `workflow/definition.json` 及其 hash；`nodes/*.json`；
   `runs/*/run.json` 的 node id、`agentResultAcquisition.occurrences`、correction disposition
   和 execution outcome；`metrics/workstream-metrics.json.agentRunCount`；
   `metrics/workstream-metrics.json.revisionCount` 及 `iterations/*.json`；final acceptance strict sidecar；
@@ -38,21 +38,21 @@ workflow id/version。real-case 结果仍未知，不得提前标记 `PASS` 或 
   `domain/completion-audit.json`；target worktree `git diff` 与 `npm test` 输出。T5 v3 的
   baseline 数字只来自归档 workstream/report，不重新计算。
 
-- **Trigger precondition:** HEAD 包含 `e25cd9f4`；worktree 除已提交 Gate/架构文档外
+- Trigger precondition: HEAD 包含 `e25cd9f4`；worktree 除已提交 Gate/架构文档外
   干净；A3 task hash、target source tree、experiment definition hash 与上方固定值一致；
   fresh package、target baseline `npm test`、Claude/Codex runner-kind 与最小 probes 全部
   PASS；real-case harness 能将 external workflow path 原样传给 `dualctl start --workflow`
   并在 preflight 中持久化 resolved path、SHA-256 和 workflow id；不得同时传
   `--workflow-variant`。
 
-- **How precondition is checked before run:** 先运行 focused deterministic tests 和 full
+- How precondition is checked before run: 先运行 focused deterministic tests 和 full
   Maven reactor；用 `git write-tree` 核对 disposable target baseline；用 SHA-256 核对 task
   与 workflow 文件；运行 `dualctl workflow validate <experiment-definition>`；执行 harness
   自测证明 start command 恰有一个 `--workflow <absolute-path>` 且没有
   `--workflow-variant`；fresh package 后运行两个 provider probes。任一字段缺失、hash
   不符或 harness 仍只支持 variant，结果立即为 `INVALID`，不得创建 workstream。
 
-- **PASS:** 以下条件必须全部满足：
+- PASS: 以下条件必须全部满足：
   1. external definition source hash 与固定值一致；persisted workflow
      id=`agent-lifecycle-terminal-delivery-experiment`，且 persisted definition 与 external
   source 语义相等；两份实际 hash 均被记录，不假设重新序列化后的字节 hash 相等；
@@ -78,24 +78,24 @@ workflow id/version。real-case 结果仍未知，不得提前标记 `PASS` 或 
   `IterationSemantics` 判定为 revision trigger 的文档数量核对；bounded corrections =
   `run.json.correctionAttempted=true` 的 run 数量，并与 occurrence 数量增量核对。
 
-- **FAIL:** 使用正确且新鲜的 experiment definition 完成有效运行，但 Agent node runs
+- FAIL: 使用正确且新鲜的 experiment definition 完成有效运行，但 Agent node runs
   或 provider occurrences 不是 9；出现任何 revision/correction；A10 或 next-stage node
   被执行；workflow 未完成；acceptance 不是 `ACCEPT`；target tests、change scope、strict
   result、lineage 任一失败；或 handoff/prompt 被生成、被要求或产生 warning。
 
-- **INVALID:** 实际运行的是 full/contract/bundled variant；workflow path/hash/id 未持久化
+- INVALID: 实际运行的是 full/contract/bundled variant；workflow path/hash/id 未持久化
   或不匹配；task/target baseline 不同；旧 jar、`--skip-build`、旧 server/worker；provider
   probe 或 runner-kind 不匹配；run/occurrence/lineage/change-scope/completion-audit 任一
   source of truth 缺失；测试 harness 未证明 external workflow 被透传。`INVALID` 不能解释
   为部分成功，也不能触发第二个样本。
 
-- **Stop-loss:** workstream 创建后第一时间核对 persisted workflow id/hash；不匹配立即
+- Stop-loss: workstream 创建后第一时间核对 persisted workflow id/hash；不匹配立即
   quiesce 并标 `INVALID`。首次 strict correction、semantic revision、scope violation、
   typed provider fatal/reconnect/rate-limit failure或 unexpected A10 node 出现时立即停止，
   通过既有 stale/session closure 闭合运行，并将本样本标 `FAIL`；不得 retry、切换模型、
   调 prompt 或启动第二个样本。
 
-- **Run artifact freshness:** 禁止 `--skip-build`。preflight 必须记录 clean HEAD、
+- Run artifact freshness: 必须执行 fresh package。preflight 必须记录 clean HEAD、
   checkpoint ancestry、Maven package start/end、jar mtime、latest JVM input mtime、
   `artifactFreshnessProven=true`、external workflow resolved path/hash/id、task hash、target
   tree、provider probe results 和 runner-kind。缺少任一项不得创建 workstream。
