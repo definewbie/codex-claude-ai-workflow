@@ -9,6 +9,7 @@
 # Usage:
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --variant full
+#   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --workflow /path/to/workflow.json
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --prompt-language zh-CN
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --verification-gate /path/to/gate.md
 #   ./scripts/run-real-case.sh --repo /path/to/repo --task-file /path/to/task.md --cleanup-worktree
@@ -34,6 +35,15 @@ REPO=""
 TASK_FILE=""
 VERIFICATION_GATE=""
 VARIANT="full"
+VARIANT_EXPLICIT=false
+WORKFLOW_PATH=""
+WORKFLOW_EXPLICIT=false
+WORKFLOW_SOURCE_SHA256=""
+WORKFLOW_ID=""
+WORKFLOW_VERSION=""
+WORKFLOW_VALIDATION_STATUS="not_applicable"
+WORKFLOW_VALIDATED_PATH=""
+WORKFLOW_PATH_MATCHES_VALIDATED=false
 PROMPT_LANGUAGE="auto"
 MAX_STEPS=80
 MAX_GATES=12
@@ -77,6 +87,9 @@ Options:
                             and artifact freshness before provider execution.
   --variant <contract|full>
                             Workflow variant. Default: full.
+  --workflow <path>         External workflow definition JSON. Mutually exclusive
+                            with --variant; its path, SHA-256, id, and version are
+                            validated and persisted before provider execution.
   --prompt-language <auto|en|zh-CN>
                             Human-readable Agent output language. Default: auto.
   --expected-runner-kind <acpx_claude_session|acpx_codex_session>
@@ -194,6 +207,12 @@ parse_args() {
       --variant)
         shift
         VARIANT="${1:-}"
+        VARIANT_EXPLICIT=true
+        ;;
+      --workflow)
+        shift
+        WORKFLOW_PATH="${1:-}"
+        WORKFLOW_EXPLICIT=true
         ;;
       --prompt-language)
         shift
@@ -243,6 +262,8 @@ validate_inputs() {
   TASK_FILE="$(abs_path "$TASK_FILE")"
   VERIFICATION_GATE="$(abs_path "$VERIFICATION_GATE")"
 
+  validate_workflow_selection || exit 1
+
   [[ -d "$REPO" ]] || { fail "repo not found: $REPO"; exit 1; }
   [[ -f "$TASK_FILE" ]] || { fail "task file not found: $TASK_FILE"; exit 1; }
   [[ -f "$VERIFICATION_GATE" ]] || { fail "verification gate not found: $VERIFICATION_GATE"; exit 1; }
@@ -255,10 +276,6 @@ validate_inputs() {
     fail "acpx not found. Initialize acpx sessions before running a real case."
     exit 1
   }
-  case "$VARIANT" in
-    contract|full) ;;
-    *) fail "--variant must be contract or full"; exit 1 ;;
-  esac
   case "$PROMPT_LANGUAGE" in
     auto|en|zh-CN|zh|zh-cn) ;;
     *) fail "--prompt-language must be auto, en, or zh-CN"; exit 1 ;;
@@ -266,11 +283,54 @@ validate_inputs() {
   case "$EXPECTED_RUNNER_KIND" in
     acpx_claude_session|acpx_codex_session) ;;
     *)
-      fail "--expected-runner-kind is required (derive via: dualctl runner-kind --variant $VARIANT). Got: '${EXPECTED_RUNNER_KIND:-<empty>}'."
+      fail "--expected-runner-kind is required for the selected workflow. Got: '${EXPECTED_RUNNER_KIND:-<empty>}'."
       fail "Provider preflight must match the workflow's acpx runner path."
       exit 1
       ;;
   esac
+}
+
+validate_workflow_selection() {
+  if [[ "$WORKFLOW_EXPLICIT" == true && "$VARIANT_EXPLICIT" == true ]]; then
+    fail "--workflow and --variant are mutually exclusive"
+    return 1
+  fi
+  if [[ "$WORKFLOW_EXPLICIT" == true ]]; then
+    [[ -n "$WORKFLOW_PATH" ]] || { fail "--workflow requires a path"; return 1; }
+    WORKFLOW_PATH="$(abs_path "$WORKFLOW_PATH")"
+    [[ -f "$WORKFLOW_PATH" ]] || { fail "workflow definition not found: $WORKFLOW_PATH"; return 1; }
+    WORKFLOW_PATH="$(cd "$(dirname "$WORKFLOW_PATH")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$WORKFLOW_PATH")")"
+    VARIANT=""
+    return 0
+  fi
+
+  case "$VARIANT" in
+    contract|full) ;;
+    *) fail "--variant must be contract or full"; return 1 ;;
+  esac
+}
+
+validate_external_workflow() {
+  [[ -n "$WORKFLOW_PATH" ]] || return 0
+  local validation_log="$CASE_DIR/logs/workflow-validate.log"
+  WORKFLOW_SOURCE_SHA256="$(shasum -a 256 "$WORKFLOW_PATH" | awk '{print $1}')"
+  if ! dualctl workflow validate "$WORKFLOW_PATH" >"$validation_log" 2>&1; then
+    WORKFLOW_VALIDATION_STATUS="failed"
+    return 1
+  fi
+  WORKFLOW_VALIDATED_PATH="$(awk -F': ' '/^Path: / {value=$2} END {print value}' "$validation_log")"
+  local workflow_ref
+  workflow_ref="$(awk -F': ' '/^Workflow: / {value=$2} END {print value}' "$validation_log")"
+  WORKFLOW_ID="${workflow_ref%@*}"
+  WORKFLOW_VERSION="${workflow_ref##*@}"
+  if [[ -z "$WORKFLOW_VALIDATED_PATH" || "$WORKFLOW_VALIDATED_PATH" != "$WORKFLOW_PATH"
+        || -z "$WORKFLOW_ID" || "$WORKFLOW_ID" == "$workflow_ref"
+        || -z "$WORKFLOW_VERSION" ]]; then
+    WORKFLOW_VALIDATION_STATUS="failed"
+    return 1
+  fi
+  WORKFLOW_PATH_MATCHES_VALIDATED=true
+  WORKFLOW_VALIDATION_STATUS="passed"
 }
 
 validate_verification_gate() {
@@ -422,6 +482,14 @@ write_preflight_evidence() {
     echo "  \"taskFile\": \"$(json_escape "$TASK_FILE")\","
     echo "  \"verificationGate\": \"$(json_escape "$VERIFICATION_GATE")\","
     echo "  \"variant\": \"$(json_escape "$VARIANT")\","
+    echo "  \"workflowSelection\": \"$(if [[ -n "$WORKFLOW_PATH" ]]; then printf external; else printf variant; fi)\","
+    echo "  \"workflowPath\": \"$(json_escape "$WORKFLOW_PATH")\","
+    echo "  \"workflowSourceSha256\": \"$(json_escape "$WORKFLOW_SOURCE_SHA256")\","
+    echo "  \"workflowId\": \"$(json_escape "$WORKFLOW_ID")\","
+    echo "  \"workflowVersion\": \"$(json_escape "$WORKFLOW_VERSION")\","
+    echo "  \"workflowValidationStatus\": \"$(json_escape "$WORKFLOW_VALIDATION_STATUS")\","
+    echo "  \"workflowValidatedPath\": \"$(json_escape "$WORKFLOW_VALIDATED_PATH")\","
+    echo "  \"workflowPathMatchesValidated\": $WORKFLOW_PATH_MATCHES_VALIDATED,"
     echo "  \"promptLanguage\": \"$(json_escape "$PROMPT_LANGUAGE")\","
     echo "  \"acpxAvailable\": true,"
     echo "  \"buildMode\": \"$(json_escape "$BUILD_MODE")\","
@@ -446,6 +514,15 @@ write_preflight_evidence() {
     echo "}"
   } >"$preflight"
 
+  if [[ -n "$WORKFLOW_PATH" && "$WORKFLOW_VALIDATION_STATUS" != "passed" ]]; then
+    fail "external workflow validation is not proven: $WORKFLOW_VALIDATION_STATUS"
+    fail "Preflight evidence: $preflight"
+    FINAL_STATUS="INVALID_WORKFLOW_PREFLIGHT"
+    write_report
+    update_benchmark_index
+    exit 1
+  fi
+
   if [[ "$freshness_valid" != true ]]; then
     fail "run artifact freshness is not proven: $freshness_status ($freshness_reason)"
     fail "Preflight evidence: $preflight"
@@ -464,6 +541,15 @@ write_preflight_evidence() {
   fi
 }
 
+run_execution_preflight() {
+  if ! validate_external_workflow; then
+    write_preflight_evidence
+    return 1
+  fi
+  run_provider_probe || true
+  write_preflight_evidence
+}
+
 init_case_dir() {
   STARTED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   local stamp
@@ -478,7 +564,9 @@ init_case_dir() {
 start_workstream() {
   log "Starting workstream in repo: $REPO"
   local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS" --prompt-language "$PROMPT_LANGUAGE")
-  if [[ "$VARIANT" != "full" ]]; then
+  if [[ -n "$WORKFLOW_PATH" ]]; then
+    args+=(--workflow "$WORKFLOW_PATH")
+  elif [[ "$VARIANT" != "full" ]]; then
     args+=(--workflow-variant "$VARIANT")
   fi
   args+=(--task-file "$TASK_FILE")
@@ -964,7 +1052,10 @@ write_report() {
     echo "- Started At: $STARTED_AT"
     echo "- Finished At: $FINISHED_AT"
     echo "- Final Status: $FINAL_STATUS"
-    echo "- Variant: $VARIANT"
+    echo "- Variant: ${VARIANT:-external}"
+    echo "- Workflow Path: ${WORKFLOW_PATH:-bundled}"
+    echo "- Workflow Source SHA-256: ${WORKFLOW_SOURCE_SHA256:-not_applicable}"
+    echo "- Workflow: ${WORKFLOW_ID:-bundled}@${WORKFLOW_VERSION:-unknown}"
     echo "- Prompt Language: $PROMPT_LANGUAGE"
     echo "- Repo: $REPO"
     echo "- Workstream: ${WORKSTREAM_ID:-unknown}"
@@ -1094,8 +1185,7 @@ main() {
   validate_inputs
   init_case_dir
   build_project
-  run_provider_probe || true
-  write_preflight_evidence
+  run_execution_preflight
   trap handle_interrupt INT TERM
   start_workstream
   status_snapshot "after-start" || true

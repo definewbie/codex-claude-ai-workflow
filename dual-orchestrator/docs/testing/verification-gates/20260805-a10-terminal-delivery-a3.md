@@ -2,8 +2,9 @@
 
 日期：2026-08-05
 
-状态：`DEFINED / NOT READY`。当前 `run-real-case.sh` 尚不能透传 external
-`--workflow <path>`，在该 deterministic harness 缺口闭合前禁止创建 workstream。
+状态：`READY / NOT RUN`。`run-real-case.sh` 已能互斥透传 external
+`--workflow <path>`，并在 provider probe 前验证和持久化 resolved path、SHA-256、
+workflow id/version。real-case 结果仍未知，不得提前标记 `PASS` 或 `PROVEN`。
 
 ## Fixed comparison inputs
 
@@ -104,11 +105,16 @@
 ```text
 Gate definition: COMPLETE
 Deterministic A10 boundary: PASS
-Real-case execution: NOT READY
-Only blocker: run-real-case.sh cannot yet pass and attest an external workflow path
+External workflow harness boundary: PASS
+Real-case execution: READY / NOT RUN
 ```
 
-下一任务只能是一个最小 harness slice：为 `run-real-case.sh` 增加互斥的
-`--workflow <path>` 透传与 preflight path/hash/id 记录，并用脚本测试证明不会回落到
-`--workflow-variant full`。该 slice 不修改 workflow、prompt、parser、Agent contract 或
-provider 行为；通过后重新评估本 Gate readiness，再单次授权 real-case。
+Readiness 证据：`scripts/run-real-case.test.sh` 已证明 `--workflow` 与显式 `--variant`
+互斥、空 workflow path fail closed、validated path 不一致 fail closed、preflight 精确记录
+path/hash/id/version、start command 恰有一个 `--workflow <absolute-path>` 且不存在
+`--workflow-variant`，workflow validation 失败时 provider probe 不会执行。脚本语法、
+`git diff --check` 与 full Maven reactor `9/9 / 1187 tests / 0 failures / 0 errors` 通过。
+
+下一动作只能是在 clean SHA 上执行本 Gate 的 fresh package、真实 workflow validate、
+target baseline 与双 provider probes；全部 PASS 后运行一次 A3。不得回退到 bundled full
+workflow，也不得启动第二个样本。

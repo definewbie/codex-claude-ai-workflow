@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: A10 Same-Case Gate / DEFINED, NOT READY
+## Current Active Step: A10 Same-Case Gate / READY, NOT RUN
 
 > 2026-08-05 已确认下一目标：对 full workflow happy path 的 10 次固定 Agent 调用
 > 逐一完成成本、owner、consumer、质量增量和 counterfactual 价值举证。最新模型增强
@@ -41,10 +41,13 @@
 > `e25cd9f4`；same-case Gate 已定义在
 > `docs/testing/verification-gates/20260805-a10-terminal-delivery-a3.md`。
 >
-> Gate 当前为 `DEFINED / NOT READY`：CLI 已支持 external `--workflow`，但
-> `run-real-case.sh` 尚未透传并证明该 path/hash/id。唯一下一任务是一个最小 harness
-> slice，只增加互斥参数透传、preflight attest 与脚本 cannot-bypass；通过前禁止创建
-> provider workstream，也禁止回落到 full variant 伪造 10 -> 9 对照。
+> Gate 当前为 `READY / NOT RUN`：`run-real-case.sh` 已支持互斥 external
+> `--workflow <path>`，在 provider probe 前验证并持久化 resolved path、SHA-256、
+> workflow id/version。cannot-bypass 已证明空 path、显式 variant 冲突、validated path
+> 不一致和 validation failure 均 fail closed，且 start 不会回落到 bundled full variant。
+> 脚本测试与 full Maven reactor `9/9 / 1187/0/0` 通过。下一动作只是在 clean SHA 上完成
+> fresh package、target baseline、真实 workflow validate 与双 provider probes，然后按
+> Gate 运行一次 A3；real-case 前仍不得标 `PROVEN`。
 
 ## Completed Step: Post-T6 Efficiency Attribution / COMPLETE
 

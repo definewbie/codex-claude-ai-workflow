@@ -19,6 +19,186 @@ assert_eq() {
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
+workflow_fixture="$tmp/terminal-delivery.json"
+cat >"$workflow_fixture" <<'EOF'
+{
+  "workflowId": "agent-lifecycle-terminal-delivery-experiment",
+  "version": 1
+}
+EOF
+workflow_fixture="$(cd "$(dirname "$workflow_fixture")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$workflow_fixture")")"
+
+set +e
+(
+  WORKFLOW_PATH="$workflow_fixture"
+  WORKFLOW_EXPLICIT=true
+  VARIANT="full"
+  VARIANT_EXPLICIT=true
+  validate_workflow_selection
+) >"$tmp/workflow-mutual-stdout.log" 2>"$tmp/workflow-mutual-stderr.log"
+workflow_mutual_exit="$?"
+set -e
+assert_eq "1" "$workflow_mutual_exit" "external workflow and variant are mutually exclusive"
+grep -q -- "--workflow and --variant are mutually exclusive" "$tmp/workflow-mutual-stderr.log" || {
+  printf '[FAIL] workflow mutual-exclusion diagnostic was not emitted\n' >&2
+  cat "$tmp/workflow-mutual-stderr.log" >&2
+  exit 1
+}
+
+set +e
+(
+  WORKFLOW_PATH=""
+  WORKFLOW_EXPLICIT=true
+  VARIANT="full"
+  VARIANT_EXPLICIT=false
+  validate_workflow_selection
+) >"$tmp/workflow-missing-path-stdout.log" 2>"$tmp/workflow-missing-path-stderr.log"
+workflow_missing_path_exit="$?"
+set -e
+assert_eq "1" "$workflow_missing_path_exit" "external workflow requires a path"
+grep -q -- "--workflow requires a path" "$tmp/workflow-missing-path-stderr.log" || {
+  printf '[FAIL] missing workflow path did not fail before full fallback\n' >&2
+  cat "$tmp/workflow-missing-path-stderr.log" >&2
+  exit 1
+}
+
+workflow_case="$tmp/workflow-case"
+mkdir -p "$workflow_case/logs"
+(
+  CASE_DIR="$workflow_case"
+  WORKFLOW_PATH="$workflow_fixture"
+  WORKFLOW_EXPLICIT=true
+  VARIANT="full"
+  VARIANT_EXPLICIT=false
+  validate_workflow_selection
+  dualctl() {
+    [[ "$1" == "workflow" && "$2" == "validate" && "$3" == "$workflow_fixture" ]]
+    printf 'Workflow definition is valid.\n'
+    printf 'Path: %s\n' "$workflow_fixture"
+    printf 'Workflow: agent-lifecycle-terminal-delivery-experiment@1\n'
+  }
+  validate_external_workflow
+  expected_sha="$(shasum -a 256 "$workflow_fixture" | awk '{print $1}')"
+  assert_eq "$expected_sha" "$WORKFLOW_SOURCE_SHA256" "external workflow SHA-256"
+  assert_eq "agent-lifecycle-terminal-delivery-experiment" "$WORKFLOW_ID" "external workflow id"
+  assert_eq "1" "$WORKFLOW_VERSION" "external workflow version"
+  assert_eq "passed" "$WORKFLOW_VALIDATION_STATUS" "external workflow validation status"
+  assert_eq "true" "$WORKFLOW_PATH_MATCHES_VALIDATED" "external workflow validated path match"
+
+  REPO="$tmp/repo"
+  TASK_FILE="$tmp/task.md"
+  VERIFICATION_GATE="$tmp/gate.md"
+  PROMPT_LANGUAGE="en"
+  SKIP_BUILD=false
+  BUILD_MODE="test"
+  BUILD_STARTED_EPOCH=1
+  BUILD_FINISHED_EPOCH=2
+  PROVIDER_PROBE_ENABLED=1
+  PROVIDER_PROBE_STATUS="passed"
+  PROVIDER_PROBE_REASON="provider_probe_completed"
+  PROVIDER_PROBE_EXIT_CODE=0
+  PROVIDER_PROBE_TIMEOUT_SECONDS=1
+  PROVIDER_PROBE_RESULT_PATH="$tmp/probe.json"
+  PROVIDER_PROBE_STDERR_PATH="$tmp/probe.stderr"
+  EXPECTED_RUNNER_KIND="acpx_claude_session"
+  PROVIDER_PROBE_RUNNER_KIND="acpx_claude_session"
+  PROVIDER_PROBE_PATH_MATCHES_EXPECTED=true
+  JAR_PATH="$tmp/dualctl.jar"
+  : >"$JAR_PATH"
+  real_case_latest_jvm_input_epoch() { printf '1'; }
+  real_case_artifact_freshness_status() { printf 'fresh'; }
+  real_case_artifact_freshness_reason() { printf 'test_fresh'; }
+  real_case_artifact_freshness_is_valid() { return 0; }
+  real_case_file_mtime_epoch() { printf '2'; }
+  real_case_provider_probe_is_valid() { return 0; }
+  write_preflight_evidence
+)
+
+grep -q '"workflowSelection": "external"' "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight did not record external workflow selection\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
+grep -q "\"workflowPath\": \"$workflow_fixture\"" "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight did not record exact external workflow path\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
+grep -q '"workflowId": "agent-lifecycle-terminal-delivery-experiment"' "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight did not record external workflow id\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
+grep -q '"workflowVersion": "1"' "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight did not record external workflow version\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
+grep -q '"workflowPathMatchesValidated": true' "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight did not record exact workflow path validation\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
+expected_workflow_sha="$(shasum -a 256 "$workflow_fixture" | awk '{print $1}')"
+grep -q "\"workflowSourceSha256\": \"$expected_workflow_sha\"" "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight did not record external workflow SHA-256\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
+
+(
+  CASE_DIR="$tmp/start-workflow-case"
+  mkdir -p "$CASE_DIR/logs"
+  REPO="$tmp/repo"
+  TASK_FILE="$tmp/task.md"
+  MAX_STEPS=80
+  PROMPT_LANGUAGE="en"
+  WORKFLOW_PATH="$workflow_fixture"
+  VARIANT=""
+  captured_args="$tmp/start-workflow-args.txt"
+  dualctl() {
+    printf '%s\n' "$@" >"$captured_args"
+    printf 'Workstream: ws-external-workflow\n'
+    printf 'Workspace: %s\n' "$tmp/workspace"
+    printf 'Ledger: %s\n' "$tmp/workspace/.agent/workstreams/ws-external-workflow"
+  }
+  start_workstream
+  assert_eq "1" "$(grep -cx -- '--workflow' "$captured_args")" "external workflow flag count"
+  grep -Fxq "$workflow_fixture" "$captured_args"
+  if grep -Fxq -- '--workflow-variant' "$captured_args"; then
+    printf '[FAIL] external workflow start fell back to a bundled variant\n' >&2
+    exit 1
+  fi
+)
+
+set +e
+(
+  CASE_DIR="$tmp/workflow-path-mismatch-case"
+  mkdir -p "$CASE_DIR/logs"
+  WORKFLOW_PATH="$workflow_fixture"
+  dualctl() {
+    printf 'Workflow definition is valid.\n'
+    printf 'Path: %s\n' "$tmp/different-workflow.json"
+    printf 'Workflow: agent-lifecycle-terminal-delivery-experiment@1\n'
+  }
+  validate_external_workflow
+) >"$tmp/workflow-path-mismatch-stdout.log" 2>"$tmp/workflow-path-mismatch-stderr.log"
+workflow_path_mismatch_exit="$?"
+set -e
+assert_eq "1" "$workflow_path_mismatch_exit" "validated workflow path mismatch fails closed"
+
+(
+  provider_probe_called=false
+  validate_external_workflow() { return 1; }
+  write_preflight_evidence() { printf 'workflow-preflight-failed\n'; }
+  run_provider_probe() { provider_probe_called=true; }
+  if run_execution_preflight; then
+    printf '[FAIL] invalid external workflow preflight unexpectedly succeeded\n' >&2
+    exit 1
+  fi
+  assert_eq "false" "$provider_probe_called" "provider probe blocked by workflow validation failure"
+)
+
 (trap - EXIT; exec sleep 30) &
 AUTORUN_PID="$!"
 stopped_autorun_pid="$AUTORUN_PID"
