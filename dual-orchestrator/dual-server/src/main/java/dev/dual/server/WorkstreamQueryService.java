@@ -177,7 +177,7 @@ public class WorkstreamQueryService {
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
         var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
         var artifacts = artifacts(root, paths);
-        var completionAudit = completionAudit(paths, artifacts);
+        var completionAudit = completionAudit(paths);
         var deliveryMerge = readJson(paths.deliveryMergePlanJson());
         var deliveryView = deliveryViewService.view(root, workstreamId);
         var goalSatisfaction = readJson(paths.goalSatisfactionJson());
@@ -624,7 +624,7 @@ public class WorkstreamQueryService {
 
     private boolean requiredArtifact(String key) {
         return switch (key) {
-            case "finalReport", "workstreamSummary", "handoffJson", "nextStagePrompt" -> true;
+            case "finalReport", "workstreamSummary" -> true;
             default -> false;
         };
     }
@@ -743,67 +743,21 @@ public class WorkstreamQueryService {
         }
     }
 
-    private Map<String, Object> completionAudit(WorkstreamPaths paths, Map<String, Object> artifacts) {
+    private Map<String, Object> completionAudit(WorkstreamPaths paths) {
         if (Files.isRegularFile(paths.completionAuditJson())) {
-            return readJson(paths.completionAuditJson());
-        }
-        var gaps = new ArrayList<String>();
-        auditFinalReport(paths, artifacts, gaps);
-        auditHandoff(paths, artifacts, gaps);
-        auditNextStagePrompt(paths, artifacts, gaps);
-        return Map.of(
-                "status", gaps.isEmpty() ? "ready" : "needs_review",
-                "gaps", List.copyOf(gaps)
-        );
-    }
-
-    private void auditFinalReport(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
-        if (!artifactAvailable(artifacts, "finalReport")) {
-            gaps.add("final report is missing");
-            return;
-        }
-        var report = readText(paths.workstreamDir().resolve("reports").resolve("latest-final-report.md"));
-        for (var heading : List.of("## User Request", "## Verification Evidence", "## Acceptance Summary", "## Git Evidence")) {
-            if (!report.contains(heading)) {
-                gaps.add("final report missing " + heading);
+            var audit = readJson(paths.completionAuditJson());
+            if (!audit.isEmpty()) {
+                return audit;
             }
+            return Map.of(
+                    "status", "invalid",
+                    "gaps", List.of("completion audit is unreadable or invalid")
+            );
         }
-    }
-
-    private void auditHandoff(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
-        if (!artifactAvailable(artifacts, "handoffJson")) {
-            gaps.add("handoff.json is missing");
-            return;
-        }
-        var handoff = readJson(paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("handoff.json"));
-        if (text(handoff.get("workstreamId")).isBlank()) {
-            gaps.add("handoff.json missing workstreamId");
-        }
-        if (textList(handoff.get("completedWork")).isEmpty() && textList(handoff.get("changedFiles")).isEmpty()) {
-            gaps.add("handoff.json has no completedWork or changedFiles");
-        }
-        if (text(handoff.get("recommendedNextStage")).isBlank()
-                && text(handoff.get("suggestedNextPrompt")).isBlank()) {
-            gaps.add("handoff.json has no recommendedNextStage or suggestedNextPrompt");
-        }
-    }
-
-    private void auditNextStagePrompt(WorkstreamPaths paths, Map<String, Object> artifacts, List<String> gaps) {
-        if (!artifactAvailable(artifacts, "nextStagePrompt")) {
-            gaps.add("next-stage prompt is missing");
-            return;
-        }
-        var prompt = readText(paths.workstreamDir().resolve("artifacts").resolve("next-stage").resolve("next-stage-prompt.md"));
-        if (!prompt.contains("## Prompt")) {
-            gaps.add("next-stage prompt missing ## Prompt section");
-        }
-        if (!prompt.contains("## Handoff Context")) {
-            gaps.add("next-stage prompt missing ## Handoff Context section");
-        }
-    }
-
-    private static boolean artifactAvailable(Map<String, Object> artifacts, String key) {
-        return Boolean.TRUE.equals(mapValue(artifacts.get(key)).get("available"));
+        return Map.of(
+                "status", "not_available",
+                "gaps", List.of("completion audit is missing")
+        );
     }
 
     private static String readText(Path path) {

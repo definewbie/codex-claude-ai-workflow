@@ -8,7 +8,41 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Post-T6 Efficiency Attribution / COMPLETE
+## Current Active Step: A10 Terminal-Delivery Experiment / DETERMINISTIC PASS
+
+> 2026-08-05 已确认下一目标：对 full workflow happy path 的 10 次固定 Agent 调用
+> 逐一完成成本、owner、consumer、质量增量和 counterfactual 价值举证。最新模型增强
+> 了长程规划、自检与多阶段执行能力，但没有证据证明 strict contract、independent
+> review、ledger、recovery 或 human responsibility 已失去价值；也没有证据证明十次
+> 固定调用对所有任务规模都必须启用。
+>
+> 单一计划为
+> `docs/plans/fixed-agent-call-value-validation-20260805.zh-CN.md`。只读 baseline 必须
+> 同时覆盖 A1-A10，不得发现第一个候选后停止。可定制 workflow 只是后续对一个候选
+> 做同 case 对照的实验手段，不是当前主目标。
+>
+> 只读 baseline 已完成 A1-A10 的成本、owner、consumer、artifact delta 和
+> counterfactual 裁决。A1/A2 与 A5/A6 在中等复杂 T6 中的 revision 收益已证明；
+> A7/A8/A9 是 governed full workflow 的必要核心；A4 证据不足，不得修改。
+>
+> A10 terminal-delivery deterministic experiment 已通过：一份 test-only external
+> definition 将 full 的 32 nodes / 49 edges / 10 Agent calls 缩为 29 / 45 / 9，
+> 仅删除 acceptance approval 之后的 handoff/next-stage 尾部。A1-A9 和其他边逐对象
+> 相等，full definition 未修改。
+>
+> completion audit 已改为消费 WorkflowDefinition 判定 handoff/next-stage 适用性：
+> terminal profile 缺失它们时由 definition 推导为 `NOT_APPLICABLE`，不产生 missing
+> gap；声明它们的 full-like definition 缺失时仍 `needs_review`。查询侧 fallback 与
+> 固定 required-artifact 重推断已经删除，损坏 audit fail visible。focused 58/0，
+> full Maven reactor 9/9 PASS。
+>
+> 当前成熟度为 `ROUTING DETERMINISTIC ENFORCED / AUDIT APPLICABILITY PROJECTED +
+> CANNOT-BYPASS / REAL-CASE NOT PROVEN`。唯一下一任务是
+> 审查并提交当前 checkpoint，然后为同一 A3 终止型交付 case 制定一份
+> Verification Gate，验证实际 10 -> 9 Agent runs 与质量不退化。该 gate 未激活；
+> 禁止自动 provider run、引入 profile DSL/value engine，或同时修改其他调用。
+
+## Completed Step: Post-T6 Efficiency Attribution / COMPLETE
 
 > 当前 production baseline 为 `72ae925a`。最新完整 T6 workstream
 > `ws-20260804T092758Z-73XJ` 已达到 `COMPLETED / ACCEPT_WITH_NOTES`：14 个 Agent

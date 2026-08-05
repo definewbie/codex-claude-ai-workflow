@@ -213,7 +213,7 @@ final class RoutingEngine {
         nextActiveIds.addAll(successorNodeIds);
 
         if (nextActiveIds.isEmpty()) {
-            completeWorkflow(paths, current, node, outcome);
+            completeWorkflow(paths, definition, current, node, outcome);
             return;
         }
 
@@ -380,6 +380,7 @@ final class RoutingEngine {
 
     private void completeWorkflow(
             WorkstreamPaths paths,
+            WorkflowDefinition definition,
             WorkflowCurrentDocument current,
             NodeInstanceDocument node,
             String outcome
@@ -390,7 +391,7 @@ final class RoutingEngine {
                 "outcome", outcome
         ));
         var now = Instant.now();
-        completionAuditWriter.write(paths, node, outcome, now);
+        completionAuditWriter.write(paths, definition, node, outcome, now);
         var completed = new WorkflowCurrentDocument(
                 1,
                 current.workstreamId(),

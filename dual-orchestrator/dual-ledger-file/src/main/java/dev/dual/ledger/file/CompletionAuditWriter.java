@@ -2,6 +2,7 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.workflow.WorkflowDefinition;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,25 +25,31 @@ public final class CompletionAuditWriter {
 
     public CompletionAuditDocument write(
             WorkstreamPaths paths,
+            WorkflowDefinition definition,
             NodeInstanceDocument finalNode,
             String finalOutcome,
             Instant completedAt
     ) throws IOException {
-        var audit = evaluate(paths, finalNode.nodeDefinitionId(), finalOutcome, completedAt);
+        var audit = evaluate(paths, definition, finalNode.nodeDefinitionId(), finalOutcome, completedAt);
         jsonWriter.write(paths.completionAuditJson(), audit);
         return audit;
     }
 
     public CompletionAuditDocument evaluate(
             WorkstreamPaths paths,
+            WorkflowDefinition definition,
             String finalNodeDefinitionId,
             String finalOutcome,
             Instant completedAt
     ) {
         var gaps = new ArrayList<String>();
         auditFinalReport(paths, gaps);
-        auditHandoff(paths, gaps);
-        auditNextStagePrompt(paths, gaps);
+        if (requiresArtifact(definition, "stage_handoff")) {
+            auditHandoff(paths, gaps);
+        }
+        if (requiresHandler(definition, "prompt.generate_next_stage")) {
+            auditNextStagePrompt(paths, gaps);
+        }
         return new CompletionAuditDocument(
                 1,
                 "ENDED",
@@ -54,6 +61,15 @@ public final class CompletionAuditWriter {
                 completedAt,
                 Instant.now()
         );
+    }
+
+    private static boolean requiresArtifact(WorkflowDefinition definition, String artifactType) {
+        return definition.nodes().stream()
+                .anyMatch(node -> artifactType.equals(text(node.config().get("expected_artifact"))));
+    }
+
+    private static boolean requiresHandler(WorkflowDefinition definition, String handlerType) {
+        return definition.nodes().stream().anyMatch(node -> handlerType.equals(node.handlerType()));
     }
 
     private void auditFinalReport(WorkstreamPaths paths, List<String> gaps) {

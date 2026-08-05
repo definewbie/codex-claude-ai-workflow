@@ -358,6 +358,56 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void overviewDoesNotRecomputeNextStageRequirementsWithoutCompletionAudit() throws Exception {
+        var fixture = createWorkstream("ws-api-no-completion-audit");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.writeString(paths.workflowCurrentJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-api-no-completion-audit",
+                  "workflowInstanceId": "wf-ws-api-no-completion-audit",
+                  "workflowId": "api-workflow",
+                  "definitionVersion": 1,
+                  "status": "COMPLETED",
+                  "activeNodeInstanceIds": [],
+                  "openGateIds": [],
+                  "lastEventId": "event-completed",
+                  "updatedAt": "2026-06-15T00:00:01Z"
+                }
+                """, StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var completion = (Map<String, Object>) response.get("completionAudit");
+        assertEquals("not_available", completion.get("status"));
+        assertEquals(List.of("completion audit is missing"), completion.get("gaps"));
+        var attention = (List<Map<String, Object>>) response.get("attention");
+        assertFalse(attention.stream().anyMatch(item ->
+                item.get("title").toString().contains("handoff")
+                        || item.get("title").toString().contains("next-stage")
+                        || item.get("detail").toString().contains("handoff.json")
+                        || item.get("detail").toString().contains("next-stage prompt")));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void overviewFailsVisibleWhenPersistedCompletionAuditIsInvalid() throws Exception {
+        var fixture = createWorkstream("ws-api-invalid-completion-audit");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        Files.createDirectories(paths.domainDir());
+        Files.writeString(paths.completionAuditJson(), "{not-json", StandardCharsets.UTF_8);
+        var controller = controller();
+
+        var response = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var completion = (Map<String, Object>) response.get("completionAudit");
+        assertEquals("invalid", completion.get("status"));
+        assertEquals(List.of("completion audit is unreadable or invalid"), completion.get("gaps"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void overviewUsesWorkflowCurrentWhenTimelineProjectionIsStale() throws Exception {
         var fixture = createWorkstream("ws-api-stale-timeline");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));

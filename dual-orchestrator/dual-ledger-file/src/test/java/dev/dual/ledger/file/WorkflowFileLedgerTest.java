@@ -752,6 +752,92 @@ class WorkflowFileLedgerTest {
         assertTrue(audit.contains("\"lifecycleState\" : \"ENDED\""));
         assertTrue(audit.contains("\"workflowStatus\" : \"COMPLETED\""));
         assertTrue(audit.contains("\"finalNodeDefinitionId\" : \"only\""));
+        assertFalse(audit.contains("handoff.json is missing"));
+        assertFalse(audit.contains("next-stage prompt is missing"));
+    }
+
+    @Test
+    void terminalAcceptanceProfileCompletesWithoutNextStageArtifacts() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-terminal-delivery"));
+        var reportsDir = paths.workstreamDir().resolve("reports");
+        Files.createDirectories(reportsDir);
+        Files.writeString(reportsDir.resolve("latest-final-report.md"), """
+                ## User Request
+                done
+                ## Verification Evidence
+                verified
+                ## Acceptance Summary
+                accepted
+                ## Git Evidence
+                scoped
+                """);
+        var definition = new WorkflowDefinition(
+                "terminal-delivery-experiment",
+                1,
+                "gate.human_acceptance",
+                List.of(new NodeDefinition("gate.human_acceptance", NodeKind.GATE, "human.review", Map.of(
+                        "terminal_gate", true,
+                        "allowed_actions", List.of("approve", "revise"),
+                        "gate_purpose", "acceptance"
+                ))),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-terminal-delivery", definition);
+        ledger.resolveOpenGate(paths, definition, "approve", "accepted delivery");
+
+        var completed = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, completed.status());
+        assertTrue(completed.activeNodeInstanceIds().isEmpty());
+        assertFalse(Files.exists(paths.workstreamDir().resolve("artifacts/next-stage/handoff.json")));
+        var audit = Files.readString(paths.completionAuditJson());
+        assertTrue(audit.contains("\"status\" : \"ready\""), audit);
+        assertTrue(audit.contains("\"gaps\" : [ ]"), audit);
+        assertFalse(audit.contains("handoff.json is missing"), audit);
+        assertFalse(audit.contains("next-stage prompt is missing"), audit);
+    }
+
+    @Test
+    void definitionThatDeclaresNextStageArtifactsStillAuditsThem() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage-required"));
+        var reportsDir = paths.workstreamDir().resolve("reports");
+        Files.createDirectories(reportsDir);
+        Files.writeString(reportsDir.resolve("latest-final-report.md"), """
+                ## User Request
+                done
+                ## Verification Evidence
+                verified
+                ## Acceptance Summary
+                accepted
+                ## Git Evidence
+                scoped
+                """);
+        var definition = new WorkflowDefinition(
+                "next-stage-required",
+                1,
+                "only",
+                List.of(
+                        new NodeDefinition("only", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("handoff", NodeKind.TASK, "acpx.agent_run", Map.of(
+                                "expected_artifact", "stage_handoff"
+                        )),
+                        new NodeDefinition("next-prompt", NodeKind.TASK, "prompt.generate_next_stage", Map.of())
+                ),
+                List.of()
+        );
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-next-stage-required", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of(), Map.of());
+
+        var audit = Files.readString(paths.completionAuditJson());
+        assertTrue(audit.contains("\"status\" : \"needs_review\""), audit);
+        assertTrue(audit.contains("handoff.json is missing"), audit);
+        assertTrue(audit.contains("next-stage prompt is missing"), audit);
     }
 
     @Test
