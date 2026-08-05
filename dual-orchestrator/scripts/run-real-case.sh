@@ -276,6 +276,10 @@ validate_inputs() {
     fail "acpx not found. Initialize acpx sessions before running a real case."
     exit 1
   }
+  command -v jq >/dev/null 2>&1 || {
+    fail "jq not found. A structured JSON parser is required for completion-audit reporting."
+    exit 1
+  }
   case "$PROMPT_LANGUAGE" in
     auto|en|zh-CN|zh|zh-cn) ;;
     *) fail "--prompt-language must be auto, en, or zh-CN"; exit 1 ;;
@@ -895,18 +899,24 @@ artifact_present_bool() {
 }
 
 missing_artifacts() {
-  local missing=()
-  [[ "$(artifact_present_bool "reports/latest-final-report.md")" == "true" ]] || missing+=("final_report")
-  [[ "$(artifact_present_bool "artifacts/next-stage/handoff.json")" == "true" ]] || missing+=("handoff_json")
-  [[ "$(artifact_present_bool "artifacts/next-stage/next-stage-prompt.md")" == "true" ]] || missing+=("next_stage_prompt")
-  [[ "$(artifact_present_bool "delivery/pr-body.md")" == "true" ]] || missing+=("delivery_pr_body")
-  [[ "$(artifact_present_bool "reports/workstream-summary.md")" == "true" ]] || missing+=("workstream_summary")
-  if [[ "${#missing[@]}" -eq 0 ]]; then
-    printf ''
+  local audit="$WS_DIR/domain/completion-audit.json"
+  [[ -f "$audit" ]] || {
+    printf 'completion_audit_missing'
     return
+  }
+
+  if jq -e '
+    .schemaVersion == 1 and
+    .lifecycleState == "ENDED" and
+    .status == "ready" and
+    .workflowStatus == "COMPLETED" and
+    (.gaps | type == "array" and length == 0) and
+    all(.gaps[]; type == "string")
+  ' "$audit" >/dev/null 2>&1; then
+    printf ''
+  else
+    printf 'completion_audit_not_ready_or_invalid'
   fi
-  local IFS=,
-  printf '%s' "${missing[*]}"
 }
 
 invalid_reason() {
@@ -1021,6 +1031,17 @@ artifact_status() {
   fi
 }
 
+completion_artifact_status() {
+  local ref="$1"
+  if [[ -f "$WS_DIR/$ref" ]]; then
+    printf 'present'
+  elif [[ -z "$(missing_artifacts)" ]]; then
+    printf 'not_applicable'
+  else
+    printf 'missing'
+  fi
+}
+
 write_report() {
   FINISHED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   write_summary_json
@@ -1123,8 +1144,8 @@ write_report() {
     if [[ -n "$WS_DIR" ]]; then
       echo "| Final Report | $(artifact_status "reports/latest-final-report.md") | $final_report |"
       echo "| Workstream Summary | $(artifact_status "reports/workstream-summary.md") | $workstream_summary |"
-      echo "| Handoff JSON | $(artifact_status "artifacts/next-stage/handoff.json") | $handoff_json |"
-      echo "| Next-stage Prompt | $(artifact_status "artifacts/next-stage/next-stage-prompt.md") | $next_prompt |"
+      echo "| Handoff JSON | $(completion_artifact_status "artifacts/next-stage/handoff.json") | $handoff_json |"
+      echo "| Next-stage Prompt | $(completion_artifact_status "artifacts/next-stage/next-stage-prompt.md") | $next_prompt |"
       echo "| Delivery PR Body | $(artifact_status "delivery/pr-body.md") | $delivery_body |"
       echo "| Delivery Commit Message | $(artifact_status "delivery/commit-message.txt") | $delivery_commit |"
     fi

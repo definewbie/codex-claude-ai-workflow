@@ -2,9 +2,9 @@
 
 日期：2026-08-05
 
-状态：`READY / NOT RUN`。`run-real-case.sh` 已能互斥透传 external
-`--workflow <path>`，并在 provider probe 前验证和持久化 resolved path、SHA-256、
-workflow id/version。real-case 结果仍未知，不得提前标记 `PASS` 或 `PROVEN`。
+状态：`PASS / ONE A3 SAME-CASE PROVEN`。真实运行使用固定 task、target tree 与 external
+workflow；随后只对 captured ledger 重放 report projection，未再次调用 provider，未运行
+第二个 A3 样本。
 
 ## Fixed comparison inputs
 
@@ -100,21 +100,41 @@ workflow id/version。real-case 结果仍未知，不得提前标记 `PASS` 或 
   `artifactFreshnessProven=true`、external workflow resolved path/hash/id、task hash、target
   tree、provider probe results 和 runner-kind。缺少任一项不得创建 workstream。
 
-## Current readiness decision
+## Result
 
 ```text
 Gate definition: COMPLETE
 Deterministic A10 boundary: PASS
 External workflow harness boundary: PASS
-Real-case execution: READY / NOT RUN
+Real-case execution: PASS / PROVEN FOR ONE A3 SAME-CASE SAMPLE
+Report projection replay: PASS
 ```
 
-Readiness 证据：`scripts/run-real-case.test.sh` 已证明 `--workflow` 与显式 `--variant`
+执行证据：workstream `ws-20260805T084458Z-54Y3` 使用固定 A3 输入完成，结果为
+`COMPLETED / ACCEPT`；Agent runs=9、provider occurrences=9、revision=0、correction=0；
+change scope PASS；独立 `npm test` 11/11 PASS；completion audit=`ready / gaps=[]`；
+`handoff.json` 与 `next-stage-prompt.md` 均不存在，符合 terminal-delivery definition 的
+`NOT_APPLICABLE` 语义。原始报告位于
+`docs/testing/real-case-reports/20260805T084110Z/report.md`。
+
+原始报告曾因 `run-real-case.sh` 用固定文件清单重新推断 applicability 而错误标记
+`Benchmark Grade: FAIL`。该报告保持不变，作为 projection gap 的历史证据。修复后，
+`missing_artifacts()` 仅消费 authoritative `domain/completion-audit.json`；audit 缺失、非法
+或非 ready 均 fail closed。使用同一 captured workstream 的 deterministic replay 得到：
+
+```text
+agent_run_count=9
+final_acceptance_decision=ACCEPT
+handoff_json=false
+next_stage_prompt=false
+verification_confidence=HIGH
+benchmark_grade=PASS
+benchmark_grade_reason=ok
+```
+
+`scripts/run-real-case.test.sh` 同时证明 `--workflow` 与显式 `--variant`
 互斥、空 workflow path fail closed、validated path 不一致 fail closed、preflight 精确记录
 path/hash/id/version、start command 恰有一个 `--workflow <absolute-path>` 且不存在
-`--workflow-variant`，workflow validation 失败时 provider probe 不会执行。脚本语法、
-`git diff --check` 与 full Maven reactor `9/9 / 1187 tests / 0 failures / 0 errors` 通过。
-
-下一动作只能是在 clean SHA 上执行本 Gate 的 fresh package、真实 workflow validate、
-target baseline 与双 provider probes；全部 PASS 后运行一次 A3。不得回退到 bundled full
-workflow，也不得启动第二个样本。
+`--workflow-variant`，workflow validation 失败时 provider probe 不会执行；并新增证明
+terminal audit 的空 gaps 不要求 handoff、非 ready/损坏/缺失 audit 不能绕过 benchmark
+失败。该结论只证明一个 A3 same-case 样本，不外推为所有任务都应删除 A10。

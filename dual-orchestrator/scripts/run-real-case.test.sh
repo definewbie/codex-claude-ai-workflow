@@ -28,6 +28,57 @@ cat >"$workflow_fixture" <<'EOF'
 EOF
 workflow_fixture="$(cd "$(dirname "$workflow_fixture")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$workflow_fixture")")"
 
+terminal_audit_workstream="$tmp/terminal-audit-workstream"
+mkdir -p "$terminal_audit_workstream/domain"
+cat >"$terminal_audit_workstream/domain/completion-audit.json" <<'EOF'
+{
+  "schemaVersion": 1,
+  "lifecycleState": "ENDED",
+  "status": "ready",
+  "workflowStatus": "COMPLETED",
+  "gaps": []
+}
+EOF
+WS_DIR="$terminal_audit_workstream"
+assert_eq "" "$(missing_artifacts)" \
+  "terminal completion audit makes absent handoff artifacts not applicable"
+assert_eq "PASS" "$(real_case_grade "COMPLETED" "true" "$(missing_artifacts)" "ACCEPT" "0" "")" \
+  "terminal completion audit permits benchmark pass without handoff artifacts"
+assert_eq "not_applicable" "$(completion_artifact_status "artifacts/next-stage/handoff.json")" \
+  "terminal completion audit projects absent handoff as not applicable"
+
+incomplete_audit_workstream="$tmp/incomplete-audit-workstream"
+mkdir -p "$incomplete_audit_workstream/domain"
+cat >"$incomplete_audit_workstream/domain/completion-audit.json" <<'EOF'
+{
+  "schemaVersion": 1,
+  "lifecycleState": "ENDED",
+  "status": "needs_review",
+  "workflowStatus": "COMPLETED",
+  "gaps": ["handoff.json is missing"]
+}
+EOF
+WS_DIR="$incomplete_audit_workstream"
+assert_eq "completion_audit_not_ready_or_invalid" "$(missing_artifacts)" \
+  "completion audit gaps remain benchmark blocking"
+assert_eq "FAIL" "$(real_case_grade "COMPLETED" "true" "$(missing_artifacts)" "ACCEPT" "0" "")" \
+  "completion audit gaps keep benchmark failed"
+assert_eq "missing" "$(completion_artifact_status "artifacts/next-stage/handoff.json")" \
+  "required handoff remains visibly missing"
+
+missing_audit_workstream="$tmp/missing-audit-workstream"
+mkdir -p "$missing_audit_workstream"
+WS_DIR="$missing_audit_workstream"
+assert_eq "completion_audit_missing" "$(missing_artifacts)" \
+  "missing completion audit fails visible"
+
+invalid_audit_workstream="$tmp/invalid-audit-workstream"
+mkdir -p "$invalid_audit_workstream/domain"
+printf '{"status":"ready","gaps":[]' >"$invalid_audit_workstream/domain/completion-audit.json"
+WS_DIR="$invalid_audit_workstream"
+assert_eq "completion_audit_not_ready_or_invalid" "$(missing_artifacts)" \
+  "invalid completion audit fails visible"
+
 set +e
 (
   WORKFLOW_PATH="$workflow_fixture"

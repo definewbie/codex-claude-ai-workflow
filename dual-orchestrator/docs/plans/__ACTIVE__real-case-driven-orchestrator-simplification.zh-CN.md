@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: A10 Same-Case Gate / READY, NOT RUN
+## Current Active Step: A10 Same-Case Gate / PASS, PROVEN
 
 > 2026-08-05 已确认下一目标：对 full workflow happy path 的 10 次固定 Agent 调用
 > 逐一完成成本、owner、consumer、质量增量和 counterfactual 价值举证。最新模型增强
@@ -36,18 +36,23 @@
 > 固定 required-artifact 重推断已经删除，损坏 audit fail visible。focused 58/0，
 > full Maven reactor 9/9 PASS。
 >
-> 当前成熟度为 `ROUTING DETERMINISTIC ENFORCED / AUDIT APPLICABILITY PROJECTED +
-> CANNOT-BYPASS / REAL-CASE NOT PROVEN`。deterministic checkpoint 已提交为
+> 当前成熟度为 `ROUTING DETERMINISTIC ENFORCED / AUDIT APPLICABILITY ENFORCED +
+> CANNOT-BYPASS / ONE A3 SAME-CASE PROVEN`。deterministic checkpoint 已提交为
 > `e25cd9f4`；same-case Gate 已定义在
 > `docs/testing/verification-gates/20260805-a10-terminal-delivery-a3.md`。
 >
-> Gate 当前为 `READY / NOT RUN`：`run-real-case.sh` 已支持互斥 external
-> `--workflow <path>`，在 provider probe 前验证并持久化 resolved path、SHA-256、
-> workflow id/version。cannot-bypass 已证明空 path、显式 variant 冲突、validated path
-> 不一致和 validation failure 均 fail closed，且 start 不会回落到 bundled full variant。
-> 脚本测试与 full Maven reactor `9/9 / 1187/0/0` 通过。下一动作只是在 clean SHA 上完成
-> fresh package、target baseline、真实 workflow validate 与双 provider probes，然后按
-> Gate 运行一次 A3；real-case 前仍不得标 `PROVEN`。
+> Gate 已使用同一 A3 task 与 target tree 运行一次：workstream
+> `ws-20260805T084458Z-54Y3` 达到 `COMPLETED / ACCEPT`，实际 Agent runs 与 provider
+> occurrences 均从 10 降为 9，revision=0、correction=0，change scope PASS，独立
+> `npm test` 11/11 PASS，completion audit=`ready / gaps=[]`，且未生成 handoff/next-stage
+> 工件。原始 harness 报告错误地用固定文件清单把两项 `NOT_APPLICABLE` 工件重算为
+> missing，暴露 report projection owner 漂移；原报告保留为历史证据。
+>
+> `missing_artifacts()` 现只消费 persisted completion audit 的 status/gaps，不再按固定
+> 文件列表重推 applicability；audit 缺失、非法或非 ready 均 fail closed。脚本
+> cannot-bypass PASS，并对同一 captured workstream 做 deterministic replay：保持
+> 9 runs、`ACCEPT` 和 handoff/prompt absent，同时得到 `Benchmark Grade: PASS`、
+> `Verification Confidence: HIGH`。未再次调用 provider，也未运行第二个 A3 样本。
 
 ## Completed Step: Post-T6 Efficiency Attribution / COMPLETE
 
