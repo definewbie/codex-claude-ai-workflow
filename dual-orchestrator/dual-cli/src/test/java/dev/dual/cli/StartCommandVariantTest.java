@@ -52,6 +52,15 @@ class StartCommandVariantTest {
     }
 
     @Test
+    void terminalDeliveryVariant_usesTerminalDeliveryVariant() throws Exception {
+        var wf = loader.loadOrDefault(null, "terminal-delivery");
+        assertEquals("agent-lifecycle-terminal-delivery", wf.workflowId());
+        assertEquals(1, wf.version());
+        assertThrows(IllegalArgumentException.class, () -> wf.node("stage.claude_handoff"));
+        assertEquals(true, wf.node("gate.human_acceptance").config().get("terminal_gate"));
+    }
+
+    @Test
     void variantFlag_overridesDefaultButFileWins() throws Exception {
         // When both --workflow and --workflow-variant are provided,
         // the file takes precedence. This is tested via the loader directly.

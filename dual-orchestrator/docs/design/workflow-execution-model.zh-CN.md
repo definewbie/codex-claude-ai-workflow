@@ -267,7 +267,7 @@ LiteFlow 已具备提升为默认 routing kernel 的验证基础。
 4. 不把 Workstream lifecycle、ledger、human gate、artifact contract、completion contract 下放给 LiteFlow。
 5. 提升默认后持续保留最小回归：controlled lifecycle、controlled reject-repair-reaccept、real acpx contract smoke、terminal completed boundary。
 
-默认内置 workflow 的定义来源是 classpath JSON 资源，由 `WorkflowDefinitionLoader` 统一加载：`agent-lifecycle.full.json` 对应默认 full workflow，`agent-lifecycle.contract.json` 对应 contract workflow。Java 不再手写 lifecycle DAG，这样可以避免“LiteFlow 是执行内核，但默认流程仍藏在 Java factory 里”的双重心智模型。
+默认内置 workflow 的定义来源是 classpath JSON 资源，由 `WorkflowDefinitionLoader` 统一加载：`agent-lifecycle.full.json` 对应默认 full workflow，`agent-lifecycle.contract.json` 对应 contract workflow，`agent-lifecycle.terminal-delivery.json` 对应验收后直接完成的 terminal-delivery workflow。Java 不再手写 lifecycle DAG，这样可以避免“LiteFlow 是执行内核，但默认流程仍藏在 Java factory 里”的双重心智模型。`terminal-delivery` 必须显式选择，runtime 不自动判断任务是否需要下一阶段。
 
 ## 2.3 编排内核边界
 

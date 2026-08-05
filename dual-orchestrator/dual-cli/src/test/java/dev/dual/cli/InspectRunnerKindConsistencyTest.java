@@ -34,6 +34,14 @@ class InspectRunnerKindConsistencyTest {
                 AgentRunnerKind.from(text(node, "agent"), text(node, "permission_profile")));
     }
 
+    @Test
+    void terminalDeliveryVariantFirstAgentRunIsAcpxClaudeSession() throws Exception {
+        var node = firstAgentRun(new WorkflowDefinitionLoader().loadOrDefault(null, "terminal-delivery"));
+        assertEquals("intake.claude_brainstorm", node.id());
+        assertEquals(AgentRunnerKind.ACPX_CLAUDE_SESSION,
+                AgentRunnerKind.from(text(node, "agent"), text(node, "permission_profile")));
+    }
+
     private static NodeDefinition firstAgentRun(WorkflowDefinition definition) {
         for (var node : definition.nodes()) {
             if ("acpx.agent_run".equals(node.handlerType())) {

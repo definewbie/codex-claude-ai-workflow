@@ -1352,7 +1352,11 @@ function updateNewTaskCommand() {
   const lifecycle = els.newTaskLifecycle.value;
   const maxSteps = Number.parseInt(els.newTaskMaxSteps.value, 10) || 80;
   const requirement = els.newTaskDescription.value.trim() || els.newTaskName.value.trim() || "任务描述";
-  const variant = lifecycle === "design-only" ? "--workflow-variant contract" : "";
+  const variant = lifecycle === "design-only"
+    ? "--workflow-variant contract"
+    : lifecycle === "terminal-delivery"
+      ? "--workflow-variant terminal-delivery"
+      : "";
   const mode = els.newTaskMode.value === "in-place" ? "# 原地运行需要 CLI 支持显式 in-place 策略；默认建议 worktree。" : "";
   els.newTaskCommand.textContent = `${mode}
 java -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar start \\

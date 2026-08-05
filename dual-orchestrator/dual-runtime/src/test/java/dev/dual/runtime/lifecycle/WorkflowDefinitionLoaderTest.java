@@ -182,7 +182,7 @@ class WorkflowDefinitionLoaderTest {
         var loader = new WorkflowDefinitionLoader();
         var allowedProfiles = java.util.Set.of("contract_discovery", "observe", "review", "implement");
 
-        for (var variant : java.util.List.of("full", "contract")) {
+        for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
             var definition = loader.loadOrDefault(null, variant);
             var missingOrInvalid = definition.nodes().stream()
                     .filter(node -> "acpx.agent_run".equals(node.handlerType()))
@@ -198,7 +198,7 @@ class WorkflowDefinitionLoaderTest {
     void bundledIntakeClaudeUsesContractDiscoveryPermissionProfile() throws Exception {
         var loader = new WorkflowDefinitionLoader();
 
-        for (var variant : java.util.List.of("full", "contract")) {
+        for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
             var definition = loader.loadOrDefault(null, variant);
 
             assertEquals(
@@ -219,6 +219,17 @@ class WorkflowDefinitionLoaderTest {
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
         assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
         assertEquals(NodeKind.TASK, definition.node("acceptance.classify_failure").kind());
+    }
+
+    @Test
+    void bundledTerminalDeliveryWorkflowIsLoadedFromClasspathResource() throws Exception {
+        var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "terminal-delivery");
+
+        assertEquals("agent-lifecycle-terminal-delivery", definition.workflowId());
+        assertEquals(1, definition.version());
+        assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
+        assertEquals(29, definition.nodes().size());
+        assertEquals(45, definition.edges().size());
     }
 
     @Test

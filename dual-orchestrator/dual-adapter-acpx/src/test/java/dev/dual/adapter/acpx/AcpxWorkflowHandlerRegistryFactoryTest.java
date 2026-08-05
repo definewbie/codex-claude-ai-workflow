@@ -29,7 +29,8 @@ class AcpxWorkflowHandlerRegistryFactoryTest {
         var loader = new WorkflowDefinitionLoader();
         return List.of(
                 loader.loadOrDefault(null, "full"),
-                loader.loadOrDefault(null, "contract")
+                loader.loadOrDefault(null, "contract"),
+                loader.loadOrDefault(null, "terminal-delivery")
         );
     }
 }

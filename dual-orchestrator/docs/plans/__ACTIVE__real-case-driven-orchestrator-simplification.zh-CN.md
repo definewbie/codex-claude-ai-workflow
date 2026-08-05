@@ -25,8 +25,8 @@
 > counterfactual 裁决。A1/A2 与 A5/A6 在中等复杂 T6 中的 revision 收益已证明；
 > A7/A8/A9 是 governed full workflow 的必要核心；A4 证据不足，不得修改。
 >
-> A10 terminal-delivery deterministic experiment 已通过：一份 test-only external
-> definition 将 full 的 32 nodes / 49 edges / 10 Agent calls 缩为 29 / 45 / 9，
+> A10 terminal-delivery deterministic experiment 已通过：该 definition
+> 将 full 的 32 nodes / 49 edges / 10 Agent calls 缩为 29 / 45 / 9，
 > 仅删除 acceptance approval 之后的 handoff/next-stage 尾部。A1-A9 和其他边逐对象
 > 相等，full definition 未修改。
 >
@@ -53,6 +53,15 @@
 > cannot-bypass PASS，并对同一 captured workstream 做 deterministic replay：保持
 > 9 runs、`ACCEPT` 和 handoff/prompt absent，同时得到 `Benchmark Grade: PASS`、
 > `Verification Confidence: HIGH`。未再次调用 provider，也未运行第二个 A3 样本。
+>
+> 在 same-case proof 后，`terminal-delivery` 已提升为正式可选 bundled variant：唯一
+> definition 位于 main resources，`WorkflowDefinitionLoader`、CLI start/runner-kind 和
+> real-case harness 均接受显式 `terminal-delivery`，Operator 新任务命令生成器也投影同一
+> CLI 参数；`full` 继续作为默认值。没有增加自动
+> profile 选择、防误选规则、registry、engine 或 DSL。正式 definition 与已验证 experiment
+> 除稳定 workflow id 外保持同一 graph delta；contract、handler、permission、runner-kind
+> consistency sweep 覆盖三个 variants。full reactor `1161/0/0`，production wiring 达到
+> `ENFORCED`；同 graph 的 A3 same-case evidence 保持 `PROVEN`。
 
 ## Completed Step: Post-T6 Efficiency Attribution / COMPLETE
 

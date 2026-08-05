@@ -41,7 +41,8 @@ Runtime 只认识三类节点：
 4. Implementation and Claude self-test report
 5. Codex acceptance review
 6. Final report
-7. Stage handoff and next-stage prompt
+7. Stage handoff and next-stage prompt (`full`/`contract`; omitted by
+   `terminal-delivery`)
 
 第一版仍是薄 mainline，但几个关键节点已经开始落地：artifact validation 会采集 Git evidence，final report 会把验收、研发自测和 Git evidence 收口成报告，next-stage prompt 会根据 Claude handoff 生成下一阶段提示词，`acpx.agent_run` 能通过 `acpx` 调 Claude / Codex，decision handler 能解析 Agent 输出里的 `dual-control` block。
 
@@ -653,7 +654,7 @@ dualctl start --workflow ./workflow.json --allow-unknown-handlers "任务描述"
 dualctl workflow print-default --output ./workflow.json
 ```
 
-如果不传 `--workflow`，默认使用 classpath 资源中的 `agent-lifecycle-full@4`。`WorkflowDefinitionLoader` 是内置定义的唯一入口；`full` 和 `contract` variant 都从 classpath JSON resource 加载，Java 不再手写 lifecycle DAG。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
+如果不传 `--workflow`，默认使用 classpath 资源中的 `agent-lifecycle-full@6`。`WorkflowDefinitionLoader` 是内置定义的唯一入口；`full`、`contract` 和 `terminal-delivery` variant 都从 classpath JSON resource 加载，Java 不再手写 lifecycle DAG。`terminal-delivery` 必须通过 `--workflow-variant terminal-delivery` 显式选择；它在最终验收后直接完成，不生成 handoff 或 next-stage prompt。如果传入 workflow 文件，启动时会严格校验 nodes / edges / entry node，并把当时的 workflow definition 固化到 `.agent/workstreams/<workstream_id>/workflow/definition.json`。后续即使原始配置文件变化，这次 run 仍按账本中的 definition 复盘。
 
 最小 workflow 示例：
 
@@ -1466,8 +1467,9 @@ cd dual-orchestrator
   --task-file /tmp/dual-task.md
 ```
 
-`full` lifecycle 是默认流程。只有在明确要跑更小的 contract-only 流程时，才使用
-`--variant contract`。
+`full` lifecycle 是默认流程。使用更小的 contract-only 流程时传
+`--variant contract`；验收后即结束、不需要下一阶段交接时传
+`--variant terminal-delivery`。
 
 跑完后查看：
 

@@ -88,7 +88,10 @@ dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.
 `WorkflowDefinitionLoader` is the single default-definition entry point. When a
 workstream starts, the resolved definition is copied into
 `workflow/definition.json`; resume, trace, and replay use that ledger copy.
-Both bundled variants are loaded from classpath JSON resources through `WorkflowDefinitionLoader`.
+All bundled variants (`full`, `contract`, and `terminal-delivery`) are loaded
+from classpath JSON resources through `WorkflowDefinitionLoader`. `full` remains
+the default; `terminal-delivery` is selected explicitly and completes after
+final acceptance without producing next-stage handoff artifacts.
 
 ### Agent Permission Boundary
 

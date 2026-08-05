@@ -398,7 +398,7 @@ workflow 终止于 human acceptance，而不是伪造 deterministic handoff。
 5. completion audit/final report 不从缺失 handoff 推断伪状态；
 6. 同 case 对照只证明终止型 profile，不外推到需要交接的任务。
 
-Boundary maturity：`VALIDATED FOR VALUE / NOT YET ENFORCED AS A CUSTOM PROFILE`。
+Boundary maturity：`PRODUCTION OPTIONAL VARIANT ENFORCED / ONE A3 SAME-CASE PROVEN`。
 
 ## 17. A10 Terminal-Delivery Deterministic Experiment Result
 
@@ -514,3 +514,23 @@ Residual risk:
    handoff 被记为 `NOT_APPLICABLE`；
 5. 该 real-case 通过前，不得宣称 token/耗时收益，不得把 experiment
    晋升为默认或内置 workflow。
+
+## 18. Production Variant Promotion Result
+
+上述 experiment 与 same-case Gate 已完成。workstream `ws-20260805T084458Z-54Y3`
+证明同一 A3 从 10 次 Agent/provider occurrence 降为 9 次，同时保持
+`COMPLETED / ACCEPT`、revision=0、correction=0、change scope PASS 和独立测试 PASS。
+
+随后没有把它提升为默认流程，而是提升为显式可选的 bundled variant：
+
+```bash
+dualctl start --workflow-variant terminal-delivery ...
+./scripts/run-real-case.sh --variant terminal-delivery ...
+```
+
+正式 definition 的唯一来源为
+`dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json`；
+原 test resource 已删除，避免双写。`full` 保持默认，runtime 不自动选择 profile。
+production wiring 与三个 bundled variants 的 contract/handler/permission/runner consistency
+由 deterministic tests 和 full reactor `1161/0/0` 强制；没有新增 registry、engine、DSL
+或自动推荐逻辑。

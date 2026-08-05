@@ -133,10 +133,15 @@ RoutingEngine
 dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/
   agent-lifecycle.full.json
   agent-lifecycle.contract.json
+  agent-lifecycle.terminal-delivery.json
 ```
 
 `WorkflowDefinitionLoader.loadOrDefault()` 负责加载。Definition 是流程结构的
 source of truth；handler registry 只是能力装配，不能重建第二份 workflow。
+
+内置 variant 的语义不同：`full` 是默认流程并生成下一阶段 handoff；`contract` 是
+合同聚焦流程；`terminal-delivery` 在最终 human acceptance 后直接完成，不生成
+handoff 或 next-stage prompt。variant 由用户显式选择，runtime 不自动推断。
 
 ### 4.2 Instance
 

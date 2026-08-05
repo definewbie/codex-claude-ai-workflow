@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
 )
 public final class InspectRunnerKindCommand implements Callable<Integer> {
 
-    @Option(names = "--variant", description = "Workflow variant: full or contract. Default: full.")
+    @Option(names = "--variant", description = "Workflow variant: full, contract, or terminal-delivery. Default: full.")
     String variant = "full";
 
     @Override

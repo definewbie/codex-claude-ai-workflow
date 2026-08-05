@@ -1,5 +1,5 @@
 {
-  "workflowId": "agent-lifecycle-terminal-delivery-experiment",
+  "workflowId": "agent-lifecycle-terminal-delivery",
   "version": 1,
   "entryNodeId": "context.intake_claude_brainstorm",
   "nodes": [

@@ -86,7 +86,7 @@ CLI、API、Operator Panel 和报告都只能读取或投影 ledger，不应各�
 dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
 ```
 
-`WorkflowDefinitionLoader` 是内置定义入口。启动 workstream 时，loader 会把当前 definition 固化到 ledger 的 `workflow/definition.json`，后续恢复、追踪和复盘都以 ledger 中的副本为准。内置 `full` 和 `contract` variant 都从 classpath JSON resource 加载，Java 不再手写 lifecycle DAG。
+`WorkflowDefinitionLoader` 是内置定义入口。启动 workstream 时，loader 会把当前 definition 固化到 ledger 的 `workflow/definition.json`，后续恢复、追踪和复盘都以 ledger 中的副本为准。内置 `full`、`contract` 和 `terminal-delivery` variant 都从 classpath JSON resource 加载，Java 不再手写 lifecycle DAG。`full` 仍是默认值；`terminal-delivery` 由用户显式选择，并在最终验收后直接完成。
 
 ### Agent Permission Boundary
 

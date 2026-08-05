@@ -18,6 +18,8 @@ import java.util.Map;
 public final class WorkflowDefinitionLoader {
     private static final String FULL_WORKFLOW_RESOURCE = "/dev/dual/runtime/lifecycle/agent-lifecycle.full.json";
     private static final String CONTRACT_WORKFLOW_RESOURCE = "/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json";
+    private static final String TERMINAL_DELIVERY_WORKFLOW_RESOURCE =
+            "/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json";
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new EdgeConditionModule())
@@ -125,14 +127,19 @@ public final class WorkflowDefinitionLoader {
         return loadBundledWorkflow(CONTRACT_WORKFLOW_RESOURCE);
     }
 
+    WorkflowDefinition loadBundledTerminalDeliveryWorkflow() throws IOException {
+        return loadBundledWorkflow(TERMINAL_DELIVERY_WORKFLOW_RESOURCE);
+    }
+
     WorkflowDefinition loadBundledVariant(String variant) throws IOException {
         String normalized = variant == null ? "" : variant.trim().toLowerCase(java.util.Locale.ROOT);
         return switch (normalized) {
             case "", "full" -> loadBundledFullWorkflow();
             case "contract" -> loadBundledContractWorkflow();
+            case "terminal-delivery" -> loadBundledTerminalDeliveryWorkflow();
             default -> throw new IllegalArgumentException(
                     "unknown workflow variant: " + variant
-                            + ". Supported: contract, full");
+                            + ". Supported: contract, full, terminal-delivery");
         };
     }
 

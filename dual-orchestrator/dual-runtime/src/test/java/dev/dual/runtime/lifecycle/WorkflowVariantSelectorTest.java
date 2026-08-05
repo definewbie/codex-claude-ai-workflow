@@ -48,8 +48,15 @@ class WorkflowVariantSelectorTest {
     }
 
     @Test
+    void forVariant_terminalDelivery_returnsTerminalDeliveryVariant() {
+        WorkflowDefinition wf = factory.forVariant("terminal-delivery");
+        assertEquals("agent-lifecycle-terminal-delivery", wf.workflowId());
+        assertEquals(1, wf.version());
+    }
+
+    @Test
     void contractVariantsDeclareProposalReviewAndCompileSubjectBoundary() {
-        for (var variant : java.util.List.of("full", "contract")) {
+        for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
             var workflow = factory.forVariant(variant);
             assertEquals("task_contract_proposal",
                     workflow.node("intake.codex_product_review").config().get("review_subject_artifact"));
@@ -62,6 +69,8 @@ class WorkflowVariantSelectorTest {
     void forVariant_professionalAliases_returnExpectedVariants() {
         assertEquals("agent-lifecycle-contract", factory.forVariant("contract").workflowId());
         assertEquals("agent-lifecycle-full", factory.forVariant("full").workflowId());
+        assertEquals("agent-lifecycle-terminal-delivery",
+                factory.forVariant("terminal-delivery").workflowId());
     }
 
     @Test
@@ -69,6 +78,8 @@ class WorkflowVariantSelectorTest {
         assertEquals("agent-lifecycle-full", factory.forVariant("  Full  ").workflowId());
         assertEquals("agent-lifecycle-full", factory.forVariant("  FULL  ").workflowId());
         assertEquals("agent-lifecycle-contract", factory.forVariant("Contract").workflowId());
+        assertEquals("agent-lifecycle-terminal-delivery",
+                factory.forVariant(" Terminal-Delivery ").workflowId());
     }
 
     @Test

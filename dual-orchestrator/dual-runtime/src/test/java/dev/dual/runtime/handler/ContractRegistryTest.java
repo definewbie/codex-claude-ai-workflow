@@ -198,6 +198,10 @@ class ContractRegistryTest {
             var nodesById = definition.nodes().stream()
                     .collect(java.util.stream.Collectors.toMap(NodeDefinition::id, node -> node));
             for (var entry : expected.entrySet()) {
+                if ("stage.claude_handoff".equals(entry.getKey())
+                        && !nodesById.containsKey(entry.getKey())) {
+                    continue;
+                }
                 var node = nodesById.get(entry.getKey());
                 assertNotNull(node, definition.workflowId() + " missing node " + entry.getKey());
                 assertEquals(entry.getValue(), String.valueOf(node.config().get("expected_artifact")),
@@ -295,7 +299,8 @@ class ContractRegistryTest {
         var loader = new WorkflowDefinitionLoader();
         return List.of(
                 loader.loadOrDefault(null, "full"),
-                loader.loadOrDefault(null, "contract")
+                loader.loadOrDefault(null, "contract"),
+                loader.loadOrDefault(null, "terminal-delivery")
         );
     }
 

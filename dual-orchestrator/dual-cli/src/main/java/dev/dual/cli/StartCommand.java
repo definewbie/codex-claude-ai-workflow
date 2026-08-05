@@ -41,7 +41,7 @@ public final class StartCommand implements Callable<Integer> {
     @Option(names = "--workflow", description = "Workflow definition JSON file. Defaults to built-in agent lifecycle.")
     Path workflowPath;
 
-    @Option(names = "--workflow-variant", description = "Built-in workflow variant: full (default), contract.")
+    @Option(names = "--workflow-variant", description = "Built-in workflow variant: full (default), contract, terminal-delivery.")
     String workflowVariant;
 
     @Option(names = "--prompt-language", description = "Agent human-readable output language: auto, en, zh-CN. Defaults to ${DEFAULT-VALUE}.")

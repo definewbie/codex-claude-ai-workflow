@@ -28,6 +28,15 @@ cat >"$workflow_fixture" <<'EOF'
 EOF
 workflow_fixture="$(cd "$(dirname "$workflow_fixture")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$workflow_fixture")")"
 
+(
+  WORKFLOW_PATH=""
+  WORKFLOW_EXPLICIT=false
+  VARIANT="terminal-delivery"
+  VARIANT_EXPLICIT=true
+  validate_workflow_selection
+  assert_eq "terminal-delivery" "$VARIANT" "terminal-delivery is a supported bundled variant"
+)
+
 terminal_audit_workstream="$tmp/terminal-audit-workstream"
 mkdir -p "$terminal_audit_workstream/domain"
 cat >"$terminal_audit_workstream/domain/completion-audit.json" <<'EOF'

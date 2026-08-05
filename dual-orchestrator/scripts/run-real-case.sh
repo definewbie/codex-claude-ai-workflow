@@ -85,7 +85,7 @@ Options:
                             Required markdown gate proving target, source of truth,
                             preconditions, pass/fail/invalid criteria, stop-loss,
                             and artifact freshness before provider execution.
-  --variant <contract|full>
+  --variant <contract|full|terminal-delivery>
                             Workflow variant. Default: full.
   --workflow <path>         External workflow definition JSON. Mutually exclusive
                             with --variant; its path, SHA-256, id, and version are
@@ -309,8 +309,8 @@ validate_workflow_selection() {
   fi
 
   case "$VARIANT" in
-    contract|full) ;;
-    *) fail "--variant must be contract or full"; return 1 ;;
+    contract|full|terminal-delivery) ;;
+    *) fail "--variant must be contract, full, or terminal-delivery"; return 1 ;;
   esac
 }
 
