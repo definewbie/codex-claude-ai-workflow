@@ -580,6 +580,37 @@ T6 已覆盖 Python backend、PostgreSQL、miniprogram frontend 与 5 个实际�
 `AcpxAgentTaskHandler` 仍有规模或专用读取复杂度，但没有证据证明存在第二控制 owner。
 只有真实性能或重复规则证据才能重新打开删除式 slice。
 
+### 13.5 十次固定 Agent 调用的价值边界
+
+当前 full workflow happy path 固定包含十次 Agent 调用。最新 T6 已证明 intake 与
+plan 的两次 revision loop 修复了会进入最终实现的真实偏差，但该证据只覆盖一个中等
+复杂度任务，不能证明十次调用对所有 task profile 都必须固定启用。
+
+后续价值验证必须覆盖全部十次调用：
+
+```text
+A1/A2  intake + product review
+A3/A4  design + architecture review
+A5/A6  plan + plan review
+A7     implementation
+A8     self-test report
+A9     acceptance review
+A10    stage handoff
+```
+
+每个调用必须从 ledger 和 strict sidecar 证明成本、authoritative output、全部 consumer、
+defect/artifact delta、最终代码或测试影响和省略后的 counterfactual。完成十项 verdict
+后才允许选择一个 subtraction/profile 实验；`--workflow` 仅是该实验的载体。治理内核
+不进入删除候选。具体实施与 gate 见
+`docs/plans/fixed-agent-call-value-validation-20260805.zh-CN.md`。
+
+当前唯一候选 A10 已完成 deterministic experiment：终止型 external definition 只删除
+acceptance 后的 handoff/next-stage 尾部，定义调用从 10 降为 9；full workflow 保持
+不变。路由边界达到 `ENFORCED`，completion-audit applicability 达到 `PROJECTED +
+CANNOT-BYPASS`，真实收益仍未证明。same-case Gate 位于
+`docs/testing/verification-gates/20260805-a10-terminal-delivery-a3.md`；在 real-case harness
+能够透传并证明 external workflow path/hash/id 前，Gate 为 `NOT READY`。
+
 ## 14. 架构保护规则
 
 任何后续任务必须满足：

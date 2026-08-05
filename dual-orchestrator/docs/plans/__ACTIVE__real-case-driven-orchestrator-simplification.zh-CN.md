@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: A10 Terminal-Delivery Experiment / DETERMINISTIC PASS
+## Current Active Step: A10 Same-Case Gate / DEFINED, NOT READY
 
 > 2026-08-05 已确认下一目标：对 full workflow happy path 的 10 次固定 Agent 调用
 > 逐一完成成本、owner、consumer、质量增量和 counterfactual 价值举证。最新模型增强
@@ -37,10 +37,14 @@
 > full Maven reactor 9/9 PASS。
 >
 > 当前成熟度为 `ROUTING DETERMINISTIC ENFORCED / AUDIT APPLICABILITY PROJECTED +
-> CANNOT-BYPASS / REAL-CASE NOT PROVEN`。唯一下一任务是
-> 审查并提交当前 checkpoint，然后为同一 A3 终止型交付 case 制定一份
-> Verification Gate，验证实际 10 -> 9 Agent runs 与质量不退化。该 gate 未激活；
-> 禁止自动 provider run、引入 profile DSL/value engine，或同时修改其他调用。
+> CANNOT-BYPASS / REAL-CASE NOT PROVEN`。deterministic checkpoint 已提交为
+> `e25cd9f4`；same-case Gate 已定义在
+> `docs/testing/verification-gates/20260805-a10-terminal-delivery-a3.md`。
+>
+> Gate 当前为 `DEFINED / NOT READY`：CLI 已支持 external `--workflow`，但
+> `run-real-case.sh` 尚未透传并证明该 path/hash/id。唯一下一任务是一个最小 harness
+> slice，只增加互斥参数透传、preflight attest 与脚本 cannot-bypass；通过前禁止创建
+> provider workstream，也禁止回落到 full variant 伪造 10 -> 9 对照。
 
 ## Completed Step: Post-T6 Efficiency Attribution / COMPLETE
 
