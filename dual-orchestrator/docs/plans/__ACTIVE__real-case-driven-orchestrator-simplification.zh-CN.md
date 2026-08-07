@@ -8,26 +8,40 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Terminal-Delivery Production Real-Case / REMEDIATION
+## Current Active Step: Terminal-Delivery Natural Production Gate / READY, NOT ACTIVE
 
-> 2026-08-07 使用正式 `terminal-delivery` profile 启动 captcha-auth Java 新项目。
-> 首次 `design.claude_design` 暴露非 intake 节点错误填写
-> `contract_obligations`，已由 `331119f8` 修复并在同 workstream retry 中证明输出
-> `contract_obligations=[]`。恢复 run 随后因重复读取已注入 prompt 的
-> `REQUIREMENT.md` / `VERIFICATION-GATE.md` 被 `REREAD_POLICY_DENIED` 阻断。
+> Target phase: `P0` integrated workflow proof. 本轮不修改 workflow、prompt、
+> parser、validator 或 model 配置，只验证已打包的 production
+> `terminal-delivery` profile 在第二个不同业务任务上能否完成交付。
 >
-> 该阻断把 token/read-reuse 效率信号错误提升为 artifact contract failure：读取已经
-> 发生、产物 strict-valid，事后丢弃产物反而增加 Agent 调用、token 和耗时。本轮作为
-> 当前 production real-case 的 P0 blocker 修复，不启动 P1 新能力：删除
-> `REREAD_POLICY_DENIED -> NodeStatus.FAILED` 控制路径和仅为其服务的 calculator；
-> persisted tool usage、read-reuse context guidance 与 `repeatedReadFiles` metrics 保留。
-> 既有 scope、安全、strict schema、typed contract 与 change-boundary 语义不变；本次
-> 不新增 path-level read authority。
+> 自然任务选定为用户已给出的 captcha-auth Java 新项目：手机号或邮箱
+> 注册/登录，注册使用 SMS/email OTP，登录前使用图形 Captcha。该任务在
+> final human acceptance 后没有已声明的下一阶段，因此 handoff/A10 的
+> `NOT_APPLICABLE` 是业务语义，而非为减少调用而人工构造。
 >
-> deterministic gate 要求：captured 等价 run 的合法 artifact 必须通过；同一文件跨
-> run 重读必须仍出现在 metrics；production 和 test 中不存在旧失败 owner。通过并提交
-> clean SHA、fresh package 后，旧 workstream 只保留为失败证据，使用同一 captcha-auth
-> requirement 新建 workstream，从 intake 到 terminal delivery 完整运行一次。
+> 旧 captcha-auth workstreams 只作为历史失败证据，不 retry/resume。已发现的
+> production blockers 已由 `331119f8`、`36f18840` 和 `6fb51608` 分别收口。
+> revision-delta PASS A 已经真实 continuation 与独立同行评审证明，Gate
+> checkpoint 为 `41e0ea70`。PASS B 不人为制造样本；若新任务自然发生合法
+> revision，只把它作为附带证据。
+>
+> 新 Gate 为
+> `docs/testing/verification-gates/20260807-terminal-delivery-captcha-auth-production.md`。
+> CC 只读同行评审已 PASS；两项 P2 已按真实 owner 修订。当前状态为
+> `REVIEW PASS / READY / NOT ACTIVE`。在 clean checkpoint、fresh package 和
+> provider probes 完成前，禁止创建新 workstream。
+
+## Completed Step: Revision Delta Integrity PASS A / PROVEN
+
+> `6fb51608` 将 schema-v3 revision 的 declared clause delta 收敛为 typed
+> validator boundary。受控 PHZX continuation 产生一次 strict-valid Claude
+> occurrence，但包含 undeclared clause changes 和 prohibited deletions；系统以
+> `TASK_CONTRACT_REVISION_DELTA_INVALID` 在 proposal reference 发布和 Codex review
+> dispatch 之前阻断。无新 proposal ref、review context 或 Codex occurrence。
+>
+> 独立同行评审为 PASS，结果 checkpoint 为 `41e0ea70`。成熟度严格区分：
+> invalid revision early rejection=`PROVEN`；valid revision-to-review=`ENFORCED /
+> NOT PROVEN`；full workflow/model quality 未由该 Gate 证明。不为 PASS B 人为创建新样本。
 
 ## Completed Step: A10 Same-Case Gate / PASS, PROVEN
 
