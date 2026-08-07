@@ -2,7 +2,7 @@
 
 日期：2026-08-07
 
-状态：`READY / NOT RUN`。
+状态：`FAIL / SAMPLE CONSUMED / ROOT-CAUSE ATTRIBUTED`。
 
 本 Gate 完成同一项尚未交付的 captcha-auth 业务任务。前一 workstream
 `ws-20260807T134039Z-R47H` 是不可变失败证据，不 retry、不 resume；本轮使用 fresh
@@ -88,3 +88,52 @@ actual provider occurrences = actual Agent executions + bounded-correction occur
 它不放宽 delta validator，也不保证模型一定产生合法 revision。Human requirement
 `revise -> intake.claude_brainstorm` 不属于本 Gate 的 Codex `NEEDS_REVISION` 路径，不在本轮
 声称范围内。
+
+## Executed Sample
+
+- Dual SHA: `83be3355a52ac1145d8ed2c0ee5ea383978f2f7b`，clean。
+- CLI JAR SHA-256:
+  `2720f252f31270946a6cfe3b494cad57a6d77e261ab53be09ffdcafc8309cb46`。
+- Gate SHA-256:
+  `ab7887c4c1e28b39207297e92b05d975358f20d0528f8fa9ce8cbd536e53b290`。
+- Fresh package: 9/9 modules，`1194/0/0` tests。
+- Provider probes: Claude PASS；Codex PASS。
+- Workstream: `ws-20260807T150938Z-2D5Y`。
+- Persisted workflow: `agent-lifecycle-terminal-delivery@1`，29 nodes / 45 edges /
+  9 nominal Agent nodes / no handoff。
+- Actual execution: 3 Agent executions，3 provider occurrences，1 semantic revision，
+  0 bounded corrections，81,622 provider-reported tokens，266,341 ms Agent duration。
+- Final state: `WAITING_FOR_RECOVERY` at `intake.claude_brainstorm`；未进入 implementation。
+
+Initial intake 和 Codex product review 均成功。Codex 产生 typed obligations `CO-1`、`CO-2`。
+revision prompt 真实包含 `### Verified Previous Task Contract Proposal`、verified proposal
+identity/hash 和完整 baseline body，因此 `08417221` 的 projection boundary 达到 real-case
+`PROVEN`。
+
+Revision execution 随后违反已经明确投影的两项合同：
+
+1. prompt 明确规定该 intake 是 seed-only、`do not call tools`，模型仍发起 Terminal 命令；
+   permission boundary 正确拒绝，ACP 以 exit code 5 / `PERMISSION_BLOCKED` 结束；
+2. prompt 明确要求 exactly one JSON object 且禁止前后 commentary，模型输出仍以
+   `Understood — ...` 开头，并在 `TR-12` 产生额外引号，strict parser 正确报告
+   `AGENT_RESULT_PARSE_FAILED`。
+
+既定 correction policy 正确记录 `SKIPPED_PROCESS_NON_ZERO`；非零 process 没有通过
+correction 恢复。authoritative execution outcome 是 `permission_blocked /
+RECOVERABLE_ADAPTER_FAILURE / MANUAL_ONLY`。本次不得 retry/resume，也不得把 parser、
+permission policy 或 correction 收紧为修复方向。
+
+Harness 还暴露一个次要 closure gap：`run-real-case.sh` 的 `start --run` failure 分支收集证据
+后直接退出，不像 `autorun` failure 分支那样调用 `sessions-reap`。本次已通过现有 typed CLI
+显式关闭 2/2 sessions，且确认无残留 provider process；该不对称应独立做最小删除式修复，
+不改变本次模型归因。
+
+## Verdict
+
+- Captcha-auth business delivery: `FAIL / NOT IMPLEMENTED`。
+- Verified revision baseline projection: `PROVEN`。
+- Invalid revision / permission bypass prevention: `PROVEN`。
+- Valid revision to second Codex review: `NOT PROVEN`。
+- Production terminal delivery and actual `10 -> 9`: `NOT PROVEN`。
+- Immediate failure owner: configured Claude backend execution
+  (`zhipu/glm-5.2`) violated explicit tool and output contracts；Dual correctly fail closed。

@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Terminal Delivery Completion v2 / READY
+## Current Active Step: Captcha-Auth Terminal Delivery Completion v2 / FAIL, SAMPLE CONSUMED
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
@@ -60,6 +60,23 @@
 > 证据，不 retry/resume。顺序固定为 clean Gate checkpoint -> fresh package -> deterministic
 > preflight -> 双 provider probes -> 一次完整 real-case。若 preflight/probes PASS，可直接运行，
 > 不再请求第二次授权。
+>
+> v2 workstream `ws-20260807T150938Z-2D5Y` 已运行并按 stop-loss 结束。Fresh package
+> 9/9 modules、`1194/0/0`，双 probes PASS，workflow identity 正确。Initial intake 与 Codex
+> review 成功，revision prompt 真实包含 exact verified baseline，因此 `08417221` 的
+> projection boundary 已由 real-case `PROVEN`。
+>
+> 失败 owner 不再是 baseline 缺失：prompt 明确禁止 tool 并要求 exactly one JSON object，
+> configured Claude backend `zhipu/glm-5.2` 仍发起 Terminal，得到
+> `PERMISSION_BLOCKED / exit 5`，随后输出前导 prose 和 malformed JSON。Dual 以
+> `SKIPPED_PROCESS_NON_ZERO` 禁止 correction 恢复并 fail closed。该样本不得 retry/resume；
+> captcha-auth 仍未进入 implementation。
+>
+> 运行另暴露一个独立 harness 缺口：initial `start --run` failure 没有自动执行与 autorun
+> failure 相同的 session reap。本次已显式关闭 2/2 sessions 且无残留进程；后续只允许先做
+> 该 closure 对称性的最小 deterministic 修复，再决定是否使用更符合 strict JSON/tool
+> discipline 的 Claude backend 完成同一业务任务。不得通过放宽 parser、permission 或
+> non-zero correction policy 迁就本次输出。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 
