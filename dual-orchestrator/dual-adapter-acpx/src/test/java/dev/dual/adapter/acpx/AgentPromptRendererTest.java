@@ -826,6 +826,47 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("[outside-workspace path removed]"));
     }
 
+    @Test
+    void intakeRevisionPromptProjectsExactVerifiedPreviousProposal() throws Exception {
+        var fixture = intakeRevisionEvidence();
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var proposal = TaskContractProposalReference.resolveProposalFromRefs(
+                tempDir, "ws-test", List.of(fixture.referenceRef()), mapper).orElseThrow().proposal();
+        var expectedBaseline = TypedContextPayloadBoundary.wrapJson(proposal);
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "intake.claude_brainstorm",
+                "intake-claude-brainstorm",
+                fixture.reviewRefs());
+
+        assertTrue(prompt.contains("### Verified Previous Task Contract Proposal"));
+        assertTrue(prompt.contains(expectedBaseline));
+        assertTrue(prompt.contains("BASELINE_CLAUSE_MUST_REMAIN_BYTE_STABLE"));
+        assertTrue(prompt.contains("/pages/captcha/index"));
+        assertEquals(1, occurrences(prompt, "BASELINE_CLAUSE_MUST_REMAIN_BYTE_STABLE"));
+    }
+
+    @Test
+    void intakeRevisionPromptRejectsTamperedPreviousProposalBeforeDispatch() throws Exception {
+        var fixture = intakeRevisionEvidence();
+        Files.writeString(
+                fixture.proposalSidecar(),
+                Files.readString(fixture.proposalSidecar())
+                        .replace("BASELINE_CLAUSE_MUST_REMAIN_BYTE_STABLE", "TAMPERED_BASELINE"));
+
+        var error = assertThrows(IllegalArgumentException.class, () -> new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "intake.claude_brainstorm",
+                "intake-claude-brainstorm",
+                fixture.reviewRefs()));
+
+        assertTrue(error.getMessage().contains(
+                "verified previous task-contract proposal is required for intake revision"));
+    }
+
 
     @Test
     void failsClearlyWhenTemplateIsMissing() {
@@ -874,6 +915,108 @@ class AgentPromptRendererTest {
                         NodeExecutionStatus.SUCCEEDED, 1L, "completed", NodeStatus.COMPLETED,
                         outputs, result, "", "run-typed", "", "claude", "session-1",
                         0, now, now, 1L));
+    }
+
+    private RevisionEvidenceFixture intakeRevisionEvidence() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var outputDir = workstreamDir.resolve("runs/run-typed/outputs");
+        Files.createDirectories(outputDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Revise the verified proposal.\n");
+
+        var proposalOutput = outputDir.resolve("intake-claude-brainstorm.json");
+        var proposalSidecar = outputDir.resolve("intake-claude-brainstorm.contract.json");
+        Files.writeString(proposalOutput, "{}\n");
+        Files.writeString(proposalSidecar, """
+                {
+                  "workstream_id": "ws-test",
+                  "run_id": "run-typed",
+                  "node_id": "intake.claude_brainstorm",
+                  "node_instance_id": "node-intake-original",
+                  "decision": "READY_FOR_PRODUCT_REVIEW",
+                  "source_artifact_type": "task_contract_proposal",
+                  "source_output_ref": "%s",
+                  "task_contract_proposal": {
+                    "artifact_type": "task_contract_proposal",
+                    "schema_version": 3,
+                    "objective": "Preserve the verified route /pages/captcha/index",
+                    "scope": {
+                      "included": [{"path": "src/main/resources/templates/captcha/index.html", "operation": "CREATE"}],
+                      "excluded": []
+                    },
+                    "acceptance_criteria": [
+                      {"id": "AC-1", "text": "BASELINE_CLAUSE_MUST_REMAIN_BYTE_STABLE"},
+                      {"id": "AC-2", "text": "The review obligation is resolved"}
+                    ],
+                    "test_requirements": [{"id": "TR-1", "text": "Verify the baseline"}],
+                    "constraints": [],
+                    "non_goals": [],
+                    "risk_areas": [],
+                    "evidence_refs": [],
+                    "open_questions": [],
+                    "revision_responses": []
+                  }
+                }
+                """.formatted(tempDir.relativize(proposalOutput).toString().replace('\\', '/')));
+        publishAgentEvidenceOccurrence(
+                proposalSidecar,
+                proposalOutput,
+                "intake.claude_brainstorm",
+                "node-intake-original",
+                "READY_FOR_PRODUCT_REVIEW");
+
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var referencePath = workstreamDir.resolve("artifacts/task-contract-proposals/intake.ref.json");
+        Files.createDirectories(referencePath.getParent());
+        mapper.writeValue(referencePath.toFile(), Map.of(
+                "schema_version", 1,
+                "proposal_id", "node-intake-original:test",
+                "workstream_id", "ws-test",
+                "producer_node_id", "intake.claude_brainstorm",
+                "producer_node_instance_id", "node-intake-original",
+                "artifact_ref", tempDir.relativize(proposalSidecar).toString().replace('\\', '/'),
+                "sha256", AgentOutputContractSidecar.sha256(proposalSidecar)));
+        var referenceRef = tempDir.relativize(referencePath).toString().replace('\\', '/');
+
+        var reviewOutput = outputDir.resolve("intake-codex-product-review.json");
+        var reviewSidecar = outputDir.resolve("intake-codex-product-review.contract.json");
+        Files.writeString(reviewOutput, "{}\n");
+        Files.writeString(reviewSidecar, """
+                {
+                  "workstream_id": "ws-test",
+                  "run_id": "run-typed",
+                  "node_id": "intake.codex_product_review",
+                  "node_instance_id": "node-intake-review",
+                  "decision": "NEEDS_REVISION",
+                  "source_artifact_type": "agent_output_contract",
+                  "source_output_ref": "%s",
+                  "contract_obligations": [
+                    {"id": "CO-1", "text": "Clarify the accepted input"}
+                  ],
+                  "review_subject": %s
+                }
+                """.formatted(
+                tempDir.relativize(reviewOutput).toString().replace('\\', '/'),
+                mapper.writeValueAsString(mapper.readTree(referencePath.toFile()))));
+        publishAgentEvidenceOccurrence(
+                reviewSidecar,
+                reviewOutput,
+                "intake.codex_product_review",
+                "node-intake-review",
+                "NEEDS_REVISION");
+
+        return new RevisionEvidenceFixture(
+                List.of(
+                        tempDir.relativize(reviewOutput).toString().replace('\\', '/'),
+                        tempDir.relativize(reviewSidecar).toString().replace('\\', '/')),
+                proposalSidecar,
+                referenceRef);
+    }
+
+    private record RevisionEvidenceFixture(
+            List<String> reviewRefs,
+            Path proposalSidecar,
+            String referenceRef
+    ) {
     }
 
     private static int occurrences(String value, String needle) {

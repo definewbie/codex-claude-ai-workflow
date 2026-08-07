@@ -2,8 +2,9 @@
 
 日期：2026-08-07
 
-状态：`CC REVIEW PASS / READY / NOT ACTIVE`。本 Gate 定义一次自然业务
-任务的 production-profile 验证；尚未授权 provider probe 或新 workstream。
+状态：`FAIL / SAMPLE CONSUMED / ROOT-CAUSE ATTRIBUTED`。provider probes 已通过，
+唯一授权的新 workstream 已运行并在第一次 intake semantic revision 被 strict
+revision-delta validator 阻断。不得 retry/resume 或创建替代样本。
 
 ## 1. Target classification
 
@@ -188,3 +189,112 @@ Independent read-only review: `PASS`.
   to the actual owner: workflow definition plus completion-audit evaluation;
 - review P2 concerning materially unchanged obligations was replaced by a fully
   typed stop-loss: second consecutive `NEEDS_REVISION` at the same stage.
+
+## 7. Executed sample
+
+- Dual SHA: `46ba22417884e17b246b3148a273c3b0848b3bfe`.
+- CLI jar SHA-256:
+  `3f927e9dd3b2f8b3cacf5429cad8e193fbf440dea8a1f66b5fb12269699f4f7c`.
+- Workstream: `ws-20260807T134039Z-R47H`.
+- Persisted workflow: `agent-lifecycle-terminal-delivery@1`, 29 nodes, 45 edges,
+  nine nominal Agent nodes, no handoff/next-stage node.
+- Bundled source SHA-256:
+  `5f8dce015e20199aceac1e541087a5099effa0ade38e504f2708b74e76d91479`.
+- Persisted JSON SHA-256:
+  `53ff9473de296685523451f4c604ced7a351fa3d36386db6f95f5049ed879e6c`.
+  The byte hashes intentionally differ because persistence adds the definition
+  `schemaVersion`; an object-level comparison found no other difference. Gate
+  identity is therefore the bundled source hash plus the loaded id/version and
+  29/45/9/no-handoff semantic shape, not equality of formatting-dependent file
+  bytes.
+- Provider probes: Claude PASS; Codex PASS.
+- Actual execution before stop: three Agent executions, three provider
+  occurrences, one semantic revision, zero bounded corrections.
+- Provider identities: Claude adapter used `zhipu/glm-5.2`; Codex adapter used
+  `openai/GPT-5.6-Sol`.
+- Final workflow state: `WAITING_FOR_RECOVERY`; active failed node
+  `node-intake-claude_brainstorm-006`; no implementation occurred.
+
+The initial proposal and Codex product review completed successfully. The review
+created typed obligations `CO-1..CO-4`. The revision returned a strict-valid
+envelope and referenced all four obligations, but changed many clauses outside
+those declared deltas, added `NG-6`, `NG-7`, `C-19`, `TR-19`, and `TR-20`, and
+deleted `R-7`. Artifact validation therefore emitted:
+
+```text
+TASK_CONTRACT_REVISION_DELTA_INVALID
+UNDECLARED_CONTRACT_CLAUSE_CHANGE
+UNDECLARED_CONTRACT_CLAUSE_ADDITION
+CONTRACT_CLAUSE_DELETION_NOT_ALLOWED
+```
+
+No revised proposal reference or second Codex product-review occurrence was
+created. The persisted `AGENT_RECONNECT_REQUIRED` signal is
+`superseded=true`; the authoritative failure is `CONTRACT_FAILED /
+required_artifact_contract_failed`, not transport recovery.
+
+## 8. Root-cause attribution
+
+The immediate invalid artifact was produced by the Claude/model execution: it
+rewrote clauses beyond its declared `revision_responses`. The validator behaved
+correctly and prevented publication and downstream review.
+
+The run also proves a Dual-owned projection gap. The revision prompt included:
+
+- the verified previous proposal reference and SHA-256;
+- the complete Codex review and typed obligations `CO-1..CO-4`;
+- the rule to preserve every existing clause not named by the current revision.
+
+It did not include the previous proposal clause body: the projected review
+document carried `taskContractProposal=null`, while the referenced proposal was
+not rendered into the prompt. Exact preservation therefore depended on implicit
+same-session memory. That is insufficient for a strict delta contract.
+
+Boundary result:
+
+- **Declared by:** verified previous proposal ref plus typed review obligations.
+- **Proven by:** persisted prompt, revision output and typed delta diagnostic.
+- **Consumed by:** artifact validation before proposal-reference publication.
+- **Enforced before:** second Codex review and contract compilation.
+- **Failure route:** node `FAILED`, outcome `CONTRACT_FAILED`, workflow
+  `WAITING_FOR_RECOVERY`.
+- **Cannot-bypass:** no new proposal ref and no second reviewer occurrence.
+
+The next change must project the verified baseline proposal exactly into the
+revision prompt. It must not loosen validation, auto-merge model output, rely on
+filesystem guessing, add retry, or create a new platform abstraction. No second
+real-case is authorized before that boundary has deterministic proof and review.
+
+Full report:
+`../real-case-reports/20260807T135202Z/report.md`.
+
+## 9. Follow-up checkpoint
+
+Independent read-only review returned `WARN` with one P1 and one P2:
+
+- P1 confirmed the verified-baseline projection gap and agreed with the dual
+  attribution: model-owned invalid output plus Dual-owned missing baseline;
+- P2 found the source/persisted byte-hash ambiguity documented above and agreed
+  that the run remains `FAIL`, not `INVALID`.
+
+The bounded P1 fix is implemented but not committed. It preserves the owners:
+
+- `TaskContractProposalReference` verifies reference identity, hash and lineage;
+- `TypedContextPayloadBoundary` serializes the verified proposal exactly once;
+- `AgentPromptRenderer` consumes that payload only for a validated intake
+  `NEEDS_REVISION` review and fails before provider dispatch if verification
+  fails;
+- `TaskContractProposalValidator` remains the only revision-delta acceptance
+  owner.
+
+No schema, workflow, validator, retry or correction behavior changed. The
+independent code-level review returned `PASS` with no P0/P1. Focused tests are
+`53/0`; the full reactor is `1194/0/0`. The verified-baseline projection is
+therefore deterministic `ENFORCED`, but it is not real-case `PROVEN` and does
+not authorize a second real-case.
+
+The review recorded one non-blocking pre-existing boundary: human requirement
+`revise -> intake.claude_brainstorm` does not carry an
+`intake.codex_product_review / NEEDS_REVISION` document and therefore does not
+trigger this baseline guard. That path is a separate follow-up item; it is not
+silently claimed by or added to this checkpoint.

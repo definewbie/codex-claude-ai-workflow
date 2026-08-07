@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
@@ -33,6 +35,16 @@ public final class TypedContextPayloadBoundary {
         } catch (IOException failure) {
             throw new IllegalArgumentException("typed context payload cannot be serialized", failure);
         }
+    }
+
+    public static Optional<String> wrapVerifiedProposal(
+            TaskContractProposalReference reference,
+            Path workspaceRoot,
+            String workstreamId,
+            ObjectMapper objectMapper
+    ) {
+        return reference.resolveVerifiedProposal(workspaceRoot, workstreamId, objectMapper)
+                .map(TypedContextPayloadBoundary::wrapJson);
     }
 
     public static TrustedPayloads trustOnce(Set<String> trustedWrappedPayloads) {

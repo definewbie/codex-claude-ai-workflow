@@ -8,28 +8,51 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Terminal-Delivery Natural Production Gate / READY, NOT ACTIVE
+## Current Active Step: Verified Revision Baseline Projection / ENFORCED, NOT REAL-CASE PROVEN
 
-> Target phase: `P0` integrated workflow proof. 本轮不修改 workflow、prompt、
-> parser、validator 或 model 配置，只验证已打包的 production
-> `terminal-delivery` profile 在第二个不同业务任务上能否完成交付。
+> 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
+> captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
+> `agent-lifecycle-terminal-delivery@1`（29 nodes / 45 edges / 9 nominal Agent
+> nodes），但在第一次 intake semantic revision 被 strict revision-delta validator
+> 阻断，workflow 停于 `WAITING_FOR_RECOVERY`，没有进入 implementation。
 >
 > 自然任务选定为用户已给出的 captcha-auth Java 新项目：手机号或邮箱
 > 注册/登录，注册使用 SMS/email OTP，登录前使用图形 Captcha。该任务在
 > final human acceptance 后没有已声明的下一阶段，因此 handoff/A10 的
 > `NOT_APPLICABLE` 是业务语义，而非为减少调用而人工构造。
 >
-> 旧 captcha-auth workstreams 只作为历史失败证据，不 retry/resume。已发现的
-> production blockers 已由 `331119f8`、`36f18840` 和 `6fb51608` 分别收口。
-> revision-delta PASS A 已经真实 continuation 与独立同行评审证明，Gate
-> checkpoint 为 `41e0ea70`。PASS B 不人为制造样本；若新任务自然发生合法
-> revision，只把它作为附带证据。
+> 本次唯一新样本结果为 `FAIL / SAMPLE CONSUMED`：3 次 Agent execution、3 次
+> provider occurrence、1 次 semantic revision、0 次 bounded correction。初始 Claude
+> proposal 和 Codex `NEEDS_REVISION` 均成功；修订 Claude 输出 strict-valid envelope，
+> 但修改了大量未声明条款、增加 5 个未声明条款并删除 `R-7`。系统以
+> `TASK_CONTRACT_REVISION_DELTA_INVALID` 在新 proposal ref 和第二次 Codex review
+> 之前 fail closed。中途 `AGENT_RECONNECT_REQUIRED` 已标记 `superseded=true`，不是
+> authoritative failure owner。
 >
-> 新 Gate 为
+> 只读归因与 CC 同行评审确认一个 Dual-owned P1 projection gap：修订 prompt 投影了 verified
+> previous proposal 的 ref/hash 和完整 reviewer obligations，但
+> `taskContractProposal=null`，没有投影上一版 clause body；同一 prompt 却要求逐条
+> 保留未点名 clauses。因此 immediate behavior 是模型重写未授权条款，validator 正确
+> 阻断；但 Dual 不能把逐字 delta 的正确性依赖于同一 session 的隐式记忆。
+>
+> 最小修复已实现并通过 CC 独立代码级审查：`TaskContractProposalReference` 继续唯一验证 baseline
+> identity/hash/lineage，`TypedContextPayloadBoundary` 继续唯一序列化 trusted proposal，
+> `AgentPromptRenderer` 只在 validated intake `NEEDS_REVISION` evidence 上附加 exact
+> baseline；baseline 无法验证时在 provider dispatch 前 fail closed。未修改 schema、
+> validator、workflow、retry 或 correction。Focused tests `53/0`，full reactor
+> `1194/0/0`，CC verdict 为 `PASS`，无 P0/P1；因此该 projection boundary 达到
+> deterministic `ENFORCED`。不得 retry/resume R47H，也不得创建第二个 real-case。
+>
+> 该结论不覆盖 human gate `revise -> intake.claude_brainstorm`：该既有路径不产生
+> `intake.codex_product_review / NEEDS_REVISION` evidence，故不触发本次 baseline guard。
+> 它作为独立后续边界保留，不扩大当前 checkpoint。模型看到 baseline 后能否稳定产生
+> 合法 delta 仍需自然 revision 样本证明，当前不得标记为 `PROVEN`。
+>
+> Gate 为
 > `docs/testing/verification-gates/20260807-terminal-delivery-captcha-auth-production.md`。
-> CC 只读同行评审已 PASS；两项 P2 已按真实 owner 修订。当前状态为
-> `REVIEW PASS / READY / NOT ACTIVE`。在 clean checkpoint、fresh package 和
-> provider probes 完成前，禁止创建新 workstream。
+> 本次报告为
+> `docs/testing/real-case-reports/20260807T135202Z/report.md`。该 Gate 不证明
+> production terminal delivery、自然任务 `10 -> 9`、PASS B 或模型稳定性。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 

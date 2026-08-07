@@ -3,6 +3,7 @@ package dev.dual.adapter.acpx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.domain.PromptLanguage;
 import dev.dual.runtime.handler.AgentEvidenceIndex;
+import dev.dual.runtime.handler.AgentOutputContractDocument;
 import dev.dual.runtime.handler.ContractRegistry;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.TypedContextPayloadBoundary;
@@ -59,7 +60,7 @@ final class AgentPromptRenderer {
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
         var languagePolicy = languagePolicy(workspaceRoot.resolve(workstreamDir), requirement);
-        var contextPackage = contextPackageSection(workspaceRoot, workstreamId, inputRefs);
+        var contextPackage = contextPackageSection(workspaceRoot, workstreamId, nodeId, inputRefs);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
@@ -334,7 +335,12 @@ final class AgentPromptRenderer {
                 .append(readIfExists(path).stripTrailing());
     }
 
-    private String contextPackageSection(Path workspaceRoot, String workstreamId, List<String> inputRefs) {
+    private String contextPackageSection(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            List<String> inputRefs
+    ) {
         if (inputRefs == null || inputRefs.isEmpty()) {
             return "(no context package provided)";
         }
@@ -370,6 +376,8 @@ final class AgentPromptRenderer {
                     builder.append("\n```json\n");
                     builder.append(renderTypedAgentEvidence(document));
                     builder.append("\n```\n\n");
+                    appendVerifiedRevisionBaseline(
+                            builder, workspaceRoot, workstreamId, nodeId, document);
                 } else if (isCanonicalDirectInputRef(workspaceRoot, workstreamId, inputRef)) {
                     builder.append("\n```text\n");
                     builder.append(readContextPreview(workspaceRoot, path));
@@ -389,6 +397,29 @@ final class AgentPromptRenderer {
             }
         }
         return builder.toString().stripTrailing();
+    }
+
+    private void appendVerifiedRevisionBaseline(
+            StringBuilder builder,
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            AgentOutputContractDocument document
+    ) {
+        if (!"intake.claude_brainstorm".equals(nodeId)
+                || !"intake.codex_product_review".equals(document.nodeId())
+                || !"NEEDS_REVISION".equals(document.decision())
+                || document.reviewSubject() == null) {
+            return;
+        }
+        var baseline = TypedContextPayloadBoundary
+                .wrapVerifiedProposal(document.reviewSubject(), workspaceRoot, workstreamId, OBJECT_MAPPER)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "verified previous task-contract proposal is required for intake revision"));
+        builder.append("### Verified Previous Task Contract Proposal\n\n");
+        builder.append("- Proposal ID: ").append(document.reviewSubject().proposalId()).append("\n");
+        builder.append("- Proposal SHA-256: ").append(document.reviewSubject().sha256()).append("\n\n");
+        builder.append(baseline).append("\n\n");
     }
 
     private boolean isCanonicalDirectInputRef(Path workspaceRoot, String workstreamId, String inputRef) {

@@ -130,7 +130,34 @@ public record TaskContractProposalReference(
             return Optional.empty();
         }
         var reference = resolved.get().reference();
-        var artifactPath = reference.resolveArtifact(workspaceRoot, expectedWorkstreamId, objectMapper);
+        var proposalArtifact = reference.resolveProposalArtifact(
+                workspaceRoot, expectedWorkstreamId, objectMapper);
+        if (proposalArtifact.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new ResolvedProposal(
+                reference,
+                resolved.get().referenceRef(),
+                proposalArtifact.get().path(),
+                proposalArtifact.get().proposal()));
+    }
+
+    /** Resolves the exact proposal carried by this verified immutable reference. */
+    Optional<TaskContractProposal> resolveVerifiedProposal(
+            Path workspaceRoot,
+            String expectedWorkstreamId,
+            ObjectMapper objectMapper
+    ) {
+        return resolveProposalArtifact(workspaceRoot, expectedWorkstreamId, objectMapper)
+                .map(ProposalArtifact::proposal);
+    }
+
+    private Optional<ProposalArtifact> resolveProposalArtifact(
+            Path workspaceRoot,
+            String expectedWorkstreamId,
+            ObjectMapper objectMapper
+    ) {
+        var artifactPath = resolveArtifact(workspaceRoot, expectedWorkstreamId, objectMapper);
         if (artifactPath.isEmpty()) {
             return Optional.empty();
         }
@@ -140,11 +167,7 @@ public record TaskContractProposalReference(
                 || document.get().taskContractProposal().schemaVersion() != TaskContractProposal.SCHEMA_VERSION) {
             return Optional.empty();
         }
-        return Optional.of(new ResolvedProposal(
-                reference,
-                resolved.get().referenceRef(),
-                artifactPath.get(),
-                document.get().taskContractProposal()));
+        return Optional.of(new ProposalArtifact(artifactPath.get(), document.get().taskContractProposal()));
     }
 
     Optional<Path> resolveArtifact(Path workspaceRoot, String expectedWorkstreamId, ObjectMapper objectMapper) {
@@ -233,4 +256,6 @@ public record TaskContractProposalReference(
             Path artifactPath,
             TaskContractProposal proposal
     ) {}
+
+    private record ProposalArtifact(Path path, TaskContractProposal proposal) {}
 }
