@@ -72,6 +72,10 @@ public final class AgentResultPromptContract {
                     "result.contract_obligations",
                     new AgentResultEnvelope.ReviewObligation("CO-1", "binding contract obligation"));
         }
+        if (ContractRegistry.forNode(nodeId).emitsArtifact("agent_output_contract")) {
+            return "For this node, `result.contract_obligations` must remain exactly `[]`; "
+                    + "contract obligations are produced only by intake contract review.";
+        }
         return "";
     }
 

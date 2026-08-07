@@ -78,6 +78,24 @@ class AgentResultPromptContractTest {
     }
 
     @Test
+    void nonIntakeAgentOutputPromptsKeepReviewObligationsEmpty() {
+        var decisions = Map.of(
+                "design.claude_design", "READY_FOR_ARCH_REVIEW",
+                "design.codex_arch_review", "READY_FOR_ARCH_REVIEW",
+                "plan.codex_plan_review", "READY_TO_IMPLEMENT",
+                "implement.claude_implement", "IMPLEMENTED"
+        );
+
+        decisions.forEach((nodeId, decision) -> {
+            var prompt = AgentResultPromptContract.render(
+                    "ws-1", "run-1", nodeId, decision, Set.of(decision));
+            assertTrue(prompt.contains(
+                    "For this node, `result.contract_obligations` must remain exactly `[]`"), nodeId);
+            assertTrue(prompt.contains("\"contract_obligations\" : [ ]"), nodeId);
+        });
+    }
+
+    @Test
     void revisionResponseRejectsUndeclaredNoteButAcceptsTheClosedRecordShape() throws Exception {
         var intake = AgentResultPromptContract.render(
                 "ws-1", "run-1", "intake.claude_brainstorm",
