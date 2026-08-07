@@ -1113,10 +1113,13 @@ truth 判定 PASS / FAIL / INVALID。
 
 - `plan-body`：`plan.claude_plan` 缺少 typed `plan_artifact` 会被卡住，不能靠 Markdown 正文通过；
 - `review-noise`：Codex summary prose 中的 “minor stylistic issue” 不会触发 `REVIEW_NOISE` 放行；
-- `reread-reason`：reusable file 的非预期重读会被 harness 计算出的 `REREAD_POLICY_DENIED` 阻断，
-  不依赖 agent 自述 `reread_reasons`。
+- `reread-reason`：reusable file 的重复读取由 persisted tool usage 和 workstream metrics
+  记录，不依赖 agent 自述 `reread_reasons`；它属于效率 telemetry，不再推翻已经满足
+  strict artifact contract 的节点结果。本次不改变既有 scope、安全、结构化合同或
+  change-boundary 语义，也不借 read-reuse 规则重新引入 path-level read authority。
 
-这证明 simple semantic boundary 的 controlled path 已闭环；它不证明真实 provider、
+这证明 simple semantic boundary 的 controlled path 已闭环；其中 read-reuse 证明的是
+“可观测但不拥有流程失败权”，不是 token benefit。它不证明真实 provider、
 token/cost attribution、provider-cache-aware、session compaction 或 cancer-clinic complex case。
 这些仍必须按各自 Verification Gate 单独验证。
 

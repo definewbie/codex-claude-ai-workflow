@@ -50,6 +50,33 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void repeatedReusableReadsDoNotInvalidateAnOtherwiseValidArtifact() throws Exception {
+        var outputRef = write(".agent/workstreams/ws-1/runs/run-1/outputs/design.json",
+                envelope("design.claude_design", reviewResult()));
+        var runRef = ".agent/workstreams/ws-1/runs/run-1/run.json";
+        write(runRef, JSON.writeValueAsString(Map.of(
+                "toolUsage", Map.of("readFiles", List.of("REQUIREMENT.md", "VERIFICATION-GATE.md")))));
+        write(".agent/workstreams/ws-1/memory/read-reuse-contract.json", JSON.writeValueAsString(Map.of(
+                "targetNodeDefinitionId", "design.claude_design",
+                "reusableReadFiles", List.of(
+                        Map.of("path", "REQUIREMENT.md"),
+                        Map.of("path", "VERIFICATION-GATE.md")),
+                "invalidatedReadFiles", List.of(),
+                "allowedRereadFiles", List.of())));
+
+        var validated = validator.validate(
+                tempDir, "ws-1", "node-design", node("design.claude_design"),
+                NodeResult.completed("completed", List.of(outputRef), Map.of(
+                        "run_id", "run-1",
+                        "run_metadata", runRef)));
+
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        assertEquals("READY_FOR_ARCH_REVIEW", validated.result().get("decision"));
+        assertTrue(validated.outputRefs().contains(
+                ".agent/workstreams/ws-1/runs/run-1/outputs/design.contract.json"));
+    }
+
+    @Test
     void nonIntakeReviewMayOmitContractObligationsWithoutProjectionFailure() throws Exception {
         var candidate = (com.fasterxml.jackson.databind.node.ObjectNode) JSON.readTree(
                 envelope("design.codex_arch_review", reviewResult()));

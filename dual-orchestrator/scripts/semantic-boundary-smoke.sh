@@ -18,10 +18,10 @@ Usage:
   scripts/semantic-boundary-smoke.sh [all|plan-body|review-noise|reread-reason]
 
 This smoke uses a controlled fake acpx but drives the real dualctl/worktree/ledger
-path. It validates semantic boundary failures:
+path. It validates semantic boundaries:
   plan-body     plan.claude_plan missing formal plan body is rejected
   review-noise  prose "minor stylistic issue" does not classify as REVIEW_NOISE
-  reread-reason reusable file re-read outside the computed reread policy is rejected
+  reread-reason reusable file re-read remains observable without invalidating the artifact
 EOF
 }
 
@@ -126,6 +126,9 @@ valid_plan() {
 
 case "$template" in
   intake-claude-brainstorm.md)
+    if [[ "$case_name" == "reread-reason" ]]; then
+      tool_read_main
+    fi
     emit_result
     ;;
   intake-codex-product-review.md)
@@ -267,9 +270,20 @@ assert_review_noise() {
 
 assert_reread_reason() {
   local workdir="$1" ws="$2"
-  grep -R "REREAD_POLICY_DENIED" "$workdir/.agent/workstreams/$ws" >/dev/null \
-    || fail "reread-reason: expected REREAD_POLICY_DENIED"
-  pass "reread-reason: reusable re-read outside computed policy is blocked"
+  local ws_dir="$workdir/.agent/workstreams/$ws"
+  local metrics="$ws_dir/metrics/workstream-metrics.json"
+  ! grep -R "REREAD_POLICY_DENIED" "$ws_dir" >/dev/null \
+    || fail "reread-reason: repeated read still invalidated the artifact"
+  [[ -f "$metrics" ]] || fail "reread-reason: expected workstream metrics"
+  python3 - "$metrics" <<'PY' || fail "reread-reason: repeated read missing from telemetry"
+import json
+import sys
+
+metrics = json.load(open(sys.argv[1]))
+repeated = metrics.get("toolMetrics", {}).get("repeatedReadFiles", [])
+assert any(item.get("path") == "main.py" and item.get("count", 0) >= 2 for item in repeated)
+PY
+  pass "reread-reason: repeated read is telemetry and does not invalidate the artifact"
 }
 
 run_case() {

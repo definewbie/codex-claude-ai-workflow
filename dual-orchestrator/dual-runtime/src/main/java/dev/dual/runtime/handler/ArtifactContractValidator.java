@@ -19,7 +19,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class ArtifactContractValidator {
@@ -107,11 +106,6 @@ public final class ArtifactContractValidator {
             if (semanticFailure != null) {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
                         parsed.envelope(), semanticFailure);
-            }
-            var rereadCoverageFailure = validateRereadCoverage(root, workstreamId, nodeDefinition, result, parsed.envelope());
-            if (rereadCoverageFailure != null) {
-                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
-                        parsed.envelope(), rereadCoverageFailure);
             }
             return withResultSidecars(
                     root, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result, contract,
@@ -255,158 +249,6 @@ public final class ArtifactContractValidator {
                     StandardCharsets.UTF_8);
         }
         return Optional.of(root.relativize(sidecarPath).toString());
-    }
-
-    private static ContractViolation validateRereadCoverage(
-            Path root,
-            String workstreamId,
-            NodeDefinition nodeDefinition,
-            NodeResult result,
-            AgentResultEnvelope envelope
-    ) {
-        if (!(envelope.result() instanceof AgentResultEnvelope.AgentOutputResult output)
-                || workstreamId == null || workstreamId.isBlank()) {
-            return null;
-        }
-        var actualReads = actualReadFiles(root, result);
-        if (actualReads.isEmpty()) {
-            return null;
-        }
-        var reusableReads = reusableReadFiles(root, workstreamId);
-        if (reusableReads.isEmpty()) {
-            return null;
-        }
-        var expectedEdits = allowedRereadFiles(root, workstreamId, nodeDefinition, output.changedFiles());
-        var policy = RereadPolicyCalculator.compute(
-                actualReads,
-                reusableReads,
-                invalidatedReadFiles(root, workstreamId),
-                expectedEdits,
-                allowedRereadFiles(root, workstreamId, nodeDefinition)
-        );
-        if (policy.denied().isEmpty()) {
-            return null;
-        }
-            return ContractViolation.of(
-                "REREAD_POLICY_DENIED",
-                "agent re-read reusable files without an expected edit or invalidation: " + policy.denied()
-                        + ". (Re-read justification is harness-computed; reread_reasons is supplementary, not the source of truth.)",
-                Map.of("denied_reread_paths", policy.denied())
-        );
-    }
-
-    private static List<String> actualReadFiles(Path root, NodeResult result) {
-        var runMetadataRef = text(result.result().get("run_metadata"));
-        if (runMetadataRef.isBlank()) {
-            return List.of();
-        }
-        var path = root.resolve(runMetadataRef).normalize();
-        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
-            return List.of();
-        }
-        try {
-            var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
-            var toolUsage = document.get("toolUsage");
-            if (!(toolUsage instanceof Map<?, ?> map)) {
-                return List.of();
-            }
-            return stringList(map.get("readFiles")).stream()
-                    .map(ArtifactContractValidator::normalizeRepoPath)
-                    .filter(item -> !item.isBlank())
-                    .distinct()
-                    .toList();
-        } catch (Exception ignored) {
-            return List.of();
-        }
-    }
-
-    private static Set<String> reusableReadFiles(Path root, String workstreamId) {
-        return readReuseContractFiles(root, workstreamId, "reusableReadFiles");
-    }
-
-    private static Set<String> invalidatedReadFiles(Path root, String workstreamId) {
-        return readReuseContractFiles(root, workstreamId, "invalidatedReadFiles");
-    }
-
-    private static Set<String> allowedRereadFiles(Path root, String workstreamId, NodeDefinition nodeDefinition) {
-        return readReuseContractFiles(root, workstreamId, "allowedRereadFiles", nodeDefinition.id());
-    }
-
-    private static Set<String> readReuseContractFiles(Path root, String workstreamId, String key) {
-        return readReuseContractFiles(root, workstreamId, key, "");
-    }
-
-    private static Set<String> readReuseContractFiles(Path root, String workstreamId, String key, String expectedTargetNode) {
-        var path = root.resolve(".agent/workstreams").resolve(workstreamId)
-                .resolve("memory/read-reuse-contract.json").normalize();
-        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
-            return Set.of();
-        }
-        try {
-            var document = OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);
-            if (!expectedTargetNode.isBlank() && !expectedTargetNode.equals(text(document.get("targetNodeDefinitionId")))) {
-                return Set.of();
-            }
-            var value = document.get(key);
-            if (!(value instanceof List<?> list)) {
-                return Set.of();
-            }
-            var out = new LinkedHashSet<String>();
-            for (var item : list) {
-                if (item instanceof Map<?, ?> map) {
-                    var normalized = normalizeRepoPath(text(map.get("path")));
-                    if (!normalized.isBlank()) {
-                        out.add(normalized);
-                    }
-                }
-            }
-            return out;
-        } catch (Exception ignored) {
-            return Set.of();
-        }
-    }
-
-    private static Set<String> allowedRereadFiles(
-            Path root,
-            String workstreamId,
-            NodeDefinition nodeDefinition,
-            List<String> changedFiles
-    ) {
-        var allowed = new LinkedHashSet<String>();
-        changedFiles.stream()
-                .map(ArtifactContractValidator::normalizeRepoPath)
-                .filter(path -> !path.isBlank())
-                .forEach(allowed::add);
-        if (!mayUsePlanArtifactForRereadPolicy(nodeDefinition)) {
-            return allowed;
-        }
-        canonicalPlanArtifact(root, workstreamId).ifPresent(plan -> {
-            plan.editFiles().stream()
-                    .map(ArtifactContractValidator::normalizeRepoPath)
-                    .filter(path -> !path.isBlank())
-                    .forEach(allowed::add);
-            plan.referenceFiles().stream()
-                    .map(ArtifactContractValidator::normalizeRepoPath)
-                    .filter(path -> !path.isBlank())
-                    .forEach(allowed::add);
-        });
-        return allowed;
-    }
-
-    private static boolean mayUsePlanArtifactForRereadPolicy(NodeDefinition nodeDefinition) {
-        var id = nodeDefinition.id();
-        return id.startsWith("implement.") || "stage.claude_handoff".equals(id);
-    }
-
-    private static Optional<PlanArtifactDocument> canonicalPlanArtifact(Path root, String workstreamId) {
-        if (workstreamId == null || workstreamId.isBlank()) {
-            return Optional.empty();
-        }
-        var path = canonicalPlanArtifactPath(root, workstreamId);
-        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
-            return Optional.empty();
-        }
-        return PlanArtifactDocument.read(path, OBJECT_MAPPER);
     }
 
     private static Path canonicalPlanArtifactPath(Path root, String workstreamId) {

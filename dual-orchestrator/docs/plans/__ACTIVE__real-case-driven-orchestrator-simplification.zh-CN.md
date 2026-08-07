@@ -8,7 +8,28 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: A10 Same-Case Gate / PASS, PROVEN
+## Current Active Step: Terminal-Delivery Production Real-Case / REMEDIATION
+
+> 2026-08-07 使用正式 `terminal-delivery` profile 启动 captcha-auth Java 新项目。
+> 首次 `design.claude_design` 暴露非 intake 节点错误填写
+> `contract_obligations`，已由 `331119f8` 修复并在同 workstream retry 中证明输出
+> `contract_obligations=[]`。恢复 run 随后因重复读取已注入 prompt 的
+> `REQUIREMENT.md` / `VERIFICATION-GATE.md` 被 `REREAD_POLICY_DENIED` 阻断。
+>
+> 该阻断把 token/read-reuse 效率信号错误提升为 artifact contract failure：读取已经
+> 发生、产物 strict-valid，事后丢弃产物反而增加 Agent 调用、token 和耗时。本轮作为
+> 当前 production real-case 的 P0 blocker 修复，不启动 P1 新能力：删除
+> `REREAD_POLICY_DENIED -> NodeStatus.FAILED` 控制路径和仅为其服务的 calculator；
+> persisted tool usage、read-reuse context guidance 与 `repeatedReadFiles` metrics 保留。
+> 既有 scope、安全、strict schema、typed contract 与 change-boundary 语义不变；本次
+> 不新增 path-level read authority。
+>
+> deterministic gate 要求：captured 等价 run 的合法 artifact 必须通过；同一文件跨
+> run 重读必须仍出现在 metrics；production 和 test 中不存在旧失败 owner。通过并提交
+> clean SHA、fresh package 后，旧 workstream 只保留为失败证据，使用同一 captcha-auth
+> requirement 新建 workstream，从 intake 到 terminal delivery 完整运行一次。
+
+## Completed Step: A10 Same-Case Gate / PASS, PROVEN
 
 > 2026-08-05 已确认下一目标：对 full workflow happy path 的 10 次固定 Agent 调用
 > 逐一完成成本、owner、consumer、质量增量和 counterfactual 价值举证。最新模型增强
@@ -374,9 +395,9 @@
 > - production sibling sweep 对 `readScope`、`allowedDirectReadFiles`、
 >   `ExplorationPlan`、`ExplorationPolicy`、`scope_expansion_request`、
 >   `READ_OUTSIDE_EXPLORATION_SCOPE` 与 `DIRECT_READ_BUDGET_EXCEEDED` 为 0。
-> - recommendation、actual read/write/tool-usage telemetry 与 read-reuse policy
->   保留；`REREAD_POLICY_DENIED` 是独立 token/read-reuse contract，不是 path
->   read authority。
+> - recommendation、actual read/write/tool-usage telemetry 与 read-reuse guidance
+>   保留；重复读取只进入 metrics，不拥有 node failure、contract violation 或 recovery
+>   权力。
 >
 > **B2 small slice = ENFORCED + PROVEN，尚未提交。**
 > - `TaskContract.scope` 声明 `CREATE` / `MODIFY` 变更意图。
