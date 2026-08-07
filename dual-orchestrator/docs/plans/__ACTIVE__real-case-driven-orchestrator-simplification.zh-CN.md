@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Verified Revision Baseline Projection / ENFORCED, NOT REAL-CASE PROVEN
+## Current Active Step: Captcha-Auth Terminal Delivery Completion v2 / READY
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
@@ -53,6 +53,13 @@
 > 本次报告为
 > `docs/testing/real-case-reports/20260807T135202Z/report.md`。该 Gate 不证明
 > production terminal delivery、自然任务 `10 -> 9`、PASS B 或模型稳定性。
+>
+> 用户确认 captcha-auth 仍是未完成的真实开发任务，因此不等待另一项自然任务。新 Gate
+> `docs/testing/verification-gates/20260807-terminal-delivery-captcha-auth-completion-v2.md`
+> 使用 fresh workstream 在 `08417221` 后重新执行同一业务需求；旧 `R47H` 只作为历史失败
+> 证据，不 retry/resume。顺序固定为 clean Gate checkpoint -> fresh package -> deterministic
+> preflight -> 双 provider probes -> 一次完整 real-case。若 preflight/probes PASS，可直接运行，
+> 不再请求第二次授权。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 
