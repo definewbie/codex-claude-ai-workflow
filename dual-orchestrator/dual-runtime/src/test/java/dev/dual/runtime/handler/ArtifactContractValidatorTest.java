@@ -2,16 +2,20 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.ledger.file.WorkflowIterationDocument;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ArtifactContractValidatorTest {
     private static final ObjectMapper JSON = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    private static final ObjectMapper LEDGER_JSON = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @TempDir
     Path tempDir;
@@ -278,6 +283,79 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void undeclaredCapturedC2RegressionFailsBeforeProposalReferencePublication() throws Exception {
+        Files.writeString(tempDir.resolve("README.md"), "# sample\n");
+        var original = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Original proposal.", false,
+                "Register users safely.", modifyScope("README.md", List.of()),
+                clauses("AC", "Registration verifies identity", "Login requires captcha"),
+                clauses("TEST", "Run registration tests"),
+                List.of(
+                        new AgentResultEnvelope.ContractClause("C-1", "Keep identity handling explicit"),
+                        new AgentResultEnvelope.ContractClause("C-2", "Preserve the local part of email addresses")),
+                List.of(), List.of(), List.of("README.md"), List.of(), List.of());
+        var originalOutput = write(".agent/workstreams/ws-1/runs/run-original/outputs/intake.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-original", "intake.claude_brainstorm", original)));
+        var originalResult = validate("intake.claude_brainstorm", originalOutput, "run-original");
+        var originalRef = originalResult.outputRefs().stream()
+                .filter(ref -> ref.endsWith(".ref.json"))
+                .findFirst()
+                .orElseThrow();
+        AgentOutputLineageFixture.publish(
+                tempDir,
+                "ws-1",
+                tempDir.resolve(originalOutput.replace(".json", ".contract.json")),
+                "iter-001");
+
+        var obligations = List.of(new AgentResultEnvelope.ReviewObligation(
+                "CO-1", "Make registration authorization atomic"));
+        var reviewOutput = write(".agent/workstreams/ws-1/runs/run-rejected/outputs/review.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-rejected", "intake.codex_product_review",
+                        contractRevisionReview(obligations))));
+        var reviewNode = new NodeDefinition(
+                "intake.codex_product_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                        "expected_artifact", "agent_output_contract",
+                        "review_subject_artifact", "task_contract_proposal"));
+        var reviewResult = validator.validate(
+                tempDir, "ws-1", "node-review-rejected", reviewNode, List.of(originalRef),
+                NodeResult.completed("completed", List.of(reviewOutput), Map.of("run_id", "run-rejected")));
+        assertEquals(NodeStatus.COMPLETED, reviewResult.status(), reviewResult.result().toString());
+        var reviewSidecar = tempDir.resolve(reviewOutput.replace(".json", ".contract.json"));
+        AgentOutputLineageFixture.publish(tempDir, "ws-1", reviewSidecar, "iter-001");
+        var reviewRef = tempDir.toAbsolutePath().normalize()
+                .relativize(reviewSidecar.toAbsolutePath().normalize()).toString();
+        writeRevisionLineage(reviewRef, "node-revision", "iter-002");
+
+        var revised = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Revised proposal.", false,
+                "Register users safely.", modifyScope("README.md", List.of()),
+                clauses("AC", "Registration atomically verifies identity", "Login requires captcha"),
+                clauses("TEST", "Run registration tests"),
+                List.of(
+                        new AgentResultEnvelope.ContractClause("C-1", "Keep identity handling explicit"),
+                        new AgentResultEnvelope.ContractClause("C-2", "Lowercase complete email addresses")),
+                List.of(), List.of(), List.of("README.md"), List.of(),
+                List.of(new AgentResultEnvelope.RevisionResponse("CO-1", List.of("AC-1"))));
+        var revisedOutput = write(".agent/workstreams/ws-1/runs/run-revision/outputs/intake.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-revision", "intake.claude_brainstorm", revised)));
+
+        var validated = validator.validate(
+                tempDir, "ws-1", "node-revision", node("intake.claude_brainstorm"),
+                NodeResult.completed("completed", List.of(revisedOutput), Map.of("run_id", "run-revision")));
+
+        assertEquals(NodeStatus.FAILED, validated.status(), validated.result().toString());
+        var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
+        assertEquals("TASK_CONTRACT_REVISION_DELTA_INVALID", artifact.errorCode());
+        assertTrue(validated.result().toString().contains("UNDECLARED_CONTRACT_CLAUSE_CHANGE: C-2"),
+                validated.result().toString());
+        assertTrue(validated.outputRefs().stream().noneMatch(ref -> ref.endsWith(".ref.json")),
+                "an invalid revision must not publish a trusted proposal reference");
+    }
+
+    @Test
     void codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs() throws Exception {
         Files.writeString(tempDir.resolve("README.md"), "# sample\n");
         var proposal = new AgentResultEnvelope.TaskContractProposalResult(
@@ -400,9 +478,61 @@ class ArtifactContractValidatorTest {
     }
 
     private NodeResult validate(String nodeId, String outputRef, String runId) throws Exception {
+        if ("intake.claude_brainstorm".equals(nodeId)) {
+            writeInitialIntakeLineage("node-instance-1", "iter-001");
+        }
         return validator.validate(
                 tempDir, "ws-1", "node-instance-1", node(nodeId),
                 NodeResult.completed("completed", List.of(outputRef), Map.of("run_id", runId, "agent", "test")));
+    }
+
+    private void writeInitialIntakeLineage(String nodeInstanceId, String iterationId) throws Exception {
+        var iterationRef = ".agent/workstreams/ws-1/iterations/" + iterationId + ".json";
+        if (!Files.isRegularFile(tempDir.resolve(iterationRef))) {
+            var iterationPath = tempDir.resolve(iterationRef);
+            Files.createDirectories(iterationPath.getParent());
+            LEDGER_JSON.writeValue(iterationPath.toFile(),
+                    WorkflowIterationDocument.initial(
+                            "intake.claude_brainstorm", Instant.parse("2026-08-07T00:00:00Z")));
+        }
+        var nodeRef = ".agent/workstreams/ws-1/nodes/" + nodeInstanceId + ".json";
+        if (!Files.isRegularFile(tempDir.resolve(nodeRef))) {
+            write(nodeRef, JSON.writeValueAsString(Map.ofEntries(
+                    Map.entry("schemaVersion", 1),
+                    Map.entry("nodeInstanceId", nodeInstanceId),
+                    Map.entry("nodeDefinitionId", "intake.claude_brainstorm"),
+                    Map.entry("kind", "TASK"),
+                    Map.entry("handlerType", "acpx.agent_run"),
+                    Map.entry("status", "RUNNING"),
+                    Map.entry("stageId", "stage-intake"),
+                    Map.entry("iterationId", iterationId),
+                    Map.entry("inputRefs", List.of()),
+                    Map.entry("outputRefs", List.of()),
+                    Map.entry("result", Map.of()))));
+        }
+    }
+
+    private void writeRevisionLineage(String rejectedReviewRef, String revisionNodeId, String iterationId)
+            throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-1");
+        var nodes = workstreamDir.resolve("nodes");
+        var iterations = workstreamDir.resolve("iterations");
+        Files.createDirectories(nodes);
+        Files.createDirectories(iterations);
+        var now = Instant.parse("2026-08-07T00:00:00Z");
+        var triggerId = "node-intake-decision-revision";
+        LEDGER_JSON.writeValue(nodes.resolve(triggerId + ".json").toFile(), new NodeInstanceDocument(
+                1, triggerId, "intake.decision", NodeKind.DECISION, "review.decision",
+                NodeStatus.COMPLETED, "stage-intake", "iter-001", List.of(rejectedReviewRef), Map.of(),
+                List.of(rejectedReviewRef), Map.of("decision", "NEEDS_REVISION"), "", "", now, now));
+        LEDGER_JSON.writeValue(iterations.resolve(iterationId + ".json").toFile(),
+                WorkflowIterationDocument.revision(
+                        iterationId, 2, "iter-001", triggerId, "NEEDS_REVISION",
+                        "intake.claude_brainstorm", "Resolve contract obligations", now));
+        LEDGER_JSON.writeValue(nodes.resolve(revisionNodeId + ".json").toFile(), new NodeInstanceDocument(
+                1, revisionNodeId, "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run",
+                NodeStatus.RUNNING, "stage-intake", iterationId, List.of(rejectedReviewRef), Map.of(),
+                List.of(), Map.of(), "", "", now, null));
     }
 
     private String envelope(String nodeId, AgentResultEnvelope.AgentResult result) throws Exception {

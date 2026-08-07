@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AdapterSignalType;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
@@ -14,6 +15,8 @@ import dev.dual.core.workflow.NodeStatus;
 import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.TaskHandler;
+import dev.dual.ledger.file.NodeInstanceDocument;
+import dev.dual.ledger.file.WorkflowIterationDocument;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTaskHandlerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper LEDGER_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @TempDir
     Path tempDir;
@@ -1509,6 +1513,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
         var instance = readyInstance("intake.claude_brainstorm");
+        writeInitialIntakeLineage(workstreamDir, instance);
         var originalUserHome = System.getProperty("user.home");
         NodeResult candidate;
         try {
@@ -1542,6 +1547,34 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(1, runMetadata.path("agentResultAcquisition").path("occurrences").size());
         assertEquals("EXITED_ZERO", runMetadata.path("agentResultAcquisition").path("occurrences")
                 .get(0).path("processResult").path("usability").asText());
+    }
+
+    private static void writeInitialIntakeLineage(Path workstreamDir, NodeInstance instance) throws Exception {
+        var now = Instant.parse("2026-08-07T00:00:00Z");
+        var iterations = workstreamDir.resolve("iterations");
+        var nodes = workstreamDir.resolve("nodes");
+        Files.createDirectories(iterations);
+        Files.createDirectories(nodes);
+        LEDGER_MAPPER.writeValue(iterations.resolve("iter-001.json").toFile(),
+                WorkflowIterationDocument.initial("intake.claude_brainstorm", now));
+        LEDGER_MAPPER.writeValue(nodes.resolve(instance.nodeInstanceId() + ".json").toFile(),
+                new NodeInstanceDocument(
+                        1,
+                        instance.nodeInstanceId(),
+                        instance.nodeDefinitionId(),
+                        instance.kind(),
+                        instance.handlerType(),
+                        instance.status(),
+                        instance.stageId(),
+                        instance.iterationId(),
+                        instance.inputRefs(),
+                        Map.of(),
+                        instance.outputRefs(),
+                        instance.result(),
+                        "",
+                        "",
+                        now,
+                        null));
     }
 
     private static void writeCapturedLargeStreamAcpx(

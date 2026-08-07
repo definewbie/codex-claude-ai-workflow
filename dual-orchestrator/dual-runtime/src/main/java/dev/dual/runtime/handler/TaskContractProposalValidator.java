@@ -5,7 +5,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.contract.TaskContractValidator;
@@ -103,6 +105,83 @@ final class TaskContractProposalValidator {
             }
         }
         return errors;
+    }
+
+    List<RevisionDeltaError> validateRevisionDelta(
+            TaskContractProposal previous,
+            TaskContractProposal current
+    ) {
+        var errors = new ArrayList<RevisionDeltaError>();
+        if (previous == null) {
+            return List.of(new RevisionDeltaError("REVISION_BASELINE_UNRESOLVABLE", ""));
+        }
+        var previousClauses = clauseSnapshot(previous);
+        var currentClauses = clauseSnapshot(current);
+        var modified = new LinkedHashSet<String>();
+        var added = new LinkedHashSet<String>();
+        var deleted = new LinkedHashSet<String>();
+        for (var entry : currentClauses.entrySet()) {
+            var baseline = previousClauses.get(entry.getKey());
+            if (baseline == null) {
+                added.add(entry.getKey());
+            } else if (!baseline.equals(entry.getValue())) {
+                modified.add(entry.getKey());
+            }
+        }
+        for (var id : previousClauses.keySet()) {
+            if (!currentClauses.containsKey(id)) {
+                deleted.add(id);
+            }
+        }
+
+        var declared = new LinkedHashSet<String>();
+        if (current.revisionResponses() != null) {
+            for (var response : current.revisionResponses()) {
+                if (response != null && response.resolvedByClauseIds() != null) {
+                    response.resolvedByClauseIds().stream()
+                            .filter(id -> !isBlank(id))
+                            .map(String::trim)
+                            .forEach(declared::add);
+                }
+            }
+        }
+        modified.stream()
+                .filter(id -> !declared.contains(id))
+                .forEach(id -> errors.add(
+                        new RevisionDeltaError("UNDECLARED_CONTRACT_CLAUSE_CHANGE", id)));
+        added.stream()
+                .filter(id -> !declared.contains(id))
+                .forEach(id -> errors.add(
+                        new RevisionDeltaError("UNDECLARED_CONTRACT_CLAUSE_ADDITION", id)));
+        deleted.forEach(id -> errors.add(
+                new RevisionDeltaError("CONTRACT_CLAUSE_DELETION_NOT_ALLOWED", id)));
+
+        return List.copyOf(errors);
+    }
+
+    private static Map<String, ClauseSnapshot> clauseSnapshot(TaskContractProposal proposal) {
+        var clauses = new LinkedHashMap<String, ClauseSnapshot>();
+        addClauseSnapshots(clauses, "acceptance_criteria", proposal.acceptanceCriteria());
+        addClauseSnapshots(clauses, "test_requirements", proposal.testRequirements());
+        addClauseSnapshots(clauses, "constraints", proposal.constraints());
+        addClauseSnapshots(clauses, "non_goals", proposal.nonGoals());
+        addClauseSnapshots(clauses, "risk_areas", proposal.riskAreas());
+        return Map.copyOf(clauses);
+    }
+
+    private static void addClauseSnapshots(
+            Map<String, ClauseSnapshot> target,
+            String section,
+            List<TaskContractProposal.ContractClause> clauses
+    ) {
+        if (clauses == null) {
+            return;
+        }
+        for (var clause : clauses) {
+            if (clause != null && !isBlank(clause.id()) && !isBlank(clause.text())) {
+                target.put(clause.id().trim(), new ClauseSnapshot(section, clause.text().trim()));
+            }
+        }
     }
 
     private static void validateClauses(
@@ -315,4 +394,12 @@ final class TaskContractProposalValidator {
                 || lower.contains("context package")
                 || lower.contains("context governance");
     }
+
+    record RevisionDeltaError(String code, String targetId) {
+        String message() {
+            return targetId == null || targetId.isBlank() ? code : code + ": " + targetId;
+        }
+    }
+
+    private record ClauseSnapshot(String section, String text) {}
 }

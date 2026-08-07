@@ -28,6 +28,8 @@ public final class ArtifactContractValidator {
     private final AgentResultEnvelopeParser resultParser = new AgentResultEnvelopeParser();
     private final AgentResultEnvelopeValidator resultValidator = new AgentResultEnvelopeValidator();
     private final AgentResultDocumentProjector resultProjector = new AgentResultDocumentProjector();
+    private final TaskContractRevisionContextResolver revisionContextResolver =
+            new TaskContractRevisionContextResolver();
 
     public NodeResult validate(Path workspaceRoot, NodeDefinition nodeDefinition, NodeResult result) throws Exception {
         return validate(workspaceRoot, "", "", nodeDefinition, List.of(), result);
@@ -102,7 +104,8 @@ public final class ArtifactContractValidator {
                 lastSourceRef = ref;
                 break;
             }
-            var semanticFailure = validateAgentResult(root, parsed.envelope());
+            var semanticFailure = validateAgentResult(
+                    root, workstreamId, nodeInstanceId, nodeDefinition, parsed.envelope());
             if (semanticFailure != null) {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
                         parsed.envelope(), semanticFailure);
@@ -116,16 +119,62 @@ public final class ArtifactContractValidator {
                 lastSourceRef, null, lastInvalid);
     }
 
-    private ContractViolation validateAgentResult(Path root, AgentResultEnvelope envelope) {
+    private ContractViolation validateAgentResult(
+            Path root,
+            String workstreamId,
+            String nodeInstanceId,
+            NodeDefinition nodeDefinition,
+            AgentResultEnvelope envelope
+    ) {
         if (envelope.result() instanceof AgentResultEnvelope.TaskContractProposalResult proposalResult) {
             var proposal = resultProjector.taskContractProposal(proposalResult);
-            var errors = new TaskContractProposalValidator().validate(proposal, root);
+            var proposalValidator = new TaskContractProposalValidator();
+            var errors = proposalValidator.validate(proposal, root);
             if (!errors.isEmpty()) {
                 return ContractViolation.of(
                         "TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED",
                         "task_contract_proposal failed mechanical validation: " + errors,
                         Map.of("errors", errors)
                 );
+            }
+            if ("intake.claude_brainstorm".equals(nodeDefinition.id())) {
+                var revisionContext = revisionContextResolver.resolveForNode(root, workstreamId, nodeInstanceId);
+                if (!revisionContext.valid()) {
+                    return ContractViolation.of(
+                            "TASK_CONTRACT_REVISION_CONTEXT_INVALID",
+                            "task_contract_proposal revision context could not be resolved",
+                            Map.of("errors", revisionContext.errors())
+                    );
+                }
+                var context = revisionContext.context();
+                var coverageErrors = context.revision()
+                        ? proposalValidator.validateRevisionCoverage(proposal, context.obligations())
+                        : proposalValidator.validateInitialIteration(proposal);
+                if (!coverageErrors.isEmpty()) {
+                    return ContractViolation.of(
+                            "TASK_CONTRACT_REVISION_COVERAGE_INVALID",
+                            "task_contract_proposal failed revision obligation coverage",
+                            Map.of("errors", coverageErrors)
+                    );
+                }
+                if (context.revision()) {
+                    var deltaErrors = proposalValidator.validateRevisionDelta(
+                            context.previousProposal(), proposal);
+                    if (!deltaErrors.isEmpty()) {
+                        return ContractViolation.of(
+                                "TASK_CONTRACT_REVISION_DELTA_INVALID",
+                                "task_contract_proposal contains an invalid revision delta",
+                                Map.of(
+                                        "error_codes", deltaErrors.stream()
+                                                .map(TaskContractProposalValidator.RevisionDeltaError::code)
+                                                .distinct()
+                                                .toList(),
+                                        "errors", deltaErrors.stream()
+                                                .map(TaskContractProposalValidator.RevisionDeltaError::message)
+                                                .toList())
+                        );
+                    }
+                }
             }
         }
         return null;

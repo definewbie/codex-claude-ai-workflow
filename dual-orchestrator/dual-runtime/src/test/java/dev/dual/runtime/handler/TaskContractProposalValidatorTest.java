@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TaskContractProposalValidatorTest {
@@ -152,6 +153,110 @@ class TaskContractProposalValidatorTest {
                 coverageErrors.toString());
         assertTrue(coverageErrors.contains("revision_responses does not cover obligation: OB-1"),
                 coverageErrors.toString());
+    }
+
+    @Test
+    void capturedC2RegressionCannotPassAsAnUndeclaredRevision() {
+        var previous = revisionProposal(
+                List.of(clause("AC-1", "Registration verifies the submitted identity.")),
+                List.of(clause("TEST-1", "Test registration.")),
+                List.of(clause("C-2", "Preserve the local part of an email address.")),
+                List.of(),
+                List.of(),
+                List.of());
+        var current = revisionProposal(
+                List.of(clause("AC-1", "Registration atomically verifies the submitted identity.")),
+                previous.testRequirements(),
+                List.of(clause("C-2", "Lowercase the complete email address.")),
+                previous.nonGoals(),
+                previous.riskAreas(),
+                List.of(new TaskContractProposal.RevisionResponse("CO-5", List.of("AC-1"))));
+
+        var errors = validator.validateRevisionDelta(previous, current);
+
+        assertEquals(List.of("UNDECLARED_CONTRACT_CLAUSE_CHANGE: C-2"),
+                errors.stream().map(TaskContractProposalValidator.RevisionDeltaError::message).toList());
+    }
+
+    @Test
+    void declaredChangesAdditionsAndSupportingClausesAreAcceptedIndependentOfOrder() {
+        var previous = revisionProposal(
+                List.of(clause("AC-1", "Old behavior"), clause("AC-2", "Supporting behavior")),
+                List.of(clause("TEST-1", "Run tests")),
+                List.of(clause("C-1", "Keep scope bounded")),
+                List.of(),
+                List.of(),
+                List.of());
+        var current = revisionProposal(
+                List.of(clause("AC-2", "Supporting behavior"), clause("AC-1", "New behavior")),
+                previous.testRequirements(),
+                previous.constraints(),
+                List.of(),
+                List.of(clause("RISK-1", "New declared risk")),
+                List.of(new TaskContractProposal.RevisionResponse(
+                        "CO-1", List.of("AC-1", "AC-2", "RISK-1"))));
+
+        assertTrue(validator.validateRevisionDelta(previous, current).isEmpty());
+    }
+
+    @Test
+    void sectionMovesAndDeletionsRemainMaterialRevisionFacts() {
+        var previous = revisionProposal(
+                List.of(clause("AC-1", "Behavior"), clause("AC-2", "Must remain")),
+                List.of(clause("TEST-1", "Run tests")),
+                List.of(clause("C-1", "Boundary")),
+                List.of(),
+                List.of(),
+                List.of());
+        var current = revisionProposal(
+                List.of(clause("AC-2", "Must remain")),
+                previous.testRequirements(),
+                List.of(clause("C-1", "Boundary"), clause("AC-1", "Behavior")),
+                List.of(),
+                List.of(),
+                List.of(new TaskContractProposal.RevisionResponse("CO-1", List.of("AC-1"))));
+
+        var moved = validator.validateRevisionDelta(previous, current);
+        assertTrue(moved.isEmpty(), moved.toString());
+
+        var deleted = revisionProposal(
+                List.of(clause("AC-1", "Behavior")),
+                previous.testRequirements(),
+                previous.constraints(),
+                List.of(),
+                List.of(),
+                List.of(new TaskContractProposal.RevisionResponse("CO-1", List.of("AC-1"))));
+        assertTrue(validator.validateRevisionDelta(previous, deleted).stream()
+                .anyMatch(error -> "CONTRACT_CLAUSE_DELETION_NOT_ALLOWED".equals(error.code())
+                        && "AC-2".equals(error.targetId())));
+    }
+
+    private static TaskContractProposal revisionProposal(
+            List<TaskContractProposal.ContractClause> acceptance,
+            List<TaskContractProposal.ContractClause> tests,
+            List<TaskContractProposal.ContractClause> constraints,
+            List<TaskContractProposal.ContractClause> nonGoals,
+            List<TaskContractProposal.ContractClause> risks,
+            List<TaskContractProposal.RevisionResponse> responses
+    ) {
+        return new TaskContractProposal(
+                "task_contract_proposal",
+                TaskContractProposal.SCHEMA_VERSION,
+                "Stable revision objective",
+                new TaskContractProposal.Scope(
+                        List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of()),
+                acceptance,
+                tests,
+                constraints,
+                nonGoals,
+                risks,
+                List.of(),
+                List.of(),
+                responses);
+    }
+
+    private static TaskContractProposal.ContractClause clause(String id, String text) {
+        return new TaskContractProposal.ContractClause(id, text);
     }
 
     @Test

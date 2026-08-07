@@ -263,6 +263,47 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void compileCannotBypassUndeclaredClauseDelta(@TempDir Path root) throws Exception {
+        prepare(root);
+        var originalProposal = writeTypedProposal(
+                root, "run-original", "Original objective",
+                List.of(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)),
+                List.of(), TaskContractProposal.SCHEMA_VERSION,
+                INITIAL_ITERATION_ID, List.of(), List.of());
+        replaceClauseText(
+                root, originalProposal, "constraints", "CONSTRAINT-1",
+                "Preserve the local part of email addresses", INITIAL_ITERATION_ID);
+        var obligations = List.of(new AgentResultEnvelope.ReviewObligation(
+                "OB-1", "Make registration authorization atomic"));
+        var rejectedReview = writeReview(
+                root, originalProposal, "run-rejected", "NEEDS_REVISION", obligations,
+                INITIAL_ITERATION_ID, false);
+        prepareRevisionIteration(root, "iter-002", rejectedReview);
+
+        var revisedProposal = writeTypedProposal(
+                root, "run-revised", "Revised objective",
+                List.of(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)),
+                List.of(), TaskContractProposal.SCHEMA_VERSION,
+                "iter-002",
+                List.of(new AgentResultEnvelope.RevisionResponse("OB-1", List.of("AC-1"))),
+                List.of());
+        replaceClauseText(
+                root, revisedProposal, "constraints", "CONSTRAINT-1",
+                "Lowercase complete email addresses", "iter-002");
+        var approvedReview = writeReview(
+                root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
+                "iter-002", true);
+
+        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview), "iter-002"));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_REVISION_DELTA_INVALID", result.outcome());
+        assertTrue(String.valueOf(result.result().get("validation_errors"))
+                .contains("UNDECLARED_CONTRACT_CLAUSE_CHANGE: CONSTRAINT-1"), result.result().toString());
+        assertFalse(Files.exists(contractPath(root)));
+    }
+
+    @Test
     void revisionWithOmittedObligationFailsBeforeCanonicalContract(@TempDir Path root) throws Exception {
         prepare(root);
         var originalProposal = writeProposal(root, "run-original", "Original objective", List.of("README.md"), List.of());
@@ -505,6 +546,25 @@ class ContractCompileHandlerTest {
             writeGate(root, reviewRef, reviewRunId, iterationId);
         }
         return reviewRef;
+    }
+
+    private static void replaceClauseText(
+            Path root,
+            String proposalSidecarRef,
+            String section,
+            String clauseId,
+            String text,
+            String iterationId
+    ) throws Exception {
+        var path = root.resolve(proposalSidecarRef);
+        var document = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
+        for (var clause : document.path("task_contract_proposal").path(section)) {
+            if (clauseId.equals(clause.path("id").asText())) {
+                ((com.fasterxml.jackson.databind.node.ObjectNode) clause).put("text", text);
+            }
+        }
+        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), document);
+        AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, path, iterationId);
     }
 
     private static void writeGate(Path root, String reviewRef, String suffix, String iterationId) throws Exception {
