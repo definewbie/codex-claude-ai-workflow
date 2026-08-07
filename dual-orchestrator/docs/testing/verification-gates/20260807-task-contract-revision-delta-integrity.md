@@ -2,9 +2,10 @@
 
 日期：2026-08-07
 
-状态：`REVIEW PASS / READY / NOT ACTIVE`。本文件只定义一次受控 revision
-continuation；独立只读同行评审已 PASS，尚未授权 provider probe、retry、resume 或
-real-case 执行。
+状态：`PASS A / EARLY INVALID-DELTA REJECTION PROVEN`。本 Gate 授权的唯一
+controlled continuation 已完成；本次只证明非法 revision 在 proposal reference
+发布和 Codex review 调用之前被阻断。`PASS B` 的合法 revision-to-review
+路径仍为 `ENFORCED / NOT PROVEN`。
 
 ## 1. 为什么不启动新的完整 workflow
 
@@ -182,7 +183,7 @@ select the branch.
   full workflow completion, compile success, token savings or all future schema
   fields.
 
-## 6. Independent review
+## 6. Pre-run independent review
 
 Independent read-only review: `PASS`.
 
@@ -194,3 +195,54 @@ Independent read-only review: `PASS`.
   call;
 - session reuse is an observed model-context variable, not a mechanical-boundary
   failure and not a reason to create a fresh session.
+
+## 7. Execution result
+
+- Execution UTC window: `2026-08-07T10:24:32Z` to
+  `2026-08-07T10:27:15Z`.
+- Disposable clone:
+  `/private/tmp/dual-revision-delta-gate-20260807T1019Z`.
+- Dual clean HEAD:
+  `5eff528b74dfd517fc68df1ac484b6b312602212`, containing checkpoint
+  `6fb51608`.
+- Fresh CLI artifact SHA-256:
+  `0e8ec751420d861b3fe9b0a52ee80173cef48b0a8703bdf2287ad2ce3692c742`.
+- New run: `run-1786098267425`.
+- Exactly one new Claude occurrence was created; total Claude occurrences moved
+  from 3 to 4.
+- No new Codex occurrence was created; total Codex occurrences remained 4.
+- The Claude process exited zero, produced one strict result occurrence, and did
+  not use bounded correction (`NOT_NEEDED`).
+- The required proposal artifact was present but invalid with
+  `TASK_CONTRACT_REVISION_DELTA_INVALID`.
+- Typed diagnostics included `UNDECLARED_CONTRACT_CLAUSE_CHANGE` and
+  `CONTRACT_CLAUSE_DELETION_NOT_ALLOWED`, with concrete clause IDs.
+- Proposal reference count remained 3 and Codex review context count remained 3.
+  No reviewer dispatch side effect occurred.
+- The node stopped as `FAILED` with typed outcome `CONTRACT_FAILED`, retry policy
+  `MANUAL_ONLY`, and workflow `WAITING_FOR_RECOVERY`.
+- The historical source workstream remained unchanged: frozen workflow and node
+  hashes still matched and its Git worktree remained clean.
+- The clone-local Claude session was closed after evidence collection.
+
+## 8. Post-run independent review
+
+Independent read-only evidence review: `PASS`.
+
+- no P0/P1 findings;
+- the reviewer independently inspected the clone ledger, run, node result,
+  contract diagnostic, proposal references and review contexts rather than
+  relying on this Gate's summary;
+- the typed invalid-delta diagnostic and concrete clause IDs were confirmed;
+- the reviewer confirmed one new Claude occurrence and no new Codex dispatch,
+  proposal reference or review context;
+- historical source isolation was confirmed;
+- `PASS A` was explicitly kept separate from `PASS B` and full-workflow/model
+  quality.
+
+Two non-blocking corrections apply to the review narrative: authoritative
+`run.json` occurrence counting is 4 to 4 for Codex, while the review's
+`.contract.json` proxy counted 3 to 3; and this disposable clone created a new
+clone-local Claude session rather than reusing the historical source session.
+Both corrections preserve the observed delta of zero and do not change the
+boundary verdict.
