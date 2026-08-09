@@ -2,7 +2,7 @@
 
 日期：2026-08-09
 
-状态：`READY / NOT RUN`。
+状态：`FAIL / CONSUMED`。
 
 - Target: 使用 clean SHA `bc08027` 的 production `AgentResultPromptContract` 重新渲染
   captured captcha-auth revision prompt，证明一个 fresh Claude session 能产生逐字保留未声明
@@ -65,3 +65,28 @@
 - verified baseline marker：present。
 - character-for-character instruction：present。
 - production implementation checkpoint：`bc08027`。
+
+## Result
+
+- Gate checkpoint：`c145c00`；worktree clean；generated prompt path/hash/bytes 与 preflight
+  完全一致。
+- fresh session：`dual-captcha-revision-v2-c145c00`；ACP stream：
+  `f8996e0e-7770-475f-a142-2c8909bb01c6.stream.ndjson`；恰好两个
+  `session/prompt` request（initial `id=3`、correction `id=4`），无第三次 occurrence。
+- initial：exit `0`、`end_turn`、108,222 ms、`PARSE_FAILURE`；usage 为 input 10,051、
+  output 9,859、total 19,910 tokens。
+- production `AcpxAgentResultAcquirer` 按 Gate 在同一 session 执行唯一 bounded syntax
+  correction：disposition=`ATTEMPTED`。correction exit `0`、`end_turn`、51,194 ms；usage 为
+  input 5,416、cached read 9,984、output 5,643、total 21,043 tokens。
+- 两次 occurrence 合计 40,953 total tokens、159,416 ms。stream/transcript 未出现
+  `session/request_permission` 或 tool call；没有 process、permission 或 transport failure。
+- correction 后唯一 final candidate 为 17,252 bytes，SHA-256
+  `1409b9450bc3269103b79cae1b381da30f5299824d12c97417e49e8521c1a58d`，仍以
+  Markdown `json` fence 开始并以 fence 结束。production strict parser 在 line 1 column 1
+  返回 `AGENT_RESULT_PARSE_FAILED / INVALID_JSON`；final envelope validation 因而未成立。
+- 只读归因再次精确移除单一首尾 fence 后，candidate 通过 strict JSON、envelope、mechanical、
+  verified CO-1/CO-2 coverage 和 revision delta，且 `AC-12`、`TR-16` 不再漂移。这证明
+  `bc08027` 的字符级保真 prompt closure 对本样本有效，但该诊断不得进入 production
+  acceptance，也不能把本 Gate 改判 PASS。
+- 最终结论：`FAIL / SAMPLE CONSUMED`。session 已关闭且无残留 provider 进程；没有启动
+  fresh captcha-auth full workstream。

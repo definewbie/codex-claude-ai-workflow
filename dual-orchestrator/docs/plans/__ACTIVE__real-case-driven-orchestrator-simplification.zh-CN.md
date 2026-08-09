@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Full-Proposal Revision Verbatim Preservation / DETERMINISTIC PASS
+## Current Active Step: Revision Verbatim Probe v2 / FAIL, CONSUMED
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
@@ -121,6 +121,18 @@
 > `f3d686fa84a1fcfe14a7b97b6489ac7900da3d90a0dc94172cd013818261329f`；只含一个 Output
 > Contract，并包含 verified baseline 与 character-for-character instruction。Gate checkpoint
 > 提交前状态仍为 `READY / NOT RUN`，不得提前调用 provider。
+>
+> v2 Probe 已在 Gate SHA `c145c00` 上执行并消耗。production acquirer 运行 initial 和唯一
+> bounded syntax correction：两次均 exit 0 / end_turn、无 tool 或 permission request，但两次
+> 最终 assistant candidate 均带 Markdown `json` fence；correction 后 strict parser 仍以
+> `AGENT_RESULT_PARSE_FAILED / INVALID_JSON` 拒绝。两次合计 40,953 total tokens、159,416 ms，
+> 无第三次 occurrence。
+>
+> 诊断性去掉 correction candidate 的单一首尾 fence 后，envelope、mechanical、verified
+> CO-1/CO-2 coverage 和 revision delta 全部 PASS，`AC-12/TR-16` 不再漂移。因此 `bc08027`
+> 的字符级保真修复已由该样本证明有效；剩余失败严格收敛为 assistant presentation format
+> 与 strict JSON boundary 不兼容。该诊断不进入 production acceptance，Gate 仍为
+> `FAIL / CONSUMED`。session 已关闭，无残留进程；fresh captcha-auth full workstream 未启动。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 
