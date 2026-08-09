@@ -61,3 +61,29 @@
   occurrence。
 - Probe 结论为 `FAIL`，因此没有启动新的 captcha-auth full workstream。session 已关闭，
   无残留 provider 进程。
+
+### Offline semantic diagnostic
+
+为区分单一 fence 偏差与 proposal 语义/保真问题，使用一次性离线 replay 精确移除首尾
+Markdown fence；该解包仅用于诊断，不进入 production acceptance，也不改变 parser。
+
+- 解包后的 candidate 通过 production strict JSON parser、envelope identity/schema validator、
+  proposal mechanical validator，以及基于真实 ledger lineage 解析出的 CO-1/CO-2 obligation
+  coverage validator。
+- revision context 从原 workstream 的 current node、iteration、verified rejected review 和
+  previous proposal 解析成功，没有手工构造 baseline 或 obligations。
+- revision delta validator 仍返回两个错误：
+  `UNDECLARED_CONTRACT_CLAUSE_CHANGE: AC-12` 和
+  `UNDECLARED_CONTRACT_CLAUSE_CHANGE: TR-16`。
+- 两项差异均为 candidate 删除了 baseline 文本中 `mvn test` 外层的 Markdown backticks；业务
+  含义未改变，但不满足现有 character-preserving revision contract，且未在
+  `revision_responses` 中声明。
+
+因此该样本不是单一格式偏差。下一 Gate 不得仅加入 bounded syntax correction 后继续 full
+workflow；必须先收敛 full-proposal revision 的逐字保真协议，且不得通过 parser 宽松、文本
+归一化或 validator 忽略差异来绕过。
+
+后续 deterministic closure 已将字符级保真要求补入唯一
+`AgentResultPromptContract` owner，并保持 parser/validator 不变。下一次独立 Gate 可允许最多
+一次既有 bounded syntax correction，但 corrected candidate 仍必须通过全部 proposal、coverage
+和 delta validator；correction 不得掩盖 semantic drift，且全部调用与资源消耗必须计入。

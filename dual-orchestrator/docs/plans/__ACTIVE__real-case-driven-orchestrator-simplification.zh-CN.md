@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha Revision Current-Backend Probe / FAIL, CONSUMED
+## Current Active Step: Full-Proposal Revision Verbatim Preservation / DETERMINISTIC PASS
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
@@ -92,6 +92,28 @@
 > `AGENT_RESULT_PARSE_FAILED / INVALID_JSON` 拒绝。Gate 因 strict JSON 条件失败而
 > `FAIL / CONSUMED`，未 correction、retry、resume，也未启动新的 captcha-auth full
 > workstream。probe session 已关闭且无残留进程。
+>
+> 后续纯离线 semantic replay 精确移除首尾 fence，并复用 production parser、envelope
+> validator、proposal validator、真实 revision context resolver、obligation coverage 和
+> revision-delta validator。前五项通过，但 delta 仍拒绝未声明修改 `AC-12`、`TR-16`：两项
+> 都只是删除 baseline 中 `mvn test` 外层 Markdown backticks。故本次不能定性为单一格式
+> 偏差，也不能只把 bounded syntax correction 加入下一 Gate。full captcha-auth 继续冻结；
+> 下一步先收敛 full-proposal revision 的逐字保真协议，不放宽 parser、不做文本归一化、不忽略
+> undeclared delta。
+>
+> 收敛已落在唯一 `AgentResultPromptContract` owner：revision 输出现在明确要求未声明 clause 的
+> `id`/`text` 从 verified previous proposal 逐字符复制，包括空格、标点、大小写和 Markdown
+> backticks；formatting normalization 明确定义为 modification，只有 clause ID 出现在
+> `resolved_by_clause_ids` 时才允许。既有 strict parser 和 revision-delta validator 未修改。
+> core/ledger/runtime deterministic tests `742/0/0`，`git diff --check` clean。当前成熟度为：
+> prompt requirement=`PROJECTED`，非法 delta rejection=`ENFORCED`，新措辞的 provider
+> compliance=`NOT PROVEN`。
+>
+> 下一次 backend eligibility Gate 可以允许同一 session 最多一次既有 bounded syntax
+> correction，但不得把 correction 当作 semantic/delta fallback；最终 candidate 必须通过
+> strict parser、mechanical、obligation coverage 和 revision delta，且两次 occurrence 的
+> 调用、token、耗时全部计入。Gate 未定稿前不得调用 provider；captcha-auth full workstream
+> 继续冻结。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 

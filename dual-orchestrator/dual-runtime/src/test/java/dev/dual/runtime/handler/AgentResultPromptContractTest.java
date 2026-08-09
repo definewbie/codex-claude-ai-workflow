@@ -67,7 +67,11 @@ class AgentResultPromptContractTest {
         assertTrue(intake.contains(
                 "result.revision_responses` item is a closed object with exactly these fields: "
                         + "[review_obligation_id, resolved_by_clause_ids]"));
-        assertTrue(intake.contains("Preserve every existing clause not named by the current `revision_responses`"));
+        assertTrue(intake.contains(
+                "copying its `id` and `text` character-for-character from the verified previous proposal"));
+        assertTrue(intake.contains("including whitespace, punctuation, capitalization, and Markdown backticks"));
+        assertTrue(intake.contains(
+                "Formatting normalization is a modification and is prohibited unless that clause ID is declared"));
         assertTrue(intake.contains("do not delete existing clause IDs"));
         assertTrue(productReview.contains(
                 "result.contract_obligations` item is a closed object with exactly these fields: [id, text]"));

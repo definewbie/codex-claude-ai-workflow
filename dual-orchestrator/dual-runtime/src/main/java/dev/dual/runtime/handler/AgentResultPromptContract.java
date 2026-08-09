@@ -60,8 +60,12 @@ public final class AgentResultPromptContract {
                     + "On an initial intake, `result.revision_responses` must be `[]`. "
                     + "On a revision, copy every routed Contract Obligation ID exactly once into "
                     + "`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`. "
-                    + "Preserve every existing clause not named by the current `revision_responses`; "
-                    + "list every added or modified clause ID in at least one `resolved_by_clause_ids` entry, "
+                    + "Preserve every existing clause not named by the current `revision_responses` by copying "
+                    + "its `id` and `text` character-for-character from the verified previous proposal, including "
+                    + "whitespace, punctuation, capitalization, and Markdown backticks. Formatting normalization "
+                    + "is a modification and is prohibited unless that clause ID is declared in "
+                    + "`resolved_by_clause_ids`. "
+                    + "List every added or modified clause ID in at least one `resolved_by_clause_ids` entry, "
                     + "and do not delete existing clause IDs. "
                     + closedItemFields(
                     "result.revision_responses",
