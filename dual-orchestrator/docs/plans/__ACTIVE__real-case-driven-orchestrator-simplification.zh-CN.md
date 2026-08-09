@@ -114,6 +114,13 @@
 > strict parser、mechanical、obligation coverage 和 revision delta，且两次 occurrence 的
 > 调用、token、耗时全部计入。Gate 未定稿前不得调用 provider；captcha-auth full workstream
 > 继续冻结。
+>
+> v2 Gate 已定稿为
+> `docs/testing/verification-gates/20260809-captcha-revision-verbatim-probe-v2.md`。production
+> renderer 生成的 captured prompt 为 34,870 bytes，SHA-256
+> `f3d686fa84a1fcfe14a7b97b6489ac7900da3d90a0dc94172cd013818261329f`；只含一个 Output
+> Contract，并包含 verified baseline 与 character-for-character instruction。Gate checkpoint
+> 提交前状态仍为 `READY / NOT RUN`，不得提前调用 provider。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 
