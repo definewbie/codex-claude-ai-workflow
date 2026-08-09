@@ -231,6 +231,87 @@ grep -q "\"workflowSourceSha256\": \"$expected_workflow_sha\"" "$workflow_case/p
   fi
 )
 
+start_failure_case="$tmp/start-failure-case"
+start_failure_workspace="$tmp/start-failure-workspace"
+start_failure_workstream="ws-start-failure"
+start_failure_calls="$tmp/start-failure-calls.log"
+mkdir -p "$start_failure_case/logs"
+set +e
+(
+  CASE_DIR="$start_failure_case"
+  REPO="$tmp/repo"
+  TASK_FILE="$tmp/task.md"
+  MAX_STEPS=80
+  PROMPT_LANGUAGE="en"
+  WORKFLOW_PATH=""
+  VARIANT="terminal-delivery"
+  dualctl() {
+    printf '%s\n' "$1" >>"$start_failure_calls"
+    if [[ "$1" == "start" ]]; then
+      printf 'Workstream: %s\n' "$start_failure_workstream"
+      printf 'Workspace: %s\n' "$start_failure_workspace"
+      return 7
+    fi
+    printf '%s\n' "$*"
+  }
+  collect_evidence() { printf 'collect_evidence\n' >>"$start_failure_calls"; }
+  status_snapshot() { :; }
+  write_report() { printf '%s\n' "$FINAL_STATUS" >"$start_failure_case/final-status.txt"; }
+  update_benchmark_index() { :; }
+  start_workstream
+) >"$tmp/start-failure-stdout.log" 2>"$tmp/start-failure-stderr.log"
+start_failure_exit="$?"
+set -e
+assert_eq "1" "$start_failure_exit" "failed start remains unsuccessful"
+assert_eq "START_FAILED" "$(cat "$start_failure_case/final-status.txt")" \
+  "successful start-failure session close preserves failure status"
+grep -q "sessions-reap --workdir $start_failure_workspace --workstream $start_failure_workstream" \
+  "$start_failure_case/logs/session-quiescence-start-stop-loss.log" || {
+  printf '[FAIL] failed start did not close durable workstream sessions\n' >&2
+  cat "$start_failure_case/logs/session-quiescence-start-stop-loss.log" >&2
+  exit 1
+}
+assert_eq $'start\nsessions-reap\ncollect_evidence' "$(cat "$start_failure_calls")" \
+  "failed start closes sessions before collecting evidence"
+
+start_reap_failure_case="$tmp/start-reap-failure-case"
+start_reap_failure_calls="$tmp/start-reap-failure-calls.log"
+mkdir -p "$start_reap_failure_case/logs"
+set +e
+(
+  CASE_DIR="$start_reap_failure_case"
+  REPO="$tmp/repo"
+  TASK_FILE="$tmp/task.md"
+  MAX_STEPS=80
+  PROMPT_LANGUAGE="en"
+  WORKFLOW_PATH=""
+  VARIANT="terminal-delivery"
+  dualctl() {
+    printf '%s\n' "$1" >>"$start_reap_failure_calls"
+    if [[ "$1" == "start" ]]; then
+      printf 'Workstream: %s\n' "$start_failure_workstream"
+      printf 'Workspace: %s\n' "$start_failure_workspace"
+      return 7
+    fi
+    if [[ "$1" == "sessions-reap" ]]; then
+      return 8
+    fi
+    return 0
+  }
+  collect_evidence() { printf 'collect_evidence\n' >>"$start_reap_failure_calls"; }
+  status_snapshot() { :; }
+  write_report() { printf '%s\n' "$FINAL_STATUS" >"$start_reap_failure_case/final-status.txt"; }
+  update_benchmark_index() { :; }
+  start_workstream
+) >"$tmp/start-reap-failure-stdout.log" 2>"$tmp/start-reap-failure-stderr.log"
+start_reap_failure_exit="$?"
+set -e
+assert_eq "1" "$start_reap_failure_exit" "start session-close failure remains unsuccessful"
+assert_eq "SESSION_QUIESCENCE_FAILED" "$(cat "$start_reap_failure_case/final-status.txt")" \
+  "start failure surfaces session quiescence failure"
+assert_eq $'start\nsessions-reap\ncollect_evidence' "$(cat "$start_reap_failure_calls")" \
+  "session close failure remains visible before evidence collection"
+
 set +e
 (
   CASE_DIR="$tmp/workflow-path-mismatch-case"

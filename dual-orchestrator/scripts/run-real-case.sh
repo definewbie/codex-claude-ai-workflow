@@ -578,8 +578,13 @@ start_workstream() {
   if ! dualctl "${args[@]}" >"$CASE_DIR/logs/start.log" 2>&1; then
     cat "$CASE_DIR/logs/start.log"
     fail "dualctl start failed"
-    parse_started_workstream || true
     FINAL_STATUS="START_FAILED"
+    if parse_started_workstream; then
+      if ! quiesce_workstream_sessions "start-stop-loss"; then
+        FINAL_STATUS="SESSION_QUIESCENCE_FAILED"
+        fail "Stopped workflow provider sessions could not be closed."
+      fi
+    fi
     collect_evidence || true
     status_snapshot "final" || true
     write_report
