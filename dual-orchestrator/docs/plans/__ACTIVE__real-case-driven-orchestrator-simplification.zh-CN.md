@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha Revision Current-Backend Probe / READY
+## Current Active Step: Captcha Revision Current-Backend Probe / FAIL, CONSUMED
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
@@ -84,6 +84,14 @@
 > Claude Code 新 session 配置精确重放 captured revision prompt，不判断模型名称。只有 exit 0、
 > 无工具请求、strict parser、coverage 和 delta 全 PASS，才允许新的完整 captcha-auth
 > workstream。
+>
+> 该 probe 已在 clean SHA `f1bdf05` 上执行一次且仅一次。ACP exit 0、`end_turn`、无 tool /
+> permission request，证明 execution permission 边界通过；但 production
+> `AcpxSessionStreamProjector` 从 captured stream 提取的唯一最终 candidate 仍带 Markdown
+> `json` fence。`AgentResultEnvelopeParser` 以
+> `AGENT_RESULT_PARSE_FAILED / INVALID_JSON` 拒绝。Gate 因 strict JSON 条件失败而
+> `FAIL / CONSUMED`，未 correction、retry、resume，也未启动新的 captcha-auth full
+> workstream。probe session 已关闭且无残留进程。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 

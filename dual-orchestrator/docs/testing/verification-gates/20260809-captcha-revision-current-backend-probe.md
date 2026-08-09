@@ -2,7 +2,7 @@
 
 日期：2026-08-09
 
-状态：`READY / NOT RUN`。
+状态：`FAIL / CONSUMED`。
 
 - Target: 使用当前 Claude Code 新 session 配置精确重放已捕获的 captcha-auth revision
   prompt，证明该 provider execution 能在不调用工具的情况下返回 exit 0、唯一 strict
@@ -44,3 +44,20 @@
 
 本 Probe 只筛选当前 backend 是否值得消耗一个完整 fresh workflow。PASS 不等于 captcha-auth
 交付成功，也不证明 terminal-delivery；FAIL 则阻止新的完整 workstream。
+
+## Result
+
+- Dual SHA：`f1bdf05`；captured prompt SHA-256 与 Gate 预期一致。
+- fresh session 只执行了一次 prompt occurrence；ACP process exit code 为 `0`，stop reason 为
+  `end_turn`，transcript 未出现 tool call 或 permission request。
+- CLI stdout 是增量片段和累计快照的展示层，不能作为候选结果。使用 production
+  `AcpxStreamWireLine` + `AcpxSessionStreamProjector` 对 captured session stream 做
+  deterministic replay 后，得到唯一最终 assistant candidate：20,285 bytes，SHA-256
+  `ed5eeb9118958e43cb2d77915654e8fdd9eb6904d56669ac1d33e807ad5a44a4`。
+- 最终 candidate 以 Markdown `json` fence 开始并以 fence 结束。production
+  `AgentResultEnvelopeParser` 返回 `AGENT_RESULT_PARSE_FAILED / INVALID_JSON`。
+- 因 strict JSON 前置条件失败，mechanical proposal、obligation coverage 与 revision delta
+  validator 不得被解释为已通过；未执行 correction、retry、resume 或第二次 provider
+  occurrence。
+- Probe 结论为 `FAIL`，因此没有启动新的 captcha-auth full workstream。session 已关闭，
+  无残留 provider 进程。
