@@ -43,6 +43,151 @@ class AcpxAgentResultAcquirerTest {
         );
         assertEquals(1, transport.calls);
         assertFalse(Files.exists(requests.correction().promptPath()));
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.NOT_NEEDED,
+                acquisition.initialPresentation().disposition()
+        );
+        assertEquals(acquisition.initialPresentation().rawSha256(),
+                acquisition.initialPresentation().candidateSha256());
+    }
+
+    @Test
+    void exactSingleJsonFenceProducesStrictCandidateWithoutCorrection() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var raw = " \n```json\n" + envelope + "\n```\n ";
+        var transport = new ScriptedTransport(validResult("request-1", raw, 0));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertTrue(acquisition.finalParse().valid());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_JSON_FENCE_REMOVED,
+                acquisition.initialPresentation().disposition()
+        );
+        assertFalse(acquisition.initialPresentation().rawSha256()
+                .equals(acquisition.initialPresentation().candidateSha256()));
+        assertEquals(1, transport.calls);
+
+        var crlfRaw = "```json\r\n" + envelope + "\r\n```";
+        var crlfTransport = new ScriptedTransport(validResult("request-crlf", crlfRaw, 0));
+        var crlfRequests = requests("crlf-session");
+        var crlfAcquisition = new AcpxAgentResultAcquirer(crlfTransport).acquire(
+                "claude", crlfRequests.initial(), crlfRequests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+        assertTrue(crlfAcquisition.finalParse().valid());
+        assertEquals(envelope, crlfAcquisition.finalCandidate());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_JSON_FENCE_REMOVED,
+                crlfAcquisition.initialPresentation().disposition()
+        );
+        assertEquals(1, crlfTransport.calls);
+    }
+
+    @Test
+    void ambiguousFencePresentationsAreNeverExtracted() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var cases = List.of(
+                "explanation\n```json\n" + envelope + "\n```",
+                "```json\n" + envelope + "\n```\n```json\n" + envelope + "\n```",
+                "```JSON\n" + envelope + "\n```",
+                "```python\n" + envelope + "\n```",
+                "```text\n" + envelope + "\n```",
+                "```json\n" + envelope,
+                "```json\n\n```"
+        );
+
+        for (var raw : cases) {
+            var transport = new ScriptedTransport(validResult("request-1", raw, 0));
+            var requests = requests("same-session-" + Math.abs(raw.hashCode()));
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                    "claude", requests.initial(), requests.correction(), "",
+                    "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+            assertFalse(acquisition.finalParse().valid(), raw);
+            assertEquals(raw, acquisition.finalCandidate());
+            assertEquals(
+                    AcpxAgentResultAcquirer.PresentationDisposition.REJECTED_AMBIGUOUS_PRESENTATION,
+                    acquisition.initialPresentation().disposition(),
+                    raw
+            );
+            assertEquals(1, transport.calls);
+        }
+    }
+
+    @Test
+    void normalizationCannotBypassStrictJsonOrSchemaValidation() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var strictFailures = List.of(
+                envelope.replaceFirst("\\\"schema_version\\\" : 1,",
+                        "\\\"schema_version\\\" : 1, \\\"schema_version\\\" : 1,"),
+                envelope + " true",
+                envelope.replaceFirst("\\\"schema_version\\\" : 1,",
+                        "\\\"schema_version\\\" : 1, \\\"unknown\\\" : true,")
+        );
+        for (var invalid : strictFailures) {
+            var transport = new ScriptedTransport(
+                    validResult("request-1", "```json\n" + invalid + "\n```", 0));
+            var requests = requests("strict-" + Math.abs(invalid.hashCode()));
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                    "claude", requests.initial(), requests.correction(), "",
+                    "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+            assertFalse(acquisition.finalParse().valid(), invalid);
+            assertEquals(
+                    AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_JSON_FENCE_REMOVED,
+                    acquisition.initialPresentation().disposition()
+            );
+        }
+
+        var wrongSchema = envelope.replace("\"schema_version\" : 1", "\"schema_version\" : 2");
+        var transport = new ScriptedTransport(
+                validResult("request-schema", "```json\n" + wrongSchema + "\n```", 0));
+        var requests = requests("schema-invalid");
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+        assertTrue(acquisition.finalParse().valid());
+        assertFalse(acquisition.initialValidation().valid());
+        assertFalse(acquisition.correctionAttempted());
+    }
+
+    @Test
+    void correctionOccurrenceUsesSamePresentationPipelineAndAuditFields() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var correctionRaw = "```json\n" + envelope + "\n```";
+        var transport = new ScriptedTransport(
+                validResult("request-1", "not-json", 0),
+                validResult("request-2", correctionRaw, 0)
+        );
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+        var document = acquisition.toDocument(
+                tempDir,
+                tempDir.resolve("outputs/initial.json"),
+                tempDir.resolve("outputs/correction.json"),
+                null,
+                null
+        );
+
+        assertTrue(acquisition.finalParse().valid());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(2, transport.calls);
+        assertEquals(2, document.schemaVersion());
+        assertEquals("NOT_NEEDED", document.occurrences().get(0).presentationDisposition());
+        assertEquals("SINGLE_JSON_FENCE_REMOVED",
+                document.occurrences().get(1).presentationDisposition());
+        assertEquals(64, document.occurrences().get(1).rawAssistantSha256().length());
+        assertEquals(64, document.occurrences().get(1).candidateSha256().length());
+        assertFalse(document.occurrences().get(1).rawAssistantSha256()
+                .equals(document.occurrences().get(1).candidateSha256()));
     }
 
     @Test

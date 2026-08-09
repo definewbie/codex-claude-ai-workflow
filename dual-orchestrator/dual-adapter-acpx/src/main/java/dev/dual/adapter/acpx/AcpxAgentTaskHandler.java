@@ -230,11 +230,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             var usage = acquisition.correctionAttempted()
                     ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
                     : initialUsage;
-            var finalArtifact = finalResult.promptCompletion().finalAssistantMessage();
+            var finalArtifact = acquisition.finalCandidate();
             if (acquisition.correctionAttempted()) {
                 Files.writeString(
                         initialOutputPath,
-                        acquisition.initialResult().promptCompletion().finalAssistantMessage(),
+                        acquisition.initialCandidate(),
                         StandardCharsets.UTF_8
                 );
                 Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);

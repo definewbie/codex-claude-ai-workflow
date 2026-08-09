@@ -90,3 +90,76 @@
   acceptance，也不能把本 Gate 改判 PASS。
 - 最终结论：`FAIL / SAMPLE CONSUMED`。session 已关闭且无残留 provider 进程；没有启动
   fresh captcha-auth full workstream。
+
+## Post-run Official Protocol Clarification
+
+2026-08-09 对 ACP v1、acpx 与 Claude ACP adapter 的官方文档和公开源码完成只读核对。
+本节只修正失败归因，不追溯修改本 Gate 的 `FAIL / CONSUMED` 历史判定。
+
+### Confirmed protocol boundary
+
+- ACP v1 将模型输出作为 `session/update` 的 `agent_message_chunk` 发送，正文是
+  `content.type=text` 的任意字符串；`session/prompt` 的终态响应只声明 `stopReason`，不携带
+  业务 output schema。官方依据：
+  [ACP Prompt Turn](https://agentclientprotocol.com/protocol/v1/prompt-turn) 和
+  [ACP Content](https://agentclientprotocol.com/protocol/v1/content)。
+- acpx `--format json` 输出 raw ACP NDJSON；`--json-strict` 只抑制非 JSON stderr；`quiet`
+  模式输出拼接后的 assistant text。它们都不约束 `content.text` 必须是 bare JSON。官方依据：
+  [acpx Output Formats](https://github.com/openclaw/acpx/blob/main/docs/output-formats.md)。
+- 因此完整 Markdown `json` fence 是 ACP/acpx 合法的 assistant text presentation。它不满足
+  Dual 当前 bare `AgentResultEnvelope` 应用合同，但不能再归因为 ACP/provider 协议违规。
+
+### Published extension scan
+
+只读源码扫描固定在：
+
+- `openclaw/acpx@5ef9b5849e137310a1c6f6e06d82ca606c2d8fb3`；
+- `agentclientprotocol/claude-agent-acp@1afa940a2c8c0f4c610f4f64d30c0961642907b0`。
+
+扫描结果：
+
+- acpx 的 `structured output` 公开措辞指 `text/json/quiet` CLI 输出模式；源码仍把
+  `agent_message_chunk.content.text` 作为 assistant output。其 flow 架构文档把 ACP node 的
+  dedicated output schema 明确列为未来可能能力，而非当前能力。
+- Claude ACP adapter 允许在 session `_meta.claudeCode.options` 中透传 Claude Agent SDK
+  `Options`，并识别 SDK 的 `error_max_structured_output_retries`；但公开 README/ACP capability
+  没有声明结构化最终结果扩展，production code 也没有把 SDK `structured_output` 投影为可供
+  ACP client 消费的 terminal result。`ToolUpdateMeta.toolResponse` 只属于 tool-call output，
+  不能作为 Agent 最终结果通道。
+- Claude ACP adapter 另有 opt-in `_meta.claudeCode.emitRawSDKMessages`，可通过
+  `_claude/sdkMessage` vendor extension 暴露未经抽象的 SDK message。它不是 initialize 时协商的
+  structured-output capability，也没有为 terminal result 提供 provider-neutral schema、唯一
+  owner 或稳定消费合同；本 checkpoint 明确不把该调试/扩展通道升级为 Dual workflow authority。
+- 所以当前可依赖的公共集成合同仍是 assistant text。不能把底层 SDK 可能拥有的 structured
+  output 能力推断为 acpx/ACP 已公开并端到端暴露的能力。
+
+### Bounded closure decision
+
+下一步只允许设计一个 adapter/acquisition-boundary presentation normalization checkpoint，
+不得立即修改 production：
+
+1. 原始 assistant text 必须继续持久化，ACP transport fact 不被改写；
+2. 只有整条消息精确由一个 `json` fenced block 构成时，才可产生 normalization candidate；
+3. fence 外 prose、多个 fence、非 `json` fence、不完整 fence 一律不 normalize；
+4. candidate 必须重新进入现有 strict parser、schema、coverage 和 revision-delta validators；
+5. 禁止 substring 搜索、brace matching、自动补括号/字段、宽松 parser、第三次 correction 或
+   provider-specific fallback；
+6. normalization 只能处理 presentation，不能改变任何 JSON 字节、业务 clause 或 routing fact。
+
+顺序固定为：每个 initial/correction occurrence 都先持久化 raw assistant text，再执行同一个
+presentation check，然后把 bare/normalized candidate 交给同一个 strict parser。只有该 parser
+失败时，既有 policy 才能允许同 session 最多一次 bounded correction；correction occurrence 不得
+使用第二套 extraction 或 parser。最小审计 disposition 为 `NOT_NEEDED`、
+`SINGLE_JSON_FENCE_REMOVED` 或 `REJECTED_AMBIGUOUS_PRESENTATION`，并记录 raw/candidate hash。
+
+该能力已按上述边界实现，当前成熟度为
+`IMPLEMENTED / DETERMINISTIC PASS / ENFORCED`：
+
+- initial/correction occurrence 共用 `AcpxAgentResultAcquirer` 的 exact single-json-fence pipeline；
+- normalized candidate 仍进入未修改的 strict parser 与既有下游 validators；
+- raw ACP presentation 保留在 transcript，occurrence schema v2 记录 disposition 与 raw/candidate
+  SHA-256；
+- cannot-bypass matrix 与完整 Maven reactor 通过（`1199 tests / 0 failures / 0 errors`）。
+
+独立代码级 diff review 已 `PASS`。在新的受控真实 workflow 通过前不得标记为 `PROVEN`，也不得
+把 presentation normalization 描述成模型输出质量已被修复。

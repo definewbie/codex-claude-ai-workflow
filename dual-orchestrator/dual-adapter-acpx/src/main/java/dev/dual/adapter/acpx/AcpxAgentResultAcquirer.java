@@ -7,6 +7,9 @@ import dev.dual.runtime.handler.NodeOutputContract;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 
 /** Acquires one strict agent-result candidate, with at most one same-session contract correction. */
 final class AcpxAgentResultAcquirer {
@@ -38,7 +41,9 @@ final class AcpxAgentResultAcquirer {
             NodeOutputContract contract
     ) throws IOException, InterruptedException {
         var initialResult = executeInitial(agent, initialRequest);
-        var initialParse = parser.parse(initialResult.promptCompletion().finalAssistantMessage());
+        var initialPresentation = presentationCandidate(
+                initialResult.promptCompletion().finalAssistantMessage());
+        var initialParse = parser.parse(initialPresentation.candidate());
         var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract);
         var correctionReason = correctionReason(initialParse, initialValidation);
         var correctionDisposition = correctionDisposition(
@@ -49,8 +54,10 @@ final class AcpxAgentResultAcquirer {
         if (correctionDisposition != CorrectionDisposition.ATTEMPTED) {
             return new Acquisition(
                     initialResult,
+                    initialPresentation,
                     initialParse,
                     initialValidation,
+                    null,
                     null,
                     null,
                     null,
@@ -68,7 +75,9 @@ final class AcpxAgentResultAcquirer {
                 StandardCharsets.UTF_8
         );
         var correctionResult = transport.runAgentResultCorrection(agent, correctionRequest);
-        var correctionParse = parser.parse(correctionResult.promptCompletion().finalAssistantMessage());
+        var correctionPresentation = presentationCandidate(
+                correctionResult.promptCompletion().finalAssistantMessage());
+        var correctionParse = parser.parse(correctionPresentation.candidate());
         var correctionValidation = validateCorrection(
                 correctionReason,
                 initialParse,
@@ -80,9 +89,11 @@ final class AcpxAgentResultAcquirer {
         );
         return new Acquisition(
                 initialResult,
+                initialPresentation,
                 initialParse,
                 initialValidation,
                 correctionResult,
+                correctionPresentation,
                 correctionParse,
                 correctionValidation,
                 initialRequest,
@@ -259,11 +270,75 @@ final class AcpxAgentResultAcquirer {
         SKIPPED_CORRECTION_UNAVAILABLE
     }
 
+    enum PresentationDisposition {
+        NOT_NEEDED,
+        SINGLE_JSON_FENCE_REMOVED,
+        REJECTED_AMBIGUOUS_PRESENTATION
+    }
+
+    record PresentationCandidate(
+            String raw,
+            String candidate,
+            PresentationDisposition disposition,
+            String rawSha256,
+            String candidateSha256
+    ) {
+    }
+
+    private static PresentationCandidate presentationCandidate(String rawAssistantMessage) {
+        var raw = rawAssistantMessage == null ? "" : rawAssistantMessage;
+        var stripped = raw.strip();
+        if (!stripped.contains("```")) {
+            return presentationCandidate(raw, raw, PresentationDisposition.NOT_NEEDED);
+        }
+
+        var candidate = exactJsonFencePayload(stripped);
+        if (candidate == null) {
+            return presentationCandidate(raw, raw, PresentationDisposition.REJECTED_AMBIGUOUS_PRESENTATION);
+        }
+        return presentationCandidate(raw, candidate, PresentationDisposition.SINGLE_JSON_FENCE_REMOVED);
+    }
+
+    private static String exactJsonFencePayload(String stripped) {
+        var lineBreak = stripped.startsWith("```json\r\n") ? "\r\n"
+                : stripped.startsWith("```json\n") ? "\n"
+                : null;
+        if (lineBreak == null || !stripped.endsWith(lineBreak + "```")) {
+            return null;
+        }
+        var openingLength = "```json".length() + lineBreak.length();
+        var closingLength = lineBreak.length() + "```".length();
+        var payload = stripped.substring(openingLength, stripped.length() - closingLength);
+        if (payload.isBlank() || payload.contains("```")) {
+            return null;
+        }
+        return payload;
+    }
+
+    private static PresentationCandidate presentationCandidate(
+            String raw,
+            String candidate,
+            PresentationDisposition disposition
+    ) {
+        return new PresentationCandidate(raw, candidate, disposition, sha256(raw), sha256(candidate));
+    }
+
+    private static String sha256(String value) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException failure) {
+            throw new IllegalStateException("SHA-256 is unavailable", failure);
+        }
+    }
+
     record Acquisition(
             AcpxRunResult initialResult,
+            PresentationCandidate initialPresentation,
             AgentResultEnvelopeParser.ParseResult initialParse,
             AgentResultEnvelopeValidator.ValidationResult initialValidation,
             AcpxRunResult correctionResult,
+            PresentationCandidate correctionPresentation,
             AgentResultEnvelopeParser.ParseResult correctionParse,
             AgentResultEnvelopeValidator.ValidationResult correctionValidation,
             AcpxRunRequest initialRequest,
@@ -277,6 +352,14 @@ final class AcpxAgentResultAcquirer {
 
         AcpxRunResult finalResult() {
             return correctionAttempted() ? correctionResult : initialResult;
+        }
+
+        String initialCandidate() {
+            return initialPresentation.candidate();
+        }
+
+        String finalCandidate() {
+            return correctionAttempted() ? correctionPresentation.candidate() : initialPresentation.candidate();
         }
 
         java.util.List<AcpxExecutionEvent> executionTimeline() {
@@ -299,21 +382,22 @@ final class AcpxAgentResultAcquirer {
                 AcpxUsage correctionUsage
         ) {
             return new AgentResultAcquisitionDocument(
-                    1,
+                    2,
                     correctionAttempted(),
                     1,
                     correctionAttempted() ? 2 : 1,
                     correctionReason.name(),
                     correctionDisposition,
                     correctionAttempted() ? java.util.List.of(
-                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse, initialValidation,
-                                    initialOutputPath, initialUsage),
-                            occurrence(workspaceRoot, 2, correctionRequest, correctionResult, correctionParse,
+                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialPresentation,
+                                    initialParse, initialValidation, initialOutputPath, initialUsage),
+                            occurrence(workspaceRoot, 2, correctionRequest, correctionResult, correctionPresentation,
+                                    correctionParse,
                                     correctionValidation,
                                     correctionOutputPath, correctionUsage))
                     : java.util.List.of(
-                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialParse, initialValidation,
-                                    initialOutputPath, initialUsage))
+                            occurrence(workspaceRoot, 1, initialRequest, initialResult, initialPresentation,
+                                    initialParse, initialValidation, initialOutputPath, initialUsage))
             );
         }
 
@@ -322,6 +406,7 @@ final class AcpxAgentResultAcquirer {
                 int occurrence,
                 AcpxRunRequest request,
                 AcpxRunResult result,
+                PresentationCandidate presentation,
                 AgentResultEnvelopeParser.ParseResult parsed,
                 AgentResultEnvelopeValidator.ValidationResult validation,
                 java.nio.file.Path outputPath,
@@ -340,6 +425,9 @@ final class AcpxAgentResultAcquirer {
                     result.durationMs(),
                     result.exitCode(),
                     result.promptCompletion().stopReason(),
+                    presentation.disposition().name(),
+                    presentation.rawSha256(),
+                    presentation.candidateSha256(),
                     parsed.valid(),
                     parsed.errorCode(),
                     validation != null && validation.valid(),

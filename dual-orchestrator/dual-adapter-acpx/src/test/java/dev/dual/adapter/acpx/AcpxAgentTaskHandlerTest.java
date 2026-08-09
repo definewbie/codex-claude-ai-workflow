@@ -763,6 +763,48 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void completedRunPreservesFencedRawTranscriptButPersistsStrictCandidate() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-fenced");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var handler = new AcpxAgentTaskHandler(new FencedCompletingTransport(), false);
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"
+        ));
+
+        var result = handler.execute(new TaskHandler.TaskContext(
+                tempDir,
+                "ws-fenced",
+                definition,
+                readyInstance("intake.claude_brainstorm")
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
+        var metadata = OBJECT_MAPPER.readTree(runMetadataPath.toFile());
+        var outputPath = tempDir.resolve(metadata.path("outputPath").asText());
+        var candidate = Files.readString(outputPath);
+        assertTrue(candidate.startsWith("{"));
+        assertFalse(candidate.contains("```"));
+        assertTrue(new dev.dual.runtime.handler.AgentResultEnvelopeParser().parse(candidate).valid());
+
+        var transcript = Files.readString(tempDir.resolve((String) result.result().get("transcript_ref")));
+        assertTrue(transcript.contains("```json"), "raw ACP presentation must remain in the transcript");
+        var acquisition = metadata.path("agentResultAcquisition");
+        assertEquals(2, acquisition.path("schemaVersion").asInt());
+        assertFalse(acquisition.path("correctionAttempted").asBoolean());
+        var occurrence = acquisition.path("occurrences").get(0);
+        assertEquals("SINGLE_JSON_FENCE_REMOVED", occurrence.path("presentationDisposition").asText());
+        assertEquals(64, occurrence.path("rawAssistantSha256").asText().length());
+        assertEquals(64, occurrence.path("candidateSha256").asText().length());
+        assertFalse(occurrence.path("rawAssistantSha256").asText()
+                .equals(occurrence.path("candidateSha256").asText()));
+    }
+
+    @Test
     void completedAgentRunRecordsAcpxUsageFromSessionStream() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var sessionsDir = tempDir.resolve("sessions");
@@ -1939,6 +1981,40 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+        }
+    }
+
+    private static final class FencedCompletingTransport extends AcpxAgentTransport {
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            Files.createDirectories(request.stdoutPath().getParent());
+            var now = Instant.parse("2026-06-01T00:00:00Z");
+            var bare = completedResult(
+                    request,
+                    0,
+                    now,
+                    List.of("acpx", "claude"),
+                    "READY_FOR_PRODUCT_REVIEW"
+            );
+            var raw = "```json\n" + bare.promptCompletion().finalAssistantMessage() + "\n```";
+            // Mirror the real transport invariant: the persisted raw stream and projected
+            // final assistant message carry the same fenced presentation.
+            Files.writeString(request.stdoutPath(), raw);
+            Files.writeString(request.stderrPath(), "");
+            return new AcpxRunResult(
+                    bare.startedAt(),
+                    bare.finishedAt(),
+                    bare.command(),
+                    bare.executionTimeline(),
+                    bare.usage(),
+                    new AcpxPromptCompletion(
+                            bare.promptCompletion().requestId(),
+                            bare.promptCompletion().stopReason(),
+                            raw
+                    ),
+                    bare.processResult(),
+                    bare.adapterSignals()
+            );
         }
     }
 

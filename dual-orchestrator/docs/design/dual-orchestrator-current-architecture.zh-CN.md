@@ -175,7 +175,21 @@ Execution 拥有：
 
 ### 4.4 Artifact
 
-LLM 最终结果必须是 strict `AgentResultEnvelope` JSON。当前路径为：
+ACP v1 的外部协议事实与 Dual 的内部应用合同必须分开：
+
+- ACP/acpx 只保证 assistant output 通过 `agent_message_chunk.content.text` 传输；该字符串可以是
+  普通文本、Markdown、bare JSON 或 fenced JSON；
+- acpx `--format json --json-strict` 保证的是外层 raw ACP NDJSON，不保证 `content.text` 是
+  bare JSON；
+- Dual 要求进入 workflow routing 的结果必须是 strict `AgentResultEnvelope` JSON。这是 Dual
+  的应用合同，不是 ACP 的 wire contract。
+
+官方依据：
+[ACP Prompt Turn](https://agentclientprotocol.com/protocol/v1/prompt-turn)、
+[ACP Content](https://agentclientprotocol.com/protocol/v1/content) 和
+[acpx Output Formats](https://github.com/openclaw/acpx/blob/main/docs/output-formats.md)。
+
+当前 production 路径为：
 
 ```text
 ACP assistant final message
@@ -190,6 +204,98 @@ ACP assistant final message
 ```
 
 Markdown 只用于人类阅读，不参与 workflow routing。
+
+#### 4.4.1 Transport fact 与 application candidate
+
+该边界的 owner 分工如下：
+
+| Fact | Owner | 约束 |
+| --- | --- | --- |
+| raw ACP JSON-RPC 与 assistant text | `AcpxAgentTransport` / stream projector | 必须原样记录，不解释业务 JSON |
+| current-turn assistant candidate | `AcpxAgentResultAcquirer` | 只选择当前 turn 的最终文本，不决定业务有效性 |
+| JSON grammar | `AgentResultEnvelopeParser` | strict parse，禁止 fence/prose/trailing token/duplicate key |
+| schema、identity 与 node contract | `AgentResultEnvelopeValidator` | 只消费 parser 产物 |
+| semantic coverage / revision delta | 对应 typed validator | 不能被 presentation 处理绕过 |
+| workflow routing | ledger / routing owner | 只消费全部验证通过的 typed artifact |
+
+因此，ACP 合法的 Markdown fenced JSON 被 strict parser 拒绝时，准确归因是
+`ACP text presentation -> Dual bare JSON contract mismatch`，不是 ACP/provider protocol
+violation。Prompt 的 `JSON only` 指令是软约束，不能充当协议能力证明。
+
+#### 4.4.2 Structured-output capability assessment
+
+2026-08-09 对官方公开源码完成只读扫描：
+
+- `openclaw/acpx@5ef9b5849e137310a1c6f6e06d82ca606c2d8fb3`；
+- `agentclientprotocol/claude-agent-acp@1afa940a2c8c0f4c610f4f64d30c0961642907b0`。
+
+acpx 当前仍以 `agent_message_chunk.content.text` 作为 assistant output；其所谓 structured output
+是 CLI `text/json/quiet` 输出模式，dedicated ACP node output schema 仍被公开设计文档列为未来
+能力。Claude ACP adapter 虽透传通用 SDK `Options` 并识别 structured-output retry error，
+但没有公开 ACP capability，也没有 production projection 将 SDK `structured_output` 暴露为
+terminal structured result。tool-call 的 `toolResponse` 不属于该边界。
+
+Claude adapter 还提供 opt-in `_meta.claudeCode.emitRawSDKMessages`，将原始 SDK message 作为
+`_claude/sdkMessage` vendor extension 发给选择启用的 client。它能暴露底层实现细节，但不是
+initialize 时协商的 structured-output capability，也没有 provider-neutral terminal schema。
+Dual 当前不消费它作为 workflow authority，避免把 contract/routing 绑定到 Claude 私有消息结构。
+
+当前结论：Dual 不能依赖一个未公开、未协商、未投影的 structured-output 通道。若后续官方
+ACP capability 出现，应先通过 initialize capability negotiation 和 typed adapter contract
+接入；不得通过探测私有 `_meta` 或 provider 名称猜测。
+
+#### 4.4.3 Bounded presentation normalization
+
+当前为 `IMPLEMENTED / DETERMINISTIC PASS / ENFORCED`。实现保持为一个
+不可再拆的 adapter/acquisition checkpoint：
+
+```text
+raw current-turn assistant text（保留）
+  -> exact single-json-fence presentation check
+  -> normalized candidate（仅删除外层 presentation fence）
+  -> existing strict AgentResultEnvelopeParser
+  -> existing schema / coverage / revision-delta validators
+  -> routing
+```
+
+允许条件必须同时满足：去除首尾空白后，整条消息只有一个带 `json` language tag 的完整
+fenced code block；
+fence 外无任何字符，内部 payload 非空且不能全为空白。normalizer 不解析、修复或重序列化 JSON。
+
+明确禁止：
+
+- 任意位置搜索 JSON substring；
+- 多 fence 选一个、裸 brace matching 或自动追加闭合符；
+- 自动补默认字段、删除 unknown field 或规范化 clause 文本；
+- 放宽 strict parser、增加第三次 correction、按 provider/model 设置 fallback；
+- 用 normalized candidate 覆盖 raw assistant evidence。
+
+cannot-bypass matrix 至少包括：bare JSON unchanged；单一 `json` fence 可产生 candidate；fence 外
+prose、多 fence、错误语言标签、未闭合 fence 全部拒绝 normalization；normalized candidate 仍
+因 duplicate key、trailing token、unknown field、schema/coverage/delta 错误而失败；raw text、
+normalization disposition 和 candidate hash 可审计。
+
+initial 与唯一 correction occurrence 必须复用同一 pipeline：先保留 raw text，再做 presentation
+check，再 strict parse。normalization 后 parse 仍失败时，既有 bounded correction policy 最多只
+能增加一个 occurrence；correction 结果不得进入另一套 extraction/parser。最小 disposition 为
+`NOT_NEEDED`、`SINGLE_JSON_FENCE_REMOVED`、`REJECTED_AMBIGUOUS_PRESENTATION`，并同时记录
+raw/candidate hash；它们是 execution evidence，不是新的 workflow state。
+
+实现位置与持久化语义：
+
+- `AcpxAgentResultAcquirer` 对 initial/correction occurrence 使用同一个 exact-fence 检查；
+- `AgentResultEnvelopeParser` 未修改，normalized candidate 仍进入原 strict parser；
+- `AcpxAgentTaskHandler` 将 candidate 写入业务 `.json` artifact；raw ACP presentation 仍保留在
+  transcript，occurrence 同时记录 `presentationDisposition`、`rawAssistantSha256` 和
+  `candidateSha256`；
+- `agentResultAcquisition.schemaVersion` 升级为 `2`，disposition 只是 execution evidence，不参与
+  routing 或 correction 次数判定。
+
+deterministic evidence：acquirer/handler cannot-bypass 测试覆盖 bare JSON、唯一 fence、fence 外
+prose、多 fence、错误标签、未闭合/空 fence、duplicate key、trailing token、unknown field、schema
+失败、correction 复用与 raw/candidate 审计；完整 Maven reactor 为 `1199 tests / 0 failures / 0
+errors`。现有 parser、artifact coverage/revision-delta 测试保持通过，独立代码级 diff review 已
+`PASS`。真实 workflow 验证前不得标记为 `PROVEN`。
 
 ### 4.5 Gate
 
