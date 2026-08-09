@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Terminal Delivery Completion v2 / FAIL, SAMPLE CONSUMED
+## Current Active Step: Captcha Revision Current-Backend Probe / READY
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
@@ -77,6 +77,13 @@
 > 该 closure 对称性的最小 deterministic 修复，再决定是否使用更符合 strict JSON/tool
 > discipline 的 Claude backend 完成同一业务任务。不得通过放宽 parser、permission 或
 > non-zero correction policy 迁就本次输出。
+>
+> `5580926` 已补齐 initial `start --run` failure 与 autorun/interruption 的 session-reap
+> 对称性，deterministic script gate PASS。下一步只执行
+> `docs/testing/verification-gates/20260809-captcha-revision-current-backend-probe.md`：使用当前
+> Claude Code 新 session 配置精确重放 captured revision prompt，不判断模型名称。只有 exit 0、
+> 无工具请求、strict parser、coverage 和 delta 全 PASS，才允许新的完整 captcha-auth
+> workstream。
 
 ## Completed Step: Revision Delta Integrity PASS A / PROVEN
 

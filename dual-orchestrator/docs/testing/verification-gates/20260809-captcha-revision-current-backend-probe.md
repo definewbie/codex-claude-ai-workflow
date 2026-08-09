@@ -1,0 +1,46 @@
+# Verification Gate: Captcha Revision Current-Backend Probe
+
+日期：2026-08-09
+
+状态：`READY / NOT RUN`。
+
+- Target: 使用当前 Claude Code 新 session 配置精确重放已捕获的 captcha-auth revision
+  prompt，证明该 provider execution 能在不调用工具的情况下返回 exit 0、唯一 strict
+  `AgentResultEnvelope`，并通过既有 revision coverage/delta validator；不判断、不比较模型名称。
+
+- Source of truth: captured prompt SHA-256、ACP process exit、stdout/stderr transcript、
+  `AgentResultEnvelopeParser`、`TaskContractRevisionContextResolver`、
+  `TaskContractProposalValidator` 及原 workstream 中 verified baseline/obligations。
+
+- Trigger precondition: Dual clean SHA 包含 `5580926`；captured prompt 必须为
+  `ws-20260807T150938Z-2D5Y` 的 revision prompt，SHA-256
+  `d403a5273068bb35f77a8501f167531675712d841703869a5ef751b1983750fb`；旧 workstream
+  只读且 sessions 已关闭；新建独立 Claude Code session；permission policy 与 captured run
+  相同，deny Terminal，且只允许一次 provider occurrence。
+
+- How precondition is checked before run: 记录 clean Dual SHA、prompt absolute path/hash、
+  fresh session name、完整 ACP command 和开始时间；调用前确认旧 workstream 状态仍为
+  `WAITING_FOR_RECOVERY` 且不执行 retry/resume；不读取或判断 provider model metadata。
+
+- PASS: ACP exit code 0；transcript 无 tool call / permission request；stdout 只含一个 JSON
+  object，无 prose/fence/trailing token；production parser valid；envelope identity 与 captured
+  revision node 一致；proposal mechanical validation、typed obligation coverage 和 revision delta
+  validation 全部无错误。
+
+- FAIL: 非零 process、tool/permission request、空输出、prose/fence/trailing token、parse/schema
+  failure、identity mismatch、coverage/delta error，或出现第二次 provider occurrence。
+
+- INVALID: Dual dirty/错误 SHA、prompt path/hash 不符、复用旧 session、旧 workstream 被修改、
+  validator 无法装载真实 baseline/obligations、输出或 transcript 缺失，导致目标不可判定。
+
+- Stop-loss: 只执行一次 fresh-session prompt request；任何 tool/permission request、非零 exit
+  或 timeout 立即 FAIL，不 correction、不 retry、不 resume、不修改 prompt/parser/permission。
+
+- Run artifact freshness: probe 报告记录 Dual SHA、Gate SHA、captured prompt path/hash、session
+  name、command、started/finished time、exit code、stdout/stderr hashes，以及 production parser、
+  coverage、delta 的 typed verdict；不以模型名称作为 freshness 或 PASS 条件。
+
+## Scope
+
+本 Probe 只筛选当前 backend 是否值得消耗一个完整 fresh workflow。PASS 不等于 captcha-auth
+交付成功，也不证明 terminal-delivery；FAIL 则阻止新的完整 workstream。
