@@ -51,9 +51,46 @@ actual Git change not declared in scope
 针对 permitted changes：实际变更必须是该集合的子集；它不表示每个声明路径最终都必须改动，
 `missingDeclared` 仍只是 evidence，而不是 scope violation。
 
-## 3. Captured Evidence
+## 3. 统一失败分类
 
-### 3.1 第一次 review
+本次 real-case 的统一结论是：
+
+```text
+Real-case FAIL
+  = Claude contract quality failures
+  + incomplete first Codex review
+  + Harness typed-scope semantics projection gap
+```
+
+它不是 `TaskContract.scope` enforcement 失败，也不是 transport/parser/lineage 失败。
+
+| 现象 | 分类 | 责任判断 |
+|---|---|---|
+| initial proposal 遗漏 explicit UX 和 all-server-input validation | 模型语义质量 | Claude 漏项 |
+| initial proposal 增加 CSRF replay、rate-limit keying 等约束 | 模型语义质量 | Claude 擅自收紧 requirement |
+| first review 漏掉 all-server-input validation | reviewer completeness | Codex 没有在第一轮找全已有 gap |
+| first revision 用 `TR-3` 声称完整解决 `CO-5` | 模型语义质量 | obligation 有映射，但映射不构成语义满足 |
+| first revision 新增 asynchronous transport 假设 | 模型 revision drift | Claude 在修订中引入新约束 |
+| first review 要求 illustrative/non-exhaustive scope | Harness projection gap + reviewer error | prompt 未投影 exact scope 语义，Codex 给出与 authority 冲突的 obligation |
+| second review 拒绝剩余 scope/input/async 问题 | 正常 quality gate | Codex 第二次决定有业务依据 |
+| 连续第二次 `NEEDS_REVISION` 后停止 | 正常 stop-loss | Harness 正确限制调用/token 继续增长 |
+
+分层判定：
+
+- **主要运行失败来源**：Claude proposal/revision 没有稳定落实完整 requirement 和 review obligation。
+- **次要成本来源**：Codex 第一轮 review 漏掉一个当时已存在的 requirement gap，造成串行发现。
+- **唯一已证明的 Harness 缺口**：producer/reviewer prompt 没有明确投影 canonical typed scope
+  的 exact authorization 语义，允许生成错误的 prose-widening obligation。
+- **已证明正常的 Harness 边界**：ACPX transport、presentation normalization、strict parser、
+  schema、revision delta、lineage、change-scope enforcement、interruption closure 和 stop-loss。
+
+因此本轮不能通过“放宽 scope enforcement”或“降低 reviewer 严格度”修复。也不能把所有模型
+漏项都归为 Harness bug。Harness 只修它 owns 的 scope-semantics projection；模型能否稳定一次
+生成完整合同，仍属于后续自然样本中的质量观测。
+
+## 4. Captured Evidence
+
+### 4.1 第一次 review
 
 第一次 review 正确发现：
 
@@ -73,7 +110,7 @@ equivalent implementations ...
 该要求把 typed exact scope 当成可由自然语言放宽的 implementation inventory，和
 Phase B 的 change-boundary owner 冲突。
 
-### 3.2 第一次 revision
+### 4.2 第一次 revision
 
 Claude 将 `CO-5` 只映射到 `TR-3`。这修复了 randomized Captcha test，但没有修改
 typed scope，也没有真正解决 obligation 的 scope 部分。现有 coverage validator 只证明：
@@ -88,7 +125,7 @@ TR-3 is an existing clause id
 同一 revision 还把 loading-state requirement 收紧为 asynchronous transport；这是 revision
 新引入的 semantic drift，第二次 review 才可能发现，不能归因为第一次 review 漏项。
 
-### 3.3 第二次 review 与第三次 proposal
+### 4.3 第二次 review 与第三次 proposal
 
 第二次 review 提出：
 
@@ -104,7 +141,7 @@ TR-3 is an existing clause id
 因此第三版中的 `C-11` 不是 change authorization，只是与 authoritative scope 冲突的文本。
 该 proposal 未经第三次 review，不得声明 READY。
 
-## 4. 为什么现有 Gate 没有提前挡住
+## 5. 为什么现有 Gate 没有提前挡住
 
 现有 v3 设计明确把 deterministic revision delta 限定在：
 
@@ -128,9 +165,9 @@ review prompt 没有告诉 reviewer：
 
 所以 reviewer 生成了结构上可表达、语义上不可执行的 obligation。
 
-## 5. 其他观察为何不选为本轮实现
+## 6. 其他观察为何不选为本轮实现
 
-### 5.1 “一次 review 必须找全所有 requirement gaps”
+### 6.1 “一次 review 必须找全所有 requirement gaps”
 
 第一次 review 确实漏掉了 server-input validation。prompt 已包含完整 requirement，并已明确要求
 explicit-requirement coverage；不存在 context truncation 或 projection 丢失。再加一句
@@ -139,18 +176,18 @@ explicit-requirement coverage；不存在 context truncation 或 projection 丢�
 若要 deterministic 保证，需要给原始 requirement 建立 typed IDs 和逐项 mapping。这会扩大为
 新的 requirement-contract 模型，当前只有一个真实样本，成本和证据不足，本轮不做。
 
-### 5.2 自动验证 obligation text 是否被 clause 语义满足
+### 6.2 自动验证 obligation text 是否被 clause 语义满足
 
 Java validator 无法在不引入 NL/embedding/LLM secondary judge 的情况下证明自然语言蕴含。
 使用关键词或文件名规则会重演 heuristic authority。本轮不做。
 
-### 5.3 立即把 scope 加入 revision target schema
+### 6.3 立即把 scope 加入 revision target schema
 
 这是合理的长期候选，但需要 schema revision、baseline delta、coverage target 和 migration
 决策。当前 captured failure 可以先通过纠正 reviewer 的既有 scope owner 语义避免，不足以授权
 schema v4。
 
-## 6. 唯一选择的候选
+## 7. 唯一选择的候选
 
 选择：`Product Review Typed Scope Semantics`。
 
@@ -176,7 +213,7 @@ scope gaps request concrete path + operation changes
 这一改动不是让 prompt 成为 authority。authority 已经是 canonical typed scope；prompt 只是
 停止教 reviewer/producer 生成与 authority 冲突的合同。
 
-## 7. 必需的 deterministic 证明
+## 8. 必需的 deterministic 证明
 
 实施前应先写 captured prompt-level tests：
 
@@ -190,7 +227,7 @@ scope gaps request concrete path + operation changes
 这些测试只能达到 `PROJECTED`，不能证明模型必然遵守。未来自然 scope revision 样本才能证明
 provider compliance；不为此人工制造第二个 captcha-auth workstream。
 
-## 8. Boundary Review
+## 9. Boundary Review
 
 ```text
 Boundary Review: PASS
