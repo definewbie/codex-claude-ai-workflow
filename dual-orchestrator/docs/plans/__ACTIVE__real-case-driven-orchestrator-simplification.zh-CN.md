@@ -30,13 +30,16 @@
 > 全部通过并显式回应这 3 项，但未获得第三次 reviewer 终局结论，不能标 READY。
 >
 > 当前边界结论：presentation normalization、typed delta、lineage、stop-loss closure 已由本
-> real-case 继续证明；terminal-delivery full workflow 与实际 9-call 收益仍未证明。下一步仅做
-> captured evidence 的只读 completeness/serial-discovery assessment，比较原始 requirement、
-> initial proposal、第一次 review obligations 和第二次新增 obligations，选择一个最大贡献的
-> 删除式改进。不得 retry/resume 本 workstream，不自动创建第二样本。
+> real-case 继续证明；terminal-delivery full workflow 与实际 9-call 收益仍未证明。captured
+> completeness/serial-discovery 只读评估已完成，唯一候选为 product-review typed-scope
+> semantics：第一次 review 的 `CO-5` 错把 authoritative exact `scope.included` 当成可由
+> “illustrative/non-exhaustive” prose 放宽的 implementation inventory，第三版 `C-11` 也不会
+> 被 change-scope enforcement 消费。实施尚未激活；不得 retry/resume 本 workstream，不自动
+> 创建第二样本。
 >
 > Gate：`docs/testing/verification-gates/20260810-terminal-delivery-captcha-auth-full-v3.md`；
 > report：`docs/testing/real-case-reports/20260810T010901Z/report.md`。
+> assessment：`docs/plans/post-captcha-full-v3-intake-serial-discovery-assessment-20260810.zh-CN.md`。
 
 ## Historical Active Step: Revision Verbatim Probe v2 / FAIL, CONSUMED
 
