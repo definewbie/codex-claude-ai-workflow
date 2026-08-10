@@ -59,6 +59,14 @@ v3 `INVALID / CONSUMED` 结论。
   `ENFORCED` 证据合并解锁下一个 full-workstream Gate；不单独声称真实 fence
   normalization `PROVEN`。
 
+## Preflight Inputs
+
+- offline runner：`/private/tmp/CaptchaRevisionCapturedOfflineReplayV31.java`。
+- runner bytes：`6543`。
+- runner SHA-256：`4a563fcbdb5969216551b42f20835665af7b701b1fa2215a46109ffb7ea44d6f`。
+- clone workspace：`/private/tmp/captcha-revision-offline-replay-v31-workspace-<gate-short-sha>`。
+- report：`/private/tmp/captcha-revision-offline-replay-v31-<gate-short-sha>.report.json`。
+
 ## Result
 
 尚未运行。
