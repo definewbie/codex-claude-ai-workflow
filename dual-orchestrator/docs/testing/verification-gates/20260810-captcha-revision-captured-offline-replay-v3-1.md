@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：`READY / NOT RUN`。
+状态：`PASS / CONSUMED`。
 
 本 Gate 只闭合 v3 一次性 runner 的 lineage path 组装缺口。它使用 v3 已产生的
 fresh captured candidate 做纯离线 replay，不调用 provider，不修改 production，不改写
@@ -69,4 +69,32 @@ v3 `INVALID / CONSUMED` 结论。
 
 ## Result
 
-尚未运行。
+本 Gate 已于 2026-08-10 在 Gate SHA
+`12258a9` 上执行一次纯离线 replay，结论为 `PASS / CONSUMED`。
+
+- fresh package PASS；runtime jar SHA-256
+  `a84e83495badd9336085b79d23819bb13642f7cd52e3e75039211871dc01bbd0`。
+- runner source SHA-256 为
+  `4a563fcbdb5969216551b42f20835665af7b701b1fa2215a46109ffb7ea44d6f`。
+- captured candidate 与 replay output SHA-256 均为
+  `3edf94b9d0eb1e354c252dbc1d47f773c000c0052b3c19ea3c820ccf07057bd9`，
+  证明 replay 没有改写 candidate。
+- production `ArtifactContractValidator` 返回 `NodeStatus.COMPLETED`，
+  `agent_execution_result_contract.valid=true`，decision 为
+  `READY_FOR_PRODUCT_REVIEW`，required `task_contract_proposal` artifact 为
+  `present=true, valid=true`。
+- sidecar `source_output_ref` 位于
+  `/runs/run-1786115545628/outputs/`；sidecar SHA-256 为
+  `5cd8f2113c94cfaa99240344d66a7776b9fb8eb70062e59a195e02f3c71bf06e`。
+- verified proposal reference 可解析；producer 为
+  `intake.claude_brainstorm/node-intake-claude_brainstorm-006`，proposal id 为
+  `node-intake-claude_brainstorm-006:5cd8f2113c94cfaa`。
+- source workspace 运行后 tree SHA-256 仍为
+  `ace6b73e2c3af0c774c004b20fdf8844fcbc0c8aba4583aba21ade9c73b3a80b`。
+- 本轮未调用 Claude、Codex 或 ACPX。
+
+因此，v3 captured candidate 的 strict parser、schema、mechanical、CO-1/CO-2
+coverage、revision-delta 和 proposal publication lineage 全部通过。该证据与
+`8992824d` deterministic presentation-normalization `ENFORCED` 证据合并后，允许
+制定一个 fresh captcha-auth full-workstream Gate；不改写 v3 Gate 的 `INVALID`
+结论，也不声称真实 fenced response 已 `PROVEN`。
