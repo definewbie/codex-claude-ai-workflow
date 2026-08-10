@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：`DRAFT / CC REVIEW REQUIRED / NOT RUN`。
+状态：`READY / CC REVIEWED / NOT RUN`。
 
 本 Gate 授权一个全新 captcha-auth workstream。所有历史 captcha-auth workstream、
 revision probe 和 candidate 只作为不可变证据，不 retry、resume 或作为本轮执行目标。
@@ -48,7 +48,11 @@ revision probe 和 candidate 只作为不可变证据，不 retry、resume 或�
 - How precondition is checked before run: 记录 clean Dual/Gate SHA 与 ancestry，target
   HEAD/tree/status/file hashes，workflow path/id/version/hash/shape，package start/end 与 CLI jar
   hash/mtime，runner kinds 和两个 probe 结果。使用 fresh CLI 启动后，在第一个
-  Agent call 前核对 persisted workflow identity；任一不符立即停止。
+  Agent call 前核对 persisted workflow identity；任一不符立即停止。执行命令必须
+  显式使用 `--variant terminal-delivery` 和
+  `--expected-runner-kind acpx_claude_session`。bundled variant 的 source SHA-256 目前
+  不由 `run-real-case.sh` 自动计算，因此必须在启动前重算 source hash，并在
+  workstream 创建后核对 persisted id/version 与 29/45/9/no-handoff 语义形状。
 
 - PASS: workflow 达到 `COMPLETED`；terminal acceptance 为 `ACCEPT`，或无
   unresolved must-fix/质量/scope 退化的 `ACCEPT_WITH_NOTES`；所有 required
@@ -74,7 +78,9 @@ revision probe 和 candidate 只作为不可变证据，不 retry、resume 或�
   terminal contradiction 或 unexplained call 立即 quiesce。单次 typed `NEEDS_REVISION`
   是正常 semantic iteration；同一 review stage 连续第二次 `NEEDS_REVISION` 或总耗时
   超过 90 分钟时停止。运行中不改 prompt/parser/model/workflow，不 retry/resume，
-  不创建第二 workstream 救场。
+  不创建第二 workstream 救场。`run-real-case.sh` 当前没有 wall-clock timeout
+  参数；本轮由外部 runner 记录开始时间并在 90 分钟达到时向脚本发送中断，
+  必须经脚本现有 interrupt trap 终止 provider、reconcile run 并关闭 sessions。
 
 - Run artifact freshness: 报告必须记录 clean Dual/Gate SHA、package times、CLI jar
   path/mtime/hash、target HEAD/tree/task hashes、persisted workflow identity/hash、runner kinds、
@@ -91,6 +97,13 @@ actual provider occurrences = actual Agent executions + bounded-correction occur
 
 只有 revision/correction 都为零时，本样本才额外证明实际 `10 -> 9`。否则只声明
 terminal-delivery 固定 A10 subtraction 成立，不声称总调用恰好为 9。
+
+## Independent Review
+
+CC 独立只读、代码级同行评审结论为 `PASS`：无 P0；一项 P1 为脚本未内建
+90 分钟 wall-clock timeout，已在本 Gate 明确为外部监督的 stop-loss；两项 P2
+分别是 expected runner kind 和 bundled workflow hash 检查隐式，已在 precondition 中显式
+固定。评审确认 Gate 可从 `DRAFT` 提升为 `READY`。
 
 ## Result
 
