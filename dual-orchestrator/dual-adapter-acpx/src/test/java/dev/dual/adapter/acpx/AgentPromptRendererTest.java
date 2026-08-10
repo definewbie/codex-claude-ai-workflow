@@ -346,6 +346,12 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Explicit-requirement coverage"));
         assertTrue(prompt.contains("Semantic neutrality"));
         assertTrue(prompt.contains("Protocol ownership"));
+        assertTrue(prompt.contains(
+                "`scope.included` is the exhaustive authorization set for permitted repository changes"));
+        assertTrue(prompt.contains(
+                "Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path"));
+        assertTrue(prompt.contains("Never request an illustrative or non-exhaustive scope"));
+        assertTrue(prompt.contains("A scope gap must request concrete typed path-and-operation changes"));
         assertTrue(prompt.contains("must not broaden or narrow accepted input"));
         assertTrue(prompt.contains("Do not require the task proposal to duplicate those harness protocols"));
         assertTrue(prompt.contains("do not return `NEEDS_REVISION` solely because they are absent"));
@@ -354,6 +360,24 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("NEEDS_REVISION"));
         assertTrue(prompt.contains("BLOCKED"));
         assertTrue(!prompt.contains("READY_FOR_PRODUCT_REVIEW|NEEDS_REVISION|BLOCKED"));
+    }
+
+    @Test
+    void intakeClaudePromptProjectsTypedScopeAuthorityForProducer() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
+
+        var prompt = new AgentPromptRenderer()
+                .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
+
+        assertTrue(prompt.contains(
+                "Treat `result.scope.included` as the exhaustive authorization set for permitted repository changes"));
+        assertTrue(prompt.contains(
+                "Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths"));
+        assertTrue(prompt.contains("never describe the typed scope as illustrative or non-exhaustive"));
+        assertTrue(prompt.contains(
+                "When a revision obligation identifies a scope gap, update the typed path-and-operation entries directly"));
     }
 
     @Test

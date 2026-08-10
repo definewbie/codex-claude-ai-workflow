@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：`ASSESSMENT COMPLETE / ONE CANDIDATE SELECTED / IMPLEMENTATION NOT ACTIVE`
+状态：`IMPLEMENTED / DETERMINISTIC PASS / PROJECTED / PROVIDER COMPLIANCE NOT PROVEN`
 
 ## 1. 目标与范围
 
@@ -213,16 +213,29 @@ scope gaps request concrete path + operation changes
 这一改动不是让 prompt 成为 authority。authority 已经是 canonical typed scope；prompt 只是
 停止教 reviewer/producer 生成与 authority 冲突的合同。
 
-## 8. 必需的 deterministic 证明
+## 8. Deterministic 证明
 
-实施前应先写 captured prompt-level tests：
+已实施并通过以下 prompt-level tests：
 
 1. product review prompt 明确包含 exact/exhaustive typed scope 语义；
 2. prompt 明确禁止 illustrative/non-exhaustive/prose-widening；
 3. intake revision prompt 要求 scope gap 修改 typed path+operation；
 4. existing strict parser、schema、coverage/delta 和 change-scope tests 全部保持绿；
-5. captured third proposal 的 `C-11` 仍不能改变 `ChangeScopeEvaluator`：未声明文件必须继续
+5. 既有 change-scope cannot-bypass tests 保持绿：captured third proposal 的 `C-11`
+   仍不能改变 `ChangeScopeEvaluator`，未声明文件必须继续
    `UNEXPECTED_ACTUAL_CHANGE`。
+
+实现范围只覆盖既有 owner：
+
+- `contract-review-principles.md`：审查者的 typed scope authority 语义；
+- `intake-claude-brainstorm.md`：生产者直接修改 typed path-and-operation entries；
+- `AgentResultPromptContract`：revision correction 路径使用相同语义；
+- `AgentPromptRendererTest` 与 `AgentResultPromptContractTest`：最终渲染 prompt 精确字符串证明。
+
+定向验证：`AgentResultPromptContractTest` 7/0，`AgentPromptRendererTest` 34/0。
+完整 Maven reactor：9/9 modules `BUILD SUCCESS`。首次沙箱内执行因 macOS
+`ProcessHandle.descendants()` 的 `sysctl` 权限被拒绝而产生两项既有 process-tree
+测试环境错误；在允许进程树读取的环境重跑后全部通过，未修改生产或测试语义。
 
 这些测试只能达到 `PROJECTED`，不能证明模型必然遵守。未来自然 scope revision 样本才能证明
 provider compliance；不为此人工制造第二个 captcha-auth workstream。
@@ -237,7 +250,8 @@ Existing enforcement: ChangeScopeEvaluator exact path + operation comparison
 Selected change: align reviewer/producer prompt with existing owner
 New domain concept: No
 Schema change: No
-Production implementation status: NOT ACTIVE
+Production implementation status: IMPLEMENTED / PROJECTED
+Provider compliance: NOT PROVEN
 ```
 
 本评估不宣称完整 workflow 已证明，也不宣称 reviewer completeness 已解决。它只证明 captured

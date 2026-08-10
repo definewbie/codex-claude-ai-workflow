@@ -36,8 +36,13 @@
 > “illustrative/non-exhaustive” prose 放宽的 implementation inventory，第三版 `C-11` 也不会
 > 被 change-scope enforcement 消费。统一失败分类为：主要运行来源是 Claude contract/revision
 > 语义质量，额外 revision 成本包含 Codex 首轮 completeness 漏项，唯一已证明的 Harness 缺口
-> 是 typed-scope semantics projection；scope enforcement 本身正确。实施尚未激活；不得
-> retry/resume 本 workstream，不自动创建第二样本。
+> 是 typed-scope semantics projection；scope enforcement 本身正确。该唯一
+> prompt-semantics 候选已在既有 producer/reviewer prompt owner 中实施：
+> `scope.included` 被明确投影为穷尽的 exact path+operation authorization，prose 不得
+> 扩大授权，scope gap 必须直接修改 typed entries。定向 prompt tests 41/0，
+> 当前成熟度仅为 `PROJECTED / DETERMINISTIC PASS`；provider compliance、reviewer
+> completeness 与 terminal-delivery full workflow 仍为 `NOT PROVEN`。不得 retry/resume 本
+> workstream，不自动创建第二样本。
 >
 > Gate：`docs/testing/verification-gates/20260810-terminal-delivery-captcha-auth-full-v3.md`；
 > report：`docs/testing/real-case-reports/20260810T010901Z/report.md`。

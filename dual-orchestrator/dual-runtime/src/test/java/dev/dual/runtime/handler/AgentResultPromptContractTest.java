@@ -73,6 +73,13 @@ class AgentResultPromptContractTest {
         assertTrue(intake.contains(
                 "Formatting normalization is a modification and is prohibited unless that clause ID is declared"));
         assertTrue(intake.contains("do not delete existing clause IDs"));
+        assertTrue(intake.contains(
+                "`result.scope.included` is the exhaustive authorization set for permitted repository changes"));
+        assertTrue(intake.contains(
+                "Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path"));
+        assertTrue(intake.contains("Never describe the typed scope as illustrative or non-exhaustive"));
+        assertTrue(intake.contains(
+                "When a revision obligation identifies a scope gap, update the typed path-and-operation entries directly"));
         assertTrue(productReview.contains(
                 "result.contract_obligations` item is a closed object with exactly these fields: [id, text]"));
         assertTrue(intake.contains(

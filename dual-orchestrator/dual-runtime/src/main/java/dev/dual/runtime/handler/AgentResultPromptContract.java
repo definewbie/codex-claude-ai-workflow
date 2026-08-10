@@ -56,7 +56,14 @@ public final class AgentResultPromptContract {
 
     private static String contractRevisionInstruction(String nodeId) {
         if ("intake.claude_brainstorm".equals(nodeId)) {
-            return "Each task-contract clause must contain stable string fields `id` and `text`. "
+            return "`result.scope.included` is the exhaustive authorization set for permitted repository changes; "
+                    + "each entry names one exact repository-relative path and `CREATE` or `MODIFY`. "
+                    + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
+                    + "risks, and other prose cannot authorize an undeclared path. Never describe the typed scope "
+                    + "as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, "
+                    + "update the typed path-and-operation entries directly and map the obligation to one or more "
+                    + "genuinely relevant clause IDs. "
+                    + "Each task-contract clause must contain stable string fields `id` and `text`. "
                     + "On an initial intake, `result.revision_responses` must be `[]`. "
                     + "On a revision, copy every routed Contract Obligation ID exactly once into "
                     + "`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`. "
