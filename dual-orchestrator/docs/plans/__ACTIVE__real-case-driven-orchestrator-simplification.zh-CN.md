@@ -8,7 +8,18 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Full v3 / FAIL, CONSUMED
+## Current Active Step: Captcha-Auth Completion v4 / READY, NOT RUN
+
+> captcha-auth 是尚未完成的真实业务任务，不是人工 prompt 样本。新 Gate 以产品
+> 交付为唯一主目标：workflow COMPLETED、terminal acceptance、完整功能、PostgreSQL/
+> Maven tests、README、change-scope、lineage 和 completion audit 必须同时通过。旧
+> `ws-20260810T011244Z-8YVB` 不 resume；在 Gate checkpoint、fresh package、target baseline
+> 和 Claude/Codex probes 全部通过后，启动一个 fresh production terminal-delivery
+> workstream。typed-scope provider compliance 只是自然观测项，不是产品 PASS 前置条件。
+>
+> Gate：`docs/testing/verification-gates/20260810-terminal-delivery-captcha-auth-completion-v4.md`。
+
+## Historical Active Step: Captcha-Auth Full v3 / FAIL, CONSUMED
 
 > 2026-08-10 在 clean Gate SHA `232250f2` 上执行了唯一 fresh
 > captcha-auth full workstream `ws-20260810T011244Z-8YVB`。fresh package
