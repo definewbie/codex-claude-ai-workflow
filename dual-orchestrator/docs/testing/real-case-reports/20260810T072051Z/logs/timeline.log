@@ -1,0 +1,13 @@
+Timeline
+Workstream: ws-20260810T072433Z-J75J
+Workflow: agent-lifecycle-terminal-delivery@1
+Status: WAITING_FOR_RECOVERY
+Projection: .agent/workstreams/ws-20260810T072433Z-J75J/timeline.json
+
+Nodes:
+  COMPLETED  context.intake_claude_brainstorm  [TASK]  iter-001
+  COMPLETED  intake.claude_brainstorm  [TASK]  iter-001
+  COMPLETED  context.intake_codex_product_review  [TASK]  iter-001
+  COMPLETED  intake.codex_product_review  [TASK]  iter-001
+  COMPLETED  intake.decision  [DECISION]  iter-001
+  FAILED  intake.claude_brainstorm  [TASK]  iter-002

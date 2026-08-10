@@ -1,0 +1,52 @@
+Current Failure
+Path: .agent/workstreams/ws-20260810T072433Z-J75J/recovery/current-failure.md
+
+Recovery Assessment
+- Classification: artifact_contract_failure
+- Retry Readiness: RETRY_AFTER_OUTPUT_CONTRACT_FIX
+- Reason: Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+- Diagnostic JSON: .agent/workstreams/ws-20260810T072433Z-J75J/artifacts/contract-failures/node-intake-claude_brainstorm-006.json
+- Diagnostic Markdown: .agent/workstreams/ws-20260810T072433Z-J75J/artifacts/contract-failures/node-intake-claude_brainstorm-006.md
+- Suggested Command: dualctl retry --workdir /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J ws-20260810T072433Z-J75J
+
+# Current Failure
+
+## Summary
+
+- Workflow Status: WAITING_FOR_RECOVERY
+- Node: intake.claude_brainstorm
+- Node Instance: node-intake-claude_brainstorm-006
+- Node Status: FAILED
+- Handler: acpx.agent_run
+- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION
+- Recoverable: N/A
+- Exit Code: 0
+- Run ID: run-1786346955946
+- Agent: claude
+- Session: claude-main-ws-20260810T072433Z-J75J
+- Attention Category: ARTIFACT_CONTRACT_FAILURE
+- Retry Safe: false
+
+## Contract Failure Diagnostic
+
+- Diagnostic JSON: .agent/workstreams/ws-20260810T072433Z-J75J/artifacts/contract-failures/node-intake-claude_brainstorm-006.json
+- Diagnostic Markdown: .agent/workstreams/ws-20260810T072433Z-J75J/artifacts/contract-failures/node-intake-claude_brainstorm-006.md
+- Error Code: TASK_CONTRACT_REVISION_DELTA_INVALID
+- Error Message: task_contract_proposal contains an invalid revision delta
+- Details:
+  - errors: [UNDECLARED_CONTRACT_CLAUSE_CHANGE: AC-6]
+  - error_codes: [UNDECLARED_CONTRACT_CLAUSE_CHANGE]
+
+## Evidence
+
+- .agent/workstreams/ws-20260810T072433Z-J75J/runs/run-1786346955946/outputs/intake-claude-brainstorm.stderr.log
+- .agent/workstreams/ws-20260810T072433Z-J75J/runs/run-1786346955946/outputs/intake-claude-brainstorm.transcript.log
+- .agent/workstreams/ws-20260810T072433Z-J75J/runs/run-1786346955946/outputs/intake-claude-brainstorm.json
+- .agent/workstreams/ws-20260810T072433Z-J75J/artifacts/contract-failures/node-intake-claude_brainstorm-006.json
+- .agent/workstreams/ws-20260810T072433Z-J75J/artifacts/contract-failures/node-intake-claude_brainstorm-006.md
+
+## Suggested Action
+
+- Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+- Inspect the contract diagnostic and fix the output contract before retrying.
+- Command: `dualctl retry --workdir /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J ws-20260810T072433Z-J75J`.

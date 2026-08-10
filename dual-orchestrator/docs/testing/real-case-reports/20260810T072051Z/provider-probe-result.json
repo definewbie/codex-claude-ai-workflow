@@ -1,0 +1,8 @@
+[client] initialize (running)
+
+[client] session/new (running)
+
+[thinking] The user is asking for a connectivity probe and wants me to reply exactly "OK" without using any tools. This is a straightforward request.The user is asking for a connectivity probe and wants me to reply exactly "OK" without using any tools. This is a straightforward request.
+OKOK
+
+[done] end_turn

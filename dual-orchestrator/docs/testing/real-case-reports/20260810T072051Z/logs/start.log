@@ -1,0 +1,27 @@
+Dual workstream started
+Workstream: ws-20260810T072433Z-J75J
+Stage: design
+Mode: worktree
+Original repo: /Users/kriswang/work/projects/ai/captcha-auth-app
+Workspace: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J
+Branch: ai/ws-20260810T072433Z-J75J
+
+Ledger: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J/.agent/workstreams/ws-20260810T072433Z-J75J
+Workflow: agent-lifecycle-terminal-delivery@1
+Prompt language: auto
+Variant: terminal-delivery
+
+Running workflow until next gate...
+Step 1: intake.claude_brainstorm -> RUNNING (resumed workflow)
+Step 2: context.intake_codex_product_review -> RUNNING (resumed workflow)
+Step 3: intake.codex_product_review -> RUNNING (resumed workflow)
+Step 4: intake.decision -> RUNNING (resumed workflow)
+Step 5: intake.claude_brainstorm -> RUNNING (resumed workflow)
+Step 6: intake.claude_brainstorm -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J ws-20260810T072433Z-J75J
+     summary: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J/.agent/workstreams/ws-20260810T072433Z-J75J/recovery/current-failure.md
+  2. Inspect the contract diagnostic and fix the output contract before retrying.
+     dualctl retry --workdir /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J ws-20260810T072433Z-J75J

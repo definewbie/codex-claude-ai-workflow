@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：`READY / NOT RUN`
+状态：`FAIL / CONSUMED / HARNESS FAIL-CLOSED`
 
 本 Gate 的唯一目标是完成尚未交付的 captcha-auth 业务任务。旧 workstream
 `ws-20260810T011244Z-8YVB` 只是历史证据，不 retry/resume；本轮使用最新
@@ -38,3 +38,46 @@ handoff nodes: 0
 - typed-scope prompt semantics 当前仍为 `PROJECTED`。只有本轮自然出现 scope revision 且 provider 正确直接修改 typed entries 时，才记录额外 `PROVEN` 证据；未触发 revision 不影响产品 Gate PASS。
 - 本 Gate 不授权新 schema、workflow、engine、registry、parser fallback 或 prompt 调试。
 
+## Result
+
+唯一 fresh 样本已于 2026-08-10 运行并消费：
+
+- execution SHA：`918b15be0ebee45cfdd03c73883afcf26d99c02f`；
+- workstream：`ws-20260810T072433Z-J75J`；
+- report：`docs/testing/real-case-reports/20260810T072051Z/report.md`；
+- workflow：`agent-lifecycle-terminal-delivery@1`；
+- fresh package：9/9 modules `BUILD SUCCESS`；
+- Claude/Codex external minimal probes：PASS；runner 内建 Claude probe：PASS。
+
+结果为 `FAIL / CONSUMED`，未进入 design/implementation。第一次 Codex product review
+产生 7 个 typed obligations，Claude 第一次 revision 正确直接增加了
+`src/test/java/com/captcha/auth/service/UserServiceTest.java + CREATE` typed scope entry，但同时
+把未被任何 obligation 声明的 `AC-6` 从：
+
+```text
+Captcha challenges ... are bound to the browser session that requested them.
+```
+
+改为：
+
+```text
+Captcha challenges ... are bound to the browser session that originated the challenge request.
+```
+
+revision prompt 已明确要求未声明 clause 逐字符保真。`TaskContractProposalValidator`
+因 `UNDECLARED_CONTRACT_CLAUSE_CHANGE: AC-6` 在 reviewer/compile/implementation 之前拒绝该候选，
+node=`FAILED`，workflow=`WAITING_FOR_RECOVERY`，target 仍 clean，provider sessions 已关闭。
+
+统一归因：
+
+```text
+Primary failure: model revision verbatim-compliance failure
+Harness behavior: correct fail-closed enforcement
+Transport/parser/schema/correction: PASS / not the cause
+Typed-scope projection: naturally observed in the rejected candidate
+Product completion: NOT ACHIEVED
+```
+
+本 Gate 不授权 retry/resume 或第二 workstream。typed-scope provider behavior 已在真实
+revision 候选中观测，但由于候选整体未通过 contract boundary，不宣称端到端
+`PROVEN`。

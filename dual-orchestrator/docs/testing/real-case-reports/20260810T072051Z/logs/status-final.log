@@ -1,0 +1,17 @@
+Workstream: ws-20260810T072433Z-J75J
+Workspace: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J
+Branch: ai/ws-20260810T072433Z-J75J
+Ledger: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J/.agent/workstreams/ws-20260810T072433Z-J75J
+
+Workflow:
+  Definition: agent-lifecycle-terminal-delivery@1
+  Status: WAITING_FOR_RECOVERY
+  Active nodes: [node-intake-claude_brainstorm-006]
+  Open gates: [recovery-node-intake-claude_brainstorm-006]
+  Active node definition: intake.claude_brainstorm
+  Active node status: FAILED
+  Active iteration: iter-002
+  Recovery: Artifact contract failed
+  Recovery detail: Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+  Next action: Inspect the contract diagnostic and fix the output contract before retrying.
+  Command: dualctl retry --workdir /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J ws-20260810T072433Z-J75J

@@ -1,0 +1,69 @@
+# Workstream Summary
+
+- Workstream: ws-20260810T072433Z-J75J
+- Workspace: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J
+- Ledger: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J/.agent/workstreams/ws-20260810T072433Z-J75J
+- Generated At: 2026-08-10T07:31:09.985865Z
+
+## Workflow
+
+- Definition: agent-lifecycle-terminal-delivery@1
+- Status: WAITING_FOR_RECOVERY
+- Active Nodes: node-intake-claude_brainstorm-006
+- Open Gates: recovery-node-intake-claude_brainstorm-006
+- Updated At: 2026-08-10T07:31:04.810197Z
+
+## Metrics
+
+- Nodes: 6
+- Agent Runs: 3
+- Gates: 0
+- Decisions: 1
+- Iterations: 2
+- Revisions: 1
+- Total Node Duration(ms): 390664
+- Token Runs: 3 / 3
+- Total Tokens: 72232 (input 36911, output 25337)
+- Metrics: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J/.agent/workstreams/ws-20260810T072433Z-J75J/metrics/workstream-metrics.md
+
+## Recommended Next Action
+
+Artifact contract failed
+
+Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+
+Inspect the contract diagnostic and fix the output contract before retrying.
+
+```bash
+dualctl recovery show --workdir '/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J' ws-20260810T072433Z-J75J
+dualctl retry --workdir /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J ws-20260810T072433Z-J75J
+```
+
+## Recent Timeline
+
+| Node | Kind | Status | Iteration | Duration |
+| --- | --- | --- | --- | --- |
+| context.intake_claude_brainstorm | TASK | COMPLETED | iter-001 | 17 |
+| intake.claude_brainstorm | TASK | COMPLETED | iter-001 | 130842 |
+| context.intake_codex_product_review | TASK | COMPLETED | iter-001 | 34 |
+| intake.codex_product_review | TASK | COMPLETED | iter-001 | 150897 |
+| intake.decision | DECISION | COMPLETED | iter-001 | 10 |
+| intake.claude_brainstorm | TASK | FAILED | iter-002 | 108864 |
+
+## Artifacts
+
+- Final Report: missing
+- Current Failure Summary: /Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J/.agent/workstreams/ws-20260810T072433Z-J75J/recovery/current-failure.md
+- Delivery: unavailable
+- Delivery Merge: not applied
+- Calibration Candidates: 0
+- Calibration Apply Plans: 0
+
+## Useful Commands
+
+```bash
+dualctl status --workdir '/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J' ws-20260810T072433Z-J75J
+dualctl timeline --workdir '/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J' ws-20260810T072433Z-J75J
+dualctl review show --workdir '/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J' ws-20260810T072433Z-J75J
+dualctl recovery show --workdir '/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J' ws-20260810T072433Z-J75J
+```

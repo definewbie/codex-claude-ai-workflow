@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v4 / READY, NOT RUN
+## Current Active Step: Captcha-Auth Completion v4 / FAIL, CONSUMED
 
 > captcha-auth 是尚未完成的真实业务任务，不是人工 prompt 样本。新 Gate 以产品
 > 交付为唯一主目标：workflow COMPLETED、terminal acceptance、完整功能、PostgreSQL/
@@ -18,6 +18,15 @@
 > workstream。typed-scope provider compliance 只是自然观测项，不是产品 PASS 前置条件。
 >
 > Gate：`docs/testing/verification-gates/20260810-terminal-delivery-captcha-auth-completion-v4.md`。
+>
+> 唯一 fresh workstream `ws-20260810T072433Z-J75J` 已运行。第一次 Codex review
+> 后，Claude revision 正确增加了 obligation 要求的 exact typed scope entry，但同时
+> 改写了未被 obligation 声明的 `AC-6`。revision-delta validator 因
+> `UNDECLARED_CONTRACT_CLAUSE_CHANGE: AC-6` 在下一次 reviewer 调用前 fail closed。
+> 统一分类为模型 revision 逐字符保真失败，不是 transport/parser/schema/scope
+> enforcement 失败。本轮未进入实现，captcha-auth 产品仍 `NOT ACHIEVED`；不
+> retry/resume，不自动创建第二 workstream。report：
+> `docs/testing/real-case-reports/20260810T072051Z/report.md`。
 
 ## Historical Active Step: Captcha-Auth Full v3 / FAIL, CONSUMED
 

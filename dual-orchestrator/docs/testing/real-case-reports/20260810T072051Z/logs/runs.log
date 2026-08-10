@@ -1,0 +1,4 @@
+Run ID	Status	Agent	Node	Exit	Duration(ms)	Source	InputTok	OutputTok	TotalTok	Cost	Failure
+run-1786346674074	completed	claude	intake.claude_brainstorm	0	127891	acpx_stream	5196	10529	15725	0.31482 USD	
+run-1786346804997	completed	codex	intake.codex_product_review	0	144981	acpx_stream	20661	4376	35021		
+run-1786346955946	failed	claude	intake.claude_brainstorm	0	106568	acpx_stream	11054	10432	21486	0.372275 USD	required_artifact_contract_failed

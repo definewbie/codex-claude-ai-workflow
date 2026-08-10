@@ -1,0 +1,8 @@
+[client] initialize (running)
+
+[client] session/new (running)
+
+[thinking] The user wants me to reply with exactly "OK" and not use any tools. This is a simple connectivity probe.The user wants me to reply with exactly "OK" and not use any tools. This is a simple connectivity probe.
+OKOK
+
+[done] end_turn
