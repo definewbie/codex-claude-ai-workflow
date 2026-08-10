@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：`READY / CC REVIEWED / NOT RUN`。
+状态：`FAIL / CONSUMED / STOP-LOSS ENFORCED`。
 
 本 Gate 授权一个全新 captcha-auth workstream。所有历史 captcha-auth workstream、
 revision probe 和 candidate 只作为不可变证据，不 retry、resume 或作为本轮执行目标。
@@ -107,4 +107,38 @@ CC 独立只读、代码级同行评审结论为 `PASS`：无 P0；一项 P1 为
 
 ## Result
 
-尚未运行。
+唯一授权样本已于 2026-08-10 运行并消费：
+
+- Dual Gate SHA：`232250f266c93987393216a7166b05c55e2abb14`。
+- workstream：`ws-20260810T011244Z-8YVB`。
+- report：`docs/testing/real-case-reports/20260810T010901Z/report.md`。
+- bundled workflow：`agent-lifecycle-terminal-delivery@1`，29 nodes / 45 edges /
+  9 nominal Agent nodes / no handoff。
+- fresh package：9/9 modules，1199 tests，0 failures / 0 errors；双 provider
+  minimal probes PASS。
+- 结果：`FAIL / CONSUMED`。同一 `intake.codex_product_review` 连续第二次
+  `NEEDS_REVISION` 后触发预定义 stop-loss；未进入 design、implementation 或 acceptance。
+
+停止时共记录 6 个 Agent runs：5 个完整成功 run，以及正在启动的第三次 Codex review。
+后者由 runner interrupt trap 受控关闭为 `OUTPUT_INCOMPLETE`；对应 node 为 `FAILED`，
+workflow 为 `WAITING_FOR_RECOVERY`，open recovery gate 已生成。无残留 ACPX/provider
+进程，target Git 仍 clean。该 interrupted run 是 stop-loss closure，不是 provider 自发失败，
+不得归因为 Codex 输出质量。
+
+前两次 `NEEDS_REVISION` 均有业务依据，但暴露了串行发现成本：
+
+1. 初始 proposal 遗漏显式 UX 条款和“所有服务端输入验证”，同时加入过窄 scope、
+   CSRF replay、rate-limit keying 等未要求约束。第一次 review 提出 5 个 obligation。
+2. 第一次 revision 修复大部分问题，但把 `CO-5` 仅映射到 `TR-3`，未增加 scope
+   flexibility；还把 loading state 收紧为 asynchronous transport。第二次 review 正确拒绝，
+   并补提第一次 review 漏掉的 server-input validation。
+3. 第三次 Claude proposal 已用 `C-11`、`AC-21`、修订后的 `AC-19` 显式回应
+   `CO-5/CO-6/CO-7`，且 strict parser、schema、coverage、revision-delta 与 lineage 均通过；
+   但 stop-loss 在第三次 Codex review 完成前生效，因此不能宣称该 proposal 最终 READY。
+
+本样本证明 presentation normalization、typed revision delta、lineage 和 interruption closure
+在真实链路中均按设计工作；它没有证明 terminal-delivery full workflow 或实际 9-call
+收益。主要未闭合项不是 transport/parser，而是 intake contract 一次成形质量，以及 reviewer
+是否能在第一次 review 中完整枚举 requirement gaps。下一步只允许基于本 captured evidence
+做只读 completeness/serial-discovery assessment；不得 retry/resume 本 workstream，也不自动
+创建第二个样本。

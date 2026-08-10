@@ -8,7 +8,37 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Revision Verbatim Probe v2 / FAIL, CONSUMED
+## Current Active Step: Captcha-Auth Full v3 / FAIL, CONSUMED
+
+> 2026-08-10 在 clean Gate SHA `232250f2` 上执行了唯一 fresh
+> captcha-auth full workstream `ws-20260810T011244Z-8YVB`。fresh package
+> 9/9 modules、1199/0/0，双 provider probes PASS，persisted workflow 为
+> `agent-lifecycle-terminal-delivery@1`（29 nodes / 45 edges / 9 nominal Agent
+> nodes / no handoff）。
+>
+> 本轮结果为 `FAIL / CONSUMED / STOP-LOSS ENFORCED`：同一
+> `intake.codex_product_review` 连续第二次 `NEEDS_REVISION`，按预定义 Gate 立即停止，
+> 未进入 design/implementation。runner 已受控关闭第三次 Codex review：run=
+> `OUTPUT_INCOMPLETE`、node=`FAILED`、workflow=`WAITING_FOR_RECOVERY`，无残留进程，
+> target Git clean。该 interrupted run 是 stop-loss closure，不是 provider 自发失败。
+>
+> 两次 revision 的最大贡献项是 intake completeness 的串行发现。初始 proposal 遗漏显式
+> UX 和 server-input validation，并加入未要求的实现约束；第一次 review 提出 5 项，但漏掉
+> server-input validation。第一次 revision 又错误地以 `TR-3` 声称解决含 scope flexibility
+> 的 `CO-5`，并把 loading-state 误收紧为 asynchronous transport；第二次 review 因而合理
+> 拒绝并新增 3 项 obligation。第三次 Claude proposal 已机械、coverage、delta、lineage
+> 全部通过并显式回应这 3 项，但未获得第三次 reviewer 终局结论，不能标 READY。
+>
+> 当前边界结论：presentation normalization、typed delta、lineage、stop-loss closure 已由本
+> real-case 继续证明；terminal-delivery full workflow 与实际 9-call 收益仍未证明。下一步仅做
+> captured evidence 的只读 completeness/serial-discovery assessment，比较原始 requirement、
+> initial proposal、第一次 review obligations 和第二次新增 obligations，选择一个最大贡献的
+> 删除式改进。不得 retry/resume 本 workstream，不自动创建第二样本。
+>
+> Gate：`docs/testing/verification-gates/20260810-terminal-delivery-captcha-auth-full-v3.md`；
+> report：`docs/testing/real-case-reports/20260810T010901Z/report.md`。
+
+## Historical Active Step: Revision Verbatim Probe v2 / FAIL, CONSUMED
 
 > 2026-08-07 已在 clean SHA `46ba2241` 上完成 provider probes，并创建唯一
 > captcha-auth production workstream `ws-20260807T134039Z-R47H`。运行使用
