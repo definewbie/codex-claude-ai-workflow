@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：`READY / NOT RUN`。
+状态：`INVALID / CONSUMED`。
 
 该 Gate 是一个新样本。它只把已消费 v2 的 verified baseline、CO-1/CO-2 obligations 和 captured
 revision prompt 当作只读输入；不复用 v2 session、candidate、correction 或 PASS/FAIL 结论，也不
@@ -91,4 +91,54 @@ revision prompt 当作只读输入；不复用 v2 session、candidate、correcti
 
 ## Result
 
-尚未运行。该节只能在本 Gate 提交、fresh package 与全部 preflight PASS 后填写。
+本 Gate 已于 2026-08-10 在 Gate SHA
+`ded6e7796100a0a47e6a674dd31380c08d91e6de` 上执行一次，结论为
+`INVALID / CONSUMED`。不得重用该 session 或把本轮解释为部分 PASS。
+
+### Preflight
+
+- worktree clean；implementation checkpoint `8992824d68800ca1c1e1ecfae236b3d7b55a8a68`
+  是 Gate SHA 的祖先。
+- fresh package PASS；runtime jar SHA-256
+  `fd348ef372e0a147f37b7bee5f0fda1257a801d32fa17ed844fb0fa8f706ee46`，adapter jar
+  SHA-256 `63d0ac5d69fce3e5665d636d741dc9d6cb856b09f8da67a63343a1a7b4536fff`。
+- prompt、runner、captured source prompt 与旧 workstream tree hash 均与 Gate 一致。
+- fresh session：`dual-captcha-revision-presentation-v3-ded6e77`；clone/report path 运行前不存在。
+
+### Captured Facts
+
+- 仅执行一个 initial occurrence，ACP transcript 以 `[done] end_turn` 结束；没有
+  correction artifact。
+- captured assistant result 是单个无 Markdown fence 的完整 JSON object；production
+  acquirer 写出 final candidate。
+- final candidate 进入 production `ArtifactContractValidator`，且已经过 strict parse、
+  envelope/schema、task-contract mechanical、CO-1/CO-2 coverage 和 revision-delta validation。
+  如果任一边界失败，validator 会在 `withResultSidecars` 之前返回 typed contract
+  violation；本轮已进入 sidecar publication。
+- session `eef6a540-a9c9-4937-a7ac-60b0843264f2` 已关闭，无残留 provider
+  进程。旧 workstream 运行后 tree SHA-256 仍为
+  `ace6b73e2c3af0c774c004b20fdf8844fcbc0c8aba4583aba21ade9c73b3a80b`。
+
+### Invalid Reason
+
+一次性 runner 把 captured output 写入 `runs/probe-v3/...`，但 envelope 的 authoritative
+`run_id` 为 `run-1786115545628`。`AgentOutputContractDocument.hasValidatedLineage(...)`
+要求 `source_output_ref` 包含 `/runs/<run_id>/`，因此
+`TaskContractProposalReference.publish(...)` 正确 fail closed，报错：
+
+```text
+validated task-contract proposal lineage is required
+```
+
+该异常发生在 runner 的 typed report 持久化之前，导致 Gate 要求的 production
+validator `COMPLETED` verdict、presentation audit 和 usage 报告不完整。这是验证
+harness 的 lineage path 组装错误，不是 provider/model、prompt、strict parser 或
+production lineage validator 错误。
+
+### Decision
+
+- 不启动 fresh captcha-auth full workstream。
+- 不再调用 provider 补跑本 Gate。
+- 后续若继续，只能先用本次 captured candidate 做一次纯离线、正确
+  lineage path 的 production validator replay；该 replay 必须单独预定 Gate，且不得
+  改写本 v3 的 `INVALID` 结论。
