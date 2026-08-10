@@ -43,6 +43,9 @@
 > 当前成熟度仅为 `PROJECTED / DETERMINISTIC PASS`；provider compliance、reviewer
 > completeness 与 terminal-delivery full workflow 仍为 `NOT PROVEN`。不得 retry/resume 本
 > workstream，不自动创建第二样本。
+> Commit `07a11db3` 的独立代码级 diff review 已 `PASS`（0 P0、0 P1），
+> typed-scope prompt-semantics checkpoint 正式关闭。两项非阻塞 P2 不改变该结论，
+> 不再为方法命名或投影次数增加代码。
 >
 > Gate：`docs/testing/verification-gates/20260810-terminal-delivery-captcha-auth-full-v3.md`；
 > report：`docs/testing/real-case-reports/20260810T010901Z/report.md`。
