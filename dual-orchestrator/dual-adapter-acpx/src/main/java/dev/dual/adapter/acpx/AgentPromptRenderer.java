@@ -55,7 +55,26 @@ final class AgentPromptRenderer {
             String promptTemplate,
             List<String> inputRefs
     ) {
+        return renderWithSections(
+                workspaceRoot, workstreamId, runId, nodeId, promptTemplate, inputRefs, null);
+    }
+
+    RenderedPrompt renderWithSections(
+            Path workspaceRoot,
+            String workstreamId,
+            String runId,
+            String nodeId,
+            String promptTemplate,
+            List<String> inputRefs,
+            String agentResultContract
+    ) {
         var template = loadTemplate(promptTemplate);
+        if (agentResultContract == null) {
+            var contract = promptContract(nodeId);
+            agentResultContract = AgentResultPromptContract.render(
+                    workstreamId, runId, nodeId, contract.decisionExample(),
+                    contract.allowedDecisionValues());
+        }
         var workstreamDir = ".agent/workstreams/" + workstreamId;
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
@@ -83,12 +102,7 @@ final class AgentPromptRenderer {
                 .replace("{{decision_example}}", promptContract.decisionExample());
         content = content.replace(
                 "{{agent_result_contract}}",
-                AgentResultPromptContract.render(
-                        workstreamId,
-                        runId,
-                        nodeId,
-                        promptContract.decisionExample(),
-                        promptContract.allowedDecisionValues())
+                agentResultContract
         );
 
         var sections = new ArrayList<PromptSection>();
@@ -115,12 +129,7 @@ final class AgentPromptRenderer {
         sections.add(new PromptSection("contract_review_principles", "static_instruction",
                 "contract-review-principles.md", contractReviewPrinciples, "review principles", true));
         sections.add(new PromptSection("prompt_contract", "tool_policy", "ContractRegistry:" + nodeId,
-                AgentResultPromptContract.render(
-                        workstreamId,
-                        runId,
-                        nodeId,
-                        promptContract.decisionExample(),
-                        promptContract.allowedDecisionValues()),
+                agentResultContract,
                 "strict agent result envelope", true));
         return new RenderedPrompt(content, sections);
     }

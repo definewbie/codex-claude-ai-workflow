@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Resolves the exact typed baseline and obligations for one intake revision. */
-final class TaskContractRevisionContextResolver {
+public final class TaskContractRevisionContextResolver {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    Result resolveForNode(
+    public Result resolveForNode(
             Path workspaceRoot,
             String workstreamId,
             String nodeInstanceId
@@ -38,7 +38,7 @@ final class TaskContractRevisionContextResolver {
         }
     }
 
-    Result resolveForIteration(
+    public Result resolveForIteration(
             Path workspaceRoot,
             String workstreamId,
             String iterationId
@@ -56,7 +56,7 @@ final class TaskContractRevisionContextResolver {
                         iterationId, iteration.iterationId());
             }
             if ("workflow_started".equals(iteration.triggerAction())) {
-                return new Result(new Context(iteration, false, null, List.of()), List.of());
+                return new Result(new Context(iteration, false, null, null, List.of()), List.of());
             }
             if (!"NEEDS_REVISION".equals(iteration.triggerAction())) {
                 return failure("contract revision reached an unsupported iteration trigger",
@@ -89,6 +89,7 @@ final class TaskContractRevisionContextResolver {
                     iteration,
                     true,
                     baseline.previousProposal(),
+                    baseline.previousReference(),
                     baseline.review().contractObligations()), List.of());
         } catch (Exception failure) {
             return failure("revision iteration lineage could not be resolved", message(failure));
@@ -151,7 +152,10 @@ final class TaskContractRevisionContextResolver {
             if (proposalDocument.isEmpty() || proposalDocument.get().taskContractProposal() == null) {
                 continue;
             }
-            baselines.add(new Baseline(document.get(), proposalDocument.get().taskContractProposal()));
+            baselines.add(new Baseline(
+                    document.get(),
+                    document.get().reviewSubject(),
+                    proposalDocument.get().taskContractProposal()));
         }
         return List.copyOf(baselines);
     }
@@ -177,21 +181,23 @@ final class TaskContractRevisionContextResolver {
         return value == null ? "" : String.valueOf(value).trim();
     }
 
-    record Context(
+    public record Context(
             WorkflowIterationDocument iteration,
             boolean revision,
             TaskContractProposal previousProposal,
+            TaskContractProposalReference previousReference,
             List<AgentResultEnvelope.ReviewObligation> obligations
     ) {}
 
-    record Result(Context context, List<String> errors) {
-        boolean valid() {
+    public record Result(Context context, List<String> errors) {
+        public boolean valid() {
             return context != null && errors.isEmpty();
         }
     }
 
     private record Baseline(
             AgentOutputContractDocument review,
+            TaskContractProposalReference previousReference,
             TaskContractProposal previousProposal
     ) {}
 }

@@ -10,6 +10,7 @@ import dev.dual.runtime.handler.AgentRunGovernanceContext;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.ContractRegistry;
 import dev.dual.runtime.handler.TaskHandler;
+import dev.dual.runtime.handler.TaskContractRevisionContextResolver;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,6 +30,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AgentPromptRenderer promptRenderer;
     private final AgentRunMetadataWriter metadataWriter;
     private final AcpxUsageReader usageReader;
+    private final TaskContractRevisionContextResolver revisionContextResolver =
+            new TaskContractRevisionContextResolver();
     // Closes a started execution that never reached the completion finalizer. This is the same
     // closer used by workflow recovery, so both paths replay the same durable execution facts.
     private final AgentExecutionAttemptReconciler attemptReconciler =
@@ -69,6 +72,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var configuredSession = configText(context, "session");
         var promptTemplate = configText(context, "prompt_template");
         var runId = "run-" + Instant.now().toEpochMilli();
+        var emissionContext = proposalEmissionContext(context);
+        if (emissionContext.failed() != null) {
+            return emissionContext.failed();
+        }
+        var agentResultContract = agentResultContractPrompt(
+                context, runId, emissionContext.context());
         var sessionScopeConfigValue = context.definition().config().get("session_scope");
         var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
         var sessionDecision = SessionScopePolicy.resolve(
@@ -130,7 +139,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 runId,
                 context.definition().id(),
                 promptTemplate,
-                inputRefs
+                inputRefs,
+                agentResultContract
         );
         Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
         promptManifestWriter.write(
@@ -214,7 +224,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     agent,
                     request,
                     correctionRequest,
-                    agentResultContractPrompt(context, runId),
+                    agentResultContract,
                     context.workstreamId(),
                     runId,
                     ContractRegistry.hasContract(context.definition().id())
@@ -416,20 +426,51 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 : usageReader.read(agent, promptPath, stderrPath).orElse(null);
     }
 
-    private static String agentResultContractPrompt(TaskContext context, String runId) {
+    private static String agentResultContractPrompt(
+            TaskContext context,
+            String runId,
+            AgentResultPromptContract.ProposalEmissionContext emissionContext
+    ) {
         if (!ContractRegistry.hasContract(context.definition().id())) {
             return "";
         }
         var contract = ContractRegistry.forNode(context.definition().id());
-        var decisionExample = contract.allowedDecisions().stream().sorted().findFirst().orElse("");
+        var decisionExample = contract.allowedDecisions().size() == 1
+                ? contract.allowedDecisions().iterator().next()
+                : "<one allowed decision>";
         return AgentResultPromptContract.render(
                 context.workstreamId(),
                 runId,
                 context.definition().id(),
                 decisionExample,
-                contract.allowedDecisions()
+                contract.allowedDecisions(),
+                emissionContext
         );
     }
+
+    private ProposalEmissionResolution proposalEmissionContext(TaskContext context) {
+        if (!"intake.claude_brainstorm".equals(context.definition().id())) {
+            return new ProposalEmissionResolution(
+                    AgentResultPromptContract.ProposalEmissionContext.notApplicable(), null);
+        }
+        var resolved = revisionContextResolver.resolveForIteration(
+                context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
+        if (!resolved.valid()) {
+            return new ProposalEmissionResolution(null, new NodeResult(
+                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID",
+                    NodeStatus.FAILED,
+                    List.of(),
+                    Map.of("errors", resolved.errors()),
+                    "task contract revision context could not be resolved"));
+        }
+        return new ProposalEmissionResolution(
+                AgentResultPromptContract.proposalEmissionContext(resolved.context()), null);
+    }
+
+    private record ProposalEmissionResolution(
+            AgentResultPromptContract.ProposalEmissionContext context,
+            NodeResult failed
+    ) {}
 
     private static void appendTimelineEvent(
             List<AcpxExecutionEvent> timeline,

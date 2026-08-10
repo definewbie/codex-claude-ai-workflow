@@ -22,6 +22,7 @@ public record AgentResultEnvelope(
     )
     @JsonSubTypes({
             @JsonSubTypes.Type(value = TaskContractProposalResult.class, name = "task_contract_proposal"),
+            @JsonSubTypes.Type(value = TaskContractRevisionPatchResult.class, name = "task_contract_revision_patch"),
             @JsonSubTypes.Type(value = AgentOutputResult.class, name = "agent_output_contract"),
             @JsonSubTypes.Type(value = PlanResult.class, name = "plan_result"),
             @JsonSubTypes.Type(value = SelfTestResult.class, name = "self_test_report"),
@@ -30,6 +31,7 @@ public record AgentResultEnvelope(
     })
     public sealed interface AgentResult permits
             TaskContractProposalResult,
+            TaskContractRevisionPatchResult,
             AgentOutputResult,
             PlanResult,
             SelfTestResult,
@@ -70,6 +72,46 @@ public record AgentResultEnvelope(
     }
 
     public record RevisionResponse(String reviewObligationId, List<String> resolvedByClauseIds) {
+    }
+
+    public record TaskContractRevisionPatchResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String baseProposalId,
+            String baseProposalSha256,
+            List<ObligationPatch> obligationPatches
+    ) implements AgentResult {
+    }
+
+    public record ObligationPatch(
+            String reviewObligationId,
+            List<String> resolvedByClauseIds,
+            List<ClauseChange> clauseChanges,
+            List<TaskContract.ScopeEntry> scopeAdditions,
+            List<String> evidenceRefAdditions
+    ) {
+    }
+
+    public record ClauseChange(
+            ClauseChangeOperation operation,
+            ClauseSection section,
+            String id,
+            String text
+    ) {
+    }
+
+    public enum ClauseChangeOperation {
+        ADD,
+        REPLACE
+    }
+
+    public enum ClauseSection {
+        ACCEPTANCE_CRITERIA,
+        TEST_REQUIREMENTS,
+        CONSTRAINTS,
+        NON_GOALS,
+        RISK_AREAS
     }
 
     public record AgentOutputResult(

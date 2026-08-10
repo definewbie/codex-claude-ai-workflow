@@ -132,6 +132,7 @@ public final class AgentResultEnvelopeValidator {
                 validateContractClauses(proposal, errors);
                 validateRevisionResponses(proposal.revisionResponses(), errors);
             }
+            case AgentResultEnvelope.TaskContractRevisionPatchResult patch -> validateRevisionPatch(patch, errors);
             case AgentResultEnvelope.AgentOutputResult output -> {
                 validateEvidencePayload(
                         output.lifecycleStatus(), output.checks(), output.evidence(), output.missingEvidence(),
@@ -185,6 +186,60 @@ public final class AgentResultEnvelopeValidator {
                 requiredText(handoff.recommendedNextStage(), "result.recommended_next_stage", errors);
                 requiredText(handoff.suggestedNextPrompt(), "result.suggested_next_prompt", errors);
             }
+        }
+    }
+
+    private static void validateRevisionPatch(
+            AgentResultEnvelope.TaskContractRevisionPatchResult patch,
+            ValidationErrors errors
+    ) {
+        requiredText(patch.baseProposalId(), "result.base_proposal_id", errors);
+        requiredText(patch.baseProposalSha256(), "result.base_proposal_sha256", errors);
+        if (patch.baseProposalSha256() != null
+                && !patch.baseProposalSha256().matches("[0-9a-f]{64}")) {
+            errors.reject("result.base_proposal_sha256 must be 64 lowercase hexadecimal characters");
+        }
+        requiredList(patch.obligationPatches(), "result.obligation_patches", true, errors);
+        if (patch.obligationPatches() == null) {
+            return;
+        }
+        var obligationIds = new HashSet<String>();
+        for (int index = 0; index < patch.obligationPatches().size(); index++) {
+            var value = patch.obligationPatches().get(index);
+            var item = "result.obligation_patches[" + index + "]";
+            if (value == null) {
+                errors.reject(item + " is required");
+                continue;
+            }
+            requiredText(value.reviewObligationId(), item + ".review_obligation_id", errors);
+            requiredList(value.resolvedByClauseIds(), item + ".resolved_by_clause_ids", true, errors);
+            requiredList(value.clauseChanges(), item + ".clause_changes", false, errors);
+            requiredList(value.scopeAdditions(), item + ".scope_additions", false, errors);
+            requiredList(value.evidenceRefAdditions(), item + ".evidence_ref_additions", false, errors);
+            if (value.reviewObligationId() != null && !value.reviewObligationId().isBlank()
+                    && !obligationIds.add(value.reviewObligationId().trim())) {
+                errors.reject("result.obligation_patches contains duplicate obligation id: "
+                        + value.reviewObligationId().trim());
+            }
+            if (value.clauseChanges() != null) {
+                for (int changeIndex = 0; changeIndex < value.clauseChanges().size(); changeIndex++) {
+                    var change = value.clauseChanges().get(changeIndex);
+                    var changeItem = item + ".clause_changes[" + changeIndex + "]";
+                    if (change == null) {
+                        errors.reject(changeItem + " is required");
+                        continue;
+                    }
+                    if (change.operation() == null) {
+                        errors.reject(changeItem + ".operation is required");
+                    }
+                    if (change.section() == null) {
+                        errors.reject(changeItem + ".section is required");
+                    }
+                    requiredText(change.id(), changeItem + ".id", errors);
+                    requiredText(change.text(), changeItem + ".text", errors);
+                }
+            }
+            validateScopeEntries(value.scopeAdditions(), errors);
         }
     }
 

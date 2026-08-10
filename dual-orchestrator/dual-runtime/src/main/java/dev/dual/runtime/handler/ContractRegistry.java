@@ -12,7 +12,7 @@ public final class ContractRegistry {
             Set.of("decision", "summary"),
             Set.of("READY_FOR_PRODUCT_REVIEW"),
             Set.of("needs_human_input"),
-            Set.of("task_contract_proposal")
+            Set.of("task_contract_proposal", "task_contract_revision_patch")
     );
     private static final NodeOutputContract INTAKE_PRODUCT_REVIEW = new NodeOutputContract(
             "intake.codex_product_review",

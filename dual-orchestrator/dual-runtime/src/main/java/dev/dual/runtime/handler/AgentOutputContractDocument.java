@@ -49,6 +49,7 @@ public record AgentOutputContractDocument(
         List<RereadReason> rereadReasons,
         TaskContractProposalReference reviewSubject,
         TaskContractProposal taskContractProposal,
+        ProposalDerivation proposalDerivation,
         PlanArtifactDocument planArtifact
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
@@ -93,8 +94,50 @@ public record AgentOutputContractDocument(
                 rereadReasonList(document.get("reread_reasons")),
                 TaskContractProposalReference.fromMap(objectMap(document.get("review_subject"))).orElse(null),
                 taskContractProposal(objectMap(document.get("task_contract_proposal"))),
+                ProposalDerivation.from(objectMap(document.get("proposal_derivation"))),
                 planArtifact(objectMap(document.get("plan_artifact")))
         );
+    }
+
+    public record ProposalDerivation(
+            String kind,
+            String baseProposalId,
+            String baseProposalSha256,
+            TaskContractProposalReference baseProposalReference,
+            String patchSourceOutputRef
+    ) {
+        static ProposalDerivation from(Map<String, Object> document) {
+            if (document.isEmpty()) {
+                return null;
+            }
+            return new ProposalDerivation(
+                    text(document.get("kind")),
+                    text(document.get("base_proposal_id")),
+                    text(document.get("base_proposal_sha256")),
+                    TaskContractProposalReference.fromMap(
+                            objectMap(document.get("base_proposal_reference"))).orElse(null),
+                    text(document.get("patch_source_output_ref")));
+        }
+
+        boolean validFor(TaskContractProposalReference reference, String sourceOutputRef) {
+            return "revision_patch_merge".equals(kind)
+                    && reference != null
+                    && reference.proposalId().equals(baseProposalId)
+                    && reference.sha256().equals(baseProposalSha256)
+                    && reference.equals(baseProposalReference)
+                    && sourceOutputRef != null
+                    && sourceOutputRef.equals(patchSourceOutputRef);
+        }
+
+        Map<String, Object> toMap() {
+            var map = new LinkedHashMap<String, Object>();
+            map.put("kind", kind);
+            map.put("base_proposal_id", baseProposalId);
+            map.put("base_proposal_sha256", baseProposalSha256);
+            map.put("base_proposal_reference", baseProposalReference.toMap());
+            map.put("patch_source_output_ref", patchSourceOutputRef);
+            return Map.copyOf(map);
+        }
     }
 
     public boolean hasValidatedLineage(String expectedWorkstreamId) {

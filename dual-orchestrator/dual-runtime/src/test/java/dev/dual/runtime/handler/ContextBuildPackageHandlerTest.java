@@ -936,7 +936,7 @@ class ContextBuildPackageHandlerTest {
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
         var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
-        var published = TaskContractProposalReference.publish(
+        var published = TaskContractProposalReference.publishInitial(
                 tempDir, "ws-ctx", sidecar, document, objectMapper);
 
         var result = handler.execute(ctx("product_review", List.of(
@@ -996,7 +996,7 @@ class ContextBuildPackageHandlerTest {
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
         var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
-        var published = TaskContractProposalReference.publish(
+        var published = TaskContractProposalReference.publishInitial(
                 tempDir, "ws-ctx", sidecar, document, objectMapper);
         Files.writeString(sidecar, Files.readString(sidecar).replace("Original objective", "Tampered objective"));
 
@@ -1042,7 +1042,7 @@ class ContextBuildPackageHandlerTest {
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
         var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
-        var published = TaskContractProposalReference.publish(
+        var published = TaskContractProposalReference.publishInitial(
                 tempDir, "ws-ctx", sidecar, document, objectMapper);
 
         var result = handler.execute(ctx(
@@ -2182,7 +2182,7 @@ class ContextBuildPackageHandlerTest {
                 """.formatted(objective), StandardCharsets.UTF_8);
         publishSidecar(sidecar);
         var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
-        return TaskContractProposalReference.publish(
+        return TaskContractProposalReference.publishInitial(
                 tempDir, "ws-ctx", sidecar, document, objectMapper).referenceRef();
     }
 

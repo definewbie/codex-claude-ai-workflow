@@ -14,6 +14,18 @@ final class AgentResultDocumentProjector {
             String nodeInstanceId,
             String sourceOutputRef
     ) {
+        return outputContract(envelope, contract, handlerType, nodeInstanceId, sourceOutputRef, null, null);
+    }
+
+    Map<String, Object> outputContract(
+            AgentResultEnvelope envelope,
+            NodeOutputContract contract,
+            String handlerType,
+            String nodeInstanceId,
+            String sourceOutputRef,
+            TaskContractProposal resolvedProposal,
+            AgentOutputContractDocument.ProposalDerivation derivation
+    ) {
         var result = envelope.result();
         var document = new LinkedHashMap<String, Object>();
         document.put("artifact_type", "agent_output_contract");
@@ -37,6 +49,14 @@ final class AgentResultDocumentProjector {
             case AgentResultEnvelope.TaskContractProposalResult proposal -> {
                 evidenceDefaults(document);
                 document.put("task_contract_proposal", taskContractProposalMap(proposal));
+            }
+            case AgentResultEnvelope.TaskContractRevisionPatchResult ignored -> {
+                if (resolvedProposal == null || derivation == null) {
+                    throw new IllegalStateException("revision patch must be merged before projection");
+                }
+                evidenceDefaults(document);
+                document.put("task_contract_proposal", taskContractProposalMap(resolvedProposal));
+                document.put("proposal_derivation", derivation.toMap());
             }
             case AgentResultEnvelope.AgentOutputResult output -> {
                 evidenceFields(document, output.lifecycleStatus(), output.blocking(), output.checks(), output.evidence(),
@@ -83,6 +103,39 @@ final class AgentResultDocumentProjector {
             }
         }
         return document;
+    }
+
+    private Map<String, Object> taskContractProposalMap(TaskContractProposal proposal) {
+        var document = new LinkedHashMap<String, Object>();
+        document.put("artifact_type", proposal.artifactType());
+        document.put("schema_version", proposal.schemaVersion());
+        document.put("objective", proposal.objective());
+        document.put("scope", Map.of(
+                "included", proposal.scope().included().stream()
+                        .map(entry -> Map.of("path", entry.path(), "operation", entry.operation().name()))
+                        .toList(),
+                "excluded", proposal.scope().excluded()));
+        document.put("acceptance_criteria", clauseMapsFromProposal(proposal.acceptanceCriteria()));
+        document.put("test_requirements", clauseMapsFromProposal(proposal.testRequirements()));
+        document.put("constraints", clauseMapsFromProposal(proposal.constraints()));
+        document.put("non_goals", clauseMapsFromProposal(proposal.nonGoals()));
+        document.put("risk_areas", clauseMapsFromProposal(proposal.riskAreas()));
+        document.put("evidence_refs", proposal.evidenceRefs());
+        document.put("open_questions", proposal.openQuestions());
+        document.put("revision_responses", proposal.revisionResponses().stream()
+                .map(response -> Map.of(
+                        "review_obligation_id", response.reviewObligationId(),
+                        "resolved_by_clause_ids", response.resolvedByClauseIds()))
+                .toList());
+        return document;
+    }
+
+    private static List<Map<String, String>> clauseMapsFromProposal(
+            List<TaskContractProposal.ContractClause> clauses
+    ) {
+        return safeList(clauses).stream()
+                .map(clause -> Map.of("id", clause.id(), "text", clause.text()))
+                .toList();
     }
 
     TaskContractProposal taskContractProposal(AgentResultEnvelope.TaskContractProposalResult result) {

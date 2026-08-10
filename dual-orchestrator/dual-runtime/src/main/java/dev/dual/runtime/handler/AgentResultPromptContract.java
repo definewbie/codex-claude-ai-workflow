@@ -23,12 +23,24 @@ public final class AgentResultPromptContract {
             String decisionExample,
             Set<String> allowedDecisions
     ) {
+        return render(workstreamId, runId, nodeId, decisionExample, allowedDecisions,
+                ProposalEmissionContext.initial());
+    }
+
+    public static String render(
+            String workstreamId,
+            String runId,
+            String nodeId,
+            String decisionExample,
+            Set<String> allowedDecisions,
+            ProposalEmissionContext proposalContext
+    ) {
         var envelope = new AgentResultEnvelope(
                 1,
                 workstreamId,
                 runId,
                 nodeId,
-                exampleResult(nodeId, decisionExample)
+                exampleResult(nodeId, decisionExample, proposalContext)
         );
         try {
             return """
@@ -46,7 +58,7 @@ public final class AgentResultPromptContract {
                             allowedDecisions.stream().sorted().toList(),
                             rereadReasonInstruction(nodeId),
                             verificationRemediationInstruction(nodeId),
-                            contractRevisionInstruction(nodeId),
+                            contractRevisionInstruction(nodeId, proposalContext),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
         } catch (Exception failure) {
@@ -54,8 +66,28 @@ public final class AgentResultPromptContract {
         }
     }
 
-    private static String contractRevisionInstruction(String nodeId) {
+    private static String contractRevisionInstruction(String nodeId, ProposalEmissionContext context) {
         if ("intake.claude_brainstorm".equals(nodeId)) {
+            if (context.revision()) {
+                return "Return only `task_contract_revision_patch`; do not return or copy a full proposal. "
+                        + "The patch is bound to base proposal id `" + context.baseProposalId()
+                        + "` and sha256 `" + context.baseProposalSha256() + "`. "
+                        + "Cover each routed obligation exactly once: "
+                        + context.obligations().stream().map(AgentResultEnvelope.ReviewObligation::id).toList()
+                        + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
+                        + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
+                        + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
+                        + "paths and uppercase CREATE/MODIFY. `section` is authoritative; clause IDs are opaque "
+                        + "and their prefixes do not determine section. "
+                        + closedItemFields("result.obligation_patches",
+                        new AgentResultEnvelope.ObligationPatch(
+                                "CO-1", List.of("AC-1"),
+                                List.of(new AgentResultEnvelope.ClauseChange(
+                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                        "AC-1", "replacement text")),
+                                List.of(), List.of()));
+            }
             return "`result.scope.included` is the exhaustive authorization set for permitted repository changes; "
                     + "each entry names one exact repository-relative path and `CREATE` or `MODIFY`. "
                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
@@ -133,9 +165,32 @@ public final class AgentResultPromptContract {
                 + "a test source change is required. Do not infer this from prose in downstream nodes.";
     }
 
-    private static AgentResultEnvelope.AgentResult exampleResult(String nodeId, String decision) {
+    private static AgentResultEnvelope.AgentResult exampleResult(
+            String nodeId,
+            String decision,
+            ProposalEmissionContext proposalContext
+    ) {
         return switch (nodeId) {
-            case "intake.claude_brainstorm" -> new AgentResultEnvelope.TaskContractProposalResult(
+            case "intake.claude_brainstorm" -> proposalContext.revision()
+                    ? new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                    "task_contract_revision_patch",
+                    decision,
+                    "one short sentence",
+                    proposalContext.baseProposalId(),
+                    proposalContext.baseProposalSha256(),
+                    List.of(new AgentResultEnvelope.ObligationPatch(
+                            proposalContext.obligations().isEmpty()
+                                    ? "CO-1" : proposalContext.obligations().getFirst().id(),
+                            List.of("AC-1"),
+                            List.of(new AgentResultEnvelope.ClauseChange(
+                                    AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+                                    AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                    "AC-1",
+                                    "replacement text")),
+                            List.of(new TaskContract.ScopeEntry(
+                                    "repo/relative/new.ext", TaskContract.ScopeOperation.CREATE)),
+                            List.of("repo/relative/evidence.ext"))))
+                    : new AgentResultEnvelope.TaskContractProposalResult(
                     "task_contract_proposal",
                     decision,
                     "one short sentence",
@@ -248,6 +303,51 @@ public final class AgentResultPromptContract {
                     List.of()
             );
         };
+    }
+
+    public static ProposalEmissionContext proposalEmissionContext(
+            TaskContractRevisionContextResolver.Context context
+    ) {
+        if (context == null || !context.revision()) {
+            return ProposalEmissionContext.initial();
+        }
+        if (context.previousReference() == null) {
+            throw new IllegalArgumentException("revision proposal reference is required");
+        }
+        return new ProposalEmissionContext(
+                EmissionMode.REVISION_PATCH,
+                context.previousReference().proposalId(),
+                context.previousReference().sha256(),
+                List.copyOf(context.obligations()));
+    }
+
+    public enum EmissionMode {
+        INITIAL_FULL,
+        REVISION_PATCH,
+        NOT_APPLICABLE
+    }
+
+    public record ProposalEmissionContext(
+            EmissionMode mode,
+            String baseProposalId,
+            String baseProposalSha256,
+            List<AgentResultEnvelope.ReviewObligation> obligations
+    ) {
+        public ProposalEmissionContext {
+            obligations = obligations == null ? List.of() : List.copyOf(obligations);
+        }
+
+        public static ProposalEmissionContext initial() {
+            return new ProposalEmissionContext(EmissionMode.INITIAL_FULL, "", "", List.of());
+        }
+
+        public static ProposalEmissionContext notApplicable() {
+            return new ProposalEmissionContext(EmissionMode.NOT_APPLICABLE, "", "", List.of());
+        }
+
+        boolean revision() {
+            return mode == EmissionMode.REVISION_PATCH;
+        }
     }
 
     private static AgentResultEnvelope.Failure emptyFailure() {

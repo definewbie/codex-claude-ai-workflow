@@ -21,6 +21,7 @@ import dev.dual.ledger.file.WorkflowIterationDocument;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +37,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTaskHandlerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    @Test
+    void invalidRevisionContextStopsBeforeProviderDispatch() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-invalid-revision");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Revise the task contract.\n");
+        var definition = new NodeDefinition(
+                "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main",
+                "prompt_template", "intake-claude-brainstorm"));
+        var instance = new NodeInstance(
+                "node-intake-revision", definition.id(), NodeKind.TASK, "acpx.agent_run",
+                NodeStatus.READY, "stage-intake", "iter-002", List.of(), List.of(), Map.of(),
+                null, null, null);
+
+        var result = new AcpxAgentTaskHandler(new ThrowingTransport(), false).execute(
+                new TaskHandler.TaskContext(tempDir, "ws-invalid-revision", definition, instance));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_REVISION_CONTEXT_INVALID", result.outcome());
+        assertTrue(result.outputRefs().isEmpty(), "provider outputs must not exist before context validation");
+        assertFalse(Files.exists(workstreamDir.resolve("runs")),
+                "no provider run may be prepared when revision lineage is unresolved");
+    }
     private static final ObjectMapper LEDGER_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @TempDir
@@ -69,7 +94,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -116,7 +141,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "implement-claude"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -142,7 +167,7 @@ class AcpxAgentTaskHandlerTest {
         ));
         var instance = readyInstance("design.claude_design");
 
-        var candidate = handler.execute(new TaskHandler.TaskContext(
+        var candidate = handler.execute(taskContext(
                 tempDir, "ws-correction", definition, instance));
         var validated = new ArtifactContractValidator().validate(
                 tempDir,
@@ -220,7 +245,7 @@ class AcpxAgentTaskHandlerTest {
         );
         var instance = readyInstance("implement.claude_self_test_report");
 
-        var candidate = handler.execute(new TaskHandler.TaskContext(
+        var candidate = handler.execute(taskContext(
                 tempDir,
                 "ws-schema-correction",
                 definition,
@@ -284,7 +309,7 @@ class AcpxAgentTaskHandlerTest {
         );
         var instance = readyInstance("implement.claude_self_test_report");
 
-        var candidate = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
+        var candidate = new AcpxAgentTaskHandler(transport, false).execute(taskContext(
                 tempDir,
                 "ws-schema-correction-fails",
                 definition,
@@ -347,7 +372,7 @@ class AcpxAgentTaskHandlerTest {
                     null
             );
 
-            var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-compact", definition, instance));
+            var result = handler.execute(taskContext(tempDir, "ws-compact", definition, instance));
             var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
             var runMetadata = Files.readString(runMetadataPath);
             assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-compact-compact-implement.claude_implement\""));
@@ -411,7 +436,7 @@ class AcpxAgentTaskHandlerTest {
                     null
             );
 
-            var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-cache-aware", definition, instance));
+            var result = handler.execute(taskContext(tempDir, "ws-cache-aware", definition, instance));
             var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
             var runMetadata = Files.readString(runMetadataPath);
             assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-cache-aware-compact-implement.claude_implement\""));
@@ -461,7 +486,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
 
         var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
         var runMetadata = Files.readString(runMetadataPath);
@@ -720,7 +745,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -775,7 +800,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-fenced",
                 definition,
@@ -838,7 +863,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
@@ -865,7 +890,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -900,7 +925,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("intake.claude_brainstorm")));
+        handler.execute(taskContext(tempDir, "ws-test", definition, readyInstance("intake.claude_brainstorm")));
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("observe", transport.lastPermissionProfile.name());
@@ -924,7 +949,7 @@ class AcpxAgentTaskHandlerTest {
                 "permission_profile", "contract_discovery"
         ));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("intake.claude_brainstorm")));
+        handler.execute(taskContext(tempDir, "ws-test", definition, readyInstance("intake.claude_brainstorm")));
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("contract_discovery", transport.lastPermissionProfile.name());
@@ -949,7 +974,7 @@ class AcpxAgentTaskHandlerTest {
                 "permission_profile", "review"
         ));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("design.codex_arch_review")));
+        handler.execute(taskContext(tempDir, "ws-test", definition, readyInstance("design.codex_arch_review")));
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("review", transport.lastPermissionProfile.name());
@@ -973,7 +998,7 @@ class AcpxAgentTaskHandlerTest {
                 "approve_all", true
         ));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, readyInstance("implement.claude_implement")));
+        handler.execute(taskContext(tempDir, "ws-test", definition, readyInstance("implement.claude_implement")));
 
         assertEquals(true, transport.lastApproveAll);
         assertEquals("implement", transport.lastPermissionProfile.name());
@@ -993,7 +1018,7 @@ class AcpxAgentTaskHandlerTest {
                 "approve_all", true
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1021,7 +1046,7 @@ class AcpxAgentTaskHandlerTest {
                 "approve_all", true
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1049,7 +1074,7 @@ class AcpxAgentTaskHandlerTest {
                 "approve_all", true
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1090,7 +1115,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var candidate = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var candidate = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
         var validated = new ArtifactContractValidator().validate(
                 tempDir,
                 "ws-test",
@@ -1134,7 +1159,7 @@ class AcpxAgentTaskHandlerTest {
         var instance = readyInstance("design.claude_design");
 
         var candidate = new AcpxAgentTaskHandler(transport, false).execute(
-                new TaskHandler.TaskContext(tempDir, "ws-non-zero-correction", definition, instance)
+                taskContext(tempDir, "ws-non-zero-correction", definition, instance)
         );
         var result = new ArtifactContractValidator().validate(
                 tempDir,
@@ -1195,7 +1220,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -1236,7 +1261,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -1284,7 +1309,7 @@ class AcpxAgentTaskHandlerTest {
                     )
             );
 
-            var result = handler.execute(new TaskHandler.TaskContext(
+            var result = handler.execute(taskContext(
                     tempDir,
                     "ws-pending-session",
                     definition,
@@ -1332,7 +1357,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
         var diagnosticMetadata = OBJECT_MAPPER.readTree(
                 tempDir.resolve((String) result.result().get("run_metadata")).toFile());
         var diagnostic = Files.readString(tempDir.resolve(diagnosticMetadata.path("stderrPath").asText()));
@@ -1364,7 +1389,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1397,7 +1422,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(
+        var result = handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1428,7 +1453,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        assertThrows(java.io.IOException.class, () -> handler.execute(new TaskHandler.TaskContext(
+        assertThrows(java.io.IOException.class, () -> handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1465,7 +1490,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        assertThrows(java.io.IOException.class, () -> handler.execute(new TaskHandler.TaskContext(
+        assertThrows(java.io.IOException.class, () -> handler.execute(taskContext(
                 tempDir,
                 "ws-test",
                 definition,
@@ -1519,7 +1544,7 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -1563,7 +1588,7 @@ class AcpxAgentTaskHandlerTest {
             candidate = new AcpxAgentTaskHandler(
                     new AcpxAgentTransport(fakeAcpx.toString(), java.time.Duration.ofSeconds(30)),
                     false
-            ).execute(new TaskHandler.TaskContext(tempDir, "ws-large-stream", definition, instance));
+            ).execute(taskContext(tempDir, "ws-large-stream", definition, instance));
         } finally {
             System.setProperty("user.home", originalUserHome);
         }
@@ -1684,7 +1709,7 @@ class AcpxAgentTaskHandlerTest {
         );
 
         var error = assertThrows(IllegalArgumentException.class, () ->
-                handler.execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, instance)));
+                handler.execute(taskContext(tempDir, "ws-test", definition, instance)));
         assertTrue(error.getMessage().contains("unsupported agent"));
     }
 
@@ -2140,7 +2165,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-sess", definition, readyInstance("intake.claude_brainstorm")));
+        handler.execute(taskContext(tempDir, "ws-sess", definition, readyInstance("intake.claude_brainstorm")));
 
         var runJson = Files.walk(workstreamDir.resolve("runs"))
                 .filter(path -> path.getFileName().toString().equals("run.json"))
@@ -2172,7 +2197,7 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-explore", definition,
+        var result = handler.execute(taskContext(tempDir, "ws-explore", definition,
                 readyInstance("intake.claude_brainstorm")));
 
         assertEquals(NodeStatus.COMPLETED, result.status(),
@@ -2219,7 +2244,7 @@ class AcpxAgentTaskHandlerTest {
         var handler = new AcpxAgentTaskHandler(new TranscriptCompletingTransport(), false);
         var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-manifest", definition,
+        handler.execute(taskContext(tempDir, "ws-manifest", definition,
                 readyInstance("intake.claude_brainstorm")));
 
         // run.json references the manifest
@@ -2259,7 +2284,7 @@ class AcpxAgentTaskHandlerTest {
         var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-timeline", definition,
+        handler.execute(taskContext(tempDir, "ws-timeline", definition,
                 readyInstance("intake.claude_brainstorm")));
 
         var runJson = Files.walk(workstreamDir.resolve("runs"))
@@ -2291,7 +2316,7 @@ class AcpxAgentTaskHandlerTest {
         var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "codex", "session", "codex-main", "prompt_template", "design-codex-review"
         ));
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-sem-run", definition,
+        handler.execute(taskContext(tempDir, "ws-sem-run", definition,
                 readyInstance("design.codex_arch_review")));
 
         var memory = Files.readString(workstreamDir.resolve("memory/workstream-memory.json"));
@@ -2316,6 +2341,25 @@ class AcpxAgentTaskHandlerTest {
                 null,
                 null
         );
+    }
+
+    private TaskHandler.TaskContext taskContext(
+            Path workspaceRoot,
+            String workstreamId,
+            NodeDefinition definition,
+            NodeInstance instance
+    ) throws IOException {
+        if ("intake.claude_brainstorm".equals(definition.id())) {
+            var iterationsDir = workspaceRoot.resolve(".agent/workstreams")
+                    .resolve(workstreamId)
+                    .resolve("iterations");
+            Files.createDirectories(iterationsDir);
+            var iteration = WorkflowIterationDocument.initial(
+                    definition.id(), Instant.parse("2026-08-10T00:00:00Z"));
+            new ObjectMapper().registerModule(new JavaTimeModule()).writerWithDefaultPrettyPrinter()
+                    .writeValue(iterationsDir.resolve(instance.iterationId() + ".json").toFile(), iteration);
+        }
+        return new TaskHandler.TaskContext(workspaceRoot, workstreamId, definition, instance);
     }
 
     private void writeCompactionMetrics(String workstreamId, long claudeCachedReadTokens, long codexCachedReadTokens)

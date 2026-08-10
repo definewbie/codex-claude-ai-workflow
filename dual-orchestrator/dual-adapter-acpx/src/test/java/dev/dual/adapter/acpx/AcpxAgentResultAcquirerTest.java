@@ -198,8 +198,10 @@ class AcpxAgentResultAcquirerTest {
         );
         var requests = requests("same-session");
 
+        var selectedContract = correctionPrompt("run-1")
+                + "\nREVISION_MODE_SENTINEL base_sha256=" + "a".repeat(64);
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
-                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "claude", requests.initial(), requests.correction(), selectedContract,
                 "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
 
         assertTrue(acquisition.correctionAttempted());
@@ -212,8 +214,11 @@ class AcpxAgentResultAcquirerTest {
         );
         assertEquals(2, transport.calls);
         assertEquals(List.of("same-session", "same-session"), transport.sessions);
-        assertTrue(Files.readString(requests.correction().promptPath())
+        var writtenCorrectionPrompt = Files.readString(requests.correction().promptPath());
+        assertTrue(writtenCorrectionPrompt
                 .contains("Return exactly one JSON object as the final assistant message."));
+        assertTrue(writtenCorrectionPrompt.contains("REVISION_MODE_SENTINEL base_sha256=" + "a".repeat(64)),
+                "bounded correction must reuse the exact contract selected before initial dispatch");
     }
 
     @Test

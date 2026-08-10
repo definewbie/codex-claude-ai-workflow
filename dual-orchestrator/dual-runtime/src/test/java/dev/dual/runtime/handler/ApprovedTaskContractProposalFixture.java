@@ -46,7 +46,7 @@ public final class ApprovedTaskContractProposalFixture {
         ));
         AgentOutputLineageFixture.publish(workspaceRoot, workstreamId, proposalSidecar, iterationId);
         var proposalDocument = AgentOutputContractDocument.read(proposalSidecar, MAPPER).orElseThrow();
-        var proposalReference = TaskContractProposalReference.publish(
+        var proposalReference = TaskContractProposalReference.publishInitial(
                 workspaceRoot, workstreamId, proposalSidecar, proposalDocument, MAPPER).reference();
 
         var reviewOutput = outputDir(workstreamDir, "run-review").resolve("intake-codex-product-review.json");

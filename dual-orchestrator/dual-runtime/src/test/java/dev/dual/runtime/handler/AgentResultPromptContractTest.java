@@ -154,4 +154,32 @@ class AgentResultPromptContractTest {
         assertTrue(acceptance.contains("EVIDENCE_COLLECTION"));
         assertTrue(acceptance.contains("TEST_CODE_CHANGE"));
     }
+
+    @Test
+    void revisionPromptRendersOnlyLineageBoundPatchAndParsesStrictly() {
+        var context = new AgentResultPromptContract.ProposalEmissionContext(
+                AgentResultPromptContract.EmissionMode.REVISION_PATCH,
+                "node-prev:0123456789abcdef",
+                "a".repeat(64),
+                java.util.List.of(
+                        new AgentResultEnvelope.ReviewObligation("CO-1", "Fix behavior"),
+                        new AgentResultEnvelope.ReviewObligation("CO-2", "Add scope")));
+
+        var prompt = AgentResultPromptContract.render(
+                "ws-1", "run-1", "intake.claude_brainstorm",
+                "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"), context);
+        var parsed = parser.parse(prompt.substring(prompt.indexOf('{')));
+
+        assertTrue(parsed.valid(), parsed.message());
+        assertTrue(parsed.envelope().result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult);
+        assertTrue(prompt.contains("Return only `task_contract_revision_patch`"));
+        assertTrue(prompt.contains("node-prev:0123456789abcdef"));
+        assertTrue(prompt.contains("CO-1"));
+        assertTrue(prompt.contains("CO-2"));
+        assertFalse(prompt.contains("\"revision_responses\""));
+        assertFalse(prompt.contains("copying its `id` and `text` character-for-character"));
+        assertTrue(validator.validate(
+                parsed.envelope(), "ws-1", "run-1", ContractRegistry.forNode("intake.claude_brainstorm"))
+                .valid());
+    }
 }

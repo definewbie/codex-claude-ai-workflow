@@ -37,7 +37,35 @@ public record TaskContractProposalReference(
         }
     }
 
-    static Published publish(
+    static Published publishInitial(
+            Path workspaceRoot,
+            String workstreamId,
+            Path sidecarPath,
+            AgentOutputContractDocument document,
+            ObjectMapper objectMapper
+    ) throws Exception {
+        if (!"task_contract_proposal".equals(document.sourceArtifactType())
+                || document.proposalDerivation() != null) {
+            throw new IllegalArgumentException("direct task-contract proposal lineage is required");
+        }
+        return publishVerified(workspaceRoot, workstreamId, sidecarPath, document, objectMapper);
+    }
+
+    static Published publishRevisionDerived(
+            Path workspaceRoot,
+            String workstreamId,
+            Path sidecarPath,
+            AgentOutputContractDocument document,
+            ObjectMapper objectMapper
+    ) throws Exception {
+        if (!"task_contract_revision_patch".equals(document.sourceArtifactType())
+                || document.proposalDerivation() == null) {
+            throw new IllegalArgumentException("revision-derived task-contract proposal lineage is required");
+        }
+        return publishVerified(workspaceRoot, workstreamId, sidecarPath, document, objectMapper);
+    }
+
+    private static Published publishVerified(
             Path workspaceRoot,
             String workstreamId,
             Path sidecarPath,
@@ -50,7 +78,8 @@ public record TaskContractProposalReference(
                 || !Files.isRegularFile(sidecar)
                 || !document.hasValidatedLineage(workstreamId, root, sidecar)
                 || !"intake.claude_brainstorm".equals(document.nodeId())
-                || !"task_contract_proposal".equals(document.sourceArtifactType())) {
+                || document.taskContractProposal() == null
+                || !validProposalSource(root, workstreamId, document, objectMapper)) {
             throw new IllegalArgumentException("validated task-contract proposal lineage is required");
         }
         var digest = sha256(sidecar);
@@ -72,6 +101,31 @@ public record TaskContractProposalReference(
         Files.createDirectories(referencePath.getParent());
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(referencePath.toFile(), reference);
         return new Published(reference, root.relativize(referencePath).toString());
+    }
+
+    private static boolean validProposalSource(
+            Path root,
+            String workstreamId,
+            AgentOutputContractDocument document,
+            ObjectMapper objectMapper
+    ) {
+        if ("task_contract_proposal".equals(document.sourceArtifactType())) {
+            return document.proposalDerivation() == null;
+        }
+        if (!"task_contract_revision_patch".equals(document.sourceArtifactType())) {
+            return false;
+        }
+        var derivation = document.proposalDerivation();
+        if (derivation == null
+                || !derivation.validFor(derivation.baseProposalReference(), document.sourceOutputRef())) {
+            return false;
+        }
+        try {
+            return derivation.baseProposalReference()
+                    .resolveArtifact(root, workstreamId, objectMapper).isPresent();
+        } catch (RuntimeException ignored) {
+            return false;
+        }
     }
 
     static Optional<TaskContractProposalReference> readVerified(
@@ -187,7 +241,7 @@ public record TaskContractProposalReference(
                     || !document.get().hasValidatedLineage(expectedWorkstreamId, root, artifactPath)
                     || !producerNodeId.equals(document.get().nodeId())
                     || !producerNodeInstanceId.equals(document.get().nodeInstanceId())
-                    || !"task_contract_proposal".equals(document.get().sourceArtifactType())) {
+                    || !validProposalSource(root, expectedWorkstreamId, document.get(), objectMapper)) {
                 return Optional.empty();
             }
             return Optional.of(artifactPath);

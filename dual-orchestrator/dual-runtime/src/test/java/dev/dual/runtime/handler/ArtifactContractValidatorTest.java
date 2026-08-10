@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArtifactContractValidatorTest {
@@ -283,7 +285,7 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void undeclaredCapturedC2RegressionFailsBeforeProposalReferencePublication() throws Exception {
+    void revisionFullProposalCannotBypassPatchContractOrPublishReference() throws Exception {
         Files.writeString(tempDir.resolve("README.md"), "# sample\n");
         var original = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Original proposal.", false,
@@ -348,11 +350,68 @@ class ArtifactContractValidatorTest {
 
         assertEquals(NodeStatus.FAILED, validated.status(), validated.result().toString());
         var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
-        assertEquals("TASK_CONTRACT_REVISION_DELTA_INVALID", artifact.errorCode());
-        assertTrue(validated.result().toString().contains("UNDECLARED_CONTRACT_CLAUSE_CHANGE: C-2"),
+        assertEquals("TASK_CONTRACT_REVISION_SHAPE_INVALID", artifact.errorCode());
+        assertTrue(validated.result().toString().contains("revision iteration requires task_contract_revision_patch"),
                 validated.result().toString());
         assertTrue(validated.outputRefs().stream().noneMatch(ref -> ref.endsWith(".ref.json")),
                 "an invalid revision must not publish a trusted proposal reference");
+
+        var baseReference = TaskContractProposalReference.readVerified(
+                tempDir, "ws-1", originalRef, JSON).orElseThrow();
+        var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                "task_contract_revision_patch",
+                "READY_FOR_PRODUCT_REVIEW",
+                "Resolve the rejected atomic-registration obligation.",
+                baseReference.proposalId(),
+                baseReference.sha256(),
+                List.of(new AgentResultEnvelope.ObligationPatch(
+                        "CO-1",
+                        List.of("AC-1"),
+                        List.of(new AgentResultEnvelope.ClauseChange(
+                                AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+                                AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                "AC-1",
+                                "Registration atomically verifies identity")),
+                        List.of(),
+                        List.of())));
+        var patchOutput = write(".agent/workstreams/ws-1/runs/run-patch/outputs/intake.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-patch", "intake.claude_brainstorm", patch)));
+
+        var patchValidated = validator.validate(
+                tempDir, "ws-1", "node-revision", node("intake.claude_brainstorm"),
+                NodeResult.completed("completed", List.of(patchOutput), Map.of("run_id", "run-patch")));
+
+        assertEquals(NodeStatus.COMPLETED, patchValidated.status(), patchValidated.result().toString());
+        var patchSidecarRef = patchValidated.outputRefs().stream()
+                .filter(ref -> ref.endsWith(".contract.json"))
+                .findFirst()
+                .orElseThrow();
+        var patchSidecar = AgentOutputContractDocument.read(tempDir.resolve(patchSidecarRef), JSON).orElseThrow();
+        assertEquals("task_contract_revision_patch", patchSidecar.sourceArtifactType());
+        assertEquals("revision_patch_merge", patchSidecar.proposalDerivation().kind());
+        assertEquals(baseReference, patchSidecar.proposalDerivation().baseProposalReference());
+        assertEquals(patchOutput, patchSidecar.proposalDerivation().patchSourceOutputRef());
+        assertEquals("Registration atomically verifies identity",
+                patchSidecar.taskContractProposal().acceptanceCriteria().getFirst().text());
+        assertEquals("Preserve the local part of email addresses",
+                patchSidecar.taskContractProposal().constraints().get(1).text(),
+                "untouched baseline clauses must remain byte-for-byte equivalent");
+        assertEquals(List.of(new TaskContractProposal.RevisionResponse("CO-1", List.of("AC-1"))),
+                patchSidecar.taskContractProposal().revisionResponses());
+        var patchReferenceRef = patchValidated.outputRefs().stream()
+                .filter(ref -> ref.endsWith(".ref.json"))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(TaskContractProposalReference.readVerified(
+                tempDir, "ws-1", patchReferenceRef, JSON).isPresent());
+
+        var sidecarMap = JSON.readValue(
+                tempDir.resolve(patchSidecarRef).toFile(), new TypeReference<Map<String, Object>>() {});
+        sidecarMap.remove("proposal_derivation");
+        var missingDerivation = AgentOutputContractDocument.from(sidecarMap);
+        assertThrows(IllegalArgumentException.class, () -> TaskContractProposalReference.publishRevisionDerived(
+                tempDir, "ws-1", tempDir.resolve(patchSidecarRef), missingDerivation, JSON));
     }
 
     @Test

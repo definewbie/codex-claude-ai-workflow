@@ -76,7 +76,7 @@ class AgentPromptRendererTest {
         assertTrue(prompt.contains("Do not create, edit, or delete files under .agent/"));
         assertTrue(prompt.contains("Only the orchestrator writes run ledger artifacts"));
         assertTrue(prompt.contains("Do not start an open-ended repository survey"));
-        assertTrue(prompt.contains("still emit the required strict `task_contract_proposal` result"));
+        assertTrue(prompt.contains("still emit the exact strict result shape rendered in the Output Contract"));
         assertTrue(prompt.contains("This intake stage is seed-only contract drafting"));
         assertTrue(prompt.contains("do not call tools"));
         assertTrue(prompt.contains("do not ask to list directories"));
@@ -372,12 +372,12 @@ class AgentPromptRendererTest {
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
         assertTrue(prompt.contains(
-                "Treat `result.scope.included` as the exhaustive authorization set for permitted repository changes"));
+                "Treat the typed scope projected by the Output Contract as the exhaustive authorization set"));
         assertTrue(prompt.contains(
                 "Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths"));
-        assertTrue(prompt.contains("never describe the typed scope as illustrative or non-exhaustive"));
+        assertTrue(prompt.contains("never describe typed scope as illustrative or non-exhaustive"));
         assertTrue(prompt.contains(
-                "When a revision obligation identifies a scope gap, update the typed path-and-operation entries directly"));
+                "When a revision obligation identifies a scope gap, use only the exact typed scope-addition field"));
     }
 
     @Test

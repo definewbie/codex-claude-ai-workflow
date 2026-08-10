@@ -8,7 +8,23 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v4 / FAIL, CONSUMED
+## Current Active Step: TaskContract Revision Patch / ENFORCED, REAL-CASE NOT PROVEN
+
+> Captcha-auth completion v4 已 `FAIL / CONSUMED`，产品仍未完成。当前只激活一个修复性
+> 设计：用有限 `task_contract_revision_patch` 替代 revision Agent 重新生成完整 Proposal，
+> 由 Dual 基于 verified baseline 确定性合并，再产生原有 canonical
+> `TaskContractProposal v3`。该设计不放宽 strict parser/delta validator，不新增 workflow
+> node、phase、module、registry 或通用 patch 平台。设计文档：
+> `docs/plans/task-contract-revision-patch-plan.zh-CN.md`。
+>
+> CC 只读架构评审与独立代码级 diff review 均已 `PASS`。评审要求的 revision-derived publication 与 typed
+> prompt-mode API 已按单一 checkpoint 实施。focused matrix `197/0/0`、full Maven reactor
+> `1206/0/0`、`git diff --check` 已通过；revision full-proposal 无法旁路 patch contract，
+> 合法 patch 会绑定 exact base id/hash，经唯一 merger 生成 canonical Proposal v3，并保留
+> derivation 后发布 immutable reference。独立复核确认无 P0/P1，当前达到 `ENFORCED`；尚未
+> 运行新的 captcha-auth full workstream，因此不得标 `PROVEN`。
+
+## Historical Active Step: Captcha-Auth Completion v4 / FAIL, CONSUMED
 
 > captcha-auth 是尚未完成的真实业务任务，不是人工 prompt 样本。新 Gate 以产品
 > 交付为唯一主目标：workflow COMPLETED、terminal acceptance、完整功能、PostgreSQL/

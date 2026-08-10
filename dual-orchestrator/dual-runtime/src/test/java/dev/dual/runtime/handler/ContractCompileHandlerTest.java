@@ -510,7 +510,7 @@ class ContractCompileHandlerTest {
     ) throws Exception {
         var proposalPath = root.resolve(proposalSidecarRef);
         var proposalDocument = AgentOutputContractDocument.read(proposalPath, OBJECT_MAPPER).orElseThrow();
-        var published = TaskContractProposalReference.publish(
+        var published = TaskContractProposalReference.publishInitial(
                 root, WORKSTREAM_ID, proposalPath, proposalDocument, OBJECT_MAPPER);
 
         var reviewDirectory = outputDir(root, reviewRunId);
