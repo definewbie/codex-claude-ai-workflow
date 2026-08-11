@@ -8,28 +8,34 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v5 / PREFLIGHT AUTHORIZED
+## Current Active Step: Captcha-Auth Completion v6 / PREFLIGHT AUTHORIZED
 
-> Captcha-auth completion v4 已 `FAIL / CONSUMED`，产品仍未完成。当前只激活一个修复性
-> 设计：用有限 `task_contract_revision_patch` 替代 revision Agent 重新生成完整 Proposal，
-> 由 Dual 基于 verified baseline 确定性合并，再产生原有 canonical
-> `TaskContractProposal v3`。该设计不放宽 strict parser/delta validator，不新增 workflow
-> node、phase、module、registry 或通用 patch 平台。设计文档：
-> `docs/plans/task-contract-revision-patch-plan.zh-CN.md`。
+> Captcha-auth completion v5 已 `FAIL / CONSUMED`，产品仍未完成。唯一 fresh workstream
+> `ws-20260811T131349Z-8GHC` 的 package、PostgreSQL 与双 provider probes 全部 PASS。真实 review
+> 自然触发两轮 typed revision patch；两轮 merge、coverage、delta、derived reference 与 reviewer
+> 消费均成功，第三轮 review 达到 `READY_FOR_PRODUCT_REVIEW`。失败发生在 `contract.compile`：旧
+> consumer 重复要求 sidecar source type 为 initial proposal，错误拒绝了已验证的 derived canonical
+> proposal。该 owner 漂移已由 checkpoint `fa1f4818` 删除；focused `18/0/0`、full reactor
+> `1206/0/0`、独立代码级 review 均 `PASS`。
 >
-> CC 只读架构评审与独立代码级 diff review 均已 `PASS`。评审要求的 revision-derived publication 与 typed
-> prompt-mode API 已按单一 checkpoint 实施。focused matrix `197/0/0`、full Maven reactor
-> `1206/0/0`、`git diff --check` 已通过；revision full-proposal 无法旁路 patch contract，
-> 合法 patch 会绑定 exact base id/hash，经唯一 merger 生成 canonical Proposal v3，并保留
-> derivation 后发布 immutable reference。独立复核确认无 P0/P1，当前达到 `ENFORCED`；尚未
-> 运行新的 captcha-auth full workstream，因此不得标 `PROVEN`。
+> v5 还证明其 operator stop-loss 无法在批量 `start --run` 内可靠执行。后续不新增 runner monitor，
+> 也不改成逐节点平台：自然 `NEEDS_REVISION` 由 `RoutingEngine` 从当前触发 revision 的
+> `intake.decision` 节点定义读取 typed `max_revisions=3` 并强制；它不是全局 workflow 配置。
+> Gate 只保留明确技术失败与 90 分钟 wall-clock stop-loss。
+> revision-patch + compiler 边界当前为 `ENFORCED / NOT PROVEN`，captcha-auth 为 `NOT ACHIEVED`。
 >
-> checkpoint `edbb37f3` 后当前只激活 Gate 定稿：
-> `docs/testing/verification-gates/20260811-terminal-delivery-captcha-auth-completion-v5.md`。
-> 本 Gate 以产品交付为主结论；真实 review 若自然触发 revision，则附带验证 typed patch
-> 到 canonical Proposal v3 的完整链路。Gate 独立 review 已 `PASS`；提交为 clean SHA 后按
-> Gate 顺序执行 fresh package、external probes 和 runner preflight，全部 PASS 后才创建唯一
-> fresh workstream。
+> 当前只激活 v6 preflight：
+> `docs/testing/verification-gates/20260811-terminal-delivery-captcha-auth-completion-v6.md`。
+> Gate 独立同行评审已 `PASS`。三份文档提交为 clean SHA 后，按 Gate 顺序执行 fresh package、
+> external probes 与 runner preflight；全部 PASS 前不创建 workstream。普通文档同步和 preflight
+> 均不升级任何 maturity。v5 report：`docs/testing/real-case-reports/20260811T131005Z/report.md`。
+
+## Historical Active Step: Captcha-Auth Completion v5 / FAIL, CONSUMED
+
+> Gate、preflight 与真实执行证据见
+> `docs/testing/verification-gates/20260811-terminal-delivery-captcha-auth-completion-v5.md` 和
+> `docs/testing/real-case-reports/20260811T131005Z/report.md`。本轮未进入 implementation，target
+> baseline 保持 clean；不 retry、不 resume、不复用 session。
 
 ## Historical Active Step: Captcha-Auth Completion v4 / FAIL, CONSUMED
 

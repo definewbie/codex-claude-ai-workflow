@@ -2,7 +2,7 @@
 
 日期：2026-08-11
 
-状态：`INDEPENDENT REVIEW PASS / AUTHORIZED FOR PREFLIGHT / NOT YET RUN`
+状态：`FAIL / CONSUMED / PRODUCT NOT ACHIEVED`
 
 本 Gate 的唯一业务目标是完成尚未交付的 captcha-auth 项目。它同时验证 clean checkpoint
 `edbb37f3` 的 revision-patch 边界，但不会人为诱导 `NEEDS_REVISION`：产品交付可以在无需
@@ -146,5 +146,24 @@ verified canonical Proposal v3
 
 ## Result
 
-`PENDING`。Gate 独立同行评审已 `PASS`；当前授权按本文顺序执行 fresh package、external
-preflight 和 runner preflight。只有全部前置条件 PASS，才能创建唯一 fresh workstream。
+`FAIL / CONSUMED`。2026-08-11 创建唯一 fresh workstream
+`ws-20260811T131349Z-8GHC`；fresh package、隔离 PostgreSQL、Claude/Codex probes、target
+baseline 与 persisted workflow identity 均通过。真实 review 自然触发两轮
+`task_contract_revision_patch`，两轮都通过 strict parse、exact base id/hash、obligation coverage、
+deterministic merge、delta validation、derived immutable reference 与下一轮 reviewer 消费；第三轮
+review 达到 `READY_FOR_PRODUCT_REVIEW`。
+
+随后 `contract.compile` 错误地再次要求 sidecar 的原始 `source_artifact_type` 必须是
+`task_contract_proposal`，拒绝了已经由 immutable reference 完整验证的 revision-derived canonical
+proposal，workflow 因此停在 `WAITING_FOR_RECOVERY`，未进入实现，产品仍 `NOT ACHIEVED`。该重复
+owner 已由 checkpoint `fa1f4818` 删除，并由真实 patch -> derived reference -> approved review ->
+compile deterministic chain 与 full reactor `1206/0/0` 验证。
+
+Persisted workflow identity 的判定来源是 workstream ledger 中的 definition/instance 与启动前
+preflight 核对；report 顶部的 `Workflow: bundled@unknown` / source hash `not_applicable` 是 bundled
+variant 的已知 report projection fallback，不是 identity 的 source of truth，也不改变本轮 FAIL 判定。
+
+本轮同时证明“第二次 `NEEDS_REVISION` 由 operator 立即止损”无法在批量 `start --run` 内可靠执行；
+该规则不再进入后续 Gate。语义 revision 应由 `RoutingEngine` 从触发 revision 的
+`intake.decision` 节点定义读取 typed `max_revisions=3` 并管理，
+而不是由 verification procedure 建立第二套 revision policy。本 workstream 不 retry、不 resume。
