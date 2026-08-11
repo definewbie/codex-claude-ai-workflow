@@ -7,6 +7,7 @@ import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowIterationDocument;
@@ -240,15 +241,10 @@ class ContractCompileHandlerTest {
                 INITIAL_ITERATION_ID, false);
         prepareRevisionIteration(root, "iter-002", rejectedReview);
 
-        var revisedProposal = writeTypedProposal(
-                root, "run-revised", "Revised objective",
-                List.of(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)),
-                List.of(), TaskContractProposal.SCHEMA_VERSION,
-                "iter-002",
-                List.of(
-                        new AgentResultEnvelope.RevisionResponse("OB-1", List.of("AC-1")),
-                        new AgentResultEnvelope.RevisionResponse("OB-2", List.of("AC-2"))),
-                List.of("evidence/revision-proof.json"));
+        var baseReference = AgentOutputContractDocument.read(root.resolve(rejectedReview), OBJECT_MAPPER)
+                .orElseThrow()
+                .reviewSubject();
+        var revisedProposal = writeValidatedRevisionPatch(root, baseReference, "iter-002");
         var approvedReview = writeReview(
                 root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
                 "iter-002", true);
@@ -257,8 +253,9 @@ class ContractCompileHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
         var contract = OBJECT_MAPPER.readValue(contractPath(root).toFile(), TaskContract.class);
-        assertEquals(List.of("evidence/revision-proof.json"), contract.evidenceRefs());
-        assertEquals(List.of("The requested behavior is observable", "Focused verification passes"),
+        assertEquals(List.of("evidence/original-review.json", "evidence/revision-proof.json"),
+                contract.evidenceRefs(), "revision compilation must preserve baseline evidence and append patch evidence");
+        assertEquals(List.of("The revised behavior is observable", "Revised verification passes"),
                 contract.acceptanceCriteria());
     }
 
@@ -510,8 +507,11 @@ class ContractCompileHandlerTest {
     ) throws Exception {
         var proposalPath = root.resolve(proposalSidecarRef);
         var proposalDocument = AgentOutputContractDocument.read(proposalPath, OBJECT_MAPPER).orElseThrow();
-        var published = TaskContractProposalReference.publishInitial(
-                root, WORKSTREAM_ID, proposalPath, proposalDocument, OBJECT_MAPPER);
+        var published = proposalDocument.proposalDerivation() == null
+                ? TaskContractProposalReference.publishInitial(
+                        root, WORKSTREAM_ID, proposalPath, proposalDocument, OBJECT_MAPPER)
+                : TaskContractProposalReference.publishRevisionDerived(
+                        root, WORKSTREAM_ID, proposalPath, proposalDocument, OBJECT_MAPPER);
 
         var reviewDirectory = outputDir(root, reviewRunId);
         var reviewEnvelope = new AgentResultEnvelope(
@@ -546,6 +546,69 @@ class ContractCompileHandlerTest {
             writeGate(root, reviewRef, reviewRunId, iterationId);
         }
         return reviewRef;
+    }
+
+    private static String writeValidatedRevisionPatch(
+            Path root,
+            TaskContractProposalReference baseReference,
+            String iterationId
+    ) throws Exception {
+        var runId = "run-revised";
+        var now = Instant.now();
+        LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("nodes/node-revision.json").toFile(),
+                new NodeInstanceDocument(
+                        1, "node-revision", "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run",
+                        NodeStatus.RUNNING, "stage-intake", iterationId, List.of(), Map.of(),
+                        List.of(), Map.of(), "", "", now, null));
+        var output = outputDir(root, runId).resolve("intake-claude-brainstorm.json");
+        var outputRef = relative(root, output);
+        var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                "task_contract_revision_patch",
+                "READY_FOR_PRODUCT_REVIEW",
+                "Resolve both verified review obligations.",
+                baseReference.proposalId(),
+                baseReference.sha256(),
+                List.of(
+                        new AgentResultEnvelope.ObligationPatch(
+                                "OB-1",
+                                List.of("AC-1"),
+                                List.of(new AgentResultEnvelope.ClauseChange(
+                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                        "AC-1",
+                                        "The revised behavior is observable")),
+                                List.of(),
+                                List.of()),
+                        new AgentResultEnvelope.ObligationPatch(
+                                "OB-2",
+                                List.of("AC-2"),
+                                List.of(new AgentResultEnvelope.ClauseChange(
+                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                        "AC-2",
+                                        "Revised verification passes")),
+                                List.of(),
+                                List.of("evidence/revision-proof.json"))));
+        var envelope = new AgentResultEnvelope(
+                1, WORKSTREAM_ID, runId, "intake.claude_brainstorm", patch);
+        Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
+
+        var validated = new ArtifactContractValidator().validate(
+                root,
+                WORKSTREAM_ID,
+                "node-revision",
+                new NodeDefinition(
+                        "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of()),
+                NodeResult.completed("completed", List.of(outputRef), Map.of("run_id", runId)));
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var sidecarRef = validated.outputRefs().stream()
+                .filter(ref -> ref.endsWith(".contract.json"))
+                .findFirst()
+                .orElseThrow();
+        AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, root.resolve(sidecarRef), iterationId);
+        assertTrue(validated.outputRefs().stream().anyMatch(ref -> ref.endsWith(".ref.json")),
+                "revision validation must publish an immutable derived proposal reference");
+        return sidecarRef;
     }
 
     private static void replaceClauseText(

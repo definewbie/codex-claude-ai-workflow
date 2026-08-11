@@ -143,8 +143,7 @@ public final class ContractCompileHandler implements TaskHandler {
             var validated = document.get();
             if (AgentOutputLineageVerifier.violation(
                         context.workspaceRoot(), context.workstreamId(), sourcePath.get(), validated).isPresent()
-                    || !"intake.claude_brainstorm".equals(validated.nodeId())
-                    || !"task_contract_proposal".equals(validated.sourceArtifactType())) {
+                    || !"intake.claude_brainstorm".equals(validated.nodeId())) {
                 return new ProposalCompileResult(null, null, proposalFailure(
                         "TASK_CONTRACT_PROPOSAL_INVALID",
                         "validated task_contract_proposal sidecar lineage is invalid",
