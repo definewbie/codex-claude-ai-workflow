@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: TaskContract Revision Patch / ENFORCED, REAL-CASE NOT PROVEN
+## Current Active Step: Captcha-Auth Completion v5 / PREFLIGHT AUTHORIZED
 
 > Captcha-auth completion v4 已 `FAIL / CONSUMED`，产品仍未完成。当前只激活一个修复性
 > 设计：用有限 `task_contract_revision_patch` 替代 revision Agent 重新生成完整 Proposal，
@@ -23,6 +23,13 @@
 > 合法 patch 会绑定 exact base id/hash，经唯一 merger 生成 canonical Proposal v3，并保留
 > derivation 后发布 immutable reference。独立复核确认无 P0/P1，当前达到 `ENFORCED`；尚未
 > 运行新的 captcha-auth full workstream，因此不得标 `PROVEN`。
+>
+> checkpoint `edbb37f3` 后当前只激活 Gate 定稿：
+> `docs/testing/verification-gates/20260811-terminal-delivery-captcha-auth-completion-v5.md`。
+> 本 Gate 以产品交付为主结论；真实 review 若自然触发 revision，则附带验证 typed patch
+> 到 canonical Proposal v3 的完整链路。Gate 独立 review 已 `PASS`；提交为 clean SHA 后按
+> Gate 顺序执行 fresh package、external probes 和 runner preflight，全部 PASS 后才创建唯一
+> fresh workstream。
 
 ## Historical Active Step: Captcha-Auth Completion v4 / FAIL, CONSUMED
 
