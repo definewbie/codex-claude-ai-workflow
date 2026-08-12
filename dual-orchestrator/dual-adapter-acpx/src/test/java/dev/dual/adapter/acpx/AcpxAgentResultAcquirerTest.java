@@ -89,6 +89,28 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void exactJsonFenceOpeningWithCompletePayloadProducesStrictCandidateWithoutCorrection() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var raw = "```json\n" + envelope;
+        var transport = new ScriptedTransport(validResult("request-1", raw, 0));
+        var requests = requests("inline-fence-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertTrue(acquisition.finalParse().valid());
+        assertTrue(acquisition.initialValidation().valid());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_JSON_FENCE_OPENING_REMOVED,
+                acquisition.initialPresentation().disposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
     void proseAroundOneCompleteJsonFenceIsDeterministicallyExtracted() throws Exception {
         var envelope = strictEnvelope("run-1");
         var raw = "Design completed after reading the approved contract.\n\n```json\n"
@@ -120,9 +142,14 @@ class AcpxAgentResultAcquirerTest {
                 "```JSON\n" + envelope + "\n```",
                 "```python\n" + envelope + "\n```",
                 "```text\n" + envelope + "\n```",
-                "```json\n" + envelope,
                 "```json\n\n```",
-                "before\n```json\n" + envelope + "\n```\nafter\n```text\nextra\n```"
+                "before\n```json\n" + envelope + "\n```\nafter\n```text\nextra\n```",
+                "before ```json" + envelope + "```",
+                "```json" + envelope + "``` after",
+                "```json" + envelope + "```json" + envelope + "```",
+                "before\n```json\n" + envelope,
+                "```json\n" + envelope + "\n```text\nextra",
+                "```" + envelope + "```"
         );
 
         for (var raw : cases) {

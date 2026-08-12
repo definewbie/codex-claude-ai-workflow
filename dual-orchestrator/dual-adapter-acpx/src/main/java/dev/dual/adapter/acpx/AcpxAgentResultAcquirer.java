@@ -273,6 +273,7 @@ final class AcpxAgentResultAcquirer {
     enum PresentationDisposition {
         NOT_NEEDED,
         SINGLE_JSON_FENCE_REMOVED,
+        SINGLE_JSON_FENCE_OPENING_REMOVED,
         SINGLE_FENCED_JSON_EXTRACTED,
         REJECTED_AMBIGUOUS_PRESENTATION
     }
@@ -297,13 +298,19 @@ final class AcpxAgentResultAcquirer {
         if (candidate == null) {
             return presentationCandidate(raw, raw, PresentationDisposition.REJECTED_AMBIGUOUS_PRESENTATION);
         }
-        var disposition = candidate.exactPresentation()
-                ? PresentationDisposition.SINGLE_JSON_FENCE_REMOVED
-                : PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED;
+        var disposition = candidate.openingOnly()
+                ? PresentationDisposition.SINGLE_JSON_FENCE_OPENING_REMOVED
+                : candidate.exactPresentation()
+                        ? PresentationDisposition.SINGLE_JSON_FENCE_REMOVED
+                        : PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED;
         return presentationCandidate(raw, candidate.payload(), disposition);
     }
 
     private static JsonFencePayload singleJsonFencePayload(String stripped) {
+        var openingOnly = exactJsonFenceOpeningPayload(stripped);
+        if (openingOnly != null) {
+            return openingOnly;
+        }
         var opening = findFenceLine(stripped, "```json", 0);
         if (opening < 0 || findFenceLine(stripped, "```json", opening + 1) >= 0) {
             return null;
@@ -329,6 +336,22 @@ final class AcpxAgentResultAcquirer {
         var prefix = stripped.substring(0, opening);
         var suffix = stripped.substring(closingEnd);
         return new JsonFencePayload(payload, prefix.isBlank() && suffix.isBlank());
+    }
+
+    private static JsonFencePayload exactJsonFenceOpeningPayload(String stripped) {
+        var opening = "```json";
+        if (!stripped.startsWith(opening)) {
+            return null;
+        }
+        var openingEnd = lineEnd(stripped, 0);
+        if (openingEnd < 0) {
+            return null;
+        }
+        var payload = stripped.substring(afterLineBreak(stripped, openingEnd));
+        if (payload.isBlank() || payload.contains("```")) {
+            return null;
+        }
+        return new JsonFencePayload(payload, true, true);
     }
 
     private static int findFenceLine(String value, String marker, int fromIndex) {
@@ -367,7 +390,10 @@ final class AcpxAgentResultAcquirer {
         return newline > 0 && value.charAt(newline - 1) == '\r' ? newline - 1 : newline;
     }
 
-    private record JsonFencePayload(String payload, boolean exactPresentation) {
+    private record JsonFencePayload(String payload, boolean exactPresentation, boolean openingOnly) {
+        private JsonFencePayload(String payload, boolean exactPresentation) {
+            this(payload, exactPresentation, false);
+        }
     }
 
     private static PresentationCandidate presentationCandidate(
