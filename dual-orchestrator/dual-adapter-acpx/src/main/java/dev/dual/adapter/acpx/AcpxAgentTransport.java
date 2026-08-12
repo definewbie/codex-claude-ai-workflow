@@ -352,9 +352,9 @@ public class AcpxAgentTransport {
                 command.add("--permission-policy");
                 command.add(request.permissionProfile().permissionPolicyJson());
             }
-            if (!request.permissionProfile().allowedTools().isEmpty()) {
+            if (!request.permissionProfile().autoApprovedTools().isEmpty()) {
                 command.add("--allowed-tools");
-                command.add(request.permissionProfile().allowedToolsArgument());
+                command.add(request.permissionProfile().autoApprovedToolsArgument());
             }
             if (!request.permissionProfile().terminalEnabled()) {
                 command.add("--no-terminal");

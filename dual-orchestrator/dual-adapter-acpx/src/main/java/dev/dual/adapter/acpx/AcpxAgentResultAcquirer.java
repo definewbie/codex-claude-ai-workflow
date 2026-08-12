@@ -273,6 +273,7 @@ final class AcpxAgentResultAcquirer {
     enum PresentationDisposition {
         NOT_NEEDED,
         SINGLE_JSON_FENCE_REMOVED,
+        SINGLE_FENCED_JSON_EXTRACTED,
         REJECTED_AMBIGUOUS_PRESENTATION
     }
 
@@ -292,27 +293,81 @@ final class AcpxAgentResultAcquirer {
             return presentationCandidate(raw, raw, PresentationDisposition.NOT_NEEDED);
         }
 
-        var candidate = exactJsonFencePayload(stripped);
+        var candidate = singleJsonFencePayload(stripped);
         if (candidate == null) {
             return presentationCandidate(raw, raw, PresentationDisposition.REJECTED_AMBIGUOUS_PRESENTATION);
         }
-        return presentationCandidate(raw, candidate, PresentationDisposition.SINGLE_JSON_FENCE_REMOVED);
+        var disposition = candidate.exactPresentation()
+                ? PresentationDisposition.SINGLE_JSON_FENCE_REMOVED
+                : PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED;
+        return presentationCandidate(raw, candidate.payload(), disposition);
     }
 
-    private static String exactJsonFencePayload(String stripped) {
-        var lineBreak = stripped.startsWith("```json\r\n") ? "\r\n"
-                : stripped.startsWith("```json\n") ? "\n"
-                : null;
-        if (lineBreak == null || !stripped.endsWith(lineBreak + "```")) {
+    private static JsonFencePayload singleJsonFencePayload(String stripped) {
+        var opening = findFenceLine(stripped, "```json", 0);
+        if (opening < 0 || findFenceLine(stripped, "```json", opening + 1) >= 0) {
             return null;
         }
-        var openingLength = "```json".length() + lineBreak.length();
-        var closingLength = lineBreak.length() + "```".length();
-        var payload = stripped.substring(openingLength, stripped.length() - closingLength);
+        var openingEnd = lineEnd(stripped, opening);
+        if (openingEnd < 0) {
+            return null;
+        }
+        var payloadStart = afterLineBreak(stripped, openingEnd);
+        var closing = findFenceLine(stripped, "```", payloadStart);
+        if (closing < 0 || findFenceLine(stripped, "```", closing + 1) >= 0) {
+            return null;
+        }
+        var payloadEnd = beforeLineBreak(stripped, closing);
+        if (payloadEnd < payloadStart) {
+            return null;
+        }
+        var payload = stripped.substring(payloadStart, payloadEnd);
         if (payload.isBlank() || payload.contains("```")) {
             return null;
         }
-        return payload;
+        var closingEnd = lineEndOrInputEnd(stripped, closing);
+        var prefix = stripped.substring(0, opening);
+        var suffix = stripped.substring(closingEnd);
+        return new JsonFencePayload(payload, prefix.isBlank() && suffix.isBlank());
+    }
+
+    private static int findFenceLine(String value, String marker, int fromIndex) {
+        var index = value.indexOf(marker, fromIndex);
+        while (index >= 0) {
+            var startsLine = index == 0 || value.charAt(index - 1) == '\n';
+            var end = index + marker.length();
+            var endsLine = end == value.length() || value.charAt(end) == '\n' || value.charAt(end) == '\r';
+            if (startsLine && endsLine) {
+                return index;
+            }
+            index = value.indexOf(marker, index + 1);
+        }
+        return -1;
+    }
+
+    private static int lineEnd(String value, int lineStart) {
+        var newline = value.indexOf('\n', lineStart);
+        return newline < 0 ? -1 : newline;
+    }
+
+    private static int lineEndOrInputEnd(String value, int lineStart) {
+        var newline = value.indexOf('\n', lineStart);
+        return newline < 0 ? value.length() : newline + 1;
+    }
+
+    private static int afterLineBreak(String value, int newline) {
+        return newline + 1;
+    }
+
+    private static int beforeLineBreak(String value, int lineStart) {
+        if (lineStart == 0) {
+            return 0;
+        }
+        var newline = lineStart - 1;
+        return newline > 0 && value.charAt(newline - 1) == '\r' ? newline - 1 : newline;
+    }
+
+    private record JsonFencePayload(String payload, boolean exactPresentation) {
     }
 
     private static PresentationCandidate presentationCandidate(

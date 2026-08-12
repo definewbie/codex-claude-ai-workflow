@@ -6,12 +6,13 @@ import java.util.List;
  * acpx/Claude Code 工具权限的 adapter 边界模型。
  *
  * Workflow node 只声明语义化 profile；这里负责把 profile 翻译成两层权限：
- * acpx 的 ACP 权限种类（read/search/execute）和 Claude Code 的工具白名单。
+ * acpx 的 ACP 权限种类（read/search/execute）和 Claude Code 的免确认工具集。
  *
  * acpx 的 `--permission-policy` 不理解 `Bash(ls *)` 这类 Claude Code 模式；
  * 它只能按 ACP 工具种类或标题批准权限请求。Claude Code 的
- * `allowedTools` 只能进一步限制 Claude Code 工具名，不能弥补 ACP 层
- * 对 execute 的过度批准。因此 discovery/observe/review 不自动批准 execute；
+ * `--allowed-tools` 实际表示工具可以无需询问即执行，不是可见性白名单。
+ * 它不能弥补 ACP 层对 execute 的过度批准。因此 discovery/observe/review
+ * 不自动批准 execute；
  * intake contract discovery 也不自动批准 direct Read，避免实现级探索在单个
  * external run 内先烧 token、后置 validator 才拦截。
  */
@@ -21,7 +22,7 @@ record AcpxPermissionProfile(
         boolean denyAll,
         boolean terminalEnabled,
         boolean simpleClaudeCode,
-        List<String> allowedTools,
+        List<String> autoApprovedTools,
         List<String> autoApproveKinds,
         int promptRetries
 ) {
@@ -32,7 +33,7 @@ record AcpxPermissionProfile(
         if (promptRetries < 0) {
             throw new IllegalArgumentException("promptRetries must be zero or positive");
         }
-        allowedTools = allowedTools == null ? List.of() : List.copyOf(allowedTools);
+        autoApprovedTools = autoApprovedTools == null ? List.of() : List.copyOf(autoApprovedTools);
         autoApproveKinds = autoApproveKinds == null ? List.of() : List.copyOf(autoApproveKinds);
     }
 
@@ -75,7 +76,7 @@ record AcpxPermissionProfile(
                 false,
                 true,
                 false,
-                observe.allowedTools(),
+                observe.autoApprovedTools(),
                 observe.autoApproveKinds(),
                 observe.promptRetries()
         );
@@ -98,8 +99,8 @@ record AcpxPermissionProfile(
         );
     }
 
-    String allowedToolsArgument() {
-        return String.join(",", allowedTools);
+    String autoApprovedToolsArgument() {
+        return String.join(",", autoApprovedTools);
     }
 
     boolean approveReads() {

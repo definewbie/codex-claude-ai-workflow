@@ -929,8 +929,8 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("observe", transport.lastPermissionProfile.name());
-        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Read"));
-        assertFalse(transport.lastPermissionProfile.allowedTools().contains("Bash(git *)"));
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Read"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("Bash(git *)"));
         assertFalse(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
     }
 
@@ -953,9 +953,9 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("contract_discovery", transport.lastPermissionProfile.name());
-        assertFalse(transport.lastPermissionProfile.allowedTools().contains("Read"));
-        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Grep"));
-        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Glob"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("Read"));
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Grep"));
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Glob"));
         assertEquals(List.of("search"), transport.lastPermissionProfile.autoApproveKinds());
     }
 
@@ -978,8 +978,8 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("review", transport.lastPermissionProfile.name());
-        assertTrue(transport.lastPermissionProfile.allowedTools().contains("Grep"));
-        assertFalse(transport.lastPermissionProfile.allowedTools().contains("Bash(rg *)"));
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Grep"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("Bash(rg *)"));
         assertFalse(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
     }
 
@@ -1145,7 +1145,7 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void nonZeroProcessCannotReachCorrectionAndRecordsSkippedDisposition() throws Exception {
+    void deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-non-zero-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1170,7 +1170,7 @@ class AcpxAgentTaskHandlerTest {
                 candidate
         );
 
-        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(1, transport.initialCalls);
         assertEquals(0, transport.correctionCalls);
         var runMetadata = OBJECT_MAPPER.readTree(
@@ -1178,18 +1178,24 @@ class AcpxAgentTaskHandlerTest {
         );
         var acquisition = runMetadata.path("agentResultAcquisition");
         assertFalse(acquisition.path("correctionAttempted").asBoolean());
-        assertEquals("PARSE_FAILURE", acquisition.path("correctionReason").asText());
+        assertEquals("NONE", acquisition.path("correctionReason").asText());
         assertEquals("SKIPPED_PROCESS_NON_ZERO", acquisition.path("correctionDisposition").asText());
         assertEquals(1, acquisition.path("occurrences").size());
         assertEquals(5, acquisition.path("occurrences").get(0).path("exitCode").asInt());
+        assertEquals("SINGLE_FENCED_JSON_EXTRACTED",
+                acquisition.path("occurrences").get(0).path("presentationDisposition").asText());
 
         var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, result);
-        assertEquals(NodeStatus.FAILED, finalized.status());
+        assertEquals(NodeStatus.COMPLETED, finalized.status());
         var finalizedMetadata = OBJECT_MAPPER.readTree(
                 tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
         );
-        assertEquals("permission_blocked",
+        assertEquals("SUCCESS_WITH_WARNINGS",
+                finalizedMetadata.path("executionOutcome").path("status").asText());
+        assertEquals("completed_with_adapter_or_process_warnings",
                 finalizedMetadata.path("executionOutcome").path("primaryReason").asText());
+        assertEquals("PERMISSION_BLOCKED",
+                finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
     }
 
     @Test
@@ -1758,7 +1764,7 @@ class AcpxAgentTaskHandlerTest {
                     new AcpxPromptCompletion(
                             "fixture-non-zero",
                             "end_turn",
-                            "I completed the design.\n" + resultJson
+                            "I completed the design.\n\n```json\n" + resultJson + "\n```"
                     ),
                     List.of(new AdapterSignal(
                             AdapterSignalType.PERMISSION_BLOCKED,

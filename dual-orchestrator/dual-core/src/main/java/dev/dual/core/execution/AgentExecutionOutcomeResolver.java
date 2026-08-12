@@ -6,8 +6,10 @@ import java.util.List;
  * Resolves one agent execution into a workflow-consumable outcome.
  *
  * <p>The rule order is deliberate: blocking adapter failures and unusable
- * process states cannot be hidden by a partial agent result; artifact
- * contract failures remain primary when the process is otherwise usable.</p>
+ * process states cannot be hidden by a partial agent result. A permission
+ * denial may be retained as a warning only when the completed result and all
+ * required artifact contracts independently prove that the denied operation
+ * was not required for this node's contract.</p>
  */
 public final class AgentExecutionOutcomeResolver {
     public AgentExecutionOutcome resolve(AgentExecutionEvidence evidence) {
@@ -20,6 +22,7 @@ public final class AgentExecutionOutcomeResolver {
                 .toList();
         var blockingSignal = signals.stream()
                 .filter(signal -> signal.type().blocksSuccess())
+                .filter(signal -> !isContainedPermissionDenial(signal, evidence))
                 .findFirst();
         if (blockingSignal.isPresent()) {
             return adapterFailure(
@@ -104,7 +107,7 @@ public final class AgentExecutionOutcomeResolver {
                     true,
                     AgentExecutionRetryPolicy.NONE,
                     RecoveryCategory.NONE,
-                "The agent produced valid result and artifact evidence, but adapter/process warnings were recorded."
+                    "The agent produced valid result and artifact evidence, but adapter/process warnings were recorded."
             );
         }
         return new AgentExecutionOutcome(
@@ -120,6 +123,19 @@ public final class AgentExecutionOutcomeResolver {
 
     private static boolean hasRecoverableWarning(List<AdapterSignal> signals) {
         return signals.stream().anyMatch(signal -> signal.type().severity() == AdapterSignalSeverity.RECOVERABLE);
+    }
+
+    private static boolean isContainedPermissionDenial(
+            AdapterSignal signal,
+            AgentExecutionEvidence evidence
+    ) {
+        if (signal.type() != AdapterSignalType.PERMISSION_BLOCKED) {
+            return false;
+        }
+        return evidence.processResult().usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+                && evidence.agentResultContract().present()
+                && evidence.agentResultContract().valid()
+                && evidence.artifactContracts().stream().allMatch(ArtifactContractResult::satisfied);
     }
 
     private static AgentExecutionOutcome adapterFailure(

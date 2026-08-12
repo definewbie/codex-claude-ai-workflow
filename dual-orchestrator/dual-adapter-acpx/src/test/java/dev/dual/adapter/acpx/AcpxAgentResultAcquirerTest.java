@@ -89,16 +89,40 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void proseAroundOneCompleteJsonFenceIsDeterministicallyExtracted() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var raw = "Design completed after reading the approved contract.\n\n```json\n"
+                + envelope
+                + "\n```\n\nThis is the implementation-ready artifact.";
+        var transport = new ScriptedTransport(validResult("request-1", raw, 0));
+        var requests = requests("same-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertFalse(acquisition.correctionAttempted());
+        assertTrue(acquisition.finalParse().valid());
+        assertTrue(acquisition.initialValidation().valid());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED,
+                acquisition.initialPresentation().disposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
     void ambiguousFencePresentationsAreNeverExtracted() throws Exception {
         var envelope = strictEnvelope("run-1");
         var cases = List.of(
-                "explanation\n```json\n" + envelope + "\n```",
                 "```json\n" + envelope + "\n```\n```json\n" + envelope + "\n```",
                 "```JSON\n" + envelope + "\n```",
                 "```python\n" + envelope + "\n```",
                 "```text\n" + envelope + "\n```",
                 "```json\n" + envelope,
-                "```json\n\n```"
+                "```json\n\n```",
+                "before\n```json\n" + envelope + "\n```\nafter\n```text\nextra\n```"
         );
 
         for (var raw : cases) {
@@ -131,7 +155,7 @@ class AcpxAgentResultAcquirerTest {
         );
         for (var invalid : strictFailures) {
             var transport = new ScriptedTransport(
-                    validResult("request-1", "```json\n" + invalid + "\n```", 0));
+                    validResult("request-1", "Result follows.\n```json\n" + invalid + "\n```\nEnd result.", 0));
             var requests = requests("strict-" + Math.abs(invalid.hashCode()));
             var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
                     "claude", requests.initial(), requests.correction(), "",
@@ -139,14 +163,14 @@ class AcpxAgentResultAcquirerTest {
 
             assertFalse(acquisition.finalParse().valid(), invalid);
             assertEquals(
-                    AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_JSON_FENCE_REMOVED,
+                    AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED,
                     acquisition.initialPresentation().disposition()
             );
         }
 
         var wrongSchema = envelope.replace("\"schema_version\" : 1", "\"schema_version\" : 2");
         var transport = new ScriptedTransport(
-                validResult("request-schema", "```json\n" + wrongSchema + "\n```", 0));
+                validResult("request-schema", "Result follows.\n```json\n" + wrongSchema + "\n```\nEnd result.", 0));
         var requests = requests("schema-invalid");
         var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
                 "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
@@ -154,6 +178,10 @@ class AcpxAgentResultAcquirerTest {
         assertTrue(acquisition.finalParse().valid());
         assertFalse(acquisition.initialValidation().valid());
         assertFalse(acquisition.correctionAttempted());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED,
+                acquisition.initialPresentation().disposition()
+        );
     }
 
     @Test

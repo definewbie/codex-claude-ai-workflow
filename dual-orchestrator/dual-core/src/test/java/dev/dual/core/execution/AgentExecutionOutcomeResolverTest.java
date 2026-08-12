@@ -148,6 +148,38 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
+    void deniedOptionalToolCannotOverrideCompleteValidatedEvidence() {
+        var signal = AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED);
+
+        var outcome = resolve(
+                ProcessResult.nonZeroComplete(5),
+                AgentResultContractResult.valid("READY_FOR_ARCH_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of(signal)
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS, outcome.status());
+        assertEquals("completed_with_adapter_or_process_warnings", outcome.primaryReason());
+        assertTrue(outcome.nodeMaySucceed());
+        assertEquals(List.of(signal), outcome.secondarySignals());
+        assertEquals(AgentExecutionRetryPolicy.NONE, outcome.retryPolicy());
+    }
+
+    @Test
+    void deniedToolStillBlocksWhenAnyRequiredArtifactIsInvalid() {
+        var outcome = resolve(
+                ProcessResult.nonZeroComplete(5),
+                AgentResultContractResult.valid("READY_FOR_ARCH_REVIEW"),
+                List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
+                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED))
+        );
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
+        assertEquals("permission_blocked", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+    }
+
+    @Test
     void rateLimitWithValidAgentResultAndArtifactRemainsRecoverableAdapterFailure() {
         var signal = AdapterSignal.of(AdapterSignalType.RATE_LIMITED);
 
