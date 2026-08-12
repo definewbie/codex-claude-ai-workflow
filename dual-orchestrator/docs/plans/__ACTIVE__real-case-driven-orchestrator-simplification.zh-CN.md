@@ -8,7 +8,30 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v7 / INFRASTRUCTURE PREFLIGHT AUTHORIZED
+## Current Active Step: Captcha-Auth Completion v8 / NON-PROVIDER PREFLIGHT AUTHORIZED
+
+> v7 fresh workstream `ws-20260812T035340Z-E3P3` 已消费并停止于 design Agent run
+> `run-1786509652821`。captured evidence 证明两个独立 Dual-owned 缺口：assistant message 的完整 JSON
+> 被 prose + fence presentation 包裹，旧 normalization 未提取；同时 Claude 尝试的未批准可选工具没有
+> 执行，但模型随后交付完整结果，旧 `PERMISSION_BLOCKED` 仍覆盖 terminal outcome。该失败不是 target
+> 业务实现失败，target 仍保持 baseline HEAD `7c7e35e8`、tree `bab065a1`、requirement hash
+> `42078b01`，无实现文件。
+>
+> 两条边界已在 checkpoint `023924b6` 原子收敛：`AcpxAgentResultAcquirer` 只提取恰好一个完整、独占行
+> 的 JSON fence，提取后仍进入原 strict parser/schema/semantic/artifact validators；
+> `AgentExecutionOutcomeResolver` 只有在 non-zero complete、AgentResult valid、全部 required artifacts
+> satisfied 时才把 `PERMISSION_BLOCKED` 保留为 secondary warning，否则继续 fail closed。
+> `allowedTools` 内部语义同步更名为 `autoApprovedTools`，明确它是免确认集合，不是用户工具可见性白名单。
+> 独立代码级 review 为 PASS，full reactor `1213/0/0/0`，当前成熟度为 `ENFORCED / NOT PROVEN`。
+>
+> 新 Gate 已起草：
+> `docs/testing/verification-gates/20260812-terminal-delivery-captcha-auth-completion-v8.md`。主目标仍是完成
+> captcha-auth 产品；presentation extraction、contained permission denial 和 human `BLOCKED` 只在自然
+> 触发时形成条件性技术结论，不人为制造。Gate 独立同行评审为 PASS。当前授权提交 Gate、active plan
+> 与 review，并执行 fresh package 及 Git/workflow/JAR/target/PostgreSQL 非 provider preflight；Claude/Codex
+> probes、其他 provider 调用与 real-case 仍未授权。
+
+## Historical Active Step: Captcha-Auth Completion v6 / FAIL, CONSUMED
 
 > 唯一 fresh workstream `ws-20260811T143704Z-RZQL` 已结束为有效 `FAIL`，不是 `INVALID`。
 > clean SHA、fresh package、target baseline、隔离 PostgreSQL 与双 provider probes 全部通过；
