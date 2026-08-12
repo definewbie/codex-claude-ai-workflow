@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Human Decision Gate Convergence / ENFORCED, CHECKPOINT READY
+## Current Active Step: Captcha-Auth Completion v7 / INFRASTRUCTURE PREFLIGHT AUTHORIZED
 
 > 唯一 fresh workstream `ws-20260811T143704Z-RZQL` 已结束为有效 `FAIL`，不是 `INVALID`。
 > clean SHA、fresh package、target baseline、隔离 PostgreSQL 与双 provider probes 全部通过；
@@ -30,8 +30,14 @@
 > 和 autorun 消费同一边界；三个 bundled workflow 已同步补齐 BLOCKED edge。focused tests 与完整
 > Maven reactor 为 `1210/0/0/0`，`git diff --check` clean，当前成熟度为 `ENFORCED / NOT PROVEN`。
 >
-> 独立代码级 diff review 已 `PASS`。下一步提交 clean checkpoint 并更新 captcha-auth completion Gate，
-> 在 fresh workstream 中自然到达 human gate，由用户通过 UI 或 CLI 提交决定并继续到 compile，才可把该边界
+> 独立代码级 diff review 已 `PASS`；v6 历史证据提交为 `01eca0e6`，human-decision checkpoint 提交为
+> `99f827d5`，worktree clean。新的 v7 Gate 已起草：
+> `docs/testing/verification-gates/20260812-terminal-delivery-captcha-auth-completion-v7.md`。
+> Gate 独立同行评审已 `PASS`：
+> `docs/testing/verification-gates/20260812-terminal-delivery-captcha-auth-completion-v7-review.md`。
+> 当前授权提交 Gate 文档，并在 clean SHA 上执行 Git/workflow identity、fresh package 与隔离 PostgreSQL
+> preflight；Claude/Codex probes、provider 和 real-case 尚未授权。infrastructure preflight PASS 后，
+> 才能在 fresh workstream 中自然到达 human gate，由用户通过 UI 或 CLI 提交决定并继续到 compile，才可把该边界
 > 标记为 `PROVEN` 并继续完成产品。不 resume v6，不调高 revision limit，不改 provider/model/prompt。
 > v6 report：`docs/testing/real-case-reports/20260811T143322Z/report.md`；实现设计：
 > `docs/plans/human-decision-gate-convergence-20260812.zh-CN.md`。
