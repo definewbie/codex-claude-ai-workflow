@@ -156,6 +156,21 @@ verified canonical Proposal v3
 
 ## Result
 
-`PENDING`。v6 Gate 独立同行评审已 `PASS`；当前授权在 Gate 与 active plan 提交为 clean SHA 后，
-按本文顺序执行 fresh package、external preflight 与 runner preflight。只有全部前置条件 PASS，
-才能创建唯一 fresh workstream。
+`FAIL / CONSUMED / PRODUCT NOT ACHIEVED`。
+
+- execution SHA：`c5bc284f3f49b8342b8449d2db9bae03e5416276`；
+- 唯一 workstream：`ws-20260811T143704Z-RZQL`；
+- preflight：fresh package、target baseline、Codex probe、Claude probe 与隔离 PostgreSQL 全部 PASS；
+- workflow：`WAITING_FOR_RECOVERY`，attention category=`SEMANTIC_REVISION_LIMIT`；
+- Agent runs：8（Claude 4、Codex 4），design revisions：3，bounded corrections：0；
+- token：8/8 measured，input=94182、output=36887、cached read=134144、total=265213；
+- target/worktree：无实现改动，未进入 compile、implementation、verification 或 acceptance；
+- final review：`BLOCKED / HUMAN_DECISION_REQUIRED`，唯一剩余 must-fix 是由人类确认手机号输入范围，
+  因为 revision producer 选择的 `E.164-only` 会收窄原始需求允许的手机号注册/登录范围。
+
+本轮是有效 `FAIL`，不是 `INVALID`：revision-patch 的三次 merge、coverage、delta、derived reference
+与下一 reviewer 消费均成功，证明 patch 到 reviewer 的真实链路；compiler 未到达，因此
+`fa1f4818` 仍为 `ENFORCED / NOT PROVEN`。不得 retry、resume 或创建第二 workstream 救场。
+
+证据：`docs/testing/real-case-reports/20260811T143322Z/report.md`，external preflight 已复制到同目录
+`external-preflight/`，复制前后字节一致。
