@@ -15,6 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AutoRunCommandTest {
     @Test
+    void blockedReviewSourceCannotBeAutoApproved() {
+        assertTrue(AutoRunCommand.requiresHumanDecision("BLOCKED"));
+        assertFalse(AutoRunCommand.requiresHumanDecision("READY_FOR_PRODUCT_REVIEW"));
+    }
+    @Test
     void autorunApprovesIntermediateHumanGates() {
         assertEquals("approve", AutoRunCommand.gateActionFor("gate.human_requirement_review"));
         assertEquals("approve", AutoRunCommand.gateActionFor("gate.contract_review"));

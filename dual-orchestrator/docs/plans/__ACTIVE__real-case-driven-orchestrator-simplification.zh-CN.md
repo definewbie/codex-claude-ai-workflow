@@ -8,27 +8,33 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v6 / PREFLIGHT AUTHORIZED
+## Current Active Step: Human Decision Gate Convergence / ENFORCED, CHECKPOINT READY
 
-> Captcha-auth completion v5 已 `FAIL / CONSUMED`，产品仍未完成。唯一 fresh workstream
-> `ws-20260811T131349Z-8GHC` 的 package、PostgreSQL 与双 provider probes 全部 PASS。真实 review
-> 自然触发两轮 typed revision patch；两轮 merge、coverage、delta、derived reference 与 reviewer
-> 消费均成功，第三轮 review 达到 `READY_FOR_PRODUCT_REVIEW`。失败发生在 `contract.compile`：旧
-> consumer 重复要求 sidecar source type 为 initial proposal，错误拒绝了已验证的 derived canonical
-> proposal。该 owner 漂移已由 checkpoint `fa1f4818` 删除；focused `18/0/0`、full reactor
-> `1206/0/0`、独立代码级 review 均 `PASS`。
+> 唯一 fresh workstream `ws-20260811T143704Z-RZQL` 已结束为有效 `FAIL`，不是 `INVALID`。
+> clean SHA、fresh package、target baseline、隔离 PostgreSQL 与双 provider probes 全部通过；
+> target 和执行 worktree 均未产生实现改动。工作流在 intake 运行 8 次 Agent（Claude 4、Codex 4），
+> 自然触发并完成 3 次 typed revision transition，最终由 `RoutingEngine` 在 revision budget 耗尽后
+> 置为 `WAITING_FOR_RECOVERY / SEMANTIC_REVISION_LIMIT`。全程 8/8 token 可测，总计 265213 token，
+> Agent duration 588419ms。
 >
-> v5 还证明其 operator stop-loss 无法在批量 `start --run` 内可靠执行。后续不新增 runner monitor，
-> 也不改成逐节点平台：自然 `NEEDS_REVISION` 由 `RoutingEngine` 从当前触发 revision 的
-> `intake.decision` 节点定义读取 typed `max_revisions=3` 并强制；它不是全局 workflow 配置。
-> Gate 只保留明确技术失败与 90 分钟 wall-clock stop-loss。
-> revision-patch + compiler 边界当前为 `ENFORCED / NOT PROVEN`，captcha-auth 为 `NOT ACHIEVED`。
+> 三次 patch 的 merge、coverage、delta、derived reference 与下一 reviewer 消费均成功，证明
+> revision-patch 到 reviewer 的真实链路可运行；本轮未到达 compiler，因此 checkpoint `fa1f4818`
+> 仍是 `ENFORCED / NOT PROVEN`。第四次 review 的唯一剩余阻塞是手机号输入范围：Claude 选择
+> `E.164-only`，Codex 判定这是原始需求未授权的用户可见范围收窄，要求 human decision。
+> captcha-auth 仍为 `NOT ACHIEVED`。
 >
-> 当前只激活 v6 preflight：
-> `docs/testing/verification-gates/20260811-terminal-delivery-captcha-auth-completion-v6.md`。
-> Gate 独立同行评审已 `PASS`。三份文档提交为 clean SHA 后，按 Gate 顺序执行 fresh package、
-> external probes 与 runner preflight；全部 PASS 前不创建 workstream。普通文档同步和 preflight
-> 均不升级任何 maturity。v5 report：`docs/testing/real-case-reports/20260811T131005Z/report.md`。
+> 四次 review/revision 的只读归因已完成：revision producer 确实逐轮修复 typed obligations，最终
+> 剩余项是真实 human product decision。human-decision convergence 已按单一 checkpoint 实施：business
+> `BLOCKED` 现在以 execution `COMPLETED` 路由到既有 human gate；`GateDocument.source_outcome`、human
+> note、reviewer `must_fix/missing_evidence` 与 compiler resolution 形成单一 ledger truth；UI、API、CLI
+> 和 autorun 消费同一边界；三个 bundled workflow 已同步补齐 BLOCKED edge。focused tests 与完整
+> Maven reactor 为 `1210/0/0/0`，`git diff --check` clean，当前成熟度为 `ENFORCED / NOT PROVEN`。
+>
+> 独立代码级 diff review 已 `PASS`。下一步提交 clean checkpoint 并更新 captcha-auth completion Gate，
+> 在 fresh workstream 中自然到达 human gate，由用户通过 UI 或 CLI 提交决定并继续到 compile，才可把该边界
+> 标记为 `PROVEN` 并继续完成产品。不 resume v6，不调高 revision limit，不改 provider/model/prompt。
+> v6 report：`docs/testing/real-case-reports/20260811T143322Z/report.md`；实现设计：
+> `docs/plans/human-decision-gate-convergence-20260812.zh-CN.md`。
 
 ## Historical Active Step: Captcha-Auth Completion v5 / FAIL, CONSUMED
 

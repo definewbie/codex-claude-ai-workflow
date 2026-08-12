@@ -15,7 +15,8 @@ public interface GateHandler {
             Path workspaceRoot,
             String workstreamId,
             NodeDefinition definition,
-            NodeInstance instance
+            NodeInstance instance,
+            String sourceOutcome
     ) {
         public GateContext {
             if (workspaceRoot == null) {
@@ -29,6 +30,9 @@ public interface GateHandler {
             }
             if (instance == null) {
                 throw new IllegalArgumentException("instance is required");
+            }
+            if (sourceOutcome == null || sourceOutcome.isBlank()) {
+                throw new IllegalArgumentException("sourceOutcome is required");
             }
         }
     }

@@ -92,6 +92,55 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void blockedReviewApprovedWithHumanNotePreservesTypedQuestions(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeProposal(root, "run-blocked", "Choose phone input semantics",
+                List.of("README.md"), List.of());
+        var reviewRef = writeReview(
+                root, proposalRef, "run-blocked-review", "BLOCKED", List.of(),
+                INITIAL_ITERATION_ID, false);
+        var reviewPath = root.resolve(reviewRef);
+        var review = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(reviewPath.toFile());
+        review.set("must_fix", OBJECT_MAPPER.valueToTree(List.of("Choose E.164-only or local phone input")));
+        review.set("missing_evidence", OBJECT_MAPPER.valueToTree(List.of("Confirm the product policy")));
+        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(reviewPath.toFile(), review);
+        AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, reviewPath, INITIAL_ITERATION_ID);
+        writeGate(root, reviewRef, "run-blocked-review", INITIAL_ITERATION_ID,
+                "BLOCKED", "Use E.164-only phone numbers");
+
+        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+
+        assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
+        var resolution = OBJECT_MAPPER.readTree(workstreamDir(root).resolve("artifacts/contract-resolution.json").toFile());
+        assertEquals(2, resolution.path("resolved_questions").size());
+        assertEquals("Choose E.164-only or local phone input",
+                resolution.path("resolved_questions").get(0).path("question").asText());
+        assertEquals("Confirm the product policy",
+                resolution.path("resolved_questions").get(1).path("question").asText());
+        for (var item : resolution.path("resolved_questions")) {
+            assertEquals("Use E.164-only phone numbers", item.path("resolution").asText());
+            assertEquals("human", item.path("source").asText());
+        }
+    }
+
+    @Test
+    void blockedReviewCannotUseReadyGateAsApproval(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeProposal(root, "run-blocked-mismatch", "Choose phone input semantics",
+                List.of("README.md"), List.of());
+        var reviewRef = writeReview(
+                root, proposalRef, "run-blocked-mismatch-review", "BLOCKED", List.of(),
+                INITIAL_ITERATION_ID, true);
+
+        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
+        assertTrue(String.valueOf(result.result().get("validation_errors"))
+                .contains("current review is not an approved intake product review"));
+    }
+
+    @Test
     void legacyV1ProposalSidecarIsExplicitlyRejected(@TempDir Path root) throws Exception {
         prepare(root);
         var proposalRef = writeTypedProposal(
@@ -518,7 +567,9 @@ class ContractCompileHandlerTest {
                 1, WORKSTREAM_ID, reviewRunId, "intake.codex_product_review",
                 new AgentResultEnvelope.AgentOutputResult(
                         "agent_output_contract", decision, "review ready", "READY", false,
-                        List.of("reviewed proposal"), List.of("proposal is coherent"), List.of(), List.of(),
+                        List.of("reviewed proposal"), List.of("proposal is coherent"),
+                        "BLOCKED".equals(decision) ? List.of("Confirm the product policy") : List.of(),
+                        "BLOCKED".equals(decision) ? List.of("Choose E.164-only or local phone input") : List.of(),
                         obligations, List.of(), List.of(), List.of(), "review complete",
                         new AgentResultEnvelope.Failure("", AgentResultEnvelope.VerificationRemediation.NONE,
                                 "NEEDS_REVISION".equals(decision) ? List.of("contract revision required") : List.of(),
@@ -631,6 +682,12 @@ class ContractCompileHandlerTest {
     }
 
     private static void writeGate(Path root, String reviewRef, String suffix, String iterationId) throws Exception {
+        writeGate(root, reviewRef, suffix, iterationId, "READY_FOR_PRODUCT_REVIEW", "approved fixture");
+    }
+
+    private static void writeGate(
+            Path root, String reviewRef, String suffix, String iterationId, String sourceOutcome, String note
+    ) throws Exception {
         var gateNodeId = "node-gate-human_requirement_review-" + suffix;
         var nodes = workstreamDir(root).resolve("nodes");
         var gates = workstreamDir(root).resolve("gates");
@@ -654,7 +711,8 @@ class ContractCompileHandlerTest {
                 "resolvedAt", now,
                 "result", Map.of(
                         "human_action", "approved",
-                        "note", "approved fixture",
+                        "note", note,
+                        "source_outcome", sourceOutcome,
                         "subject_input_refs", List.of(reviewRef))));
     }
 

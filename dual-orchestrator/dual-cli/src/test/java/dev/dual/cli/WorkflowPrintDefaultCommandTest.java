@@ -28,7 +28,7 @@ class WorkflowPrintDefaultCommandTest {
         assertTrue(json.contains("\"condition\""));
         var reloaded = new WorkflowDefinitionLoader().load(output);
         assertEquals("agent-lifecycle-full", reloaded.workflowId());
-        assertEquals(6, reloaded.version());
+        assertEquals(7, reloaded.version());
         assertTrue(reloaded.edges().stream().anyMatch(edge -> "unconditional".equals(edge.condition().type())));
     }
 }

@@ -91,6 +91,7 @@ public final class ApprovedTaskContractProposalFixture {
                 "result", Map.of(
                         "human_action", "approved",
                         "note", "approved integration fixture",
+                        "source_outcome", "READY_FOR_PRODUCT_REVIEW",
                         "subject_input_refs", List.of(reviewRef))));
         return reviewRef;
     }

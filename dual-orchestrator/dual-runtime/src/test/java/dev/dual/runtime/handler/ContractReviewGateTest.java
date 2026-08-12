@@ -30,7 +30,8 @@ class ContractReviewGateTest {
                 new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of(
                         "allowed_actions", List.of("approve", "clarify", "reduce_scope", "reject")
                 )),
-                node("gate.contract_review", NodeKind.GATE, "human.review")
+                node("gate.contract_review", NodeKind.GATE, "human.review"),
+                "READY"
         ));
 
         assertEquals(NodeStatus.WAITING, result.status());

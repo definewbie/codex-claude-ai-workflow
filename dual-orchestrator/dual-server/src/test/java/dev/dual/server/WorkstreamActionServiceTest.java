@@ -62,7 +62,7 @@ class WorkstreamActionServiceTest {
 
         var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
-        var response = service.approve(tempDir, "ws-approve", false, 1);
+        var response = service.approve(tempDir, "ws-approve", "approved by test", false, 1);
 
         assertEquals("review.approve", response.get("action"));
         var current = ledger.loadCurrent(paths);

@@ -64,7 +64,8 @@ public final class ContractCompileHandler implements TaskHandler {
         if (approvedProposal.failed() != null) {
             return approvedProposal.failed();
         }
-        var revisionContext = resolveRevisionContext(context, approvedProposal.reviewedProposal());
+        var revisionContext = resolveRevisionContext(
+                context, approvedProposal.reviewedProposal(), approvedProposal.gate());
         if (revisionContext.failed() != null) {
             return revisionContext.failed();
         }
@@ -81,7 +82,8 @@ public final class ContractCompileHandler implements TaskHandler {
             );
         }
         var contract = proposalResult.contract();
-        var resolutionResult = resolveContractNegotiation(proposalResult.proposal(), approvedProposal.gate());
+        var resolutionResult = resolveContractNegotiation(
+                proposalResult.proposal(), approvedProposal.reviewedProposal(), approvedProposal.gate());
         if (resolutionResult.failed() != null) {
             return resolutionResult.failed();
         }
@@ -276,7 +278,8 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private RevisionContextResult resolveRevisionContext(
             TaskContext context,
-            ReviewedProposal approvedReview
+            ReviewedProposal approvedReview,
+            ResolvedGate gate
     ) {
         var workstreamDir = context.workspaceRoot().resolve(".agent/workstreams").resolve(context.workstreamId());
         try {
@@ -290,7 +293,7 @@ public final class ContractCompileHandler implements TaskHandler {
                         resolved.errors());
             }
             var iteration = resolved.context().iteration();
-            var currentLineageErrors = validateCurrentApprovedLineage(workstreamDir, iteration, approvedReview);
+            var currentLineageErrors = validateCurrentApprovedLineage(workstreamDir, iteration, approvedReview, gate);
             if (!currentLineageErrors.isEmpty()) {
                 return revisionContextFailure("approved review and proposal are outside the current iteration",
                         currentLineageErrors);
@@ -309,11 +312,18 @@ public final class ContractCompileHandler implements TaskHandler {
     private List<String> validateCurrentApprovedLineage(
             Path workstreamDir,
             WorkflowIterationDocument iteration,
-            ReviewedProposal approvedReview
+            ReviewedProposal approvedReview,
+            ResolvedGate gate
     ) throws IOException {
         var errors = new ArrayList<String>();
+        var reviewDecision = approvedReview.document().decision();
+        var eligibleReady = "READY_FOR_PRODUCT_REVIEW".equals(reviewDecision)
+                && "READY_FOR_PRODUCT_REVIEW".equals(gate.sourceOutcome());
+        var eligibleBlocked = "BLOCKED".equals(reviewDecision)
+                && "BLOCKED".equals(gate.sourceOutcome())
+                && !gate.note().isBlank();
         if (!"intake.codex_product_review".equals(approvedReview.document().nodeId())
-                || !"READY_FOR_PRODUCT_REVIEW".equals(approvedReview.document().decision())) {
+                || (!eligibleReady && !eligibleBlocked)) {
             errors.add("current review is not an approved intake product review");
         }
         if (!TaskContractRevisionContextResolver.nodeBelongsToIteration(
@@ -363,9 +373,21 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private ContractResolutionResult resolveContractNegotiation(
             TaskContractProposal proposal,
+            ReviewedProposal approvedReview,
             ResolvedGate gateResolution
     ) {
-        var openQuestions = cleanList(proposal.openQuestions());
+        var blockedReview = "BLOCKED".equals(approvedReview.document().decision())
+                && "BLOCKED".equals(gateResolution.sourceOutcome());
+        var openQuestions = blockedReview
+                ? blockedReviewQuestions(approvedReview.document())
+                : cleanList(proposal.openQuestions());
+        if (blockedReview && (gateResolution.note().isBlank() || openQuestions.isEmpty())) {
+            return new ContractResolutionResult(null, proposalFailure(
+                    "TASK_CONTRACT_PROPOSAL_INVALID",
+                    "a BLOCKED review requires typed questions and a human resolution note",
+                    List.of(approvedReview.reviewRef())
+            ));
+        }
         var resolvedQuestions = new ArrayList<ContractResolutionDocument.ResolvedQuestion>();
         for (var question : openQuestions) {
             resolvedQuestions.add(new ContractResolutionDocument.ResolvedQuestion(
@@ -393,6 +415,13 @@ public final class ContractCompileHandler implements TaskHandler {
                 Instant.now()
         );
         return new ContractResolutionResult(resolution, null);
+    }
+
+    private static List<String> blockedReviewQuestions(AgentOutputContractDocument review) {
+        var questions = new java.util.LinkedHashSet<String>();
+        questions.addAll(cleanList(review.mustFix()));
+        questions.addAll(cleanList(review.missingEvidence()));
+        return List.copyOf(questions);
     }
 
     private Optional<ResolvedGate> latestResolvedRequirementGate(TaskContext context, String reviewRef) throws IOException {
@@ -455,8 +484,10 @@ public final class ContractCompileHandler implements TaskHandler {
             }
             var noteValue = result.get("note");
             var note = noteValue == null ? "" : String.valueOf(noteValue);
+            var sourceOutcomeValue = result.get("source_outcome");
+            var sourceOutcome = sourceOutcomeValue == null ? "" : String.valueOf(sourceOutcomeValue);
             var gateRef = context.workspaceRoot().relativize(gatePath).toString();
-            return Optional.of(new ResolvedGate(gateRef, action, note));
+            return Optional.of(new ResolvedGate(gateRef, action, note, sourceOutcome));
         } catch (Exception ignored) {
             return Optional.empty();
         }
@@ -546,6 +577,6 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private record ContractResolutionResult(ContractResolutionDocument resolution, NodeResult failed) {}
 
-    private record ResolvedGate(String gateRef, String action, String note) {}
+    private record ResolvedGate(String gateRef, String action, String note, String sourceOutcome) {}
 
 }

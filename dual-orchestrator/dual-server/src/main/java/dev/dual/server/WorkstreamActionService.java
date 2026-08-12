@@ -111,9 +111,11 @@ public class WorkstreamActionService {
         return actionResponse("recovery.close_mistaken_iteration", workstreamId, "mistaken iteration closed");
     }
 
-    public Map<String, Object> approve(Path workspaceRoot, String workstreamId, boolean runImmediately, int maxSteps) throws Exception {
+    public Map<String, Object> approve(
+            Path workspaceRoot, String workstreamId, String note, boolean runImmediately, int maxSteps
+    ) throws Exception {
         var root = normalize(workspaceRoot);
-        resolveGate(root, workstreamId, "approved", "approved from API");
+        resolveGate(root, workstreamId, "approved", note);
         if (runImmediately) {
             var response = resume(root, workstreamId, maxSteps);
             response.put("action", "review.approve.run");

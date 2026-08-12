@@ -4,6 +4,7 @@ const state = {
   selectedStageId: localStorage.getItem("dual.selectedStageId") || "",
   status: null,
   timeline: null,
+  currentReview: null,
   stream: null,
   streamUrl: "",
 };
@@ -709,6 +710,7 @@ function renderOverviewAgentTasks(tasks) {
 async function loadReviewPacket() {
   const status = state.status?.workflow?.status || "";
   if (status !== "WAITING_FOR_HUMAN") {
+    state.currentReview = null;
     els.reviewPanel.classList.add("hidden");
     els.gateGrid.classList.add("gate-grid-single");
     els.gateGrid.classList.remove("gate-grid-history");
@@ -721,6 +723,7 @@ async function loadReviewPacket() {
   }
   try {
     const data = await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/current?workdir=${workdirParam()}`);
+    state.currentReview = data;
     els.reviewPanel.classList.remove("hidden");
     els.gateGrid.classList.remove("gate-grid-single");
     els.gateGrid.classList.remove("gate-grid-history");
@@ -731,6 +734,7 @@ async function loadReviewPacket() {
     renderReviewStructured(data.packet || {});
     els.reviewPacket.textContent = data.packetMarkdown || "(empty review packet)";
   } catch (error) {
+    state.currentReview = null;
     els.reviewPanel.classList.remove("hidden");
     els.gateGrid.classList.remove("gate-grid-single");
     els.gateGrid.classList.remove("gate-grid-history");
@@ -1288,7 +1292,15 @@ $("tick").addEventListener("click", async () => {
 });
 
 $("resume").addEventListener("click", () => postAction(`${selectedBase()}/resume?workdir=${workdirParam()}&maxSteps=${maxSteps()}`));
-$("approve").addEventListener("click", () => postAction(`${selectedBase()}/review/approve?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`));
+$("approve").addEventListener("click", () => {
+  const note = els.feedback.value.trim();
+  if (state.currentReview?.packet?.sourceOutcome === "BLOCKED" && !note) {
+    setResponse({ error: "当前评审要求人工决定，请填写说明后再批准。" });
+    els.feedback.focus();
+    return;
+  }
+  postAction(`${selectedBase()}/review/approve?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`, { note });
+});
 $("complete").addEventListener("click", () => postAction(`${selectedBase()}/review/complete?workdir=${workdirParam()}`, { note: "completed from operator panel" }));
 $("recoverStaleRunning").addEventListener("click", () => postAction(
   `${selectedBase()}/recovery/stale?workdir=${workdirParam()}`,

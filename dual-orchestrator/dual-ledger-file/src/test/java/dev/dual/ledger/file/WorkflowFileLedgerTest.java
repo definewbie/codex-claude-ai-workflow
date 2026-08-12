@@ -640,13 +640,15 @@ class WorkflowFileLedgerTest {
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
-                "gate.human_next_stage_approval",
+                "before.final_gate",
                 List.of(
+                        new NodeDefinition("before.final_gate", NodeKind.TASK, "noop.task", Map.of()),
                         new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of("max_revisions", 1)),
                         new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of()),
                         new NodeDefinition("intake.decision", NodeKind.DECISION, "review.decision", Map.of())
                 ),
                 List.of(
+                        new EdgeDefinition("before.final_gate", "completed", "gate.human_next_stage_approval"),
                         new EdgeDefinition("gate.human_next_stage_approval", "revise", "intake.claude_brainstorm"),
                         new EdgeDefinition("intake.claude_brainstorm", "completed", "intake.decision")
                 )
@@ -654,6 +656,8 @@ class WorkflowFileLedgerTest {
 
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-close-mistaken", definition);
+        var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var gate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.resolveOpenGate(paths, definition, "revise", "historical bad route");
         new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
@@ -774,17 +778,21 @@ class WorkflowFileLedgerTest {
         var definition = new WorkflowDefinition(
                 "terminal-delivery-experiment",
                 1,
-                "gate.human_acceptance",
-                List.of(new NodeDefinition("gate.human_acceptance", NodeKind.GATE, "human.review", Map.of(
-                        "terminal_gate", true,
-                        "allowed_actions", List.of("approve", "revise"),
-                        "gate_purpose", "acceptance"
-                ))),
-                List.of()
+                "before.acceptance",
+                List.of(
+                        new NodeDefinition("before.acceptance", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_acceptance", NodeKind.GATE, "human.review", Map.of(
+                                "terminal_gate", true,
+                                "allowed_actions", List.of("approve", "revise"),
+                                "gate_purpose", "acceptance"
+                        ))),
+                List.of(new EdgeDefinition("before.acceptance", "completed", "gate.human_acceptance"))
         );
 
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-terminal-delivery", definition);
+        var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         ledger.resolveOpenGate(paths, definition, "approve", "accepted delivery");
 
         var completed = ledger.loadCurrent(paths);
@@ -847,15 +855,20 @@ class WorkflowFileLedgerTest {
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
-                "gate.human_next_stage_approval",
-                List.of(new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
-                        "allowed_actions", List.of("revise", "complete")
-                ))),
-                List.of()
+                "before.final_gate",
+                List.of(
+                        new NodeDefinition("before.final_gate", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise", "complete")
+                        ))),
+                List.of(new EdgeDefinition("before.final_gate", "completed", "gate.human_next_stage_approval"))
         );
 
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-gate-complete", definition);
+        var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var gateNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
 
         ledger.resolveOpenGate(paths, definition, "complete", "all stages accepted");
 
@@ -864,7 +877,7 @@ class WorkflowFileLedgerTest {
         assertTrue(completed.activeNodeInstanceIds().isEmpty());
         assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_completed"));
         assertTrue(Files.readString(paths.completionAuditJson()).contains("\"finalOutcome\" : \"complete\""));
-        var node = ledger.loadNode(paths, "node-gate-human_next_stage_approval-001");
+        var node = ledger.loadNode(paths, gateNodeId);
         assertEquals("complete", node.result().get("human_action"));
     }
 

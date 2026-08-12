@@ -418,7 +418,7 @@ class WorkflowIntegrationTest {
                 List.of(reviewRef)
         ));
 
-        assertEquals(NodeStatus.BLOCKED, result.status());
+        assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("BLOCKED", result.outcome());
         assertEquals("BLOCKED", result.result().get("decision"));
         assertEquals("Hardcoded API key is a security violation", result.result().get("summary"));

@@ -23,7 +23,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
     String action;
 
     @Option(names = "--note", description = "Optional decision note.")
-    String note = "decided from CLI";
+    String note = "";
 
     @Option(names = "--run", description = "After deciding, immediately run until the next gate, recovery, failure, or completion.")
     boolean runImmediately;

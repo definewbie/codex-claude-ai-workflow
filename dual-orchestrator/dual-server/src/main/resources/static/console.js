@@ -1171,7 +1171,16 @@ async function postAction(path, body) {
 }
 
 function approveAndRun() {
-  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/approve?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`);
+  const note = (els.revisionFeedback?.value || "").trim();
+  if (state.review?.packet?.sourceOutcome === "BLOCKED" && !note) {
+    renderFailure("缺少人工决定", "当前评审要求人工决定。请填写决定说明后再批准。");
+    els.revisionFeedback?.focus();
+    return;
+  }
+  postAction(
+    `/api/workstreams/${encodeURIComponent(state.selectedId)}/review/approve?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`,
+    { note }
+  );
 }
 
 function reviseAndRun() {

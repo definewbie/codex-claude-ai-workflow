@@ -167,9 +167,11 @@ public class WorkstreamApiController {
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = "") String workdir,
             @RequestParam(defaultValue = "false") boolean run,
-            @RequestParam(defaultValue = "20") int maxSteps
+            @RequestParam(defaultValue = "20") int maxSteps,
+            @RequestBody(required = false) ReviewApproveRequest request
     ) throws Exception {
-        return actionService.approve(workdirPath(workdir), workstreamId, run, maxSteps);
+        return actionService.approve(
+                workdirPath(workdir), workstreamId, request == null ? "" : request.note(), run, maxSteps);
     }
 
     @PostMapping("/{workstreamId}/review/complete")
@@ -249,6 +251,9 @@ public class WorkstreamApiController {
     }
 
     public record ReviewReviseRequest(String feedback) {
+    }
+
+    public record ReviewApproveRequest(String note) {
     }
 
     public record ReviewCompleteRequest(String note) {

@@ -256,16 +256,18 @@ class WorkflowRuntimeTest {
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
-                "gate.review",
-                List.of(new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of())),
-                List.of()
+                "before.gate",
+                List.of(
+                        new NodeDefinition("before.gate", NodeKind.TASK, "fake.task", Map.of()),
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of())),
+                List.of(new EdgeDefinition("before.gate", "completed", "gate.review"))
         );
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-gate", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
-                new HandlerRegistry(List.of(), List.of(), List.of(new FakeGate()))
+                new HandlerRegistry(List.of(new FakeTask()), List.of(), List.of(new FakeGate()))
         );
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-gate"));
 

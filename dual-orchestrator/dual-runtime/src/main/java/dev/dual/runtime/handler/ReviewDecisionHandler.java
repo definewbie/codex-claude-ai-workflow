@@ -49,10 +49,6 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                 "decision", decision,
                 "source", "contract-sidecar",
                 "summary", document.summary());
-        if ("BLOCKED".equals(decision)) {
-            return new NodeResult(decision, NodeStatus.BLOCKED, context.instance().inputRefs(), facts,
-                    "contract sidecar decision is BLOCKED");
-        }
         return NodeResult.completed(decision, context.instance().inputRefs(), facts);
     }
 

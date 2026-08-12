@@ -160,8 +160,18 @@ public final class AgentWorker {
             var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
             var node = ledger.loadCoreNode(paths, activeNodeId);
             handlers.gate(nodeDefinition.handlerType())
-                    .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                    .openOrInspect(new GateHandler.GateContext(
+                            command.workspaceRoot(), command.workstreamId(), nodeDefinition, node,
+                            sourceOutcome(paths, activeNodeId)));
         }
+    }
+
+    private String sourceOutcome(WorkstreamPaths paths, String nodeInstanceId) throws Exception {
+        var value = ledger.loadOpenGateForNode(paths, nodeInstanceId).result().get("source_outcome");
+        if (value == null || String.valueOf(value).isBlank()) {
+            throw new IllegalStateException("open gate is missing source_outcome: " + nodeInstanceId);
+        }
+        return String.valueOf(value);
     }
 
     private String activeNodeDefinitionId(WorkstreamPaths paths, dev.dual.ledger.file.WorkflowCurrentDocument current)

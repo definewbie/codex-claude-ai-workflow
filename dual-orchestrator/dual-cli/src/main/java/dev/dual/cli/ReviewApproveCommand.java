@@ -24,6 +24,9 @@ public class ReviewApproveCommand implements Callable<Integer> {
     @Option(names = "--max-steps", description = "Maximum workflow nodes to execute when --run is used. Defaults to ${DEFAULT-VALUE}.")
     int maxSteps = 20;
 
+    @Option(names = "--note", description = "Decision note. Required when the reviewed outcome is BLOCKED.")
+    String note = "";
+
     @Parameters(index = "0")
     String workstreamId;
 
@@ -33,7 +36,7 @@ public class ReviewApproveCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review approve"))) {
             var ledger = CliLedgerFactory.create();
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "approved", "approved from CLI");
+            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "approved", note);
         }
         System.out.println("Human gate approved");
         System.out.println("Workstream: " + workstreamId);

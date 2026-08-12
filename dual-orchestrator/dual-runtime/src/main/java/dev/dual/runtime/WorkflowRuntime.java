@@ -237,7 +237,9 @@ public final class WorkflowRuntime {
         if (nodeDefinition.kind() == NodeKind.GATE) {
             var node = ledger.loadCoreNode(paths, activeNodeId);
             handlers.gate(nodeDefinition.handlerType())
-                    .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                    .openOrInspect(new GateHandler.GateContext(
+                            command.workspaceRoot(), command.workstreamId(), nodeDefinition, node,
+                            sourceOutcome(paths, activeNodeId)));
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, nodeDefinition.id(), "waiting for human review");
         }
 
@@ -385,8 +387,18 @@ public final class WorkflowRuntime {
             var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
             var node = ledger.loadCoreNode(paths, activeNodeId);
             handlers.gate(nodeDefinition.handlerType())
-                    .openOrInspect(new GateHandler.GateContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                    .openOrInspect(new GateHandler.GateContext(
+                            command.workspaceRoot(), command.workstreamId(), nodeDefinition, node,
+                            sourceOutcome(paths, activeNodeId)));
         }
+    }
+
+    private String sourceOutcome(WorkstreamPaths paths, String nodeInstanceId) throws Exception {
+        var value = ledger.loadOpenGateForNode(paths, nodeInstanceId).result().get("source_outcome");
+        if (value == null || String.valueOf(value).isBlank()) {
+            throw new IllegalStateException("open gate is missing source_outcome: " + nodeInstanceId);
+        }
+        return String.valueOf(value);
     }
 
     private void emitDomainEvents(WorkstreamPaths paths, String nodeDefinitionId,

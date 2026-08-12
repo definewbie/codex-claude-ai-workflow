@@ -38,7 +38,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                node("gate.human_design_approval", NodeKind.GATE, "human.review")
+                node("gate.human_design_approval", NodeKind.GATE, "human.review"), "READY"
         ));
 
         assertEquals(NodeStatus.WAITING, result.status());
@@ -63,7 +63,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -80,6 +80,8 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("Raw agent logs are not embedded here by default."));
 
         var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"sourceOutcome\" : \"READY\""));
+        assertTrue(markdown.contains("Source Outcome: READY"));
         assertTrue(json.contains("\"schemaVersion\""));
         assertTrue(json.contains("\"gateNodeDefinitionId\""));
         assertTrue(json.contains("\"reviewPacketPath\""));
@@ -112,7 +114,7 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(reviewRef));
 
         new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                tempDir, "ws", gateDefinition(), gateNode));
+                tempDir, "ws", gateDefinition(), gateNode, "READY"));
 
         var packetDir = tempDir.resolve(".agent/workstreams/ws/reviews");
         var markdown = Files.readString(packetDir.resolve(gateNode.nodeInstanceId() + ".md"));
@@ -143,7 +145,7 @@ class BuiltinHandlerTest {
                 }
                 """.formatted(inputRef), StandardCharsets.UTF_8);
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
-        var context = new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode);
+        var context = new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode, "READY");
 
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(context));
         assertFalse(Files.exists(tempDir.resolve(
@@ -230,7 +232,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -287,7 +289,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -325,7 +327,7 @@ class BuiltinHandlerTest {
                         tempDir,
                         "ws",
                         gateDefinition(),
-                        gateNode
+                        gateNode, "READY"
                 )));
 
         assertTrue(failure.getMessage().contains("lineage"));
@@ -362,7 +364,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -407,7 +409,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -446,7 +448,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -482,7 +484,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -522,7 +524,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -549,7 +551,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -582,7 +584,7 @@ class BuiltinHandlerTest {
                 tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode
+                gateNode, "READY"
         ));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
@@ -941,7 +943,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void reviewDecisionBlocksOnBlockedDecisionFromSidecar() throws Exception {
+    void reviewDecisionTreatsBlockedAsCompletedBusinessOutcome() throws Exception {
         var output = writeOutput("codex-review.contract.json", """
                 {
                   "artifact_type": "agent_output_contract",
@@ -958,8 +960,9 @@ class BuiltinHandlerTest {
                 node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
         ));
 
-        assertEquals(NodeStatus.BLOCKED, result.status());
+        assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("BLOCKED", result.outcome());
+        assertEquals(List.of(output), result.outputRefs());
     }
 
     @Test

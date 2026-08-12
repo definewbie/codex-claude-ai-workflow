@@ -87,6 +87,13 @@ public final class AutoRunCommand implements Callable<Integer> {
             }
 
             if (snapshot.current().status() == WorkflowStatus.WAITING_FOR_HUMAN) {
+                if (requiresHumanDecision(snapshot.sourceOutcome())) {
+                    refreshSummary(paths);
+                    registerOperatorWorkspace(workspaceRoot);
+                    System.out.println("Autorun stopped: the current review requires a human decision note.");
+                    System.out.println("Use the UI or dualctl review decide --action approve|revise --note <decision>.");
+                    return 1;
+                }
                 gateCount++;
                 if (gateCount > maxGates) {
                     refreshSummary(paths);
@@ -135,7 +142,15 @@ public final class AutoRunCommand implements Callable<Integer> {
             if (!current.activeNodeInstanceIds().isEmpty()) {
                 node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
             }
-            return new Snapshot(current, node);
+            var sourceOutcome = "";
+            if (node != null && node.kind() == dev.dual.core.workflow.NodeKind.GATE) {
+                var value = ledger.loadOpenGateForNode(paths, node.nodeInstanceId()).result().get("source_outcome");
+                if (value == null || String.valueOf(value).isBlank()) {
+                    throw new IllegalStateException("open gate is missing source_outcome: " + node.nodeInstanceId());
+                }
+                sourceOutcome = String.valueOf(value);
+            }
+            return new Snapshot(current, node, sourceOutcome);
         }
     }
 
@@ -243,6 +258,10 @@ public final class AutoRunCommand implements Callable<Integer> {
         return node.nodeInstanceId();
     }
 
+    static boolean requiresHumanDecision(String sourceOutcome) {
+        return "BLOCKED".equals(sourceOutcome);
+    }
+
     static boolean hasAttemptedRecovery(NodeInstanceDocument node, LinkedHashSet<String> attemptedRecoveryKeys) {
         return node == null || attemptedRecoveryKeys.contains(recoveryKey(node));
     }
@@ -262,6 +281,6 @@ public final class AutoRunCommand implements Callable<Integer> {
         return node.nodeDefinitionId() + "@" + node.iterationId();
     }
 
-    private record Snapshot(WorkflowCurrentDocument current, NodeInstanceDocument node) {
+    private record Snapshot(WorkflowCurrentDocument current, NodeInstanceDocument node, String sourceOutcome) {
     }
 }

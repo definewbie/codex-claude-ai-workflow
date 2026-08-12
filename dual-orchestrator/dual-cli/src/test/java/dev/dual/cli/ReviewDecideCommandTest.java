@@ -27,16 +27,22 @@ class ReviewDecideCommandTest {
         var definition = new WorkflowDefinition(
                 "test-review-decide",
                 1,
-                "gate.contract_review",
+                "before.review",
                 List.of(
+                        new NodeDefinition("before.review", NodeKind.TASK, "noop.task", Map.of()),
                         new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review",
                                 Map.of("allowed_actions", List.of("approve", "clarify", "reduce_scope", "reject"))),
                         new NodeDefinition("after.reject", NodeKind.TASK, "noop.task", Map.of())
                 ),
-                List.of(new EdgeDefinition("gate.contract_review", "reject", "after.reject"))
+                List.of(
+                        new EdgeDefinition("before.review", "completed", "gate.contract_review"),
+                        new EdgeDefinition("gate.contract_review", "reject", "after.reject"))
         );
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-review-decide", definition);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, entry,
+                dev.dual.core.workflow.NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
         var command = new ReviewDecideCommand();
         command.workdir = tempDir;
@@ -57,16 +63,22 @@ class ReviewDecideCommandTest {
         var definition = new WorkflowDefinition(
                 "test-review-decide",
                 1,
-                "gate.contract_review",
+                "before.review",
                 List.of(
+                        new NodeDefinition("before.review", NodeKind.TASK, "noop.task", Map.of()),
                         new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review",
                                 Map.of("allowed_actions", List.of("approve", "reject"))),
                         new NodeDefinition("after.approved", NodeKind.TASK, "noop.task", Map.of())
                 ),
-                List.of(new EdgeDefinition("gate.contract_review", "approved", "after.approved"))
+                List.of(
+                        new EdgeDefinition("before.review", "completed", "gate.contract_review"),
+                        new EdgeDefinition("gate.contract_review", "approved", "after.approved"))
         );
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-review-decide", definition);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, entry,
+                dev.dual.core.workflow.NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
         var command = new ReviewDecideCommand();
         command.workdir = tempDir;

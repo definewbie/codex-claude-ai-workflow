@@ -1,6 +1,6 @@
 {
   "workflowId" : "agent-lifecycle-full",
-  "version" : 6,
+  "version" : 7,
   "entryNodeId" : "context.intake_claude_brainstorm",
   "nodes" : [ {
     "id" : "context.intake_claude_brainstorm",
@@ -383,6 +383,12 @@
     }
   }, {
     "from" : "intake.decision",
+    "on" : "BLOCKED",
+    "to" : "gate.human_requirement_review",
+    "condition" : null,
+    "metadata" : { "transitionType" : "normal", "branchGroupId" : "", "required" : true, "purpose" : "", "joinStrategy" : "", "loopReason" : "" }
+  }, {
+    "from" : "intake.decision",
     "on" : "NEEDS_REVISION",
     "to" : "intake.claude_brainstorm",
     "condition" : null,
@@ -526,6 +532,12 @@
     }
   }, {
     "from" : "design.decision",
+    "on" : "BLOCKED",
+    "to" : "gate.human_design_approval",
+    "condition" : null,
+    "metadata" : { "transitionType" : "normal", "branchGroupId" : "", "required" : true, "purpose" : "", "joinStrategy" : "", "loopReason" : "" }
+  }, {
+    "from" : "design.decision",
     "on" : "NEEDS_REVISION",
     "to" : "design.claude_design",
     "condition" : null,
@@ -615,6 +627,12 @@
       "joinStrategy" : "",
       "loopReason" : ""
     }
+  }, {
+    "from" : "plan.decision",
+    "on" : "BLOCKED",
+    "to" : "gate.human_plan_approval",
+    "condition" : null,
+    "metadata" : { "transitionType" : "normal", "branchGroupId" : "", "required" : true, "purpose" : "", "joinStrategy" : "", "loopReason" : "" }
   }, {
     "from" : "plan.decision",
     "on" : "NEEDS_REVISION",

@@ -28,6 +28,7 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     @Override
     public NodeResult openOrInspect(GateContext context) throws Exception {
+        assertBlockedSourceMatchesReview(context);
         var allowedActions = allowedActions(context);
         var packetRef = reviewPacketRef(context, ".md");
         var packetJsonRef = reviewPacketRef(context, ".json");
@@ -38,6 +39,17 @@ public final class HumanReviewGateHandler implements GateHandler {
                 "review_packet", packetRef,
                 "review_packet_json", packetJsonRef
         ));
+    }
+
+    private void assertBlockedSourceMatchesReview(GateContext context) {
+        if (!"BLOCKED".equals(context.sourceOutcome())) {
+            return;
+        }
+        var decision = latestAgentDecision(context).decision();
+        if (!"BLOCKED".equals(decision)) {
+            throw new IllegalStateException(
+                    "BLOCKED gate source does not match the validated reviewer decision");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -71,6 +83,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("gateNodeDefinitionId", context.instance().nodeDefinitionId());
         packet.put("stageId", context.instance().stageId());
         packet.put("iterationId", context.instance().iterationId());
+        packet.put("sourceOutcome", context.sourceOutcome());
         packet.put("allowedActions", allowedActions);
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("inputArtifacts", inputArtifactSummaries(context));
@@ -96,6 +109,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("- Gate Instance: ").append(context.instance().nodeInstanceId()).append("\n");
         builder.append("- Stage: ").append(context.instance().stageId()).append("\n");
         builder.append("- Iteration: ").append(context.instance().iterationId()).append("\n");
+        builder.append("- Source Outcome: ").append(context.sourceOutcome()).append("\n");
         builder.append("- Allowed Actions: ").append(String.join(", ", allowedActions)).append("\n\n");
 
         appendOperatorGuidance(builder, context, allowedActions);

@@ -187,7 +187,10 @@ final class RoutingEngine {
                         LedgerUtils.allowedActions(nextDefinition),
                         Instant.now(),
                         null,
-                        Map.of("subject_input_refs", List.copyOf(outputRefs))
+                        Map.of(
+                                "subject_input_refs", List.copyOf(outputRefs),
+                                "source_outcome", outcome
+                        )
                     ));
             }
 
@@ -336,7 +339,12 @@ final class RoutingEngine {
         if (!hasEdge && !actionAllowed) {
             throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
         }
-        resolveGateDocument(paths, current, node, canonicalAction, note);
+        var gate = requireOpenGate(paths, current, node);
+        var sourceOutcome = text(gate.result().get("source_outcome"));
+        if ("BLOCKED".equals(sourceOutcome) && (note == null || note.isBlank())) {
+            throw new IOException("a decision note is required for a BLOCKED human gate");
+        }
+        resolveGateDocument(paths, gate, canonicalAction, note);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction, node.inputRefs(), Map.of(
                 "human_action", canonicalAction,
                 "requested_action", action,
@@ -358,12 +366,10 @@ final class RoutingEngine {
         return action;
     }
 
-    private void resolveGateDocument(
+    private GateDocument requireOpenGate(
             WorkstreamPaths paths,
             WorkflowCurrentDocument current,
-            NodeInstanceDocument node,
-            String action,
-            String note
+            NodeInstanceDocument node
     ) throws IOException {
         for (var gateId : current.openGateIds()) {
             var gatePath = paths.gateJson(gateId);
@@ -371,11 +377,20 @@ final class RoutingEngine {
                 continue;
             }
             var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
-            if (gate.nodeInstanceId().equals(node.nodeInstanceId())) {
-                jsonWriter.write(gatePath, gate.resolved(action, note));
-                return;
+            if (gate.nodeInstanceId().equals(node.nodeInstanceId()) && "open".equals(gate.status())) {
+                return gate;
             }
         }
+        throw new IOException("no matching open gate document for node: " + node.nodeInstanceId());
+    }
+
+    private void resolveGateDocument(
+            WorkstreamPaths paths,
+            GateDocument gate,
+            String action,
+            String note
+    ) throws IOException {
+        jsonWriter.write(paths.gateJson(gate.gateId()), gate.resolved(action, note));
     }
 
     private void completeWorkflow(

@@ -165,6 +165,21 @@ public final class WorkflowFileLedger {
         return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);
     }
 
+    public GateDocument loadOpenGateForNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
+        var current = loadCurrent(paths);
+        for (var gateId : current.openGateIds()) {
+            var gatePath = paths.gateJson(gateId);
+            if (!Files.isRegularFile(gatePath)) {
+                continue;
+            }
+            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            if (nodeInstanceId.equals(gate.nodeInstanceId()) && "open".equals(gate.status())) {
+                return gate;
+            }
+        }
+        throw new IOException("no matching open gate document for node: " + nodeInstanceId);
+    }
+
     public NodeInstance loadCoreNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
         var node = loadNode(paths, nodeInstanceId);
         return new NodeInstance(
