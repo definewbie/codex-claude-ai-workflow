@@ -75,6 +75,9 @@ class AgentResultPromptContractTest {
         assertTrue(intake.contains("do not delete existing clause IDs"));
         assertTrue(intake.contains(
                 "`result.scope.included` is the exhaustive authorization set for permitted repository changes"));
+        assertTrue(intake.contains("Each scope path must name one exact file, not a directory"));
+        assertTrue(intake.contains("must not end with `/`"));
+        assertTrue(intake.contains("no `./`, `..`, repeated separators"));
         assertTrue(intake.contains(
                 "Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path"));
         assertTrue(intake.contains("Never describe the typed scope as illustrative or non-exhaustive"));
@@ -191,6 +194,9 @@ class AgentResultPromptContractTest {
         assertTrue(prompt.contains("node-prev:0123456789abcdef"));
         assertTrue(prompt.contains("CO-1"));
         assertTrue(prompt.contains("CO-2"));
+        assertTrue(prompt.contains("Each scope path must name one exact file, not a directory"));
+        assertTrue(prompt.contains("must not end with `/`"));
+        assertTrue(prompt.contains("no `./`, `..`, repeated separators"));
         assertFalse(prompt.contains("\"revision_responses\""));
         assertFalse(prompt.contains("copying its `id` and `text` character-for-character"));
         assertTrue(validator.validate(

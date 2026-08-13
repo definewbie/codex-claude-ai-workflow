@@ -10,6 +10,10 @@ import java.util.Set;
 public final class AgentResultPromptContract {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    private static final String CANONICAL_SCOPE_PATH_REQUIREMENT =
+            "Each scope path must name one exact file, not a directory; it must be repository-relative, "
+                    + "must not end with `/`, and must already be canonical (no `./`, `..`, repeated separators, "
+                    + "backslashes, leading/trailing whitespace, `.git`, or `.agent` segments). ";
 
     private AgentResultPromptContract() {
     }
@@ -75,7 +79,8 @@ public final class AgentResultPromptContract {
                         + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
-                        + "paths. Dual derives CREATE/MODIFY from the effective worktree. `section` is authoritative; clause IDs are opaque "
+                        + "paths. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+                        + "Dual derives CREATE/MODIFY from the effective worktree. `section` is authoritative; clause IDs are opaque "
                         + "and their prefixes do not determine section. "
                         + closedItemFields("result.obligation_patches",
                         new AgentResultEnvelope.ObligationPatch(
@@ -87,7 +92,8 @@ public final class AgentResultPromptContract {
                                 List.of(), List.of()));
             }
             return "`result.scope.included` is the exhaustive authorization set for permitted repository changes; "
-                    + "each entry names one exact repository-relative path. Dual derives CREATE/MODIFY from the effective worktree. "
+                    + "each entry names one exact repository-relative path. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+                    + "Dual derives CREATE/MODIFY from the effective worktree. "
                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
                     + "risks, and other prose cannot authorize an undeclared path. Never describe the typed scope "
                     + "as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, "
