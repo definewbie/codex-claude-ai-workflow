@@ -8,25 +8,32 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v9 / NON-PROVIDER PREFLIGHT AUTHORIZED
+## Current Active Step: Intake Scope-Operation Fact Projection / IMPLEMENTED, DIFF REVIEW REQUIRED
 
-> v8 workstream 已成为历史证据：真实 self-test sidecar 产出 `SELF_TEST_INCOMPLETE`，但旧
-> terminal-delivery@2 把 Agent task 的 execution outcome `completed` 直接路由到 artifact validation，直到
-> acceptance context 才拒绝，属于 self-test semantic decision 未被 routing 强制消费的 late rejection。
+> v9 fresh workstream `ws-20260813T115256Z-8G74` 已消费。fresh package、target identity、PostgreSQL 与双
+> provider probes 均 PASS；首个 intake Agent run 正常 `end_turn`，strict JSON、schema 和 Agent result
+> contract 均有效，但 proposal 把不存在的 `README.md` 声明为 `MODIFY`，required artifact contract 在
+> reviewer 与实现副作用前 fail closed。workflow 进入 `WAITING_FOR_RECOVERY`，target 与 fresh worktree 均无
+> 业务代码改动，因此本轮是有效 `FAIL`，不是 provider、parser、transport 或 stale artifact 导致的 `INVALID`。
 >
-> checkpoint `b2306882` 已将该边界收敛为 `implement.self_test_decision`：`SELF_TEST_COMPLETE` 进入
-> artifact validation，`SELF_TEST_INCOMPLETE` 进入一次 bounded implementation repair，`BLOCKED` 进入需
-> 非空 note 的 human implementation repair gate。revision budget 同时改为按 `(trigger owner, repair target)`
-> 计数，避免 self-test 与 human acceptance 共用 `context.implement_claude` 时互相扣减预算。三个 bundled
-> workflow 已同步，focused `179/0`、full reactor `1218/0/0/0`、两轮 CC review PASS。
+> 根因不应简化为模型偏差。`TaskContractProposalValidator` 用 workspace filesystem 判定 `CREATE/MODIFY`，
+> 但 seed-only intake 同时禁止工具调用；此时 `repo-map.json` 的来源仅是尚未存在的 task contract 与 Git
+> evidence，所以 files 为空，prompt 没有投影 authoritative existing-path fact。当前 active objective 是收敛
+> 这一信息边界：validator 与 prompt 必须消费同一份 deterministic repository-baseline fact；不得自动把
+> `MODIFY` 改成 `CREATE`，不得放宽 validator，也不得通过 retry 掩盖缺口。
 >
-> 实现提交 `b2306882`，审查证据提交 `901c0432`。clean SHA 上 fresh CLI/server package 已 PASS，JAR
-> hashes 已记录。新的产品 Gate：
-> `docs/testing/verification-gates/20260813-terminal-delivery-captcha-auth-completion-v9.md`。产品完整交付仍是
-> 唯一主目标；self-test repair 仅在自然触发时形成条件性 `PROVEN`，不得制造失败。当前只授权 Gate 独立
-> review。独立 Gate review 为 PASS（0 P0 / 0 P1）；两个非阻塞 P2 已在提交前消歧并补充 focused test
-> 复现清单。当前授权提交 Gate + active plan，并执行 Git/workflow/JAR/target/PostgreSQL non-provider
-> preflight；双 provider probes、provider 调用与 fresh workstream 尚未授权。
+> v9 报告位于 `docs/testing/real-case-reports/20260813T114916Z/`，external preflight 已按原始 SHA-256
+> 固化。captcha-auth 仍为 `NOT ACHIEVED`；self-test repair 未被运行到，仍为 `ENFORCED / NOT PROVEN`。
+> 原子实施计划已落到
+> `docs/plans/intake-scope-operation-fact-projection-plan-20260813.zh-CN.md`：Agent-facing contract 只声明 exact
+> path，Dual 由单一 resolver 根据 effective worktree 派生 durable `CREATE/MODIFY`；initial 与 revision patch
+> 同步收敛，不扩大 repo-map、不增加 correction/retry。CC 设计评审已 `PASS`；实现现已完成，focused tests
+> `55/0/0/0`、受影响 ACP adapter tests `41/0/0/0`、full Maven reactor `1223/0/0/0`，
+> `git diff --check` clean。当前成熟度为 deterministic `ENFORCED / NOT PROVEN`，等待 CC 独立代码级 diff
+> review；review 前不提交、不 retry、不创建第二个 provider 样本或新 phase。失败表面同步拆分为：Agent-facing
+> path shape/resolution 错误使用 `TASK_CONTRACT_SCOPE_RESOLUTION_FAILED`，resolver 之后 durable operation 被篡改或
+> 与 filesystem 相反仍由 `TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED` fail closed；routing/recovery 不按这两个
+> code 分支。
 
 ## Historical Active Step: Captcha-Auth Completion v8 / CONSUMED, PRODUCT NOT ACHIEVED
 

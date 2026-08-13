@@ -157,8 +157,16 @@ public final class ArtifactContractValidator {
                         "revision iteration requires task_contract_revision_patch",
                         Map.of()));
             }
-            proposal = resultProjector.taskContractProposal(
-                    (AgentResultEnvelope.TaskContractProposalResult) envelope.result());
+            var proposalResult = (AgentResultEnvelope.TaskContractProposalResult) envelope.result();
+            var resolvedScope = new TaskContractScopeResolver().resolve(
+                    proposalResult.scope().included(), root);
+            if (!resolvedScope.valid()) {
+                return ProposalResolution.failure(ContractViolation.of(
+                        "TASK_CONTRACT_SCOPE_RESOLUTION_FAILED",
+                        "task contract scope paths could not be resolved",
+                        Map.of("errors", resolvedScope.errors())));
+            }
+            proposal = resultProjector.taskContractProposal(proposalResult, resolvedScope.entries());
         } else {
             if (!context.revision()) {
                 return ProposalResolution.failure(ContractViolation.of(
@@ -167,7 +175,7 @@ public final class ArtifactContractValidator {
                         Map.of()));
             }
             var merged = revisionMerger.merge(
-                    context, (AgentResultEnvelope.TaskContractRevisionPatchResult) envelope.result());
+                    context, (AgentResultEnvelope.TaskContractRevisionPatchResult) envelope.result(), root);
             if (!merged.valid()) {
                 return ProposalResolution.failure(ContractViolation.of(
                         "TASK_CONTRACT_REVISION_PATCH_INVALID",

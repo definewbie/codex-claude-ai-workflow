@@ -2,7 +2,10 @@ package dev.dual.runtime.handler;
 
 import dev.dual.core.contract.TaskContract;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TaskContractProposalRevisionMergerTest {
     private final TaskContractProposalRevisionMerger merger = new TaskContractProposalRevisionMerger();
+
+    @TempDir
+    Path workspace;
 
     @Test
     void capturedAc6BaselineIsPreservedWhileDeclaredClauseAndScopeChangesMerge() {
@@ -31,15 +37,14 @@ class TaskContractProposalRevisionMergerTest {
                                 List.of(), List.of()),
                         new AgentResultEnvelope.ObligationPatch(
                                 "CO-6", List.of("TR-6"), List.of(),
-                                List.of(new TaskContract.ScopeEntry(
-                                        "src/test/java/com/captcha/auth/service/UserServiceTest.java",
-                                        TaskContract.ScopeOperation.CREATE)),
+                                List.of(new AgentResultEnvelope.ProposalScopePath(
+                                        "src/test/java/com/captcha/auth/service/UserServiceTest.java")),
                                 List.of()),
                         new AgentResultEnvelope.ObligationPatch(
                                 "CO-7", List.of("TR-6"), List.of(), List.of(),
                                 List.of("src/test/java/com/captcha/auth/service/UserServiceTest.java"))));
 
-        var result = merger.merge(context, patch);
+        var result = merger.merge(context, patch, workspace);
 
         assertTrue(result.valid(), result.errors().toString());
         assertEquals("Captcha challenges expire and cannot be reused.",
@@ -73,7 +78,7 @@ class TaskContractProposalRevisionMergerTest {
                                         AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
                                         "AC-8", "two")), List.of(), List.of())));
 
-        var result = merger.merge(context, patch);
+        var result = merger.merge(context, patch, workspace);
 
         assertFalse(result.valid());
         assertTrue(result.errors().contains("REVISION_BASE_PROPOSAL_ID_MISMATCH"));
@@ -97,7 +102,7 @@ class TaskContractProposalRevisionMergerTest {
                                 "TR-NAMED-BUT-AC-SECTION", "Typed section is authoritative.")),
                         List.of(), List.of())));
 
-        var result = merger.merge(context, patch);
+        var result = merger.merge(context, patch, workspace);
 
         assertTrue(result.valid(), result.errors().toString());
         assertEquals("Typed section is authoritative.",
@@ -118,10 +123,28 @@ class TaskContractProposalRevisionMergerTest {
                                 "AC-MISSING", "Must not be synthesized.")),
                         List.of(), List.of())));
 
-        var result = merger.merge(context, patch);
+        var result = merger.merge(context, patch, workspace);
 
         assertFalse(result.valid());
         assertEquals(List.of("UNKNOWN_CLAUSE_REPLACE_TARGET: AC-MISSING"), result.errors());
+    }
+
+    @Test
+    void existingRevisionScopeAdditionResolvesToModify() throws Exception {
+        Files.writeString(workspace.resolve("README.md"), "baseline\n");
+        var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Add exact scope")));
+        var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "scope",
+                context.previousReference().proposalId(), context.previousReference().sha256(),
+                List.of(new AgentResultEnvelope.ObligationPatch(
+                        "CO-1", List.of("AC-8"), List.of(),
+                        List.of(new AgentResultEnvelope.ProposalScopePath("README.md")), List.of())));
+
+        var result = merger.merge(context, patch, workspace);
+
+        assertTrue(result.valid(), result.errors().toString());
+        assertTrue(result.proposal().scope().included().contains(
+                new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)));
     }
 
     private static TaskContractRevisionContextResolver.Context context() {

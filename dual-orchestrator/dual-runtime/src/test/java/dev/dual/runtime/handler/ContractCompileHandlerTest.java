@@ -506,25 +506,30 @@ class ContractCompileHandlerTest {
             List<String> evidenceRefs
     ) throws Exception {
         var directory = outputDir(root, runId);
+        var proposalResult = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "proposal ready", false,
+                objective, new AgentResultEnvelope.ProposalScope(
+                        included.stream()
+                                .map(entry -> new AgentResultEnvelope.ProposalScopePath(entry.path()))
+                                .toList(),
+                        List.of("No unrelated changes")),
+                envelopeClauses("AC", "The requested behavior is observable", "Focused verification passes"),
+                envelopeClauses("TEST", "Run focused verification"),
+                envelopeClauses("CONSTRAINT", "Keep the change scoped"),
+                envelopeClauses("NON_GOAL", "No unrelated refactor"),
+                envelopeClauses("RISK", "Regression risk"),
+                evidenceRefs, questions, revisionResponses);
         var envelope = new AgentResultEnvelope(
                 1, WORKSTREAM_ID, runId, "intake.claude_brainstorm",
-                new AgentResultEnvelope.TaskContractProposalResult(
-                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "proposal ready", false,
-                        objective, new AgentResultEnvelope.ProposalScope(
-                                included,
-                                List.of("No unrelated changes")),
-                        envelopeClauses("AC", "The requested behavior is observable", "Focused verification passes"),
-                        envelopeClauses("TEST", "Run focused verification"),
-                        envelopeClauses("CONSTRAINT", "Keep the change scoped"),
-                        envelopeClauses("NON_GOAL", "No unrelated refactor"),
-                        envelopeClauses("RISK", "Regression risk"),
-                        evidenceRefs, questions, revisionResponses));
+                proposalResult);
         var output = directory.resolve("intake-claude-brainstorm.json");
         var outputRef = relative(root, output);
         Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
-        var document = new AgentResultDocumentProjector().outputContract(
+        var projector = new AgentResultDocumentProjector();
+        var resolvedProposal = projector.taskContractProposal(proposalResult, included);
+        var document = projector.outputContract(
                 envelope, ContractRegistry.forNode("intake.claude_brainstorm"), "acpx.agent_run",
-                "inst-intake-" + runId, outputRef);
+                "inst-intake-" + runId, outputRef, resolvedProposal, null);
         ((Map<String, Object>) document.get("task_contract_proposal"))
                 .put("schema_version", proposalSchemaVersion);
         AgentContractSemantics.addSidecarFields(document);

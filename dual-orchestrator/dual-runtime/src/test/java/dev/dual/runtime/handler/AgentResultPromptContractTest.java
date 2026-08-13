@@ -79,7 +79,7 @@ class AgentResultPromptContractTest {
                 "Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path"));
         assertTrue(intake.contains("Never describe the typed scope as illustrative or non-exhaustive"));
         assertTrue(intake.contains(
-                "When a revision obligation identifies a scope gap, update the typed path-and-operation entries directly"));
+                "When a revision obligation identifies a scope gap, update the typed path entries directly"));
         assertTrue(productReview.contains(
                 "result.contract_obligations` item is a closed object with exactly these fields: [id, text]"));
         assertTrue(intake.contains(
@@ -134,14 +134,29 @@ class AgentResultPromptContractTest {
     }
 
     @Test
-    void intakePromptUsesTypedScopeEntriesForModifyAndCreate() {
+    void intakePromptDeclaresPathsWhileDualOwnsScopeOperations() {
         var intake = AgentResultPromptContract.render(
                 "ws-1", "run-1", "intake.claude_brainstorm",
                 "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"));
 
-        assertTrue(intake.contains("\"operation\" : \"MODIFY\""));
-        assertTrue(intake.contains("\"operation\" : \"CREATE\""));
+        assertTrue(intake.contains("Dual derives CREATE/MODIFY from the effective worktree"));
+        assertTrue(intake.contains("\"path\" : \"repo/relative/existing.ext\""));
+        assertFalse(intake.contains("\"operation\""));
         assertFalse(intake.contains("new:repo/"));
+    }
+
+    @Test
+    void intakeOldScopeOperationShapeIsRejectedAsUnknownInput() throws Exception {
+        var intake = AgentResultPromptContract.render(
+                "ws-1", "run-1", "intake.claude_brainstorm",
+                "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"));
+        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(
+                intake.substring(intake.indexOf('{')));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.path("result").path("scope")
+                .path("included").get(0)).put("operation", "MODIFY");
+
+        assertFalse(parser.parse(objectMapper.writeValueAsString(envelope)).valid());
     }
 
     @Test

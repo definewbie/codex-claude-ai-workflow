@@ -368,6 +368,7 @@ final class TaskContractProposalValidator {
             errors.add("scope.included must be an exact file path, not a directory: " + ref.path());
             return;
         }
+        // Resolution and this durable guard run synchronously against the same effective worktree.
         if (ref.operation() == TaskContract.ScopeOperation.MODIFY && !Files.exists(path)) {
             errors.add("scope.included MODIFY path does not exist: " + ref.path());
         }

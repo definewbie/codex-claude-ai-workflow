@@ -56,10 +56,10 @@ def task_proposal() -> dict:
         "needs_human_input": False,
         "objective": "Add goodbye() and document it without changing command-line output.",
         "scope": {
-            "included": [
-                {"path": "main.py", "operation": "MODIFY"},
-                {"path": "README.md", "operation": "MODIFY"},
-            ],
+        "included": [
+            {"path": "main.py"},
+            {"path": "README.md"},
+        ],
             "excluded": [
                 "Do not change __main__ output",
                 "Do not add dependencies",

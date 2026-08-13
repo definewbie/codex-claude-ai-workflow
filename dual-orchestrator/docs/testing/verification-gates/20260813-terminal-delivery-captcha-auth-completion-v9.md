@@ -2,7 +2,7 @@
 
 日期：2026-08-13
 
-状态：`DRAFT / INDEPENDENT REVIEW REQUIRED / PROVIDER NOT AUTHORIZED / NOT YET RUN`
+状态：`CONSUMED / FAIL / PRODUCT NOT ACHIEVED`
 
 本 Gate 的唯一主目标是完成 captcha-auth 产品。checkpoint `b2306882` 修复的 self-test semantic repair
 routing 只在真实 self-test 自然产生 `SELF_TEST_INCOMPLETE` 或 `BLOCKED` 时形成条件性技术结论；不得为了
@@ -130,6 +130,23 @@ UI/CLI 只是 command 入口；最终判定只读取 ledger 的 open/resolved ga
 - captcha-auth：`NOT ACHIEVED`，只有本 Gate 的产品 PASS 条件全部成立后才可升级；
 - 本 Gate 不新增 runner monitor、parser fallback、retry、module、registry、engine 或平台能力。
 
+## Real-Case Evidence
+
+- Workstream：`ws-20260813T115256Z-8G74`；workflow identity 为
+  `agent-lifecycle-terminal-delivery@3`（31 nodes / 52 edges / 9 nominal Agent nodes）。
+- Fresh package、target identity、PostgreSQL 和双 provider probes 均 PASS；本轮不是 `INVALID`。
+- 首个 Agent run `run-1786621976773` 正常 `end_turn`，process exit code 为 `0`；strict JSON、schema 和
+  Agent result contract 均有效，未触发 presentation normalization 或 bounded correction。
+- required artifact contract 在 reviewer 与实现副作用之前 fail closed：proposal 将不存在的 `README.md`
+  声明为 `MODIFY`，产生 `TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED`。workflow 进入
+  `WAITING_FOR_RECOVERY`，target 与 fresh worktree 均无业务代码改动。
+- 失败同时暴露 Dual-owned 信息闭环缺口：`TaskContractProposalValidator` 用 workspace filesystem 判定
+  `CREATE/MODIFY`，但 seed-only intake prompt 禁止工具调用，context 中的 `repo-map.json` 又因尚无
+  task contract / Git evidence 而为空，未向 Agent 投影任何 authoritative existing-path fact。Dual 因而要求
+  Agent 声明一个它无法从输入确定、但 validator 自己掌握的事实。
+- 本轮没有到达 self-test routing；checkpoint `b2306882` 保持 `ENFORCED / NOT PROVEN`。
+
 ## Result
 
-`DRAFT / INDEPENDENT REVIEW REQUIRED / PROVIDER NOT AUTHORIZED / NOT YET RUN`。
+`FAIL / CONSUMED / PRODUCT NOT ACHIEVED`。不得 retry 本 workstream，也不得在修复 scope-operation 事实投影
+边界前创建第二个样本。

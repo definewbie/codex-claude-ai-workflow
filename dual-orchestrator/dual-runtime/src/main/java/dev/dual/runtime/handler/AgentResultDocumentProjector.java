@@ -46,9 +46,12 @@ final class AgentResultDocumentProjector {
         document.put("control_source", Map.of("kind", "strict_agent_result_envelope"));
 
         switch (result) {
-            case AgentResultEnvelope.TaskContractProposalResult proposal -> {
+            case AgentResultEnvelope.TaskContractProposalResult ignored -> {
+                if (resolvedProposal == null) {
+                    throw new IllegalStateException("initial proposal must be scope-resolved before projection");
+                }
                 evidenceDefaults(document);
-                document.put("task_contract_proposal", taskContractProposalMap(proposal));
+                document.put("task_contract_proposal", taskContractProposalMap(resolvedProposal));
             }
             case AgentResultEnvelope.TaskContractRevisionPatchResult ignored -> {
                 if (resolvedProposal == null || derivation == null) {
@@ -138,12 +141,15 @@ final class AgentResultDocumentProjector {
                 .toList();
     }
 
-    TaskContractProposal taskContractProposal(AgentResultEnvelope.TaskContractProposalResult result) {
+    TaskContractProposal taskContractProposal(
+            AgentResultEnvelope.TaskContractProposalResult result,
+            List<dev.dual.core.contract.TaskContract.ScopeEntry> resolvedScope
+    ) {
         return new TaskContractProposal(
                 result.artifactType(),
                 TaskContractProposal.SCHEMA_VERSION,
                 result.objective(),
-                new TaskContractProposal.Scope(result.scope().included(), result.scope().excluded()),
+                new TaskContractProposal.Scope(resolvedScope, result.scope().excluded()),
                 proposalClauses(result.acceptanceCriteria()),
                 proposalClauses(result.testRequirements()),
                 proposalClauses(result.constraints()),
@@ -153,35 +159,6 @@ final class AgentResultDocumentProjector {
                 result.openQuestions(),
                 revisionResponses(result.revisionResponses())
         );
-    }
-
-    private Map<String, Object> taskContractProposalMap(
-            AgentResultEnvelope.TaskContractProposalResult result
-    ) {
-        var proposal = new LinkedHashMap<String, Object>();
-        proposal.put("artifact_type", result.artifactType());
-        proposal.put("schema_version", TaskContractProposal.SCHEMA_VERSION);
-        proposal.put("objective", result.objective());
-        proposal.put("scope", Map.of(
-                "included", result.scope().included().stream()
-                        .map(entry -> Map.of(
-                                "path", entry.path(),
-                                "operation", entry.operation().name()))
-                        .toList(),
-                "excluded", result.scope().excluded()));
-        proposal.put("acceptance_criteria", clauseMaps(result.acceptanceCriteria()));
-        proposal.put("test_requirements", clauseMaps(result.testRequirements()));
-        proposal.put("constraints", clauseMaps(result.constraints()));
-        proposal.put("non_goals", clauseMaps(result.nonGoals()));
-        proposal.put("risk_areas", clauseMaps(result.riskAreas()));
-        proposal.put("evidence_refs", result.evidenceRefs());
-        proposal.put("open_questions", result.openQuestions());
-        proposal.put("revision_responses", result.revisionResponses().stream()
-                .map(response -> Map.of(
-                        "review_obligation_id", response.reviewObligationId(),
-                        "resolved_by_clause_ids", response.resolvedByClauseIds()))
-                .toList());
-        return proposal;
     }
 
     private static List<TaskContractProposal.ContractClause> proposalClauses(

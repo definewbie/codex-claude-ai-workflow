@@ -2,8 +2,6 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import dev.dual.core.contract.TaskContract;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -77,7 +75,7 @@ public final class AgentResultPromptContract {
                         + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
-                        + "paths and uppercase CREATE/MODIFY. `section` is authoritative; clause IDs are opaque "
+                        + "paths. Dual derives CREATE/MODIFY from the effective worktree. `section` is authoritative; clause IDs are opaque "
                         + "and their prefixes do not determine section. "
                         + closedItemFields("result.obligation_patches",
                         new AgentResultEnvelope.ObligationPatch(
@@ -89,11 +87,11 @@ public final class AgentResultPromptContract {
                                 List.of(), List.of()));
             }
             return "`result.scope.included` is the exhaustive authorization set for permitted repository changes; "
-                    + "each entry names one exact repository-relative path and `CREATE` or `MODIFY`. "
+                    + "each entry names one exact repository-relative path. Dual derives CREATE/MODIFY from the effective worktree. "
                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
                     + "risks, and other prose cannot authorize an undeclared path. Never describe the typed scope "
                     + "as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, "
-                    + "update the typed path-and-operation entries directly and map the obligation to one or more "
+                    + "update the typed path entries directly and map the obligation to one or more "
                     + "genuinely relevant clause IDs. "
                     + "Each task-contract clause must contain stable string fields `id` and `text`. "
                     + "On an initial intake, `result.revision_responses` must be `[]`. "
@@ -187,8 +185,7 @@ public final class AgentResultPromptContract {
                                     AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
                                     "AC-1",
                                     "replacement text")),
-                            List.of(new TaskContract.ScopeEntry(
-                                    "repo/relative/new.ext", TaskContract.ScopeOperation.CREATE)),
+                            List.of(new AgentResultEnvelope.ProposalScopePath("repo/relative/new.ext")),
                             List.of("repo/relative/evidence.ext"))))
                     : new AgentResultEnvelope.TaskContractProposalResult(
                     "task_contract_proposal",
@@ -198,12 +195,8 @@ public final class AgentResultPromptContract {
                     "one clear objective",
                     new AgentResultEnvelope.ProposalScope(
                             List.of(
-                                    new TaskContract.ScopeEntry(
-                                            "repo/relative/existing.ext",
-                                            TaskContract.ScopeOperation.MODIFY),
-                                    new TaskContract.ScopeEntry(
-                                            "repo/relative/new.ext",
-                                            TaskContract.ScopeOperation.CREATE)
+                                    new AgentResultEnvelope.ProposalScopePath("repo/relative/existing.ext"),
+                                    new AgentResultEnvelope.ProposalScopePath("repo/relative/new.ext")
                             ),
                             List.of("explicit non-goal")
                     ),

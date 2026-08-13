@@ -343,7 +343,7 @@ public final class AgentResultEnvelopeValidator {
     }
 
     private static void validateScopeEntries(
-            List<dev.dual.core.contract.TaskContract.ScopeEntry> entries,
+            List<AgentResultEnvelope.ProposalScopePath> entries,
             ValidationErrors errors
     ) {
         if (entries == null) {
@@ -355,9 +355,6 @@ public final class AgentResultEnvelopeValidator {
                 continue;
             }
             requiredText(entry.path(), "result.scope.included.path", errors);
-            if (entry.operation() == null) {
-                errors.reject("result.scope.included.operation is required");
-            }
         }
     }
 

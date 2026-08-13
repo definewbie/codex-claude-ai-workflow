@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import dev.dual.core.contract.TaskContract;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,7 +14,8 @@ import java.util.Map;
 final class TaskContractProposalRevisionMerger {
     MergeResult merge(
             TaskContractRevisionContextResolver.Context context,
-            AgentResultEnvelope.TaskContractRevisionPatchResult patch
+            AgentResultEnvelope.TaskContractRevisionPatchResult patch,
+            Path workspaceRoot
     ) {
         var errors = new ArrayList<String>();
         if (context == null || !context.revision()
@@ -53,8 +55,7 @@ final class TaskContractProposalRevisionMerger {
             }
             for (var entry : safe(obligationPatch.scopeAdditions())) {
                 if (entry != null) {
-                    var key = entry.path() + "\u0000" + entry.operation();
-                    if (!scopeTargets.add(key)) {
+                    if (!scopeTargets.add(entry.path())) {
                         errors.add("DUPLICATE_SCOPE_PATCH_TARGET: " + entry.path());
                     }
                 }
@@ -110,12 +111,24 @@ final class TaskContractProposalRevisionMerger {
         var scope = new ArrayList<>(List.copyOf(previous.scope().included()));
         var evidence = new ArrayList<>(List.copyOf(previous.evidenceRefs()));
         var responses = new ArrayList<TaskContractProposal.RevisionResponse>();
+        var scopeResolver = new TaskContractScopeResolver();
         for (var obligationPatch : patch.obligationPatches()) {
-            scope.addAll(List.copyOf(obligationPatch.scopeAdditions()));
+            var scopeAdditions = safe(obligationPatch.scopeAdditions());
+            if (!scopeAdditions.isEmpty()) {
+                var resolvedScope = scopeResolver.resolve(scopeAdditions, workspaceRoot);
+                if (!resolvedScope.valid()) {
+                    errors.addAll(resolvedScope.errors());
+                    continue;
+                }
+                scope.addAll(resolvedScope.entries());
+            }
             evidence.addAll(List.copyOf(obligationPatch.evidenceRefAdditions()));
             responses.add(new TaskContractProposal.RevisionResponse(
                     obligationPatch.reviewObligationId(),
                     List.copyOf(obligationPatch.resolvedByClauseIds())));
+        }
+        if (!errors.isEmpty()) {
+            return new MergeResult(null, List.copyOf(errors));
         }
         var merged = new TaskContractProposal(
                 "task_contract_proposal",

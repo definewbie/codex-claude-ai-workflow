@@ -183,10 +183,8 @@ class ArtifactContractValidatorTest {
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
                 "Add an API.", new AgentResultEnvelope.ProposalScope(
                         List.of(
-                                new TaskContract.ScopeEntry(
-                                        "README.md", TaskContract.ScopeOperation.MODIFY),
-                                new TaskContract.ScopeEntry(
-                                        "src/issueApi.js", TaskContract.ScopeOperation.CREATE)),
+                                new AgentResultEnvelope.ProposalScopePath("README.md"),
+                                new AgentResultEnvelope.ProposalScopePath("src/issueApi.js")),
                         List.of("package.json")),
                 clauses("AC", "API exists", "Tests pass"), clauses("TEST", "run tests"),
                 clauses("CONSTRAINT", "keep scope bounded"), clauses("NON_GOAL", "no dependencies"),
@@ -207,12 +205,13 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void nonexistentModifyScopeFailsAsArtifactContractNotMissingAgentResult() throws Exception {
+    void capturedV9NewPathsResolveToCreateBeforeSidecarPublication() throws Exception {
         var proposal = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
-                "Modify a missing file.", new AgentResultEnvelope.ProposalScope(
-                        List.of(new TaskContract.ScopeEntry(
-                                "src/missing.js", TaskContract.ScopeOperation.MODIFY)),
+                "Create a new application.", new AgentResultEnvelope.ProposalScope(
+                        List.of(
+                                new AgentResultEnvelope.ProposalScopePath("pom.xml"),
+                                new AgentResultEnvelope.ProposalScopePath("README.md")),
                         List.of()),
                 clauses("AC", "Change is visible", "Tests pass"), clauses("TEST", "run tests"),
                 clauses("CONSTRAINT", "keep scope bounded"), List.of(), List.of(), List.of(), List.of(), List.of());
@@ -221,22 +220,21 @@ class ArtifactContractValidatorTest {
 
         var validated = validate("intake.claude_brainstorm", ref, "run-1");
 
-        assertEquals(NodeStatus.FAILED, validated.status());
-        assertTrue(AgentExecutionResultFacts.agentResultContract(validated).valid());
-        var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
-        assertTrue(artifact.present());
-        assertFalse(artifact.valid());
-        assertEquals("TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED", artifact.errorCode());
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var sidecar = AgentOutputContractDocument.read(
+                tempDir.resolve(".agent/workstreams/ws-1/runs/run-1/outputs/intake.contract.json"),
+                JSON).orElseThrow();
+        assertTrue(sidecar.taskContractProposal().scope().included().stream()
+                .allMatch(entry -> entry.operation() == TaskContract.ScopeOperation.CREATE));
     }
 
     @Test
-    void existingCreateScopeFailsAsArtifactContractNotMissingAgentResult() throws Exception {
+    void existingPathResolvesToModifyBeforeSidecarPublication() throws Exception {
         Files.writeString(tempDir.resolve("README.md"), "# sample\n");
         var proposal = new AgentResultEnvelope.TaskContractProposalResult(
                 "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
-                "Create an existing file.", new AgentResultEnvelope.ProposalScope(
-                        List.of(new TaskContract.ScopeEntry(
-                                "README.md", TaskContract.ScopeOperation.CREATE)),
+                "Update an existing file.", new AgentResultEnvelope.ProposalScope(
+                        List.of(new AgentResultEnvelope.ProposalScopePath("README.md")),
                         List.of()),
                 clauses("AC", "Change is visible", "Tests pass"), clauses("TEST", "run tests"),
                 clauses("CONSTRAINT", "keep scope bounded"), List.of(), List.of(), List.of(), List.of(), List.of());
@@ -245,12 +243,12 @@ class ArtifactContractValidatorTest {
 
         var validated = validate("intake.claude_brainstorm", ref, "run-1");
 
-        assertEquals(NodeStatus.FAILED, validated.status());
-        assertTrue(AgentExecutionResultFacts.agentResultContract(validated).valid());
-        var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
-        assertTrue(artifact.present());
-        assertFalse(artifact.valid());
-        assertEquals("TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED", artifact.errorCode());
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var sidecar = AgentOutputContractDocument.read(
+                tempDir.resolve(".agent/workstreams/ws-1/runs/run-1/outputs/intake.contract.json"),
+                JSON).orElseThrow();
+        assertEquals(TaskContract.ScopeOperation.MODIFY,
+                sidecar.taskContractProposal().scope().included().getFirst().operation());
     }
 
     @Test
@@ -651,7 +649,7 @@ class ArtifactContractValidatorTest {
             List<String> excluded
     ) {
         return new AgentResultEnvelope.ProposalScope(
-                List.of(new TaskContract.ScopeEntry(path, TaskContract.ScopeOperation.MODIFY)),
+                List.of(new AgentResultEnvelope.ProposalScopePath(path)),
                 excluded);
     }
 
