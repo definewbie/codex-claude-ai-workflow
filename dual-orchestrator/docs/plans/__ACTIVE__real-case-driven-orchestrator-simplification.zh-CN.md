@@ -8,7 +8,30 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v10 Gate / INDEPENDENT REVIEW REQUIRED
+## Current Active Step: Captcha-Auth Completion v11 / PREFLIGHT AUTHORIZED
+
+> v10 fresh workstream `ws-20260813T143229Z-BAS8` 已消费。ScopeOperation early boundary、validated proposal
+> reference、Codex product review 与真实 human `BLOCKED -> approved` 决策均通过；产品方明确选择手机号仅接受
+> E.164。随后 compiled `TaskContract` 仍保留与该决定相反的本地号码规则，operator 在 contract review 选择
+> `clarify`。旧 bundled `terminal-delivery@3` 错误地把该语义动作直接路由回确定性 `contract.compile`，且回边
+> 只携带 compiled artifacts，导致 `TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING / review_subject_count=0`，workflow
+> 进入 `WAITING_FOR_RECOVERY`。这是有效技术 FAIL，不是 provider、parser 或模型失败；旧 workstream 不 retry/
+> resume，captcha-auth 仍为 `NOT ACHIEVED`。
+>
+> 根因是 owner 错配：contract clarification 应由 typed proposal owner 处理，compiler 只能消费已验证 proposal，
+> 不能修改业务语义。checkpoint `4afd15e2` 已将三个 bundled workflow 的 `clarify` 收敛为 loop 到
+> `intake.claude_brainstorm`；human note 经新 iteration 成为 lineage-bound typed obligation；resolver 从 verified
+> requirement gate、contract resolution、Codex review 与 proposal reference 恢复唯一 baseline，缺失/篡改
+> fail closed。当前 patch schema 不支持 scope deletion，因此删除了虚假的 `reduce_scope` action/edge/CLI 示例。
+> focused tests 与非沙箱 full Maven reactor PASS，`git diff --check` clean；当前成熟度为
+> `ENFORCED / NOT PROVEN`。
+>
+> 新 Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v11.md`。主目标仍是
+> 完成 captcha-auth；contract clarification 只在自然触发时形成条件性证明，不人为制造。当前授权提交 Gate 与
+> active plan，并执行 fresh package、Dual/target/workflow identity 与隔离 PostgreSQL non-provider preflight；
+> provider probes 与 fresh workstream 只在 preflight PASS 后执行。
+
+## Historical Active Step: Captcha-Auth Completion v10 / FAIL, CONSUMED
 
 > v9 fresh workstream `ws-20260813T115256Z-8G74` 已消费。fresh package、target identity、PostgreSQL 与双
 > provider probes 均 PASS；首个 intake Agent run 正常 `end_turn`，strict JSON、schema 和 Agent result
