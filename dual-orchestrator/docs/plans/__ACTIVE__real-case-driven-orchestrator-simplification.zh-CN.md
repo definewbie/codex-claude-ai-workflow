@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Intake Scope-Operation Fact Projection / IMPLEMENTED, DIFF REVIEW REQUIRED
+## Current Active Step: Captcha-Auth Completion v10 Gate / INDEPENDENT REVIEW REQUIRED
 
 > v9 fresh workstream `ws-20260813T115256Z-8G74` 已消费。fresh package、target identity、PostgreSQL 与双
 > provider probes 均 PASS；首个 intake Agent run 正常 `end_turn`，strict JSON、schema 和 Agent result
@@ -29,11 +29,19 @@
 > path，Dual 由单一 resolver 根据 effective worktree 派生 durable `CREATE/MODIFY`；initial 与 revision patch
 > 同步收敛，不扩大 repo-map、不增加 correction/retry。CC 设计评审已 `PASS`；实现现已完成，focused tests
 > `55/0/0/0`、受影响 ACP adapter tests `41/0/0/0`、full Maven reactor `1223/0/0/0`，
-> `git diff --check` clean。当前成熟度为 deterministic `ENFORCED / NOT PROVEN`，等待 CC 独立代码级 diff
-> review；review 前不提交、不 retry、不创建第二个 provider 样本或新 phase。失败表面同步拆分为：Agent-facing
+> `git diff --check` clean。CC 独立代码级 diff review 已 `PASS`，checkpoint 已提交为 `c753cfc`；当前成熟度为
+> deterministic `ENFORCED / NOT PROVEN`。失败表面同步拆分为：Agent-facing
 > path shape/resolution 错误使用 `TASK_CONTRACT_SCOPE_RESOLUTION_FAILED`，resolver 之后 durable operation 被篡改或
 > 与 filesystem 相反仍由 `TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED` fail closed；routing/recovery 不按这两个
 > code 分支。
+>
+> 下一版产品 Gate 已起草为
+> `docs/testing/verification-gates/20260813-terminal-delivery-captcha-auth-completion-v10.md`。唯一主目标仍是完成
+> captcha-auth；ScopeOperation 只是在首个 reviewer 前必须通过的 early boundary，不单独制造样本或调用。
+> Gate 独立同行评审已 `PASS`，两项非阻塞措辞建议已闭合：human action 必须来自当前 packet 的
+> `allowed_actions`；ScopeOperation 复核以 frozen target tree 为存在性事实来源。提交 Gate、active plan 与
+> review 后，授权 fresh package 和 non-provider preflight；provider probes、workstream 创建与 real-case
+> 仍未授权。
 
 ## Historical Active Step: Captcha-Auth Completion v8 / CONSUMED, PRODUCT NOT ACHIEVED
 
