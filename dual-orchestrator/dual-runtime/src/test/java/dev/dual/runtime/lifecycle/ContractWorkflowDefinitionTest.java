@@ -40,7 +40,7 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
-    void contractVariantRoutesClarifyBackToCompile() {
+    void contractVariantRoutesClarifyBackToTypedProposalOwner() {
         WorkflowDefinition wf = factory.forVariant("contract");
 
         var clarifyEdges = wf.edgesFrom("gate.contract_review").stream()
@@ -49,15 +49,17 @@ class ContractWorkflowDefinitionTest {
 
         assertEquals(1, clarifyEdges.size(),
                 "Expected exactly one edge from gate.contract_review on 'clarify'");
-        assertEquals("contract.compile", clarifyEdges.get(0).to());
+        assertEquals("intake.claude_brainstorm", clarifyEdges.get(0).to());
+        assertEquals("loop", clarifyEdges.get(0).metadata().transitionType());
 
         var reduceScopeEdges = wf.edgesFrom("gate.contract_review").stream()
                 .filter(e -> "reduce_scope".equals(e.on()))
                 .toList();
 
-        assertEquals(1, reduceScopeEdges.size(),
-                "Expected exactly one edge from gate.contract_review on 'reduce_scope'");
-        assertEquals("contract.compile", reduceScopeEdges.get(0).to());
+        assertTrue(reduceScopeEdges.isEmpty(),
+                "Unsupported scope deletion must not be exposed as a working contract-review route");
+        assertFalse(((java.util.List<?>) wf.node("gate.contract_review").config().get("allowed_actions"))
+                .contains("reduce_scope"));
     }
 
     @Test

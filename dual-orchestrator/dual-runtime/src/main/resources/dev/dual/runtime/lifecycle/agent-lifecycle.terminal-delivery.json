@@ -1,6 +1,6 @@
 {
   "workflowId": "agent-lifecycle-terminal-delivery",
-  "version": 3,
+  "version": 4,
   "entryNodeId": "context.intake_claude_brainstorm",
   "nodes": [
     {
@@ -99,7 +99,6 @@
         "allowed_actions": [
           "approve",
           "clarify",
-          "reduce_scope",
           "reject"
         ],
         "max_revisions": 3,
@@ -540,29 +539,15 @@
     {
       "from": "gate.contract_review",
       "on": "clarify",
-      "to": "contract.compile",
+      "to": "intake.claude_brainstorm",
       "condition": null,
       "metadata": {
-        "transitionType": "normal",
+        "transitionType": "loop",
         "branchGroupId": "",
         "required": true,
         "purpose": "",
         "joinStrategy": "",
-        "loopReason": ""
-      }
-    },
-    {
-      "from": "gate.contract_review",
-      "on": "reduce_scope",
-      "to": "contract.compile",
-      "condition": null,
-      "metadata": {
-        "transitionType": "normal",
-        "branchGroupId": "",
-        "required": true,
-        "purpose": "",
-        "joinStrategy": "",
-        "loopReason": ""
+        "loopReason": "Human requested a typed task-contract clarification"
       }
     },
     {

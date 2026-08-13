@@ -156,7 +156,7 @@ class WorkflowDefinitionLoaderTest {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null);
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
-        assertEquals(8, definition.version(), "default full workflow should be loaded from the bundled JSON resource");
+        assertEquals(9, definition.version(), "default full workflow should be loaded from the bundled JSON resource");
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
     }
@@ -214,7 +214,7 @@ class WorkflowDefinitionLoaderTest {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "contract");
 
         assertEquals("agent-lifecycle-contract", definition.workflowId());
-        assertEquals(7, definition.version());
+        assertEquals(8, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
         assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
@@ -226,10 +226,10 @@ class WorkflowDefinitionLoaderTest {
         var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "terminal-delivery");
 
         assertEquals("agent-lifecycle-terminal-delivery", definition.workflowId());
-        assertEquals(3, definition.version());
+        assertEquals(4, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals(31, definition.nodes().size());
-        assertEquals(52, definition.edges().size());
+        assertEquals(51, definition.edges().size());
     }
 
     @Test

@@ -124,6 +124,51 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void contractClarificationResolvesVerifiedProposalAndHumanNoteAsTypedObligation(@TempDir Path root)
+            throws Exception {
+        prepare(root);
+        var proposalRef = writeProposal(
+                root, "run-clarify-base", "Phone authentication", List.of("README.md"), List.of());
+        var reviewRef = writeApprovedReview(root, proposalRef, "run-clarify-review", true);
+        var compiled = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        assertEquals(NodeStatus.COMPLETED, compiled.status(), compiled.result().toString());
+        var note = "Phone registration and login must accept E.164 identifiers only";
+        prepareContractClarificationIteration(root, "iter-002", compiled.outputRefs(), note);
+
+        var resolved = new TaskContractRevisionContextResolver()
+                .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+
+        assertTrue(resolved.valid(), resolved.errors().toString());
+        assertTrue(resolved.context().revision());
+        assertEquals("Phone authentication", resolved.context().previousProposal().objective());
+        assertEquals(1, resolved.context().obligations().size());
+        assertEquals("HUMAN-CLARIFY-1", resolved.context().obligations().getFirst().id());
+        assertEquals(note, resolved.context().obligations().getFirst().text());
+    }
+
+    @Test
+    void contractClarificationCannotBypassVerifiedRequirementGateLineage(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeProposal(
+                root, "run-clarify-tampered", "Phone authentication", List.of("README.md"), List.of());
+        var reviewRef = writeApprovedReview(root, proposalRef, "run-clarify-tampered-review", true);
+        var compiled = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        assertEquals(NodeStatus.COMPLETED, compiled.status(), compiled.result().toString());
+        var resolutionPath = workstreamDir(root).resolve("artifacts/contract-resolution.json");
+        var resolution = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(resolutionPath.toFile());
+        resolution.put("gate_ref", ".agent/workstreams/" + WORKSTREAM_ID + "/gates/missing.json");
+        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(resolutionPath.toFile(), resolution);
+        prepareContractClarificationIteration(root, "iter-002", compiled.outputRefs(), "Require E.164 only");
+
+        var resolved = new TaskContractRevisionContextResolver()
+                .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+
+        assertFalse(resolved.valid());
+        assertTrue(resolved.errors().toString().contains("approved requirement gate referenced"),
+                resolved.errors().toString());
+    }
+
+    @Test
     void blockedReviewCannotUseReadyGateAsApproval(@TempDir Path root) throws Exception {
         prepare(root);
         var proposalRef = writeProposal(root, "run-blocked-mismatch", "Choose phone input semantics",
@@ -745,6 +790,28 @@ class ContractCompileHandlerTest {
             String rejectedReviewRef
     ) throws Exception {
         prepareRevisionIteration(root, revisionIterationId, List.of(rejectedReviewRef));
+    }
+
+    private static void prepareContractClarificationIteration(
+            Path root,
+            String revisionIterationId,
+            List<String> compiledRefs,
+            String note
+    ) throws Exception {
+        var triggerNodeId = "node-gate-contract-review-clarify";
+        var now = Instant.now();
+        var nodes = workstreamDir(root).resolve("nodes");
+        Files.createDirectories(nodes);
+        LEDGER_MAPPER.writeValue(nodes.resolve(triggerNodeId + ".json").toFile(), new NodeInstanceDocument(
+                1, triggerNodeId, "gate.contract_review", NodeKind.GATE, "human.review",
+                NodeStatus.COMPLETED, "stage-gate", INITIAL_ITERATION_ID,
+                compiledRefs, Map.of(), compiledRefs,
+                Map.of("human_action", "clarify", "note", note),
+                "", "", now, now));
+        LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("iterations").resolve(revisionIterationId + ".json").toFile(),
+                WorkflowIterationDocument.revision(
+                        revisionIterationId, 2, INITIAL_ITERATION_ID, triggerNodeId,
+                        "clarify", "intake.claude_brainstorm", note, now));
     }
 
     private static void prepareRevisionIteration(

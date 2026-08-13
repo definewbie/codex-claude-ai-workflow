@@ -182,6 +182,51 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void contractClarificationStartsTypedProposalRevisionBeforeCompilerCanRun() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-contract-clarify"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle", 1, "contract.compile",
+                List.of(
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                        new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "clarify"),
+                                "max_revisions", 3)),
+                        new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of(
+                        new EdgeDefinition("contract.compile", "completed", "gate.contract_review"),
+                        new EdgeDefinition("gate.contract_review", "clarify", "intake.claude_brainstorm", null,
+                                new TransitionMetadata("loop", "", true, "", "",
+                                        "Human requested a typed task-contract clarification"))));
+
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-contract-clarify", definition);
+        var compiler = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var compiledRefs = List.of(
+                ".agent/workstreams/ws-contract-clarify/artifacts/task-contract.json",
+                ".agent/workstreams/ws-contract-clarify/artifacts/contract-resolution.json");
+        ledger.completeAndRoute(paths, definition, compiler.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", compiledRefs, Map.of());
+
+        var waiting = ledger.loadCurrent(paths);
+        var gate = ledger.loadNode(paths, waiting.activeNodeInstanceIds().getFirst());
+        ledger.resolveOpenGate(paths, definition, "clarify", "Require E.164 phone identifiers");
+
+        var current = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        assertEquals("intake.claude_brainstorm", next.nodeDefinitionId());
+        assertEquals(compiledRefs, next.inputRefs());
+        assertFalse(next.iterationId().equals(gate.iterationId()));
+        var iteration = new com.fasterxml.jackson.databind.ObjectMapper()
+                .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                .readValue(paths.iterationJson(next.iterationId()).toFile(), WorkflowIterationDocument.class);
+        assertEquals(gate.nodeInstanceId(), iteration.triggerNodeInstanceId());
+        assertEquals("clarify", iteration.triggerAction());
+        assertEquals("intake.claude_brainstorm", iteration.targetNodeDefinitionId());
+        assertEquals("Require E.164 phone identifiers", iteration.reason());
+    }
+
+    @Test
     void writesTimelineProjectionFromWorkflowAndNodes() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-timeline"));
         Files.createDirectories(paths.workstreamDir());

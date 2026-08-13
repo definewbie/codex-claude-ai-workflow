@@ -14,7 +14,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
         var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
-        assertEquals(8, definition.version());
+        assertEquals(9, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals(NodeKind.TASK, definition.node("context.intake_claude_brainstorm").kind());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());

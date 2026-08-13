@@ -28,7 +28,7 @@ class ContractReviewGateTest {
                 tempDir,
                 "ws",
                 new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of(
-                        "allowed_actions", List.of("approve", "clarify", "reduce_scope", "reject")
+                        "allowed_actions", List.of("approve", "clarify", "reject")
                 )),
                 node("gate.contract_review", NodeKind.GATE, "human.review"),
                 "READY"
@@ -37,10 +37,9 @@ class ContractReviewGateTest {
         assertEquals(NodeStatus.WAITING, result.status());
         assertEquals("open", result.outcome());
         var actions = (List<?>) result.result().get("allowed_actions");
-        assertEquals(4, actions.size());
+        assertEquals(3, actions.size());
         assertTrue(actions.contains("approve"));
         assertTrue(actions.contains("clarify"));
-        assertTrue(actions.contains("reduce_scope"));
         assertTrue(actions.contains("reject"));
     }
 

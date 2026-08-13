@@ -19,7 +19,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
-    @Option(names = "--action", required = true, description = "Gate action, for example approve, approved, revise, clarify, reduce_scope, reject, or complete.")
+    @Option(names = "--action", required = true, description = "Gate action, for example approve, approved, revise, clarify, reject, or complete.")
     String action;
 
     @Option(names = "--note", description = "Optional decision note.")

@@ -3,6 +3,7 @@ package dev.dual.runtime.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.ledger.file.GateDocument;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowIterationDocument;
 
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /** Resolves the exact typed baseline and obligations for one intake revision. */
 public final class TaskContractRevisionContextResolver {
@@ -58,6 +60,10 @@ public final class TaskContractRevisionContextResolver {
             if ("workflow_started".equals(iteration.triggerAction())) {
                 return new Result(new Context(iteration, false, null, null, List.of()), List.of());
             }
+            if ("clarify".equals(iteration.triggerAction())) {
+                return resolveContractClarification(
+                        root, workstreamId, workstreamDir, iteration);
+            }
             if (!"NEEDS_REVISION".equals(iteration.triggerAction())) {
                 return failure("contract revision reached an unsupported iteration trigger",
                         "trigger_action=" + iteration.triggerAction());
@@ -79,7 +85,8 @@ public final class TaskContractRevisionContextResolver {
                         iteration.triggerNodeInstanceId());
             }
             var baselines = verifiedBaselines(
-                    root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId());
+                    root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId(),
+                    Set.of("NEEDS_REVISION"), true);
             if (baselines.size() != 1) {
                 return failure("revision trigger must reference exactly one verified rejected intake review",
                         "review_count=" + baselines.size());
@@ -94,6 +101,82 @@ public final class TaskContractRevisionContextResolver {
         } catch (Exception failure) {
             return failure("revision iteration lineage could not be resolved", message(failure));
         }
+    }
+
+    private Result resolveContractClarification(
+            Path root,
+            String workstreamId,
+            Path workstreamDir,
+            WorkflowIterationDocument iteration
+    ) throws IOException {
+        if (iteration.triggerNodeInstanceId().isBlank() || iteration.parentIterationId().isBlank()) {
+            return failure("contract clarification iteration trigger lineage is incomplete", iteration.iterationId());
+        }
+        var triggerPath = workstreamDir.resolve("nodes").resolve(iteration.triggerNodeInstanceId() + ".json");
+        if (!Files.isRegularFile(triggerPath)) {
+            return failure("contract clarification gate node is missing", triggerPath.toString());
+        }
+        var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);
+        var note = text(trigger.result().get("note"));
+        if (!"gate.contract_review".equals(trigger.nodeDefinitionId())
+                || !iteration.parentIterationId().equals(trigger.iterationId())
+                || trigger.status() != NodeStatus.COMPLETED
+                || !"clarify".equals(text(trigger.result().get("human_action")))
+                || note.isBlank()) {
+            return failure("revision trigger is not a completed contract clarification gate",
+                    iteration.triggerNodeInstanceId());
+        }
+        var resolutionRefs = trigger.inputRefs().stream()
+                .filter(ref -> ref != null && ref.endsWith("/artifacts/contract-resolution.json"))
+                .toList();
+        if (resolutionRefs.size() != 1) {
+            return failure("contract clarification must reference exactly one contract resolution",
+                    "resolution_count=" + resolutionRefs.size());
+        }
+        var resolutionPath = root.resolve(resolutionRefs.getFirst()).normalize();
+        if (!resolutionPath.startsWith(root) || !Files.isRegularFile(resolutionPath)) {
+            return failure("contract clarification resolution artifact is missing", resolutionRefs.getFirst());
+        }
+        var resolution = OBJECT_MAPPER.readValue(resolutionPath.toFile(), ContractResolutionDocument.class);
+        if (!"APPROVE".equals(resolution.decision())
+                || !"human_gate".equals(resolution.approvedBy())
+                || resolution.gateRef() == null || resolution.gateRef().isBlank()) {
+            return failure("contract clarification resolution is not bound to an approved requirement gate",
+                    resolutionRefs.getFirst());
+        }
+        var requirementGatePath = root.resolve(resolution.gateRef()).normalize();
+        if (!requirementGatePath.startsWith(root) || !Files.isRegularFile(requirementGatePath)) {
+            return failure("approved requirement gate referenced by contract resolution is missing",
+                    resolution.gateRef());
+        }
+        var requirementGate = OBJECT_MAPPER.readValue(requirementGatePath.toFile(), GateDocument.class);
+        var gateNodePath = workstreamDir.resolve("nodes").resolve(requirementGate.nodeInstanceId() + ".json");
+        if (!Files.isRegularFile(gateNodePath)) {
+            return failure("approved requirement gate node is missing", requirementGate.nodeInstanceId());
+        }
+        var gateNode = OBJECT_MAPPER.readValue(gateNodePath.toFile(), NodeInstanceDocument.class);
+        var gateAction = text(requirementGate.result().get("human_action"));
+        var subjectRefs = stringList(requirementGate.result().get("subject_input_refs"));
+        if (!"resolved".equals(requirementGate.status())
+                || !"approved".equals(gateAction)
+                || !"gate.human_requirement_review".equals(gateNode.nodeDefinitionId())
+                || !iteration.parentIterationId().equals(gateNode.iterationId())) {
+            return failure("contract resolution requirement gate lineage is invalid", resolution.gateRef());
+        }
+        var baselines = verifiedBaselines(
+                root, workstreamId, workstreamDir, subjectRefs, iteration.parentIterationId(),
+                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"), false);
+        if (baselines.size() != 1) {
+            return failure("contract clarification must resolve exactly one verified approved proposal",
+                    "review_count=" + baselines.size());
+        }
+        var baseline = baselines.getFirst();
+        return new Result(new Context(
+                iteration,
+                true,
+                baseline.previousProposal(),
+                baseline.previousReference(),
+                List.of(new AgentResultEnvelope.ReviewObligation("HUMAN-CLARIFY-1", note))), List.of());
     }
 
     static boolean nodeBelongsToIteration(
@@ -117,7 +200,9 @@ public final class TaskContractRevisionContextResolver {
             String workstreamId,
             Path workstreamDir,
             List<String> refs,
-            String expectedIterationId
+            String expectedIterationId,
+            Set<String> allowedDecisions,
+            boolean requireObligations
     ) throws IOException {
         var baselines = new ArrayList<Baseline>();
         for (var ref : refs) {
@@ -133,9 +218,9 @@ public final class TaskContractRevisionContextResolver {
                     || AgentOutputLineageVerifier.violation(root, workstreamId, path, document.get()).isPresent()
                     || !"intake.codex_product_review".equals(document.get().nodeId())
                     || !"agent_output_contract".equals(document.get().sourceArtifactType())
-                    || !"NEEDS_REVISION".equals(document.get().decision())
+                    || !allowedDecisions.contains(document.get().decision())
                     || document.get().reviewSubject() == null
-                    || document.get().contractObligations().isEmpty()
+                    || (requireObligations && document.get().contractObligations().isEmpty())
                     || !nodeBelongsToIteration(
                             workstreamDir, document.get().nodeInstanceId(), expectedIterationId)
                     || !nodeBelongsToIteration(
@@ -158,6 +243,13 @@ public final class TaskContractRevisionContextResolver {
                     proposalDocument.get().taskContractProposal()));
         }
         return List.copyOf(baselines);
+    }
+
+    private static List<String> stringList(Object value) {
+        if (!(value instanceof List<?> values)) {
+            return List.of();
+        }
+        return values.stream().map(String::valueOf).filter(item -> !item.isBlank()).toList();
     }
 
     private static Path workstreamDir(Path workspaceRoot, String workstreamId) {

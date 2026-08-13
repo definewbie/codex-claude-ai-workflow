@@ -31,7 +31,7 @@ class ReviewDecideCommandTest {
                 List.of(
                         new NodeDefinition("before.review", NodeKind.TASK, "noop.task", Map.of()),
                         new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review",
-                                Map.of("allowed_actions", List.of("approve", "clarify", "reduce_scope", "reject"))),
+                                Map.of("allowed_actions", List.of("approve", "clarify", "reject"))),
                         new NodeDefinition("after.reject", NodeKind.TASK, "noop.task", Map.of())
                 ),
                 List.of(

@@ -22,7 +22,7 @@ class TerminalDeliveryWorkflowDefinitionTest {
 
         assertEquals("agent-lifecycle-terminal-delivery", terminal.workflowId());
         assertEquals(31, terminal.nodes().size());
-        assertEquals(52, terminal.edges().size());
+        assertEquals(51, terminal.edges().size());
         assertEquals(9, terminal.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
