@@ -118,6 +118,12 @@ public final class ContractRegistry {
             Set.of("READY_TO_IMPLEMENT", "NEEDS_REVISION", "BLOCKED"),
             Set.of()
     );
+    private static final NodeOutputContract SELF_TEST_DECISION = new NodeOutputContract(
+            "implement.self_test_decision",
+            Set.of("decision", "summary"),
+            Set.of("SELF_TEST_COMPLETE", "SELF_TEST_INCOMPLETE", "BLOCKED"),
+            Set.of()
+    );
     private static final NodeOutputContract ACCEPTANCE_DECISION = new NodeOutputContract(
             "acceptance.decision",
             Set.of("decision", "summary"),
@@ -139,6 +145,7 @@ public final class ContractRegistry {
             Map.entry("intake.decision", INTAKE_DECISION),
             Map.entry("design.decision", DESIGN_DECISION),
             Map.entry("plan.decision", PLAN_DECISION),
+            Map.entry("implement.self_test_decision", SELF_TEST_DECISION),
             Map.entry("acceptance.decision", ACCEPTANCE_DECISION),
             Map.entry("contract.compile", CONTRACT_COMPILE),
             Map.entry("acceptance.classify_failure", ACCEPTANCE_CLASSIFY_FAILURE)

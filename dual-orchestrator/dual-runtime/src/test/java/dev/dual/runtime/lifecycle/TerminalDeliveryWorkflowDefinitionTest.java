@@ -21,8 +21,8 @@ class TerminalDeliveryWorkflowDefinitionTest {
         var terminal = new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery");
 
         assertEquals("agent-lifecycle-terminal-delivery", terminal.workflowId());
-        assertEquals(29, terminal.nodes().size());
-        assertEquals(48, terminal.edges().size());
+        assertEquals(31, terminal.nodes().size());
+        assertEquals(52, terminal.edges().size());
         assertEquals(9, terminal.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -38,6 +38,15 @@ class TerminalDeliveryWorkflowDefinitionTest {
                 .orElseThrow()
                 .to());
         assertEquals(true, terminal.node("gate.human_acceptance").config().get("terminal_gate"));
+        assertEquals(1, terminal.node("implement.self_test_decision").config().get("max_revisions"));
+        assertEquals(java.util.List.of("revise"),
+                terminal.node("gate.human_implementation_repair").config().get("allowed_actions"));
+        assertEquals(java.util.Map.of(
+                        "SELF_TEST_COMPLETE", "implement.artifact_validation",
+                        "SELF_TEST_INCOMPLETE", "context.implement_claude",
+                        "BLOCKED", "gate.human_implementation_repair"),
+                terminal.edgesFrom("implement.self_test_decision").stream()
+                        .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())));
 
         for (var node : full.nodes()) {
             if (OMITTED_TAIL_NODES.contains(node.id()) || "gate.human_acceptance".equals(node.id())) {

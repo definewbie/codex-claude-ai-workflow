@@ -14,7 +14,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
         var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
-        assertEquals(7, definition.version());
+        assertEquals(8, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals(NodeKind.TASK, definition.node("context.intake_claude_brainstorm").kind());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
@@ -24,6 +24,8 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertEquals(NodeKind.TASK, definition.node("plan.claude_plan").kind());
         assertEquals(NodeKind.TASK, definition.node("context.implement_claude").kind());
         assertEquals(NodeKind.TASK, definition.node("implement.claude_implement").kind());
+        assertEquals(NodeKind.DECISION, definition.node("implement.self_test_decision").kind());
+        assertEquals(NodeKind.GATE, definition.node("gate.human_implementation_repair").kind());
         assertEquals(NodeKind.TASK, definition.node("context.acceptance_codex_verifier_review").kind());
         assertEquals(NodeKind.TASK, definition.node("acceptance.codex_verifier_review").kind());
         assertEquals(NodeKind.TASK, definition.node("delivery.prepare_pr").kind());
@@ -33,6 +35,8 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertEquals(3, definition.node("design.decision").config().get("max_revisions"));
         assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"));
         assertEquals(3, definition.node("plan.decision").config().get("max_revisions"));
+        assertEquals(1, definition.node("implement.self_test_decision").config().get("max_revisions"));
+        assertEquals(1, definition.node("gate.human_implementation_repair").config().get("max_revisions"));
         assertEquals("context.build_package", definition.node("context.implement_claude").handlerType());
         assertTrue(definition.edgesFrom("context.intake_claude_brainstorm").stream()
                 .anyMatch(edge -> edge.to().equals("intake.claude_brainstorm")));
@@ -42,6 +46,14 @@ class LifecycleWorkflowDefinitionFactoryTest {
                 .anyMatch(edge -> edge.to().equals("intake.codex_product_review")));
         assertTrue(definition.edgesFrom("acceptance.generate_final_report").stream()
                 .anyMatch(edge -> edge.to().equals("delivery.prepare_pr")));
+        assertTrue(definition.edgesFrom("implement.claude_self_test_report").stream()
+                .anyMatch(edge -> edge.to().equals("implement.self_test_decision")));
+        assertTrue(definition.edgesFrom("implement.self_test_decision").stream()
+                .anyMatch(edge -> "SELF_TEST_INCOMPLETE".equals(edge.on())
+                        && edge.to().equals("context.implement_claude")));
+        assertTrue(definition.edgesFrom("implement.self_test_decision").stream()
+                .anyMatch(edge -> "BLOCKED".equals(edge.on())
+                        && edge.to().equals("gate.human_implementation_repair")));
         assertTrue(definition.edgesFrom("delivery.prepare_pr").stream()
                 .anyMatch(edge -> edge.to().equals("gate.human_acceptance")));
     }

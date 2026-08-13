@@ -1,6 +1,6 @@
 {
   "workflowId": "agent-lifecycle-terminal-delivery",
-  "version": 2,
+  "version": 3,
   "entryNodeId": "context.intake_claude_brainstorm",
   "nodes": [
     {
@@ -285,6 +285,26 @@
           "INSUFFICIENT_EVIDENCE",
           "BLOCKED"
         ]
+      }
+    },
+    {
+      "id": "implement.self_test_decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "max_revisions": 1
+      }
+    },
+    {
+      "id": "gate.human_implementation_repair",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "allowed_actions": [
+          "revise"
+        ],
+        "max_revisions": 1,
+        "gate_purpose": "implementation_repair"
       }
     },
     {
@@ -786,7 +806,7 @@
     {
       "from": "implement.claude_self_test_report",
       "on": "completed",
-      "to": "implement.artifact_validation",
+      "to": "implement.self_test_decision",
       "condition": null,
       "metadata": {
         "transitionType": "normal",
@@ -795,6 +815,62 @@
         "purpose": "",
         "joinStrategy": "",
         "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "SELF_TEST_COMPLETE",
+      "to": "implement.artifact_validation",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Only verified complete self-test evidence may enter artifact validation.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "SELF_TEST_INCOMPLETE",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Return incomplete self-test evidence to bounded implementation repair.",
+        "joinStrategy": "",
+        "loopReason": "Self-test evidence proves the implementation is incomplete"
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "BLOCKED",
+      "to": "gate.human_implementation_repair",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Require a human decision before repairing a blocked implementation.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "revise",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Apply the operator's explicit repair decision.",
+        "joinStrategy": "",
+        "loopReason": "Human authorized implementation repair after a blocked self-test"
       }
     },
     {

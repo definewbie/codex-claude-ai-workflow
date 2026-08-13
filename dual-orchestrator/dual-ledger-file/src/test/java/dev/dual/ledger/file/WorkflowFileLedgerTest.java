@@ -499,6 +499,127 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void selfTestDecisionRoutesCompleteIncompleteAndBlockedWithoutBypass() throws Exception {
+        var definition = new WorkflowDefinition(
+                "self-test-repair",
+                1,
+                "implement.self_test_decision",
+                List.of(
+                        new NodeDefinition("implement.self_test_decision", NodeKind.DECISION,
+                                "review.decision", Map.of("max_revisions", 1)),
+                        new NodeDefinition("implement.artifact_validation", NodeKind.TASK,
+                                "noop.task", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK,
+                                "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_implementation_repair", NodeKind.GATE,
+                                "human.review", Map.of("allowed_actions", List.of("revise"), "max_revisions", 1))
+                ),
+                List.of(
+                        new EdgeDefinition("implement.self_test_decision", "SELF_TEST_COMPLETE",
+                                "implement.artifact_validation"),
+                        new EdgeDefinition("implement.self_test_decision", "SELF_TEST_INCOMPLETE",
+                                "context.implement_claude", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "self-test incomplete")),
+                        new EdgeDefinition("implement.self_test_decision", "BLOCKED",
+                                "gate.human_implementation_repair"),
+                        new EdgeDefinition("context.implement_claude", "completed",
+                                "implement.self_test_decision"),
+                        new EdgeDefinition("gate.human_implementation_repair", "revise",
+                                "context.implement_claude", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "human repair"))
+                )
+        );
+
+        var completePaths = initializedPaths("ws-self-test-complete", definition);
+        var completeDecision = activeNode(completePaths);
+        new WorkflowFileLedger().completeAndRoute(completePaths, definition, completeDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "SELF_TEST_COMPLETE", List.of("self-test.json"), Map.of());
+        assertEquals("implement.artifact_validation", activeNode(completePaths).nodeDefinitionId());
+
+        var incompletePaths = initializedPaths("ws-self-test-incomplete", definition);
+        var incompleteDecision = activeNode(incompletePaths);
+        new WorkflowFileLedger().completeAndRoute(incompletePaths, definition, incompleteDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test.json"), Map.of());
+        var repair = activeNode(incompletePaths);
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        var incompleteLedger = new WorkflowFileLedger();
+        incompleteLedger.completeAndRoute(incompletePaths, definition, repair.nodeInstanceId(),
+                NodeStatus.COMPLETED, "completed", List.of("implementation.json"), Map.of());
+        var repeatedDecision = activeNode(incompletePaths);
+        incompleteLedger.completeAndRoute(incompletePaths, definition, repeatedDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test-2.json"), Map.of());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, incompleteLedger.loadCurrent(incompletePaths).status());
+        assertEquals(NodeStatus.BLOCKED, incompleteLedger.loadNode(incompletePaths, repeatedDecision.nodeInstanceId()).status());
+        assertTrue(Files.readString(incompletePaths.eventsJsonl()).contains("revision_limit_reached"));
+
+        var blockedPaths = initializedPaths("ws-self-test-blocked", definition);
+        var blockedDecision = activeNode(blockedPaths);
+        var blockedLedger = new WorkflowFileLedger();
+        blockedLedger.completeAndRoute(blockedPaths, definition, blockedDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "BLOCKED", List.of("self-test.json"), Map.of());
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, blockedLedger.loadCurrent(blockedPaths).status());
+        var error = assertThrows(IOException.class,
+                () -> blockedLedger.resolveOpenGate(blockedPaths, definition, "revise", ""));
+        assertTrue(error.getMessage().contains("decision note is required"));
+        blockedLedger.resolveOpenGate(blockedPaths, definition, "revise", "Repair the reported test blocker.");
+        assertEquals("context.implement_claude", activeNode(blockedPaths).nodeDefinitionId());
+    }
+
+    @Test
+    void revisionBudgetCountsExactRepairTargetInsteadOfSharedStage() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-exact-repair-target"));
+        Files.createDirectories(paths.iterationsDir());
+        new AtomicJsonWriter().write(paths.iterationJson("iter-001"),
+                WorkflowIterationDocument.initial("context.intake_claude_brainstorm", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
+                "iter-002", 2, "iter-001", "node-intake", "NEEDS_REVISION",
+                "context.intake_claude_brainstorm", "intake repair", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-003"), WorkflowIterationDocument.revision(
+                "iter-003", 3, "iter-002", "node-self-test", "SELF_TEST_INCOMPLETE",
+                "context.implement_claude", "implementation repair", Instant.now()));
+
+        var writer = new AtomicJsonWriter();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+        var tracker = new RevisionTracker(writer, mapper, new LedgerEventLog(writer, mapper));
+
+        writeCompletedTriggerNode(paths, "node-intake", "intake.decision", "iter-001");
+        writeCompletedTriggerNode(paths, "node-self-test", "implement.self_test_decision", "iter-002");
+
+        assertEquals(1, tracker.revisionCount(
+                paths, "intake.decision", "context.intake_claude_brainstorm"));
+        assertEquals(1, tracker.revisionCount(
+                paths, "implement.self_test_decision", "context.implement_claude"));
+        assertEquals(0, tracker.revisionCount(
+                paths, "acceptance.decision", "context.implement_claude"));
+    }
+
+    @Test
+    void revisionBudgetSeparatesDifferentOwnersOfTheSameRepairTarget() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-repair-owner-budget"));
+        Files.createDirectories(paths.iterationsDir());
+        new AtomicJsonWriter().write(paths.iterationJson("iter-001"),
+                WorkflowIterationDocument.initial("context.intake_claude_brainstorm", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
+                "iter-002", 2, "iter-001", "node-self-test", "SELF_TEST_INCOMPLETE",
+                "context.implement_claude", "self-test repair", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-003"), WorkflowIterationDocument.revision(
+                "iter-003", 3, "iter-002", "node-acceptance", "revise",
+                "context.implement_claude", "acceptance repair", Instant.now()));
+        writeCompletedTriggerNode(paths, "node-self-test", "implement.self_test_decision", "iter-001");
+        writeCompletedTriggerNode(paths, "node-acceptance", "gate.human_acceptance", "iter-002");
+
+        var writer = new AtomicJsonWriter();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+        var tracker = new RevisionTracker(writer, mapper, new LedgerEventLog(writer, mapper));
+
+        assertEquals(1, tracker.revisionCount(
+                paths, "implement.self_test_decision", "context.implement_claude"));
+        assertEquals(1, tracker.revisionCount(
+                paths, "gate.human_acceptance", "context.implement_claude"));
+    }
+
+    @Test
     void acceptanceRejectRoutesToClassifierBeforeStartingRepairIteration() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-reject"));
         Files.createDirectories(paths.workstreamDir());
@@ -1395,6 +1516,45 @@ class WorkflowFileLedgerTest {
                 null,
                 null,
                 Map.of()
+        ));
+    }
+
+    private WorkstreamPaths initializedPaths(String workstreamId, WorkflowDefinition definition) throws Exception {
+        var paths = new WorkstreamPaths(tempDir.resolve(workstreamId), new DualId(workstreamId));
+        Files.createDirectories(paths.workstreamDir());
+        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, definition);
+        return paths;
+    }
+
+    private NodeInstanceDocument activeNode(WorkstreamPaths paths) throws Exception {
+        var ledger = new WorkflowFileLedger();
+        return ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+    }
+
+    private void writeCompletedTriggerNode(
+            WorkstreamPaths paths,
+            String nodeInstanceId,
+            String nodeDefinitionId,
+            String iterationId
+    ) throws Exception {
+        Files.createDirectories(paths.nodesDir());
+        new AtomicJsonWriter().write(paths.nodeJson(nodeInstanceId), new NodeInstanceDocument(
+                1,
+                nodeInstanceId,
+                nodeDefinitionId,
+                NodeKind.DECISION,
+                "review.decision",
+                NodeStatus.COMPLETED,
+                LedgerUtils.stageId(nodeDefinitionId),
+                iterationId,
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(),
+                "",
+                "",
+                Instant.now(),
+                Instant.now()
         ));
     }
 }

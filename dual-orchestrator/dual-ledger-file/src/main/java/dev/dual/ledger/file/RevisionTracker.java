@@ -145,20 +145,34 @@ final class RevisionTracker {
         }
     }
 
-    int revisionCount(WorkstreamPaths paths, String targetNodeDefinitionId) throws IOException {
+    int revisionCount(
+            WorkstreamPaths paths,
+            String triggerNodeDefinitionId,
+            String targetNodeDefinitionId
+    ) throws IOException {
         if (!Files.exists(paths.iterationsDir())) {
             return 0;
         }
-        var targetStage = LedgerUtils.stageId(targetNodeDefinitionId);
         try (var stream = Files.list(paths.iterationsDir())) {
-            return (int) stream
+            var iterations = stream
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().matches("iter-\\d{3}\\.json"))
                     .map(path -> readIterationOrNull(path))
                     .filter(iteration -> iteration != null)
-                    .filter(iteration -> targetStage.equals(iteration.stageId()))
+                    .filter(iteration -> targetNodeDefinitionId.equals(iteration.targetNodeDefinitionId()))
                     .filter(iteration -> !"workflow_started".equals(iteration.triggerAction()))
-                    .count();
+                    .toList();
+            var count = 0;
+            for (var iteration : iterations) {
+                var triggerNode = objectMapper.readValue(
+                        paths.nodeJson(iteration.triggerNodeInstanceId()).toFile(),
+                        NodeInstanceDocument.class
+                );
+                if (triggerNodeDefinitionId.equals(triggerNode.nodeDefinitionId())) {
+                    count++;
+                }
+            }
+            return count;
         }
     }
 

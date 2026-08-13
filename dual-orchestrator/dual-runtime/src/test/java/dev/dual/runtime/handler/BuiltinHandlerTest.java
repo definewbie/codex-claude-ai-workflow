@@ -633,6 +633,35 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void selfTestDecisionConsumesTypedIncompleteEvidence() throws Exception {
+        var output = writeOutput("implement-claude-self-test.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "implement.claude_self_test_report",
+                  "decision": "SELF_TEST_INCOMPLETE",
+                  "summary": "Tests exposed implementation defects.",
+                  "source_artifact_type": "self_test_report",
+                  "control": {
+                    "decision": "SELF_TEST_INCOMPLETE",
+                    "summary": "Tests exposed implementation defects."
+                  }
+                }
+                """);
+
+        var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
+                tempDir,
+                "ws",
+                decisionDefinition("implement.self_test_decision"),
+                node("implement.self_test_decision", NodeKind.DECISION, "review.decision", List.of(output))
+        ));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("SELF_TEST_INCOMPLETE", result.outcome());
+        assertEquals("contract-sidecar", result.result().get("source"));
+        assertEquals(List.of(output), result.outputRefs());
+    }
+
+    @Test
     void reviewDecisionRejectsSidecarFromAnotherWorkstream() throws Exception {
         var output = writeOutput("foreign-review.contract.json", """
                 {

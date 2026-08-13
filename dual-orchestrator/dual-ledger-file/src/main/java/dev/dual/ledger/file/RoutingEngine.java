@@ -132,7 +132,11 @@ final class RoutingEngine {
             var iterationStartedPayload = Map.<String, Object>of();
             if (startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
                 var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
-                var currentRevisionCount = revisionTracker.revisionCount(paths, nextDefinition.id());
+                var currentRevisionCount = revisionTracker.revisionCount(
+                        paths,
+                        node.nodeDefinitionId(),
+                        nextDefinition.id()
+                );
                 if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
                     revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
                     return;

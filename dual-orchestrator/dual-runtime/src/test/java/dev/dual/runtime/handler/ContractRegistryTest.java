@@ -144,6 +144,7 @@ class ContractRegistryTest {
                 "intake.decision", Set.of("READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED"),
                 "design.decision", Set.of("READY_FOR_ARCH_REVIEW", "NEEDS_REVISION", "BLOCKED"),
                 "plan.decision", Set.of("READY_TO_IMPLEMENT", "NEEDS_REVISION", "BLOCKED"),
+                "implement.self_test_decision", Set.of("SELF_TEST_COMPLETE", "SELF_TEST_INCOMPLETE", "BLOCKED"),
                 "acceptance.decision", Set.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT", "BLOCKED")
         );
         for (var entry : decisionContracts.entrySet()) {
