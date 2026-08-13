@@ -8,7 +8,27 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v8 / NON-PROVIDER PREFLIGHT AUTHORIZED
+## Current Active Step: Captcha-Auth Completion v9 / NON-PROVIDER PREFLIGHT AUTHORIZED
+
+> v8 workstream 已成为历史证据：真实 self-test sidecar 产出 `SELF_TEST_INCOMPLETE`，但旧
+> terminal-delivery@2 把 Agent task 的 execution outcome `completed` 直接路由到 artifact validation，直到
+> acceptance context 才拒绝，属于 self-test semantic decision 未被 routing 强制消费的 late rejection。
+>
+> checkpoint `b2306882` 已将该边界收敛为 `implement.self_test_decision`：`SELF_TEST_COMPLETE` 进入
+> artifact validation，`SELF_TEST_INCOMPLETE` 进入一次 bounded implementation repair，`BLOCKED` 进入需
+> 非空 note 的 human implementation repair gate。revision budget 同时改为按 `(trigger owner, repair target)`
+> 计数，避免 self-test 与 human acceptance 共用 `context.implement_claude` 时互相扣减预算。三个 bundled
+> workflow 已同步，focused `179/0`、full reactor `1218/0/0/0`、两轮 CC review PASS。
+>
+> 实现提交 `b2306882`，审查证据提交 `901c0432`。clean SHA 上 fresh CLI/server package 已 PASS，JAR
+> hashes 已记录。新的产品 Gate：
+> `docs/testing/verification-gates/20260813-terminal-delivery-captcha-auth-completion-v9.md`。产品完整交付仍是
+> 唯一主目标；self-test repair 仅在自然触发时形成条件性 `PROVEN`，不得制造失败。当前只授权 Gate 独立
+> review。独立 Gate review 为 PASS（0 P0 / 0 P1）；两个非阻塞 P2 已在提交前消歧并补充 focused test
+> 复现清单。当前授权提交 Gate + active plan，并执行 Git/workflow/JAR/target/PostgreSQL non-provider
+> preflight；双 provider probes、provider 调用与 fresh workstream 尚未授权。
+
+## Historical Active Step: Captcha-Auth Completion v8 / CONSUMED, PRODUCT NOT ACHIEVED
 
 > v7 fresh workstream `ws-20260812T035340Z-E3P3` 已消费并停止于 design Agent run
 > `run-1786509652821`。captured evidence 证明两个独立 Dual-owned 缺口：assistant message 的完整 JSON
