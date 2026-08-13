@@ -8,7 +8,24 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v11 / PREFLIGHT AUTHORIZED
+## Current Active Step: Captcha-Auth Completion v12 / GATE DRAFTED
+
+> v11 fresh workstream `ws-20260813T232431Z-5XZZ` 已消费。fresh build 与 provider execution 正常；首个
+> `intake.claude_brainstorm` exit=0、`end_turn`，strict JSON、schema 和 AgentResult contract 全部有效，未发生
+> correction。artifact projection 随后以 `TASK_CONTRACT_SCOPE_RESOLUTION_FAILED` fail closed，因为 proposal
+> 使用四个 `src/.../` 目录作为 scope，而 durable scope 只接受 canonical exact file path。
+>
+> 真实根因是 Dual contract projection 不完整：prompt 仅声明 exact repository-relative path，却没有投影
+> validator 已强制的 exact file、非目录、不得以 `/` 结尾及 canonical exclusions。checkpoint `e64bf7c` 已在
+> `AgentResultPromptContract` 的单一 owner 内同步修复 initial proposal 与 revision patch；不放宽 validator、
+> 不自动扩目录、不增加 retry/correction。focused test 与 full reactor `1226/0/0/0` PASS，当前为
+> `ENFORCED / NOT PROVEN`。
+>
+> v12 Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v12.md`。
+> 下一步只提交文档并完成 independent Gate review 与 non-provider preflight；provider probes 与 fresh
+> workstream 需在 Gate PASS 后按授权边界执行。captcha-auth 仍为 `NOT ACHIEVED`。
+
+## Historical Active Step: Captcha-Auth Completion v11 / FAIL, CONSUMED
 
 > v10 fresh workstream `ws-20260813T143229Z-BAS8` 已消费。ScopeOperation early boundary、validated proposal
 > reference、Codex product review 与真实 human `BLOCKED -> approved` 决策均通过；产品方明确选择手机号仅接受

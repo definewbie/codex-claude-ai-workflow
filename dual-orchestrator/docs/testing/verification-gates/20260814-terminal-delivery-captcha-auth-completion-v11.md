@@ -2,7 +2,23 @@
 
 日期：2026-08-14
 
-状态：`DETERMINISTIC ENFORCED / PREFLIGHT AUTHORIZED / PROVIDER NOT YET RUN`
+状态：`FAIL / CONSUMED`
+
+## Result
+
+- Fresh build：9/9 modules PASS；workstream 使用 `agent-lifecycle-terminal-delivery@4`。
+- Workstream：`ws-20260813T232431Z-5XZZ`。
+- 首个 `intake.claude_brainstorm` 进程 exit=0、stopReason=`end_turn`；strict JSON、schema 与
+  AgentResult contract 全部有效，未触发 correction。
+- required artifact projection 以 `TASK_CONTRACT_SCOPE_RESOLUTION_FAILED` fail closed；四个
+  `scope.included` 条目为目录（`src/main/java/`、`src/main/resources/`、`src/test/java/`、
+  `src/test/resources/`），不满足既有 canonical exact-file validator。
+- 根因是 Agent-facing prompt 只声明“exact repository-relative path”，没有投影 validator 已强制的
+  “exact file、非目录、不得以 `/` 结尾及 canonical path”规则。该缺口属于 Dual contract projection，
+  不是 provider、transport、parser、schema 或 resolver 故障。
+- checkpoint `e64bf7c` 让 initial proposal 与 revision patch 共享同一 canonical-file-path prompt projection；
+  focused test 与 full reactor `1226/0/0/0` PASS。修复达到 `ENFORCED / NOT PROVEN`。
+- 本 workstream 已消费，不 retry/resume；captcha-auth 仍为 `NOT ACHIEVED`。
 
 本 Gate 的唯一主目标仍是完成 captcha-auth 产品。checkpoint `4afd15e2` 修复的 contract clarification
 owner/lineage 边界只在真实业务自然触发 `gate.contract_review=clarify` 时形成条件性证明；不得为了证明该边界
