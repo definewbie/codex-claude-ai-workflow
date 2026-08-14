@@ -2,7 +2,24 @@
 
 日期：2026-08-14
 
-状态：`DETERMINISTIC ENFORCED / NOT YET AUTHORIZED FOR PROVIDER`
+状态：`FAIL / CONSUMED / SUPERSEDED BY v13`
+
+## Result
+
+- 唯一 fresh workstream：`ws-20260813T235458Z-4RQE`；workflow 冻结为
+  `agent-lifecycle-terminal-delivery@4`，最终停在 `WAITING_FOR_RECOVERY` / `implement.claude_implement`。
+- scope、contract、design、plan 与 human gates 已通过，目标 worktree 已生成 Java/Spring/PostgreSQL implementation
+  files；
+  产品未进入 self-test、acceptance 与 delivery，不能声明完成。
+- implementation run `run-1786671207221` 使用 `acpx --timeout 600`，持续 `605118ms` 后 exit 5；ACP stream
+  已接受 prompt 并持续产生 typed updates，不是已证明的 ACP 协议兼容失败。
+- 当前 implementation occurrence 没有 permission request；旧 design turn 的拒绝经 acpx 累计
+  `permissionStats` 把当前 CLI exit 投影为 5，旧 Dual 又从裸 exit 5 合成 `PERMISSION_BLOCKED`。该结论是历史
+  permission evidence 污染，不是当前 implementation 等待人工授权。
+- caller timeout 没有自动取消 persistent prompt。checkpoint `1db62088` 已删除裸 exit 5/累计统计的权限
+  authority，并要求 abnormal return 前 cancel/close exact named session；checkpoint `b6bc8e79` 已收敛 interrupted
+  execution 的 durable terminal facts。deterministic reactor `1239/0/0/0` 与独立 diff/delta review PASS。
+- 本 workstream、worktree 与 named session 均已消费，不得 retry/resume。captcha-auth 仍为 `NOT ACHIEVED`。
 
 本 Gate 的唯一主目标是完成 captcha-auth 产品。checkpoint `e64bf7c` 只修复 Agent-facing scope path
 契约投影缺失，不放宽 canonical path validator，不自动展开目录，也不增加 correction、retry、workflow、

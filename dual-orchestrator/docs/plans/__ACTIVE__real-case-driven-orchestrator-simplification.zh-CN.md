@@ -8,22 +8,34 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v12 / GATE DRAFTED
+## Current Active Step: Captcha-Auth Completion v13 / GATE REVIEW PASS / NON-PROVIDER PREFLIGHT AUTHORIZED
 
-> v11 fresh workstream `ws-20260813T232431Z-5XZZ` 已消费。fresh build 与 provider execution 正常；首个
-> `intake.claude_brainstorm` exit=0、`end_turn`，strict JSON、schema 和 AgentResult contract 全部有效，未发生
-> correction。artifact projection 随后以 `TASK_CONTRACT_SCOPE_RESOLUTION_FAILED` fail closed，因为 proposal
-> 使用四个 `src/.../` 目录作为 scope，而 durable scope 只接受 canonical exact file path。
+> v12 fresh workstream `ws-20260813T235458Z-4RQE` 已消费。scope、contract、design、plan 与 human gates 已通过，
+> implementation worktree 已形成 Java/Spring/PostgreSQL 实现，但 `implement.claude_implement` 在
+> `acpx --timeout 600` 后以 605118ms / exit 5 停止，workflow=`WAITING_FOR_RECOVERY`，产品未进入 self-test、
+> acceptance 与 delivery。
 >
-> 真实根因是 Dual contract projection 不完整：prompt 仅声明 exact repository-relative path，却没有投影
-> validator 已强制的 exact file、非目录、不得以 `/` 结尾及 canonical exclusions。checkpoint `e64bf7c` 已在
-> `AgentResultPromptContract` 的单一 owner 内同步修复 initial proposal 与 revision patch；不放宽 validator、
-> 不自动扩目录、不增加 retry/correction。focused test 与 full reactor `1226/0/0/0` PASS，当前为
+> 独立代码与 captured stream 审查确认两项 execution boundary 根因：caller timeout 未取消 persistent prompt；
+> 当前 implementation 没有 permission request，旧 design turn 的拒绝被 acpx 累计 permission stats 投影成当前
+> exit 5，而旧 Dual 又从裸 exit 5 合成 `PERMISSION_BLOCKED`。这不是已证明的 ACP 协议不兼容，也不是当前 turn
+> 等待人工批准。checkpoint `1db62088` 已将权限 authority 收敛为 current occurrence 的 typed request/result，
+> 并在 abnormal return 前 cancel/close exact named session；`b6bc8e79` 已收敛 interrupted execution terminal facts。
+> full reactor `1239/0/0/0`、两轮独立 diff review 与 `git diff --check` 均 PASS，成熟度为
 > `ENFORCED / NOT PROVEN`。
 >
-> v12 Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v12.md`。
-> 下一步只提交文档并完成 independent Gate review 与 non-provider preflight；provider probes 与 fresh
-> workstream 需在 Gate PASS 后按授权边界执行。captcha-auth 仍为 `NOT ACHIEVED`。
+> v13 Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v13.md`。独立 Gate
+> review 已 PASS（P0/P1=0/0，三个非阻塞 P2 已在 Gate 执行文字中闭合）。下一步选择性提交 v13、v12 历史同步、
+> active plan 与 review evidence，获得 clean SHA；随后执行 fresh package、旧 probe/session 清理与隔离
+> PostgreSQL non-provider preflight。provider probes/fresh workstream 尚未授权。不得 resume v12 workstream，也不为
+> 证明条件边界人为制造 denial/timeout。
+
+## Historical Active Step: Captcha-Auth Completion v12 / FAIL, CONSUMED
+
+> Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v12.md`。唯一 fresh
+> workstream `ws-20260813T235458Z-4RQE` 已通过 scope、contract、design、plan 与 human gates，在
+> `implement.claude_implement` 因 caller timeout、未取消 persistent prompt 与历史 permission evidence 污染进入
+> `WAITING_FOR_RECOVERY`。worktree 中虽已有产品实现，但 self-test、acceptance、completion audit 与 delivery
+> 均未闭合，因此 v12=`FAIL / CONSUMED`、captcha-auth=`NOT ACHIEVED`。该 workstream/worktree/session 不得复用。
 
 ## Historical Active Step: Captcha-Auth Completion v11 / FAIL, CONSUMED
 
