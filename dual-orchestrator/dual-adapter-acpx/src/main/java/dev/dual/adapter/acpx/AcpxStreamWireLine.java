@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Adapter-local wire view of one acpx session-stream NDJSON line.
@@ -32,16 +34,30 @@ record AcpxStreamWireLine(
         MALFORMED
     }
 
-    record Request(String promptText) {
+    record Request(
+            String promptText,
+            String permissionToolCallId,
+            String permissionToolKind,
+            String permissionTitle,
+            String permissionCommand,
+            List<String> permissionOptions
+    ) {
         Request {
             promptText = promptText == null ? "" : promptText;
+            permissionToolCallId = permissionToolCallId == null ? "" : permissionToolCallId;
+            permissionToolKind = permissionToolKind == null ? "" : permissionToolKind;
+            permissionTitle = permissionTitle == null ? "" : permissionTitle;
+            permissionCommand = permissionCommand == null ? "" : permissionCommand;
+            permissionOptions = permissionOptions == null ? List.of() : List.copyOf(permissionOptions);
         }
     }
 
-    record Result(String sessionId, String stopReason, Usage usage) {
+    record Result(String sessionId, String stopReason, Usage usage, String permissionOutcome, String permissionOptionId) {
         Result {
             sessionId = sessionId == null ? "" : sessionId;
             stopReason = stopReason == null ? "" : stopReason;
+            permissionOutcome = permissionOutcome == null ? "" : permissionOutcome;
+            permissionOptionId = permissionOptionId == null ? "" : permissionOptionId;
         }
     }
 
@@ -142,7 +158,9 @@ record AcpxStreamWireLine(
                     new Result(
                             text(resultNode.get("sessionId")),
                             text(resultNode.get("stopReason")),
-                            usage(resultNode.get("usage"))
+                            usage(resultNode.get("usage")),
+                            text(resultNode.at("/outcome/outcome")),
+                            text(resultNode.at("/outcome/optionId"))
                     ),
                     null,
                     null
@@ -154,7 +172,14 @@ record AcpxStreamWireLine(
                     Kind.JSONRPC_REQUEST,
                     requestId,
                     method,
-                    new Request(text(node.at("/params/prompt/0/text"))),
+                    new Request(
+                            text(node.at("/params/prompt/0/text")),
+                            text(node.at("/params/toolCall/toolCallId")),
+                            text(node.at("/params/toolCall/kind")),
+                            text(node.at("/params/toolCall/title")),
+                            text(node.at("/params/toolCall/rawInput/command")),
+                            strings(node.at("/params/options"), "optionId")
+                    ),
                     null,
                     null,
                     null
@@ -250,6 +275,20 @@ record AcpxStreamWireLine(
 
     private static BigDecimal decimal(JsonNode node) {
         return node == null || !node.isNumber() ? null : node.decimalValue();
+    }
+
+    private static List<String> strings(JsonNode node, String field) {
+        if (node == null || !node.isArray()) {
+            return List.of();
+        }
+        var values = new ArrayList<String>();
+        for (var item : node) {
+            var value = text(item.get(field));
+            if (!value.isBlank()) {
+                values.add(value);
+            }
+        }
+        return List.copyOf(values);
     }
 
     private static AcpxStreamWireLine malformed() {

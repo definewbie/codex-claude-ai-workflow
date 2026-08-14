@@ -23,6 +23,7 @@ final class AcpxSessionStreamProjector {
     private final StringBuilder ungroupedAssistantDeltas = new StringBuilder();
     private final Map<String, String> assistantMessages = new LinkedHashMap<>();
     private AcpxPromptCompletion promptCompletion = AcpxPromptCompletion.EMPTY;
+    private final Map<String, AgentLifecycleEvent.PermissionEvidence> permissionDetails = new HashMap<>();
 
     Optional<AgentLifecycleEvent> accept(long sequence, AcpxStreamWireLine wire) {
         return accept(sequence, wire, true);
@@ -66,7 +67,8 @@ final class AcpxSessionStreamProjector {
             AcpxStreamWireLine wire,
             boolean currentObservation
     ) {
-        if ("session/prompt".equals(wire.method()) && !currentObservation) {
+        if (("session/prompt".equals(wire.method()) || "session/request_permission".equals(wire.method()))
+                && !currentObservation) {
             return Optional.empty();
         }
         pendingRequests.computeIfAbsent(wire.requestId(), ignored -> new ArrayDeque<>())
@@ -79,6 +81,11 @@ final class AcpxSessionStreamProjector {
         }
         if ("session/new".equals(wire.method()) || "session/resume".equals(wire.method())) {
             sessionReady = false;
+        }
+        if ("session/request_permission".equals(wire.method())) {
+            var evidence = permissionEvidence(wire.request());
+            permissionDetails.put(wire.requestId(), evidence);
+            return Optional.of(AgentLifecycleEvent.permissionRequested(sequence, evidence));
         }
         return switch (wire.method()) {
             case "session/new" -> Optional.of(AgentLifecycleEvent.sessionNewRequested(sequence));
@@ -112,6 +119,21 @@ final class AcpxSessionStreamProjector {
                     finalAssistantMessage()
             );
             return Optional.of(AgentLifecycleEvent.promptCompleted(sequence));
+        }
+        if (currentObservation && "session/request_permission".equals(method)) {
+            var evidence = permissionDetails.remove(wire.requestId());
+            if (evidence == null) {
+                return Optional.empty();
+            }
+            var outcome = wire.result() == null ? "" : wire.result().permissionOutcome();
+            var optionId = wire.result() == null ? "" : wire.result().permissionOptionId();
+            if ("selected".equals(outcome) && ("allow".equals(optionId) || "allow_always".equals(optionId))) {
+                return Optional.of(AgentLifecycleEvent.permissionApproved(sequence, evidence.withDisposition("APPROVED")));
+            }
+            if ("selected".equals(outcome) && optionId.startsWith("reject")) {
+                return Optional.of(AgentLifecycleEvent.permissionDenied(sequence, evidence.withDisposition("DENIED")));
+            }
+            return Optional.of(AgentLifecycleEvent.permissionCancelled(sequence, evidence.withDisposition("CANCELLED")));
         }
         if (wire.result() != null && wire.result().usage() != null) {
             return Optional.of(AgentLifecycleEvent.usageUpdate(sequence));
@@ -224,5 +246,24 @@ final class AcpxSessionStreamProjector {
         return "session/new".equals(method)
                 || "session/resume".equals(method)
                 || "session/prompt".equals(method);
+    }
+
+    private AgentLifecycleEvent.PermissionEvidence permissionEvidence(AcpxStreamWireLine.Request request) {
+        if (request == null) {
+            return AgentLifecycleEvent.PermissionEvidence.EMPTY;
+        }
+        return new AgentLifecycleEvent.PermissionEvidence(
+                crop(request.permissionToolCallId(), 160),
+                crop(request.permissionToolKind(), 80),
+                crop(request.permissionTitle(), 240),
+                crop(request.permissionCommand(), 512),
+                request.permissionOptions(),
+                "REQUESTED"
+        );
+    }
+
+    private String crop(String value, int maxLength) {
+        var normalized = value == null ? "" : value.replaceAll("\\s+", " ").strip();
+        return normalized.length() <= maxLength ? normalized : normalized.substring(0, maxLength) + "...";
     }
 }

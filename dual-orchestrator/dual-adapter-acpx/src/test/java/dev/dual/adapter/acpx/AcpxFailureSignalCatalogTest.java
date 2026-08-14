@@ -158,7 +158,7 @@ class AcpxFailureSignalCatalogTest {
     }
 
     @Test
-    void matchesNonInteractiveToolPermissionFailuresFromStdout() {
+    void rawPermissionWordingCannotCreateCurrentTurnPermissionAuthority() {
         var evidence = new AcpxFailureEvidence(
                 """
                 <tool_use_error>Cancelled: parallel tool call Bash(ls /repo)
@@ -168,11 +168,7 @@ class AcpxFailureSignalCatalogTest {
                 4
         );
 
-        var signal = catalog.match(evidence).orElseThrow();
-
-        assertEquals("agent_permission_blocked", signal.id());
-        assertEquals("RECOVERABLE_AGENT_PERMISSION_BLOCKED", signal.reason().code());
-        assertTrue(signal.recoverable());
+        assertTrue(catalog.match(evidence).isEmpty());
     }
 
     @Test

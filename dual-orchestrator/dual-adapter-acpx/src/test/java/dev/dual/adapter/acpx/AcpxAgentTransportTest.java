@@ -378,6 +378,9 @@ class AcpxAgentTransportTest {
         var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
         var sessionId = "55555555-6666-7777-8888-999999999999";
         Files.createDirectories(sessionsDir);
+        Files.writeString(sessionsDir.resolve("index.json"), """
+                {"entries":[{"name":"codex-reviewer","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), sessionId), StandardCharsets.UTF_8);
         var fakeAcpx = tempDir.resolve("acpx-prompt-completion.sh");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
@@ -491,6 +494,9 @@ class AcpxAgentTransportTest {
                 {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"old","content":{"type":"text","text":"{\\\"run_id\\\":\\\"old\\\"}"}}}}
                 {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
                 """, StandardCharsets.UTF_8);
+        Files.writeString(sessionsDir.resolve("index.json"), """
+                {"entries":[{"name":"codex-reviewer","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), sessionId), StandardCharsets.UTF_8);
         var exactResponseWritten = tempDir.resolve("current-exact-response-written");
         var fakeAcpx = tempDir.resolve("acpx-prompt-occurrence.sh");
         Files.writeString(fakeAcpx, """
@@ -949,7 +955,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                printf '%s\\n' "$@" > "__ARGS_LOG__"
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
                 printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
                 echo "ACPX_DONE"
                 exit 0
@@ -1047,7 +1053,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                printf '%s\\n' "$@" > "__ARGS_LOG__"
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
@@ -1083,7 +1089,7 @@ class AcpxAgentTransportTest {
                 if [ "$1" = "--help" ]; then
                   exit 0
                 fi
-                printf '%s\\n' "$@" > "__ARGS_LOG__"
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
@@ -1245,7 +1251,7 @@ class AcpxAgentTransportTest {
     }
 
     @Test
-    void stopsWhenPermissionBlockedSignalPersistsEvenIfOutputKeepsGrowing() throws Exception {
+    void wrapperPermissionTextAloneCannotCreatePermissionAuthority() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-permission-blocked.sh");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
@@ -1254,7 +1260,7 @@ class AcpxAgentTransportTest {
                 fi
                 echo "Tool permission request failed: Error: Tool use aborted"
                 i=0
-                while [ "$i" -lt 20 ]; do
+                while [ "$i" -lt 2 ]; do
                   echo "thinking $i"
                   i=$((i + 1))
                   sleep 1
@@ -1278,12 +1284,14 @@ class AcpxAgentTransportTest {
                 false
         ));
 
-        assertEquals(4, result.exitCode());
+        assertEquals(0, result.exitCode());
         assertTrue(Files.readString(stdout).contains("Tool permission request failed"));
+        assertTrue(result.activeAdapterSignals().stream()
+                .noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED));
     }
 
     @Test
-    void acpxPermissionDeniedExitProjectsTypedBlockingSignal() throws Exception {
+    void bareAcpxExitFiveCannotFabricatePermissionAuthority() throws Exception {
         var fakeAcpx = tempDir.resolve("acpx-permission-denied-exit.sh");
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
@@ -1314,12 +1322,232 @@ class AcpxAgentTransportTest {
 
         assertEquals(5, result.exitCode());
         assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT, result.processResult().usability());
-        var signal = result.activeAdapterSignals().stream()
-                .filter(candidate -> candidate.type() == AdapterSignalType.PERMISSION_BLOCKED)
-                .findFirst()
-                .orElseThrow();
-        assertEquals("acpx_exit", signal.source());
-        assertEquals("claude-permission", signal.sessionId());
-        assertFalse(signal.superseded());
+        assertTrue(result.activeAdapterSignals().stream()
+                .noneMatch(candidate -> candidate.type() == AdapterSignalType.PERMISSION_BLOCKED));
+        assertTrue(result.executionTimeline().stream()
+                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE));
+    }
+
+    @Test
+    void historicalPermissionDenialBeforeNamedSessionBaselineCannotPolluteCurrentTurn() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home-historical-permission");
+        var sessions = fakeHome.resolve(".acpx/sessions");
+        var recordId = "11111111-1111-1111-1111-111111111111";
+        Files.createDirectories(sessions);
+        Files.writeString(sessions.resolve(recordId + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Old request","rawInput":{"command":"old command"}}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """, StandardCharsets.UTF_8);
+        Files.writeString(sessions.resolve("index.json"), """
+                {"entries":[{"name":"claude-historical","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), recordId), StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-historical-permission.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                echo "connected (%s)" >&2
+                exit 5
+                """.formatted(recordId), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("historical-permission-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-historical",
+                    prompt,
+                    tempDir.resolve("historical-permission.stdout"),
+                    tempDir.resolve("historical-permission.stderr"),
+                    AcpxPermissionProfile.observe()
+            ));
+
+            assertEquals(5, result.exitCode());
+            assertTrue(result.activeAdapterSignals().stream()
+                    .noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void missingSessionIndexCannotReplayHistoricalPermissionDenialAsCurrent() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home-missing-session-index");
+        var sessions = fakeHome.resolve(".acpx/sessions");
+        var recordId = "12121212-1212-1212-1212-121212121212";
+        Files.createDirectories(sessions);
+        Files.writeString(sessions.resolve(recordId + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Historical request","rawInput":{"command":"old command"}}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """, StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-missing-session-index.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                echo "connected (%s)" >&2
+                exit 5
+                """.formatted(recordId), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("missing-session-index-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-missing-index",
+                    prompt,
+                    tempDir.resolve("missing-session-index.stdout"),
+                    tempDir.resolve("missing-session-index.stderr"),
+                    AcpxPermissionProfile.observe()
+            ));
+
+            assertEquals(5, result.exitCode());
+            assertTrue(result.activeAdapterSignals().stream()
+                    .noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void currentPermissionDenialIsTypedAndAbnormalReturnCancelsExactNamedSession() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home-current-permission");
+        var sessions = fakeHome.resolve(".acpx/sessions");
+        var recordId = "22222222-2222-2222-2222-222222222222";
+        var commandLog = tempDir.resolve("permission-command.log");
+        Files.createDirectories(sessions);
+        Files.writeString(sessions.resolve(recordId + ".stream.ndjson"), "", StandardCharsets.UTF_8);
+        Files.writeString(sessions.resolve("index.json"), """
+                {"entries":[{"name":"claude-current","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), recordId), StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-current-permission.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                printf '%%s\n' "$*" >> '%s'
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                echo "connected (%s)" >&2
+                cat >> '%s' <<'EOF'
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"options":[{"optionId":"allow"},{"optionId":"reject"}],"toolCall":{"toolCallId":"call-current-1","kind":"execute","title":"Run tests","rawInput":{"command":"mvn test"}}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                EOF
+                exit 5
+                """.formatted(commandLog, recordId, sessions.resolve(recordId + ".stream.ndjson")), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("current-permission-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-current",
+                    prompt,
+                    tempDir.resolve("current-permission.stdout"),
+                    tempDir.resolve("current-permission.stderr"),
+                    AcpxPermissionProfile.observe()
+            ));
+
+            var permission = result.activeAdapterSignals().stream()
+                    .filter(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED)
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals("acpx_stream", permission.source());
+            assertTrue(permission.message().contains("mvn test"));
+            assertTrue(Files.readString(commandLog).contains("claude cancel -s claude-current"));
+            var permissionEvent = result.executionTimeline().stream()
+                    .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PERMISSION_DECISION)
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals("call-current-1", permissionEvent.details().get("toolCallId"));
+            assertEquals("execute", permissionEvent.details().get("toolKind"));
+            assertEquals("claude-current", permissionEvent.details().get("sessionName"));
+            assertEquals(java.util.List.of("allow", "reject"), permissionEvent.details().get("requestedOptions"));
+            assertEquals("DENIED", permissionEvent.details().get("disposition"));
+            assertTrue(result.executionTimeline().stream().anyMatch(event ->
+                    event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
+                            && "CANCELLED".equals(event.details().get("disposition"))));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void abnormalReturnCannotLeavePersistentTurnWritingAfterTransportReturns() throws Exception {
+        var marker = tempDir.resolve("persistent-turn-marker.log");
+        var ownerPid = tempDir.resolve("persistent-turn.pid");
+        var fakeAcpx = tempDir.resolve("acpx-persistent-turn.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then
+                  kill "$(cat '%s')" 2>/dev/null || true
+                  exit 0
+                fi
+                sh -c 'while true; do echo tick >> "%s"; sleep 0.1; done' >/dev/null 2>&1 &
+                echo $! > '%s'
+                exit 5
+                """.formatted(ownerPid, marker, ownerPid), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("persistent-turn-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-persistent",
+                prompt,
+                tempDir.resolve("persistent-turn.stdout"),
+                tempDir.resolve("persistent-turn.stderr"),
+                AcpxPermissionProfile.observe()
+        ));
+        var sizeAtReturn = Files.size(marker);
+        Thread.sleep(500);
+
+        assertEquals(sizeAtReturn, Files.size(marker));
+        assertTrue(result.executionTimeline().stream().anyMatch(event ->
+                event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
+                        && "CANCELLED".equals(event.details().get("disposition"))));
+    }
+
+    @Test
+    void failedCancelAndCloseRemainFailClosedAsProcessStalled() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-closure-fails.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                args=" $* "
+                case "$args" in
+                  *" sessions ensure "*) exit 0 ;;
+                  *" sessions close "*) exit 9 ;;
+                  *" cancel "*) exit 8 ;;
+                  *) exit 5 ;;
+                esac
+                """, StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("closure-fails-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-closure-fails",
+                prompt,
+                tempDir.resolve("closure-fails.stdout"),
+                tempDir.resolve("closure-fails.stderr"),
+                AcpxPermissionProfile.observe()
+        ));
+
+        assertTrue(result.activeAdapterSignals().stream().anyMatch(signal ->
+                signal.type() == AdapterSignalType.PROCESS_STALLED
+                        && "session_closure".equals(signal.source())
+                        && "claude-closure-fails".equals(signal.sessionId())));
+        assertTrue(result.executionTimeline().stream().anyMatch(event ->
+                event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
+                        && "FAILED".equals(event.details().get("disposition"))));
     }
 }

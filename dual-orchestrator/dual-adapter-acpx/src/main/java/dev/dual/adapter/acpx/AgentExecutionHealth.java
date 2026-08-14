@@ -73,6 +73,8 @@ final class AgentExecutionHealth {
                 }
             }
             case SESSION_NEW_REQUESTED -> markProgress(event, elapsed);
+            case PERMISSION_REQUESTED, PERMISSION_APPROVED -> markProgress(event, elapsed);
+            case PERMISSION_DENIED, PERMISSION_CANCELLED -> observePermissionDecision(event);
             case SESSION_RESUME_FAILED, RECONNECT_SIGNAL, PROVIDER_FAILURE -> observeFailure(event, elapsed);
             case OTHER -> {
                 // Other text is evidence, not lifecycle state.
@@ -126,6 +128,20 @@ final class AgentExecutionHealth {
             observedSignals.add(currentAdapterSignal);
             currentFailureSince = elapsed;
         }
+    }
+
+    private void observePermissionDecision(AgentLifecycleEvent event) {
+        var message = event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED
+                ? "current ACP turn permission denied: " + event.text()
+                : "current ACP turn permission cancelled: " + event.text();
+        observedSignals.add(new AdapterSignal(
+                AdapterSignalType.PERMISSION_BLOCKED,
+                message,
+                event.sequence(),
+                "acpx_stream",
+                "",
+                false
+        ));
     }
 
     private void supersedeCurrentSignal() {

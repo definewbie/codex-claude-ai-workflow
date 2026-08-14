@@ -122,6 +122,11 @@ final class AgentLifecycleEventReader {
         if (sessionId == null || sessionId.isBlank()) {
             return Optional.empty();
         }
+        if (streamBaselineCaptured
+                && !streamStartOffsets.isEmpty()
+                && !streamStartOffsets.containsKey(sessionId)) {
+            return Optional.empty();
+        }
         var path = sessionsDir.resolve(sessionId + ".stream.ndjson");
         return Files.isRegularFile(path) ? Optional.of(path) : Optional.empty();
     }

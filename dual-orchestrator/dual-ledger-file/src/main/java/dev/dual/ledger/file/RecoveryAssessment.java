@@ -371,8 +371,9 @@ public record RecoveryAssessment(
             // inspection before a manual retry.
             case "session_bootstrap_failed" ->
                     retry + "  # only after inspecting the session bootstrap failure";
+            case "permission_blocked" ->
+                    retry + "  # only after changing the permission policy and rebuilding the acpx session";
             case "auth_failed",
-                 "permission_blocked",
                  "provider_connection_failed",
                  "context_window_exceeded",
                  "rate_limited" -> retry;

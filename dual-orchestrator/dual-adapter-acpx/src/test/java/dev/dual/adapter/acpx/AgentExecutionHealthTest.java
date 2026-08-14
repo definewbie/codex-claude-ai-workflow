@@ -187,4 +187,23 @@ class AgentExecutionHealthTest {
         assertTrue(assessment.status() != AgentExecutionHealth.Status.RECOVERABLE_FAILURE);
         assertTrue(assessment.signal() == null || assessment.signal().type() != AdapterSignalType.RATE_LIMITED);
     }
+
+    @Test
+    void currentPermissionDenialIsRecordedWithoutStoppingTheTurnEarly() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(1), Duration.ofSeconds(60));
+        var stream = new AcpxSessionStreamProjector();
+        health.observe(stream.accept(0, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":9,"method":"session/request_permission","params":{"toolCall":{"title":"Run tests","rawInput":{"command":"mvn test"}}}}
+                """)).orElseThrow());
+        health.observe(stream.accept(1, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":9,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """)).orElseThrow());
+
+        var assessment = health.assess(Duration.ofSeconds(2));
+        assertEquals(AgentExecutionHealth.Status.HEALTHY, assessment.status());
+        assertNull(assessment.signal());
+        assertEquals(1, assessment.signals().size());
+        assertEquals(AdapterSignalType.PERMISSION_BLOCKED, assessment.signals().get(0).type());
+        assertTrue(assessment.signals().get(0).message().contains("mvn test"));
+    }
 }

@@ -1,5 +1,6 @@
 package dev.dual.adapter.acpx;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AdapterSignalType;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class AcpxAgentTransport {
     private static final int RECOVERABLE_SIGNAL_EXIT_CODE = 4;
-    private static final int ACPX_PERMISSION_DENIED_EXIT_CODE = 5;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final long STDERR_SIGNAL_POLL_SECONDS = 2;
     private static final long DEFAULT_RECOVERABLE_SIGNAL_GRACE_SECONDS = 30;
     private static final long DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS = 600;
@@ -196,7 +197,7 @@ public class AcpxAgentTransport {
         command.add(request.promptPath().toString());
 
         var managedProcessBaseline = managedToolPids();
-        var sessionStreamBaseline = sessionStreamBaseline();
+        var sessionStreamBaseline = sessionStreamBaseline(request);
         var startedAt = Instant.now();
         var processBuilder = new ProcessBuilder(command)
                 .directory(request.workdir().toFile())
@@ -222,6 +223,9 @@ public class AcpxAgentTransport {
             ));
             var waitResult = waitForExitOrRecoverableSignal(process, request, sessionStreamBaseline);
             timeline.addAll(waitResult.executionTimeline());
+            if (requiresSessionClosure(waitResult)) {
+                waitResult = withSessionClosure(agent, request, waitResult, timeline, startedAt);
+            }
             recordEvent(timeline, request, AcpxExecutionEvent.now(
                     AgentExecutionTimelineEventKind.PROCESS_EXITED,
                     "adapter",
@@ -261,10 +265,23 @@ public class AcpxAgentTransport {
                     waitResult.signals()
             );
         } catch (InterruptedException failure) {
-            Thread.currentThread().interrupt();
-            return transportExceptionResult(agent, request, startedAt, process.pid(), failure, true);
+            Thread.interrupted();
+            try {
+                var closure = quiesceSession(agent, request);
+                return transportExceptionResult(agent, request, startedAt, process.pid(), failure, true, closure);
+            } finally {
+                Thread.currentThread().interrupt();
+            }
         } catch (ExecutionEventPersistenceException failure) {
-            return transportExceptionResult(agent, request, startedAt, process.pid(), failure, false);
+            return transportExceptionResult(
+                    agent,
+                    request,
+                    startedAt,
+                    process.pid(),
+                    failure,
+                    false,
+                    quiesceSession(agent, request)
+            );
         } finally {
             if (process.isAlive()) {
                 process.destroyForcibly();
@@ -280,6 +297,18 @@ public class AcpxAgentTransport {
             Long pid,
             Exception failure,
             boolean interrupted
+    ) {
+        return transportExceptionResult(agent, request, startedAt, pid, failure, interrupted, null);
+    }
+
+    private AcpxRunResult transportExceptionResult(
+            String agent,
+            AcpxRunRequest request,
+            Instant startedAt,
+            Long pid,
+            Exception failure,
+            boolean interrupted,
+            SessionClosureResult closure
     ) {
         var finishedAt = Instant.now();
         var command = List.of(acpxExecutable, agent, "transport");
@@ -298,9 +327,9 @@ public class AcpxAgentTransport {
         } catch (IOException ignored) {
             // The typed result remains authoritative when diagnostic persistence fails.
         }
-        var signals = interrupted
-                ? List.<AdapterSignal>of()
-                : List.of(new AdapterSignal(
+        var signals = new ArrayList<AdapterSignal>();
+        if (!interrupted) {
+            signals.add(new AdapterSignal(
                         AdapterSignalType.PROCESS_STALLED,
                         message,
                         0,
@@ -308,11 +337,18 @@ public class AcpxAgentTransport {
                         "",
                         false
                 ));
+        }
+        if (closure != null && !closure.success()) {
+            signals.add(sessionClosureFailureSignal(closure, signals.size(), request.sessionName()));
+        }
+        var timeline = closure == null
+                ? List.<AcpxExecutionEvent>of()
+                : List.of(sessionClosureEvent(closure, startedAt, 0));
         return new AcpxRunResult(
                 startedAt,
                 finishedAt,
                 command,
-                List.of(),
+                timeline,
                 null,
                 AcpxPromptCompletion.EMPTY,
                 new ProcessResult(
@@ -328,7 +364,7 @@ public class AcpxAgentTransport {
                         interrupted,
                         false
                 ),
-                signals
+                List.copyOf(signals)
         );
     }
 
@@ -389,6 +425,8 @@ public class AcpxAgentTransport {
         var kind = switch (event.kind()) {
             case PROMPT_ACCEPTED -> AgentExecutionTimelineEventKind.PROMPT_ACCEPTED;
             case PROMPT_COMPLETED -> AgentExecutionTimelineEventKind.PROMPT_COMPLETED;
+            case PERMISSION_APPROVED, PERMISSION_DENIED, PERMISSION_CANCELLED ->
+                    AgentExecutionTimelineEventKind.PERMISSION_DECISION;
             default -> null;
         };
         if (kind == null) {
@@ -399,8 +437,33 @@ public class AcpxAgentTransport {
                 "acpx_stream",
                 event.sequence(),
                 startedAt,
-                Map.of("lifecycleSequence", event.sequence())
+                event.kind() == AgentLifecycleEvent.Kind.PERMISSION_APPROVED
+                        || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED
+                        || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_CANCELLED
+                        ? permissionTimelineDetails(event, request)
+                        : Map.of("lifecycleSequence", event.sequence())
         ));
+    }
+
+    private Map<String, Object> permissionTimelineDetails(AgentLifecycleEvent event, AcpxRunRequest request) {
+        var evidence = event.permissionEvidence();
+        if (evidence == null) {
+            return Map.of(
+                    "lifecycleSequence", event.sequence(),
+                    "sessionName", request.sessionName(),
+                    "disposition", "UNAVAILABLE"
+            );
+        }
+        return Map.of(
+                "lifecycleSequence", event.sequence(),
+                "sessionName", request.sessionName(),
+                "toolCallId", evidence.toolCallId(),
+                "toolKind", evidence.toolKind(),
+                "title", evidence.title(),
+                "resource", evidence.resource(),
+                "requestedOptions", evidence.requestedOptions(),
+                "disposition", evidence.disposition()
+        );
     }
 
     private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
@@ -478,6 +541,15 @@ public class AcpxAgentTransport {
     }
 
     private SessionCommandResult runSessionCommand(List<String> command, Path workdir, boolean simpleClaudeCode) throws InterruptedException {
+        return runSessionCommand(command, workdir, simpleClaudeCode, sessionCommandTimeout);
+    }
+
+    private SessionCommandResult runSessionCommand(
+            List<String> command,
+            Path workdir,
+            boolean simpleClaudeCode,
+            Duration timeout
+    ) throws InterruptedException {
         Path outputPath = null;
         var startedAt = Instant.now();
         try {
@@ -490,7 +562,7 @@ public class AcpxAgentTransport {
                 processBuilder.environment().put("CLAUDE_CODE_SIMPLE", "1");
             }
             var process = processBuilder.start();
-            var completed = process.waitFor(sessionCommandTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            var completed = process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
             if (!completed) {
                 terminateProcessTree(process.toHandle());
                 return new SessionCommandResult(false, true, -1, readFile(outputPath), command, startedAt, Instant.now());
@@ -578,19 +650,6 @@ public class AcpxAgentTransport {
                 var exitCode = process.exitValue();
                 var signals = new ArrayList<>(assessment.signals());
                 var terminalSignal = assessment.signal();
-                if (exitCode == ACPX_PERMISSION_DENIED_EXIT_CODE
-                        && signals.stream().noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED
-                                && !signal.superseded())) {
-                    terminalSignal = new AdapterSignal(
-                            AdapterSignalType.PERMISSION_BLOCKED,
-                            "acpx exited with PERMISSION_DENIED (5)",
-                            eventReader.nextSequence(),
-                            "acpx_exit",
-                            request.sessionName(),
-                            false
-                    );
-                    signals.add(terminalSignal);
-                }
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
                         AgentExecutionTimelineEventKind.PROCESS_WAIT_COMPLETED,
                         "adapter",
@@ -678,28 +737,128 @@ public class AcpxAgentTransport {
         }
     }
 
-    private Map<String, Long> sessionStreamBaseline() {
+    private Map<String, Long> sessionStreamBaseline(AcpxRunRequest request) {
         var sessionsDir = Path.of(System.getProperty("user.home"), ".acpx", "sessions");
-        if (!Files.isDirectory(sessionsDir)) {
-            return Map.of();
+        var indexPath = sessionsDir.resolve("index.json");
+        if (!Files.isRegularFile(indexPath)) {
+            return null;
         }
-        var baseline = new java.util.LinkedHashMap<String, Long>();
-        try (var paths = Files.list(sessionsDir)) {
-            paths.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".stream.ndjson"))
-                    .forEach(path -> {
-                        var name = path.getFileName().toString();
-                        var sessionId = name.substring(0, name.length() - ".stream.ndjson".length());
-                        try {
-                            baseline.put(sessionId, Files.size(path));
-                        } catch (IOException ignored) {
-                            baseline.put(sessionId, 0L);
-                        }
-                    });
-        } catch (IOException ignored) {
-            return Map.of();
+        try {
+            var entries = OBJECT_MAPPER.readTree(indexPath.toFile()).path("entries");
+            String selectedId = "";
+            String selectedLastUsed = "";
+            var expectedWorkdir = request.workdir().toAbsolutePath().normalize().toString();
+            for (var entry : entries) {
+                if (!request.sessionName().equals(entry.path("name").asText())
+                        || entry.path("closed").asBoolean(false)
+                        || !expectedWorkdir.equals(Path.of(entry.path("cwd").asText(".")).toAbsolutePath().normalize().toString())) {
+                    continue;
+                }
+                var candidateId = entry.path("acpxRecordId").asText();
+                var lastUsed = entry.path("lastUsedAt").asText();
+                if (!candidateId.isBlank() && (selectedId.isBlank() || lastUsed.compareTo(selectedLastUsed) > 0)) {
+                    selectedId = candidateId;
+                    selectedLastUsed = lastUsed;
+                }
+            }
+            if (selectedId.isBlank()) {
+                return null;
+            }
+            var streamPath = sessionsDir.resolve(selectedId + ".stream.ndjson");
+            return Map.of(selectedId, Files.isRegularFile(streamPath) ? Files.size(streamPath) : 0L);
+        } catch (IOException | RuntimeException ignored) {
+            return null;
         }
-        return Map.copyOf(baseline);
+    }
+
+    private boolean requiresSessionClosure(ProcessWaitResult result) {
+        return result.terminatedByHealth()
+                || !result.promptCompletion().completed();
+    }
+
+    private ProcessWaitResult withSessionClosure(
+            String agent,
+            AcpxRunRequest request,
+            ProcessWaitResult result,
+            List<AcpxExecutionEvent> timeline,
+            Instant startedAt
+    ) throws InterruptedException {
+        var closure = quiesceSession(agent, request);
+        recordEvent(timeline, request, sessionClosureEvent(closure, startedAt, timeline.size()));
+        var signals = new ArrayList<>(result.signals());
+        var terminalSignal = result.signal();
+        if (!closure.success()) {
+            terminalSignal = sessionClosureFailureSignal(closure, signals.size(), request.sessionName());
+            signals.add(terminalSignal);
+        }
+        return new ProcessWaitResult(
+                result.exitCode(),
+                result.executionTimeline(),
+                result.promptCompletion(),
+                signals,
+                terminalSignal,
+                result.terminatedByHealth()
+        );
+    }
+
+    private SessionClosureResult quiesceSession(String agent, AcpxRunRequest request) throws InterruptedException {
+        var cancel = runSessionCommand(
+                List.of(acpxExecutable, agent, "cancel", "-s", request.sessionName()),
+                request.workdir(),
+                false,
+                closureCommandTimeout()
+        );
+        if (cancel.success()) {
+            return new SessionClosureResult(SessionClosureDisposition.CANCELLED, cancel, null);
+        }
+        var close = runSessionCommand(
+                List.of(acpxExecutable, agent, "sessions", "close", request.sessionName()),
+                request.workdir(),
+                false,
+                closureCommandTimeout()
+        );
+        return new SessionClosureResult(
+                close.success() ? SessionClosureDisposition.CLOSED_AFTER_CANCEL : SessionClosureDisposition.FAILED,
+                cancel,
+                close
+        );
+    }
+
+    private AcpxExecutionEvent sessionClosureEvent(SessionClosureResult closure, Instant startedAt, long sequence) {
+        return AcpxExecutionEvent.now(
+                AgentExecutionTimelineEventKind.SESSION_CLOSURE,
+                "adapter",
+                sequence,
+                startedAt,
+                Map.of(
+                        "disposition", closure.disposition().name(),
+                        "cancelExitCode", closure.cancel().exitCode(),
+                        "cancelTimedOut", closure.cancel().timedOut(),
+                        "closeExitCode", closure.close() == null ? 0 : closure.close().exitCode(),
+                        "closeTimedOut", closure.close() != null && closure.close().timedOut()
+                )
+        );
+    }
+
+    private AdapterSignal sessionClosureFailureSignal(
+            SessionClosureResult closure,
+            long sequence,
+            String sessionName
+    ) {
+        return new AdapterSignal(
+                AdapterSignalType.PROCESS_STALLED,
+                "acpx session did not reach a quiescent boundary after cancel and close",
+                sequence,
+                "session_closure",
+                sessionName,
+                false
+        );
+    }
+
+    private Duration closureCommandTimeout() {
+        return sessionCommandTimeout.compareTo(Duration.ofSeconds(5)) <= 0
+                ? sessionCommandTimeout
+                : Duration.ofSeconds(5);
     }
 
     private void cleanupManagedToolsStartedByRun(Set<Long> knownBefore) {
@@ -904,6 +1063,22 @@ public class AcpxAgentTransport {
     ) {
         ProcessWaitResult {
             signals = signals == null ? List.of() : List.copyOf(signals);
+        }
+    }
+
+    private enum SessionClosureDisposition {
+        CANCELLED,
+        CLOSED_AFTER_CANCEL,
+        FAILED
+    }
+
+    private record SessionClosureResult(
+            SessionClosureDisposition disposition,
+            SessionCommandResult cancel,
+            SessionCommandResult close
+    ) {
+        boolean success() {
+            return disposition != SessionClosureDisposition.FAILED;
         }
     }
 

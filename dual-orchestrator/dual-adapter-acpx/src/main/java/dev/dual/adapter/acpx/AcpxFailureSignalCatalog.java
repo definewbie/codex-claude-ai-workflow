@@ -87,17 +87,6 @@ final class AcpxFailureSignalCatalog {
                         "agent accepted the prompt but produced no trusted progress"
                 ),
                 signal(
-                        "agent_permission_blocked",
-                        AcpxFailureReason.AGENT_PERMISSION_BLOCKED,
-                        85,
-                        "agent tool permission was blocked in non-interactive execution; inspect the prompt/output, then retry with a fixed session or workflow permission policy",
-                        true,
-                        true,
-                        "tool permission request failed",
-                        "tool use aborted",
-                        "tool_use_error>cancelled"
-                ),
-                signal(
                         "session_bootstrap_failed",
                         AcpxFailureReason.SESSION_BOOTSTRAP_FAILED,
                         82,

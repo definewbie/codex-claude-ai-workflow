@@ -28,7 +28,8 @@ public final class AgentExecutionOutcomeResolver {
             return adapterFailure(
                     AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE,
                     blockingSignal.get(),
-                    "Blocking adapter signal: " + blockingSignal.get().type(),
+                    "Blocking adapter signal: " + blockingSignal.get().type()
+                            + (blockingSignal.get().message().isBlank() ? "" : " - " + blockingSignal.get().message()),
                     AgentExecutionRetryPolicy.MANUAL_ONLY
             );
         }

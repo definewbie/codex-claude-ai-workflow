@@ -198,6 +198,28 @@ class RecoveryAssessmentTest {
     }
 
     @Test
+    void typedPermissionFailurePreservesCurrentActionForOperatorWithoutBlindRetry() {
+        var node = failedAcpxNode(Map.of(
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "permission_blocked",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "Blocking adapter signal: PERMISSION_BLOCKED - current ACP turn permission denied: Run tests: mvn test"
+                )
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("agent_permission_blocked", assessment.classification());
+        assertEquals("RETRY_AFTER_EXTERNAL_FIX", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe());
+        assertTrue(assessment.reason().contains("mvn test"));
+        assertTrue(assessment.suggestedCommand().contains("changing the permission policy"));
+        assertTrue(assessment.suggestedCommand().contains("rebuilding the acpx session"));
+    }
+
+    @Test
     void typedReconnectMatchesLegacySessionRecovery() {
         var typed = RecoveryAssessment.from(failedAcpxNode(Map.of(
                 "agent", "codex",

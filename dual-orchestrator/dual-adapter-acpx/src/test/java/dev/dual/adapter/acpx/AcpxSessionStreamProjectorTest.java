@@ -155,6 +155,43 @@ class AcpxSessionStreamProjectorTest {
         assertFalse(projector.promptCompletion().completed());
     }
 
+    @Test
+    void correlatesCurrentPermissionRequestAndDeniedDecision() {
+        var projector = new AcpxSessionStreamProjector();
+        var requested = projector.accept(1, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Run tests","rawInput":{"command":"mvn test"}}}}
+                """)).orElseThrow();
+        var denied = projector.accept(2, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """)).orElseThrow();
+
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_REQUESTED, requested.kind());
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_DENIED, denied.kind());
+        assertTrue(denied.text().contains("mvn test"));
+    }
+
+    @Test
+    void historicalPermissionDecisionCannotBecomeCurrentEvidence() {
+        var projector = new AcpxSessionStreamProjector();
+        assertTrue(projector.accept(1, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Old request"}}}
+                """), false).isEmpty());
+        assertTrue(projector.accept(2, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """), false).isEmpty());
+    }
+
+    @Test
+    void currentPermissionResultWithoutCurrentRequestCannotCreateEvidence() {
+        var projector = new AcpxSessionStreamProjector();
+        assertTrue(projector.accept(1, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Historical request"}}}
+                """), false).isEmpty());
+        assertTrue(projector.accept(2, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """), true).isEmpty());
+    }
+
     private static String update(String messageId, String text) {
         var messageField = messageId.isBlank() ? "" : "\"messageId\":\"" + messageId + "\",";
         return "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"update\":{"

@@ -13,7 +13,8 @@ record AgentLifecycleEvent(
         Source source,
         Kind kind,
         String text,
-        AcpxStreamEvidence.TypedError streamError
+        AcpxStreamEvidence.TypedError streamError,
+        PermissionEvidence permissionEvidence
 ) {
     static AgentLifecycleEvent stderrLine(long sequence, String text) {
         return textLine(sequence, Source.STDERR, text);
@@ -55,8 +56,24 @@ record AgentLifecycleEvent(
         return streamEvent(sequence, Kind.PROVIDER_FAILURE, error);
     }
 
+    static AgentLifecycleEvent permissionRequested(long sequence, PermissionEvidence evidence) {
+        return permissionEvent(sequence, Kind.PERMISSION_REQUESTED, evidence);
+    }
+
+    static AgentLifecycleEvent permissionApproved(long sequence, PermissionEvidence evidence) {
+        return permissionEvent(sequence, Kind.PERMISSION_APPROVED, evidence);
+    }
+
+    static AgentLifecycleEvent permissionDenied(long sequence, PermissionEvidence evidence) {
+        return permissionEvent(sequence, Kind.PERMISSION_DENIED, evidence);
+    }
+
+    static AgentLifecycleEvent permissionCancelled(long sequence, PermissionEvidence evidence) {
+        return permissionEvent(sequence, Kind.PERMISSION_CANCELLED, evidence);
+    }
+
     private static AgentLifecycleEvent textLine(long sequence, Source source, String text) {
-        return new AgentLifecycleEvent(sequence, source, classifyText(source, text), text == null ? "" : text, null);
+        return new AgentLifecycleEvent(sequence, source, classifyText(source, text), text == null ? "" : text, null, null);
     }
 
     private static AgentLifecycleEvent streamEvent(
@@ -64,7 +81,28 @@ record AgentLifecycleEvent(
             Kind kind,
             AcpxStreamEvidence.TypedError error
     ) {
-        return new AgentLifecycleEvent(sequence, Source.ACPX_STREAM, kind, "", error);
+        return streamEvent(sequence, kind, "", error);
+    }
+
+    private static AgentLifecycleEvent streamEvent(
+            long sequence,
+            Kind kind,
+            String text,
+            AcpxStreamEvidence.TypedError error
+    ) {
+        return new AgentLifecycleEvent(sequence, Source.ACPX_STREAM, kind, text == null ? "" : text, error, null);
+    }
+
+    private static AgentLifecycleEvent permissionEvent(long sequence, Kind kind, PermissionEvidence evidence) {
+        var normalized = evidence == null ? PermissionEvidence.EMPTY : evidence;
+        return new AgentLifecycleEvent(
+                sequence,
+                Source.ACPX_STREAM,
+                kind,
+                normalized.summary(),
+                null,
+                normalized
+        );
     }
 
     /** Wrapper stdout/stderr compatibility only; ACP stream lines are decoded structurally. */
@@ -81,9 +119,7 @@ record AgentLifecycleEvent(
         }
         if ((source == Source.STDOUT || source == Source.STDERR) && (trimmed.startsWith("[error]")
                 || trimmed.startsWith("runtime:")
-                || trimmed.startsWith("no acpx session found")
-                || trimmed.startsWith("tool permission request failed")
-                || trimmed.startsWith("tool use aborted"))) {
+                || trimmed.startsWith("no acpx session found"))) {
             return Kind.PROVIDER_FAILURE;
         }
         if (sourceLikeWrapperActivity(lower)) {
@@ -104,6 +140,37 @@ record AgentLifecycleEvent(
         ACPX_STREAM
     }
 
+    record PermissionEvidence(
+            String toolCallId,
+            String toolKind,
+            String title,
+            String resource,
+            java.util.List<String> requestedOptions,
+            String disposition
+    ) {
+        static final PermissionEvidence EMPTY = new PermissionEvidence("", "", "", "", java.util.List.of(), "UNAVAILABLE");
+
+        PermissionEvidence {
+            toolCallId = toolCallId == null ? "" : toolCallId;
+            toolKind = toolKind == null ? "" : toolKind;
+            title = title == null ? "" : title;
+            resource = resource == null ? "" : resource;
+            requestedOptions = requestedOptions == null ? java.util.List.of() : java.util.List.copyOf(requestedOptions);
+            disposition = disposition == null ? "UNAVAILABLE" : disposition;
+        }
+
+        PermissionEvidence withDisposition(String value) {
+            return new PermissionEvidence(toolCallId, toolKind, title, resource, requestedOptions, value);
+        }
+
+        String summary() {
+            if (!title.isBlank() && !resource.isBlank()) {
+                return title + ": " + resource;
+            }
+            return !resource.isBlank() ? resource : (!title.isBlank() ? title : "permission request");
+        }
+    }
+
     enum Kind {
         OTHER,
         AGENT_ACTIVITY,
@@ -112,6 +179,10 @@ record AgentLifecycleEvent(
         SESSION_NEW_CREATED,
         PROMPT_ACCEPTED,
         PROMPT_COMPLETED,
+        PERMISSION_REQUESTED,
+        PERMISSION_APPROVED,
+        PERMISSION_DENIED,
+        PERMISSION_CANCELLED,
         TOOL_RESULT,
         USAGE_UPDATE,
         RECONNECT_SIGNAL,

@@ -5,6 +5,8 @@ public enum AgentExecutionTimelineEventKind {
     PROCESS_WAIT_STARTED("process_wait_started"),
     PROMPT_ACCEPTED("prompt_accepted"),
     PROMPT_COMPLETED("prompt_completed"),
+    PERMISSION_DECISION("permission_decision"),
+    SESSION_CLOSURE("session_closure"),
     PROCESS_WAIT_COMPLETED("process_wait_completed"),
     RECOVERABLE_SIGNAL_DETECTED("recoverable_signal_detected"),
     PROCESS_EXITED("process_exited"),

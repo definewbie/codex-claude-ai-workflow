@@ -1573,6 +1573,10 @@ class AcpxAgentTaskHandlerTest {
         Files.writeString(tempDir.resolve("main.py"), "def hello(): return 'hello'\n");
         Files.writeString(tempDir.resolve("README.md"), "# Fixture\n");
         var sessionsDir = tempDir.resolve(".acpx/sessions");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(sessionsDir.resolve("index.json"), """
+                {"entries":[{"name":"claude-main-ws-large-stream","cwd":"%s","acpxRecordId":"123e4567-e89b-12d3-a456-426614174106","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath()), StandardCharsets.UTF_8);
         var fakeAcpx = tempDir.resolve("captured-large-acpx.sh");
         var strictResultFixture = Path.of("..", "scripts/fixtures/emit-strict-agent-result.py")
                 .toAbsolutePath()

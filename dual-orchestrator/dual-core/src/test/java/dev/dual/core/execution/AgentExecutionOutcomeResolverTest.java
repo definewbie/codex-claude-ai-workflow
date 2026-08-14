@@ -133,11 +133,19 @@ class AgentExecutionOutcomeResolverTest {
 
     @Test
     void permissionBlockedRemainsPrimaryWhenAgentResultIsInvalid() {
+        var permission = new AdapterSignal(
+                AdapterSignalType.PERMISSION_BLOCKED,
+                "current ACP turn permission denied: Run tests: mvn test",
+                7,
+                "acpx_stream",
+                "claude-main",
+                false
+        );
         var outcome = resolve(
                 ProcessResult.nonZeroComplete(5),
                 AgentResultContractResult.invalid("AGENT_RESULT_PARSE_FAILED"),
                 List.of(ArtifactContractResult.requiredMissing("agent_output_contract")),
-                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED))
+                List.of(permission)
         );
 
         assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, outcome.status());
@@ -145,6 +153,7 @@ class AgentExecutionOutcomeResolverTest {
         assertFalse(outcome.nodeMaySucceed());
         assertEquals(AgentExecutionRetryPolicy.MANUAL_ONLY, outcome.retryPolicy());
         assertEquals(RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE, outcome.recoveryCategory());
+        assertTrue(outcome.operatorMessage().contains("mvn test"));
     }
 
     @Test
