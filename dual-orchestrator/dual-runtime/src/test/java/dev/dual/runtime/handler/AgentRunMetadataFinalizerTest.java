@@ -183,6 +183,72 @@ class AgentRunMetadataFinalizerTest {
     }
 
     @Test
+    void interruptedPermissionFailureFinalizesWithoutContradictoryAttemptState() throws Exception {
+        var runJson = tempDir.resolve(".agent/workstreams/ws-permission/runs/run-permission/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 2,
+                  "runId": "run-permission",
+                  "workstreamId": "ws-permission",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "status": "process_exited",
+                  "startedAt": "2026-08-14T01:33:27Z",
+                  "finishedAt": "2026-08-14T01:43:32Z",
+                  "executionAttempt": {
+                    "attemptId": "att-run-permission",
+                    "status": "INTERRUPTED",
+                    "processStatus": "INTERRUPTED",
+                    "failureSignal": "PERMISSION_BLOCKED",
+                    "recoverable": true,
+                    "startedAt": "2026-08-14T01:33:27Z",
+                    "finishedAt": "2026-08-14T01:43:32Z"
+                  },
+                  "processResult": {
+                    "exitCode": 5,
+                    "usability": "INTERRUPTED",
+                    "durationMs": 605000,
+                    "interrupted": true,
+                    "timedOut": false
+                  },
+                  "adapterSignals": [ {
+                    "type": "PERMISSION_BLOCKED",
+                    "message": "acpx exited with PERMISSION_DENIED (5)",
+                    "observedSequence": 44256,
+                    "source": "acpx_exit",
+                    "sessionId": "claude-main-ws-permission",
+                    "superseded": false
+                  } ]
+                }
+                """);
+
+        var facts = new LinkedHashMap<String, Object>();
+        facts.put("run_metadata", ".agent/workstreams/ws-permission/runs/run-permission/run.json");
+        facts.put("exit_code", 5);
+        facts.put("process_usability", "INTERRUPTED");
+        var nodeResult = AgentExecutionResultFacts.attach(new NodeResult(
+                "completed",
+                NodeStatus.COMPLETED,
+                List.of(),
+                facts,
+                ""
+        ), AgentResultContractResult.missing(), List.of(), null);
+
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
+
+        assertEquals(NodeStatus.FAILED, finalized.status());
+        var json = OBJECT_MAPPER.readValue(runJson.toFile(), Map.class);
+        var attempt = map(json.get("executionAttempt"));
+        assertEquals("INTERRUPTED", attempt.get("status"));
+        assertEquals("INTERRUPTED", attempt.get("processStatus"));
+        assertEquals("PERMISSION_BLOCKED", attempt.get("failureSignal"));
+        var outcome = map(json.get("executionOutcome"));
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", outcome.get("status"));
+        assertEquals("permission_blocked", outcome.get("primaryReason"));
+    }
+
+    @Test
     void persistsSuccessfulExecutionOutcomeToRunMetadata() throws Exception {
         var runJson = tempDir.resolve(".agent/workstreams/ws-ok/runs/run-2/run.json");
         Files.createDirectories(runJson.getParent());

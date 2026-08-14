@@ -130,6 +130,22 @@ class AgentExecutionFinalizerTest {
         assertTrue(finalized.legacyRecoverable());
     }
 
+    @Test
+    void blockingPermissionSignalCannotMakeInterruptedAttemptInternallyInvalid() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.interruptedProcess(),
+                AgentResultContractResult.missing(),
+                List.of(),
+                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED))
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
+        assertEquals("permission_blocked", finalized.outcome().primaryReason());
+        assertEquals(AgentExecutionAttemptStatus.INTERRUPTED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.INTERRUPTED, finalized.attempt().processStatus());
+        assertEquals(AdapterSignalType.PERMISSION_BLOCKED, finalized.attempt().failureSignal());
+    }
+
     private static AgentExecutionAttempt baseAttempt() {
         return new AgentExecutionAttempt(
                 "att-run-1",

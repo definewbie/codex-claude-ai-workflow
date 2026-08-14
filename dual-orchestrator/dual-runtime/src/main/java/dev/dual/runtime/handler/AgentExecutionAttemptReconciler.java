@@ -83,7 +83,7 @@ public final class AgentExecutionAttemptReconciler {
                 classification.get().process(),
                 AgentResultContractResult.missing(),
                 List.of(),
-                List.of()
+                classification.get().signals()
         );
         var finalized = finalizer.finalize(baseAttempt(json), evidence);
         writeReconciled(runJson, json, finalized, classification.get());
@@ -235,6 +235,18 @@ public final class AgentExecutionAttemptReconciler {
 
     private Optional<Classification> classify(ObjectNode json) {
         var now = Instant.now();
+        var durableProcess = json.path("processResult");
+        if (durableProcess.isObject() && !durableProcess.path("usability").asText("").isBlank()) {
+            var signals = json.path("adapterSignals").isMissingNode()
+                    ? List.<AdapterSignal>of()
+                    : AgentRunMetadataFinalizer.adapterSignalsFromRunMetadata(json);
+            return Optional.of(new Classification(
+                    AgentRunMetadataFinalizer.processResultFromRunMetadata(json),
+                    AgentExecutionTimelineEventKind.ATTEMPT_RECONCILED,
+                    "durable_process_result_without_terminal_outcome",
+                    null,
+                    signals));
+        }
         var exited = readProcessExit(json);
         if (exited.isPresent()) {
             var exit = exited.get();
@@ -260,7 +272,8 @@ public final class AgentExecutionAttemptReconciler {
                     ),
                     AgentExecutionTimelineEventKind.ATTEMPT_RECONCILED,
                     "process_exited_before_finalization",
-                    null));
+                    null,
+                    List.of()));
         }
         var pid = readPid(json);
         if (pid > 0 && !ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)) {
@@ -280,7 +293,8 @@ public final class AgentExecutionAttemptReconciler {
                     ),
                     AgentExecutionTimelineEventKind.PROCESS_INTERRUPTED,
                     "process_interrupted",
-                    null));
+                    null,
+                    List.of()));
         }
         var startedAt = readStartedAt(json);
         if (startedAt != null && Duration.between(startedAt, now).compareTo(staleTimeout) > 0) {
@@ -288,7 +302,8 @@ public final class AgentExecutionAttemptReconciler {
                     ProcessResult.timedOutProcess(),
                     AgentExecutionTimelineEventKind.ATTEMPT_RECONCILED,
                     "stale_running_attempt",
-                    staleTimeout.toMillis()));
+                    staleTimeout.toMillis(),
+                    List.of()));
         }
         return Optional.empty();
     }
@@ -369,10 +384,8 @@ public final class AgentExecutionAttemptReconciler {
                 firstNonBlank(json.path("workstreamId").asText(""), attempt.path("workstreamId").asText("")),
                 firstNonBlank(json.path("nodeId").asText(""), attempt.path("nodeId").asText("")),
                 firstNonBlank(json.path("agent").asText(""), attempt.path("agent").asText("")),
-                enumValue(AgentExecutionAttemptStatus.class, attempt.path("status").asText(""),
-                        AgentExecutionAttemptStatus.RUNNING),
-                enumValue(AgentExecutionProcessStatus.class, attempt.path("processStatus").asText(""),
-                        AgentExecutionProcessStatus.RUNNING),
+                AgentExecutionAttemptStatus.RUNNING,
+                AgentExecutionProcessStatus.RUNNING,
                 null,
                 false,
                 false,
@@ -527,7 +540,8 @@ public final class AgentExecutionAttemptReconciler {
             ProcessResult process,
             AgentExecutionTimelineEventKind timelineKind,
             String reason,
-            Long timeoutMs
+            Long timeoutMs,
+            List<AdapterSignal> signals
     ) {
     }
 

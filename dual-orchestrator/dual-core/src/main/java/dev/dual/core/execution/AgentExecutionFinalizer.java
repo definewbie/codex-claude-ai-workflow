@@ -45,7 +45,7 @@ public final class AgentExecutionFinalizer {
             AgentExecutionEvidence evidence,
             AgentExecutionOutcome outcome
     ) {
-        var status = attemptStatus(outcome);
+        var status = attemptStatus(evidence.processResult(), outcome);
         var processStatus = processStatus(evidence.processResult(), outcome);
         var failureSignal = status == AgentExecutionAttemptStatus.COMPLETED ? null : primaryFailureSignal(outcome);
         var recoverable = status == AgentExecutionAttemptStatus.RECOVERABLE_FAILED
@@ -75,7 +75,21 @@ public final class AgentExecutionFinalizer {
         );
     }
 
-    private static AgentExecutionAttemptStatus attemptStatus(AgentExecutionOutcome outcome) {
+    private static AgentExecutionAttemptStatus attemptStatus(
+            ProcessResult process,
+            AgentExecutionOutcome outcome
+    ) {
+        // Process terminal facts remain authoritative for the attempt shape even
+        // when a blocking adapter signal owns the higher-level outcome reason.
+        if (process.usability() == ProcessUsability.TIMED_OUT) {
+            return AgentExecutionAttemptStatus.TIMED_OUT;
+        }
+        if (process.usability() == ProcessUsability.STALLED) {
+            return AgentExecutionAttemptStatus.STALLED;
+        }
+        if (process.usability() == ProcessUsability.INTERRUPTED) {
+            return AgentExecutionAttemptStatus.INTERRUPTED;
+        }
         if (outcome.nodeMaySucceed()) {
             return AgentExecutionAttemptStatus.COMPLETED;
         }

@@ -131,6 +131,60 @@ class AgentExecutionAttemptReconcilerTest {
     }
 
     @Test
+    void completedMetadataWithoutOutcomeReplaysDurablePermissionFailure() throws Exception {
+        var runJson = tempDir.resolve("runs/run-finalizer-gap/run.json");
+        Files.createDirectories(runJson.getParent());
+        Files.writeString(runJson, """
+                {
+                  "schemaVersion": 3,
+                  "status": "process_exited",
+                  "runId": "run-finalizer-gap",
+                  "workstreamId": "ws-test",
+                  "nodeId": "implement.claude_implement",
+                  "agent": "claude",
+                  "startedAt": "2026-08-14T01:33:27Z",
+                  "finishedAt": "2026-08-14T01:43:32Z",
+                  "executionAttempt": {
+                    "attemptId": "att-run-finalizer-gap",
+                    "status": "INTERRUPTED",
+                    "processStatus": "INTERRUPTED",
+                    "failureSignal": "PERMISSION_BLOCKED",
+                    "recoverable": true,
+                    "startedAt": "2026-08-14T01:33:27Z",
+                    "finishedAt": "2026-08-14T01:43:32Z"
+                  },
+                  "processResult": {
+                    "pid": 99999999,
+                    "exitCode": 5,
+                    "usability": "INTERRUPTED",
+                    "durationMs": 605000,
+                    "interrupted": true,
+                    "timedOut": false
+                  },
+                  "adapterSignals": [ {
+                    "type": "PERMISSION_BLOCKED",
+                    "message": "acpx exited with PERMISSION_DENIED (5)",
+                    "observedSequence": 44256,
+                    "source": "acpx_exit",
+                    "sessionId": "claude-main-ws-test",
+                    "superseded": false
+                  } ]
+                }
+                """);
+
+        var result = new AgentExecutionAttemptReconciler(Duration.ofMinutes(10)).reconcile(runJson);
+
+        assertTrue(result.reconciled());
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE", result.outcome().status().name());
+        assertEquals("permission_blocked", result.outcome().primaryReason());
+        var node = (ObjectNode) MAPPER.readTree(runJson.toFile());
+        assertEquals("INTERRUPTED", node.path("executionAttempt").path("status").asText());
+        assertEquals("PERMISSION_BLOCKED", node.path("executionAttempt").path("failureSignal").asText());
+        assertEquals("PERMISSION_BLOCKED",
+                node.path("executionOutcome").path("secondarySignals").path(0).path("type").asText());
+    }
+
+    @Test
     void preparedRunExceedingStaleTimeoutReconcilesToTimeout() throws Exception {
         var runJson = writeInFlightRun("run-timeout", null, Instant.now().minus(Duration.ofHours(1)));
 

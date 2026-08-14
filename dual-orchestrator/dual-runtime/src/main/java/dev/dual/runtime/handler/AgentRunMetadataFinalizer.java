@@ -177,7 +177,7 @@ public final class AgentRunMetadataFinalizer {
         return type == null ? List.of() : List.of(new AdapterSignal(type, reason, 0));
     }
 
-    private static List<AdapterSignal> adapterSignalsFromRunMetadata(ObjectNode json) {
+    static List<AdapterSignal> adapterSignalsFromRunMetadata(ObjectNode json) {
         var existing = json.path("adapterSignals");
         if (!existing.isArray()) {
             throw new IllegalArgumentException("typed adapterSignals must be an array");
@@ -323,13 +323,11 @@ public final class AgentRunMetadataFinalizer {
                 firstNonBlank(json.path("workstreamId").asText(""), attempt.path("workstreamId").asText("")),
                 firstNonBlank(json.path("nodeId").asText(""), attempt.path("nodeId").asText("")),
                 firstNonBlank(json.path("agent").asText(""), attempt.path("agent").asText(""), text(result.result().get("agent"))),
-                enumValue(AgentExecutionAttemptStatus.class, attempt.path("status").asText(""),
-                        AgentExecutionAttemptStatus.PROCESS_EXITED),
-                enumValue(AgentExecutionProcessStatus.class, attempt.path("processStatus").asText(""),
-                        AgentExecutionProcessStatus.EXITED),
-                enumValue(AdapterSignalType.class, attempt.path("failureSignal").asText(""), null),
-                attempt.path("recoverable").asBoolean(false),
-                attempt.path("retrySafe").asBoolean(false),
+                AgentExecutionAttemptStatus.RUNNING,
+                AgentExecutionProcessStatus.RUNNING,
+                null,
+                false,
+                false,
                 firstNonBlank(attempt.path("message").asText(""), "process exited"),
                 attempt.path("stderrPath").asText(""),
                 attempt.path("transcriptPath").asText(""),
@@ -381,7 +379,7 @@ public final class AgentRunMetadataFinalizer {
         return merged;
     }
 
-    private static ProcessResult processResultFromRunMetadata(ObjectNode json) {
+    static ProcessResult processResultFromRunMetadata(ObjectNode json) {
         var existing = json.path("processResult");
         if (existing.isMissingNode()) {
             return null;
