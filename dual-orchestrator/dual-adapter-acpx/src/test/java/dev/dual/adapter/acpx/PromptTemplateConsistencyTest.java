@@ -126,6 +126,27 @@ class PromptTemplateConsistencyTest {
         assertEquals(10, allTemplates().count());
     }
 
+    @Test
+    void designTemplatesRequireCompleteReplacementAndCompleteCurrentReview() {
+        var claude = loadTemplate("design-claude");
+        assertTrue(claude.contains("complete replacement design"));
+        assertTrue(claude.contains("interruption/crash"));
+        assertTrue(claude.contains("restart/recovery"));
+        assertTrue(claude.contains("rollback/conflict"));
+        assertTrue(claude.contains("Prefer deleting unnecessary mechanisms"));
+
+        var codex = loadTemplate("design-codex-review");
+        assertTrue(codex.contains("complete current typed design"));
+        assertTrue(codex.contains("complete blocking set"));
+        assertTrue(codex.contains("interruption/crash"));
+        assertTrue(codex.contains("restart/recovery"));
+        assertTrue(codex.contains("rollback/conflict"));
+        assertTrue(codex.contains("simplifying the state model"));
+        assertTrue(codex.contains("Anchor every blocker to the TaskContract"));
+        assertFalse(codex.contains("increase the revision budget"));
+        assertFalse(codex.contains("relax the strict contract"));
+    }
+
     private static String loadTemplate(String templateName) {
         var resource = TEMPLATE_ROOT + templateName + ".md";
         try (var stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource)) {

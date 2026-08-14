@@ -62,12 +62,23 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     null);
         }
         var reviewSubject = resolveRequiredReviewSubject(context);
+        var architectureReviewSubject = resolveRequiredArchitectureReviewSubject(context);
         if (requiresTaskContractProposal(context) && reviewSubject.isEmpty()) {
             return new NodeResult(
                     "failed",
                     NodeStatus.FAILED,
                     List.of(),
                     Map.of("error", "verified task-contract proposal reference is required for product review"),
+                    null);
+        }
+        if (requiresArchitectureReviewSubject(context) && architectureReviewSubject.isEmpty()) {
+            return new NodeResult(
+                    "REQUIRED_AGENT_EVIDENCE_MISSING",
+                    NodeStatus.FAILED,
+                    List.of(),
+                    Map.of(
+                            "failure_code", "REQUIRED_AGENT_EVIDENCE_MISSING",
+                            "error", "validated design review subject is required for architecture review"),
                     null);
         }
         var missingAgentEvidence = missingRequiredAgentEvidence(context);
@@ -85,7 +96,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
 
         if (ContextProfiles.hasProfile(profileName) && !hasSectionOverride) {
-            return executeGoverned(context, workstreamDir, packagePath, profileName, reviewSubject);
+            return executeGoverned(context, workstreamDir, packagePath, profileName,
+                    reviewSubject, architectureReviewSubject);
         }
 
         var requestedSections = effectiveSections(context);
@@ -97,8 +109,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var governance = governanceEnabled()
                 ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, OBJECT_MAPPER)
                 : null;
-        var markdown = renderPackage(context, workstreamDir, manifest, governance, reviewSubject);
+        var markdown = renderPackage(context, workstreamDir, manifest, governance,
+                reviewSubject, architectureReviewSubject);
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
+        var requiredTypedSubjectTokens = requiredTypedSubjectTokens(reviewSubject, architectureReviewSubject);
         var metadataPath = writeContextPackageMetadata(
                 context,
                 packagePath,
@@ -110,7 +124,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 manifestPath,
                 memoryEnabled(),
                 disabledMemorySections(sections(context), requestedSections),
-                governance
+                governance,
+                requiredTypedSubjectTokens
         );
 
         return buildLegacyResult(context, packagePath, metadataPath, requestedSections);
@@ -157,7 +172,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             Path workstreamDir,
             Path packagePath,
             String profileName,
-            Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject
+            Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject,
+            Optional<AgentEvidenceIndex.Entry> architectureReviewSubject
     ) throws IOException {
         var rawBudget = ContextProfiles.budgetFor(profileName);
         var budget = effectiveBudget(rawBudget);
@@ -253,15 +269,22 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
         }
 
-        int requiredReviewSubjectTokens = 0;
+        var requiredTypedSubjectTokens = new LinkedHashMap<String, Integer>();
         if (reviewSubject.isPresent()) {
             var start = builder.length();
             ContextPackageSectionRenderer.appendRequiredReviewSubject(builder, reviewSubject.get());
-            requiredReviewSubjectTokens = tokenCount(builder.substring(start));
+            requiredTypedSubjectTokens.put("required_review_subject", tokenCount(builder.substring(start)));
+        }
+        if (architectureReviewSubject.isPresent()) {
+            var start = builder.length();
+            ContextPackageSectionRenderer.appendRequiredArchitectureReviewSubject(
+                    builder, architectureReviewSubject.get());
+            requiredTypedSubjectTokens.put(
+                    "required_architecture_review_subject", tokenCount(builder.substring(start)));
         }
         // Required typed evidence is never dropped; report its cost instead of hiding it behind the soft budget.
         builder.replace(0, builder.indexOf("\n## Context Governance"),
-                rebuildGovernedHeader(context, budget, sorted, requiredReviewSubjectTokens));
+                rebuildGovernedHeader(context, budget, sorted, requiredTypedSubjectTokens));
         var markdown = builder.toString();
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
         var declaredSections = budget.sections().stream()
@@ -279,7 +302,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 memoryEnabled(),
                 disabledMemorySections(rawBudget.sections().stream().map(SectionRequirement::section).toList(),
                         budget.sections().stream().map(SectionRequirement::section).toList()),
-                governance
+                governance,
+                requiredTypedSubjectTokens
         );
         return buildLegacyResult(context, packagePath, metadataPath, declaredSections);
     }
@@ -330,7 +354,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             List<String> memoryDisabledSections
     ) throws IOException {
         return writeContextPackageMetadata(context, packagePath, profileName, budget, estimatedTokens, sections,
-                manifest, manifestPath, memoryEnabled, memoryDisabledSections, null);
+                manifest, manifestPath, memoryEnabled, memoryDisabledSections, null, Map.of());
     }
 
     private static Path writeContextPackageMetadata(
@@ -344,7 +368,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             Path manifestPath,
             boolean memoryEnabled,
             List<String> memoryDisabledSections,
-            RepoScopeGovernance.Documents governance
+            RepoScopeGovernance.Documents governance,
+            Map<String, Integer> requiredTypedSubjectTokens
     ) throws IOException {
         var metadataPath = packagePath.resolveSibling(stripMarkdownExtension(packagePath.getFileName().toString()) + ".json");
         var metadata = new LinkedHashMap<String, Object>();
@@ -360,6 +385,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         metadata.put("memoryEnabled", memoryEnabled);
         metadata.put("memoryDisabledSections", memoryDisabledSections);
         metadata.put("contextGovernanceEnabled", governance != null);
+        metadata.put("requiredTypedSubjectTokens", Map.copyOf(requiredTypedSubjectTokens));
         metadata.put("generatedAt", Instant.now().toString());
         metadata.put("sections", sections.stream()
                 .map(ContextBuildPackageHandler::sectionMetadata)
@@ -453,12 +479,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             TaskContext context,
             ContextBudget budget,
             List<ResolvedSection> sections,
-            int requiredReviewSubjectTokens
+            Map<String, Integer> requiredTypedSubjectTokens
     ) {
         var sb = new StringBuilder();
         int total = 0;
         for (var rs : sections) total += rs.renderedChars;
-        total += requiredReviewSubjectTokens;
+        total += requiredTypedSubjectTokens.values().stream().mapToInt(Integer::intValue).sum();
 
         sb.append("# Context Package\n\n");
         sb.append("- Workstream: ").append(context.workstreamId()).append("\n");
@@ -481,10 +507,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
               .append(" | ").append(degraded).append(" | ").append(formatTokens(rs.originalChars))
               .append(" | ").append(formatTokens(rs.renderedChars)).append(" |\n");
         }
-        if (requiredReviewSubjectTokens > 0) {
-            sb.append("| required_review_subject | full | no | ")
-                    .append(formatTokens(requiredReviewSubjectTokens))
-                    .append(" | ").append(formatTokens(requiredReviewSubjectTokens)).append(" |\n");
+        for (var subject : requiredTypedSubjectTokens.entrySet()) {
+            sb.append("| ").append(subject.getKey()).append(" | full | no | ")
+                    .append(formatTokens(subject.getValue()))
+                    .append(" | ").append(formatTokens(subject.getValue())).append(" |\n");
         }
         sb.append("\nDegraded sections have full data at their original paths listed below.\n\n");
         return sb.toString();
@@ -520,6 +546,18 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
 
         rs.degraded = true;
+        if (rs.req.degradeTo().strategy() == Degradation.DECISION_ONLY) {
+            section.setLength(0);
+            appendGovernedSection(section, rs, context, workstreamDir, handoff, manifest, budget);
+            var decisions = section.toString();
+            rs.renderedChars = tokenCount(decisions);
+            if (rs.renderedChars <= rs.req.softBudget()) {
+                return RenderedSection.content(decisions);
+            }
+            var capped = capSectionToBudget(rs.req.section(), decisions, rs.req.softBudget(), workstreamDir);
+            rs.renderedChars = tokenCount(capped);
+            return RenderedSection.content(capped);
+        }
         var capped = capSectionToBudget(rs.req.section(), full, rs.req.softBudget(), workstreamDir);
         rs.renderedChars = tokenCount(capped);
         return RenderedSection.content(capped);
@@ -652,7 +690,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             Path workstreamDir,
             EvidenceManifest manifest,
             RepoScopeGovernance.Documents governance,
-            Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject
+            Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject,
+            Optional<AgentEvidenceIndex.Entry> architectureReviewSubject
     ) throws IOException {
         var targetNode = configText(context, "target_node", "(not specified)");
         var purpose = configText(context, "purpose", "Prepare focused context for the next agent step.");
@@ -728,6 +767,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (reviewSubject.isPresent()) {
             ContextPackageSectionRenderer.appendRequiredReviewSubject(builder, reviewSubject.get());
         }
+        if (architectureReviewSubject.isPresent()) {
+            ContextPackageSectionRenderer.appendRequiredArchitectureReviewSubject(
+                    builder, architectureReviewSubject.get());
+        }
         return builder.toString();
     }
 
@@ -746,6 +789,44 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
     private static boolean requiresTaskContractProposal(TaskContext context) {
         return "task_contract_proposal".equals(configText(context, "required_input_artifact", ""));
+    }
+
+    private static Optional<AgentEvidenceIndex.Entry> resolveRequiredArchitectureReviewSubject(
+            TaskContext context
+    ) {
+        if (!requiresArchitectureReviewSubject(context)) {
+            return Optional.empty();
+        }
+        return AgentEvidenceIndex.fromRefs(
+                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
+                .recent(Math.max(1, context.instance().inputRefs().size()))
+                .stream()
+                .filter(entry -> "design.claude_design".equals(entry.document().nodeId()))
+                .findFirst();
+    }
+
+    private static boolean requiresArchitectureReviewSubject(TaskContext context) {
+        return "architecture_review".equals(profile(context))
+                && "design.codex_arch_review".equals(configText(context, "target_node", ""));
+    }
+
+    private static Map<String, Integer> requiredTypedSubjectTokens(
+            Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject,
+            Optional<AgentEvidenceIndex.Entry> architectureReviewSubject
+    ) throws IOException {
+        var tokens = new LinkedHashMap<String, Integer>();
+        if (reviewSubject.isPresent()) {
+            var rendered = new StringBuilder();
+            ContextPackageSectionRenderer.appendRequiredReviewSubject(rendered, reviewSubject.get());
+            tokens.put("required_review_subject", tokenCount(rendered.toString()));
+        }
+        if (architectureReviewSubject.isPresent()) {
+            var rendered = new StringBuilder();
+            ContextPackageSectionRenderer.appendRequiredArchitectureReviewSubject(
+                    rendered, architectureReviewSubject.get());
+            tokens.put("required_architecture_review_subject", tokenCount(rendered.toString()));
+        }
+        return Map.copyOf(tokens);
     }
 
     private static Optional<RequiredAgentEvidence> missingRequiredAgentEvidence(TaskContext context) {
@@ -864,6 +945,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "architecture_review" -> List.of(
                     "requirement",
                     "input_artifacts",
+                    "iteration_history",
                     "human_feedback",
                     "recent_agent_outputs",
                     "ledger_pointers"

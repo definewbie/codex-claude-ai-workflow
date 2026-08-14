@@ -94,7 +94,7 @@ public final class WorkstreamMemoryProjection {
                 || !changedFiles.isEmpty() || !reusablePaths.isEmpty();
 
         if (!hasAny) {
-            builder.append("(no prior verdict, open issues, changed files, or memory recorded yet) Evidence: ")
+            builder.append("(no cumulative review verdict recorded; no open issues, changed files, or reusable memory recorded yet) Evidence: ")
                     .append(ref(workspaceRoot, workstreamDir.resolve("memory/workstream-memory.json")))
                     .append("; ")
                     .append(ref(workspaceRoot, workstreamDir.resolve("artifacts/task-contract.json")))
@@ -102,7 +102,11 @@ public final class WorkstreamMemoryProjection {
             return;
         }
 
-        builder.append("Incremental acceptance from orchestrator memory; do NOT re-audit the whole repo.\n\n");
+        if (verdicts.isEmpty()) {
+            builder.append("No cumulative review verdict recorded. Review the complete current subject against the contract baseline.\n\n");
+        } else {
+            builder.append("Incremental acceptance from orchestrator memory; verify it against the complete current subject.\n\n");
+        }
 
         if (!verdicts.isEmpty()) {
             var verdict = verdicts.get(verdicts.size() - 1);
@@ -124,8 +128,12 @@ public final class WorkstreamMemoryProjection {
             builder.append("- Relevant memory (reuse, do not re-read): ").append(String.join("; ", reusablePaths)).append("\n\n");
         }
 
-        builder.append("Confirm prior must-fix against this round's diff and acceptance criteria; surface new risks. ")
-                .append("Re-read a file only with a reason (edit/verify/sha-changed/stage-gap).\n");
+        if (verdicts.isEmpty()) {
+            builder.append("Derive the complete current blocker set from the review subject and acceptance criteria; ");
+        } else {
+            builder.append("Confirm prior must-fix and derive any additional current blockers from the complete review subject; ");
+        }
+        builder.append("re-read a file only with a reason (edit/verify/sha-changed/stage-gap).\n");
         builder.append("Evidence: memory ").append(ref(workspaceRoot, workstreamDir.resolve("memory/workstream-memory.json")))
                 .append("; diff ").append(ref(workspaceRoot, workstreamDir.resolve("artifacts/git-evidence/diff.patch")))
                 .append("; changed ").append(ref(workspaceRoot, workstreamDir.resolve("artifacts/git-evidence/changed-files.txt")))

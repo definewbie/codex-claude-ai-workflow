@@ -675,6 +675,97 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Review the complete design.", StandardCharsets.UTF_8);
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+
+        var output = wsDir.resolve("runs/run-design/outputs/design-claude.md");
+        Files.createDirectories(output.getParent());
+        Files.writeString(output, "UNVALIDATED_RAW_TRANSCRIPT_MUST_STAY_OUT", StandardCharsets.UTF_8);
+        var sidecar = AgentOutputContractSidecar.pathFor(output);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), Map.of(
+                "artifact_type", "agent_output_contract",
+                "node_id", "design.claude_design",
+                "decision", "READY_FOR_ARCH_REVIEW",
+                "summary", "Compact current design summary",
+                "checks", List.of(
+                        "CONCURRENCY_BOUNDARY " + "c".repeat(4_000),
+                        "CRASH_RESTART_BOUNDARY " + "r".repeat(4_000)),
+                "evidence", List.of(
+                        "ROLLBACK_CONFLICT_EVIDENCE " + "e".repeat(4_000),
+                        "uq_otp_current WHERE state IN ('PENDING','ACTIVE')"),
+                "must_fix", List.of(),
+                "open_risks", List.of("Stale PENDING must be recoverable"),
+                "verification_summary", "Lifecycle matrix reviewed"));
+        publishSidecar(sidecar);
+
+        var result = handler.execute(ctx("architecture_review", List.of(
+                ".agent/workstreams/ws-ctx/runs/run-design/outputs/design-claude.md"),
+                "design.codex_arch_review"));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("## Required Architecture Review Subject"));
+        assertTrue(markdown.contains("CONCURRENCY_BOUNDARY"));
+        assertTrue(markdown.contains("CRASH_RESTART_BOUNDARY"));
+        assertTrue(markdown.contains("ROLLBACK_CONFLICT_EVIDENCE"));
+        assertTrue(markdown.contains("uq_otp_current WHERE state IN ('PENDING','ACTIVE')"));
+        assertTrue(markdown.contains("| required_architecture_review_subject | full | no |"));
+        assertFalse(markdown.contains("UNVALIDATED_RAW_TRANSCRIPT_MUST_STAY_OUT"));
+
+        var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
+        var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
+        assertTrue(metadata.get("requiredTypedSubjectTokens") instanceof Map<?, ?> subjectTokens
+                        && ((Number) subjectTokens.get("required_architecture_review_subject")).intValue() > 1_000,
+                "the budget-exempt subject cost must remain visible in metadata");
+    }
+
+    @Test
+    void architectureReviewCannotStartWithoutValidatedDesignSubject() throws Exception {
+        Files.createDirectories(wsDir);
+        Files.writeString(wsDir.resolve("requirement.md"), "Review the design.", StandardCharsets.UTF_8);
+
+        var result = handler.execute(ctx(
+                "architecture_review", List.of(), "design.codex_arch_review"));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.result().get("failure_code"));
+        assertFalse(Files.exists(wsDir.resolve("context/node-001.md")),
+                "the reviewer context must not be created without a validated design subject");
+    }
+
+    @Test
+    void architectureReviewDecisionOnlyHistoryKeepsLatestReasonsWhenDegraded() throws Exception {
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.createDirectories(wsDir.resolve("nodes"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Review revision history.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+        for (int i = 1; i <= 7; i++) {
+            objectMapper.writeValue(wsDir.resolve("iterations/iter-%03d.json".formatted(i)).toFile(), Map.of(
+                    "iterationId", "iter-%03d".formatted(i),
+                    "triggerAction", "NEEDS_REVISION",
+                    "targetNodeDefinitionId", "design.claude_design",
+                    "createdAt", "2026-08-14T00:00:%02dZ".formatted(i),
+                    "reason", "revision-reason-%03d ".formatted(i) + "x".repeat(280)));
+        }
+
+        var result = handler.execute(ctx("architecture_review", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains("## Iteration History"));
+        assertTrue(markdown.contains("| iteration_history | decision_only | yes |"),
+                "the fixture must exercise the governed DECISION_ONLY degradation path");
+        assertTrue(markdown.contains("iter-007") && markdown.contains("revision-reason-007"));
+        assertTrue(markdown.contains("iter-003") && markdown.contains("revision-reason-003"));
+        assertFalse(markdown.contains("iter-002"));
+        assertFalse(markdown.contains("iter-001"));
+    }
+
+    @Test
     void summaryRenderingRejectsAgentSidecarWithoutLedgerOccurrence() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Summary lineage test.", StandardCharsets.UTF_8);

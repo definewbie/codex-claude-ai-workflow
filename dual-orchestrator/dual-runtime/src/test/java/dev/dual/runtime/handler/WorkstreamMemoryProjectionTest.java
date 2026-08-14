@@ -138,6 +138,28 @@ class WorkstreamMemoryProjectionTest {
     }
 
     @Test
+    void acceptanceWithoutVerdictsDoesNotClaimIncrementalReviewMemory() throws Exception {
+        writeMemory("ws-contract-only", """
+                {"schemaVersion":1,"artifactType":"workstream_memory","workstreamId":"ws-contract-only",
+                 "priorVerdicts":[],"openIssues":[],"readFiles":[],"decisions":[]}
+                """);
+        writeContract("ws-contract-only", """
+                {"objective":"o","status":"active","scope":{"included":[],"excluded":[]},
+                 "non_goals":[],"acceptance_criteria":["OTP remains single-use"],"constraints":[],"risk_areas":[]}
+                """);
+
+        var builder = new StringBuilder();
+        WorkstreamMemoryProjection.appendReviewEvidenceBrief(
+                builder, workstreamDir("ws-contract-only"), tempDir);
+        var text = builder.toString();
+
+        assertTrue(text.contains("No cumulative review verdict recorded"), text);
+        assertTrue(text.contains("OTP remains single-use"), text);
+        assertFalse(text.contains("Incremental acceptance from orchestrator memory"), text);
+        assertFalse(text.contains("Prior must-fix"), text);
+    }
+
+    @Test
     void agentHandoffRendersSemanticReadSummary() throws Exception {
         writeMemory("ws-sem-proj", """
                 {"schemaVersion":1,"artifactType":"workstream_memory","workstreamId":"ws-sem-proj",

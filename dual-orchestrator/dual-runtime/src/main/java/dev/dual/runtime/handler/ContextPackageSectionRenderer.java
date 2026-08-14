@@ -142,6 +142,10 @@ final class ContextPackageSectionRenderer {
                 builder.append("- ").append(text(iteration.get("iterationId")));
                 builder.append(": trigger=").append(text(iteration.get("triggerAction")));
                 builder.append(", target=").append(text(iteration.get("targetNodeDefinitionId")));
+                var reason = text(iteration.get("reason"));
+                if (!reason.isBlank()) {
+                    builder.append(", reason=").append(reason.replace("\n", " "));
+                }
                 builder.append("\n");
             }
             builder.append("\n");
@@ -264,6 +268,14 @@ final class ContextPackageSectionRenderer {
         builder.append("- Proposal Reference: ").append(subject.referenceRef()).append("\n");
         builder.append("- Proposal SHA-256: ").append(subject.reference().sha256()).append("\n\n");
         builder.append(TypedContextPayloadBoundary.wrapJson(subject.proposal())).append("\n\n");
+    }
+
+    static void appendRequiredArchitectureReviewSubject(
+            StringBuilder builder,
+            AgentEvidenceIndex.Entry subject
+    ) {
+        builder.append("## Required Architecture Review Subject\n\n");
+        appendAgentContractFields(builder, subject.document(), subject.path(), true);
     }
 
     static void appendInputArtifacts(StringBuilder builder, TaskHandler.TaskContext context, int maxSnippetChars) throws IOException {
@@ -441,6 +453,15 @@ final class ContextPackageSectionRenderer {
             AgentOutputContractDocument contract,
             Path sidecar
     ) {
+        appendAgentContractFields(builder, contract, sidecar, false);
+    }
+
+    private static void appendAgentContractFields(
+            StringBuilder builder,
+            AgentOutputContractDocument contract,
+            Path sidecar,
+            boolean includeArchitectureEvidence
+    ) {
         var nodeId = contract.nodeId();
         var decision = contract.decision();
         var summary = contract.summary();
@@ -456,6 +477,10 @@ final class ContextPackageSectionRenderer {
         }
         if (!summary.isBlank()) {
             builder.append("- Summary: ").append(summary).append("\n");
+        }
+        if (includeArchitectureEvidence) {
+            appendListSection(builder, "Checks", contract.checks());
+            appendListSection(builder, "Evidence", contract.evidence());
         }
         appendListSummary(builder, "Must Fix", contract.mustFix());
         appendReviewObligations(builder, contract.contractObligations());

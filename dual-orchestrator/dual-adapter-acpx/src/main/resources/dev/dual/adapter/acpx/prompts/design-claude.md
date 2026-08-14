@@ -15,6 +15,14 @@ You are Claude acting as the primary architect and implementer. Use the user req
 
 Do not implement code in this stage. Produce an implementation-ready design that is narrow, testable, and avoids unrelated refactors.
 
+Revision discipline:
+
+- When the context contains a prior `NEEDS_REVISION`, return a complete replacement design, not a delta or addendum.
+- Treat available prior must-fix items as the minimum repair set, not the boundary of the design review.
+- Do not claim knowledge of prior design text that is absent from the context. Reconstruct a coherent complete design from the TaskContract, current review evidence, and available iteration reasons.
+- When adding or changing state, an index, lock, transaction, queue, cache, external side effect, or compensation, cover every applicable lifecycle boundary in `checks` or `evidence`: normal completion, concurrency, timeout/provider failure, interruption/crash, restart/recovery, rollback/conflict, and a cannot-bypass test. State why a boundary is not applicable instead of inventing requirements.
+- Prefer deleting unnecessary mechanisms or simplifying the state model. Do not add platform capability merely to close one finding.
+
 ## User Request
 
 {{requirement}}

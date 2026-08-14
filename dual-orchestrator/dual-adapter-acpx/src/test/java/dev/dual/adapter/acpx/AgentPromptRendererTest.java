@@ -502,6 +502,48 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void capturedDesignReviewReplayKeepsTypedMechanismEvidenceAndRevisionSequence() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
+        var contextPath = workstreamDir.resolve("context/design-review.md");
+        Files.createDirectories(contextPath.getParent());
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Design captcha authentication.\n");
+        var capturedScaleEvidence = "CAPTURED_SCALE_EVIDENCE_" + "x".repeat(12_000);
+        Files.writeString(contextPath, """
+                # Context Package
+
+                ## Iteration History
+
+                - iter-003: trigger=NEEDS_REVISION, target=design.claude_design, reason=atomic OTP consumption
+                - iter-004: trigger=NEEDS_REVISION, target=design.claude_design, reason=resend state consistency
+                - iter-005: trigger=NEEDS_REVISION, target=design.claude_design, reason=concurrent resend guard
+
+                ## Required Architecture Review Subject
+
+                **Checks:**
+                - crash/restart leaves stale PENDING recoverable
+
+                **Evidence:**
+                - uq_otp_current WHERE state IN ('PENDING','ACTIVE')
+                - rollback/conflict behavior is explicit
+                - %s
+                """.formatted(capturedScaleEvidence));
+
+        var prompt = new AgentPromptRenderer().render(
+                tempDir,
+                "ws-test",
+                "design.codex_arch_review",
+                "design-codex-review",
+                List.of(".agent/workstreams/ws-test/context/design-review.md"));
+
+        assertTrue(prompt.contains("uq_otp_current WHERE state IN ('PENDING','ACTIVE')"));
+        assertTrue(prompt.contains(capturedScaleEvidence));
+        assertTrue(prompt.contains("iter-003") && prompt.contains("iter-004") && prompt.contains("iter-005"));
+        assertTrue(prompt.contains("interruption/crash"));
+        assertTrue(prompt.contains("restart/recovery"));
+        assertTrue(prompt.contains("rollback/conflict"));
+    }
+
+    @Test
     void acceptancePromptInjectsDecisionValuesFromRuntimeContract() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
