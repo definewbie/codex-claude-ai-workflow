@@ -8,26 +8,37 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v13 / GATE REVIEW PASS / NON-PROVIDER PREFLIGHT AUTHORIZED
+## Current Active Step: Design Review Convergence Captured Replay / GATE REVIEW PASS / PROVIDER NOT AUTHORIZED
 
-> v12 fresh workstream `ws-20260813T235458Z-4RQE` 已消费。scope、contract、design、plan 与 human gates 已通过，
-> implementation worktree 已形成 Java/Spring/PostgreSQL 实现，但 `implement.claude_implement` 在
-> `acpx --timeout 600` 后以 605118ms / exit 5 停止，workflow=`WAITING_FOR_RECOVERY`，产品未进入 self-test、
-> acceptance 与 delivery。
+> Captcha-auth v13 workstream `ws-20260814T103857Z-AEHF` 已在第四轮 architecture review 后耗尽 design semantic
+> revision budget，进入 `WAITING_FOR_RECOVERY / semantic_revision_limit`；实现尚未开始，该 workstream 为
+> `FAIL / CONSUMED`，不得 resume。只读归因确认旧 context 将当前 design 的 typed checks/evidence 降为 summary，
+> bounded iteration history 未进入 architecture-review profile，且空 workstream-memory 文案冒充 incremental
+> prior verdict，造成 reviewer 串行发现 blocker。
 >
-> 独立代码与 captured stream 审查确认两项 execution boundary 根因：caller timeout 未取消 persistent prompt；
-> 当前 implementation 没有 permission request，旧 design turn 的拒绝被 acpx 累计 permission stats 投影成当前
-> exit 5，而旧 Dual 又从裸 exit 5 合成 `PERMISSION_BLOCKED`。这不是已证明的 ACP 协议不兼容，也不是当前 turn
-> 等待人工批准。checkpoint `1db62088` 已将权限 authority 收敛为 current occurrence 的 typed request/result，
-> 并在 abnormal return 前 cancel/close exact named session；`b6bc8e79` 已收敛 interrupted execution terminal facts。
-> full reactor `1239/0/0/0`、两轮独立 diff review 与 `git diff --check` 均 PASS，成熟度为
-> `ENFORCED / NOT PROVEN`。
+> checkpoint `44e72306494c6df3edc31ff9de2907c7a1efbacc` 已将当前 lineage-validated design 作为 budget-exempt
+> `Required Architecture Review Subject` 完整投影，加入 bounded iteration reasons，修正 empty-memory honesty，
+> 并要求 Claude 输出完整 replacement design、Codex 在当前 turn 扫描完整 lifecycle boundary。focused/full reactor
+> `1245/0/0/0`、两轮 diff review 与 P2-1 delta review 均 PASS；成熟度为
+> `PROJECTED / VALIDATED / NOT PROVEN`。
 >
-> v13 Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v13.md`。独立 Gate
-> review 已 PASS（P0/P1=0/0，三个非阻塞 P2 已在 Gate 执行文字中闭合）。下一步选择性提交 v13、v12 历史同步、
-> active plan 与 review evidence，获得 clean SHA；随后执行 fresh package、旧 probe/session 清理与隔离
-> PostgreSQL non-provider preflight。provider probes/fresh workstream 尚未授权。不得 resume v12 workstream，也不为
-> 证明条件边界人为制造 denial/timeout。
+> 一次性 Gate：`docs/testing/verification-gates/20260815-design-review-convergence-captured-replay.md`。已用 current
+> production `ContextBuildPackageHandler + AgentPromptRenderer` 从 v13 final design 与真实 `iter-003..005` 生成并冻结
+> exact prompt；历史 reviewer 答案不在 prompt 中。独立 Gate review 已 PASS（P0/P1=0/0），允许选择性提交并执行
+> non-provider preflight；provider 仍未授权。preflight PASS 后才可单独授权一次 Codex replay；不创建 fresh
+> captcha-auth workstream。
+
+## Historical Active Step: Captcha-Auth Completion v13 / FAIL, CONSUMED
+
+> Gate：`docs/testing/verification-gates/20260814-terminal-delivery-captcha-auth-completion-v13.md`。唯一 fresh
+> workstream `ws-20260814T103857Z-AEHF` 完成 intake、TaskContract 与 human contract gates，但在 design stage
+> 连续经历 4 次 Claude design 与 4 次 Codex architecture review。第四次 review 从 final typed design 发现 partial
+> unique index 的 stale-PENDING、过期 activation 与 rollback/conflict recovery 缺口；design semantic revision budget
+> 已耗尽，workflow 进入 `WAITING_FOR_RECOVERY / semantic_revision_limit`。
+>
+> 该轮未进入 plan、implementation、self-test、acceptance 或 delivery，captcha-auth 仍为 `NOT ACHIEVED`。workstream、
+> worktree 与 named sessions 均为 `FAIL / CONSUMED`，不得 resume/reuse。其 captured final design、iteration ledger 与
+> historical reviewer contract 只作为当前一次性 replay 的只读证据。
 
 ## Historical Active Step: Captcha-Auth Completion v12 / FAIL, CONSUMED
 

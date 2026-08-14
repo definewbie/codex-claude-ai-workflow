@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "design-review-convergence-captured-replay-20260815",
+  "checkpointSha": "44e72306494c6df3edc31ff9de2907c7a1efbacc",
+  "capturedWorkstreamId": "ws-20260814T103857Z-AEHF",
+  "expectedReplayRunId": "replay-design-review-44e7230",
+  "capturedInputs": {
+    "requirementSha256": "42078b01418be3079852869891730a9b55f62ebf572c17b187059c1cd03138f0",
+    "designContractSha256": "bfe320531137cd63046185b1dc3b268c3a73f34692f034feec5f2d3ddcd5455e",
+    "designCandidateSha256": "666429af9bbd9a72b369564eed266e8a1f95b8f5947703db28eee49ae1a8f6d7",
+    "iteration003Sha256": "99d286724c91ccd2047ff62c5615180b3a6fdc0143f9e97701a59465cbdaaca2",
+    "iteration004Sha256": "5d44cfbf36b43f45c60592def61429f0fe3df27a49a02a3651765aa8c589b776",
+    "iteration005Sha256": "5ba0996029da97d2802e6e3110c7e1e3d254fd7694b4871aa915890a30619be3",
+    "historicalReviewContractSha256": "4d9d08f4bb25be7146ec888725db78b8caf25514fde064568097605ddd0e66a4"
+  },
+  "productionClasses": {
+    "contextBuildPackageHandlerSha256": "8e90fe742c783455556583e30b525388211c10ea0a3e58c774b63db3f824c33b",
+    "agentPromptRendererSha256": "1247e14cd8d05f961ac401e6b5bcc6709ec4fd3ea36b704196ebf999f0516c97"
+  },
+  "fixtureFiles": {
+    "CapturedDesignReplayPromptBuilder.java.txt": "25b77582088202682e526f93bdc34a7831b1016b63f0dd3d3046631d949537dc",
+    "CapturedDesignReplayResultValidator.java.txt": "af2ffe7fb4e378e1059468ce2c97be650f544baa58d66a263cb2ad587f3415b6",
+    "context-package-metadata.json": "a086bf8d68e0daa69c6e96d0e9477a5b97a669edb9e378153d93166aabd4b8fb",
+    "replay-prompt.md": "255318dcf144e71db2a4d6140054a5344397d535f61669a2b15266cdbebc288f"
+  },
+  "promptFacts": {
+    "bytes": 30632,
+    "requiredArchitectureReviewSubjectTokens": 1928,
+    "iterationHistoryTokens": 347,
+    "containsRequiredArchitectureReviewSubject": true,
+    "containsIteration003To005": true,
+    "containsHistoricalReviewAnswer": false
+  }
+}

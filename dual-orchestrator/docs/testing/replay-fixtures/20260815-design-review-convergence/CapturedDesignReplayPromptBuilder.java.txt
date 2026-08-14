@@ -1,0 +1,75 @@
+package dev.dual.adapter.acpx;
+
+import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.NodeInstance;
+import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeStatus;
+import dev.dual.runtime.handler.ContextBuildPackageHandler;
+import dev.dual.runtime.handler.TaskHandler;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public final class CapturedDesignReplayPromptBuilder {
+    private static final String WORKSTREAM_ID = "ws-20260814T103857Z-AEHF";
+    private static final List<String> DESIGN_REFS = List.of(
+            ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-1786707985252/outputs/design-claude.stderr.log",
+            ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-1786707985252/outputs/design-claude.transcript.log",
+            ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-1786707985252/outputs/design-claude.json",
+            ".agent/workstreams/" + WORKSTREAM_ID + "/runs/run-1786707985252/outputs/design-claude.contract.json"
+    );
+
+    private CapturedDesignReplayPromptBuilder() {
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length != 2) {
+            throw new IllegalArgumentException("usage: <captured-workspace-copy> <prompt-output>");
+        }
+        var workspaceRoot = Path.of(args[0]).toAbsolutePath().normalize();
+        var promptOutput = Path.of(args[1]).toAbsolutePath().normalize();
+        var config = new LinkedHashMap<String, Object>();
+        config.put("target_node", "design.codex_arch_review");
+        config.put("profile", "architecture_review");
+        var definition = new NodeDefinition(
+                "context.design_codex_arch_review.replay",
+                NodeKind.TASK,
+                "context.build_package",
+                Map.copyOf(config));
+        var instance = new NodeInstance(
+                "node-context-design_codex_arch_review-replay",
+                definition.id(),
+                NodeKind.TASK,
+                definition.handlerType(),
+                NodeStatus.READY,
+                "stage-context",
+                "iter-005",
+                DESIGN_REFS,
+                List.of(),
+                Map.of(),
+                null,
+                null,
+                null);
+        var context = new TaskHandler.TaskContext(workspaceRoot, WORKSTREAM_ID, definition, instance);
+        var result = new ContextBuildPackageHandler().execute(context);
+        if (result.status() != NodeStatus.COMPLETED) {
+            throw new IllegalStateException("context build failed: " + result.result());
+        }
+        var contextRef = String.valueOf(result.result().get("context_package"));
+        var prompt = new AgentPromptRenderer().renderWithSections(
+                workspaceRoot,
+                WORKSTREAM_ID,
+                "replay-design-review-44e7230",
+                "design.codex_arch_review",
+                "design-codex-review",
+                List.of(contextRef)).content();
+        Files.createDirectories(promptOutput.getParent());
+        Files.writeString(promptOutput, prompt, StandardCharsets.UTF_8);
+        System.out.println("contextRef=" + contextRef);
+        System.out.println("prompt=" + promptOutput);
+    }
+}

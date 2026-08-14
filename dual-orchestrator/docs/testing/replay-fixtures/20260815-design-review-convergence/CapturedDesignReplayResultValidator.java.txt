@@ -1,0 +1,47 @@
+package dev.dual.runtime.handler;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public final class CapturedDesignReplayResultValidator {
+    private static final String WORKSTREAM_ID = "ws-20260814T103857Z-AEHF";
+    private static final String RUN_ID = "replay-design-review-44e7230";
+    private static final String NODE_ID = "design.codex_arch_review";
+
+    private CapturedDesignReplayResultValidator() {
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length != 2) {
+            throw new IllegalArgumentException("usage: <raw-assistant-output> <projected-sidecar-output>");
+        }
+        var raw = Files.readString(Path.of(args[0]));
+        var acquirer = Class.forName("dev.dual.adapter.acpx.AcpxAgentResultAcquirer");
+        var presentationMethod = acquirer.getDeclaredMethod("presentationCandidate", String.class);
+        presentationMethod.setAccessible(true);
+        var presentation = presentationMethod.invoke(null, raw);
+        Method candidateMethod = presentation.getClass().getDeclaredMethod("candidate");
+        candidateMethod.setAccessible(true);
+        var candidate = String.valueOf(candidateMethod.invoke(presentation));
+
+        var parsed = new AgentResultEnvelopeParser().parse(candidate);
+        if (!parsed.valid()) {
+            throw new IllegalStateException("strict parse failed: " + parsed.errorCode() + " " + parsed.message());
+        }
+        var contract = ContractRegistry.forNode(NODE_ID);
+        var validation = new AgentResultEnvelopeValidator().validate(
+                parsed.envelope(), WORKSTREAM_ID, RUN_ID, contract);
+        if (!validation.valid()) {
+            throw new IllegalStateException("contract validation failed: " + validation.errors());
+        }
+        var projected = new AgentResultDocumentProjector().outputContract(
+                parsed.envelope(), contract, "acpx.agent_run",
+                "node-design-codex_arch_review-replay", "replay-output.json");
+        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(Path.of(args[1]).toFile(), projected);
+        System.out.println("decision=" + projected.get("decision"));
+        System.out.println("projectedSidecar=" + args[1]);
+    }
+}
