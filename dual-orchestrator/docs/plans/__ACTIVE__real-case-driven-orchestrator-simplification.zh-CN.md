@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Architecture Review Advisory / Human Authority Convergence / REVIEW PASS, READY FOR SELECTIVE COMMIT
+## Current Active Step: Captcha-Auth Human Authority v14 Gate / REVIEW PASS, NON-PROVIDER PREFLIGHT AUTHORIZED
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -29,6 +29,15 @@
 > `PASS（P0=0 / P1=0 / P2=4 非阻塞观察项）`，确认 authority owner、canonical gate action、iteration budget 和
 > autorun stop 边界不可绕过，满足选择性提交条件。当前成熟度为 `ENFORCED / NOT PROVEN`；提交后不重放已消费样本，
 > 等待下一次自然 design review 验证任意 verdict 都先停 human gate，再由人工决定 approve/revise。
+>
+> checkpoint 已选择性提交为 `d5a36483`，工作树 clean。下一自然任务仍采用尚未完成的 captcha-auth 产品，而不是
+> 构造 reviewer 样本。Verification Gate：
+> `docs/testing/verification-gates/20260815-terminal-delivery-captcha-auth-human-authority-v14.md`。主结论是产品是否完整
+> 交付；human-authority 是自然触发时的条件子结论：首次合法 architecture review 无论 verdict 为何都必须先停
+> `gate.human_design_approval`，人工决定前不得创建 plan/design successor、iteration 或额外 Agent run。Gate 当前仅为
+> 独立只读同行评审为 `PASS（P0=0 / P1=0 / P2=4 非阻塞观察项）`。Gate 已补充精确 PostgreSQL probe procedure，
+> 并明确人工 CLI 决定不使用 `--run`。满足只提交 Gate + active plan 的条件；提交后只授权 fresh package 与
+> non-provider preflight。provider probes、fresh workstream 仍未授权。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
