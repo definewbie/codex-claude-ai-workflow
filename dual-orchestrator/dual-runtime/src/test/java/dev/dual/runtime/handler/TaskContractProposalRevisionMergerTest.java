@@ -147,6 +147,37 @@ class TaskContractProposalRevisionMergerTest {
                 new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)));
     }
 
+    @Test
+    void capturedV14DuplicateEvidenceFailsButSingleAdditionPreservesAllObligations() {
+        var obligations = List.of(
+                new AgentResultEnvelope.ReviewObligation("CO-1", "Normalize identifiers"),
+                new AgentResultEnvelope.ReviewObligation("CO-2", "Bind registration authorization"),
+                new AgentResultEnvelope.ReviewObligation("CO-3", "Define rate limits"),
+                new AgentResultEnvelope.ReviewObligation("CO-4", "Remove unsupported restriction"));
+        var context = context(obligations);
+        var duplicate = capturedV14Patch(context, true);
+
+        var rejected = merger.merge(context, duplicate, workspace);
+
+        assertFalse(rejected.valid());
+        assertEquals(List.of(
+                "DUPLICATE_EVIDENCE_PATCH_TARGET: src/main/resources/application.yml"), rejected.errors());
+
+        var merged = merger.merge(context, capturedV14Patch(context, false), workspace);
+
+        assertTrue(merged.valid(), merged.errors().toString());
+        assertEquals(List.of("README.md", "src/main/resources/application.yml"),
+                merged.proposal().evidenceRefs());
+        assertEquals(List.of("CO-1", "CO-2", "CO-3", "CO-4"),
+                merged.proposal().revisionResponses().stream()
+                        .map(TaskContractProposal.RevisionResponse::reviewObligationId)
+                        .toList());
+        assertEquals("Normalize identifiers.", clause(merged.proposal(), "AC-8").text());
+        assertEquals("Bind registration authorization.", clause(merged.proposal(), "AC-6").text());
+        assertEquals("Define rate limits.", clause(merged.proposal(), "TR-6").text());
+        assertEquals("Use the requested baseline only.", clause(merged.proposal(), "C-1").text());
+    }
+
     private static TaskContractRevisionContextResolver.Context context() {
         return context(List.of(
                 new AgentResultEnvelope.ReviewObligation("CO-1", "Fix AC-8"),
@@ -165,6 +196,39 @@ class TaskContractProposalRevisionMergerTest {
                 null, true, proposal(), reference, obligations);
     }
 
+    private static AgentResultEnvelope.TaskContractRevisionPatchResult capturedV14Patch(
+            TaskContractRevisionContextResolver.Context context,
+            boolean duplicateEvidence
+    ) {
+        return new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "Resolve four obligations",
+                context.previousReference().proposalId(), context.previousReference().sha256(),
+                List.of(
+                        replacement("CO-1", "AC-8", AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                "Normalize identifiers.", List.of("src/main/resources/application.yml")),
+                        replacement("CO-2", "AC-6", AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                "Bind registration authorization.", List.of()),
+                        replacement("CO-3", "TR-6", AgentResultEnvelope.ClauseSection.TEST_REQUIREMENTS,
+                                "Define rate limits.", duplicateEvidence
+                                        ? List.of("src/main/resources/application.yml") : List.of()),
+                        replacement("CO-4", "C-1", AgentResultEnvelope.ClauseSection.CONSTRAINTS,
+                                "Use the requested baseline only.", List.of())));
+    }
+
+    private static AgentResultEnvelope.ObligationPatch replacement(
+            String obligationId,
+            String clauseId,
+            AgentResultEnvelope.ClauseSection section,
+            String text,
+            List<String> evidence
+    ) {
+        return new AgentResultEnvelope.ObligationPatch(
+                obligationId, List.of(clauseId),
+                List.of(new AgentResultEnvelope.ClauseChange(
+                        AgentResultEnvelope.ClauseChangeOperation.REPLACE, section, clauseId, text)),
+                List.of(), evidence);
+    }
+
     private static TaskContractProposal proposal() {
         return new TaskContractProposal(
                 "task_contract_proposal", 3, "Build captcha auth.",
@@ -177,7 +241,7 @@ class TaskContractProposalRevisionMergerTest {
                         new TaskContractProposal.ContractClause("AC-8", "Old behavior.")),
                 List.of(new TaskContractProposal.ContractClause("TR-6", "Test registration.")),
                 List.of(new TaskContractProposal.ContractClause("C-1", "Use Java 21.")),
-                List.of(), List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of("README.md"), List.of(), List.of());
     }
 
     private static TaskContractProposal.ContractClause clause(TaskContractProposal proposal, String id) {

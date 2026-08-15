@@ -1,7 +1,7 @@
 # Verification Gate: Terminal-Delivery Captcha-Auth Human Authority v14
 
 日期：2026-08-15  
-状态：`INDEPENDENT REVIEW PASS / AUTHORIZED FOR FRESH PACKAGE AND NON-PROVIDER PREFLIGHT / PROVIDER NOT AUTHORIZED`
+状态：`FAIL / CONSUMED`。唯一 fresh workstream 在 intake revision patch 合并边界失败；不得 retry、resume 或创建同 Gate 第二样本。
 
 本 Gate 使用未完成的 captcha-auth 产品作为自然开发任务。唯一产品目标仍是完成登录注册应用；本轮同时在自然
 architecture review 边界验证 checkpoint `d5a36483`。不指定或诱导 reviewer verdict，不重放已消费样本，不为了

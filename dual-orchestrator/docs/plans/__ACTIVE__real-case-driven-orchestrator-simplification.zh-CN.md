@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Human Authority v14 Gate / REVIEW PASS, NON-PROVIDER PREFLIGHT AUTHORIZED
+## Current Active Step: Revision Patch Target Uniqueness Projection / ROOT CAUSE CONFIRMED
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -30,14 +30,27 @@
 > autorun stop 边界不可绕过，满足选择性提交条件。当前成熟度为 `ENFORCED / NOT PROVEN`；提交后不重放已消费样本，
 > 等待下一次自然 design review 验证任意 verdict 都先停 human gate，再由人工决定 approve/revise。
 >
-> checkpoint 已选择性提交为 `d5a36483`，工作树 clean。下一自然任务仍采用尚未完成的 captcha-auth 产品，而不是
-> 构造 reviewer 样本。Verification Gate：
-> `docs/testing/verification-gates/20260815-terminal-delivery-captcha-auth-human-authority-v14.md`。主结论是产品是否完整
-> 交付；human-authority 是自然触发时的条件子结论：首次合法 architecture review 无论 verdict 为何都必须先停
-> `gate.human_design_approval`，人工决定前不得创建 plan/design successor、iteration 或额外 Agent run。Gate 当前仅为
-> 独立只读同行评审为 `PASS（P0=0 / P1=0 / P2=4 非阻塞观察项）`。Gate 已补充精确 PostgreSQL probe procedure，
-> 并明确人工 CLI 决定不使用 `--run`。满足只提交 Gate + active plan 的条件；提交后只授权 fresh package 与
-> non-provider preflight。provider probes、fresh workstream 仍未授权。
+> checkpoint 已选择性提交为 `d5a36483`，Gate 提交为 `820db46d`。v14 fresh package、隔离 PostgreSQL、双 provider
+> probes 与历史资源清理均 PASS，随后只创建一个 fresh workstream `ws-20260815T033043Z-Z95C`。初始 Claude intake 与
+> Codex product review 完成；Codex 自然给出四项 contract obligations。第二次 Claude intake 返回合法 strict
+> `task_contract_revision_patch`，但在 CO-1 与 CO-3 的 `evidence_ref_additions` 中重复声明
+> `src/main/resources/application.yml`。merger 以 typed
+> `DUPLICATE_EVIDENCE_PATCH_TARGET` fail-closed，workflow 停在 `WAITING_FOR_RECOVERY`。未 retry/resume，两个 scoped
+> sessions 已关闭，产品仍 `NOT ACHIEVED`；流程未进入 design，因此 human-authority 仍为 `ENFORCED / NOT PROVEN`。
+>
+> 只读归因确认：baseline `evidence_refs` 只有 `README.md`，新增 `application.yml` 本身合法；问题是 Agent-facing
+> revision contract 未投影 merger 已强制的“所有 obligation patches 共享全局 mutation target namespace”不变量。
+> prompt 只要求 obligation ID 恰好一次，没有说明 clause/scope/evidence target 跨 patch 全局唯一。当前 active 动作是制定并
+> 评审一个 bounded contract-projection checkpoint：共享 owner 定义 target uniqueness，prompt 完整投影，envelope
+> validator 提前给出 typed error，merger 保留 durable fail-closed guard，并用本次 captured JSON 做一拒一受的
+> deterministic replay。禁止自动去重、parser 放宽、correction/retry、额外 Agent 调用或 resume v14。结果见
+> `docs/testing/verification-gates/20260815-terminal-delivery-captcha-auth-human-authority-v14-result.md`。
+>
+> 收敛计划已通过独立架构评审并完成未提交实现：新增一个 package-private target semantic owner，early envelope
+> validator 与 durable merger 双消费；merger 原有三组本地 Set 已删除；prompt 完整投影 clause/scope/evidence 的
+> patch-wide uniqueness。captured v14 duplicate/valid pair、三类 sibling、比较规则 parity 与 `NOT_REPAIRABLE` correction
+> 边界均有 deterministic tests。focused 18/0/0/0，full reactor 1253/0/0/0，`git diff --check` PASS。当前等待独立
+> code-level diff review；未提交、未运行 provider 或新 real-case。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 

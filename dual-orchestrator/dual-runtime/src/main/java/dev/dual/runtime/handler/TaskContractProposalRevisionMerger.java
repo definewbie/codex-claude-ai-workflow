@@ -4,7 +4,6 @@ import dev.dual.core.contract.TaskContract;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,9 +35,6 @@ final class TaskContractProposalRevisionMerger {
             }
         }
         var actualObligations = new LinkedHashSet<String>();
-        var clauseTargets = new HashSet<String>();
-        var scopeTargets = new HashSet<String>();
-        var evidenceTargets = new HashSet<String>();
         for (var obligationPatch : safe(patch.obligationPatches())) {
             if (obligationPatch == null || obligationPatch.reviewObligationId() == null) {
                 continue;
@@ -47,25 +43,8 @@ final class TaskContractProposalRevisionMerger {
             if (!actualObligations.add(obligationId)) {
                 errors.add("DUPLICATE_REVISION_OBLIGATION: " + obligationId);
             }
-            for (var change : safe(obligationPatch.clauseChanges())) {
-                if (change != null && change.id() != null
-                        && !clauseTargets.add(change.id().trim())) {
-                    errors.add("DUPLICATE_CLAUSE_PATCH_TARGET: " + change.id().trim());
-                }
-            }
-            for (var entry : safe(obligationPatch.scopeAdditions())) {
-                if (entry != null) {
-                    if (!scopeTargets.add(entry.path())) {
-                        errors.add("DUPLICATE_SCOPE_PATCH_TARGET: " + entry.path());
-                    }
-                }
-            }
-            for (var ref : safe(obligationPatch.evidenceRefAdditions())) {
-                if (ref != null && !evidenceTargets.add(ref)) {
-                    errors.add("DUPLICATE_EVIDENCE_PATCH_TARGET: " + ref);
-                }
-            }
         }
+        errors.addAll(TaskContractRevisionPatchTargetValidator.validate(patch));
         for (var expected : expectedObligations) {
             if (!actualObligations.contains(expected)) {
                 errors.add("MISSING_REVISION_OBLIGATION: " + expected);

@@ -197,6 +197,10 @@ class AgentResultPromptContractTest {
         assertTrue(prompt.contains("Each scope path must name one exact file, not a directory"));
         assertTrue(prompt.contains("must not end with `/`"));
         assertTrue(prompt.contains("no `./`, `..`, repeated separators"));
+        assertTrue(prompt.contains("Across the entire `result.obligation_patches` array"));
+        assertTrue(prompt.contains("each `clause_changes[].id`, `scope_additions[].path`, and "
+                + "`evidence_ref_additions[]` target must appear at most once"));
+        assertTrue(prompt.contains("use each obligation's `resolved_by_clause_ids` to express coverage"));
         assertFalse(prompt.contains("\"revision_responses\""));
         assertFalse(prompt.contains("copying its `id` and `text` character-for-character"));
         assertTrue(validator.validate(

@@ -241,6 +241,7 @@ public final class AgentResultEnvelopeValidator {
             }
             validateScopeEntries(value.scopeAdditions(), errors);
         }
+        TaskContractRevisionPatchTargetValidator.validate(patch).forEach(errors::reject);
     }
 
     private static void validateContractClauses(

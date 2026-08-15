@@ -82,6 +82,10 @@ public final class AgentResultPromptContract {
                         + "paths. " + CANONICAL_SCOPE_PATH_REQUIREMENT
                         + "Dual derives CREATE/MODIFY from the effective worktree. `section` is authoritative; clause IDs are opaque "
                         + "and their prefixes do not determine section. "
+                        + "Across the entire `result.obligation_patches` array, each `clause_changes[].id`, "
+                        + "`scope_additions[].path`, and `evidence_ref_additions[]` target must appear at most once. "
+                        + "When one evidence ref supports multiple obligations, add it in one most relevant patch only; "
+                        + "use each obligation's `resolved_by_clause_ids` to express coverage instead of adding the ref again. "
                         + closedItemFields("result.obligation_patches",
                         new AgentResultEnvelope.ObligationPatch(
                                 "CO-1", List.of("AC-1"),
