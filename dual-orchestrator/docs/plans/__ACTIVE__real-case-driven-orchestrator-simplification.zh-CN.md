@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Revision Patch Target Uniqueness Projection / ROOT CAUSE CONFIRMED
+## Current Active Step: Captcha-Auth Completion v15 Gate / DRAFT, PROVIDER NOT AUTHORIZED
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -51,6 +51,20 @@
 > patch-wide uniqueness。captured v14 duplicate/valid pair、三类 sibling、比较规则 parity 与 `NOT_REPAIRABLE` correction
 > 边界均有 deterministic tests。focused 18/0/0/0，full reactor 1253/0/0/0，`git diff --check` PASS。当前等待独立
 > code-level diff review；未提交、未运行 provider 或新 real-case。
+>
+> checkpoint 随后通过独立 diff review：`PASS（P0=0 / P1=0 / P2=3 非阻塞观察项）`，focused 18/0/0/0、full
+> reactor 1253/0/0/0 与 diff-check 均被独立复现。已选择性提交为
+> `0c77ce0c61a4699a608e4322781da4d604df9d5b`，工作树 clean，成熟度 `ENFORCED / NOT PROVEN`。
+> 下一 Gate 为
+> `docs/testing/verification-gates/20260815-terminal-delivery-captcha-auth-completion-v15.md`：继续以完成 captcha-auth 产品为唯一
+> 主目标，target uniqueness 与 human authority 只在自然触发时形成条件结论；不 resume v14，不诱导 revision/reviewer verdict。
+> 首轮独立 review 为 `WARN（P0=0 / P1=1 / P2=3）`：v14 的唯一 `.agent` evidence 仍只存在于待清理 worktree，branch 与
+> result SHA 不能替代 artifact 内容。Gate 已修订为先完整复制 workstream ledger 到独立只读 archive、生成逐文件 SHA manifest、
+> 与 result 四个工件对账，再删除 source worktree；session hygiene 明确核对 open 状态而非 record 存在；target 下 preflight
+> evidence 明确只是临时目录，后续 clean 前必须复制到 durable case report。当前等待 delta review；provider 与 fresh workstream
+> 未授权。delta review 已 `PASS（P0=0 / P1=0 / P2=1 非阻塞）`，原 P1-1 与 session/evidence durability 均 CLOSED；Gate
+> 又补充 source/archive 双侧同规格排序 manifest 必须逐行一致，闭合最后一个复制完整性 P2。满足只提交 Gate + active plan 的条件；
+> 提交后只授权归档清理、fresh package 与 non-provider PostgreSQL preflight。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
