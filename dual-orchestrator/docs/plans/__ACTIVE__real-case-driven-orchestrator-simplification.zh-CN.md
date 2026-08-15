@@ -8,7 +8,29 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
+## Current Active Step: Architecture Review Advisory / Human Authority Convergence / REVIEW PASS, READY FOR SELECTIVE COMMIT
+
+> Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
+> projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
+> blocker 集”的假设：reviewer 发现新的有效 B5，却遗漏已冻结的 B1-B4；同时输出自由文本 enum，被 strict parser
+> 正确拒绝。继续增强 judge prompt、增加 retry 或更换 judge 不能建立业务裁决 authority。
+>
+> 当前只读收敛计划：`docs/plans/architecture-review-advisory-human-authority-plan-20260815.zh-CN.md`。目标是撤销
+> LLM `NEEDS_REVISION` 对自动 design revision 的控制权：三个 bundled workflow 的合法 review outcomes 全部进入
+> 既有 human design gate；进入 gate 不启动 iteration，只有 canonical human `revise` 才消耗 gate-owned revision
+> budget 并返回 Claude。独立设计评审首轮 `WARN` 指出 `dualctl autorun` 会自动 approve 非 BLOCKED gate；修订计划已将
+> autorun 纳入同一 authority 边界：design gate 无论 reviewer 建议为何都必须停给人，其他 gate 的
+> `BLOCKED/NEEDS_REVISION` 也不得自动批准。严格 review contract 继续 fail closed，现有 packet/UI/API/CLI 复用，
+> 不新增 schema、Agent 调用、judge panel、retry、module 或平台能力。修订计划 delta review 为
+> `PASS / Implementation READY`。单一 checkpoint 已实施但未提交：三个 workflow 的 design review 三态全部进入 human gate；进入 gate
+> 不写 iteration；design revise 必须携带人工 note；autorun 对 design gate 三态全部停止；人工可覆盖 negative advisory
+> 直接 approve，也可 revise 并由 gate-owned budget 计数。focused tests PASS，最终非沙箱 full Maven reactor
+> 9/9 modules、`1249/0/0/0`，`git diff --check` clean。独立代码级 diff review 为
+> `PASS（P0=0 / P1=0 / P2=4 非阻塞观察项）`，确认 authority owner、canonical gate action、iteration budget 和
+> autorun stop 边界不可绕过，满足选择性提交条件。当前成熟度为 `ENFORCED / NOT PROVEN`；提交后不重放已消费样本，
+> 等待下一次自然 design review 验证任意 verdict 都先停 human gate，再由人工决定 approve/revise。
+
+## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
 > Captcha-auth v13 workstream `ws-20260814T103857Z-AEHF` 已在第四轮 architecture review 后耗尽 design semantic
 > revision budget，进入 `WAITING_FOR_RECOVERY / semantic_revision_limit`；实现尚未开始，该 workstream 为

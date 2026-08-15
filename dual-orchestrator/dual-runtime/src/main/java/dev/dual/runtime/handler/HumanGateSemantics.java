@@ -37,4 +37,15 @@ public final class HumanGateSemantics {
         }
         return terminalGate(nodeDefinitionId);
     }
+
+    public static boolean requiresOperatorDecision(
+            Map<String, Object> config,
+            String nodeDefinitionId,
+            String sourceOutcome
+    ) {
+        if ("design".equals(purpose(config, nodeDefinitionId))) {
+            return true;
+        }
+        return "BLOCKED".equals(sourceOutcome) || "NEEDS_REVISION".equals(sourceOutcome);
+    }
 }

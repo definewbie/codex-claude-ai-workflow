@@ -15,9 +15,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AutoRunCommandTest {
     @Test
-    void blockedReviewSourceCannotBeAutoApproved() {
-        assertTrue(AutoRunCommand.requiresHumanDecision("BLOCKED"));
-        assertFalse(AutoRunCommand.requiresHumanDecision("READY_FOR_PRODUCT_REVIEW"));
+    void designReviewAlwaysRequiresOperatorDecision() {
+        var config = Map.<String, Object>of("gate_purpose", "design");
+
+        assertTrue(AutoRunCommand.requiresHumanDecision(
+                config, "gate.human_design_approval", "READY_FOR_ARCH_REVIEW"));
+        assertTrue(AutoRunCommand.requiresHumanDecision(
+                config, "gate.human_design_approval", "NEEDS_REVISION"));
+        assertTrue(AutoRunCommand.requiresHumanDecision(
+                config, "gate.human_design_approval", "BLOCKED"));
+    }
+
+    @Test
+    void negativeAdvisoryCannotBeAutoApprovedAtOtherGates() {
+        var config = Map.<String, Object>of("gate_purpose", "contract");
+
+        assertTrue(AutoRunCommand.requiresHumanDecision(
+                config, "gate.contract_review", "NEEDS_REVISION"));
+        assertTrue(AutoRunCommand.requiresHumanDecision(
+                config, "gate.contract_review", "BLOCKED"));
+        assertFalse(AutoRunCommand.requiresHumanDecision(
+                config, "gate.contract_review", "READY_FOR_CONTRACT_REVIEW"));
     }
     @Test
     void autorunApprovesIntermediateHumanGates() {

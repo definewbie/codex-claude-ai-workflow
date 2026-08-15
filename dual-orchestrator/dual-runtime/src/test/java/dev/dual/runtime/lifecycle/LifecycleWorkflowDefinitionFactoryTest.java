@@ -14,7 +14,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
         var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
 
         assertEquals("agent-lifecycle-full", definition.workflowId());
-        assertEquals(9, definition.version());
+        assertEquals(10, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals(NodeKind.TASK, definition.node("context.intake_claude_brainstorm").kind());
         assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
@@ -32,7 +32,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertEquals(NodeKind.TASK, definition.node("stage.generate_next_prompt").kind());
         assertEquals(NodeKind.GATE, definition.node("gate.human_design_approval").kind());
         assertEquals(3, definition.node("intake.decision").config().get("max_revisions"));
-        assertEquals(3, definition.node("design.decision").config().get("max_revisions"));
+        assertFalse(definition.node("design.decision").config().containsKey("max_revisions"));
         assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"));
         assertEquals(3, definition.node("plan.decision").config().get("max_revisions"));
         assertEquals(1, definition.node("implement.self_test_decision").config().get("max_revisions"));
@@ -42,6 +42,12 @@ class LifecycleWorkflowDefinitionFactoryTest {
                 .anyMatch(edge -> edge.to().equals("intake.claude_brainstorm")));
         assertTrue(definition.edgesFrom("intake.claude_brainstorm").stream()
                 .anyMatch(edge -> edge.to().equals("context.intake_codex_product_review")));
+        assertEquals(java.util.Map.of(
+                        "READY_FOR_ARCH_REVIEW", "gate.human_design_approval",
+                        "NEEDS_REVISION", "gate.human_design_approval",
+                        "BLOCKED", "gate.human_design_approval"),
+                definition.edgesFrom("design.decision").stream()
+                        .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())));
         assertTrue(definition.edgesFrom("context.intake_codex_product_review").stream()
                 .anyMatch(edge -> edge.to().equals("intake.codex_product_review")));
         assertTrue(definition.edgesFrom("acceptance.generate_final_report").stream()
@@ -65,6 +71,24 @@ class LifecycleWorkflowDefinitionFactoryTest {
         for (var edge : definition.edges()) {
             assertEquals(edge.from(), definition.node(edge.from()).id());
             assertEquals(edge.to(), definition.node(edge.to()).id());
+        }
+    }
+
+    @Test
+    void architectureReviewIsAdvisoryAcrossBundledVariants() {
+        var factory = new LifecycleWorkflowDefinitionFactory();
+
+        for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
+            var definition = factory.forVariant(variant);
+            assertFalse(definition.node("design.decision").config().containsKey("max_revisions"), variant);
+            assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"), variant);
+            assertEquals(java.util.Map.of(
+                            "READY_FOR_ARCH_REVIEW", "gate.human_design_approval",
+                            "NEEDS_REVISION", "gate.human_design_approval",
+                            "BLOCKED", "gate.human_design_approval"),
+                    definition.edgesFrom("design.decision").stream()
+                            .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())),
+                    variant);
         }
     }
 

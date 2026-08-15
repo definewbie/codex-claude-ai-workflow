@@ -590,6 +590,7 @@ class BuiltinHandlerTest {
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
         assertTrue(markdown.contains("## Input Artifacts"));
+        assertTrue(markdown.contains("Read the complete referenced design and review sidecars before approving"));
         assertTrue(markdown.contains(inputRef));
         assertTrue(markdown.contains("intake-codex-product-review.contract.json"));
         assertTrue(markdown.contains("READY_FOR_PRODUCT_REVIEW"));

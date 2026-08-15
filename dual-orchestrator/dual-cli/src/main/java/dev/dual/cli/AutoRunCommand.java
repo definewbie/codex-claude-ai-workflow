@@ -9,6 +9,7 @@ import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.HumanGateSemantics;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -87,11 +88,18 @@ public final class AutoRunCommand implements Callable<Integer> {
             }
 
             if (snapshot.current().status() == WorkflowStatus.WAITING_FOR_HUMAN) {
-                if (requiresHumanDecision(snapshot.sourceOutcome())) {
+                if (snapshot.node() == null) {
+                    throw new IllegalStateException("workflow is waiting for human but has no active gate node");
+                }
+                if (requiresHumanDecision(
+                        snapshot.gateConfig(),
+                        snapshot.node().nodeDefinitionId(),
+                        snapshot.sourceOutcome()
+                )) {
                     refreshSummary(paths);
                     registerOperatorWorkspace(workspaceRoot);
-                    System.out.println("Autorun stopped: the current review requires a human decision note.");
-                    System.out.println("Use the UI or dualctl review decide --action approve|revise --note <decision>.");
+                    System.out.println("Autorun stopped: the current review requires a human decision.");
+                    System.out.println("Use the UI or dualctl review decide --action approve|revise; include --note when revising or resolving a blocker.");
                     return 1;
                 }
                 gateCount++;
@@ -143,14 +151,16 @@ public final class AutoRunCommand implements Callable<Integer> {
                 node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
             }
             var sourceOutcome = "";
+            var gateConfig = java.util.Map.<String, Object>of();
             if (node != null && node.kind() == dev.dual.core.workflow.NodeKind.GATE) {
                 var value = ledger.loadOpenGateForNode(paths, node.nodeInstanceId()).result().get("source_outcome");
                 if (value == null || String.valueOf(value).isBlank()) {
                     throw new IllegalStateException("open gate is missing source_outcome: " + node.nodeInstanceId());
                 }
                 sourceOutcome = String.valueOf(value);
+                gateConfig = ledger.loadDefinition(paths).node(node.nodeDefinitionId()).config();
             }
-            return new Snapshot(current, node, sourceOutcome);
+            return new Snapshot(current, node, sourceOutcome, gateConfig);
         }
     }
 
@@ -258,8 +268,12 @@ public final class AutoRunCommand implements Callable<Integer> {
         return node.nodeInstanceId();
     }
 
-    static boolean requiresHumanDecision(String sourceOutcome) {
-        return "BLOCKED".equals(sourceOutcome);
+    static boolean requiresHumanDecision(
+            java.util.Map<String, Object> gateConfig,
+            String nodeDefinitionId,
+            String sourceOutcome
+    ) {
+        return HumanGateSemantics.requiresOperatorDecision(gateConfig, nodeDefinitionId, sourceOutcome);
     }
 
     static boolean hasAttemptedRecovery(NodeInstanceDocument node, LinkedHashSet<String> attemptedRecoveryKeys) {
@@ -281,6 +295,11 @@ public final class AutoRunCommand implements Callable<Integer> {
         return node.nodeDefinitionId() + "@" + node.iterationId();
     }
 
-    private record Snapshot(WorkflowCurrentDocument current, NodeInstanceDocument node, String sourceOutcome) {
+    private record Snapshot(
+            WorkflowCurrentDocument current,
+            NodeInstanceDocument node,
+            String sourceOutcome,
+            java.util.Map<String, Object> gateConfig
+    ) {
     }
 }

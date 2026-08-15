@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorkflowGateResolutionTest {
     @TempDir
@@ -63,6 +65,68 @@ class WorkflowGateResolutionTest {
     }
 
     @Test
+    void advisoryRevisionWaitsForHumanAndOnlyNotedHumanRevisionConsumesBudget() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-advisory-design-review"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = advisoryDesignDefinition();
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-advisory-design-review", definition);
+        var decision = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+
+        ledger.completeAndRoute(paths, definition, decision, NodeStatus.COMPLETED,
+                "NEEDS_REVISION", List.of("design-review.contract.json"), Map.of());
+
+        var waiting = ledger.loadCurrent(paths);
+        assertEquals(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_HUMAN, waiting.status());
+        var firstGate = ledger.loadNode(paths, waiting.activeNodeInstanceIds().getFirst());
+        assertEquals("gate.human_design_approval", firstGate.nodeDefinitionId());
+        assertEquals("iter-001", firstGate.iterationId());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")),
+                "an advisory verdict must not create a revision before the human decision");
+
+        var missingNote = assertThrows(java.io.IOException.class,
+                () -> ledger.resolveOpenGate(paths, definition, "revise", ""));
+        assertEquals("a decision note is required to revise a design", missingNote.getMessage());
+
+        var humanReason = "Keep the transaction design, but add a crash-recovery invariant.";
+        ledger.resolveOpenGate(paths, definition, "revise", humanReason);
+        var revisedDesign = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        assertEquals("design.claude_design", revisedDesign.nodeDefinitionId());
+        assertEquals("iter-002", revisedDesign.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains(humanReason));
+
+        ledger.completeAndRoute(paths, definition, revisedDesign.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("design-v2.contract.json"), Map.of());
+        var secondGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.resolveOpenGate(paths, definition, "revise", "A second revision exceeds this test budget.");
+
+        assertEquals(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY,
+                ledger.loadCurrent(paths).status());
+        assertEquals(NodeStatus.BLOCKED, ledger.loadNode(paths, secondGate.nodeInstanceId()).status());
+        assertFalse(Files.exists(paths.iterationJson("iter-003")));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("revision_limit_reached"));
+    }
+
+    @Test
+    void humanCanApproveNegativeAdvisoryWithoutCreatingRevision() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-approve-negative-advisory"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = advisoryDesignDefinition();
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-approve-negative-advisory", definition);
+        var decision = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+
+        ledger.completeAndRoute(paths, definition, decision, NodeStatus.COMPLETED,
+                "NEEDS_REVISION", List.of("design-review.contract.json"), Map.of());
+        ledger.resolveOpenGate(paths, definition, "approve", "The advisory risk is accepted for this scope.");
+
+        var plan = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        assertEquals("plan.claude_plan", plan.nodeDefinitionId());
+        assertEquals("iter-001", plan.iterationId());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
     void rejectsResolutionWhenActiveNodeIsNotGate() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-not-gate"));
         Files.createDirectories(paths.workstreamDir());
@@ -95,6 +159,32 @@ class WorkflowGateResolutionTest {
                         new EdgeDefinition("before.gate", "completed", "gate.review"),
                         new EdgeDefinition("before.gate", "BLOCKED", "gate.review"),
                         new EdgeDefinition("gate.review", "approved", "after.approve")
+                )
+        );
+    }
+
+    private static WorkflowDefinition advisoryDesignDefinition() {
+        return new WorkflowDefinition(
+                "advisory-design",
+                1,
+                "design.decision",
+                List.of(
+                        new NodeDefinition("design.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                        new NodeDefinition("gate.human_design_approval", NodeKind.GATE, "human.review", Map.of(
+                                "gate_purpose", "design",
+                                "allowed_actions", List.of("approve", "revise"),
+                                "max_revisions", 1
+                        )),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("plan.claude_plan", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("design.decision", "READY_FOR_ARCH_REVIEW", "gate.human_design_approval"),
+                        new EdgeDefinition("design.decision", "NEEDS_REVISION", "gate.human_design_approval"),
+                        new EdgeDefinition("design.decision", "BLOCKED", "gate.human_design_approval"),
+                        new EdgeDefinition("gate.human_design_approval", "approved", "plan.claude_plan"),
+                        new EdgeDefinition("gate.human_design_approval", "revise", "design.claude_design"),
+                        new EdgeDefinition("design.claude_design", "completed", "gate.human_design_approval")
                 )
         );
     }

@@ -130,7 +130,8 @@ final class RoutingEngine {
             var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
             var nextIterationId = node.iterationId();
             var iterationStartedPayload = Map.<String, Object>of();
-            if (startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
+            if (nextDefinition.kind() != NodeKind.GATE
+                    && startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
                 var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
                 var currentRevisionCount = revisionTracker.revisionCount(
                         paths,
@@ -347,6 +348,12 @@ final class RoutingEngine {
         var sourceOutcome = text(gate.result().get("source_outcome"));
         if ("BLOCKED".equals(sourceOutcome) && (note == null || note.isBlank())) {
             throw new IOException("a decision note is required for a BLOCKED human gate");
+        }
+        var gatePurpose = text(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"));
+        if ("design".equals(gatePurpose)
+                && "revise".equals(canonicalAction)
+                && (note == null || note.isBlank())) {
+            throw new IOException("a decision note is required to revise a design");
         }
         resolveGateDocument(paths, gate, canonicalAction, note);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction, node.inputRefs(), Map.of(

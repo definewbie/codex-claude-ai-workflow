@@ -1,6 +1,6 @@
 {
   "workflowId": "agent-lifecycle-terminal-delivery",
-  "version": 4,
+  "version": 5,
   "entryNodeId": "context.intake_claude_brainstorm",
   "nodes": [
     {
@@ -154,9 +154,7 @@
       "id": "design.decision",
       "kind": "DECISION",
       "handlerType": "review.decision",
-      "config": {
-        "max_revisions": 3
-      }
+      "config": {}
     },
     {
       "id": "gate.human_design_approval",
@@ -616,7 +614,7 @@
     {
       "from": "design.decision",
       "on": "NEEDS_REVISION",
-      "to": "design.claude_design",
+      "to": "gate.human_design_approval",
       "condition": null,
       "metadata": {
         "transitionType": "normal",

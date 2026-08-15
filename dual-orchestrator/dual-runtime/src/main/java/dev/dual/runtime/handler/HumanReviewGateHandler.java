@@ -115,7 +115,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendOperatorGuidance(builder, context, allowedActions);
 
         builder.append("## Review Focus\n\n");
-        builder.append("- Read the referenced artifacts before approving.\n");
+        builder.append("- Read the complete referenced design and review sidecars before approving; the packet summary is not a substitute.\n");
         builder.append("- Use `approve` only when the current gate is good enough to continue.\n");
         builder.append("- Use `revise` when the agent should address concrete feedback first.\n\n");
 
