@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Design Review Convergence Captured Replay / GATE REVIEW PASS / PROVIDER NOT AUTHORIZED
+## Current Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
 > Captcha-auth v13 workstream `ws-20260814T103857Z-AEHF` 已在第四轮 architecture review 后耗尽 design semantic
 > revision budget，进入 `WAITING_FOR_RECOVERY / semantic_revision_limit`；实现尚未开始，该 workstream 为
@@ -24,9 +24,12 @@
 >
 > 一次性 Gate：`docs/testing/verification-gates/20260815-design-review-convergence-captured-replay.md`。已用 current
 > production `ContextBuildPackageHandler + AgentPromptRenderer` 从 v13 final design 与真实 `iter-003..005` 生成并冻结
-> exact prompt；历史 reviewer 答案不在 prompt 中。独立 Gate review 已 PASS（P0/P1=0/0），允许选择性提交并执行
-> non-provider preflight；provider 仍未授权。preflight PASS 后才可单独授权一次 Codex replay；不创建 fresh
-> captcha-auth workstream。
+> exact prompt；历史 reviewer 答案不在 prompt 中。Gate/fixture 已提交为 `5499f4e`，non-provider preflight PASS。
+> 唯一授权 Codex replay 随后执行：1 次 prompt、0 correction/retry、0 permission/tool、exit=0、`end_turn`、session
+> closed。但 final assistant message 因 `failure.verification_remediation` 使用自由文本而被 strict enum 拒绝，同时只
+> 发现新的 in-flight resend blocker，未覆盖 Gate B1-B4。结果为 `FAIL / CONSUMED`；不得运行第二次 replay 或 fresh
+> captcha-auth workstream。结果见
+> `docs/testing/verification-gates/20260815-design-review-convergence-captured-replay-result.md`。
 
 ## Historical Active Step: Captcha-Auth Completion v13 / FAIL, CONSUMED
 
