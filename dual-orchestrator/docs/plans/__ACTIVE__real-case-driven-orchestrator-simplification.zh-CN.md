@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth v15 EOF Recurrence / PROMPT-PROJECTION DESIGN
+## Current Active Step: Agent Result Prompt Projection / ADEQUACY REVIEW
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -88,10 +88,19 @@
 > candidate 追加一个 `}` 后可通过 production parser、schema/semantic、coverage、lineage、target-uniqueness 与 merger 全链，但该事实不足以
 > 支持 production normalization。root-closure 方案评审结论为 `WARN / Implementation NOT READY`，继续维持完全拒绝。
 >
-> 当前唯一 active 动作仍是 bounded prompt-projection checkpoint：仅把相关单行 JSON 示例改为结构清晰的多行示例并强调最终根闭合检查，
+> 此前拟议的 active 动作是 bounded prompt-projection checkpoint：把相关单行 JSON 示例改为结构清晰的多行示例并强调最终根闭合检查，
 > 保持 schema、strict parser、单次 correction、workflow 与 Agent 调用数不变。只有 prompt projection 落地后的独立自然样本再次出现 exact
 > root-only morphology，或第三个历史样本由原始 wire/ledger 工件证实时，才重新评估 root-closure normalization。必须先完成架构评审和
 > deterministic prompt tests；不授权修改 parser、自动补 `}`、增加 correction/retry、resume v15 或运行新 provider 样本。
+>
+> 进入该步骤后核对 production 与 v15 captured prompt，发现原定 checkpoint 的前提不成立：
+> `AgentResultPromptContract` 自 strict-envelope checkpoint 起就使用 Jackson pretty printer 输出多行完整 JSON，且 v15 initial/correction prompt
+> 均明确声明 every object closed、展示最终根 `}`；correction 还提供 root EOF 的 typed diagnostic。所谓“单行示例改多行”没有代码 delta，
+> 再加末字符提醒只是无法形成 cannot-bypass 的 soft-prompt 同义重复。已形成停止性评估：
+> `docs/plans/agent-result-prompt-projection-adequacy-assessment-20260817.zh-CN.md`。建议 `NO IMPLEMENTATION / KEEP STRICT REJECTION`，
+> 独立架构评审已 `PASS`，确认所有 bundled Agent 路径共用同一 pretty-printed contract、correction 复用完整 contract、没有 legacy bypass，
+> 且不存在有效 production delta。prompt checkpoint 正式关闭，未修改 production、未调用 provider。下一步返回 captcha-auth 产品完成主目标，
+> 制定 fresh v16 Verification Gate；provider JSON compliance 只能作为运行期风险，不能伪装成启动前保证。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
