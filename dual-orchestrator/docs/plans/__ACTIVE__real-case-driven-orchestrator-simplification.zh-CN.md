@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Agent Result Prompt Projection / ADEQUACY REVIEW
+## Current Active Step: Captcha-Auth Completion v16 Gate / DRAFT REVIEW
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -101,6 +101,15 @@
 > 独立架构评审已 `PASS`，确认所有 bundled Agent 路径共用同一 pretty-printed contract、correction 复用完整 contract、没有 legacy bypass，
 > 且不存在有效 production delta。prompt checkpoint 正式关闭，未修改 production、未调用 provider。下一步返回 captcha-auth 产品完成主目标，
 > 制定 fresh v16 Verification Gate；provider JSON compliance 只能作为运行期风险，不能伪装成启动前保证。
+>
+> v16 Gate 草案已形成：
+> `docs/testing/verification-gates/20260817-terminal-delivery-captcha-auth-completion-v16.md`。唯一主目标仍是完成 captcha-auth 产品；provider
+> probes 只证明可调用，不保证 JSON compliance。现有 strict parser、单次 correction 与 fail-closed recovery 保持不变；exact root-only EOF
+> 仅作为有原始 wire 证据的运行期观察与 root-normalization 重评触发，不进入 workflow 控制。v15 ledger 必须先完整归档、双 manifest 对账并
+> 核对 sessions closed，才可删除旧 worktree。独立评审为 `WARN（P0=0 / P1=1）`：Gate 错称 v15 result 已记录四个 SHA，且 ledger 外的
+> authoritative ACP stream 未纳入归档程序。两处已修正：只复算 result 已记录的两个 candidate SHA，归档时新增登记 run SHA；三个 HUAX
+> scoped session record 与 stream 全部复制进 archive 并核对 SHA。90 分钟 active runtime 也明确为 operator 依据 ledger 时间戳计算，
+> 非 runner 自动计时器。按评审结论，P1 修复后 Gate `Execution READY`，满足选择性提交条件；仍不授权 package、probe 或 fresh workstream。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
