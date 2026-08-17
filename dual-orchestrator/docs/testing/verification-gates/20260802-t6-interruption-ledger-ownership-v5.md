@@ -27,6 +27,18 @@ No second v5 sample is authorized. This result proves the new execution-fact
 ownership behavior on the observed normal and contract-failure paths, but the
 checkpoint cannot be promoted as a complete full-workflow `PROVEN` result.
 
+## Evidence Correction (2026-08-17)
+
+The original result text above classified both failed outputs as ending one
+root-closing brace early. A later independent reconstruction of the surviving
+authoritative ACP wire streams refuted that morphology: the retained messages
+include fenced or prefixed presentation, balanced multi-document content, and
+depth-2 truncation. None is recoverable by appending one root-closing brace.
+The original workstream ledger has been deleted, so a full parser/validator/
+merger replay is `NOT VERIFIABLE`. The gate's `FAIL / CONSUMED` verdict and its
+execution-ledger conclusions remain unchanged; only the historical parse-shape
+attribution is corrected.
+
 - Target: Prove clean Dual checkpoint `0c81fbc8` composes with one full pinned
   cancer-clinic workflow without losing or fabricating execution facts across
   normal completion, bounded correction, provider failure, or an externally

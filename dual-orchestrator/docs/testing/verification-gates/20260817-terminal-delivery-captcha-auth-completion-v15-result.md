@@ -41,14 +41,13 @@ Target uniqueness checkpoint: `ENFORCED / NOT PROVEN`
 - The acpx session record's history view contains duplicated/near-duplicated assistant text, while the wire stream contains only the terminal message consumed by Dual. This is an adapter/provider history-presentation observation, not a control-path input.
 - The exact producer of the extra history copy cannot be established from the captured evidence. It remains `UNKNOWN`; it must not be attributed conclusively to reconnect, the provider, or Dual.
 
-## Cross-Sample EOF Frequency
+## Cross-Sample EOF Evidence Correction
 
-A read-only scan of retained run metadata and historical verification evidence found two independently captured real-case failures with this exact shape:
+The confirmed lower bound for this exact root-only EOF morphology is **1 run / 2 occurrences**, both from captcha-auth v15.
 
-1. T6 v5 (`ws-20260802T152626Z-QN2R`, `plan.claude_plan`): initial output and its single correction both ended one root-closing brace early.
-2. Captcha-auth v15 (`ws-20260817T141747Z-HUAX`, `intake.claude_brainstorm`): initial output and its single correction both ended one root-closing brace early.
+A subsequent independent review reconstructed the surviving authoritative ACP wire streams for T6 v5 (`ws-20260802T152626Z-QN2R`). Those messages contain fenced or prefixed presentation, balanced multi-document content, and depth-2 truncation. None is recoverable by appending one root-closing brace. The T6 v5 ledger no longer exists, so its full parser/validator/merger replay is `NOT VERIFIABLE`.
 
-That is at least **2 independent runs / 4 occurrences** with the same EOF morphology. Other retained strict failures include different classes such as a Markdown fence or an invalid enum and are not counted. Older ledgers do not all retain the newer typed diagnostic fields, so this is a confirmed lower bound, not a population rate.
+The earlier classification of T6 v5 as the same root-only morphology was an unsupported extrapolation from a historical summary and is withdrawn. Other retained strict failures such as fences and invalid enums are different classes and are not counted.
 
 ## Boundary Review
 
@@ -68,5 +67,6 @@ Independent peer review: `PASS`, with no Dual-side P0/P1. The strict parser, cor
 
 Do not resume this workstream, create a second v15 sample, auto-append `}`, relax the parser, or add another correction/retry.
 
-The recurrence threshold is sufficient to design one bounded **prompt-projection** checkpoint: replace the relevant one-line JSON output example with a structurally readable multi-line example and explicit final-root closure check, without changing the accepted schema or parser. This is a model-facing risk reduction, not a correctness guarantee. The checkpoint requires architecture review and deterministic prompt tests before any future real-case authorization.
+Proceed first with one bounded **prompt-projection** checkpoint: replace the relevant one-line JSON output example with a structurally readable multi-line example and explicit final-root closure check, without changing the accepted schema or parser. This is a model-facing risk reduction, not a correctness guarantee.
 
+Root-closure normalization remains deferred and the current strict rejection remains in force. Reconsider normalization only if the exact morphology reappears in an independent natural run after prompt projection, or if a third historical sample is proven by original wire/ledger artifacts. The prompt checkpoint requires architecture review and deterministic prompt tests before any future real-case authorization.

@@ -82,11 +82,16 @@
 > acpx record history 中的重复呈现不是 Dual 控制输入，其确切来源保持 `UNKNOWN`。结果见
 > `docs/testing/verification-gates/20260817-terminal-delivery-captcha-auth-completion-v15-result.md`。
 >
-> 对 retained captured evidence 的只读扫描确认该 EOF 形态至少出现于两个独立 real-case、四个 occurrence：T6 v5 的 initial/correction 与
-> captcha-auth v15 的 initial/correction 都恰好缺根闭合 `}`。这是可确认下界，不是总体发生率；fence 与非法 enum 等其他 strict failure
-> 不计入。当前唯一 active 动作是设计一个 bounded prompt-projection checkpoint：仅把相关单行 JSON 示例改为结构清晰的多行示例并强调
-> 最终根闭合检查，保持 schema、strict parser、单次 correction、workflow 与 Agent 调用数不变。必须先完成架构评审和 deterministic prompt
-> tests；不授权修改 parser、自动补 `}`、增加 correction/retry、resume v15 或运行新 provider 样本。
+> 后续独立评审直接重建 T6 v5 幸存的 authoritative ACP wire streams，推翻了“两个独立 real-case、四个 occurrence 同形”的历史外推：
+> T6 v5 实际包含 fence/前置 prose、多文档与 depth-2 深截断，没有任何 occurrence 可由追加一个根 `}` 恢复；其 ledger 已删除，完整 replay
+> 为 `NOT VERIFIABLE`。当前可确认下界因此修正为 **1 个 run / 2 个 occurrence**，即仅 captcha-auth v15。评审同时离线证明 v15 两个
+> candidate 追加一个 `}` 后可通过 production parser、schema/semantic、coverage、lineage、target-uniqueness 与 merger 全链，但该事实不足以
+> 支持 production normalization。root-closure 方案评审结论为 `WARN / Implementation NOT READY`，继续维持完全拒绝。
+>
+> 当前唯一 active 动作仍是 bounded prompt-projection checkpoint：仅把相关单行 JSON 示例改为结构清晰的多行示例并强调最终根闭合检查，
+> 保持 schema、strict parser、单次 correction、workflow 与 Agent 调用数不变。只有 prompt projection 落地后的独立自然样本再次出现 exact
+> root-only morphology，或第三个历史样本由原始 wire/ledger 工件证实时，才重新评估 root-closure normalization。必须先完成架构评审和
+> deterministic prompt tests；不授权修改 parser、自动补 `}`、增加 correction/retry、resume v15 或运行新 provider 样本。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
