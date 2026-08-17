@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v15 / FRESH WORKSTREAM AUTHORIZED, PRE-START
+## Current Active Step: Captcha-Auth v15 EOF Recurrence / PROMPT-PROJECTION DESIGN
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -72,6 +72,21 @@
 > `scripts/lib/verification-gate.sh` 的 typed text contract 只接受 ASCII `:`。本次为 pre-start `INVALID`，未创建样本、未消费业务
 > Agent 调用。当前只做机械协议闭合：九个字段改为 ASCII `:`，用 production validator 离线验证后选择性提交，再沿用本次授权启动唯一
 > fresh workstream；不修改 Gate 业务语义、workflow、prompt、provider 配置或 production 代码。
+>
+> 机械修复已提交为 `070ad84d64f58d442308cb5995c1e842b1a1d018`。唯一 fresh workstream
+> `ws-20260817T141747Z-HUAX` 随后运行：initial intake 与 Codex product review 完成，第二次
+> `intake.claude_brainstorm` 的 initial occurrence 和唯一 bounded correction 均 exit `0`、`end_turn`，但都只缺根对象最后一个
+> `}`。首次 typed correction 已准确携带 `UNEXPECTED_END_OF_INPUT` 与位置，第二次仍失败；strict parser 正确阻止 sidecar、reference、
+> reviewer 与 successor，workflow 进入 `WAITING_FOR_RECOVERY / OUTPUT_INCOMPLETE / MANUAL_ONLY`。未 retry/resume、未创建第二样本，
+> sessions 已关闭。独立同行审查确认 Dual 捕获、投影、strict parse、bounded correction、terminal outcome 与 recovery 路由均正确；
+> acpx record history 中的重复呈现不是 Dual 控制输入，其确切来源保持 `UNKNOWN`。结果见
+> `docs/testing/verification-gates/20260817-terminal-delivery-captcha-auth-completion-v15-result.md`。
+>
+> 对 retained captured evidence 的只读扫描确认该 EOF 形态至少出现于两个独立 real-case、四个 occurrence：T6 v5 的 initial/correction 与
+> captcha-auth v15 的 initial/correction 都恰好缺根闭合 `}`。这是可确认下界，不是总体发生率；fence 与非法 enum 等其他 strict failure
+> 不计入。当前唯一 active 动作是设计一个 bounded prompt-projection checkpoint：仅把相关单行 JSON 示例改为结构清晰的多行示例并强调
+> 最终根闭合检查，保持 schema、strict parser、单次 correction、workflow 与 Agent 调用数不变。必须先完成架构评审和 deterministic prompt
+> tests；不授权修改 parser、自动补 `}`、增加 correction/retry、resume v15 或运行新 provider 样本。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
