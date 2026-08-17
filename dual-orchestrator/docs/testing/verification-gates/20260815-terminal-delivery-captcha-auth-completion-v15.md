@@ -1,26 +1,26 @@
 # Verification Gate: Terminal-Delivery Captcha-Auth Completion v15
 
 日期：2026-08-15  
-状态：`DRAFT / AWAITING INDEPENDENT REVIEW / PROVIDER NOT AUTHORIZED`
+状态：`INDEPENDENT REVIEW PASS / PROVIDER PREFLIGHT PASS / FRESH WORKSTREAM AUTHORIZED`
 
 ## Verification Gate
 
-- Target：使用一个且仅一个 fresh `agent-lifecycle-terminal-delivery@5` workstream 完成
+- Target: 使用一个且仅一个 fresh `agent-lifecycle-terminal-delivery@5` workstream 完成
   `/Users/kriswang/work/projects/ai/captcha-auth-app`。产品必须满足 Java 21、Spring Boot 3、Maven、Thymeleaf、
   PostgreSQL/Flyway、手机号或邮箱加密码登录、登录前 image Captcha、注册短信或邮件 OTP、测试与 README。条件子结论：
   若自然发生 intake revision，checkpoint `0c77ce0c61a4699a608e4322781da4d604df9d5b` 必须在 Agent boundary 与 durable
   merge boundary 守住 patch-wide target uniqueness；若自然进入 architecture review，任意合法 advisory verdict 必须先进入
   human design gate，由 operator 决定 approve/revise。
-- Source of truth：target `REQUIREMENT.md`；persisted workflow definition/instance；typed proposal/revision/review sidecars 与
+- Source of truth: target `REQUIREMENT.md`；persisted workflow definition/instance；typed proposal/revision/review sidecars 与
   references；human gate/action ledger；每个 `run.json`；compiled contract、self-test、change-scope、completion audit、terminal
   acceptance；PostgreSQL verification、`mvn test` 与最终 Git diff。Markdown、模型自述和控制台文本不是控制事实。
-- Trigger precondition：Dual 必须是包含 `0c77ce0c61a4699a608e4322781da4d604df9d5b` 的 clean Gate SHA；target 必须保持
+- Trigger precondition: Dual 必须是包含 `0c77ce0c61a4699a608e4322781da4d604df9d5b` 的 clean Gate SHA；target 必须保持
   clean HEAD `7c7e35e89a66b14c29a335958ad90c8a92779fa0`、tree
   `bab065a1ff9fe4d7032d1d573b7d1b6c1181a574`、requirement SHA-256
   `42078b01418be3079852869891730a9b55f62ebf572c17b187059c1cd03138f0`，且只有 `REQUIREMENT.md`、
   `VERIFICATION-GATE.md` 两个 tracked files。v14 workstream/worktree/sessions 不得复用。fresh package、隔离 PostgreSQL 与
   non-provider preflight 必须先 PASS；provider probes 和 fresh workstream 需要本 Gate 独立 review PASS 后另行授权。
-- How precondition is checked before run：记录 Dual/target Git identity、checkpoint ancestry、target files/hashes、workflow
+- How precondition is checked before run: 记录 Dual/target Git identity、checkpoint ancestry、target files/hashes、workflow
   source SHA/shape、JAR SHA/mtime。删除 v14 worktree 前，必须把整个
   `.agent/workstreams/ws-20260815T033043Z-Z95C/` 复制到独立 archive
   `/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v14-ws-20260815T033043Z-Z95C/`，生成逐文件
@@ -29,22 +29,22 @@
   result。fresh package 后创建 Git ignored 的临时 preflight evidence，清理旧 PostgreSQL 资源并验证 health/`SELECT 1`；该 evidence
   必须在任何后续 Maven clean 前复制到本轮 durable case report 并复算 SHA。独立运行 Claude/Codex minimal probes；全部 PASS 后才创建
   fresh workstream，并立即核对 persisted workflow identity。
-- PASS：workflow=`COMPLETED`；terminal acceptance=`ACCEPT`，或 typed
+- PASS: workflow=`COMPLETED`；terminal acceptance=`ACCEPT`，或 typed
   `ACCEPT_WITH_NOTES + blocking=false + must_fix=[]`；PostgreSQL-backed verification、`mvn test`、README、scope、lineage、
   completion audit 与 final diff 全部通过。若自然发生 revision patch：合法唯一 target patch 必须进入 reviewer；重复 target 必须在
   reviewer 调用前以精确 `DUPLICATE_*_PATCH_TARGET`、`NOT_REPAIRABLE` 失败，且不发布 proposal reference、不增加 correction/Agent
   调用。若自然到达 design review：必须停在唯一 human design gate，operator action 前无 successor/iteration/Agent run；approve
   只进入 plan，带 note revise 只创建一个 design iteration。
-- FAIL：产品未完成；acceptance blocking/must-fix；业务、数据库、测试、scope、lineage、completion 任一失败；revision target
+- FAIL: 产品未完成；acceptance blocking/must-fix；业务、数据库、测试、scope、lineage、completion 任一失败；revision target
   uniqueness 被绕过、合法唯一 patch 被误拒、重复 target 发布 durable reference、错误进入 correction；architecture verdict 自动路由、
   human gate 被 autorun 解决；或 typed ledger facts 与外部副作用矛盾。
-- INVALID：identity/hash/JAR/workflow/probe 不符；复用 v14 worktree/workstream/session；人为诱导 reviewer/revision target；运行中修改
+- INVALID: identity/hash/JAR/workflow/probe 不符；复用 v14 worktree/workstream/session；人为诱导 reviewer/revision target；运行中修改
   Dual、target、workflow、prompt 或 provider 配置；旧 server/JAR；缺少 preflight evidence；手工编辑 ledger；或 observation fields
   缺失而无法判定。条件子目标未自然触发时记 `NOT_APPLICABLE`，不得伪造样本，但产品主结论仍可 PASS/FAIL。
-- Stop-loss：任何 freshness/identity/probe 错误在 provider 前停止。同一 technical failure 第二次出现、strict/lineage failure、failed
+- Stop-loss: 任何 freshness/identity/probe 错误在 provider 前停止。同一 technical failure 第二次出现、strict/lineage failure、failed
   correction、session closure failure、terminal contradiction 或 typed revision budget 耗尽时终止并 quiesce；不 retry/resume、不创建
   第二样本。`WAITING_FOR_HUMAN` 是合法暂停，不计活跃运行时长；每次 gate 必须由用户本人决定。
-- Run artifact freshness：从本 Gate 独立 review 后的 clean Gate SHA 执行 fresh package，记录 CLI/server JAR SHA-256/mtime；不得
+- Run artifact freshness: 从本 Gate 独立 review 后的 clean Gate SHA 执行 fresh package，记录 CLI/server JAR SHA-256/mtime；不得
   `--skip-build`。workstream 创建后保存 persisted definition hash、version、node/edge counts、worktree path、branch 和 scoped session
   names。
 

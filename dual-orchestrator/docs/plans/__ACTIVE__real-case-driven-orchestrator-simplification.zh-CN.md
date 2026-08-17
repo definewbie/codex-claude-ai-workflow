@@ -8,7 +8,7 @@
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v15 Gate / DRAFT, PROVIDER NOT AUTHORIZED
+## Current Active Step: Captcha-Auth Completion v15 / FRESH WORKSTREAM AUTHORIZED, PRE-START
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -65,6 +65,13 @@
 > 未授权。delta review 已 `PASS（P0=0 / P1=0 / P2=1 非阻塞）`，原 P1-1 与 session/evidence durability 均 CLOSED；Gate
 > 又补充 source/archive 双侧同规格排序 manifest 必须逐行一致，闭合最后一个复制完整性 P2。满足只提交 Gate + active plan 的条件；
 > 提交后只授权归档清理、fresh package 与 non-provider PostgreSQL preflight。
+>
+> Gate 与 active plan 已提交为 `5e48bfec`。v14 ledger 归档/双 manifest 对账、fresh package `1253/0/0/0`、隔离
+> PostgreSQL、Claude/Codex minimal probes 与 session closure 均 PASS。用户随后授权创建唯一 fresh workstream；runner 在任何
+> package、provider 或 workstream 副作用前 fail-closed，因为 Gate 九个必填字段使用全角 `：`，而
+> `scripts/lib/verification-gate.sh` 的 typed text contract 只接受 ASCII `:`。本次为 pre-start `INVALID`，未创建样本、未消费业务
+> Agent 调用。当前只做机械协议闭合：九个字段改为 ASCII `:`，用 production validator 离线验证后选择性提交，再沿用本次授权启动唯一
+> fresh workstream；不修改 Gate 业务语义、workflow、prompt、provider 配置或 production 代码。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
