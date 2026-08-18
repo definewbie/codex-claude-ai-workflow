@@ -18,6 +18,11 @@ projection、registry、通用框架、性能优化与成熟度扩张。只允�
 与人工 note，形成 revision patch emission context。它不新增领域概念或调用。完成 focused tests、fresh package 和一次
 代码级 diff review 后，直接继续当前 workstream，以首个完整 E2E `COMPLETED` 作为唯一成功口径。
 
+首次原位重试证明 trigger consumer 已闭合并成功启动 provider，但暴露同一 typed 链的下一处丢字段：resolver 产出的
+`ReviewObligation(id,text)` 在 `AgentResultPromptContract` 中只投影 id，人工 note 没有进入 prompt。模型因而沿用旧 review
+上下文，反向选择了“允许本地号码 + 默认地区”，并再次输出未闭合 JSON。当前只修复 authoritative obligation 的 id+text
+完整投影；不自动补 JSON、不放宽 parser，也不把错误业务语义包装成成功。
+
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
 ## Current Active Step: Human Revise Revision-Context Boundary / v16 FAIL, CONSUMED

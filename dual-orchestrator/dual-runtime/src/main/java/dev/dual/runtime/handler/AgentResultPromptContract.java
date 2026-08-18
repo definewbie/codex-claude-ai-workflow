@@ -74,8 +74,8 @@ public final class AgentResultPromptContract {
                 return "Return only `task_contract_revision_patch`; do not return or copy a full proposal. "
                         + "The patch is bound to base proposal id `" + context.baseProposalId()
                         + "` and sha256 `" + context.baseProposalSha256() + "`. "
-                        + "Cover each routed obligation exactly once: "
-                        + context.obligations().stream().map(AgentResultEnvelope.ReviewObligation::id).toList()
+                        + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
+                        + json(context.obligations())
                         + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
@@ -161,6 +161,14 @@ public final class AgentResultPromptContract {
         tree.fieldNames().forEachRemaining(fields::add);
         return "Each `" + fieldPath + "` item is a closed object with exactly these fields: "
                 + fields + ". No other keys are permitted.";
+    }
+
+    private static String json(Object value) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(value);
+        } catch (Exception failure) {
+            throw new IllegalStateException("failed to render typed prompt value", failure);
+        }
     }
 
     private static String verificationRemediationInstruction(String nodeId) {

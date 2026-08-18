@@ -188,6 +188,15 @@ class ContractCompileHandlerTest {
         assertEquals(1, resolved.context().obligations().size());
         assertEquals("HUMAN-REVISE-1", resolved.context().obligations().getFirst().id());
         assertEquals(note, resolved.context().obligations().getFirst().text());
+        var promptContract = AgentResultPromptContract.render(
+                WORKSTREAM_ID,
+                "run-human-revise-next",
+                "intake.claude_brainstorm",
+                "READY_FOR_PRODUCT_REVIEW",
+                java.util.Set.of("READY_FOR_PRODUCT_REVIEW"),
+                AgentResultPromptContract.proposalEmissionContext(resolved.context()));
+        assertTrue(promptContract.contains("\"id\":\"HUMAN-REVISE-1\""), promptContract);
+        assertTrue(promptContract.contains(note), promptContract);
     }
 
     @Test

@@ -186,7 +186,7 @@ class AgentResultPromptContractTest {
         var prompt = AgentResultPromptContract.render(
                 "ws-1", "run-1", "intake.claude_brainstorm",
                 "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"), context);
-        var parsed = parser.parse(prompt.substring(prompt.indexOf('{')));
+        var parsed = parser.parse(prompt.substring(prompt.indexOf("{\n  \"schema_version\"")));
 
         assertTrue(parsed.valid(), parsed.message());
         assertTrue(parsed.envelope().result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult);
@@ -194,6 +194,8 @@ class AgentResultPromptContractTest {
         assertTrue(prompt.contains("node-prev:0123456789abcdef"));
         assertTrue(prompt.contains("CO-1"));
         assertTrue(prompt.contains("CO-2"));
+        assertTrue(prompt.contains("Fix behavior"));
+        assertTrue(prompt.contains("Add scope"));
         assertTrue(prompt.contains("Each scope path must name one exact file, not a directory"));
         assertTrue(prompt.contains("must not end with `/`"));
         assertTrue(prompt.contains("no `./`, `..`, repeated separators"));
