@@ -64,6 +64,10 @@ public final class TaskContractRevisionContextResolver {
                 return resolveContractClarification(
                         root, workstreamId, workstreamDir, iteration);
             }
+            if ("revise".equals(iteration.triggerAction())) {
+                return resolveHumanRequirementRevision(
+                        root, workstreamId, workstreamDir, iteration);
+            }
             if (!"NEEDS_REVISION".equals(iteration.triggerAction())) {
                 return failure("contract revision reached an unsupported iteration trigger",
                         "trigger_action=" + iteration.triggerAction());
@@ -101,6 +105,45 @@ public final class TaskContractRevisionContextResolver {
         } catch (Exception failure) {
             return failure("revision iteration lineage could not be resolved", message(failure));
         }
+    }
+
+    private Result resolveHumanRequirementRevision(
+            Path root,
+            String workstreamId,
+            Path workstreamDir,
+            WorkflowIterationDocument iteration
+    ) throws IOException {
+        if (iteration.triggerNodeInstanceId().isBlank() || iteration.parentIterationId().isBlank()) {
+            return failure("human requirement revision trigger lineage is incomplete", iteration.iterationId());
+        }
+        var triggerPath = workstreamDir.resolve("nodes").resolve(iteration.triggerNodeInstanceId() + ".json");
+        if (!Files.isRegularFile(triggerPath)) {
+            return failure("human requirement revision gate node is missing", triggerPath.toString());
+        }
+        var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);
+        var note = text(trigger.result().get("note"));
+        if (!"gate.human_requirement_review".equals(trigger.nodeDefinitionId())
+                || !iteration.parentIterationId().equals(trigger.iterationId())
+                || trigger.status() != NodeStatus.COMPLETED
+                || !"revise".equals(text(trigger.result().get("human_action")))
+                || note.isBlank()) {
+            return failure("revision trigger is not a completed human requirement revision gate",
+                    iteration.triggerNodeInstanceId());
+        }
+        var baselines = verifiedBaselines(
+                root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId(),
+                Set.of("BLOCKED"), false);
+        if (baselines.size() != 1) {
+            return failure("human requirement revision must reference exactly one verified blocked intake review",
+                    "review_count=" + baselines.size());
+        }
+        var baseline = baselines.getFirst();
+        return new Result(new Context(
+                iteration,
+                true,
+                baseline.previousProposal(),
+                baseline.previousReference(),
+                List.of(new AgentResultEnvelope.ReviewObligation("HUMAN-REVISE-1", note))), List.of());
     }
 
     private Result resolveContractClarification(

@@ -169,6 +169,46 @@ class ContractCompileHandlerTest {
     }
 
     @Test
+    void humanRequirementRevisionResolvesVerifiedBlockedProposalAndHumanNote(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeProposal(
+                root, "run-human-revise", "Phone authentication", List.of("README.md"), List.of());
+        var reviewRef = writeReview(
+                root, proposalRef, "run-human-revise-review", "BLOCKED", List.of(),
+                INITIAL_ITERATION_ID, false);
+        var note = "Accept only explicit E.164 phone identifiers and canonical lowercase email identities";
+        prepareHumanRequirementRevisionIteration(root, "iter-002", reviewRef, note);
+
+        var resolved = new TaskContractRevisionContextResolver()
+                .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+
+        assertTrue(resolved.valid(), resolved.errors().toString());
+        assertTrue(resolved.context().revision());
+        assertEquals("Phone authentication", resolved.context().previousProposal().objective());
+        assertEquals(1, resolved.context().obligations().size());
+        assertEquals("HUMAN-REVISE-1", resolved.context().obligations().getFirst().id());
+        assertEquals(note, resolved.context().obligations().getFirst().text());
+    }
+
+    @Test
+    void humanRequirementRevisionCannotUseNonBlockedReviewAsBaseline(@TempDir Path root) throws Exception {
+        prepare(root);
+        var proposalRef = writeProposal(
+                root, "run-human-revise-ready", "Phone authentication", List.of("README.md"), List.of());
+        var reviewRef = writeReview(
+                root, proposalRef, "run-human-revise-ready-review", "READY_FOR_PRODUCT_REVIEW", List.of(),
+                INITIAL_ITERATION_ID, false);
+        prepareHumanRequirementRevisionIteration(root, "iter-002", reviewRef, "Change the accepted contract");
+
+        var resolved = new TaskContractRevisionContextResolver()
+                .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+
+        assertFalse(resolved.valid());
+        assertTrue(resolved.errors().toString().contains("verified blocked intake review"),
+                resolved.errors().toString());
+    }
+
+    @Test
     void blockedReviewCannotUseReadyGateAsApproval(@TempDir Path root) throws Exception {
         prepare(root);
         var proposalRef = writeProposal(root, "run-blocked-mismatch", "Choose phone input semantics",
@@ -812,6 +852,28 @@ class ContractCompileHandlerTest {
                 WorkflowIterationDocument.revision(
                         revisionIterationId, 2, INITIAL_ITERATION_ID, triggerNodeId,
                         "clarify", "intake.claude_brainstorm", note, now));
+    }
+
+    private static void prepareHumanRequirementRevisionIteration(
+            Path root,
+            String revisionIterationId,
+            String reviewRef,
+            String note
+    ) throws Exception {
+        var triggerNodeId = "node-gate-human-requirement-revise";
+        var now = Instant.now();
+        var nodes = workstreamDir(root).resolve("nodes");
+        Files.createDirectories(nodes);
+        LEDGER_MAPPER.writeValue(nodes.resolve(triggerNodeId + ".json").toFile(), new NodeInstanceDocument(
+                1, triggerNodeId, "gate.human_requirement_review", NodeKind.GATE, "human.review",
+                NodeStatus.COMPLETED, "stage-gate", INITIAL_ITERATION_ID,
+                List.of(reviewRef), Map.of(), List.of(reviewRef),
+                Map.of("human_action", "revise", "note", note),
+                "", "", now, now));
+        LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("iterations").resolve(revisionIterationId + ".json").toFile(),
+                WorkflowIterationDocument.revision(
+                        revisionIterationId, 2, INITIAL_ITERATION_ID, triggerNodeId,
+                        "revise", "intake.claude_brainstorm", note, now));
     }
 
     private static void prepareRevisionIteration(

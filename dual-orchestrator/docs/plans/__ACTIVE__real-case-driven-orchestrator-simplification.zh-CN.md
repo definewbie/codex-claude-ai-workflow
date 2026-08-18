@@ -6,9 +6,21 @@
 2. 让 node executor/handler 只负责编排，领域规则归属唯一 domain owner。
 3. LLM workflow 结果只通过 strict `AgentResultEnvelope` 进入状态流转；Markdown 仅供人阅读，不参与控制。
 
+## 当前唯一优先级：先跑通一个完整端到端
+
+在 captcha-auth 从需求进入真实产品交付并达到 workflow `COMPLETED` 之前，暂停新的 schema、workflow node、Gate、
+projection、registry、通用框架、性能优化与成熟度扩张。只允许处理阻止当前 happy path 继续运行的已证实缺陷，
+并且优先恢复当前 `ws-20260818T011340Z-WA53`；仅当冻结实例无法安全消费修复时才创建 fresh workstream。
+
+当前 blocker 是确定性的 Definition/Instance consumer 矛盾：workflow 与 ledger 合法产生 human requirement
+`trigger_action=revise`，但 `TaskContractRevisionContextResolver` 未消费该既有动作，导致 provider dispatch 前失败。
+本 checkpoint 只闭合这条既有 typed lineage：从 completed human gate 读取 verified `BLOCKED` review、上一版 proposal
+与人工 note，形成 revision patch emission context。它不新增领域概念或调用。完成 focused tests、fresh package 和一次
+代码级 diff review 后，直接继续当前 workstream，以首个完整 E2E `COMPLETED` 作为唯一成功口径。
+
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Captcha-Auth Completion v16 Gate / DRAFT REVIEW
+## Current Active Step: Human Revise Revision-Context Boundary / v16 FAIL, CONSUMED
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整
@@ -110,6 +122,22 @@
 > authoritative ACP stream 未纳入归档程序。两处已修正：只复算 result 已记录的两个 candidate SHA，归档时新增登记 run SHA；三个 HUAX
 > scoped session record 与 stream 全部复制进 archive 并核对 SHA。90 分钟 active runtime 也明确为 operator 依据 ledger 时间戳计算，
 > 非 runner 自动计时器。按评审结论，P1 修复后 Gate `Execution READY`，满足选择性提交条件；仍不授权 package、probe 或 fresh workstream。
+>
+> v16 随后完成 v15 ledger/session 归档、fresh package `1253/0/0/0`、隔离 PostgreSQL 与各一次 Claude/Codex minimal
+> probe，全部 PASS。唯一 fresh workstream `ws-20260818T011340Z-WA53` 持久化为
+> `agent-lifecycle-terminal-delivery@5`（31 nodes / 51 edges / 9 ACP agent nodes / 0 handoff）。三轮 intake proposal 与
+> Codex product review 均形成合法 typed result；第三轮自然 `BLOCKED` 到达 human requirement gate。用户选择 `revise`，完整产品决策
+> 被持久化，并唯一激活 `intake.claude_brainstorm` / `iter-004`。human gate 的 authority、note 与 route slice 因而得到真实样本证明。
+>
+> 但 revision successor 在 provider 启动前失败：`RoutingEngine` 合法写入 human action
+> `trigger_action=revise`，`TaskContractRevisionContextResolver` 却只接受 `workflow_started`、`clarify`、`NEEDS_REVISION`，返回
+> `contract revision reached an unsupported iteration trigger`。失败节点没有 `runRef`、没有 `run.json`、没有 ACP/provider
+> occurrence；随后缺失 output 被投影为 `AGENT_RESULT_MISSING / AGENT_OUTPUT_CONTRACT_VIOLATION`，workflow 进入
+> `WAITING_FOR_RECOVERY`。本轮按 Gate 判定 `FAIL / STOP-LOSS / CONSUMED`，未 retry/resume；sessions 已关闭，PostgreSQL probe
+> container 已删除。结果见 `docs/testing/real-case-reports/20260818T011340Z/result.md`。
+>
+> 下一步只允许对 human `revise` authoritative fact 到 TaskContract revision context 的 owner、lineage 与 patch shape 做只读架构归因，
+> 制定单一 bounded checkpoint 与真实 cannot-bypass test。不得继续 WA53、创建第二个 real-case、放宽 parser 或增加 retry。
 
 ## Historical Active Step: Design Review Convergence Captured Replay / FAIL, CONSUMED
 
