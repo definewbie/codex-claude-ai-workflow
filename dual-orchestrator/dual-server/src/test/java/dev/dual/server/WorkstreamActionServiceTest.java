@@ -70,6 +70,45 @@ class WorkstreamActionServiceTest {
     }
 
     @Test
+    void approveCompletesTerminalHumanGateWithoutApprovedEdge() throws Exception {
+        var paths = createWorkstream("ws-terminal-approve", completeGateDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
+        var response = service.approve(tempDir, "ws-terminal-approve", "approved by test", false, 1);
+
+        assertEquals("review.approve", response.get("action"));
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, current.status());
+        assertEquals(List.of(), current.activeNodeInstanceIds());
+    }
+
+    @Test
+    void approveAndRunReturnsCompletedWithoutResumingTerminalHumanGate() throws Exception {
+        var paths = createWorkstream("ws-terminal-approve-run", completeGateDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
+        ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            throw new AssertionError("terminal approval must not resume a completed workflow");
+        });
+        var response = service.approve(tempDir, "ws-terminal-approve-run", "approved by test", true, 1);
+
+        assertEquals("review.approve.run", response.get("action"));
+        assertEquals("COMPLETED", response.get("status"));
+        assertEquals("boundary", response.get("stoppedBecause"));
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, current.status());
+        assertEquals(List.of(), current.activeNodeInstanceIds());
+    }
+
+    @Test
     void completeResolvesCurrentHumanGateAndCompletesWorkflow() throws Exception {
         var paths = createWorkstream("ws-complete", completeGateDefinition());
         var ledger = new WorkflowFileLedger();

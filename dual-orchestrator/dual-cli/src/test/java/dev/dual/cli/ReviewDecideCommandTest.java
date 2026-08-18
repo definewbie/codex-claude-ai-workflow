@@ -5,6 +5,7 @@ import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.junit.jupiter.api.Test;
@@ -90,5 +91,36 @@ class ReviewDecideCommandTest {
 
         var current = ledger.loadCurrent(paths);
         assertEquals("after.approved", ledger.loadNode(paths, current.activeNodeInstanceIds().get(0)).nodeDefinitionId());
+    }
+
+    @Test
+    void approveShortcutCompletesTerminalGateThatAllowsApproveWithoutAnEdge() throws Exception {
+        var workstreamId = "ws-review-approve-terminal";
+        var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
+        var definition = new WorkflowDefinition(
+                "test-review-approve-terminal",
+                1,
+                "before.review",
+                List.of(
+                        new NodeDefinition("before.review", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_acceptance", NodeKind.GATE, "human.review",
+                                Map.of("allowed_actions", List.of("approve", "revise")))
+                ),
+                List.of(new EdgeDefinition("before.review", "completed", "gate.human_acceptance"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-review-approve-terminal", definition);
+        var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, entry,
+                dev.dual.core.workflow.NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var command = new ReviewApproveCommand();
+        command.workdir = tempDir;
+        command.note = "final acceptance";
+        command.workstreamId = workstreamId;
+
+        assertEquals(0, command.call());
+
+        assertEquals(WorkflowStatus.COMPLETED, ledger.loadCurrent(paths).status());
     }
 }

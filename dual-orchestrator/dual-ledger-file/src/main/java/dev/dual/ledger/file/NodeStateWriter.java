@@ -205,6 +205,126 @@ final class NodeStateWriter {
         eventLog.writeInstanceFromCurrent(paths, resumed, now);
     }
 
+    void replayDeterministicClassification(WorkstreamPaths paths, String note) throws IOException {
+        if (note == null || note.isBlank()) {
+            throw new IOException("classification replay note is required");
+        }
+        var current = loadCurrent(paths);
+        if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY
+                || current.activeNodeInstanceIds().size() != 1) {
+            throw new IOException("classification replay requires exactly one active recovery node");
+        }
+        var failed = loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        if (failed.status() != NodeStatus.FAILED
+                || !"contract.compile".equals(failed.nodeDefinitionId())
+                || !"TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING".equals(
+                LedgerUtils.text(LedgerUtils.resultValue(failed.result(), "reason")))) {
+            throw new IOException("active recovery node is not a replayable classification misroute");
+        }
+
+        var iteration = objectMapper.readValue(
+                paths.iterationJson(failed.iterationId()).toFile(), WorkflowIterationDocument.class);
+        if (!failed.nodeDefinitionId().equals(iteration.targetNodeDefinitionId())
+                || iteration.triggerNodeInstanceId().isBlank()) {
+            throw new IOException("failed node does not have an authoritative classification trigger");
+        }
+        var classifier = loadNode(paths, iteration.triggerNodeInstanceId());
+        if (!"acceptance.classify_failure".equals(classifier.nodeDefinitionId())
+                || !"acceptance.failure_classify".equals(classifier.handlerType())
+                || classifier.status() != NodeStatus.COMPLETED
+                || !classifier.outputRefs().equals(failed.inputRefs())) {
+            throw new IOException("failed node is not lineage-bound to a completed acceptance classifier");
+        }
+
+        GateDocument recoveryGate = null;
+        for (var gateId : current.openGateIds()) {
+            var gatePath = paths.gateJson(gateId);
+            if (!java.nio.file.Files.isRegularFile(gatePath)) {
+                continue;
+            }
+            var candidate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            if (failed.nodeInstanceId().equals(candidate.nodeInstanceId()) && "open".equals(candidate.status())) {
+                recoveryGate = candidate;
+                break;
+            }
+        }
+        if (recoveryGate == null) {
+            throw new IOException("classification replay requires the failed node recovery gate");
+        }
+
+        var now = Instant.now();
+        jsonWriter.write(paths.nodeJson(failed.nodeInstanceId()), new NodeInstanceDocument(
+                failed.schemaVersion(),
+                failed.nodeInstanceId(),
+                failed.nodeDefinitionId(),
+                failed.kind(),
+                failed.handlerType(),
+                NodeStatus.SKIPPED,
+                failed.stageId(),
+                failed.iterationId(),
+                failed.inputRefs(),
+                failed.inputTransition(),
+                failed.outputRefs(),
+                LedgerUtils.mergedResult(failed.result(), Map.of(
+                        "classification_replay_compensated", true,
+                        "classification_node_instance_id", classifier.nodeInstanceId(),
+                        "compensation_note", note
+                )),
+                failed.runRef(),
+                failed.latestExecutionId(),
+                failed.startedAt(),
+                now
+        ));
+        jsonWriter.write(paths.nodeJson(classifier.nodeInstanceId()), new NodeInstanceDocument(
+                classifier.schemaVersion(),
+                classifier.nodeInstanceId(),
+                classifier.nodeDefinitionId(),
+                classifier.kind(),
+                classifier.handlerType(),
+                NodeStatus.READY,
+                classifier.stageId(),
+                classifier.iterationId(),
+                classifier.inputRefs(),
+                classifier.inputTransition(),
+                List.of(),
+                Map.of(
+                        "replay_of_status", classifier.status().name(),
+                        "recovery_note", note,
+                        "superseded_node_instance_id", failed.nodeInstanceId()
+                ),
+                classifier.runRef(),
+                classifier.latestExecutionId(),
+                null,
+                null
+        ));
+        jsonWriter.write(
+                paths.gateJson(recoveryGate.gateId()),
+                recoveryGate.resolved("replay_classification", note)
+        );
+
+        var eventId = LedgerUtils.nextEventId(current.lastEventId());
+        eventLog.appendEvent(paths, eventId, "deterministic_classification_replay_requested", Map.of(
+                "classification_node_instance_id", classifier.nodeInstanceId(),
+                "superseded_node_instance_id", failed.nodeInstanceId(),
+                "recovery_gate_id", recoveryGate.gateId(),
+                "note", note
+        ));
+        var resumed = new WorkflowCurrentDocument(
+                current.schemaVersion(),
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.RUNNING,
+                List.of(classifier.nodeInstanceId()),
+                List.of(),
+                eventId,
+                now
+        );
+        jsonWriter.write(paths.workflowCurrentJson(), resumed);
+        eventLog.writeInstanceFromCurrent(paths, resumed, now);
+    }
+
     void recoverStaleRunningNode(WorkstreamPaths paths, String note) throws IOException {
         var current = loadCurrent(paths);
         if (current.status() != WorkflowStatus.RUNNING) {

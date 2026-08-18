@@ -1336,6 +1336,107 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void replayClassificationCompensatesOnlyTheLineageBoundMisroute() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-replay-classification"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "acceptance.classify_failure",
+                List.of(
+                        new NodeDefinition(
+                                "acceptance.classify_failure",
+                                NodeKind.DECISION,
+                                "acceptance.failure_classify",
+                                Map.of()
+                        ),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(new EdgeDefinition(
+                        "acceptance.classify_failure",
+                        "REJECT_CONTRACT_GAP",
+                        "contract.compile",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("stale classification")
+                ))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-replay-classification", definition);
+        var classifier = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var classificationRef = ".agent/workstreams/ws-replay-classification/artifacts/failure-classification.json";
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                classifier.nodeInstanceId(),
+                NodeStatus.COMPLETED,
+                "REJECT_CONTRACT_GAP",
+                List.of(classificationRef),
+                Map.of("category", "CONTRACT_GAP")
+        );
+        var compile = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                compile.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING",
+                List.of(),
+                Map.of("reason", "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING")
+        );
+
+        ledger.replayDeterministicClassification(paths, "verification_remediation owner corrected");
+
+        var replayCurrent = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.RUNNING, replayCurrent.status());
+        assertEquals(List.of(classifier.nodeInstanceId()), replayCurrent.activeNodeInstanceIds());
+        assertTrue(replayCurrent.openGateIds().isEmpty());
+        var replayClassifier = ledger.loadNode(paths, classifier.nodeInstanceId());
+        assertEquals(NodeStatus.READY, replayClassifier.status());
+        assertEquals(classifier.inputRefs(), replayClassifier.inputRefs());
+        assertTrue(replayClassifier.outputRefs().isEmpty());
+        assertEquals(compile.nodeInstanceId(), replayClassifier.result().get("superseded_node_instance_id"));
+        var skippedCompile = ledger.loadNode(paths, compile.nodeInstanceId());
+        assertEquals(NodeStatus.SKIPPED, skippedCompile.status());
+        assertEquals(true, skippedCompile.result().get("classification_replay_compensated"));
+        var recoveryGate = Files.readString(paths.gateJson("recovery-" + compile.nodeInstanceId()));
+        assertTrue(recoveryGate.contains("\"status\" : \"resolved\""));
+        assertTrue(recoveryGate.contains("replay_classification"));
+        assertTrue(Files.readString(paths.eventsJsonl())
+                .contains("deterministic_classification_replay_requested"));
+    }
+
+    @Test
+    void replayClassificationRejectsAnUnrelatedRecoveryFailure() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-replay-classification-reject"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "contract.compile",
+                List.of(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-replay-classification-reject", definition);
+        var compile = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                compile.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "IO_FAILURE",
+                List.of(),
+                Map.of("reason", "IO_FAILURE")
+        );
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.replayDeterministicClassification(paths, "not a classifier misroute"));
+
+        assertTrue(error.getMessage().contains("not a replayable classification misroute"));
+        assertEquals(NodeStatus.FAILED, ledger.loadNode(paths, compile.nodeInstanceId()).status());
+    }
+
+    @Test
     void staleRunningNodeMovesToRecoveryWhenPidIsGone() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-stale-running"));
         Files.createDirectories(paths.workstreamDir());

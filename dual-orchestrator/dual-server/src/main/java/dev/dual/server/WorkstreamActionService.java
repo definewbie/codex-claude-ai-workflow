@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -115,8 +116,19 @@ public class WorkstreamActionService {
             Path workspaceRoot, String workstreamId, String note, boolean runImmediately, int maxSteps
     ) throws Exception {
         var root = normalize(workspaceRoot);
-        resolveGate(root, workstreamId, "approved", note);
+        resolveGate(root, workstreamId, "approve", note);
         if (runImmediately) {
+            var current = ledger.loadCurrent(paths(root, workstreamId));
+            if (current.status() == WorkflowStatus.COMPLETED) {
+                maybeCloseTerminalSessions(root, workstreamId);
+                var response = actionResponse("review.approve.run", workstreamId, "human gate approved; workflow completed");
+                response.put("status", WorkflowStatus.COMPLETED.name());
+                response.put("activeNode", "");
+                response.put("steps", List.of());
+                response.put("maxSteps", maxSteps);
+                response.put("stoppedBecause", "boundary");
+                return response;
+            }
             var response = resume(root, workstreamId, maxSteps);
             response.put("action", "review.approve.run");
             return response;

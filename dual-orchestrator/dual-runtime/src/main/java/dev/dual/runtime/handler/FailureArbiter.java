@@ -75,6 +75,17 @@ public final class FailureArbiter {
             String categoryHint,
             AgentResultEnvelope.VerificationRemediation verificationRemediation
     ) {
+        // The typed remediation owns the recovery route. A reviewer may describe
+        // an implementation's contract violation in contract_gaps, but when the
+        // required remedy is code, routing back to contract compilation is wrong.
+        if (verificationRemediation == AgentResultEnvelope.VerificationRemediation.TEST_CODE_CHANGE) {
+            var evidence = missingTests == null ? List.<String>of() : missingTests;
+            return build(FailureCategory.IMPLEMENTATION_BUG, 4,
+                    "Review requires test code changes: " + String.join(", ", evidence),
+                    "Implement the required test changes, then run the relevant verification",
+                    evidence, reviewDecision);
+        }
+
         // Rule 1: CONTRACT_GAP
         if (contractGaps != null && !contractGaps.isEmpty()) {
             return build(FailureCategory.CONTRACT_GAP, 1,
@@ -104,16 +115,6 @@ public final class FailureArbiter {
                     "Implementation touched out-of-scope files: " + String.join(", ", outOfScopeFiles),
                     "Re-implement, staying within scope boundaries",
                     outOfScopeFiles, reviewDecision);
-        }
-
-        // Rule 4: a verifier can distinguish missing test code from missing test evidence.
-        // This decision is typed in the acceptance artifact; do not infer it from prose.
-        if (verificationRemediation == AgentResultEnvelope.VerificationRemediation.TEST_CODE_CHANGE) {
-            var evidence = missingTests == null ? List.<String>of() : missingTests;
-            return build(FailureCategory.IMPLEMENTATION_BUG, 4,
-                    "Review requires test code changes: " + String.join(", ", evidence),
-                    "Implement the required test changes, then run the relevant verification",
-                    evidence, reviewDecision);
         }
 
         // Rule 4: VERIFICATION_INSUFFICIENT. Explicit missing verification evidence

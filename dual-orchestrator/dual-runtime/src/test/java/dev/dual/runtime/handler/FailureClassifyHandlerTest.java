@@ -352,6 +352,7 @@ class FailureClassifyHandlerTest {
                   "failure": {
                     "category_hint": "VERIFICATION_INSUFFICIENT",
                     "verification_remediation": "TEST_CODE_CHANGE",
+                    "contract_gaps": ["The implementation violates an existing acceptance criterion"],
                     "missing_tests": ["Add the equal-date cycle-number tie-breaker test in backend/tests/test_chemo.py"],
                     "reason": "The test source must change; collecting existing evidence is insufficient."
                   }

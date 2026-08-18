@@ -36,7 +36,7 @@ public class ReviewApproveCommand implements Callable<Integer> {
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review approve"))) {
             var ledger = CliLedgerFactory.create();
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "approved", note);
+            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "approve", note);
         }
         System.out.println("Human gate approved");
         System.out.println("Workstream: " + workstreamId);

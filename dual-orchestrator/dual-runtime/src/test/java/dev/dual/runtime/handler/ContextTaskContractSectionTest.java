@@ -56,6 +56,8 @@ class ContextTaskContractSectionTest {
                 "task_contract section should exist in acceptance profile");
         assertEquals(Priority.CRITICAL, taskContractSection.get().priority(),
                 "task_contract should be CRITICAL priority");
+        assertEquals(2_500, taskContractSection.get().softBudget(),
+                "acceptance must retain complete contracts that legitimately exceed the old 2k limit");
     }
 
     @Test

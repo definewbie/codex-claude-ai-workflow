@@ -1295,3 +1295,69 @@ Assessment 与首切片：
 >
 > 以上仅为历史许可记录；当前 objective 以本文顶部的 Phase C assessment
 > 状态为准。
+
+## 2026-08-18 Captcha-Auth Full Workstream 暂停点
+
+当前主目标仍是先完成首个完整端到端产品 workstream，不启动新的优化 phase。
+
+- workstream：`ws-20260818T011340Z-WA53`；
+- effective worktree：`/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53`；
+- workflow 当前仍为 `WAITING_FOR_RECOVERY`，active node 为
+  `node-contract-compile-100`；ledger 未被手工改写；
+- acceptance typed contract 已确认真实实现缺陷：生产默认非零 OTP resend interval
+  下，新 `otp_send_state` 记录把 `last_sent_at` 初始化为当前时间，首次发送随即被
+  resend 检查拒绝；
+- 产品修复已落在 worktree：以 `INSERT ... ON CONFLICT DO NOTHING` 的更新行数判定
+  首次准入，首次插入跳过 resend 检查，冲突路径继续在行锁下检查；新增 unit 与真实
+  PostgreSQL 非零间隔回归；
+- 产品全量测试：`98 tests / 0 failures / 0 errors / 0 skipped`；
+- Dual 未提交修复：acceptance `task_contract` section soft budget
+  `2000 -> 2500`；`FailureArbiter` 以 closed typed
+  `verification_remediation=TEST_CODE_CHANGE` 优先于自由文本 `contract_gaps`
+  路由 implementation repair；focused Dual tests `42/0/0`；
+- 旧 classifier 已把同一 acceptance REJECT 误分为 `CONTRACT_GAP`，继而进入
+  `contract.compile` 并以 `TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING` 失败；
+- 一次手工 ledger 补偿尝试被安全边界拒绝，命令未执行、ledger 未变化。恢复时不得
+  绕过该边界；应实现一个严格限定、带事件记录且由 ledger owner 执行的
+  deterministic-classification replay/compensation 命令，或经独立边界评审选择其他
+  正式恢复路径；
+- 暂停期间不得调用 provider、不得创建 fresh workstream、不得 resume 当前错误节点。
+
+恢复后的下一步：先闭合正式 reclassification recovery 边界并做 focused test；随后用
+新 CLI 对当前 classifier 重放，让 RoutingEngine 正常生成 implementation repair iteration，
+再继续 self-test -> artifact validation -> acceptance，目标为 workflow `COMPLETED`。
+
+### 2026-08-18 恢复与完成结果
+
+上述暂停点已关闭，首个 captcha-auth 完整端到端 workstream 已完成：
+
+- 新增 ledger-owned `recovery replay-classification`，仅接受 lineage-bound
+  `acceptance.classify_failure -> contract.compile` 且 compile 以
+  `TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING` 失败的精确误路由；旧 compile node
+  保留为 `SKIPPED` 并记录 compensation evidence，recovery gate 被显式 resolved；
+- 当前 captured workstream 使用该命令产生 event
+  `deterministic_classification_replay_requested`，corrected classifier 输出
+  `IMPLEMENTATION_BUG / matched_rule=4`，RoutingEngine 正常创建 `iter-011`；
+- DeepSeek implementation 输出 `IMPLEMENTED`，随后 self-test 输出
+  `SELF_TEST_COMPLETE`；真实 PostgreSQL regression 同时覆盖 email 与 phone 的
+  非零 resend interval 首发成功和立即重发节流；
+- self-test 与 Codex acceptance 均记录 `99 tests / 0 failures / 0 errors / 0 skipped`；
+- artifact validation：`PASS`，`changed_file_count=61`、scope violations `0`、
+  missing declared `0`、hygiene warnings `0`；
+- Codex acceptance：`ACCEPT_WITH_NOTES`、`blocking=false`、`must_fix=[]`、
+  `missing_evidence=[]`、`verification_remediation=NONE`；
+- human acceptance 通过明确 action `approve` 完成；workflow 最终
+  `COMPLETED`，completion audit 为 `ready`、`lifecycleState=ENDED`、`gaps=[]`；
+- 同次运行暴露并修复 CLI shortcut 漂移：`ReviewApproveCommand` 现在提交用户动作
+  `approve`，canonicalization 仍唯一归 ledger；terminal approve-without-edge 与
+  approved-edge 两种 sibling path 均有测试；
+- 独立 diff review 发现 server/UI sibling 仍预先发送 `approved`；现已收敛为发送
+  `approve`，由同一 ledger owner 决定 terminal completion 或 legacy `approved`
+  edge 映射；terminal `approve + run` 在 ledger 已完成时直接返回完成边界，不再
+  resume 已结束 workflow。`WorkstreamActionServiceTest` 为 `11/0/0`；
+- Dual 受影响切片最终结果：ledger `41/0/0`、runtime `42/0/0`、CLI `4/0/0`，
+  `git diff --check` clean。
+
+主目标状态：`PROVEN`（真实 workflow `COMPLETED` + 非退化 `ACCEPT_WITH_NOTES` +
+产品 PostgreSQL-backed tests 全绿）。下一步不是再制造 real-case，而是独立审查并选择性
+提交本轮 Dual checkpoint；产品 worktree 可进入交付/提交整理。
