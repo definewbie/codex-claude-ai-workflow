@@ -1361,3 +1361,24 @@ Assessment 与首切片：
 主目标状态：`PROVEN`（真实 workflow `COMPLETED` + 非退化 `ACCEPT_WITH_NOTES` +
 产品 PostgreSQL-backed tests 全绿）。下一步不是再制造 real-case，而是独立审查并选择性
 提交本轮 Dual checkpoint；产品 worktree 可进入交付/提交整理。
+
+### 2026-08-18 E2E Harness 边界复盘
+
+首个完整 E2E 的架构结论已固化到
+`docs/design/e2e-harness-boundary-retrospective.zh-CN.md`。本轮确认并关闭了 acceptance
+context projection、typed failure classification、deterministic compensation、gate action
+ownership 与 terminal approve command composition 五类 harness 缺陷。
+
+当前最高的 ledger correctness risk 是多文件状态转换的崩溃一致性。下一步仅授权 bounded
+architecture assessment：清点 sibling transitions、定义 commit point、建立 failpoint/restart
+证据并比较最小协议；未授权直接引入 transaction framework、database、event store、新
+module 或新的 provider real-case。
+
+### 2026-08-18 Model-Strength Harness Subtraction 对照
+
+参考《模型越来越强，harness 该留下什么？》后，架构复盘末尾新增 L0-L3 对照与删除
+候选。优先级进一步区分为：R1 仍是最高 ledger correctness risk；prompt/rule subtraction
+是短期成本更低的 optimization track。下一步先做只读 Prompt/Rule Ownership Inventory，
+覆盖 10 个 prompt、`AgentResultPromptContract` 和已有 validators；随后只选择一个有
+deterministic owner 的删除 checkpoint。A8 deterministic self-test replacement、small
+profile 和 R1 crash protocol 均需各自独立 Gate，不混成一次改造。
