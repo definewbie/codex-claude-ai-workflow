@@ -186,7 +186,7 @@ final class ContextProfiles {
                 new SectionRequirement("task_contract",
                         MissingPolicy.PLACEHOLDER, Priority.CRITICAL,
                         new DegradationPolicy(Degradation.FULL, 0),
-                        OverflowPolicy.FAIL, 2_500)
+                        OverflowPolicy.PRESERVE_FULL, 2_500)
         ));
     }
 

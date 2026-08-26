@@ -47,11 +47,27 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 .resolve("workstreams")
                 .resolve(context.workstreamId());
         var contextDir = workstreamDir.resolve("context");
-        Files.createDirectories(contextDir);
-
         var packagePath = contextDir.resolve(context.instance().nodeInstanceId() + ".md");
         var profileName = profile(context);
         var hasSectionOverride = context.definition().config().get("include_sections") instanceof List<?>;
+        if ("acceptance".equals(profileName) && hasSectionOverride) {
+            return new NodeResult(
+                    "MANDATORY_CONTEXT_SECTION_OVERRIDE_REJECTED",
+                    NodeStatus.FAILED,
+                    List.of(),
+                    Map.of(
+                            "failure_code", "MANDATORY_CONTEXT_SECTION_OVERRIDE_REJECTED",
+                            "error", "acceptance profile cannot override mandatory context sections"),
+                    null);
+        }
+        var qualifiedContract = Optional.<TaskContractProjectionVerifier.QualifiedTaskContract>empty();
+        if ("acceptance".equals(profileName)) {
+            var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+            if (resolution.failure() != null) {
+                return qualificationFailure(resolution.failure());
+            }
+            qualifiedContract = resolution.qualified();
+        }
         var requiredInputArtifact = configText(context, "required_input_artifact", "");
         if (!requiredInputArtifact.isBlank() && !"task_contract_proposal".equals(requiredInputArtifact)) {
             return new NodeResult(
@@ -95,9 +111,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     null);
         }
 
+        Files.createDirectories(contextDir);
+
         if (ContextProfiles.hasProfile(profileName) && !hasSectionOverride) {
             return executeGoverned(context, workstreamDir, packagePath, profileName,
-                    reviewSubject, architectureReviewSubject);
+                    reviewSubject, architectureReviewSubject, qualifiedContract);
         }
 
         var requestedSections = effectiveSections(context);
@@ -158,6 +176,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         result.put("generated_at", Instant.now().toString());
         var outputRefs = new ArrayList<String>();
         outputRefs.add(packageRef);
+        if (metadataPath != null && "acceptance".equals(profile(context))) {
+            outputRefs.add(toWorkspaceRef(context.workspaceRoot(), metadataPath));
+        }
         for (var inputRef : context.instance().inputRefs()) {
             if (TaskContractProposalReference.readVerified(
                     context.workspaceRoot(), context.workstreamId(), inputRef, OBJECT_MAPPER).isPresent()) {
@@ -173,18 +194,20 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             Path packagePath,
             String profileName,
             Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject,
-            Optional<AgentEvidenceIndex.Entry> architectureReviewSubject
+            Optional<AgentEvidenceIndex.Entry> architectureReviewSubject,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
         var rawBudget = ContextProfiles.budgetFor(profileName);
         var budget = effectiveBudget(rawBudget);
         var handoff = loadHandoff(workstreamDir);
         var manifest = budget.sections().stream().anyMatch(req -> requiresEvidenceManifest(req.section()))
                 ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(),
-                        context.instance().inputRefs(), OBJECT_MAPPER)
+                        context.instance().inputRefs(), OBJECT_MAPPER, qualifiedContract)
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = governanceEnabled()
-                ? RepoScopeGovernance.build(context.workspaceRoot(), workstreamDir, context, OBJECT_MAPPER)
+                ? RepoScopeGovernance.build(
+                        context.workspaceRoot(), workstreamDir, context, OBJECT_MAPPER, qualifiedContract)
                 : null;
 
         // Phase 2: Resolve section availability
@@ -204,6 +227,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         for (var rs : sorted) {
             if (!rs.available) continue;
             if (allocated + rs.req.softBudget() > budget.totalBudget()) {
+                if (rs.req.overflowPolicy() == OverflowPolicy.PRESERVE_FULL) {
+                    continue;
+                }
                 rs.degraded = true;
                 if (rs.req.overflowPolicy() == OverflowPolicy.DROP_OPTIONAL) {
                     rs.dropped = true;
@@ -218,7 +244,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         // Phase 4: Render sections with degradation
         var builder = new StringBuilder();
         appendGovernedHeader(builder, context, budget, sorted);
-        ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
+        ContextStateEvidenceBoundaryRenderer.append(
+                builder, context, workstreamDir, OBJECT_MAPPER, qualifiedContract);
         RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot(), compactGovernance(budget));
 
         for (var rs : sorted) {
@@ -229,7 +256,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 }
                 continue;
             }
-            var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, manifest, budget);
+            var section = renderGovernedSectionOrFailure(
+                    rs, context, workstreamDir, handoff, manifest, budget, qualifiedContract);
             if (section.failure() != null) {
                 return section.failure();
             }
@@ -242,12 +270,16 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 if (tokenCount(builder.toString()) <= budget.totalBudget()) break;
                 var rs = sorted.get(i);
                 if (!rs.available || rs.dropped) continue;
-                if (rs.req.overflowPolicy() == OverflowPolicy.FAIL) continue;
+                if (rs.req.overflowPolicy() == OverflowPolicy.FAIL
+                        || rs.req.overflowPolicy() == OverflowPolicy.PRESERVE_FULL) {
+                    continue;
+                }
                 rs.dropped = true;
             }
             builder.setLength(0);
             appendGovernedHeader(builder, context, budget, sorted);
-            ContextStateEvidenceBoundaryRenderer.append(builder, context, workstreamDir, OBJECT_MAPPER);
+            ContextStateEvidenceBoundaryRenderer.append(
+                    builder, context, workstreamDir, OBJECT_MAPPER, qualifiedContract);
             RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot(), compactGovernance(budget));
             for (var rs : sorted) {
                 if (rs.dropped || !rs.available) {
@@ -257,15 +289,23 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     }
                     continue;
                 }
-                var section = renderGovernedSectionOrFailure(rs, context, workstreamDir, handoff, manifest, budget);
+                var section = renderGovernedSectionOrFailure(
+                        rs, context, workstreamDir, handoff, manifest, budget, qualifiedContract);
                 if (section.failure() != null) {
                     return section.failure();
                 }
                 builder.append(section.content());
             }
-            if (tokenCount(builder.toString()) > budget.totalBudget()) {
+            var governedTokens = tokenCount(builder.toString());
+            var preservedTokens = sorted.stream()
+                    .filter(rs -> rs.req.overflowPolicy() == OverflowPolicy.PRESERVE_FULL)
+                    .mapToInt(rs -> rs.renderedChars)
+                    .sum();
+            if (governedTokens > budget.totalBudget()
+                    && governedTokens - preservedTokens > budget.totalBudget()) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(),
-                        Map.of("error", "budget exceeded: " + tokenCount(builder.toString()) + " > " + budget.totalBudget() + " tokens"), null);
+                        Map.of("error", "budget exceeded: " + governedTokens + " > "
+                                + budget.totalBudget() + " tokens"), null);
             }
         }
 
@@ -303,7 +343,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 disabledMemorySections(rawBudget.sections().stream().map(SectionRequirement::section).toList(),
                         budget.sections().stream().map(SectionRequirement::section).toList()),
                 governance,
-                requiredTypedSubjectTokens
+                requiredTypedSubjectTokens,
+                qualifiedContract
         );
         return buildLegacyResult(context, packagePath, metadataPath, declaredSections);
     }
@@ -371,6 +412,26 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             RepoScopeGovernance.Documents governance,
             Map<String, Integer> requiredTypedSubjectTokens
     ) throws IOException {
+        return writeContextPackageMetadata(
+                context, packagePath, profileName, budget, estimatedTokens, sections, manifest, manifestPath,
+                memoryEnabled, memoryDisabledSections, governance, requiredTypedSubjectTokens, Optional.empty());
+    }
+
+    private static Path writeContextPackageMetadata(
+            TaskContext context,
+            Path packagePath,
+            String profileName,
+            ContextBudget budget,
+            int estimatedTokens,
+            List<ResolvedSection> sections,
+            EvidenceManifest manifest,
+            Path manifestPath,
+            boolean memoryEnabled,
+            List<String> memoryDisabledSections,
+            RepoScopeGovernance.Documents governance,
+            Map<String, Integer> requiredTypedSubjectTokens,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
         var metadataPath = packagePath.resolveSibling(stripMarkdownExtension(packagePath.getFileName().toString()) + ".json");
         var metadata = new LinkedHashMap<String, Object>();
         metadata.put("schemaVersion", 1);
@@ -382,10 +443,23 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         metadata.put("estimatedTokens", estimatedTokens);
         metadata.put("tokenBudget", budget == null ? 0 : budget.totalBudget());
         metadata.put("withinBudget", budget == null || estimatedTokens <= budget.totalBudget());
+        metadata.put("budgetWarnings", sections.stream()
+                .filter(section -> section.softBudgetExceeded)
+                .map(section -> Map.<String, Object>of(
+                        "section", section.req.section(),
+                        "softBudgetTokens", section.req.softBudget(),
+                        "actualTokens", section.renderedChars,
+                        "packageTokenBudget", budget == null ? 0 : budget.totalBudget(),
+                        "estimatedPackageTokens", estimatedTokens))
+                .toList());
         metadata.put("memoryEnabled", memoryEnabled);
         metadata.put("memoryDisabledSections", memoryDisabledSections);
         metadata.put("contextGovernanceEnabled", governance != null);
         metadata.put("requiredTypedSubjectTokens", Map.copyOf(requiredTypedSubjectTokens));
+        qualifiedContract.ifPresent(contract -> {
+            metadata.put("taskContractSha256", contract.sha256());
+            metadata.put("taskContractCompileNodeRef", contract.compileNodeRef());
+        });
         metadata.put("generatedAt", Instant.now().toString());
         metadata.put("sections", sections.stream()
                 .map(ContextBuildPackageHandler::sectionMetadata)
@@ -421,6 +495,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         section.put("priority", rs.req.priority().name());
         section.put("overflowPolicy", rs.req.overflowPolicy().name());
         section.put("softBudgetTokens", rs.req.softBudget());
+        section.put("softBudgetExceeded", rs.softBudgetExceeded);
         section.put("originalTokens", rs.originalChars);
         section.put("renderedTokens", rs.renderedChars);
         section.put("degradation", rs.degraded ? rs.req.degradeTo().strategy().name() : "FULL");
@@ -522,14 +597,20 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             Path workstreamDir,
             StageHandoffDocument handoff,
             EvidenceManifest manifest,
-            ContextBudget budget
+            ContextBudget budget,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
         var section = new StringBuilder();
-        appendGovernedSection(section, rs, context, workstreamDir, handoff, manifest, budget);
+        appendGovernedSection(section, rs, context, workstreamDir, handoff, manifest, budget, qualifiedContract);
         var full = section.toString();
         rs.originalChars = tokenCount(full);
 
         if (rs.originalChars <= rs.req.softBudget()) {
+            rs.renderedChars = rs.originalChars;
+            return RenderedSection.content(full);
+        }
+        if (rs.req.overflowPolicy() == OverflowPolicy.PRESERVE_FULL) {
+            rs.softBudgetExceeded = true;
             rs.renderedChars = rs.originalChars;
             return RenderedSection.content(full);
         }
@@ -548,7 +629,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         rs.degraded = true;
         if (rs.req.degradeTo().strategy() == Degradation.DECISION_ONLY) {
             section.setLength(0);
-            appendGovernedSection(section, rs, context, workstreamDir, handoff, manifest, budget);
+            appendGovernedSection(section, rs, context, workstreamDir, handoff, manifest, budget, qualifiedContract);
             var decisions = section.toString();
             rs.renderedChars = tokenCount(decisions);
             if (rs.renderedChars <= rs.req.softBudget()) {
@@ -567,7 +648,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                                                TaskContext context, Path workstreamDir,
                                                StageHandoffDocument handoff,
                                                EvidenceManifest manifest,
-                                               ContextBudget budget) throws IOException {
+                                               ContextBudget budget,
+                                               Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract) throws IOException {
         builder.append("## ").append(sectionTitle(rs.req.section())).append("\n\n");
         var strategy = rs.degraded ? rs.req.degradeTo().strategy() : Degradation.FULL;
         var maxItems = rs.degraded ? rs.req.degradeTo().maxItems() : 0;
@@ -630,7 +712,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             }
             case "task_contract" -> {
                 var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
-                if (Files.exists(contractPath)) {
+                if (qualifiedContract.isPresent()) {
+                    ContextPackageSectionRenderer.appendQualifiedTaskContract(builder, qualifiedContract.get());
+                    ContextPackageSectionRenderer.appendContractResolution(builder, workstreamDir.resolve("artifacts/contract-resolution.json"));
+                } else if (Files.exists(contractPath)) {
                     ContextPackageSectionRenderer.appendTaskContract(builder, contractPath);
                     ContextPackageSectionRenderer.appendContractResolution(builder, workstreamDir.resolve("artifacts/contract-resolution.json"));
                 } else {
@@ -672,6 +757,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         final boolean available;
         boolean degraded;
         boolean dropped;
+        boolean softBudgetExceeded;
         int originalChars;
         int renderedChars;
 
@@ -679,6 +765,18 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             this.req = req;
             this.available = available;
         }
+    }
+
+    private static NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
+        return new NodeResult(
+                TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                NodeStatus.FAILED,
+                List.of(),
+                Map.of(
+                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                        "reason", failure.reason(),
+                        "error", failure.message()),
+                null);
     }
 
     private static boolean requiresEvidenceManifest(String section) {

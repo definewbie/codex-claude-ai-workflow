@@ -89,6 +89,8 @@ class ContractCompileHandlerTest {
                 new TaskContract.ScopeEntry(
                         "src/issueApi.js", TaskContract.ScopeOperation.CREATE)), contract.scope().included());
         assertEquals(List.of("src/issueWorkflow.js", "src/issueApi.js"), contract.evidenceRefs());
+        assertEquals(TaskContractArtifactWriter.sha256(contractPath(root)),
+                result.result().get("task_contract_sha256"));
     }
 
     @Test

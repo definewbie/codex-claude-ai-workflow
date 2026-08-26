@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -42,12 +43,23 @@ final class RepoScopeGovernance {
             TaskHandler.TaskContext context,
             ObjectMapper objectMapper
     ) throws IOException {
+        return build(workspaceRoot, workstreamDir, context, objectMapper, Optional.empty());
+    }
+
+    static Documents build(
+            Path workspaceRoot,
+            Path workstreamDir,
+            TaskHandler.TaskContext context,
+            ObjectMapper objectMapper,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
         var stageId = stageId(context);
         var targetNodeDefinitionId = targetNodeDefinitionId(context);
         var memoryDir = workstreamDir.resolve("memory");
         var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
         var existingMemory = readWorkstreamMemory(workstreamMemoryPath, objectMapper);
-        var plan = buildFileRelevancePlan(workstreamDir, context, objectMapper, stageId, targetNodeDefinitionId);
+        var plan = buildFileRelevancePlan(
+                workstreamDir, context, objectMapper, stageId, targetNodeDefinitionId, qualifiedContract);
         var repoMap = buildRepoMap(
                 workspaceRoot,
                 workstreamDir,
@@ -208,9 +220,10 @@ final class RepoScopeGovernance {
             TaskHandler.TaskContext context,
             ObjectMapper objectMapper,
             String stageId,
-            String targetNodeDefinitionId
+            String targetNodeDefinitionId,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
-        var contractScope = contractScopePaths(workstreamDir, objectMapper);
+        var contractScope = contractScopePaths(workstreamDir, objectMapper, qualifiedContract);
         var candidates = new LinkedHashSet<String>();
         candidates.addAll(contractScope);
         addGitChangedFiles(candidates, workstreamDir);
@@ -561,13 +574,24 @@ final class RepoScopeGovernance {
         return summary;
     }
 
-    private static List<String> contractScopePaths(Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+    private static List<String> contractScopePaths(
+            Path workstreamDir,
+            ObjectMapper objectMapper,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
+        if (qualifiedContract.isPresent()) {
+            return contractScopePaths(qualifiedContract.get().contract());
+        }
         var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
         if (!Files.isRegularFile(contractPath)) {
             return List.of();
         }
-        var paths = new LinkedHashSet<String>();
         var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
+        return contractScopePaths(contract);
+    }
+
+    private static List<String> contractScopePaths(TaskContract contract) {
+        var paths = new LinkedHashSet<String>();
         if (contract.scope() != null) {
             for (var item : contract.scope().included()) {
                 var path = text(item.path());

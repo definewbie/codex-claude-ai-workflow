@@ -153,6 +153,34 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void acceptanceBindingMismatchFailsBeforeTransportInvocation() throws Exception {
+        var fixture = AcceptanceContractProjectionFixture.create(
+                tempDir, "ws-test", "acceptance.codex_verifier_review");
+        var metadata = new ObjectMapper().readTree(fixture.metadataPath().toFile());
+        ((com.fasterxml.jackson.databind.node.ObjectNode) metadata).put("taskContractSha256", "0".repeat(64));
+        new ObjectMapper().writeValue(fixture.metadataPath().toFile(), metadata);
+        var transport = new CountingAcceptanceTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition(
+                "acceptance.codex_verifier_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "permission_profile", "review",
+                "prompt_template", "acceptance-codex-review",
+                "expected_artifact", "acceptance_review"));
+        var instance = new NodeInstance(
+                "node-acceptance", definition.id(), NodeKind.TASK, definition.handlerType(),
+                NodeStatus.READY, "acceptance", "iter-001", fixture.inputRefs(), List.of(), Map.of(),
+                null, null, null);
+
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED", result.outcome());
+        assertEquals(0, transport.calls);
+    }
+
+    @Test
     void prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-correction");
         Files.createDirectories(workstreamDir);
@@ -1970,6 +1998,16 @@ class AcpxAgentTaskHandlerTest {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
             throw new java.io.IOException("simulated transport failure");
+        }
+    }
+
+    private static final class CountingAcceptanceTransport extends AcpxAgentTransport {
+        private int calls;
+
+        @Override
+        public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) {
+            calls++;
+            throw new AssertionError("transport must not run for an invalid task contract binding");
         }
     }
 

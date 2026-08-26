@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.stream.Collectors;
 
 final class TaskContractArtifactWriter {
@@ -80,6 +82,18 @@ final class TaskContractArtifactWriter {
 
     static ObjectMapper mapper() {
         return MAPPER;
+    }
+
+    static String sha256(byte[] bytes) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (Exception failure) {
+            throw new IllegalStateException("SHA-256 digest is unavailable", failure);
+        }
+    }
+
+    static String sha256(Path path) throws IOException {
+        return sha256(Files.readAllBytes(path));
     }
 
     private static void appendListSection(StringBuilder md, String title, java.util.List<String> items) {

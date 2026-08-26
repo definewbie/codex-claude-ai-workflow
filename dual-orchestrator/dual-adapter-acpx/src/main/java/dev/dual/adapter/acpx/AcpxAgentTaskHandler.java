@@ -128,7 +128,18 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 compactionDecision
         ).orElse(null);
         var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
-        inputRefs.add(AgentRunGovernanceContext.ensure(context, runId));
+        AgentRunGovernanceContext.PreparedContext governanceContext;
+        try {
+            governanceContext = AgentRunGovernanceContext.ensureQualified(context, runId);
+            inputRefs.add(governanceContext.contextRef());
+        } catch (AgentRunGovernanceContext.QualificationException failure) {
+            return new NodeResult(
+                    AgentRunGovernanceContext.QUALIFICATION_FAILURE_OUTCOME,
+                    NodeStatus.FAILED,
+                    List.of(),
+                    Map.of("error", failure.getMessage()),
+                    failure.getMessage());
+        }
         if (seedPath != null) {
             inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
         }
@@ -140,7 +151,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 context.definition().id(),
                 promptTemplate,
                 inputRefs,
-                agentResultContract
+                agentResultContract,
+                governanceContext.trustedTaskContractPayload().orElse(null)
         );
         Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
         promptManifestWriter.write(

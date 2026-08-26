@@ -436,8 +436,20 @@ class WorkflowIntegrationTest {
         Files.createDirectories(nodesDir);
         Files.writeString(nodesDir.resolve("node-gate-human-approval-001.json"), """
                 {
+                  "schemaVersion": 1,
                   "nodeInstanceId": "node-gate-human-approval-001",
                   "nodeDefinitionId": "gate.human_design_approval",
+                  "kind": "GATE",
+                  "handlerType": "human.review_gate",
+                  "status": "COMPLETED",
+                  "stageId": "design",
+                  "iterationId": "iter-001",
+                  "inputRefs": [],
+                  "inputTransition": {},
+                  "outputRefs": [],
+                  "runRef": null,
+                  "latestExecutionId": "",
+                  "startedAt": "2026-05-28T08:59:00Z",
                   "finishedAt": "2026-05-28T09:00:00Z",
                   "result": {
                     "human_action": "revise",
@@ -456,13 +468,13 @@ class WorkflowIntegrationTest {
                   "created_at": "2026-05-28T09:00:00Z",
                   "objective": "Test objective",
                   "scope": {
-                    "included": [{"path": "src/", "operation": "MODIFY"}],
+                    "included": [{"path": "src/App.java", "operation": "MODIFY"}],
                     "excluded": []
                   },
-                  "acceptance_criteria": ["AC1"],
-                  "test_requirements": [],
-                  "constraints": [],
-                  "non_goals": [],
+                  "acceptance_criteria": ["AC1", "AC2"],
+                  "test_requirements": ["Run tests"],
+                  "constraints": ["Keep scope narrow"],
+                  "non_goals": ["No unrelated changes"],
                   "risk_areas": [],
                   "ambiguity_notes": [],
                   "human_questions": [],
@@ -471,6 +483,7 @@ class WorkflowIntegrationTest {
                   "source": { "raw_request_ref": "requirement.md", "created_by": "contract_compiler" }
                 }
                 """);
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-int");
 
         // product_review: should NOT have human_feedback, git_evidence
         var productResult = buildContextPackage("product_review");
@@ -484,6 +497,7 @@ class WorkflowIntegrationTest {
 
         // acceptance: should have EVERYTHING including git_evidence
         var acceptanceResult = buildContextPackage("acceptance");
+        assertEquals(NodeStatus.COMPLETED, acceptanceResult.status(), acceptanceResult.result().toString());
         var acceptanceMd = readPackageMarkdown(acceptanceResult);
         assertFalse(acceptanceMd.contains("User Requirement"));
         assertTrue(acceptanceMd.contains("## Git Evidence"), "acceptance should have git_evidence");

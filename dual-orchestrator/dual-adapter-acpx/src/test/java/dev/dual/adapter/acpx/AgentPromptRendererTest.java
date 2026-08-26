@@ -605,6 +605,34 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void acceptancePromptUsesQualifiedSnapshotWithoutRereadingOrLeakingMachineMetadata() throws Exception {
+        var fixture = AcceptanceContractProjectionFixture.create(
+                tempDir, "ws-test", "acceptance.codex_verifier_review");
+        var trustedPayload = TypedContextPayloadBoundary.wrap(
+                "```json\n" + fixture.rawContract() + "\n```");
+        Files.writeString(
+                tempDir.resolve(".agent/workstreams/ws-test/artifacts/task-contract.json"),
+                "{\"tampered\":true}");
+
+        var prompt = new AgentPromptRenderer().renderWithSections(
+                tempDir,
+                "ws-test",
+                "run-acceptance",
+                "acceptance.codex_verifier_review",
+                "acceptance-codex-review",
+                fixture.inputRefs(),
+                null,
+                trustedPayload).content();
+
+        assertTrue(prompt.contains("Project the complete authentication contract"));
+        assertTrue(prompt.contains("src/Auth.java"));
+        assertFalse(prompt.contains("tampered"));
+        assertFalse(prompt.contains(fixture.metadataRef()));
+        assertFalse(prompt.contains("taskContractSha256"));
+        assertFalse(prompt.contains("dual:typed-payload"));
+    }
+
+    @Test
     void directInputRefsDoNotExpandExecutionNoiseRawCandidatesOrUnknownFiles() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var outputs = workstreamDir.resolve("runs/run-001/outputs");

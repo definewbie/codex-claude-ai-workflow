@@ -8,6 +8,7 @@ import dev.dual.runtime.handler.ContractRegistry;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.TypedContextPayloadBoundary;
 import dev.dual.runtime.handler.TaskContractProposalReference;
+import dev.dual.runtime.handler.AgentRunGovernanceContext;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -68,6 +69,21 @@ final class AgentPromptRenderer {
             List<String> inputRefs,
             String agentResultContract
     ) {
+        return renderWithSections(
+                workspaceRoot, workstreamId, runId, nodeId, promptTemplate, inputRefs,
+                agentResultContract, null);
+    }
+
+    RenderedPrompt renderWithSections(
+            Path workspaceRoot,
+            String workstreamId,
+            String runId,
+            String nodeId,
+            String promptTemplate,
+            List<String> inputRefs,
+            String agentResultContract,
+            String trustedTaskContractPayload
+    ) {
         var template = loadTemplate(promptTemplate);
         if (agentResultContract == null) {
             var contract = promptContract(nodeId);
@@ -79,7 +95,8 @@ final class AgentPromptRenderer {
         var requirementPath = workspaceRoot.resolve(workstreamDir).resolve("requirement.md");
         var requirement = readIfExists(requirementPath);
         var languagePolicy = languagePolicy(workspaceRoot.resolve(workstreamDir), requirement);
-        var contextPackage = contextPackageSection(workspaceRoot, workstreamId, nodeId, inputRefs);
+        var contextPackage = contextPackageSection(
+                workspaceRoot, workstreamId, nodeId, inputRefs, trustedTaskContractPayload);
         var contractReviewPrinciples = principleTemplate(workspaceRoot, "contract-review-principles.md");
         var promptContract = promptContract(nodeId);
         var workspaceGuard = workspaceGuard(workspaceRoot, nodeId);
@@ -348,7 +365,8 @@ final class AgentPromptRenderer {
             Path workspaceRoot,
             String workstreamId,
             String nodeId,
-            List<String> inputRefs
+            List<String> inputRefs,
+            String trustedTaskContractPayload
     ) {
         if (inputRefs == null || inputRefs.isEmpty()) {
             return "(no context package provided)";
@@ -358,13 +376,15 @@ final class AgentPromptRenderer {
                 .toList();
         var directInputRefs = inputRefs.stream()
                 .filter(ref -> !contextRefs.contains(ref))
+                .filter(ref -> !isCanonicalContextPackageMetadataRef(workspaceRoot, workstreamId, ref))
                 .toList();
         if (contextRefs.isEmpty() && directInputRefs.isEmpty()) {
             return "(no context package provided)";
         }
         var builder = new StringBuilder();
         var trustedTypedPayloads = TypedContextPayloadBoundary.trustOnce(
-                trustedTypedPayloads(workspaceRoot, workstreamId, inputRefs));
+                trustedTypedPayloads(
+                        workspaceRoot, workstreamId, nodeId, inputRefs, trustedTaskContractPayload));
         if (!directInputRefs.isEmpty()) {
             builder.append("### Direct Input Artifacts\n\n");
             var renderedEvidence = new LinkedHashSet<String>();
@@ -476,6 +496,23 @@ final class AgentPromptRenderer {
                 && isRegularFileWithin(root, path, contextDir, true);
     }
 
+    private boolean isCanonicalContextPackageMetadataRef(
+            Path workspaceRoot,
+            String workstreamId,
+            String inputRef
+    ) {
+        if (workstreamId == null || workstreamId.isBlank() || inputRef == null || inputRef.isBlank()) {
+            return false;
+        }
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var contextDir = root.resolve(".agent/workstreams").resolve(workstreamId).resolve("context").normalize();
+        var path = root.resolve(inputRef).normalize();
+        return contextDir.startsWith(root)
+                && contextDir.equals(path.getParent())
+                && path.getFileName().toString().endsWith(".json")
+                && isRegularFileWithin(root, path, contextDir, true);
+    }
+
     private boolean isRegularFileWithin(
             Path workspaceRoot,
             Path path,
@@ -505,11 +542,26 @@ final class AgentPromptRenderer {
         }
     }
 
-    private Set<String> trustedTypedPayloads(Path workspaceRoot, String workstreamId, List<String> inputRefs) {
-        return TaskContractProposalReference.resolveProposalFromRefs(
+    private Set<String> trustedTypedPayloads(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            List<String> inputRefs,
+            String trustedTaskContractPayload
+    ) {
+        var trusted = new LinkedHashSet<String>();
+        TaskContractProposalReference.resolveProposalFromRefs(
                         workspaceRoot, workstreamId, inputRefs, OBJECT_MAPPER)
-                .map(subject -> Set.of(TypedContextPayloadBoundary.wrapJson(subject.proposal())))
-                .orElseGet(Set::of);
+                .map(subject -> TypedContextPayloadBoundary.wrapJson(subject.proposal()))
+                .ifPresent(trusted::add);
+        if (trustedTaskContractPayload == null) {
+            AgentRunGovernanceContext.trustedTaskContractPayload(
+                            workspaceRoot, workstreamId, nodeId, inputRefs)
+                    .ifPresent(trusted::add);
+        } else {
+            trusted.add(trustedTaskContractPayload);
+        }
+        return Set.copyOf(trusted);
     }
 
     private String readCompleteContextPackage(

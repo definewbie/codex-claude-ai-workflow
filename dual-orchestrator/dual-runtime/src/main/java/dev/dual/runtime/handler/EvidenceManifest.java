@@ -45,8 +45,19 @@ final class EvidenceManifest {
 
     static EvidenceManifest rebuild(Path workspaceRoot, Path workstreamDir, String workstreamId,
                                     List<String> routedRefs, ObjectMapper objectMapper) throws IOException {
+        return rebuild(workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, Optional.empty());
+    }
+
+    static EvidenceManifest rebuild(
+            Path workspaceRoot,
+            Path workstreamDir,
+            String workstreamId,
+            List<String> routedRefs,
+            ObjectMapper objectMapper,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
         var items = new ArrayList<EvidenceItem>();
-        addFixedArtifacts(workspaceRoot, workstreamDir, objectMapper, items);
+        addFixedArtifacts(workspaceRoot, workstreamDir, objectMapper, items, qualifiedContract);
         addRoutedAgentContracts(workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, items);
         addHumanDecisions(workspaceRoot, workstreamDir, objectMapper, items);
         items.sort(Comparator
@@ -106,10 +117,21 @@ final class EvidenceManifest {
         return document;
     }
 
-    private static void addFixedArtifacts(Path workspaceRoot, Path workstreamDir, ObjectMapper objectMapper,
-                                          List<EvidenceItem> items) throws IOException {
-        addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,
-                workstreamDir.resolve("artifacts/task-contract.json"), "task_contract");
+    private static void addFixedArtifacts(
+            Path workspaceRoot,
+            Path workstreamDir,
+            ObjectMapper objectMapper,
+            List<EvidenceItem> items,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
+        var taskContractPath = workstreamDir.resolve("artifacts/task-contract.json");
+        if (qualifiedContract.isPresent()) {
+            items.add(itemFromJson(
+                    workspaceRoot, workstreamDir, taskContractPath, "task_contract",
+                    qualifiedContract.get().document()));
+        } else {
+            addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items, taskContractPath, "task_contract");
+        }
         addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,
                 workstreamDir.resolve("artifacts/contract-resolution.json"), "contract_resolution");
         addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,

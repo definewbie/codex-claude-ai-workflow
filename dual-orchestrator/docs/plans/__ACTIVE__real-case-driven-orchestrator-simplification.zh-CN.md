@@ -6,26 +6,48 @@
 2. 让 node executor/handler 只负责编排，领域规则归属唯一 domain owner。
 3. LLM workflow 结果只通过 strict `AgentResultEnvelope` 进入状态流转；Markdown 仅供人阅读，不参与控制。
 
-## 当前唯一优先级：先跑通一个完整端到端
+## 当前唯一优先级：先关闭已知正确性残余，再做删除优化
 
-在 captcha-auth 从需求进入真实产品交付并达到 workflow `COMPLETED` 之前，暂停新的 schema、workflow node、Gate、
-projection、registry、通用框架、性能优化与成熟度扩张。只允许处理阻止当前 happy path 继续运行的已证实缺陷，
-并且优先恢复当前 `ws-20260818T011340Z-WA53`；仅当冻结实例无法安全消费修复时才创建 fresh workstream。
+captcha-auth workstream `ws-20260818T011340Z-WA53` 已达到 workflow `COMPLETED`，首个完整 E2E 主目标已经
+`PROVEN`。当前不再恢复该 workstream，也不再制造同类 provider 样本。
 
-当前 blocker 是确定性的 Definition/Instance consumer 矛盾：workflow 与 ledger 合法产生 human requirement
-`trigger_action=revise`，但 `TaskContractRevisionContextResolver` 未消费该既有动作，导致 provider dispatch 前失败。
-本 checkpoint 只闭合这条既有 typed lineage：从 completed human gate 读取 verified `BLOCKED` review、上一版 proposal
-与人工 note，形成 revision patch emission context。它不新增领域概念或调用。完成 focused tests、fresh package 和一次
-代码级 diff review 后，直接继续当前 workstream，以首个完整 E2E `COMPLETED` 作为唯一成功口径。
+综合 E2E 复盘中 H1、H2、H4 的代码级核实，执行顺序调整为：
 
-首次原位重试证明 trigger consumer 已闭合并成功启动 provider，但暴露同一 typed 链的下一处丢字段：resolver 产出的
-`ReviewObligation(id,text)` 在 `AgentResultPromptContract` 中只投影 id，人工 note 没有进入 prompt。模型因而沿用旧 review
-上下文，反向选择了“允许本地号码 + 默认地区”，并再次输出未闭合 JSON。当前只修复 authoritative obligation 的 id+text
-完整投影；不自动补 JSON、不放宽 parser，也不把错误业务语义包装成成功。
+1. H1：制定并评审“qualified task contract 全文必达、soft budget 只告警、hard capacity 独立归属”的
+   implementation-ready plan，随后实施单一 deterministic checkpoint；
+2. H4：制定并评审独立的 workflow action visibility consistency 计划，随后只强制 outgoing edge
+   必须在 `allowed_actions` 中可见；保留显式 no-edge terminal action，不再增加 CLI/UI/action mapper；
+3. H2：保持冻结。typed remediation 到 implementation repair routing 已 `ENFORCED + PROVEN`，无新 bypass
+   证据不得继续改 prompt/schema/parser/routing；
+4. 完成 H1/H4 后再进行 R1 multi-file mutation bounded assessment；
+5. 最后恢复 Prompt/Rule Ownership Inventory、纯删除 checkpoint 和 A8/small-profile 实验。
+
+H1/H4 均不得调用 provider 或新增 workflow node、schema、module、registry、engine。H1 终版计划已获 CC PASS 并进入
+deterministic implementation checkpoint；仍未授权 provider/real-case，也未授权 R1 事务方案或 harness subtraction。
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: Human Revise Revision-Context Boundary / v16 FAIL, CONSUMED
+## Current Active Step: H1 Mandatory Task-Contract Projection Boundary / READY FOR SELECTIVE COMMIT
+
+权威说明见 `docs/design/e2e-harness-boundary-retrospective.zh-CN.md` 第 3.1、3.4 和 10 节。当前先把 H1 的
+qualified contract owner、完整投影、soft warning、token accounting、hard-capacity ownership 与 cannot-bypass
+tests 写成一个原子实施计划；计划草案已落在
+`docs/plans/h1-mandatory-task-contract-projection-plan-20260826.zh-CN.md`。首轮 CC 评审为 WARN：指出 Phase 3
+未定义 `PRESERVE_FULL`、EvidenceManifest 漏出单快照边界。修订已闭合两项 P1，并额外把 acceptance agent
+dispatch 时的 governance 重建纳入同一 SHA identity。第二轮 delta review 再次为 WARN，确认设计正确但指出 metadata
+当前不在 output refs；终版修订明确只由 acceptance context 路由 metadata，prompt projector 将其作为 machine-only ref
+过滤，其他 profile 的 input/output refs 不变。最终 delta review 已 PASS，单一 checkpoint 已完成实现。focused runtime +
+adapter 为 `83/0/0/0`；full Maven reactor 9/9 modules、`1270/0/0/0`；`git diff --check` clean。测试已证明
+compile SHA、latest compile qualification、qualified snapshot 四消费者、>2500 token 全文保留、Phase 3/Phase 5
+不可降级或删除、override fail-before-write、acceptance-only metadata routing、metadata 不泄漏及
+dispatch-before-transport typed 拒绝。deterministic PASS 不冒充 real-case `PROVEN`。
+
+独立代码级 diff review 已 `PASS（P0=0 / P1=0 / P2=3 非阻塞）`，并独立复现 full reactor
+`1270/0/0/0` 与 diff-check。评审确认无第二 owner、TOCTOU、raw metadata 泄漏或 budget bypass，满足单一原子
+checkpoint 的选择性提交条件。成熟度口径为 qualified projection `ENFORCED`、provider hard-capacity
+`NOT MODELED`、real-case value `NOT PROVEN`；提交后进入 H4 计划，不为 H1 制造 provider 样本。
+
+## 历史执行记录：Human Revise Revision-Context Boundary / v16 FAIL, CONSUMED
 
 > Captured replay 的 evidence 与结果已由独立评审复现，并提交为 `f413cb44`。该样本证明 current design typed
 > projection 与 strict contract enforcement 工作正常，但否定了“单次 LLM architecture judge 能稳定给出完整

@@ -101,6 +101,7 @@ class ContextTaskContractSectionTest {
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
 
         // Also create events.jsonl for ledger_pointers availability
         Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);

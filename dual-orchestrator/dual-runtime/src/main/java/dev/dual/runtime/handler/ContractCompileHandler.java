@@ -108,6 +108,7 @@ public final class ContractCompileHandler implements TaskHandler {
         var artifactsDir = workstreamDir.resolve("artifacts");
         TaskContractArtifactWriter.writeJson(contract, artifactsDir);
         TaskContractArtifactWriter.writeMarkdown(contract, artifactsDir);
+        var contractSha256 = TaskContractArtifactWriter.sha256(artifactsDir.resolve("task-contract.json"));
         var resolutionRefs = writeContractResolutionArtifacts(context, artifactsDir, resolutionResult.resolution());
 
         var now = Instant.now();
@@ -115,6 +116,7 @@ public final class ContractCompileHandler implements TaskHandler {
         result.put("contract_id", contract.id());
         result.put("contract_status", contract.status().name());
         result.put("contract_version", contract.version());
+        result.put("task_contract_sha256", contractSha256);
         result.put("compilation_pass", contract.compilationPass());
         var outputRefs = new ArrayList<String>();
         outputRefs.add(".agent/workstreams/" + context.workstreamId() + "/artifacts/task-contract.json");

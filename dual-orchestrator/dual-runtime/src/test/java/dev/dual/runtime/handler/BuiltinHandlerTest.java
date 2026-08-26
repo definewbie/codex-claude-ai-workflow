@@ -1472,7 +1472,7 @@ class BuiltinHandlerTest {
                 "ws",
                 new NodeDefinition("context.custom", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "custom.agent",
-                        "profile", "acceptance",
+                        "profile", "implementation",
                         "include_sections", List.of("requirement", "input_artifacts"),
                         "max_snippet_chars", 10,
                         "max_recent_agent_outputs", 1

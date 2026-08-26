@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -27,10 +28,20 @@ final class ContextStateEvidenceBoundaryRenderer {
     }
 
     static void append(StringBuilder builder, TaskHandler.TaskContext context, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+        append(builder, context, workstreamDir, objectMapper, Optional.empty());
+    }
+
+    static void append(
+            StringBuilder builder,
+            TaskHandler.TaskContext context,
+            Path workstreamDir,
+            ObjectMapper objectMapper,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
         builder.append("## State & Evidence Boundary\n\n");
         builder.append("This package separates deterministic harness facts from agent proposals.\n\n");
 
-        appendTrustedFacts(builder, workstreamDir, objectMapper);
+        appendTrustedFacts(builder, workstreamDir, objectMapper, qualifiedContract);
         var routedEvidence = AgentEvidenceIndex.fromRefs(
                 context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper);
         appendCurrentRepairObjective(builder, workstreamDir, objectMapper, routedEvidence);
@@ -39,11 +50,17 @@ final class ContextStateEvidenceBoundaryRenderer {
         appendPendingGaps(builder, workstreamDir, objectMapper);
     }
 
-    private static void appendTrustedFacts(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) throws IOException {
+    private static void appendTrustedFacts(
+            StringBuilder builder,
+            Path workstreamDir,
+            ObjectMapper objectMapper,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) throws IOException {
         builder.append("### Trusted Harness Facts\n\n");
         var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
-        if (Files.exists(contractPath)) {
-            var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
+        if (qualifiedContract.isPresent() || Files.exists(contractPath)) {
+            var contract = qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contract)
+                    .orElseGet(() -> readContract(contractPath, objectMapper));
             builder.append("- TaskContract: ").append(contract.status()).append(" - ")
                     .append(contract.objective()).append(" (").append(toDisplayRef(contractPath)).append(")\n");
         } else {
@@ -61,6 +78,14 @@ final class ContextStateEvidenceBoundaryRenderer {
             builder.append(" (").append(toDisplayRef(gitEvidencePath)).append(")\n");
         } else {
             builder.append("- Git Evidence: not generated yet\n");
+        }
+    }
+
+    private static TaskContract readContract(Path path, ObjectMapper objectMapper) {
+        try {
+            return objectMapper.readValue(path.toFile(), TaskContract.class);
+        } catch (IOException failure) {
+            throw new IllegalStateException("cannot read task contract", failure);
         }
     }
 

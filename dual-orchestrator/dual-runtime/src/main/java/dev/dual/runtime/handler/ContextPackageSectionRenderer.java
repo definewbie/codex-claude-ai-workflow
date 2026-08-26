@@ -50,6 +50,13 @@ final class ContextPackageSectionRenderer {
         appendListSection(builder, "Evidence References", contract.evidenceRefs());
     }
 
+    static void appendQualifiedTaskContract(
+            StringBuilder builder,
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract
+    ) {
+        builder.append(qualifiedContract.wrappedPayload()).append("\n\n");
+    }
+
     static void appendContractResolution(StringBuilder builder, Path resolutionPath) throws IOException {
         if (!Files.exists(resolutionPath)) {
             return;

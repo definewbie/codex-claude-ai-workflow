@@ -1,6 +1,8 @@
 package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.contract.ContractStatus;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -529,11 +532,11 @@ class ContextBuildPackageHandlerTest {
                   "created_at": "2026-06-18T00:00:00Z",
                   "objective": "Accept the change.",
                   "status": "READY_FOR_REVIEW",
-                  "scope": {"included": [], "excluded": []},
-                  "acceptance_criteria": ["tokens refreshed"],
-                  "test_requirements": [],
+                  "scope": {"included": [{"path":"src/auth.py","operation":"MODIFY"}], "excluded": []},
+                  "acceptance_criteria": ["tokens refreshed", "refresh failures remain visible"],
+                  "test_requirements": ["Run auth tests"],
                   "non_goals": [],
-                  "constraints": [],
+                  "constraints": ["Keep the change in auth scope"],
                   "risk_areas": [],
                   "evidence_refs": ["evidence/task-contract-proof.json"],
                   "ambiguity_notes": [],
@@ -541,6 +544,7 @@ class ContextBuildPackageHandlerTest {
                   "compilation_pass": 1
                 }
                 """, StandardCharsets.UTF_8);
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
         var evidenceDir = wsDir.resolve("artifacts/git-evidence");
         Files.createDirectories(evidenceDir);
         Files.writeString(evidenceDir.resolve("changed-files.txt"), "src/auth.py\n", StandardCharsets.UTF_8);
@@ -553,7 +557,6 @@ class ContextBuildPackageHandlerTest {
         assertTrue(markdown.contains("REJECTED"));
         assertTrue(markdown.contains("src/auth.py"));
         assertTrue(markdown.contains("tokens refreshed"));
-        assertTrue(markdown.contains("Evidence References"));
         assertTrue(markdown.contains("evidence/task-contract-proof.json"));
         assertTrue(markdown.toLowerCase().contains("incremental"));
     }
@@ -929,10 +932,10 @@ class ContextBuildPackageHandlerTest {
                   "created_at": "2026-06-18T00:00:00Z",
                   "objective": "Verify context package raw-output hygiene.",
                   "status": "READY_FOR_REVIEW",
-                  "scope": {"included": [], "excluded": []},
-                  "acceptance_criteria": [],
-                  "test_requirements": [],
-                  "non_goals": [],
+                  "scope": {"included": [{"path":"miniprogram/src/pages/record/index.vue","operation":"MODIFY"}], "excluded": []},
+                  "acceptance_criteria": ["validated evidence is projected", "raw output is omitted"],
+                  "test_requirements": ["Run context projection tests"],
+                  "non_goals": ["Do not change unrelated pages"],
                   "constraints": [],
                   "risk_areas": [],
                   "ambiguity_notes": [],
@@ -944,6 +947,7 @@ class ContextBuildPackageHandlerTest {
                   }
                 }
                 """, StandardCharsets.UTF_8);
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
 
         var result = handler.execute(ctx("acceptance", List.of(
                 ".agent/workstreams/ws-ctx/runs/run-002/outputs/self-test.md")));
@@ -1388,6 +1392,7 @@ class ContextBuildPackageHandlerTest {
                   "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
                 }
                 """, StandardCharsets.UTF_8);
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
         Files.writeString(wsDir.resolve("artifacts/contract-resolution.json"), """
                 {
                   "schema_version": 1,
@@ -2226,6 +2231,61 @@ class ContextBuildPackageHandlerTest {
         assertFalse(Files.exists(wsDir.resolve("artifacts/context-governance/node-001.json")));
     }
 
+    @Test
+    void acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning() throws Exception {
+        Files.createDirectories(wsDir.resolve("artifacts"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Review the complete contract.");
+        var objective = "complete-contract-fact-".repeat(700);
+        var contract = new TaskContract(
+                "tc-large", 1, Instant.parse("2026-08-26T00:00:00Z"), objective,
+                new TaskContract.Scope(
+                        List.of(new TaskContract.ScopeEntry("src/Auth.java", TaskContract.ScopeOperation.MODIFY)),
+                        List.of("unrelated files")),
+                List.of("registration works", "login works"),
+                List.of("Run authentication tests"),
+                List.of("Keep the existing API"),
+                List.of("Do not add SSO"),
+                List.of(), List.of(), List.of("src/Auth.java"),
+                ContractStatus.READY_FOR_REVIEW, 1,
+                new TaskContract.Source("requirement.md", "contract_compiler"));
+        TaskContractArtifactWriter.writeJson(contract, wsDir.resolve("artifacts"));
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
+
+        var result = handler.execute(ctx("acceptance", List.of()));
+
+        assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        assertTrue(markdown.contains(objective), "the complete qualified contract must survive the soft ceiling");
+        assertEquals(1, occurrences(markdown, TypedContextPayloadBoundary.START),
+                "typed marker index=" + markdown.indexOf("dual:typed")
+                        + ", objective index=" + markdown.indexOf(objective));
+        var metadata = objectMapper.readTree(
+                tempDir.resolve((String) result.result().get("context_package_metadata")).toFile());
+        assertTrue(metadata.path("budgetWarnings").toString().contains("task_contract"));
+        assertTrue(metadata.path("sections").toString().contains("softBudgetExceeded"));
+    }
+
+    @Test
+    void acceptanceSectionOverrideFailsBeforePublishingContextArtifacts() throws Exception {
+        Files.createDirectories(wsDir);
+        var definition = new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", Map.of(
+                "target_node", "acceptance.codex_verifier_review",
+                "profile", "acceptance",
+                "include_sections", List.of("task_contract")));
+        var context = new TaskHandler.TaskContext(
+                tempDir, "ws-ctx", definition,
+                new NodeInstance("node-acceptance", definition.id(), NodeKind.TASK, definition.handlerType(),
+                        NodeStatus.READY, "acceptance", "iter-001", List.of(), List.of(), Map.of(),
+                        null, null, null));
+
+        var result = handler.execute(context);
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("MANDATORY_CONTEXT_SECTION_OVERRIDE_REJECTED", result.outcome());
+        assertTrue(result.outputRefs().isEmpty());
+        assertFalse(Files.exists(wsDir.resolve("context")));
+    }
+
     // --- Helper ---
 
     private void writeFile(String relativePath, String content) throws Exception {
@@ -2279,6 +2339,16 @@ class ContextBuildPackageHandlerTest {
 
     private static String relative(Path root, Path path) {
         return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
+    }
+
+    private static int occurrences(String content, String value) {
+        var count = 0;
+        var offset = 0;
+        while ((offset = content.indexOf(value, offset)) >= 0) {
+            count++;
+            offset += value.length();
+        }
+        return count;
     }
 
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs) {
