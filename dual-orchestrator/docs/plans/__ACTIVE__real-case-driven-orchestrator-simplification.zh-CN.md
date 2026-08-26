@@ -27,7 +27,18 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: H1 Mandatory Task-Contract Projection Boundary / READY FOR SELECTIVE COMMIT
+## Current Active Step: H4 Workflow Action Visibility Consistency / PLAN
+
+H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
+warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
+其 bounded reason guard-matrix 仅作为测试覆盖候选记录，不阻塞主线。
+
+当前唯一动作是制定 H4 的独立 implementation plan：统一 workflow outgoing edge 与 human gate
+`allowed_actions` 的可见性，明确 no-edge terminal action 的合法例外、authoritative action owner、UI/CLI/API/read-model
+投影与 cannot-bypass tests。计划不得新增 action mapper、workflow phase、通用 gate engine 或 provider 调用；未经独立架构
+评审 PASS 不实施代码。
+
+### Completed H1 Checkpoint
 
 权威说明见 `docs/design/e2e-harness-boundary-retrospective.zh-CN.md` 第 3.1、3.4 和 10 节。当前先把 H1 的
 qualified contract owner、完整投影、soft warning、token accounting、hard-capacity ownership 与 cannot-bypass
