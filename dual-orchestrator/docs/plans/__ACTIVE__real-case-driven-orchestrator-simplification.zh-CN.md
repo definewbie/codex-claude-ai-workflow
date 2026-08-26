@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: R1 Multi-File Mutation / BOUNDED ASSESSMENT
+## Current Active Step: R1 Multi-File Mutation / TEST-ONLY EVIDENCE REVIEW
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -54,6 +54,19 @@ H4 不需要 provider/real-case。独立代码级 diff review 已
 H1/H4 correctness residual 已完成。当前进入 R1 multi-file mutation bounded assessment：先只读清点一次 ledger
 mutation 涉及的文件集合、可观察 commit point、失败窗口与 restart/recovery 行为，再用最小 failpoint/restart 证据判断
 是否需要修复。此阶段不预设 WAL、transaction manager、event store 或通用事务框架，也不调用 provider/real-case。
+
+assessment plan 已落在
+`docs/plans/r1-multi-file-mutation-bounded-assessment-plan-20260826.zh-CN.md`。代码清点确认至少六类 sibling mutation；
+第一轮只选择 initialize、human gate resolution、stale recovery、normal routing 四个 restart slice，逐个持久化真实写序
+前缀并用新 ledger 实例检查引用一致性、原命令幂等重放和 second restart。已有代码证据显示 gate resolved 先于
+node/current，node FAILED 先于 recovery current，均可能让原命令失去重放资格；但在 S1-S4 结果出来前不选择共享
+协议。独立架构评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`。评审建议的 writer decorator 经复核不可直接使用：
+`AtomicJsonWriter` 为 `final` 且 `write()` 不可覆写；本轮改用目标 `.tmp` 占位和 event append 阻断，在不改 production
+的前提下驱动真实写序。S1-S4 共 14 个 prefix 已完成：`PASS=2 / FAIL=12 / INVALID=0`。S1、S2、S3、S4 均至少
+存在一个 stuck prefix；S4 在 event append 前可安全 finish-forward，event append 后会重复 event id，current commit 后
+会与 instance 漂移。M6 agent-run/execution/agent-task 写点清单已同步落盘。结果见
+`docs/plans/r1-multi-file-mutation-bounded-assessment-result-20260826.zh-CN.md`。当前只允许独立代码级 diff review 该
+test-only evidence checkpoint；PASS 前不设计或实现 production mutation protocol。
 
 ### Completed H1 Checkpoint
 
