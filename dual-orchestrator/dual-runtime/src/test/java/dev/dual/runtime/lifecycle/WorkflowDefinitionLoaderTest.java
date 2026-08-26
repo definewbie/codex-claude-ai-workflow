@@ -1,6 +1,7 @@
 package dev.dual.runtime.lifecycle;
 
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.HumanGateActionSemantics;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -230,6 +231,54 @@ class WorkflowDefinitionLoaderTest {
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals(31, definition.nodes().size());
         assertEquals(51, definition.edges().size());
+    }
+
+    @Test
+    void bundledGateEdgesAreReachableFromVisibleActions() throws Exception {
+        var loader = new WorkflowDefinitionLoader();
+
+        for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
+            var definition = loader.loadOrDefault(null, variant);
+            for (var gate : definition.nodes().stream().filter(node -> node.kind() == NodeKind.GATE).toList()) {
+                var outgoingEdges = definition.edgesFrom(gate.id());
+                var visibleActions = HumanGateActionSemantics.allowedActions(gate);
+                for (var edge : outgoingEdges) {
+                    assertTrue(visibleActions.stream().anyMatch(action -> edge.on().equals(
+                                    HumanGateActionSemantics.canonicalAction(outgoingEdges, action))),
+                            variant + ":" + gate.id() + " hides edge action " + edge.on());
+                }
+            }
+        }
+    }
+
+    @Test
+    void rejectsCustomWorkflowWithHiddenGateEdge() throws Exception {
+        var workflowPath = tempDir.resolve("hidden-gate-action.json");
+        Files.writeString(workflowPath, """
+                {
+                  "workflowId": "hidden-gate-action",
+                  "version": 1,
+                  "entryNodeId": "gate.review",
+                  "nodes": [
+                    {
+                      "id": "gate.review",
+                      "kind": "GATE",
+                      "handlerType": "human.review",
+                      "config": {"allowed_actions": ["approve"]}
+                    },
+                    {"id": "next", "kind": "TASK", "handlerType": "noop.task", "config": {}}
+                  ],
+                  "edges": [
+                    {"from": "gate.review", "on": "revise", "to": "next"}
+                  ]
+                }
+                """);
+
+        var error = assertThrows(java.io.IOException.class,
+                () -> new WorkflowDefinitionLoader().load(workflowPath));
+
+        assertTrue(error.getMessage().contains("gate.review"));
+        assertTrue(error.getMessage().contains("revise"));
     }
 
     @Test

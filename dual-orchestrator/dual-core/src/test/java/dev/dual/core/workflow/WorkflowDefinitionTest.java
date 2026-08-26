@@ -32,6 +32,49 @@ class WorkflowDefinitionTest {
     }
 
     @Test
+    void rejectsGateEdgeThatNoVisibleActionCanTrigger() {
+        var exception = assertThrows(IllegalArgumentException.class, () -> new WorkflowDefinition(
+                "hidden-gate-action",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approved"))),
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(new EdgeDefinition("gate.review", "approve", "next"))
+        ));
+
+        assertTrue(exception.getMessage().contains("gate.review"));
+        assertTrue(exception.getMessage().contains("approve"));
+        assertTrue(exception.getMessage().contains("approved"));
+    }
+
+    @Test
+    void acceptsDirectionalApprovedCompatibilityAndAllowedOnlyTerminalActions() {
+        var routed = new WorkflowDefinition(
+                "canonical-gate-action",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "reject"))),
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(new EdgeDefinition("gate.review", "approved", "next"))
+        );
+        var terminal = new WorkflowDefinition(
+                "terminal-gate-action",
+                1,
+                "gate.review",
+                List.of(new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                        "allowed_actions", List.of("reject", "complete")))),
+                List.of()
+        );
+
+        assertEquals("approved", routed.edgesFrom("gate.review").getFirst().on());
+        assertTrue(terminal.edgesFrom("gate.review").isEmpty());
+    }
+
+    @Test
     void rejectsMissingEntryNode() {
         var exception = assertThrows(IllegalArgumentException.class, () -> new WorkflowDefinition(
                 "agent-lifecycle",

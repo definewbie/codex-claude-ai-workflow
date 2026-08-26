@@ -27,16 +27,33 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: H4 Workflow Action Visibility Consistency / PLAN
+## Current Active Step: R1 Multi-File Mutation / BOUNDED ASSESSMENT
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
 其 bounded reason guard-matrix 仅作为测试覆盖候选记录，不阻塞主线。
 
-当前唯一动作是制定 H4 的独立 implementation plan：统一 workflow outgoing edge 与 human gate
-`allowed_actions` 的可见性，明确 no-edge terminal action 的合法例外、authoritative action owner、UI/CLI/API/read-model
-投影与 cannot-bypass tests。计划不得新增 action mapper、workflow phase、通用 gate engine 或 provider 调用；未经独立架构
-评审 PASS 不实施代码。
+H4 implementation plan 已落在
+`docs/plans/h4-workflow-action-visibility-consistency-plan-20260826.zh-CN.md`。计划把 ledger 现有 directional
+`approve -> approved` canonicalization 与 ledger/handler 两份 fallback 集中为 core semantic owner，并由
+`WorkflowDefinition` 在 bundled/custom/frozen definition 的共同构造边界强制“每条 gate edge 都能由 visible action
+触发”。allowed-only no-edge action继续作为显式 terminal command，覆盖 contract `reject`、terminal acceptance
+`approve` 与 next-stage `complete`；不增加 terminal registry 或 node-id exception。独立架构评审已
+`PASS（P0=0 / P1=0 / P2=2 非阻塞）`，确认 single core
+semantic owner、directional canonical rule、三类 no-edge terminal command 与共同 Definition guard 均成立。
+P2-1 的 `FullWorkflowDefinitionTest` 已补入 direct-test 清单。checkpoint 已按计划完成实现：新增单一 core
+`HumanGateActionSemantics` owner，`WorkflowDefinition` 在 bundled/custom/frozen definition 的共同构造边界拒绝
+hidden edge；ledger gate document、runtime canonicalization 与 human review packet 全部消费该 owner，三条旧解释路径
+已删除。focused H4 slice 为 `167/0/0/0`；非沙箱 full Maven reactor 9/9 modules、`1280/0/0/0`；
+`git diff --check` clean。deterministic 证据支持 action visibility `ENFORCED`；全 UI action 动态投影仍
+`NOT MODELED`，所有 entry/action 组合仍 `NOT PROVEN`。当前等待一次独立代码级 diff review，PASS 前不提交；
+H4 不需要 provider/real-case。独立代码级 diff review 已
+`PASS（P0=0 / P1=0 / P2=0）`，并独立复现 focused 超集 `178/0/0/0`、full reactor
+`1280/0/0/0` 与 clean diff-check；确认 13 个文件满足单一原子 checkpoint 的选择性提交条件。
+
+H1/H4 correctness residual 已完成。当前进入 R1 multi-file mutation bounded assessment：先只读清点一次 ledger
+mutation 涉及的文件集合、可观察 commit point、失败窗口与 restart/recovery 行为，再用最小 failpoint/restart 证据判断
+是否需要修复。此阶段不预设 WAL、transaction manager、event store 或通用事务框架，也不调用 provider/real-case。
 
 ### Completed H1 Checkpoint
 

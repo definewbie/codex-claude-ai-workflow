@@ -1,9 +1,6 @@
 package dev.dual.ledger.file;
 
-import dev.dual.core.workflow.NodeDefinition;
-
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 final class LedgerUtils {
@@ -27,17 +24,6 @@ final class LedgerUtils {
 
     static Object firstNonBlank(Object first, Object second) {
         return text(first).isBlank() ? second : first;
-    }
-
-    static List<String> allowedActions(NodeDefinition definition) {
-        var configured = definition.config().get("allowed_actions");
-        if (configured instanceof List<?> list && !list.isEmpty()) {
-            return list.stream()
-                    .map(String::valueOf)
-                    .filter(action -> !action.isBlank())
-                    .toList();
-        }
-        return List.of("approve", "revise");
     }
 
     static String revisionReason(Map<String, Object> result) {

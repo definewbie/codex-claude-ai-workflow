@@ -6,6 +6,7 @@ import dev.dual.core.flow.FlowOrchestrationKernel;
 import dev.dual.core.flow.FlowSignal;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.HumanGateActionSemantics;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.core.workflow.WorkflowStatus;
 
@@ -189,7 +190,7 @@ final class RoutingEngine {
                         nextNodeInstanceId,
                         nextDefinition.handlerType(),
                         "open",
-                        LedgerUtils.allowedActions(nextDefinition),
+                        HumanGateActionSemantics.allowedActions(nextDefinition),
                         Instant.now(),
                         null,
                         Map.of(
@@ -334,13 +335,15 @@ final class RoutingEngine {
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
         }
-        var canonicalAction = canonicalGateAction(definition, node.nodeDefinitionId(), action.trim());
+        var outgoingEdges = definition.edgesFrom(node.nodeDefinitionId());
+        var canonicalAction = HumanGateActionSemantics.canonicalAction(outgoingEdges, action.trim());
         if (FINAL_NEXT_STAGE_GATE.equals(node.nodeDefinitionId())
                 && ("approve".equals(canonicalAction) || "approved".equals(canonicalAction))) {
             throw new IOException("final next-stage gate cannot be approved; use complete to finish the workstream");
         }
-        var hasEdge = definition.edgesFrom(node.nodeDefinitionId()).stream().anyMatch(edge -> edge.on().equals(canonicalAction));
-        var actionAllowed = LedgerUtils.allowedActions(definition.node(node.nodeDefinitionId())).contains(canonicalAction);
+        var hasEdge = outgoingEdges.stream().anyMatch(edge -> edge.on().equals(canonicalAction));
+        var actionAllowed = HumanGateActionSemantics.allowedActions(definition.node(node.nodeDefinitionId()))
+                .contains(canonicalAction);
         if (!hasEdge && !actionAllowed) {
             throw new IOException("unsupported gate action for " + node.nodeDefinitionId() + ": " + action);
         }
@@ -361,20 +364,6 @@ final class RoutingEngine {
                 "requested_action", action,
                 "note", note == null ? "" : note
         ));
-    }
-
-    private static String canonicalGateAction(WorkflowDefinition definition, String nodeDefinitionId, String action) {
-        if (!"approve".equals(action)) {
-            return action;
-        }
-        var hasApproveEdge = definition.edgesFrom(nodeDefinitionId).stream()
-                .anyMatch(edge -> "approve".equals(edge.on()));
-        var hasApprovedEdge = definition.edgesFrom(nodeDefinitionId).stream()
-                .anyMatch(edge -> "approved".equals(edge.on()));
-        if (!hasApproveEdge && hasApprovedEdge) {
-            return "approved";
-        }
-        return action;
     }
 
     private GateDocument requireOpenGate(

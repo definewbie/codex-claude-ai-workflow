@@ -2,10 +2,15 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.core.id.DualId;
+import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkstreamPaths;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +84,59 @@ class WorkflowIntegrationTest {
         assertEquals(NodeStatus.COMPLETED, decisionResult.status());
         assertEquals("READY_FOR_PRODUCT_REVIEW", decisionResult.outcome());
         assertEquals("READY_FOR_PRODUCT_REVIEW", decisionResult.result().get("decision"));
+    }
+
+    @Test
+    void gateDocumentAndReviewPacketExposeTheSameActions() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-actions"));
+        Files.createDirectories(paths.workstreamDir());
+        var gateDefinition = new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                "allowed_actions", List.of("approve", "revise")));
+        var definition = new WorkflowDefinition(
+                "action-visibility",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        gateDefinition,
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(
+                        new EdgeDefinition("first", "READY", "gate.review"),
+                        new EdgeDefinition("gate.review", "approved", "next"),
+                        new EdgeDefinition("gate.review", "revise", "first"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-actions", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "READY", List.of(), Map.of());
+        var current = ledger.loadCurrent(paths);
+        var gateNode = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        var gate = ledger.loadOpenGateForNode(paths, gateNode.nodeInstanceId());
+        var instance = new NodeInstance(
+                gateNode.nodeInstanceId(),
+                gateNode.nodeDefinitionId(),
+                gateNode.kind(),
+                gateNode.handlerType(),
+                gateNode.status(),
+                gateNode.stageId(),
+                gateNode.iterationId(),
+                gateNode.inputRefs(),
+                gateNode.outputRefs(),
+                gateNode.result(),
+                gateNode.runRef(),
+                gateNode.startedAt(),
+                gateNode.finishedAt()
+        );
+
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                tempDir, "ws-actions", gateDefinition, instance, "READY"));
+        @SuppressWarnings("unchecked")
+        var packet = (Map<String, Object>) new ObjectMapper().readValue(
+                tempDir.resolve(String.valueOf(result.result().get("review_packet_json"))).toFile(), Map.class);
+
+        assertEquals(gate.allowedActions(), result.result().get("allowed_actions"));
+        assertEquals(gate.allowedActions(), packet.get("allowedActions"));
     }
 
     @Test

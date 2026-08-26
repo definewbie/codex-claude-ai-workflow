@@ -47,6 +47,30 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateUsesLedgerCompatibleFallbackForMissingEmptyAndNonListActions() throws Exception {
+        var definitions = List.of(
+                new NodeDefinition("gate.missing", NodeKind.GATE, "human.review", Map.of()),
+                new NodeDefinition("gate.empty", NodeKind.GATE, "human.review", Map.of(
+                        "allowed_actions", List.of())),
+                new NodeDefinition("gate.non_list", NodeKind.GATE, "human.review", Map.of(
+                        "allowed_actions", "approve"))
+        );
+
+        for (var definition : definitions) {
+            var instance = node(definition.id(), NodeKind.GATE, "human.review");
+            var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                    tempDir, "ws", definition, instance, "READY"));
+
+            assertEquals(List.of("approve", "revise"), result.result().get("allowed_actions"));
+            var packetBase = tempDir.resolve(".agent/workstreams/ws/reviews/" + instance.nodeInstanceId());
+            var json = Files.readString(Path.of(packetBase + ".json"));
+            var markdown = Files.readString(Path.of(packetBase + ".md"));
+            assertTrue(json.contains("\"allowedActions\" : [ \"approve\", \"revise\" ]"));
+            assertTrue(markdown.contains("Allowed Actions: approve, revise"));
+        }
+    }
+
+    @Test
     void humanGateWritesReviewPacket() throws Exception {
         var inputRef = writeOutput("codex-review.md", """
                 # Codex Review

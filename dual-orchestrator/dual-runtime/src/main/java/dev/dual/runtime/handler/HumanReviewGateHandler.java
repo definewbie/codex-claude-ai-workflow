@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.HumanGateActionSemantics;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,7 +30,7 @@ public final class HumanReviewGateHandler implements GateHandler {
     @Override
     public NodeResult openOrInspect(GateContext context) throws Exception {
         assertBlockedSourceMatchesReview(context);
-        var allowedActions = allowedActions(context);
+        var allowedActions = HumanGateActionSemantics.allowedActions(context.definition());
         var packetRef = reviewPacketRef(context, ".md");
         var packetJsonRef = reviewPacketRef(context, ".json");
         writeReviewPacket(context, allowedActions, packetRef, packetJsonRef);
@@ -50,15 +51,6 @@ public final class HumanReviewGateHandler implements GateHandler {
             throw new IllegalStateException(
                     "BLOCKED gate source does not match the validated reviewer decision");
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> allowedActions(GateContext context) {
-        var configured = context.definition().config().getOrDefault("allowed_actions", List.of("approve", "revise"));
-        if (configured instanceof List<?> values) {
-            return values.stream().map(String::valueOf).toList();
-        }
-        return List.of("approve", "revise");
     }
 
     private String reviewPacketRef(GateContext context, String extension) {

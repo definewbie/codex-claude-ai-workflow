@@ -32,6 +32,7 @@ public record WorkflowDefinition(
                 throw new IllegalArgumentException("edge to node does not exist: " + edge.to());
             }
         }
+        HumanGateActionSemantics.validateVisibility(nodes, edges);
     }
 
     public NodeDefinition node(String nodeId) {

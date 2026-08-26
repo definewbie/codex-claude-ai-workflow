@@ -62,6 +62,33 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void loadDefinitionRejectsFrozenHiddenGateEdge() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-hidden-frozen-edge"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "visible-gate-action",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise"))),
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(new EdgeDefinition("gate.review", "revise", "next"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-hidden-frozen-edge", definition);
+        var frozen = Files.readString(paths.workflowDefinitionJson())
+                .replace("\"allowed_actions\" : [ \"revise\" ]", "\"allowed_actions\" : [ \"approve\" ]");
+        assertTrue(frozen.contains("\"allowed_actions\" : [ \"approve\" ]"));
+        Files.writeString(paths.workflowDefinitionJson(), frozen);
+
+        var error = assertThrows(Exception.class, () -> ledger.loadDefinition(paths));
+
+        assertTrue(error.getMessage().contains("gate.review"));
+        assertTrue(error.getMessage().contains("revise"));
+    }
+
+    @Test
     void completesNodeAndActivatesNextNodeByOutcome() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-route"));
         Files.createDirectories(paths.workstreamDir());
@@ -179,6 +206,50 @@ class WorkflowFileLedgerTest {
         var completedGate = Files.readString(paths.nodeJson("node-gate-human_requirement_review-002"));
         assertTrue(completedGate.contains("\"human_action\" : \"approved\""));
         assertTrue(completedGate.contains("\"requested_action\" : \"approve\""));
+    }
+
+    @Test
+    void unsupportedGateActionIsRejectedBeforeAnyLedgerWrite() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-unsupported-gate-action"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "unsupported-gate-action",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "revise"))),
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(
+                        new EdgeDefinition("first", "READY", "gate.review"),
+                        new EdgeDefinition("gate.review", "approved", "next"))
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-unsupported-gate-action", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "READY", List.of(), Map.of());
+        var current = ledger.loadCurrent(paths);
+        var gateNodeId = current.activeNodeInstanceIds().getFirst();
+        var gateId = current.openGateIds().getFirst();
+        var before = List.of(
+                Files.readString(paths.workflowCurrentJson()),
+                Files.readString(paths.nodeJson(gateNodeId)),
+                Files.readString(paths.gateJson(gateId)),
+                Files.readString(paths.eventsJsonl())
+        );
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.resolveOpenGate(paths, definition, "delete", "unsupported"));
+
+        assertTrue(error.getMessage().contains("unsupported gate action"));
+        assertEquals(before, List.of(
+                Files.readString(paths.workflowCurrentJson()),
+                Files.readString(paths.nodeJson(gateNodeId)),
+                Files.readString(paths.gateJson(gateId)),
+                Files.readString(paths.eventsJsonl())
+        ));
     }
 
     @Test
