@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: R1 Multi-File Mutation / TEST-ONLY EVIDENCE REVIEW
+## Current Active Step: R1 CLOSED / PROMPT-RULE OWNERSHIP INVENTORY
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -67,6 +67,17 @@ node/current，node FAILED 先于 recovery current，均可能让原命令失去
 会与 instance 漂移。M6 agent-run/execution/agent-task 写点清单已同步落盘。结果见
 `docs/plans/r1-multi-file-mutation-bounded-assessment-result-20260826.zh-CN.md`。当前只允许独立代码级 diff review 该
 test-only evidence checkpoint；PASS 前不设计或实现 production mutation protocol。
+
+test-only evidence checkpoint 已通过独立 diff review：`PASS（P0=0 / P1=0 / P2=0）`，focused `4/0/0/0`、full
+reactor `1284/0/0/0` 与 diff-check 均独立复现，并选择性提交为 `3ecef0c4`。后续 bounded comparison 已落在
+`docs/plans/r1-multi-file-mutation-design-comparison-20260826.zh-CN.md`：generation pointer 因约 31 个文件、84 个
+reader 调用点、event/layout migration 与 legacy 双读成本被拒绝；prepared manifest 仍需 mutation plan/apply、event-id
+幂等、pending-aware reader 与 M6 owner 收敛。独立架构评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`，并指出原比较
+遗漏 transition-specific reconciliation。comparison 已补入第三候选：event-id 幂等、instance 从 current 重派生，
+以及 S2/S3 两个精确 stuck-shape finish-forward，可覆盖 11/12 个 FAIL 形态但不能恢复 S1；它会扩大守卫接受空间，
+因此在零自然事故条件下同样 `DEFERRED`。reader 成本口径已补为四个 main source roots 中指定四类 symbol 的
+`rg -l=31`、`rg -n=84`。当前结论为 `RISK VALIDATED / IMPLEMENTATION DEFERRED`；评审已授权选择性提交两份文档，
+关闭 R1 implementation 并返回删除式优化。
 
 ### Completed H1 Checkpoint
 
