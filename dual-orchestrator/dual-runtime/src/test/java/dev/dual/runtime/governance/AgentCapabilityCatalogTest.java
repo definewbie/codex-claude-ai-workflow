@@ -10,12 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentCapabilityCatalogTest {
     @Test
-    void intakeContractDiscoveryDoesNotAdvertiseDirectReadOrShellCapability() {
+    void intakeContractDiscoveryAdvertisesDirectReadButNotShellCapability() {
         var catalog = AgentCapabilityCatalog.fromAvailableCommands(
                 "ws-001",
                 "intake.claude_brainstorm",
                 Set.of("rtk", "codegraph"),
-                false,
+                true,
                 false
         );
 
@@ -24,7 +24,7 @@ class AgentCapabilityCatalogTest {
         assertEquals("agent_capability_catalog", document.get("artifactType"));
         assertEquals(false, catalog.hasKind("token_filtered_shell"));
         assertEquals(false, catalog.hasKind("symbol_index"));
-        assertEquals(false, catalog.hasKind("direct_file_read"));
+        assertEquals(true, catalog.hasKind("direct_file_read"));
     }
 
     @Test

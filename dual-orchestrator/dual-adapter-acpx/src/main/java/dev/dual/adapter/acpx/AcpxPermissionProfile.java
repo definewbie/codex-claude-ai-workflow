@@ -13,8 +13,8 @@ import java.util.List;
  * `--allowed-tools` 实际表示工具可以无需询问即执行，不是可见性白名单。
  * 它不能弥补 ACP 层对 execute 的过度批准。因此 discovery/observe/review
  * 不自动批准 execute；
- * intake contract discovery 也不自动批准 direct Read，避免实现级探索在单个
- * external run 内先烧 token、后置 validator 才拦截。
+ * intake contract discovery 只批准 read/search，并继续关闭 terminal；它不依赖
+ * deny-all 与 permission-policy 的组合优先级来获得基本读取能力。
  */
 record AcpxPermissionProfile(
         String name,
@@ -54,10 +54,11 @@ record AcpxPermissionProfile(
     }
 
     static AcpxPermissionProfile contractDiscovery() {
-        return new AcpxPermissionProfile("contract_discovery", false, true, false, true, List.of(
+        return new AcpxPermissionProfile("contract_discovery", false, false, false, true, List.of(
+                "Read",
                 "Grep",
                 "Glob"
-        ), List.of("search"), 1);
+        ), List.of("read", "search"), 1);
     }
 
     static AcpxPermissionProfile observe() {

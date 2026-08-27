@@ -1031,11 +1031,12 @@ class AcpxAgentTransportTest {
 
         assertEquals(0, result.exitCode());
         var args = Files.readString(acpxLog);
-        assertTrue(args.contains("--deny-all"), args);
+        assertFalse(args.contains("--deny-all"), args);
+        assertTrue(args.contains("--approve-reads"), args);
         assertTrue(args.contains("--non-interactive-permissions\nfail"), args);
         assertTrue(args.contains("--permission-policy"), args);
-        assertTrue(args.contains("\"autoApprove\":[\"search\"]"), args);
-        assertTrue(args.contains("--allowed-tools\nGrep,Glob"), args);
+        assertTrue(args.contains("\"autoApprove\":[\"read\",\"search\"]"), args);
+        assertTrue(args.contains("--allowed-tools\nRead,Grep,Glob"), args);
         assertTrue(args.contains("--no-terminal"), args);
         assertTrue(args.contains("claude\nsessions\nnew\n--name\nclaude-main-run-001"), args);
         assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt), args);

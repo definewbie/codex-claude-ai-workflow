@@ -25,6 +25,9 @@ class ContextGovernanceActualReportWriterTest {
         var workstreamDir = workspace.resolve(".agent/workstreams").resolve(workstreamId);
         var memoryDir = workstreamDir.resolve("memory");
         Files.createDirectories(memoryDir);
+        Files.createDirectories(workspace.resolve("src"));
+        Files.writeString(workspace.resolve("src/main.py"), "print('main')\n");
+        Files.writeString(workspace.resolve("src/extra.py"), "print('extra')\n");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(
                 memoryDir.resolve("evidence-manifest.json").toFile(),
                 Map.of(
@@ -107,6 +110,8 @@ class ContextGovernanceActualReportWriterTest {
         assertEquals(false, json.has("outsideScopeReads"));
         assertEquals(false, json.has("outsideScopeWrites"));
         assertEquals(4, json.get("toolUsage").get("toolCallCount").asInt());
+        assertEquals("src/main.py", json.get("actualReadEvidence").get(0).get("path").asText());
+        assertEquals(64, json.get("actualReadEvidence").get(0).get("sha256").asText().length());
 
         var metrics = objectMapper.readTree(memoryDir.resolve("memory-metrics.json").toFile());
         assertEquals("memory_metrics", metrics.get("artifactType").asText());

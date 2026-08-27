@@ -74,7 +74,7 @@ public final class AgentCapabilityCatalog {
         }
 
         var capabilities = new ArrayList<Map<String, Object>>();
-        if (directReadAllowed && allowsDirectFileRead(nodeDefinitionId)) {
+        if (directReadAllowed) {
             capabilities.add(capability("direct_file_read", "Read", "Direct file content retrieval tool."));
         }
         if (shellAllowed && allowsTokenFilteredShell(nodeDefinitionId) && commands.contains("rtk")) {
@@ -118,10 +118,6 @@ public final class AgentCapabilityCatalog {
         return item;
     }
 
-    private static boolean allowsDirectFileRead(String nodeDefinitionId) {
-        return !"intake.claude_brainstorm".equals(text(nodeDefinitionId));
-    }
-
     private static boolean allowsTokenFilteredShell(String nodeDefinitionId) {
         return !"intake.claude_brainstorm".equals(text(nodeDefinitionId));
     }
@@ -160,7 +156,7 @@ public final class AgentCapabilityCatalog {
             }
             var profile = text(nodeConfig == null ? null : nodeConfig.get("permission_profile"));
             return switch (profile) {
-                case "contract_discovery" -> new CapabilityPermission(false, false);
+                case "contract_discovery" -> new CapabilityPermission(true, false);
                 case "observe", "review" -> new CapabilityPermission(true, false);
                 case "implement" -> new CapabilityPermission(true, true);
                 default -> new CapabilityPermission(true, false);

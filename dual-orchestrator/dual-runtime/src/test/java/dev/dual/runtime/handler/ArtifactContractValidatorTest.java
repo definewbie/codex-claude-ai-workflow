@@ -237,7 +237,7 @@ class ArtifactContractValidatorTest {
                         List.of(new AgentResultEnvelope.ProposalScopePath("README.md")),
                         List.of()),
                 clauses("AC", "Change is visible", "Tests pass"), clauses("TEST", "run tests"),
-                clauses("CONSTRAINT", "keep scope bounded"), List.of(), List.of(), List.of(), List.of(), List.of());
+                clauses("CONSTRAINT", "keep scope bounded"), List.of(), List.of(), List.of("README.md"), List.of(), List.of());
         var ref = write(".agent/workstreams/ws-1/runs/run-1/outputs/intake.json",
                 envelope("intake.claude_brainstorm", proposal));
 
@@ -544,6 +544,7 @@ class ArtifactContractValidatorTest {
     }
 
     private void writeInitialIntakeLineage(String nodeInstanceId, String iterationId) throws Exception {
+        writeTrackedInventoryFixture();
         var iterationRef = ".agent/workstreams/ws-1/iterations/" + iterationId + ".json";
         if (!Files.isRegularFile(tempDir.resolve(iterationRef))) {
             var iterationPath = tempDir.resolve(iterationRef);
@@ -567,6 +568,22 @@ class ArtifactContractValidatorTest {
                     Map.entry("outputRefs", List.of()),
                     Map.entry("result", Map.of()))));
         }
+    }
+
+    private void writeTrackedInventoryFixture() throws Exception {
+        var files = new java.util.ArrayList<Map<String, Object>>();
+        try (var paths = Files.walk(tempDir)) {
+            for (var path : paths.filter(Files::isRegularFile).toList()) {
+                var ref = tempDir.relativize(path).toString().replace('\\', '/');
+                if (!ref.startsWith(".agent/")) {
+                    files.add(Map.of("path", ref));
+                }
+            }
+        }
+        files.sort(java.util.Comparator.comparing(item -> String.valueOf(item.get("path"))));
+        write(".agent/workstreams/ws-1/memory/repo-map.json", JSON.writeValueAsString(Map.of(
+                "artifactType", "repo_map",
+                "files", files)));
     }
 
     private void writeRevisionLineage(String rejectedReviewRef, String revisionNodeId, String iterationId)

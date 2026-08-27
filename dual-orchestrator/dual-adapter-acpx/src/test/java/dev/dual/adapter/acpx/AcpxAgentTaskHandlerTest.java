@@ -963,10 +963,11 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void contractDiscoveryProfileDoesNotAllowDirectRead() throws Exception {
+    void contractDiscoveryProfileAllowsReadAndSearchWithoutExecute() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+        initializeGitRepository();
 
         var transport = new CapturingApprovalTransport();
         var handler = new AcpxAgentTaskHandler(transport, false);
@@ -981,10 +982,12 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(false, transport.lastApproveAll);
         assertEquals("contract_discovery", transport.lastPermissionProfile.name());
-        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("Read"));
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Read"));
         assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Grep"));
         assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Glob"));
-        assertEquals(List.of("search"), transport.lastPermissionProfile.autoApproveKinds());
+        assertEquals(List.of("read", "search"), transport.lastPermissionProfile.autoApproveKinds());
+        assertFalse(transport.lastPermissionProfile.terminalEnabled());
+        assertFalse(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
     }
 
     @Test
@@ -1600,6 +1603,7 @@ class AcpxAgentTaskHandlerTest {
         Files.writeString(existingFile, "existing\n");
         Files.writeString(tempDir.resolve("main.py"), "def hello(): return 'hello'\n");
         Files.writeString(tempDir.resolve("README.md"), "# Fixture\n");
+        initializeGitRepository("main.py", "README.md", "repo/relative/existing.ext");
         var sessionsDir = tempDir.resolve(".acpx/sessions");
         Files.createDirectories(sessionsDir);
         Files.writeString(sessionsDir.resolve("index.json"), """
@@ -1615,7 +1619,8 @@ class AcpxAgentTaskHandlerTest {
         var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
-                "prompt_template", "intake-claude-brainstorm"
+                "prompt_template", "intake-claude-brainstorm",
+                "permission_profile", "contract_discovery"
         ));
         var instance = readyInstance("intake.claude_brainstorm");
         writeInitialIntakeLineage(workstreamDir, instance);
@@ -1680,6 +1685,32 @@ class AcpxAgentTaskHandlerTest {
                         "",
                         now,
                         null));
+    }
+
+    private void initializeGitRepository(String... trackedPaths) throws Exception {
+        runGit("init");
+        runGit("config", "user.email", "dual-test@example.invalid");
+        runGit("config", "user.name", "Dual Test");
+        if (trackedPaths.length > 0) {
+            var add = new java.util.ArrayList<String>();
+            add.add("add");
+            add.add("--");
+            add.addAll(List.of(trackedPaths));
+            runGit(add.toArray(String[]::new));
+        }
+        runGit("commit", "--allow-empty", "-m", "fixture baseline");
+    }
+
+    private void runGit(String... arguments) throws Exception {
+        var command = new java.util.ArrayList<String>();
+        command.add("git");
+        command.addAll(List.of(arguments));
+        var process = new ProcessBuilder(command)
+                .directory(tempDir.toFile())
+                .redirectErrorStream(true)
+                .start();
+        var output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
     }
 
     private static void writeCapturedLargeStreamAcpx(

@@ -8,11 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,6 +108,7 @@ final class ContextGovernanceActualReportWriter {
         report.put("expectedWriteFiles", plannedWrite);
         report.put("actualReadFiles", actualRead);
         report.put("actualDirectReadFiles", actualDirectRead);
+        report.put("actualReadEvidence", readEvidence(workspaceRoot, actualRead));
         report.put("actualReadFileKinds", actualReadKinds);
         report.put("actualDirectReadFileKinds", actualDirectReadKinds);
         report.put("actualCapabilityUsages", actualCapabilityUsages);
@@ -219,6 +223,34 @@ final class ContextGovernanceActualReportWriter {
             }
         }
         return Map.copyOf(result);
+    }
+
+    private static List<Map<String, Object>> readEvidence(Path workspaceRoot, List<String> actualReadFiles)
+            throws IOException {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var evidence = new ArrayList<Map<String, Object>>();
+        for (var ref : actualReadFiles) {
+            var path = root.resolve(ref).normalize();
+            if (!path.startsWith(root) || !Files.isRegularFile(path)) {
+                continue;
+            }
+            evidence.add(Map.of(
+                    "path", normalize(ref),
+                    "sha256", sha256(path),
+                    "sizeBytes", Files.size(path)
+            ));
+        }
+        return List.copyOf(evidence);
+    }
+
+    private static String sha256(Path path) throws IOException {
+        try {
+            var digest = MessageDigest.getInstance("SHA-256");
+            digest.update(Files.readAllBytes(path));
+            return HexFormat.of().formatHex(digest.digest());
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IOException("SHA-256 is unavailable", impossible);
+        }
     }
 
     private static boolean matchesNodeDefinition(JsonNode json, String nodeDefinitionId) {

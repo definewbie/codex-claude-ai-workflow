@@ -58,14 +58,22 @@ final class RepoScopeGovernance {
         var memoryDir = workstreamDir.resolve("memory");
         var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
         var existingMemory = readWorkstreamMemory(workstreamMemoryPath, objectMapper);
+        var trackedInventory = contractDiscovery(context)
+                ? GitTrackedPathInventory.capture(workspaceRoot)
+                : GitTrackedPathInventory.empty();
         var plan = buildFileRelevancePlan(
-                workstreamDir, context, objectMapper, stageId, targetNodeDefinitionId, qualifiedContract);
+                workstreamDir, context, objectMapper, stageId, targetNodeDefinitionId, qualifiedContract,
+                trackedInventory);
+        var repoMapPaths = contractDiscovery(context)
+                ? trackedInventory.paths()
+                : textList(plan.get("readCandidates"));
         var repoMap = buildRepoMap(
                 workspaceRoot,
                 workstreamDir,
                 context,
                 objectMapper,
-                textList(plan.get("readCandidates"))
+                repoMapPaths,
+                trackedInventory
         );
         var policy = buildStageScopePolicy(context, stageId, plan, targetNodeDefinitionId);
         var report = buildInitialReport(context, stageId, plan, policy, targetNodeDefinitionId);
@@ -150,6 +158,7 @@ final class RepoScopeGovernance {
             return;
         }
         builder.append("- Repo map: ").append(ref(workspaceRoot, documents.repoMapPath())).append("\n");
+        appendInventoryIdentity(builder, documents);
         builder.append("- File relevance plan: ").append(ref(workspaceRoot, documents.fileRelevancePlanPath())).append("\n");
         builder.append("- Stage scope policy: ").append(ref(workspaceRoot, documents.stageScopePolicyPath())).append("\n");
         builder.append("- Workstream memory: ").append(ref(workspaceRoot, documents.workstreamMemoryPath())).append("\n");
@@ -172,7 +181,10 @@ final class RepoScopeGovernance {
                 .append(ref(workspaceRoot, documents.agentCapabilityCatalogPath()))
                 .append("; readReuseContract=")
                 .append(ref(workspaceRoot, documents.readReuseContractPath()))
+                .append("; repoMap=")
+                .append(ref(workspaceRoot, documents.repoMapPath()))
                 .append("\n\n");
+        appendInventoryIdentity(builder, documents);
         builder.append("- Available context capabilities: ")
                 .append(inlineList(capabilitySummaries(documents.agentCapabilityCatalog()), 4))
                 .append("\n\n");
@@ -185,7 +197,8 @@ final class RepoScopeGovernance {
             Path workstreamDir,
             TaskHandler.TaskContext context,
             ObjectMapper objectMapper,
-            List<String> knownPaths
+            List<String> knownPaths,
+            GitTrackedPathInventory trackedInventory
     ) throws IOException {
         var files = new ArrayList<Map<String, Object>>();
         var root = workspaceRoot.toAbsolutePath().normalize();
@@ -208,7 +221,12 @@ final class RepoScopeGovernance {
         document.put("generatedAt", Instant.now().toString());
         document.put("effectiveWorkdir", workspaceRoot.toAbsolutePath().normalize().toString());
         document.put("baseCommit", readBaseCommit(workstreamDir, objectMapper));
-        document.put("source", "task_contract_scope+git_evidence");
+        document.put("source", contractDiscovery(context)
+                ? "git_tracked_inventory"
+                : "task_contract_scope+git_evidence");
+        document.put("inventoryHead", trackedInventory.head());
+        document.put("inventorySha256", trackedInventory.sha256());
+        document.put("inventoryPathCount", trackedInventory.paths().size());
         document.put("files", files);
         document.put("fileCount", files.size());
         document.put("truncated", false);
@@ -221,12 +239,16 @@ final class RepoScopeGovernance {
             ObjectMapper objectMapper,
             String stageId,
             String targetNodeDefinitionId,
-            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract,
+            GitTrackedPathInventory trackedInventory
     ) throws IOException {
         var contractScope = contractScopePaths(workstreamDir, objectMapper, qualifiedContract);
         var candidates = new LinkedHashSet<String>();
         candidates.addAll(contractScope);
         addGitChangedFiles(candidates, workstreamDir);
+        if (contractDiscovery(context)) {
+            candidates.addAll(trackedInventory.paths());
+        }
         var readCandidates = bounded(candidates, MAX_SCOPE_FILES);
         var writeCandidates = stageAllowsBusinessWrites(stageId)
                 ? contractScope
@@ -245,7 +267,13 @@ final class RepoScopeGovernance {
         document.put("builderNodeDefinitionId", context.definition().id());
         document.put("targetNodeDefinitionId", targetNodeDefinitionId);
         document.put("iterationId", context.instance().iterationId());
-        document.put("source", "task_contract_scope+git_evidence");
+        document.put("source", contractDiscovery(context)
+                ? "git_tracked_inventory+task_contract_scope+git_evidence"
+                : "task_contract_scope+git_evidence");
+        document.put("trackedInventoryRef", contractDiscovery(context) ? REPO_MAP_REF : "");
+        document.put("trackedInventoryHead", trackedInventory.head());
+        document.put("trackedInventorySha256", trackedInventory.sha256());
+        document.put("trackedInventoryPathCount", trackedInventory.paths().size());
         document.put("readCandidates", readCandidates);
         document.put("contractScopeCandidates", contractScope);
         document.put("writeCandidates", writeCandidates);
@@ -648,6 +676,20 @@ final class RepoScopeGovernance {
 
     private static boolean stageAllowsBroadExploration(String stageId) {
         return false;
+    }
+
+    private static boolean contractDiscovery(TaskHandler.TaskContext context) {
+        return "contract_discovery".equals(text(context.definition().config().get("permission_profile")));
+    }
+
+    private static void appendInventoryIdentity(StringBuilder builder, Documents documents) {
+        var count = documents.repoMap().get("inventoryPathCount");
+        var head = text(documents.repoMap().get("inventoryHead"));
+        var sha = text(documents.repoMap().get("inventorySha256"));
+        builder.append("- Tracked inventory: count=").append(count == null ? 0 : count)
+                .append("; head=").append(head)
+                .append("; sha256=").append(sha)
+                .append("\n\n");
     }
 
     private static List<String> forbiddenScope(String stageId) {

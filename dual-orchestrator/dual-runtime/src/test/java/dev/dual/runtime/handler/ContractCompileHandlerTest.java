@@ -377,7 +377,7 @@ class ContractCompileHandlerTest {
                 root, "run-original", "Original objective",
                 List.of(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)),
                 List.of(), TaskContractProposal.SCHEMA_VERSION,
-                INITIAL_ITERATION_ID, List.of(), List.of("evidence/original-review.json"));
+                INITIAL_ITERATION_ID, List.of(), List.of("README.md", "evidence/original-review.json"));
         var obligations = List.of(
                 new AgentResultEnvelope.ReviewObligation("OB-1", "Make the behavior observable"),
                 new AgentResultEnvelope.ReviewObligation("OB-2", "Preserve the evidence reference"));
@@ -398,7 +398,7 @@ class ContractCompileHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
         var contract = OBJECT_MAPPER.readValue(contractPath(root).toFile(), TaskContract.class);
-        assertEquals(List.of("evidence/original-review.json", "evidence/revision-proof.json"),
+        assertEquals(List.of("README.md", "evidence/original-review.json", "evidence/revision-proof.json"),
                 contract.evidenceRefs(), "revision compilation must preserve baseline evidence and append patch evidence");
         assertEquals(List.of("The revised behavior is observable", "Revised verification passes"),
                 contract.acceptanceCriteria());
@@ -705,6 +705,11 @@ class ContractCompileHandlerTest {
             TaskContractProposalReference baseReference,
             String iterationId
     ) throws Exception {
+        var repoMap = workstreamDir(root).resolve(RepoScopeGovernance.REPO_MAP_REF);
+        Files.createDirectories(repoMap.getParent());
+        OBJECT_MAPPER.writeValue(repoMap.toFile(), Map.of(
+                "artifactType", "repo_map",
+                "files", List.of(Map.of("path", "README.md"))));
         var runId = "run-revised";
         var now = Instant.now();
         LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("nodes/node-revision.json").toFile(),

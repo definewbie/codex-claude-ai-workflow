@@ -7,6 +7,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,6 +18,57 @@ class TaskContractProposalValidatorTest {
     Path workspace;
 
     private final TaskContractProposalValidator validator = new TaskContractProposalValidator();
+
+    @Test
+    void initialEvidenceMustReferenceTrackedInventory() throws Exception {
+        Files.writeString(workspace.resolve("README.md"), "# fixture\n");
+        var repoMap = workspace.resolve(".agent/workstreams/ws-test/memory/repo-map.json");
+        Files.createDirectories(repoMap.getParent());
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValue(repoMap.toFile(), Map.of(
+                "artifactType", "repo_map",
+                "files", List.of(Map.of("path", "README.md"))));
+
+        var withoutEvidence = proposal(
+                List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of(), List.of());
+        var unknownEvidence = proposal(
+                List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of(), List.of("missing.md"));
+        var trackedEvidence = proposal(
+                List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of(), List.of("README.md"));
+
+        assertTrue(validator.validateEvidenceTraceability(withoutEvidence, workspace, "ws-test").stream()
+                .anyMatch(error -> error.contains("requires at least one")));
+        assertTrue(validator.validateEvidenceTraceability(unknownEvidence, workspace, "ws-test").stream()
+                .anyMatch(error -> error.contains("requires at least one")));
+        assertTrue(validator.validateEvidenceTraceability(trackedEvidence, workspace, "ws-test").isEmpty());
+    }
+
+    @Test
+    void rejectsTrackedInventoryThatChangedAfterProjection() throws Exception {
+        Files.writeString(workspace.resolve("README.md"), "# fixture\n");
+        runGit("init");
+        runGit("config", "user.email", "dual-test@example.invalid");
+        runGit("config", "user.name", "Dual Test");
+        runGit("add", "README.md");
+        runGit("commit", "-m", "baseline");
+        var inventory = GitTrackedPathInventory.capture(workspace);
+        var repoMap = workspace.resolve(".agent/workstreams/ws-test/memory/repo-map.json");
+        Files.createDirectories(repoMap.getParent());
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValue(repoMap.toFile(), Map.of(
+                "artifactType", "repo_map",
+                "source", "git_tracked_inventory",
+                "inventoryHead", inventory.head(),
+                "inventorySha256", inventory.sha256(),
+                "inventoryPathCount", inventory.paths().size(),
+                "files", List.of(Map.of("path", "README.md"))));
+
+        Files.writeString(workspace.resolve("NEW.md"), "new\n");
+        runGit("add", "NEW.md");
+        var proposal = proposal(
+                List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of(), List.of("README.md"));
+
+        assertTrue(validator.validateEvidenceTraceability(proposal, workspace, "ws-test").stream()
+                .anyMatch(error -> error.contains("identity changed")));
+    }
 
     @Test
     void acceptsProjectNeutralCreateAndModifyPaths() throws Exception {
@@ -49,9 +101,29 @@ class TaskContractProposalValidatorTest {
         return proposal(included, List.of());
     }
 
+    private void runGit(String... arguments) throws Exception {
+        var command = new java.util.ArrayList<String>();
+        command.add("git");
+        command.addAll(List.of(arguments));
+        var process = new ProcessBuilder(command)
+                .directory(workspace.toFile())
+                .redirectErrorStream(true)
+                .start();
+        var output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
+    }
+
     private static TaskContractProposal proposal(
             List<TaskContract.ScopeEntry> included,
             List<String> excluded
+    ) {
+        return proposal(included, excluded, List.of());
+    }
+
+    private static TaskContractProposal proposal(
+            List<TaskContract.ScopeEntry> included,
+            List<String> excluded,
+            List<String> evidenceRefs
     ) {
         return new TaskContractProposal(
                 "task_contract_proposal",
@@ -63,7 +135,7 @@ class TaskContractProposalValidatorTest {
                 clauses("CONSTRAINT", "Keep workspace containment"),
                 List.of(),
                 List.of(),
-                List.of(),
+                evidenceRefs,
                 List.of(),
                 List.of()
         );

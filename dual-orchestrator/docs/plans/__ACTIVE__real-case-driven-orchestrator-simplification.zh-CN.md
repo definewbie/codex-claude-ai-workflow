@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: SMALL WORKFLOW CAPTCHA-AUTH MAILPIT / PROVIDER PROBES PENDING AUTHORIZATION
+## Current Active Step: INITIAL CONTRACT FACT ACQUISITION / ARCHITECTURE REVIEW
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -192,7 +192,31 @@ fresh package、workflow validation 与 source-side identity/hash 复算；works
 fresh-workstream 授权。non-provider preflight 已从 Gate clean SHA `26070ca6` 完成：clean package 与 fresh CLI/server
 JAR、external workflow validation、Dual checkpoint ancestry、target HEAD/tree/cleanliness 及 task/check SHA 全部 PASS；
 typed evidence 保存于 ignored `target/verification-preflight/captcha-auth-mailpit-small/non-provider-preflight.json`。
-当前不调用 provider、不创建 workstream；下一关是一组 Claude/Codex minimal probes，仍待单独授权。
+该时点尚未调用 provider 或创建 workstream，后续双 probes 与 fresh workstream 结果如下。
+
+双 provider probes 随后均 PASS 并闭合 session；唯一 fresh workstream `ws-20260827T142330Z-FX2Y` 完成 persisted
+workflow identity 与 execution-workspace capture/verify。首轮 Claude intake strict output PASS，但 prompt 禁止全部工具且
+投影的 `repo-map.files`、`contractScopeCandidates` 均为空；Codex reviewer 因 scope 无仓库事实与 Mailpit 测试隔离不足返回
+`NEEDS_REVISION`。Gate 首次 revision stop-loss 因而触发；Dual 创建了 revision execution，但 captured run 仍停在
+prepared 边界（无 command/PID/process-start/provider occurrence），随后由 stale reconciler 分类为 `TIMEOUT`。sessions
+已关闭，ledger 已收口到 `WAITING_FOR_RECOVERY`。small-profile `8 calls / 0 revision` 为 FAIL，产品未完成。
+
+根因不是模型格式或环境，而是 initial contract 的事实获取循环：首次 TaskContract 不存在，context projection 又从已有
+TaskContract scope 派生 candidates，同时 seed-only prompt 禁止 Agent 获取新事实。通用修复计划已落在
+`docs/plans/initial-contract-fact-acquisition-plan-20260827.zh-CN.md`。首轮独立架构评审 `PASS（P0=0/P1=0）`，其三个
+P2 已通过代码事实核实：execution 与 provider turn 的边界已改正；`AgentCapabilityCatalog` 纳入一致性边界；acpx policy
+优先级在本仓与已公开 adapter surface 中无法证明，因此实现不再依赖 `--deny-all` 与 policy 的组合优先级，而是使用
+terminal-disabled、无 write/execute approval 的明确 read/search profile。进一步核实发现 initial semantic `BLOCKED` 并非合法 contract shape，
+且当前只有 read telemetry、没有可复用的 pre-call 数字预算 owner；修订计划因此明确不扩 schema/graph、不用 post-run hard
+count 再次牺牲正确性，只强制 read/search-only workspace boundary，并让 reviewer/human 继续拥有 scope 完整性裁决。
+delta 架构复审已 `PASS（P0=0 / P1=0）`。checkpoint 已实现 Git tracked-path inventory、identity 重验、bounded
+read candidates、actual-read SHA evidence、read/search-only permission 与 capability/prompt 一致性；proposal 在非空 inventory
+下必须至少引用一个 tracked fact，其他既有 durable evidence refs 保持合法。当前仅进行 deterministic verification 与独立
+代码级 diff review。focused runtime + adapter 为 `116/0/0/0`，revision/compile 补充切片为 `41/0/0/0`；非沙箱 full
+Maven reactor 9/9 modules、`1246/0/0/0`，`git diff --check` clean。成熟度为
+`FACT ACQUISITION ENFORCED / REAL-CASE NOT PROVEN`。独立代码级 diff review 已
+`PASS（P0=0 / P1=0 / P2=2 知会）`，并独立复现 focused `180/0/0/0`、full reactor
+`1246/0/0/0` 与 clean diff-check；checkpoint 满足选择性提交条件。不 resume captured workstream、不调用 provider。
 
 ### Completed H1 Checkpoint
 

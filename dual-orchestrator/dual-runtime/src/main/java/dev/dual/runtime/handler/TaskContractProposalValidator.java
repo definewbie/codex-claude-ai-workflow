@@ -1,5 +1,9 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -13,6 +17,10 @@ import dev.dual.core.contract.TaskContract;
 import dev.dual.core.contract.TaskContractValidator;
 
 final class TaskContractProposalValidator {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
+
     List<String> validate(TaskContractProposal proposal, Path workspaceRoot) {
         var errors = new ArrayList<String>();
         if (!"task_contract_proposal".equals(proposal.artifactType())) {
@@ -59,6 +67,75 @@ final class TaskContractProposalValidator {
             return List.of();
         }
         return List.of("revision_responses must be empty for the initial workflow iteration");
+    }
+
+    List<String> validateEvidenceTraceability(
+            TaskContractProposal proposal,
+            Path workspaceRoot,
+            String workstreamId
+    ) {
+        var errors = new ArrayList<String>();
+        var repoMapPath = workspaceRoot.resolve(".agent/workstreams")
+                .resolve(workstreamId)
+                .resolve(RepoScopeGovernance.REPO_MAP_REF)
+                .normalize();
+        if (!Files.isRegularFile(repoMapPath)) {
+            return List.of("tracked inventory is required before task contract proposal validation");
+        }
+        final Map<String, Object> repoMap;
+        try {
+            repoMap = OBJECT_MAPPER.readValue(repoMapPath.toFile(), MAP_TYPE);
+        } catch (IOException failure) {
+            return List.of("tracked inventory cannot be read: " + failure.getMessage());
+        }
+        if ("git_tracked_inventory".equals(String.valueOf(repoMap.get("source")))) {
+            try {
+                var current = GitTrackedPathInventory.capture(workspaceRoot);
+                var expectedHead = String.valueOf(repoMap.getOrDefault("inventoryHead", ""));
+                var expectedSha = String.valueOf(repoMap.getOrDefault("inventorySha256", ""));
+                var expectedCount = repoMap.get("inventoryPathCount") instanceof Number count
+                        ? count.intValue()
+                        : -1;
+                if (!current.head().equals(expectedHead)
+                        || !current.sha256().equals(expectedSha)
+                        || current.paths().size() != expectedCount) {
+                    errors.add("tracked inventory identity changed after context projection");
+                }
+            } catch (IOException failure) {
+                errors.add("tracked inventory identity cannot be revalidated: " + failure.getMessage());
+            }
+        }
+        var inventoryPaths = new LinkedHashSet<String>();
+        if (repoMap.get("files") instanceof List<?> files) {
+            for (var item : files) {
+                if (item instanceof Map<?, ?> file) {
+                    var value = file.get("path");
+                    var path = value == null ? "" : String.valueOf(value).trim();
+                    if (!path.isBlank()) {
+                        inventoryPaths.add(path);
+                    }
+                }
+            }
+        }
+        var evidenceRefs = proposal.evidenceRefs() == null ? List.<String>of() : proposal.evidenceRefs();
+        var tracedRepositoryFact = false;
+        for (var evidenceRef : evidenceRefs) {
+            if (isBlank(evidenceRef)) {
+                continue;
+            }
+            var ref = evidenceRef.trim();
+            if (!TaskContractValidator.isCanonicalPath(ref)) {
+                errors.add("evidence_refs contains a non-canonical path: " + ref);
+            } else if (inventoryPaths.contains(ref) && !Files.isRegularFile(workspaceRoot.resolve(ref).normalize())) {
+                errors.add("evidence_refs does not resolve to an existing file: " + ref);
+            } else if (inventoryPaths.contains(ref)) {
+                tracedRepositoryFact = true;
+            }
+        }
+        if (!inventoryPaths.isEmpty() && !tracedRepositoryFact) {
+            errors.add("evidence_refs requires at least one fact from the tracked inventory");
+        }
+        return List.copyOf(errors);
     }
 
     List<String> validateRevisionCoverage(

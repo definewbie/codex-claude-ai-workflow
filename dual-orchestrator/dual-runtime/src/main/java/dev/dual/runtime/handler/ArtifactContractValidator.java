@@ -208,6 +208,13 @@ public final class ArtifactContractValidator {
                     "task_contract_proposal failed revision obligation coverage",
                     Map.of("errors", coverageErrors)));
         }
+        var evidenceErrors = proposalValidator.validateEvidenceTraceability(proposal, root, workstreamId);
+        if (!evidenceErrors.isEmpty()) {
+            return ProposalResolution.failure(ContractViolation.of(
+                    "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+                    "task_contract_proposal is not grounded in the tracked inventory",
+                    Map.of("errors", evidenceErrors)));
+        }
         if (context.revision()) {
             var deltaErrors = proposalValidator.validateRevisionDelta(context.previousProposal(), proposal);
             if (!deltaErrors.isEmpty()) {
