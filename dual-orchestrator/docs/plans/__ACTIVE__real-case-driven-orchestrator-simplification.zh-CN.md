@@ -218,6 +218,18 @@ Maven reactor 9/9 modules、`1246/0/0/0`，`git diff --check` clean。成熟度�
 `PASS（P0=0 / P1=0 / P2=2 知会）`，并独立复现 focused `180/0/0/0`、full reactor
 `1246/0/0/0` 与 clean diff-check；checkpoint 满足选择性提交条件。不 resume captured workstream、不调用 provider。
 
+checkpoint 已选择性提交为 `cca00827`。新的 cold-start Gate 草案已落在
+`docs/testing/verification-gates/20260828-small-workflow-captcha-auth-mailpit-fact-acquisition.md`。它不再把 inventory 存在
+等同于事实闭环，而是同时要求：initial Read/Search execution fact、actualReadEvidence path/SHA、proposal evidence 与
+repo-map 交集、typed product review READY，以及最终 8 calls / 0 correction / 0 revision / workflow COMPLETED / Mailpit 产品
+验收全部成立。旧 `FX2Y` 只保留为 defect evidence；因 initial occurrence 已由旧 checkpoint 执行，不得 resume 来冒充
+cold-start proof。当前只允许独立只读评审 Gate 与 active plan；不执行 package、probe 或 provider。
+
+Gate 独立评审已 `PASS（P0=0 / P1=0 / P2=2 知会）`。inventory SHA 的强制判定 owner 已明确为
+`TaskContractProposalValidator` 的 production re-capture；operator 等价命令仅作报告交叉核对。Gate 具备选择性提交条件；
+提交后下一步为 fresh package、external workflow validation 与 source-side frozen identity/hash 复算，仍不创建 workstream、
+不调用 provider。
+
 ### Completed H1 Checkpoint
 
 权威说明见 `docs/design/e2e-harness-boundary-retrospective.zh-CN.md` 第 3.1、3.4 和 10 节。当前先把 H1 的
