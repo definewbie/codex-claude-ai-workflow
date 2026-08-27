@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: NATURAL CONFIGURED REAL-CASE / WAITING
+## Current Active Step: SMALL WORKFLOW CAPTCHA-AUTH MAILPIT / NON-PROVIDER PREFLIGHT
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -180,6 +180,16 @@ checkout baseline 不能证明实际 execution workspace eligibility。
 均 PASS，syntax 与 diff-check clean；Java/workflow/schema/provider 零变更。独立代码级 diff review 已
 `PASS（P0=0 / P1=0）`，checkpoint 已选择性提交。下一步不制造第二个 Darwin 样本，也不恢复
 `ws-20260827T051220Z-2U4R`；等待下一次自然且明确配置 workspace check 的真实任务，用完整完成结果评估 `PROVEN`。
+
+该自然任务已从 captcha-auth-app 的真实未完成可用性能力中选定：为本地开发加入 Mailpit-backed email OTP 注册链路。
+已验收的 captcha-auth 实现先以 `de59e98` 合入 target master；任务说明与 target-owned workspace check 以 `dc0ea59`
+提交。workspace check 将 Docker 29/Testcontainers 的既有 API 兼容条件局部限定为 `-Dapi.version=1.44`，未修改产品依赖，
+并独立复现 `99/0/0/0`。新的 small-workflow Gate 已冻结 Dual、workflow、target、task 与 check identity；当前只允许独立
+Gate review，不调用 provider、不创建 workstream。
+
+Gate 独立评审已 `PASS（P0=0 / P1=0）`。唯一 P2 的授权顺序歧义已消除：本轮 non-provider preflight 只允许
+fresh package、workflow validation 与 source-side identity/hash 复算；workspace capture/verify 明确归入后续
+fresh-workstream 授权。当前不调用 provider、不创建 workstream。
 
 ### Completed H1 Checkpoint
 
