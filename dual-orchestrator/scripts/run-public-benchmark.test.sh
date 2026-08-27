@@ -46,6 +46,26 @@ assert_contains "$VERIFICATION_GATE" "provider connectivity probe passes" "gate 
 assert_contains "$VERIFICATION_GATE" "providerProbeStatus=passed" "gate precondition check"
 assert_contains "$VERIFICATION_GATE" "providerProbeStatus is not passed" "gate invalid condition"
 assert_contains "$VERIFICATION_GATE" "recording provider probe evidence" "gate freshness evidence"
+assert_contains "$VERIFICATION_GATE" "workspace eligibility proof is not configured" \
+  "legacy benchmark does not claim execution workspace proof"
+
+WORKSPACE_PREFLIGHT_CHECK="$tmp/check scripts/benchmark check.sh"
+mkdir -p "$(dirname "$WORKSPACE_PREFLIGHT_CHECK")"
+printf '#!/usr/bin/env bash\nexit 0\n' >"$WORKSPACE_PREFLIGHT_CHECK"
+chmod +x "$WORKSPACE_PREFLIGHT_CHECK"
+public_benchmark_write_verification_gate
+assert_gate_valid "$VERIFICATION_GATE" "workspace-aware lifecycle gate"
+assert_contains "$VERIFICATION_GATE" "Execution workspace eligibility is configured through --workspace-preflight-check $WORKSPACE_PREFLIGHT_CHECK" \
+  "configured benchmark declares execution workspace check"
+args=(--repo "$DEST_DIR")
+public_benchmark_append_workspace_preflight_arg
+[[ "${args[2]}" == "--workspace-preflight-check" && "${args[3]}" == "$WORKSPACE_PREFLIGHT_CHECK" ]] || {
+  printf '[FAIL] workspace preflight argument was not forwarded intact\n' >&2
+  printf '%s\n' "${args[@]}" >&2
+  exit 1
+}
+
+WORKSPACE_PREFLIGHT_CHECK=""
 
 VALIDATION_TARGET="glm-token-attribution"
 DUAL_GLM_BASELINE_TOKENS="43540000"

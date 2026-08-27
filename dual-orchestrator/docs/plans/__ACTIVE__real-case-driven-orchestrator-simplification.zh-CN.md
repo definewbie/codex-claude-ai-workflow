@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: SMALL WORKFLOW NATURAL REAL-CASE GATE / DRAFT
+## Current Active Step: NATURAL CONFIGURED REAL-CASE / WAITING
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -160,6 +160,26 @@ preflight 记录，缺失或漂移为 INVALID。有效样本中的 provider/adap
 现已关闭；task SHA 更新为 `5c0d9f8d9507b75ed72eecd1d4740133ec9e20f67a9420856d9f87ef9e0b2362`。当前只允许
 选择性提交 Gate、task、active plan 与独立 review；提交后仅授权 fresh package 和 non-provider preflight，provider probes
 与 fresh workstream 仍未授权。
+
+该 natural real-case 已执行并按预定义 stop-loss 收口。small profile 确实删除 A6，前 8 个 provider occurrences 无
+correction；但 acceptance 在实际 execution worktree 发现 `238 passed / 2 failed` 并 typed `REJECT`，workflow 创建
+revision 与第 9 个 run，因此 `9 -> 8 且质量不退化` 为 `FAIL / NOT PROVEN`。第 9 个 run 已终止并 stale recovery，最终
+workflow 为 `WAITING_FOR_RECOVERY`，不 resume、不重跑同一样本。
+
+只读对照证明失败不是 `list --json` 局部实现：同一 target HEAD 的 source checkout runnable baseline 为
+`234 passed / 0 failed`，fresh worktree 在还原三个任务文件后仍有两项 snapshot failure。根因是目标测试以 tracked
+fixture 的 `st_mtime` 选择“最新”工件，而 Git worktree checkout 改写 mtime；这暴露了共性 verification 缺口：source
+checkout baseline 不能证明实际 execution workspace eligibility。
+
+候选比较与独立评审已提交为 `fddb356a`，结论为 `PROCEED_WITH_GUARDS`。implementation plan 随后通过独立架构评审
+`PASS（P0=0 / P1=0 / P2=2 非阻塞）`，两项 P2 已落实为含空格路径测试和 `StartCommand.java:77-79` locator
+漂移 fail-visible 说明。harness-only checkpoint 已实施：runner 时序为
+`start(no --run) -> persisted workspace capture -> pre-run verify -> run -> autorun`；configured check 的 non-zero、identity
+漂移、tracked dirty 或 evidence 缺失均在首次业务 Agent 前 INVALID，legacy 无 check 明确投影
+`not_configured/false`。pre-run interrupt 不再伪造 stale recovery/session reap。focused 三份测试与全部 8 个 shell tests
+均 PASS，syntax 与 diff-check clean；Java/workflow/schema/provider 零变更。独立代码级 diff review 已
+`PASS（P0=0 / P1=0）`，checkpoint 已选择性提交。下一步不制造第二个 Darwin 样本，也不恢复
+`ws-20260827T051220Z-2U4R`；等待下一次自然且明确配置 workspace check 的真实任务，用完整完成结果评估 `PROVEN`。
 
 ### Completed H1 Checkpoint
 

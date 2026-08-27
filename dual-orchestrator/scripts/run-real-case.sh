@@ -28,6 +28,8 @@ source "$PROJECT_ROOT/scripts/lib/real-case-grade.sh"
 source "$PROJECT_ROOT/scripts/lib/real-case-invalid.sh"
 # shellcheck source=scripts/lib/real-case-preflight.sh
 source "$PROJECT_ROOT/scripts/lib/real-case-preflight.sh"
+# shellcheck source=scripts/lib/real-case-workspace-preflight.sh
+source "$PROJECT_ROOT/scripts/lib/real-case-workspace-preflight.sh"
 # shellcheck source=scripts/lib/verification-gate.sh
 source "$PROJECT_ROOT/scripts/lib/verification-gate.sh"
 
@@ -50,6 +52,13 @@ MAX_GATES=12
 SKIP_BUILD=false
 CLEANUP_WORKTREE=false
 UPDATE_BENCHMARK_INDEX=false
+WORKSPACE_PREFLIGHT_CHECK=""
+WORKSPACE_PREFLIGHT_CHECK_SHA256=""
+WORKSPACE_PREFLIGHT_CONFIGURED=false
+WORKSPACE_PREFLIGHT_EVIDENCE=""
+SOURCE_HEAD=""
+SOURCE_TREE=""
+SOURCE_TRACKED_STATUS_SHA256=""
 
 WORKSTREAM_ID=""
 WORKSPACE_DIR=""
@@ -72,6 +81,7 @@ EXPECTED_RUNNER_KIND=""
 PROVIDER_PROBE_RUNNER_KIND=""
 PROVIDER_PROBE_PATH_MATCHES_EXPECTED=false
 AUTORUN_PID=""
+BUSINESS_RUN_STARTED=false
 
 usage() {
   cat <<'EOF'
@@ -96,6 +106,10 @@ Options:
                             Actual first agent runner kind, derived by
                             dualctl runner-kind. Required so provider preflight
                             matches the workflow execution path.
+  --workspace-preflight-check <executable-script>
+                            Run this target-owned eligibility check inside the
+                            persisted execution workspace before the first
+                            business Agent execution.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
   --skip-build              Do not run Maven package before starting. This is
@@ -122,9 +136,13 @@ handle_interrupt() {
   log "Interrupted. Quiescing the active provider execution before collecting evidence..."
   stop_autorun_process
   parse_started_workstream || true
-  if ! quiesce_interrupted_workstream; then
-    FINAL_STATUS="INTERRUPTION_RECOVERY_FAILED"
-    fail "Interrupted provider execution could not be closed to recovery."
+  if [[ "$BUSINESS_RUN_STARTED" == true ]]; then
+    if ! quiesce_interrupted_workstream; then
+      FINAL_STATUS="INTERRUPTION_RECOVERY_FAILED"
+      fail "Interrupted provider execution could not be closed to recovery."
+    fi
+  else
+    log "Interrupted before the first business Agent execution; no recovery or session reap is required."
   fi
   collect_evidence || true
   write_report || true
@@ -222,6 +240,11 @@ parse_args() {
         shift
         EXPECTED_RUNNER_KIND="${1:-}"
         ;;
+      --workspace-preflight-check)
+        shift
+        WORKSPACE_PREFLIGHT_CHECK="${1:-}"
+        WORKSPACE_PREFLIGHT_CONFIGURED=true
+        ;;
       --max-steps)
         shift
         MAX_STEPS="${1:-}"
@@ -272,6 +295,18 @@ validate_inputs() {
     fail "repo must be a git repository: $REPO"
     exit 1
   }
+  REPO="$(git -C "$REPO" rev-parse --show-toplevel)"
+  REPO="$(real_case_workspace_canonical_dir "$REPO")"
+  if [[ "$WORKSPACE_PREFLIGHT_CONFIGURED" == true ]]; then
+    [[ -n "$WORKSPACE_PREFLIGHT_CHECK" ]] || { fail "--workspace-preflight-check requires a path"; exit 1; }
+    WORKSPACE_PREFLIGHT_CHECK="$(abs_path "$WORKSPACE_PREFLIGHT_CHECK")"
+    [[ -f "$WORKSPACE_PREFLIGHT_CHECK" && -x "$WORKSPACE_PREFLIGHT_CHECK" ]] || {
+      fail "workspace preflight check must be an executable file: $WORKSPACE_PREFLIGHT_CHECK"
+      exit 1
+    }
+    WORKSPACE_PREFLIGHT_CHECK="$(cd "$(dirname "$WORKSPACE_PREFLIGHT_CHECK")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$WORKSPACE_PREFLIGHT_CHECK")")"
+    WORKSPACE_PREFLIGHT_CHECK_SHA256="$(real_case_workspace_sha256_file "$WORKSPACE_PREFLIGHT_CHECK")"
+  fi
   command -v acpx >/dev/null 2>&1 || {
     fail "acpx not found. Initialize acpx sessions before running a real case."
     exit 1
@@ -371,6 +406,13 @@ build_project() {
   log "Building dual-cli and dual-server..."
   (cd "$PROJECT_ROOT" && mvn -pl dual-cli,dual-server -am package)
   BUILD_FINISHED_EPOCH="$(date '+%s')"
+}
+
+freeze_source_identity() {
+  SOURCE_HEAD="$(git -C "$REPO" rev-parse HEAD)"
+  SOURCE_TREE="$(git -C "$REPO" rev-parse 'HEAD^{tree}')"
+  SOURCE_TRACKED_STATUS_SHA256="$(real_case_workspace_sha256_text \
+    "$(git -C "$REPO" status --porcelain=v1 --untracked-files=no)")"
 }
 
 run_provider_probe() {
@@ -514,7 +556,13 @@ write_preflight_evidence() {
     echo "  \"providerProbeStderrPath\": \"$(json_escape "$PROVIDER_PROBE_STDERR_PATH")\","
     echo "  \"expectedRunnerKind\": \"$(json_escape "$EXPECTED_RUNNER_KIND")\","
     echo "  \"providerProbeRunnerKind\": \"$(json_escape "$PROVIDER_PROBE_RUNNER_KIND")\","
-    echo "  \"providerProbePathMatchesExpected\": $PROVIDER_PROBE_PATH_MATCHES_EXPECTED"
+    echo "  \"providerProbePathMatchesExpected\": $PROVIDER_PROBE_PATH_MATCHES_EXPECTED,"
+    echo "  \"sourceHead\": \"$(json_escape "$SOURCE_HEAD")\","
+    echo "  \"sourceTree\": \"$(json_escape "$SOURCE_TREE")\","
+    echo "  \"sourceTrackedStatusSha256\": \"$(json_escape "$SOURCE_TRACKED_STATUS_SHA256")\","
+    echo "  \"workspacePreflightConfigured\": $WORKSPACE_PREFLIGHT_CONFIGURED,"
+    echo "  \"workspacePreflightCheckPath\": \"$(json_escape "$WORKSPACE_PREFLIGHT_CHECK")\","
+    echo "  \"workspacePreflightCheckSha256\": \"$(json_escape "$WORKSPACE_PREFLIGHT_CHECK_SHA256")\""
     echo "}"
   } >"$preflight"
 
@@ -546,6 +594,7 @@ write_preflight_evidence() {
 }
 
 run_execution_preflight() {
+  freeze_source_identity
   if ! validate_external_workflow; then
     write_preflight_evidence
     return 1
@@ -567,7 +616,7 @@ init_case_dir() {
 
 start_workstream() {
   log "Starting workstream in repo: $REPO"
-  local -a args=(start --run --workdir "$REPO" --max-steps "$MAX_STEPS" --prompt-language "$PROMPT_LANGUAGE")
+  local -a args=(start --workdir "$REPO" --max-steps "$MAX_STEPS" --prompt-language "$PROMPT_LANGUAGE")
   if [[ -n "$WORKFLOW_PATH" ]]; then
     args+=(--workflow "$WORKFLOW_PATH")
   elif [[ "$VARIANT" != "full" ]]; then
@@ -579,12 +628,7 @@ start_workstream() {
     cat "$CASE_DIR/logs/start.log"
     fail "dualctl start failed"
     FINAL_STATUS="START_FAILED"
-    if parse_started_workstream; then
-      if ! quiesce_workstream_sessions "start-stop-loss"; then
-        FINAL_STATUS="SESSION_QUIESCENCE_FAILED"
-        fail "Stopped workflow provider sessions could not be closed."
-      fi
-    fi
+    parse_started_workstream || true
     collect_evidence || true
     status_snapshot "final" || true
     write_report
@@ -592,10 +636,16 @@ start_workstream() {
     exit 1
   fi
 
-  parse_started_workstream
-
-  [[ -n "$WORKSTREAM_ID" ]] || { cat "$CASE_DIR/logs/start.log"; fail "could not parse Workstream"; exit 1; }
-  [[ -n "$WORKSPACE_DIR" ]] || { cat "$CASE_DIR/logs/start.log"; fail "could not parse Workspace"; exit 1; }
+  if ! parse_started_workstream; then
+    cat "$CASE_DIR/logs/start.log"
+    fail "persisted execution workspace identity could not be resolved"
+    FINAL_STATUS="INVALID_EXECUTION_WORKSPACE_IDENTITY"
+    collect_evidence || true
+    status_snapshot "final" || true
+    write_report
+    update_benchmark_index
+    exit 1
+  fi
 
   WS_DIR="$WORKSPACE_DIR/.agent/workstreams/$WORKSTREAM_ID"
   log "Workstream: $WORKSTREAM_ID"
@@ -607,10 +657,84 @@ start_workstream() {
 parse_started_workstream() {
   [[ -f "$CASE_DIR/logs/start.log" ]] || return 1
   WORKSTREAM_ID="$(awk '/^Workstream:/ { value = $2 } END { print value }' "$CASE_DIR/logs/start.log")"
-  WORKSPACE_DIR="$(awk '/^Workspace:/ { value = $2 } END { print value }' "$CASE_DIR/logs/start.log")"
-  if [[ -n "$WORKSTREAM_ID" && -n "$WORKSPACE_DIR" ]]; then
-    WS_DIR="$WORKSPACE_DIR/.agent/workstreams/$WORKSTREAM_ID"
+  [[ -n "$WORKSTREAM_ID" ]] || return 1
+  local candidate
+  candidate="$(dirname "$REPO")/$(basename "$REPO")-agent-runs/$WORKSTREAM_ID"
+  real_case_workspace_resolve_identity "$REPO" "$candidate" "$WORKSTREAM_ID" || return 1
+  WORKSPACE_DIR="$REAL_CASE_RESOLVED_WORKSPACE"
+  WS_DIR="$WORKSPACE_DIR/.agent/workstreams/$WORKSTREAM_ID"
+}
+
+write_workspace_preflight_not_configured() {
+  WORKSPACE_PREFLIGHT_EVIDENCE="$CASE_DIR/workspace-preflight.json"
+  jq -n \
+    --arg workstreamId "$WORKSTREAM_ID" \
+    --arg workspaceId "$REAL_CASE_RESOLVED_WORKSPACE_ID" \
+    --arg effectiveWorkdir "$WORKSPACE_DIR" \
+    '{
+      schemaVersion: 1,
+      status: "not_configured",
+      reason: "workspace_preflight_check_not_configured",
+      verificationStatus: "not_applicable",
+      workstreamId: $workstreamId,
+      workspaceId: $workspaceId,
+      effectiveWorkdir: $effectiveWorkdir,
+      terminalDigest: "",
+      verifiedAt: ""
+    }' >"$WORKSPACE_PREFLIGHT_EVIDENCE"
+}
+
+run_workspace_preflight() {
+  WORKSPACE_PREFLIGHT_EVIDENCE="$CASE_DIR/workspace-preflight.json"
+  if [[ "$WORKSPACE_PREFLIGHT_CONFIGURED" != true ]]; then
+    write_workspace_preflight_not_configured
     return 0
+  fi
+  log "Running target eligibility check in persisted execution workspace..."
+  if real_case_workspace_preflight_capture \
+    "$REPO" "$WORKSPACE_DIR" "$WORKSTREAM_ID" "$SOURCE_HEAD" "$SOURCE_TREE" \
+    "$WORKSPACE_PREFLIGHT_CHECK" "$WORKSPACE_PREFLIGHT_CHECK_SHA256" "$CASE_DIR"; then
+    return 0
+  fi
+  FINAL_STATUS="INVALID_EXECUTION_WORKSPACE_PREFLIGHT"
+  fail "execution workspace eligibility preflight failed"
+  return 1
+}
+
+run_initial_segment() {
+  if [[ "$WORKSPACE_PREFLIGHT_CONFIGURED" == true ]]; then
+    if ! real_case_workspace_preflight_verify "$WORKSPACE_PREFLIGHT_EVIDENCE"; then
+      FINAL_STATUS="INVALID_EXECUTION_WORKSPACE_PREFLIGHT"
+      fail "execution workspace identity changed before the first run"
+      return 1
+    fi
+  elif ! real_case_workspace_resolve_identity "$REPO" "$WORKSPACE_DIR" "$WORKSTREAM_ID"; then
+    FINAL_STATUS="INVALID_EXECUTION_WORKSPACE_IDENTITY"
+    fail "persisted execution workspace identity changed before the first run"
+    return 1
+  fi
+
+  log "Running initial workflow segment..."
+  local initial_exit=0
+  BUSINESS_RUN_STARTED=true
+  dualctl run \
+    --workdir "$WORKSPACE_DIR" \
+    --max-steps "$MAX_STEPS" \
+    "$WORKSTREAM_ID" >"$CASE_DIR/logs/initial-run.log" 2>&1 || initial_exit="$?"
+  if [[ "$initial_exit" -eq 0 ]]; then
+    print_step_lines "$(cat "$CASE_DIR/logs/initial-run.log")"
+    return 0
+  fi
+
+  cat "$CASE_DIR/logs/initial-run.log"
+  local status_output
+  status_output="$(current_status_text || true)"
+  printf '%s\n' "$status_output" >"$CASE_DIR/logs/status-after-initial-run-failure.log"
+  FINAL_STATUS="$(workflow_status "$status_output")"
+  [[ -n "$FINAL_STATUS" ]] || FINAL_STATUS="INITIAL_RUN_FAILED"
+  if ! quiesce_workstream_sessions "initial-run-stop-loss"; then
+    FINAL_STATUS="SESSION_QUIESCENCE_FAILED"
+    fail "Stopped workflow provider sessions could not be closed."
   fi
   return 1
 }
@@ -754,6 +878,36 @@ preflight_json() {
     cat "$preflight"
   else
     printf '{}'
+  fi
+}
+
+workspace_preflight_json() {
+  local evidence="${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}"
+  if [[ -f "$evidence" ]]; then
+    cat "$evidence"
+  else
+    printf '{}'
+  fi
+}
+
+workspace_eligibility_status() {
+  local evidence="${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}"
+  [[ -f "$evidence" ]] || { printf 'missing'; return; }
+  jq -r '.status // "invalid_evidence"' "$evidence" 2>/dev/null || printf 'invalid_evidence'
+}
+
+workspace_eligibility_reason() {
+  local evidence="${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}"
+  [[ -f "$evidence" ]] || { printf 'workspace_preflight_evidence_missing'; return; }
+  jq -r '.reason // "workspace_preflight_evidence_invalid"' "$evidence" 2>/dev/null || printf 'workspace_preflight_evidence_invalid'
+}
+
+workspace_eligibility_proven() {
+  local evidence="${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}"
+  if [[ -f "$evidence" ]] && jq -e '.status == "passed" and .verificationStatus == "passed"' "$evidence" >/dev/null 2>&1; then
+    printf 'true'
+  else
+    printf 'false'
   fi
 }
 
@@ -946,6 +1100,18 @@ invalid_reason() {
       return
     fi
   fi
+  local workspace_evidence="${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}"
+  if [[ -f "$workspace_evidence" ]]; then
+    local workspace_status
+    workspace_status="$(workspace_eligibility_status)"
+    if [[ "$workspace_status" == "failed" || "$workspace_status" == "invalid_evidence" ]]; then
+      printf 'workspace_preflight_%s' "$(workspace_eligibility_reason)"
+      return
+    fi
+  elif [[ "$FINAL_STATUS" == INVALID_EXECUTION_WORKSPACE_* ]]; then
+    printf 'workspace_preflight_evidence_missing'
+    return
+  fi
   real_case_invalid_reason_from_runs_dir "${WS_DIR:-}/runs"
 }
 
@@ -996,6 +1162,11 @@ write_summary_json() {
     echo "  \"task_file\": \"$(json_escape "$TASK_FILE")\","
     echo "  \"verification_gate\": $(verification_gate_json),"
     echo "  \"preflight\": $(preflight_json),"
+    echo "  \"workspace_eligibility_status\": \"$(json_escape "$(workspace_eligibility_status)")\","
+    echo "  \"workspace_eligibility_reason\": \"$(json_escape "$(workspace_eligibility_reason)")\","
+    echo "  \"workspace_eligibility_proven\": $(workspace_eligibility_proven),"
+    echo "  \"workspace_preflight_evidence\": \"$(json_escape "${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}")\","
+    echo "  \"workspace_preflight\": $(workspace_preflight_json),"
     echo "  \"workstream\": \"$(json_escape "${WORKSTREAM_ID:-unknown}")\","
     echo "  \"effective_workdir\": \"$(json_escape "${WORKSPACE_DIR:-unknown}")\","
     echo "  \"ledger\": \"$(json_escape "${WS_DIR:-unknown}")\","
@@ -1126,6 +1297,18 @@ write_report() {
     fi
     echo '```'
     echo
+    echo "## Execution Workspace Eligibility"
+    echo
+    echo "- Status: $(workspace_eligibility_status)"
+    echo "- Reason: $(workspace_eligibility_reason)"
+    echo "- Proven: $(workspace_eligibility_proven)"
+    echo "- Evidence: ${WORKSPACE_PREFLIGHT_EVIDENCE:-$CASE_DIR/workspace-preflight.json}"
+    echo
+    echo '```json'
+    workspace_preflight_json
+    echo
+    echo '```'
+    echo
     echo "## Summary JSON"
     echo
     echo '```text'
@@ -1215,6 +1398,24 @@ main() {
   trap handle_interrupt INT TERM
   start_workstream
   status_snapshot "after-start" || true
+
+  if ! run_workspace_preflight; then
+    collect_evidence
+    status_snapshot "final" || true
+    write_report
+    update_benchmark_index
+    cleanup_worktree
+    exit 1
+  fi
+
+  if ! run_initial_segment; then
+    collect_evidence
+    status_snapshot "final" || true
+    write_report
+    update_benchmark_index
+    cleanup_worktree
+    exit 1
+  fi
 
   if run_autorun; then
     FINAL_STATUS="COMPLETED"

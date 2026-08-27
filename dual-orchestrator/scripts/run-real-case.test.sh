@@ -205,6 +205,11 @@ grep -q "\"workflowSourceSha256\": \"$expected_workflow_sha\"" "$workflow_case/p
   cat "$workflow_case/preflight.json" >&2
   exit 1
 }
+jq empty "$workflow_case/preflight.json" || {
+  printf '[FAIL] preflight evidence is not valid JSON\n' >&2
+  cat "$workflow_case/preflight.json" >&2
+  exit 1
+}
 
 (
   CASE_DIR="$tmp/start-workflow-case"
@@ -222,14 +227,55 @@ grep -q "\"workflowSourceSha256\": \"$expected_workflow_sha\"" "$workflow_case/p
     printf 'Workspace: %s\n' "$tmp/workspace"
     printf 'Ledger: %s\n' "$tmp/workspace/.agent/workstreams/ws-external-workflow"
   }
+  real_case_workspace_resolve_identity() {
+    REAL_CASE_RESOLVED_WORKSPACE="$tmp/workspace"
+    REAL_CASE_RESOLVED_WORKSPACE_ID="wsp-external-workflow"
+    return 0
+  }
   start_workstream
   assert_eq "1" "$(grep -cx -- '--workflow' "$captured_args")" "external workflow flag count"
   grep -Fxq "$workflow_fixture" "$captured_args"
+  if grep -Fxq -- '--run' "$captured_args"; then
+    printf '[FAIL] start invoked the first business run before workspace eligibility\n' >&2
+    exit 1
+  fi
   if grep -Fxq -- '--workflow-variant' "$captured_args"; then
     printf '[FAIL] external workflow start fell back to a bundled variant\n' >&2
     exit 1
   fi
 )
+
+identity_failure_case="$tmp/start-identity-failure-case"
+identity_failure_calls="$tmp/start-identity-failure-calls.log"
+mkdir -p "$identity_failure_case/logs"
+set +e
+(
+  CASE_DIR="$identity_failure_case"
+  REPO="$tmp/repo"
+  TASK_FILE="$tmp/task.md"
+  MAX_STEPS=80
+  PROMPT_LANGUAGE="en"
+  WORKFLOW_PATH=""
+  VARIANT="terminal-delivery"
+  dualctl() {
+    printf '%s\n' "$1" >>"$identity_failure_calls"
+    printf 'Workstream: ws-identity-failure\n'
+    return 0
+  }
+  real_case_workspace_resolve_identity() { return 1; }
+  collect_evidence() { printf 'collect_evidence\n' >>"$identity_failure_calls"; }
+  status_snapshot() { return 1; }
+  write_report() { printf '%s\n' "$FINAL_STATUS" >"$identity_failure_case/final-status.txt"; }
+  update_benchmark_index() { :; }
+  start_workstream
+) >"$tmp/start-identity-failure-stdout.log" 2>"$tmp/start-identity-failure-stderr.log"
+identity_failure_exit="$?"
+set -e
+assert_eq "1" "$identity_failure_exit" "unresolved persisted workspace identity fails closed"
+assert_eq "INVALID_EXECUTION_WORKSPACE_IDENTITY" "$(cat "$identity_failure_case/final-status.txt")" \
+  "unresolved persisted workspace identity status"
+assert_eq $'start\ncollect_evidence' "$(cat "$identity_failure_calls")" \
+  "identity resolution failure blocks every business run"
 
 start_failure_case="$tmp/start-failure-case"
 start_failure_workspace="$tmp/start-failure-workspace"
@@ -264,53 +310,9 @@ start_failure_exit="$?"
 set -e
 assert_eq "1" "$start_failure_exit" "failed start remains unsuccessful"
 assert_eq "START_FAILED" "$(cat "$start_failure_case/final-status.txt")" \
-  "successful start-failure session close preserves failure status"
-grep -q "sessions-reap --workdir $start_failure_workspace --workstream $start_failure_workstream" \
-  "$start_failure_case/logs/session-quiescence-start-stop-loss.log" || {
-  printf '[FAIL] failed start did not close durable workstream sessions\n' >&2
-  cat "$start_failure_case/logs/session-quiescence-start-stop-loss.log" >&2
-  exit 1
-}
-assert_eq $'start\nsessions-reap\ncollect_evidence' "$(cat "$start_failure_calls")" \
-  "failed start closes sessions before collecting evidence"
-
-start_reap_failure_case="$tmp/start-reap-failure-case"
-start_reap_failure_calls="$tmp/start-reap-failure-calls.log"
-mkdir -p "$start_reap_failure_case/logs"
-set +e
-(
-  CASE_DIR="$start_reap_failure_case"
-  REPO="$tmp/repo"
-  TASK_FILE="$tmp/task.md"
-  MAX_STEPS=80
-  PROMPT_LANGUAGE="en"
-  WORKFLOW_PATH=""
-  VARIANT="terminal-delivery"
-  dualctl() {
-    printf '%s\n' "$1" >>"$start_reap_failure_calls"
-    if [[ "$1" == "start" ]]; then
-      printf 'Workstream: %s\n' "$start_failure_workstream"
-      printf 'Workspace: %s\n' "$start_failure_workspace"
-      return 7
-    fi
-    if [[ "$1" == "sessions-reap" ]]; then
-      return 8
-    fi
-    return 0
-  }
-  collect_evidence() { printf 'collect_evidence\n' >>"$start_reap_failure_calls"; }
-  status_snapshot() { :; }
-  write_report() { printf '%s\n' "$FINAL_STATUS" >"$start_reap_failure_case/final-status.txt"; }
-  update_benchmark_index() { :; }
-  start_workstream
-) >"$tmp/start-reap-failure-stdout.log" 2>"$tmp/start-reap-failure-stderr.log"
-start_reap_failure_exit="$?"
-set -e
-assert_eq "1" "$start_reap_failure_exit" "start session-close failure remains unsuccessful"
-assert_eq "SESSION_QUIESCENCE_FAILED" "$(cat "$start_reap_failure_case/final-status.txt")" \
-  "start failure surfaces session quiescence failure"
-assert_eq $'start\nsessions-reap\ncollect_evidence' "$(cat "$start_reap_failure_calls")" \
-  "session close failure remains visible before evidence collection"
+  "start failure before any Agent session preserves failure status"
+assert_eq $'start\ncollect_evidence' "$(cat "$start_failure_calls")" \
+  "failed no-run start does not invent a session closure"
 
 set +e
 (
@@ -389,12 +391,34 @@ Ledger: $interrupted_workspace/.agent/workstreams/$interrupted_workstream
 EOF
 : >"$interrupted_case/logs/original-git-status-short.log"
 
+pre_run_recovery_marker="$tmp/pre-run-recovery-called"
+set +e
+(
+  BUSINESS_RUN_STARTED=false
+  AUTORUN_PID=""
+  stop_autorun_process() { :; }
+  parse_started_workstream() { return 1; }
+  quiesce_interrupted_workstream() { : >"$pre_run_recovery_marker"; return 1; }
+  collect_evidence() { :; }
+  write_report() { :; }
+  update_benchmark_index() { :; }
+  handle_interrupt
+) >"$tmp/pre-run-interrupt-stdout.log" 2>"$tmp/pre-run-interrupt-stderr.log"
+pre_run_interrupt_exit="$?"
+set -e
+assert_eq "130" "$pre_run_interrupt_exit" "pre-run interrupt exit code"
+if [[ -e "$pre_run_recovery_marker" ]]; then
+  printf '[FAIL] pre-run interrupt invoked stale recovery without a business execution\n' >&2
+  exit 1
+fi
+
 CASE_DIR="$interrupted_case"
 WORKSTREAM_ID=""
 WORKSPACE_DIR=""
 WS_DIR=""
 STARTED_AT="2026-07-29T00:00:00Z"
 FINAL_STATUS="UNKNOWN"
+BUSINESS_RUN_STARTED=true
 REPO="$tmp/original-repo"
 TASK_FILE="$tmp/task.md"
 VARIANT="full"
@@ -418,6 +442,12 @@ dualctl() {
     return 1
   fi
   printf '%s\n' "$*"
+}
+
+real_case_workspace_resolve_identity() {
+  REAL_CASE_RESOLVED_WORKSPACE="$interrupted_workspace"
+  REAL_CASE_RESOLVED_WORKSPACE_ID="wsp-interrupted-test"
+  return 0
 }
 
 (trap - EXIT; exec sleep 30) &
@@ -445,6 +475,11 @@ grep -q "\"effective_workdir\": \"$interrupted_workspace\"" "$interrupted_case/s
 }
 grep -q '"agent_run_count": 1' "$interrupted_case/summary.json" || {
   printf '[FAIL] interrupted summary did not project collected run evidence\n' >&2
+  cat "$interrupted_case/summary.json" >&2
+  exit 1
+}
+jq empty "$interrupted_case/summary.json" || {
+  printf '[FAIL] interrupted summary with workspace projection is not valid JSON\n' >&2
   cat "$interrupted_case/summary.json" >&2
   exit 1
 }
@@ -545,3 +580,91 @@ if run_autorun; then
 fi
 assert_eq "SESSION_QUIESCENCE_FAILED" "$FINAL_STATUS" \
   "natural stop-loss surfaces session quiescence failure"
+
+sequence_case="$tmp/workspace-sequence-case"
+mkdir -p "$sequence_case/logs"
+CASE_DIR="$sequence_case"
+WORKSTREAM_ID="ws-sequence"
+WORKSPACE_DIR="$tmp/sequence-workspace"
+WS_DIR="$WORKSPACE_DIR/.agent/workstreams/$WORKSTREAM_ID"
+REPO="$tmp/sequence-source"
+SOURCE_HEAD="head-sequence"
+SOURCE_TREE="tree-sequence"
+WORKSPACE_PREFLIGHT_CHECK="$tmp/sequence-check.sh"
+WORKSPACE_PREFLIGHT_CHECK_SHA256="check-sequence"
+WORKSPACE_PREFLIGHT_CONFIGURED=true
+MAX_STEPS=3
+MAX_GATES=2
+FINAL_STATUS="UNKNOWN"
+sequence_calls="$tmp/workspace-sequence-calls.log"
+
+real_case_workspace_preflight_capture() {
+  printf 'capture\n' >>"$sequence_calls"
+  printf '{"status":"passed","reason":"workspace_check_passed","verificationStatus":"pending"}\n' \
+    >"$CASE_DIR/workspace-preflight.json"
+}
+real_case_workspace_preflight_verify() {
+  printf 'verify\n' >>"$sequence_calls"
+}
+dualctl() {
+  printf '%s\n' "$1" >>"$sequence_calls"
+  return 0
+}
+
+run_workspace_preflight
+run_initial_segment
+run_autorun
+assert_eq $'capture\nverify\nrun\nautorun' "$(cat "$sequence_calls")" \
+  "configured workspace check orders capture verify run autorun"
+
+: >"$sequence_calls"
+real_case_workspace_preflight_capture() {
+  printf 'capture\n' >>"$sequence_calls"
+  printf '{"status":"failed","reason":"check_nonzero_exit","verificationStatus":"not_run"}\n' \
+    >"$CASE_DIR/workspace-preflight.json"
+  return 1
+}
+if run_workspace_preflight; then
+  printf '[FAIL] failed workspace capture unexpectedly allowed the first run\n' >&2
+  exit 1
+fi
+assert_eq "capture" "$(cat "$sequence_calls")" \
+  "workspace capture failure blocks run and autorun"
+assert_eq "INVALID_EXECUTION_WORKSPACE_PREFLIGHT" "$FINAL_STATUS" \
+  "workspace capture failure status"
+
+: >"$sequence_calls"
+real_case_workspace_preflight_capture() {
+  printf 'capture\n' >>"$sequence_calls"
+  printf '{"status":"passed","reason":"workspace_check_passed","verificationStatus":"pending"}\n' \
+    >"$CASE_DIR/workspace-preflight.json"
+}
+real_case_workspace_preflight_verify() {
+  printf 'verify\n' >>"$sequence_calls"
+  return 1
+}
+run_workspace_preflight
+if run_initial_segment; then
+  printf '[FAIL] failed pre-run verify unexpectedly invoked dualctl run\n' >&2
+  exit 1
+fi
+assert_eq $'capture\nverify' "$(cat "$sequence_calls")" \
+  "pre-run identity drift blocks run and autorun"
+
+: >"$sequence_calls"
+WORKSPACE_PREFLIGHT_CONFIGURED=false
+REAL_CASE_RESOLVED_WORKSPACE_ID="wsp-sequence"
+real_case_workspace_resolve_identity() {
+  REAL_CASE_RESOLVED_WORKSPACE="$WORKSPACE_DIR"
+  REAL_CASE_RESOLVED_WORKSPACE_ID="wsp-sequence"
+  return 0
+}
+run_workspace_preflight
+run_initial_segment
+run_autorun
+assert_eq $'run\nautorun' "$(cat "$sequence_calls")" \
+  "legacy case keeps start run autorun lifecycle without a target check"
+assert_eq "not_configured" "$(workspace_eligibility_status)" \
+  "legacy case evidence status"
+assert_eq "false" "$(workspace_eligibility_proven)" \
+  "legacy case cannot claim workspace proof"

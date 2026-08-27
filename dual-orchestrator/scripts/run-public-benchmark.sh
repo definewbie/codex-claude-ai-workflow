@@ -31,6 +31,7 @@ UPDATE_BENCHMARK_INDEX=false
 SUITE_FILE="$PROJECT_ROOT/docs/testing/real-case-benchmarks/benchmark-suite.json"
 VERIFICATION_GATE=""
 VALIDATION_TARGET="lifecycle"
+WORKSPACE_PREFLIGHT_CHECK=""
 
 usage() {
   cat <<'EOF'
@@ -46,6 +47,9 @@ Options:
                             Human-readable Agent output language. Default: auto.
   --max-steps <n>           Max nodes per run/approve. Default: 80.
   --max-gates <n>           Max human gates to auto-approve. Default: 12.
+  --workspace-preflight-check <executable-script>
+                            Forward a target-owned execution-workspace
+                            eligibility check to run-real-case.sh.
   --skip-build              Forwarded to run-real-case.sh, which rejects real
                             provider runs when artifact freshness cannot be
                             proven.
@@ -140,6 +144,10 @@ parse_args() {
         shift
         MAX_GATES="${1:-}"
         ;;
+      --workspace-preflight-check)
+        shift
+        WORKSPACE_PREFLIGHT_CHECK="${1:-}"
+        ;;
       --skip-build)
         SKIP_BUILD=true
         ;;
@@ -165,6 +173,19 @@ parse_args() {
     esac
     shift
   done
+}
+
+public_benchmark_workspace_preflight_statement() {
+  if [[ -n "$WORKSPACE_PREFLIGHT_CHECK" ]]; then
+    printf 'Execution workspace eligibility is configured through --workspace-preflight-check %s; run-real-case.sh freezes its SHA-256, runs it in the persisted effective worktree, and verifies the resulting evidence before the first business Agent execution.' "$WORKSPACE_PREFLIGHT_CHECK"
+  else
+    printf 'Execution workspace eligibility proof is not configured for this legacy benchmark; source-checkout facts must not be described as proof of the persisted execution worktree.'
+  fi
+}
+
+public_benchmark_append_workspace_preflight_arg() {
+  [[ -n "$WORKSPACE_PREFLIGHT_CHECK" ]] || return 0
+  args+=(--workspace-preflight-check "$WORKSPACE_PREFLIGHT_CHECK")
 }
 
 prepare_repo() {
@@ -215,11 +236,11 @@ public_benchmark_write_verification_gate() {
 
 - Target: Validate GLM-5.2 provider token attribution for the public benchmark case $CASE_ID without using money as the acceptance metric.
 - Source of truth: pre-run GLM console token total DUAL_GLM_BASELINE_TOKENS=${DUAL_GLM_BASELINE_TOKENS}, post-run GLM console token total captured after the run, workstream run.json providerModelIdentity, workstream-metrics.json tokenAttribution.perRun, and dualctl trace Token Attribution.
-- Trigger precondition: DUAL_GLM_BASELINE_TOKENS is a numeric token total captured from the GLM console immediately before the run; disposable benchmark repo exists; task file exists; acpx is available; run-real-case.sh builds fresh artifacts; provider connectivity probe passes before workflow execution.
-- How precondition is checked before run: run-public-benchmark.sh refuses this target unless DUAL_GLM_BASELINE_TOKENS is numeric; prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, preflight artifact freshness, and providerProbeStatus=passed before starting a workstream.
+- Trigger precondition: DUAL_GLM_BASELINE_TOKENS is a numeric token total captured from the GLM console immediately before the run; disposable benchmark repo exists; task file exists; acpx is available; run-real-case.sh builds fresh artifacts; provider connectivity probe passes before workflow execution. $(public_benchmark_workspace_preflight_statement)
+- How precondition is checked before run: run-public-benchmark.sh refuses this target unless DUAL_GLM_BASELINE_TOKENS is numeric; prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, preflight artifact freshness, and providerProbeStatus=passed before starting a workstream. Workspace eligibility is authoritative only when workspace-preflight.json records status=passed, verificationStatus=passed, and the persisted workspace identity.
 - PASS: Workflow reaches COMPLETED; GLM provider runs in run.json and workstream-metrics.json preserve provider=zhipu, model=glm-5.2, billingMode=subscription_token_only, real input/output/cachedRead token counts, costAttribution.reliability=token_only, and providerCachePolicy.mode=token_policy_active; post-run GLM console token total minus DUAL_GLM_BASELINE_TOKENS matches the summed GLM totalTokens in metrics within the documented console bucket granularity.
 - FAIL: Workflow does not complete, GLM provider/model/billingMode is wrong, real GLM token counts are missing or zero for completed provider runs, metrics and trace disagree on GLM totalTokens, or post-run GLM console delta contradicts summed GLM totalTokens beyond the documented console bucket granularity.
-- INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, DUAL_GLM_BASELINE_TOKENS was not captured immediately before this run, post-run GLM console total is not captured, the executed provider is not GLM-5.2 through Zhipu, required metrics/run.json/trace artifacts are missing, or this gate does not match the executed case.
+- INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, a configured workspace eligibility check does not produce verified PASS evidence, DUAL_GLM_BASELINE_TOKENS was not captured immediately before this run, post-run GLM console total is not captured, the executed provider is not GLM-5.2 through Zhipu, required metrics/run.json/trace artifacts are missing, or this gate does not match the executed case.
 - Stop-loss: Stop on provider preflight failure, start/autorun failure, missing providerModelIdentity after the first completed GLM run, or GLM console token delta exceeding 3,000,000 before acceptance; do not launch a second benchmark automatically.
 - Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence.
 EOF
@@ -231,11 +252,11 @@ EOF
 
 - Target: Validate provider/model/usage/economics attribution (L1 usage + L2 economics) for the public benchmark case $CASE_ID; provider-agnostic, not GLM-specific.
 - Source of truth: run.json usage/providerModelIdentity/costAttribution; workstream-metrics.json tokenAttribution.perRun; dualctl trace Token Attribution.
-- Trigger precondition: Disposable benchmark repo exists; task file exists; acpx is available; run-real-case.sh builds fresh artifacts; provider connectivity probe matches the actual runner kind and passes.
-- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task, acpx, variant, prompt language, this gate, preflight artifact freshness, expectedRunnerKind/providerProbeRunnerKind/providerProbePathMatchesExpected, and providerProbeStatus=passed before starting a workstream.
+- Trigger precondition: Disposable benchmark repo exists; task file exists; acpx is available; run-real-case.sh builds fresh artifacts; provider connectivity probe matches the actual runner kind and passes. $(public_benchmark_workspace_preflight_statement)
+- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task, acpx, variant, prompt language, this gate, preflight artifact freshness, expectedRunnerKind/providerProbeRunnerKind/providerProbePathMatchesExpected, and providerProbeStatus=passed before starting a workstream. Workspace eligibility is authoritative only when workspace-preflight.json records status=passed, verificationStatus=passed, and the persisted workspace identity.
 - PASS: At least one provider run has measurementType=PROVIDER_RUN_USAGE (not an artifact estimate); provider/model identity is preserved or carries a typed unknown reason; input/output/cache-read/cache-write/total token counts are not zero for completed provider runs; known provider routes through the catalog (zhipu subscription token-only; DeepSeek cache pricing; Anthropic full pricing; OpenAI/Codex catalog); unknown provider preserves tokens with an explicit pricing-unknown state and is never zeroed; billingMode/costAttribution.reliability/providerCachePolicy.mode are consistent with the catalog; run.json/metrics/trace do not contradict each other.
 - FAIL: Provider run usage exists but tokens are zeroed; provider/model identity is lost without a typed reason; known provider does not route through the catalog; billingMode is wrong; metrics/trace/run.json are contradictory; an artifact estimate is disguised as provider usage.
-- INVALID: Preflight artifact freshness is not proven; providerProbePathMatchesExpected is false; providerProbeStatus is not passed; no provider run started; provider usage is unavailable without a typed unavailableReason; stale jar; or this gate does not match the executed case.
+- INVALID: Preflight artifact freshness is not proven; providerProbePathMatchesExpected is false; providerProbeStatus is not passed; a configured workspace eligibility check does not produce verified PASS evidence; no provider run started; provider usage is unavailable without a typed unavailableReason; stale jar; or this gate does not match the executed case.
 - Stop-loss: Stop on provider preflight failure, start/autorun failure, or WAITING_FOR_RECOVERY; do not launch a second benchmark automatically.
 - Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence including expectedRunnerKind, providerProbeRunnerKind, and providerProbePathMatchesExpected.
 EOF
@@ -246,11 +267,11 @@ EOF
 
 - Target: Run the public benchmark case $CASE_ID through the full dual lifecycle with real acpx agents.
 - Source of truth: Generated report summary.json, workstream ledger, run.json, workstream-metrics.json, and dualctl trace for the created workstream.
-- Trigger precondition: Disposable benchmark repo exists, task file exists, acpx is available, run-real-case.sh builds fresh artifacts, and provider connectivity probe passes before workflow execution.
-- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, preflight artifact freshness, and providerProbeStatus=passed before starting a workstream.
+- Trigger precondition: Disposable benchmark repo exists, task file exists, acpx is available, run-real-case.sh builds fresh artifacts, and provider connectivity probe passes before workflow execution. $(public_benchmark_workspace_preflight_statement)
+- How precondition is checked before run: prepare-public-benchmark-repo.sh produced $DEST_DIR; run-real-case.sh validates repo, task file, acpx, variant, prompt language, this gate, preflight artifact freshness, and providerProbeStatus=passed before starting a workstream. Workspace eligibility is authoritative only when workspace-preflight.json records status=passed, verificationStatus=passed, and the persisted workspace identity.
 - PASS: Workflow reaches COMPLETED, original repo stays clean, key artifacts exist, final acceptance is ACCEPT or ACCEPT_WITH_NOTES, and trace/metrics can explain execution/token state.
 - FAIL: Workflow does not complete, original repo is polluted, required report/handoff/delivery artifacts are missing, or acceptance rejects without expected repair evidence.
-- INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
+- INVALID: preflight artifact freshness is not proven, providerProbeStatus is not passed, a configured workspace eligibility check does not produce verified PASS evidence, provider/model/token attribution fields are missing for a token benchmark target, or this gate does not match the executed case.
 - Stop-loss: The script stops on start/autorun failure and writes local evidence; do not launch a second benchmark automatically.
 - Run artifact freshness: run-real-case.sh builds dual-cli and dual-server before starting, then writes preflight.json proving the executed jar is fresh and recording provider probe evidence.
 EOF
@@ -274,6 +295,7 @@ run_case() {
   [[ "$SKIP_BUILD" == true ]] && args+=(--skip-build)
   [[ "$CLEANUP_WORKTREE" == true ]] && args+=(--cleanup-worktree)
   [[ "$UPDATE_BENCHMARK_INDEX" == true ]] && args+=(--update-benchmark-index)
+  public_benchmark_append_workspace_preflight_arg
 
   validate_validation_target
   public_benchmark_write_verification_gate

@@ -42,6 +42,28 @@ selected public case and passes it to `run-real-case.sh`. Direct calls to
 `run-real-case.sh` must provide `--verification-gate <gate.md>`; the runner
 rejects real provider execution without it.
 
+When a Gate relies on target tests or another target-specific baseline, provide
+an executable check that can run from the actual execution worktree:
+
+```bash
+./scripts/run-real-case.sh \
+  --repo /path/to/repo \
+  --task-file /path/to/task.md \
+  --verification-gate /path/to/gate.md \
+  --workspace-preflight-check /path/to/check-workspace.sh
+```
+
+The runner creates the workstream without starting an Agent, resolves the
+persisted workspace identity from the ledger, runs the check in that workspace,
+and verifies the evidence again immediately before the first `dualctl run`.
+The check owns target semantics and reports success only through its exit code;
+the harness does not parse pytest, Maven, npm, or prose output.
+
+Existing cases without this option remain runnable, but their report records
+`workspace_eligibility_status=not_configured` and
+`workspace_eligibility_proven=false`. A source-checkout baseline must not be
+described as proof of execution-workspace eligibility in those cases.
+
 List available public cases:
 
 ```bash
