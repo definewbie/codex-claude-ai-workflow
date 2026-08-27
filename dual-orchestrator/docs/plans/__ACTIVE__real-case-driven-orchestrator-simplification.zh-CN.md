@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: SMALL WORKFLOW CAPTCHA-AUTH MAILPIT / NON-PROVIDER PREFLIGHT
+## Current Active Step: SMALL WORKFLOW CAPTCHA-AUTH MAILPIT / PROVIDER PROBES PENDING AUTHORIZATION
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -189,7 +189,10 @@ Gate review，不调用 provider、不创建 workstream。
 
 Gate 独立评审已 `PASS（P0=0 / P1=0）`。唯一 P2 的授权顺序歧义已消除：本轮 non-provider preflight 只允许
 fresh package、workflow validation 与 source-side identity/hash 复算；workspace capture/verify 明确归入后续
-fresh-workstream 授权。当前不调用 provider、不创建 workstream。
+fresh-workstream 授权。non-provider preflight 已从 Gate clean SHA `26070ca6` 完成：clean package 与 fresh CLI/server
+JAR、external workflow validation、Dual checkpoint ancestry、target HEAD/tree/cleanliness 及 task/check SHA 全部 PASS；
+typed evidence 保存于 ignored `target/verification-preflight/captcha-auth-mailpit-small/non-provider-preflight.json`。
+当前不调用 provider、不创建 workstream；下一关是一组 Claude/Codex minimal probes，仍待单独授权。
 
 ### Completed H1 Checkpoint
 
