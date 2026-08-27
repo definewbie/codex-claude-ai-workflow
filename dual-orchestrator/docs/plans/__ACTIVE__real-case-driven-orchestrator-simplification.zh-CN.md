@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: SMALL WORKFLOW PROFILE DETERMINISTIC CHECKPOINT / REVIEW PASS
+## Current Active Step: SMALL WORKFLOW NATURAL REAL-CASE GATE / DRAFT
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -136,7 +136,30 @@ gate-owned revision budget 测试。test-only external definition 已生成，SH
 
 独立代码级 diff review 已 `PASS（P0=0 / P1=0 / P2=0）`，并独立复现 focused `7/0/0/0`、full reactor
 `1243/0/0/0` 与 clean diff-check。评审确认六文件构成单一 test-only checkpoint、零 production 变化，满足选择性
-提交条件；提交后只制定 natural small-task real-case Gate，不在 Gate 独立评审前调用 provider。
+提交条件；checkpoint 已选择性提交为 `e369a6e7`。
+
+natural small-task Gate 草案已落在
+`docs/testing/verification-gates/20260827-small-workflow-darwin-list-json.md`，冻结任务为
+`docs/testing/real-case-tasks/20260827-darwin-list-json.md`。目标是在 clean
+`darwin-skill-optimizer` 上为 `darwin list` 增加 opt-in `--json` 输出：默认文本行为不变、JSON shape/排序/空列表/坏条目
+可见性/无写入均可机械验收。该任务有真实脚本消费价值，范围仅为 CLI、focused tests 与 README，不需要数据库、网络或
+新依赖。
+
+Gate 同时把质量与收益钉死：A5 typed plan 必须直接进入用户 human plan gate；A6 三节点不得存在或执行；Agent runs 与
+provider occurrences 必须恰好 `8`，correction 与 semantic revision 必须均为 `0`。首次 revision 已使 9 -> 8 目标失效，
+因此立即记录 FAIL 并止损，不继续消耗 provider 来追求产品完成。`run-real-case.sh` 会 autorun/auto-approve human gate，
+不适用于本 Gate；执行必须使用 fresh JAR 分段推进并由用户本人处理 gate。当前只允许独立同行评审 Gate、task 与 active
+plan；评审 PASS 前不运行 package/probe，不创建 workstream。
+
+Gate 独立评审为 `WARN（P0=0 / P1=1 / P2=2）`：冻结 target 的三个模块依赖不存在的
+`/Users/krisdwang/.hermes/skills/...` 绝对路径，完整 pytest 在 collection 阶段固定产生 3 个
+`FileNotFoundError`，原“full tests PASS”前置不可执行。修订没有把这些错误伪装成 PASS：task 与 Gate 现在分别冻结完整
+collection 的三个文件/异常/缺失路径签名，并单独要求其余 runnable suite 全绿。独立复核得到
+`234 passed / 0 failed / 0 errors`；完整 collection 恰为预登记的 3 errors。pytest executable/runtime/version 也必须在
+preflight 记录，缺失或漂移为 INVALID。有效样本中的 provider/adapter fatal 已明确归为 execution FAIL。P1/P2 文字缺口
+现已关闭；task SHA 更新为 `5c0d9f8d9507b75ed72eecd1d4740133ec9e20f67a9420856d9f87ef9e0b2362`。当前只允许
+选择性提交 Gate、task、active plan 与独立 review；提交后仅授权 fresh package 和 non-provider preflight，provider probes
+与 fresh workstream 仍未授权。
 
 ### Completed H1 Checkpoint
 
