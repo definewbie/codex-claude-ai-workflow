@@ -85,10 +85,6 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("current").resolve("checkpoint.json");
     }
 
-    public Path currentHumanGateJson() {
-        return workstreamDir().resolve("current").resolve("human-gate.json");
-    }
-
     public Path workflowDir() {
         return workstreamDir().resolve("workflow");
     }

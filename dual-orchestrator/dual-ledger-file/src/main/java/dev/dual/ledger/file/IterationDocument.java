@@ -28,35 +28,4 @@ public record IterationDocument(
                 List.of()
         );
     }
-
-    public static IterationDocument designRevision(int number) {
-        var suffix = "%03d".formatted(number);
-        return new IterationDocument(
-                1,
-                "iter-" + suffix,
-                "stage-design",
-                number,
-                "created",
-                "Revise the design using Codex review and human feedback.",
-                "",
-                "",
-                List.of("artifact-requirement", "artifact-codex-review-001", "artifact-human-feedback-001"),
-                List.of()
-        );
-    }
-
-    IterationDocument withStatus(String nextStatus) {
-        return new IterationDocument(
-                schemaVersion,
-                iterationId,
-                stageId,
-                number,
-                nextStatus,
-                objective,
-                claudeRunId,
-                codexRunId,
-                inputArtifactRefs,
-                outputArtifactRefs
-        );
-    }
 }

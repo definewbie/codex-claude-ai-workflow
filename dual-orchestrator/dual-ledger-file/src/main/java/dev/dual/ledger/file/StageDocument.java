@@ -29,34 +29,4 @@ public record StageDocument(
                 Map.of("human_review_after_pass", true)
         );
     }
-
-    StageDocument withStatus(String nextStatus) {
-        return new StageDocument(
-                schemaVersion,
-                stageId,
-                workstreamId,
-                workspaceId,
-                type,
-                nextStatus,
-                currentIterationId,
-                inputArtifactRefs,
-                outputArtifactRefs,
-                gatePolicy
-        );
-    }
-
-    StageDocument withStatusAndCurrentIteration(String nextStatus, String nextIterationId) {
-        return new StageDocument(
-                schemaVersion,
-                stageId,
-                workstreamId,
-                workspaceId,
-                type,
-                nextStatus,
-                nextIterationId,
-                inputArtifactRefs,
-                outputArtifactRefs,
-                gatePolicy
-        );
-    }
 }

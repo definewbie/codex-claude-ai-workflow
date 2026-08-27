@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: R1 CLOSED / PROMPT-RULE OWNERSHIP INVENTORY
+## Current Active Step: D2/D3 SINGLE SUBTRACTION CANDIDATE ASSESSMENT
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -78,6 +78,30 @@ reader 调用点、event/layout migration 与 legacy 双读成本被拒绝；pre
 因此在零自然事故条件下同样 `DEFERRED`。reader 成本口径已补为四个 main source roots 中指定四类 symbol 的
 `rg -l=31`、`rg -n=84`。当前结论为 `RISK VALIDATED / IMPLEMENTATION DEFERRED`；评审已授权选择性提交两份文档，
 关闭 R1 implementation 并返回删除式优化。
+
+Prompt/Rule Ownership Inventory 已落在
+`docs/plans/prompt-rule-ownership-inventory-20260826.zh-CN.md`。10 个 prompt + 1 个 shared template 共 428 行；
+`AgentResultPromptContract`、parser、validator 与 permission/change-boundary owner 已逐类对账。结论是 D2/D3 暂无满足
+直接删除条件的规则组：validator 只负责拒绝，不能替代 producer interface；implementation/self-test 也没有完整
+`.agent/` filesystem guard。D1 复核则发现原候选范围过窄：不只是 `approveDesign()`，`FileLedgerStore` 的 11 个
+legacy design-loop prepare/complete/fail/approve/revise public methods 全部 production-unreachable，仅由旧测试消费。
+继续沿引用闭包核对后，`PreparedRunView`、`RunDocument`、`ArtifactManifest`、`CodexReviewControl`、
+`HumanGateDocument` 也完全没有正式 workflow consumer；若只删 11 个入口会留下 dead type 与 legacy document factories。
+下一步只允许独立评审“删除整个 legacy design-loop writer family”的原子 checkpoint；PASS 前不改 production，
+不删除 prompt，不调用 provider/real-case。
+
+独立架构评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`，并补出唯一 sibling：
+`WorkstreamPaths.currentHumanGateJson()` 的全部消费者同属 dead family。checkpoint 已按评审边界实施纯删除：移除 11 个
+legacy public writer、5 个 dead DTO/control type、仅由旧流程消费的 factory/mutator、human-gate path helper 及专属测试；
+保留 initialization/status/timeline compatibility record shape 与正式 workflow human gate owner。机械 sibling sweep 已确认
+11 个旧入口、5 个 dead type、legacy factories/mutators 与 `currentHumanGateJson()` 在 main/test 中全部零命中；focused
+初始化、状态与正式 workflow gate slice 为 `53/0/0/0`。非沙箱 full Maven reactor 9/9 modules、
+`1236/0/0/0`，`git diff --check` clean；沙箱内第一次 full run 的两项错误均来自 macOS 拒绝
+`ProcessHandle.descendants()` 所需的 `sysctl`，在非沙箱同一代码上通过，不属于删除回归。当前只允许独立代码级 diff
+review。独立 diff review 已 `PASS（P0=0 / P1=0 / P2=0）`，并独立复现核心 focused `51/0/0/0`、full
+reactor `1236/0/0/0` 与 clean diff-check；确认 D1 成熟度为 `VALIDATED`，正式 human/design transition owner 继续为
+`ENFORCED`。D1 已满足选择性提交条件。下一步仅评估一个 D2/D3 subtraction 候选；在完成字段级信息增量 diff、
+deterministic counterfactual 与独立评审前，不删除 prompt，也不调用 provider/real-case。
 
 ### Completed H1 Checkpoint
 

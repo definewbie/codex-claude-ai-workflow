@@ -36,38 +36,6 @@ public record WorkstreamDocument(
         );
     }
 
-    WorkstreamDocument withStatus(String nextStatus) {
-        return new WorkstreamDocument(
-                schemaVersion,
-                workstreamId,
-                title,
-                nextStatus,
-                repository,
-                primaryWorkspaceId,
-                currentStageId,
-                currentIterationId,
-                requirementPath,
-                createdAt,
-                Instant.now()
-        );
-    }
-
-    WorkstreamDocument withStatusAndCurrentIteration(String nextStatus, String nextIterationId) {
-        return new WorkstreamDocument(
-                schemaVersion,
-                workstreamId,
-                title,
-                nextStatus,
-                repository,
-                primaryWorkspaceId,
-                currentStageId,
-                nextIterationId,
-                requirementPath,
-                createdAt,
-                Instant.now()
-        );
-    }
-
     public record RepositoryDocument(String originalWorkdir, String gitRoot) {
     }
 }
