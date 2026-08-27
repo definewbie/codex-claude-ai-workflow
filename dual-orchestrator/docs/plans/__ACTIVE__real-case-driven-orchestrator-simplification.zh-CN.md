@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: SMALL WORKFLOW PROFILE BOUNDED ASSESSMENT
+## Current Active Step: SMALL WORKFLOW PROFILE DETERMINISTIC CHECKPOINT / REVIEW PASS
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -117,6 +117,26 @@ A8 独立评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`。成本拆分后，
 评审确认现行 self-test evidence boundary 为 `ENFORCED + PROVEN`，A8 assessment 为 `VALIDATED`，deterministic
 replacement 为 `NOT MODELED`。A8 就此关闭；当前进入 small workflow profile bounded assessment，只读判断哪些自然
 小任务可以删除完整 Agent node，而不替换或削弱 typed contract、human authority 与 verification kernel。
+
+small profile assessment 已落在
+`docs/plans/small-workflow-profile-bounded-assessment-20260827.zh-CN.md`。A2 因 `ContractCompileHandler` 的 validated
+product-review identity 要求保留；A4 因 captcha-auth 已证明真实 defect yield，不作为首个实验。唯一候选为 A6 plan
+review：以 terminal-delivery@5 为基线，在 test-only external definition 中删除 plan-review context、A6 和 plan decision，
+让 A5 typed plan 直接进入既有 human plan gate。预期 31/51/9/6 -> 28/46/8/6；A1-A5、A7-A9、所有 human gates、
+TaskContract、自测、acceptance 与 delivery kernel 不变。当前只允许独立架构评审；PASS 前不制作 definition、不改
+production、不调用 provider/real-case。该架构评审现已完成，下面记录已授权的 deterministic checkpoint 结果。
+
+独立架构评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`；P2 已分别落实为 A5 BLOCKED ledger parity 与
+gate-owned revision budget 测试。test-only external definition 已生成，SHA-256 为
+`d41b835e4d8a8347b64984e085385030246976bbc485a866f215dfafc97faaec`，精确为 terminal-delivery@5 删除 3 nodes、
+6 incident edges并新增 A5 -> human plan gate 一条 edge。focused tests `7/0/0/0`，full reactor
+`1243/0/0/0`，diff-check clean；production 与 bundled definitions 零修改。当前 profile graph/ledger boundary 为
+`VALIDATED`，production variant `NOT MODELED`，real-case `NOT PROVEN`。下一步仅允许独立代码级 diff review；PASS 后
+选择性提交并制定一次 natural small-task Verification Gate，不直接启动 provider。
+
+独立代码级 diff review 已 `PASS（P0=0 / P1=0 / P2=0）`，并独立复现 focused `7/0/0/0`、full reactor
+`1243/0/0/0` 与 clean diff-check。评审确认六文件构成单一 test-only checkpoint、零 production 变化，满足选择性
+提交条件；提交后只制定 natural small-task real-case Gate，不在 Gate 独立评审前调用 provider。
 
 ### Completed H1 Checkpoint
 
