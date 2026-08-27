@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: D2/D3 SINGLE SUBTRACTION CANDIDATE ASSESSMENT
+## Current Active Step: SMALL WORKFLOW PROFILE BOUNDED ASSESSMENT
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -102,6 +102,21 @@ review。独立 diff review 已 `PASS（P0=0 / P1=0 / P2=0）`，并独立复现
 reactor `1236/0/0/0` 与 clean diff-check；确认 D1 成熟度为 `VALIDATED`，正式 human/design transition owner 继续为
 `ENFORCED`。D1 已满足选择性提交条件。下一步仅评估一个 D2/D3 subtraction 候选；在完成字段级信息增量 diff、
 deterministic counterfactual 与独立评审前，不删除 prompt，也不调用 provider/real-case。
+
+D2/D3 单一候选筛选未发现值得 production 实验的删除项：intake deny-all 已机械覆盖的工具禁令虽可局部删除，但 token
+收益远低于一次 full real-case 成本；D3 的 validator 仍不能替代 producer interface。因此没有为了兑现 subtraction 而
+制造低价值 prompt checkpoint。随后按 retrospective 的高价值候选进入 A8 bounded assessment，结果见
+`docs/plans/a8-self-test-deterministic-executor-bounded-assessment-20260827.zh-CN.md`。captured captcha-auth 证明 A8
+成本真实（8 calls、约 38.5 分钟），但也证明有效 self-test 曾从失败堆栈发现真实实现缺陷；当前 production 没有
+authoritative canonical verification command，直接 deterministic replacement 会新增 heuristic owner 并丢失 evidence
+sufficiency/routing 语义。当前判定 `NO-GO FOR DIRECT REPLACEMENT`，等待一次独立只读架构评审；PASS 后关闭 A8，
+转入 small workflow profile assessment，不改 production、不调用 provider/real-case。
+
+A8 独立评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`。成本拆分后，5 个 adapter/output failures 占总时长约
+69.5%，3 个有效语义调用约 11.8 分钟；failure-rate 是独立 execution reliability 轴，不能当作 replacement 收益。
+评审确认现行 self-test evidence boundary 为 `ENFORCED + PROVEN`，A8 assessment 为 `VALIDATED`，deterministic
+replacement 为 `NOT MODELED`。A8 就此关闭；当前进入 small workflow profile bounded assessment，只读判断哪些自然
+小任务可以删除完整 Agent node，而不替换或削弱 typed contract、human authority 与 verification kernel。
 
 ### Completed H1 Checkpoint
 
