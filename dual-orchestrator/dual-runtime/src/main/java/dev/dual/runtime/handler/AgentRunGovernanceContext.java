@@ -63,7 +63,7 @@ public final class AgentRunGovernanceContext {
                 context.instance().inputRefs(), OBJECT_MAPPER, qualifiedContract);
         manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = RepoScopeGovernance.build(
-                workspaceRoot, workstreamDir, context, OBJECT_MAPPER, qualifiedContract);
+                workspaceRoot, workstreamDir, context, OBJECT_MAPPER, qualifiedContract, runId);
 
         var packagePath = contextDir.resolve("agent-governance-"
                 + safeFileName(context.instance().nodeInstanceId())
@@ -81,7 +81,8 @@ public final class AgentRunGovernanceContext {
         Files.writeString(packagePath, builder.toString(), StandardCharsets.UTF_8);
         return new PreparedContext(
                 workspaceRoot.relativize(packagePath).toString(),
-                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::wrappedPayload));
+                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::wrappedPayload),
+                governance.repositoryFactBinding());
     }
 
     public static Optional<String> trustedTaskContractPayload(
@@ -105,7 +106,11 @@ public final class AgentRunGovernanceContext {
         }
     }
 
-    public record PreparedContext(String contextRef, Optional<String> trustedTaskContractPayload) {
+    public record PreparedContext(
+            String contextRef,
+            Optional<String> trustedTaskContractPayload,
+            RepositoryFactBinding.Verified repositoryFactBinding
+    ) {
     }
 
     private static String safeFileName(String value) {

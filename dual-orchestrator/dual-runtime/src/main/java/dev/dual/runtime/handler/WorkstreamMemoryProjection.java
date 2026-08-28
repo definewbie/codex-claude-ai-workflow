@@ -246,10 +246,16 @@ public final class WorkstreamMemoryProjection {
     }
 
     private static void appendEvidenceRefs(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+        var memory = readMemory(workstreamDir);
+        var refs = map(memory.get("refs"));
         builder.append("Evidence refs:\n");
         builder.append("- Memory: ").append(ref(workspaceRoot, workstreamDir.resolve("memory/workstream-memory.json"))).append("\n");
         builder.append("- Scope source: ").append(ref(workspaceRoot, workstreamDir.resolve("artifacts/task-contract.json"))).append("\n");
-        builder.append("- Read-reuse contract: ").append(ref(workspaceRoot, workstreamDir.resolve("memory/read-reuse-contract.json"))).append("\n\n");
+        var readReuseRef = text(refs.get("readReuseContract"));
+        if (!readReuseRef.isBlank()) {
+            builder.append("- Read-reuse contract: ").append(readReuseRef).append("\n");
+        }
+        builder.append("\n");
     }
 
     private static Map<String, Object> readMemory(Path workstreamDir) {

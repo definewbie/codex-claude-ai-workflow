@@ -72,13 +72,17 @@ final class TaskContractProposalValidator {
     List<String> validateEvidenceTraceability(
             TaskContractProposal proposal,
             Path workspaceRoot,
-            String workstreamId
+            RepositoryFactBinding.Verified repositoryFactBinding
     ) {
         var errors = new ArrayList<String>();
-        var repoMapPath = workspaceRoot.resolve(".agent/workstreams")
-                .resolve(workstreamId)
-                .resolve(RepoScopeGovernance.REPO_MAP_REF)
-                .normalize();
+        if (repositoryFactBinding == null) {
+            return List.of("tracked inventory occurrence binding is required before task contract proposal validation");
+        }
+        var repoMapArtifact = repositoryFactBinding.document().artifacts().get("repoMap");
+        if (repoMapArtifact == null) {
+            return List.of("tracked inventory occurrence binding has no repoMap artifact");
+        }
+        var repoMapPath = workspaceRoot.toAbsolutePath().normalize().resolve(repoMapArtifact.ref()).normalize();
         if (!Files.isRegularFile(repoMapPath)) {
             return List.of("tracked inventory is required before task contract proposal validation");
         }
@@ -91,11 +95,9 @@ final class TaskContractProposalValidator {
         if ("git_tracked_inventory".equals(String.valueOf(repoMap.get("source")))) {
             try {
                 var current = GitTrackedPathInventory.capture(workspaceRoot);
-                var expectedHead = String.valueOf(repoMap.getOrDefault("inventoryHead", ""));
-                var expectedSha = String.valueOf(repoMap.getOrDefault("inventorySha256", ""));
-                var expectedCount = repoMap.get("inventoryPathCount") instanceof Number count
-                        ? count.intValue()
-                        : -1;
+                var expectedHead = repositoryFactBinding.document().inventoryHead();
+                var expectedSha = repositoryFactBinding.document().inventorySha256();
+                var expectedCount = repositoryFactBinding.document().inventoryPathCount();
                 if (!current.head().equals(expectedHead)
                         || !current.sha256().equals(expectedSha)
                         || current.paths().size() != expectedCount) {

@@ -831,7 +831,7 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var plan = objectMapper.readValue(
-                wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+                occurrenceArtifact(wsDir, "file-relevance-plan.json").toFile(), Map.class);
         assertFalse(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("src/routed-change.java"),
                 "validated agent claims must not be converted into repository-read recommendations");
@@ -1835,7 +1835,7 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Repo Scope Guidance"));
-        assertTrue(markdown.contains("agent-capability-catalog-node-001.json"));
+        assertTrue(markdown.contains("agent-capability-catalog.json"));
         assertFalse(markdown.contains("exploration-plan-node-001.json"));
         assertTrue(markdown.contains("miniprogram/src/pages/treatment-record/index.vue"));
         assertTrue(markdown.contains("Already inspected files"));
@@ -1846,18 +1846,21 @@ class ContextBuildPackageHandlerTest {
         var metadataPath = tempDir.resolve((String) result.result().get("context_package_metadata"));
         var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
         assertEquals(true, metadata.get("contextGovernanceEnabled"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/repo-map.json", metadata.get("repoMap"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/file-relevance-plan-node-001.json", metadata.get("fileRelevancePlan"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/stage-scope-policy-node-001.json", metadata.get("stageScopePolicy"));
-        assertEquals(".agent/workstreams/ws-ctx/artifacts/context-governance/node-001.json", metadata.get("contextGovernanceReport"));
+        var occurrenceRef = ".agent/workstreams/ws-ctx/artifacts/context-governance/occurrences/node-001/";
+        assertEquals(occurrenceRef + "repo-map.json", metadata.get("repoMap"));
+        assertEquals(occurrenceRef + "file-relevance-plan.json", metadata.get("fileRelevancePlan"));
+        assertEquals(occurrenceRef + "stage-scope-policy.json", metadata.get("stageScopePolicy"));
+        assertEquals(occurrenceRef + "planned-report.json", metadata.get("contextGovernanceReport"));
         assertEquals(".agent/workstreams/ws-ctx/memory/workstream-memory.json", metadata.get("workstreamMemory"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/working-set.json", metadata.get("workingSet"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/file-summaries.json", metadata.get("fileSummaries"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/read-reuse-contract.json", metadata.get("readReuseContract"));
-        assertEquals(".agent/workstreams/ws-ctx/memory/agent-capability-catalog-node-001.json", metadata.get("agentCapabilityCatalog"));
+        assertEquals(occurrenceRef + "working-set.json", metadata.get("workingSet"));
+        assertEquals(occurrenceRef + "file-summaries.json", metadata.get("fileSummaries"));
+        assertEquals(occurrenceRef + "read-reuse-contract.json", metadata.get("readReuseContract"));
+        assertEquals(occurrenceRef + "agent-capability-catalog.json", metadata.get("agentCapabilityCatalog"));
+        assertEquals(occurrenceRef + "binding.json", metadata.get("repositoryFactBinding"));
+        assertEquals(64, String.valueOf(metadata.get("repositoryFactBindingSha256")).length());
         assertFalse(metadata.containsKey("agentExplorationPlan"));
 
-        var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        var plan = objectMapper.readValue(occurrenceArtifact(wsDir, "file-relevance-plan.json").toFile(), Map.class);
         assertEquals("ctx.test", plan.get("builderNodeDefinitionId"));
         assertEquals("next.node", plan.get("targetNodeDefinitionId"));
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
@@ -1871,7 +1874,7 @@ class ContextBuildPackageHandlerTest {
                         && !avoidance.isEmpty(),
                 "file relevance plan should include typed repeated-read avoidance hints");
 
-        var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+        var policy = objectMapper.readValue(occurrenceArtifact(wsDir, "stage-scope-policy.json").toFile(), Map.class);
         assertEquals("implement", policy.get("stageId"));
         assertFalse(policy.containsKey("scopeExceedPolicy"),
                 "stage scope guidance must not own a change-boundary failure mode");
@@ -1887,19 +1890,19 @@ class ContextBuildPackageHandlerTest {
                         && Boolean.TRUE.equals(reusePolicy.get("preferExistingEvidence")),
                 "stage scope policy should carry read reuse rules as typed data, not only prompt text");
 
-        var workingSet = objectMapper.readValue(wsDir.resolve("memory/working-set.json").toFile(), Map.class);
+        var workingSet = objectMapper.readValue(occurrenceArtifact(wsDir, "working-set.json").toFile(), Map.class);
         assertEquals("working_set", workingSet.get("artifactType"));
         assertTrue(workingSet.get("coreFiles") instanceof List<?> coreFiles
                         && !coreFiles.isEmpty(),
                 "working set should expose bounded core files for the next agent");
 
-        var fileSummaries = objectMapper.readValue(wsDir.resolve("memory/file-summaries.json").toFile(), Map.class);
+        var fileSummaries = objectMapper.readValue(occurrenceArtifact(wsDir, "file-summaries.json").toFile(), Map.class);
         assertEquals("file_summaries", fileSummaries.get("artifactType"));
         assertTrue(fileSummaries.get("files") instanceof List<?> summaries
                         && !summaries.isEmpty(),
                 "file summaries should give agents reusable memory before repeated reads");
 
-        var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
+        var readReuse = objectMapper.readValue(occurrenceArtifact(wsDir, "read-reuse-contract.json").toFile(), Map.class);
         assertEquals("read_reuse_contract", readReuse.get("artifactType"));
         assertTrue(readReuse.get("avoidRepeatingReads") instanceof List<?> avoidReads
                         && !avoidReads.isEmpty(),
@@ -1927,6 +1930,7 @@ class ContextBuildPackageHandlerTest {
                 "stage guidance should project the contract change intent without read authority");
         var workstreamMemory = objectMapper.readValue(wsDir.resolve("memory/workstream-memory.json").toFile(), Map.class);
         assertEquals("workstream_memory", workstreamMemory.get("artifactType"));
+        assertEquals("latest_projection_refs", workstreamMemory.get("refsSemantics"));
         assertTrue(workstreamMemory.get("readFiles") instanceof List<?> remembered
                         && !remembered.isEmpty(),
                 "context governance must preserve typed read memory instead of overwriting it with refs only");
@@ -1934,7 +1938,7 @@ class ContextBuildPackageHandlerTest {
                         && refs.containsKey("readReuseContract"),
                 "workstream memory should index the reusable memory sidecars");
 
-        var report = objectMapper.readValue(wsDir.resolve("artifacts/context-governance/node-001.json").toFile(), Map.class);
+        var report = objectMapper.readValue(occurrenceArtifact(wsDir, "planned-report.json").toFile(), Map.class);
         assertEquals("planned", report.get("reportPhase"));
         assertEquals("ctx.test", report.get("builderNodeDefinitionId"));
         assertEquals("next.node", report.get("targetNodeDefinitionId"));
@@ -1953,7 +1957,7 @@ class ContextBuildPackageHandlerTest {
             var result = handler.execute(ctx(stage, List.of()));
 
             assertEquals(NodeStatus.COMPLETED, result.status(), stage);
-            var policy = objectMapper.readValue(wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+        var policy = objectMapper.readValue(occurrenceArtifact(wsDir, "stage-scope-policy.json").toFile(), Map.class);
             assertFalse(policy.containsKey("scopeExceedPolicy"), stage);
             assertFalse(policy.containsKey("readScope"), stage);
             assertFalse(policy.containsKey("explorationBudget"), stage);
@@ -1990,7 +1994,7 @@ class ContextBuildPackageHandlerTest {
         assertFalse(markdown.contains("miniprogram/src/pages/follow-up-summary/index.vue"));
         assertFalse(markdown.contains("Treatment Event Chain API Usage"));
 
-        var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        var plan = objectMapper.readValue(occurrenceArtifact(wsDir, "file-relevance-plan.json").toFile(), Map.class);
         assertTrue(plan.get("readCandidates") instanceof List<?> candidates
                         && candidates.isEmpty(),
                 "unrouted workspace files must not become context candidates");
@@ -1998,7 +2002,7 @@ class ContextBuildPackageHandlerTest {
                         && scopeCandidates.isEmpty(),
                 "context discovery must not invent canonical contract scope");
         var policy = objectMapper.readValue(
-                wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+                occurrenceArtifact(wsDir, "stage-scope-policy.json").toFile(), Map.class);
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope && writeScope.isEmpty(),
                 "unrouted workspace files must not become change intent");
         assertFalse(plan.containsKey("seedEvidenceDigests"),
@@ -2020,7 +2024,7 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains(ref));
         assertFalse(markdown.contains("UNTRUSTED_CONTEXT_PAYLOAD"));
-        var plan = objectMapper.readValue(wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+        var plan = objectMapper.readValue(occurrenceArtifact(wsDir, "file-relevance-plan.json").toFile(), Map.class);
         assertFalse(plan.get("readCandidates") instanceof List<?> candidates && candidates.contains(ref),
                 "an unknown routed ref must not become a repository-read candidate");
     }
@@ -2065,7 +2069,7 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var relevancePlan = objectMapper.readValue(
-                wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+                occurrenceArtifact(wsDir, "file-relevance-plan.json").toFile(), Map.class);
         assertFalse(relevancePlan.get("readCandidates") instanceof List<?> candidates
                         && candidates.contains("src/recommended.rs"),
                 "filename and requirement heuristics must not enter prepared context");
@@ -2077,7 +2081,7 @@ class ContextBuildPackageHandlerTest {
                 relevancePlan.get("contractScopeCandidates"));
 
         var policy = objectMapper.readValue(
-                wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+                occurrenceArtifact(wsDir, "stage-scope-policy.json").toFile(), Map.class);
         assertEquals(
                 List.of("src/allowed.java", "docs/API contract.md"),
                 policy.get("writeScope"),
@@ -2115,13 +2119,13 @@ class ContextBuildPackageHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var relevancePlan = objectMapper.readValue(
-                wsDir.resolve("memory/file-relevance-plan-node-001.json").toFile(), Map.class);
+                occurrenceArtifact(wsDir, "file-relevance-plan.json").toFile(), Map.class);
         assertTrue(relevancePlan.get("contractScopeCandidates") instanceof List<?> scope
                         && scope.size() == 30
                         && scope.contains("src/file-29.go"),
                 "canonical contract scope must not inherit the 24-file recommendation limit");
         var policy = objectMapper.readValue(
-                wsDir.resolve("memory/stage-scope-policy-node-001.json").toFile(), Map.class);
+                occurrenceArtifact(wsDir, "stage-scope-policy.json").toFile(), Map.class);
         assertTrue(policy.get("writeScope") instanceof List<?> writeScope
                         && writeScope.size() == 30,
                 "writeScope must carry all contract scope entries");
@@ -2164,7 +2168,7 @@ class ContextBuildPackageHandlerTest {
                 "product_review", List.of(proposalRef), "intake.codex_product_review"));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
+        var readReuse = objectMapper.readValue(occurrenceArtifact(wsDir, "read-reuse-contract.json").toFile(), Map.class);
         assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed
                         && allowed.stream().anyMatch(item -> String.valueOf(item).contains("src/api.js"))
                         && allowed.stream().noneMatch(item -> String.valueOf(item).contains("docs/spec.md")),
@@ -2202,7 +2206,7 @@ class ContextBuildPackageHandlerTest {
         var result = handler.execute(ctx("implementation", List.of(), "implement.claude_implement"));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        var readReuse = objectMapper.readValue(wsDir.resolve("memory/read-reuse-contract.json").toFile(), Map.class);
+        var readReuse = objectMapper.readValue(occurrenceArtifact(wsDir, "read-reuse-contract.json").toFile(), Map.class);
         assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed && allowed.isEmpty(),
                 "producer targets must use changed_files/plan/invalidation, not review reread allowance");
         assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
@@ -2228,7 +2232,7 @@ class ContextBuildPackageHandlerTest {
         var metadata = objectMapper.readValue(metadataPath.toFile(), Map.class);
         assertEquals(false, metadata.get("contextGovernanceEnabled"));
         assertFalse(Files.exists(wsDir.resolve("memory/repo-map.json")));
-        assertFalse(Files.exists(wsDir.resolve("artifacts/context-governance/node-001.json")));
+        assertFalse(Files.exists(wsDir.resolve("artifacts/context-governance/occurrences/node-001")));
     }
 
     @Test
@@ -2339,6 +2343,10 @@ class ContextBuildPackageHandlerTest {
 
     private static String relative(Path root, Path path) {
         return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
+    }
+
+    private static Path occurrenceArtifact(Path workstreamDir, String fileName) {
+        return workstreamDir.resolve("artifacts/context-governance/occurrences/node-001").resolve(fileName);
     }
 
     private static int occurrences(String content, String value) {

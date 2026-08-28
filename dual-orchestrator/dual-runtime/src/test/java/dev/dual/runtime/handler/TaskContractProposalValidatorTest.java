@@ -22,7 +22,7 @@ class TaskContractProposalValidatorTest {
     @Test
     void initialEvidenceMustReferenceTrackedInventory() throws Exception {
         Files.writeString(workspace.resolve("README.md"), "# fixture\n");
-        var repoMap = workspace.resolve(".agent/workstreams/ws-test/memory/repo-map.json");
+        var repoMap = workspace.resolve(".agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-run/repo-map.json");
         Files.createDirectories(repoMap.getParent());
         new com.fasterxml.jackson.databind.ObjectMapper().writeValue(repoMap.toFile(), Map.of(
                 "artifactType", "repo_map",
@@ -35,11 +35,12 @@ class TaskContractProposalValidatorTest {
         var trackedEvidence = proposal(
                 List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of(), List.of("README.md"));
 
-        assertTrue(validator.validateEvidenceTraceability(withoutEvidence, workspace, "ws-test").stream()
+        var binding = binding(repoMap, "", "", 0);
+        assertTrue(validator.validateEvidenceTraceability(withoutEvidence, workspace, binding).stream()
                 .anyMatch(error -> error.contains("requires at least one")));
-        assertTrue(validator.validateEvidenceTraceability(unknownEvidence, workspace, "ws-test").stream()
+        assertTrue(validator.validateEvidenceTraceability(unknownEvidence, workspace, binding).stream()
                 .anyMatch(error -> error.contains("requires at least one")));
-        assertTrue(validator.validateEvidenceTraceability(trackedEvidence, workspace, "ws-test").isEmpty());
+        assertTrue(validator.validateEvidenceTraceability(trackedEvidence, workspace, binding).isEmpty());
     }
 
     @Test
@@ -51,7 +52,7 @@ class TaskContractProposalValidatorTest {
         runGit("add", "README.md");
         runGit("commit", "-m", "baseline");
         var inventory = GitTrackedPathInventory.capture(workspace);
-        var repoMap = workspace.resolve(".agent/workstreams/ws-test/memory/repo-map.json");
+        var repoMap = workspace.resolve(".agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-run/repo-map.json");
         Files.createDirectories(repoMap.getParent());
         new com.fasterxml.jackson.databind.ObjectMapper().writeValue(repoMap.toFile(), Map.of(
                 "artifactType", "repo_map",
@@ -66,7 +67,8 @@ class TaskContractProposalValidatorTest {
         var proposal = proposal(
                 List.of(entry("README.md", TaskContract.ScopeOperation.MODIFY)), List.of(), List.of("README.md"));
 
-        assertTrue(validator.validateEvidenceTraceability(proposal, workspace, "ws-test").stream()
+        var binding = binding(repoMap, inventory.head(), inventory.sha256(), inventory.paths().size());
+        assertTrue(validator.validateEvidenceTraceability(proposal, workspace, binding).stream()
                 .anyMatch(error -> error.contains("identity changed")));
     }
 
@@ -111,6 +113,25 @@ class TaskContractProposalValidatorTest {
                 .start();
         var output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         assertEquals(0, process.waitFor(), output);
+    }
+
+    private RepositoryFactBinding.Verified binding(
+            Path repoMap,
+            String inventoryHead,
+            String inventorySha256,
+            int inventoryPathCount
+    ) throws Exception {
+        return RepositoryFactBinding.write(
+                workspace,
+                repoMap.resolveSibling("binding.json"),
+                "ws-test",
+                "node-run",
+                "run-1",
+                inventoryHead,
+                inventorySha256,
+                inventoryPathCount,
+                Map.of("repoMap", repoMap),
+                new com.fasterxml.jackson.databind.ObjectMapper());
     }
 
     private static TaskContractProposal proposal(

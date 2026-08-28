@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.runtime.handler.RepositoryFactBinding;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,9 +43,11 @@ final class ContextGovernanceActualReportWriter {
             String nodeDefinitionId,
             String runId,
             Path transcriptPath,
-            AcpxToolUsage toolUsage
+            AcpxToolUsage toolUsage,
+            RepositoryFactBinding.Verified repositoryFactBinding
     ) throws IOException {
-        return write(workspaceRoot, workstreamId, nodeDefinitionId, runId, null, transcriptPath, toolUsage);
+        return write(workspaceRoot, workstreamId, nodeDefinitionId, runId, null, transcriptPath, toolUsage,
+                repositoryFactBinding);
     }
 
     Optional<Path> write(
@@ -54,7 +57,8 @@ final class ContextGovernanceActualReportWriter {
             String runId,
             Path outputPath,
             Path transcriptPath,
-            AcpxToolUsage toolUsage
+            AcpxToolUsage toolUsage,
+            RepositoryFactBinding.Verified repositoryFactBinding
     ) throws IOException {
         if (workspaceRoot == null || workstreamId == null || workstreamId.isBlank() || toolUsage == null) {
             return Optional.empty();
@@ -64,13 +68,25 @@ final class ContextGovernanceActualReportWriter {
             return Optional.empty();
         }
         var memoryDir = workstreamDir.resolve(MEMORY_DIR);
-        var plan = latestDocument(memoryDir, "file-relevance-plan-", nodeDefinitionId);
-        var policy = latestDocument(memoryDir, "stage-scope-policy-", nodeDefinitionId);
-        var capabilityCatalog = latestDocument(memoryDir, "agent-capability-catalog-", nodeDefinitionId);
-        if (capabilityCatalog.isEmpty()) {
-            capabilityCatalog = document(memoryDir.resolve("agent-capability-catalog.json"));
+        if (repositoryFactBinding == null) {
+            throw new IOException("repository fact binding is required for an actual governance report");
         }
-        var repoMap = document(memoryDir.resolve("repo-map.json"));
+        var bindingVerification = RepositoryFactBinding.verify(
+                workspaceRoot,
+                workstreamId,
+                repositoryFactBinding.ref(),
+                repositoryFactBinding.sha256(),
+                repositoryFactBinding.document().nodeInstanceId(),
+                runId,
+                OBJECT_MAPPER);
+        if (!bindingVerification.valid()) {
+            throw new IOException("repository fact binding is invalid: " + bindingVerification.errors());
+        }
+        var binding = bindingVerification.verified();
+        var plan = boundDocument(workspaceRoot, binding, "fileRelevancePlan");
+        var policy = boundDocument(workspaceRoot, binding, "stageScopePolicy");
+        var capabilityCatalog = boundDocument(workspaceRoot, binding, "agentCapabilityCatalog");
+        var repoMap = boundDocument(workspaceRoot, binding, "repoMap");
         var plannedRead = textList(plan.map(doc -> doc.get("readCandidates")).orElse(null));
         var plannedWrite = firstNonEmpty(textList(plan.map(doc -> doc.get("writeCandidates")).orElse(null)),
                 textList(policy.map(doc -> doc.get("writeScope")).orElse(null)));
@@ -102,6 +118,11 @@ final class ContextGovernanceActualReportWriter {
         report.put("iterationId", text(policy.map(doc -> doc.get("iterationId")).orElse(null)));
         report.put("stageId", text(policy.map(doc -> doc.get("stageId")).orElse(null)));
         report.put("runId", runId);
+        report.put("repositoryFactBinding", binding.ref());
+        report.put("repositoryFactBindingSha256", binding.sha256());
+        report.put("inventoryHead", binding.document().inventoryHead());
+        report.put("inventorySha256", binding.document().inventorySha256());
+        report.put("inventoryPathCount", binding.document().inventoryPathCount());
         report.put("reportPhase", "actual");
         report.put("planningAvailable", plan.isPresent() || policy.isPresent());
         report.put("recommendedReadFiles", plannedRead);
@@ -163,39 +184,16 @@ final class ContextGovernanceActualReportWriter {
         OBJECT_MAPPER.writeValue(memoryDir.resolve("memory-metrics.json").toFile(), document);
     }
 
-    private static Optional<JsonNode> latestDocument(Path dir, String prefix, String nodeDefinitionId) throws IOException {
-        var path = latestDocumentPath(dir, prefix, nodeDefinitionId);
-        if (path.isEmpty()) {
+    private static Optional<JsonNode> boundDocument(
+            Path workspaceRoot,
+            RepositoryFactBinding.Verified binding,
+            String artifactName
+    ) throws IOException {
+        var artifact = binding.document().artifacts().get(artifactName);
+        if (artifact == null) {
             return Optional.empty();
         }
-        return Optional.of(OBJECT_MAPPER.readTree(path.get().toFile()));
-    }
-
-    private static Optional<Path> latestDocumentPath(Path dir, String prefix, String nodeDefinitionId) throws IOException {
-        if (!Files.isDirectory(dir)) {
-            return Optional.empty();
-        }
-        var candidates = new ArrayList<Path>();
-        try (var files = Files.list(dir)) {
-            files.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().startsWith(prefix))
-                    .filter(path -> path.getFileName().toString().endsWith(".json"))
-                    .forEach(candidates::add);
-        }
-        candidates.sort(Comparator.comparing(ContextGovernanceActualReportWriter::lastModified).reversed());
-        for (var path : candidates) {
-            var json = OBJECT_MAPPER.readTree(path.toFile());
-            if (matchesNodeDefinition(json, nodeDefinitionId)) {
-                return Optional.of(path);
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static Optional<JsonNode> document(Path path) throws IOException {
-        if (path == null || !Files.isRegularFile(path)) {
-            return Optional.empty();
-        }
+        var path = workspaceRoot.toAbsolutePath().normalize().resolve(artifact.ref()).normalize();
         return Optional.of(OBJECT_MAPPER.readTree(path.toFile()));
     }
 
@@ -250,25 +248,6 @@ final class ContextGovernanceActualReportWriter {
             return HexFormat.of().formatHex(digest.digest());
         } catch (NoSuchAlgorithmException impossible) {
             throw new IOException("SHA-256 is unavailable", impossible);
-        }
-    }
-
-    private static boolean matchesNodeDefinition(JsonNode json, String nodeDefinitionId) {
-        if (nodeDefinitionId == null || nodeDefinitionId.isBlank()) {
-            return false;
-        }
-        var targetNodeDefinitionId = text(json.get("targetNodeDefinitionId"));
-        if (!targetNodeDefinitionId.isBlank()) {
-            return nodeDefinitionId.equals(targetNodeDefinitionId);
-        }
-        return nodeDefinitionId.equals(text(json.get("nodeDefinitionId")));
-    }
-
-    private static long lastModified(Path path) {
-        try {
-            return Files.getLastModifiedTime(path).toMillis();
-        } catch (IOException e) {
-            return 0L;
         }
     }
 

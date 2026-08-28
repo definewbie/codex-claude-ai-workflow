@@ -183,11 +183,15 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     sessionMeta,
                     compactionMeta
             );
-            return NodeResult.completed("completed", List.of(context.workspaceRoot().relativize(promptPath).toString()), Map.of(
+            return NodeResult.completed("completed", List.of(
+                    context.workspaceRoot().relativize(promptPath).toString(),
+                    governanceContext.repositoryFactBinding().ref()), Map.of(
                     "run_id", runId,
                     "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
                     "agent", agent,
                     "session", session,
+                    "repository_fact_binding_ref", governanceContext.repositoryFactBinding().ref(),
+                    "repository_fact_binding_sha256", governanceContext.repositoryFactBinding().sha256(),
                     "prepared", true
             ));
         }
@@ -298,11 +302,17 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     usage,
                     sessionMeta,
                     compactionMeta,
-                    acquisitionDocument
+                    acquisitionDocument,
+                    governanceContext.repositoryFactBinding()
             );
             return authoritySnapshot.enforce(NodeResult.completed(
                     "completed",
-                    evidenceOutputRefs(context, outputPath, transcriptPath, stderrPath),
+                    evidenceOutputRefs(
+                            context,
+                            outputPath,
+                            transcriptPath,
+                            stderrPath,
+                            governanceContext.repositoryFactBinding().ref()),
                     resultFacts(
                             context,
                             runDir,
@@ -311,7 +321,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             agent,
                             session,
                             runId,
-                            outputComplete
+                            outputComplete,
+                            governanceContext.repositoryFactBinding()
                     )
             ));
         } catch (Exception failure) {
@@ -516,13 +527,17 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             TaskContext context,
             java.nio.file.Path outputPath,
             java.nio.file.Path transcriptPath,
-            java.nio.file.Path stderrPath
+            java.nio.file.Path stderrPath,
+            String repositoryFactBindingRef
     ) {
         var refs = new java.util.ArrayList<String>();
         refs.add(context.workspaceRoot().relativize(stderrPath).toString());
         refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
         if (Files.exists(outputPath)) {
             refs.add(context.workspaceRoot().relativize(outputPath).toString());
+        }
+        if (repositoryFactBindingRef != null && !repositoryFactBindingRef.isBlank()) {
+            refs.add(repositoryFactBindingRef);
         }
         return List.copyOf(refs);
     }
@@ -535,7 +550,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             String agent,
             String session,
             String runId,
-            boolean outputComplete
+            boolean outputComplete,
+            dev.dual.runtime.handler.RepositoryFactBinding.Verified repositoryFactBinding
     ) {
         var facts = new LinkedHashMap<String, Object>();
         facts.put("run_id", runId);
@@ -545,6 +561,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         facts.put("exit_code", result.exitCode());
         facts.put("transcript_ref", context.workspaceRoot().relativize(transcriptPath).toString());
         facts.put("output_complete", outputComplete);
+        facts.put("repository_fact_binding_ref", repositoryFactBinding.ref());
+        facts.put("repository_fact_binding_sha256", repositoryFactBinding.sha256());
         facts.put("process_usability", result.processResult().usability().name());
         facts.put("adapter_signals", result.adapterSignals().stream()
                 .map(AcpxAgentTaskHandler::adapterSignalFact)

@@ -705,12 +705,28 @@ class ContractCompileHandlerTest {
             TaskContractProposalReference baseReference,
             String iterationId
     ) throws Exception {
-        var repoMap = workstreamDir(root).resolve(RepoScopeGovernance.REPO_MAP_REF);
+        var runId = "run-revised";
+        var occurrenceDir = workstreamDir(root)
+                .resolve("artifacts/context-governance/occurrences/node-revision-" + runId);
+        var repoMap = occurrenceDir.resolve("repo-map.json");
         Files.createDirectories(repoMap.getParent());
         OBJECT_MAPPER.writeValue(repoMap.toFile(), Map.of(
                 "artifactType", "repo_map",
+                "inventoryHead", "",
+                "inventorySha256", "",
+                "inventoryPathCount", 0,
                 "files", List.of(Map.of("path", "README.md"))));
-        var runId = "run-revised";
+        var binding = RepositoryFactBinding.write(
+                root,
+                occurrenceDir.resolve("binding.json"),
+                WORKSTREAM_ID,
+                "node-revision",
+                runId,
+                "",
+                "",
+                0,
+                Map.of("repoMap", repoMap),
+                OBJECT_MAPPER);
         var now = Instant.now();
         LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("nodes/node-revision.json").toFile(),
                 new NodeInstanceDocument(
@@ -756,7 +772,10 @@ class ContractCompileHandlerTest {
                 "node-revision",
                 new NodeDefinition(
                         "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of()),
-                NodeResult.completed("completed", List.of(outputRef), Map.of("run_id", runId)));
+                NodeResult.completed("completed", List.of(outputRef, binding.ref()), Map.of(
+                        "run_id", runId,
+                        "repository_fact_binding_ref", binding.ref(),
+                        "repository_fact_binding_sha256", binding.sha256())));
         assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         var sidecarRef = validated.outputRefs().stream()
                 .filter(ref -> ref.endsWith(".contract.json"))

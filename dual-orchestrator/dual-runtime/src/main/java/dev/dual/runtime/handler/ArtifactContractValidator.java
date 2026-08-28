@@ -79,9 +79,12 @@ public final class ArtifactContractValidator {
         var contract = ContractRegistry.forNode(nodeDefinition.id());
         ContractViolation lastInvalid = null;
         String lastSourceRef = "";
+        var repositoryFactBindingRef = text(result.result().get("repository_fact_binding_ref"));
         for (int i = result.outputRefs().size() - 1; i >= 0; i--) {
             var ref = result.outputRefs().get(i);
-            if (ref.startsWith("artifact://") || !ref.endsWith(".json")) {
+            if (ref.startsWith("artifact://")
+                    || !ref.endsWith(".json")
+                    || ref.equals(repositoryFactBindingRef)) {
                 continue;
             }
             var path = root.resolve(ref).normalize();
@@ -106,8 +109,11 @@ public final class ArtifactContractValidator {
                 lastSourceRef = ref;
                 break;
             }
+            var repositoryFactBinding = resolveRepositoryFactBinding(
+                    root, workstreamId, nodeInstanceId, expectedRunId, result);
             var proposalResolution = resolveProposalCandidate(
-                    root, workstreamId, nodeInstanceId, nodeDefinition, parsed.envelope(), ref);
+                    root, workstreamId, nodeInstanceId, nodeDefinition, parsed.envelope(), ref,
+                    repositoryFactBinding);
             if (proposalResolution.failure() != null) {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
                         parsed.envelope(), proposalResolution.failure());
@@ -127,12 +133,19 @@ public final class ArtifactContractValidator {
             String nodeInstanceId,
             NodeDefinition nodeDefinition,
             AgentResultEnvelope envelope,
-            String sourceOutputRef
+            String sourceOutputRef,
+            RepositoryFactBinding.Verification repositoryFactBinding
     ) {
         var isProposal = envelope.result() instanceof AgentResultEnvelope.TaskContractProposalResult;
         var isPatch = envelope.result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult;
         if (!isProposal && !isPatch) {
             return ProposalResolution.none();
+        }
+        if (!repositoryFactBinding.valid()) {
+            return ProposalResolution.failure(ContractViolation.of(
+                    "TASK_CONTRACT_REPOSITORY_FACT_BINDING_INVALID",
+                    "task contract proposal has no valid repository fact occurrence binding",
+                    Map.of("errors", repositoryFactBinding.errors())));
         }
         if (!"intake.claude_brainstorm".equals(nodeDefinition.id())) {
             return ProposalResolution.failure(ContractViolation.of(
@@ -208,7 +221,8 @@ public final class ArtifactContractValidator {
                     "task_contract_proposal failed revision obligation coverage",
                     Map.of("errors", coverageErrors)));
         }
-        var evidenceErrors = proposalValidator.validateEvidenceTraceability(proposal, root, workstreamId);
+        var evidenceErrors = proposalValidator.validateEvidenceTraceability(
+                proposal, root, repositoryFactBinding.verified());
         if (!evidenceErrors.isEmpty()) {
             return ProposalResolution.failure(ContractViolation.of(
                     "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
@@ -228,7 +242,7 @@ public final class ArtifactContractValidator {
                                         .map(TaskContractProposalValidator.RevisionDeltaError::message).toList())));
             }
         }
-        return new ProposalResolution(proposal, derivation, null);
+        return new ProposalResolution(proposal, derivation, repositoryFactBinding.verified(), null);
     }
 
     private NodeResult withResultSidecars(
@@ -266,6 +280,10 @@ public final class ArtifactContractValidator {
                                 Map.of("review_subject_artifact", requiredReviewSubject)));
             }
             document.put("review_subject", reviewSubject.get().reference().toMap());
+        }
+        if (proposalResolution.proposal() != null) {
+            document.put("repository_fact_binding",
+                    RepositoryFactBinding.reference(proposalResolution.repositoryFactBinding()).toMap());
         }
         AgentContractSemantics.addSidecarFields(document);
         var validatedDocument = AgentOutputContractDocument.from(document);
@@ -328,15 +346,40 @@ public final class ArtifactContractValidator {
     private record ProposalResolution(
             TaskContractProposal proposal,
             AgentOutputContractDocument.ProposalDerivation derivation,
+            RepositoryFactBinding.Verified repositoryFactBinding,
             ContractViolation failure
     ) {
         static ProposalResolution none() {
-            return new ProposalResolution(null, null, null);
+            return new ProposalResolution(null, null, null, null);
         }
 
         static ProposalResolution failure(ContractViolation failure) {
-            return new ProposalResolution(null, null, failure);
+            return new ProposalResolution(null, null, null, failure);
         }
+    }
+
+    private RepositoryFactBinding.Verification resolveRepositoryFactBinding(
+            Path root,
+            String workstreamId,
+            String nodeInstanceId,
+            String runId,
+            NodeResult result
+    ) {
+        var bindingRef = text(result.result().get("repository_fact_binding_ref"));
+        var bindingSha256 = text(result.result().get("repository_fact_binding_sha256"));
+        if (bindingRef.isBlank() || bindingSha256.isBlank() || !result.outputRefs().contains(bindingRef)) {
+            return new RepositoryFactBinding.Verification(
+                    null,
+                    List.of("adapter-owned repository fact binding ref/sha is missing or not routed"));
+        }
+        return RepositoryFactBinding.verify(
+                root,
+                workstreamId,
+                bindingRef,
+                bindingSha256,
+                nodeInstanceId,
+                runId,
+                OBJECT_MAPPER);
     }
 
     private Optional<String> writePlanArtifactSidecars(

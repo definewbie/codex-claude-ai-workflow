@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: INITIAL CONTRACT FACT ACQUISITION / ARCHITECTURE REVIEW
+## Current Active Step: REPOSITORY FACT OCCURRENCE OWNERSHIP / DIFF REVIEW
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -229,6 +229,51 @@ Gate 独立评审已 `PASS（P0=0 / P1=0 / P2=2 知会）`。inventory SHA 的�
 `TaskContractProposalValidator` 的 production re-capture；operator 等价命令仅作报告交叉核对。Gate 具备选择性提交条件；
 提交后下一步为 fresh package、external workflow validation 与 source-side frozen identity/hash 复算，仍不创建 workstream、
 不调用 provider。
+
+Gate 与 active plan 已提交为 `f69a161c`，fresh package、workflow/identity preflight 与 Claude/Codex minimal probes 均
+PASS。用户授权后创建唯一 fresh workstream `ws-20260827T232026Z-EFCB`；execution-workspace preflight 为
+`99/0/0/0`。首个 Claude intake occurrence 实际产生 `17` 次 read/tool usage、`16` 条 path/SHA read evidence，proposal
+通过 strict parser、inventory re-capture 与 evidence traceability，Codex product review 返回
+`READY_FOR_PRODUCT_REVIEW / blocking=false / must_fix=[]`，随后合法停在 human requirement gate。
+
+early boundary audit 发现该样本不能继续：contract-discovery 使用的 Git inventory 写入历史共享路径
+`memory/repo-map.json`，后续 product-review context build 又无条件覆盖同一路径。validator 在当时消费的是正确 inventory，
+但 proposal lineage 没有绑定该 occurrence 的 repo-map ref/SHA，最终 audit 无法从 durable ledger 重建判定依据；actual
+governance writer 同时还以 mtime latest 选择 plan/policy/catalog。样本因此判为
+`INVALID_EVIDENCE_DURABILITY`，不是模型/provider/product FAIL。workstream-scoped sessions 已关闭；未批准 gate、未 resume、
+未创建第二样本。
+
+通用修复与问题发现方案已落在
+`docs/plans/repository-fact-occurrence-ownership-and-boundary-discovery-plan-20260828.zh-CN.md`。目标是把 repository fact、
+plan/policy/catalog 与相关 governance projections 绑定到不可变 run occurrence；validator、actual report、proposal sidecar
+lineage 与 final audit 消费同一 ref/SHA；workstream memory 只保留显式 current/cumulative projection。验证纪律从单步字段
+检查升级为 producer -> consumer -> sibling writer -> pause/restart -> cold audit 的 temporal sequence，并在 real-case human
+gate 与 terminal completion 前设置 typed boundary sentinels。当前只允许独立只读架构评审该计划；不授权编码、provider、
+resume EFCB 或新的 workstream。
+
+独立架构评审已 `PASS（P0=0 / P1=0 / P2=3 非阻塞）`。decision 名已修正为
+`READY_FOR_PRODUCT_REVIEW`，并补充 captured plan 只残留 inventory HEAD/SHA、无法重建完整路径事实的精确边界。
+评审要求的 reader/writer/sibling sweep 已关闭 binding 唯一落点：immutable binding JSON 是唯一 authority；
+`PreparedContext` 仅 transient 传递；adapter 把 binding ref 加入 `NodeResult.outputRefs`；proposal sidecar 只保存 ref/SHA
+作为 lineage anchor；actual report 只投影同一 ref/SHA；`run.json` 不重复保存 binding。`TaskContractProposalReference`
+read path 负责冷启动全链重验，现有 ledger `CompletionAuditWriter` 不被扩张为 runtime repository semantic owner。
+计划现为 `IMPLEMENTATION READY`，下一步只允许实施该单一 deterministic checkpoint 与 sequence tests；仍不调用 provider、
+不 resume/批准 EFCB、不创建新 workstream。
+
+occurrence ownership checkpoint 已按该原子边界实施。repository fact、plan/policy/catalog、working-set、file summaries、
+read-reuse contract 与 planned report 现在写入 `nodeInstanceId + runId` 唯一目录，并由 immutable binding JSON 记录每个
+artifact 的 ref/SHA 与 Git inventory identity；累计 `workstream-memory.json` 仅保存 latest projection refs。adapter 在
+prompt 前持有 typed binding，并把其 ref/SHA 作为 machine-owned result facts 传给 validator；proposal sidecar 在写盘和
+计算 reference SHA 之前写入 binding anchor，`TaskContractProposalReference.readVerified` 冷读取时重验 binding 与全部
+artifact。actual report 只消费传入 binding，旧 fixed-global 与 mtime-latest authority 已从 production 删除。
+
+cannot-bypass 测试在实施中实际抓出并关闭两处顺序缺口：binding ref 曾被旧“倒序最后 JSON”逻辑误当 Agent envelope；
+sidecar 曾在 binding 字段注入前写盘，导致字段只存在于内存 map。现在前者按 adapter-owned binding ref 排除候选，后者在
+typed semantic validation、写盘与 reference SHA 前完成注入。sequence tests 证明同 node 不同 run 不覆盖、后续 sibling
+build 不改变旧 occurrence 字节、global repo-map 不能替代缺失 binding、artifact 篡改 fail closed、cold proposal reference
+会重验 binding。focused runtime `128/0/0/0`、adapter `47/0/0/0`；非沙箱 clean full reactor
+`1248/0/0/0`；`git diff --check` clean。当前成熟度为 repository fact occurrence ownership `ENFORCED / NOT PROVEN`；
+等待一次独立代码级 diff review，PASS 前不提交、不调用 provider、不 resume/批准 EFCB、不创建新 workstream。
 
 ### Completed H1 Checkpoint
 

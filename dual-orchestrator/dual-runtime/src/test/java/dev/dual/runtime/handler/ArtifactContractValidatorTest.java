@@ -177,6 +177,29 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
+    void globalRepoMapCannotBypassMissingOccurrenceBindingBeforeSidecarPublication() throws Exception {
+        Files.writeString(tempDir.resolve("README.md"), "# sample\n");
+        write(".agent/workstreams/ws-1/memory/repo-map.json", "{\"files\":[{\"path\":\"README.md\"}]}");
+        var proposal = new AgentResultEnvelope.TaskContractProposalResult(
+                "task_contract_proposal", "READY_FOR_PRODUCT_REVIEW", "Proposal ready.", false,
+                "Update documentation.", modifyScope("README.md", List.of()),
+                clauses("AC", "README is updated"), clauses("TEST", "inspect diff"),
+                List.of(), List.of(), List.of(), List.of("README.md"), List.of(), List.of());
+        var output = write(".agent/workstreams/ws-1/runs/run-missing-binding/outputs/intake.json",
+                JSON.writeValueAsString(new AgentResultEnvelope(
+                        1, "ws-1", "run-missing-binding", "intake.claude_brainstorm", proposal)));
+
+        var validated = validator.validate(
+                tempDir, "ws-1", "node-missing-binding", node("intake.claude_brainstorm"),
+                NodeResult.completed("completed", List.of(output), Map.of("run_id", "run-missing-binding")));
+
+        assertEquals(NodeStatus.FAILED, validated.status());
+        assertEquals("TASK_CONTRACT_REPOSITORY_FACT_BINDING_INVALID",
+                AgentExecutionResultFacts.artifactContractResults(validated).getFirst().errorCode());
+        assertTrue(validated.outputRefs().stream().noneMatch(ref -> ref.endsWith(".contract.json")));
+    }
+
+    @Test
     void taskProposalCarriesTypedCreateAndModifyScopeThroughValidation() throws Exception {
         Files.writeString(tempDir.resolve("README.md"), "# sample\n");
         var proposal = new AgentResultEnvelope.TaskContractProposalResult(
@@ -341,10 +364,14 @@ class ArtifactContractValidatorTest {
         var revisedOutput = write(".agent/workstreams/ws-1/runs/run-revision/outputs/intake.json",
                 JSON.writeValueAsString(new AgentResultEnvelope(
                         1, "ws-1", "run-revision", "intake.claude_brainstorm", revised)));
+        var revisionBinding = writeTrackedInventoryFixture("node-revision", "run-revision");
 
         var validated = validator.validate(
                 tempDir, "ws-1", "node-revision", node("intake.claude_brainstorm"),
-                NodeResult.completed("completed", List.of(revisedOutput), Map.of("run_id", "run-revision")));
+                NodeResult.completed("completed", List.of(revisedOutput, revisionBinding.ref()), Map.of(
+                        "run_id", "run-revision",
+                        "repository_fact_binding_ref", revisionBinding.ref(),
+                        "repository_fact_binding_sha256", revisionBinding.sha256())));
 
         assertEquals(NodeStatus.FAILED, validated.status(), validated.result().toString());
         var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
@@ -375,10 +402,14 @@ class ArtifactContractValidatorTest {
         var patchOutput = write(".agent/workstreams/ws-1/runs/run-patch/outputs/intake.json",
                 JSON.writeValueAsString(new AgentResultEnvelope(
                         1, "ws-1", "run-patch", "intake.claude_brainstorm", patch)));
+        var patchBinding = writeTrackedInventoryFixture("node-revision", "run-patch");
 
         var patchValidated = validator.validate(
                 tempDir, "ws-1", "node-revision", node("intake.claude_brainstorm"),
-                NodeResult.completed("completed", List.of(patchOutput), Map.of("run_id", "run-patch")));
+                NodeResult.completed("completed", List.of(patchOutput, patchBinding.ref()), Map.of(
+                        "run_id", "run-patch",
+                        "repository_fact_binding_ref", patchBinding.ref(),
+                        "repository_fact_binding_sha256", patchBinding.sha256())));
 
         assertEquals(NodeStatus.COMPLETED, patchValidated.status(), patchValidated.result().toString());
         var patchSidecarRef = patchValidated.outputRefs().stream()
@@ -403,6 +434,10 @@ class ArtifactContractValidatorTest {
                 .orElseThrow();
         assertTrue(TaskContractProposalReference.readVerified(
                 tempDir, "ws-1", patchReferenceRef, JSON).isPresent());
+        Files.delete(patchBinding.path());
+        assertTrue(TaskContractProposalReference.readVerified(
+                tempDir, "ws-1", patchReferenceRef, JSON).isEmpty(),
+                "a cold proposal reference read must re-verify its immutable repository fact binding");
 
         var sidecarMap = JSON.readValue(
                 tempDir.resolve(patchSidecarRef).toFile(), new TypeReference<Map<String, Object>>() {});
@@ -535,16 +570,30 @@ class ArtifactContractValidatorTest {
     }
 
     private NodeResult validate(String nodeId, String outputRef, String runId) throws Exception {
+        RepositoryFactBinding.Verified binding = null;
         if ("intake.claude_brainstorm".equals(nodeId)) {
-            writeInitialIntakeLineage("node-instance-1", "iter-001");
+            binding = writeInitialIntakeLineage("node-instance-1", "iter-001", runId);
+        }
+        var outputRefs = new java.util.ArrayList<>(List.of(outputRef));
+        var facts = new java.util.LinkedHashMap<String, Object>();
+        facts.put("run_id", runId);
+        facts.put("agent", "test");
+        if (binding != null) {
+            outputRefs.add(binding.ref());
+            facts.put("repository_fact_binding_ref", binding.ref());
+            facts.put("repository_fact_binding_sha256", binding.sha256());
         }
         return validator.validate(
                 tempDir, "ws-1", "node-instance-1", node(nodeId),
-                NodeResult.completed("completed", List.of(outputRef), Map.of("run_id", runId, "agent", "test")));
+                NodeResult.completed("completed", List.copyOf(outputRefs), Map.copyOf(facts)));
     }
 
-    private void writeInitialIntakeLineage(String nodeInstanceId, String iterationId) throws Exception {
-        writeTrackedInventoryFixture();
+    private RepositoryFactBinding.Verified writeInitialIntakeLineage(
+            String nodeInstanceId,
+            String iterationId,
+            String runId
+    ) throws Exception {
+        var binding = writeTrackedInventoryFixture(nodeInstanceId, runId);
         var iterationRef = ".agent/workstreams/ws-1/iterations/" + iterationId + ".json";
         if (!Files.isRegularFile(tempDir.resolve(iterationRef))) {
             var iterationPath = tempDir.resolve(iterationRef);
@@ -568,9 +617,13 @@ class ArtifactContractValidatorTest {
                     Map.entry("outputRefs", List.of()),
                     Map.entry("result", Map.of()))));
         }
+        return binding;
     }
 
-    private void writeTrackedInventoryFixture() throws Exception {
+    private RepositoryFactBinding.Verified writeTrackedInventoryFixture(
+            String nodeInstanceId,
+            String runId
+    ) throws Exception {
         var files = new java.util.ArrayList<Map<String, Object>>();
         try (var paths = Files.walk(tempDir)) {
             for (var path : paths.filter(Files::isRegularFile).toList()) {
@@ -581,9 +634,27 @@ class ArtifactContractValidatorTest {
             }
         }
         files.sort(java.util.Comparator.comparing(item -> String.valueOf(item.get("path"))));
-        write(".agent/workstreams/ws-1/memory/repo-map.json", JSON.writeValueAsString(Map.of(
+        var occurrenceDir = tempDir.resolve(".agent/workstreams/ws-1/artifacts/context-governance/occurrences")
+                .resolve(nodeInstanceId + "-" + runId);
+        var repoMap = occurrenceDir.resolve("repo-map.json");
+        Files.createDirectories(occurrenceDir);
+        Files.writeString(repoMap, JSON.writeValueAsString(Map.of(
                 "artifactType", "repo_map",
+                "inventoryHead", "",
+                "inventorySha256", "",
+                "inventoryPathCount", 0,
                 "files", files)));
+        return RepositoryFactBinding.write(
+                tempDir,
+                occurrenceDir.resolve("binding.json"),
+                "ws-1",
+                nodeInstanceId,
+                runId,
+                "",
+                "",
+                0,
+                Map.of("repoMap", repoMap),
+                JSON);
     }
 
     private void writeRevisionLineage(String rejectedReviewRef, String revisionNodeId, String iterationId)

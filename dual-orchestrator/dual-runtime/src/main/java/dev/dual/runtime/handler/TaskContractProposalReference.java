@@ -109,6 +109,16 @@ public record TaskContractProposalReference(
             AgentOutputContractDocument document,
             ObjectMapper objectMapper
     ) {
+        if (document.repositoryFactBinding() != null
+                && !RepositoryFactBinding.verifyReference(
+                        root,
+                        workstreamId,
+                        document.repositoryFactBinding(),
+                        document.nodeInstanceId(),
+                        document.runId(),
+                        objectMapper).valid()) {
+            return false;
+        }
         if ("task_contract_proposal".equals(document.sourceArtifactType())) {
             return document.proposalDerivation() == null;
         }

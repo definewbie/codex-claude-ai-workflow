@@ -49,6 +49,7 @@ public record AgentOutputContractDocument(
         List<RereadReason> rereadReasons,
         TaskContractProposalReference reviewSubject,
         TaskContractProposal taskContractProposal,
+        RepositoryFactBinding.Reference repositoryFactBinding,
         ProposalDerivation proposalDerivation,
         PlanArtifactDocument planArtifact
 ) {
@@ -94,6 +95,7 @@ public record AgentOutputContractDocument(
                 rereadReasonList(document.get("reread_reasons")),
                 TaskContractProposalReference.fromMap(objectMap(document.get("review_subject"))).orElse(null),
                 taskContractProposal(objectMap(document.get("task_contract_proposal"))),
+                RepositoryFactBinding.Reference.fromMap(objectMap(document.get("repository_fact_binding"))),
                 ProposalDerivation.from(objectMap(document.get("proposal_derivation"))),
                 planArtifact(objectMap(document.get("plan_artifact")))
         );

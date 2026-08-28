@@ -29,7 +29,6 @@ import java.util.Set;
  * behavior.
  */
 final class RepoScopeGovernance {
-    static final String REPO_MAP_REF = "memory/repo-map.json";
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private static final int MAX_SCOPE_FILES = 24;
@@ -53,17 +52,45 @@ final class RepoScopeGovernance {
             ObjectMapper objectMapper,
             Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
+        return build(workspaceRoot, workstreamDir, context, objectMapper, qualifiedContract, "");
+    }
+
+    static Documents build(
+            Path workspaceRoot,
+            Path workstreamDir,
+            TaskHandler.TaskContext context,
+            ObjectMapper objectMapper,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract,
+            String runId
+    ) throws IOException {
         var stageId = stageId(context);
         var targetNodeDefinitionId = targetNodeDefinitionId(context);
         var memoryDir = workstreamDir.resolve("memory");
         var workstreamMemoryPath = memoryDir.resolve("workstream-memory.json");
         var existingMemory = readWorkstreamMemory(workstreamMemoryPath, objectMapper);
+        var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
+        var nodeKey = safeFileName(context.instance().nodeInstanceId());
+        var occurrenceKey = runId == null || runId.isBlank()
+                ? nodeKey
+                : nodeKey + "-" + safeFileName(runId);
+        var occurrenceDir = governanceDir.resolve("occurrences").resolve(occurrenceKey);
+        var repoMapPath = occurrenceDir.resolve("repo-map.json");
+        var planPath = occurrenceDir.resolve("file-relevance-plan.json");
+        var policyPath = occurrenceDir.resolve("stage-scope-policy.json");
+        var workingSetPath = occurrenceDir.resolve("working-set.json");
+        var fileSummariesPath = occurrenceDir.resolve("file-summaries.json");
+        var readReuseContractPath = occurrenceDir.resolve("read-reuse-contract.json");
+        var capabilityCatalogPath = occurrenceDir.resolve("agent-capability-catalog.json");
+        var reportPath = occurrenceDir.resolve("planned-report.json");
+        var bindingPath = occurrenceDir.resolve("binding.json");
+        Files.createDirectories(memoryDir);
+        Files.createDirectories(occurrenceDir);
         var trackedInventory = contractDiscovery(context)
                 ? GitTrackedPathInventory.capture(workspaceRoot)
                 : GitTrackedPathInventory.empty();
         var plan = buildFileRelevancePlan(
                 workstreamDir, context, objectMapper, stageId, targetNodeDefinitionId, qualifiedContract,
-                trackedInventory);
+                trackedInventory, ref(workspaceRoot, repoMapPath));
         var repoMapPaths = contractDiscovery(context)
                 ? trackedInventory.paths()
                 : textList(plan.get("readCandidates"));
@@ -85,19 +112,35 @@ final class RepoScopeGovernance {
                 targetNodeDefinitionId,
                 context.definition().config()
         );
-        var governanceDir = workstreamDir.resolve("artifacts").resolve("context-governance");
-        Files.createDirectories(memoryDir);
-        Files.createDirectories(governanceDir);
-
-        var nodeKey = safeFileName(context.instance().nodeInstanceId());
-        var repoMapPath = memoryDir.resolve("repo-map.json");
-        var planPath = memoryDir.resolve("file-relevance-plan-" + nodeKey + ".json");
-        var policyPath = memoryDir.resolve("stage-scope-policy-" + nodeKey + ".json");
-        var workingSetPath = memoryDir.resolve("working-set.json");
-        var fileSummariesPath = memoryDir.resolve("file-summaries.json");
-        var readReuseContractPath = memoryDir.resolve("read-reuse-contract.json");
-        var capabilityCatalogPath = memoryDir.resolve("agent-capability-catalog-" + nodeKey + ".json");
-        var reportPath = governanceDir.resolve(nodeKey + ".json");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(repoMapPath.toFile(), repoMap);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(planPath.toFile(), plan);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(policyPath.toFile(), policy);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(workingSetPath.toFile(), workingSet);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(fileSummariesPath.toFile(), fileSummaries);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(readReuseContractPath.toFile(), readReuseContract);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(capabilityCatalogPath.toFile(), capabilityCatalog.toDocument());
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(reportPath.toFile(), report);
+        var binding = RepositoryFactBinding.write(
+                workspaceRoot,
+                bindingPath,
+                context.workstreamId(),
+                context.instance().nodeInstanceId(),
+                runId,
+                trackedInventory.head(),
+                trackedInventory.sha256(),
+                trackedInventory.paths().size(),
+                Map.of(
+                        "repoMap", repoMapPath,
+                        "fileRelevancePlan", planPath,
+                        "stageScopePolicy", policyPath,
+                        "workingSet", workingSetPath,
+                        "fileSummaries", fileSummariesPath,
+                        "readReuseContract", readReuseContractPath,
+                        "agentCapabilityCatalog", capabilityCatalogPath,
+                        "plannedReport", reportPath
+                ),
+                objectMapper
+        );
         var workstreamMemory = buildWorkstreamMemory(
                 context,
                 workspaceRoot,
@@ -108,18 +151,10 @@ final class RepoScopeGovernance {
                 policyPath,
                 workingSetPath,
                 fileSummariesPath,
-                readReuseContractPath
+                readReuseContractPath,
+                binding.path()
         );
-
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(repoMapPath.toFile(), repoMap);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(planPath.toFile(), plan);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(policyPath.toFile(), policy);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(workingSetPath.toFile(), workingSet);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(fileSummariesPath.toFile(), fileSummaries);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(readReuseContractPath.toFile(), readReuseContract);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(capabilityCatalogPath.toFile(), capabilityCatalog.toDocument());
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(workstreamMemoryPath.toFile(), workstreamMemory);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(reportPath.toFile(), report);
 
         return new Documents(
                 repoMap,
@@ -138,7 +173,8 @@ final class RepoScopeGovernance {
                 fileSummariesPath,
                 readReuseContractPath,
                 capabilityCatalogPath,
-                workstreamMemoryPath
+                workstreamMemoryPath,
+                binding
         );
     }
 
@@ -158,6 +194,8 @@ final class RepoScopeGovernance {
             return;
         }
         builder.append("- Repo map: ").append(ref(workspaceRoot, documents.repoMapPath())).append("\n");
+        builder.append("- Repository fact binding: ")
+                .append(documents.repositoryFactBinding().ref()).append("\n");
         appendInventoryIdentity(builder, documents);
         builder.append("- File relevance plan: ").append(ref(workspaceRoot, documents.fileRelevancePlanPath())).append("\n");
         builder.append("- Stage scope policy: ").append(ref(workspaceRoot, documents.stageScopePolicyPath())).append("\n");
@@ -183,6 +221,8 @@ final class RepoScopeGovernance {
                 .append(ref(workspaceRoot, documents.readReuseContractPath()))
                 .append("; repoMap=")
                 .append(ref(workspaceRoot, documents.repoMapPath()))
+                .append("; repositoryFactBinding=")
+                .append(documents.repositoryFactBinding().ref())
                 .append("\n\n");
         appendInventoryIdentity(builder, documents);
         builder.append("- Available context capabilities: ")
@@ -240,7 +280,8 @@ final class RepoScopeGovernance {
             String stageId,
             String targetNodeDefinitionId,
             Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract,
-            GitTrackedPathInventory trackedInventory
+            GitTrackedPathInventory trackedInventory,
+            String trackedInventoryRef
     ) throws IOException {
         var contractScope = contractScopePaths(workstreamDir, objectMapper, qualifiedContract);
         var candidates = new LinkedHashSet<String>();
@@ -270,7 +311,7 @@ final class RepoScopeGovernance {
         document.put("source", contractDiscovery(context)
                 ? "git_tracked_inventory+task_contract_scope+git_evidence"
                 : "task_contract_scope+git_evidence");
-        document.put("trackedInventoryRef", contractDiscovery(context) ? REPO_MAP_REF : "");
+        document.put("trackedInventoryRef", contractDiscovery(context) ? trackedInventoryRef : "");
         document.put("trackedInventoryHead", trackedInventory.head());
         document.put("trackedInventorySha256", trackedInventory.sha256());
         document.put("trackedInventoryPathCount", trackedInventory.paths().size());
@@ -471,7 +512,8 @@ final class RepoScopeGovernance {
             Path policyPath,
             Path workingSetPath,
             Path fileSummariesPath,
-            Path readReuseContractPath
+            Path readReuseContractPath,
+            Path repositoryFactBindingPath
     ) {
         var document = new LinkedHashMap<String, Object>(existingMemory);
         document.put("schemaVersion", 1);
@@ -487,13 +529,15 @@ final class RepoScopeGovernance {
         document.putIfAbsent("openIssues", List.of());
         document.putIfAbsent("priorVerdicts", List.of());
         document.putIfAbsent("priorFailures", List.of());
+        document.put("refsSemantics", "latest_projection_refs");
         document.put("refs", Map.of(
                 "repoMap", ref(workspaceRoot, repoMapPath),
                 "fileRelevancePlan", ref(workspaceRoot, planPath),
                 "stageScopePolicy", ref(workspaceRoot, policyPath),
                 "workingSet", ref(workspaceRoot, workingSetPath),
                 "fileSummaries", ref(workspaceRoot, fileSummariesPath),
-                "readReuseContract", ref(workspaceRoot, readReuseContractPath)
+                "readReuseContract", ref(workspaceRoot, readReuseContractPath),
+                "repositoryFactBinding", ref(workspaceRoot, repositoryFactBindingPath)
         ));
         document.put("generatedAt", Instant.now().toString());
         return document;
@@ -1022,7 +1066,8 @@ final class RepoScopeGovernance {
             Path fileSummariesPath,
             Path readReuseContractPath,
             Path agentCapabilityCatalogPath,
-            Path workstreamMemoryPath
+            Path workstreamMemoryPath,
+            RepositoryFactBinding.Verified repositoryFactBinding
     ) {
     }
 }

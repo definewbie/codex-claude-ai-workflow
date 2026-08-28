@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import dev.dual.runtime.handler.RepositoryFactBinding;
 
 final class AgentRunMetadataWriter {
     private static final String PROMPT_DEBUG_ENV = "DUAL_AGENT_PROMPT_DEBUG";
@@ -142,7 +143,8 @@ final class AgentRunMetadataWriter {
             AcpxUsage usage,
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta,
-            AgentResultAcquisitionDocument agentResultAcquisition
+            AgentResultAcquisitionDocument agentResultAcquisition,
+            RepositoryFactBinding.Verified repositoryFactBinding
     ) throws IOException {
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
@@ -169,7 +171,8 @@ final class AgentRunMetadataWriter {
                 runId,
                 stdoutPath,
                 transcriptPath,
-                toolUsage
+                toolUsage,
+                repositoryFactBinding
         ).orElse(null);
         var attempt = executionAttempt(
                 runId,

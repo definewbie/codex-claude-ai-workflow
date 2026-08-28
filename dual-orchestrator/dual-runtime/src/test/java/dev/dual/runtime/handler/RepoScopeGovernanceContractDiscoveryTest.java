@@ -85,8 +85,94 @@ class RepoScopeGovernanceContractDiscoveryTest {
 
         var guidance = new StringBuilder();
         RepoScopeGovernance.appendMarkdownGuidance(guidance, documents, root, true);
-        assertTrue(guidance.toString().contains("repoMap=.agent/workstreams/ws-cold/memory/repo-map.json"));
+        assertTrue(guidance.toString().contains(
+                "repoMap=.agent/workstreams/ws-cold/artifacts/context-governance/occurrences/node-intake/repo-map.json"));
         assertTrue(guidance.toString().contains("Tracked inventory: count=33"));
+        var binding = RepositoryFactBinding.verify(
+                root,
+                "ws-cold",
+                documents.repositoryFactBinding().ref(),
+                documents.repositoryFactBinding().sha256(),
+                "node-intake",
+                "",
+                new ObjectMapper().registerModule(new JavaTimeModule()));
+        assertTrue(binding.valid(), binding.errors().toString());
+    }
+
+    @Test
+    void occurrenceBindingsSurviveSiblingRunsAndRejectGlobalFallbackOrTampering() throws Exception {
+        Files.createDirectories(root.resolve("src"));
+        Files.writeString(root.resolve("src/Main.java"), "class Main {}\n");
+        git("init");
+        git("config", "user.email", "dual@example.test");
+        git("config", "user.name", "Dual Test");
+        git("add", ".");
+        git("commit", "-m", "baseline");
+
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var workstreamDir = root.resolve(".agent/workstreams/ws-cold");
+        Files.createDirectories(workstreamDir);
+        var definition = new NodeDefinition(
+                "intake.claude_brainstorm",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                Map.of("permission_profile", "contract_discovery"));
+        var context = new TaskHandler.TaskContext(
+                root,
+                "ws-cold",
+                definition,
+                new NodeInstance(
+                        "node-intake",
+                        definition.id(),
+                        definition.kind(),
+                        definition.handlerType(),
+                        NodeStatus.RUNNING,
+                        "intake",
+                        "iter-001",
+                        List.of(),
+                        List.of(),
+                        Map.of(),
+                        null,
+                        null,
+                        null));
+
+        var first = RepoScopeGovernance.build(root, workstreamDir, context, mapper, java.util.Optional.empty(), "run-1");
+        var firstBindingBytes = Files.readAllBytes(first.repositoryFactBinding().path());
+        var firstRepoMap = root.resolve(first.repositoryFactBinding().document().artifacts().get("repoMap").ref());
+        var firstRepoMapBytes = Files.readAllBytes(firstRepoMap);
+
+        var second = RepoScopeGovernance.build(root, workstreamDir, context, mapper, java.util.Optional.empty(), "run-2");
+
+        assertFalse(first.repositoryFactBinding().ref().equals(second.repositoryFactBinding().ref()));
+        assertEquals(List.of("run-1", "run-2"), List.of(
+                first.repositoryFactBinding().document().runId(),
+                second.repositoryFactBinding().document().runId()));
+        assertTrue(java.util.Arrays.equals(firstBindingBytes, Files.readAllBytes(first.repositoryFactBinding().path())));
+        assertTrue(java.util.Arrays.equals(firstRepoMapBytes, Files.readAllBytes(firstRepoMap)));
+        assertTrue(RepositoryFactBinding.verify(
+                root, "ws-cold", first.repositoryFactBinding().ref(), first.repositoryFactBinding().sha256(),
+                "node-intake", "run-1", mapper).valid());
+        assertTrue(RepositoryFactBinding.verify(
+                root, "ws-cold", second.repositoryFactBinding().ref(), second.repositoryFactBinding().sha256(),
+                "node-intake", "run-2", mapper).valid());
+
+        var globalRepoMap = workstreamDir.resolve("memory/repo-map.json");
+        Files.createDirectories(globalRepoMap.getParent());
+        Files.writeString(globalRepoMap, "{\"files\":[]}");
+        Files.delete(first.repositoryFactBinding().path());
+        assertFalse(RepositoryFactBinding.verify(
+                root, "ws-cold", first.repositoryFactBinding().ref(), first.repositoryFactBinding().sha256(),
+                "node-intake", "run-1", mapper).valid(),
+                "a mutable global projection must not replace a missing occurrence binding");
+
+        Files.write(first.repositoryFactBinding().path(), firstBindingBytes);
+        Files.writeString(firstRepoMap, "{\"tampered\":true}");
+        var tampered = RepositoryFactBinding.verify(
+                root, "ws-cold", first.repositoryFactBinding().ref(), first.repositoryFactBinding().sha256(),
+                "node-intake", "run-1", mapper);
+        assertFalse(tampered.valid());
+        assertTrue(tampered.errors().stream().anyMatch(error -> error.contains("artifact sha256 does not match")),
+                tampered.errors().toString());
     }
 
     private void git(String... args) throws Exception {

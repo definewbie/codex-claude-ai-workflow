@@ -14,6 +14,7 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
+import dev.dual.runtime.handler.RepositoryFactBinding;
 import dev.dual.runtime.handler.TaskHandler;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowIterationDocument;
@@ -581,7 +582,8 @@ class AcpxAgentTaskHandlerTest {
                 ),
                 null,
                 null,
-                null
+                null,
+                repositoryFactBindingFixture("ws-test", "node-design", "run-001")
         );
 
         var runMetadata = Files.readString(runDir.resolve("run.json"));
@@ -782,11 +784,12 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
-        assertEquals(3, result.outputRefs().size());
+        assertEquals(4, result.outputRefs().size());
         var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
         var finalArtifactRef = OBJECT_MAPPER.readTree(runMetadataPath.toFile()).path("outputPath").asText();
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith(".transcript.log")));
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith(".stderr.log")));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("/binding.json")));
 
         var outputPath = tempDir.resolve(finalArtifactRef);
         var finalArtifact = Files.readString(outputPath);
@@ -1304,9 +1307,10 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("completed", result.outcome());
         assertEquals(0, result.result().get("exit_code"));
         assertEquals("EXITED_ZERO", result.result().get("process_usability"));
-        assertEquals(2, result.outputRefs().size());
+        assertEquals(3, result.outputRefs().size());
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.transcript.log")));
         assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.stderr.log")));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("/binding.json")));
         var runMetadata = Files.readString(tempDir.resolve((String) result.result().get("run_metadata")));
         assertTrue(runMetadata.contains("\"exitCode\" : 0"));
         assertFalse(runMetadata.contains("RECOVERABLE_AGENT_RECONNECT"), runMetadata);
@@ -2954,6 +2958,47 @@ class AcpxAgentTaskHandlerTest {
                 ),
                 signals
         );
+    }
+
+    private RepositoryFactBinding.Verified repositoryFactBindingFixture(
+            String workstreamId,
+            String nodeInstanceId,
+            String runId
+    ) throws Exception {
+        var occurrenceDir = tempDir.resolve(".agent/workstreams").resolve(workstreamId)
+                .resolve("artifacts/context-governance/occurrences")
+                .resolve(nodeInstanceId + "-" + runId);
+        Files.createDirectories(occurrenceDir);
+        var repoMap = occurrenceDir.resolve("repo-map.json");
+        OBJECT_MAPPER.writeValue(repoMap.toFile(), Map.of(
+                "artifactType", "repo_map",
+                "inventoryHead", "",
+                "inventorySha256", "",
+                "inventoryPathCount", 0,
+                "files", List.of()));
+        var binding = occurrenceDir.resolve("binding.json");
+        OBJECT_MAPPER.writeValue(binding.toFile(), new RepositoryFactBinding.Document(
+                RepositoryFactBinding.SCHEMA_VERSION,
+                workstreamId,
+                nodeInstanceId,
+                runId,
+                "",
+                "",
+                0,
+                Map.of("repoMap", new RepositoryFactBinding.ArtifactRef(
+                        tempDir.relativize(repoMap).toString(),
+                        RepositoryFactBinding.sha256(repoMap)))));
+        var bindingRef = tempDir.relativize(binding).toString();
+        var verification = RepositoryFactBinding.verify(
+                tempDir,
+                workstreamId,
+                bindingRef,
+                RepositoryFactBinding.sha256(binding),
+                nodeInstanceId,
+                runId,
+                OBJECT_MAPPER);
+        assertTrue(verification.valid(), verification.errors().toString());
+        return verification.verified();
     }
 
     private static String completionJson(AcpxRunRequest request, String decision) throws java.io.IOException {

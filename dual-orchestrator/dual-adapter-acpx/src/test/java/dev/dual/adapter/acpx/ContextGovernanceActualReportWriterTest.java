@@ -1,6 +1,7 @@
 package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.runtime.handler.RepositoryFactBinding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -86,13 +87,22 @@ class ContextGovernanceActualReportWriterTest {
         Files.createDirectories(transcript.getParent());
         Files.writeString(transcript, "transcript");
 
+        var binding = binding(workspace, workstreamId, "node-001", "run-001",
+                Map.of("nodeDefinitionId", "implement.claude_implement",
+                        "readCandidates", List.of("src/main.py"),
+                        "writeCandidates", List.of("src/main.py")),
+                Map.of("nodeDefinitionId", "implement.claude_implement",
+                        "nodeInstanceId", "node-001", "iterationId", "iter-001",
+                        "stageId", "implement", "writeScope", List.of("src/main.py")),
+                Map.of());
         var output = new ContextGovernanceActualReportWriter().write(
                 workspace,
                 workstreamId,
                 "implement.claude_implement",
                 "run-001",
                 transcript,
-                toolUsage
+                toolUsage,
+                binding
         );
 
         assertTrue(output.isPresent());
@@ -143,6 +153,8 @@ class ContextGovernanceActualReportWriterTest {
         Files.createDirectories(transcript.getParent());
         Files.writeString(transcript, "transcript");
 
+        var binding = binding(workspace, workstreamId, "node-design", "run-001",
+                Map.of(), Map.of(), Map.of());
         var output = new ContextGovernanceActualReportWriter().write(
                 workspace,
                 workstreamId,
@@ -162,7 +174,8 @@ class ContextGovernanceActualReportWriterTest {
                         List.of(),
                         List.of(),
                         List.of()
-                )
+                ),
+                binding
         );
 
         assertTrue(output.isPresent());
@@ -206,6 +219,16 @@ class ContextGovernanceActualReportWriterTest {
         Files.createDirectories(transcript.getParent());
         Files.writeString(transcript, "transcript");
 
+        var binding = binding(workspace, workstreamId, "node-context-001", "run-001",
+                Map.of("nodeDefinitionId", "context.intake_claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "readCandidates", List.of("README.md", "main.py"),
+                        "writeCandidates", List.of()),
+                Map.of("nodeDefinitionId", "context.intake_claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "nodeInstanceId", "node-context-001", "iterationId", "iter-001",
+                        "stageId", "intake", "writeScope", List.of()),
+                Map.of());
         var output = new ContextGovernanceActualReportWriter().write(
                 workspace,
                 workstreamId,
@@ -225,7 +248,8 @@ class ContextGovernanceActualReportWriterTest {
                         List.of(),
                         List.of(),
                         List.of()
-                )
+                ),
+                binding
         );
 
         assertTrue(output.isPresent());
@@ -270,6 +294,14 @@ class ContextGovernanceActualReportWriterTest {
         Files.createDirectories(transcript.getParent());
         Files.writeString(transcript, "transcript");
 
+        var binding = binding(workspace, workstreamId, "node-001", "run-001",
+                Map.of(), Map.of(), Map.of(
+                        "schemaVersion", 1,
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "capabilities", List.of(
+                                Map.of("kind", "direct_file_read", "provider", "Read"),
+                                Map.of("kind", "token_filtered_shell", "provider", "rtk"))));
         var report = new ContextGovernanceActualReportWriter().write(
                 workspace,
                 workstreamId,
@@ -289,7 +321,8 @@ class ContextGovernanceActualReportWriterTest {
                         List.of(),
                         List.of("rtk read docs/product.md"),
                         List.of("rtk")
-                )
+                ),
+                binding
         );
 
         assertTrue(report.isPresent());
@@ -323,6 +356,13 @@ class ContextGovernanceActualReportWriterTest {
         Files.createDirectories(transcript.getParent());
         Files.writeString(transcript, "transcript");
 
+        var binding = binding(workspace, workstreamId, "node-001", "run-001",
+                Map.of(), Map.of(), Map.of(
+                        "schemaVersion", 1,
+                        "nodeDefinitionId", "intake.claude_brainstorm",
+                        "targetNodeDefinitionId", "intake.claude_brainstorm",
+                        "capabilities", List.of(
+                                Map.of("kind", "token_filtered_shell", "provider", "rtk"))));
         var report = new ContextGovernanceActualReportWriter().write(
                 workspace,
                 workstreamId,
@@ -343,7 +383,8 @@ class ContextGovernanceActualReportWriterTest {
                         List.of(),
                         List.of("rtk grep issueWorkflow src"),
                         List.of("rtk")
-                )
+                ),
+                binding
         );
 
         assertTrue(report.isPresent());
@@ -352,5 +393,71 @@ class ContextGovernanceActualReportWriterTest {
         assertEquals(0, json.get("actualDirectReadFiles").size());
         assertEquals(false, json.has("explorationPolicyResult"));
         assertEquals("token_filtered_shell", json.get("actualCapabilityUsages").get(0).get("kind").asText());
+    }
+
+    private RepositoryFactBinding.Verified binding(
+            Path workspace,
+            String workstreamId,
+            String nodeInstanceId,
+            String runId,
+            Map<String, Object> plan,
+            Map<String, Object> policy,
+            Map<String, Object> catalog
+    ) throws Exception {
+        var occurrenceDir = workspace.resolve(".agent/workstreams").resolve(workstreamId)
+                .resolve("artifacts/context-governance/occurrences")
+                .resolve(nodeInstanceId + "-" + runId);
+        Files.createDirectories(occurrenceDir);
+        var repoMapPath = occurrenceDir.resolve("repo-map.json");
+        objectMapper.writeValue(repoMapPath.toFile(), Map.of(
+                "artifactType", "repo_map",
+                "inventoryHead", "",
+                "inventorySha256", "",
+                "inventoryPathCount", 0,
+                "files", List.of()));
+        var artifacts = new java.util.LinkedHashMap<String, Path>();
+        artifacts.put("repoMap", repoMapPath);
+        if (!plan.isEmpty()) {
+            var path = occurrenceDir.resolve("file-relevance-plan.json");
+            objectMapper.writeValue(path.toFile(), plan);
+            artifacts.put("fileRelevancePlan", path);
+        }
+        if (!policy.isEmpty()) {
+            var path = occurrenceDir.resolve("stage-scope-policy.json");
+            objectMapper.writeValue(path.toFile(), policy);
+            artifacts.put("stageScopePolicy", path);
+        }
+        if (!catalog.isEmpty()) {
+            var path = occurrenceDir.resolve("agent-capability-catalog.json");
+            objectMapper.writeValue(path.toFile(), catalog);
+            artifacts.put("agentCapabilityCatalog", path);
+        }
+        var artifactRefs = new java.util.LinkedHashMap<String, RepositoryFactBinding.ArtifactRef>();
+        for (var entry : artifacts.entrySet()) {
+            artifactRefs.put(entry.getKey(), new RepositoryFactBinding.ArtifactRef(
+                    workspace.relativize(entry.getValue()).toString(),
+                    RepositoryFactBinding.sha256(entry.getValue())));
+        }
+        var bindingPath = occurrenceDir.resolve("binding.json");
+        objectMapper.writeValue(bindingPath.toFile(), new RepositoryFactBinding.Document(
+                RepositoryFactBinding.SCHEMA_VERSION,
+                workstreamId,
+                nodeInstanceId,
+                runId,
+                "",
+                "",
+                0,
+                artifactRefs));
+        var bindingRef = workspace.relativize(bindingPath).toString();
+        var verification = RepositoryFactBinding.verify(
+                workspace,
+                workstreamId,
+                bindingRef,
+                RepositoryFactBinding.sha256(bindingPath),
+                nodeInstanceId,
+                runId,
+                objectMapper);
+        assertTrue(verification.valid(), verification.errors().toString());
+        return verification.verified();
     }
 }
