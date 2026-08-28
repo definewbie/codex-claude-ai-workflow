@@ -111,6 +111,94 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void missingOnlyRootObjectClosureIsRecoveredAndRevalidatedWithoutCorrection() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var missingRootClosure = envelope.substring(0, envelope.length() - 1);
+        var transport = new ScriptedTransport(validResult("request-1", missingRootClosure, 0));
+        var requests = requests("root-closure-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+        var document = acquisition.toDocument(
+                tempDir,
+                tempDir.resolve("outputs/initial.json"),
+                tempDir.resolve("outputs/correction.json"),
+                null,
+                null
+        );
+
+        assertTrue(acquisition.finalParse().valid());
+        assertTrue(acquisition.initialValidation().valid());
+        assertFalse(acquisition.correctionAttempted());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(AcpxAgentResultAcquirer.CorrectionReason.NONE, acquisition.correctionReason());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.ROOT_OBJECT_CLOSURE_RECOVERED,
+                acquisition.initialPresentation().disposition()
+        );
+        assertEquals(1, transport.calls);
+        assertFalse(document.occurrences().get(0).rawAssistantSha256()
+                .equals(document.occurrences().get(0).candidateSha256()));
+        assertEquals("ROOT_OBJECT_CLOSURE_RECOVERED",
+                document.occurrences().get(0).presentationDisposition());
+    }
+
+    @Test
+    void fencedPayloadCanRecoverOnlyItsMissingRootObjectClosure() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var missingRootClosure = envelope.substring(0, envelope.length() - 1);
+        var raw = "Design result follows.\n```json\n" + missingRootClosure + "\n```\nDone.";
+        var transport = new ScriptedTransport(validResult("request-1", raw, 0));
+        var requests = requests("fenced-root-closure-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertTrue(acquisition.finalParse().valid());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition
+                        .SINGLE_FENCED_JSON_EXTRACTED_AND_ROOT_OBJECT_CLOSURE_RECOVERED,
+                acquisition.initialPresentation().disposition()
+        );
+        assertEquals(1, transport.calls);
+    }
+
+    @Test
+    void rootClosureRecoveryRejectsEveryDeeperOrAmbiguousEofShape() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var beforeResultClosure = envelope.substring(0, envelope.lastIndexOf("\n  }"));
+        var rejected = List.of(
+                beforeResultClosure,
+                envelope.substring(0, envelope.length() - 1) + ",",
+                "{\"schema_version\":1,\"value\":\"unterminated",
+                "{\"schema_version\":1,\"value\":[1,2",
+                "{\"schema_version\":1,\"value\":",
+                "{\"schema_version\":1,\"value\":1e",
+                "[1,2"
+        );
+
+        for (var candidate : rejected) {
+            var transport = new ScriptedTransport(validResult("request-1", candidate, 0));
+            var requests = requests("rejected-root-closure-" + Math.abs(candidate.hashCode()));
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                    "claude", requests.initial(), requests.correction(), "",
+                    "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+            assertFalse(acquisition.finalParse().valid(), candidate);
+            assertEquals(candidate, acquisition.finalCandidate(), candidate);
+            assertEquals(
+                    AcpxAgentResultAcquirer.PresentationDisposition.NOT_NEEDED,
+                    acquisition.initialPresentation().disposition(),
+                    candidate
+            );
+            assertEquals(1, transport.calls);
+        }
+    }
+
+    @Test
     void proseAroundOneCompleteJsonFenceIsDeterministicallyExtracted() throws Exception {
         var envelope = strictEnvelope("run-1");
         var raw = "Design completed after reading the approved contract.\n\n```json\n"
@@ -246,6 +334,30 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void correctionOccurrenceUsesTheSameRootClosureRecovery() throws Exception {
+        var envelope = strictEnvelope("run-1");
+        var transport = new ScriptedTransport(
+                validResult("request-1", "not-json", 0),
+                validResult("request-2", envelope.substring(0, envelope.length() - 1), 0)
+        );
+        var requests = requests("root-closure-correction-session");
+
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                "claude", requests.initial(), requests.correction(), correctionPrompt("run-1"),
+                "ws-test", "run-1", ContractRegistry.forNode("design.claude_design"));
+
+        assertTrue(acquisition.correctionAttempted());
+        assertTrue(acquisition.finalParse().valid());
+        assertTrue(acquisition.correctionValidation().valid());
+        assertEquals(envelope, acquisition.finalCandidate());
+        assertEquals(
+                AcpxAgentResultAcquirer.PresentationDisposition.ROOT_OBJECT_CLOSURE_RECOVERED,
+                acquisition.correctionPresentation().disposition()
+        );
+        assertEquals(2, transport.calls);
+    }
+
+    @Test
     void prosePrefixedResultGetsExactlyOneSameSessionCorrection() throws Exception {
         var transport = new ScriptedTransport(
                 validResult("request-1", "I have completed the task.\n" + strictEnvelope("run-1"), 0),
@@ -280,10 +392,10 @@ class AcpxAgentResultAcquirerTest {
     void failedCorrectionDoesNotStartAThirdPrompt() throws Exception {
         var rawOnlySentinel = "UNIQUE_RAW_PAYLOAD_SENTINEL";
         var complete = strictEnvelope("run-1").replace("one short sentence", rawOnlySentinel);
-        var missingRootClose = complete.substring(0, complete.length() - 1);
+        var deepTruncation = complete.substring(0, complete.lastIndexOf("\n  }"));
         var transport = new ScriptedTransport(
-                validResult("request-1", missingRootClose, 0),
-                validResult("request-2", missingRootClose, 0)
+                validResult("request-1", deepTruncation, 0),
+                validResult("request-2", deepTruncation, 0)
         );
         var requests = requests("same-session");
 
@@ -296,10 +408,8 @@ class AcpxAgentResultAcquirerTest {
         assertEquals("AGENT_RESULT_PARSE_FAILED", acquisition.finalParse().errorCode());
         assertEquals(2, transport.calls);
         var prompt = Files.readString(requests.correction().promptPath());
-        assertTrue(prompt.contains("kind: UNEXPECTED_END_OF_INPUT"));
-        assertTrue(prompt.contains("- line: "));
-        assertTrue(prompt.contains("- column: "));
-        assertTrue(prompt.contains("root JSON object was closed"));
+        assertTrue(prompt.contains("- kind: "));
+        assertTrue(prompt.contains("Re-emit the complete AgentResultEnvelope"));
         assertFalse(prompt.contains(rawOnlySentinel), "correction prompt must not duplicate malformed raw output");
     }
 

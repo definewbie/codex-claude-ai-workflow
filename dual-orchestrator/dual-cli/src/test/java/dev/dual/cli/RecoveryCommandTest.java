@@ -11,5 +11,6 @@ class RecoveryCommandTest {
         var commandLine = new CommandLine(new RecoveryCommand());
 
         assertTrue(commandLine.getSubcommands().containsKey("replay-classification"));
+        assertTrue(commandLine.getSubcommands().containsKey("approve-websearch"));
     }
 }

@@ -5,7 +5,12 @@ import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowStatus;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,6 +154,60 @@ final class NodeStateWriter {
     }
 
     void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
+        retryActiveNode(paths, note, Map.of(), "node_retry_requested");
+    }
+
+    void approvePublicWebSearch(WorkstreamPaths paths, String note, boolean publicRepositoryAttested)
+            throws IOException {
+        if (!publicRepositoryAttested) {
+            throw new IOException("public repository attestation is required to approve WebSearch");
+        }
+        if (note == null || note.isBlank()) {
+            throw new IOException("a human approval note is required to approve WebSearch");
+        }
+        var current = loadCurrent(paths);
+        if (current.activeNodeInstanceIds().isEmpty()) {
+            throw new IOException("no active node awaiting permission approval");
+        }
+        var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
+        if (node.status() != NodeStatus.FAILED) {
+            throw new IOException("active node is not awaiting permission approval: "
+                    + node.nodeDefinitionId() + " (" + node.status() + ")");
+        }
+        var assessment = RecoveryAssessment.from(
+                node,
+                paths.workspaceRoot(),
+                paths.workstreamId().value());
+        if (!assessment.allowedActions().contains("approve_public_websearch")) {
+            throw new IOException("current failure does not allow public WebSearch approval");
+        }
+        var request = publicWebSearchEscalation(paths, node);
+        var approval = new LinkedHashMap<String, Object>();
+        approval.put("schema_version", 1);
+        approval.put("type", "PUBLIC_WEBSEARCH");
+        approval.put("workstream_id", paths.workstreamId().value());
+        approval.put("node_instance_id", node.nodeInstanceId());
+        approval.put("tool_name", "WebSearch");
+        approval.put("tool_kind", "fetch");
+        approval.put("source_run_ref", request.runRef());
+        approval.put("source_tool_call_id", request.toolCallId());
+        approval.put("source_query_sha256", sha256(request.resource()));
+        approval.put("public_repository_attested", true);
+        approval.put("note", note.trim());
+        approval.put("approved_at", Instant.now().toString());
+        retryActiveNode(
+                paths,
+                note,
+                Map.of("permission_approval", Map.copyOf(approval)),
+                "public_websearch_approved");
+    }
+
+    private void retryActiveNode(
+            WorkstreamPaths paths,
+            String note,
+            Map<String, Object> additionalResult,
+            String eventType
+    ) throws IOException {
         var current = loadCurrent(paths);
         if (current.activeNodeInstanceIds().isEmpty()) {
             throw new IOException("no active node to retry");
@@ -157,6 +216,10 @@ final class NodeStateWriter {
         if (node.status() != NodeStatus.FAILED && node.status() != NodeStatus.BLOCKED) {
             throw new IOException("active node is not retryable: " + node.nodeDefinitionId() + " (" + node.status() + ")");
         }
+        var retryResult = new LinkedHashMap<String, Object>();
+        retryResult.put("retry_of_status", node.status().name());
+        retryResult.put("retry_note", note == null ? "" : note);
+        retryResult.putAll(additionalResult);
         var retry = new NodeInstanceDocument(
                 node.schemaVersion(),
                 node.nodeInstanceId(),
@@ -169,10 +232,7 @@ final class NodeStateWriter {
                 node.inputRefs(),
                 node.inputTransition(),
                 List.of(),
-                Map.of(
-                        "retry_of_status", node.status().name(),
-                        "retry_note", note == null ? "" : note
-                ),
+                retryResult,
                 node.runRef(),
                 node.latestExecutionId(),
                 null,
@@ -181,13 +241,16 @@ final class NodeStateWriter {
         jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), retry);
 
         var eventId = LedgerUtils.nextEventId(current.lastEventId());
-        eventLog.appendEvent(paths, eventId, "node_retry_requested", Map.of(
-                "node", node.nodeDefinitionId(),
-                "node_instance_id", node.nodeInstanceId(),
-                "previous_status", node.status().name(),
-                "note", note == null ? "" : note,
-                "recovery_gate_ids", current.openGateIds()
-        ));
+        var eventDetails = new LinkedHashMap<String, Object>();
+        eventDetails.put("node", node.nodeDefinitionId());
+        eventDetails.put("node_instance_id", node.nodeInstanceId());
+        eventDetails.put("previous_status", node.status().name());
+        eventDetails.put("note", note == null ? "" : note);
+        eventDetails.put("recovery_gate_ids", current.openGateIds());
+        if (additionalResult.containsKey("permission_approval")) {
+            eventDetails.put("permission_approval", additionalResult.get("permission_approval"));
+        }
+        eventLog.appendEvent(paths, eventId, eventType, Map.copyOf(eventDetails));
         var now = Instant.now();
         var resumed = new WorkflowCurrentDocument(
                 1,
@@ -203,6 +266,59 @@ final class NodeStateWriter {
         );
         jsonWriter.write(paths.workflowCurrentJson(), resumed);
         eventLog.writeInstanceFromCurrent(paths, resumed, now);
+    }
+
+    private PermissionEscalation publicWebSearchEscalation(WorkstreamPaths paths, NodeInstanceDocument node)
+            throws IOException {
+        var runRef = text(node.result().get("run_metadata"));
+        if (runRef.isBlank()) {
+            throw new IOException("permission escalation is missing run metadata");
+        }
+        var root = paths.workspaceRoot().toAbsolutePath().normalize();
+        var runPath = root.resolve(runRef).normalize();
+        if (!runPath.startsWith(paths.workstreamDir().toAbsolutePath().normalize())
+                || !Files.isRegularFile(runPath)) {
+            throw new IOException("permission escalation run metadata is invalid: " + runRef);
+        }
+        var run = objectMapper.readTree(runPath.toFile());
+        var timeline = run.path("executionTimeline");
+        if (!timeline.isArray()) {
+            throw new IOException("permission escalation execution timeline is missing");
+        }
+        for (var index = timeline.size() - 1; index >= 0; index--) {
+            var event = timeline.get(index);
+            if (!"permission_decision".equals(event.path("kind").asText())) {
+                continue;
+            }
+            var details = event.path("details");
+            if ("ESCALATION_REQUIRED".equals(details.path("authorityDisposition").asText())
+                    && "fetch".equals(details.path("toolKind").asText())
+                    && "WebSearch".equals(details.path("toolName").asText())
+                    && !details.path("toolCallId").asText().isBlank()
+                    && !details.path("resource").asText().isBlank()) {
+                return new PermissionEscalation(
+                        runRef,
+                        details.path("toolCallId").asText(),
+                        details.path("resource").asText());
+            }
+        }
+        throw new IOException("no exact WebSearch permission escalation is awaiting approval");
+    }
+
+    private static String sha256(String value) throws IOException {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException failure) {
+            throw new IOException("SHA-256 is unavailable", failure);
+        }
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : value.toString().trim();
+    }
+
+    private record PermissionEscalation(String runRef, String toolCallId, String resource) {
     }
 
     void replayDeterministicClassification(WorkstreamPaths paths, String note) throws IOException {

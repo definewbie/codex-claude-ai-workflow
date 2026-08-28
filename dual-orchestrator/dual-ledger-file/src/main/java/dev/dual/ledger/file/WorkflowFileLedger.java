@@ -415,6 +415,15 @@ public final class WorkflowFileLedger {
         refreshProjections(paths);
     }
 
+    public void approvePublicWebSearch(
+            WorkstreamPaths paths,
+            String note,
+            boolean publicRepositoryAttested
+    ) throws IOException {
+        nodeStateWriter.approvePublicWebSearch(paths, note, publicRepositoryAttested);
+        refreshProjections(paths);
+    }
+
     public void replayDeterministicClassification(WorkstreamPaths paths, String note) throws IOException {
         nodeStateWriter.replayDeterministicClassification(paths, note);
         refreshProjections(paths);

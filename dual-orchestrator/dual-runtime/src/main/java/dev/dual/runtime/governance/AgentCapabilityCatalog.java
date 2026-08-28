@@ -151,16 +151,18 @@ public final class AgentCapabilityCatalog {
 
     private record CapabilityPermission(boolean directReadAllowed, boolean shellAllowed) {
         static CapabilityPermission fromNodeConfig(Map<String, Object> nodeConfig) {
-            if (nodeConfig != null && Boolean.TRUE.equals(nodeConfig.get("approve_all"))) {
-                return new CapabilityPermission(true, true);
-            }
             var profile = text(nodeConfig == null ? null : nodeConfig.get("permission_profile"));
-            return switch (profile) {
+            if (!profile.isBlank()) {
+                return switch (profile) {
                 case "contract_discovery" -> new CapabilityPermission(true, false);
                 case "observe", "review" -> new CapabilityPermission(true, false);
                 case "implement" -> new CapabilityPermission(true, true);
                 default -> new CapabilityPermission(true, false);
-            };
+                };
+            }
+            return nodeConfig != null && Boolean.TRUE.equals(nodeConfig.get("approve_all"))
+                    ? new CapabilityPermission(true, true)
+                    : new CapabilityPermission(true, false);
         }
     }
 }

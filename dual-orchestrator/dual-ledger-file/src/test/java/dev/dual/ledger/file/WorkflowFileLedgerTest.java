@@ -1403,7 +1403,140 @@ class WorkflowFileLedgerTest {
         assertFalse(Files.exists(paths.iterationJson("iter-002")));
         assertTrue(retryNode.outputRefs().isEmpty());
         assertEquals("FAILED", retryNode.result().get("retry_of_status"));
+        assertFalse(retryNode.result().containsKey("permission_approval"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("node_retry_requested"));
+    }
+
+    @Test
+    void publicWebSearchApprovalRequiresExactEscalationAndCreatesOneRetryGrant() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-websearch-approval"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.claude_design",
+                List.of(new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-websearch-approval", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        var runPath = paths.runsDir().resolve("run-websearch").resolve("run.json");
+        Files.createDirectories(runPath.getParent());
+        writePermissionEscalationRun(runPath, "WebFetch");
+        var runRef = tempDir.relativize(runPath).toString();
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                node.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "failed",
+                List.of(runRef),
+                permissionBlockedResult(runRef)
+        );
+
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "public dependency lookup", false));
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "", true));
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "public dependency lookup", true));
+
+        writePermissionEscalationRun(runPath, "WebSearch");
+        ledger.approvePublicWebSearch(paths, "public dependency lookup", true);
+
+        var approvedCurrent = ledger.loadCurrent(paths);
+        var approvedNode = ledger.loadNode(paths, approvedCurrent.activeNodeInstanceIds().getFirst());
+        assertEquals(WorkflowStatus.RUNNING, approvedCurrent.status());
+        assertEquals(NodeStatus.READY, approvedNode.status());
+        var approval = (Map<?, ?>) approvedNode.result().get("permission_approval");
+        assertEquals("PUBLIC_WEBSEARCH", approval.get("type"));
+        assertEquals("WebSearch", approval.get("tool_name"));
+        assertEquals("fetch", approval.get("tool_kind"));
+        assertEquals(Boolean.TRUE, approval.get("public_repository_attested"));
+        assertTrue(approval.get("source_query_sha256").toString().matches("[0-9a-f]{64}"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("public_websearch_approved"));
+        assertTrue(events.contains("permission_approval"));
+        assertTrue(events.contains("source_query_sha256"));
+
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                approvedNode.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "failed",
+                List.of(runRef),
+                permissionBlockedResult(runRef)
+        );
+        ledger.retryActiveNode(paths, "retry without a second human approval");
+        var nextRetry = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        assertFalse(nextRetry.result().containsKey("permission_approval"),
+                "the one-retry WebSearch grant must be consumed by the completed execution");
+    }
+
+    @Test
+    void publicWebSearchApprovalCannotBypassTheCurrentRecoveryAssessment() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-websearch-auth-failure"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle", 1, "design.claude_design",
+                List.of(new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of());
+        var ledger = new WorkflowFileLedger();
+        ledger.initialize(paths, "wf-websearch-auth-failure", definition);
+        var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var runPath = paths.runsDir().resolve("run-websearch").resolve("run.json");
+        Files.createDirectories(runPath.getParent());
+        writePermissionEscalationRun(runPath, "WebSearch");
+        var runRef = tempDir.relativize(runPath).toString();
+        ledger.completeAndRoute(
+                paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "failed", List.of(runRef),
+                Map.of(
+                        "run_metadata", runRef,
+                        "agent_execution_outcome", Map.of(
+                                "status", "AUTH_FAILED",
+                                "primaryReason", "authentication_failed",
+                                "recoveryCategory", "AUTH_FAILED",
+                                "retryPolicy", "MANUAL_ONLY",
+                                "operatorMessage", "Authentication failed."
+                        )));
+
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "public dependency lookup", true));
+    }
+
+    private void writePermissionEscalationRun(Path runPath, String toolName) throws Exception {
+        Files.writeString(runPath, """
+                {
+                  "executionTimeline": [{
+                    "kind": "permission_decision",
+                    "details": {
+                      "authorityDisposition": "ESCALATION_REQUIRED",
+                      "disposition": "DENIED",
+                      "toolCallId": "call-websearch-1",
+                      "toolKind": "fetch",
+                      "toolName": "%s",
+                      "title": "Mailpit latest stable Docker tag",
+                      "resource": "Mailpit latest stable Docker tag"
+                    }
+                  }]
+                }
+                """.formatted(toolName));
+    }
+
+    private Map<String, Object> permissionBlockedResult(String runRef) {
+        return Map.of(
+                "run_metadata", runRef,
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "permission_blocked",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "WebSearch requires approval."
+                )
+        );
     }
 
     @Test

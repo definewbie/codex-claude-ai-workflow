@@ -92,6 +92,26 @@ public class WorkstreamActionService {
         return actionResponse("retry", workstreamId, "active node marked ready for retry");
     }
 
+    public Map<String, Object> approvePublicWebSearch(
+            Path workspaceRoot,
+            String workstreamId,
+            String note,
+            boolean publicRepositoryAttested
+    ) throws Exception {
+        var root = normalize(workspaceRoot);
+        var paths = paths(root, workstreamId);
+        try (var ignored = WorkstreamLock.acquire(
+                paths.workstreamDir(),
+                LockOwner.currentProcess(workstreamId, "api approve public WebSearch"))) {
+            assertNotCompleted(paths, "approve public WebSearch");
+            ledger.approvePublicWebSearch(paths, note, publicRepositoryAttested);
+        }
+        return actionResponse(
+                "recovery.approve_public_websearch",
+                workstreamId,
+                "public WebSearch approved for one retry");
+    }
+
     public Map<String, Object> recoverStaleRunning(Path workspaceRoot, String workstreamId, String note) throws Exception {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);

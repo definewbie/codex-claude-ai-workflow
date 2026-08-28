@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayDeque;
 import java.util.HexFormat;
 
 /** Acquires one strict agent-result candidate, with at most one same-session contract correction. */
@@ -41,9 +42,10 @@ final class AcpxAgentResultAcquirer {
             NodeOutputContract contract
     ) throws IOException, InterruptedException {
         var initialResult = executeInitial(agent, initialRequest);
-        var initialPresentation = presentationCandidate(
-                initialResult.promptCompletion().finalAssistantMessage());
-        var initialParse = parser.parse(initialPresentation.candidate());
+        var initialParsedPresentation = parsePresentation(presentationCandidate(
+                initialResult.promptCompletion().finalAssistantMessage()));
+        var initialPresentation = initialParsedPresentation.presentation();
+        var initialParse = initialParsedPresentation.parsed();
         var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract);
         var correctionReason = correctionReason(initialParse, initialValidation);
         var correctionDisposition = correctionDisposition(
@@ -75,9 +77,10 @@ final class AcpxAgentResultAcquirer {
                 StandardCharsets.UTF_8
         );
         var correctionResult = transport.runAgentResultCorrection(agent, correctionRequest);
-        var correctionPresentation = presentationCandidate(
-                correctionResult.promptCompletion().finalAssistantMessage());
-        var correctionParse = parser.parse(correctionPresentation.candidate());
+        var correctionParsedPresentation = parsePresentation(presentationCandidate(
+                correctionResult.promptCompletion().finalAssistantMessage()));
+        var correctionPresentation = correctionParsedPresentation.presentation();
+        var correctionParse = correctionParsedPresentation.parsed();
         var correctionValidation = validateCorrection(
                 correctionReason,
                 initialParse,
@@ -109,6 +112,25 @@ final class AcpxAgentResultAcquirer {
             case "codex" -> transport.runCodexDesignReview(request);
             default -> throw new IllegalArgumentException("unsupported agent: " + agent);
         };
+    }
+
+    private ParsedPresentation parsePresentation(PresentationCandidate presentation) {
+        var parsed = parser.parse(presentation.candidate());
+        var recoveredCandidate = singleRootObjectClosureCandidate(
+                presentation.candidate(), parsed.diagnostic());
+        if (recoveredCandidate == null
+                || presentation.disposition() == PresentationDisposition.REJECTED_AMBIGUOUS_PRESENTATION) {
+            return new ParsedPresentation(presentation, parsed);
+        }
+        var recovered = presentationCandidate(
+                presentation.raw(),
+                recoveredCandidate,
+                rootClosureDisposition(presentation.disposition())
+        );
+        var recoveredParse = parser.parse(recovered.candidate());
+        return recoveredParse.valid()
+                ? new ParsedPresentation(recovered, recoveredParse)
+                : new ParsedPresentation(presentation, parsed);
     }
 
     private CorrectionDisposition correctionDisposition(
@@ -275,6 +297,10 @@ final class AcpxAgentResultAcquirer {
         SINGLE_JSON_FENCE_REMOVED,
         SINGLE_JSON_FENCE_OPENING_REMOVED,
         SINGLE_FENCED_JSON_EXTRACTED,
+        ROOT_OBJECT_CLOSURE_RECOVERED,
+        SINGLE_JSON_FENCE_REMOVED_AND_ROOT_OBJECT_CLOSURE_RECOVERED,
+        SINGLE_JSON_FENCE_OPENING_REMOVED_AND_ROOT_OBJECT_CLOSURE_RECOVERED,
+        SINGLE_FENCED_JSON_EXTRACTED_AND_ROOT_OBJECT_CLOSURE_RECOVERED,
         REJECTED_AMBIGUOUS_PRESENTATION
     }
 
@@ -284,6 +310,12 @@ final class AcpxAgentResultAcquirer {
             PresentationDisposition disposition,
             String rawSha256,
             String candidateSha256
+    ) {
+    }
+
+    private record ParsedPresentation(
+            PresentationCandidate presentation,
+            AgentResultEnvelopeParser.ParseResult parsed
     ) {
     }
 
@@ -336,6 +368,99 @@ final class AcpxAgentResultAcquirer {
         var prefix = stripped.substring(0, opening);
         var suffix = stripped.substring(closingEnd);
         return new JsonFencePayload(payload, prefix.isBlank() && suffix.isBlank());
+    }
+
+    private static String singleRootObjectClosureCandidate(
+            String candidate,
+            AgentResultEnvelopeParser.ParseDiagnostic diagnostic
+    ) {
+        if (candidate == null
+                || diagnostic == null
+                || diagnostic.kind() != AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT
+                || diagnostic.offset() != candidate.length()) {
+            return null;
+        }
+
+        var first = firstNonWhitespace(candidate);
+        if (first < 0 || candidate.charAt(first) != '{') {
+            return null;
+        }
+
+        var stack = new ArrayDeque<Character>();
+        var inString = false;
+        var escaped = false;
+        for (var index = first; index < candidate.length(); index++) {
+            var current = candidate.charAt(index);
+            if (inString) {
+                if (escaped) {
+                    escaped = false;
+                } else if (current == '\\') {
+                    escaped = true;
+                } else if (current == '"') {
+                    inString = false;
+                }
+                continue;
+            }
+            if (current == '"') {
+                inString = true;
+            } else if (current == '{' || current == '[') {
+                stack.push(current);
+            } else if (current == '}' || current == ']') {
+                if (stack.isEmpty() || !matchingDelimiter(stack.pop(), current)) {
+                    return null;
+                }
+            }
+        }
+
+        var last = lastNonWhitespace(candidate);
+        if (inString
+                || escaped
+                || stack.size() != 1
+                || stack.peek() != '{'
+                || last < first
+                || candidate.charAt(last) == ','
+                || candidate.charAt(last) == ':'
+                || candidate.charAt(last) == '{'
+                || candidate.charAt(last) == '[') {
+            return null;
+        }
+        return candidate + "}";
+    }
+
+    private static boolean matchingDelimiter(char opening, char closing) {
+        return opening == '{' && closing == '}' || opening == '[' && closing == ']';
+    }
+
+    private static int firstNonWhitespace(String value) {
+        for (var index = 0; index < value.length(); index++) {
+            if (!Character.isWhitespace(value.charAt(index))) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    private static int lastNonWhitespace(String value) {
+        for (var index = value.length() - 1; index >= 0; index--) {
+            if (!Character.isWhitespace(value.charAt(index))) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    private static PresentationDisposition rootClosureDisposition(PresentationDisposition disposition) {
+        return switch (disposition) {
+            case NOT_NEEDED -> PresentationDisposition.ROOT_OBJECT_CLOSURE_RECOVERED;
+            case SINGLE_JSON_FENCE_REMOVED ->
+                    PresentationDisposition.SINGLE_JSON_FENCE_REMOVED_AND_ROOT_OBJECT_CLOSURE_RECOVERED;
+            case SINGLE_JSON_FENCE_OPENING_REMOVED ->
+                    PresentationDisposition.SINGLE_JSON_FENCE_OPENING_REMOVED_AND_ROOT_OBJECT_CLOSURE_RECOVERED;
+            case SINGLE_FENCED_JSON_EXTRACTED ->
+                    PresentationDisposition.SINGLE_FENCED_JSON_EXTRACTED_AND_ROOT_OBJECT_CLOSURE_RECOVERED;
+            default -> throw new IllegalArgumentException(
+                    "root closure is not available for presentation disposition " + disposition);
+        };
     }
 
     private static JsonFencePayload exactJsonFenceOpeningPayload(String stripped) {

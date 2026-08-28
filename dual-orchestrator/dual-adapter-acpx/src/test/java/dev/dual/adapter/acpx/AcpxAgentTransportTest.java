@@ -141,7 +141,12 @@ class AcpxAgentTransportTest {
         assertTrue(ensureLine.contains("sessions ensure --name codex-implement"),
                 "implement must use sessions ensure: " + log);
         assertFalse(ensureLine.contains(" sessions new "), "implement must not force a fresh session: " + log);
-        assertTrue(ensureLine.contains("--approve-all"), "implement ensure must carry approve-all: " + ensureLine);
+        assertFalse(ensureLine.contains("--approve-all"), "implement must not auto-approve network tools: " + ensureLine);
+        assertTrue(ensureLine.contains("\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"]"), ensureLine);
+        assertTrue(ensureLine.contains("\"escalate\":[\"fetch\"]"), ensureLine);
+        assertTrue(ensureLine.contains("--allowed-tools Read,Write,Edit,MultiEdit,Grep,Glob,Bash"), ensureLine);
+        assertFalse(ensureLine.contains("WebSearch"), ensureLine);
+        assertFalse(ensureLine.contains("WebFetch"), ensureLine);
     }
 
     @Test
@@ -1115,7 +1120,10 @@ class AcpxAgentTransportTest {
         var args = Files.readString(argsLog);
         assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt));
         assertFalse(args.contains("--prompt-retries"));
-        assertTrue(args.contains("--approve-all"));
+        assertFalse(args.contains("--approve-all"));
+        assertTrue(args.contains("\"escalate\":[\"fetch\"]"));
+        assertFalse(args.contains("WebSearch"));
+        assertFalse(args.contains("WebFetch"));
     }
 
     @Test
@@ -1436,7 +1444,8 @@ class AcpxAgentTransportTest {
                 if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
                 echo "connected (%s)" >&2
                 cat >> '%s' <<'EOF'
-                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"options":[{"optionId":"allow"},{"optionId":"reject"}],"toolCall":{"toolCallId":"call-current-1","kind":"execute","title":"Run tests","rawInput":{"command":"mvn test"}}}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"session-current","update":{"sessionUpdate":"tool_call_update","toolCallId":"call-current-1","_meta":{"claudeCode":{"toolName":"WebSearch"}}}}}
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"options":[{"optionId":"allow"},{"optionId":"reject"}],"toolCall":{"toolCallId":"call-current-1","kind":"fetch","title":"Mailpit latest stable Docker tag","rawInput":{"query":"Mailpit latest stable Docker tag"}}}}
                 {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
                 EOF
                 exit 5
@@ -1461,17 +1470,19 @@ class AcpxAgentTransportTest {
                     .findFirst()
                     .orElseThrow();
             assertEquals("acpx_stream", permission.source());
-            assertTrue(permission.message().contains("mvn test"));
+            assertTrue(permission.message().contains("Mailpit latest stable Docker tag"));
             assertTrue(Files.readString(commandLog).contains("claude cancel -s claude-current"));
             var permissionEvent = result.executionTimeline().stream()
                     .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PERMISSION_DECISION)
                     .findFirst()
                     .orElseThrow();
+            assertEquals("WebSearch", permissionEvent.details().get("toolName"));
             assertEquals("call-current-1", permissionEvent.details().get("toolCallId"));
-            assertEquals("execute", permissionEvent.details().get("toolKind"));
+            assertEquals("fetch", permissionEvent.details().get("toolKind"));
             assertEquals("claude-current", permissionEvent.details().get("sessionName"));
             assertEquals(java.util.List.of("allow", "reject"), permissionEvent.details().get("requestedOptions"));
             assertEquals("DENIED", permissionEvent.details().get("disposition"));
+            assertEquals("ESCALATION_REQUIRED", permissionEvent.details().get("authorityDisposition"));
             assertTrue(result.executionTimeline().stream().anyMatch(event ->
                     event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
                             && "CANCELLED".equals(event.details().get("disposition"))));

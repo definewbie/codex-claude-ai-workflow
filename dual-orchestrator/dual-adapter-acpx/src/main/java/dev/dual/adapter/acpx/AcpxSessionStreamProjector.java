@@ -24,6 +24,7 @@ final class AcpxSessionStreamProjector {
     private final Map<String, String> assistantMessages = new LinkedHashMap<>();
     private AcpxPromptCompletion promptCompletion = AcpxPromptCompletion.EMPTY;
     private final Map<String, AgentLifecycleEvent.PermissionEvidence> permissionDetails = new HashMap<>();
+    private final Map<String, String> toolNamesByCallId = new HashMap<>();
 
     Optional<AgentLifecycleEvent> accept(long sequence, AcpxStreamWireLine wire) {
         return accept(sequence, wire, true);
@@ -167,6 +168,11 @@ final class AcpxSessionStreamProjector {
         }
         var notification = wire.notification();
         var updateKind = notification == null ? "" : notification.updateKind();
+        if (notification != null
+                && !notification.toolCallId().isBlank()
+                && !notification.toolName().isBlank()) {
+            toolNamesByCallId.put(notification.toolCallId(), notification.toolName());
+        }
         // A bounded tail may start after session/new. A structurally complete
         // typed session/update still proves that the named session was active;
         // malformed/bare notifications contribute no readiness fact.
@@ -255,6 +261,7 @@ final class AcpxSessionStreamProjector {
         return new AgentLifecycleEvent.PermissionEvidence(
                 crop(request.permissionToolCallId(), 160),
                 crop(request.permissionToolKind(), 80),
+                crop(toolNamesByCallId.get(request.permissionToolCallId()), 80),
                 crop(request.permissionTitle(), 240),
                 crop(request.permissionCommand(), 512),
                 request.permissionOptions(),

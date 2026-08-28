@@ -467,9 +467,9 @@ function renderEvidence(status) {
     const assessment = state.overview?.recoveryAssessment || state.recovery?.assessment || {};
     left = evidenceCard("恢复摘要", "运行时恢复，不等于业务验收失败。", [
       ["失败类型", assessment.classification || assessment.category || status],
-      ["恢复状态", assessment.readiness || "-"],
+      ["恢复状态", assessment.retryReadiness || assessment.readiness || "-"],
       ["原因", assessment.reason || state.recovery?.message || "-"],
-      ["建议", assessment.nextAction || "-"],
+      ["建议", assessment.suggestedCommand || assessment.nextAction || "-"],
     ], recoveryEvidence());
   } else if (status === "RUNNING") {
     left = evidenceCard("当前执行摘要", "运行中只展示观察信息，避免误触发第二次 execution。", [
@@ -1131,6 +1131,13 @@ function allowedActions(status) {
     ];
   }
   if (["WAITING_FOR_RECOVERY", "FAILED", "BLOCKED"].includes(status)) {
+    const assessment = state.overview?.recoveryAssessment || state.recovery?.assessment || {};
+    if (asList(assessment.allowedActions).includes("approve_public_websearch")) {
+      return [
+        { label: "批准本次 WebSearch", kind: "primary", onClick: approvePublicWebSearch },
+        { label: "查看请求与诊断", kind: "ghost", onClick: () => switchView("management") },
+      ];
+    }
     return [
       { label: "重试当前节点", kind: "primary", onClick: retryCurrent },
       { label: "查看管理诊断", kind: "ghost", onClick: () => switchView("management") },
@@ -1197,6 +1204,24 @@ function retryCurrent() {
   postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/retry?workdir=${selectedWorkdirParam()}`, { note: "retry from operator console" });
 }
 
+function approvePublicWebSearch() {
+  const assessment = state.overview?.recoveryAssessment || state.recovery?.assessment || {};
+  const request = assessment.permissionRequest || {};
+  const query = request.query || "(query unavailable)";
+  if (!window.confirm(`仅当当前仓库和查询内容均为公开信息时批准。\n\nWebSearch query:\n${query}`)) {
+    return;
+  }
+  const note = window.prompt("请输入批准理由（必填）：", "公开仓库的依赖版本查询");
+  if (!note || !note.trim()) {
+    renderFailure("缺少批准说明", "批准 WebSearch 必须填写人工理由。");
+    return;
+  }
+  postAction(
+    `/api/workstreams/${encodeURIComponent(state.selectedId)}/recovery/approve-websearch?workdir=${selectedWorkdirParam()}`,
+    { note: note.trim(), publicRepositoryAttested: true }
+  );
+}
+
 function mergeDelivery() {
   postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/delivery/merge?workdir=${selectedWorkdirParam()}`);
 }
@@ -1208,6 +1233,7 @@ function commandForStatus(status, assessment) {
   const jar = "java -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar";
   if (!state.selectedId) return "请选择任务。";
   if (["WAITING_FOR_RECOVERY", "FAILED", "BLOCKED"].includes(status)) {
+    if (assessment.suggestedCommand) return assessment.suggestedCommand;
     const probe = assessment.classification ? "claude -p \"hello\"" : "# 如涉及 Agent 故障，先运行短探针";
     return `${probe}\n${jar} retry ${base}\n${jar} run ${base} --max-steps 40`;
   }

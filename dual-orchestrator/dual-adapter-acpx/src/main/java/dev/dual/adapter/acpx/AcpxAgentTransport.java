@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -454,16 +455,20 @@ public class AcpxAgentTransport {
                     "disposition", "UNAVAILABLE"
             );
         }
-        return Map.of(
-                "lifecycleSequence", event.sequence(),
-                "sessionName", request.sessionName(),
-                "toolCallId", evidence.toolCallId(),
-                "toolKind", evidence.toolKind(),
-                "title", evidence.title(),
-                "resource", evidence.resource(),
-                "requestedOptions", evidence.requestedOptions(),
-                "disposition", evidence.disposition()
-        );
+        var details = new LinkedHashMap<String, Object>();
+        details.put("lifecycleSequence", event.sequence());
+        details.put("sessionName", request.sessionName());
+        details.put("toolCallId", evidence.toolCallId());
+        details.put("toolKind", evidence.toolKind());
+        details.put("toolName", evidence.toolName());
+        details.put("title", evidence.title());
+        details.put("resource", evidence.resource());
+        details.put("requestedOptions", evidence.requestedOptions());
+        details.put("disposition", evidence.disposition());
+        details.put("authorityDisposition", request.permissionProfile().escalates(evidence.toolKind())
+                ? "ESCALATION_REQUIRED"
+                : evidence.disposition());
+        return Map.copyOf(details);
     }
 
     private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
@@ -638,7 +643,11 @@ public class AcpxAgentTransport {
                 request.stderrPath(),
                 Path.of(System.getProperty("user.home"), ".acpx", "sessions"),
                 sessionStreamBaseline);
-        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), recoverableSignalGrace, agentProgressTimeout);
+        var health = new AgentExecutionHealth(
+                new AcpxFailureSignalCatalog(),
+                recoverableSignalGrace,
+                agentProgressTimeout,
+                request.permissionProfile().escalateKinds());
         while (true) {
             if (process.waitFor(STDERR_SIGNAL_POLL_SECONDS, TimeUnit.SECONDS)) {
                 var elapsed = Duration.between(startedAt, Instant.now());

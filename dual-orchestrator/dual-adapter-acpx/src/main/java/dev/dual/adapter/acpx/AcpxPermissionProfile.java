@@ -24,6 +24,7 @@ record AcpxPermissionProfile(
         boolean simpleClaudeCode,
         List<String> autoApprovedTools,
         List<String> autoApproveKinds,
+        List<String> escalateKinds,
         int promptRetries
 ) {
     AcpxPermissionProfile {
@@ -35,11 +36,22 @@ record AcpxPermissionProfile(
         }
         autoApprovedTools = autoApprovedTools == null ? List.of() : List.copyOf(autoApprovedTools);
         autoApproveKinds = autoApproveKinds == null ? List.of() : List.copyOf(autoApproveKinds);
+        escalateKinds = escalateKinds == null ? List.of() : List.copyOf(escalateKinds);
     }
 
     static AcpxPermissionProfile fromName(String name, boolean approveAllFallback) {
         if (approveAllFallback) {
-            return implement();
+            return new AcpxPermissionProfile(
+                    "implement",
+                    true,
+                    false,
+                    true,
+                    false,
+                    List.of(),
+                    List.of(),
+                    List.of(),
+                    0
+            );
         }
         if (name == null || name.isBlank()) {
             return observe();
@@ -58,7 +70,7 @@ record AcpxPermissionProfile(
                 "Read",
                 "Grep",
                 "Glob"
-        ), List.of("read", "search"), 1);
+        ), List.of("read", "search"), List.of("fetch"), 1);
     }
 
     static AcpxPermissionProfile observe() {
@@ -66,7 +78,7 @@ record AcpxPermissionProfile(
                 "Read",
                 "Grep",
                 "Glob"
-        ), List.of("read", "search"), 1);
+        ), List.of("read", "search"), List.of("fetch"), 1);
     }
 
     static AcpxPermissionProfile review() {
@@ -79,12 +91,21 @@ record AcpxPermissionProfile(
                 false,
                 observe.autoApprovedTools(),
                 observe.autoApproveKinds(),
+                observe.escalateKinds(),
                 observe.promptRetries()
         );
     }
 
     static AcpxPermissionProfile implement() {
-        return new AcpxPermissionProfile("implement", true, false, true, false, List.of(), List.of(), 0);
+        return new AcpxPermissionProfile("implement", false, false, true, false, List.of(
+                "Read",
+                "Write",
+                "Edit",
+                "MultiEdit",
+                "Grep",
+                "Glob",
+                "Bash"
+        ), List.of("read", "search", "edit", "execute"), List.of("fetch"), 0);
     }
 
     static AcpxPermissionProfile contractCorrection() {
@@ -94,6 +115,7 @@ record AcpxPermissionProfile(
                 true,
                 false,
                 false,
+                List.of(),
                 List.of(),
                 List.of(),
                 0
@@ -112,13 +134,40 @@ record AcpxPermissionProfile(
         return simpleClaudeCode;
     }
 
+    boolean escalates(String kind) {
+        return kind != null && escalateKinds.contains(kind);
+    }
+
+    AcpxPermissionProfile withAutoApprovedTool(String tool) {
+        if (tool == null || tool.isBlank() || autoApprovedTools.contains(tool)) {
+            return this;
+        }
+        var tools = new java.util.ArrayList<>(autoApprovedTools);
+        tools.add(tool);
+        return new AcpxPermissionProfile(
+                name,
+                approveAll,
+                denyAll,
+                terminalEnabled,
+                simpleClaudeCode,
+                tools,
+                autoApproveKinds,
+                escalateKinds,
+                promptRetries
+        );
+    }
+
     String permissionPolicyJson() {
-        if (autoApproveKinds.isEmpty()) {
+        if (autoApproveKinds.isEmpty() && escalateKinds.isEmpty()) {
             return "";
         }
         var autoApprove = autoApproveKinds.stream()
                 .map(kind -> "\"" + kind + "\"")
                 .collect(java.util.stream.Collectors.joining(","));
-        return "{\"autoApprove\":[" + autoApprove + "],\"defaultAction\":\"deny\"}";
+        var escalate = escalateKinds.stream()
+                .map(kind -> "\"" + kind + "\"")
+                .collect(java.util.stream.Collectors.joining(","));
+        return "{\"autoApprove\":[" + autoApprove + "],\"escalate\":[" + escalate
+                + "],\"defaultAction\":\"deny\"}";
     }
 }

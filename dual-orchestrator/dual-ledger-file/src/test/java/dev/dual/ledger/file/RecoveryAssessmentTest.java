@@ -220,6 +220,50 @@ class RecoveryAssessmentTest {
     }
 
     @Test
+    void typedWebSearchEscalationProjectsExactHumanAuthorityAction() throws Exception {
+        var runRef = ".agent/workstreams/ws-recovery/runs/run-websearch/run.json";
+        var runPath = tempDir.resolve(runRef);
+        Files.createDirectories(runPath.getParent());
+        Files.writeString(runPath, """
+                {
+                  "executionTimeline": [{
+                    "kind": "permission_decision",
+                    "details": {
+                      "authorityDisposition": "ESCALATION_REQUIRED",
+                      "disposition": "DENIED",
+                      "toolCallId": "call-websearch-1",
+                      "toolKind": "fetch",
+                      "toolName": "WebSearch",
+                      "title": "Mailpit latest stable Docker tag",
+                      "resource": "Mailpit latest stable Docker tag"
+                    }
+                  }]
+                }
+                """, StandardCharsets.UTF_8);
+        var node = failedAcpxNode(Map.of(
+                "run_metadata", runRef,
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "permission_blocked",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "WebSearch requires approval."
+                )
+        ));
+
+        var assessment = RecoveryAssessment.from(node, tempDir, "ws-recovery");
+
+        assertEquals("agent_permission_approval_required", assessment.classification());
+        assertEquals("HUMAN_APPROVE_PUBLIC_WEBSEARCH_OR_ABORT", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe());
+        assertEquals("WebSearch", assessment.permissionRequest().get("toolName"));
+        assertEquals("Mailpit latest stable Docker tag", assessment.permissionRequest().get("query"));
+        assertEquals(List.of("approve_public_websearch", "abort"), assessment.allowedActions());
+        assertTrue(assessment.suggestedCommand().contains("recovery approve-websearch"));
+        assertTrue(assessment.suggestedCommand().contains("--public-repository"));
+    }
+
+    @Test
     void typedReconnectMatchesLegacySessionRecovery() {
         var typed = RecoveryAssessment.from(failedAcpxNode(Map.of(
                 "agent", "codex",

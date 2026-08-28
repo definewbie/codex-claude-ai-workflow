@@ -143,16 +143,19 @@ record AgentLifecycleEvent(
     record PermissionEvidence(
             String toolCallId,
             String toolKind,
+            String toolName,
             String title,
             String resource,
             java.util.List<String> requestedOptions,
             String disposition
     ) {
-        static final PermissionEvidence EMPTY = new PermissionEvidence("", "", "", "", java.util.List.of(), "UNAVAILABLE");
+        static final PermissionEvidence EMPTY = new PermissionEvidence(
+                "", "", "", "", "", java.util.List.of(), "UNAVAILABLE");
 
         PermissionEvidence {
             toolCallId = toolCallId == null ? "" : toolCallId;
             toolKind = toolKind == null ? "" : toolKind;
+            toolName = toolName == null ? "" : toolName;
             title = title == null ? "" : title;
             resource = resource == null ? "" : resource;
             requestedOptions = requestedOptions == null ? java.util.List.of() : java.util.List.copyOf(requestedOptions);
@@ -160,7 +163,7 @@ record AgentLifecycleEvent(
         }
 
         PermissionEvidence withDisposition(String value) {
-            return new PermissionEvidence(toolCallId, toolKind, title, resource, requestedOptions, value);
+            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, value);
         }
 
         String summary() {

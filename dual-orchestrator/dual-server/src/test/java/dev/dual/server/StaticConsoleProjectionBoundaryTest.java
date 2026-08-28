@@ -33,5 +33,10 @@ class StaticConsoleProjectionBoundaryTest {
                 "management console must consume runtime recovery attention from API, not infer stale running locally");
         assertTrue(mgt.contains("hasRuntimeRecoveryAttention(data)"));
         assertTrue(mgt.contains("item.category === \"RUNTIME_RECOVERY\""));
+        assertTrue(console.contains("assessment.allowedActions"));
+        assertTrue(console.contains("approve_public_websearch"));
+        assertTrue(console.contains("/recovery/approve-websearch"));
+        assertFalse(console.contains("assessment.classification === \"agent_permission_approval_required\""),
+                "console must consume allowedActions instead of reinterpreting recovery classification");
     }
 }

@@ -70,6 +70,48 @@ class WorkstreamActionServiceTest {
     }
 
     @Test
+    void apiPublicWebSearchApprovalUsesTheLedgerHumanAuthorityBoundary() throws Exception {
+        var paths = createWorkstream("ws-websearch", simpleDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        var runPath = paths.runsDir().resolve("run-websearch/run.json");
+        Files.createDirectories(runPath.getParent());
+        Files.writeString(runPath, """
+                {"executionTimeline":[{"kind":"permission_decision","details":{
+                  "authorityDisposition":"ESCALATION_REQUIRED","disposition":"DENIED",
+                  "toolCallId":"call-websearch-1","toolKind":"fetch","toolName":"WebSearch",
+                  "title":"Mailpit latest stable Docker tag",
+                  "resource":"Mailpit latest stable Docker tag"}}]}
+                """);
+        var runRef = tempDir.relativize(runPath).toString();
+        ledger.completeAndRoute(
+                paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "failed",
+                List.of(runRef), Map.of(
+                        "run_metadata", runRef,
+                        "agent_execution_outcome", Map.of(
+                                "status", "RECOVERABLE_ADAPTER_FAILURE",
+                                "primaryReason", "permission_blocked",
+                                "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                                "retryPolicy", "MANUAL_ONLY",
+                                "operatorMessage", "WebSearch requires approval."
+                        )));
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.RUNNING, "first", "unused"));
+
+        assertThrows(Exception.class,
+                () -> service.approvePublicWebSearch(tempDir, "ws-websearch", "public lookup", false));
+        var response = service.approvePublicWebSearch(tempDir, "ws-websearch", "public lookup", true);
+
+        assertEquals("recovery.approve_public_websearch", response.get("action"));
+        var approved = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        assertEquals(NodeStatus.READY, approved.status());
+        assertTrue(approved.result().containsKey("permission_approval"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("public_websearch_approved"));
+    }
+
+    @Test
     void approveCompletesTerminalHumanGateWithoutApprovedEdge() throws Exception {
         var paths = createWorkstream("ws-terminal-approve", completeGateDefinition());
         var ledger = new WorkflowFileLedger();

@@ -29,11 +29,32 @@ public record RecoveryAssessment(
         String diagnosticJsonRef,
         String diagnosticMarkdownRef,
         Map<String, Object> contractDiagnostic,
-        boolean retrySafe
+        boolean retrySafe,
+        Map<String, Object> permissionRequest,
+        java.util.List<String> allowedActions
 ) {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+
+    public RecoveryAssessment(
+            String classification,
+            String retryReadiness,
+            String reason,
+            String suggestedCommand,
+            String diagnosticJsonRef,
+            String diagnosticMarkdownRef,
+            Map<String, Object> contractDiagnostic,
+            boolean retrySafe
+    ) {
+        this(classification, retryReadiness, reason, suggestedCommand, diagnosticJsonRef,
+                diagnosticMarkdownRef, contractDiagnostic, retrySafe, Map.of(), java.util.List.of());
+    }
+
+    public RecoveryAssessment {
+        permissionRequest = permissionRequest == null ? Map.of() : Map.copyOf(permissionRequest);
+        allowedActions = allowedActions == null ? java.util.List.of() : java.util.List.copyOf(allowedActions);
+    }
 
     public static RecoveryAssessment from(
             NodeInstanceDocument node,
@@ -59,6 +80,23 @@ public record RecoveryAssessment(
                 diagnostic
         );
         if (outcomeAssessment != null) {
+            var permissionRequest = readPermissionEscalation(root, workstreamId, result);
+            if ("agent_permission_blocked".equals(outcomeAssessment.classification())
+                    && !permissionRequest.isEmpty()) {
+                return new RecoveryAssessment(
+                        "agent_permission_approval_required",
+                        "HUMAN_APPROVE_PUBLIC_WEBSEARCH_OR_ABORT",
+                        "The agent requested exact WebSearch for a public fact. The current turn was denied; a human may approve WebSearch for one retry only after confirming this repository is public.",
+                        "dualctl recovery approve-websearch --public-repository --note \"<reason>\" --workdir "
+                                + root + " " + workstreamId,
+                        diagnosticJsonRef,
+                        diagnosticMarkdownRef,
+                        diagnostic,
+                        false,
+                        permissionRequest,
+                        java.util.List.of("approve_public_websearch", "abort")
+                );
+            }
             return outcomeAssessment;
         }
         var diagnosticCategory = text(diagnostic.get("category"));
@@ -391,7 +429,52 @@ public record RecoveryAssessment(
         map.put("diagnosticJsonRef", diagnosticJsonRef);
         map.put("diagnosticMarkdownRef", diagnosticMarkdownRef);
         map.put("contractDiagnostic", contractDiagnostic);
+        map.put("permissionRequest", permissionRequest);
+        map.put("allowedActions", allowedActions);
         return map;
+    }
+
+    private static Map<String, Object> readPermissionEscalation(
+            Path root,
+            String workstreamId,
+            Map<String, Object> result
+    ) {
+        var runRef = text(result.get("run_metadata"));
+        if (runRef.isBlank()) {
+            return Map.of();
+        }
+        try {
+            var path = root.resolve(runRef).normalize();
+            var workstreamRoot = root.resolve(".agent/workstreams").resolve(workstreamId).normalize();
+            if (!path.startsWith(workstreamRoot) || !Files.isRegularFile(path)) {
+                return Map.of();
+            }
+            var run = OBJECT_MAPPER.readTree(path.toFile());
+            var timeline = run.path("executionTimeline");
+            if (!timeline.isArray()) {
+                return Map.of();
+            }
+            for (var index = timeline.size() - 1; index >= 0; index--) {
+                var event = timeline.get(index);
+                var details = event.path("details");
+                if ("permission_decision".equals(event.path("kind").asText())
+                        && "ESCALATION_REQUIRED".equals(details.path("authorityDisposition").asText())
+                        && "fetch".equals(details.path("toolKind").asText())
+                        && "WebSearch".equals(details.path("toolName").asText())) {
+                    var request = new LinkedHashMap<String, Object>();
+                    request.put("toolName", "WebSearch");
+                    request.put("toolKind", "fetch");
+                    request.put("toolCallId", details.path("toolCallId").asText());
+                    request.put("query", details.path("resource").asText());
+                    request.put("runRef", runRef);
+                    request.put("disposition", details.path("disposition").asText());
+                    return Map.copyOf(request);
+                }
+            }
+        } catch (Exception ignored) {
+            return Map.of();
+        }
+        return Map.of();
     }
 
     private static Map<String, Object> readDiagnostic(Path root, String ref) {

@@ -67,6 +67,8 @@ record AcpxStreamWireLine(
             String messageId,
             String contentType,
             String text,
+            String toolCallId,
+            String toolName,
             UsageUpdate usageUpdate
     ) {
         Notification {
@@ -75,6 +77,8 @@ record AcpxStreamWireLine(
             messageId = messageId == null ? "" : messageId;
             contentType = contentType == null ? "" : contentType;
             text = text == null ? "" : text;
+            toolCallId = toolCallId == null ? "" : toolCallId;
+            toolName = toolName == null ? "" : toolName;
         }
     }
 
@@ -177,7 +181,7 @@ record AcpxStreamWireLine(
                             text(node.at("/params/toolCall/toolCallId")),
                             text(node.at("/params/toolCall/kind")),
                             text(node.at("/params/toolCall/title")),
-                            text(node.at("/params/toolCall/rawInput/command")),
+                            permissionResource(node.at("/params/toolCall/rawInput")),
                             strings(node.at("/params/options"), "optionId")
                     ),
                     null,
@@ -201,6 +205,8 @@ record AcpxStreamWireLine(
                             text(update.get("messageId")),
                             text(update.at("/content/type")),
                             text(update.at("/content/text")),
+                            text(update.get("toolCallId")),
+                            text(update.at("/_meta/claudeCode/toolName")),
                             usageUpdate(updateKind, update)
                     ),
                     null
@@ -218,6 +224,14 @@ record AcpxStreamWireLine(
                 text(data.get("message")),
                 text(data.get("details"))
         );
+    }
+
+    private static String permissionResource(JsonNode rawInput) {
+        if (rawInput == null || !rawInput.isObject()) {
+            return "";
+        }
+        var command = text(rawInput.get("command"));
+        return command.isBlank() ? text(rawInput.get("query")) : command;
     }
 
     private static Usage usage(JsonNode usage) {

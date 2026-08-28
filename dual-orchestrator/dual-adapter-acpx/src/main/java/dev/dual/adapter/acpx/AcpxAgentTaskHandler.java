@@ -144,7 +144,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
         }
         var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
-        var rendered = promptRenderer.renderWithSections(
+        var effectivePermissionProfile = permissionProfile(context);
+        var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
                 context.workspaceRoot(),
                 context.workstreamId(),
                 runId,
@@ -153,7 +154,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 inputRefs,
                 agentResultContract,
                 governanceContext.trustedTaskContractPayload().orElse(null)
-        );
+        ), effectivePermissionProfile);
         Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
         promptManifestWriter.write(
                 PromptManifestWriter.manifestPathFor(promptPath),
@@ -218,7 +219,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 promptPath,
                 transcriptPath,
                 stderrPath,
-                permissionProfile(context),
+                effectivePermissionProfile,
                 event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
         );
         var correctionRequest = new AcpxRunRequest(
@@ -519,8 +520,72 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
 
     private static AcpxPermissionProfile permissionProfile(TaskContext context) {
         var value = context.definition().config().get("permission_profile");
-        var profile = value instanceof String text ? text : "";
-        return AcpxPermissionProfile.fromName(profile, approveAll(context));
+        var profile = value instanceof String text ? text.trim() : "";
+        // Named profiles are the permission authority. approve_all remains only as
+        // compatibility for old definitions that do not declare a profile.
+        var resolved = AcpxPermissionProfile.fromName(profile, profile.isBlank() && approveAll(context));
+        return hasApprovedPublicWebSearch(context) ? resolved.withAutoApprovedTool("WebSearch") : resolved;
+    }
+
+    private static boolean hasApprovedPublicWebSearch(TaskContext context) {
+        var value = context.instance().result().get("permission_approval");
+        if (value == null) {
+            return false;
+        }
+        if (!(value instanceof Map<?, ?> approval)
+                || !Integer.valueOf(1).equals(approval.get("schema_version"))
+                || !"PUBLIC_WEBSEARCH".equals(text(approval.get("type")))
+                || !"WebSearch".equals(text(approval.get("tool_name")))
+                || !"fetch".equals(text(approval.get("tool_kind")))
+                || !context.workstreamId().equals(text(approval.get("workstream_id")))
+                || !context.instance().nodeInstanceId().equals(text(approval.get("node_instance_id")))
+                || !Boolean.TRUE.equals(approval.get("public_repository_attested"))
+                || text(approval.get("source_run_ref")).isBlank()
+                || text(approval.get("source_tool_call_id")).isBlank()
+                || !text(approval.get("source_query_sha256")).matches("[0-9a-f]{64}")
+                || text(approval.get("note")).isBlank()
+                || text(approval.get("approved_at")).isBlank()) {
+            throw new IllegalArgumentException("invalid public WebSearch permission approval for "
+                    + context.instance().nodeInstanceId());
+        }
+        return true;
+    }
+
+    private static AgentPromptRenderer.RenderedPrompt withExternalResearchGuidance(
+            AgentPromptRenderer.RenderedPrompt rendered,
+            AcpxPermissionProfile profile
+    ) {
+        var webSearchApproved = profile.autoApprovedTools().contains("WebSearch");
+        var guidance = """
+                ## External Research Discipline
+
+                - Use repository facts and supplied context first.
+                - WebSearch is %s for this occurrence. Use it only for public package, version, or documentation facts.
+                - Never use WebFetch or arbitrary URL retrieval. Do not place secrets, source contents, credentials, or private identifiers in a search query.
+                - If the needed public fact cannot be obtained under the active permission policy, state the evidence gap instead of bypassing the policy.
+                """.formatted(webSearchApproved ? "operator-approved" : "not auto-approved; request human approval if necessary").strip();
+        var marker = "\n## Output Contract\n";
+        var markerIndex = rendered.content().lastIndexOf(marker);
+        if (markerIndex < 0) {
+            throw new IllegalStateException("agent prompt is missing the Output Contract boundary");
+        }
+        var content = rendered.content().substring(0, markerIndex).stripTrailing()
+                + "\n\n" + guidance + "\n"
+                + rendered.content().substring(markerIndex);
+        var sections = new java.util.ArrayList<>(rendered.sections());
+        sections.add(new AgentPromptRenderer.PromptSection(
+                "external_research_discipline",
+                "permission_policy_projection",
+                profile.name(),
+                guidance,
+                "guide provider behavior without replacing adapter enforcement",
+                true
+        ));
+        return new AgentPromptRenderer.RenderedPrompt(content, List.copyOf(sections));
+    }
+
+    private static String text(Object value) {
+        return value == null ? "" : value.toString().trim();
     }
 
     private static List<String> evidenceOutputRefs(

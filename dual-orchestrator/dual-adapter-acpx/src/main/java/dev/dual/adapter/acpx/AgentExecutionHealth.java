@@ -23,6 +23,7 @@ final class AgentExecutionHealth {
     private final AcpxFailureSignalCatalog signalCatalog;
     private final Duration recoverableSignalGrace;
     private final Duration progressStallTimeout;
+    private final java.util.Set<String> escalatedPermissionKinds;
 
     private long lastConsumedSequence = -1;
     private long lastProgressSequence = -1;
@@ -41,9 +42,20 @@ final class AgentExecutionHealth {
             Duration recoverableSignalGrace,
             Duration progressStallTimeout
     ) {
+        this(signalCatalog, recoverableSignalGrace, progressStallTimeout, java.util.Set.of());
+    }
+
+    AgentExecutionHealth(
+            AcpxFailureSignalCatalog signalCatalog,
+            Duration recoverableSignalGrace,
+            Duration progressStallTimeout,
+            java.util.Collection<String> escalatedPermissionKinds
+    ) {
         this.signalCatalog = signalCatalog;
         this.recoverableSignalGrace = recoverableSignalGrace;
         this.progressStallTimeout = progressStallTimeout;
+        this.escalatedPermissionKinds = java.util.Set.copyOf(
+                escalatedPermissionKinds == null ? java.util.Set.of() : escalatedPermissionKinds);
     }
 
     void observe(AgentLifecycleEvent event) {
@@ -131,9 +143,12 @@ final class AgentExecutionHealth {
     }
 
     private void observePermissionDecision(AgentLifecycleEvent event) {
-        var message = event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED
-                ? "current ACP turn permission denied: " + event.text()
-                : "current ACP turn permission cancelled: " + event.text();
+        var evidence = event.permissionEvidence();
+        var escalationRequired = evidence != null && escalatedPermissionKinds.contains(evidence.toolKind());
+        var disposition = event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED ? "denied" : "cancelled";
+        var message = escalationRequired
+                ? "current ACP turn permission requires human approval: " + event.text()
+                : "current ACP turn permission " + disposition + ": " + event.text();
         observedSignals.add(new AdapterSignal(
                 AdapterSignalType.PERMISSION_BLOCKED,
                 message,

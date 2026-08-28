@@ -66,4 +66,17 @@ class AgentCapabilityCatalogTest {
         assertTrue(catalog.hasKind("token_filtered_shell"));
         assertTrue(catalog.hasKind("symbol_index"));
     }
+
+    @Test
+    void namedProfileRemainsAuthoritativeWhenLegacyApproveAllIsAlsoPresent() {
+        var catalog = AgentCapabilityCatalog.detect(
+                "ws-001",
+                "design.codex_arch_review",
+                Map.of("permission_profile", "review", "approve_all", true)
+        );
+
+        assertTrue(catalog.hasKind("direct_file_read"));
+        assertEquals(false, catalog.hasKind("token_filtered_shell"));
+        assertEquals(false, catalog.hasKind("symbol_index"));
+    }
 }

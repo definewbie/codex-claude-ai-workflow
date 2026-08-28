@@ -144,6 +144,22 @@ public class WorkstreamApiController {
         return actionService.retry(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
+    @PostMapping("/{workstreamId}/recovery/approve-websearch")
+    public Map<String, Object> approvePublicWebSearch(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody PublicWebSearchApprovalRequest request
+    ) throws Exception {
+        if (request == null) {
+            throw new IllegalArgumentException("public WebSearch approval request is required");
+        }
+        return actionService.approvePublicWebSearch(
+                workdirPath(workdir),
+                workstreamId,
+                request.note(),
+                request.publicRepositoryAttested());
+    }
+
     @PostMapping("/{workstreamId}/recovery/close-mistaken-iteration")
     public Map<String, Object> closeMistakenIteration(
             @PathVariable String workstreamId,
@@ -248,6 +264,9 @@ public class WorkstreamApiController {
     }
 
     public record RecoveryStaleRequest(String note) {
+    }
+
+    public record PublicWebSearchApprovalRequest(String note, boolean publicRepositoryAttested) {
     }
 
     public record ReviewReviseRequest(String feedback) {

@@ -1013,6 +1013,8 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(false, transport.lastApproveAll);
         assertEquals("review", transport.lastPermissionProfile.name());
         assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Grep"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebSearch"));
+        assertTrue(transport.lastPermissionProfile.escalateKinds().contains("fetch"));
         assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("Bash(rg *)"));
         assertFalse(transport.lastPermissionProfile.autoApproveKinds().contains("execute"));
     }
@@ -1036,6 +1038,76 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(true, transport.lastApproveAll);
         assertEquals("implement", transport.lastPermissionProfile.name());
+    }
+
+    @Test
+    void namedImplementProfileOverridesLegacyApproveAllFlag() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved plan.\n");
+
+        var transport = new CapturingApprovalTransport();
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "implement-claude",
+                "permission_profile", "implement",
+                "approve_all", true
+        ));
+
+        new AcpxAgentTaskHandler(transport, false).execute(
+                taskContext(tempDir, "ws-test", definition, readyInstance("implement.claude_implement")));
+
+        assertEquals(false, transport.lastApproveAll);
+        assertEquals("implement", transport.lastPermissionProfile.name());
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("Bash"));
+        assertTrue(transport.lastPermissionProfile.autoApproveKinds().contains("edit"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebSearch"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebFetch"));
+        assertTrue(transport.lastPermissionProfile.escalateKinds().contains("fetch"));
+    }
+
+    @Test
+    void typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Review public dependency metadata.\n");
+        var transport = new CapturingApprovalTransport();
+        var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "codex",
+                "session", "codex-reviewer",
+                "prompt_template", "design-codex-review",
+                "permission_profile", "review"
+        ));
+        var base = readyInstance("design.codex_arch_review");
+        var approval = Map.<String, Object>ofEntries(
+                Map.entry("schema_version", 1),
+                Map.entry("type", "PUBLIC_WEBSEARCH"),
+                Map.entry("workstream_id", "ws-test"),
+                Map.entry("node_instance_id", base.nodeInstanceId()),
+                Map.entry("tool_name", "WebSearch"),
+                Map.entry("tool_kind", "fetch"),
+                Map.entry("source_run_ref", ".agent/workstreams/ws-test/runs/run-1/run.json"),
+                Map.entry("source_tool_call_id", "call-websearch-1"),
+                Map.entry("source_query_sha256", "a".repeat(64)),
+                Map.entry("public_repository_attested", true),
+                Map.entry("note", "public repository dependency lookup"),
+                Map.entry("approved_at", "2026-08-28T00:00:00Z")
+        );
+        var approved = new NodeInstance(
+                base.nodeInstanceId(), base.nodeDefinitionId(), base.kind(), base.handlerType(), base.status(),
+                base.stageId(), base.iterationId(), base.inputRefs(), base.outputRefs(),
+                Map.of("permission_approval", approval), base.runRef(), base.startedAt(), base.finishedAt());
+
+        new AcpxAgentTaskHandler(transport, false).execute(taskContext(tempDir, "ws-test", definition, approved));
+
+        assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("WebSearch"));
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebFetch"));
+        assertTrue(transport.lastPermissionProfile.escalateKinds().contains("fetch"));
+        var prompt = Files.readString(Files.list(workstreamDir.resolve("runs"))
+                .findFirst().orElseThrow().resolve("prompts/design-codex-review.md"));
+        assertTrue(prompt.contains("WebSearch is operator-approved"));
+        assertTrue(prompt.contains("Never use WebFetch"));
     }
 
     @Test
@@ -1228,6 +1300,55 @@ class AcpxAgentTaskHandlerTest {
                 finalizedMetadata.path("executionOutcome").path("status").asText());
         assertEquals("completed_with_adapter_or_process_warnings",
                 finalizedMetadata.path("executionOutcome").path("primaryReason").asText());
+        assertEquals("PERMISSION_BLOCKED",
+                finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
+    }
+
+    @Test
+    void deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-root-closure-warning");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+
+        var transport = new NonZeroProsePrefixedTransport(true);
+        var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "prompt_template", "design-claude"
+        ));
+        var instance = readyInstance("design.claude_design");
+
+        var candidate = new AcpxAgentTaskHandler(transport, false).execute(
+                taskContext(tempDir, "ws-root-closure-warning", definition, instance)
+        );
+        var validated = new ArtifactContractValidator().validate(
+                tempDir,
+                "ws-root-closure-warning",
+                instance.nodeInstanceId(),
+                definition,
+                instance.inputRefs(),
+                candidate
+        );
+
+        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals(1, transport.initialCalls);
+        assertEquals(0, transport.correctionCalls);
+        var runMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) candidate.result().get("run_metadata")).toFile()
+        );
+        var acquisition = runMetadata.path("agentResultAcquisition");
+        assertFalse(acquisition.path("correctionAttempted").asBoolean());
+        assertEquals("ROOT_OBJECT_CLOSURE_RECOVERED",
+                acquisition.path("occurrences").get(0).path("presentationDisposition").asText());
+        assertTrue(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
+
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
+        assertEquals(NodeStatus.COMPLETED, finalized.status());
+        var finalizedMetadata = OBJECT_MAPPER.readTree(
+                tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
+        );
+        assertEquals("SUCCESS_WITH_WARNINGS",
+                finalizedMetadata.path("executionOutcome").path("status").asText());
         assertEquals("PERMISSION_BLOCKED",
                 finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
     }
@@ -1812,6 +1933,15 @@ class AcpxAgentTaskHandlerTest {
     private static final class NonZeroProsePrefixedTransport extends AcpxAgentTransport {
         private int initialCalls;
         private int correctionCalls;
+        private final boolean missingRootClosure;
+
+        private NonZeroProsePrefixedTransport() {
+            this(false);
+        }
+
+        private NonZeroProsePrefixedTransport(boolean missingRootClosure) {
+            this.missingRootClosure = missingRootClosure;
+        }
 
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
@@ -1821,6 +1951,9 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "[acpx] session claude-main · agent connected\n");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             var resultJson = completionJson(request, "READY_FOR_ARCH_REVIEW");
+            var finalMessage = missingRootClosure
+                    ? resultJson.substring(0, resultJson.length() - 1)
+                    : "I completed the design.\n\n```json\n" + resultJson + "\n```";
             return fixtureResult(
                     5,
                     now,
@@ -1831,7 +1964,7 @@ class AcpxAgentTaskHandlerTest {
                     new AcpxPromptCompletion(
                             "fixture-non-zero",
                             "end_turn",
-                            "I completed the design.\n\n```json\n" + resultJson + "\n```"
+                            finalMessage
                     ),
                     List.of(new AdapterSignal(
                             AdapterSignalType.PERMISSION_BLOCKED,

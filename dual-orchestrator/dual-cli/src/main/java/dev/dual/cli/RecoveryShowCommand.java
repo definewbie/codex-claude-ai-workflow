@@ -66,6 +66,10 @@ public final class RecoveryShowCommand implements Callable<Integer> {
         if (!assessment.diagnosticMarkdownRef().isBlank()) {
             System.out.println("- Diagnostic Markdown: " + assessment.diagnosticMarkdownRef());
         }
+        if (!assessment.permissionRequest().isEmpty()) {
+            System.out.println("- Permission Request: " + assessment.permissionRequest());
+            System.out.println("- Allowed Actions: " + assessment.allowedActions());
+        }
         System.out.println("- Suggested Command: " + assessment.suggestedCommand());
         System.out.println();
     }
