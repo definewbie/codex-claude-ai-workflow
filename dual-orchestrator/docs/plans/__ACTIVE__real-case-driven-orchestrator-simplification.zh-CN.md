@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: REPOSITORY FACT OCCURRENCE OWNERSHIP / DIFF REVIEW
+## Current Active Step: REPOSITORY FACT OCCURRENCE DURABILITY / COLD-START GATE REVIEW
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
@@ -274,6 +274,24 @@ build 不改变旧 occurrence 字节、global repo-map 不能替代缺失 bindin
 会重验 binding。focused runtime `128/0/0/0`、adapter `47/0/0/0`；非沙箱 clean full reactor
 `1248/0/0/0`；`git diff --check` clean。当前成熟度为 repository fact occurrence ownership `ENFORCED / NOT PROVEN`；
 等待一次独立代码级 diff review，PASS 前不提交、不调用 provider、不 resume/批准 EFCB、不创建新 workstream。
+
+独立代码级 diff review 已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`，并独立复现 full reactor
+`1248/0/0/0` 与 clean diff-check。P2-1 记录 binding 非原子直写的 fail-closed availability 残余，归入既有 R1
+revisit trigger，不在本 checkpoint 扩张写协议；P2-2 确认旧 workstream 新校验 fail-closed 符合 no-fallback/no-resume
+政策。checkpoint 已选择性提交为 `b25d211`，repository fact occurrence ownership 达到 `ENFORCED / NOT PROVEN`。
+
+新的 cold-start Gate 草案已落在
+`docs/testing/verification-gates/20260828-small-workflow-captcha-auth-mailpit-occurrence-durability.md`。它把主 PASS 定义为
+occurrence durability 与 Mailpit 产品 E2E 同时完成，并在每个 human gate 前与 terminal acceptance 前执行 durable cold
+audit；`8 calls / 0 revision` 降为独立 efficiency 子结果，合法 revision/correction 不再自动使可完成的产品任务失败。
+独立 Gate 评审已 `PASS（P0=0 / P1=0 / P2=2 非阻塞）`，确认 occurrence durability、产品完成与 efficiency 子结果已
+正确解耦，typed/durable SoT、FAIL/INVALID、stop-loss、cold audit 与授权边界均可执行。P2-1 已吸收为 case-report 侧的
+精确只读命令清单：每个 proposal/run 元组从 routed `.ref.json` 冷定位 sidecar 与 binding，逐项复算八个 artifact SHA、
+inventory identity、actual report 与 current projection refs；该清单只保存 Gate evidence，不成为 production validator 或
+路由 owner。P2-2 的长样本风险由 90 分钟 active-runtime 上限、human pause 不计时和同 blocker 二击止损继续约束。
+当前仅授权选择性提交 Gate 与 active plan；提交后 package、workflow validation 与 source identity 复算仍需按 Gate 边界
+执行，provider probes 与唯一 fresh workstream 分别等待独立授权。不调用 provider、不 resume/批准 EFCB、不创建新
+workstream。
 
 ### Completed H1 Checkpoint
 
