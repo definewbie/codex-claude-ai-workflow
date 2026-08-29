@@ -9,8 +9,6 @@ final class CliSupportedHandlers {
             "artifact.validate",
             "context.build_package",
             "contract.compile",
-            "delivery.create_pr",
-            "delivery.git_commit",
             "delivery.prepare_pr",
             "human.review",
             "prompt.generate_next_stage",

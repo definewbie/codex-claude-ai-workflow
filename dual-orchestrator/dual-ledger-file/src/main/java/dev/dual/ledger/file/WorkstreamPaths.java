@@ -189,6 +189,14 @@ public record WorkstreamPaths(Path workspaceRoot, DualId workstreamId) {
         return workstreamDir().resolve("delivery");
     }
 
+    public Path deliveryCandidatesDir() {
+        return deliveryDir().resolve("candidates");
+    }
+
+    public Path deliveryCandidateDir(String producerNodeInstanceId) {
+        return deliveryCandidatesDir().resolve(producerNodeInstanceId);
+    }
+
     public Path deliveryMergePlanJson() {
         return deliveryDir().resolve("merge-plan.json");
     }

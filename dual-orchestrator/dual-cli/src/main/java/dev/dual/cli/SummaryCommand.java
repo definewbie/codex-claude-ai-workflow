@@ -176,8 +176,10 @@ public final class SummaryCommand implements Callable<Integer> {
             if ("APPLIED".equals(mergeStatus)) {
                 var targetRepo = text(deliveryMerge.get("targetRepo"));
                 var command = targetRepo.isBlank() ? "" : "git -C " + quoteString(targetRepo) + " diff --cached";
-                return "Review the staged target diff, then commit from the target repo when ready."
-                        + commandBlock(command);
+                return "Review the staged target diff, commit from the target repo, then finalize the exact commit SHA."
+                        + commandBlock(command)
+                        + "\n\n```bash\ndualctl delivery finalize --workdir " + quote(paths.workspaceRoot())
+                        + " --commit <target_commit_sha> " + paths.workstreamId().value() + "\n```";
             }
             if ("FAILED".equals(mergeStatus)) {
                 var failure = text(deliveryMerge.get("failureReason"), "Delivery merge failed.");
@@ -306,13 +308,17 @@ public final class SummaryCommand implements Callable<Integer> {
         var parts = new ArrayList<String>();
         parts.add(text(deliveryMerge.get("status"), "unknown"));
         parts.add("changedFiles=" + listSize(deliveryMerge.get("changedFiles")));
+        var candidateSha = text(deliveryMerge.get("candidateSha256"));
+        if (!candidateSha.isBlank()) {
+            parts.add("candidateSha256=" + candidateSha);
+        }
         var targetRepo = text(deliveryMerge.get("targetRepo"));
         if (!targetRepo.isBlank()) {
             parts.add("target=" + targetRepo);
         }
         var failure = text(deliveryMerge.get("failureReason"));
         if (!failure.isBlank()) {
-            parts.add("failure=" + failure);
+            parts.add("failure=" + text(deliveryMerge.get("failureCode")) + ":" + failure);
         }
         return String.join(", ", parts);
     }

@@ -78,10 +78,6 @@ class WorkflowDefinitionLoaderTest {
                       "claude": "team-claude",
                       "codex": "team-codex"
                     },
-                    "delivery": {
-                      "base": "develop",
-                      "draft": true
-                    },
                     "revision": {
                       "max_revisions": 1
                     }
@@ -107,12 +103,6 @@ class WorkflowDefinitionLoaderTest {
                       }
                     },
                     {
-                      "id": "delivery.create_pr",
-                      "kind": "TASK",
-                      "handlerType": "delivery.create_pr",
-                      "config": {}
-                    },
-                    {
                       "id": "design.decision",
                       "kind": "DECISION",
                       "handlerType": "review.decision",
@@ -132,11 +122,6 @@ class WorkflowDefinitionLoaderTest {
                       "from": "intake.claude_brainstorm",
                       "on": "completed",
                       "to": "review.codex"
-                    },
-                    {
-                      "from": "review.codex",
-                      "on": "completed",
-                      "to": "delivery.create_pr"
                     }
                   ]
                 }
@@ -146,8 +131,6 @@ class WorkflowDefinitionLoaderTest {
 
         assertEquals("team-claude", definition.node("intake.claude_brainstorm").config().get("session"));
         assertEquals("explicit-codex", definition.node("review.codex").config().get("session"));
-        assertEquals("develop", definition.node("delivery.create_pr").config().get("base"));
-        assertEquals(true, definition.node("delivery.create_pr").config().get("draft"));
         assertEquals(1, definition.node("design.decision").config().get("max_revisions"));
         assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"));
     }

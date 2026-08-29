@@ -63,9 +63,6 @@ public final class WorkflowDefinitionLoader {
             applySessionDefault(config, defaults);
             applyRetryDefaults(config, objectMap(defaults.get("retry")));
         }
-        if ("delivery.create_pr".equals(node.handlerType())) {
-            applyObjectDefaults(config, objectMap(defaults.get("delivery")));
-        }
         if ("review.decision".equals(node.handlerType()) || "human.review".equals(node.handlerType())) {
             applyObjectDefaults(config, objectMap(defaults.get("revision")));
         }

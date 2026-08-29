@@ -7,16 +7,15 @@ import picocli.CommandLine.Command;
 @Command(
         name = "delivery",
         mixinStandardHelpOptions = true,
-        description = "Prepare or create delivery artifacts.",
+        description = "Apply and finalize an accepted delivery candidate.",
         subcommands = {
-                DeliveryCommitCommand.class,
-                DeliveryCreatePrCommand.class,
-                DeliveryMergeCommand.class
+                DeliveryMergeCommand.class,
+                DeliveryFinalizeCommand.class
         }
 )
 public final class DeliveryCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use delivery merge, commit, or create-pr.");
+        System.out.println("Use delivery merge or delivery finalize.");
     }
 }

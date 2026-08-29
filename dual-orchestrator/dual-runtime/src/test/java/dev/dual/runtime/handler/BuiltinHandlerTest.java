@@ -5,10 +5,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.ContractStatus;
 import dev.dual.core.contract.TaskContract;
+import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
+import dev.dual.ledger.file.DeliveryCandidateDocument;
+import dev.dual.ledger.file.DeliveryCandidateWriter;
+import dev.dual.ledger.file.WorkstreamPaths;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -168,7 +172,7 @@ class BuiltinHandlerTest {
                   "summary": "forged approval"
                 }
                 """.formatted(inputRef), StandardCharsets.UTF_8);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
         var context = new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode, "READY");
 
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(context));
@@ -249,7 +253,7 @@ class BuiltinHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
         handler.openOrInspect(new GateHandler.GateContext(
@@ -306,7 +310,7 @@ class BuiltinHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
         handler.openOrInspect(new GateHandler.GateContext(
@@ -345,7 +349,7 @@ class BuiltinHandlerTest {
         tampered.put("decision", "REJECT");
         mapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), tampered);
 
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
         var failure = assertThrows(IllegalStateException.class, () ->
                 new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
                         tempDir,
@@ -381,7 +385,7 @@ class BuiltinHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
         handler.openOrInspect(new GateHandler.GateContext(
@@ -426,7 +430,7 @@ class BuiltinHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
         handler.openOrInspect(new GateHandler.GateContext(
@@ -465,7 +469,7 @@ class BuiltinHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
         publishSidecar(sidecar);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(inputRef));
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
         handler.openOrInspect(new GateHandler.GateContext(
@@ -538,7 +542,7 @@ class BuiltinHandlerTest {
                   "verification_summary": "Verified by inspection."
                 }
                 """, StandardCharsets.UTF_8);
-        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", List.of(
+        var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(
                 ".agent/workstreams/ws/delivery/commit-message.txt",
                 ".agent/workstreams/ws/delivery/pr-body.md"
         ));
@@ -1833,6 +1837,12 @@ class BuiltinHandlerTest {
 
     @Test
     void deliveryPrepareHandlerGeneratesCommitMessageAndPrBody() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "base\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var report = workstreamDir.resolve("reports/latest-final-report.md");
         var acceptance = workstreamDir.resolve("runs/run-011/outputs/acceptance-codex-review.md");
@@ -1845,6 +1855,24 @@ class BuiltinHandlerTest {
         Files.writeString(acceptance, "Codex accepts with notes.\n");
         Files.writeString(evidenceDir.resolve("changed-files.txt"), "dual-orchestrator/README.md\n");
         Files.writeString(evidenceDir.resolve("diff.stat"), " dual-orchestrator/README.md | 2 ++\n");
+        Files.writeString(tempDir.resolve("README.md"), "base\nchanged\n");
+        Files.writeString(workstreamDir.resolve("workstream.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws",
+                  "repository": {"originalWorkdir": "%s", "gitRoot": "%s"},
+                  "primaryWorkspaceId": "wsp-test"
+                }
+                """.formatted(tempDir, tempDir));
+        Files.createDirectories(workstreamDir.resolve("workspaces"));
+        Files.writeString(workstreamDir.resolve("workspaces/wsp-test.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workspaceId": "wsp-test",
+                  "workstreamId": "ws",
+                  "effectiveWorkdir": "%s"
+                }
+                """.formatted(tempDir));
 
         var handler = new DeliveryPrepareHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
@@ -1860,6 +1888,7 @@ class BuiltinHandlerTest {
         assertEquals(".agent/workstreams/ws/delivery/pr-body.md", result.result().get("pr_body_path"));
         assertTrue(result.outputRefs().contains(".agent/workstreams/ws/delivery/commit-message.txt"));
         assertTrue(result.outputRefs().contains(".agent/workstreams/ws/delivery/pr-body.md"));
+        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.contains("/delivery/candidates/") && ref.endsWith(".json")));
 
         var commitMessage = Files.readString(tempDir.resolve(".agent/workstreams/ws/delivery/commit-message.txt"));
         assertTrue(commitMessage.contains("feat: dual agent task ws"));
@@ -1873,154 +1902,6 @@ class BuiltinHandlerTest {
         assertTrue(prBody.contains("## Codex Final Acceptance"));
         assertTrue(prBody.contains("dual-orchestrator/README.md"));
         assertTrue(prBody.contains("latest-final-report.md"));
-    }
-
-    @Test
-    void deliveryCommitHandlerCommitsBusinessChangesWithoutAgentLedger() throws Exception {
-        git(tempDir, "init");
-        git(tempDir, "config", "user.email", "dual@example.test");
-        git(tempDir, "config", "user.name", "Dual Test");
-        Files.writeString(tempDir.resolve("README.md"), "before\n");
-        git(tempDir, "add", "README.md");
-        git(tempDir, "commit", "-m", "init");
-
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var deliveryDir = workstreamDir.resolve("delivery");
-        var reportsDir = workstreamDir.resolve("reports");
-        Files.createDirectories(deliveryDir);
-        Files.createDirectories(reportsDir);
-        Files.writeString(deliveryDir.resolve("commit-message.txt"), """
-                feat: dual agent task ws
-
-                Add lifecycle delivery support.
-
-                Run report: .agent/workstreams/ws/reports/latest-final-report.md
-                """);
-        Files.writeString(reportsDir.resolve("latest-final-report.md"), "# Dual Final Report\n\nAccepted.\n");
-        Files.writeString(tempDir.resolve("README.md"), "after\n");
-        Files.writeString(workstreamDir.resolve("ledger-noise.txt"), "do not commit\n");
-
-        var handler = new DeliveryCommitHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("delivery.git_commit", "delivery.git_commit"),
-                node("delivery.git_commit", NodeKind.TASK, "delivery.git_commit")
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("committed", result.outcome());
-        assertEquals(true, result.result().get("commit_created"));
-        assertTrue(((String) result.result().get("commit")).matches("[0-9a-f]{40}"));
-        assertEquals("feat: dual agent task ws", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
-        assertTrue(gitOutput(tempDir, "show", "--name-only", "--pretty=", "HEAD").contains("README.md"));
-        assertFalse(gitOutput(tempDir, "show", "--name-only", "--pretty=", "HEAD").contains(".agent"));
-
-        var deliveryJson = Files.readString(workstreamDir.resolve("delivery").resolve("delivery.json"));
-        assertTrue(deliveryJson.contains("\"commitCreated\" : true"));
-        assertTrue(deliveryJson.contains("\"commit\" : \"" + result.result().get("commit") + "\""));
-        assertTrue(deliveryJson.contains("\"status\" : \"committed\""));
-        var finalReport = Files.readString(reportsDir.resolve("latest-final-report.md"));
-        assertTrue(finalReport.contains("## Delivery"));
-        assertTrue(finalReport.contains("- Status: committed"));
-        assertTrue(finalReport.contains("- Commit: " + result.result().get("commit")));
-    }
-
-    @Test
-    void deliveryCommitHandlerSkipsWhenNoBusinessChangesExist() throws Exception {
-        git(tempDir, "init");
-        git(tempDir, "config", "user.email", "dual@example.test");
-        git(tempDir, "config", "user.name", "Dual Test");
-        Files.writeString(tempDir.resolve("README.md"), "before\n");
-        git(tempDir, "add", "README.md");
-        git(tempDir, "commit", "-m", "init");
-
-        var deliveryDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws").resolve("delivery");
-        Files.createDirectories(deliveryDir);
-        Files.writeString(deliveryDir.resolve("commit-message.txt"), "feat: dual agent task ws\n");
-        Files.writeString(deliveryDir.resolve("note.txt"), "ledger only\n");
-
-        var handler = new DeliveryCommitHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("delivery.git_commit", "delivery.git_commit"),
-                node("delivery.git_commit", NodeKind.TASK, "delivery.git_commit")
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("skipped_no_changes", result.outcome());
-        assertEquals(false, result.result().get("commit_created"));
-        assertEquals("init", gitOutput(tempDir, "log", "-1", "--pretty=%s").trim());
-        assertTrue(Files.readString(deliveryDir.resolve("delivery.json")).contains("\"status\" : \"skipped_no_changes\""));
-    }
-
-    @Test
-    void deliveryPrCreateHandlerPushesBranchAndRunsGhCreate() throws Exception {
-        var repo = tempDir.resolve("repo");
-        var remote = tempDir.resolve("remote.git");
-        Files.createDirectories(repo);
-        git(repo, "init");
-        git(repo, "config", "user.email", "dual@example.test");
-        git(repo, "config", "user.name", "Dual Test");
-        Files.writeString(repo.resolve("README.md"), "before\n");
-        git(repo, "add", "README.md");
-        git(repo, "commit", "-m", "init");
-        git(repo, "checkout", "-b", "ai/ws");
-        git(remote.getParent(), "init", "--bare", remote.toString());
-        git(repo, "remote", "add", "origin", remote.toString());
-
-        var deliveryDir = repo.resolve(".agent").resolve("workstreams").resolve("ws").resolve("delivery");
-        var reportsDir = repo.resolve(".agent").resolve("workstreams").resolve("ws").resolve("reports");
-        Files.createDirectories(deliveryDir);
-        Files.createDirectories(reportsDir);
-        Files.writeString(deliveryDir.resolve("commit-message.txt"), "feat: dual agent task ws\n");
-        Files.writeString(deliveryDir.resolve("pr-body.md"), "# Dual Agent Run PR\n");
-        Files.writeString(reportsDir.resolve("latest-final-report.md"), "# Dual Final Report\n\nAccepted.\n");
-        Files.writeString(repo.resolve("README.md"), "after\n");
-
-        var fakeGh = tempDir.resolve("fake-gh.sh");
-        Files.writeString(fakeGh, """
-                #!/bin/sh
-                echo "$@" > "$PWD/.agent/workstreams/ws/delivery/fake-gh-args.txt"
-                echo "https://github.com/example/repo/pull/123"
-                """);
-        Files.setPosixFilePermissions(fakeGh, Set.of(
-                PosixFilePermission.OWNER_READ,
-                PosixFilePermission.OWNER_WRITE,
-                PosixFilePermission.OWNER_EXECUTE
-        ));
-
-        var handler = new DeliveryPrCreateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                repo,
-                "ws",
-                new NodeDefinition("delivery.create_pr", NodeKind.TASK, "delivery.create_pr", Map.of(
-                        "gh_command", fakeGh.toString(),
-                        "base", "main",
-                        "draft", true
-                )),
-                node("delivery.create_pr", NodeKind.TASK, "delivery.create_pr")
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("pr_created", result.outcome());
-        assertEquals(true, result.result().get("pr_created"));
-        assertEquals("https://github.com/example/repo/pull/123", result.result().get("pr_url"));
-        assertTrue(Files.readString(deliveryDir.resolve("pr-url.txt")).contains("https://github.com/example/repo/pull/123"));
-        assertTrue(Files.readString(deliveryDir.resolve("fake-gh-args.txt")).contains("pr create"));
-        assertTrue(Files.readString(deliveryDir.resolve("fake-gh-args.txt")).contains("--draft"));
-        assertEquals("feat: dual agent task ws", gitOutput(repo, "log", "-1", "--pretty=%s").trim());
-
-        var deliveryJson = Files.readString(deliveryDir.resolve("delivery.json"));
-        assertTrue(deliveryJson.contains("\"status\" : \"pr_created\""));
-        assertTrue(deliveryJson.contains("\"prCreated\" : true"));
-        assertTrue(deliveryJson.contains("\"prUrl\" : \"https://github.com/example/repo/pull/123\""));
-        assertTrue(deliveryJson.contains("\"branch\" : \"ai/ws\""));
-        var finalReport = Files.readString(reportsDir.resolve("latest-final-report.md"));
-        assertTrue(finalReport.contains("## Delivery"));
-        assertTrue(finalReport.contains("- Status: pr_created"));
-        assertTrue(finalReport.contains("- PR URL: https://github.com/example/repo/pull/123"));
     }
 
     @Test
@@ -2282,6 +2163,41 @@ class BuiltinHandlerTest {
                 null,
                 null
         );
+    }
+
+    private List<String> withDeliveryCandidate(String... inputRefs) throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws"));
+        var occurrence = "node-delivery-prepare-pr";
+        var writer = new DeliveryCandidateWriter();
+        var existing = writer.existing(paths, occurrence);
+        if (existing == null) {
+            var dir = paths.deliveryCandidateDir(occurrence);
+            var patchRef = workspaceRef(dir.resolve("merge.patch"));
+            var commitRef = workspaceRef(dir.resolve("commit-message.txt"));
+            var prRef = workspaceRef(dir.resolve("pr-body.md"));
+            var patch = "diff --git a/README.md b/README.md\n".getBytes(StandardCharsets.UTF_8);
+            var commit = "test commit\n".getBytes(StandardCharsets.UTF_8);
+            var pr = "# test PR\n".getBytes(StandardCharsets.UTF_8);
+            var candidate = new DeliveryCandidateDocument(
+                    1, "ws", occurrence, "iter-001", "wsp-test", tempDir.toString(),
+                    "1111111111111111111111111111111111111111",
+                    "2222222222222222222222222222222222222222",
+                    List.of("README.md"), List.of(),
+                    new DeliveryCandidateDocument.ArtifactReference(patchRef, DeliveryCandidateWriter.sha256(patch)),
+                    "3333333333333333333333333333333333333333",
+                    new DeliveryCandidateDocument.ArtifactReference(commitRef, DeliveryCandidateWriter.sha256(commit)),
+                    new DeliveryCandidateDocument.ArtifactReference(prRef, DeliveryCandidateWriter.sha256(pr)),
+                    Instant.parse("2026-08-28T00:00:00Z")
+            );
+            existing = writer.publish(paths, candidate, Map.of(
+                    "merge.patch", patch,
+                    "commit-message.txt", commit,
+                    "pr-body.md", pr
+            ));
+        }
+        var refs = new java.util.ArrayList<>(List.of(inputRefs));
+        refs.add(existing.ref());
+        return List.copyOf(refs);
     }
 
     private void writeTaskContract(TaskContract.ScopeEntry... entries) throws Exception {

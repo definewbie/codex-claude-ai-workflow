@@ -38,5 +38,9 @@ class StaticConsoleProjectionBoundaryTest {
         assertTrue(console.contains("/recovery/approve-websearch"));
         assertFalse(console.contains("assessment.classification === \"agent_permission_approval_required\""),
                 "console must consume allowedActions instead of reinterpreting recovery classification");
+        assertTrue(console.contains("delivery.canFinalize"));
+        assertTrue(console.contains("/delivery/finalize"));
+        assertFalse(console.contains("delivery.status === \"APPLIED\""),
+                "console must consume shared delivery capabilities instead of interpreting lifecycle status");
     }
 }

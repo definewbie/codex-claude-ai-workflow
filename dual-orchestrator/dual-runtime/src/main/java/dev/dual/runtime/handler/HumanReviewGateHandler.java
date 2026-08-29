@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
+import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.HumanGateActionSemantics;
+import dev.dual.ledger.file.DeliveryCandidateWriter;
+import dev.dual.ledger.file.WorkstreamPaths;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -242,6 +245,11 @@ public final class HumanReviewGateHandler implements GateHandler {
             return;
         }
         builder.append("## Delivery Artifacts\n\n");
+        appendField(builder, "Candidate", text(delivery.get("candidateRef")));
+        appendField(builder, "Candidate SHA-256", text(delivery.get("candidateSha256")));
+        appendField(builder, "Expected Git Tree", text(delivery.get("expectedResultTree")));
+        appendList(builder, "Accepted Files", delivery.get("acceptedFiles"));
+        appendList(builder, "Excluded Files", delivery.get("excludedFiles"));
         appendField(builder, "PR Body", text(delivery.get("prBodyPath")));
         appendField(builder, "Commit Message", text(delivery.get("commitMessagePath")));
         builder.append("\n");
@@ -385,6 +393,34 @@ public final class HumanReviewGateHandler implements GateHandler {
         }
         if (Files.isRegularFile(commitMessage)) {
             summary.put("commitMessagePath", displayRef(context.workspaceRoot(), commitMessage));
+        }
+        var candidateRefs = context.instance().inputRefs().stream()
+                .filter(ref -> ref.matches("\\.agent/workstreams/[^/]+/delivery/candidates/[^/]+/candidate-[0-9a-f]{64}\\.json"))
+                .toList();
+        if ("acceptance".equals(gatePurpose(context))) {
+            if (candidateRefs.size() != 1) {
+                throw new IllegalStateException("acceptance gate must receive exactly one delivery candidate");
+            }
+            try {
+                var candidatePath = resolveInsideWorkspace(context.workspaceRoot(), candidateRefs.get(0));
+                if (candidatePath == null || candidatePath.getParent() == null) {
+                    throw new IllegalStateException("acceptance delivery candidate ref is invalid");
+                }
+                var paths = new WorkstreamPaths(context.workspaceRoot(), new DualId(context.workstreamId()));
+                var published = new DeliveryCandidateWriter().existing(
+                        paths, candidatePath.getParent().getFileName().toString());
+                if (published == null || !published.ref().equals(candidateRefs.get(0))) {
+                    throw new IllegalStateException("acceptance delivery candidate is not the published occurrence");
+                }
+                summary.put("candidateRef", published.ref());
+                summary.put("candidateSha256", published.sha256());
+                summary.put("baseCommit", published.document().baseCommit());
+                summary.put("expectedResultTree", published.document().expectedResultTree());
+                summary.put("acceptedFiles", published.document().acceptedFiles());
+                summary.put("excludedFiles", published.document().excludedFiles());
+            } catch (Exception failure) {
+                throw new IllegalStateException("acceptance delivery candidate verification failed", failure);
+            }
         }
         return summary;
     }

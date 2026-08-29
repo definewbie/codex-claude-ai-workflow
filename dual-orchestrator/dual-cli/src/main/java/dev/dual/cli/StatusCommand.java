@@ -95,9 +95,12 @@ public final class StatusCommand implements Callable<Integer> {
             System.out.println("Delivery Merge:");
             System.out.println("  Status: " + text(merge.get("status")));
             System.out.println("  Target repo: " + text(merge.get("targetRepo")));
+            System.out.println("  Candidate: " + text(merge.get("candidateRef")));
+            System.out.println("  Candidate SHA-256: " + text(merge.get("candidateSha256")));
             System.out.println("  Changed files: " + sizeOf(merge.get("changedFiles")));
             if (!text(merge.get("failureReason")).isBlank()) {
-                System.out.println("  Failure: " + text(merge.get("failureReason")));
+                System.out.println("  Failure: " + text(merge.get("failureCode"))
+                        + " - " + text(merge.get("failureReason")));
             }
             if (merge.containsKey("updatedAt")) {
                 System.out.println("  Updated at: " + text(merge.get("updatedAt")));

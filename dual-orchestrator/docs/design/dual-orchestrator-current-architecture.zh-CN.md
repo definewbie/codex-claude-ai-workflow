@@ -484,7 +484,7 @@ sequenceDiagram
 | `ArtifactContractValidator` | schema、lineage、semantic admission | provider transport |
 | `WorkflowFileLedger/RoutingEngine` | durable state 和 transition | 解析 Agent 自然语言 |
 
-## 7. 12 个 concrete handler
+## 7. 10 个 concrete handler
 
 | Handler | 当前职责 | 主要 domain owner |
 | --- | --- | --- |
@@ -495,13 +495,13 @@ sequenceDiagram
 | `FailureClassifyHandler` | 收集 typed acceptance failure facts | `AgentEvidenceIndex` + `FailureArbiter` |
 | `ReviewDecisionHandler` | routed decision handler | `AgentEvidenceIndex` |
 | `HumanReviewGateHandler` | review packet 和 operator guidance | `StageOutcome` + ledger gate |
-| `DeliveryPrepareHandler` | commit message/PR body | typed accepted artifacts |
-| `DeliveryCommitHandler` | Git commit side effect | Git repository |
-| `DeliveryPrCreateHandler` | PR creation side effect | external Git provider |
+| `DeliveryPrepareHandler` | immutable candidate、commit message、PR body | source Git facts + candidate artifact |
 | `PromptGenerateNextStageHandler` | handoff/next prompt projection | validated routed artifacts |
 | `ReportGenerateFinalHandler` | final report projection | ledger/read models |
 
-Phase D 已删除四个已证明重复 owner。部分 handler 仍然较大，但“类较大”不等于
+Delivery target 写入不再由 workflow handler 执行；`DeliveryApplicationService` 在 workflow 完成后唯一消费 resolved human gate 绑定的 immutable candidate，并由 CLI/API 共同调用。旧 commit/create-PR handler 及其平行 `delivery.json` writer 已删除。
+
+Phase D 与后续 subtraction 已删除已证明重复或旁路的 owner。部分 handler 仍然较大，但“类较大”不等于
 存在错误 owner；没有真实重复规则或性能证据时不得继续拆分。
 
 ## 8. Ledger 目录结构

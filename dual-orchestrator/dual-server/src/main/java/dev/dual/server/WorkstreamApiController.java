@@ -126,6 +126,18 @@ public class WorkstreamApiController {
         return deliveryViewService.merge(workdirPath(workdir), workstreamId);
     }
 
+    @PostMapping("/{workstreamId}/delivery/finalize")
+    public Map<String, Object> deliveryFinalize(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody DeliveryFinalizeRequest request
+    ) throws Exception {
+        if (request == null || request.commit() == null || request.commit().isBlank()) {
+            throw new IllegalArgumentException("delivery commit is required");
+        }
+        return deliveryViewService.finalizeCommit(workdirPath(workdir), workstreamId, request.commit());
+    }
+
     @PostMapping("/{workstreamId}/resume")
     public Map<String, Object> resume(
             @PathVariable String workstreamId,
@@ -276,5 +288,8 @@ public class WorkstreamApiController {
     }
 
     public record ReviewCompleteRequest(String note) {
+    }
+
+    public record DeliveryFinalizeRequest(String commit) {
     }
 }

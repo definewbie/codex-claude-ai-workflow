@@ -27,7 +27,27 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: REPOSITORY FACT OCCURRENCE DURABILITY / COLD-START GATE REVIEW
+## Current Active Step: ACCEPTED DELIVERY CANDIDATE / D1 SELECTIVE COMMIT
+
+首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
+`bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
+边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。
+
+当前只推进 D1 Accepted Delivery Candidate。producer/consumer/sibling sweep 已完成：human acceptance 目前只绑定
+commit/PR Markdown，CLI/server 各自扫描 runs 并重读当前 worktree；此外 `delivery commit/create-pr` 仍可绕过 gate
+直接 add/commit/push。实施计划已落在
+`docs/plans/accepted-delivery-candidate-implementation-plan-20260828.zh-CN.md`，选择 content-addressed candidate、
+直接消费 authoritative gate history 的 deterministic resolver、runtime 单一 application service、manual commit finalize，并删除 legacy delivery
+bypass。独立架构评审已 `PASS（P0=0 / P1=0）`，checkpoint 已按计划完成：immutable candidate、event-ordered
+resolver、共享 apply/finalize、CLI/API/UI 委托与 legacy sibling subtraction 全部落地；workflow JSON 零修改。
+focused boundary slice 全绿，非沙箱 full Maven reactor 为 `1268/0/0/0`。deterministic 证据支持 D1
+`ENFORCED / NOT REAL-CASE PROVEN`；当前只允许独立代码级 diff review，PASS 前不提交、不调用 provider、不启动
+real-case，也不进入 D2/E1 production 实施。
+
+D1 独立 diff review 已 `PASS（P0=0 / P1=0 / P2=2 知会）`，并独立复现 full reactor
+`1268/0/0/0` 与 clean diff-check。两个 P2 已结转 D2：历史 `delivery.json` 只读投影残迹，以及稳定
+commit-message/PR-body 只能保持 presentation 身份。D1 已满足选择性提交条件；提交后才允许进入 D2 只读
+producer/consumer/sibling analysis，仍不授权 provider/real-case。
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，

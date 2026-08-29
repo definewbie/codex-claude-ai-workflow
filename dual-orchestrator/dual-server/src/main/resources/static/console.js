@@ -1154,8 +1154,8 @@ function allowedActions(status) {
     const actions = [];
     if (delivery.canMerge) {
       actions.push({ label: "合回原始仓库", kind: "primary", onClick: mergeDelivery });
-    } else if (delivery.status === "APPLIED") {
-      actions.push({ label: "查看已暂存差异和命令", kind: "primary", onClick: () => switchView("management") });
+    } else if (delivery.canFinalize) {
+      actions.push({ label: "登记交付提交", kind: "primary", onClick: finalizeDelivery });
     } else {
       actions.push({ label: "查看交付差异", kind: "primary", onClick: () => switchView("management") });
     }
@@ -1226,6 +1226,15 @@ function mergeDelivery() {
   postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/delivery/merge?workdir=${selectedWorkdirParam()}`);
 }
 
+function finalizeDelivery() {
+  const commit = window.prompt("请输入原始仓库中已创建的提交 SHA：", "");
+  if (!commit || !commit.trim()) return;
+  postAction(
+    `/api/workstreams/${encodeURIComponent(state.selectedId)}/delivery/finalize?workdir=${selectedWorkdirParam()}`,
+    { commit: commit.trim() }
+  );
+}
+
 function commandForStatus(status, assessment) {
   const task = selectedTask();
   const effectiveWorkdir = task?.effectiveWorkdir || state.workdir || ".";
@@ -1244,7 +1253,14 @@ function commandForStatus(status, assessment) {
     return `${jar} trace ${base}`;
   }
   if (status === "COMPLETED") {
-    return `${jar} summary ${base}\n${jar} delivery merge --workdir "${effectiveWorkdir}" --target "<original_repo>" ${state.selectedId}`;
+    const delivery = deliveryView();
+    if (delivery.canFinalize) {
+      return `${jar} delivery finalize --workdir "${effectiveWorkdir}" --commit <target_commit_sha> ${state.selectedId}`;
+    }
+    if (delivery.canMerge) {
+      return `${jar} delivery merge --workdir "${effectiveWorkdir}" --target "<original_repo>" ${state.selectedId}`;
+    }
+    return `${jar} summary ${base}`;
   }
   return `${jar} status ${base}`;
 }
@@ -1724,7 +1740,7 @@ function deliveryEvidenceCard() {
   asList(delivery.nextCommands).forEach((command) => {
     bullets.push(`命令：${command}`);
   });
-  if (delivery.status === "APPLIED") {
+  if (delivery.canFinalize) {
     bullets.push("说明：当前只完成暂存，没有自动提交、推送或创建 PR。");
   }
   if (!bullets.length) {

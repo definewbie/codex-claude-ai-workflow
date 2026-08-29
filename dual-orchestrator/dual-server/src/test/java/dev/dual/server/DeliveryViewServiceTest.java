@@ -22,23 +22,21 @@ class DeliveryViewServiceTest {
     Path tempDir;
 
     @Test
-    void completedAcceptedWorkstreamIsReadyForDeliveryMerge() throws Exception {
+    void legacyCompletedWorkstreamIsBlockedWithoutCandidateBinding() throws Exception {
         var fixture = createDeliveryFixture("ws-delivery-ready", "ACCEPT_WITH_NOTES");
         var service = new DeliveryViewService(objectMapper);
 
         var view = service.view(fixture.sourceWorktree(), fixture.workstreamId());
 
-        assertEquals("READY", view.get("status"));
-        assertEquals("ACCEPT_WITH_NOTES", view.get("acceptanceDecision"));
-        assertEquals(true, view.get("canMerge"));
-        assertEquals(List.of("README.md"), view.get("changedFiles"));
+        assertEquals("BLOCKED", view.get("status"));
+        assertEquals(false, view.get("canMerge"));
+        assertEquals("LEGACY_NOT_BOUND", view.get("reasonCode"));
         assertTrue(String.valueOf(view.get("targetRepo")).endsWith("target-repo"));
-        assertTrue(String.valueOf(view.get("operatorNextAction")).contains("合回原始仓库"));
-        assertTrue(strings(view.get("nextCommands")).contains("git status"));
+        assertTrue(String.valueOf(view.get("operatorNextAction")).contains("边界错误"));
     }
 
     @Test
-    void rejectedAcceptanceBlocksDeliveryMerge() throws Exception {
+    void legacyMarkdownRejectionCannotBecomeDeliveryAuthority() throws Exception {
         var fixture = createDeliveryFixture("ws-delivery-rejected", "REJECT");
         var service = new DeliveryViewService(objectMapper);
 
@@ -46,22 +44,20 @@ class DeliveryViewServiceTest {
 
         assertEquals("BLOCKED", view.get("status"));
         assertEquals(false, view.get("canMerge"));
-        assertTrue(String.valueOf(view.get("blockedReasons")).contains("REJECT"));
+        assertEquals("LEGACY_NOT_BOUND", view.get("reasonCode"));
     }
 
     @Test
-    void mergeAppliesPatchToOriginalRepoAndRecordsPlan() throws Exception {
+    void mergeCannotBypassMissingCandidateBinding() throws Exception {
         var fixture = createDeliveryFixture("ws-delivery-merge", "ACCEPT");
         var service = new DeliveryViewService(objectMapper);
 
         var view = service.merge(fixture.sourceWorktree(), fixture.workstreamId());
 
-        assertEquals("APPLIED", view.get("status"));
+        assertEquals("FAILED", view.get("status"));
         assertEquals(false, view.get("canMerge"));
         assertTrue(Files.isRegularFile(fixture.paths().deliveryMergePlanJson()));
-        assertTrue(String.valueOf(view.get("operatorNextAction")).contains("暂存"));
-        assertTrue(strings(view.get("nextCommands")).contains("git diff --cached"));
-        assertTrue(git(fixture.targetRepo(), "diff", "--cached", "--", "README.md").contains("changed by agent"));
+        assertTrue(git(fixture.targetRepo(), "diff", "--cached", "--", "README.md").isBlank());
     }
 
     private Fixture createDeliveryFixture(String workstreamId, String decision) throws Exception {
@@ -93,13 +89,20 @@ class DeliveryViewServiceTest {
         Files.createDirectories(paths.workflowDir());
         Files.writeString(paths.workflowCurrentJson(), """
                 {
+                  "schemaVersion": 1,
+                  "workstreamId": "%s",
+                  "workflowInstanceId": "wf-test",
                   "workflowId": "delivery-test",
-                  "definitionVersion": "test",
+                  "definitionVersion": 1,
                   "status": "COMPLETED",
                   "activeNodeInstanceIds": [],
                   "openGateIds": [],
+                  "lastEventId": "evt-000001",
                   "updatedAt": "2026-06-01T00:00:00Z"
                 }
+                """.formatted(workstreamId), StandardCharsets.UTF_8);
+        Files.writeString(paths.eventsJsonl(), """
+                {"event_id":"evt-000001","event_type":"workflow_completed","payload":{}}
                 """, StandardCharsets.UTF_8);
         Files.createDirectories(paths.domainDir());
         Files.writeString(paths.completionAuditJson(), """

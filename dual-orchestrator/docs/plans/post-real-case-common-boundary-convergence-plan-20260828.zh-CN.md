@@ -1,7 +1,7 @@
 # 首个完整 Real-Case 后的共性边界统一修复计划
 
 日期：2026-08-28  
-状态：`ARCHITECTURE REVIEW PASS / D1 SWEEP REQUIRED / NO PROVIDER AUTHORIZED`
+状态：`ARCHITECTURE REVIEW PASS / D1 SWEEP COMPLETE / D1 IMPLEMENTATION PLAN IN REVIEW / NO PROVIDER AUTHORIZED`
 
 ## 1. 决策摘要
 
@@ -80,6 +80,12 @@
 
 ## 4. Checkpoint D1：Accepted Delivery Candidate
 
+producer/consumer/sibling sweep 已完成，实施计划见
+`docs/plans/accepted-delivery-candidate-implementation-plan-20260828.zh-CN.md`。sweep 除确认 CLI/server 的重复 merge owner 外，
+还发现公开的 `delivery commit` / `delivery create-pr` 会绕过 human candidate 直接 add/commit/push，并写入平行
+`delivery.json` lifecycle；四个 bundled workflow 均不消费这两个 handler。D1 因此必须同时删除该 legacy family，不能只修
+original-repo merge 后留下另一条 delivery side-effect bypass。
+
 ### 4.1 目标链
 
 ```text
@@ -104,7 +110,7 @@ delivery.prepare_pr
 - binary patch ref + SHA-256；
 - 临时 index `write-tree` 产生的 expected result tree SHA；
 - commit-message/pr-body refs + SHA-256；
-- acceptance subject binding 所需的 candidate ref + SHA-256；
+- gate subject 绑定 candidate ref；candidate 文件名中的 SHA-256 与文件 bytes 必须一致（candidate 文档本身不包含自引用 SHA）；
 - `created_at` 仅作审计，不参与 identity。
 
 不得把 Markdown、console 输出、mtime、目录顺序或 source index 状态作为 identity。
@@ -311,6 +317,14 @@ production 实施都受此条件阻断。
 D1 clean checkpoint 后再实施。先追踪 final-report 的 routed refs，若 existing refs 足够则禁止新增 typed selector。完成
 CLI/API/UI/report sibling sweep、focused tests、reactor 与独立 diff review。
 
+D1 diff review 结转的 sibling 清单：
+
+- `StatusCommand`、`SummaryCommand`、`WorkstreamQueryService` 与 `smoke-test.sh` 仍只读历史
+  `delivery/delivery.json`；其 writer 已删除，新 workstream 不再产生该文档。D2 必须把它明确归类为 legacy historical
+  projection 或删除，不得让它与 `merge-plan.json` 并列解释当前 delivery 状态。
+- `delivery/commit-message.txt` 与 `delivery/pr-body.md` 是从已验证 candidate 重建的稳定展示文件；D2 不得把稳定路径
+  当成 acceptance、candidate 或 completion SoT。
+
 ### 8.3 E1
 
 可与 D2 的只读分析并行，但 production 实施必须等 capability assessment PASS。assessment FAIL 即止损，不因安全目标正确就制造
@@ -345,8 +359,8 @@ D1/D2 deterministic ENFORCED、E1 有诚实结论且当前 dirty adapter checkpo
 |---|---|
 | small workflow 完整 real-case | `PROVEN`（单一 Mailpit case） |
 | product Mailpit feature | `PROVEN / COMMITTED @ c2e74f9` |
-| delivery supports accepted untracked files | `NOT ENFORCED` |
-| accepted bytes bound to target apply/commit | `NOT MODELED` |
+| delivery supports accepted untracked files | `ENFORCED / NOT REAL-CASE PROVEN` |
+| accepted bytes bound to target apply/commit | `ENFORCED / NOT REAL-CASE PROVEN` |
 | delivery/self-test/current-state projection consistency | `VALIDATED DEFECT / NOT ENFORCED` |
 | exact WebSearch human authority | `ENFORCED / REAL-CASE OBSERVED` |
 | total Bash/subprocess network authority | `NOT MODELED` |

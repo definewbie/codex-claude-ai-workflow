@@ -1,12 +1,14 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.core.workflow.NodeKind;
 import dev.dual.runtime.lifecycle.WorkflowDefinitionLoader;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AcpxWorkflowHandlerRegistryFactoryTest {
 
@@ -23,6 +25,16 @@ class AcpxWorkflowHandlerRegistryFactoryTest {
                 );
             }
         }
+    }
+
+    @Test
+    void legacyDeliverySideEffectHandlersAreNotResolvable() {
+        var registry = AcpxWorkflowHandlerRegistryFactory.create();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registry.resolve(NodeKind.TASK, "delivery.git_commit"));
+        assertThrows(IllegalArgumentException.class,
+                () -> registry.resolve(NodeKind.TASK, "delivery.create_pr"));
     }
 
     private static List<WorkflowDefinition> bundledDefinitions() throws Exception {

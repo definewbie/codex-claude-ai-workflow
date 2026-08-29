@@ -79,8 +79,8 @@ product-oriented categories instead of internal implementation phase numbers.
 - [x] Final report generation.
 - [x] Workstream summary report.
 - [x] Delivery PR body and commit-message preparation.
-- [x] Explicit `delivery merge` from accepted worktree back to a clean original repo.
-- [x] Conservative `delivery commit` and `delivery create-pr` commands.
+- [x] Immutable delivery candidate bound to final human acceptance.
+- [x] Explicit `delivery merge` to a clean original repo plus exact-tree commit finalization.
 - [x] Original repo cleanliness checks in benchmark reports.
 - [ ] Automatic merge without an explicit operator command is intentionally out of scope.
 

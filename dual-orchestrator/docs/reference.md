@@ -87,7 +87,7 @@ Runtime 只认识三类节点：
 - `handoff.json` sidecar：从 agent handoff markdown 解析生成结构化 JSON，下游 handler 可直接消费 `completedWork`（iteration_history section）和 `openRisks`（human_feedback section）。
 - Configurable retry policies：per-failure-type 策略（RATE_LIMIT / SESSION_MISSING / AGENT_RECONNECT / CONTEXT_WINDOW），指数退避 + `Thread.sleep`，node-level config override。
 - `WorkflowFileLedger` 重构为 facade + 4 delegates（`RoutingEngine`、`NodeStateWriter`、`RevisionTracker`、`LedgerEventLog`）+ `LedgerUtils` 工具类。公共 API 不变。
-- Delivery 管线：`delivery.prepare_pr` → `dualctl delivery commit` → `dualctl delivery create-pr`（自动 commit + push + `gh pr create`）。
+- Delivery 管线：`delivery.prepare_pr` 固化候选 bytes → final human acceptance 绑定候选 → `dualctl delivery merge` 应用到原始仓库 → operator commit → `dualctl delivery finalize` 校验并登记精确 commit。
 - CalibrationCandidate MVP：failure classification 可生成 `calibration/candidates/<id>.json` / `.md`，并可通过 `dualctl calibration plan` 生成可审阅 apply plan。
 - Failure summary MVP：节点 `FAILED` / `BLOCKED` 或分类失败时会生成 `recovery/current-failure.md`。
 - Watch mode MVP：`dualctl watch` 基于 `timeline.json` 轮询展示 workflow 进度。
@@ -709,9 +709,8 @@ dualctl workflow print-default --output ./workflow.json
 
 - `defaults.sessions.claude` 会填充 `agent=claude` 且没有显式 `session` 的 `acpx.agent_run` 节点。
 - `defaults.sessions.codex` 会填充 `agent=codex` 且没有显式 `session` 的 `acpx.agent_run` 节点。
-- `defaults.delivery` 会填充 `delivery.create_pr` 节点缺失的 `base`、`draft` 等配置。
 - `defaults.revision.max_revisions` 会填充 `review.decision` 和 `human.review` 节点缺失的 revision 上限。达到上限后，workflow 会停在 recovery gate，不会无限开新 iteration。
-- 节点自己的 `config` 优先级更高；一旦节点显式写了 `session`、`base`、`draft` 或 `max_revisions`，不会被 defaults 覆盖。
+- 节点自己的 `config` 优先级更高；一旦节点显式写了 `session` 或 `max_revisions`，不会被 defaults 覆盖。
 
 启动后会打印：
 
@@ -1277,11 +1276,11 @@ dualctl delivery merge \
 
 - workflow status 是 `COMPLETED`；
 - completion audit 是 `ready`；
-- final acceptance 是 `ACCEPT` 或 `ACCEPT_WITH_NOTES`；
+- 最后一次 human acceptance 已批准且 gate subject 绑定恰好一个 immutable delivery candidate；
 - target repo 是干净的 Git repo；
-- source worktree 有非空 tracked 业务 diff。
+- source worktree 的 base、accepted/excluded path sets、patch SHA 与 expected Git tree 仍与获批 candidate 完全一致。
 
-它会从 source worktree 生成 patch，排除 `.agent/`、`.serena/`、`node_modules/`、`dist/`、`build/`、`target/` 和 `*.log`，然后 apply 到 target repo index。它不会自动 commit，也不会自动删除 worktree。
+candidate 由 `delivery.prepare_pr` 使用临时 Git index 生成，支持 tracked、untracked、binary、rename、delete 和 mode change；生成过程不会修改 source 的真实 index。`.agent/`、`.serena/` 为内部路径，build output 与 `*.log` 记为 excluded。`delivery merge` 只应用获批的 immutable patch，不会重新解释当前 worktree，也不会自动 commit 或删除 worktree。
 
 交付合并证据写入：
 
@@ -1294,34 +1293,18 @@ dualctl delivery merge \
 .agent/workstreams/<workstream_id>/delivery/apply.stderr.log
 ```
 
-第一版只支持 tracked 业务文件改动。未跟踪的业务文件会让命令失败并给出原因，避免 delivery merge 静默修改 source worktree index。
-
-需要提交业务改动时执行：
+检查 target 中已暂存的精确候选后，由 operator 正常创建 Git commit。随后登记该 commit：
 
 ```bash
-dualctl delivery commit --workdir <effective_worktree> <workstream_id>
+dualctl delivery finalize \
+  --workdir <effective_worktree> \
+  --commit <target_commit_sha> \
+  <workstream_id>
 ```
 
-`delivery commit` 会用生成的 commit message 执行 `git commit`，并排除 `.agent` 运行账本；如果没有 `.agent` 之外的业务改动，会跳过提交。
-执行结果会写入 `.agent/workstreams/<workstream_id>/delivery/delivery.json`，并刷新 `reports/latest-final-report.md` 里的 `## Delivery` 段。
+`delivery finalize` 要求 target clean、HEAD 等于给定 SHA、commit parent 等于 candidate base、commit tree 等于获批 `expectedResultTree`。通过后 `merge-plan.json` 进入 `COMMITTED`。旧的 `delivery commit` / `delivery create-pr` 旁路已删除；未来 push/PR 能力也必须消费同一 finalized commit，不能直接对当前 worktree 执行 `git add -A`。
 
-需要创建 PR 时执行：
-
-```bash
-dualctl delivery create-pr --workdir <effective_worktree> <workstream_id>
-dualctl delivery create-pr --workdir <effective_worktree> --base main --draft <workstream_id>
-dualctl delivery create-pr --workdir <effective_worktree> --title "feat: my task" <workstream_id>
-```
-
-`delivery create-pr` 会先确保业务改动已提交，然后执行 `git push -u origin <branch>` 和 `gh pr create`。它要求当前分支不是 `main` / `master`，并且 worktree 有可识别的 `origin` remote。gh 输出会保存到：
-
-```text
-.agent/workstreams/<workstream_id>/delivery/gh-pr-create.stdout.log
-.agent/workstreams/<workstream_id>/delivery/gh-pr-create.stderr.log
-.agent/workstreams/<workstream_id>/delivery/pr-url.txt
-```
-
-`dualctl status` 会读取 `delivery.json` 并显示 delivery status、commit hash 和 PR URL；如果存在 `merge-plan.json`，也会显示 Delivery Merge status、target repo 和 changed file 数量。
+`dualctl status` 会显示 `merge-plan.json` 中的 delivery status、typed failure、target repo、candidate identity 与 commit；历史 `delivery.json` 只作为旧 workstream 的只读兼容投影。
 
 过渡期仍会看到旧 design-loop ledger：
 
