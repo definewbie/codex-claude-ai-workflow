@@ -25,14 +25,16 @@
 安全边界必须由可机械执行的 sandbox/policy 强制，prompt 只做引导
 ```
 
-实施拆成三个原子 checkpoint，顺序固定：
+原计划拆成三个原子 checkpoint；经 D1/D2 收口后重新评估优先级：
 
 1. `D1 Accepted Delivery Candidate`：先关闭会改变目标仓库的交付正确性边界；
 2. `D2 Shared Completion Projection`：再统一 delivery/self-test/workflow status 的只读投影；
-3. `E1 External Execution Authority`：先做 capability proof，只有 OS 级网络边界可被当前 frozen adapter 强制时才实施。
+3. `E1 External Execution Authority`：安全增强 TODO，仅在触发条件成立后先做 capability proof；
+   只有 OS 级网络边界可被当前 frozen adapter 强制时才实施。
 
-当前主线锁定分类：`D1/D2 = P0 lifecycle integrity`；`E1 = P0.5 adapter authority blocker`。不开展 P1/P2/P3
-功能扩张，不新增 workflow node、通用 evidence platform、规则引擎或第二次 real-case。
+当前主线分类：`D1/D2 = P0 lifecycle integrity`，已 deterministic ENFORCED；
+`E1 = IMPORTANT / NOT URGENT SECURITY TODO`，不再是 workflow 正确性、delivery 完整性或下一次
+real-case 的 blocker。不新增 workflow node、通用 evidence platform 或规则引擎。
 
 ## 2. Captured 事实与分类
 
@@ -222,6 +224,20 @@ CLI `DeliveryMergeCommand` 与 server `DeliveryViewService` 当前各自实现 p
 
 ## 6. Checkpoint E1：External Execution Authority
 
+**优先级决策（2026-08-29）：`IMPORTANT / NOT URGENT SECURITY TODO`。**
+
+E1 解决的是模型通过 Bash 及子进程绕过 exact WebSearch human authority 的运行安全问题，
+不是当前 workflow 状态、artifact lineage、delivery authority 或 real-case 完成性缺口。在个人、
+可信仓库、无敏感凭据且有人值守的现有运行模式下，暂缓实施的短期风险可接受。
+
+仅以下任一条成立时重开 E1：
+
+1. Dual 开始运行陌生或不可信仓库；
+2. worktree 包含敏感源码、凭据或受管数据；
+3. 开启无人值守、批量或共享 worker 运行；
+4. 发生 Bash/子进程未经授权访网的自然 incident；
+5. pinned provider adapter 已提供可离线证明的 OS sandbox 注入与 fail-closed 能力，使实施成本显著下降。
+
 ### 6.1 已确认的安全事实
 
 exact WebSearch human recovery 只控制 ACP `WebSearch` tool request。它不控制 Bash 子进程。Claude Code 官方文档明确说明：
@@ -327,12 +343,14 @@ D1 diff review 结转的 sibling 清单：
 
 ### 8.3 E1
 
-可与 D2 的只读分析并行，但 production 实施必须等 capability assessment PASS。assessment FAIL 即止损，不因安全目标正确就制造
-不可证明的 command policy。
+当前放入安全 TODO，不占用主线实施时间。只有 §6 的重开条件成立后才执行 capability
+assessment；production 实施仍必须等 assessment PASS。assessment FAIL 即止损，不因安全目标
+正确就制造不可证明的 command policy。
 
 ### 8.4 Real-case
 
-D1/D2 deterministic ENFORCED、E1 有诚实结论且当前 dirty adapter checkpoint 已独立评审并提交前，不启动新的 real-case。
+D1/D2 deterministic ENFORCED 且当前 checkpoint 已独立评审并提交后，可以制定新的
+Verification Gate 验证其自然 real-case 价值。E1 当前为安全 TODO，不是启动该 real-case 的前置条件。
 下一次 real-case 只验证：
 
 - approved candidate 与实际 merge/commit 精确一致；
@@ -361,9 +379,9 @@ D1/D2 deterministic ENFORCED、E1 有诚实结论且当前 dirty adapter checkpo
 | product Mailpit feature | `PROVEN / COMMITTED @ c2e74f9` |
 | delivery supports accepted untracked files | `ENFORCED / NOT REAL-CASE PROVEN` |
 | accepted bytes bound to target apply/commit | `ENFORCED / NOT REAL-CASE PROVEN` |
-| delivery/self-test/current-state projection consistency | `VALIDATED DEFECT / NOT ENFORCED` |
+| delivery/self-test/current-state projection consistency | `ENFORCED / NOT REAL-CASE PROVEN` |
 | exact WebSearch human authority | `ENFORCED / REAL-CASE OBSERVED` |
-| total Bash/subprocess network authority | `NOT MODELED` |
+| total Bash/subprocess network authority | `IMPORTANT / NOT URGENT TODO / NOT MODELED` |
 
 停止扩张条件：
 

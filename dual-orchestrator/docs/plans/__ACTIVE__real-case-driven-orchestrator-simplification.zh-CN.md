@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: D2-B SELECTIVE COMMIT
+## Current Active Step: NEXT NATURAL REAL-CASE GATE
 
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
@@ -147,6 +147,14 @@ mutation command capability 门控、scheduler 零 legacy action、混合 event 
 `NotificationService` 自有 payload 与 list-item fallback reader。成熟度正式为
 `DELIVERY/CURRENT PROJECTION CONSISTENCY ENFORCED / NOT REAL-CASE PROVEN`，当前允许选择性提交该单一
 checkpoint。
+
+D2-B 已选择性提交为 `fdd8a49b`，工作树恢复 clean。D1/D2-A/D2-B 至此完成
+deterministic enforcement，下一主线是制定一次自然 real-case Verification Gate 证明 accepted candidate、
+completion evidence 与多端 projection 的端到端价值。
+
+E1 total Bash/subprocess network authority 定位为 `IMPORTANT / NOT URGENT SECURITY TODO / NOT MODELED`，
+不再是下一次 real-case 的 blocker。仅在运行陌生仓库、敏感代码/凭据、无人值守或共享
+worker、自然未授权访网 incident，或 provider sandbox 能力使实施成本显著下降时重开。
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
