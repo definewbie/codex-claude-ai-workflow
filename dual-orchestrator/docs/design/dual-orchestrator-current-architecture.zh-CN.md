@@ -501,6 +501,13 @@ sequenceDiagram
 
 Delivery target 写入不再由 workflow handler 执行；`DeliveryApplicationService` 在 workflow 完成后唯一消费 resolved human gate 绑定的 immutable candidate，并由 CLI/API 共同调用。旧 commit/create-PR handler 及其平行 `delivery.json` writer 已删除。
 
+Delivery/current projection 同样遵守单一 owner：workflow 当前状态只来自 `WorkflowCurrentDocument`；delivery
+状态、失败原因与 `canMerge/canFinalize` 只来自 `DeliveryApplicationService.View`。CLI、server 与两个 UI 只格式化
+这两个 read model，不再读取 legacy `delivery.json`、直接解释 raw merge plan 或使用 timeline/workstream 初始状态
+作为 action authority。`WorkstreamAttentionEvaluator` 只解释 workflow/goal/recovery，delivery next action 由 runtime
+view 单独投影。历史 workstream 无 current 或 candidate binding 时分别标注 `legacy_initial`、`LEGACY_NOT_BOUND`，
+不通过 fallback 伪造当前状态。
+
 Phase D 与后续 subtraction 已删除已证明重复或旁路的 owner。部分 handler 仍然较大，但“类较大”不等于
 存在错误 owner；没有真实重复规则或性能证据时不得继续拆分。
 

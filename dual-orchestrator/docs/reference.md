@@ -1304,7 +1304,14 @@ dualctl delivery finalize \
 
 `delivery finalize` 要求 target clean、HEAD 等于给定 SHA、commit parent 等于 candidate base、commit tree 等于获批 `expectedResultTree`。通过后 `merge-plan.json` 进入 `COMMITTED`。旧的 `delivery commit` / `delivery create-pr` 旁路已删除；未来 push/PR 能力也必须消费同一 finalized commit，不能直接对当前 worktree 执行 `git add -A`。
 
-`dualctl status` 会显示 `merge-plan.json` 中的 delivery status、typed failure、target repo、candidate identity 与 commit；历史 `delivery.json` 只作为旧 workstream 的只读兼容投影。
+`dualctl status`、`dualctl summary` 与 operator API/UI 只消费 `DeliveryApplicationService.View`，不会直接解释
+`merge-plan.json`。该 view 先重验人工验收绑定的 candidate identity，再投影 delivery status、typed failure、target
+repo、candidate identity、commit 与 `canMerge/canFinalize`。workflow 尚未完成或 completion audit 未 ready 时显式显示
+`BLOCKED / WORKFLOW_NOT_DELIVERABLE`，但不把它解释为 workflow failure，也不开放 mutation command。
+
+历史 `delivery.json` 不再由任何 current surface 读取；它只作为 frozen artifact 留在旧 workstream 中供人工审计。
+缺少 D1 candidate binding 的旧 workstream 显式投影 `BLOCKED / LEGACY_NOT_BOUND`，不会从旧 commit/PR 字段重建
+delivery authority。
 
 过渡期仍会看到旧 design-loop ledger：
 

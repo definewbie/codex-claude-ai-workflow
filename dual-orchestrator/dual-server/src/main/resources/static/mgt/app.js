@@ -212,7 +212,7 @@ function renderWorkstreams(items) {
     button.className = `workstream ${item.workstreamId === state.selectedId ? "active" : ""}`;
     button.innerHTML = `
       <strong>${escapeHtml(item.workstreamId || "(unknown)")}</strong>
-      <span>${escapeHtml(item.workflowStatus || item.status || "(no status)")}</span>
+      <span>${escapeHtml(item.status || "(no status)")} · ${escapeHtml(item.statusSource === "legacy_initial" ? "legacy" : "current")}</span>
       <span>${escapeHtml(item.title || "")}</span>
     `;
     button.addEventListener("click", async () => {
@@ -301,7 +301,7 @@ function renderOverview(data) {
   renderOverviewAttention(data.attention || []);
   renderOverviewTimeline(data.recentTimeline || []);
   renderOverviewArtifacts(data.artifacts || {});
-  renderOverviewDeliveryMerge(data.deliveryMerge || {}, data);
+  renderOverviewDelivery(data.deliveryView || {});
   renderOverviewAgentTasks(data.latestAgentTasks || []);
 }
 
@@ -652,37 +652,34 @@ function renderOverviewArtifacts(artifacts) {
   }
 }
 
-function renderOverviewDeliveryMerge(deliveryMerge, data) {
+function renderOverviewDelivery(delivery) {
   els.overviewDeliveryMerge.innerHTML = "";
-  const workflow = data.workflow || {};
-  if (!deliveryMerge || !Object.keys(deliveryMerge).length) {
+  if (!delivery || !Object.keys(delivery).length) {
     const item = document.createElement("div");
     item.className = "mini-item muted-item";
-    const command = workflow.status === "COMPLETED"
-      ? `dualctl delivery merge --workdir ${state.workdir || "<source_worktree>"} --target <original_repo> ${state.selectedId || "<workstream_id>"}`
-      : "available after completion";
     item.innerHTML = `
-      <strong>Not applied</strong>
-      <span>${escapeHtml(command)}</span>
+      <strong>Unavailable</strong>
+      <span>Delivery view is not available.</span>
     `;
     els.overviewDeliveryMerge.appendChild(item);
     return;
   }
-  const status = deliveryMerge.status || "UNKNOWN";
-  const changedFiles = Array.isArray(deliveryMerge.changedFiles) ? deliveryMerge.changedFiles.length : 0;
+  const status = delivery.status || "UNKNOWN";
+  const changedFiles = Array.isArray(delivery.changedFiles) ? delivery.changedFiles.length : 0;
+  const notDeliverable = delivery.reasonCode === "WORKFLOW_NOT_DELIVERABLE";
   const item = document.createElement("div");
-  item.className = `mini-item ${status === "FAILED" ? "danger-item" : ""}`;
+  item.className = `mini-item ${status === "FAILED" ? "danger-item" : notDeliverable ? "muted-item" : ""}`;
   item.innerHTML = `
-    <strong>${escapeHtml(status)}</strong>
-    <span>${escapeHtml(`${changedFiles} changed file(s) -> ${deliveryMerge.targetRepo || ""}`)}</span>
+    <strong>${escapeHtml(notDeliverable ? "Not yet deliverable" : status)}</strong>
+    <span>${escapeHtml(notDeliverable ? delivery.failureReason || "Workflow is still in progress." : `${changedFiles} changed file(s) -> ${delivery.targetRepo || ""}`)}</span>
   `;
   els.overviewDeliveryMerge.appendChild(item);
-  if (deliveryMerge.failureReason) {
+  if (delivery.failureReason && !notDeliverable) {
     const failure = document.createElement("div");
     failure.className = "mini-item danger-item";
     failure.innerHTML = `
       <strong>Failure</strong>
-      <span>${escapeHtml(deliveryMerge.failureReason)}</span>
+      <span>${escapeHtml(delivery.failureReason)}</span>
     `;
     els.overviewDeliveryMerge.appendChild(failure);
   }

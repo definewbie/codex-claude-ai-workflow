@@ -152,7 +152,7 @@ class WorkstreamAttentionEvaluatorTest {
     }
 
     @Test
-    void completedWorkflowWithAppliedDeliveryMergeSuggestsCommitNotMergeAgain() throws Exception {
+    void completedWorkflowAttentionDoesNotInterpretDeliveryMergePlan() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-delivery-applied"));
         var ledger = new WorkflowFileLedger();
         var definition = new WorkflowDefinition(
@@ -188,10 +188,11 @@ class WorkstreamAttentionEvaluatorTest {
         var attention = WorkstreamAttentionEvaluator.evaluate(paths);
 
         assertEquals(WorkstreamAttentionCategory.COMPLETED, attention.category());
-        assertEquals("Delivery merge applied", attention.title());
-        assertTrue(attention.nextAction().contains("Review the staged target diff"));
-        assertTrue(attention.command().contains("git -C /tmp/target diff --cached"));
-        assertFalse(attention.command().contains("delivery merge"));
+        assertEquals("Workflow completed", attention.title());
+        assertEquals("Review final artifacts and Git status.", attention.nextAction());
+        assertTrue(attention.command().contains("dualctl summary"));
+        assertFalse(attention.detail().contains("Delivery merge"));
+        assertFalse(attention.command().contains("/tmp/target"));
     }
 
     private static WorkflowDefinition singleNodeDefinition() {

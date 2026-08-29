@@ -7,6 +7,8 @@ import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.DeliveryCandidateDocument;
 import dev.dual.ledger.file.DeliveryCandidateWriter;
+import dev.dual.ledger.file.DeliveryMergePlan;
+import dev.dual.ledger.file.DeliveryMergeStatus;
 import dev.dual.ledger.file.GateDocument;
 import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkstreamPaths;
@@ -109,6 +111,25 @@ class DeliveryApplicationServiceTest {
 
         assertEquals("BLOCKED", result.status());
         assertEquals("LEGACY_NOT_BOUND", result.reasonCode());
+    }
+
+    @Test
+    void appliedPlanWithoutAcceptedCandidateBindingCannotBecomeAuthority() throws Exception {
+        var fixture = fixture("ws-unbound-applied-plan");
+        mapper.writeValue(fixture.paths().deliveryMergePlanJson().toFile(), DeliveryMergePlan.create(
+                fixture.workstreamId(), fixture.source().toString(), fixture.target().toString(), "approved",
+                "", "", "", "", fixture.expectedTree(), List.of("README.md"), List.of(),
+                DeliveryMergeStatus.APPLIED, "", ""
+        ));
+
+        var result = new DeliveryApplicationService().view(
+                fixture.source(), fixture.workstreamId(), fixture.target());
+
+        assertEquals("BLOCKED", result.status());
+        assertEquals("ACCEPTED_CANDIDATE_INVALID", result.reasonCode());
+        assertTrue(result.reason().contains("missing its accepted candidate binding"));
+        assertEquals(false, result.canMerge());
+        assertEquals(false, result.canFinalize());
     }
 
     @Test
@@ -266,6 +287,7 @@ class DeliveryApplicationServiceTest {
         ));
         Files.writeString(paths.eventsJsonl(), """
                 {"event_id":"evt-000001","event_type":"node_completed","payload":{}}
+                {"event_id":"agent-task-finished-001","event_type":"agent_task_completed","payload":{}}
                 {"event_id":"evt-000002","event_type":"node_routed","payload":{"to":"gate.human_acceptance","gate_id":"gate-001","node_instance_id":"%s"}}
                 """.formatted(gateNodeId));
     }

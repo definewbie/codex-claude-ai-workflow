@@ -59,9 +59,12 @@ public class WorkstreamQueryService {
                 "baseBranch", legacy.workspace().baseBranch(),
                 "baseCommit", legacy.workspace().baseCommit()
         ));
+        response.put("legacyInitialStatus", legacy.workstream().status());
 
         if (Files.exists(paths.workflowCurrentJson())) {
             var current = workflowLedger.loadCurrent(paths);
+            response.put("status", current.status().name());
+            response.put("statusSource", "workflow_current");
             var agentTasks = agentTaskSummaries(paths, 20);
             var activeNodes = current.activeNodeInstanceIds().stream()
                     .map(nodeId -> activeNode(paths, nodeId, agentTasks))
@@ -76,18 +79,14 @@ public class WorkstreamQueryService {
                     "updatedAt", current.updatedAt()
             ));
             response.put("agentTasks", agentTasks);
+        } else {
+            response.put("status", legacy.workstream().status());
+            response.put("statusSource", "legacy_initial");
         }
         response.put("artifactContracts", artifactContracts(root, paths));
         response.put("completionEvidence", completionEvidence(
                 paths, CompletionEvidenceLineageResolver.resolveCurrent(root, workstreamId)));
 
-        var deliveryJson = paths.workstreamDir().resolve("delivery").resolve("delivery.json");
-        if (Files.exists(deliveryJson)) {
-            response.put("delivery", objectMapper.readValue(deliveryJson.toFile(), MAP_TYPE));
-        }
-        if (Files.exists(paths.deliveryMergePlanJson())) {
-            response.put("deliveryMerge", objectMapper.readValue(paths.deliveryMergePlanJson().toFile(), MAP_TYPE));
-        }
         response.put("deliveryView", deliveryViewService.view(root, workstreamId));
         return response;
     }
@@ -172,6 +171,7 @@ public class WorkstreamQueryService {
         var activeNodeIds = current == null ? textList(timeline.get("activeNodeInstanceIds")) : current.activeNodeInstanceIds();
         var openGateIds = current == null ? textList(timeline.get("openGateIds")) : current.openGateIds();
         var status = current == null ? text(timeline.get("workflowStatus")) : current.status().name();
+        var statusSource = current == null ? "timeline_projection" : "workflow_current";
         var workflowUpdatedAt = current == null ? text(timeline.get("updatedAt")) : current.updatedAt().toString();
         var workflowId = current == null ? text(timeline.get("workflowId")) : current.workflowId();
         var definitionVersion = current == null ? text(timeline.get("definitionVersion")) : current.definitionVersion();
@@ -192,7 +192,6 @@ public class WorkstreamQueryService {
                 : (summaryConfidence.isBlank() ? "derived_from_final_acceptance" : "real_case_summary_projection");
         var artifacts = artifacts(root, paths);
         var completionAudit = completionAudit(paths);
-        var deliveryMerge = readJson(paths.deliveryMergePlanJson());
         var deliveryView = deliveryViewService.view(root, workstreamId);
         var goalSatisfaction = readJson(paths.goalSatisfactionJson());
         var currentNode = currentNode(nodes, activeNodeIds);
@@ -213,6 +212,7 @@ public class WorkstreamQueryService {
                 "workflowId", workflowId,
                 "definitionVersion", definitionVersion,
                 "status", status,
+                "statusSource", statusSource,
                 "currentNode", currentNode,
                 "activeNodeInstanceIds", activeNodeIds,
                 "openGateIds", openGateIds,
@@ -236,7 +236,6 @@ public class WorkstreamQueryService {
         response.put("latestAgentRuns", latestAgentRuns);
         response.put("artifacts", artifacts);
         response.put("completionAudit", completionAudit);
-        response.put("deliveryMerge", deliveryMerge);
         response.put("deliveryView", deliveryView);
         response.put("recoveryAssessment", recoveryAssessment);
         return response;
@@ -332,7 +331,10 @@ public class WorkstreamQueryService {
         var item = new LinkedHashMap<String, Object>();
         item.put("workstreamId", text(workstream.get("workstreamId")));
         item.put("title", text(workstream.get("title")));
-        item.put("status", text(workstream.get("status")));
+        var legacyInitialStatus = text(workstream.get("status"));
+        item.put("legacyInitialStatus", legacyInitialStatus);
+        item.put("status", legacyInitialStatus);
+        item.put("statusSource", "legacy_initial");
         item.put("updatedAt", text(workstream.get("updatedAt")));
         item.put("effectiveWorkdir", effectiveRoot.toString());
         item.put("ledger", safeRelative(requestedRoot, dir));
@@ -341,7 +343,8 @@ public class WorkstreamQueryService {
         if (Files.exists(currentJson)) {
             var current = objectMapper.readValue(currentJson.toFile(), MAP_TYPE);
             item.put("workflowId", text(current.get("workflowId")));
-            item.put("workflowStatus", text(current.get("status")));
+            item.put("status", text(current.get("status")));
+            item.put("statusSource", "workflow_current");
             item.put("activeNodeCount", sizeOf(current.get("activeNodeInstanceIds")));
             item.put("openGateCount", sizeOf(current.get("openGateIds")));
         }

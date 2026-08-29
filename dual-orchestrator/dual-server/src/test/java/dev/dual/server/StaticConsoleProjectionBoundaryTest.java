@@ -42,5 +42,13 @@ class StaticConsoleProjectionBoundaryTest {
         assertTrue(console.contains("/delivery/finalize"));
         assertFalse(console.contains("delivery.status === \"APPLIED\""),
                 "console must consume shared delivery capabilities instead of interpreting lifecycle status");
+        assertFalse(console.contains("state.overview?.deliveryMerge"));
+        assertFalse(console.contains("state.status?.deliveryMerge"));
+        assertFalse(mgt.contains("data.deliveryMerge"));
+        assertFalse(console.contains("item.workflowStatus"));
+        assertFalse(console.contains("task?.workflowStatus"));
+        assertFalse(mgt.contains("item.workflowStatus"));
+        assertTrue(mgt.contains("data.deliveryView"));
+        assertTrue(mgt.contains("WORKFLOW_NOT_DELIVERABLE"));
     }
 }

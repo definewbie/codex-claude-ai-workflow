@@ -170,6 +170,27 @@ class SchedulerServiceTest {
         );
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void tickDoesNotScheduleFromLegacyInitialStatus() throws Exception {
+        paths("ws-legacy");
+        var calls = new AtomicInteger();
+        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            calls.incrementAndGet();
+            return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
+        });
+        var scheduler = new SchedulerService(queryService(), actionService);
+
+        var response = scheduler.tick(tempDir, 10, 1, true);
+
+        assertEquals(1, response.get("skipped"));
+        assertEquals(0, calls.get());
+        var workstreams = (List<Map<String, Object>>) response.get("workstreams");
+        assertEquals("ws-legacy", workstreams.get(0).get("workstreamId"));
+        assertEquals("skipped", workstreams.get(0).get("result"));
+        assertEquals("canonical workflow current is unavailable", workstreams.get(0).get("reason"));
+    }
+
     private void createRunningWorkstream(String workstreamId) throws Exception {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());

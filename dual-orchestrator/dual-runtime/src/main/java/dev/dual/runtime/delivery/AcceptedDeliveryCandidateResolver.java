@@ -15,9 +15,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /** Resolves the final accepted candidate from authoritative ledger history. */
 public final class AcceptedDeliveryCandidateResolver {
+    private static final Pattern WORKFLOW_EVENT_ID = Pattern.compile("evt-(\\d{6,})");
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private final ObjectMapper objectMapper;
@@ -87,7 +89,7 @@ public final class AcceptedDeliveryCandidateResolver {
     private Occurrence lastAcceptanceOccurrence(WorkstreamPaths paths) throws IOException {
         if (!Files.isRegularFile(paths.eventsJsonl())) throw new IOException("workflow event history is missing");
         var occurrences = new ArrayList<Occurrence>();
-        var previousEventId = "";
+        long previousWorkflowSequence = -1;
         for (var line : Files.readAllLines(paths.eventsJsonl(), StandardCharsets.UTF_8)) {
             if (line.isBlank()) continue;
             Map<String, Object> event;
@@ -97,10 +99,18 @@ public final class AcceptedDeliveryCandidateResolver {
                 throw new IOException("workflow event history contains invalid JSON", failure);
             }
             var eventId = text(event.get("event_id"));
-            if (eventId.isBlank() || (!previousEventId.isBlank() && eventId.compareTo(previousEventId) <= 0)) {
+            var workflowEvent = WORKFLOW_EVENT_ID.matcher(eventId);
+            if (!workflowEvent.matches()) {
+                if ("node_routed".equals(text(event.get("event_type")))) {
+                    throw new IOException("routing event does not have a workflow event id");
+                }
+                continue;
+            }
+            var workflowSequence = Long.parseLong(workflowEvent.group(1));
+            if (workflowSequence <= previousWorkflowSequence) {
                 throw new IOException("workflow event history is not strictly ordered");
             }
-            previousEventId = eventId;
+            previousWorkflowSequence = workflowSequence;
             if (!"node_routed".equals(text(event.get("event_type")))) continue;
             var payload = map(event.get("payload"));
             if (!"gate.human_acceptance".equals(text(payload.get("to")))) continue;

@@ -222,13 +222,14 @@ function renderTaskList() {
   }
   const start = (state.taskPage - 1) * pageSize;
   for (const item of state.workstreams.slice(start, start + pageSize)) {
-    const status = item.workflowStatus || item.status || "-";
+    const status = item.status || "-";
+    const statusSource = item.statusSource === "legacy_initial" ? "旧记录" : "当前";
     const button = document.createElement("button");
     button.type = "button";
     button.className = `task ${item.workstreamId === state.selectedId ? "active" : ""}`;
     button.innerHTML = `
       <span class="t">${escapeHtml(item.title || item.workstreamId || "未命名任务")}</span>
-      <span class="m"><i class="dot ${statusKind(status)}"></i>${escapeHtml(statusLabel(status))} · ${escapeHtml(timeLabel(item.updatedAt) || shortId(item.workstreamId))}</span>
+      <span class="m"><i class="dot ${statusKind(status)}"></i>${escapeHtml(statusLabel(status))} · ${escapeHtml(statusSource)} · ${escapeHtml(timeLabel(item.updatedAt) || shortId(item.workstreamId))}</span>
     `;
     button.addEventListener("click", async () => {
       state.selectedId = item.workstreamId || "";
@@ -331,7 +332,7 @@ function renderAll() {
   const task = selectedTask();
   const overview = state.overview || {};
   const workflow = overview.workflow || state.status?.workflow || {};
-  const status = workflow.status || task?.workflowStatus || task?.status || "-";
+  const status = workflow.status || task?.status || "-";
   const title = task?.title || state.selectedId || "未命名任务";
   const updated = workflow.updatedAt || task?.updatedAt || "";
 
@@ -392,7 +393,7 @@ function currentWorkflowStatus() {
   const task = selectedTask();
   const overview = state.overview || {};
   const workflow = overview.workflow || state.status?.workflow || {};
-  return workflow.status || task?.workflowStatus || task?.status || "-";
+  return workflow.status || task?.status || "-";
 }
 
 function renderSelectionPanels() {
@@ -897,7 +898,6 @@ function renderRca(status) {
     recoveryAssessment: assessment,
     acceptance: state.overview?.acceptance || {},
     goalSatisfaction: state.overview?.goalSatisfaction || {},
-    deliveryMerge: state.overview?.deliveryMerge || {},
     deliveryView: state.overview?.deliveryView || {},
   }, null, 2);
 }
@@ -1768,7 +1768,7 @@ function completionEvidence() {
 }
 
 function deliveryView() {
-  return state.overview?.deliveryView || state.status?.deliveryView || state.overview?.deliveryMerge || state.status?.deliveryMerge || {};
+  return state.overview?.deliveryView || state.status?.deliveryView || {};
 }
 
 function deliveryStatus() {

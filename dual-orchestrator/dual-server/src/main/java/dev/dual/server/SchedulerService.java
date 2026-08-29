@@ -57,7 +57,11 @@ public class SchedulerService {
             boolean autoRecover
     ) throws Exception {
         var workstreamId = text(summary.get("workstreamId"));
-        var status = text(summary.get("workflowStatus"));
+        var statusSource = text(summary.get("statusSource"));
+        if (!"workflow_current".equals(statusSource)) {
+            return SchedulerWorkstreamResult.skipped(workstreamId, "canonical workflow current is unavailable");
+        }
+        var status = text(summary.get("status"));
         var assessment = recoveryAssessment(workspaceRoot, workstreamId, status, autoRecover);
         var decision = schedulerPolicy.decide(status, autoRecover, assessment);
         return switch (decision.action()) {

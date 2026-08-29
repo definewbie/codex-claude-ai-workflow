@@ -1,11 +1,9 @@
 package dev.dual.cli;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.ledger.file.FileLedgerStore;
-import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.delivery.DeliveryApplicationService;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -13,16 +11,11 @@ import picocli.CommandLine.Parameters;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 @Component
 @Command(name = "status", description = "Show workstream status.", mixinStandardHelpOptions = true)
 public final class StatusCommand implements Callable<Integer> {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-    };
-
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
@@ -73,39 +66,23 @@ public final class StatusCommand implements Callable<Integer> {
             }
         }
 
-        var deliveryJson = paths.workstreamDir().resolve("delivery").resolve("delivery.json");
-        if (Files.exists(deliveryJson)) {
-            var delivery = OBJECT_MAPPER.readValue(deliveryJson.toFile(), MAP_TYPE);
-            System.out.println();
-            System.out.println("Delivery:");
-            System.out.println("  Status: " + text(delivery.get("status")));
-            if (Boolean.TRUE.equals(delivery.get("commitCreated"))) {
-                System.out.println("  Commit: " + text(delivery.get("commit")));
-            }
-            if (Boolean.TRUE.equals(delivery.get("prCreated"))) {
-                System.out.println("  PR URL: " + text(delivery.get("prUrl")));
-            }
-            if (delivery.containsKey("updatedAt")) {
-                System.out.println("  Updated at: " + text(delivery.get("updatedAt")));
-            }
+        var delivery = new DeliveryApplicationService().view(workspaceRoot, workstreamId, null);
+        System.out.println();
+        System.out.println("Delivery:");
+        System.out.println("  Status: " + delivery.status());
+        if ("WORKFLOW_NOT_DELIVERABLE".equals(delivery.reasonCode())) {
+            System.out.println("  Eligibility: Current workflow is not yet deliverable.");
         }
-        if (Files.exists(paths.deliveryMergePlanJson())) {
-            var merge = OBJECT_MAPPER.readValue(paths.deliveryMergePlanJson().toFile(), MAP_TYPE);
-            System.out.println();
-            System.out.println("Delivery Merge:");
-            System.out.println("  Status: " + text(merge.get("status")));
-            System.out.println("  Target repo: " + text(merge.get("targetRepo")));
-            System.out.println("  Candidate: " + text(merge.get("candidateRef")));
-            System.out.println("  Candidate SHA-256: " + text(merge.get("candidateSha256")));
-            System.out.println("  Changed files: " + sizeOf(merge.get("changedFiles")));
-            if (!text(merge.get("failureReason")).isBlank()) {
-                System.out.println("  Failure: " + text(merge.get("failureCode"))
-                        + " - " + text(merge.get("failureReason")));
-            }
-            if (merge.containsKey("updatedAt")) {
-                System.out.println("  Updated at: " + text(merge.get("updatedAt")));
-            }
+        if (!delivery.reasonCode().isBlank() || !delivery.reason().isBlank()) {
+            System.out.println("  Reason: " + delivery.reasonCode() + " - " + delivery.reason());
         }
+        if (!delivery.targetRepo().isBlank()) System.out.println("  Target repo: " + delivery.targetRepo());
+        if (!delivery.candidateRef().isBlank()) System.out.println("  Candidate: " + delivery.candidateRef());
+        if (!delivery.candidateSha256().isBlank()) System.out.println("  Candidate SHA-256: " + delivery.candidateSha256());
+        System.out.println("  Changed files: " + delivery.changedFiles().size());
+        if (!delivery.commit().isBlank()) System.out.println("  Commit: " + delivery.commit());
+        System.out.println("  Can merge: " + delivery.canMerge());
+        System.out.println("  Can finalize: " + delivery.canFinalize());
 
         if (showLegacy || !hasWorkflowCurrent) {
             System.out.println();
@@ -118,14 +95,6 @@ public final class StatusCommand implements Callable<Integer> {
             System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
         }
         return 0;
-    }
-
-    private static String text(Object value) {
-        return value == null ? "" : String.valueOf(value);
-    }
-
-    private static int sizeOf(Object value) {
-        return value instanceof java.util.List<?> list ? list.size() : 0;
     }
 
     private static String runningPidStatus(Object value) {

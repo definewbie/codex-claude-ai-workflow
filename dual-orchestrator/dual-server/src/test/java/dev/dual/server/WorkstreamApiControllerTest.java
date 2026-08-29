@@ -55,8 +55,18 @@ class WorkstreamApiControllerTest {
         var workflow = (Map<String, Object>) response.get("workflow");
         assertEquals("api-workflow", workflow.get("workflowId"));
         assertEquals("WAITING_FOR_HUMAN", workflow.get("status"));
+        assertEquals("WAITING_FOR_HUMAN", response.get("status"));
+        assertEquals("workflow_current", response.get("statusSource"));
+        assertEquals("created", response.get("legacyInitialStatus"));
         var activeNodes = (List<Map<String, Object>>) workflow.get("activeNodes");
         assertEquals("review.gate", activeNodes.get(0).get("nodeDefinitionId"));
+        assertFalse(response.containsKey("delivery"));
+        assertFalse(response.containsKey("deliveryMerge"));
+        var delivery = (Map<String, Object>) response.get("deliveryView");
+        assertEquals("BLOCKED", delivery.get("status"));
+        assertEquals("WORKFLOW_NOT_DELIVERABLE", delivery.get("reasonCode"));
+        assertEquals(false, delivery.get("canMerge"));
+        assertEquals(false, delivery.get("canFinalize"));
     }
 
     @Test
@@ -104,7 +114,10 @@ class WorkstreamApiControllerTest {
         var workstreams = (List<Map<String, Object>>) response.get("workstreams");
         assertEquals(2, workstreams.size());
         assertEquals("ws-api-list-a", workstreams.get(0).get("workstreamId"));
-        assertEquals("WAITING_FOR_HUMAN", workstreams.get(0).get("workflowStatus"));
+        assertEquals("WAITING_FOR_HUMAN", workstreams.get(0).get("status"));
+        assertEquals("workflow_current", workstreams.get(0).get("statusSource"));
+        assertEquals("created", workstreams.get(0).get("legacyInitialStatus"));
+        assertFalse(workstreams.get(0).containsKey("workflowStatus"));
         assertEquals(1, workstreams.get(0).get("openGateCount"));
         assertFalse(workstreams.get(0).containsKey("legacy"));
     }
@@ -202,6 +215,7 @@ class WorkstreamApiControllerTest {
 
         var workflow = (Map<String, Object>) response.get("workflow");
         assertEquals("WAITING_FOR_HUMAN", workflow.get("status"));
+        assertEquals("workflow_current", workflow.get("statusSource"));
         assertEquals("review.gate", workflow.get("currentNode"));
         var acceptance = (Map<String, Object>) response.get("acceptance");
         assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
@@ -242,6 +256,9 @@ class WorkstreamApiControllerTest {
         assertEquals(2, metrics.get("nodeCount"));
         var artifacts = (Map<String, Object>) response.get("artifacts");
         assertEquals(true, artifacts.containsKey("finalReport"));
+        assertFalse(response.containsKey("deliveryMerge"));
+        var delivery = (Map<String, Object>) response.get("deliveryView");
+        assertEquals("WORKFLOW_NOT_DELIVERABLE", delivery.get("reasonCode"));
     }
 
     @Test

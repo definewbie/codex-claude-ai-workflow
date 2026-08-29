@@ -36,7 +36,8 @@ class SummaryCommandTest {
         assertTrue(printed.contains("| design.codex_arch_review | task | COMPLETED | iter-001 | 42 |"));
         assertTrue(printed.contains("candidate-1=ACCEPTED"));
         assertTrue(printed.contains("- Calibration Apply Plans: 1"));
-        assertTrue(printed.contains("- Delivery: prepared, commit=abc123"));
+        assertTrue(printed.contains("- Delivery: BLOCKED"));
+        assertTrue(printed.contains("reason=WORKFLOW_NOT_DELIVERABLE"));
         assertTrue(printed.contains("- Current Failure Summary: not current (historical recovery artifact retained)"));
 
         var summary = tempDir.resolve(".agent/workstreams/ws-summary/reports/workstream-summary.md");
@@ -79,7 +80,7 @@ class SummaryCommandTest {
     }
 
     @Test
-    void completedSummaryWithAppliedDeliveryMergeSuggestsTargetCommitInsteadOfMergeAgain() throws Exception {
+    void rawAppliedPlanCannotProduceFinalizeWithoutAcceptedCandidateBinding() throws Exception {
         writeLedger("COMPLETED");
         var deliveryDir = tempDir.resolve(".agent/workstreams/ws-summary/delivery");
         Files.writeString(deliveryDir.resolve("merge-plan.json"), """
@@ -103,9 +104,10 @@ class SummaryCommandTest {
 
         var printed = captureStdout(command::call);
 
-        assertTrue(printed.contains("Review the staged target diff"));
-        assertTrue(printed.contains("git -C '/tmp/target' diff --cached"));
-        assertTrue(printed.contains("- Delivery Merge: APPLIED, changedFiles=2, target=/tmp/target"));
+        assertTrue(printed.contains("- Delivery: BLOCKED"));
+        assertTrue(printed.contains("ACCEPTED_CANDIDATE_INVALID"));
+        assertTrue(!printed.contains("Review the staged target diff"));
+        assertTrue(!printed.contains("delivery finalize"));
         assertTrue(!printed.contains("dualctl delivery merge --workdir"));
     }
 
@@ -117,6 +119,37 @@ class SummaryCommandTest {
         Files.createDirectories(root.resolve("calibration/candidates"));
         Files.createDirectories(root.resolve("calibration/apply-plans"));
         Files.createDirectories(root.resolve("metrics"));
+        Files.createDirectories(root.resolve("workflow"));
+        Files.createDirectories(root.resolve("domain"));
+        Files.writeString(root.resolve("workstream.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-summary",
+                  "title": "summary test",
+                  "status": "created",
+                  "repository": {
+                    "originalWorkdir": "%s",
+                    "gitRoot": "%s"
+                  }
+                }
+                """.formatted(jsonPath(tempDir), jsonPath(tempDir)), StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("workflow/current.json"), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-summary",
+                  "workflowInstanceId": "wf-summary",
+                  "workflowId": "agent-lifecycle-contract",
+                  "definitionVersion": 2,
+                  "status": "%s",
+                  "activeNodeInstanceIds": ["node-gate-1"],
+                  "openGateIds": ["gate-node-gate-1"],
+                  "lastEventId": "evt-000001",
+                  "updatedAt": "2026-06-04T00:00:00Z"
+                }
+                """.formatted(status), StandardCharsets.UTF_8);
+        Files.writeString(root.resolve("domain/completion-audit.json"), """
+                {"status":"ready","gaps":[]}
+                """, StandardCharsets.UTF_8);
         Files.writeString(root.resolve("reports/latest-final-report.md"), "# Final\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("recovery/current-failure.md"), "# Failure\n", StandardCharsets.UTF_8);
         Files.writeString(root.resolve("delivery/delivery.json"), """
@@ -175,6 +208,10 @@ class SummaryCommandTest {
                 }
                 """.formatted(status), StandardCharsets.UTF_8);
         Files.writeString(root.resolve("metrics/workstream-metrics.md"), "# Workstream Metrics\n", StandardCharsets.UTF_8);
+    }
+
+    private static String jsonPath(Path path) {
+        return path.toAbsolutePath().normalize().toString().replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private String captureStdout(ThrowingCallable callable) throws Exception {

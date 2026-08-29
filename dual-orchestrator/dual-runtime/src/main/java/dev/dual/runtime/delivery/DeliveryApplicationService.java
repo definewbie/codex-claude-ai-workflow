@@ -60,7 +60,12 @@ public final class DeliveryApplicationService {
             var existing = readPlan(paths);
             requireCompleted(paths);
             if (existing != null) {
-                if (!existing.candidateRef().isBlank()) {
+                if (existing.candidateRef().isBlank()) {
+                    if (existing.status() != DeliveryMergeStatus.FAILED) {
+                        accepted(paths);
+                        throw boundary("ACCEPTED_CANDIDATE_INVALID", "delivery plan is missing its accepted candidate binding");
+                    }
+                } else {
                     requirePlanCandidate(existing, accepted(paths));
                 }
                 return fromPlan(existing);

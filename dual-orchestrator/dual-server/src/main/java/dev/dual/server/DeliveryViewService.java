@@ -52,14 +52,17 @@ public class DeliveryViewService {
         response.put("canMerge", view.canMerge());
         response.put("canFinalize", view.canFinalize());
         response.put("blockedReasons", view.reason().isBlank() ? List.of() : List.of(view.reason()));
-        response.put("nextAction", nextAction(view.status()));
-        response.put("operatorNextAction", operatorNextAction(view.status()));
+        response.put("nextAction", nextAction(view));
+        response.put("operatorNextAction", operatorNextAction(view));
         response.put("nextCommands", nextCommands(view, workstreamId));
         return response;
     }
 
-    private static String nextAction(String status) {
-        return switch (status) {
+    private static String nextAction(DeliveryApplicationService.View view) {
+        if ("WORKFLOW_NOT_DELIVERABLE".equals(view.reasonCode())) {
+            return "The workflow is not yet eligible for delivery.";
+        }
+        return switch (view.status()) {
             case "READY" -> "Apply the accepted candidate to the original repository.";
             case "APPLIED" -> "Review and commit the staged target diff, then finalize that commit.";
             case "FAILED", "BLOCKED" -> "Resolve the recorded boundary failure before retrying delivery.";
@@ -68,8 +71,11 @@ public class DeliveryViewService {
         };
     }
 
-    private static String operatorNextAction(String status) {
-        return switch (status) {
+    private static String operatorNextAction(DeliveryApplicationService.View view) {
+        if ("WORKFLOW_NOT_DELIVERABLE".equals(view.reasonCode())) {
+            return "当前尚不可交付；请先完成工作流与完成审计。";
+        }
+        return switch (view.status()) {
             case "READY" -> "候选内容已与人工验收绑定，可以合回原始仓库。";
             case "APPLIED" -> "改动已暂存。检查后手工提交，再登记提交 SHA 完成交付。";
             case "FAILED", "BLOCKED" -> "先处理已记录的边界错误，再重试交付。";
@@ -81,17 +87,20 @@ public class DeliveryViewService {
     private static List<String> nextCommands(DeliveryApplicationService.View view, String workstreamId) {
         if (view.targetRepo().isBlank()) return List.of();
         var cd = "cd " + shellQuote(view.targetRepo());
-        return switch (view.status()) {
-            case "READY" -> List.of(cd, "git status", "git diff --stat");
-            case "APPLIED" -> List.of(
+        if (view.canMerge()) {
+            return List.of(cd, "git status", "git diff --stat");
+        }
+        if (view.canFinalize()) {
+            return List.of(
                     cd,
                     "git diff --cached",
                     "git commit -m " + shellQuote("feat: dual delivery " + workstreamId),
                     "dualctl delivery finalize --commit $(git rev-parse HEAD) --workdir <source-worktree> " + workstreamId
             );
-            case "COMMITTED" -> List.of(cd, "git show --stat " + view.commit());
-            default -> List.of();
-        };
+        }
+        return "COMMITTED".equals(view.status())
+                ? List.of(cd, "git show --stat " + view.commit())
+                : List.of();
     }
 
     private static String shellQuote(String value) {

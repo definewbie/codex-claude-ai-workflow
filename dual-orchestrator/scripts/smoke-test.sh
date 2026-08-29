@@ -180,7 +180,7 @@ safe_remove_dir() {
   local target="${1:-}"
   [[ -n "$target" ]] || return 0
   case "$target" in
-    "$FIXTURE_DIR"|"$FIXTURE_DIR"/*|"${FIXTURE_DIR}-agent-runs"|"${FIXTURE_DIR}-agent-runs"/*|/tmp/dual-smoke-acpx-*)
+    "$FIXTURE_DIR"|"$FIXTURE_DIR"/*|"${FIXTURE_DIR}-agent-runs"|"${FIXTURE_DIR}-agent-runs"/*|/tmp/dual-smoke-acpx-*|/tmp/dual-smoke-home-*)
       rm -rf "$target"
       ;;
     *)
@@ -198,6 +198,20 @@ fcount() {
     return 0
   fi
   find "$dir" -maxdepth 1 -name "$pattern" 2>/dev/null | wc -l | tr -d ' '
+}
+
+current_workflow_status() {
+  python3 - "$WS_DIR/workflow/current.json" <<'PY'
+import json
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+if not path.is_file():
+    print("")
+else:
+    print(json.loads(path.read_text(encoding="utf-8")).get("status", ""))
+PY
 }
 
 review_packet_ref_for_active_node() {
@@ -263,8 +277,49 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     claude|codex)
       agent="$1"
-      if [[ "${2:-}" == "sessions" && "${3:-}" == "new" ]]; then
-        echo "created controlled $agent session"
+      if [[ "${2:-}" == "sessions" && ( "${3:-}" == "new" || "${3:-}" == "ensure" ) ]]; then
+        session_action="${3:-}"
+        shift 3
+        while [[ $# -gt 0 ]]; do
+          case "$1" in
+            --name)
+              shift
+              session_name="${1:-controlled-session}"
+              ;;
+          esac
+          shift
+        done
+        session_id="$(python3 - "$session_name" <<'PY'
+import sys
+import uuid
+print(uuid.uuid5(uuid.NAMESPACE_URL, "dual-controlled-smoke:" + sys.argv[1]))
+PY
+)"
+        sessions_dir="$HOME/.acpx/sessions"
+        mkdir -p "$sessions_dir"
+        python3 - "$sessions_dir/index.json" "$session_id" "$session_name" "$(pwd -P)" <<'PY'
+import json
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+record_id, name, cwd = sys.argv[2:]
+path.write_text(json.dumps({
+    "schema": "acpx.session-index.v1",
+    "entries": [{
+        "acpxRecordId": record_id,
+        "name": name,
+        "cwd": cwd,
+        "closed": False,
+        "lastUsedAt": "9999-12-31T23:59:59Z",
+    }],
+}, separators=(",", ":")), encoding="utf-8")
+PY
+        echo "${session_action} controlled $agent session"
+        exit 0
+      fi
+      if [[ "${2:-}" == "sessions" && ( "${3:-}" == "close" || "${3:-}" == "cancel" ) ]]; then
+        echo "closed controlled $agent session"
         exit 0
       fi
       shift
@@ -622,10 +677,13 @@ run_smoke_case() {
   FULL_CLASSIFY_NOT_EXERCISED=""
   CLEANED_UP=false
   PATH_BEFORE_CONTROLLED_ACPX=""
+  HOME_BEFORE_CONTROLLED_ACPX="${HOME:-}"
+  JAVA_TOOL_OPTIONS_BEFORE_CONTROLLED_ACPX="${JAVA_TOOL_OPTIONS:-}"
 
   FIXTURE_DIR="/tmp/dual-smoke-${CASE_NAME}-$$"
   FIXTURE_REPO_NAME="dual-smoke-${CASE_NAME}-$$"
   CONTROLLED_ACPX_DIR="/tmp/dual-smoke-acpx-${CASE_NAME}-$$"
+  CONTROLLED_HOME_DIR="/tmp/dual-smoke-home-${CASE_NAME}-$$"
 
   # ─── Cleanup trap for this case ─────────────────────────────────────────
   do_cleanup() {
@@ -636,7 +694,16 @@ run_smoke_case() {
     if [[ -n "$PATH_BEFORE_CONTROLLED_ACPX" ]]; then
       export PATH="$PATH_BEFORE_CONTROLLED_ACPX"
     fi
+    if [[ "$CASE_USE_CONTROLLED_ACPX" == true ]]; then
+      export HOME="$HOME_BEFORE_CONTROLLED_ACPX"
+      if [[ -n "$JAVA_TOOL_OPTIONS_BEFORE_CONTROLLED_ACPX" ]]; then
+        export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS_BEFORE_CONTROLLED_ACPX"
+      else
+        unset JAVA_TOOL_OPTIONS
+      fi
+    fi
     safe_remove_dir "$CONTROLLED_ACPX_DIR"
+    safe_remove_dir "$CONTROLLED_HOME_DIR"
     if [[ "$CLEANUP" != true ]]; then
       return 0
     fi
@@ -683,6 +750,9 @@ run_smoke_case() {
 
   # 0.3 Verify acpx (real acpx for E2E cases, controlled fake acpx for lifecycle)
   if [[ "$CASE_USE_CONTROLLED_ACPX" == true ]]; then
+    mkdir -p "$CONTROLLED_HOME_DIR"
+    export HOME="$CONTROLLED_HOME_DIR"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS_BEFORE_CONTROLLED_ACPX:+$JAVA_TOOL_OPTIONS_BEFORE_CONTROLLED_ACPX }-Duser.home=$CONTROLLED_HOME_DIR"
     install_controlled_acpx "$CONTROLLED_ACPX_DIR"
     PATH_BEFORE_CONTROLLED_ACPX="$PATH"
     export PATH="$CONTROLLED_ACPX_DIR:$PATH"
@@ -874,28 +944,29 @@ GITIGNORE
       log "  $line"
     done
 
-    # Check for terminal states
-    if echo "$STATUS_OUTPUT" | grep -q "COMPLETED"; then
+    # Control flow reads the authoritative workflow current, never presentation text.
+    CURRENT_WORKFLOW_STATUS="$(current_workflow_status)"
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "COMPLETED" ]]; then
       FINAL_STATUS="COMPLETED"
       ok "Workflow completed!"
       break
     fi
 
-    if echo "$STATUS_OUTPUT" | grep -q "FAILED"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "FAILED" ]]; then
       FINAL_STATUS="FAILED"
       fail "Workflow failed at round $CURRENT_ROUND"
       echo "$STATUS_OUTPUT"
       break
     fi
 
-    if echo "$STATUS_OUTPUT" | grep -q "WAITING_FOR_RECOVERY"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "WAITING_FOR_RECOVERY" ]]; then
       FINAL_STATUS="WAITING_FOR_RECOVERY"
       warn "Workflow waiting for recovery at round $CURRENT_ROUND"
       echo "$STATUS_OUTPUT"
       break
     fi
 
-    if echo "$STATUS_OUTPUT" | grep -q "BLOCKED"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "BLOCKED" ]]; then
       FINAL_STATUS="BLOCKED"
       fail "Workflow blocked at round $CURRENT_ROUND"
       echo "$STATUS_OUTPUT"
@@ -903,7 +974,7 @@ GITIGNORE
     fi
 
     # Must be WAITING_FOR_HUMAN — approve
-    if ! echo "$STATUS_OUTPUT" | grep -q "WAITING_FOR_HUMAN"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" != "WAITING_FOR_HUMAN" ]]; then
       warn "Unexpected status (not HUMAN/COMPLETED/FAILED), attempting approve anyway"
     fi
 
@@ -1003,26 +1074,27 @@ GITIGNORE
       log "  $line"
     done
 
-    # Check if we hit another gate or terminal
-    if echo "$APPROVE_OUTPUT" | grep -q "WAITING_FOR_HUMAN"; then
+    # Check the ledger after the action; output text may contain delivery status too.
+    CURRENT_WORKFLOW_STATUS="$(current_workflow_status)"
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "WAITING_FOR_HUMAN" ]]; then
       ok "Reached next gate"
       continue
     fi
 
-    if echo "$APPROVE_OUTPUT" | grep -q "COMPLETED"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "COMPLETED" ]]; then
       FINAL_STATUS="COMPLETED"
       ok "Workflow completed!"
       break
     fi
 
-    if echo "$APPROVE_OUTPUT" | grep -q "FAILED"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "FAILED" ]]; then
       FINAL_STATUS="FAILED"
       fail "Workflow failed"
       echo "$APPROVE_OUTPUT"
       break
     fi
 
-    if echo "$APPROVE_OUTPUT" | grep -q "WAITING_FOR_RECOVERY"; then
+    if [[ "$CURRENT_WORKFLOW_STATUS" == "WAITING_FOR_RECOVERY" ]]; then
       FINAL_STATUS="WAITING_FOR_RECOVERY"
       warn "Workflow waiting for recovery"
       break
@@ -1150,11 +1222,11 @@ GITIGNORE
     ok "delivery/ directory exists"
     verify_file "$DELIVERY_DIR/commit-message.txt"
     verify_file "$DELIVERY_DIR/pr-body.md"
-    if [[ -f "$DELIVERY_DIR/delivery.json" ]]; then
-      DEL_STATUS=$(python3 -c "import json; print(json.load(open('$DELIVERY_DIR/delivery.json')).get('status','?'))" 2>/dev/null || echo "?")
-      ok "Delivery status: $DEL_STATUS"
+    DELIVERY_VIEW_OUTPUT=$(dualctl status --workdir "$WORKSPACE_DIR" "$WORKSTREAM_ID" 2>&1 || true)
+    if printf '%s\n' "$DELIVERY_VIEW_OUTPUT" | grep -A10 '^Delivery:$' | grep -q '  Status: READY'; then
+      ok "Delivery view: READY from accepted candidate"
     else
-      ok "delivery.json not present before explicit delivery commit/create-pr"
+      fail "Delivery view did not project READY from the accepted candidate"
     fi
   else
     if [[ "$FINAL_STATUS" == "COMPLETED" ]]; then

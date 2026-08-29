@@ -108,7 +108,7 @@ public final class WorkstreamAttentionEvaluator {
         // Terminal workflows can still carry goal warnings, but they must not
         // suggest run/resume. Observation and audit are the only safe actions.
         if (current.status() == WorkflowStatus.COMPLETED) {
-            return completed(paths, current, nodeId, nodeInstanceId, domainOutcome, goalReason, evidenceRefs, base);
+            return completed(current, nodeId, nodeInstanceId, domainOutcome, goalReason, evidenceRefs, base);
         }
         if ("NEEDS_REDESIGN".equals(domainOutcome) && isRevisionLimit(activeNode)) {
             return new WorkstreamAttention(
@@ -158,7 +158,6 @@ public final class WorkstreamAttentionEvaluator {
     }
 
     private static WorkstreamAttention completed(
-            WorkstreamPaths paths,
             WorkflowCurrentDocument current,
             String nodeId,
             String nodeInstanceId,
@@ -168,46 +167,6 @@ public final class WorkstreamAttentionEvaluator {
             String base
     ) throws IOException {
         var unsatisfiedGoal = "NEEDS_REPAIR".equals(domainOutcome) || "NEEDS_REDESIGN".equals(domainOutcome);
-        var deliveryMerge = readMap(paths.deliveryMergePlanJson());
-        var mergeStatus = text(deliveryMerge.get("status"));
-        if ("APPLIED".equals(mergeStatus)) {
-            var targetRepo = text(deliveryMerge.get("targetRepo"));
-            var detail = targetRepo.isBlank()
-                    ? "Delivery merge has been applied to the target repo index."
-                    : "Delivery merge has been applied to the target repo index: " + targetRepo + ".";
-            var command = targetRepo.isBlank() ? "" : "git -C " + quote(targetRepo) + " diff --cached";
-            return new WorkstreamAttention(
-                    WorkstreamAttentionCategory.COMPLETED,
-                    "info",
-                    "Delivery merge applied",
-                    detail,
-                    "Review the staged target diff, then commit from the target repo when ready.",
-                    command,
-                    false,
-                    current.status().name(),
-                    nodeId,
-                    nodeInstanceId,
-                    domainOutcome,
-                    evidenceRefs
-            );
-        }
-        if ("FAILED".equals(mergeStatus)) {
-            var failure = blankDefault(text(deliveryMerge.get("failureReason")), "Delivery merge failed. Inspect delivery logs.");
-            return new WorkstreamAttention(
-                    WorkstreamAttentionCategory.COMPLETED,
-                    "warning",
-                    "Delivery merge failed",
-                    failure,
-                    "Inspect merge-plan.json and apply stderr before retrying delivery merge.",
-                    "dualctl summary " + base,
-                    false,
-                    current.status().name(),
-                    nodeId,
-                    nodeInstanceId,
-                    domainOutcome,
-                    evidenceRefs
-            );
-        }
         var warningDetail = "Workflow is terminal, but the latest goal outcome is " + domainOutcome
                 + ". " + blankDefault(goalReason, "Inspect artifacts before delivery.");
         return new WorkstreamAttention(

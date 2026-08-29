@@ -60,6 +60,34 @@ class DeliveryViewServiceTest {
         assertTrue(git(fixture.targetRepo(), "diff", "--cached", "--", "README.md").isBlank());
     }
 
+    @Test
+    void runningWorkflowIsVisibleAsNotYetDeliverableWithoutMutationCommands() throws Exception {
+        var fixture = createDeliveryFixture("ws-delivery-running", "ACCEPT");
+        Files.writeString(fixture.paths().workflowCurrentJson(), """
+                {
+                  "schemaVersion": 1,
+                  "workstreamId": "ws-delivery-running",
+                  "workflowInstanceId": "wf-test",
+                  "workflowId": "delivery-test",
+                  "definitionVersion": 1,
+                  "status": "RUNNING",
+                  "activeNodeInstanceIds": [],
+                  "openGateIds": [],
+                  "lastEventId": "evt-000001",
+                  "updatedAt": "2026-06-01T00:00:00Z"
+                }
+                """, StandardCharsets.UTF_8);
+
+        var view = new DeliveryViewService(objectMapper).view(fixture.sourceWorktree(), fixture.workstreamId());
+
+        assertEquals("BLOCKED", view.get("status"));
+        assertEquals("WORKFLOW_NOT_DELIVERABLE", view.get("reasonCode"));
+        assertEquals(false, view.get("canMerge"));
+        assertEquals(false, view.get("canFinalize"));
+        assertTrue(String.valueOf(view.get("operatorNextAction")).contains("当前尚不可交付"));
+        assertTrue(strings(view.get("nextCommands")).isEmpty());
+    }
+
     private Fixture createDeliveryFixture(String workstreamId, String decision) throws Exception {
         var targetRepo = tempDir.resolve(workstreamId + "-target-repo");
         var sourceWorktree = tempDir.resolve(workstreamId + "-source");

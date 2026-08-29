@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: D2-A COMPLETE / D2-B PLANNING NEXT
+## Current Active Step: D2-B SELECTIVE COMMIT
 
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
@@ -100,6 +100,53 @@ id 的既有硬编码耦合和 status 高频完整只读 resolution 的性能观
 真实轮询成本证据作为 revisit trigger。D2-A 选择性提交条件满足，成熟度正式记录为 completion evidence lineage
 `ENFORCED / NOT REAL-CASE PROVEN`、final report `VERIFIED PRE-HUMAN SNAPSHOT`。下一步仅允许在 clean checkpoint 后
 制定 D2-B projection convergence 实施计划，不直接编码、不调用 provider/real-case。
+
+D2-A 已选择性提交为 `83d840ed`，工作树 clean 后完成 D2-B producer/consumer 的代码级复核。D2-B 不新增
+delivery 状态或 read model：workflow current 继续拥有当前 workflow 状态，D1 `DeliveryApplicationService.View`
+继续拥有 delivery status/reason/capability；CLI/server 只格式化 view，ledger attention 删除 delivery 解释。
+实施计划已写入
+`docs/plans/d2-b-delivery-projection-convergence-implementation-plan-20260829.zh-CN.md`，同时纳入两个容易遗漏的
+边界：`SummaryCommand` 的 action-bearing workflow 判断必须从 timeline 切换到 current，以及 list API 将
+`status/workflowStatus` 双解释收敛为 canonical `status + statusSource + legacyInitialStatus`。当前只允许独立架构
+评审该计划；PASS 前不改 production、不调用 provider/real-case。
+
+D2-B 计划首轮独立架构评审为 `WARN（P0=0 / P1=1 / P2=3）`。唯一 P1 是计划漏掉运行中 workstream 的
+主导 delivery eligibility：`DeliveryApplicationService.view()` 会投影
+`BLOCKED / WORKFLOW_NOT_DELIVERABLE`，但原测试矩阵没有规定其展示和 command 边界。delta 已将其定义为
+“当前尚不可交付”的可见资格状态，要求 CLI/API/两个 UI 保留 reason、零 mutation command、零 legacy/raw
+fallback；同时明确放弃 legacy PR URL/时间戳展示、补 `workflowStatus` reader 零命中 sweep，并把 UI 测试对准真实
+fallback delta。当前只允许一次独立 delta 复审；PASS 前仍不实施 production。
+
+D2-B delta 复审已 `PASS / READY（P0=0 / P1=0）`，随后进入单一 deterministic implementation checkpoint。
+CLI status/summary 与 server status/overview/list 已收敛到 workflow current + runtime delivery view；两个 UI 删除
+raw delivery 与 `workflowStatus` fallback；ledger attention 删除 delivery plan 解释。实施期通过反转旧 Summary fixture
+发现 D1 view 仍会接受 candidateRef 为空的非 FAILED raw plan，已在唯一 runtime owner 中 fail closed，并以 unbound
+APPLIED 反证测试钉住。后续 sibling sweep 发现 `SchedulerService` 仍以 list-item `workflowStatus`
+触发副作，已改为仅消费 `statusSource=workflow_current` 的 canonical `status`，并以 legacy-only fixture 证明零
+runtime action。
+
+controlled lifecycle smoke 又暴露两个只有完整序列才可见的缺口：smoke gate loop 从 CLI 文本搜
+`BLOCKED`会把 delivery eligibility 误当 workflow status；D1 candidate resolver 对异构 event id 全局字典序
+校验，会把真实 ledger 中交错的 `agent-task-*`/`domain-*` 事件误判为乱序。前者已改为直接
+消费 `workflow/current.json.status`；后者改为仅对 workflow-owned `evt-NNNNNN` 做数值递增校验，
+非 workflow event 不参与排序，workflow event id 按生成器的“最少 6 位”契约解析，但
+`node_routed` 缺 workflow event id 仍 fail closed。反证 fixture 已加
+interleaved agent-task event。
+
+最终 controlled smoke 到达 `COMPLETED`（6 gate rounds / 112 events / 32 nodes / 11 runs / 0 warnings），
+delivery view 为 `READY` 且 `canMerge=true`；full reactor 独立报告聚合为 151 files，
+`1286/0/0/0`，`git diff --check` 与 smoke shell syntax 均通过。production sweep 确认旧
+`delivery/delivery.json`、raw `deliveryMerge`、list/task-row `workflowStatus` 已不再作为状态或命令能力
+reader。当前成熟度候选为 `ENFORCED / NOT REAL-CASE PROVEN`，正在等待独立代码级 diff review；
+PASS 前不选择性提交。
+
+D2-B 独立 diff review 已 `PASS（P0=0 / P1=0 / P2=2 知会）`，并独立复现 full reactor
+`1286/0/0/0` 与 `git diff --check` clean。评审确认 workflow current + delivery view 的单一 authority、
+mutation command capability 门控、scheduler 零 legacy action、混合 event ledger resolver 与 controlled smoke 边界均
+成立。P2-1 的三个实施期 production 文件已回填计划 §7；P2-2 仅要求后续 sweep 区分
+`NotificationService` 自有 payload 与 list-item fallback reader。成熟度正式为
+`DELIVERY/CURRENT PROJECTION CONSISTENCY ENFORCED / NOT REAL-CASE PROVEN`，当前允许选择性提交该单一
+checkpoint。
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，

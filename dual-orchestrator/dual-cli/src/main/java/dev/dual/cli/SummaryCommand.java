@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
 import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.delivery.DeliveryApplicationService;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -68,10 +69,17 @@ public final class SummaryCommand implements Callable<Integer> {
     static String render(WorkstreamPaths paths) throws Exception {
         var timeline = readMap(paths.timelineJson());
         var metrics = readMap(paths.workstreamMetricsJson());
-        var delivery = readMap(paths.workstreamDir().resolve("delivery").resolve("delivery.json"));
-        var deliveryMerge = readMap(paths.deliveryMergePlanJson());
-        var activeNodes = listOfText(timeline.get("activeNodeInstanceIds"));
-        var openGates = listOfText(timeline.get("openGateIds"));
+        var current = Files.isRegularFile(paths.workflowCurrentJson())
+                ? CliLedgerFactory.create().loadCurrent(paths)
+                : null;
+        var workflowStatus = current == null ? text(timeline.get("workflowStatus")) : current.status().name();
+        var statusSource = current == null ? "timeline_projection" : "workflow_current";
+        var activeNodes = current == null
+                ? listOfText(timeline.get("activeNodeInstanceIds"))
+                : current.activeNodeInstanceIds();
+        var openGates = current == null ? listOfText(timeline.get("openGateIds")) : current.openGateIds();
+        var delivery = new DeliveryApplicationService().view(
+                paths.workspaceRoot(), paths.workstreamId().value(), null);
         var nodes = nodes(timeline);
 
         var lines = new ArrayList<String>();
@@ -85,7 +93,8 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("## Workflow");
         lines.add("");
         lines.add("- Definition: " + text(timeline.get("workflowId")) + "@" + text(timeline.get("definitionVersion")));
-        lines.add("- Status: " + text(timeline.get("workflowStatus"), "(timeline unavailable)"));
+        lines.add("- Status: " + text(workflowStatus, "(unavailable)"));
+        lines.add("- Status Source: " + statusSource);
         lines.add("- Active Nodes: " + emptyDash(activeNodes));
         lines.add("- Open Gates: " + emptyDash(openGates));
         lines.add("- Updated At: " + text(timeline.get("updatedAt")));
@@ -112,7 +121,7 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("");
         lines.add("## Recommended Next Action");
         lines.add("");
-        lines.add(recommendedAction(paths, timeline, deliveryMerge, activeNodes, openGates));
+        lines.add(recommendedAction(paths, workflowStatus, statusSource, delivery, activeNodes, openGates));
         lines.add("");
         lines.add("## Recent Timeline");
         lines.add("");
@@ -132,9 +141,8 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("## Artifacts");
         lines.add("");
         lines.add("- Final Report: " + presence(paths.workstreamDir().resolve("reports").resolve("latest-final-report.md")));
-        lines.add("- Current Failure Summary: " + currentFailurePresence(paths, text(timeline.get("workflowStatus"))));
+        lines.add("- Current Failure Summary: " + currentFailurePresence(paths, workflowStatus));
         lines.add("- Delivery: " + deliverySummary(delivery));
-        lines.add("- Delivery Merge: " + deliveryMergeSummary(deliveryMerge));
         lines.add("- Calibration Candidates: " + calibrationSummary(paths.workstreamDir().resolve("calibration").resolve("candidates")));
         lines.add("- Calibration Apply Plans: " + countJson(paths.workstreamDir().resolve("calibration").resolve("apply-plans")));
         lines.add("");
@@ -150,9 +158,17 @@ public final class SummaryCommand implements Callable<Integer> {
         return String.join("\n", lines);
     }
 
-    private static String recommendedAction(WorkstreamPaths paths, Map<String, Object> timeline, Map<String, Object> deliveryMerge,
-                                     List<String> activeNodes, List<String> openGates) {
-        var status = text(timeline.get("workflowStatus"));
+    private static String recommendedAction(
+            WorkstreamPaths paths,
+            String status,
+            String statusSource,
+            DeliveryApplicationService.View delivery,
+            List<String> activeNodes,
+            List<String> openGates
+    ) {
+        if (!"workflow_current".equals(statusSource)) {
+            return "Current workflow state is unavailable. Inspect the frozen ledger; no action command is projected.";
+        }
         if ("WAITING_FOR_HUMAN".equals(status)) {
             return "Review the current packet, then approve or revise:\n\n```bash\n"
                     + "dualctl review show --workdir " + quote(paths.workspaceRoot()) + " " + paths.workstreamId().value() + "\n"
@@ -172,23 +188,23 @@ public final class SummaryCommand implements Callable<Integer> {
                     + "```";
         }
         if ("COMPLETED".equals(status)) {
-            var mergeStatus = text(deliveryMerge.get("status"));
-            if ("APPLIED".equals(mergeStatus)) {
-                var targetRepo = text(deliveryMerge.get("targetRepo"));
+            if (delivery.canFinalize()) {
+                var targetRepo = delivery.targetRepo();
                 var command = targetRepo.isBlank() ? "" : "git -C " + quoteString(targetRepo) + " diff --cached";
                 return "Review the staged target diff, commit from the target repo, then finalize the exact commit SHA."
                         + commandBlock(command)
                         + "\n\n```bash\ndualctl delivery finalize --workdir " + quote(paths.workspaceRoot())
                         + " --commit <target_commit_sha> " + paths.workstreamId().value() + "\n```";
             }
-            if ("FAILED".equals(mergeStatus)) {
-                var failure = text(deliveryMerge.get("failureReason"), "Delivery merge failed.");
-                return "Inspect merge-plan.json and apply stderr before retrying delivery merge.\n\n"
-                        + failure;
+            if (delivery.canMerge()) {
+                return "Review final report and the accepted candidate. If ready, apply it to the original repository:\n\n```bash\n"
+                        + "dualctl delivery merge --workdir " + quote(paths.workspaceRoot()) + " "
+                        + paths.workstreamId().value() + "\n```";
             }
-            return "Review final report and delivery artifacts. If ready, merge accepted worktree changes back to the original repo:\n\n```bash\n"
-                    + "dualctl delivery merge --workdir " + quote(paths.workspaceRoot()) + " --target <original_repo> " + paths.workstreamId().value() + "\n"
-                    + "```";
+            if ("COMMITTED".equals(delivery.status())) {
+                return "The accepted delivery candidate has been committed. Inspect the recorded commit and final artifacts.";
+            }
+            return "Delivery is not actionable: " + delivery.reasonCode() + " - " + delivery.reason();
         }
         if ("RUNNING".equals(status) && activeNodes.isEmpty() && openGates.isEmpty()) {
             return "Workflow is marked RUNNING but no active node is visible. Run status and inspect ledger consistency.";
@@ -286,45 +302,25 @@ public final class SummaryCommand implements Callable<Integer> {
         }
     }
 
-    private static String deliverySummary(Map<String, Object> delivery) {
-        if (delivery.isEmpty()) {
-            return "unavailable";
-        }
+    private static String deliverySummary(DeliveryApplicationService.View delivery) {
         var parts = new ArrayList<String>();
-        parts.add(text(delivery.get("status"), "unknown"));
-        if (Boolean.TRUE.equals(delivery.get("commitCreated"))) {
-            parts.add("commit=" + text(delivery.get("commit")));
-        }
-        if (Boolean.TRUE.equals(delivery.get("prCreated"))) {
-            parts.add("pr=" + text(delivery.get("prUrl")));
-        }
-        return String.join(", ", parts);
-    }
-
-    private static String deliveryMergeSummary(Map<String, Object> deliveryMerge) {
-        if (deliveryMerge.isEmpty()) {
-            return "not applied";
-        }
-        var parts = new ArrayList<String>();
-        parts.add(text(deliveryMerge.get("status"), "unknown"));
-        parts.add("changedFiles=" + listSize(deliveryMerge.get("changedFiles")));
-        var candidateSha = text(deliveryMerge.get("candidateSha256"));
+        parts.add(delivery.status());
+        parts.add("changedFiles=" + delivery.changedFiles().size());
+        var candidateSha = delivery.candidateSha256();
         if (!candidateSha.isBlank()) {
             parts.add("candidateSha256=" + candidateSha);
         }
-        var targetRepo = text(deliveryMerge.get("targetRepo"));
+        var targetRepo = delivery.targetRepo();
         if (!targetRepo.isBlank()) {
             parts.add("target=" + targetRepo);
         }
-        var failure = text(deliveryMerge.get("failureReason"));
-        if (!failure.isBlank()) {
-            parts.add("failure=" + text(deliveryMerge.get("failureCode")) + ":" + failure);
+        if (!delivery.commit().isBlank()) {
+            parts.add("commit=" + delivery.commit());
+        }
+        if (!delivery.reason().isBlank()) {
+            parts.add("reason=" + delivery.reasonCode() + ":" + delivery.reason());
         }
         return String.join(", ", parts);
-    }
-
-    private static int listSize(Object value) {
-        return value instanceof List<?> list ? list.size() : 0;
     }
 
     private static String presence(Path path) {

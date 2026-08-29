@@ -80,6 +80,11 @@ class StatusCommandTest {
         assertTrue(printed.contains("Status: RUNNING"));
         assertTrue(printed.contains("Active node definition: implementation.claude"));
         assertTrue(printed.contains("Active node status: READY"));
+        assertTrue(printed.contains("Delivery:"));
+        assertTrue(printed.contains("Reason: WORKFLOW_NOT_DELIVERABLE"));
+        assertTrue(printed.contains("Eligibility: Current workflow is not yet deliverable."));
+        assertTrue(printed.contains("Can merge: false"));
+        assertTrue(printed.contains("Can finalize: false"));
         assertFalse(printed.contains("Compatibility snapshot"));
         assertFalse(printed.contains("Stage: design (pending)"));
     }
