@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: NEXT NATURAL REAL-CASE GATE
+## Current Active Step: OKX FRESH REAL-CASE PREFLIGHT
 
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
@@ -155,6 +155,21 @@ completion evidence 与多端 projection 的端到端价值。
 E1 total Bash/subprocess network authority 定位为 `IMPORTANT / NOT URGENT SECURITY TODO / NOT MODELED`，
 不再是下一次 real-case 的 blocker。仅在运行陌生仓库、敏感代码/凭据、无人值守或共享
 worker、自然未授权访网 incident，或 provider sandbox 能力使实施成本显著下降时重开。
+
+下一次 generalization real-case 已选定 fresh 项目 `okx-btc-k-line-demo`，目标路径为
+`/Users/kriswang/work/projects/ai/okx-btc-k-line-demo`。需求是使用 Java 25、Spring Boot 4.1.0、
+MyBatis-Plus 3.5.17 与 SQLite 构建 BTC-USDT 1m K 线采集、定时同步和 Web 展示应用。
+官方文档已确认 Spring Boot 4.1.0 GA 与 `mybatis-plus-spring-boot4-starter:3.5.17`
+组合有效。
+
+target baseline 已以 `c848079` 提交，README 与 requirement 均为中文，仅含
+`REQUIREMENT.md`、README、`.gitignore` 与
+target-owned workspace check；无 `pom.xml`、无 `src/`，用于真实验证 cold-start 实现。Gate 已写入
+`docs/testing/verification-gates/20260829-small-workflow-okx-btc-k-line-fresh-project.md`。主 PASS 要求产品
+完整性与 D1 accepted-candidate/apply/finalize、D2 completion/delivery 多端投影同时成立；8-call
+仅是次级效率结果。用户已显式授权唯一 fresh real-case；不再把 CC 需求评审设为前置审批层。
+当前先选择性提交 Gate，随后执行 non-provider preflight 与 standing-authorized minimal probes；
+所有前置机械 PASS 后才创建唯一 workstream 并启动 provider。
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
