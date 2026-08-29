@@ -25,6 +25,16 @@ public final class AgentOutputLineageFixture {
     }
 
     public static void completeAndPublish(Path workspaceRoot, String workstreamId, Path sidecarPath) throws Exception {
+        completeAndPublish(workspaceRoot, workstreamId, sidecarPath, "iteration-fixture", List.of());
+    }
+
+    public static void completeAndPublish(
+            Path workspaceRoot,
+            String workstreamId,
+            Path sidecarPath,
+            String iterationId,
+            List<String> inputRefs
+    ) throws Exception {
         var tree = MAPPER.readTree(sidecarPath.toFile());
         if (!(tree instanceof ObjectNode sidecar)) {
             throw new IllegalArgumentException("agent output sidecar must be a JSON object");
@@ -37,7 +47,7 @@ public final class AgentOutputLineageFixture {
                 + sidecarPath.getFileName().toString().replaceAll("[^A-Za-z0-9._-]", "-"));
         sidecar.put("source_output_ref", relative(workspaceRoot, source));
         MAPPER.writerWithDefaultPrettyPrinter().writeValue(sidecarPath.toFile(), sidecar);
-        publish(workspaceRoot, workstreamId, sidecarPath);
+        publish(workspaceRoot, workstreamId, sidecarPath, iterationId, inputRefs);
     }
 
     public static void publish(Path workspaceRoot, String workstreamId, Path sidecarPath) throws Exception {
@@ -49,6 +59,16 @@ public final class AgentOutputLineageFixture {
             String workstreamId,
             Path sidecarPath,
             String iterationId
+    ) throws Exception {
+        publish(workspaceRoot, workstreamId, sidecarPath, iterationId, List.of());
+    }
+
+    public static void publish(
+            Path workspaceRoot,
+            String workstreamId,
+            Path sidecarPath,
+            String iterationId,
+            List<String> inputRefs
     ) throws Exception {
         var sidecar = MAPPER.readValue(sidecarPath.toFile(), MAP_TYPE);
         var runId = text(sidecar.get("run_id"));
@@ -79,7 +99,7 @@ public final class AgentOutputLineageFixture {
         var now = Instant.parse("2026-07-21T00:00:00Z");
         MAPPER.writeValue(nodesDir.resolve(nodeInstanceId + ".json").toFile(), new NodeInstanceDocument(
                 1, nodeInstanceId, nodeId, NodeKind.TASK, "acpx.agent_run", NodeStatus.COMPLETED,
-                "stage-fixture", iterationId, List.of(), Map.of(), outputs,
+                "stage-fixture", iterationId, inputRefs, Map.of(), outputs,
                 result, runId, executionId, now, now));
         MAPPER.writeValue(executionsDir.resolve(executionId + ".json").toFile(), new NodeExecutionDocument(
                 1, executionId, "agent-task-fixture", "workflow-execution-fixture",

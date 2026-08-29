@@ -23,11 +23,13 @@ class ReportFailureClassificationTest {
     @TempDir
     Path tempDir;
     private TestLedgerFixture fixture;
+    private CompletionEvidenceLineageFixture.Prepared lineage;
 
     @BeforeEach
     void setUp() throws Exception {
         fixture = new TestLedgerFixture(tempDir, "ws-rfc");
         fixture.init();
+        lineage = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-rfc");
     }
 
     @Test
@@ -56,9 +58,7 @@ class ReportFailureClassificationTest {
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir, "ws-rfc",
                 new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-report-001", "acceptance.generate_final_report", NodeKind.TASK,
-                        "report.generate_final", NodeStatus.READY, "stage-acceptance", "iter-001",
-                        List.of(), List.of(), Map.of(), null, null, null)
+                lineage.reportNode()
         ));
 
         var reportPath = (String) result.result().get("report_path");
@@ -80,9 +80,7 @@ class ReportFailureClassificationTest {
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir, "ws-rfc",
                 new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-report-002", "acceptance.generate_final_report", NodeKind.TASK,
-                        "report.generate_final", NodeStatus.READY, "stage-acceptance", "iter-001",
-                        List.of(), List.of(), Map.of(), null, null, null)
+                lineage.reportNode()
         ));
 
         var reportPath = (String) result.result().get("report_path");

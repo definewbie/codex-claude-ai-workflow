@@ -12,6 +12,7 @@ import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkflowIterationDocument;
 import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.runtime.handler.CompletionEvidenceLineageResolver;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -77,6 +78,8 @@ public class WorkstreamQueryService {
             response.put("agentTasks", agentTasks);
         }
         response.put("artifactContracts", artifactContracts(root, paths));
+        response.put("completionEvidence", completionEvidence(
+                paths, CompletionEvidenceLineageResolver.resolveCurrent(root, workstreamId)));
 
         var deliveryJson = paths.workstreamDir().resolve("delivery").resolve("delivery.json");
         if (Files.exists(deliveryJson)) {
@@ -173,9 +176,20 @@ public class WorkstreamQueryService {
         var workflowId = current == null ? text(timeline.get("workflowId")) : current.workflowId();
         var definitionVersion = current == null ? text(timeline.get("definitionVersion")) : current.definitionVersion();
         var repairActions = repairActions(paths, summary);
-        var finalAcceptance = finalAcceptance(paths, summary);
+        var completionResolution = CompletionEvidenceLineageResolver.resolveCurrent(root, workstreamId);
+        var completionEvidence = completionEvidence(paths, completionResolution);
+        var finalAcceptance = completionResolution.status() == CompletionEvidenceLineageResolver.Status.AVAILABLE
+                ? completionResolution.acceptance().document().decision()
+                : "none";
         var repairLoopCount = Math.max(number(summary.get("repair_loop_count")), repairActions.size());
-        var verificationConfidence = text(summary.get("verification_confidence"), confidence(finalAcceptance));
+        var summaryConfidence = text(summary.get("verification_confidence"));
+        var verificationConfidence = completionResolution.status() == CompletionEvidenceLineageResolver.Status.AVAILABLE
+                ? (summaryConfidence.isBlank() ? confidence(finalAcceptance) : summaryConfidence)
+                : "UNKNOWN";
+        var verificationConfidenceSource = completionResolution.status()
+                != CompletionEvidenceLineageResolver.Status.AVAILABLE
+                ? "completion_evidence_status"
+                : (summaryConfidence.isBlank() ? "derived_from_final_acceptance" : "real_case_summary_projection");
         var artifacts = artifacts(root, paths);
         var completionAudit = completionAudit(paths);
         var deliveryMerge = readJson(paths.deliveryMergePlanJson());
@@ -189,7 +203,7 @@ public class WorkstreamQueryService {
         var attentionItems = new ArrayList<Map<String, Object>>();
         attentionItems.add(workstreamAttention.toMap());
         attentionItems.addAll(attention(root, workstreamId, status, finalAcceptance, verificationConfidence, repairLoopCount,
-                artifacts, completionAudit));
+                artifacts, completionAudit, completionResolution.status()));
 
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
@@ -207,10 +221,12 @@ public class WorkstreamQueryService {
         response.put("acceptance", Map.of(
                 "finalDecision", finalAcceptance,
                 "verificationConfidence", verificationConfidence,
+                "verificationConfidenceSource", verificationConfidenceSource,
                 "repairLoopCount", repairLoopCount,
                 "repairActions", repairActions
         ));
         response.put("goalSatisfaction", goalSatisfaction);
+        response.put("completionEvidence", completionEvidence);
         response.put("whyStopped", workstreamAttention.detail());
         response.put("nextAction", nextAction(workstreamAttention));
         response.put("attention", attentionItems);
@@ -487,30 +503,6 @@ public class WorkstreamQueryService {
         }
     }
 
-    private String finalAcceptance(WorkstreamPaths paths, Map<String, Object> summary) throws IOException {
-        var fromSummary = text(summary.get("final_acceptance_decision"));
-        if (!fromSummary.isBlank()) {
-            return fromSummary;
-        }
-        if (!Files.isDirectory(paths.runsDir())) {
-            return "none";
-        }
-        var decisions = new ArrayList<String>();
-        try (var stream = Files.walk(paths.runsDir(), 4)) {
-            for (var path : stream
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().equals("acceptance-codex-review.contract.json"))
-                    .sorted(Comparator.comparing(Path::toString))
-                    .toList()) {
-                var decision = text(readJson(path).get("decision"));
-                if (!decision.isBlank()) {
-                    decisions.add(decision);
-                }
-            }
-        }
-        return decisions.isEmpty() ? "none" : decisions.get(decisions.size() - 1);
-    }
-
     private String currentNode(List<Map<String, Object>> nodes, List<String> activeNodeIds) {
         var node = currentNodeView(nodes, activeNodeIds);
         if (!node.isEmpty()) {
@@ -545,9 +537,26 @@ public class WorkstreamQueryService {
     private List<Map<String, Object>> attention(Path root, String workstreamId, String status, String finalAcceptance,
                                                 String verificationConfidence, int repairLoopCount,
                                                 Map<String, Object> artifacts,
-                                                Map<String, Object> completionAudit) {
+                                                Map<String, Object> completionAudit,
+                                                CompletionEvidenceLineageResolver.Status completionEvidenceStatus) {
         var items = new ArrayList<Map<String, Object>>();
         var base = "--workdir \"" + root + "\" " + workstreamId;
+        if (completionEvidenceStatus == CompletionEvidenceLineageResolver.Status.INVALID) {
+            items.add(attentionItem(
+                    "critical",
+                    "Completion evidence lineage is invalid",
+                    "The final acceptance evidence could not be verified from ledger lineage.",
+                    "dualctl summary " + base
+            ));
+        } else if ("COMPLETED".equals(status)
+                && completionEvidenceStatus != CompletionEvidenceLineageResolver.Status.AVAILABLE) {
+            items.add(attentionItem(
+                    "warning",
+                    "Completion evidence is not available",
+                    "The workflow is completed but final typed completion evidence is not available.",
+                    "dualctl summary " + base
+            ));
+        }
         if ("ACCEPT_WITH_NOTES".equals(finalAcceptance)) {
             items.add(attentionItem(
                     "warning",
@@ -602,7 +611,10 @@ public class WorkstreamQueryService {
                 ));
             }
         }
-        if (items.isEmpty() && "COMPLETED".equals(status) && "ACCEPT".equals(finalAcceptance)) {
+        if (items.isEmpty()
+                && completionEvidenceStatus == CompletionEvidenceLineageResolver.Status.AVAILABLE
+                && "COMPLETED".equals(status)
+                && "ACCEPT".equals(finalAcceptance)) {
             items.add(attentionItem(
                     "ok",
                     "No obvious follow-up",
@@ -611,6 +623,46 @@ public class WorkstreamQueryService {
             ));
         }
         return items;
+    }
+
+    private Map<String, Object> completionEvidence(
+            WorkstreamPaths paths,
+            CompletionEvidenceLineageResolver.Resolution resolution
+    ) {
+        var result = new LinkedHashMap<String, Object>();
+        result.put("status", switch (resolution.status()) {
+            case AVAILABLE -> "available";
+            case NOT_CONFIGURED -> "not_configured";
+            case NOT_FINAL -> "not_final";
+            case INVALID -> "unavailable";
+        });
+        result.put("failureCode", resolution.failureCode());
+        result.put("detail", resolution.detail());
+        if (resolution.goal() != null) {
+            result.put("goalSource", paths.workspaceRoot().toAbsolutePath().normalize()
+                    .relativize(paths.goalSatisfactionJson().toAbsolutePath().normalize()).toString());
+            result.put("goalOutcome", resolution.goal().outcome());
+            result.put("goalDomainOutcome", resolution.goal().domainOutcome().name());
+            result.put("goalNodeInstanceId", resolution.goal().nodeInstanceId());
+            result.put("iterationId", resolution.goal().iterationId());
+        }
+        if (resolution.status() == CompletionEvidenceLineageResolver.Status.AVAILABLE) {
+            result.put("acceptance", evidenceView(resolution.acceptance()));
+            result.put("selfTest", evidenceView(resolution.selfTest()));
+        }
+        return result;
+    }
+
+    private Map<String, Object> evidenceView(CompletionEvidenceLineageResolver.Evidence evidence) {
+        return Map.of(
+                "ref", evidence.ref(),
+                "nodeId", evidence.document().nodeId(),
+                "nodeInstanceId", evidence.document().nodeInstanceId(),
+                "runId", evidence.document().runId(),
+                "decision", evidence.document().decision(),
+                "summary", evidence.document().summary(),
+                "sourceOutputRef", evidence.document().sourceOutputRef()
+        );
     }
 
     private Map<String, Object> attentionItem(String severity, String title, String detail, String command) {

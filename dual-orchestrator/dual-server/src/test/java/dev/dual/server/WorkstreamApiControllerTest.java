@@ -1,6 +1,7 @@
 package dev.dual.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.domain.Workspace;
 import dev.dual.core.domain.Workstream;
 import dev.dual.core.id.DualId;
@@ -9,8 +10,15 @@ import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.core.workflow.WorkflowStatus;
 import dev.dual.ledger.file.FileLedgerStore;
+import dev.dual.ledger.file.GoalDomainOutcome;
+import dev.dual.ledger.file.GoalSatisfactionDocument;
+import dev.dual.ledger.file.NodeExecutionDocument;
+import dev.dual.ledger.file.NodeExecutionStatus;
+import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkflowCurrentDocument;
 import dev.dual.ledger.file.WorkstreamAttentionEvaluator;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.junit.jupiter.api.Test;
@@ -20,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 
@@ -186,6 +195,7 @@ class WorkstreamApiControllerTest {
         Files.writeString(paths.eventsJsonl(), """
                 {"event_type":"iteration_started","payload":{"trigger_action":"REJECT_IMPLEMENTATION_BUG"}}
                 """, StandardCharsets.UTF_8);
+        addCompletionEvidence(paths, "ACCEPT_WITH_NOTES");
         var controller = controller();
 
         var response = controller.overview(fixture.workstreamId(), tempDir.toString());
@@ -196,7 +206,15 @@ class WorkstreamApiControllerTest {
         var acceptance = (Map<String, Object>) response.get("acceptance");
         assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
         assertEquals("MEDIUM", acceptance.get("verificationConfidence"));
+        assertEquals("real_case_summary_projection", acceptance.get("verificationConfidenceSource"));
         assertEquals(1, acceptance.get("repairLoopCount"));
+        var completionEvidence = (Map<String, Object>) response.get("completionEvidence");
+        assertEquals("available", completionEvidence.get("status"));
+        assertEquals("ACCEPT_WITH_NOTES", completionEvidence.get("goalOutcome"));
+        assertEquals("acceptance.codex_verifier_review",
+                ((Map<String, Object>) completionEvidence.get("acceptance")).get("nodeId"));
+        assertEquals("implement.claude_self_test_report",
+                ((Map<String, Object>) completionEvidence.get("selfTest")).get("nodeId"));
         assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
         assertEquals(true, response.get("nextAction").toString().contains("dualctl review show"));
         var attention = (List<Map<String, Object>>) response.get("attention");
@@ -209,17 +227,106 @@ class WorkstreamApiControllerTest {
         assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
         assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
         var latestAgentRuns = (List<Map<String, Object>>) response.get("latestAgentRuns");
-        assertEquals(1, latestAgentRuns.size());
-        assertEquals(2, ((Map<String, Object>) latestAgentRuns.getFirst().get("toolUsage")).get("toolCallCount"));
+        assertEquals(3, latestAgentRuns.size());
+        var originalRun = latestAgentRuns.stream()
+                .filter(run -> "run-001".equals(run.get("runId")))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(2, ((Map<String, Object>) originalRun.get("toolUsage")).get("toolCallCount"));
         assertEquals(
                 ".agent/workstreams/ws-api-overview/artifacts/context-governance/acceptance.codex_verifier_review-actual-run-001.json",
-                latestAgentRuns.getFirst().get("contextGovernanceActualReportPath")
+                originalRun.get("contextGovernanceActualReportPath")
         );
         var metrics = (Map<String, Object>) response.get("metrics");
         assertEquals(fixture.workstreamId(), metrics.get("workstreamId"));
         assertEquals(2, metrics.get("nodeCount"));
         var artifacts = (Map<String, Object>) response.get("artifacts");
         assertEquals(true, artifacts.containsKey("finalReport"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void serverProjectsNotConfiguredWithoutScanningDecoyAcceptanceRuns() throws Exception {
+        var fixture = createWorkstream("ws-api-completion-not-configured");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var decoy = paths.runsDir().resolve("run-decoy/outputs/acceptance-codex-review.contract.json");
+        Files.createDirectories(decoy.getParent());
+        Files.writeString(decoy, """
+                {"node_id":"acceptance.codex_verifier_review","decision":"ACCEPT",
+                 "source_artifact_type":"acceptance_review","summary":"decoy"}
+                """);
+        var controller = controller();
+
+        var status = controller.status(fixture.workstreamId(), tempDir);
+        var statusEvidence = (Map<String, Object>) status.get("completionEvidence");
+        assertEquals("not_configured", statusEvidence.get("status"));
+        assertEquals("COMPLETION_GOAL_NOT_CONFIGURED", statusEvidence.get("failureCode"));
+
+        var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
+        assertEquals("none", ((Map<String, Object>) overview.get("acceptance")).get("finalDecision"));
+        assertEquals("UNKNOWN", ((Map<String, Object>) overview.get("acceptance")).get("verificationConfidence"));
+        var attention = (List<Map<String, Object>>) overview.get("attention");
+        assertEquals(false, attention.stream().anyMatch(item -> "No obvious follow-up".equals(item.get("title"))));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void serverProjectsLegitimateNonFinalGoalWithoutCorruptionOrSuccessAttention() throws Exception {
+        var fixture = createWorkstream("ws-api-completion-not-final");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        writeNonFinalGoal(paths);
+        var controller = controller();
+
+        var status = controller.status(fixture.workstreamId(), tempDir);
+        assertEquals("not_final",
+                ((Map<String, Object>) status.get("completionEvidence")).get("status"));
+
+        var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
+        assertEquals("not_final", ((Map<String, Object>) overview.get("completionEvidence")).get("status"));
+        assertEquals("none", ((Map<String, Object>) overview.get("acceptance")).get("finalDecision"));
+        var attention = (List<Map<String, Object>>) overview.get("attention");
+        assertEquals(false, attention.stream().anyMatch(item -> "No obvious follow-up".equals(item.get("title"))));
+        assertEquals(false, attention.stream()
+                .anyMatch(item -> "Completion evidence lineage is invalid".equals(item.get("title"))));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void serverProjectsInvalidLineageAsUnavailableAndCritical() throws Exception {
+        var fixture = createWorkstream("ws-api-completion-invalid");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        addCompletionEvidence(paths, "ACCEPT_WITH_NOTES");
+        Files.writeString(
+                paths.runsDir().resolve("run-acceptance/outputs/acceptance-codex-review.contract.json"),
+                "\n", java.nio.file.StandardOpenOption.APPEND);
+        var controller = controller();
+
+        var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var completion = (Map<String, Object>) overview.get("completionEvidence");
+        assertEquals("unavailable", completion.get("status"));
+        assertEquals("COMPLETION_ACCEPTANCE_LINEAGE_INVALID", completion.get("failureCode"));
+        assertEquals("none", ((Map<String, Object>) overview.get("acceptance")).get("finalDecision"));
+        var attention = (List<Map<String, Object>>) overview.get("attention");
+        assertEquals(true, attention.stream()
+                .anyMatch(item -> "Completion evidence lineage is invalid".equals(item.get("title"))));
+        assertEquals(false, attention.stream().anyMatch(item -> "No obvious follow-up".equals(item.get("title"))));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void completedWorkflowWithoutCompletionEvidenceGetsWarningNotSuccess() throws Exception {
+        var fixture = createWorkstream("ws-api-completion-warning");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        markWorkflowCompleted(paths);
+        var controller = controller();
+
+        var overview = controller.overview(fixture.workstreamId(), tempDir.toString());
+
+        var attention = (List<Map<String, Object>>) overview.get("attention");
+        assertEquals(true, attention.stream()
+                .anyMatch(item -> "Completion evidence is not available".equals(item.get("title"))));
+        assertEquals(false, attention.stream().anyMatch(item -> "No obvious follow-up".equals(item.get("title"))));
     }
 
     @Test
@@ -788,9 +895,30 @@ class WorkstreamApiControllerTest {
                 "first",
                 List.of(
                         new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
-                        new NodeDefinition("review.gate", NodeKind.GATE, "human.review", Map.of())
+                        new NodeDefinition("review.gate", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("implement.claude_self_test_report", NodeKind.TASK,
+                                "acpx.agent_run", Map.of()),
+                        new NodeDefinition("context.acceptance_codex_verifier_review", NodeKind.TASK,
+                                "context.build_package", Map.of(
+                                "profile", "acceptance",
+                                "target_node", "acceptance.codex_verifier_review",
+                                "required_agent_evidence", Map.of(
+                                        "node_id", "implement.claude_self_test_report",
+                                        "source_artifact_type", "self_test_report",
+                                        "decision", "SELF_TEST_COMPLETE"))),
+                        new NodeDefinition("acceptance.codex_verifier_review", NodeKind.TASK,
+                                "acpx.agent_run", Map.of()),
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION,
+                                "review.decision", Map.of()),
+                        new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK,
+                                "report.generate_final", Map.of())
                 ),
-                List.of(new EdgeDefinition("first", "completed", "review.gate"))
+                List.of(
+                        new EdgeDefinition("first", "completed", "review.gate"),
+                        new EdgeDefinition("acceptance.codex_verifier_review", "ACCEPT_WITH_NOTES",
+                                "acceptance.decision"),
+                        new EdgeDefinition("acceptance.decision", "ACCEPT_WITH_NOTES",
+                                "acceptance.generate_final_report"))
         );
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "wf-" + workstreamIdValue, definition);
@@ -876,6 +1004,129 @@ class WorkstreamApiControllerTest {
                 List.of(".agent/workstreams/" + workstreamIdValue + "/runs/run-001/outputs/agent.md"),
                 Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION"));
         return new Fixture(workstreamIdValue);
+    }
+
+    private void addCompletionEvidence(WorkstreamPaths paths, String acceptanceDecision) throws Exception {
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var iterationId = "iter-completion";
+        var workstreamId = paths.workstreamId().value();
+        var selfTest = writeAgentEvidence(
+                mapper, paths, "run-self-test", "node-self-test", "implement.claude_self_test_report",
+                "implement-claude-self-test", "self_test_report", "SELF_TEST_COMPLETE",
+                "Self-test passed.", iterationId, List.of());
+
+        var contextNodeId = "node-acceptance-context";
+        var packageRef = ".agent/workstreams/" + workstreamId + "/context/" + contextNodeId + ".md";
+        var metadataRef = ".agent/workstreams/" + workstreamId + "/context/" + contextNodeId + ".json";
+        Files.createDirectories(tempDir.resolve(packageRef).getParent());
+        Files.writeString(tempDir.resolve(packageRef), "# Acceptance context\n");
+        Files.writeString(tempDir.resolve(metadataRef), "{}\n");
+        mapper.writeValue(paths.nodeJson(contextNodeId).toFile(), new NodeInstanceDocument(
+                1, contextNodeId, "context.acceptance_codex_verifier_review", NodeKind.TASK,
+                "context.build_package", NodeStatus.COMPLETED, "stage-acceptance", iterationId,
+                List.of(selfTest.sidecarRef()), Map.of(), List.of(packageRef, metadataRef), Map.of(),
+                "", "", Instant.parse("2026-06-01T01:00:00Z"), Instant.parse("2026-06-01T01:00:01Z")));
+
+        var acceptance = writeAgentEvidence(
+                mapper, paths, "run-acceptance", "node-acceptance", "acceptance.codex_verifier_review",
+                "acceptance-codex-review", "acceptance_review", acceptanceDecision,
+                "Accepted with notes.", iterationId, List.of(packageRef, metadataRef));
+        var acceptanceRefs = List.of(acceptance.sourceRef(), acceptance.sidecarRef());
+        var decisionNodeId = "node-acceptance-decision";
+        var decisionResult = Map.<String, Object>of("decision", acceptanceDecision);
+        mapper.writeValue(paths.nodeJson(decisionNodeId).toFile(), new NodeInstanceDocument(
+                1, decisionNodeId, "acceptance.decision", NodeKind.DECISION, "review.decision",
+                NodeStatus.COMPLETED, "stage-acceptance", iterationId, acceptanceRefs, Map.of(),
+                acceptanceRefs, decisionResult, "", "", Instant.parse("2026-06-01T01:00:02Z"),
+                Instant.parse("2026-06-01T01:00:03Z")));
+        Files.createDirectories(paths.domainDir());
+        mapper.writeValue(paths.goalSatisfactionJson().toFile(), new GoalSatisfactionDocument(
+                1, workstreamId, "wf-" + workstreamId, decisionNodeId, "acceptance.decision", iterationId,
+                acceptanceDecision, GoalDomainOutcome.SATISFIED_WITH_NOTES, "Accepted with notes.",
+                acceptanceRefs, decisionResult, Instant.parse("2026-06-01T01:00:04Z")));
+    }
+
+    private void writeNonFinalGoal(WorkstreamPaths paths) throws Exception {
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        Files.createDirectories(paths.domainDir());
+        mapper.writeValue(paths.goalSatisfactionJson().toFile(), new GoalSatisfactionDocument(
+                1, paths.workstreamId().value(), "wf-" + paths.workstreamId().value(),
+                "node-design-decision", "design.decision", "iter-design", "NEEDS_REVISION",
+                GoalDomainOutcome.NEEDS_REDESIGN, "Design needs revision.", List.of(), Map.of(),
+                Instant.parse("2026-06-01T02:00:00Z")));
+    }
+
+    private void markWorkflowCompleted(WorkstreamPaths paths) throws Exception {
+        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var current = mapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
+        mapper.writeValue(paths.workflowCurrentJson().toFile(), new WorkflowCurrentDocument(
+                current.schemaVersion(), current.workstreamId(), current.workflowInstanceId(), current.workflowId(),
+                current.definitionVersion(), WorkflowStatus.COMPLETED, List.of(), List.of(), current.lastEventId(),
+                Instant.parse("2026-06-01T03:00:00Z")));
+    }
+
+    private AgentEvidenceRefs writeAgentEvidence(
+            ObjectMapper mapper,
+            WorkstreamPaths paths,
+            String runId,
+            String nodeInstanceId,
+            String nodeId,
+            String outputStem,
+            String artifactType,
+            String decision,
+            String summary,
+            String iterationId,
+            List<String> inputRefs
+    ) throws Exception {
+        var outputDir = paths.runsDir().resolve(runId).resolve("outputs");
+        Files.createDirectories(outputDir);
+        var sourcePath = outputDir.resolve(outputStem + ".json");
+        var sidecarPath = outputDir.resolve(outputStem + ".contract.json");
+        Files.writeString(sourcePath, "{}\n");
+        var sourceRef = relative(sourcePath);
+        var sidecarRef = relative(sidecarPath);
+        mapper.writeValue(sidecarPath.toFile(), Map.of(
+                "workstream_id", paths.workstreamId().value(),
+                "run_id", runId,
+                "node_id", nodeId,
+                "node_instance_id", nodeInstanceId,
+                "decision", decision,
+                "stage_outcome", "COMPLETED",
+                "summary", summary,
+                "source_artifact_type", artifactType,
+                "source_output_ref", sourceRef
+        ));
+        var result = Map.<String, Object>of(
+                "run_id", runId,
+                "decision", decision,
+                "contract_sidecar_sha256", sha256(sidecarPath));
+        var outputRefs = List.of(sourceRef, sidecarRef);
+        var executionId = "nxe-" + nodeInstanceId;
+        var started = Instant.parse("2026-06-01T00:30:00Z");
+        var finished = Instant.parse("2026-06-01T00:30:01Z");
+        mapper.writeValue(paths.nodeJson(nodeInstanceId).toFile(), new NodeInstanceDocument(
+                1, nodeInstanceId, nodeId, NodeKind.TASK, "acpx.agent_run", NodeStatus.COMPLETED,
+                "stage-acceptance", iterationId, inputRefs, Map.of(), outputRefs, result,
+                runId, executionId, started, finished));
+        Files.createDirectories(paths.nodeExecutionsDir());
+        mapper.writeValue(paths.nodeExecutionJson(executionId).toFile(), new NodeExecutionDocument(
+                1, executionId, "agt-" + nodeInstanceId, "wfe-test", nodeInstanceId, nodeId,
+                "acpx.agent_run", NodeExecutionStatus.SUCCEEDED, 1L, "completed", NodeStatus.COMPLETED,
+                outputRefs, result, "", runId, "", "fixture-agent", "fixture-session", 0,
+                started, finished, 1L));
+        return new AgentEvidenceRefs(sourceRef, sidecarRef);
+    }
+
+    private String relative(Path path) {
+        return tempDir.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
+    }
+
+    private static String sha256(Path path) throws Exception {
+        var digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(path));
+        return java.util.HexFormat.of().formatHex(digest);
+    }
+
+    private record AgentEvidenceRefs(String sourceRef, String sidecarRef) {
     }
 
     private record Fixture(String workstreamId) {

@@ -1,75 +1,43 @@
 package dev.dual.runtime.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
-
+import dev.dual.ledger.file.GoalDomainOutcome;
+import dev.dual.ledger.file.GoalSatisfactionDocument;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReportGenerateFinalHandlerTest {
+    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+
     @TempDir
     Path tempDir;
 
     @Test
-    void generatesFullReportWithAllData() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt");
-        Files.createDirectories(wsDir);
+    void generatesVerificationSnapshotFromResolvedTypedEvidence() throws Exception {
+        var fixture = prepare("ws-rpt");
+        var wsDir = workstreamDir("ws-rpt");
         Files.writeString(wsDir.resolve("requirement.md"), "Implement feature X.", StandardCharsets.UTF_8);
-
-        var acceptance = wsDir.resolve("runs/run-003/outputs/acceptance-codex-review.md");
-        Files.createDirectories(acceptance.getParent());
-        Files.writeString(acceptance, "raw acceptance markdown should stay as an artifact pointer", StandardCharsets.UTF_8);
-        Files.writeString(wsDir.resolve("runs/run-003/outputs/acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_review",
-                  "decision": "ACCEPT",
-                  "stage_outcome": "ACCEPTED",
-                  "summary": "Codex accepts the implementation.",
-                  "verification_summary": "All checks green.",
-                  "evidence": ["diff matches contract"]
-                }
-                """, StandardCharsets.UTF_8);
-
-        var selfTest = wsDir.resolve("runs/run-002/outputs/implement-claude-self-test.md");
-        Files.createDirectories(selfTest.getParent());
-        Files.writeString(selfTest, "raw self-test markdown should stay as an artifact pointer", StandardCharsets.UTF_8);
-        Files.writeString(wsDir.resolve("runs/run-002/outputs/implement-claude-self-test.contract.json"), """
-                {
-                  "node_id": "implement.claude_self_test",
-                  "decision": "SELF_TEST_COMPLETE",
-                  "stage_outcome": "READY",
-                  "summary": "Developer self-test passed.",
-                  "verification_summary": "Tests: 42 passed",
-                  "evidence": ["unit tests passed"]
-                }
-                """, StandardCharsets.UTF_8);
-
         var evidenceDir = wsDir.resolve("artifacts/git-evidence");
         Files.createDirectories(evidenceDir);
-        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}");
 
-        var handler = new ReportGenerateFinalHandler();
-        var inputRefs = List.of(
-                ".agent/workstreams/ws-rpt/runs/run-002/outputs/implement-claude-self-test.contract.json",
-                ".agent/workstreams/ws-rpt/runs/run-003/outputs/acceptance-codex-review.contract.json"
-        );
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-001", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
-        ));
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt", fixture));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
@@ -78,52 +46,51 @@ class ReportGenerateFinalHandlerTest {
         assertTrue(report.contains("Tests: 42 passed"));
         assertTrue(report.contains("diff matches contract"));
         assertTrue(report.contains("unit tests passed"));
-        assertTrue(report.contains("acceptance-codex-review.contract.json"));
-        assertTrue(report.contains("implement-claude-self-test.contract.json"));
+        assertTrue(report.contains("## Selected Typed Outputs"));
+        assertTrue(report.contains("pre-human-delivery verification snapshot"));
         assertTrue(report.contains("git-evidence.json"));
     }
 
     @Test
-    void missingOptionalDataShowsNotAvailable() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-empty");
-        Files.createDirectories(wsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Minimal requirement.", StandardCharsets.UTF_8);
+    void missingGoalFailsWithoutPublishingAReport() throws Exception {
+        var wsDir = workstreamDir("ws-rpt-missing");
+        Files.createDirectories(wsDir.resolve("reports"));
+        Files.writeString(wsDir.resolve("requirement.md"), "Minimal requirement.");
+        Files.writeString(wsDir.resolve("reports/latest-final-report.md"), "historical report bytes");
 
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-empty",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-002", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        ));
+        var result = new ReportGenerateFinalHandler().execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-missing", definition(), emptyReportNode("ws-rpt-missing")));
 
-        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
-        assertTrue(report.contains("not available"));
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_CONFIGURED, result.result().get("failure_code"));
+        assertTrue(result.outputRefs().isEmpty());
+        assertEquals("historical report bytes", Files.readString(wsDir.resolve("reports/latest-final-report.md")));
     }
 
     @Test
-    void noAgentOutputsShowsPlaceholder() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-no-outputs");
-        Files.createDirectories(wsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "No outputs.", StandardCharsets.UTF_8);
+    void nonFinalGoalFailsWithoutBeingRelabeledAsCorruption() throws Exception {
+        var fixture = prepare("ws-rpt-not-final");
+        var goalPath = workstreamDir("ws-rpt-not-final").resolve("domain/goal-satisfaction.json");
+        var goal = MAPPER.readValue(goalPath.toFile(), GoalSatisfactionDocument.class);
+        MAPPER.writeValue(goalPath.toFile(), new GoalSatisfactionDocument(
+                goal.schemaVersion(), goal.workstreamId(), goal.workflowInstanceId(), goal.nodeInstanceId(),
+                "design.decision", goal.iterationId(), "NEEDS_REVISION", GoalDomainOutcome.NEEDS_REDESIGN,
+                "design needs revision", goal.evidenceRefs(), goal.sourceResult(), goal.generatedAt()));
 
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-no-outputs",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-003", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        ));
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-not-final", fixture));
 
-        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
-        assertTrue(report.contains("no agent outputs"));
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_FINAL, result.result().get("failure_code"));
+        assertTrue(result.outputRefs().isEmpty());
     }
 
     @Test
     void acceptWithNotesClassificationIsRenderedAsNotesNotFailure() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-notes");
+        var fixture = CompletionEvidenceLineageFixture.prepare(
+                tempDir, "ws-rpt-notes", "ACCEPT_WITH_NOTES", "Accepted with runtime validation note.");
+        var wsDir = workstreamDir("ws-rpt-notes");
         Files.createDirectories(wsDir.resolve("artifacts"));
-        Files.writeString(wsDir.resolve("requirement.md"), "Notes report.", StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("requirement.md"), "Notes report.");
         Files.writeString(wsDir.resolve("artifacts/failure-classification.json"), """
                 {
                   "category": "REVIEW_NOISE",
@@ -134,228 +101,120 @@ class ReportGenerateFinalHandlerTest {
                   "source": "deterministic",
                   "classified_at": "2026-06-03T00:00:00Z"
                 }
-                """, StandardCharsets.UTF_8);
+                """);
 
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-notes",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-005", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        ));
-
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-notes", fixture));
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
         assertTrue(report.contains("## Acceptance Notes Classification"));
         assertTrue(report.contains("Record non-blocking acceptance notes and continue"));
-        assertTrue(!report.contains("## Failure Classification"));
+        assertFalse(report.contains("## Failure Classification"));
     }
 
     @Test
     void gitEvidenceHygieneWarningsAreRendered() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-hygiene");
+        var fixture = prepare("ws-rpt-hygiene");
+        var wsDir = workstreamDir("ws-rpt-hygiene");
         var evidenceDir = wsDir.resolve("artifacts/git-evidence");
         Files.createDirectories(evidenceDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Hygiene report.", StandardCharsets.UTF_8);
-        Files.writeString(evidenceDir.resolve("git-evidence.json"), """
-                {
-                  "available": true,
-                  "hygieneWarningCount": 1
-                }
-                """, StandardCharsets.UTF_8);
-        Files.writeString(evidenceDir.resolve("hygiene-warnings.txt"), """
-                __pycache__/ looks like a generated self-test byproduct; remove it unless it is an intentional deliverable.
-                """, StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("requirement.md"), "Hygiene report.");
+        Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}");
+        Files.writeString(evidenceDir.resolve("hygiene-warnings.txt"),
+                "__pycache__/ looks like a generated self-test byproduct");
 
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-hygiene",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-006", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        ));
-
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-hygiene", fixture));
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
         assertTrue(report.contains("## Repository Hygiene Warnings"));
         assertTrue(report.contains("__pycache__/ looks like a generated self-test byproduct"));
     }
 
     @Test
-    void structuredVerificationEvidenceIsRendered() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-evidence");
-        var outputsDir = wsDir.resolve("runs/run-007/outputs");
-        Files.createDirectories(outputsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Evidence report.", StandardCharsets.UTF_8);
-        Files.writeString(outputsDir.resolve("implement-claude-self-test.contract.json"), """
-                {
-                  "node_id": "implement.claude_self_test_report",
-                  "decision": "SELF_TEST_COMPLETE",
-                  "summary": "Self-test completed with one runtime gap.",
-                  "checks_run": ["npm test"],
-                  "checks_skipped": ["device smoke: simulator unavailable"],
-                  "evidence": ["Test output showed 24 passing tests."],
-                  "missing_evidence": ["No physical device validation."],
-                  "verification_summary": "Developer evidence is mostly sufficient."
-                }
-                """, StandardCharsets.UTF_8);
-        Files.writeString(outputsDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "ACCEPT_WITH_NOTES",
-                  "summary": "Accepted with runtime validation note.",
-                  "missing_evidence": ["No physical device validation."],
-                  "acceptance_notes": ["Run visual smoke before release."],
-                  "verification_summary": "Evidence is adequate for merge with notes."
-                }
-                """, StandardCharsets.UTF_8);
+    void unroutedNewerOutputsCannotReplaceResolvedEvidence() throws Exception {
+        var fixture = prepare("ws-rpt-routed");
+        var wsDir = workstreamDir("ws-rpt-routed");
+        Files.writeString(wsDir.resolve("requirement.md"), "Routed evidence report.");
+        var sibling = wsDir.resolve("runs/run-999/outputs/acceptance-codex-review.md");
+        Files.createDirectories(sibling.getParent());
+        Files.writeString(sibling, "Unrouted newer acceptance must not appear.");
 
-        var handler = new ReportGenerateFinalHandler();
-        var inputRefs = List.of(
-                ".agent/workstreams/ws-rpt-evidence/runs/run-007/outputs/implement-claude-self-test.contract.json",
-                ".agent/workstreams/ws-rpt-evidence/runs/run-007/outputs/acceptance-codex-review.contract.json"
-        );
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-evidence",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-007", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
-        ));
-
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-routed", fixture));
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
-        assertTrue(report.contains("## Verification Evidence"));
-        assertTrue(report.contains("Self-test completed with one runtime gap."));
-        assertTrue(report.contains("npm test"));
-        assertTrue(report.contains("device smoke: simulator unavailable"));
-        assertTrue(report.contains("No physical device validation."));
-        assertTrue(report.contains("Run visual smoke before release."));
-    }
-
-    @Test
-    void finalReportUsesRoutedVerificationRefsNotUnroutedNewerRuns() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-routed");
-        var routedDir = wsDir.resolve("runs/run-001/outputs");
-        var unroutedDir = wsDir.resolve("runs/run-999/outputs");
-        Files.createDirectories(routedDir);
-        Files.createDirectories(unroutedDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Routed evidence report.", StandardCharsets.UTF_8);
-        Files.writeString(routedDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "REJECT",
-                  "summary": "Routed rejection.",
-                  "verification_summary": "Routed acceptance evidence is the only source."
-                }
-                """, StandardCharsets.UTF_8);
-        Files.writeString(unroutedDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "ACCEPT",
-                  "summary": "Unrouted newer acceptance.",
-                  "verification_summary": "This newer file must not be selected."
-                }
-                """, StandardCharsets.UTF_8);
-
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-routed",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-routed", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001",
-                        List.of(".agent/workstreams/ws-rpt-routed/runs/run-001/outputs/acceptance-codex-review.contract.json"),
-                        List.of(), Map.of(), null, null, null)
-        ));
-
-        var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
-        assertTrue(report.contains("Routed acceptance evidence is the only source."));
-        assertTrue(report.contains("REJECT"));
-        assertTrue(!report.contains("This newer file must not be selected."));
-        assertTrue(!report.contains("Unrouted newer acceptance."));
+        assertTrue(report.contains("Codex accepts the implementation."));
+        assertFalse(report.contains("Unrouted newer acceptance must not appear."));
     }
 
     @Test
     void contractResolutionIsRendered() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-resolution");
+        var fixture = prepare("ws-rpt-resolution");
+        var wsDir = workstreamDir("ws-rpt-resolution");
         var artifactsDir = wsDir.resolve("artifacts");
         Files.createDirectories(artifactsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Resolution report.", StandardCharsets.UTF_8);
-        Files.writeString(artifactsDir.resolve("task-contract.json"), taskContractJson("Resolution objective"), StandardCharsets.UTF_8);
+        Files.writeString(wsDir.resolve("requirement.md"), "Resolution report.");
         Files.writeString(artifactsDir.resolve("contract-resolution.json"), """
                 {
-                  "schema_version": 1,
                   "decision": "APPROVE",
-                  "resolved_questions": [
-                    {
-                      "question": "Should review be mandatory?",
-                      "resolution": "Yes, mandatory review was approved.",
-                      "source": "human"
-                    }
-                  ],
-                  "assumptions": ["Human approved the requirement gate."],
+                  "resolved_questions": [{
+                    "question": "Should review be mandatory?",
+                    "resolution": "Yes, mandatory review was approved.",
+                    "source": "human"
+                  }],
                   "accepted_risks": ["Existing shortcut is intentionally removed."],
-                  "gate_ref": ".agent/workstreams/ws-rpt-resolution/gates/gate-node-001.json",
-                  "approved_by": "human_gate",
-                  "created_at": "2026-06-06T00:00:00Z"
+                  "approved_by": "human_gate"
                 }
-                """, StandardCharsets.UTF_8);
+                """);
 
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-resolution",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-resolution", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        ));
-
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-resolution", fixture));
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
         assertTrue(report.contains("## Contract Resolution"));
         assertTrue(report.contains("Should review be mandatory?"));
-        assertTrue(report.contains("Yes, mandatory review was approved."));
         assertTrue(report.contains("Existing shortcut is intentionally removed."));
     }
 
     @Test
     void filenamesIncludeIterationId() throws Exception {
-        var wsDir = tempDir.resolve(".agent/workstreams/ws-rpt-filename");
-        Files.createDirectories(wsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Filename test.", StandardCharsets.UTF_8);
+        var fixture = CompletionEvidenceLineageFixture.prepare(
+                tempDir, "ws-rpt-filename", "ACCEPT", "Accepted.", "iter-003");
+        Files.writeString(workstreamDir("ws-rpt-filename").resolve("requirement.md"), "Filename test.");
 
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-filename",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-004", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-003", List.of(), List.of(), Map.of(), null, null, null)
-        ));
+        var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-filename", fixture));
 
-        var reportRef = (String) result.result().get("report_path");
-        var latestRef = (String) result.result().get("latest_report_path");
-        assertTrue(reportRef.contains("iter-003-final-report.md"));
-        assertTrue(latestRef.contains("latest-final-report.md"));
-        assertTrue(Files.exists(tempDir.resolve(reportRef)));
-        assertTrue(Files.exists(tempDir.resolve(latestRef)));
+        assertTrue(((String) result.result().get("report_path")).contains("iter-003-final-report.md"));
+        assertTrue(((String) result.result().get("latest_report_path")).contains("latest-final-report.md"));
     }
 
-    private static String taskContractJson(String objective) {
-        return """
-                {
-                  "id": "task-ws",
-                  "version": 1,
-                  "created_at": "2026-06-03T00:00:00Z",
-                  "objective": "%s",
-                  "scope": {
-                    "included": [{"path": "src/issueWorkflow.js", "operation": "MODIFY"}],
-                    "excluded": ["No external dependencies"]
-                  },
-                  "acceptance_criteria": ["Criterion one", "Criterion two"],
-                  "test_requirements": ["Run tests"],
-                  "constraints": ["Keep scope narrow"],
-                  "non_goals": ["Do not add UI"],
-                  "risk_areas": [],
-                  "ambiguity_notes": [],
-                  "human_questions": [],
-                  "status": "READY_FOR_REVIEW",
-                  "compilation_pass": 1,
-                  "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
-                }
-                """.formatted(objective);
+    private CompletionEvidenceLineageFixture.Prepared prepare(String workstreamId) throws Exception {
+        return CompletionEvidenceLineageFixture.prepare(tempDir, workstreamId);
+    }
+
+    private Path workstreamDir(String workstreamId) {
+        return tempDir.resolve(".agent/workstreams").resolve(workstreamId);
+    }
+
+    private TaskHandler.TaskContext context(
+            String workstreamId,
+            CompletionEvidenceLineageFixture.Prepared fixture
+    ) {
+        return new TaskHandler.TaskContext(tempDir, workstreamId, definition(), fixture.reportNode());
+    }
+
+    private static NodeDefinition definition() {
+        return new NodeDefinition(
+                "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of());
+    }
+
+    private static NodeInstance emptyReportNode(String workstreamId) {
+        return new NodeInstance(
+                "node-report-" + workstreamId,
+                "acceptance.generate_final_report",
+                NodeKind.TASK,
+                "report.generate_final",
+                NodeStatus.RUNNING,
+                "stage-acceptance",
+                "iter-001",
+                List.of(),
+                List.of(),
+                Map.of(),
+                "",
+                Instant.now(),
+                null);
     }
 }

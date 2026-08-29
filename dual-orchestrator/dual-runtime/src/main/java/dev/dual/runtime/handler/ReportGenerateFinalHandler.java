@@ -9,16 +9,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
 public final class ReportGenerateFinalHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
-    private static final int MAX_RECENT_OUTPUTS = 8;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
@@ -28,6 +24,23 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
 
     @Override
     public NodeResult execute(TaskContext context) throws IOException {
+        var evidence = CompletionEvidenceLineageResolver.resolveForReport(
+                context.workspaceRoot(), context.workstreamId(), context.instance());
+        if (evidence.status() != CompletionEvidenceLineageResolver.Status.AVAILABLE) {
+            var result = new LinkedHashMap<String, Object>();
+            result.put("failure_code", evidence.failureCode());
+            result.put("error", evidence.detail());
+            if (evidence.goal() != null) {
+                result.put("goal_node_instance_id", evidence.goal().nodeInstanceId());
+                result.put("goal_iteration_id", evidence.goal().iterationId());
+            }
+            return new NodeResult(
+                    evidence.failureCode(),
+                    dev.dual.core.workflow.NodeStatus.FAILED,
+                    List.of(),
+                    result,
+                    evidence.detail());
+        }
         var workstreamDir = context.workspaceRoot()
                 .resolve(".agent")
                 .resolve("workstreams")
@@ -38,7 +51,7 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         var iterationId = context.instance().iterationId();
         var reportPath = reportsDir.resolve(iterationId + "-final-report.md");
         var latestPath = reportsDir.resolve("latest-final-report.md");
-        var markdown = renderReport(context, workstreamDir);
+        var markdown = renderReport(context, workstreamDir, evidence);
         Files.writeString(reportPath, markdown, StandardCharsets.UTF_8);
         Files.writeString(latestPath, markdown, StandardCharsets.UTF_8);
 
@@ -52,12 +65,18 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         return NodeResult.completed("completed", List.of(reportRef, latestRef), result);
     }
 
-    private static String renderReport(TaskContext context, Path workstreamDir) throws IOException {
+    private static String renderReport(
+            TaskContext context,
+            Path workstreamDir,
+            CompletionEvidenceLineageResolver.Resolution evidence
+    ) throws IOException {
         var builder = new StringBuilder();
         builder.append("# Dual Final Report\n\n");
         builder.append("- Workstream: ").append(context.workstreamId()).append("\n");
         builder.append("- Iteration: ").append(context.instance().iterationId()).append("\n");
         builder.append("- Generated At: ").append(Instant.now()).append("\n");
+        builder.append("- Report Scope: pre-human-delivery verification snapshot\n");
+        builder.append("- Excludes: subsequent human acceptance, delivery apply, and delivery commit status\n");
         builder.append("- Ledger: ").append(toDisplayRef(workstreamDir)).append("\n\n");
 
         builder.append("## User Request\n\n");
@@ -70,19 +89,19 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         appendFailureClassificationSection(builder, workstreamDir);
 
         builder.append("## Verification Evidence\n\n");
-        appendVerificationEvidence(builder, context);
+        appendVerificationEvidence(builder, evidence);
 
         builder.append("## Acceptance Summary\n\n");
-        appendLatestContractSummary(builder, context, "acceptance-codex-review.contract.json");
+        appendContractSummary(builder, evidence.acceptance());
 
         builder.append("## Developer Self-Test Summary\n\n");
-        appendLatestContractSummary(builder, context, "implement-claude-self-test.contract.json");
+        appendContractSummary(builder, evidence.selfTest());
 
         builder.append("## Git Evidence\n\n");
         appendGitEvidence(builder, workstreamDir);
 
-        builder.append("## Recent Agent Outputs\n\n");
-        appendRecentOutputs(builder, workstreamDir);
+        builder.append("## Selected Typed Outputs\n\n");
+        appendSelectedOutputs(builder, evidence);
 
         builder.append("## Run Artifacts\n\n");
         builder.append("- Workflow current: ").append(toDisplayRef(workstreamDir.resolve("workflow/current.json"))).append("\n");
@@ -203,19 +222,12 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static void appendVerificationEvidence(StringBuilder builder, TaskContext context) throws IOException {
-        var selfTest = latestInputContractPath(context, "implement-claude-self-test.contract.json");
-        var acceptance = latestInputContractPath(context, "acceptance-codex-review.contract.json");
-        if (selfTest == null && acceptance == null) {
-            builder.append("(structured verification evidence not available)\n\n");
-            return;
-        }
-        if (selfTest != null) {
-            appendContractEvidence(builder, "Developer Self-Test Evidence", selfTest);
-        }
-        if (acceptance != null) {
-            appendContractEvidence(builder, "Codex Acceptance Evidence", acceptance);
-        }
+    private static void appendVerificationEvidence(
+            StringBuilder builder,
+            CompletionEvidenceLineageResolver.Resolution evidence
+    ) throws IOException {
+        appendContractEvidence(builder, "Developer Self-Test Evidence", evidence.selfTest().path());
+        appendContractEvidence(builder, "Codex Acceptance Evidence", evidence.acceptance().path());
     }
 
     private static void appendContractEvidence(StringBuilder builder, String title, Path sidecar) throws IOException {
@@ -257,13 +269,12 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static void appendLatestContractSummary(StringBuilder builder, TaskContext context, String fileName) throws IOException {
-        var sidecar = latestInputContractPath(context, fileName);
-        if (sidecar == null) {
-            builder.append("(not available)\n\n");
-            return;
-        }
-        builder.append("- Source: ").append(toDisplayRef(sidecar)).append("\n");
+    private static void appendContractSummary(
+            StringBuilder builder,
+            CompletionEvidenceLineageResolver.Evidence evidence
+    ) throws IOException {
+        var sidecar = evidence.path();
+        builder.append("- Source: ").append(evidence.ref()).append("\n");
         try {
             var json = OBJECT_MAPPER.readTree(sidecar.toFile());
             appendJsonField(builder, "Node", json.path("node_id").asText(""));
@@ -317,52 +328,15 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         }
     }
 
-    private static void appendRecentOutputs(StringBuilder builder, Path workstreamDir) throws IOException {
-        var runsDir = workstreamDir.resolve("runs");
-        if (!Files.exists(runsDir)) {
-            builder.append("(no agent outputs)\n\n");
-            return;
+    private static void appendSelectedOutputs(
+            StringBuilder builder,
+            CompletionEvidenceLineageResolver.Resolution evidence
+    ) {
+        for (var selected : List.of(evidence.selfTest(), evidence.acceptance())) {
+            builder.append("- Source output: ").append(selected.document().sourceOutputRef()).append("\n");
+            builder.append("  Sidecar: ").append(selected.ref()).append("\n");
         }
-        try (Stream<Path> paths = Files.walk(runsDir)) {
-            var outputs = paths
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getParent() != null && "outputs".equals(path.getParent().getFileName().toString()))
-                    .filter(path -> path.getFileName().toString().endsWith(".md"))
-                    .sorted(Comparator.comparing(ReportGenerateFinalHandler::lastModified).reversed())
-                    .limit(MAX_RECENT_OUTPUTS)
-                    .toList();
-            if (outputs.isEmpty()) {
-                builder.append("(no agent outputs)\n\n");
-                return;
-            }
-            for (Path output : outputs) {
-                builder.append("- ").append(toDisplayRef(output)).append("\n");
-            }
-            builder.append("\n");
-        }
-    }
-
-    private static Path latestInputContractPath(TaskContext context, String fileName) {
-        var refs = context.instance().inputRefs();
-        for (int i = refs.size() - 1; i >= 0; i--) {
-            var ref = refs.get(i);
-            if (!Path.of(ref).getFileName().toString().equals(fileName)) {
-                continue;
-            }
-            var path = context.workspaceRoot().resolve(ref).normalize();
-            if (Files.isRegularFile(path)) {
-                return path;
-            }
-        }
-        return null;
-    }
-
-    private static Instant lastModified(Path path) {
-        try {
-            return Files.readAttributes(path, BasicFileAttributes.class).lastModifiedTime().toInstant();
-        } catch (IOException e) {
-            return Instant.EPOCH;
-        }
+        builder.append("\n");
     }
 
     private static String readOrDefault(Path path, String fallback) throws IOException {

@@ -1804,16 +1804,14 @@ class BuiltinHandlerTest {
                 """);
         Files.writeString(evidence, "{\"available\":true,\"hasChanges\":true}\n");
         Files.writeString(evidence.getParent().resolve("changed-files.txt"), "README.md\n");
+        var lineage = CompletionEvidenceLineageFixture.prepare(tempDir, "ws");
 
         var handler = new ReportGenerateFinalHandler();
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
                 "ws",
                 taskDefinition("acceptance.generate_final_report", "report.generate_final"),
-                node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", List.of(
-                        ".agent/workstreams/ws/runs/run-010/outputs/implement-claude-self-test.contract.json",
-                        ".agent/workstreams/ws/runs/run-011/outputs/acceptance-codex-review.contract.json"
-                ))
+                lineage.reportNode()
         ));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -2001,7 +1999,7 @@ class BuiltinHandlerTest {
     }
 
     @Test
-    void finalReportWithMinimalData() throws Exception {
+    void finalReportWithoutCompletionEvidenceFailsClosed() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         Files.createDirectories(workstreamDir);
         // Only requirement, no runs, no git evidence
@@ -2015,10 +2013,10 @@ class BuiltinHandlerTest {
                 node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final")
         ));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        var markdown = Files.readString(tempDir.resolve(".agent/workstreams/ws/reports/latest-final-report.md"));
-        assertTrue(markdown.contains("Minimal report."));
-        assertTrue(markdown.contains("(not available)"));
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_CONFIGURED,
+                result.result().get("failure_code"));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/reports/latest-final-report.md")));
     }
 
     @Test

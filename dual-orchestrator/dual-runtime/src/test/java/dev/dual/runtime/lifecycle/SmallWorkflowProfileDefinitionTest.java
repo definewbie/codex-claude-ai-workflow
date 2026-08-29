@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -100,6 +101,27 @@ class SmallWorkflowProfileDefinitionTest {
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
         assertEquals("bcf1763a75cc03a118c636590441d5e7f447dd71d157e388934de1f6ce54fcdb",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
+    }
+
+    @Test
+    void allAcceptanceProfilesDeclareTheSameRequiredSelfTestEvidence() throws Exception {
+        var definitions = List.of(
+                new LifecycleWorkflowDefinitionFactory().forVariant("full"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("contract"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery"),
+                loadExperiment());
+
+        for (var definition : definitions) {
+            var context = definition.node("context.acceptance_codex_verifier_review");
+            assertEquals("acceptance", context.config().get("profile"), definition.workflowId());
+            assertEquals("acceptance.codex_verifier_review", context.config().get("target_node"),
+                    definition.workflowId());
+            assertEquals(Map.of(
+                            "node_id", "implement.claude_self_test_report",
+                            "source_artifact_type", "self_test_report",
+                            "decision", "SELF_TEST_COMPLETE"),
+                    context.config().get("required_agent_evidence"), definition.workflowId());
+        }
     }
 
     static dev.dual.core.workflow.WorkflowDefinition loadExperiment() throws Exception {

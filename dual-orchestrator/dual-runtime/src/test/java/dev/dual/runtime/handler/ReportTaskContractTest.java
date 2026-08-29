@@ -27,6 +27,7 @@ class ReportTaskContractTest {
 
     @Test
     void finalReportIncludesTaskContractSection() throws Exception {
+        var lineage = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-001");
         var wsDir = tempDir.resolve(".agent/workstreams/ws-001");
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Add project description to README", StandardCharsets.UTF_8);
@@ -63,8 +64,7 @@ class ReportTaskContractTest {
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir, "ws-001",
                 new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-001", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+                lineage.reportNode()
         ));
 
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
@@ -77,6 +77,7 @@ class ReportTaskContractTest {
 
     @Test
     void finalReportShowsLegacyPlaceholderWhenNoContract() throws Exception {
+        var lineage = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-legacy");
         var wsDir = tempDir.resolve(".agent/workstreams/ws-legacy");
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Legacy task", StandardCharsets.UTF_8);
@@ -85,8 +86,7 @@ class ReportTaskContractTest {
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir, "ws-legacy",
                 new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                new NodeInstance("node-002", "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
+                lineage.reportNode()
         ));
 
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));

@@ -27,13 +27,13 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: ACCEPTED DELIVERY CANDIDATE / D1 SELECTIVE COMMIT
+## Current Active Step: D2-A COMPLETE / D2-B PLANNING NEXT
 
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。
 
-当前只推进 D1 Accepted Delivery Candidate。producer/consumer/sibling sweep 已完成：human acceptance 目前只绑定
+D1 历史执行记录：producer/consumer/sibling sweep 已确认 human acceptance 当时只绑定
 commit/PR Markdown，CLI/server 各自扫描 runs 并重读当前 worktree；此外 `delivery commit/create-pr` 仍可绕过 gate
 直接 add/commit/push。实施计划已落在
 `docs/plans/accepted-delivery-candidate-implementation-plan-20260828.zh-CN.md`，选择 content-addressed candidate、
@@ -41,13 +41,65 @@ commit/PR Markdown，CLI/server 各自扫描 runs 并重读当前 worktree；此
 bypass。独立架构评审已 `PASS（P0=0 / P1=0）`，checkpoint 已按计划完成：immutable candidate、event-ordered
 resolver、共享 apply/finalize、CLI/API/UI 委托与 legacy sibling subtraction 全部落地；workflow JSON 零修改。
 focused boundary slice 全绿，非沙箱 full Maven reactor 为 `1268/0/0/0`。deterministic 证据支持 D1
-`ENFORCED / NOT REAL-CASE PROVEN`；当前只允许独立代码级 diff review，PASS 前不提交、不调用 provider、不启动
-real-case，也不进入 D2/E1 production 实施。
+`ENFORCED / NOT REAL-CASE PROVEN`；该 checkpoint 后续已通过独立 diff review 并提交。
 
 D1 独立 diff review 已 `PASS（P0=0 / P1=0 / P2=2 知会）`，并独立复现 full reactor
 `1268/0/0/0` 与 clean diff-check。两个 P2 已结转 D2：历史 `delivery.json` 只读投影残迹，以及稳定
 commit-message/PR-body 只能保持 presentation 身份。D1 已满足选择性提交条件；提交后才允许进入 D2 只读
 producer/consumer/sibling analysis，仍不授权 provider/real-case。
+
+D1 已选择性提交为 `d04d0a58`，工作树恢复 clean 后完成 D2 只读 producer-consumer sweep，结果见
+`docs/plans/d2-completion-delivery-producer-consumer-sweep-20260829.zh-CN.md`。sweep 证明现有 persisted node
+input/output refs 已足够从 final acceptance sidecar 反向重建 acceptance context 与 self-test occurrence lineage，因此
+拒绝新增 durable `VerificationEvidenceSelection`；同时 D1 的 `DeliveryApplicationService.View` 已是唯一 delivery
+read model，不再建立包揽 workflow/completion/evidence/delivery 的通用模型。D2 收缩为两个有序 checkpoint：D2-A
+新增只读 completion evidence lineage resolver 并删除 final-report/server 的 runs+mtime 猜测；D2-B 复用 D1 view，删除
+`delivery.json`、raw merge-plan、legacy status 与 UI fallback 的重复解释。当前成熟度为 `ASSESSED / NOT IMPLEMENTED`；
+该 sweep 随后进入独立架构评审，仍未调用 provider/real-case。
+
+D2 sweep 独立评审结论为 `PASS（P0=0 / P1=0 / P2=2）`，确认 existing routed refs 足以机械重建
+report -> acceptance -> acceptance context -> self-test occurrence lineage，且 D2-A/D2-B 的拆分与顺序最小。P2-1 要求
+实现时不能只凭 context package 文件名定位 node：定位后必须验证该 completed context node 的 outputRefs 确实包含 package
+ref，并核对 workflow definition 的 acceptance profile/target/required evidence；P2-2 将 generic artifact-contract/artifacts
+mtime scan 登记为 presentation residual，不冒充本轮已修。基于该结论已形成
+`docs/plans/d2-a-completion-evidence-lineage-implementation-plan-20260829.zh-CN.md`。当前只允许对 D2-A 计划做一次独立
+架构评审；PASS 后实施单一 D2-A checkpoint，D2-B 必须等待 D2-A clean commit。
+
+D2-A 计划独立评审确认所有 producer/consumer 事实与逐跳 lineage 均成立，文件范围最小且不产生第二 SoT，但发现一个
+P1 计划语义冲突：合法 intermediate goal 会由 `NEEDS_REVISION/BLOCKED` 写入，不能归为 corruption。计划已增加
+`COMPLETION_GOAL_NOT_CONFIGURED` 与 `COMPLETION_GOAL_NOT_FINAL`，API 分别投影 `not_configured/not_final`；report node
+仍对所有非 `AVAILABLE` 状态 fail closed，但保留原始分类。另修正 production bundled variants 为三个，将 small-plan
+experiment 明示为 test-only，并把 `TraceCommand.acceptance()` 与 `artifacts().contextPackageMetadata` mtime 选择登记为
+D2-B/presentation residual。delta 复审确认上一轮 P1/P2 全部关闭，结论为 `READY（P0=0 / P1=0）`；新增 P2 仅要求
+report 入口补 `NOT_CONFIGURED/NOT_FINAL` 对偶测试与修正文档指针，已并入测试矩阵。当前进入单一 D2-A deterministic
+implementation checkpoint；仍不调用 provider、不启动 real-case，D2-B 等待 D2-A clean commit。
+
+D2-A 已按该边界实施。新增只读 resolver 只从 canonical goal 与 persisted routed refs 重建
+decision -> acceptance sidecar -> acceptance context producer -> required self-test sidecar，并逐跳重验 workflow identity、
+iteration、node/execution/sidecar SHA、context outputRefs 与 definition config。final report 在任何写入前消费同一
+resolution，非 AVAILABLE 保留 `NOT_CONFIGURED/NOT_FINAL/INVALID` 原分类并 fail closed；server status/overview/attention
+使用同一四态投影，旧 summary/runs acceptance 与 report filename/mtime recent-output authority 已删除。
+
+攻击测试覆盖 sidecar SHA 篡改、goal/decision refs 漂移、双 acceptance、forged context package、缺 routed self-test、
+cross-iteration、旧 report bytes 保留和 bundled/test-only sibling consistency。首轮 focused resolver/report `17/0/0/0`，
+相关 report fixture slice `77/0/0/0`，server controller `22/0/0/0`；首轮非沙箱 full reactor
+`1277/0/0/0`，`git diff --check` clean。当前成熟度候选为 completion evidence lineage
+`ENFORCED / NOT REAL-CASE PROVEN`、final report `VERIFIED PRE-HUMAN SNAPSHOT`；等待一次独立代码级 diff review，
+PASS 前不提交、不进入 D2-B、不调用 provider/real-case。
+
+首轮独立 diff review 为 `WARN（P0=0 / P1=1 / P2=4）`。唯一阻塞项是 server 未测试
+NOT_CONFIGURED/NOT_FINAL/INVALID、`finalDecision=none`、critical/warning attention、成功 attention 门控与 decoy runs
+no-scan。delta 已新增四条 controller tests 完整覆盖这些分支；另补 acceptance/context 跨 iteration 与 future-mtime
+decoy tests，并将计划校验顺序修正为 goal identity corruption 优先于 finality。delta focused resolver/report
+`19/0/0/0`、server controller `26/0/0/0`，最终非沙箱 full reactor `1283/0/0/0`，`git diff --check`
+clean。当前等待独立 delta review；PASS 前仍不提交、不进入 D2-B。
+
+第二轮独立 delta review 已 `PASS（P0=0 / P1=0 / P2=2 知会）`，独立复现 focused 与 full reactor 数字，确认
+原 P1-1、identity/finality 文档顺序及三腿跨 iteration/mtime 反证全部 CLOSED。两个残留 P2 仅为 acceptance/report
+id 的既有硬编码耦合和 status 高频完整只读 resolution 的性能观察，不构成 authority fallback；分别以 workflow 泛化和
+真实轮询成本证据作为 revisit trigger。D2-A 选择性提交条件满足，成熟度正式记录为 completion evidence lineage
+`ENFORCED / NOT REAL-CASE PROVEN`、final report `VERIFIED PRE-HUMAN SNAPSHOT`。下一步仅允许在 clean checkpoint 后
+制定 D2-B projection convergence 实施计划，不直接编码、不调用 provider/real-case。
 
 H1 mandatory TaskContract projection checkpoint 已选择性提交为 `e1b6e9e5`。qualified full projection 与 soft
 warning 达到 `ENFORCED`；provider hard-capacity 保持 `NOT MODELED`；real-case value 保持 `NOT PROVEN`。H1 不再扩张，
