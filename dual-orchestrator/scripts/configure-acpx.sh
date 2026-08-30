@@ -9,15 +9,20 @@
 #
 # Usage:
 #   ./scripts/configure-acpx.sh
-#   DUAL_CLAUDE_ACP_COMMAND='npx -y @agentclientprotocol/claude-agent-acp@0.46.0' ./scripts/configure-acpx.sh
+#   DUAL_CLAUDE_ACP_COMMAND='npx -y @agentclientprotocol/claude-agent-acp@0.70.0' ./scripts/configure-acpx.sh
 #   DUAL_CODEX_ACP_COMMAND='npx -y @zed-industries/codex-acp-darwin-arm64@0.16.0' ./scripts/configure-acpx.sh
 #
 
 set -euo pipefail
 
-EXPECTED_ACPX_VERSION="${DUAL_ACPX_VERSION:-0.11.0}"
+EXPECTED_ACPX_VERSION="0.13.2"
+EXPECTED_UPSTREAM_COMMIT="fd173f04aa1b56f9e3f5ca5190c034ddcae28792"
+EXPECTED_PATCH_SHA256="304577dc136c87b055b5873b0562929cd5c16b1b0d18321e27f851209b3ab811"
+EXPECTED_POLICY_SCHEMA="claude_execution_policy.v1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_ACP_COMMAND="${DUAL_CLAUDE_ACP_COMMAND:-$SCRIPT_DIR/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.46.0}"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ACPX_EXECUTABLE="${DUAL_ACPX_EXECUTABLE:-$REPO_ROOT/.tools/acpx-e1/bin/acpx}"
+CLAUDE_ACP_COMMAND="${DUAL_CLAUDE_ACP_COMMAND:-$SCRIPT_DIR/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0}"
 CONFIG_PATH="${ACPX_CONFIG_PATH:-$HOME/.acpx/config.json}"
 
 fail() {
@@ -51,9 +56,25 @@ codex_platform_package() {
 
 check_acpx_version() {
   local actual
-  actual="$(acpx --version 2>/dev/null | head -1 | tr -d '[:space:]')"
-  [[ "$actual" == "$EXPECTED_ACPX_VERSION" ]] || fail "Expected acpx $EXPECTED_ACPX_VERSION, found ${actual:-unknown}. Install with: npm install -g acpx@$EXPECTED_ACPX_VERSION"
+  actual="$("$ACPX_EXECUTABLE" --version 2>/dev/null | head -1 | tr -d '[:space:]')"
+  [[ "$actual" == "$EXPECTED_ACPX_VERSION" ]] || fail "Expected patched acpx $EXPECTED_ACPX_VERSION, found ${actual:-unknown}. Run ./scripts/install-acpx-e1.sh"
   log "acpx version pinned: $actual"
+}
+
+check_acpx_build_identity() {
+  local build_info
+  build_info="$("$ACPX_EXECUTABLE" build-info --json 2>/dev/null)" || fail "NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build-info is unavailable"
+  if ! node - "$build_info" "$EXPECTED_UPSTREAM_COMMIT" "$EXPECTED_PATCH_SHA256" "$EXPECTED_POLICY_SCHEMA" <<'NODE'
+const [raw, upstream, patch, schema] = process.argv.slice(2);
+const value = JSON.parse(raw);
+if (value.upstream_commit !== upstream || value.patch_sha256 !== patch || value.policy_schema !== schema) {
+  process.exit(1);
+}
+NODE
+  then
+    fail "NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build identity mismatch"
+  fi
+  log "E1 policy transport build identity verified"
 }
 
 write_config() {
@@ -77,12 +98,14 @@ NODE
 
 main() {
   require_command node
-  require_command acpx
+  [[ -x "$ACPX_EXECUTABLE" ]] || fail "Patched acpx is missing: $ACPX_EXECUTABLE. Run ./scripts/install-acpx-e1.sh"
   CODEX_ACP_COMMAND="${DUAL_CODEX_ACP_COMMAND:-npx -y $(codex_platform_package)}"
   check_acpx_version
+  check_acpx_build_identity
   write_config
-  acpx config show >/dev/null
+  "$ACPX_EXECUTABLE" config show >/dev/null
   log "acpx config is readable"
+  log "export DUAL_ACPX_EXECUTABLE=$ACPX_EXECUTABLE before running Dual"
 }
 
 main "$@"

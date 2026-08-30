@@ -20,15 +20,17 @@ acpx --version
 真实运行前要固定 adapter 版本。否则 `acpx` 可能解析到浮动的 Claude/Codex ACP adapter，导致同一个流程在不同时间表现不同：
 
 ```bash
-npm install -g acpx@0.11.0
+DUAL_NODE_BIN_DIR=/path/to/node-22.13-or-newer/bin ./scripts/install-acpx-e1.sh
+export DUAL_ACPX_EXECUTABLE="$PWD/.tools/acpx-e1/bin/acpx"
 ./scripts/configure-acpx.sh
 ```
 
 如果 Claude Code 使用 GLM、DeepSeek、one-api、claude-code-router 等
 Anthropic-compatible 后端，把 provider 变量放在 `~/.claude/settings.json`
 的 `env` 字段里即可。`configure-acpx.sh` 会安装一个很薄的 Claude
-adapter wrapper，在运行时读取这些变量，不会把 token 写进
-`~/.acpx/config.json`。
+adapter wrapper，在运行时只读取固定的 Anthropic provider allowlist，
+不会把 token 写进 `~/.acpx/config.json`。当前只证明了 policy transport
+不可绕过；真实 sandbox/network 效果仍需单独 capability gate 验证。
 
 ## 2. 安装
 

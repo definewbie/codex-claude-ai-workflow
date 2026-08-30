@@ -15,6 +15,7 @@ dual-agent-workflow-article.md
 
 # Java orchestrator build outputs
 dual-orchestrator/**/target/
+dual-orchestrator/.tools/
 dual-orchestrator/docs/testing/real-case-reports/
 dual-orchestrator/todo.md
 dual-orchestrator/.understand-anything

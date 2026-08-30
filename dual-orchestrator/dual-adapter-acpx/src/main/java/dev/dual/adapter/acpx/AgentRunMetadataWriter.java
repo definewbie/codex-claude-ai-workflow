@@ -54,6 +54,27 @@ final class AgentRunMetadataWriter {
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta
     ) throws IOException {
+        writePrepared(workspaceRoot, workstreamId, nodeId, agent, session, promptTemplate, runId, runDir,
+                promptPath, stdoutPath, transcriptPath, stderrPath, sessionMeta, compactionMeta, null);
+    }
+
+    void writePrepared(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            Path runDir,
+            Path promptPath,
+            Path stdoutPath,
+            Path transcriptPath,
+            Path stderrPath,
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta,
+            ClaudeExecutionPolicy.Binding executionPolicy
+    ) throws IOException {
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
         writePromptDebugIfEnabled(promptPath);
@@ -114,6 +135,7 @@ final class AgentRunMetadataWriter {
                 Map.of(),
                 null,
                 null,
+                executionAuthority(executionPolicy),
                 null,
                 List.of(),
                 null,
@@ -144,7 +166,8 @@ final class AgentRunMetadataWriter {
             SessionMeta sessionMeta,
             SessionCompactionMeta compactionMeta,
             AgentResultAcquisitionDocument agentResultAcquisition,
-            RepositoryFactBinding.Verified repositoryFactBinding
+            RepositoryFactBinding.Verified repositoryFactBinding,
+            ClaudeExecutionPolicy.Binding executionPolicy
     ) throws IOException {
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
         var promptMetadataPath = metadataPath(promptPath);
@@ -300,6 +323,7 @@ final class AgentRunMetadataWriter {
                 providerModelIdentity(effectiveUsage),
                 toolUsage,
                 relativeOrNull(workspaceRoot, governanceReportPath),
+                executionAuthority(executionPolicy),
                 processResult(result.processResult()),
                 adapterSignals(result.adapterSignals()),
                 null,
@@ -308,6 +332,38 @@ final class AgentRunMetadataWriter {
                 null,
                 executionTimeline(runTimeline)
         ));
+    }
+
+    void writeCompleted(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeId,
+            String agent,
+            String session,
+            String promptTemplate,
+            String runId,
+            Path runDir,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            Path transcriptPath,
+            AcpxRunResult result,
+            List<AcpxExecutionEvent> runTimeline,
+            AcpxUsage usage,
+            SessionMeta sessionMeta,
+            SessionCompactionMeta compactionMeta,
+            AgentResultAcquisitionDocument agentResultAcquisition,
+            RepositoryFactBinding.Verified repositoryFactBinding
+    ) throws IOException {
+        writeCompleted(workspaceRoot, workstreamId, nodeId, agent, session, promptTemplate, runId, runDir,
+                promptPath, stdoutPath, stderrPath, transcriptPath, result, runTimeline, usage, sessionMeta,
+                compactionMeta, agentResultAcquisition, repositoryFactBinding, null);
+    }
+
+    private static Map<String, Object> executionAuthority(ClaudeExecutionPolicy.Binding policy) {
+        return policy == null
+                ? Map.of("transportDisposition", "NETWORK_AUTHORITY_NOT_CONFIGURED")
+                : policy.metadata("POLICY_BOUND");
     }
 
     void appendExecutionEvent(Path runJsonPath, AcpxExecutionEvent event) {

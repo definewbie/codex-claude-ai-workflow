@@ -6,6 +6,7 @@ import dev.dual.core.execution.ProcessUsability;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AcpxAgentTransportTest {
@@ -183,6 +185,88 @@ class AcpxAgentTransportTest {
         assertTrue(invocation.contains("--no-terminal"));
         assertFalse(invocation.contains("sessions new"));
         assertFalse(invocation.contains("sessions ensure"));
+    }
+
+    @Test
+    void claudeSessionPromptAndCorrectionCarryTheSameVerifiedPolicyBinding() throws Exception {
+        var invocationLog = tempDir.resolve("policy-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-policy.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        var prompt = tempDir.resolve("policy-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir, "claude-policy", prompt,
+                tempDir.resolve("policy.stdout"), tempDir.resolve("policy.stderr"),
+                AcpxPermissionProfile.implement(), AcpxExecutionEventSink.NOOP, binding);
+
+        assertEquals(0, new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(request).exitCode());
+        assertEquals(0, new AcpxAgentTransport(fakeAcpx.toString())
+                .runAgentResultCorrection("claude", request).exitCode());
+
+        var lines = Files.readAllLines(invocationLog);
+        assertTrue(lines.size() >= 3, "ensure, prompt and correction must all be observed");
+        var policyBearingLines = lines.stream()
+                .filter(line -> line.contains(" sessions ") || line.contains(" -f "))
+                .toList();
+        for (var line : policyBearingLines) {
+            assertTrue(line.contains("--claude-execution-policy-ref " + binding.ref()), line);
+            assertTrue(line.contains("--claude-execution-policy-sha256 " + binding.sha256()), line);
+        }
+        assertTrue(policyBearingLines.stream().anyMatch(line -> line.contains("claude sessions ensure")), lines.toString());
+        assertTrue(policyBearingLines.stream().filter(line -> line.contains("claude -s claude-policy -f")).count() >= 2,
+                lines.toString());
+    }
+
+    @Test
+    void invalidPolicyBindingFailsBeforeAcpxInvocation() throws Exception {
+        var invocationLog = tempDir.resolve("invalid-policy-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-invalid-policy.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        Files.delete(tempDir.resolve(binding.ref()));
+        var prompt = tempDir.resolve("invalid-policy-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir, "claude-policy", prompt,
+                tempDir.resolve("invalid-policy.stdout"), tempDir.resolve("invalid-policy.stderr"),
+                AcpxPermissionProfile.implement(), AcpxExecutionEventSink.NOOP, binding);
+
+        assertThrows(IOException.class,
+                () -> new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(request));
+        assertFalse(Files.exists(invocationLog), "invalid policy must fail before any acpx side effect");
+    }
+
+    @Test
+    void policyBindingCannotBeSentToCodexOrApproveAllClaude() throws Exception {
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        var prompt = tempDir.resolve("wrong-owner-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        var codexRequest = new AcpxRunRequest(
+                tempDir, "codex-policy", prompt,
+                tempDir.resolve("codex-policy.stdout"), tempDir.resolve("codex-policy.stderr"),
+                AcpxPermissionProfile.review(), AcpxExecutionEventSink.NOOP, binding);
+        var approveAllRequest = new AcpxRunRequest(
+                tempDir, "claude-policy", prompt,
+                tempDir.resolve("approve-all.stdout"), tempDir.resolve("approve-all.stderr"),
+                AcpxPermissionProfile.fromName("", true), AcpxExecutionEventSink.NOOP, binding);
+        var transport = new AcpxAgentTransport(tempDir.resolve("never-called").toString());
+
+        assertThrows(IOException.class, () -> transport.runCodexDesignReview(codexRequest));
+        assertThrows(IOException.class, () -> transport.runClaudeDesign(approveAllRequest));
     }
 
     @Test

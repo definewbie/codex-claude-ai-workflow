@@ -150,7 +150,7 @@ dual-server
 - JDK 21+
 - Maven 3.9+
 - Git
-- acpx 0.11.0
+- Dual-reviewed acpx E1 fork（upstream 0.13.2）
 - Claude Code / Codex 对应的 acpx agent runtime 可用
 
 检查：
@@ -159,7 +159,8 @@ dual-server
 java -version
 mvn -version
 git --version
-acpx --version
+./scripts/install-acpx-e1.sh
+export DUAL_ACPX_EXECUTABLE="$PWD/.tools/acpx-e1/bin/acpx"
 ./scripts/configure-acpx.sh
 ```
 
@@ -416,7 +417,8 @@ acpx codex -s codex-reviewer -f <prompt_file>
 真实运行前必须固定 acpx 和 Claude/Codex ACP adapter：
 
 ```bash
-npm install -g acpx@0.11.0
+DUAL_NODE_BIN_DIR=/path/to/node-22.13-or-newer/bin ./scripts/install-acpx-e1.sh
+export DUAL_ACPX_EXECUTABLE="$PWD/.tools/acpx-e1/bin/acpx"
 ./scripts/configure-acpx.sh
 dualctl doctor --workdir /path/to/git/repo
 ```
@@ -424,7 +426,7 @@ dualctl doctor --workdir /path/to/git/repo
 `configure-acpx.sh` 会把 adapter command 写成固定版本，例如：
 
 ```text
-agents.claude.command = scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.46.0
+agents.claude.command = scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0
 agents.codex.command = npx -y @zed-industries/codex-acp@0.16.0
 ```
 
@@ -1590,7 +1592,8 @@ acpx --version
 如果没有输出，需要先安装或修正 PATH。当前推荐固定版本：
 
 ```bash
-npm install -g acpx@0.11.0
+DUAL_NODE_BIN_DIR=/path/to/node-22.13-or-newer/bin ./scripts/install-acpx-e1.sh
+export DUAL_ACPX_EXECUTABLE="$PWD/.tools/acpx-e1/bin/acpx"
 ./scripts/configure-acpx.sh
 ```
 

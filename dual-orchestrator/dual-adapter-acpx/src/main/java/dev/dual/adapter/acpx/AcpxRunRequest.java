@@ -9,7 +9,8 @@ public record AcpxRunRequest(
         Path stdoutPath,
         Path stderrPath,
         AcpxPermissionProfile permissionProfile,
-        AcpxExecutionEventSink executionEventSink
+        AcpxExecutionEventSink executionEventSink,
+        ClaudeExecutionPolicy.Binding claudeExecutionPolicy
 ) {
     public AcpxRunRequest(
             Path workdir,
@@ -19,7 +20,21 @@ public record AcpxRunRequest(
             Path stderrPath,
             AcpxPermissionProfile permissionProfile
     ) {
-        this(workdir, sessionName, promptPath, stdoutPath, stderrPath, permissionProfile, AcpxExecutionEventSink.NOOP);
+        this(workdir, sessionName, promptPath, stdoutPath, stderrPath, permissionProfile,
+                AcpxExecutionEventSink.NOOP, null);
+    }
+
+    public AcpxRunRequest(
+            Path workdir,
+            String sessionName,
+            Path promptPath,
+            Path stdoutPath,
+            Path stderrPath,
+            AcpxPermissionProfile permissionProfile,
+            AcpxExecutionEventSink executionEventSink
+    ) {
+        this(workdir, sessionName, promptPath, stdoutPath, stderrPath, permissionProfile,
+                executionEventSink, null);
     }
 
     public AcpxRunRequest {

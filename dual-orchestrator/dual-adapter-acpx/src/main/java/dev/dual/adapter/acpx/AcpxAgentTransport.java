@@ -37,6 +37,7 @@ public class AcpxAgentTransport {
     private static final String QUEUE_TTL_ENV = "DUAL_ACPX_QUEUE_TTL_SECONDS";
     private static final String SESSION_COMMAND_TIMEOUT_ENV = "DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS";
     private static final String API_TIMEOUT_MS_ENV = "API_TIMEOUT_MS";
+    private static final String ACPX_EXECUTABLE_ENV = "DUAL_ACPX_EXECUTABLE";
 
     private final String acpxExecutable;
     private final Duration recoverableSignalGrace;
@@ -45,7 +46,7 @@ public class AcpxAgentTransport {
     private final Duration queueTtl;
 
     public AcpxAgentTransport() {
-        this("acpx", "claude");
+        this(configuredAcpxExecutable(), "claude");
     }
 
     AcpxAgentTransport(String acpxExecutable) {
@@ -113,6 +114,11 @@ public class AcpxAgentTransport {
         this.agentProgressTimeout = agentProgressTimeout;
         this.sessionCommandTimeout = sessionCommandTimeout;
         this.queueTtl = configuredQueueTtl();
+    }
+
+    private static String configuredAcpxExecutable() {
+        var configured = System.getenv(ACPX_EXECUTABLE_ENV);
+        return configured == null || configured.isBlank() ? "acpx" : configured.trim();
     }
 
     public boolean isAvailable(Path workdir) {
@@ -191,6 +197,7 @@ public class AcpxAgentTransport {
         command.add("--ttl");
         command.add(Long.toString(queueTtl.toSeconds()));
         addPermissionArguments(command, request);
+        addExecutionPolicyArguments(command, agent, request);
         command.add(agent);
         command.add("-s");
         command.add(request.sessionName());
@@ -399,6 +406,31 @@ public class AcpxAgentTransport {
         }
     }
 
+    private void addExecutionPolicyArguments(
+            ArrayList<String> command,
+            String agent,
+            AcpxRunRequest request
+    ) throws IOException {
+        var binding = request.claudeExecutionPolicy();
+        if (!"claude".equals(agent)) {
+            if (binding != null) {
+                throw new IOException("Claude execution policy cannot be used by agent " + agent);
+            }
+            return;
+        }
+        if (binding == null) {
+            return;
+        }
+        if (request.approveAll()) {
+            throw new IOException("NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+        }
+        binding.verify(request.workdir());
+        command.add("--claude-execution-policy-ref");
+        command.add(binding.ref());
+        command.add("--claude-execution-policy-sha256");
+        command.add(binding.sha256());
+    }
+
     private void recordEvent(List<AcpxExecutionEvent> timeline, AcpxRunRequest request, AcpxExecutionEvent event) {
         timeline.add(event);
         try {
@@ -471,7 +503,8 @@ public class AcpxAgentTransport {
         return Map.copyOf(details);
     }
 
-    private SessionCommandResult ensureSession(String agent, AcpxRunRequest request) throws InterruptedException {
+    private SessionCommandResult ensureSession(String agent, AcpxRunRequest request)
+            throws IOException, InterruptedException {
         var command = new ArrayList<String>();
         command.add(acpxExecutable);
         // Both `sessions new` and the idempotent `sessions ensure` carry the current
@@ -479,6 +512,7 @@ public class AcpxAgentTransport {
         // fresh session is created (createClient); an existing persistent record is
         // returned unchanged on reuse, so reusing a session never alters its policy.
         addPermissionArguments(command, request);
+        addExecutionPolicyArguments(command, agent, request);
         command.add(agent);
         command.add("sessions");
         command.add(request.permissionProfile().requiresFreshSession() ? "new" : "ensure");
@@ -498,7 +532,8 @@ public class AcpxAgentTransport {
         return result;
     }
 
-    private SessionCommandResult rebuildSession(String agent, AcpxRunRequest request) throws InterruptedException {
+    private SessionCommandResult rebuildSession(String agent, AcpxRunRequest request)
+            throws IOException, InterruptedException {
         closeSession(agent, request);
         return ensureSession(agent, request);
     }

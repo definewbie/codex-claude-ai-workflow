@@ -11,7 +11,7 @@
 #
 # 作用：
 # 1. 读取 ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json 的 env 字段。
-# 2. 将这些键值 export 到当前进程环境。
+# 2. 只导出固定的 provider 连接 allowlist，不转发 proxy 或任意用户变量。
 # 3. exec 传入的 pinned Claude ACP adapter 命令。
 #
 # 参数：
@@ -37,10 +37,10 @@ load_claude_settings_env() {
   [[ -f "$CLAUDE_SETTINGS_PATH" ]] || return 0
   command -v node >/dev/null 2>&1 || fail "node is required to read $CLAUDE_SETTINGS_PATH"
 
-  # 用 Node 生成 shell-safe export 语句。只允许常规环境变量名，避免 settings
-  # 文件中的异常 key 进入 shell eval 边界。
-  eval "$(
-    node - "$CLAUDE_SETTINGS_PATH" <<'NODE'
+  # 固定 allowlist 是 adapter 连接输入，不是通用 settings passthrough。
+  while IFS= read -r -d '' key && IFS= read -r -d '' value; do
+    export "$key=$value"
+  done < <(node - "$CLAUDE_SETTINGS_PATH" <<'NODE'
 const fs = require("fs");
 const path = process.argv[2];
 let root = {};
@@ -50,20 +50,31 @@ try {
   process.exit(0);
 }
 const env = root && typeof root.env === "object" && !Array.isArray(root.env) ? root.env : {};
+const allowed = new Set([
+  "ANTHROPIC_BASE_URL",
+  "ANTHROPIC_AUTH_TOKEN",
+  "ANTHROPIC_API_KEY",
+  "ANTHROPIC_MODEL",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+  "CLAUDE_CODE_MODEL",
+]);
 for (const [key, value] of Object.entries(env)) {
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+  if (!allowed.has(key)) {
     continue;
   }
   if (value === null || value === undefined) {
     continue;
   }
-  process.stdout.write(`export ${key}=${JSON.stringify(String(value))}\n`);
+  process.stdout.write(`${key}\0${String(value)}\0`);
 }
 NODE
-  )"
+  )
 }
 
 main() {
+  unset ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY all_proxy http_proxy https_proxy no_proxy
   load_claude_settings_env
   if [[ "$#" -gt 0 ]]; then
     exec "$@"

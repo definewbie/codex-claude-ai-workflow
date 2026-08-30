@@ -145,6 +145,19 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         }
         var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
         var effectivePermissionProfile = permissionProfile(context);
+        var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
+        if (e1Enabled && effectivePermissionProfile.approveAll()) {
+            throw new IllegalStateException(
+                    "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+        }
+        var executionPolicy = e1Enabled
+                ? ClaudeExecutionPolicy.write(
+                        context.workspaceRoot(),
+                        context.workstreamId(),
+                        context.instance().nodeInstanceId(),
+                        runId,
+                        runDir)
+                : null;
         var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
                 context.workspaceRoot(),
                 context.workstreamId(),
@@ -182,7 +195,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     transcriptPath,
                     stderrPath,
                     sessionMeta,
-                    compactionMeta
+                    compactionMeta,
+                    executionPolicy
             );
             return NodeResult.completed("completed", List.of(
                     context.workspaceRoot().relativize(promptPath).toString(),
@@ -211,7 +225,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 transcriptPath,
                 stderrPath,
                 sessionMeta,
-                compactionMeta
+                compactionMeta,
+                executionPolicy
         );
         var request = new AcpxRunRequest(
                 context.workspaceRoot(),
@@ -220,7 +235,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 transcriptPath,
                 stderrPath,
                 effectivePermissionProfile,
-                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
+                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+                executionPolicy
         );
         var correctionRequest = new AcpxRunRequest(
                 context.workspaceRoot(),
@@ -229,7 +245,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 correctionTranscriptPath,
                 correctionStderrPath,
                 AcpxPermissionProfile.contractCorrection(),
-                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event)
+                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+                executionPolicy
         );
         var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
                 context.workspaceRoot(),
@@ -304,7 +321,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     sessionMeta,
                     compactionMeta,
                     acquisitionDocument,
-                    governanceContext.repositoryFactBinding()
+                    governanceContext.repositoryFactBinding(),
+                    executionPolicy
             );
             return authoritySnapshot.enforce(NodeResult.completed(
                     "completed",
@@ -525,6 +543,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         // compatibility for old definitions that do not declare a profile.
         var resolved = AcpxPermissionProfile.fromName(profile, profile.isBlank() && approveAll(context));
         return hasApprovedPublicWebSearch(context) ? resolved.withAutoApprovedTool("WebSearch") : resolved;
+    }
+
+    private static boolean hasNamedPermissionProfile(TaskContext context) {
+        var value = context.definition().config().get("permission_profile");
+        return value instanceof String text && !text.isBlank();
     }
 
     private static boolean hasApprovedPublicWebSearch(TaskContext context) {

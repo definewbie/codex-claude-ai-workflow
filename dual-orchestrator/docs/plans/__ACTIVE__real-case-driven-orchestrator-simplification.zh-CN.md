@@ -27,7 +27,7 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: OKX FRESH REAL-CASE PREFLIGHT
+## Current Active Step: E1 CONTROLLED NETWORK ACCESS + MINI-B
 
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
@@ -152,9 +152,48 @@ D2-B 已选择性提交为 `fdd8a49b`，工作树恢复 clean。D1/D2-A/D2-B 至
 deterministic enforcement，下一主线是制定一次自然 real-case Verification Gate 证明 accepted candidate、
 completion evidence 与多端 projection 的端到端价值。
 
-E1 total Bash/subprocess network authority 定位为 `IMPORTANT / NOT URGENT SECURITY TODO / NOT MODELED`，
-不再是下一次 real-case 的 blocker。仅在运行陌生仓库、敏感代码/凭据、无人值守或共享
-worker、自然未授权访网 incident，或 provider sandbox 能力使实施成本显著下降时重开。
+E1 原定位为 `IMPORTANT / NOT URGENT SECURITY TODO / NOT MODELED`。OKX fresh real-case
+`ws-20260829T122452Z-9BZG` 已自然触发 revisit 条件：implement retry 的 ACP stream 对 Bash/curl 产生
+permission request，但 `autoApprove execute` 自动选择 `allow`；随后 npm registry 下载成功，且 tarball 被错误保存为
+`klinecharts.min.js`。operator 已中断 run、执行 stale recovery 并关闭 persistent session，workstream 保留在
+`WAITING_FOR_RECOVERY`，不得直接 retry。
+
+该 incident 证明“受控网络入口”与“Agent tool 子进程默认禁网”必须合并：A 单独存在时仍可被 Bash 绕过。
+实施计划已写入
+`docs/plans/e1-controlled-network-access-and-agent-egress-enforcement-plan-20260829.zh-CN.md`，当前成熟度为
+`NATURAL INCIDENT PROVEN / ENFORCEMENT NOT IMPLEMENTED`。下一步仅允许独立架构评审该计划；评审 PASS 后先做
+frozen adapter capability proof，proof PASS 才实施 A + mini-B 原子 checkpoint。评审与 deterministic enforcement
+完成前不恢复 OKX workstream、不创建第二样本。
+
+E1 首轮独立架构评审为 `WARN（P0=0 / P1=2 / P2=6）`。总体设计与 A+mini-B 原子性成立，但 capability proof
+漏了两个会改变 enforcement 声明的边界：generated sandbox 下既有 WebSearch 必须继续可用而 WebFetch 仍拒绝；网络
+sandbox 不能静默破坏 worktree/`/tmp` scratch 的常规 filesystem 语义。计划 delta 已补齐两项 P1，并将 loopback/LAN、
+IP/DNS、proxy env、legacy approveAll 与 scheduler manual-only 纳入 proof/cannot-bypass 矩阵；同时修正 incident 工件事实：
+当前 vendored 文件已被 run 内解压为正确 min.js，但来源未经授权，需要 provenance 处置而不是按 `.tgz` 删除。当前等待一次
+独立 delta 复审；PASS 前不做 capability probe、不改 production、不恢复 workstream。
+
+E1 delta 复审已 `PASS / READY（P0=0 / P1=0 / P2=2）`，确认上轮 8 项 finding 全部由 proof 问题、测试断言与
+FAIL 门真实关闭。P2 已随执行吸收：incident permission request 数修正为 4/4；capability proof 的命令、原始输出 SHA、
+逐问题结论和 residual 统一落在
+`docs/testing/capability-proofs/20260829-e1-claude-tool-egress-capability-proof/`。non-provider capability proof 已执行并判定 `FAIL`：Claude SDK/adapter 支持 session-bound sandbox options，但 frozen `acpx@0.11.0` 没有把 `settings/managedSettings/sandbox` 传入 `session/new._meta` 的入口，且现有 wrapper 尚未分离 provider env 与 tool subprocess env。按 stop-loss 未启动真实 Claude tool turn、未改 production、未恢复 OKX workstream。
+
+E1 policy transport bounded comparison 已经独立评审 `PASS（P0=0 / P1=0 / P2=3）`，确认 frozen client 白名单缺口真实、候选 A 最小且不存在可行 settings 文件替代。三项 P2 已写回：拒绝 `CLAUDE_CONFIG_DIR + user settings` 与宿主 managed-settings；env 分层明确依赖 wrapper 收窄和 managed deny；fork 采用 exact source commit/patch/manifest/独立 review。
+
+实施级 reflection 进一步确认：当前 adapter 0.46 固定 Claude Code 2.1.178，早于 credential env deny 与 strict allowlist 的能力版本；只补 acpx 仍会让 provider secret 暴露给 Bash ambient env，不能进入生产。新的最小计划为 `docs/plans/e1-policy-transport-checkpoint-implementation-plan-20260829.zh-CN.md`：固定 acpx source patch + adapter 0.70/SDK 0.3.232 capability baseline，仅证明 fixed policy transport，不实现 network approval。当前只允许独立评审该计划；PASS 前零 production/provider/real-case。不得扩张为通用 adapter/settings 平台，也不得以 target settings、Bash parser 或直接 provider probe 绕过该缺口。
+
+E1 policy transport 实施计划独立评审已 `PASS / READY（P0=0 / P1=0）`。三项 P2 已写回：修正
+upstream parser 路径；明确 adapter ambient env、wrapper provider allowlist、policy credential deny 与真实 Bash env
+四层断言；枚举固定 provider env allowlist。按计划 stop-point，当前只完成 acpx fork checkpoint：固定
+`v0.13.2@fd173f04`，生成 patch SHA
+`304577dc136c87b055b5873b0562929cd5c16b1b0d18321e27f851209b3ab811` 与 manifest；focused
+`147/0/0/0`，合规 Node 24 下 upstream full suite `972/0/0/0`，build/lint/format/diff-check 全部 PASS。
+结果见 `docs/plans/e1-policy-transport-acpx-fork-checkpoint-result-20260829.zh-CN.md`。当前只允许独立 review
+fork patch；PASS 前不得接线 Dual、调用 provider、恢复 OKX workstream或创建第二样本。
+
+fork 独立 diff review 为 `WARN（P0=0 / P1=1 / P2=3）`，确认 fixed-policy 输入、真实 `_meta` 消费、session
+binding 与成熟度边界成立。阻塞项已关闭：manifest repository 修正为公开权威 `openclaw/acpx`；同时补 tag object、
+npm tarball SHA，并将 queue-owner 半绑定从静默跳过收紧为立即拒绝，delta focused `89/0/0/0`。当前允许进入
+Dual fake tests -> installer -> policy writer -> transport binding；仍不得调用 provider 或恢复 real-case。
 
 下一次 generalization real-case 已选定 fresh 项目 `okx-btc-k-line-demo`，目标路径为
 `/Users/kriswang/work/projects/ai/okx-btc-k-line-demo`。需求是使用 Java 25、Spring Boot 4.1.0、
@@ -1812,3 +1851,24 @@ module 或新的 provider real-case。
 覆盖 10 个 prompt、`AgentResultPromptContract` 和已有 validators；随后只选择一个有
 deterministic owner 的删除 checkpoint。A8 deterministic self-test replacement、small
 profile 和 R1 crash protocol 均需各自独立 Gate，不混成一次改造。
+
+## 2026-08-30 E1 Policy Transport Checkpoint
+
+OKX real-case 暴露的通用 execution-policy transport 缺口已完成 deterministic 实施：
+
+- acpx fork 固定于 upstream `fd173f04...`，reviewed patch SHA 为 `304577dc...`；manifest 已修正
+  权威仓库 URL，并新增 annotated tag object 与 npm tarball SHA；
+- installer 使用 Node >=22.13 复跑 upstream `973/0/0/0`，build identity 与 audit evidence 落盘；
+- Dual 对 named-profile Claude occurrence 生成固定 policy，ensure/new/prompt/correction 绑定同一 ref/SHA，
+  删除、篡改、越界或 lineage 漂移在 provider side effect 前拒绝；
+- legacy `approve_all` 保持可运行，但 `run.json.executionAuthority` 明确为
+  `NETWORK_AUTHORITY_NOT_CONFIGURED`，不继承 E1 成熟度；
+- wrapper 收窄为固定 provider env allowlist，Doctor/configure 对 fork identity fail closed；
+- Dual full reactor `1294/0/0/0`，fork `973/0/0/0`，shell tests 与 `git diff --check` clean。
+
+成熟度仅为 `E1 POLICY TRANSPORT ENFORCED / SANDBOX EFFECT NOT PROVEN`。独立 Dual diff review 已
+`PASS（P0=0 / P1=0 / P2=4 知会）`，并独立复现 focused `95/0/0`、full reactor
+`1294/0/0/0`、fork installer `973/0/0/0` 与 clean diff-check。四项 P2 已登记为 capability proof
+输入：system tmpdir scratch 语义、official acpx 参数硬失败、ignored installer audit 与 operator-trusted
+`DUAL_ACPX_EXECUTABLE`。当前 active step 仅为离线 capability proof Q1-Q3；Q4-Q15、provider、旧 OKX
+workstream resume 与新 real-case 均未授权。

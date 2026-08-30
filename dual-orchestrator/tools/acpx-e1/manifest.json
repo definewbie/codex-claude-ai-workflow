@@ -1,0 +1,13 @@
+{
+  "schema_version": "acpx_e1_patch_manifest.v1",
+  "upstream_repository": "https://github.com/openclaw/acpx.git",
+  "upstream_tag": "v0.13.2",
+  "upstream_tag_object": "a5db336c1f886fb722b6ba5a4a9898181fe1a92a",
+  "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+  "upstream_npm_tarball_sha256": "b483b20ea1db5ffdeb0eb2e3105283ffda0b88ccf37e034d500522aaeef8d12b",
+  "patch_ref": "patches/acpx-v0.13.2-e1-policy-transport.patch",
+  "patch_sha256": "304577dc136c87b055b5873b0562929cd5c16b1b0d18321e27f851209b3ab811",
+  "policy_schema": "claude_execution_policy.v1",
+  "claude_agent_acp_version": "0.70.0",
+  "build_identity_command": "acpx build-info --json"
+}

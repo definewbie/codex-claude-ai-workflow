@@ -45,6 +45,7 @@ record AgentRunDocument(
         Map<String, Object> providerModelIdentity,
         AcpxToolUsage toolUsage,
         String contextGovernanceActualReportPath,
+        Map<String, Object> executionAuthority,
         Map<String, Object> processResult,
         List<Map<String, Object>> adapterSignals,
         Map<String, Object> agentResultContract,

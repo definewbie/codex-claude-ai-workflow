@@ -1,0 +1,42 @@
+$ git rev-parse HEAD
+f1c4e9255d2f59db1091a0a3b5c86fa98e2c0c44
+
+$ acpx --version
+0.11.0
+
+$ <bundled-claude> --version
+2.1.178 (Claude Code)
+
+$ sw_vers
+ProductName: macOS
+ProductVersion: 15.6.1
+BuildVersion: 24G90
+
+$ uname -m
+arm64
+
+$ npm view acpx version dist-tags --json
+{"version":"0.13.2","dist-tags":{"latest":"0.13.2"}}
+
+$ npm view @agentclientprotocol/claude-agent-acp version dist-tags --json
+{"version":"0.70.0","dist-tags":{"latest":"0.70.0"}}
+
+$ inspect acpx@0.11.0 buildClaudeCodeOptionsMeta/assignClaudeCodeOptions
+settingSources=["project","local"]
+forwarded=model,allowedTools,maxTurns,systemPrompt
+forwarded_not_present=settings,managedSettings,sandbox
+
+$ inspect acpx@0.13.2 buildClaudeCodeOptionsMeta/assignClaudeCodeOptions
+settingSources=["project","local"]
+forwarded=model,allowedTools,maxTurns,systemPrompt,env
+forwarded_not_present=settings,managedSettings,sandbox
+
+$ inspect claude-agent-acp@0.46.0
+userProvidedOptions=sessionMeta?.claudeCode?.options
+userProvidedOptions spread into Claude Agent SDK options
+
+$ inspect dual-orchestrator/scripts/acpx-claude-agent-env.sh
+reads=${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json
+exports=every valid-name entry from settings.env
+secret_values_recorded=false
+

@@ -1,0 +1,23 @@
+captured_at=2026-08-29
+dual_head=f1c4e9255d2f59db1091a0a3b5c86fa98e2c0c44
+acpx_version=0.11.0
+claude_agent_acp_version=0.46.0
+claude_agent_sdk_version=0.3.178
+claude_code_version=2.1.178
+macos_version=15.6.1
+macos_build=24G90
+architecture=arm64
+result=FAIL
+provider_called=false
+production_modified=false
+
+b54a0013d3da299877e4d40cb424b112f6139c9228961383f81010dd05e02d28  proof/non-provider-output.txt
+c5b6234127aa30d965bd6a56e8717598754279f1a9cf4c7fd4f0c1b36dceee99  acpx-0.11.0/package.json
+85fdd3fb1e8bfec5477089430fd8b04d825083a2ab79becfb542f164375e0400  acpx-0.11.0/dist/cli.js
+59c11783aaf885b9b5fb7f84940a2c346291fe0997828a6933b8bbc4559eb0f1  acpx-0.11.0/dist/live-checkpoint-BZrk9Mjz.js
+71fa901a0f8e1717a7024e4c9c7f368bfd186a25e2e52f4e2938b513c46553bf  claude-agent-acp-0.46.0/package.json
+07c2ae237b220b0202340ab056fcfc7008586a383ceb0fa1a1c16e24ac55e806  claude-agent-acp-0.46.0/dist/acp-agent.js
+d406f3bd1486faee4b24ac9c83f7565cc4f3f9cd53f066d7b28a51c358c7a2ea  claude-agent-sdk-0.3.178/package.json
+b25c80aaebf770499a92208893189c38d396d7b239f04f2ff3921a948b209497  claude-agent-sdk-0.3.178/sdk.d.ts
+473495d0c15d6616cd0870480db5eb8aa0402fe4f8ead3277a1b521e94110309  claude-code-2.1.178/darwin-arm64/claude
+26ef54faba63b3db01e2716cf301fab79f64741134c7f2e8a638f5dcc2be836a  dual/scripts/acpx-claude-agent-env.sh

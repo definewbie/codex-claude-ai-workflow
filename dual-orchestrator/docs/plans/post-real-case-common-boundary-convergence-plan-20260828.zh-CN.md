@@ -224,11 +224,18 @@ CLI `DeliveryMergeCommand` 与 server `DeliveryViewService` 当前各自实现 p
 
 ## 6. Checkpoint E1：External Execution Authority
 
-**优先级决策（2026-08-29）：`IMPORTANT / NOT URGENT SECURITY TODO`。**
+**优先级决策（2026-08-29 incident delta）：`P0 REAL-CASE BLOCKER / REOPENED`。**
 
-E1 解决的是模型通过 Bash 及子进程绕过 exact WebSearch human authority 的运行安全问题，
-不是当前 workflow 状态、artifact lineage、delivery authority 或 real-case 完成性缺口。在个人、
-可信仓库、无敏感凭据且有人值守的现有运行模式下，暂缓实施的短期风险可接受。
+E1 解决的是模型通过 Bash 及子进程绕过 exact WebSearch human authority 的运行安全问题。
+此前在个人、可信仓库、无敏感凭据且有人值守的模式下被暂缓；OKX fresh real-case
+`ws-20260829T122452Z-9BZG` 已自然触发未授权 Bash/curl：ACP 发出 permission request，但
+`autoApprove execute` 自动选择 `allow`，随后从 npm registry 下载了错误落盘为 `.js` 的 tarball。
+operator 已 stop-loss，workstream 当前停在 recovery。因此 revisit trigger 4 已满足，E1 现在同时是当前
+real-case 的执行 blocker。
+
+后续按 `docs/plans/e1-controlled-network-access-and-agent-egress-enforcement-plan-20260829.zh-CN.md`
+实施 `Controlled Network Access + mini-B`。两者不可拆分：只增加批准入口而不阻断 Bash 绕过，不能达到
+`ENFORCED`。
 
 仅以下任一条成立时重开 E1：
 

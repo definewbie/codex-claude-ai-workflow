@@ -23,15 +23,18 @@ Use pinned adapter versions for real runs. `acpx` may otherwise resolve
 floating Claude/Codex ACP adapters and change behavior between runs:
 
 ```bash
-npm install -g acpx@0.11.0
+DUAL_NODE_BIN_DIR=/path/to/node-22.13-or-newer/bin ./scripts/install-acpx-e1.sh
+export DUAL_ACPX_EXECUTABLE="$PWD/.tools/acpx-e1/bin/acpx"
 ./scripts/configure-acpx.sh
 ```
 
 If your Claude Code uses a third-party Anthropic-compatible backend such as
 GLM, DeepSeek, one-api, or claude-code-router, keep the provider variables in
 `~/.claude/settings.json` under `env`. `configure-acpx.sh` installs a small
-Claude adapter wrapper that reads those variables at runtime, so secrets are not
-written into `~/.acpx/config.json`.
+Claude adapter wrapper that reads only the fixed Anthropic provider allowlist at
+runtime, so secrets are not written into `~/.acpx/config.json`. The patched
+transport binding is enforced deterministically; real sandbox/network behavior
+remains unproven until its separate capability gate passes.
 
 ## 2. Install
 

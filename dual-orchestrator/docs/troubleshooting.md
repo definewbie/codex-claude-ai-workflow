@@ -37,7 +37,8 @@ dualctl doctor --workdir /path/to/repo
 Fix:
 
 ```bash
-npm install -g acpx@0.11.0
+DUAL_NODE_BIN_DIR=/path/to/node-22.13-or-newer/bin ./scripts/install-acpx-e1.sh
+export DUAL_ACPX_EXECUTABLE="$PWD/.tools/acpx-e1/bin/acpx"
 ./scripts/configure-acpx.sh
 ```
 

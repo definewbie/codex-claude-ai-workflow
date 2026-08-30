@@ -77,7 +77,8 @@ class AcpxAgentTaskHandlerTest {
         var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
-                "prompt_template", "design-claude"
+                "prompt_template", "design-claude",
+                "permission_profile", "review"
         ));
         var instance = new NodeInstance(
                 "node-design",
@@ -659,6 +660,8 @@ class AcpxAgentTaskHandlerTest {
                 "writePrepared must not write a terminal executionOutcome");
         assertTrue(prepared.path("failureReason").isMissingNode() || prepared.path("failureReason").isNull(),
                 "writePrepared must not write a terminal failureReason");
+        assertEquals("NETWORK_AUTHORITY_NOT_CONFIGURED",
+                prepared.path("executionAuthority").path("transportDisposition").asText());
 
         writer.appendExecutionEvent(
                 runDir.resolve("run.json"),
@@ -1203,7 +1206,8 @@ class AcpxAgentTaskHandlerTest {
         var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
-                "prompt_template", "design-claude"
+                "prompt_template", "design-claude",
+                "permission_profile", "review"
         ));
         var instance = new NodeInstance(
                 "node-design",
@@ -1233,6 +1237,15 @@ class AcpxAgentTaskHandlerTest {
         var result = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result() + " / " + result.errorMessage());
+        try (var paths = Files.walk(workstreamDir.resolve("runs"))) {
+            var runJson = paths.filter(path -> path.getFileName().toString().equals("run.json"))
+                    .findFirst().orElseThrow();
+            var run = OBJECT_MAPPER.readTree(runJson.toFile());
+            assertEquals("POLICY_BOUND",
+                    run.path("executionAuthority").path("transportDisposition").asText());
+            assertEquals(ClaudeExecutionPolicy.SCHEMA,
+                    run.path("executionAuthority").path("schema").asText());
+        }
         assertEquals("completed", result.outcome());
         assertEquals(5, result.result().get("exit_code"));
         assertEquals("EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT", result.result().get("process_usability"));
@@ -1910,6 +1923,9 @@ class AcpxAgentTaskHandlerTest {
     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            assertTrue(request.claudeExecutionPolicy() != null,
+                    "every Claude execution occurrence must carry an E1 policy binding");
+            request.claudeExecutionPolicy().verify(request.workdir());
             Files.createDirectories(request.stdoutPath().getParent());
             Files.writeString(request.stdoutPath(), """
                     ## Requirement Restatement

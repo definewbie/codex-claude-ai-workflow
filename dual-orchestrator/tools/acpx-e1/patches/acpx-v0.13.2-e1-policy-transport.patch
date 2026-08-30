@@ -1,0 +1,1336 @@
+diff --git a/src/acp/agent-command.ts b/src/acp/agent-command.ts
+index 8732833..5d8a812 100644
+--- a/src/acp/agent-command.ts
++++ b/src/acp/agent-command.ts
+@@ -6,6 +6,7 @@ import {
+   resolveWindowsExecutablePath,
+ } from "../spawn-command-options.js";
+ import { type AcpClientOptions } from "../types.js";
++import { loadClaudeExecutionPolicy } from "./claude-execution-policy.js";
+ import { basenameToken, splitCommandLine } from "./client-process.js";
+ 
+ const DEFAULT_AGENT_CLOSE_AFTER_STDIN_END_MS = 100;
+@@ -299,14 +300,16 @@ export async function ensureCopilotAcpSupport(command: string): Promise<void> {
+ 
+ export function buildClaudeCodeOptionsMeta(
+   options: AcpClientOptions["sessionOptions"],
+-  isolateUserSettings = false,
++  claudeAcp = false,
++  cwd = process.cwd(),
+ ): Record<string, unknown> | undefined {
+   const claudeCodeOptions: Record<string, unknown> = {};
+-  if (isolateUserSettings) {
++  if (claudeAcp) {
+     claudeCodeOptions.settingSources = resolveClaudeCodeSettingSources();
+   }
+   if (options) {
+     assignClaudeCodeOptions(claudeCodeOptions, options);
++    assignClaudeExecutionPolicyOptions(claudeCodeOptions, options, claudeAcp, cwd);
+   }
+ 
+   const meta: Record<string, unknown> = {};
+@@ -323,6 +326,27 @@ export function buildClaudeCodeOptionsMeta(
+   return meta;
+ }
+ 
++function assignClaudeExecutionPolicyOptions(
++  target: Record<string, unknown>,
++  options: NonNullable<AcpClientOptions["sessionOptions"]>,
++  claudeAcp: boolean,
++  cwd: string,
++): void {
++  const ref = options.claudeExecutionPolicyRef;
++  const sha256 = options.claudeExecutionPolicySha256;
++  if (ref === undefined && sha256 === undefined) {
++    return;
++  }
++  if (!claudeAcp) {
++    throw new Error("claude execution policy is only supported by claude-agent-acp");
++  }
++  if (!ref || !sha256) {
++    throw new Error("claude execution policy ref and SHA-256 must be provided together");
++  }
++  const policy = loadClaudeExecutionPolicy(cwd, { ref, sha256 });
++  Object.assign(target, policy);
++}
++
+ export function resolveClaudeCodeSettingSources(env: NodeJS.ProcessEnv = process.env): string[] {
+   if (env.ACPX_CLAUDE_INCLUDE_USER_SETTINGS?.trim() === "1") {
+     return ["user", ...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
+diff --git a/src/acp/claude-execution-policy.ts b/src/acp/claude-execution-policy.ts
+new file mode 100644
+index 0000000..40b6a29
+--- /dev/null
++++ b/src/acp/claude-execution-policy.ts
+@@ -0,0 +1,359 @@
++import { createHash } from "node:crypto";
++import fs from "node:fs";
++import path from "node:path";
++
++export const CLAUDE_EXECUTION_POLICY_SCHEMA = "claude_execution_policy.v1";
++
++const POLICY_KEYS = new Set([
++  "schema_version",
++  "workstream_id",
++  "node_instance_id",
++  "run_id",
++  "setting_sources",
++  "sandbox",
++  "subprocess_denied_env_names",
++  "generated_at",
++]);
++const SANDBOX_KEYS = new Set([
++  "enabled",
++  "fail_if_unavailable",
++  "allow_unsandboxed_commands",
++  "auto_allow_sandboxed_bash",
++  "network",
++  "filesystem",
++]);
++const NETWORK_KEYS = new Set([
++  "strict_allowlist",
++  "allowed_domains",
++  "allow_local_binding",
++  "allow_unix_sockets",
++]);
++const FILESYSTEM_KEYS = new Set(["allow_read", "allow_write", "deny_read", "deny_write"]);
++const REQUIRED_DENIED_ENV_NAMES = [
++  "ALL_PROXY",
++  "ANTHROPIC_API_KEY",
++  "ANTHROPIC_AUTH_TOKEN",
++  "ANTHROPIC_BASE_URL",
++  "HTTP_PROXY",
++  "HTTPS_PROXY",
++  "NO_PROXY",
++  "all_proxy",
++  "http_proxy",
++  "https_proxy",
++  "no_proxy",
++] as const;
++const DOMAIN_PATTERN = /^(?:\*\.)?[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
++const SHA256_PATTERN = /^[a-f0-9]{64}$/;
++const SECRET_LIKE_PATTERN =
++  /(?:bearer\s+|sk-[a-z0-9]|ghp_[a-z0-9]|-----begin [^-]*private key-----)/i;
++
++type JsonObject = Record<string, unknown>;
++
++export type ClaudeExecutionPolicyBinding = {
++  ref: string;
++  sha256: string;
++};
++
++export type ClaudeExecutionPolicyOptions = {
++  settingSources: [];
++  sandbox: JsonObject;
++  managedSettings: { sandbox: JsonObject };
++};
++
++export function loadClaudeExecutionPolicy(
++  cwd: string,
++  binding: ClaudeExecutionPolicyBinding,
++): ClaudeExecutionPolicyOptions {
++  const policyPath = resolvePolicyPath(cwd, binding.ref);
++  const bytes = fs.readFileSync(policyPath);
++  const actualSha = createHash("sha256").update(bytes).digest("hex");
++  if (!SHA256_PATTERN.test(binding.sha256) || actualSha !== binding.sha256) {
++    throw new Error("claude execution policy SHA-256 mismatch");
++  }
++
++  const raw = bytes.toString("utf8");
++  assertNoDuplicateObjectKeys(raw);
++  const parsed = JSON.parse(raw) as unknown;
++  const policy = requireObject(parsed, "claude execution policy");
++  assertExactKeys(policy, POLICY_KEYS, "claude execution policy");
++  assertText(policy, "schema_version", CLAUDE_EXECUTION_POLICY_SCHEMA);
++  assertIdentifier(policy, "workstream_id");
++  assertIdentifier(policy, "node_instance_id");
++  assertIdentifier(policy, "run_id");
++  assertEmptyArray(policy.setting_sources, "setting_sources");
++  assertGeneratedAt(policy.generated_at);
++
++  const sdkSandbox = validatedSandboxOptions(policy.sandbox);
++  assertDeniedEnvironment(policy.subprocess_denied_env_names);
++  if (containsSecretLikeValue(policy)) {
++    throw new Error("claude execution policy contains a secret-like value");
++  }
++  return {
++    settingSources: [],
++    sandbox: sdkSandbox,
++    managedSettings: { sandbox: sdkSandbox },
++  };
++}
++
++function validatedSandboxOptions(value: unknown): JsonObject {
++  const sandbox = requireObject(value, "sandbox");
++  assertExactKeys(sandbox, SANDBOX_KEYS, "sandbox");
++  assertBoolean(sandbox, "enabled", true);
++  assertBoolean(sandbox, "fail_if_unavailable", true);
++  assertBoolean(sandbox, "allow_unsandboxed_commands", false);
++  assertBoolean(sandbox, "auto_allow_sandboxed_bash", true);
++
++  const network = validatedNetworkOptions(sandbox.network);
++  const filesystem = validatedFilesystemOptions(sandbox.filesystem);
++  return {
++    enabled: true,
++    failIfUnavailable: true,
++    allowUnsandboxedCommands: false,
++    autoAllowBashIfSandboxed: true,
++    network,
++    filesystem,
++    credentials: {
++      envVars: REQUIRED_DENIED_ENV_NAMES.map((name) => ({ name, mode: "deny" })),
++    },
++  };
++}
++
++function validatedNetworkOptions(value: unknown): JsonObject {
++  const network = requireObject(value, "sandbox.network");
++  assertExactKeys(network, NETWORK_KEYS, "sandbox.network");
++  assertBoolean(network, "strict_allowlist", true);
++  assertBoolean(network, "allow_local_binding", false);
++  assertEmptyArray(network.allow_unix_sockets, "sandbox.network.allow_unix_sockets");
++  const allowedDomains = requireStringArray(network.allowed_domains, "allowed_domains");
++  if (
++    allowedDomains.some((domain) => domain !== domain.toLowerCase() || !DOMAIN_PATTERN.test(domain))
++  ) {
++    throw new Error("sandbox.network.allowed_domains contains a non-canonical domain");
++  }
++  return {
++    strictAllowlist: true,
++    allowManagedDomainsOnly: true,
++    allowedDomains,
++    allowLocalBinding: false,
++    allowAllUnixSockets: false,
++    allowUnixSockets: [],
++  };
++}
++
++function validatedFilesystemOptions(value: unknown): JsonObject {
++  const filesystem = requireObject(value, "sandbox.filesystem");
++  assertExactKeys(filesystem, FILESYSTEM_KEYS, "sandbox.filesystem");
++  const allowRead = requireCanonicalPaths(filesystem.allow_read, "sandbox.filesystem.allow_read");
++  const allowWrite = requireCanonicalPaths(
++    filesystem.allow_write,
++    "sandbox.filesystem.allow_write",
++  );
++  const denyRead = requireCanonicalPaths(filesystem.deny_read, "sandbox.filesystem.deny_read");
++  const denyWrite = requireCanonicalPaths(filesystem.deny_write, "sandbox.filesystem.deny_write");
++  if (allowRead.length === 0 || allowWrite.length === 0) {
++    throw new Error("sandbox filesystem allow lists must not be empty");
++  }
++  return { allowRead, allowWrite, denyRead, denyWrite };
++}
++
++function assertDeniedEnvironment(value: unknown): void {
++  const deniedEnvNames = requireStringArray(value, "subprocess_denied_env_names");
++  if (
++    deniedEnvNames.length !== REQUIRED_DENIED_ENV_NAMES.length ||
++    deniedEnvNames.some((name, index) => name !== REQUIRED_DENIED_ENV_NAMES[index])
++  ) {
++    throw new Error("subprocess_denied_env_names must equal the fixed E1 deny set");
++  }
++}
++
++function resolvePolicyPath(cwd: string, ref: string): string {
++  if (!ref || path.isAbsolute(ref) || ref.includes("\0")) {
++    throw new Error("claude execution policy ref must be a relative path");
++  }
++  const root = fs.realpathSync(cwd);
++  const resolved = path.resolve(root, ref);
++  if (resolved === root || !resolved.startsWith(`${root}${path.sep}`)) {
++    throw new Error("claude execution policy ref escapes cwd");
++  }
++  const real = fs.realpathSync(resolved);
++  if (!real.startsWith(`${root}${path.sep}`)) {
++    throw new Error("claude execution policy resolves outside cwd");
++  }
++  return real;
++}
++
++function requireObject(value: unknown, label: string): JsonObject {
++  if (!value || typeof value !== "object" || Array.isArray(value)) {
++    throw new Error(`${label} must be an object`);
++  }
++  return value as JsonObject;
++}
++
++function assertExactKeys(value: JsonObject, expected: ReadonlySet<string>, label: string): void {
++  const actual = Object.keys(value);
++  if (actual.length !== expected.size || actual.some((key) => !expected.has(key))) {
++    throw new Error(`${label} has unknown or missing fields`);
++  }
++}
++
++function assertText(value: JsonObject, key: string, expected: string): void {
++  if (value[key] !== expected) {
++    throw new Error(`${key} must equal ${expected}`);
++  }
++}
++
++function assertIdentifier(value: JsonObject, key: string): void {
++  const text = value[key];
++  if (typeof text !== "string" || !/^[A-Za-z0-9._-]+$/.test(text)) {
++    throw new Error(`${key} must be a canonical identifier`);
++  }
++}
++
++function assertBoolean(value: JsonObject, key: string, expected: boolean): void {
++  if (value[key] !== expected) {
++    throw new Error(`${key} must equal ${expected}`);
++  }
++}
++
++function assertEmptyArray(value: unknown, label: string): void {
++  if (!Array.isArray(value) || value.length !== 0) {
++    throw new Error(`${label} must be an empty array`);
++  }
++}
++
++function assertGeneratedAt(value: unknown): void {
++  if (
++    typeof value !== "string" ||
++    !/^\d{4}-\d{2}-\d{2}T/.test(value) ||
++    Number.isNaN(Date.parse(value))
++  ) {
++    throw new Error("generated_at must be an ISO-8601 timestamp");
++  }
++}
++
++function requireStringArray(value: unknown, label: string): string[] {
++  if (!Array.isArray(value) || !value.every((entry) => typeof entry === "string")) {
++    throw new Error(`${label} must be a string array`);
++  }
++  if (new Set(value).size !== value.length) {
++    throw new Error(`${label} must not contain duplicates`);
++  }
++  return [...value];
++}
++
++function requireCanonicalPaths(value: unknown, label: string): string[] {
++  const paths = requireStringArray(value, label);
++  if (paths.some((entry) => !path.isAbsolute(entry) || path.normalize(entry) !== entry)) {
++    throw new Error(`${label} contains a non-canonical absolute path`);
++  }
++  return paths;
++}
++
++function containsSecretLikeValue(value: unknown): boolean {
++  if (typeof value === "string") {
++    return SECRET_LIKE_PATTERN.test(value);
++  }
++  if (Array.isArray(value)) {
++    return value.some(containsSecretLikeValue);
++  }
++  if (value && typeof value === "object") {
++    return Object.values(value as JsonObject).some(containsSecretLikeValue);
++  }
++  return false;
++}
++
++function assertNoDuplicateObjectKeys(raw: string): void {
++  new DuplicateKeyScanner(raw).scan();
++}
++
++class DuplicateKeyScanner {
++  private readonly stack: Array<Set<string> | null> = [];
++  private index = 0;
++  private expectingObjectKey = false;
++
++  constructor(private readonly raw: string) {}
++
++  scan(): void {
++    while (this.index < this.raw.length) {
++      const char = this.raw[this.index];
++      if (/\s/.test(char)) {
++        this.index += 1;
++      } else if (char === '"') {
++        this.consumeString();
++      } else {
++        this.consumeStructural(char);
++      }
++    }
++  }
++
++  private consumeStructural(char: string): void {
++    const action = STRUCTURAL_ACTIONS[char];
++    if (action) {
++      action(this);
++    }
++    this.index += 1;
++  }
++
++  private consumeString(): void {
++    const start = this.index;
++    this.index += 1;
++    this.consumeStringBody();
++    if (this.expectingObjectKey) {
++      this.recordKey(JSON.parse(this.raw.slice(start, this.index)) as string);
++    }
++  }
++
++  private consumeStringBody(): void {
++    let escaped = false;
++    while (this.index < this.raw.length) {
++      const current = this.raw[this.index];
++      this.index += 1;
++      if (escaped) {
++        escaped = false;
++      } else if (current === "\\") {
++        escaped = true;
++      } else if (current === '"') {
++        return;
++      }
++    }
++  }
++
++  private recordKey(key: string): void {
++    const keys = this.stack.at(-1);
++    if (!(keys instanceof Set)) {
++      throw new Error("invalid object-key state in claude execution policy");
++    }
++    if (keys.has(key)) {
++      throw new Error(`claude execution policy contains duplicate key: ${key}`);
++    }
++    keys.add(key);
++    this.expectingObjectKey = false;
++  }
++
++  openObject(): void {
++    this.stack.push(new Set());
++    this.expectingObjectKey = true;
++  }
++
++  openArray(): void {
++    this.stack.push(null);
++    this.expectingObjectKey = false;
++  }
++
++  closeContainer(): void {
++    this.stack.pop();
++    this.expectingObjectKey = false;
++  }
++
++  nextEntry(): void {
++    this.expectingObjectKey = this.stack.at(-1) instanceof Set;
++  }
++}
++
++const STRUCTURAL_ACTIONS: Record<string, (scanner: DuplicateKeyScanner) => void> = {
++  "{": (scanner) => scanner.openObject(),
++  "[": (scanner) => scanner.openArray(),
++  "}": (scanner) => scanner.closeContainer(),
++  "]": (scanner) => scanner.closeContainer(),
++  ",": (scanner) => scanner.nextEntry(),
++};
+diff --git a/src/acp/client.ts b/src/acp/client.ts
+index 5c9b5d2..5c0a443 100644
+--- a/src/acp/client.ts
++++ b/src/acp/client.ts
+@@ -1160,7 +1160,11 @@ export class AcpClient {
+         connection.newSession({
+           cwd: sessionCwd,
+           mcpServers: this.options.mcpServers ?? [],
+-          _meta: buildClaudeCodeOptionsMeta(this.options.sessionOptions, claudeAcp),
++          _meta: buildClaudeCodeOptionsMeta(
++            this.options.sessionOptions,
++            claudeAcp,
++            this.options.cwd,
++          ),
+         }),
+       );
+       result = claudeAcp
+diff --git a/src/cli-core.ts b/src/cli-core.ts
+index f1663eb..6b7df04 100644
+--- a/src/cli-core.ts
++++ b/src/cli-core.ts
+@@ -10,6 +10,7 @@ import {
+ import { listBuiltInAgents } from "./agent-registry.js";
+ import { InterruptedError } from "./async-control.js";
+ import { configurePublicCli } from "./cli-public.js";
++import { registerBuildInfoCommand } from "./cli/build-info-command.js";
+ import { handlePrompt } from "./cli/command-handlers.js";
+ import { registerAgentCommand, registerDefaultCommands } from "./cli/command-registration.js";
+ import { loadResolvedConfig } from "./cli/config.js";
+@@ -42,6 +43,7 @@ const TOP_LEVEL_VERBS = new Set([
+   "sessions",
+   "status",
+   "config",
++  "build-info",
+   "help",
+ ]);
+ 
+@@ -52,6 +54,8 @@ const TOP_LEVEL_VERSION_VALUE_FLAG_VALUES = [
+   "--non-interactive-permissions",
+   "--permission-policy",
+   "--policy",
++  "--claude-execution-policy-ref",
++  "--claude-execution-policy-sha256",
+   "--format",
+   "--model",
+   "--allowed-tools",
+@@ -547,6 +551,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
+   const program = createProgram(requestedJsonStrict);
+ 
+   addGlobalFlags(program);
++  registerBuildInfoCommand(program);
+ 
+   configurePublicCli({
+     program,
+diff --git a/src/cli/build-info-command.ts b/src/cli/build-info-command.ts
+new file mode 100644
+index 0000000..1214587
+--- /dev/null
++++ b/src/cli/build-info-command.ts
+@@ -0,0 +1,28 @@
++import type { Command } from "commander";
++import { CLAUDE_EXECUTION_POLICY_SCHEMA } from "../acp/claude-execution-policy.js";
++import { E1_PATCH_SHA256, E1_UPSTREAM_COMMIT } from "../e1-build-info.generated.js";
++
++export function e1BuildInfoDocument() {
++  return {
++    upstream_commit: E1_UPSTREAM_COMMIT,
++    patch_sha256: E1_PATCH_SHA256,
++    policy_schema: CLAUDE_EXECUTION_POLICY_SCHEMA,
++  };
++}
++
++export function registerBuildInfoCommand(program: Command): void {
++  program
++    .command("build-info")
++    .description("Show the fixed E1 policy transport build identity")
++    .option("--json", "Print build identity as JSON")
++    .action((flags: { json?: boolean }) => {
++      const info = e1BuildInfoDocument();
++      if (flags.json) {
++        process.stdout.write(`${JSON.stringify(info)}\n`);
++        return;
++      }
++      process.stdout.write(
++        `upstream_commit=${info.upstream_commit}\npatch_sha256=${info.patch_sha256}\npolicy_schema=${info.policy_schema}\n`,
++      );
++    });
++}
+diff --git a/src/cli/command-handlers.ts b/src/cli/command-handlers.ts
+index 2aba8a7..78df701 100644
+--- a/src/cli/command-handlers.ts
++++ b/src/cli/command-handlers.ts
+@@ -191,6 +191,8 @@ function sessionOptionsFromGlobalFlags(
+     allowedTools: globalFlags.allowedTools,
+     maxTurns: globalFlags.maxTurns,
+     systemPrompt: globalFlags.systemPrompt,
++    claudeExecutionPolicyRef: globalFlags.claudeExecutionPolicyRef,
++    claudeExecutionPolicySha256: globalFlags.claudeExecutionPolicySha256,
+   };
+ }
+ 
+@@ -368,12 +370,7 @@ export async function handlePrompt(
+     promptRetries: globalFlags.promptRetries,
+     verbose: globalFlags.verbose,
+     waitForCompletion: flags.wait !== false,
+-    sessionOptions: {
+-      model: globalFlags.model,
+-      allowedTools: globalFlags.allowedTools,
+-      maxTurns: globalFlags.maxTurns,
+-      systemPrompt: globalFlags.systemPrompt,
+-    },
++    sessionOptions: sessionOptionsFromGlobalFlags(globalFlags),
+   });
+ 
+   if ("queued" in result) {
+@@ -455,12 +452,7 @@ export async function handleExec(
+     timeoutMs: globalFlags.timeout,
+     verbose: globalFlags.verbose,
+     promptRetries: globalFlags.promptRetries,
+-    sessionOptions: {
+-      model: globalFlags.model,
+-      allowedTools: globalFlags.allowedTools,
+-      maxTurns: globalFlags.maxTurns,
+-      systemPrompt: globalFlags.systemPrompt,
+-    },
++    sessionOptions: sessionOptionsFromGlobalFlags(globalFlags),
+   });
+ 
+   applyPermissionExitCode(result, outputPolicy.format === "quiet" ? outputFormatter : undefined);
+diff --git a/src/cli/flags.ts b/src/cli/flags.ts
+index d8b2ac6..30cfe72 100644
+--- a/src/cli/flags.ts
++++ b/src/cli/flags.ts
+@@ -52,6 +52,8 @@ export type GlobalFlags = PermissionFlags & {
+   systemPrompt?: SystemPromptOption;
+   promptRetries?: number;
+   permissionPolicy?: string;
++  claudeExecutionPolicyRef?: string;
++  claudeExecutionPolicySha256?: string;
+ };
+ 
+ export type PromptFlags = {
+@@ -319,6 +321,16 @@ export function addGlobalFlags(command: Command): Command {
+       "Permission policy JSON or path (autoApprove, autoDeny, escalate, defaultAction)",
+     )
+     .option("--policy <json-or-file>", "Alias for --permission-policy")
++    .option(
++      "--claude-execution-policy-ref <path>",
++      "Relative path to a fixed claude_execution_policy.v1 document",
++      (value: string) => parseNonEmptyValue("Claude execution policy ref", value),
++    )
++    .option(
++      "--claude-execution-policy-sha256 <sha256>",
++      "Expected SHA-256 of the fixed Claude execution policy",
++      parseSha256,
++    )
+     .option("--format <fmt>", "Output format: text, json, quiet", parseOutputFormat)
+     .option("--suppress-reads", "Suppress raw read-file contents in output")
+     .option("--model <id>", "Agent model id")
+@@ -418,6 +430,7 @@ export function resolveGlobalFlags(command: Command, config: ResolvedAcpxConfig)
+   const jsonStrict = opts.jsonStrict === true;
+   const verbose = opts.verbose === true;
+   assertOutputFlagCompatibility(format, jsonStrict, verbose);
++  const claudeExecutionPolicy = resolveClaudeExecutionPolicyBinding(opts);
+ 
+   return {
+     agent: stringOption(opts.agent),
+@@ -428,6 +441,7 @@ export function resolveGlobalFlags(command: Command, config: ResolvedAcpxConfig)
+       config,
+     ),
+     permissionPolicy: resolvePermissionPolicyOption(opts),
++    ...claudeExecutionPolicy,
+     jsonStrict,
+     suppressReads: opts.suppressReads === true,
+     fs: resolveCapabilityOption(opts.fs),
+@@ -447,6 +461,30 @@ export function resolveGlobalFlags(command: Command, config: ResolvedAcpxConfig)
+   };
+ }
+ 
++function resolveClaudeExecutionPolicyBinding(
++  opts: Record<string, unknown>,
++): Pick<GlobalFlags, "claudeExecutionPolicyRef" | "claudeExecutionPolicySha256"> {
++  const ref = stringOption(opts.claudeExecutionPolicyRef);
++  const sha256 = stringOption(opts.claudeExecutionPolicySha256);
++  if (ref === undefined && sha256 === undefined) {
++    return {};
++  }
++  if (!ref || !sha256) {
++    throw new InvalidArgumentError(
++      "--claude-execution-policy-ref and --claude-execution-policy-sha256 must be provided together",
++    );
++  }
++  return { claudeExecutionPolicyRef: ref, claudeExecutionPolicySha256: sha256 };
++}
++
++export function parseSha256(value: string): string {
++  const normalized = value.trim();
++  if (!/^[a-f0-9]{64}$/.test(normalized)) {
++    throw new InvalidArgumentError("SHA-256 must be 64 lowercase hexadecimal characters");
++  }
++  return normalized;
++}
++
+ function resolveCwdOption(value: unknown): string {
+   return stringOption(value) ?? process.cwd();
+ }
+diff --git a/src/cli/queue/messages.ts b/src/cli/queue/messages.ts
+index a6ff34c..665d2c1 100644
+--- a/src/cli/queue/messages.ts
++++ b/src/cli/queue/messages.ts
+@@ -285,7 +285,16 @@ function parseSessionOptions(value: unknown): QueueSessionOptions | null | undef
+   if (!assignSessionEnv(sessionOptions, record.env)) {
+     return null;
+   }
++  return assignParsedPolicyBinding(sessionOptions, record);
++}
+ 
++function assignParsedPolicyBinding(
++  sessionOptions: QueueSessionOptions,
++  record: Record<string, unknown>,
++): QueueSessionOptions | null {
++  if (!assignSessionPolicyBinding(sessionOptions, record)) {
++    return null;
++  }
+   return sessionOptions;
+ }
+ 
+@@ -354,6 +363,28 @@ function assignSessionEnv(options: QueueSessionOptions, value: unknown): boolean
+   return true;
+ }
+ 
++function assignSessionPolicyBinding(
++  options: QueueSessionOptions,
++  record: Record<string, unknown>,
++): boolean {
++  const ref = record.claudeExecutionPolicyRef;
++  const sha256 = record.claudeExecutionPolicySha256;
++  if (ref == null && sha256 == null) {
++    return true;
++  }
++  if (
++    typeof ref !== "string" ||
++    ref.trim().length === 0 ||
++    typeof sha256 !== "string" ||
++    !/^[a-f0-9]{64}$/.test(sha256)
++  ) {
++    return false;
++  }
++  options.claudeExecutionPolicyRef = ref;
++  options.claudeExecutionPolicySha256 = sha256;
++  return true;
++}
++
+ function parseOwnerGeneration(value: unknown): number | undefined | null {
+   if (value == null) {
+     return undefined;
+diff --git a/src/cli/queue/owner-env.ts b/src/cli/queue/owner-env.ts
+index a00147f..e3a87ba 100644
+--- a/src/cli/queue/owner-env.ts
++++ b/src/cli/queue/owner-env.ts
+@@ -137,6 +137,11 @@ function assignQueueOwnerSessionOptions(
+   assignSessionMaxTurns(options.sessionOptions, sessionOpts.maxTurns);
+   assignSessionSystemPrompt(options.sessionOptions, sessionOpts.systemPrompt);
+   assignSessionEnv(options.sessionOptions, sessionOpts.env);
++  assignSessionPolicyBinding(
++    options.sessionOptions,
++    sessionOpts.claudeExecutionPolicyRef,
++    sessionOpts.claudeExecutionPolicySha256,
++  );
+ }
+ 
+ function assignSessionModel(
+@@ -181,6 +186,27 @@ function assignSessionSystemPrompt(
+   }
+ }
+ 
++function assignSessionPolicyBinding(
++  options: NonNullable<QueueOwnerRuntimeOptions["sessionOptions"]>,
++  ref: unknown,
++  sha256: unknown,
++): void {
++  if (ref === undefined && sha256 === undefined) {
++    return;
++  }
++  if (
++    typeof ref === "string" &&
++    ref.trim().length > 0 &&
++    typeof sha256 === "string" &&
++    /^[a-f0-9]{64}$/.test(sha256)
++  ) {
++    options.claudeExecutionPolicyRef = ref;
++    options.claudeExecutionPolicySha256 = sha256;
++    return;
++  }
++  throw new Error("queue owner payload has invalid Claude execution policy binding");
++}
++
+ function assignSessionEnv(
+   options: NonNullable<QueueOwnerRuntimeOptions["sessionOptions"]>,
+   value: unknown,
+diff --git a/src/e1-build-info.generated.ts b/src/e1-build-info.generated.ts
+new file mode 100644
+index 0000000..0b4c64d
+--- /dev/null
++++ b/src/e1-build-info.generated.ts
+@@ -0,0 +1,3 @@
++// Replaced by the Dual installer after the reviewed patch SHA is verified.
++export const E1_UPSTREAM_COMMIT = "UNBUILT";
++export const E1_PATCH_SHA256 = "UNBUILT";
+diff --git a/src/flows/cli.ts b/src/flows/cli.ts
+index b6450f8..2d2af53 100644
+--- a/src/flows/cli.ts
++++ b/src/flows/cli.ts
+@@ -62,6 +62,8 @@ export async function handleFlowRun(
+       model: globalFlags.model,
+       allowedTools: globalFlags.allowedTools,
+       maxTurns: globalFlags.maxTurns,
++      claudeExecutionPolicyRef: globalFlags.claudeExecutionPolicyRef,
++      claudeExecutionPolicySha256: globalFlags.claudeExecutionPolicySha256,
+     },
+   });
+ 
+diff --git a/src/runtime/engine/manager.ts b/src/runtime/engine/manager.ts
+index 6d6bfb9..788b332 100644
+--- a/src/runtime/engine/manager.ts
++++ b/src/runtime/engine/manager.ts
+@@ -968,6 +968,7 @@ export class AcpRuntimeManager {
+       return false;
+     }
+     if (input.mode === "persistent") {
++      assertCompatibleClaudeExecutionPolicy(existing.record, input.sessionOptions);
+       return true;
+     }
+     return Boolean(
+@@ -2025,3 +2026,16 @@ export class AcpRuntimeManager {
+     return record;
+   }
+ }
++
++function assertCompatibleClaudeExecutionPolicy(
++  record: SessionRecord,
++  requested: SessionAgentOptions | undefined,
++): void {
++  if (policyBindingKey(sessionOptionsFromRecord(record)) !== policyBindingKey(requested)) {
++    throw new Error("CLAUDE_EXECUTION_POLICY_CONFLICT: persistent session policy binding differs");
++  }
++}
++
++function policyBindingKey(options: SessionAgentOptions | undefined): string {
++  return [options?.claudeExecutionPolicyRef, options?.claudeExecutionPolicySha256].join("\0");
++}
+diff --git a/src/runtime/engine/session-options.ts b/src/runtime/engine/session-options.ts
+index 57674e4..a479aae 100644
+--- a/src/runtime/engine/session-options.ts
++++ b/src/runtime/engine/session-options.ts
+@@ -17,6 +17,8 @@ export type SessionAgentOptions = {
+    * passing them to acpx.
+    */
+   env?: Record<string, string>;
++  claudeExecutionPolicyRef?: string;
++  claudeExecutionPolicySha256?: string;
+ };
+ 
+ export function mergeSessionOptions(
+@@ -29,9 +31,18 @@ export function mergeSessionOptions(
+   assignDefinedOption(merged, "maxTurns", preferred?.maxTurns);
+   assignDefinedOption(merged, "systemPrompt", preferred?.systemPrompt);
+   assignDefinedOption(merged, "env", mergeEnvRecords(fallback?.env, preferred?.env));
++  assignPolicyBinding(merged, preferred);
+   return Object.keys(merged).length > 0 ? merged : undefined;
+ }
+ 
++function assignPolicyBinding(
++  target: SessionAgentOptions,
++  source: SessionAgentOptions | undefined,
++): void {
++  assignDefinedOption(target, "claudeExecutionPolicyRef", source?.claudeExecutionPolicyRef);
++  assignDefinedOption(target, "claudeExecutionPolicySha256", source?.claudeExecutionPolicySha256);
++}
++
+ function mergeEnvRecords(
+   fallback: Record<string, string> | undefined,
+   preferred: Record<string, string> | undefined,
+@@ -88,6 +99,16 @@ export function sessionOptionsFromRecord(record: SessionRecord): SessionAgentOpt
+     storedSystemPromptOption(stored.system_prompt),
+   );
+   assignStoredOption(sessionOptions, "env", storedEnvRecord(stored.env));
++  assignStoredOption(
++    sessionOptions,
++    "claudeExecutionPolicyRef",
++    nonEmptyString(stored.claude_execution_policy_ref),
++  );
++  assignStoredOption(
++    sessionOptions,
++    "claudeExecutionPolicySha256",
++    storedSha256(stored.claude_execution_policy_sha256),
++  );
+ 
+   return Object.keys(sessionOptions).length > 0 ? sessionOptions : undefined;
+ }
+@@ -103,6 +124,12 @@ function persistedSessionOptions(
+     max_turns: typeof options.maxTurns === "number" ? options.maxTurns : undefined,
+     system_prompt: normalizeSystemPromptOption(options.systemPrompt),
+     env: storedEnvRecord(options.env),
++    ...(nonEmptyString(options.claudeExecutionPolicyRef) !== undefined
++      ? { claude_execution_policy_ref: nonEmptyString(options.claudeExecutionPolicyRef) }
++      : {}),
++    ...(storedSha256(options.claudeExecutionPolicySha256) !== undefined
++      ? { claude_execution_policy_sha256: storedSha256(options.claudeExecutionPolicySha256) }
++      : {}),
+   } satisfies PersistedSessionOptions;
+   return hasPersistedSessionOptions(next) ? next : undefined;
+ }
+@@ -113,7 +140,9 @@ function hasPersistedSessionOptions(options: PersistedSessionOptions): boolean {
+     options.allowed_tools !== undefined ||
+     options.max_turns !== undefined ||
+     options.system_prompt !== undefined ||
+-    options.env !== undefined
++    options.env !== undefined ||
++    options.claude_execution_policy_ref !== undefined ||
++    options.claude_execution_policy_sha256 !== undefined
+   );
+ }
+ 
+@@ -173,3 +202,8 @@ function storedSystemPromptOption(value: unknown): SystemPromptOption | undefine
+ function nonEmptyString(value: unknown): string | undefined {
+   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+ }
++
++function storedSha256(value: unknown): string | undefined {
++  const text = nonEmptyString(value);
++  return text && /^[a-f0-9]{64}$/.test(text) ? text : undefined;
++}
+diff --git a/src/session/conversation-model.ts b/src/session/conversation-model.ts
+index 45826af..c69ab7a 100644
+--- a/src/session/conversation-model.ts
++++ b/src/session/conversation-model.ts
+@@ -594,6 +594,12 @@ function cloneSessionOptions(
+       ? { system_prompt: cloneSystemPromptOption(options.system_prompt) }
+       : {}),
+     ...(options.env !== undefined ? { env: { ...options.env } } : {}),
++    ...(options.claude_execution_policy_ref !== undefined
++      ? { claude_execution_policy_ref: options.claude_execution_policy_ref }
++      : {}),
++    ...(options.claude_execution_policy_sha256 !== undefined
++      ? { claude_execution_policy_sha256: options.claude_execution_policy_sha256 }
++      : {}),
+   };
+ }
+ 
+diff --git a/src/session/persistence/parse.ts b/src/session/persistence/parse.ts
+index 8c1efdb..8cc28cc 100644
+--- a/src/session/persistence/parse.ts
++++ b/src/session/persistence/parse.ts
+@@ -514,6 +514,11 @@ function assignParsedSessionOptions(state: SessionAcpxState, raw: unknown): void
+   assignSessionOptionMaxTurns(parsedSessionOptions, sessionOptions.max_turns);
+   assignSessionOptionSystemPrompt(parsedSessionOptions, sessionOptions.system_prompt);
+   assignSessionOptionEnv(parsedSessionOptions, sessionOptions.env);
++  assignSessionOptionPolicyBinding(
++    parsedSessionOptions,
++    sessionOptions.claude_execution_policy_ref,
++    sessionOptions.claude_execution_policy_sha256,
++  );
+ 
+   if (Object.keys(parsedSessionOptions).length > 0) {
+     state.session_options = parsedSessionOptions;
+@@ -582,6 +587,22 @@ function assignSessionOptionEnv(
+   }
+ }
+ 
++function assignSessionOptionPolicyBinding(
++  options: NonNullable<SessionAcpxState["session_options"]>,
++  ref: unknown,
++  sha256: unknown,
++): void {
++  if (
++    typeof ref === "string" &&
++    ref.trim().length > 0 &&
++    typeof sha256 === "string" &&
++    /^[a-f0-9]{64}$/.test(sha256)
++  ) {
++    options.claude_execution_policy_ref = ref;
++    options.claude_execution_policy_sha256 = sha256;
++  }
++}
++
+ function parseEventLog(raw: unknown, sessionId: string): SessionEventLog {
+   const record = asRecord(raw);
+   if (!record || !hasValidEventLogCore(record)) {
+diff --git a/src/types.ts b/src/types.ts
+index 17d7b6a..e0209a0 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -252,6 +252,8 @@ export type AcpClientOptions = {
+     maxTurns?: number;
+     systemPrompt?: string | { append: string };
+     env?: Record<string, string>;
++    claudeExecutionPolicyRef?: string;
++    claudeExecutionPolicySha256?: string;
+   };
+   onAcpMessage?: (direction: AcpMessageDirection, message: AcpJsonRpcMessage) => void;
+   onAcpOutputMessage?: (direction: AcpMessageDirection, message: AcpJsonRpcMessage) => void;
+@@ -402,6 +404,8 @@ export type SessionAcpxState = {
+     max_turns?: number;
+     system_prompt?: string | { append: string };
+     env?: Record<string, string>;
++    claude_execution_policy_ref?: string;
++    claude_execution_policy_sha256?: string;
+   };
+ };
+ 
+diff --git a/test/build-info-command.test.ts b/test/build-info-command.test.ts
+new file mode 100644
+index 0000000..3d6e623
+--- /dev/null
++++ b/test/build-info-command.test.ts
+@@ -0,0 +1,11 @@
++import assert from "node:assert/strict";
++import test from "node:test";
++import { e1BuildInfoDocument } from "../src/cli/build-info-command.js";
++
++test("E1 build info exposes only the frozen transport identity", () => {
++  assert.deepEqual(e1BuildInfoDocument(), {
++    upstream_commit: "UNBUILT",
++    patch_sha256: "UNBUILT",
++    policy_schema: "claude_execution_policy.v1",
++  });
++});
+diff --git a/test/claude-execution-policy.test.ts b/test/claude-execution-policy.test.ts
+new file mode 100644
+index 0000000..31341cd
+--- /dev/null
++++ b/test/claude-execution-policy.test.ts
+@@ -0,0 +1,147 @@
++import assert from "node:assert/strict";
++import { createHash } from "node:crypto";
++import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
++import os from "node:os";
++import path from "node:path";
++import test from "node:test";
++import { buildClaudeCodeOptionsMeta } from "../src/acp/agent-command.js";
++import { loadClaudeExecutionPolicy } from "../src/acp/claude-execution-policy.js";
++
++const DENIED_ENV_NAMES = [
++  "ALL_PROXY",
++  "ANTHROPIC_API_KEY",
++  "ANTHROPIC_AUTH_TOKEN",
++  "ANTHROPIC_BASE_URL",
++  "HTTP_PROXY",
++  "HTTPS_PROXY",
++  "NO_PROXY",
++  "all_proxy",
++  "http_proxy",
++  "https_proxy",
++  "no_proxy",
++];
++
++test("fixed Claude execution policy maps to isolated SDK options", async () => {
++  const fixture = await policyFixture();
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++
++  assert.deepEqual(options.settingSources, []);
++  assert.equal(options.sandbox.enabled, true);
++  assert.equal(options.sandbox.failIfUnavailable, true);
++  assert.equal(options.sandbox.allowUnsandboxedCommands, false);
++  assert.deepEqual(
++    (options.sandbox.credentials as { envVars: unknown[] }).envVars,
++    DENIED_ENV_NAMES.map((name) => ({ name, mode: "deny" })),
++  );
++  assert.deepEqual(options.managedSettings.sandbox, options.sandbox);
++});
++
++test("Claude ACP metadata consumes the fixed policy while other agents reject it", async () => {
++  const fixture = await policyFixture();
++  const sessionOptions = {
++    claudeExecutionPolicyRef: fixture.binding.ref,
++    claudeExecutionPolicySha256: fixture.binding.sha256,
++  };
++  const meta = buildClaudeCodeOptionsMeta(sessionOptions, true, fixture.root);
++  assert(meta);
++  const options = (meta.claudeCode as { options: Record<string, unknown> }).options;
++  assert.deepEqual(options.settingSources, []);
++  assert.equal((options.sandbox as { enabled: boolean }).enabled, true);
++  assert.ok(options.managedSettings);
++  assert.equal(options.env, undefined);
++
++  assert.throws(
++    () => buildClaudeCodeOptionsMeta(sessionOptions, false, fixture.root),
++    /only supported by claude-agent-acp/,
++  );
++});
++
++test("fixed Claude execution policy rejects duplicate fields before parsing", async () => {
++  const fixture = await policyFixture((raw) =>
++    raw.replace(
++      '"schema_version":"claude_execution_policy.v1"',
++      '"schema_version":"claude_execution_policy.v1","schema_version":"claude_execution_policy.v1"',
++    ),
++  );
++  assert.throws(() => loadClaudeExecutionPolicy(fixture.root, fixture.binding), /duplicate key/);
++});
++
++test("fixed Claude execution policy rejects SHA drift, unknown fields, and path escape", async () => {
++  const fixture = await policyFixture();
++  assert.throws(
++    () => loadClaudeExecutionPolicy(fixture.root, { ...fixture.binding, sha256: "0".repeat(64) }),
++    /SHA-256 mismatch/,
++  );
++
++  const unknown = await policyFixture((raw) => raw.replace(/}$/, ',"settings":{}}'));
++  assert.throws(
++    () => loadClaudeExecutionPolicy(unknown.root, unknown.binding),
++    /unknown or missing/,
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(fixture.root, { ...fixture.binding, ref: "../policy.json" }),
++    /escapes cwd/,
++  );
++});
++
++test("fixed Claude execution policy rejects weakened network, escape, and credential controls", async () => {
++  const weakenedNetwork = await policyFixture((raw) =>
++    raw.replace('"strict_allowlist":true', '"strict_allowlist":false'),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(weakenedNetwork.root, weakenedNetwork.binding),
++    /strict_allowlist must equal true/,
++  );
++  const escapeEnabled = await policyFixture((raw) =>
++    raw.replace('"allow_unsandboxed_commands":false', '"allow_unsandboxed_commands":true'),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(escapeEnabled.root, escapeEnabled.binding),
++    /allow_unsandboxed_commands must equal false/,
++  );
++  const missingCredential = await policyFixture((raw) => raw.replace('"NO_PROXY",', ""));
++  assert.throws(
++    () => loadClaudeExecutionPolicy(missingCredential.root, missingCredential.binding),
++    /fixed E1 deny set/,
++  );
++});
++
++async function policyFixture(transform: (raw: string) => string = (raw) => raw) {
++  const root = await mkdtemp(path.join(os.tmpdir(), "acpx-e1-policy-"));
++  const policyDir = path.join(root, "runs", "run-1", "execution-authority");
++  await mkdir(policyDir, { recursive: true });
++  const document = {
++    schema_version: "claude_execution_policy.v1",
++    workstream_id: "ws-1",
++    node_instance_id: "node-1",
++    run_id: "run-1",
++    setting_sources: [],
++    sandbox: {
++      enabled: true,
++      fail_if_unavailable: true,
++      allow_unsandboxed_commands: false,
++      auto_allow_sandboxed_bash: true,
++      network: {
++        strict_allowlist: true,
++        allowed_domains: ["example.com"],
++        allow_local_binding: false,
++        allow_unix_sockets: [],
++      },
++      filesystem: {
++        allow_read: [root],
++        allow_write: [root, os.tmpdir()],
++        deny_read: [],
++        deny_write: [],
++      },
++    },
++    subprocess_denied_env_names: DENIED_ENV_NAMES,
++    generated_at: "2026-08-29T00:00:00.000Z",
++  };
++  const raw = transform(JSON.stringify(document));
++  const ref = path.relative(root, path.join(policyDir, "claude-execution-policy.json"));
++  await writeFile(path.join(root, ref), raw);
++  return {
++    root,
++    binding: { ref, sha256: createHash("sha256").update(raw).digest("hex") },
++  };
++}
+diff --git a/test/client.test.ts b/test/client.test.ts
+index b813e21..7ac0d4b 100644
+--- a/test/client.test.ts
++++ b/test/client.test.ts
+@@ -1,4 +1,7 @@
+ import assert from "node:assert/strict";
++import { createHash } from "node:crypto";
++import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
++import os from "node:os";
+ import path from "node:path";
+ import { PassThrough } from "node:stream";
+ import test from "node:test";
+@@ -813,6 +816,82 @@ test("AcpClient createSession forwards claudeCode options in _meta", async () =>
+   });
+ });
+ 
++test("AcpClient createSession forwards a bound Claude execution policy in _meta", async () => {
++  const cwd = await mkdtemp(path.join(os.tmpdir(), "acpx-client-e1-policy-"));
++  const policyDir = path.join(cwd, "runs", "run-1", "execution-authority");
++  await mkdir(policyDir, { recursive: true });
++  const policy = JSON.stringify({
++    schema_version: "claude_execution_policy.v1",
++    workstream_id: "ws-1",
++    node_instance_id: "node-1",
++    run_id: "run-1",
++    setting_sources: [],
++    sandbox: {
++      enabled: true,
++      fail_if_unavailable: true,
++      allow_unsandboxed_commands: false,
++      auto_allow_sandboxed_bash: true,
++      network: {
++        strict_allowlist: true,
++        allowed_domains: ["example.com"],
++        allow_local_binding: false,
++        allow_unix_sockets: [],
++      },
++      filesystem: {
++        allow_read: [cwd],
++        allow_write: [cwd, os.tmpdir()],
++        deny_read: [],
++        deny_write: [],
++      },
++    },
++    subprocess_denied_env_names: [
++      "ALL_PROXY",
++      "ANTHROPIC_API_KEY",
++      "ANTHROPIC_AUTH_TOKEN",
++      "ANTHROPIC_BASE_URL",
++      "HTTP_PROXY",
++      "HTTPS_PROXY",
++      "NO_PROXY",
++      "all_proxy",
++      "http_proxy",
++      "https_proxy",
++      "no_proxy",
++    ],
++    generated_at: "2026-08-29T00:00:00.000Z",
++  });
++  const ref = path.join("runs", "run-1", "execution-authority", "policy.json");
++  await writeFile(path.join(cwd, ref), policy);
++  const client = makeClient({
++    agentCommand: "npx -y @agentclientprotocol/claude-agent-acp",
++    cwd,
++    sessionOptions: {
++      claudeExecutionPolicyRef: ref,
++      claudeExecutionPolicySha256: createHash("sha256").update(policy).digest("hex"),
++    },
++  });
++
++  let capturedParams: Record<string, unknown> | undefined;
++  asInternals(client).connection = {
++    newSession: async (params: Record<string, unknown>) => {
++      capturedParams = params;
++      return { sessionId: "session-e1-policy" };
++    },
++  };
++
++  await client.createSession(cwd);
++  const options =
++    (capturedParams?._meta as { claudeCode?: { options?: Record<string, unknown> } })?.claudeCode
++      ?.options ?? {};
++  assert.deepEqual(options.settingSources, []);
++  assert.equal((options.sandbox as { enabled?: boolean }).enabled, true);
++  assert.equal(
++    (options.managedSettings as { sandbox?: { failIfUnavailable?: boolean } }).sandbox
++      ?.failIfUnavailable,
++    true,
++  );
++  assert.equal(options.env, undefined);
++});
++
+ test("AcpClient creates built-in Claude sessions without user settings by default", async () => {
+   const cwd = path.resolve("/tmp/acpx-client-claude-settings");
+   const client = makeClient({
+diff --git a/test/queue-messages.test.ts b/test/queue-messages.test.ts
+index 93d9eca..f4fe431 100644
+--- a/test/queue-messages.test.ts
++++ b/test/queue-messages.test.ts
+@@ -69,6 +69,8 @@ test("parseQueueRequest accepts prompt session options", () => {
+       env: {
+         GIT_AUTHOR_EMAIL: "agent@example.local",
+       },
++      claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      claudeExecutionPolicySha256: "a".repeat(64),
+     },
+     waitForCompletion: true,
+   });
+@@ -91,6 +93,8 @@ test("parseQueueRequest accepts prompt session options", () => {
+       env: {
+         GIT_AUTHOR_EMAIL: "agent@example.local",
+       },
++      claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      claudeExecutionPolicySha256: "a".repeat(64),
+     },
+   });
+ });
+@@ -122,6 +126,19 @@ test("parseQueueRequest rejects invalid prompt session options", () => {
+     }),
+     null,
+   );
++  assert.equal(
++    parseQueueRequest({
++      type: "submit_prompt",
++      requestId: "req-session-options-incomplete-policy",
++      message: "hello",
++      permissionMode: "approve-reads",
++      sessionOptions: {
++        claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      },
++      waitForCompletion: true,
++    }),
++    null,
++  );
+ });
+ 
+ test("parseQueueOwnerMessage accepts typed queue error payload", () => {
+diff --git a/test/queue-owner-env.test.ts b/test/queue-owner-env.test.ts
+index ac8a5b5..4f2aea5 100644
+--- a/test/queue-owner-env.test.ts
++++ b/test/queue-owner-env.test.ts
+@@ -39,6 +39,8 @@ describe("parseQueueOwnerPayload", () => {
+           env: {
+             GIT_AUTHOR_EMAIL: "agent@example.local",
+           },
++          claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++          claudeExecutionPolicySha256: "a".repeat(64),
+         },
+       }),
+     );
+@@ -75,6 +77,8 @@ describe("parseQueueOwnerPayload", () => {
+       env: {
+         GIT_AUTHOR_EMAIL: "agent@example.local",
+       },
++      claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      claudeExecutionPolicySha256: "a".repeat(64),
+     });
+   });
+ 
+@@ -107,6 +111,21 @@ describe("parseQueueOwnerPayload", () => {
+         message: /Invalid mcpServers\[0\] in queue owner payload\.url: expected non-empty string/,
+       },
+     );
++    assert.throws(
++      () =>
++        parseQueueOwnerPayload(
++          JSON.stringify({
++            sessionId: "session-1",
++            permissionMode: "deny-all",
++            sessionOptions: {
++              claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++            },
++          }),
++        ),
++      {
++        message: "queue owner payload has invalid Claude execution policy binding",
++      },
++    );
+   });
+ });
+ 
+diff --git a/test/runtime-manager.test.ts b/test/runtime-manager.test.ts
+index 8762e30..a212606 100644
+--- a/test/runtime-manager.test.ts
++++ b/test/runtime-manager.test.ts
+@@ -4560,6 +4560,45 @@ test("AcpRuntimeManager ignores sessionOptions when reusing an existing persiste
+   assert.equal(record.acpx?.session_options, undefined);
+ });
+ 
++test("AcpRuntimeManager rejects a different Claude execution policy on persistent reuse", async () => {
++  const existing = makeSessionRecord({
++    acpxRecordId: "policy-reuse-key",
++    acpSessionId: "sid-existing-policy",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++    acpx: {
++      session_options: {
++        claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++        claude_execution_policy_sha256: "a".repeat(64),
++      },
++    },
++  });
++  const store = new InMemorySessionStore([existing]);
++  const manager = new AcpRuntimeManager(
++    createRuntimeOptions({ cwd: "/workspace", sessionStore: store }),
++    {
++      clientFactory: () => {
++        throw new Error("clientFactory must not run after a policy conflict");
++      },
++    },
++  );
++
++  await assert.rejects(
++    async () =>
++      await manager.ensureSession({
++        sessionKey: "policy-reuse-key",
++        agent: "codex",
++        mode: "persistent",
++        cwd: "/workspace",
++        sessionOptions: {
++          claudeExecutionPolicyRef: "runs/run-2/execution-authority/policy.json",
++          claudeExecutionPolicySha256: "b".repeat(64),
++        },
++      }),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++});
++
+ test("AcpRuntimeManager getStatus surfaces token usage breakdowns and available commands", async () => {
+   const record = makeSessionRecord(
+     {

@@ -42,7 +42,7 @@ class DoctorCommandTest {
                         {
                           "agents": {
                             "claude": {
-                              "command": "npx -y @agentclientprotocol/claude-agent-acp@0.46.0"
+                              "command": "npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
                             }
                           }
                         }
@@ -62,7 +62,7 @@ class DoctorCommandTest {
                         {
                           "agents": {
                             "claude": {
-                              "command": "/repo/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.46.0"
+                              "command": "/repo/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
                             }
                           }
                         }
@@ -89,7 +89,7 @@ class DoctorCommandTest {
                         {
                           "agents": {
                             "claude": {
-                              "command": "npx -y @agentclientprotocol/claude-agent-acp@0.46.0"
+                              "command": "npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
                             }
                           }
                         }
@@ -116,7 +116,7 @@ class DoctorCommandTest {
                         {
                           "agents": {
                             "claude": {
-                              "command": "npx -y @agentclientprotocol/claude-agent-acp@0.46.0"
+                              "command": "npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
                             }
                           }
                         }
@@ -188,5 +188,38 @@ class DoctorCommandTest {
 
         assertEquals(DoctorCommand.PinLevel.WARN, result.level());
         assertTrue(result.message().contains("local codex-acp command"));
+    }
+
+    @Test
+    void acceptsExactPatchedAcpxBuildIdentity() {
+        var result = DoctorCommand.evaluateAcpxBuildIdentity("""
+                {
+                  "upstream_commit": "%s",
+                  "patch_sha256": "%s",
+                  "policy_schema": "%s"
+                }
+                """.formatted(
+                DoctorCommand.EXPECTED_ACPX_UPSTREAM_COMMIT,
+                DoctorCommand.EXPECTED_ACPX_PATCH_SHA256,
+                DoctorCommand.EXPECTED_ACPX_POLICY_SCHEMA));
+
+        assertEquals(DoctorCommand.PinLevel.OK, result.level());
+    }
+
+    @Test
+    void rejectsOfficialOrMismatchedAcpxBuildIdentity() {
+        var missing = DoctorCommand.evaluateAcpxBuildIdentity("{}");
+        var wrongPatch = DoctorCommand.evaluateAcpxBuildIdentity("""
+                {
+                  "upstream_commit": "%s",
+                  "patch_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                  "policy_schema": "%s"
+                }
+                """.formatted(DoctorCommand.EXPECTED_ACPX_UPSTREAM_COMMIT,
+                DoctorCommand.EXPECTED_ACPX_POLICY_SCHEMA));
+
+        assertEquals(DoctorCommand.PinLevel.FAIL, missing.level());
+        assertEquals(DoctorCommand.PinLevel.FAIL, wrongPatch.level());
+        assertTrue(wrongPatch.message().contains("NETWORK_AUTHORITY_NOT_CONFIGURED"));
     }
 }

@@ -23,8 +23,11 @@ import java.util.concurrent.TimeUnit;
 public final class DoctorCommand implements Callable<Integer> {
     private static final Duration COMMAND_TIMEOUT = Duration.ofSeconds(10);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    static final String EXPECTED_ACPX_VERSION = "0.11.0";
-    static final String EXPECTED_CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp@0.46.0";
+    static final String EXPECTED_ACPX_VERSION = "0.13.2";
+    static final String EXPECTED_ACPX_UPSTREAM_COMMIT = "fd173f04aa1b56f9e3f5ca5190c034ddcae28792";
+    static final String EXPECTED_ACPX_PATCH_SHA256 = "304577dc136c87b055b5873b0562929cd5c16b1b0d18321e27f851209b3ab811";
+    static final String EXPECTED_ACPX_POLICY_SCHEMA = "claude_execution_policy.v1";
+    static final String EXPECTED_CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp@0.70.0";
     static final String EXPECTED_CODEX_ACP_VERSION = "0.16.0";
 
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
@@ -81,7 +84,8 @@ public final class DoctorCommand implements Callable<Integer> {
     }
 
     private void checkAcpxCommand() throws IOException, InterruptedException {
-        var result = run("acpx", "--version");
+        var executable = acpxExecutable();
+        var result = run(executable, "--version");
         if (result.exitCode() != 0) {
             fail("acpx command", firstLine(result.output()));
             return;
@@ -89,15 +93,43 @@ public final class DoctorCommand implements Callable<Integer> {
         var actualVersion = result.output().trim();
         if (!EXPECTED_ACPX_VERSION.equals(actualVersion)) {
             fail("acpx version", "expected " + EXPECTED_ACPX_VERSION + ", found " + actualVersion
-                    + ". Install with: npm install -g acpx@" + EXPECTED_ACPX_VERSION);
+                    + ". Run ./scripts/install-acpx-e1.sh and export DUAL_ACPX_EXECUTABLE");
             return;
         }
         ok("acpx version", actualVersion);
-        checkAcpxAdaptersPinned();
+        checkAcpxBuildIdentity(executable);
+        checkAcpxAdaptersPinned(executable);
     }
 
-    private void checkAcpxAdaptersPinned() throws IOException, InterruptedException {
-        var result = run("acpx", "config", "show");
+    private void checkAcpxBuildIdentity(String executable) throws IOException, InterruptedException {
+        var result = run(executable, "build-info", "--json");
+        if (result.exitCode() != 0) {
+            fail("E1 policy transport", "NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build-info is unavailable");
+            return;
+        }
+        var check = evaluateAcpxBuildIdentity(result.output());
+        reportPin("E1 policy transport", check);
+    }
+
+    static PinCheck evaluateAcpxBuildIdentity(String buildInfoJson) {
+        try {
+            Map<String, Object> document = MAPPER.readValue(buildInfoJson, new TypeReference<>() {
+            });
+            if (!EXPECTED_ACPX_UPSTREAM_COMMIT.equals(stringValue(document.get("upstream_commit")))
+                    || !EXPECTED_ACPX_PATCH_SHA256.equals(stringValue(document.get("patch_sha256")))
+                    || !EXPECTED_ACPX_POLICY_SCHEMA.equals(stringValue(document.get("policy_schema")))) {
+                return PinCheck.fail("NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build identity mismatch");
+            }
+            return PinCheck.ok("upstream=" + EXPECTED_ACPX_UPSTREAM_COMMIT
+                    + ", patch=" + EXPECTED_ACPX_PATCH_SHA256);
+        } catch (Exception failure) {
+            return PinCheck.fail("NETWORK_AUTHORITY_NOT_CONFIGURED: invalid patched acpx build-info: "
+                    + failure.getMessage());
+        }
+    }
+
+    private void checkAcpxAdaptersPinned(String executable) throws IOException, InterruptedException {
+        var result = run(executable, "config", "show");
         if (result.exitCode() != 0) {
             fail("acpx config", firstLine(result.output()));
             return;
@@ -114,6 +146,11 @@ public final class DoctorCommand implements Callable<Integer> {
                 readUserClaudeSettings(),
                 System.getenv()
         ));
+    }
+
+    private static String acpxExecutable() {
+        var configured = System.getenv("DUAL_ACPX_EXECUTABLE");
+        return configured == null || configured.isBlank() ? "acpx" : configured.trim();
     }
 
     static PinCheck evaluateCodexAdapterPin(String configJson) {
