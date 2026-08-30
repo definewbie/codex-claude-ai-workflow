@@ -1870,5 +1870,10 @@ OKX real-case 暴露的通用 execution-policy transport 缺口已完成 determi
 `PASS（P0=0 / P1=0 / P2=4 知会）`，并独立复现 focused `95/0/0`、full reactor
 `1294/0/0/0`、fork installer `973/0/0/0` 与 clean diff-check。四项 P2 已登记为 capability proof
 输入：system tmpdir scratch 语义、official acpx 参数硬失败、ignored installer audit 与 operator-trusted
-`DUAL_ACPX_EXECUTABLE`。当前 active step 仅为离线 capability proof Q1-Q3；Q4-Q15、provider、旧 OKX
-workstream resume 与新 real-case 均未授权。
+`DUAL_ACPX_EXECUTABLE`。离线 capability proof Q1-Q3 已完成：Q1 `PASS`；Q2 transport/env separation
+`PASS`、provider connection `NOT PROVEN`；Q3 option consumption `VALIDATED`、OS sandbox behavior
+`NOT PROVEN`。直接裸跑 upstream suite 因绕开 installer identity 注入并受当前进程权限限制而判
+`INVALID`，相关进程已全部终止，正式 installer 已重跑并恢复 `973/0/0/0`。证据位于
+`docs/testing/capability-proofs/20260830-e1-policy-transport-offline-replay/`。下一 active step 只能是制定
+Q3 behavioral effect + Q4-Q15 的独立 Verification Gate；provider、旧 OKX workstream resume 与新 real-case
+均未授权。
