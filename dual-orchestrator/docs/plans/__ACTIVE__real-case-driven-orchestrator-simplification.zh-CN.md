@@ -1877,3 +1877,15 @@ OKX real-case 暴露的通用 execution-policy transport 缺口已完成 determi
 `docs/testing/capability-proofs/20260830-e1-policy-transport-offline-replay/`。下一 active step 只能是制定
 Q3 behavioral effect + Q4-Q15 的独立 Verification Gate；provider、旧 OKX workstream resume 与新 real-case
 均未授权。
+
+E1 真实能力 Gate 已起草为
+`docs/testing/verification-gates/20260831-e1-claude-sandbox-effect-capability.md`，并冻结 package-local launcher、
+network matrix script、Bash prompt 与 WebSearch prompt 四个 fixture。Gate 将原 Q3-Q15 拆为 provider capability、既有
+deterministic enforcement 与 implementation-deferred 三类，避免用尚未实现的 Q10/Q14 形成循环前提。当前只允许独立只读
+评审 Gate/fixtures；两个带工具的 Claude prompts 不属于 standing minimal health probe，尚未授权。
+
+Gate 独立评审已 `PASS / READY（P0=0 / P1=0 / P2=5）`，fixture SHA、编译配方、production writer/transport 与
+WebSearch 启用形态均经独立复现。五项 P2 已作为小 delta 吸收：npm/Maven 改为已知存在工件形成 hard discriminator；
+tool env 任一 credential/proxy presence 立即 exit 73；session conflict 补精确 ensure 命令与 prompt-count 反证；sentinel
+固定在空专用目录；case report 强制登记 WebSearch 为 Gate operator opt-in、未执行 production human authority。当前进入
+文档 checkpoint 提交与 non-provider preflight，两个带工具 prompts 仍需一次性明确授权。

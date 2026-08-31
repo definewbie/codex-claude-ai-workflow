@@ -1,0 +1,65 @@
+package dev.dual.adapter.acpx;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+
+public final class E1SandboxProbeLauncher {
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT);
+
+    private E1SandboxProbeLauncher() {
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length != 4) {
+            throw new IllegalArgumentException("usage: <workspace> <session> <prompt> <bash|websearch>");
+        }
+        var workspace = Path.of(args[0]).toRealPath();
+        var session = args[1];
+        var prompt = Path.of(args[2]).toRealPath();
+        var mode = args[3];
+        if (!prompt.startsWith(workspace)) {
+            throw new IllegalArgumentException("prompt must be inside workspace");
+        }
+
+        var workstreamId = "ws-e1-capability";
+        var nodeInstanceId = "node-e1-" + mode;
+        var runId = "run-e1-" + mode;
+        var runDir = Files.createDirectories(workspace.resolve(
+                ".agent/workstreams/" + workstreamId + "/runs/" + runId));
+        var binding = ClaudeExecutionPolicy.write(
+                workspace, workstreamId, nodeInstanceId, runId, runDir);
+        var profile = switch (mode) {
+            case "bash" -> AcpxPermissionProfile.implement();
+            case "websearch" -> AcpxPermissionProfile.review().withAutoApprovedTool("WebSearch");
+            default -> throw new IllegalArgumentException("unsupported mode: " + mode);
+        };
+        var request = new AcpxRunRequest(
+                workspace,
+                session,
+                prompt,
+                runDir.resolve("probe.stdout"),
+                runDir.resolve("probe.stderr"),
+                profile,
+                AcpxExecutionEventSink.NOOP,
+                binding);
+
+        var result = new AcpxAgentTransport().runClaudeDesign(request);
+        var output = new LinkedHashMap<String, Object>();
+        output.put("mode", mode);
+        output.put("session", session);
+        output.put("policyRef", binding.ref());
+        output.put("policySha256", binding.sha256());
+        output.put("exitCode", result.exitCode());
+        output.put("durationMs", result.durationMs());
+        output.put("command", result.command());
+        output.put("activeAdapterSignals", result.activeAdapterSignals());
+        output.put("stdout", workspace.relativize(request.stdoutPath()).toString());
+        output.put("stderr", workspace.relativize(request.stderrPath()).toString());
+        MAPPER.writeValue(System.out, output);
+    }
+}
