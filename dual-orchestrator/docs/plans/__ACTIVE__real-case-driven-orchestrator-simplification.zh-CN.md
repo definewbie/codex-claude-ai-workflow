@@ -1958,3 +1958,18 @@ R2 Gate 与独立 fixture 已新增：proxy URL 只输出 `absent/empty/controll
 不落原始值；新增 unset 全部 proxy 后的 direct/loopback/LAN 三条绕过测试，最终 PASS 必须同时依赖完整网络矩阵与 structured
 denial evidence。离线分类测试覆盖 absent、loopback、empty、external 与 wildcard bypass，当前 PASS。R2 独立评审与 clean
 checkpoint 前不调用 provider。
+
+## 2026-09-01 E1 R3 Documented Contract Result
+
+R3 Gate/fixture 已经独立评审 PASS，并分别以 `5c26c0df`、`0d70d3f5` 冻结。fresh package、Doctor、
+launcher compile、离线 fixture、runtime identity、宿主 loopback/LAN/external/direct-socket precheck 与 minimal
+health 均通过。唯一 Bash capability occurrence 恰好执行一次冻结命令，随后在任何网络请求之前返回
+`exit 73 / E1_PROXY_CREDENTIAL_LEAK HTTP_PROXY`；三个 Anthropic credential 名称均 absent，但
+`HTTP_PROXY` 分类为 `present_with_userinfo`。按 Gate 立即 stop-loss；WebSearch、网络矩阵、retry、correction 与
+第二样本均未执行，两个 session 已关闭，sentinel 已停止。
+
+程序结论为 `FAIL / STOP-LOSS EXECUTED`。这证明 Dual policy 中的 `subprocess_denied_env_names` 没有成为
+最终 effective Bash environment 的完整 enforcement，但不能证明宿主凭据泄漏或 Claude sandbox 不安全：当前无值探针无法区分
+宿主 proxy credential 与 Claude 内建 sandbox proxy 注入的 session-scoped capability。下一步仅允许 bounded provenance
+comparison，明确 value owner、注入阶段、scope/lifetime 与 exec 前唯一验证点；不得清空受控 proxy、放宽 Gate、重跑 provider、
+实施 `PUBLIC_NETWORK_DOMAIN` 或恢复 OKX。

@@ -1,0 +1,19 @@
+{
+  "defaultAgent": "codex",
+  "defaultPermissions": "approve-all",
+  "nonInteractivePermissions": "deny",
+  "authPolicy": "skip",
+  "ttl": 300,
+  "timeout": null,
+  "queueMaxDepth": 16,
+  "format": "text",
+  "agents": {
+    "codex": {
+      "command": "npx -y @zed-industries/codex-acp-darwin-arm64@0.16.0"
+    },
+    "claude": {
+      "command": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
+    }
+  },
+  "auth": {}
+}

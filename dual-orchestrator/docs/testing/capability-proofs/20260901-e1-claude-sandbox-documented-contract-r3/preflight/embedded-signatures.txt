@@ -1,0 +1,4 @@
+   4 Connection blocked by network allowlist
+   6 Operation not permitted
+   2 [sandbox] Blocked network request to 
+   3 network path not allowed: 
