@@ -1,0 +1,11 @@
+ANTHROPIC_API_KEY	absent
+ANTHROPIC_AUTH_TOKEN	absent
+ANTHROPIC_BASE_URL	absent
+HTTP_PROXY	present
+HTTPS_PROXY	present
+ALL_PROXY	present
+NO_PROXY	present
+http_proxy	present
+https_proxy	present
+all_proxy	present
+no_proxy	present

@@ -1,0 +1,27 @@
+{
+  "generated_at" : "2026-08-31T02:30:39.650962Z",
+  "node_instance_id" : "node-e1-bash",
+  "run_id" : "run-e1-bash",
+  "sandbox" : {
+    "allow_unsandboxed_commands" : false,
+    "auto_allow_sandboxed_bash" : true,
+    "enabled" : true,
+    "fail_if_unavailable" : true,
+    "filesystem" : {
+      "allow_read" : [ "/private/tmp/dual-e1-sandbox-effect-49495db-r2/workspace", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "allow_write" : [ "/private/tmp/dual-e1-sandbox-effect-49495db-r2/workspace", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "deny_read" : [ ],
+      "deny_write" : [ ]
+    },
+    "network" : {
+      "allow_local_binding" : false,
+      "allow_unix_sockets" : [ ],
+      "allowed_domains" : [ ],
+      "strict_allowlist" : true
+    }
+  },
+  "schema_version" : "claude_execution_policy.v1",
+  "setting_sources" : [ ],
+  "subprocess_denied_env_names" : [ "ALL_PROXY", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "all_proxy", "http_proxy", "https_proxy", "no_proxy" ],
+  "workstream_id" : "ws-e1-capability"
+}

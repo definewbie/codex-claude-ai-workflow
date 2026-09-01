@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-DEFAULT_CLAUDE_ACP_COMMAND=(npx -y @agentclientprotocol/claude-agent-acp@0.46.0)
+DEFAULT_CLAUDE_ACP_COMMAND=(npx -y @agentclientprotocol/claude-agent-acp@0.70.0)
 CLAUDE_SETTINGS_PATH="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
 
 fail() {

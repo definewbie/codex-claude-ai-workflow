@@ -29,6 +29,15 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 ## Current Active Step: E1 CONTROLLED NETWORK ACCESS + MINI-B
 
+2026-09-01：E1 R2 Gate 独立评审发现 classifier execution failure 与 external proxy 共用 `exit 74`，会把环境
+`INVALID` 错投影为能力 `FAIL`。delta 将 Node 自检及非 `0/1` 退出统一归为 `exit 76 / INVALID`，并补 `126/127`、
+IPv4 `127/8`、`NO_PROXY` 尾逗号测试；同时记录 r1 fixture 修订链和历史样本的显式 runtime command 来源。此阶段仍只修
+capability observation，不修改 production network policy，也不调用 provider。
+
+E1 R2 delta 独立复审已 `PASS / EXECUTION READY（P0=0 / P1=0）`，确认上一轮 P1/P2 全部关闭；仅保留 stdin
+读取异常的 nano 级理论观察，不再改动冻结 fixture。下一步按顺序提交 docs/fixture/runtime-pin checkpoint，再执行 standing
+授权内 non-tool preflight；Bash/WebSearch capability prompts 仍需一次性明确授权。
+
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。
@@ -1889,3 +1898,30 @@ WebSearch 启用形态均经独立复现。五项 P2 已作为小 delta 吸收�
 tool env 任一 credential/proxy presence 立即 exit 73；session conflict 补精确 ensure 命令与 prompt-count 反证；sentinel
 固定在空专用目录；case report 强制登记 WebSearch 为 Gate operator opt-in、未执行 production human authority。当前进入
 文档 checkpoint 提交与 non-provider preflight，两个带工具 prompts 仍需一次性明确授权。
+
+Gate checkpoint 已提交为 `49495dbe`；non-provider preflight 通过：fresh reactor `1294/0/0/0`、E1 focused
+`95/0/0`、fork installer `973/0/0`，Doctor/build identity/fixture SHA/launcher compile 均 PASS。用户随后明确授权一次
+minimal health 与两个 tool prompts。minimal health fresh+closed 且回答 `OK`。Bash probe 在 workspace/system tmpdir 写读成功后，
+发现 tool subprocess 可见 `ANTHROPIC_AUTH_TOKEN`、`ANTHROPIC_BASE_URL` 与 8 个大小写 proxy 变量，按冻结脚本
+`exit 73 / E1_TOOL_ENV_LEAK` 触发首个 stop-loss。WebSearch、session conflict 与任何后续 tool prompt 均未执行；Bash session
+已关闭，sentinel 已停止。Gate 结论为 `FAIL`，不是 `INVALID`；E1 sandbox effect 与 WebSearch coexistence 仍 `NOT PROVEN`，
+禁止实施 `PUBLIC_NETWORK_DOMAIN` 或恢复 OKX。当前唯一动作是 env propagation owner 的 bounded comparison。
+
+用户升级 standalone Claude Code 到 `2.1.236` 后，核实 Dual 实际执行链仍由 acpx 配置固定在
+`claude-agent-acp 0.46.0 / embedded Claude Code 2.1.178`，standalone CLI 不拥有 ACP runtime。现已把用户级 acpx
+配置与 wrapper fallback 同步到 `claude-agent-acp 0.70.0`；fresh handshake 证明实际依赖
+`claude-agent-sdk 0.3.232 / embedded Claude Code 2.1.232`，Doctor 与 wrapper test PASS。
+
+随后在 detached clean source `49495dbe` 上重跑同一 frozen Bash fixture。fresh health PASS；Bash tool 中
+`ANTHROPIC_API_KEY`、`ANTHROPIC_AUTH_TOKEN`、`ANTHROPIC_BASE_URL` 已全部 absent；但八个大小写 proxy 变量仍 present，
+冻结脚本按原规则 `exit 73`，故程序性记录为 `FAIL / STOP-LOSS EXECUTED`，未运行网络矩阵、WebSearch 或 session conflict。
+后续核实发现新版 Claude sandbox runtime 包含为 policy-enforcing local proxy 注入 HTTP(S)_PROXY 等变量的实现，而
+presence-only fixture 既把空变量算 present，也无法区分受控内部代理与宿主泄漏。因此 proxy/network capability 的语义结论修正为
+`INVALID_OBSERVATION_MODEL`；三个 Anthropic 名称不可见仅保留为 captured fact，不以未做消融对照的单样本宣称机制 PROVEN。
+证据位于 `docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/`。下一步只允许修订 proxy provenance
+观测与 network-denial Gate；不得删除受控 sandbox proxy、不得恢复 OKX 或实施 `PUBLIC_NETWORK_DOMAIN`。
+
+R2 Gate 与独立 fixture 已新增：proxy URL 只输出 `absent/empty/controlled_loopback/external`，`NO_PROXY` 只输出固定分类，
+不落原始值；新增 unset 全部 proxy 后的 direct/loopback/LAN 三条绕过测试，最终 PASS 必须同时依赖完整网络矩阵与 structured
+denial evidence。离线分类测试覆盖 absent、loopback、empty、external 与 wildcard bypass，当前 PASS。R2 独立评审与 clean
+checkpoint 前不调用 provider。

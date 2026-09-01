@@ -1,0 +1,15 @@
+88cf7c2c67e49bbbbac1de7e9b5163c2ab5d615c9c4e156b2a95d7567b26b9d3  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-run/claude-execution-policy.json
+7734857a9066b2c426a9715dcb9e5b92d7445bdfec1f90606c5e9c9e4088d17e  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-run/environment.tsv
+9e3258b73c571d0e4c49d3782aa3607ed6108d323eb4eebc35df0018d9181368  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-run/probe.stderr
+d4b23ab81f624b8d6b4b20141516755b3f953e0cad6ad1a4dcc0fb3692d4e64c  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-run/probe.stdout
+985475de2ebec46eb18af8db0f08b0d91c723aba937bcdc0dcc744e3661b678f  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-run/results.tsv
+ddb2ae2980a9253312a05ae709f3012e754aa275ea36d66ed1ab8beec7dfbcce  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-session-record.json
+98082e6c33760527cb07e32cdd76a01205f63e90e30348aeef787f4fd7cacbdd  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/bash-session-stream.ndjson
+0cbcd6b324a9c829fc3710671f6f1c004f980905c735d03400bb713d97918096  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/health-session-record.json
+7cc43b94a4e69804af15f07dcd9eac2a8831d32adf31a0fdd1ce3059843d92b5  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/health-session-stream.ndjson
+af1cce492d35ff372e1e85c60b313be4fb62e9d355a93a425f838ed3f4c2e8d8  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/inputs/bash-probe-prompt.md
+121be03d37859d7f4d50d715d8896cb9e59e99dcaa9582d075826881a602bc32  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/inputs/e1-network-probe.sh
+fc20bd893816f01cfb81e0afafdda3448218040a8595f2c0c147b7ea0af65afc  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/result.md
+525d47d24b97531457387384cfdbc9e80e8a129211d6f9715648f6e630abf211  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/runtime/acpx-config.json
+dc85a06d256602b6ad40429b69bc7920ee4297839136b0e722199e4c7daf8567  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/runtime/claude-agent-acp-package.json
+7f06dfa738cd0e505aa6fb8fd4f038e37629fce6d67906adfdc64655a095285c  docs/testing/capability-proofs/20260831-e1-claude-sandbox-effect-49495db-r2/runtime/claude-agent-sdk-package.json

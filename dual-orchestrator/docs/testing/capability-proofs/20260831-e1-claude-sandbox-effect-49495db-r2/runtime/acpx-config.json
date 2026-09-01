@@ -1,0 +1,10 @@
+{
+  "agents": {
+    "claude": {
+      "command": "/private/tmp/dual-e1-gate-source-49495db-r2/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
+    },
+    "codex": {
+      "command": "npx -y @zed-industries/codex-acp-darwin-arm64@0.16.0"
+    }
+  }
+}
