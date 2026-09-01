@@ -71,6 +71,40 @@ R3 delta 复审已 `PASS / EXECUTION READY（P0=0 / P1=0）`；四个拒绝签�
 acpx fork、ACP/SDK/embedded Claude identity 与 binary SHA。下一步为 docs-only freeze commit 后的 fresh package/Doctor/preflight；
 任一身份或签名漂移即 INVALID，不调用 provider。
 
+R3 结果随后证明原观察模型仍有 owner 冲突：Dual 将八个 proxy 名作为 Bash credential deny，而 Claude sandbox 按官方契约
+可用同名变量承载自身 network transport。bounded comparison 推荐固定 `network_transport_owner=claude_sandbox`、只把三个
+Anthropic provider 名作为 credential deny，并将 ambient proxy scrub 下沉到 reviewed fork 的 E1-bound Claude child spawn；
+wrapper/Doctor 仅保留 defense in depth。独立评审 `PASS / IMPLEMENTATION READY（P0=0 / P1=0 / P2=5）`，五项 P2 已写回
+comparison，`resolveSettings(settingSources=[])` 的 presence-only 证据也已归档。
+
+当前只读 sweep 已完成并形成
+`docs/plans/e1-claude-sandbox-network-transport-owner-implementation-plan-20260901.zh-CN.md`。首轮独立计划评审发现
+`P0-1`：固定 `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` 会按 Anthropic 官方 settings reference 关闭
+`autoAllowBashIfSandboxed`，使 env 成为第二 policy owner，并重新阻断 Bash capability probe。delta 已按最小方向反转：
+只在 Claude + 完整 E1 binding 下、晚于 process/auth/session env merge 删除八个 proxy 名和 ambient SCRUB 开关；provider
+credential 的 sandboxed Bash 隔离仍由 policy v2 `sandbox.credentials.envVars` 唯一拥有；finalizer 挂在
+`ensureLaunchSupport` 之后、spawn 之前，并补 production command-shape 回归与证据文件 SHA。下一步仅允许独立 delta review；
+PASS 前不修改 production/fork patch、不调用 provider、不恢复 OKX。
+
+P0 delta 独立复审已 `PASS / IMPLEMENTATION READY（P0=0 / P1=0 / P2=3）`，确认删除 ambient SCRUB 恢复
+policy 对 auto-allow 的唯一 ownership，且不改变 R2/R3 已验证配置。三项 P2 已同步：Boundary Map 删除旧“固定安全开关”
+措辞、引用改为 official settings-reference、测试 5 覆盖 SCRUB 大小写变体。当前进入 §6 单一 deterministic
+implementation checkpoint；仍禁止 provider、real-case、domain approval、自建 proxy 与 workflow/ledger/UI 改动。
+
+checkpoint 首轮独立 diff review 为 `WARN（P0=0 / P1=2）`：stamped build identity 测试仍固定期待 `UNBUILT`，且
+finalizer 仅有纯函数测试、未从 `AcpClient.start()` 证明最终 child env。两项均已最小关闭：build-info test 改为消费 generated
+identity 常量；真实 child harness 证明完整 E1 binding 删除八个 proxy 名与 ambient SCRUB、保留 executable，并以 unbound
+Claude/non-Claude sibling 证明不越界。patch identity 更新为
+`fc2783a8b5aa2a450007b9e5516ca473d9a5e5785d8760b342e230ea180c60cc`；fork pre-stamp 与 stamped
+full suite 均为 `980/0/0`，Dual reactor `1294/0/0/0`，wrapper、patch apply/reverse、fresh Doctor 全部 PASS。
+`AcpxAgentTaskHandler`、`AcpxAgentTransport`、`AgentRunMetadataWriter` 保持零 diff 是因为其既有 ref/SHA binding 与持久化
+不依赖 policy schema 字段，已由现有测试覆盖。当前只允许独立 delta review；PASS 前不提交、不进入 capability Gate。
+
+delta diff review 已 `PASS / READY TO COMMIT（P0=0 / P1=0 / P2=3 非阻塞）`，独立复跑交付树
+`980/0/0`、wrapper、Java focused、fresh Doctor 与 reverse-apply 均通过；两个 P1 正式关闭。当前先选择性提交 E1
+Network Transport Owner checkpoint，随后另起 sandbox-effect capability Verification Gate。用户已预授权该 Gate 所需的
+provider tool turns，不再重复询问；授权不包含绕过 Gate/stop-loss、恢复 OKX real-case、domain approval 或 custom proxy。
+
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。
@@ -1973,3 +2007,30 @@ health 均通过。唯一 Bash capability occurrence 恰好执行一次冻结命
 宿主 proxy credential 与 Claude 内建 sandbox proxy 注入的 session-scoped capability。下一步仅允许 bounded provenance
 comparison，明确 value owner、注入阶段、scope/lifetime 与 exec 前唯一验证点；不得清空受控 proxy、放宽 Gate、重跑 provider、
 实施 `PUBLIC_NETWORK_DOMAIN` 或恢复 OKX。
+
+R3 result 独立评审 `PASS（P0=0 / P1=0 / P2=4）`，结果与证据已提交为 `fc0b1efe`。四项 P2 已如实
+登记：sentinel closure receipt 与显式时间戳缺失、operator 语境 Python EPERM 不得跨语境归因、tool 等值仅以
+`command` 字段判定。随后完成 bounded comparison：wrapper 已在 adapter spawn 前清除全部宿主 proxy，captured
+session 又使用 `settingSources=[]`，因此不再为已有 deterministic 边界建设 HMAC provenance 平台。推荐 Candidate C：
+固定 `network_transport_owner=claude_sandbox`，sensitive-env deny 仅拥有 provider runtime inputs，wrapper scrub 成为该 owner 的
+ambient-env precondition；不检查 Claude 内部 proxy URL，不设置 custom proxy port。当前只达到 `ASSESSED / NOT IMPLEMENTED`，下一步
+仅允许独立架构评审 comparison 与实施边界，不授权 production 修改或 provider。
+
+## 2026-09-01 E1 Network Transport Owner Checkpoint
+
+bounded comparison、实施计划评审与 P0 delta 复审均已 PASS，production checkpoint 已按单一边界实施：
+
+- `ClaudeExecutionPolicy` 升级为 `claude_execution_policy.v2`，固定
+  `network_transport_owner=claude_sandbox`；provider credential deny 仅保留三个 Anthropic 名称；
+- reviewed acpx fork 在 Claude E1 child 的全部 env merge 与 executable resolution 完成后、spawn 前删除八个
+  ambient proxy 名及 ambient `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`；非 E1、非 Claude sibling 不变；
+- fork loader 继续以 exact keys、SHA、lineage 与固定值校验 policy；半绑定或非 Claude binding 在 child spawn 前拒绝；
+- patch、manifest、configure、Doctor 与安装 build identity 统一为
+  `fd173f04 / fc2783a8b5aa2a450007b9e5516ca473d9a5e5785d8760b342e230ea180c60cc / claude_execution_policy.v2`；
+- installer 在 Node 22.21 正常权限环境复跑 fork `978/0/0`；Dual focused `95/0/0`，正常权限 full reactor
+  `1294/0/0/0`，wrapper test 与 `git diff --check` PASS。Codex 沙箱内首次 reactor 的两个 ProcessHandle
+  `sysctl EPERM` 属验证环境 INVALID，正常权限重跑已消除。
+
+准确成熟度为 `NETWORK TRANSPORT OWNERSHIP ENFORCED / SANDBOX EFFECT NOT PROVEN`。当前只允许独立代码级 diff
+review；review PASS 并 clean commit 后，才制定新的 capability Verification Gate。不得在本 checkpoint 中调用 provider、
+恢复 OKX、实施 domain approval 或宣称网络效果已证明。

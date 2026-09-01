@@ -34,6 +34,9 @@ class ClaudeExecutionPolicyTest {
                 tempDir.resolve(binding.ref()).toFile(), new TypeReference<>() {
                 });
         assertEquals(ClaudeExecutionPolicy.SCHEMA, document.get("schema_version"));
+        assertEquals(ClaudeExecutionPolicy.NETWORK_TRANSPORT_OWNER, document.get("network_transport_owner"));
+        assertEquals(List.of("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"),
+                document.get("provider_subprocess_denied_env_names"));
         assertEquals(List.of(), document.get("setting_sources"));
         var sandbox = map(document.get("sandbox"));
         assertEquals(true, sandbox.get("enabled"));
@@ -48,6 +51,8 @@ class ClaudeExecutionPolicyTest {
         var serialized = Files.readString(tempDir.resolve(binding.ref()));
         assertFalse(serialized.contains("secret-value"));
         assertTrue(serialized.contains("ANTHROPIC_AUTH_TOKEN"));
+        assertFalse(serialized.contains("HTTP_PROXY"));
+        assertFalse(serialized.contains("\"subprocess_denied_env_names\""));
     }
 
     @Test

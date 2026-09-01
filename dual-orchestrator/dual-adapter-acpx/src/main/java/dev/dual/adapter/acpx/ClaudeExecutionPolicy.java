@@ -18,19 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 final class ClaudeExecutionPolicy {
-    static final String SCHEMA = "claude_execution_policy.v1";
-    private static final List<String> DENIED_ENV_NAMES = List.of(
-            "ALL_PROXY",
+    static final String SCHEMA = "claude_execution_policy.v2";
+    static final String NETWORK_TRANSPORT_OWNER = "claude_sandbox";
+    private static final List<String> PROVIDER_DENIED_ENV_NAMES = List.of(
             "ANTHROPIC_API_KEY",
             "ANTHROPIC_AUTH_TOKEN",
-            "ANTHROPIC_BASE_URL",
-            "HTTP_PROXY",
-            "HTTPS_PROXY",
-            "NO_PROXY",
-            "all_proxy",
-            "http_proxy",
-            "https_proxy",
-            "no_proxy"
+            "ANTHROPIC_BASE_URL"
     );
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
@@ -80,9 +73,10 @@ final class ClaudeExecutionPolicy {
         document.put("workstream_id", requireIdentifier(workstreamId, "workstreamId"));
         document.put("node_instance_id", requireIdentifier(nodeInstanceId, "nodeInstanceId"));
         document.put("run_id", requireIdentifier(runId, "runId"));
+        document.put("network_transport_owner", NETWORK_TRANSPORT_OWNER);
         document.put("setting_sources", List.of());
         document.put("sandbox", sandbox);
-        document.put("subprocess_denied_env_names", DENIED_ENV_NAMES);
+        document.put("provider_subprocess_denied_env_names", PROVIDER_DENIED_ENV_NAMES);
         document.put("generated_at", Instant.now().toString());
 
         var bytes = MAPPER.writeValueAsBytes(document);
@@ -130,6 +124,7 @@ final class ClaudeExecutionPolicy {
             requireEquals(document, "workstream_id", workstreamId);
             requireEquals(document, "node_instance_id", nodeInstanceId);
             requireEquals(document, "run_id", runId);
+            requireEquals(document, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
         }
 
         Map<String, Object> metadata(String disposition) {

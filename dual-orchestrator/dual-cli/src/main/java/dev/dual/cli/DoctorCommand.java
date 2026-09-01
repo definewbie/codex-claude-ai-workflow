@@ -25,8 +25,8 @@ public final class DoctorCommand implements Callable<Integer> {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     static final String EXPECTED_ACPX_VERSION = "0.13.2";
     static final String EXPECTED_ACPX_UPSTREAM_COMMIT = "fd173f04aa1b56f9e3f5ca5190c034ddcae28792";
-    static final String EXPECTED_ACPX_PATCH_SHA256 = "304577dc136c87b055b5873b0562929cd5c16b1b0d18321e27f851209b3ab811";
-    static final String EXPECTED_ACPX_POLICY_SCHEMA = "claude_execution_policy.v1";
+    static final String EXPECTED_ACPX_PATCH_SHA256 = "fc2783a8b5aa2a450007b9e5516ca473d9a5e5785d8760b342e230ea180c60cc";
+    static final String EXPECTED_ACPX_POLICY_SCHEMA = "claude_execution_policy.v2";
     static final String EXPECTED_CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp@0.70.0";
     static final String EXPECTED_CODEX_ACP_VERSION = "0.16.0";
 
