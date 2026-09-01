@@ -1,0 +1,4 @@
+e20cfa3c54fba394e9d9d5df082b663ea8178ec43614c54831b1eb12d7e64a91  ./inputs/bash-probe-prompt.md
+97bdc2e9935e42316d599170dcb2380714b73f2834377851e0cea1fc2cd461f4  ./inputs/e1-sandbox-contract-probe.sh
+e42779776ead228528086706e1463caf3772593173008d2de0378a734b6519e5  ./inputs/e1-sandbox-contract-probe.test.sh
+36f4bd2e85104d3404ac125791b71ed0623ccee404fbc3a002db3975da647554  ./inputs/websearch-probe-prompt.md

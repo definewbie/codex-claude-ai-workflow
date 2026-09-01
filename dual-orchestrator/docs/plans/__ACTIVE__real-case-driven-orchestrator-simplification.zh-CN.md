@@ -38,6 +38,34 @@ E1 R2 delta 独立复审已 `PASS / EXECUTION READY（P0=0 / P1=0）`，确认�
 读取异常的 nano 级理论观察，不再改动冻结 fixture。下一步按顺序提交 docs/fixture/runtime-pin checkpoint，再执行 standing
 授权内 non-tool preflight；Bash/WebSearch capability prompts 仍需一次性明确授权。
 
+E1 R2 checkpoint 已提交为 `05f864ba`；fresh package、Doctor、fixture SHA、launcher compile、离线测试与一次 fresh minimal
+health 全部 PASS。用户随后明确授权两个 capability prompts。本轮 Bash session 精确执行一个 `./e1-network-probe.sh` tool call：
+三个 Anthropic credential 均 absent，但严格分类器判定 `HTTP_PROXY=external`，脚本在首个网络请求前以
+`exit 74 / E1_UNSAFE_PROXY_PROVENANCE` fail-closed。按 Gate 立即 stop-loss：未运行 WebSearch、session-conflict 或第二样本；
+Bash session 已关闭，sentinel 已停止。
+
+2026-09-01 对照 Anthropic 官方 sandbox/settings/secure-deployment 文档后纠正判定：Claude Code 的公开安全契约是“沙箱外代理
++ OS 级阻断直连 + 域名策略”，并未承诺 Bash 子进程的 proxy URL 必须呈现 loopback hostname。未设置 `httpProxyPort` /
+`socksProxyPort` 时，Claude Code 可使用内建代理。因此本轮不是能力 `FAIL`，而是
+`INVALID_OBSERVATION_MODEL / STOP-LOSS EXECUTED`：Gate 把实现投影的地址形态误当成安全 authority，真正的 network deny
+effect 仍 `NOT PROVEN`。下一步仅允许按官方契约重写 Gate 与独立评审；不得消耗第二样本、实施 `PUBLIC_NETWORK_DOMAIN`
+或恢复 OKX。
+
+R3 documented-contract Gate 已起草于
+`docs/testing/verification-gates/20260901-e1-claude-sandbox-documented-contract-r3.md`，并新增去除 proxy URL 形态判断的冻结
+fixture。新版只验证官方契约效果：credential stripping、deny-all proxy domain rejection、raw-socket OS no-direct-connect、
+strict no-unsandboxed fallback 与 WebSearch 共存。离线 fixture test 已 PASS；当前为
+`DRAFT / EXECUTION AUTHORIZED AFTER INDEPENDENT REVIEW PASS`，必须先完成独立同行评审与 clean docs checkpoint，不运行第二
+provider 样本。
+
+R3 独立评审结论为 `PASS / EXECUTION READY AFTER GATE-SIDE CONDITIONS（P0=0 / P1=1）`。唯一 P1 是网络拒绝正向归因仍留给
+operator 解释。Gate 已改为 frozen-runtime 签名白名单：proxy path 只接受 network allowlist/sandbox block 签名，direct path
+只接受这些签名或 `Operation not permitted`；普通 HTTP/DNS/TLS/timeout/connection failure 一律不能 PASS，缺少或歧义签名为
+`INVALID_OBSERVATION_SIGNATURE`。同时吸收 P2：72/75 归 INVALID、73 按 typed reason 归 FAIL，precheck/sentinel 原始输出入 SHA，
+复验 `allowManagedDomainsOnly=true`、空 excludedCommands 与 Claude Code 最低版本，并要求净化环境运行离线 test。为避免
+direct-path 的 `EPERM` 被 curl 抹平成普通连接错误，fixture 进一步改为 raw Python socket，并让 proxy curl 保留拒绝响应正文；
+因此 SHA 已更新，必须做一次 delta 复审后才能执行。
+
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。

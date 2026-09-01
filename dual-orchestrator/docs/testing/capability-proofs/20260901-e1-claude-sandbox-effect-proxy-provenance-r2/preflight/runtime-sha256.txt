@@ -1,0 +1,2 @@
+52495e277e2e27797b633325ad102f1de07da64269f06bf1e41705bec90ad872  dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar
+79ec855accb52fd218d2068335feaebf318c4295e399d609f2c34a008122984c  /private/tmp/dual-e1-sandbox-effect-05f864b-r2/classes/dev/dual/adapter/acpx/E1SandboxProbeLauncher.class

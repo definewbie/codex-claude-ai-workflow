@@ -1,0 +1,12 @@
+{
+  "mode" : "bash",
+  "session" : "e1-sandbox-bash-05f864b-r2",
+  "policyRef" : ".agent/workstreams/ws-e1-capability/runs/run-e1-bash/execution-authority/claude-execution-policy.json",
+  "policySha256" : "b93c55884c335c7958694036a95bb0787fcab2319786570507ffacbf0a6c241e",
+  "exitCode" : 0,
+  "durationMs" : 21522,
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Write,Edit,MultiEdit,Grep,Glob,Bash", "--claude-execution-policy-ref", ".agent/workstreams/ws-e1-capability/runs/run-e1-bash/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "b93c55884c335c7958694036a95bb0787fcab2319786570507ffacbf0a6c241e", "claude", "-s", "e1-sandbox-bash-05f864b-r2", "-f", "/private/tmp/dual-e1-sandbox-effect-05f864b-r2/workspace/bash-probe-prompt.md" ],
+  "activeAdapterSignals" : [ ],
+  "stdout" : ".agent/workstreams/ws-e1-capability/runs/run-e1-bash/probe.stdout",
+  "stderr" : ".agent/workstreams/ws-e1-capability/runs/run-e1-bash/probe.stderr"
+}
