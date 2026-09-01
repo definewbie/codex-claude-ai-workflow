@@ -66,6 +66,11 @@ operator 解释。Gate 已改为 frozen-runtime 签名白名单：proxy path 只
 direct-path 的 `EPERM` 被 curl 抹平成普通连接错误，fixture 进一步改为 raw Python socket，并让 proxy curl 保留拒绝响应正文；
 因此 SHA 已更新，必须做一次 delta 复审后才能执行。
 
+R3 delta 复审已 `PASS / EXECUTION READY（P0=0 / P1=0）`；四个拒绝签名在实际 embedded `2.1.232` binary 中独立命中，
+更新后的 fixture SHA、净化环境离线 test 与 Bash 语法均复现通过。首个 clean fixture/Gate checkpoint 为 `5c26c0df`；Gate 已冻结
+acpx fork、ACP/SDK/embedded Claude identity 与 binary SHA。下一步为 docs-only freeze commit 后的 fresh package/Doctor/preflight；
+任一身份或签名漂移即 INVALID，不调用 provider。
+
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。

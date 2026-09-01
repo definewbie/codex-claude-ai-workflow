@@ -99,12 +99,13 @@ R3 只验证上述行为契约，不解释或约束 Bash 中 proxy URL 的值、
 
 ```text
 source ancestor: 05f864baabfa5a107fcc6f6fdace3c9a1d196a75
-fixture checkpoint: <clean commit containing R3 fixture and Gate>
-execution source HEAD: <clean descendant used for fresh package; record in result>
-acpx fork identity: <Doctor result>
-claude-agent-acp: <Doctor/session record actual>
-claude-agent-sdk: <Doctor/session record actual>
-embedded Claude Code: <Doctor/session record actual>
+fixture checkpoint: 5c26c0df (full SHA recorded by git/preflight)
+execution source HEAD: clean descendant of fixture checkpoint, recorded in preflight/result
+acpx fork identity: upstream fd173f04aa1b56f9e3f5ca5190c034ddcae28792 / patch 304577dc136c87b055b5873b0562929cd5c16b1b0d18321e27f851209b3ab811
+claude-agent-acp: 0.70.0
+claude-agent-sdk: 0.3.232
+embedded Claude Code: 2.1.232
+embedded darwin-arm64 binary SHA-256: 7b39c1588df919d001dea3ffd5651adb682f2451b5a0e18d42d4233296b53cc7
 Bash prompt SHA-256: e20cfa3c54fba394e9d9d5df082b663ea8178ec43614c54831b1eb12d7e64a91
 network script SHA-256: 97bdc2e9935e42316d599170dcb2380714b73f2834377851e0cea1fc2cd461f4
 offline test SHA-256: e42779776ead228528086706e1463caf3772593173008d2de0378a734b6519e5
