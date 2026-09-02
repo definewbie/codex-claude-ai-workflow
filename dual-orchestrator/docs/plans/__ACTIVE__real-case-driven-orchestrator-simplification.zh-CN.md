@@ -105,6 +105,30 @@ delta diff review 已 `PASS / READY TO COMMIT（P0=0 / P1=0 / P2=3 非阻塞）`
 Network Transport Owner checkpoint，随后另起 sandbox-effect capability Verification Gate。用户已预授权该 Gate 所需的
 provider tool turns，不再重复询问；授权不包含绕过 Gate/stop-loss、恢复 OKX real-case、domain approval 或 custom proxy。
 
+E1 Network Transport Owner checkpoint 已提交为 `5018790`，工作树随后 clean。新的 capability Gate 已写入
+`docs/testing/verification-gates/20260902-e1-claude-sandbox-effect-after-transport-owner.md`：复用 R3 原冻结 fixture，唯一改变是
+执行基线升级为 policy v2 与新 fork identity，用于直接验证 owner 修复后的 Bash domain deny、OS no-direct-connect、filesystem/
+credential 不退化及 WebSearch 共存。当前只允许独立 Gate review；review PASS 与 clean docs checkpoint 后按 standing
+authorization 直接执行 provider turns，不再重复询问。
+
+Gate 首轮独立评审发现 `P0-1`：我错误复用了 R3 的 proxy userinfo 分类与 exit 73 前闸，它属于已废弃的 v1 owner 契约，
+会在当前 runtime 上确定性阻断网络矩阵并重新把 Claude-owned transport URL 当成 Dual authority。delta 已按批准计划 §3.5
+修正：复制新 fixture，proxy 只记录名称 presence、不读取值；URL-shaped canary 必须完整完成矩阵且证据不泄漏；exit 73 仅保留
+给三个 Anthropic credential。同步冻结 launcher 源码，并补 WebSearch profile/stream 结果与 Bash permission-request 判读。
+offline 双场景 test、shell syntax 与 production classpath launcher compile 已 PASS；fixture SHA 已冻结。当前预授权不激活，
+只允许独立 fixture/Gate delta review。
+
+fixture/Gate 首轮 delta review 确认原 P0 已关闭，但发现 `P1-1`：Gate 把 WebSearch profile 描述成“只批准 WebSearch、
+retry=0”，冻结 launcher 实际使用 production review profile，确定性参数为 allowed tools `Read,Grep,Glob,WebSearch`、
+autoApprove kinds `read/search`、fetch escalate，且继承 retry=1。仅改文字接受 retry=1 会破坏单次样本纪律，因此 launcher
+现在保留完整 production 权限字段，只把该验证 occurrence 的 retry 收紧为 0；Gate 同步冻结完整 CLI/policy JSON，并明确
+WebFetch request/deny 是预期证明路径。当前仍只允许 SHA 重算、离线验证与独立 delta 复审，预授权不激活。
+
+P1 alignment delta 独立复审已 `PASS / EXECUTION READY（P0=0 / P1=0）`：launcher 逐字段保留 production review
+profile，仅收紧 retry=0；Gate 的 allowed-tools、permission-policy 与 flag absence 判据和实际装配完全一致；launcher
+`cdaa7bf6...5142fb`、fixture `5/5` SHA、compile、offline test、bash syntax 均复现通过。当前先提交 clean Gate/fixture
+checkpoint；全部 non-provider preflight PASS 后，用户预授权自动生效，按 Gate 恰一次 Bash、条件式恰一次 WebSearch。
+
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。
