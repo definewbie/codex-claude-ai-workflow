@@ -78,6 +78,34 @@ class SessionScopePolicyTest {
     }
 
     @Test
+    void occurrenceBoundPolicyAlwaysUsesRunScope() {
+        var first = SessionScopePolicy.occurrenceBound(
+                BASE, WS, "stage-implement", "iter-003", "run-41");
+        var second = SessionScopePolicy.occurrenceBound(
+                BASE, WS, "stage-implement", "iter-003", "run-42");
+
+        assertEquals(SessionScopePolicy.Scope.RUN, first.scope());
+        assertEquals(BASE + "-" + WS + "-run-41", first.sessionName());
+        assertEquals(BASE + "-" + WS + "-run-42", second.sessionName());
+        assertNotEquals(first.sessionName(), second.sessionName());
+        assertEquals("execution-policy:occurrence-bound", first.reason());
+    }
+
+    @Test
+    void occurrenceBoundPolicyIgnoresLegacyWorkstreamEnvironment() {
+        var legacy = SessionScopePolicy.resolve(
+                "claude", BASE, WS, "stage-implement", "iter-003", "run-41",
+                env(Map.of("DUAL_SESSION_SCOPE_CLAUDE", "workstream")));
+        var occurrence = SessionScopePolicy.occurrenceBound(
+                BASE, WS, "stage-implement", "iter-003", "run-41");
+
+        assertEquals(SessionScopePolicy.Scope.WORKSTREAM, legacy.scope());
+        assertEquals(BASE + "-" + WS, legacy.sessionName());
+        assertEquals(SessionScopePolicy.Scope.RUN, occurrence.scope());
+        assertEquals(BASE + "-" + WS + "-run-41", occurrence.sessionName());
+    }
+
+    @Test
     void neverEmitsBareBaseSessionName() {
         for (String wire : List.of("workstream", "stage", "stage_iteration", "run")) {
             var d = resolve("claude", BASE, wire);

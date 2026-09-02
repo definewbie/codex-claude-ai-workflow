@@ -103,6 +103,28 @@ public final class SessionScopePolicy {
         return resolve(agent, baseSessionName, workstreamId, stageId, iterationId, runId, System::getenv, nodeConfigScope);
     }
 
+    /**
+     * An occurrence-bound execution policy cannot share a physical provider session
+     * with another run because its ref/SHA lineage includes the run id.
+     */
+    static Decision occurrenceBound(
+            String baseSessionName,
+            String workstreamId,
+            String stageId,
+            String iterationId,
+            String runId
+    ) {
+        return build(
+                baseSessionName,
+                workstreamId,
+                stageId,
+                iterationId,
+                runId,
+                Scope.RUN,
+                "execution-policy:occurrence-bound"
+        );
+    }
+
     public static Decision resolve(
             String agent,
             String baseSessionName,

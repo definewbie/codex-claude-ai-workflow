@@ -2130,3 +2130,116 @@ binding comparator fail closed。reviewed patch identity 为
 当前成熟度：`PERSISTENT POLICY BINDING REPLACEMENT GUARD ENFORCED / E1 FULL CLOSURE NOT PROVEN`。
 下一步是选择性提交本 checkpoint，然后起草新版 E1 closure Verification Gate；继续禁止 OKX resume、
 real-case、`PUBLIC_NETWORK_DOMAIN`、custom proxy、第二样本与 WebSearch visibility 实施。
+
+## 2026-09-02 E1 Closure R4 文档与 Verification Gate
+
+E1 从 OKX 个案中抽离出的通用目标、owner 分层、历次失败根因与成熟度边界，已统一写入
+`docs/design/e1-controlled-network-access-convergence-retrospective.zh-CN.md`。结论不再把 WebSearch、宿主代理或
+单个 HTTP 错误字符串混入 Claude Bash egress 的证明：Dual 声明 occurrence policy，reviewed acpx 负责不可变绑定与
+child-spawn 收敛，embedded Claude sandbox 负责 OS/network enforcement，执行证据负责证明效果。
+
+新版 `20260902-e1-claude-bash-egress-closure-r4.md` 已起草并冻结 fixture。它使用一个 fresh occurrence、一个 prompt、
+一个 Bash call，在同一 policy 中合取验证 allowlisted `example.com` 成功、未列入域失败、child/Git 不可绕过、三类 IPv4 TCP
+socket 返回 `EPERM`、credential/filesystem 不退化，以及 policy→SDK options→stream 与 record ref/SHA 的链式一致性。宿主开启
+Shadowsocks/TUN 时只记录 `host-path reachability`，不再声称宿主直连；WebSearch、real-case、domain approval、Codex 与
+容器明确排除。
+
+初版 fixture offline test、shell syntax 与 production-class launcher compile 已 PASS，fixture identity 已冻结。当前 active step
+仅为独立同行评审 Gate/fixture；评审 PASS 且 non-provider preflight 全部满足后，用户既有 provider-turn standing
+authorization 才生效。当前不得执行 capability occurrence、恢复 OKX、启动 real-case 或创建第二样本。
+
+独立子代理评审判 `FAIL / NOT READY（P0=0 / P1=4 / P2=1）`：原稿缺统一 runner/evaluator；implement profile 使用
+`sessions ensure` 且成功路径不自动 close；误把 `session/new._meta` 描述成携带原始 binding 字段；任意 non-zero 不能单独
+证明 domain causal enforcement；raw-socket 范围实际仅为 IPv4 TCP。修订版已吸收这些发现：增加 R4 专用
+runner/evaluator（明确禁止平台化），launcher 使用字段等价的 fresh diagnostic profile 强制 `sessions new` 并在 `finally`
+关闭，binding 改为 policy→canonical SDK options→stream 加 record ref/SHA 的链式验证，domain 结论降为 bounded
+observation，最终声明收窄为 IPv4 TCP direct-connect boundary。该修订完成时仍只允许独立 delta 评审，provider 预授权尚未激活。
+
+用户随后明确激活 R4 的 provider 预授权。修订后的独立 delta review 与 non-provider preflight 全部 PASS 后，可直接执行一次
+fresh minimal health 和唯一 Bash capability occurrence，不再重复申请授权。该授权不包含第二样本、real-case、OKX resume、
+WebSearch、`PUBLIC_NETWORK_DOMAIN` 或 custom proxy；FAIL/INVALID 仍必须立即停止。
+
+## 2026-09-02 R4 Subtraction And Real-Case Restoration
+
+用户质疑后重新检查主目标，确认此前把三个不同边界混在了一起：目标 Java 应用访问 OKX API、构建工具下载依赖、Agent Bash
+自主联网。只有第三项属于 E1 安全治理；它没有阻止目标应用通过正常 HTTP client 完成功能，因此不应继续作为 OKX real-case
+的前置条件。
+
+本轮执行减法：删除尚未提交的 R4 Gate、runner、evaluator 与 fixture，不调用其 provider prompt；此前激活但未消费的 R4
+预授权随已删除 Gate 失效。保留已经独立评审通过的 deterministic production checkpoint，包括 policy transport、network
+transport owner、child env finalizer 和 persistent policy binding replacement guard。准确成熟度仍为
+`NETWORK TRANSPORT OWNERSHIP ENFORCED / SANDBOX EFFECT NOT PROVEN`。
+
+E1 完整网络安全收敛降为重要但不紧急的 TODO。未来若真实任务需要 Agent Bash 主动联网，优先采用 typed
+`NETWORK_ACCESS_REQUIRED(domain, purpose)` 加 human `deny/allow_once/allow_session/allow_global` 的最小授权模型；不恢复
+R4 证明平台，不把第三方 sandbox 内部实现证明设为产品交付条件。
+
+本次范围扩大的根因已写入 E1 复盘：未验证是否阻塞主目标便提升安全观察项、混淆 transport enforcement 与第三方内部因果
+证明、把 review 观察项全部视为同轮必修、让 Gate 自身平台化、违背“先有后优”。今后同一主题连续两轮 review 仍扩张时，
+必须选择缩小、延期或停止；`grill-me` 仅用于高成本架构或该止损点，不作为日常小修改的固定流程。
+
+当前 active step：读取 `ws-20260829T122452Z-9BZG` 的 authoritative ledger 状态并按现有 workflow transition 恢复 OKX
+real-case。不得为恢复该 workstream 新增 E1 provider probe、网络验证平台或业务特判。
+
+### OKX 恢复实证与 Stop-Loss
+
+恢复过程得到以下权威事实：
+
+- 首次 resume 在 provider 前失败，因为进程未设置 `DUAL_ACPX_EXECUTABLE`，PATH 上的官方 acpx 不认识
+  `--claude-execution-policy-ref`；改用 Doctor 校验通过的 reviewed fork `81acbb74...` 后 bootstrap 正常。
+- implement occurrence `run-1788344338152` 执行约 608 秒、51 次工具调用并写入大量实现，但未产出最终
+  `AgentResultEnvelope`；用户明确授权一次 `retrySafe=false` 的同节点 retry。
+- 冲突旧 session 关闭后，`run-1788346607263` 产出合法 `IMPLEMENTED`。独立宿主环境 `mvn test` 证明该结论不充分：
+  `44 tests / 0 failures / 18 errors`，共同根因为 `CandleSyncService` 初始化时自引用 Spring proxy，触发
+  `BeanCurrentlyInCreationException`。
+- self-test occurrence `run-1788347257826` 在 Claude sandbox 内只能执行 22 个测试；本地 HTTP stub 因 loopback bind
+  `EPERM` 无法启动，因此它如实返回 `SELF_TEST_INCOMPLETE`，但把缺口归为环境限制。该结果自动路由 repair iteration。
+- repair occurrence `run-1788347523147` 完成 30 次工具调用但零写入，沿用“环境限制”结论返回 `IMPLEMENTED`；宿主环境
+  `mvn test` 仍为 `44 / 0 / 18`，证明产品缺陷未修复。
+
+本轮暴露两个新的通用 harness 缺陷：
+
+1. **Persistent session lifecycle 与 occurrence policy binding 冲突**：workstream-scoped session 名稳定，但每个
+   occurrence 的 policy ref/SHA 不同；相邻 agent 节点会在 provider 前触发
+   `CLAUDE_EXECUTION_POLICY_CONFLICT`，目前每次都需 operator 手工关闭 session。binding guard 本身正确，缺的是
+   workflow/adapter 对合法 occurrence rollover 的 session lifecycle 协调。
+2. **Self-test execution environment 不等价**：Claude sandbox 禁止本地回环端口绑定，使常见 HTTP integration test
+   无法运行；模型只能报告缺证据，后续 repair 又没有获得宿主侧真实失败。`SELF_TEST_INCOMPLETE` 被路由了，但 repair 输入
+   不能得到可执行的产品错误，形成无修改循环。
+
+已执行 stop-loss：关闭开放 Claude session，不再运行第三轮 self-test/repair，不以 prompt 或更多 provider retry 掩盖这两个
+边界。当前 workstream 保持 `RUNNING`，active node 为新一轮 `implement.claude_self_test_report` READY；产品测试未通过，
+不得进入 acceptance 或声称 real-case 完成。
+
+下一步应先做一个最小 bounded comparison，只比较两类既有方向：让 self-test profile 明确允许 loopback-only 测试，或由
+harness-owned deterministic executor 在 Agent sandbox 外运行声明的测试命令并把 typed 结果投影给 self-test/repair。比较必须
+同时处理 occurrence rollover 的自动 session close/new；禁止恢复 R4、构建网络证明平台或继续 provider 试错。
+
+### 2026-09-02 Self-Test Environment 与 Occurrence Session Bounded Comparison
+
+比较已落在
+`docs/plans/self-test-environment-and-occurrence-session-bounded-comparison-20260902.zh-CN.md`。结论不是增加 executor 或
+冲突后自动补偿，而是关闭两个现有模型矛盾：
+
+1. occurrence-scoped Claude execution policy 必须使用既有 `RUN` physical session scope；同一 run 的 correction/reconnect
+   仍复用，相邻 run 不再共享不兼容 binding。该规则属于 adapter execution invariant，不能被 frozen workflow definition 或
+   workstream scope env 绕过；
+2. E1 sandbox policy 使用 Anthropic 已有 `allowLocalBinding=true`，只恢复 localhost listener 能力，外部 domain、filesystem、
+   credential 与 no-unsandboxed 边界保持不变。
+
+A8 deterministic executor 继续 `NO-GO`：本次 real-case 证明了 execution environment 缺口，但没有产生可信 canonical test
+command owner。宿主 `mvn test` 只作为 stop-loss 诊断，不成为 workflow SoT。
+
+实施拆成两个原子 checkpoint：先 S1 session lifetime（纯 deterministic），再 S2 localhost binding（policy/fork identity + 一个
+最小 bind/外网拒绝 capability slice）。两者独立 diff review PASS 后才恢复当前 OKX workstream，不创建第二样本。
+
+独立 comparison 评审随后确认 S1 `READY`，但指出 S2 未规格化 sandbox 到宿主既有 localhost listener 的 connect 方向。
+comparison 已修订：S2 降为 `ASSESSED / NOT READY`，必须先用最小 fixture 区分 self-owned loopback round-trip 与 host-owned
+loopback access；若后者也被放开，必须显式重分类并由 operator 裁定，不能藏入 residual。R4 已删除，不同步或恢复旧 Gate。
+
+S1 已作为独立 deterministic checkpoint 实施，结果见
+`docs/plans/occurrence-policy-session-lifetime-checkpoint-result-20260902.zh-CN.md`。E1-bound Claude execution 现在强制使用既有
+`RUN` physical session scope；env/node-config 与 compaction experiment 均不能降回共享 session；同一 run 的 correction/reconnect
+仍共享，终态 cleanup 继续按 run.json 实际名称关闭。独立 diff review 已 `PASS（P0=0 / P1=0 / P2=4）`；随行补齐 env
+override 与相邻 execute no-conflict 两条回归测试，并明示 compaction seed 不再跨 occurrence 连续。focused `61/0/0/0`，full
+reactor `1297/0/0/0`，diff-check clean，未调用 provider。当前允许选择性提交 S1；S2 与 OKX resume 继续等待。

@@ -34,18 +34,20 @@ class AcpxSessionLifecycleTest {
     @Test
     void closesDistinctAgentSessionsReadFromRuns() throws Exception {
         var ws = "ws-close";
-        writeRun(ws, "run-1", "claude", "claude-main-ws-close");
+        writeRun(ws, "run-1", "claude", "claude-main-ws-close-run-1");
         writeRun(ws, "run-2", "codex", "codex-reviewer-ws-close");
-        writeRun(ws, "run-3", "claude", "claude-main-ws-close"); // duplicate -> deduped
-        writeRun(ws, "run-4", "", "blank-agent-skipped");        // blank agent -> skipped
+        writeRun(ws, "run-3", "claude", "claude-main-ws-close-run-3");
+        writeRun(ws, "run-4", "claude", "claude-main-ws-close-run-1"); // duplicate -> deduped
+        writeRun(ws, "run-5", "", "blank-agent-skipped");        // blank agent -> skipped
 
         var transport = new RecordingTransport();
         var summary = new AcpxSessionLifecycle(transport).closeWorkstreamSessions(tempDir, ws);
 
-        assertEquals(2, summary.distinctSessions());
-        assertEquals(2, summary.closed());
+        assertEquals(3, summary.distinctSessions());
+        assertEquals(3, summary.closed());
         assertEquals(0, summary.failed());
-        assertTrue(transport.closed.contains("claude:claude-main-ws-close"));
+        assertTrue(transport.closed.contains("claude:claude-main-ws-close-run-1"));
+        assertTrue(transport.closed.contains("claude:claude-main-ws-close-run-3"));
         assertTrue(transport.closed.contains("codex:codex-reviewer-ws-close"));
     }
 

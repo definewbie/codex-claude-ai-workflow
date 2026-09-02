@@ -116,7 +116,9 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(runMetadata.contains("\"schemaVersion\" : 2"));
         assertTrue(runMetadata.contains("\"status\" : \"prepared\""));
         assertTrue(runMetadata.contains("\"nodeId\" : \"design.claude_design\""));
-        assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-test\""));
+        assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-test-run-"));
+        assertTrue(runMetadata.contains("\"sessionScope\" : \"run\""));
+        assertTrue(runMetadata.contains("\"sessionScopeReason\" : \"execution-policy:occurrence-bound\""));
         assertTrue(runMetadata.contains("\"promptPath\" :"));
         assertTrue(runMetadata.contains("\"promptMetadataPath\" :"));
         assertTrue(runMetadata.contains("\"toolUsage\" : null"));
@@ -152,6 +154,36 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertTrue(transport.sawPreparedRunJson);
+    }
+
+    @Test
+    void adjacentE1ExecutionsDoNotReuseAConflictingPolicySession() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-adjacent-e1");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the accepted change.\n");
+
+        var transport = new PolicyConflictGuardTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "session_scope", "workstream",
+                "permission_profile", "implement",
+                "prompt_template", "implement-claude"
+        ));
+        var instance = readyInstance("implement.claude_implement");
+
+        var first = handler.execute(taskContext(tempDir, "ws-adjacent-e1", definition, instance));
+        Thread.sleep(5L);
+        var second = handler.execute(taskContext(tempDir, "ws-adjacent-e1", definition, instance));
+
+        assertEquals(NodeStatus.COMPLETED, first.status());
+        assertEquals(NodeStatus.COMPLETED, second.status());
+        assertEquals(2, transport.sessions.size());
+        assertEquals(2, transport.sessions.stream().distinct().count());
+        assertEquals(2, transport.policyShas.stream().distinct().count());
+        assertTrue(transport.sessions.stream().allMatch(
+                session -> session.startsWith("claude-main-ws-adjacent-e1-run-")));
     }
 
     @Test
@@ -270,6 +302,7 @@ class AcpxAgentTaskHandlerTest {
                 Map.of(
                         "agent", "claude",
                         "session", "claude-main",
+                        "permission_profile", "implement",
                         "prompt_template", "implement-claude-self-test"
                 )
         );
@@ -294,10 +327,10 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(NodeStatus.COMPLETED, validated.status());
         assertEquals("SELF_TEST_COMPLETE", validated.result().get("decision"));
         assertEquals(2, transport.calls);
-        assertEquals(List.of(
-                "claude-main-ws-schema-correction",
-                "claude-main-ws-schema-correction"
-        ), transport.sessions);
+        assertEquals(1, transport.sessions.stream().distinct().count());
+        assertEquals(2, transport.sessions.size());
+        assertTrue(transport.sessions.getFirst().startsWith(
+                "claude-main-ws-schema-correction-run-"));
         assertTrue(transport.correctionProfile.denyAll());
         assertFalse(transport.correctionProfile.terminalEnabled());
         assertFalse(transport.correctionProfile.approveAll());
@@ -384,6 +417,7 @@ class AcpxAgentTaskHandlerTest {
             var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
                     "agent", "claude",
                     "session", "claude-main",
+                    "permission_profile", "implement",
                     "prompt_template", "implement-claude"
             ));
             var instance = new NodeInstance(
@@ -405,9 +439,11 @@ class AcpxAgentTaskHandlerTest {
             var result = handler.execute(taskContext(tempDir, "ws-compact", definition, instance));
             var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
             var runMetadata = Files.readString(runMetadataPath);
-            assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-compact-compact-implement.claude_implement\""));
+            assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-compact-run-"));
+            assertTrue(runMetadata.contains("\"sessionScope\" : \"run\""));
             assertTrue(runMetadata.contains("\"sessionCompactionMode\" : \"implement_boundary\""));
             assertTrue(runMetadata.contains("\"sessionCompactionEnabled\" : true"));
+            assertTrue(runMetadata.contains("occurrence-bound session retained"));
             assertTrue(runMetadata.contains("\"sessionCompactionSeedKind\" : \"agent_handoff\""));
             assertTrue(runMetadata.contains("\"sessionCompactionSeedPath\" :"));
 
@@ -1744,9 +1780,6 @@ class AcpxAgentTaskHandlerTest {
         initializeGitRepository("main.py", "README.md", "repo/relative/existing.ext");
         var sessionsDir = tempDir.resolve(".acpx/sessions");
         Files.createDirectories(sessionsDir);
-        Files.writeString(sessionsDir.resolve("index.json"), """
-                {"entries":[{"name":"claude-main-ws-large-stream","cwd":"%s","acpxRecordId":"123e4567-e89b-12d3-a456-426614174106","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
-                """.formatted(tempDir.toAbsolutePath()), StandardCharsets.UTF_8);
         var fakeAcpx = tempDir.resolve("captured-large-acpx.sh");
         var strictResultFixture = Path.of("..", "scripts/fixtures/emit-strict-agent-result.py")
                 .toAbsolutePath()
@@ -1859,7 +1892,18 @@ class AcpxAgentTaskHandlerTest {
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
                 case " $* " in
-                  *" sessions "*) exit 0 ;;
+                  *" sessions "*)
+                    name=""
+                    while [ "$#" -gt 0 ]; do
+                      if [ "$1" = "--name" ]; then
+                        shift
+                        name="$1"
+                      fi
+                      shift
+                    done
+                    printf '{"entries":[{"name":"%s","cwd":"__WORKDIR__","acpxRecordId":"123e4567-e89b-12d3-a456-426614174106","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}\n' "$name" > "__SESSIONS__/index.json"
+                    exit 0
+                    ;;
                 esac
                 prompt=""
                 while [ "$#" -gt 0 ]; do
@@ -1887,6 +1931,7 @@ class AcpxAgentTaskHandlerTest {
                 """
                 .replace("__SESSIONS__", sessionsDir.toString())
                 .replace("__TEST_HOME__", sessionsDir.getParent().getParent().toString())
+                .replace("__WORKDIR__", sessionsDir.getParent().getParent().toString())
                 .replace("__STRICT_FIXTURE__", strictResultFixture.toString()), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
     }
@@ -2028,6 +2073,32 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+        }
+    }
+
+    private static final class PolicyConflictGuardTransport extends AcpxAgentTransport {
+        private final java.util.ArrayList<String> sessions = new java.util.ArrayList<>();
+        private final java.util.ArrayList<String> policyShas = new java.util.ArrayList<>();
+        private final java.util.Map<String, String> policyBySession = new java.util.LinkedHashMap<>();
+
+        @Override
+        public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            var binding = request.claudeExecutionPolicy();
+            if (binding == null) {
+                throw new java.io.IOException("E1 execution policy is required");
+            }
+            var previous = policyBySession.putIfAbsent(request.sessionName(), binding.sha256());
+            if (previous != null && !previous.equals(binding.sha256())) {
+                throw new java.io.IOException("CLAUDE_EXECUTION_POLICY_CONFLICT");
+            }
+            sessions.add(request.sessionName());
+            policyShas.add(binding.sha256());
+            Files.createDirectories(request.stdoutPath().getParent());
+            Files.writeString(request.stdoutPath(), "");
+            Files.writeString(request.stderrPath(), "");
+            var now = Instant.parse("2026-09-02T00:00:00Z");
+            return completedResult(
+                    request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
     }
 

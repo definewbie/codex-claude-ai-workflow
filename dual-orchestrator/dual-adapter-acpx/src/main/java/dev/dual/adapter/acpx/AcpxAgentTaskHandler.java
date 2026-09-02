@@ -72,6 +72,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         var configuredSession = configText(context, "session");
         var promptTemplate = configText(context, "prompt_template");
         var runId = "run-" + Instant.now().toEpochMilli();
+        var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
         var emissionContext = proposalEmissionContext(context);
         if (emissionContext.failed() != null) {
             return emissionContext.failed();
@@ -80,15 +81,21 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 context, runId, emissionContext.context());
         var sessionScopeConfigValue = context.definition().config().get("session_scope");
         var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
-        var sessionDecision = SessionScopePolicy.resolve(
-                agent,
-                configuredSession,
-                context.workstreamId(),
-                context.instance().stageId(),
-                context.instance().iterationId(),
-                runId,
-                nodeConfigScope.isBlank() ? null : nodeConfigScope
-        );
+        var sessionDecision = e1Enabled
+                ? SessionScopePolicy.occurrenceBound(
+                        configuredSession,
+                        context.workstreamId(),
+                        context.instance().stageId(),
+                        context.instance().iterationId(),
+                        runId)
+                : SessionScopePolicy.resolve(
+                        agent,
+                        configuredSession,
+                        context.workstreamId(),
+                        context.instance().stageId(),
+                        context.instance().iterationId(),
+                        runId,
+                        nodeConfigScope.isBlank() ? null : nodeConfigScope);
         var compactionDecision = sessionCompactionPolicy.decide(
                 agent,
                 context.definition().id(),
@@ -98,6 +105,16 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 sessionDecision,
                 context.workspaceRoot()
         );
+        if (e1Enabled && compactionDecision.enabled()) {
+            compactionDecision = new SessionCompactionPolicy.Decision(
+                    compactionDecision.mode(),
+                    true,
+                    sessionDecision.sessionName(),
+                    sessionDecision.segmentKey(),
+                    compactionDecision.seedKind(),
+                    compactionDecision.reason() + "; occurrence-bound session retained"
+            );
+        }
         var session = compactionDecision.enabled() ? compactionDecision.sessionName() : sessionDecision.sessionName();
         var sessionMeta = SessionMeta.from(
                 sessionDecision,
@@ -145,7 +162,6 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         }
         var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
         var effectivePermissionProfile = permissionProfile(context);
-        var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
         if (e1Enabled && effectivePermissionProfile.approveAll()) {
             throw new IllegalStateException(
                     "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
