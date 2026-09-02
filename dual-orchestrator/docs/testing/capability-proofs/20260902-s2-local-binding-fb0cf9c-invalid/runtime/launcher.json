@@ -1,0 +1,15 @@
+{
+  "activeAdapterSignals" : [ {
+    "type" : "SESSION_BOOTSTRAP_FAILED",
+    "message" : "allow_local_binding must equal false\n",
+    "observedSequence" : 0,
+    "source" : "session_command",
+    "sessionId" : "",
+    "superseded" : false
+  } ],
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Write,Edit,MultiEdit,Grep,Glob,Bash", "--claude-execution-policy-ref", ".agent/workstreams/ws-e1-local-binding-diagnostic/runs/run-e1-local-binding-diagnostic/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "ebcc447ced0599105682b17d8d673270d1795cbb628f5e11aef4f96e6660d00f", "claude", "sessions", "ensure", "--name", "s2-local-binding-20260902T145709Z-5577" ],
+  "durationMs" : 1867,
+  "exitCode" : 4,
+  "policyRef" : ".agent/workstreams/ws-e1-local-binding-diagnostic/runs/run-e1-local-binding-diagnostic/execution-authority/claude-execution-policy.json",
+  "policySha256" : "ebcc447ced0599105682b17d8d673270d1795cbb628f5e11aef4f96e6660d00f"
+}

@@ -1,0 +1,5 @@
+E1LocalBindingDiagnosticLauncher.java.txt: OK
+prompt.md: OK
+s2-loopback-probe.sh: OK
+run-once.sh: OK
+offline-test.sh: OK

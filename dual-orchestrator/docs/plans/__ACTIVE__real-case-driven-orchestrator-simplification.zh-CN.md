@@ -2274,3 +2274,25 @@ loopback bind 失败仅用于确认测试必须在 Gate 规定的宿主环境执
 最新 fixture delta review 已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=1）`。独立评审复现 offline test、5/5 SHA 与
 launcher production-classpath 编译；三项阻塞全部关闭。当前允许选择性提交 Gate/fixture/active plan，再执行 non-provider
 preflight；全部通过后只运行唯一一次 production-chain Bash occurrence。可选 IP literal 探针不纳入本轮。
+
+Gate checkpoint `fb0cf9c` 的 non-provider preflight 全绿后启动唯一 execution attempt，但在 provider 前被 reviewed fork 拒绝：
+`allow_local_binding must equal false`。`launcher.json` 记录 transport `exitCode=4 / SESSION_BOOTSTRAP_FAILED`；无 ACP session、
+无 provider prompt、无 tool call、无 probe TSV，故结论为 `INVALID_PRE_PROVIDER / NOT MEASURED`，不是 S2 FAIL。根因是计划错误
+类比 allowlist differential：`allowed_domains` 是 fork 允许变化的输入，而 `allow_local_binding` 在 parser 与 SDK projection 两处
+都被固定为 false。runner 还遗漏了 transport exitCode 的 fail-fast。证据已归档到
+`docs/testing/capability-proofs/20260902-s2-local-binding-fb0cf9c-invalid/`；不修改冻结 fixture、不原地重跑、不消费第二样本。
+
+下一步采用更小且无循环依赖的 SDK capability Gate：直接以本地 SDK `0.3.232` 的 `managedSettings` 驱动同一 embedded Claude
+`2.1.232`，测量 self loopback、host loopback 与 external deny。该 Gate 不经过 acpx fork guard、不修改 production、不创建
+session，`persistSession=false`；目的仅是确定第三方 runtime 对 `allowLocalBinding=true` 的真实语义。Gate 与 fixture 位于
+`docs/testing/verification-gates/20260903-s2-sdk-sandbox-option-local-binding.md` 及同名 fixture 目录。当前只允许独立只读评审，
+provider 尚未调用。
+
+在新 Gate 的 provider 前置核验中，SDK `resolveSettings()` 实测将 `managedSettings` 内的 `allowLocalBinding=true` 过滤掉，证明
+managed policy tier 只能承载 restrictive policy，不能承载该 permissive runtime capability。draft 已纠正为唯一职责划分：
+`Options.sandbox` 投递 local-binding runtime 开关，`managedSettings` 继续拥有 strict allowlist、空 domains、禁止 unsandboxed
+command 与 credential deny。该发现未消耗 provider，也未修改 production。
+
+新 Gate 独立评审已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=3）`，并复现 offline test、fixture/SDK/binary SHA 与
+SDK 类型契约。按 P2 补充了失败解释边界：self bind FAIL 只能证明 option+managed 合并路径不可用，不能外推 runtime 完全不
+支持。用户既有 provider tool-turn 预授权明确覆盖本次唯一 SDK query；不增加通用 adjudicator 或 IP/DNS 探针。
