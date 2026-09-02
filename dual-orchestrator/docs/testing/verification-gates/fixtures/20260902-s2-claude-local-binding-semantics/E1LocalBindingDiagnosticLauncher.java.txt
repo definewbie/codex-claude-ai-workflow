@@ -1,0 +1,77 @@
+package dev.dual.adapter.acpx;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public final class E1LocalBindingDiagnosticLauncher {
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+
+    private E1LocalBindingDiagnosticLauncher() {
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length != 3) {
+            throw new IllegalArgumentException("usage: <workspace> <session> <prompt>");
+        }
+        var workspace = Path.of(args[0]).toRealPath();
+        var prompt = Path.of(args[2]).toRealPath();
+        if (!prompt.startsWith(workspace)) {
+            throw new IllegalArgumentException("prompt must be inside workspace");
+        }
+
+        var workstreamId = "ws-e1-local-binding-diagnostic";
+        var nodeInstanceId = "node-e1-local-binding-diagnostic";
+        var runId = "run-e1-local-binding-diagnostic";
+        var runDir = Files.createDirectories(workspace.resolve(
+                ".agent/workstreams/" + workstreamId + "/runs/" + runId));
+
+        var original = ClaudeExecutionPolicy.write(
+                workspace, workstreamId, nodeInstanceId, runId, runDir);
+        var policyPath = workspace.resolve(original.ref());
+        Map<String, Object> document = MAPPER.readValue(
+                Files.readAllBytes(policyPath), new TypeReference<>() { });
+        @SuppressWarnings("unchecked")
+        var sandbox = (Map<String, Object>) document.get("sandbox");
+        @SuppressWarnings("unchecked")
+        var network = (Map<String, Object>) sandbox.get("network");
+        network.put("allow_local_binding", true);
+        var bytes = MAPPER.writeValueAsBytes(document);
+        Files.write(policyPath, bytes);
+        var binding = new ClaudeExecutionPolicy.Binding(
+                original.ref(), sha256(bytes), workstreamId, nodeInstanceId, runId);
+        binding.verify(workspace);
+
+        var request = new AcpxRunRequest(
+                workspace,
+                args[1],
+                prompt,
+                runDir.resolve("probe.stdout"),
+                runDir.resolve("probe.stderr"),
+                AcpxPermissionProfile.implement(),
+                AcpxExecutionEventSink.NOOP,
+                binding);
+        var result = new AcpxAgentTransport().runClaudeDesign(request);
+        var output = new LinkedHashMap<String, Object>();
+        output.put("policyRef", binding.ref());
+        output.put("policySha256", binding.sha256());
+        output.put("exitCode", result.exitCode());
+        output.put("durationMs", result.durationMs());
+        output.put("command", result.command());
+        output.put("activeAdapterSignals", result.activeAdapterSignals());
+        MAPPER.writeValue(System.out, output);
+    }
+
+    private static String sha256(byte[] bytes) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+    }
+}

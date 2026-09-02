@@ -2243,3 +2243,34 @@ S1 已作为独立 deterministic checkpoint 实施，结果见
 仍共享，终态 cleanup 继续按 run.json 实际名称关闭。独立 diff review 已 `PASS（P0=0 / P1=0 / P2=4）`；随行补齐 env
 override 与相邻 execute no-conflict 两条回归测试，并明示 compaction seed 不再跨 occurrence 连续。focused `61/0/0/0`，full
 reactor `1297/0/0/0`，diff-check clean，未调用 provider。当前允许选择性提交 S1；S2 与 OKX resume 继续等待。
+
+### 2026-09-02 S2 Local Binding Semantics Gate
+
+S1 已由 checkpoint `08229040` 选择性提交。S2 不直接修改 production：先用
+`docs/testing/verification-gates/20260902-s2-claude-local-binding-semantics.md` 与冻结 fixture 测量
+`allowLocalBinding=true` 的两个方向。self-owned listener 必须 bind + round-trip 成功；sandbox client 对预先存在的宿主
+loopback sentinel 原样分类为 `HOST_DENIED` 或 `HOST_REACHABLE`；未授权 external HTTPS 必须失败。
+
+首次方案直接调用 standalone Claude `2.1.236`。独立评审指出这同时偏离 production 的 embedded `2.1.232` 版本和 SDK
+`managedSettings` 投递路径，结果不能直接支撑 S2 决策，并会迫使同一能力重复消耗 provider 样本。该方向已停止，未执行 provider。
+
+修订后的 Gate 复用 production `ClaudeExecutionPolicy.write -> reviewed AcpxAgentTransport/fork -> claude-agent-acp 0.70.0 ->
+SDK 0.3.232 / embedded Claude 2.1.232` 链。fixture launcher 只在 disposable occurrence policy 中把
+`allow_local_binding=false` 翻为 `true` 并重算 binding SHA；production 默认值不变。probe 仍只测 self-owned loopback、
+host-owned loopback 和未授权 external HTTPS 三项，宿主 sentinel 运行前后双检，curl 使用 `--noproxy '*'` 排除 Shadowsocks
+proxy 中介。standalone settings/flag 机器已删除，不新增网络框架或通用 evaluator。
+
+当前只允许 production-chain Gate/fixture 的 delta review 与 non-provider 离线校验；provider 尚未执行。用户既有 provider
+tool-turn 预授权仅在 delta review PASS 后激活，且只覆盖唯一一次 S2 Bash occurrence；不恢复 OKX、不创建第二样本。
+
+production-chain delta review 确认方向正确，但发现冻结 offline test 自身断言错误、固定 session 名会在 prompt 前失败后与新
+policy SHA 冲突、runner 的离线端到端仿真被误删。三项均已在 fixture 内最小修复：断言改为 fixed-string、session 名按运行时
+唯一生成并落 evidence、fake java/acpx/curl 重新跑通 runner 的 sentinel/watchdog/SHA 管线。未采纳可选 IP/DNS 扩展；当前仍只
+允许重新冻结 SHA、离线复验和简短 delta review。
+
+重冻结后，fixture SHA `5/5`、package-local launcher compile 与宿主侧 offline end-to-end 均 PASS；Codex 自身受限沙箱内的
+loopback bind 失败仅用于确认测试必须在 Gate 规定的宿主环境执行，不作为 S2 测量结果。provider 仍未调用。
+
+最新 fixture delta review 已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=1）`。独立评审复现 offline test、5/5 SHA 与
+launcher production-classpath 编译；三项阻塞全部关闭。当前允许选择性提交 Gate/fixture/active plan，再执行 non-provider
+preflight；全部通过后只运行唯一一次 production-chain Bash occurrence。可选 IP literal 探针不纳入本轮。
