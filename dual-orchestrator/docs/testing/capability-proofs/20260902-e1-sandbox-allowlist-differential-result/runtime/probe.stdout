@@ -1,0 +1,21 @@
+[client] initialize (running)
+
+[client] session/new (running)
+
+[thinking] The user wants me to run exactly one Bash tool call with the exact command `./connectivity-probe.sh`, and nothing else. Then reply only with DONE.
+           
+           This seems like a sandbox connectivity diagnostic scenario. The command is in the working directory. Let me just run it.
+
+[tool] Terminal (pending)
+  input: {}
+
+[tool] ./connectivity-probe.sh (completed)
+  kind: execute
+  input: ./connectivity-probe.sh
+  output:
+    (Bash completed with no output)
+    
+    Run connectivity probe script
+DONE
+
+[done] end_turn

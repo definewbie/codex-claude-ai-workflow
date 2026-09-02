@@ -1,0 +1,7 @@
+filesystem	0
+proxy_curl	56
+proxy_child	56
+proxy_git	128
+direct_external	97
+direct_loopback	97
+direct_lan	97

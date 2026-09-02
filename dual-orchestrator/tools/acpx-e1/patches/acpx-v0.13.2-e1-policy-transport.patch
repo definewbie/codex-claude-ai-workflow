@@ -1,5 +1,5 @@
 diff --git a/src/acp/agent-command.ts b/src/acp/agent-command.ts
-index 8732833..5d8a812 100644
+index 873283378748a19208987fd6d042f792bc4c31ee..5d8a81261b1b4503e1c1d2abf6a4472ef0b743b6 100644
 --- a/src/acp/agent-command.ts
 +++ b/src/acp/agent-command.ts
 @@ -6,6 +6,7 @@ import {
@@ -58,7 +58,7 @@ index 8732833..5d8a812 100644
    if (env.ACPX_CLAUDE_INCLUDE_USER_SETTINGS?.trim() === "1") {
      return ["user", ...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
 diff --git a/src/acp/auth-env.ts b/src/acp/auth-env.ts
-index 35d2030..63c4b54 100644
+index 35d20301573ca8255d5426e4bae1398afce2e414..63c4b54b62f8b923273c1a6e287268a7b2cfd0c3 100644
 --- a/src/acp/auth-env.ts
 +++ b/src/acp/auth-env.ts
 @@ -43,6 +43,28 @@ function protectedEnvKey(key: string): string {
@@ -92,7 +92,7 @@ index 35d2030..63c4b54 100644
  }
 diff --git a/src/acp/claude-execution-policy.ts b/src/acp/claude-execution-policy.ts
 new file mode 100644
-index 0000000..6175383
+index 0000000000000000000000000000000000000000..617538320eaa1ee1597c2c5abfe191ef22f95e48
 --- /dev/null
 +++ b/src/acp/claude-execution-policy.ts
 @@ -0,0 +1,354 @@
@@ -451,7 +451,7 @@ index 0000000..6175383
 +  ",": (scanner) => scanner.nextEntry(),
 +};
 diff --git a/src/acp/client.ts b/src/acp/client.ts
-index 5c9b5d26..22f3e6c 100644
+index 5c9b5d2656a59c93c31fb74a954044b14b727426..22f3e6c3148a14f4b3dcf1e3241f591a3d4bafc5 100644
 --- a/src/acp/client.ts
 +++ b/src/acp/client.ts
 @@ -101,6 +101,7 @@ import {
@@ -535,7 +535,7 @@ index 5c9b5d26..22f3e6c 100644
        );
        result = claudeAcp
 diff --git a/src/cli-core.ts b/src/cli-core.ts
-index f1663eb..6b7df04 100644
+index f1663eb4787bf3d08241a675b361139737f5ea4d..6b7df047b60f28d003d126e37f3756f5be5dcbb5 100644
 --- a/src/cli-core.ts
 +++ b/src/cli-core.ts
 @@ -10,6 +10,7 @@ import {
@@ -573,7 +573,7 @@ index f1663eb..6b7df04 100644
      program,
 diff --git a/src/cli/build-info-command.ts b/src/cli/build-info-command.ts
 new file mode 100644
-index 0000000..1214587
+index 0000000000000000000000000000000000000000..1214587084e278770bd3dedb2444e77d4bd62d49
 --- /dev/null
 +++ b/src/cli/build-info-command.ts
 @@ -0,0 +1,28 @@
@@ -606,7 +606,7 @@ index 0000000..1214587
 +    });
 +}
 diff --git a/src/cli/command-handlers.ts b/src/cli/command-handlers.ts
-index 2aba8a7..78df701 100644
+index 2aba8a7470b49731b4e7e079ed7d0d67c1439780..78df7017c8a7c78f5d0c1e05903473b1250671ef 100644
 --- a/src/cli/command-handlers.ts
 +++ b/src/cli/command-handlers.ts
 @@ -191,6 +191,8 @@ function sessionOptionsFromGlobalFlags(
@@ -647,7 +647,7 @@ index 2aba8a7..78df701 100644
 
    applyPermissionExitCode(result, outputPolicy.format === "quiet" ? outputFormatter : undefined);
 diff --git a/src/cli/flags.ts b/src/cli/flags.ts
-index d8b2ac6..b103382 100644
+index d8b2ac6ec1aba0961dede5a88c5c0a631880d51c..b103382b2765ded767f564a2fdfd466177495d6d 100644
 --- a/src/cli/flags.ts
 +++ b/src/cli/flags.ts
 @@ -52,6 +52,8 @@ export type GlobalFlags = PermissionFlags & {
@@ -724,7 +724,7 @@ index d8b2ac6..b103382 100644
    return stringOption(value) ?? process.cwd();
  }
 diff --git a/src/cli/queue/messages.ts b/src/cli/queue/messages.ts
-index a6ff34c..665d2c1 100644
+index a6ff34c978de64199dbf5f15141e7ee8077bf72b..665d2c1309ed249773aa4a8f0fb9d2e38c5af021 100644
 --- a/src/cli/queue/messages.ts
 +++ b/src/cli/queue/messages.ts
 @@ -285,7 +285,16 @@ function parseSessionOptions(value: unknown): QueueSessionOptions | null | undef
@@ -774,7 +774,7 @@ index a6ff34c..665d2c1 100644
    if (value == null) {
      return undefined;
 diff --git a/src/cli/queue/owner-env.ts b/src/cli/queue/owner-env.ts
-index a00147f..e3a87ba 100644
+index a00147f8afd26dcd8bb151ed037007482c8216de..e3a87ba35e4ef28efce37dfa93e108ee91a22b69 100644
 --- a/src/cli/queue/owner-env.ts
 +++ b/src/cli/queue/owner-env.ts
 @@ -137,6 +137,11 @@ function assignQueueOwnerSessionOptions(
@@ -817,9 +817,105 @@ index a00147f..e3a87ba 100644
  function assignSessionEnv(
    options: NonNullable<QueueOwnerRuntimeOptions["sessionOptions"]>,
    value: unknown,
+diff --git a/src/cli/session/queue-owner-runtime.ts b/src/cli/session/queue-owner-runtime.ts
+index cbcb0f8b463e15c5aa42e8afcd0ee29ca803bdc0..517c665a2bcae27c79f75eb3d92d089eab296fa8 100644
+--- a/src/cli/session/queue-owner-runtime.ts
++++ b/src/cli/session/queue-owner-runtime.ts
+@@ -6,6 +6,7 @@ import { setPerfGauge } from "../../perf-metrics.js";
+ import { promptToDisplayText } from "../../prompt-content.js";
+ import { applyLifecycleSnapshotToRecord } from "../../runtime/engine/lifecycle.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   mergeSessionOptions,
+   sessionOptionsFromRecord,
+ } from "../../runtime/engine/session-options.js";
+@@ -350,6 +351,8 @@ function startQueueOwnerHeartbeat(params: {
+ }
+
+ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): Promise<void> {
++  const sessionRecord = await resolveSessionRecord(options.sessionId);
++  assertCompatiblePersistentSessionOptions(sessionRecord, options.sessionOptions);
+   const lease = await tryAcquireQueueOwnerLease(options.sessionId, {
+     path: options.mcpConfigPath,
+     fingerprint: options.mcpConfigFingerprint,
+@@ -358,7 +361,6 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+     return;
+   }
+
+-  const sessionRecord = await resolveSessionRecord(options.sessionId);
+   let owner: SessionQueueOwner | undefined;
+   let heartbeatTimer: NodeJS.Timeout | undefined;
+   const sharedClient = createQueueOwnerSharedClient(options, sessionRecord);
+diff --git a/src/cli/session/runtime.ts b/src/cli/session/runtime.ts
+index 0d90d3c71a4d92cef217bf13264fe80f927a050b..e66b4a8c08db210a707f5ccdac0be4342fbfc6e7 100644
+--- a/src/cli/session/runtime.ts
++++ b/src/cli/session/runtime.ts
+@@ -16,6 +16,7 @@ import {
+ import { runPromptTurn } from "../../runtime/engine/prompt-turn.js";
+ import { connectAndLoadSession } from "../../runtime/engine/reconnect.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   mergeSessionOptions,
+   sessionOptionsFromRecord,
+   type SessionAgentOptions,
+@@ -244,6 +245,23 @@ export function mergeConnectedModelState(
+   return nextState;
+ }
+
++function mergeConnectedSessionOptions(
++  state: SessionAcpxState | undefined,
++  connectedState: SessionAcpxState | undefined,
++): SessionAcpxState | undefined {
++  if (connectedState?.session_options === undefined) {
++    if (state?.session_options === undefined) {
++      return state;
++    }
++    const nextState = cloneSessionAcpxState(state) ?? {};
++    delete nextState.session_options;
++    return nextState;
++  }
++  const nextState = cloneSessionAcpxState(state) ?? {};
++  nextState.session_options = structuredClone(connectedState.session_options);
++  return nextState;
++}
++
+ function mergeConnectedAdvertisedModelState(
+   nextState: SessionAcpxState,
+   connectedState: SessionAcpxState,
+@@ -633,6 +651,7 @@ async function runSessionPrompt(options: RunSessionPromptOptions): Promise<Sessi
+   const record = await measurePerf("session.resolve_prompt_record", async () => {
+     return await resolveSessionRecord(options.sessionRecordId);
+   });
++  assertCompatiblePersistentSessionOptions(record, options.sessionOptions);
+   const conversation = cloneSessionConversation(record);
+   let acpxState = cloneSessionAcpxState(record.acpx);
+   const promptStartedAt = isoNow();
+@@ -824,6 +843,7 @@ async function runSessionPrompt(options: RunSessionPromptOptions): Promise<Sessi
+           replacingConfigOption: requestedModelId(options.sessionOptions?.model)
+             ? { key: "model" }
+             : undefined,
++          freshSessionOptions: sessionOptions,
+           timeoutMs: options.timeoutMs,
+           verbose: options.verbose,
+           suppressWarnings: options.suppressSdkConsoleErrors,
+@@ -841,6 +861,7 @@ async function runSessionPrompt(options: RunSessionPromptOptions): Promise<Sessi
+         });
+       });
+       acpxState = mergeConnectedModelState(acpxState, record.acpx);
++      acpxState = mergeConnectedSessionOptions(acpxState, record.acpx);
+       flushConnectOutput(connected.loadError);
+       emitConnectPerfMetric(connectStartedAt, options.verbose);
+       return connected;
+@@ -1187,5 +1208,6 @@ export async function sendSessionDirect(options: SessionSendOptions): Promise<Se
+     suppressSdkConsoleErrors: options.suppressSdkConsoleErrors,
+     verbose: options.verbose,
+     client: options.client,
++    sessionOptions: options.sessionOptions,
+   });
+ }
 diff --git a/src/e1-build-info.generated.ts b/src/e1-build-info.generated.ts
 new file mode 100644
-index 0000000..9e6d233
+index 0000000000000000000000000000000000000000..9e6d23337e3d9d3e4c0d7e59b8de36ccbe9ace9b
 --- /dev/null
 +++ b/src/e1-build-info.generated.ts
 @@ -0,0 +1,3 @@
@@ -827,7 +923,7 @@ index 0000000..9e6d233
 +export const E1_UPSTREAM_COMMIT = "UNBUILT";
 +export const E1_PATCH_SHA256 = "UNBUILT";
 diff --git a/src/flows/cli.ts b/src/flows/cli.ts
-index b6450f8..2d2af53 100644
+index b6450f889fc588be44b0b108cff2f0d0c671438c..2d2af532a87978794ff503bdfb43293ca269ad03 100644
 --- a/src/flows/cli.ts
 +++ b/src/flows/cli.ts
 @@ -62,6 +62,8 @@ export async function handleFlowRun(
@@ -840,36 +936,60 @@ index b6450f8..2d2af53 100644
    });
 
 diff --git a/src/runtime/engine/manager.ts b/src/runtime/engine/manager.ts
-index 6d6bfb9..788b332 100644
+index 6d6bfb9250da0adc695780df57837fb517d5d887..a7ecc76543ab602db48200c38da415536848f459 100644
 --- a/src/runtime/engine/manager.ts
 +++ b/src/runtime/engine/manager.ts
-@@ -968,6 +968,7 @@ export class AcpRuntimeManager {
-       return false;
+@@ -72,6 +72,7 @@ import {
+ } from "./reconnect.js";
+ import { shouldReuseExistingRecord } from "./reuse-policy.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   persistSessionOptions,
+   sessionOptionsFromRecord,
+   type SessionAgentOptions,
+@@ -923,6 +924,9 @@ export class AcpRuntimeManager {
+     );
+     const agent = { cwd, agentCommand, agentArgv };
+     const existing = await this.loadExistingRuntimeSession(input);
++    if (existing && input.mode === "persistent") {
++      assertCompatiblePersistentSessionOptions(existing.record, input.sessionOptions);
++    }
+     if (existing && this.canReuseRuntimeSession(input, agent, existing)) {
+       return await this.reuseRuntimeSession(existing.record);
      }
-     if (input.mode === "persistent") {
-+      assertCompatibleClaudeExecutionPolicy(existing.record, input.sessionOptions);
-       return true;
-     }
-     return Boolean(
-@@ -2025,3 +2026,16 @@ export class AcpRuntimeManager {
-     return record;
-   }
- }
-+
-+function assertCompatibleClaudeExecutionPolicy(
-+  record: SessionRecord,
-+  requested: SessionAgentOptions | undefined,
-+): void {
-+  if (policyBindingKey(sessionOptionsFromRecord(record)) !== policyBindingKey(requested)) {
-+    throw new Error("CLAUDE_EXECUTION_POLICY_CONFLICT: persistent session policy binding differs");
+diff --git a/src/runtime/engine/reconnect.ts b/src/runtime/engine/reconnect.ts
+index 974200f819e73504f60522b7a2851f240d03c031..bab1b88be10f19a603151360ae5dba8b8ae4bb77 100644
+--- a/src/runtime/engine/reconnect.ts
++++ b/src/runtime/engine/reconnect.ts
+@@ -42,6 +42,7 @@ import {
+   reconcileAgentSessionId,
+   sessionHasAgentMessages,
+ } from "./lifecycle.js";
++import { persistSessionOptions, type SessionAgentOptions } from "./session-options.js";
+
+ export type ConnectedSessionController = {
+   hasActivePrompt: () => boolean;
+@@ -75,6 +76,7 @@ export type ConnectAndLoadSessionOptions = {
+     key: string;
+     resolve?: (record: SessionRecord) => string;
+   };
++  freshSessionOptions?: SessionAgentOptions;
+   timeoutMs?: number;
+   verbose?: boolean;
+   suppressWarnings?: boolean;
+@@ -383,6 +385,10 @@ export async function connectAndLoadSession(
+   pendingAgentSessionId = loadState.pendingAgentSessionId;
+   sessionModels = loadState.sessionModels;
+
++  if (createdFreshSession && options.freshSessionOptions !== undefined) {
++    persistSessionOptions(record, options.freshSessionOptions);
 +  }
-+}
 +
-+function policyBindingKey(options: SessionAgentOptions | undefined): string {
-+  return [options?.claudeExecutionPolicyRef, options?.claudeExecutionPolicySha256].join("\0");
-+}
+   const preferenceReplay = await replaySessionPreferences({
+     client,
+     record,
 diff --git a/src/runtime/engine/session-options.ts b/src/runtime/engine/session-options.ts
-index 57674e4..a479aae 100644
+index 57674e40779b845ac7f554325fbcfae8c0452e96..1c15fc443b4a2b263ee9a6a738b93e09b5d0f1e0 100644
 --- a/src/runtime/engine/session-options.ts
 +++ b/src/runtime/engine/session-options.ts
 @@ -17,6 +17,8 @@ export type SessionAgentOptions = {
@@ -881,7 +1001,7 @@ index 57674e4..a479aae 100644
  };
 
  export function mergeSessionOptions(
-@@ -29,9 +31,18 @@ export function mergeSessionOptions(
+@@ -29,9 +31,34 @@ export function mergeSessionOptions(
    assignDefinedOption(merged, "maxTurns", preferred?.maxTurns);
    assignDefinedOption(merged, "systemPrompt", preferred?.systemPrompt);
    assignDefinedOption(merged, "env", mergeEnvRecords(fallback?.env, preferred?.env));
@@ -889,6 +1009,22 @@ index 57674e4..a479aae 100644
    return Object.keys(merged).length > 0 ? merged : undefined;
  }
 
++export function assertCompatiblePersistentSessionOptions(
++  record: SessionRecord,
++  requested: SessionAgentOptions | undefined,
++): void {
++  if (
++    executionPolicyBindingKey(sessionOptionsFromRecord(record)) !==
++    executionPolicyBindingKey(requested)
++  ) {
++    throw new Error("CLAUDE_EXECUTION_POLICY_CONFLICT: persistent session policy binding differs");
++  }
++}
++
++function executionPolicyBindingKey(options: SessionAgentOptions | undefined): string {
++  return [options?.claudeExecutionPolicyRef, options?.claudeExecutionPolicySha256].join("\0");
++}
++
 +function assignPolicyBinding(
 +  target: SessionAgentOptions,
 +  source: SessionAgentOptions | undefined,
@@ -900,7 +1036,7 @@ index 57674e4..a479aae 100644
  function mergeEnvRecords(
    fallback: Record<string, string> | undefined,
    preferred: Record<string, string> | undefined,
-@@ -88,6 +99,16 @@ export function sessionOptionsFromRecord(record: SessionRecord): SessionAgentOpt
+@@ -88,6 +115,16 @@ export function sessionOptionsFromRecord(record: SessionRecord): SessionAgentOpt
      storedSystemPromptOption(stored.system_prompt),
    );
    assignStoredOption(sessionOptions, "env", storedEnvRecord(stored.env));
@@ -917,7 +1053,7 @@ index 57674e4..a479aae 100644
 
    return Object.keys(sessionOptions).length > 0 ? sessionOptions : undefined;
  }
-@@ -103,6 +124,12 @@ function persistedSessionOptions(
+@@ -103,6 +140,12 @@ function persistedSessionOptions(
      max_turns: typeof options.maxTurns === "number" ? options.maxTurns : undefined,
      system_prompt: normalizeSystemPromptOption(options.systemPrompt),
      env: storedEnvRecord(options.env),
@@ -930,7 +1066,7 @@ index 57674e4..a479aae 100644
    } satisfies PersistedSessionOptions;
    return hasPersistedSessionOptions(next) ? next : undefined;
  }
-@@ -113,7 +140,9 @@ function hasPersistedSessionOptions(options: PersistedSessionOptions): boolean {
+@@ -113,7 +156,9 @@ function hasPersistedSessionOptions(options: PersistedSessionOptions): boolean {
      options.allowed_tools !== undefined ||
      options.max_turns !== undefined ||
      options.system_prompt !== undefined ||
@@ -941,7 +1077,7 @@ index 57674e4..a479aae 100644
    );
  }
 
-@@ -173,3 +202,8 @@ function storedSystemPromptOption(value: unknown): SystemPromptOption | undefine
+@@ -173,3 +218,8 @@ function storedSystemPromptOption(value: unknown): SystemPromptOption | undefine
  function nonEmptyString(value: unknown): string | undefined {
    return typeof value === "string" && value.trim().length > 0 ? value : undefined;
  }
@@ -951,7 +1087,7 @@ index 57674e4..a479aae 100644
 +  return text && /^[a-f0-9]{64}$/.test(text) ? text : undefined;
 +}
 diff --git a/src/session/conversation-model.ts b/src/session/conversation-model.ts
-index 45826af..c69ab7a 100644
+index 45826afc139304eb0cc1edc93a3674db12d2cc03..c69ab7a93e758eff1dfeeaded70781a8b83b8e89 100644
 --- a/src/session/conversation-model.ts
 +++ b/src/session/conversation-model.ts
 @@ -594,6 +594,12 @@ function cloneSessionOptions(
@@ -968,7 +1104,7 @@ index 45826af..c69ab7a 100644
  }
 
 diff --git a/src/session/persistence/parse.ts b/src/session/persistence/parse.ts
-index 8c1efdb..8cc28cc 100644
+index 8c1efdbb0d7c23bf40c699dd2ca6afce51949027..8cc28cc48d465e3283aab98480eeff56abef0deb 100644
 --- a/src/session/persistence/parse.ts
 +++ b/src/session/persistence/parse.ts
 @@ -514,6 +514,11 @@ function assignParsedSessionOptions(state: SessionAcpxState, raw: unknown): void
@@ -1007,7 +1143,7 @@ index 8c1efdb..8cc28cc 100644
    const record = asRecord(raw);
    if (!record || !hasValidEventLogCore(record)) {
 diff --git a/src/types.ts b/src/types.ts
-index 17d7b6a..e0209a0 100644
+index 17d7b6a9a980289228398298cb0c7595534d4b5a..e0209a0f37d70daf1941a654e52e348ea37843fa 100644
 --- a/src/types.ts
 +++ b/src/types.ts
 @@ -252,6 +252,8 @@ export type AcpClientOptions = {
@@ -1030,7 +1166,7 @@ index 17d7b6a..e0209a0 100644
 
 diff --git a/test/build-info-command.test.ts b/test/build-info-command.test.ts
 new file mode 100644
-index 0000000..8544c56
+index 0000000000000000000000000000000000000000..8544c568301576486c223a028357039697653908
 --- /dev/null
 +++ b/test/build-info-command.test.ts
 @@ -0,0 +1,13 @@
@@ -1049,7 +1185,7 @@ index 0000000..8544c56
 +});
 diff --git a/test/claude-execution-policy.test.ts b/test/claude-execution-policy.test.ts
 new file mode 100644
-index 0000000..ec64f7d
+index 0000000000000000000000000000000000000000..ec64f7dbbfe149094dc38da7bc8c693964144248
 --- /dev/null
 +++ b/test/claude-execution-policy.test.ts
 @@ -0,0 +1,173 @@
@@ -1227,7 +1363,7 @@ index 0000000..ec64f7d
 +  };
 +}
 diff --git a/test/client.test.ts b/test/client.test.ts
-index b813e21..e7a53cb 100644
+index b813e216fde20c4f0c677098d217a7158a415997..e7a53cbb03d8ae53ff93abdab59e213fbd4c2f72 100644
 --- a/test/client.test.ts
 +++ b/test/client.test.ts
 @@ -1,5 +1,9 @@
@@ -1500,8 +1636,161 @@ index b813e21..e7a53cb 100644
  function makeClient(
    overrides: Partial<ConstructorParameters<typeof AcpClient>[0]> = {},
  ): AcpClient {
+diff --git a/test/connect-load.test.ts b/test/connect-load.test.ts
+index a7961fa5025c0185900eebdda9f999eb0242ec09..b14663bcfb4fa735714ed80b697cb84329388db1 100644
+--- a/test/connect-load.test.ts
++++ b/test/connect-load.test.ts
+@@ -356,6 +356,11 @@ test("connectAndLoadSession falls back to createSession when load returns resour
+       agentCommand: "agent",
+       cwd,
+       acpx: {
++        session_options: {
++          allowed_tools: ["OldTool"],
++          claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++          claude_execution_policy_sha256: "a".repeat(64),
++        },
+         current_model_id: "old-model",
+         available_models: ["old-model"],
+         model_control: "config_option",
+@@ -406,6 +411,11 @@ test("connectAndLoadSession falls back to createSession when load returns resour
+       record,
+       timeoutMs: 1_000,
+       activeController: ACTIVE_CONTROLLER,
++      freshSessionOptions: {
++        allowedTools: ["Read"],
++        claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "a".repeat(64),
++      },
+     });
+
+     assert.equal(result.resumed, false);
+@@ -417,6 +427,15 @@ test("connectAndLoadSession falls back to createSession when load returns resour
+     assert.equal(record.acpx?.config_options, undefined);
+     assert.equal(record.acpx?.current_model_id, undefined);
+     assert.equal(record.acpx?.model_control, undefined);
++    assert.deepEqual(record.acpx?.session_options, {
++      model: undefined,
++      allowed_tools: ["Read"],
++      max_turns: undefined,
++      system_prompt: undefined,
++      env: undefined,
++      claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++      claude_execution_policy_sha256: "a".repeat(64),
++    });
+   });
+ });
+
+diff --git a/test/prompt-runner.test.ts b/test/prompt-runner.test.ts
+index 932a9f077333ba5f48cb3cd0e15253c13712f541..12ffd5ffeb418ab6497dd3cfe4a39090165c5ecb 100644
+--- a/test/prompt-runner.test.ts
++++ b/test/prompt-runner.test.ts
+@@ -14,12 +14,104 @@ import { sendSessionDirect } from "../src/cli/session/runtime.js";
+ import { resolveSessionRecord } from "../src/session/persistence/repository.js";
+ import {
+   makeSessionRecord as makeSessionRecordFixture,
++  sessionFilePath,
+   withTempHome as withTempHomeFixture,
+   writeSessionRecordFile as writeSessionRecord,
+ } from "./runtime-test-helpers.js";
+
+ const MOCK_AGENT_PATH = fileURLToPath(new URL("./mock-agent.js", import.meta.url));
+
++test("sendSessionDirect rejects an unbound request before changing a bound record", async () => {
++  await withTempHome(async (homeDir) => {
++    const cwd = path.join(homeDir, "workspace");
++    await fs.mkdir(cwd, { recursive: true });
++    const record = makeSessionRecord({
++      acpxRecordId: "direct-policy-conflict",
++      acpSessionId: "direct-policy-conflict-backend",
++      agentCommand: `node ${JSON.stringify(MOCK_AGENT_PATH)} --supports-load-session`,
++      cwd,
++      acpx: {
++        session_options: {
++          claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++          claude_execution_policy_sha256: "a".repeat(64),
++        },
++      },
++    });
++    await writeSessionRecord(homeDir, record);
++    const recordPath = sessionFilePath(homeDir, record.acpxRecordId);
++    const before = await fs.readFile(recordPath, "utf8");
++
++    await assert.rejects(
++      sendSessionDirect({
++        sessionId: record.acpxRecordId,
++        prompt: [{ type: "text", text: "must not be recorded" }],
++        permissionMode: "approve-all",
++        outputFormatter: createOutputFormatter("quiet"),
++        timeoutMs: 5_000,
++      }),
++      /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++    );
++
++    assert.equal(await fs.readFile(recordPath, "utf8"), before);
++  });
++});
++
++test("sendSessionDirect checkpoints replacement options after a fresh-session fallback", async () => {
++  await withTempHome(async (homeDir) => {
++    const cwd = path.join(homeDir, "workspace");
++    await fs.mkdir(cwd, { recursive: true });
++    const agentCommand = `node ${JSON.stringify(MOCK_AGENT_PATH)} --supports-load-session --load-session-fails-on-empty`;
++    const policyRef = "runs/run-1/execution-authority/policy.json";
++    const policySha256 = "a".repeat(64);
++    const record = makeSessionRecord({
++      acpxRecordId: "direct-fresh-policy-replacement",
++      acpSessionId: "stale-policy-session",
++      agentCommand,
++      cwd,
++      messages: [],
++      acpx: {
++        session_options: {
++          allowed_tools: ["OldTool"],
++          claude_execution_policy_ref: policyRef,
++          claude_execution_policy_sha256: policySha256,
++        },
++      },
++    });
++    await writeSessionRecord(homeDir, record);
++    const client = new AcpClient({
++      agentCommand,
++      cwd,
++      permissionMode: "approve-all",
++    });
++
++    try {
++      await sendSessionDirect({
++        sessionId: record.acpxRecordId,
++        prompt: [{ type: "text", text: "checkpoint the fresh session" }],
++        permissionMode: "approve-all",
++        outputFormatter: createOutputFormatter("quiet"),
++        client,
++        timeoutMs: 5_000,
++        sessionOptions: {
++          allowedTools: ["Read"],
++          claudeExecutionPolicyRef: policyRef,
++          claudeExecutionPolicySha256: policySha256,
++        },
++      });
++    } finally {
++      await client.close();
++    }
++
++    const persisted = await resolveSessionRecord(record.acpxRecordId);
++    assert.notEqual(persisted.acpSessionId, "stale-policy-session");
++    assert.deepEqual(persisted.acpx?.session_options, {
++      allowed_tools: ["Read"],
++      claude_execution_policy_ref: policyRef,
++      claude_execution_policy_sha256: policySha256,
++    });
++  });
++});
++
+ test("sendSessionDirect closes a shared client after reconnect preference failure", async () => {
+   await withTempHome(async (homeDir) => {
+     const cwd = path.join(homeDir, "workspace");
 diff --git a/test/queue-messages.test.ts b/test/queue-messages.test.ts
-index 93d9eca..f4fe431 100644
+index 93d9eca90360b084c1362bf3aebbf1ba934857d6..f4fe4310abca7cec1f3418be0b49906afeff23f3 100644
 --- a/test/queue-messages.test.ts
 +++ b/test/queue-messages.test.ts
 @@ -69,6 +69,8 @@ test("parseQueueRequest accepts prompt session options", () => {
@@ -1543,7 +1832,7 @@ index 93d9eca..f4fe431 100644
 
  test("parseQueueOwnerMessage accepts typed queue error payload", () => {
 diff --git a/test/queue-owner-env.test.ts b/test/queue-owner-env.test.ts
-index ac8a5b5..4f2aea5 100644
+index ac8a5b5d67358570319ef0883fab91667d44db70..4f2aea576846eb43fd84dfada0a06c35d447de48 100644
 --- a/test/queue-owner-env.test.ts
 +++ b/test/queue-owner-env.test.ts
 @@ -39,6 +39,8 @@ describe("parseQueueOwnerPayload", () => {
@@ -1586,11 +1875,121 @@ index ac8a5b5..4f2aea5 100644
    });
  });
 
+diff --git a/test/queue-owner-lifecycle.test.ts b/test/queue-owner-lifecycle.test.ts
+index 21bb361f86bcdfb14dc1c85e344f99bbaf3e26c3..3f5f8fb70bc8c420b889368e15bb99fdec4694a6 100644
+--- a/test/queue-owner-lifecycle.test.ts
++++ b/test/queue-owner-lifecycle.test.ts
+@@ -135,7 +135,56 @@ function waitForProcessExit(
+   });
+ }
+
++async function assertQueueOwnerRejectsPolicyMismatch(): Promise<void> {
++  await withTempHome("acpx-queue-policy-conflict-", async (homeDir) => {
++    const cwd = path.join(homeDir, "workspace");
++    await fs.mkdir(cwd, { recursive: true });
++    const record = makeSessionRecord({
++      acpxRecordId: "queue-policy-conflict",
++      acpSessionId: "queue-policy-conflict-session",
++      agentCommand: `node ${JSON.stringify(MOCK_AGENT_PATH)}`,
++      cwd,
++      acpx: {
++        session_options: {
++          claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++          claude_execution_policy_sha256: "a".repeat(64),
++        },
++      },
++    });
++    await writeSessionRecordFile(homeDir, record);
++    const lockPath = queueLockFilePath(record.acpxRecordId, homeDir);
++    const payload = JSON.stringify({
++      sessionId: record.acpxRecordId,
++      permissionMode: "approve-reads",
++      sessionOptions: {
++        claudeExecutionPolicyRef: "runs/run-2/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "b".repeat(64),
++      },
++    });
++    const child = spawn(process.execPath, [CLI_PATH, "__queue-owner"], {
++      env: {
++        ...process.env,
++        HOME: homeDir,
++        ACPX_QUEUE_OWNER_PAYLOAD: payload,
++      },
++      stdio: ["ignore", "ignore", "pipe"],
++    });
++    const stderrChunks: Buffer[] = [];
++    child.stderr?.on("data", (chunk: Buffer) => stderrChunks.push(chunk));
++
++    const { code } = await waitForProcessExit(child);
++    const stderr = Buffer.concat(stderrChunks).toString("utf8");
++    assert.notEqual(code, 0);
++    assert.match(stderr, /CLAUDE_EXECUTION_POLICY_CONFLICT/);
++    assert.equal(await fileExists(lockPath), false);
++  });
++}
++
+ describe("queue owner lifecycle — graceful SIGTERM shutdown", () => {
++  it("rejects a policy mismatch before acquiring its lease", async () => {
++    await assertQueueOwnerRejectsPolicyMismatch();
++  });
++
+   it("exits with code 0 and releases its lease when it receives SIGTERM", async () => {
+     if (process.platform === "win32") {
+       // SIGTERM semantics differ on Windows; skip this test.
 diff --git a/test/runtime-manager.test.ts b/test/runtime-manager.test.ts
-index 8762e30..a212606 100644
+index 8762e30828b6f37f206c62691845023e56ee8a9a..1ecdad91527b1d82f7c79cb29e5bfe65e0ddf891 100644
 --- a/test/runtime-manager.test.ts
 +++ b/test/runtime-manager.test.ts
-@@ -4560,6 +4560,45 @@ test("AcpRuntimeManager ignores sessionOptions when reusing an existing persiste
+@@ -5,6 +5,7 @@ import type { SessionModelState } from "../src/acp/model-support.js";
+ import { AcpxOperationalError } from "../src/errors.js";
+ import { AcpRuntimeManager } from "../src/runtime/engine/manager.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   mergeSessionOptions,
+   persistSessionOptions,
+   sessionOptionsFromRecord,
+@@ -4529,6 +4530,40 @@ test("mergeSessionOptions merges session env per key with preferred overriding f
+   });
+ });
+
++test("persistent policy compatibility rejects either one-sided binding", () => {
++  const bound = makeSessionRecord({
++    acpxRecordId: "bound-policy-record",
++    acpSessionId: "bound-policy-session",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++    acpx: {
++      session_options: {
++        claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++        claude_execution_policy_sha256: "a".repeat(64),
++      },
++    },
++  });
++  const unbound = makeSessionRecord({
++    acpxRecordId: "unbound-policy-record",
++    acpSessionId: "unbound-policy-session",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++  });
++
++  assert.throws(
++    () => assertCompatiblePersistentSessionOptions(bound, undefined),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++  assert.throws(
++    () =>
++      assertCompatiblePersistentSessionOptions(unbound, {
++        claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "a".repeat(64),
++      }),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++});
++
+ test("AcpRuntimeManager ignores sessionOptions when reusing an existing persistent record", async () => {
+   const existing = makeSessionRecord({
+     acpxRecordId: "reuse-key",
+@@ -4560,6 +4595,91 @@ test("AcpRuntimeManager ignores sessionOptions when reusing an existing persiste
    assert.equal(record.acpx?.session_options, undefined);
  });
 
@@ -1633,11 +2032,57 @@ index 8762e30..a212606 100644
 +  );
 +});
 +
++test("AcpRuntimeManager rejects a policy change before reset-on-ensure replacement", async () => {
++  const existing = makeSessionRecord({
++    acpxRecordId: "policy-reset-key",
++    acpSessionId: "sid-existing-policy-reset",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++    acpx: {
++      reset_on_next_ensure: true,
++      session_options: {
++        claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++        claude_execution_policy_sha256: "a".repeat(64),
++      },
++    },
++  });
++  const store = new InMemorySessionStore([existing]);
++  const before = await store.load(existing.acpxRecordId);
++  let factoryCalls = 0;
++  const manager = new AcpRuntimeManager(
++    createRuntimeOptions({ cwd: "/workspace", sessionStore: store }),
++    {
++      clientFactory: () => {
++        factoryCalls += 1;
++        throw new Error("clientFactory must not run after a policy conflict");
++      },
++    },
++  );
++
++  await assert.rejects(
++    manager.ensureSession({
++      sessionKey: existing.acpxRecordId,
++      agent: "codex",
++      mode: "persistent",
++      cwd: "/workspace",
++      sessionOptions: {
++        claudeExecutionPolicyRef: "runs/run-2/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "b".repeat(64),
++      },
++    }),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++
++  assert.equal(factoryCalls, 0);
++  assert.deepEqual(await store.load(existing.acpxRecordId), before);
++  assert.deepEqual(store.savedRecordIds, []);
++});
++
  test("AcpRuntimeManager getStatus surfaces token usage breakdowns and available commands", async () => {
    const record = makeSessionRecord(
      {
 diff --git a/test/spawn-options.test.ts b/test/spawn-options.test.ts
-index fb76197..cf0b6c9 100644
+index fb76197392c6a16ac0305757ab4f5dd81eb42b74..cf0b6c9986e15a7b670296a2f08c41b0906e9950 100644
 --- a/test/spawn-options.test.ts
 +++ b/test/spawn-options.test.ts
 @@ -7,6 +7,7 @@ import test from "node:test";

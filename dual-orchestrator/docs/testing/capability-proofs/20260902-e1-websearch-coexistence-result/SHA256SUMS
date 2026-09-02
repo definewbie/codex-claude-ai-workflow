@@ -1,0 +1,10 @@
+36f4bd2e85104d3404ac125791b71ed0623ccee404fbc3a002db3975da647554  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/fixture/websearch-probe-prompt.md
+16fab909957dc08c157ced70041b6cd0edb1bb16962c2ac75e7aa0cc8e21e051  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/result.md
+05fec219ac5f2f76ad4184c3638789aed337df9c434b7289d6cc5a0b85c68b3a  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/root-cause.md
+d3e5348196611598d3af3a7645251058652b58796787cff581f93348120f5732  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/claude-execution-policy.json
+eee42e6da4430af00c5ea49d405e45c02eaf2d04c45d68f7723da603045ee90e  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/launcher.json
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/launcher.stderr
+aab1c2585ed238d804ce22fc37b2f1fbdd800166fcbb3d70399c4a2360d9c85a  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/probe.stderr
+7f3d74ca94f380f55fad5ecc891e566eba3ced0ff7982df5a0c4a623415bf945  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/probe.stdout
+4889c4050880b769a913cbf6728737d0de53f65f317bdbcec554f777250f95c3  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/session.json
+bccb3e585e7208f0393ea060f14801ecf3a0229c9dd0a824f75998c448c64f11  dual-orchestrator/docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/runtime/session.stream.ndjson

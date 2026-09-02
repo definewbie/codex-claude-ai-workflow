@@ -1,0 +1,8 @@
+{
+  "activeAdapterSignals" : [ ],
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Write,Edit,MultiEdit,Grep,Glob,Bash", "--claude-execution-policy-ref", ".agent/workstreams/ws-e1-allowlist-diagnostic/runs/run-e1-allowlist-diagnostic/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "ce796a1bfb1880830735f843da809a548b339df443f3d1d97769d689cfb7e443", "claude", "-s", "e1-allowlist-diagnostic-20260902", "-f", "/private/tmp/e1-sandbox-connectivity-diagnostic/workspace/prompt.md" ],
+  "durationMs" : 14965,
+  "exitCode" : 0,
+  "policyRef" : ".agent/workstreams/ws-e1-allowlist-diagnostic/runs/run-e1-allowlist-diagnostic/execution-authority/claude-execution-policy.json",
+  "policySha256" : "ce796a1bfb1880830735f843da809a548b339df443f3d1d97769d689cfb7e443"
+}

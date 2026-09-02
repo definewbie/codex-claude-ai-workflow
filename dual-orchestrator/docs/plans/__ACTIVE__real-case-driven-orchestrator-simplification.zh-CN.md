@@ -129,9 +129,65 @@ profile，仅收紧 retry=0；Gate 的 allowed-tools、permission-policy 与 fla
 `cdaa7bf6...5142fb`、fixture `5/5` SHA、compile、offline test、bash syntax 均复现通过。当前先提交 clean Gate/fixture
 checkpoint；全部 non-provider preflight PASS 后，用户预授权自动生效，按 Gate 恰一次 Bash、条件式恰一次 WebSearch。
 
+Gate/fixture 已提交为 `3831b6d4`，全部 preflight 与 minimal health PASS 后执行了唯一 Bash occurrence。policy v2、credential
+absence、workspace/tmp、三条 raw socket `Operation not permitted` 与零 permission request 均实证成立；但 inherited-proxy 的
+curl/child/git 只返回普通 `CONNECT tunnel failed, response 403`，stderr/tool result/stream 均无 Gate 冻结的 domain-policy
+归因信号。按 Gate 判 `INVALID_OBSERVATION_SIGNATURE` 并立即 stop-loss：WebSearch occurrence 为零、Bash/health session 均
+closed、未运行第二样本。另发现 host raw TCP before 与 sentinel console 原始输出未持久化，证据卫生也不足。结果落在
+`docs/testing/capability-proofs/20260902-e1-sandbox-effect-after-owner-result/`。下一步只允许只读归因与结果独立评审，禁止调
+fixture 重跑、OKX resume、real-case、domain approval 或 custom proxy。
+
+用户随后补充本次运行期间宿主开启 Shadowsocks VPN；只读核对显示 macOS system proxy 字典为空，但外部 IPv4 路由由
+`utun4`/`198.18.0/15` 接管，符合 TUN/透明路由形态。因此原 Gate 的 `host direct` 只能解释为
+`host-path reachability control`，不能证明宿主无代理直连。sandbox 内 raw socket 的 `EPERM` 仍是 connect 前 OS 拒绝事实，
+但 inherited-proxy 的 403 可能来自 Claude sandbox proxy、Shadowsocks/宿主代理链或上游，进一步确认
+`INVALID_OBSERVATION_SIGNATURE` 而非 PASS/FAIL。该拓扑为运行后补充事实，已单独标注，不冒充 frozen preflight evidence。
+
+用户随后明确要求先用 shell/acpx 做不改 production 的 sandbox 连通性诊断。一次性 launcher 复用 production policy writer、
+transport 与已验签 E1 fork，只在 `/private/tmp` 将 `allowed_domains` 改为 `["example.com"]` 并重算 binding SHA；同一 Bash
+tool call 中 `https://example.com/` exit 0，而未列入 allowlist 的 Cloudflare URL exit 22/HTTP 403。两条请求共享同一
+Claude sandbox 与宿主 Shadowsocks/TUN 下游，因此差分证明 sandbox 可联网且 strict allowlist 产生 allow/deny effect；
+它不证明 403 内部 producer、完整绕过矩阵或 `PUBLIC_NETWORK_DOMAIN` 已实现。有效 provider 样本恰一个 prompt/一个 Bash、
+零 permission request、session closed。原 Gate 仍为 INVALID，不追溯改写；独立证据位于
+`docs/testing/capability-proofs/20260902-e1-sandbox-allowlist-differential-result/`。
+
+随后按用户授权继续执行一次冻结 WebSearch coexistence probe。CLI/policy 装配与预期一致，恰一个 prompt，WebSearch 与
+WebFetch 各调用一次、无 Bash、session closed；但两者均以同一个 provider/tool-backend
+`API Error: 400 [1214][modelCode：不存在]` 失败，且 WebFetch 未出现预期 permission request/deny。adapter exit 0 只代表
+turn 完成，不能冒充工具 PASS。本轮判 `INVALID_PROVIDER_TOOL_BACKEND`：WebSearch coexistence 与 exact WebFetch denial 均
+`NOT PROVEN`，但不能归因 sandbox 网络失败。下一步只能只读核实 provider tool backend 与 permission event 顺序，backend
+preflight 可机械通过前不得重复样本或通过开放 fetch 制造 PASS。证据位于
+`docs/testing/capability-proofs/20260902-e1-websearch-coexistence-result/`。
+
+只读根因定位确认两个 owner 被混淆：当前 ACP provider 为 `open.bigmodel.cn + glm-5.3`，文本模型可用但 Anthropic native
+WebSearch/WebFetch backend 对该 modelCode 不兼容；同时 `--allowed-tools`/`allowedTools` 只是免确认集合，SDK 真正的工具
+可见性 owner 是 `tools`/`disallowedTools`，Dual 当前没有传递。故 ledger WebSearch approval transport 虽 deterministic
+`ENFORCED`，provider side effect 前的 exact-tool cannot-bypass 仍 `NOT MODELED/NOT PROVEN`。E1 sandbox network 与 WebSearch
+必须拆开：前者以 Bash allow/deny differential 达到 bounded `PROVEN`；后者另起最小 visibility-authority 设计。GLM 如需联网，
+应评审其官方 Search/Reader MCP exact-tool 边界，不把 native server tool、MCP 与 Bash fetch 合并。完整根因见同目录
+`root-cause.md`。
+
+独立根因评审随后 `PASS（P0=0 / P1=1 / P2=4）`，但发现 reviewed acpx fork 的 persistent policy binding
+guard 只在 `shouldReuseExistingRecord(...)` 成功后执行。captured differential 的有效 occurrence 由 launcher、policy 文件与
+`session/new` `_meta` 共同证明使用 `ce796a1b...`，而归档 record 仍残留早期 invocation 的 `ea47a3ed...`；因此行为差分
+观察成立，record durability 不成立。当前唯一 active step 改为评审
+`docs/plans/e1-acpx-persistent-policy-binding-replacement-guard-plan-20260902.zh-CN.md`：persistent 同名 record 必须在任何
+reuse/replacement/client 副作用前全等校验 binding；只有 binding 相同且 backend session 失效时才允许重建并完整刷新
+options。差分目录新增 `ERRATUM.md`，不改原始工件。该 plan/delta review PASS 前不修改 fork、不调用 provider、不进入
+新版 E1 closure Gate 或 WebSearch visibility 实施。
+
 首个完整 Mailpit real-case 已完成并通过产品 diff 审查，target commit 为 `c2e74f9`。后续共性边界计划已提交为
 `bd2be53`；root-closure 与 exact WebSearch human authority checkpoint 已提交为 `4401149d`，其 deterministic
 边界达到 `ENFORCED`，root closure 另有两个自然 occurrence 支持 `PROVEN`。
+
+Persistent policy binding replacement guard 计划独立评审已 `PASS / IMPLEMENTATION READY（P0=0 / P1=0 / P2=4）`，
+checkpoint 随后完成。manager replacement、direct prompt、queue owner 与 resource-not-found fresh fallback 现在共用唯一
+binding guard；不一致或单侧缺失均在 client/lease/prompt/record 副作用前拒绝，same-binding fresh fallback 会完整刷新并
+checkpoint 新 options。fork Node 24 full suite `985/0/0`、Dual reactor `1294/0/0/0`、clean apply/reverse、installer、
+configure、fresh package 与 Doctor 全部 PASS；reviewed identity 更新为
+`fd173f04 / 81acbb7491a17aedfb48b1a73f077b59e06f1d5eceb7cd617e59df86aa5c60ab / claude_execution_policy.v2`。
+captured differential 的 record durability 已通过 ERRATUM 明确降为 `INVALID`，不改写原始工件。当前只允许独立 diff review；
+provider、real-case、OKX resume、domain approval 与 WebSearch visibility 实施仍未授权。
 
 D1 历史执行记录：producer/consumer/sibling sweep 已确认 human acceptance 当时只绑定
 commit/PR Markdown，CLI/server 各自扫描 runs 并重读当前 worktree；此外 `delivery commit/create-pr` 仍可绕过 gate
@@ -2058,3 +2114,19 @@ bounded comparison、实施计划评审与 P0 delta 复审均已 PASS，producti
 准确成熟度为 `NETWORK TRANSPORT OWNERSHIP ENFORCED / SANDBOX EFFECT NOT PROVEN`。当前只允许独立代码级 diff
 review；review PASS 并 clean commit 后，才制定新的 capability Verification Gate。不得在本 checkpoint 中调用 provider、
 恢复 OKX、实施 domain approval 或宣称网络效果已证明。
+
+## 2026-09-02 E1 acpx Persistent Policy Binding Replacement Guard
+
+独立 diff review 已 `PASS / READY TO COMMIT（P0=0 / P1=0 / P2=4）`。manager replacement、direct prompt、
+queue owner 与 fresh-session fallback 四条绕过路径均在 client/record/prompt/lease 副作前由唯一
+binding comparator fail closed。reviewed patch identity 为
+`81acbb7491a17aedfb48b1a73f077b59e06f1d5eceb7cd617e59df86aa5c60ab`。
+
+提交前在受支持 Node `22.21.0` 与正常 Unix socket 权限下复跑 fork full suite：`985/0/0`。
+高负载下曾有一次不可复现的 upstream timing 失败；处置纪律是提交必须有完整 clean pass，同一失败可连续复现则阻断并单独治理，
+不用无限重跑挑选结果。其余 P2（参数化 replacement 矩阵、resume 保留 options 显式断言、Doctor/manifest 机器交叉断言）
+在下次触及对应文件时作为 sibling test 要求，不为它们改变已评审 patch identity。
+
+当前成熟度：`PERSISTENT POLICY BINDING REPLACEMENT GUARD ENFORCED / E1 FULL CLOSURE NOT PROVEN`。
+下一步是选择性提交本 checkpoint，然后起草新版 E1 closure Verification Gate；继续禁止 OKX resume、
+real-case、`PUBLIC_NETWORK_DOMAIN`、custom proxy、第二样本与 WebSearch visibility 实施。

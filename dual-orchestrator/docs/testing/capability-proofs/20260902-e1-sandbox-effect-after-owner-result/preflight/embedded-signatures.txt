@@ -1,0 +1,15 @@
+Operation not permitted
+Connection blocked by network allowlist
+Connection blocked by network allowlist
+[sandbox] Blocked network request to 
+network path not allowed: 
+Operation not permitted
+Operation not permitted
+Operation not permitted
+Connection blocked by network allowlist
+Connection blocked by network allowlist
+[sandbox] Blocked network request to 
+network path not allowed: 
+network path not allowed: 
+Operation not permitted
+Operation not permitted

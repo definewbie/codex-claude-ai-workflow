@@ -1,0 +1,12 @@
+{
+  "mode" : "websearch",
+  "session" : "e1-websearch-coexistence-20260902",
+  "policyRef" : ".agent/workstreams/ws-e1-capability/runs/run-e1-websearch/execution-authority/claude-execution-policy.json",
+  "policySha256" : "d3e5348196611598d3af3a7645251058652b58796787cff581f93348120f5732",
+  "exitCode" : 0,
+  "durationMs" : 42313,
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob,WebSearch", "--claude-execution-policy-ref", ".agent/workstreams/ws-e1-capability/runs/run-e1-websearch/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "d3e5348196611598d3af3a7645251058652b58796787cff581f93348120f5732", "claude", "-s", "e1-websearch-coexistence-20260902", "-f", "/private/tmp/e1-websearch-coexistence-diagnostic/workspace/websearch-probe-prompt.md" ],
+  "activeAdapterSignals" : [ ],
+  "stdout" : ".agent/workstreams/ws-e1-capability/runs/run-e1-websearch/probe.stdout",
+  "stderr" : ".agent/workstreams/ws-e1-capability/runs/run-e1-websearch/probe.stderr"
+}
