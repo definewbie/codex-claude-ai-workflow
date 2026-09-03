@@ -272,7 +272,9 @@
       "id": "implement.artifact_validation",
       "kind": "TASK",
       "handlerType": "artifact.validate",
-      "config": {}
+      "config": {
+        "route_scope_violation": true
+      }
     },
     {
       "id": "context.acceptance_codex_verifier_review",
@@ -768,7 +770,21 @@
         "required": true,
         "purpose": "Apply the operator's explicit repair decision.",
         "joinStrategy": "",
-        "loopReason": "Human authorized implementation repair after a blocked self-test"
+        "loopReason": "Human authorized implementation repair"
+      }
+    },
+    {
+      "from": "implement.artifact_validation",
+      "on": "CHANGE_SCOPE_VIOLATION",
+      "to": "gate.human_implementation_repair",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Require human authorization before repairing a deterministic scope violation.",
+        "joinStrategy": "",
+        "loopReason": ""
       }
     },
     {

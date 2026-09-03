@@ -1134,7 +1134,8 @@ class BuiltinHandlerTest {
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
                 "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                        Map.of("route_scope_violation", true)),
                 node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
         ));
 
@@ -1349,7 +1350,8 @@ class BuiltinHandlerTest {
         var result = handler.execute(new TaskHandler.TaskContext(
                 tempDir,
                 "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
+                new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                        Map.of("route_scope_violation", true)),
                 node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
         ));
 
@@ -1444,6 +1446,108 @@ class BuiltinHandlerTest {
                 ".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json"));
         assertTrue(evaluation.contains("\"code\" : \"UNEXPECTED_ACTUAL_CHANGE\""));
         assertTrue(evaluation.contains("\"path\" : \"unexpected.txt\""));
+    }
+
+    @Test
+    void configuredArtifactValidationRoutesViolationWithOccurrenceEvidence() throws Exception {
+        git(tempDir, "init");
+        git(tempDir, "config", "user.email", "dual@example.test");
+        git(tempDir, "config", "user.name", "Dual Test");
+        Files.writeString(tempDir.resolve("README.md"), "before\n");
+        git(tempDir, "add", "README.md");
+        git(tempDir, "commit", "-m", "init");
+        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
+        Files.writeString(tempDir.resolve("unexpected.txt"), "outside contract\n");
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
+        var definition = new NodeDefinition(
+                "implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                Map.of("route_scope_violation", true));
+        var instance = node("implement.artifact_validation", NodeKind.TASK, "artifact.validate");
+
+        var result = new ArtifactValidateHandler().execute(
+                new TaskHandler.TaskContext(tempDir, "ws", definition, instance));
+
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals("CHANGE_SCOPE_VIOLATION", result.outcome());
+        assertEquals("CHANGE_SCOPE_VIOLATION", result.result().get("change_scope_disposition"));
+        var occurrenceRef = String.valueOf(result.result().get("change_scope_evaluation_ref"));
+        assertTrue(result.outputRefs().contains(occurrenceRef));
+        assertTrue(occurrenceRef.contains("/occurrences/" + instance.nodeInstanceId() + "/"));
+    }
+
+    @Test
+    void changeScopeViolationGateRequiresVerifiedProducerLineage() throws Exception {
+        var evaluation = new ChangeScopeEvaluation(
+                1, ChangeScopeEvaluation.Status.FAIL, List.of(), List.of(), List.of(), List.of(), null);
+        var sourceId = "node-implement-artifact-validation-001";
+        var reference = ChangeScopeEvaluationArtifact.publish(tempDir, "ws", sourceId, evaluation);
+        var nodesDir = tempDir.resolve(".agent/workstreams/ws/nodes");
+        Files.createDirectories(nodesDir);
+        var mapper = new ObjectMapper().findAndRegisterModules();
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        var gate = node("gate.human_implementation_repair", NodeKind.GATE, "human.review", List.of(reference.ref()));
+
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION"));
+
+        assertEquals(NodeStatus.WAITING, result.status());
+        var packet = Files.readString(tempDir.resolve(String.valueOf(result.result().get("review_packet_json"))));
+        assertTrue(packet.contains("changeScopeEvaluation"));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.FAILED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "wrong.validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-002", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-001", List.of(), "CHANGE_SCOPE_VIOLATION"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "wrong"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "wrong.handler",
+                        NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        var sourcePath = nodesDir.resolve(sourceId + ".json");
+        Files.writeString(sourcePath, Files.readString(sourcePath).replace(
+                reference.sha256(), "0".repeat(64)));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+        var second = ChangeScopeEvaluationArtifact.publish(tempDir, "ws", "node-second", evaluation);
+        var multiple = node("gate.human_implementation_repair", NodeKind.GATE, "human.review",
+                List.of(reference.ref(), second.ref()));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), multiple, "CHANGE_SCOPE_VIOLATION")));
+        var stableOnly = node("gate.human_implementation_repair", NodeKind.GATE, "human.review",
+                List.of(".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json"));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), stableOnly, "CHANGE_SCOPE_VIOLATION")));
+        mapper.writeValue(sourcePath.toFile(),
+                scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
+                        NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
+        Files.delete(tempDir.resolve(reference.ref()));
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
     }
 
     @Test
@@ -2232,6 +2336,26 @@ class BuiltinHandlerTest {
 
     private static NodeDefinition taskDefinition(String id, String handler) {
         return new NodeDefinition(id, NodeKind.TASK, handler, Map.of());
+    }
+
+    private static dev.dual.ledger.file.NodeInstanceDocument scopeProducer(
+            String sourceId,
+            ChangeScopeEvaluationArtifact.Reference reference,
+            String definitionId,
+            String handler,
+            NodeStatus status,
+            String iteration,
+            List<String> outputRefs,
+            String disposition
+    ) {
+        return new dev.dual.ledger.file.NodeInstanceDocument(
+                1, sourceId, definitionId, NodeKind.TASK, handler, status, "stage-test", iteration,
+                List.of(), Map.of(), outputRefs, Map.of(
+                        "change_scope_status", "FAIL",
+                        "change_scope_disposition", disposition,
+                        "change_scope_evaluation_ref", reference.ref(),
+                        "change_scope_evaluation_sha256", reference.sha256()),
+                null, "", null, Instant.now());
     }
 
     private static NodeInstance node(String id, NodeKind kind, String handlerType) {

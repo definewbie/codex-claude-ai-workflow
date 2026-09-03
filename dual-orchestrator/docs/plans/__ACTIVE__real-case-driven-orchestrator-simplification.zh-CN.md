@@ -2409,3 +2409,82 @@ self-test 单节点 Gate 已以 checkpoint `82fb49e` 冻结并执行，结论 `P
 
 当前 active step：先执行既有 deterministic self-test decision，不调用 provider；随后根据唯一 typed route 决定下一节点。
 Playwright cache 差异只登记为 self-test 环境残余，本轮不扩成 executor、cache 投影或权限平台。
+
+deterministic self-test decision 已把 `SELF_TEST_COMPLETE` 路由到 `implement.artifact_validation-058`；该节点随后以
+`CHANGE_SCOPE_VIOLATION` 失败并进入 `WAITING_FOR_RECOVERY / evt-000059`，未调用 provider。evaluation 实证为
+53 个 actual changes、16 个 unexpected actual、12 个 missing declared。主要差异是测试 package/fixture 路径偏离
+TaskContract exact scope，以及 human repair 后新增的 `CandleCommitService.java` 未获 contract scope 授权。
+
+validator 的拒绝本身正确；新发现的 harness 缺口是 typed scope violation 没有声明的 repair route，`retry` 只能重复失败，
+operator 又不能绕开 ledger 手工改 workspace。bounded comparison 见
+`docs/plans/change-scope-violation-repair-routing-bounded-comparison-20260903.zh-CN.md`。推荐只把 configured
+`CHANGE_SCOPE_VIOLATION` 路由到既有 human implementation repair gate；TaskContract、human action 与 scope schema
+均不变，evidence unavailable 仍 fail-closed。validation 提前到 self-test 前只记为效率候选，本轮不实施。
+
+当前 active step：独立评审该 bounded comparison；PASS 前不 retry 当前节点、不改产品、不调用 provider。
+
+独立评审判定 `WARN / NOT READY（P0=0 / P1=3）`：推荐 route 方向正确，但现有 stable git-evidence
+会被 sibling 覆盖，Gate packet 又不展示 violations/missingDeclared；implementation repair 的 revise note 在非 BLOCKED
+来源下并非必填；当前 workstream 的 repair revision budget 已于 `evt-000047` 消费，无法安全迁移。
+
+comparison 已修订为最小完整链：node-instance-scoped git-evidence occurrence refs 随 route 进入 Gate；Gate 禁止 stable
+fallback 并展示 violation 明细；所有 implementation-repair revise 均要求 note；三个 bundled definition 加一个 experiment
+sibling 声明同一 route。当前 OKX 样本明确终止为 FAIL，不提高 revision limit、不手改 ledger/workspace、不 retry。
+
+当前 active step：对修订 comparison 做 delta review；PASS 后制定单一 implementation plan。后续证明必须使用 fresh
+workstream，当前样本仅作为 natural failure evidence 保留。
+
+comparison delta review 已 `PASS（P0=0 / P1=0）`。P2 要求 implementation plan 明确 occurrence evidence
+的防篡改结构，且将残留“四个 lifecycle”措辞改为“三个 bundled + 一个 experiment”；两项均已吸收。
+实施计划见 `docs/plans/change-scope-violation-repair-routing-implementation-plan-20260903.zh-CN.md`：复用现有
+change-scope evaluation、human repair gate 与 implementation loop，只新增 content-addressed occurrence ref/SHA、
+definition-owned violation disposition、routed-ref Gate consumption 与 implementation-repair note guard。
+
+当前 active step：独立架构评审实施计划。评审 PASS 前不改 production、不 retry/迁移当前 OKX ledger、不调用 provider。
+
+实施计划首轮评审为 `WARN / NOT READY（P0=0 / P1=2）`：flag=true 但缺少 violation edge 时 custom
+workflow 会被错误完成；Gate 仅从 ref 自身解析 producer node 会形成自证。计划已补 named production definition
+invariant，要求 flag 为真布尔且恰一条 edge 指向 implementation-repair Gate；同时补 producer node 的
+definition/handler/status/iteration/outputRefs/disposition 全链验证。artifact 与 definition 专属测试改为必需，note guard
+补齐 sibling 反例。
+
+当前 active step：实施计划 delta review；P0/P1 清零前不进入代码。
+
+第二轮 delta review 仍为 `WARN / NOT READY（P1=2）`：violation edge 若带 false condition 仍可零后继完成；
+semantic Gate 若允许 approve 或没有有效 revise loop 也可绕过 repair。计划选择更小的固定协议，不建设 custom gate
+平台：flag=true 时必须是 unconditional violation edge 到 `gate.human_implementation_repair`；该 Gate 必须
+revise-only，并恰有一条 unconditional loop 到 `context.implement_claude`。对应反例测试已列入 invariant matrix。
+
+当前 active step：最终 implementation-plan delta review；通过后立即按 failing-tests-first 实施。
+
+最终 implementation-plan delta review 已 `PASS / IMPLEMENTATION READY（P0=0 / P1=0）`。实现严格沿已评审边界完成：
+`TaskContract.scope` 仍是唯一授权源；artifact validation 同时保留 stable latest projection，并发布按 validation node instance
+隔离、content-addressed 的 occurrence evaluation；仅 definition 显式开启时，`FAIL` 以 typed
+`CHANGE_SCOPE_VIOLATION` 完成并路由到既有 implementation-repair Gate，`UNAVAILABLE` 与未配置定义仍走 recovery。
+Gate 在写 packet 前重验 producer definition/handler/status/iteration/outputRefs/result disposition 与 occurrence SHA，禁止
+stable fallback；所有 implementation-repair `revise` 统一要求非空 note。三个 bundled workflow 与一个 experiment 已同步，
+definition 构造期会拒绝字符串 flag、条件/缺失/多重 violation edge、错误 Gate 与无效 repair loop。
+
+focused tests 159/0/0/0；full reactor 1320/0/0/0；`git diff --check` clean。当前 OKX workstream 仍保持
+`WAITING_FOR_RECOVERY / evt-000059` 并按既定判断记为 FAIL，没有 retry、迁移或 provider 调用。
+
+当前 active step：独立代码级 diff review；P0/P1 清零后选择性提交本 checkpoint，旧的
+`20260903-okx-s2-recovery-and-terminal-completion.md` 继续排除。
+
+首轮独立 diff review 为 `WARN / NO COMMIT（P0=0 / P1=2 / P2=1）`。P1-1 指出 core definition 允许任意
+`artifact.validate` source id，但 Gate 固定验证 `implement.artifact_validation`，形成定义可通过、运行时 Gate 必拒的协议裂缝；
+P1-2 指出 cannot-bypass matrix 未按计划完整落测。P2 指出 scope-violation packet 混合 occurrence authority 与可能被 sibling
+覆盖的 stable latest 摘要。
+
+delta 已统一为固定最小协议：definition invariant 同样要求 source id=`implement.artifact_validation`；补齐 violation edge、
+repair Gate/loop 与 producer lineage 全负向矩阵；scope-violation Gate 只展示 occurrence-backed evaluation，不再混入 stable
+changed-files/diff/status。delta focused 126/0/0/0，重新执行 full reactor 为 1323/0/0/0，diff-check clean。
+
+当前 active step：独立 delta diff review；P0/P1 清零后才允许选择性提交。
+
+delta diff review 已 `PASS / ALLOWED TO COMMIT（P0=0 / P1=0 / P2=1）`，并独立复跑 full reactor
+1323/0/0/0 与 clean diff-check。首轮两个 P1 和 stable/occurrence 混合展示 P2 均确认 CLOSED；剩余 P2 仅为
+Gate 测试字段级断言可更细，不影响 production 边界或提交。
+
+当前 active step：选择性提交 change-scope violation repair checkpoint，明确排除旧 OKX recovery Gate；提交后不恢复
+当前失败样本，下一步只允许评估是否需要为 fresh real-case 起草最小 Verification Gate。

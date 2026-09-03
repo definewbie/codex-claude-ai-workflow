@@ -706,6 +706,43 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void declaredChangeScopeViolationRequiresHumanNoteBeforeRepairIteration() throws Exception {
+        var definition = new WorkflowDefinition(
+                "scope-repair", 1, "implement.artifact_validation",
+                List.of(
+                        new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                                Map.of("route_scope_violation", true)),
+                        new NodeDefinition("gate.human_implementation_repair", NodeKind.GATE, "human.review",
+                                Map.of("allowed_actions", List.of("revise"),
+                                        "gate_purpose", "implementation_repair")),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK,
+                                "context.build_package", Map.of())),
+                List.of(
+                        new EdgeDefinition("implement.artifact_validation", "CHANGE_SCOPE_VIOLATION",
+                                "gate.human_implementation_repair"),
+                        new EdgeDefinition("gate.human_implementation_repair", "revise",
+                                "context.implement_claude", null,
+                                new dev.dual.core.workflow.TransitionMetadata(
+                                        "loop", "", true, "", "", "Human authorized implementation repair"))));
+        var paths = initializedPaths("ws-scope-repair", definition);
+        var validation = activeNode(paths);
+        var ledger = new WorkflowFileLedger();
+
+        ledger.completeAndRoute(paths, definition, validation.nodeInstanceId(), NodeStatus.COMPLETED,
+                "CHANGE_SCOPE_VIOLATION", List.of("scope-occurrence.json"),
+                Map.of("change_scope_status", "FAIL"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, ledger.loadCurrent(paths).status());
+        assertEquals("gate.human_implementation_repair", activeNode(paths).nodeDefinitionId());
+        assertThrows(IOException.class, () -> ledger.resolveOpenGate(paths, definition, "revise", ""));
+        ledger.resolveOpenGate(paths, definition, "revise", "Repair only the compiled TaskContract scope.");
+        var repair = activeNode(paths);
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertEquals(List.of("scope-occurrence.json"), repair.inputRefs());
+    }
+
+    @Test
     void ambiguousRevisionLimitBlockedRoutesFailClosed() throws Exception {
         var definition = new WorkflowDefinition(
                 "ambiguous-revision-limit",

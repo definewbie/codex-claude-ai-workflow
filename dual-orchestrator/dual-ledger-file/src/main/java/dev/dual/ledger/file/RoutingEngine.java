@@ -448,6 +448,11 @@ final class RoutingEngine {
             throw new IOException("a decision note is required for a BLOCKED human gate");
         }
         var gatePurpose = text(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"));
+        if ("implementation_repair".equals(gatePurpose)
+                && "revise".equals(canonicalAction)
+                && (note == null || note.isBlank())) {
+            throw new IOException("a decision note is required for implementation repair");
+        }
         if ("design".equals(gatePurpose)
                 && "revise".equals(canonicalAction)
                 && (note == null || note.isBlank())) {

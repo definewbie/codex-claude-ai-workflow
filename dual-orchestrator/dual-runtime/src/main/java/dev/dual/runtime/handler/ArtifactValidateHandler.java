@@ -43,6 +43,11 @@ public final class ArtifactValidateHandler implements TaskHandler {
         var evaluation = evaluateChangeScope(context.workspaceRoot(), context.workstreamId(), evidence);
         var evaluationPath = evidenceDir.resolve("change-scope-evaluation.json");
         OBJECT_MAPPER.writeValue(evaluationPath.toFile(), evaluation);
+        var occurrence = ChangeScopeEvaluationArtifact.publish(
+                context.workspaceRoot(),
+                context.workstreamId(),
+                context.instance().nodeInstanceId(),
+                evaluation);
 
         var outputRefs = new ArrayList<String>();
         outputRefs.addAll(AgentEvidenceIndex.fromRefs(
@@ -67,6 +72,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
                 outputRefs.add(toWorkspaceRef(context.workspaceRoot(), path));
             }
         }
+        outputRefs.add(occurrence.ref());
 
         var result = new LinkedHashMap<String, Object>();
         result.put("validation", evidence.available() ? "git_evidence_collected" : "git_unavailable");
@@ -83,6 +89,8 @@ public final class ArtifactValidateHandler implements TaskHandler {
                 evidenceDir.resolve("git-evidence.json")
         ));
         result.put("change_scope_evaluation_path", toWorkspaceRef(context.workspaceRoot(), evaluationPath));
+        result.put("change_scope_evaluation_ref", occurrence.ref());
+        result.put("change_scope_evaluation_sha256", occurrence.sha256());
         result.put("error", evidence.error());
 
         if (!evaluation.passed()) {
@@ -92,9 +100,25 @@ public final class ArtifactValidateHandler implements TaskHandler {
             var error = evaluation.error() == null
                     ? "actual Git changes do not satisfy TaskContract.scope"
                     : evaluation.error();
+            if (evaluation.status() == ChangeScopeEvaluation.Status.FAIL && routesScopeViolation(context)) {
+                result.put("change_scope_disposition", "CHANGE_SCOPE_VIOLATION");
+                result.put("change_scope_message", error);
+                return new NodeResult(outcome, NodeStatus.COMPLETED, outputRefs, result, null);
+            }
             return new NodeResult(outcome, NodeStatus.FAILED, outputRefs, result, error);
         }
         return NodeResult.completed("completed", outputRefs, result);
+    }
+
+    private static boolean routesScopeViolation(TaskContext context) {
+        var configured = context.definition().config().get("route_scope_violation");
+        if (configured == null) {
+            return false;
+        }
+        if (!(configured instanceof Boolean enabled)) {
+            throw new IllegalArgumentException("route_scope_violation must be a boolean");
+        }
+        return enabled;
     }
 
     private static GitEvidence collectEvidence(Path workdir, String workstreamId, Path evidenceDir) throws IOException, InterruptedException {

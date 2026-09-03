@@ -62,7 +62,7 @@ class SmallWorkflowProfileDefinitionTest {
         assertEquals(expectedEdges, experiment.edges());
         assertTrue(directEdgeAdded);
         assertEquals(28, experiment.nodes().size());
-        assertEquals(46, experiment.edges().size());
+        assertEquals(47, experiment.edges().size());
         assertEquals(8, experiment.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -95,11 +95,11 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        assertEquals("4b359ae884fc18d6933215570c8c0cb3cd52654751dc2382f51532404e684f83",
+        assertEquals("8e636007fe0cac843d14a3fc0b37dd61e0841191bc1369e8d1ddb36efcbe2103",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("fce06b1e5c7506bdb9bdade9a2daf2e91ee9bda5bbb2efa32e2d3e1c97e1ff19",
+        assertEquals("c8fff7d2f07aaf777eadc4d3aadb7ce0dc65ac422c84b39ee492760de58a9672",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("bcf1763a75cc03a118c636590441d5e7f447dd71d157e388934de1f6ce54fcdb",
+        assertEquals("bd4122f8db60615f25d5908adcd728efe3104c91647082ee0d04e27eafb2c762",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 
@@ -121,6 +121,29 @@ class SmallWorkflowProfileDefinitionTest {
                             "source_artifact_type", "self_test_report",
                             "decision", "SELF_TEST_COMPLETE"),
                     context.config().get("required_agent_evidence"), definition.workflowId());
+        }
+    }
+
+    @Test
+    void allLifecycleProfilesDeclareTheSameChangeScopeRepairRoute() throws Exception {
+        var definitions = List.of(
+                new LifecycleWorkflowDefinitionFactory().forVariant("full"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("contract"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery"),
+                loadExperiment());
+
+        for (var definition : definitions) {
+            assertEquals(true, definition.node("implement.artifact_validation")
+                    .config().get("route_scope_violation"), definition.workflowId());
+            var route = definition.edgesFrom("implement.artifact_validation").stream()
+                    .filter(edge -> "CHANGE_SCOPE_VIOLATION".equals(edge.on()))
+                    .findFirst().orElseThrow();
+            assertEquals("gate.human_implementation_repair", route.to(), definition.workflowId());
+            var repair = definition.edgesFrom("gate.human_implementation_repair").stream()
+                    .filter(edge -> "revise".equals(edge.on()))
+                    .findFirst().orElseThrow();
+            assertEquals("Human authorized implementation repair", repair.metadata().loopReason(),
+                    definition.workflowId());
         }
     }
 

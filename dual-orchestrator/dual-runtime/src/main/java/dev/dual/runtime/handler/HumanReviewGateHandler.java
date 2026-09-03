@@ -8,6 +8,7 @@ import dev.dual.core.id.DualId;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.HumanGateActionSemantics;
 import dev.dual.ledger.file.DeliveryCandidateWriter;
+import dev.dual.ledger.file.NodeInstanceDocument;
 import dev.dual.ledger.file.WorkstreamPaths;
 
 import java.nio.charset.StandardCharsets;
@@ -33,6 +34,7 @@ public final class HumanReviewGateHandler implements GateHandler {
     @Override
     public NodeResult openOrInspect(GateContext context) throws Exception {
         assertBlockedSourceMatchesReview(context);
+        assertChangeScopeViolationSource(context);
         var allowedActions = HumanGateActionSemantics.allowedActions(context.definition());
         var packetRef = reviewPacketRef(context, ".md");
         var packetJsonRef = reviewPacketRef(context, ".json");
@@ -66,6 +68,13 @@ public final class HumanReviewGateHandler implements GateHandler {
         var maxRevisions = integralValue(result.get("max_revisions"));
         var currentRevisionCount = integralValue(result.get("current_revision_count"));
         return maxRevisions >= 0 && currentRevisionCount >= maxRevisions;
+    }
+
+    private void assertChangeScopeViolationSource(GateContext context) {
+        if (!"CHANGE_SCOPE_VIOLATION".equals(context.sourceOutcome())) {
+            return;
+        }
+        changeScopeEvaluationSummary(context);
     }
 
     private long integralValue(Object value) {
@@ -407,6 +416,9 @@ public final class HumanReviewGateHandler implements GateHandler {
     }
 
     private Map<String, Object> gitEvidenceSummary(GateContext context) {
+        if ("CHANGE_SCOPE_VIOLATION".equals(context.sourceOutcome())) {
+            return Map.of("changeScopeEvaluation", changeScopeEvaluationSummary(context));
+        }
         var evidenceDir = workstreamDir(context).resolve("artifacts/git-evidence");
         var changedFiles = readLines(evidenceDir.resolve("changed-files.txt"));
         var diffStat = readText(evidenceDir.resolve("diff.stat"));
@@ -419,6 +431,53 @@ public final class HumanReviewGateHandler implements GateHandler {
         summary.put("diffStat", diffStat);
         summary.put("statusShort", status);
         return summary;
+    }
+
+    private Map<String, Object> changeScopeEvaluationSummary(GateContext context) {
+        var refs = context.instance().inputRefs().stream()
+                .filter(ref -> ChangeScopeEvaluationArtifact.isCanonicalRefForWorkstream(ref, context.workstreamId()))
+                .toList();
+        if (refs.size() != 1) {
+            throw new IllegalStateException(
+                    "change-scope violation gate must receive exactly one occurrence evaluation");
+        }
+        var ref = refs.getFirst();
+        var sourceNodeInstanceId = ChangeScopeEvaluationArtifact.sourceNodeInstanceId(ref);
+        try {
+            var sourcePath = workstreamDir(context).resolve("nodes").resolve(sourceNodeInstanceId + ".json");
+            var source = objectMapper.readValue(sourcePath.toFile(), NodeInstanceDocument.class);
+            if (!"implement.artifact_validation".equals(source.nodeDefinitionId())
+                    || !"artifact.validate".equals(source.handlerType())
+                    || source.status() != dev.dual.core.workflow.NodeStatus.COMPLETED
+                    || !context.instance().iterationId().equals(source.iterationId())
+                    || !source.outputRefs().contains(ref)
+                    || !"FAIL".equals(text(source.result().get("change_scope_status")))
+                    || !"CHANGE_SCOPE_VIOLATION".equals(
+                            text(source.result().get("change_scope_disposition")))) {
+                throw new IllegalStateException("change-scope evaluation producer lineage is invalid");
+            }
+            var expectedRef = text(source.result().get("change_scope_evaluation_ref"));
+            var expectedSha = text(source.result().get("change_scope_evaluation_sha256"));
+            if (!ref.equals(expectedRef)) {
+                throw new IllegalStateException("change-scope evaluation ref does not match producer result");
+            }
+            var verified = ChangeScopeEvaluationArtifact.verify(
+                    context.workspaceRoot(), context.workstreamId(), sourceNodeInstanceId, ref, expectedSha);
+            var evaluation = verified.document().evaluation();
+            if (evaluation.status() != ChangeScopeEvaluation.Status.FAIL) {
+                throw new IllegalStateException("change-scope occurrence is not a failed evaluation");
+            }
+            var summary = new LinkedHashMap<String, Object>();
+            summary.put("ref", verified.ref());
+            summary.put("sha256", verified.sha256());
+            summary.put("violations", evaluation.violations());
+            summary.put("missingDeclared", evaluation.missingDeclared());
+            return Map.copyOf(summary);
+        } catch (IllegalStateException failure) {
+            throw failure;
+        } catch (Exception failure) {
+            throw new IllegalStateException("change-scope evaluation verification failed", failure);
+        }
     }
 
     private Map<String, Object> deliverySummary(GateContext context) {

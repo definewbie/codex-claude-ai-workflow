@@ -33,6 +33,7 @@ public record WorkflowDefinition(
             }
         }
         HumanGateActionSemantics.validateVisibility(nodes, edges);
+        ChangeScopeViolationRoutingSemantics.validate(nodes, edges);
     }
 
     public NodeDefinition node(String nodeId) {
