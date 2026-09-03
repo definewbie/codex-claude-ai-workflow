@@ -2398,3 +2398,14 @@ Doctor 与 reviewed acpx identity 均 PASS；当前节点仍为 `node-implement-
 
 当前 active step：停止自动推进，先以当前 READY 的 `implement.claude_self_test_report-056` 为边界制定最短继续策略；
 不得把 adapter Gate PASS 外推为 OKX real-case 已完成，也不得再次修复身份、timeout、网络或 permission 机制。
+
+self-test 单节点 Gate 已以 checkpoint `82fb49e` 冻结并执行，结论 `PASS`。唯一 run
+`run-1788439283922` 使用 reviewed acpx、E1 binding 与 `--timeout 1200`，在 `598390ms` 后产出合法
+`SELF_TEST_COMPLETE / READY` contract。沙箱内离线测试为 44/0/0/1，唯一 skip 来自 Playwright
+无法写宿主 cache，contract 已明确记录该 missing evidence；没有把它冒充沙箱内全量通过。provider 结束后 operator
+原样复跑 `mvn test` 为 44/0/0/0，fresh Surefire XML 的原 44 个 testcase 零缺失；target 四项 source identity
+全部不变。node 056 已完成，`evt-000057` 只激活 deterministic `implement.self_test_decision-057 / READY`，
+没有第二个 provider run。
+
+当前 active step：先执行既有 deterministic self-test decision，不调用 provider；随后根据唯一 typed route 决定下一节点。
+Playwright cache 差异只登记为 self-test 环境残余，本轮不扩成 executor、cache 投影或权限平台。

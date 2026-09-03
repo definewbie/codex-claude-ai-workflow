@@ -1,7 +1,7 @@
 # OKX Self-Test Recovery Gate
 
 日期：2026-09-03  
-状态：`READY AFTER CHECKPOINT / PROVIDER NOT RUN`
+状态：`PASS`
 
 ## Verification Gate
 
@@ -28,3 +28,24 @@ java -jar /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchest
 
 本 Gate 只证明 self-test 节点恢复，不证明 acceptance、delivery 或整个 real-case 已完成。
 命令因 `--max-steps=1` 达到步数上限而返回 exit code 1 本身不构成 FAIL，最终判定只看 ledger、run artifact 与上述产品测试证据。
+
+## 执行结果
+
+- Gate checkpoint=`82fb49e`。唯一新增 run=`run-1788439283922`，归属 node 056；command
+  含精确 `--timeout 1200` 与 E1 policy binding，存在 `prompt_completed`，无 identity/bootstrap/
+  permission failure。
+- provider occurrence 在 `598390ms` 后正常 exit 0；self-test contract 合法，decision=
+  `SELF_TEST_COMPLETE`、lifecycle=`READY`、execution outcome=`SUCCESS/completed`。node 056 已
+  `COMPLETED`，`evt-000057` 只路由到 deterministic
+  `node-implement-self_test_decision-057 / READY`，该节点没有 run；run 总数恰为 22。
+- 沙箱内 `mvn -o test` 为 `44/0/0/1`：唯一 skip 是 `ChartPageDomTest` 无权写宿主
+  Playwright cache 后按测试既有 assumption 降级。该事实已在 contract 的 `checks_skipped` 与
+  `missing_evidence` 中显式记录，未被解释成沙箱内全量证明。
+- provider 结束后 operator 原样执行 `mvn test`，结果 `44/0/0/0 / BUILD SUCCESS`。全部
+  Surefire XML 晚于新 run startedAt；testcase manifest SHA256 仍为
+  `ed8e5f3a7a5d2a6413d553f87a605e9cd696057c920ad445936e18bead0f43c1`，原 44 项零缺失。
+- target HEAD、tracked diff、porcelain-v1-z 与 51 个 untracked 文件 path+content identity
+  全部与运行前一致，模型没有修改产品文件。
+
+结论：`PASS`。self-test 节点恢复与产品测试完整性已由 run contract 加 operator fresh XML
+共同证明；沙箱本身仍未运行真实 Playwright 浏览器，这一环境差异不得外推为已闭合。
