@@ -2382,3 +2382,19 @@ TOCTOU，不阻塞 captured 缺陷关闭，也不在本 checkpoint 扩成新机�
 
 当前 active step：选择性提交本 checkpoint（排除旧 OKX Gate）并构建 fresh JAR；随后为当前
 `node-implement-claude_implement-049` 写一份短 recovery Gate，复核后只执行一次 recovery。
+
+checkpoint 已提交为 `3bb87f3`。fresh JAR SHA256 为 `86beadc7a473d2cdec9fccaad9bffb4231502ba4130b2f2d98a61c72862fa8a8`，
+Doctor 与 reviewed acpx identity 均 PASS；当前节点仍为 `node-implement-claude_implement-049 / WAITING_FOR_RECOVERY / evt-000054`，
+目标工作区 `mvn test` 再次为 44/0/0/0。旧 S2 Gate 已过时且保持不动；当前 recovery Gate 见
+`docs/testing/verification-gates/20260903-okx-acpx-identity-deadline-recovery.md`。
+
+新 Gate 经独立只读核验后执行完成，结论为 `PASS`。唯一新增 run
+`run-1788437649906` 使用 reviewed acpx、E1 policy binding 与精确 `--timeout 1200`；首次 provider
+输出运行 `790110ms` 后产生 `prompt_completed`，证明旧 600 秒提前终止已消除。首次 JSON 解析失败由同一 run
+的既有 correction 在 `25794ms` 内闭合，最终 AgentResult 合法、execution outcome=`SUCCESS/completed`，无
+`AGENT_RESULT_MISSING`。节点 049 已完成并以 `evt-000056` 路由到 self-test 节点；`--max-steps 1`
+在第二个 provider run 前停止。运行后 target source identity 未漂移，operator 复跑产品测试为 44/0/0/0，
+原 44 个 testcase 零缺失。
+
+当前 active step：停止自动推进，先以当前 READY 的 `implement.claude_self_test_report-056` 为边界制定最短继续策略；
+不得把 adapter Gate PASS 外推为 OKX real-case 已完成，也不得再次修复身份、timeout、网络或 permission 机制。
