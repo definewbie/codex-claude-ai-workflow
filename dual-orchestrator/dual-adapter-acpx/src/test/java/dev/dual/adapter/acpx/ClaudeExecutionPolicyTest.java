@@ -56,6 +56,27 @@ class ClaudeExecutionPolicyTest {
     }
 
     @Test
+    void enablesLocalBindingOnlyForImplementProfile() throws Exception {
+        var implementRun = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-implement"));
+        var reviewRun = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-review"));
+
+        var implement = ClaudeExecutionPolicy.write(
+                tempDir, "ws-1", "node-implement", "run-implement", implementRun,
+                AcpxPermissionProfile.implement());
+        var review = ClaudeExecutionPolicy.write(
+                tempDir, "ws-1", "node-review", "run-review", reviewRun,
+                AcpxPermissionProfile.review());
+
+        assertEquals(true, localBinding(implement));
+        assertEquals(false, localBinding(review));
+        assertTrue(AcpxPermissionProfile.implement().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.contractDiscovery().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.observe().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.review().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.contractCorrection().allowsLocalBinding());
+    }
+
+    @Test
     void rejectsDeletionTamperingAndLineageDrift() throws Exception {
         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
@@ -88,5 +109,12 @@ class ClaudeExecutionPolicyTest {
     @SuppressWarnings("unchecked")
     private static Map<String, Object> map(Object value) {
         return (Map<String, Object>) value;
+    }
+
+    private boolean localBinding(ClaudeExecutionPolicy.Binding binding) throws IOException {
+        Map<String, Object> document = MAPPER.readValue(
+                tempDir.resolve(binding.ref()).toFile(), new TypeReference<>() {
+                });
+        return (boolean) map(map(document.get("sandbox")).get("network")).get("allow_local_binding");
     }
 }

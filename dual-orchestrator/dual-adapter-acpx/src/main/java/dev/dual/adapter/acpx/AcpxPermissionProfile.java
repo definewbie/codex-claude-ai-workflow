@@ -138,6 +138,10 @@ record AcpxPermissionProfile(
         return kind != null && escalateKinds.contains(kind);
     }
 
+    boolean allowsLocalBinding() {
+        return "implement".equals(name);
+    }
+
     AcpxPermissionProfile withAutoApprovedTool(String tool) {
         if (tool == null || tool.isBlank() || autoApprovedTools.contains(tool)) {
             return this;

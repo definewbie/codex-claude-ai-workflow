@@ -1,0 +1,50 @@
+{
+  "sdkPath": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs",
+  "sdkSha256": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+  "claudeBinary": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude",
+  "claudeBinarySha256": "7b39c1588df919d001dea3ffd5651adb682f2451b5a0e18d42d4233296b53cc7",
+  "settingSources": [],
+  "tools": [
+    "Bash"
+  ],
+  "allowedTools": [
+    "Bash"
+  ],
+  "permissionMode": "dontAsk",
+  "persistSession": false,
+  "maxTurns": 2,
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true,
+    "network": {
+      "allowLocalBinding": true
+    }
+  },
+  "managedSettings": {
+    "sandbox": {
+      "allowUnsandboxedCommands": false,
+      "network": {
+        "strictAllowlist": true,
+        "allowedDomains": [],
+        "allowUnixSockets": []
+      },
+      "credentials": {
+        "envVars": [
+          {
+            "name": "ANTHROPIC_API_KEY",
+            "mode": "deny"
+          },
+          {
+            "name": "ANTHROPIC_AUTH_TOKEN",
+            "mode": "deny"
+          },
+          {
+            "name": "ANTHROPIC_BASE_URL",
+            "mode": "deny"
+          }
+        ]
+      }
+    }
+  }
+}

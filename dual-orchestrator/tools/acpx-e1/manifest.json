@@ -6,7 +6,7 @@
   "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
   "upstream_npm_tarball_sha256": "b483b20ea1db5ffdeb0eb2e3105283ffda0b88ccf37e034d500522aaeef8d12b",
   "patch_ref": "patches/acpx-v0.13.2-e1-policy-transport.patch",
-  "patch_sha256": "81acbb7491a17aedfb48b1a73f077b59e06f1d5eceb7cd617e59df86aa5c60ab",
+  "patch_sha256": "41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c",
   "policy_schema": "claude_execution_policy.v2",
   "claude_agent_acp_version": "0.70.0",
   "build_identity_command": "acpx build-info --json"

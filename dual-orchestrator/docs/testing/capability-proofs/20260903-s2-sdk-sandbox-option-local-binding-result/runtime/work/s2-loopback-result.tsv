@@ -1,0 +1,7 @@
+probe_complete	false
+python3_available	true
+self_bind	pass
+self_connect	pass
+host_connect	pass
+external_connect	denied
+probe_complete	true

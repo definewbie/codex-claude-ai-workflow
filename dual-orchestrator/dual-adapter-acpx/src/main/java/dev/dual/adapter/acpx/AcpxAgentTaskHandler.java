@@ -172,7 +172,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         context.workstreamId(),
                         context.instance().nodeInstanceId(),
                         runId,
-                        runDir)
+                        runDir,
+                        effectivePermissionProfile)
                 : null;
         var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
                 context.workspaceRoot(),

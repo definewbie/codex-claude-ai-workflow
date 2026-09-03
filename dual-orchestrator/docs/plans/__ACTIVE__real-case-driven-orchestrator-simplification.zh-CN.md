@@ -27,7 +27,17 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: E1 CONTROLLED NETWORK ACCESS + MINI-B
+## Current Active Step: S2 IMPLEMENT PROFILE LOCAL BINDING DIFF REVIEW
+
+2026-09-03：S2 SDK capability Gate 已证明 SDK `0.3.232` + embedded Claude Code `2.1.232` 在
+`Options.sandbox.network.allowLocalBinding=true` 时 self bind/connect PASS、host loopback reachable、external direct
+connect denied；operator 明确接受将该能力限定给现有 `implement` profile。实施 checkpoint 已完成：
+profile 是唯一 capability owner，occurrence policy 是 durable fact，reviewed fork 只投影到 SDK option，
+managed settings 对 true/false 均省略该 permissive key。零 workflow/profile/ledger/schema 扩张。reviewed fork
+full suite `986/0/0`、Dual reactor `1298/0/0/0`、installer/configure/fresh Doctor 全部 PASS；patch identity 更新为
+`41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c`。独立 diff review 已
+`PASS（P0=0 / P1=0）`，并独立复现 fork 两次直跑全绿、Java focused `50/0/0/0`、六方 identity 与
+reverse-apply。当前允许选择性提交本 S2 checkpoint；OKX 恢复须在 clean commit 后单独进行。
 
 2026-09-01：E1 R2 Gate 独立评审发现 classifier execution failure 与 external proxy 共用 `exit 74`，会把环境
 `INVALID` 错投影为能力 `FAIL`。delta 将 Node 自检及非 `0/1` 退出统一归为 `exit 76 / INVALID`，并补 `126/127`、
@@ -2296,3 +2306,16 @@ command 与 credential deny。该发现未消耗 provider，也未修改 product
 新 Gate 独立评审已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=3）`，并复现 offline test、fixture/SDK/binary SHA 与
 SDK 类型契约。按 P2 补充了失败解释边界：self bind FAIL 只能证明 option+managed 合并路径不可用，不能外推 runtime 完全不
 支持。用户既有 provider tool-turn 预授权明确覆盖本次唯一 SDK query；不增加通用 adjudicator 或 IP/DNS 探针。
+
+### 2026-09-03 S2 SDK Local Binding 实测结果
+
+唯一 SDK query 已完成，机械判定为 `PASS / HOST_REACHABLE / OPERATOR DECISION REQUIRED`。冻结 SDK `0.3.232`
+与 embedded Claude Code `2.1.232` 下，`Options.sandbox.network.allowLocalBinding=true` 同时允许 sandbox 内
+self bind/connect 与访问宿主机已监听的 loopback sentinel；空 domain allowlist 下 external direct connect 仍被拒绝。
+运行为一个 prompt、一个精确 Bash tool call、SDK success、零 permission denial，host pre/postcheck 均 PASS。
+
+Operator 已接受 `HOST_REACHABLE` 语义。代码事实进一步确认实现与自测节点共用现有
+`permission_profile=implement`；因此只对 self-test 做节点特判反而会新增漂移路径。已起草
+`docs/plans/s2-implement-profile-local-binding-implementation-plan-20260903.zh-CN.md`，最小边界是对现有
+`implement` profile 投影 SDK local-binding option，其他 profile 保持关闭。当前 active step 为该计划的独立架构评审；
+评审 PASS 前不改 production、不恢复 OKX real-case、不运行第二 provider 样本。

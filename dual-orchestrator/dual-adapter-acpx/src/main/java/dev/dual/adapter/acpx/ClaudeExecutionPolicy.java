@@ -39,6 +39,37 @@ final class ClaudeExecutionPolicy {
             String runId,
             Path runDir
     ) throws IOException {
+        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, false);
+    }
+
+    static Binding write(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeInstanceId,
+            String runId,
+            Path runDir,
+            AcpxPermissionProfile permissionProfile
+    ) throws IOException {
+        if (permissionProfile == null) {
+            throw new IllegalArgumentException("permissionProfile is required");
+        }
+        return write(
+                workspaceRoot,
+                workstreamId,
+                nodeInstanceId,
+                runId,
+                runDir,
+                permissionProfile.allowsLocalBinding());
+    }
+
+    private static Binding write(
+            Path workspaceRoot,
+            String workstreamId,
+            String nodeInstanceId,
+            String runId,
+            Path runDir,
+            boolean allowLocalBinding
+    ) throws IOException {
         var root = workspaceRoot.toRealPath();
         var realRunDir = runDir.toRealPath();
         if (!realRunDir.startsWith(root)) {
@@ -51,7 +82,7 @@ final class ClaudeExecutionPolicy {
         var network = new LinkedHashMap<String, Object>();
         network.put("strict_allowlist", true);
         network.put("allowed_domains", List.of());
-        network.put("allow_local_binding", false);
+        network.put("allow_local_binding", allowLocalBinding);
         network.put("allow_unix_sockets", List.of());
 
         var filesystem = new LinkedHashMap<String, Object>();

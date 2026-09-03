@@ -154,6 +154,7 @@ class AcpxAgentTaskHandlerTest {
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertTrue(transport.sawPreparedRunJson);
+        assertTrue(transport.localBindingAllowed);
     }
 
     @Test
@@ -2050,12 +2051,17 @@ class AcpxAgentTaskHandlerTest {
     // markdown with no dual-control fence and no typed artifact. This must be adapter/
     private static final class PreparedMetadataObservedTransport extends AcpxAgentTransport {
         private boolean sawPreparedRunJson;
+        private boolean localBindingAllowed;
 
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
             var runJson = request.stdoutPath().getParent().getParent().resolve("run.json");
             sawPreparedRunJson = Files.exists(runJson)
                     && Files.readString(runJson).contains("\"status\" : \"prepared\"");
+            var policy = new ObjectMapper().readTree(
+                    request.workdir().resolve(request.claudeExecutionPolicy().ref()).toFile());
+            localBindingAllowed = policy.path("sandbox").path("network")
+                    .path("allow_local_binding").asBoolean(false);
             Files.createDirectories(request.stdoutPath().getParent());
             Files.writeString(request.stdoutPath(), """
                     <dual-artifact type="agent_output_contract">

@@ -1,0 +1,5 @@
+prompt.md: OK
+s2-loopback-probe.sh: OK
+sdk-local-binding-runner.mjs: OK
+run-once.sh: OK
+offline-test.sh: OK
