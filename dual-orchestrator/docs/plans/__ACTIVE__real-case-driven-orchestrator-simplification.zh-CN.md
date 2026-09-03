@@ -2495,3 +2495,19 @@ change-scope violation repair checkpoint 已提交为 `22ae064`。当前 OKX 样
 当前 active step：停止继续扩展 harness。下一步应回到主目标，选择一个 fresh real-case，用最小 Gate 验证新路径能够在真实
 scope violation 时进入人工 repair，并在 revise 后重新 validation PASS；若新任务没有自然触发 violation，不得人为制造问题，
 只验证正常路径无回归。
+
+### 2026-09-04 Fresh OKX Normal Path / Natural Scope Repair Gate
+
+用户已授权使用干净 OKX 需求基线创建唯一 fresh real-case。Verification Gate 位于
+`docs/testing/verification-gates/20260904-okx-fresh-normal-and-natural-scope-repair.md`。主目标优先验证当前 small workflow
+正常路径完整完成且无回归；scope-repair 只在 Agent 自然产生 `CHANGE_SCOPE_VIOLATION` 时进入验证，禁止通过修改 TaskContract、
+workspace、evidence、ledger 或提示模型越界来制造样本。
+
+边界保持 Definition / Instance / Execution 分离：当前 external workflow 是唯一 Definition；新 workstream 是唯一 Instance；
+每次 provider run 是独立 Execution；TaskContract scope 是唯一授权源；occurrence-scoped evaluation ref/SHA 是 violation 事实；
+human implementation-repair Gate 是唯一修复授权。正常路径完成只证明无回归；只有自然 violation 经用户带 note 的 `revise`、新
+iteration 和后续 scope PASS 后，才可把 scope-repair 从 `ENFORCED` 提升为 `REAL-CASE PROVEN`。
+
+当前 active step：完成 Gate 机械复核与 docs-only checkpoint，fresh package、workflow/identity/workspace preflight 和 standing-authorized
+minimal probes 全部 PASS 后，以 `start`（不带 `--run`）创建唯一 workstream，并分段运行到每个人工 Gate。禁止使用会自动批准
+human gate 的 `run-real-case.sh` autorun 路径；旧 `ws-20260829T122452Z-9BZG` 与旧 recovery Gate 继续封存。
