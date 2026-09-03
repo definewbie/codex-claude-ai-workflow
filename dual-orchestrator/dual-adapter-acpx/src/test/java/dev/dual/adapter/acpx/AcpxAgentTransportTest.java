@@ -11,7 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -24,6 +26,42 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AcpxAgentTransportTest {
     @TempDir
     Path tempDir;
+
+    @Test
+    void zeroExitWithoutCompletionAtDeclaredDeadlineIsTimedOut() {
+        var startedAt = Instant.parse("2026-09-03T00:00:00Z");
+
+        var usability = AcpxAgentTransport.exitedUsability(
+                0,
+                AcpxPromptCompletion.EMPTY,
+                List.of("acpx", "--timeout", "600", "claude"),
+                startedAt,
+                startedAt.plusSeconds(604)
+        );
+
+        assertEquals(ProcessUsability.TIMED_OUT, usability);
+    }
+
+    @Test
+    void completedPromptKeepsExitSemanticsEvenAtDeclaredDeadline() {
+        var startedAt = Instant.parse("2026-09-03T00:00:00Z");
+        var completion = new AcpxPromptCompletion("request-1", "end_turn", "{}");
+
+        assertEquals(ProcessUsability.EXITED_ZERO, AcpxAgentTransport.exitedUsability(
+                0, completion, List.of("acpx", "--timeout", "600"), startedAt, startedAt.plusSeconds(604)));
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT,
+                AcpxAgentTransport.exitedUsability(
+                        5, completion, List.of("acpx", "--timeout", "600"),
+                        startedAt, startedAt.plusSeconds(604)));
+    }
+
+    @Test
+    void commandTimeoutConfigurationIsExplicitAndBounded() {
+        assertEquals(Duration.ofSeconds(600), AcpxAgentTransport.configuredCommandTimeout(null));
+        assertEquals(Duration.ofSeconds(1200), AcpxAgentTransport.configuredCommandTimeout("1200"));
+        assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("0"));
+        assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("invalid"));
+    }
 
     @Test
     void processStartFailureReturnsTransportOwnedTypedFacts() throws Exception {
@@ -80,6 +118,7 @@ class AcpxAgentTransportTest {
         var promptIdx = log.indexOf(" -f ");
         assertTrue(ensureIdx >= 0, "Codex must ensure the named session before the prompt: " + log);
         assertTrue(promptIdx > ensureIdx, "session ensure must precede the prompt run: " + log);
+        assertFalse(log.contains("build-info"), "Codex must not inherit the Claude E1 identity preflight");
     }
 
     @Test
@@ -194,6 +233,11 @@ class AcpxAgentTransportTest {
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
                 echo "$@" >> "__LOG__"
+                if [ "$1" = "build-info" ]; then
+                  cat <<'EOF'
+                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c","policy_schema":"claude_execution_policy.v2"}
+                EOF
+                fi
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
@@ -222,6 +266,89 @@ class AcpxAgentTransportTest {
         assertTrue(policyBearingLines.stream().anyMatch(line -> line.contains("claude sessions ensure")), lines.toString());
         assertTrue(policyBearingLines.stream().filter(line -> line.contains("claude -s claude-policy -f")).count() >= 2,
                 lines.toString());
+        assertTrue(lines.getFirst().contains("build-info --json"), lines.toString());
+        assertEquals(2, lines.stream().filter(line -> line.contains("build-info --json")).count(), lines.toString());
+    }
+
+    @Test
+    void unreviewedAcpxFailsBeforePolicyBoundSessionOrPrompt() throws Exception {
+        var invocationLog = tempDir.resolve("unreviewed-acpx.log");
+        var fakeAcpx = tempDir.resolve("acpx-unreviewed.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                if [ "$1" = "build-info" ]; then
+                  echo '{"upstream_commit":"wrong","patch_sha256":"wrong","policy_schema":"wrong"}'
+                fi
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-unreviewed"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-unreviewed", runDir);
+        var prompt = tempDir.resolve("unreviewed-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir, "claude-unreviewed", prompt,
+                tempDir.resolve("unreviewed.stdout"), tempDir.resolve("unreviewed.stderr"),
+                AcpxPermissionProfile.implement(), AcpxExecutionEventSink.NOOP, binding));
+
+        assertEquals(4, result.exitCode());
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED, result.activeAdapterSignals().getFirst().type());
+        assertTrue(result.activeAdapterSignals().getFirst().message().contains("build identity mismatch"));
+        assertEquals(List.of("build-info --json"), Files.readAllLines(invocationLog));
+    }
+
+    @Test
+    void unreviewedAcpxCannotBypassIdentityCheckThroughCorrection() throws Exception {
+        var invocationLog = tempDir.resolve("unreviewed-correction.log");
+        var fakeAcpx = tempDir.resolve("acpx-unreviewed-correction.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                echo '{"upstream_commit":"wrong","patch_sha256":"wrong","policy_schema":"wrong"}'
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-correction"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-correction", runDir);
+        var prompt = tempDir.resolve("correction-prompt.md");
+        Files.writeString(prompt, "# Correction\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir, "claude-correction", prompt,
+                tempDir.resolve("correction.stdout"), tempDir.resolve("correction.stderr"),
+                AcpxPermissionProfile.contractCorrection(), AcpxExecutionEventSink.NOOP, binding);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString())
+                .runAgentResultCorrection("claude", request);
+
+        assertEquals(4, result.exitCode());
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED, result.activeAdapterSignals().getFirst().type());
+        assertEquals(List.of("build-info --json"), Files.readAllLines(invocationLog));
+    }
+
+    @Test
+    void configuredTotalDeadlineIsPassedToAcpxWithoutChangingProgressTimeout() throws Exception {
+        var invocationLog = tempDir.resolve("deadline-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-deadline.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("deadline-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(
+                fakeAcpx.toString(), Duration.ofSeconds(30), Duration.ofSeconds(600),
+                Duration.ofSeconds(45), Duration.ofSeconds(1200)
+        ).runClaudeDesign(new AcpxRunRequest(
+                tempDir, "claude-deadline", prompt,
+                tempDir.resolve("deadline.stdout"), tempDir.resolve("deadline.stderr"),
+                AcpxPermissionProfile.observe()));
+
+        assertTrue(Files.readString(invocationLog).contains("--timeout 1200"));
     }
 
     @Test

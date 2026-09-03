@@ -98,6 +98,21 @@ class AgentExecutionFinalizerTest {
     }
 
     @Test
+    void timeoutRemainsPrimaryWhenAgentResultIsMissing() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.timedOutProcess(),
+                AgentResultContractResult.missing(),
+                List.of(),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.TIMEOUT, finalized.outcome().status());
+        assertEquals("process_timed_out", finalized.outcome().primaryReason());
+        assertEquals(AgentExecutionAttemptStatus.TIMED_OUT, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.TIMED_OUT, finalized.attempt().processStatus());
+    }
+
+    @Test
     void stalledProducesStalledAttemptAndNoSuccessContradiction() {
         var stalled = finalizer.finalize(baseAttempt(), evidence(
                 new ProcessResult("", null, null, ProcessUsability.STALLED, 0, "", "", false, false),

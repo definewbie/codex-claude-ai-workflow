@@ -2351,3 +2351,34 @@ Operator 已接受 `HOST_REACHABLE` 语义。代码事实进一步确认实现�
 `docs/plans/s2-implement-profile-local-binding-implementation-plan-20260903.zh-CN.md`，最小边界是对现有
 `implement` profile 投影 SDK local-binding option，其他 profile 保持关闭。当前 active step 为该计划的独立架构评审；
 评审 PASS 前不改 production、不恢复 OKX real-case、不运行第二 provider 样本。
+
+### 2026-09-03 acpx Executable 与 Turn Deadline 边界
+
+OKX 产品修复已在宿主环境通过 `mvn test`（44/0/0/0），但同一 implement 节点的两个 reviewed-acpx occurrence
+分别运行 `608153ms` 与 `603998ms` 后，以 exit 0、无 `prompt_completed`、空 final assistant message 结束，随后被
+误投影为 `AGENT_RESULT_MISSING`。另一次 provider 前失败证明未设置 `DUAL_ACPX_EXECUTABLE` 时会静默 fallback 到 PATH
+中的 acpx 0.11.0，直到发送 E1 flags 才暴露不兼容。
+
+这两个问题同属 adapter execution boundary，实施计划见
+`docs/plans/acpx-executable-and-turn-deadline-boundary-plan-20260903.zh-CN.md`。修复只复用既有
+`TIMED_OUT` 与 `SESSION_BOOTSTRAP_FAILED`：E1-bound request 在 session/provider 前校验 reviewed build identity；
+无 completion 且到达声明 deadline 时，即使 exit 0 也必须分类为 typed timeout；总 turn deadline增加显式有界配置，
+当前 OKX 恢复使用 1200 秒，600 秒 inactivity watchdog 不变。禁止新增 workflow/schema/recovery action/自动重试或配置平台。
+
+当前 active step：先写 cannot-bypass tests，再实施单一 adapter checkpoint；full reactor 与独立 diff review PASS 后构建
+fresh JAR，只恢复当前 OKX 节点一次。同类失败再次出现即停止，不创建第二样本。
+
+实施已完成，result 见
+`docs/plans/acpx-executable-and-turn-deadline-boundary-result-20260903.zh-CN.md`。边界自审补齐了 correction prompt 入口，
+避免同一 occurrence 在初始 prompt 通过身份检查后从 correction 绕过。聚焦测试分别为 transport 42/0/0/0、Doctor
+11/0/0/0、handler 46/0/0/0、finalizer 9/0/0/0；full reactor 1311/0/0/0，`git diff --check` clean。
+
+当前 active step：独立代码级 diff review。review PASS 前不恢复 OKX；review 后选择性提交、构建 fresh JAR，再按既有
+Gate 以 reviewed acpx 和 `DUAL_ACPX_COMMAND_TIMEOUT_SECONDS=1200` 只恢复当前节点一次。
+
+独立 diff review 已 `PASS / ALLOWED（P0=0 / P1=0 / P2=4）`，并独立复跑 focused 108/0/0/0、full reactor
+1311/0/0/0 与 clean diff-check。P2 仅记录 sibling/双 timer 测试强度、deadline 5 秒容差及本地 executable replacement
+TOCTOU，不阻塞 captured 缺陷关闭，也不在本 checkpoint 扩成新机制。
+
+当前 active step：选择性提交本 checkpoint（排除旧 OKX Gate）并构建 fresh JAR；随后为当前
+`node-implement-claude_implement-049` 写一份短 recovery Gate，复核后只执行一次 recovery。

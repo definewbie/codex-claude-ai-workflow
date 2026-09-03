@@ -38,12 +38,14 @@ public class AcpxAgentTransport {
     private static final String SESSION_COMMAND_TIMEOUT_ENV = "DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS";
     private static final String API_TIMEOUT_MS_ENV = "API_TIMEOUT_MS";
     private static final String ACPX_EXECUTABLE_ENV = "DUAL_ACPX_EXECUTABLE";
+    private static final String ACPX_COMMAND_TIMEOUT_ENV = "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS";
 
     private final String acpxExecutable;
     private final Duration recoverableSignalGrace;
     private final Duration agentProgressTimeout;
     private final Duration sessionCommandTimeout;
     private final Duration queueTtl;
+    private final Duration commandTimeout;
 
     public AcpxAgentTransport() {
         this(configuredAcpxExecutable(), "claude");
@@ -94,6 +96,18 @@ public class AcpxAgentTransport {
             Duration agentProgressTimeout,
             Duration sessionCommandTimeout
     ) {
+        this(acpxExecutable, claudeExecutable, recoverableSignalGrace, agentProgressTimeout,
+                sessionCommandTimeout, configuredCommandTimeout(System.getenv(ACPX_COMMAND_TIMEOUT_ENV)));
+    }
+
+    private AcpxAgentTransport(
+            String acpxExecutable,
+            String claudeExecutable,
+            Duration recoverableSignalGrace,
+            Duration agentProgressTimeout,
+            Duration sessionCommandTimeout,
+            Duration commandTimeout
+    ) {
         if (acpxExecutable == null || acpxExecutable.isBlank()) {
             throw new IllegalArgumentException("acpxExecutable is required");
         }
@@ -109,11 +123,26 @@ public class AcpxAgentTransport {
         if (sessionCommandTimeout == null || sessionCommandTimeout.isNegative() || sessionCommandTimeout.isZero()) {
             throw new IllegalArgumentException("sessionCommandTimeout must be positive");
         }
+        if (commandTimeout == null || commandTimeout.isNegative() || commandTimeout.isZero()) {
+            throw new IllegalArgumentException("commandTimeout must be positive");
+        }
         this.acpxExecutable = acpxExecutable;
         this.recoverableSignalGrace = recoverableSignalGrace;
         this.agentProgressTimeout = agentProgressTimeout;
         this.sessionCommandTimeout = sessionCommandTimeout;
         this.queueTtl = configuredQueueTtl();
+        this.commandTimeout = commandTimeout;
+    }
+
+    AcpxAgentTransport(
+            String acpxExecutable,
+            Duration recoverableSignalGrace,
+            Duration agentProgressTimeout,
+            Duration sessionCommandTimeout,
+            Duration commandTimeout
+    ) {
+        this(acpxExecutable, "claude", recoverableSignalGrace, agentProgressTimeout,
+                sessionCommandTimeout, commandTimeout);
     }
 
     private static String configuredAcpxExecutable() {
@@ -154,6 +183,11 @@ public class AcpxAgentTransport {
      */
     private AcpxRunResult runWithSession(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
         try {
+            validateExecutionPolicyBinding(agent, request);
+            var identityFailure = reviewedBuildIdentityFailure(agent, request);
+            if (identityFailure != null) {
+                return identityFailure.toRunResult();
+            }
             var bootstrap = ensureSession(agent, request);
             if (!bootstrap.success()) {
                 return bootstrap.toRunResult();
@@ -180,11 +214,31 @@ public class AcpxAgentTransport {
         }
     }
 
+    private SessionCommandResult reviewedBuildIdentityFailure(String agent, AcpxRunRequest request)
+            throws InterruptedException {
+        if (!"claude".equals(agent) || request.claudeExecutionPolicy() == null) {
+            return null;
+        }
+        var command = List.of(acpxExecutable, "build-info", "--json");
+        var result = runSessionCommand(command, request.workdir(), false, sessionCommandTimeout);
+        if (!result.success()) {
+            return result.withOutput("NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build-info is unavailable"
+                    + (result.output().isBlank() ? "" : " - " + result.output()));
+        }
+        var verification = ReviewedAcpxBuildIdentity.verify(result.output());
+        return verification.valid() ? null : result.asFailure(verification.message());
+    }
+
     /** Sends a bounded contract-correction turn to the already established session. */
     AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request)
             throws IOException, InterruptedException {
         if (!"claude".equals(agent) && !"codex".equals(agent)) {
             throw new IllegalArgumentException("unsupported agent: " + agent);
+        }
+        validateExecutionPolicyBinding(agent, request);
+        var identityFailure = reviewedBuildIdentityFailure(agent, request);
+        if (identityFailure != null) {
+            return identityFailure.toRunResult();
         }
         return run(agent, request);
     }
@@ -193,7 +247,7 @@ public class AcpxAgentTransport {
         var command = new ArrayList<String>();
         command.add(acpxExecutable);
         command.add("--timeout");
-        command.add(Long.toString(DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS));
+        command.add(Long.toString(commandTimeout.toSeconds()));
         command.add("--ttl");
         command.add(Long.toString(queueTtl.toSeconds()));
         addPermissionArguments(command, request);
@@ -411,6 +465,18 @@ public class AcpxAgentTransport {
             String agent,
             AcpxRunRequest request
     ) throws IOException {
+        validateExecutionPolicyBinding(agent, request);
+        var binding = request.claudeExecutionPolicy();
+        if (binding == null) {
+            return;
+        }
+        command.add("--claude-execution-policy-ref");
+        command.add(binding.ref());
+        command.add("--claude-execution-policy-sha256");
+        command.add(binding.sha256());
+    }
+
+    private void validateExecutionPolicyBinding(String agent, AcpxRunRequest request) throws IOException {
         var binding = request.claudeExecutionPolicy();
         if (!"claude".equals(agent)) {
             if (binding != null) {
@@ -425,10 +491,6 @@ public class AcpxAgentTransport {
             throw new IOException("NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
         }
         binding.verify(request.workdir());
-        command.add("--claude-execution-policy-ref");
-        command.add(binding.ref());
-        command.add("--claude-execution-policy-sha256");
-        command.add(binding.sha256());
     }
 
     private void recordEvent(List<AcpxExecutionEvent> timeline, AcpxRunRequest request, AcpxExecutionEvent event) {
@@ -1010,6 +1072,21 @@ public class AcpxAgentTransport {
         );
     }
 
+    static Duration configuredCommandTimeout(String value) {
+        if (value == null || value.isBlank()) {
+            return Duration.ofSeconds(DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS);
+        }
+        try {
+            var seconds = Long.parseLong(value.trim());
+            if (seconds <= 0) {
+                throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + " must be a positive integer");
+            }
+            return Duration.ofSeconds(seconds);
+        } catch (NumberFormatException failure) {
+            throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + " must be a positive integer", failure);
+        }
+    }
+
     private static Duration configuredAgentProgressTimeout() {
         return durationFromSecondsEnv(
                 AGENT_PROGRESS_TIMEOUT_ENV,
@@ -1065,6 +1142,15 @@ public class AcpxAgentTransport {
             Instant startedAt,
             Instant finishedAt
     ) {
+        SessionCommandResult withOutput(String replacement) {
+            return new SessionCommandResult(success, timedOut, exitCode, replacement, command, startedAt, finishedAt);
+        }
+
+        SessionCommandResult asFailure(String failure) {
+            return new SessionCommandResult(false, false, RECOVERABLE_SIGNAL_EXIT_CODE,
+                    failure, command, startedAt, finishedAt);
+        }
+
         AcpxRunResult toRunResult() {
             var signal = new AdapterSignal(
                     AdapterSignalType.SESSION_BOOTSTRAP_FAILED,
@@ -1136,21 +1222,23 @@ public class AcpxAgentTransport {
                 : ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL;
     }
 
-    private static ProcessUsability exitedUsability(
+    static ProcessUsability exitedUsability(
             int exitCode,
             AcpxPromptCompletion completion,
             List<String> command,
             Instant startedAt,
             Instant finishedAt
     ) {
-        if (exitCode == 0) {
-            return ProcessUsability.EXITED_ZERO;
-        }
         if (completion != null && completion.completed()) {
-            return ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT;
+            return exitCode == 0
+                    ? ProcessUsability.EXITED_ZERO
+                    : ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT;
         }
-        return reachedDeclaredTimeout(command, startedAt, finishedAt, Duration.ofSeconds(5))
-                ? ProcessUsability.INTERRUPTED
+        if (reachedDeclaredTimeout(command, startedAt, finishedAt, Duration.ofSeconds(5))) {
+            return ProcessUsability.TIMED_OUT;
+        }
+        return exitCode == 0
+                ? ProcessUsability.EXITED_ZERO
                 : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
     }
 

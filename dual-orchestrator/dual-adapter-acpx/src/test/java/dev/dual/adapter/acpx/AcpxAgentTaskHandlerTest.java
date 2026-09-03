@@ -1542,12 +1542,12 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void recordsTypedInterruptedProcessFactWithoutPosthocInference() throws Exception {
+    void recordsTypedTimeoutForZeroExitWithoutPromptCompletionAtDeadline() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved plan.\n");
 
-        var handler = new AcpxAgentTaskHandler(new TimeoutInterruptedExitZeroTransport(), false);
+        var handler = new AcpxAgentTaskHandler(new DeadlineExitZeroTransport(), false);
         var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "claude",
                 "session", "claude-main",
@@ -1577,13 +1577,13 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
         assertEquals(0, result.result().get("exit_code"), diagnostic);
-        assertEquals("INTERRUPTED", result.result().get("process_usability"));
+        assertEquals("TIMED_OUT", result.result().get("process_usability"));
         assertFalse(result.result().containsKey("acpx_failure.reason"));
         var runMetadata = OBJECT_MAPPER.readTree(tempDir.resolve((String) result.result().get("run_metadata")).toFile());
         assertEquals(0, runMetadata.path("exitCode").asInt());
         assertEquals("process_exited", runMetadata.path("status").asText());
-        assertEquals("INTERRUPTED", runMetadata.path("executionAttempt").path("status").asText());
-        assertEquals("INTERRUPTED", runMetadata.path("executionAttempt").path("processStatus").asText());
+        assertEquals("TIMED_OUT", runMetadata.path("executionAttempt").path("status").asText());
+        assertEquals("TIMED_OUT", runMetadata.path("executionAttempt").path("processStatus").asText());
         assertTrue(runMetadata.path("executionOutcome").isMissingNode() || runMetadata.path("executionOutcome").isNull());
         assertEquals(0, runMetadata.path("adapterSignals").size());
     }
@@ -1892,6 +1892,12 @@ class AcpxAgentTaskHandlerTest {
     ) throws Exception {
         Files.writeString(fakeAcpx, """
                 #!/bin/sh
+                if [ "$1" = "build-info" ]; then
+                  cat <<'EOF'
+                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c","policy_schema":"claude_execution_policy.v2"}
+                EOF
+                  exit 0
+                fi
                 case " $* " in
                   *" sessions "*)
                     name=""
@@ -2887,7 +2893,7 @@ class AcpxAgentTaskHandlerTest {
         }
     }
 
-    private static final class TimeoutInterruptedExitZeroTransport extends AcpxAgentTransport {
+    private static final class DeadlineExitZeroTransport extends AcpxAgentTransport {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
             Files.createDirectories(request.stdoutPath().getParent());
@@ -2903,7 +2909,7 @@ class AcpxAgentTaskHandlerTest {
                     now,
                     now.plusSeconds(605),
                     List.of("acpx", "--timeout", "600", "claude"),
-                    ProcessUsability.INTERRUPTED,
+                    ProcessUsability.TIMED_OUT,
                     null
             );
         }

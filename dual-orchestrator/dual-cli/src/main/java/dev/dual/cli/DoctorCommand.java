@@ -3,6 +3,7 @@ package dev.dual.cli;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
+import dev.dual.adapter.acpx.ReviewedAcpxBuildIdentity;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -23,10 +24,10 @@ import java.util.concurrent.TimeUnit;
 public final class DoctorCommand implements Callable<Integer> {
     private static final Duration COMMAND_TIMEOUT = Duration.ofSeconds(10);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    static final String EXPECTED_ACPX_VERSION = "0.13.2";
-    static final String EXPECTED_ACPX_UPSTREAM_COMMIT = "fd173f04aa1b56f9e3f5ca5190c034ddcae28792";
-    static final String EXPECTED_ACPX_PATCH_SHA256 = "41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c";
-    static final String EXPECTED_ACPX_POLICY_SCHEMA = "claude_execution_policy.v2";
+    static final String EXPECTED_ACPX_VERSION = ReviewedAcpxBuildIdentity.VERSION;
+    static final String EXPECTED_ACPX_UPSTREAM_COMMIT = ReviewedAcpxBuildIdentity.UPSTREAM_COMMIT;
+    static final String EXPECTED_ACPX_PATCH_SHA256 = ReviewedAcpxBuildIdentity.PATCH_SHA256;
+    static final String EXPECTED_ACPX_POLICY_SCHEMA = ReviewedAcpxBuildIdentity.POLICY_SCHEMA;
     static final String EXPECTED_CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp@0.70.0";
     static final String EXPECTED_CODEX_ACP_VERSION = "0.16.0";
 
@@ -112,20 +113,10 @@ public final class DoctorCommand implements Callable<Integer> {
     }
 
     static PinCheck evaluateAcpxBuildIdentity(String buildInfoJson) {
-        try {
-            Map<String, Object> document = MAPPER.readValue(buildInfoJson, new TypeReference<>() {
-            });
-            if (!EXPECTED_ACPX_UPSTREAM_COMMIT.equals(stringValue(document.get("upstream_commit")))
-                    || !EXPECTED_ACPX_PATCH_SHA256.equals(stringValue(document.get("patch_sha256")))
-                    || !EXPECTED_ACPX_POLICY_SCHEMA.equals(stringValue(document.get("policy_schema")))) {
-                return PinCheck.fail("NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build identity mismatch");
-            }
-            return PinCheck.ok("upstream=" + EXPECTED_ACPX_UPSTREAM_COMMIT
-                    + ", patch=" + EXPECTED_ACPX_PATCH_SHA256);
-        } catch (Exception failure) {
-            return PinCheck.fail("NETWORK_AUTHORITY_NOT_CONFIGURED: invalid patched acpx build-info: "
-                    + failure.getMessage());
-        }
+        var verification = ReviewedAcpxBuildIdentity.verify(buildInfoJson);
+        return verification.valid()
+                ? PinCheck.ok(verification.message())
+                : PinCheck.fail(verification.message());
     }
 
     private void checkAcpxAdaptersPinned(String executable) throws IOException, InterruptedException {
