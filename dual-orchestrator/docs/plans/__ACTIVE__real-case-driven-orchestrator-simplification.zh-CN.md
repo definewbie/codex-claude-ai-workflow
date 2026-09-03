@@ -27,7 +27,23 @@ deterministic implementation checkpoint；仍未授权 provider/real-case，也�
 
 当前成熟度：Phase A 的 strict agent-result、typed lineage 与完整小案例已达到 `ENFORCED + PROVEN`；Phase B 的 read-governance subtraction 与 typed change-boundary enforcement 已由 deterministic tests 和 controlled real-case 达到 `ENFORCED + PROVEN`；Phase C 的 typed context boundary 已由 deterministic tests、README 与 A3 controlled real-case 达到 `ENFORCED + PROVEN`；Phase D 已通过四个删除式 slice 收敛已证明的 handler 重复 owner，并达到 `ENFORCED + PROVEN`。
 
-## Current Active Step: S2 IMPLEMENT PROFILE LOCAL BINDING DIFF REVIEW
+## Current Active Step: OKX S2 RECOVERY AND TERMINAL COMPLETION
+
+2026-09-03：S2 checkpoint `d43f4351` 已在 OKX 同一 workstream 的新 self-test occurrence
+`run-1788411416526` 中得到真实证明：policy ref/SHA 可重验且 `allow_local_binding=true`，sandbox 内本地 listener
+与 HTTP stub 成功运行。S2 结论提升为 `IMPLEMENT PROFILE LOCAL BINDING ENFORCED + REAL-CASE PROVEN`。
+
+该运行随后暴露真实产品缺陷：`44 tests / 0 failures / 18 errors`，共同根因为 `CandleSyncService` 在
+`@PostConstruct` 中获取自身 Spring proxy，触发 `BeanCurrentlyInCreationException`；添加 Byte Buddy javaagent 后
+Mockito 环境错误消失，产品根因不变。typed self-test 正确返回 `SELF_TEST_INCOMPLETE`。
+
+workflow 当前停在 `WAITING_FOR_RECOVERY / node-implement-self_test_decision-042`。这不是 S2 或 provider 失败：
+revision-limit 拦截器在路由前创建 synthetic `retry/abort` gate，遮蔽了 frozen definition 已声明的
+`BLOCKED -> gate.human_implementation_repair`。`retryActiveNode` 只会重跑同一 decision，不能创建 repair iteration，
+因此 blind retry 被禁止。当前唯一下一步是实施
+`revision-limit-declared-human-repair-routing-plan-20260903.zh-CN.md` 的最小通用修复；不新增 recovery action、
+不重置预算、不修改 OKX 代码、不调用 provider。修复通过独立 diff review 后，才用 deterministic retry 把当前
+decision 路由到既有人工 repair gate。
 
 2026-09-03：S2 SDK capability Gate 已证明 SDK `0.3.232` + embedded Claude Code `2.1.232` 在
 `Options.sandbox.network.allowLocalBinding=true` 时 self bind/connect PASS、host loopback reachable、external direct
@@ -37,7 +53,8 @@ managed settings 对 true/false 均省略该 permissive key。零 workflow/profi
 full suite `986/0/0`、Dual reactor `1298/0/0/0`、installer/configure/fresh Doctor 全部 PASS；patch identity 更新为
 `41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c`。独立 diff review 已
 `PASS（P0=0 / P1=0）`，并独立复现 fork 两次直跑全绿、Java focused `50/0/0/0`、六方 identity 与
-reverse-apply。当前允许选择性提交本 S2 checkpoint；OKX 恢复须在 clean commit 后单独进行。
+reverse-apply。S2 checkpoint 已选择性提交为 `d43f4351`，工作树 clean。当前唯一下一步是按
+`20260903-okx-s2-recovery-and-terminal-completion.md` 恢复既有 OKX workstream；不新建样本、不运行 E1 probe。
 
 2026-09-01：E1 R2 Gate 独立评审发现 classifier execution failure 与 external proxy 共用 `exit 74`，会把环境
 `INVALID` 错投影为能力 `FAIL`。delta 将 Node 自检及非 `0/1` 退出统一归为 `exit 76 / INVALID`，并补 `126/127`、

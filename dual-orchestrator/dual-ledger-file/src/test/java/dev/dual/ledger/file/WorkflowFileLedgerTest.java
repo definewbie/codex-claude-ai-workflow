@@ -665,9 +665,28 @@ class WorkflowFileLedgerTest {
         var repeatedDecision = activeNode(incompletePaths);
         incompleteLedger.completeAndRoute(incompletePaths, definition, repeatedDecision.nodeInstanceId(),
                 NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test-2.json"), Map.of());
-        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, incompleteLedger.loadCurrent(incompletePaths).status());
-        assertEquals(NodeStatus.BLOCKED, incompleteLedger.loadNode(incompletePaths, repeatedDecision.nodeInstanceId()).status());
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, incompleteLedger.loadCurrent(incompletePaths).status());
+        var repairGate = activeNode(incompletePaths);
+        assertEquals("gate.human_implementation_repair", repairGate.nodeDefinitionId());
+        assertEquals(List.of("self-test-2.json"), repairGate.inputRefs());
+        var repairGateDocument = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules()
+                .readValue(incompletePaths.gateJson(
+                        incompleteLedger.loadCurrent(incompletePaths).openGateIds().getFirst()).toFile(), GateDocument.class);
+        assertEquals("BLOCKED", repairGateDocument.result().get("source_outcome"));
+        var limitedDecision = incompleteLedger.loadNode(incompletePaths, repeatedDecision.nodeInstanceId());
+        assertEquals(NodeStatus.COMPLETED, limitedDecision.status());
+        assertEquals("revision_limit_reached", limitedDecision.result().get("reason"));
+        assertEquals("SELF_TEST_INCOMPLETE", limitedDecision.result().get("revision_limit_original_outcome"));
         assertTrue(Files.readString(incompletePaths.eventsJsonl()).contains("revision_limit_reached"));
+        var missingRepairNote = assertThrows(IOException.class,
+                () -> incompleteLedger.resolveOpenGate(incompletePaths, definition, "revise", ""));
+        assertTrue(missingRepairNote.getMessage().contains("decision note is required"));
+        incompleteLedger.resolveOpenGate(incompletePaths, definition, "revise",
+                "Repair the product defect proven by the latest self-test.");
+        var authorizedRepair = activeNode(incompletePaths);
+        assertEquals("context.implement_claude", authorizedRepair.nodeDefinitionId());
+        assertEquals("iter-003", authorizedRepair.iterationId());
+        assertEquals(List.of("self-test-2.json"), authorizedRepair.inputRefs());
 
         var blockedPaths = initializedPaths("ws-self-test-blocked", definition);
         var blockedDecision = activeNode(blockedPaths);
@@ -680,6 +699,89 @@ class WorkflowFileLedgerTest {
         assertTrue(error.getMessage().contains("decision note is required"));
         blockedLedger.resolveOpenGate(blockedPaths, definition, "revise", "Repair the reported test blocker.");
         assertEquals("context.implement_claude", activeNode(blockedPaths).nodeDefinitionId());
+    }
+
+    @Test
+    void ambiguousRevisionLimitBlockedRoutesFailClosed() throws Exception {
+        var definition = new WorkflowDefinition(
+                "ambiguous-revision-limit",
+                1,
+                "decision",
+                List.of(
+                        new NodeDefinition("decision", NodeKind.DECISION, "review.decision", Map.of("max_revisions", 0)),
+                        new NodeDefinition("repair", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.repair.one", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("gate.repair.two", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("decision", "REVISE", "repair", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "repair")),
+                        new EdgeDefinition("decision", "BLOCKED", "gate.repair.one"),
+                        new EdgeDefinition("decision", "BLOCKED", "gate.repair.two")
+                )
+        );
+        var paths = initializedPaths("ws-ambiguous-limit-gate", definition);
+        var decision = activeNode(paths);
+
+        var error = assertThrows(IOException.class,
+                () -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                        NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
+
+        assertTrue(error.getMessage().contains("exactly one human gate"));
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void revisionLimitBlockedRouteToNonGateFailsClosed() throws Exception {
+        var definition = revisionLimitDefinition(
+                new NodeDefinition("blocked.target", NodeKind.TASK, "noop.task", Map.of()),
+                new EdgeDefinition("decision", "BLOCKED", "blocked.target")
+        );
+        var paths = initializedPaths("ws-limit-non-gate", definition);
+        var decision = activeNode(paths);
+
+        var error = assertThrows(IOException.class,
+                () -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                        NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
+
+        assertTrue(error.getMessage().contains("exactly one human gate"));
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void revisionLimitBlockedGateCannotStartAnotherIteration() throws Exception {
+        var definition = revisionLimitDefinition(
+                new NodeDefinition("gate.repair", NodeKind.GATE, "human.review", Map.of()),
+                new EdgeDefinition("decision", "BLOCKED", "gate.repair", null,
+                        new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "invalid gate loop"))
+        );
+        var paths = initializedPaths("ws-limit-loop-gate", definition);
+        var decision = activeNode(paths);
+
+        var error = assertThrows(IOException.class,
+                () -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                        NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
+
+        assertTrue(error.getMessage().contains("must not start an iteration"));
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    private WorkflowDefinition revisionLimitDefinition(NodeDefinition blockedTarget, EdgeDefinition blockedEdge) {
+        return new WorkflowDefinition(
+                "revision-limit-declared-blocked-route",
+                1,
+                "decision",
+                List.of(
+                        new NodeDefinition("decision", NodeKind.DECISION, "review.decision", Map.of("max_revisions", 0)),
+                        new NodeDefinition("repair", NodeKind.TASK, "noop.task", Map.of()),
+                        blockedTarget
+                ),
+                List.of(
+                        new EdgeDefinition("decision", "REVISE", "repair", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "repair")),
+                        blockedEdge
+                )
+        );
     }
 
     @Test

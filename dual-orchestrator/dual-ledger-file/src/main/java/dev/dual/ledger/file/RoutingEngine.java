@@ -106,10 +106,96 @@ final class RoutingEngine {
         );
         var matchingTransitions = routeResult.transitions();
 
+        var effectiveOutcome = outcome;
+        var effectiveResult = result;
+        var lastEventId = current.lastEventId();
+        for (var transition : matchingTransitions) {
+            var nextDefinition = definition.node(transition.toNodeDefinitionId());
+            var transitionAttributes = effectiveTransitionAttributes(node, transition.attributes());
+            if (nextDefinition.kind() == NodeKind.GATE
+                    || !startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
+                continue;
+            }
+            var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
+            var currentRevisionCount = revisionTracker.revisionCount(
+                    paths,
+                    node.nodeDefinitionId(),
+                    nextDefinition.id()
+            );
+            if (maxRevisions < 0 || currentRevisionCount < maxRevisions) {
+                continue;
+            }
+
+            var blockedResult = new LinkedHashMap<String, Object>();
+            if (result != null) {
+                blockedResult.putAll(result);
+            }
+            blockedResult.put("reason", "revision_limit_reached");
+            blockedResult.put("revision_limit_original_outcome", outcome);
+            blockedResult.put("max_revisions", maxRevisions);
+            blockedResult.put("current_revision_count", currentRevisionCount);
+            var blockedRoutingContext = new LinkedHashMap<String, Object>(blockedResult);
+            blockedRoutingContext.put("outcome", "BLOCKED");
+            var blockedRoute = flowKernel.advance(
+                    definition,
+                    new FlowExecutionSnapshot(current.workflowInstanceId(),
+                            activeNodeDefinitionIds(paths, current.activeNodeInstanceIds())),
+                    FlowSignal.completed(node.nodeDefinitionId(), "BLOCKED", blockedRoutingContext)
+            ).transitions();
+            if (blockedRoute.isEmpty()) {
+                revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome,
+                        maxRevisions, currentRevisionCount);
+                return;
+            }
+            if (blockedRoute.size() != 1
+                    || definition.node(blockedRoute.getFirst().toNodeDefinitionId()).kind() != NodeKind.GATE) {
+                throw new IOException("revision limit BLOCKED route must resolve to exactly one human gate: "
+                        + node.nodeDefinitionId());
+            }
+            var blockedTransition = blockedRoute.getFirst();
+            var blockedTarget = definition.node(blockedTransition.toNodeDefinitionId());
+            var blockedAttributes = effectiveTransitionAttributes(node, blockedTransition.attributes());
+            if (startsNewIteration(blockedAttributes, node.nodeDefinitionId(), "BLOCKED", blockedTarget.id())) {
+                throw new IOException("revision limit BLOCKED route to a human gate must not start an iteration: "
+                        + node.nodeDefinitionId());
+            }
+
+            effectiveOutcome = "BLOCKED";
+            effectiveResult = blockedResult;
+            matchingTransitions = blockedRoute;
+            jsonWriter.write(paths.nodeJson(nodeInstanceId), new NodeInstanceDocument(
+                    finished.schemaVersion(),
+                    finished.nodeInstanceId(),
+                    finished.nodeDefinitionId(),
+                    finished.kind(),
+                    finished.handlerType(),
+                    finished.status(),
+                    finished.stageId(),
+                    finished.iterationId(),
+                    finished.inputRefs(),
+                    finished.inputTransition(),
+                    finished.outputRefs(),
+                    effectiveResult,
+                    finished.runRef(),
+                    finished.latestExecutionId(),
+                    finished.startedAt(),
+                    finished.finishedAt()
+            ));
+            lastEventId = LedgerUtils.nextEventId(lastEventId);
+            eventLog.appendEvent(paths, lastEventId, "revision_limit_reached", Map.of(
+                    "node", node.nodeDefinitionId(),
+                    "node_instance_id", node.nodeInstanceId(),
+                    "outcome", outcome,
+                    "max_revisions", maxRevisions,
+                    "current_revision_count", currentRevisionCount,
+                    "declared_blocked_gate", blockedTarget.id()
+            ));
+            break;
+        }
+
         // Fan-out: create successor nodes for all matching edges
         var successorNodeIds = new java.util.ArrayList<String>();
         var allOpenGateIds = new java.util.ArrayList<String>();
-        var lastEventId = current.lastEventId();
         var workflowStatus = WorkflowStatus.RUNNING;
 
         for (var transition : matchingTransitions) {
@@ -132,7 +218,7 @@ final class RoutingEngine {
             var nextIterationId = node.iterationId();
             var iterationStartedPayload = Map.<String, Object>of();
             if (nextDefinition.kind() != NodeKind.GATE
-                    && startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
+                    && startsNewIteration(transitionAttributes, node.nodeDefinitionId(), effectiveOutcome, nextDefinition.id())) {
                 var maxRevisions = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
                 var currentRevisionCount = revisionTracker.revisionCount(
                         paths,
@@ -140,10 +226,12 @@ final class RoutingEngine {
                         nextDefinition.id()
                 );
                 if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
-                    revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, result, outcome, maxRevisions, currentRevisionCount);
+                    revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, effectiveResult,
+                            effectiveOutcome, maxRevisions, currentRevisionCount);
                     return;
                 }
-                var nextIteration = revisionTracker.nextRevisionIteration(paths, node, outcome, nextDefinition.id(), result);
+                var nextIteration = revisionTracker.nextRevisionIteration(
+                        paths, node, effectiveOutcome, nextDefinition.id(), effectiveResult);
                 Files.createDirectories(paths.iterationsDir());
                 jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);
                 nextIterationId = nextIteration.iterationId();
@@ -195,7 +283,7 @@ final class RoutingEngine {
                         null,
                         Map.of(
                                 "subject_input_refs", List.copyOf(outputRefs),
-                                "source_outcome", outcome
+                                "source_outcome", effectiveOutcome
                         )
                     ));
             }
@@ -203,7 +291,7 @@ final class RoutingEngine {
             lastEventId = LedgerUtils.nextEventId(lastEventId);
             eventLog.appendEvent(paths, lastEventId, "node_routed", Map.of(
                     "from", node.nodeDefinitionId(),
-                    "outcome", outcome,
+                    "outcome", effectiveOutcome,
                     "to", nextDefinition.id(),
                     "node_instance_id", nextNodeInstanceId,
                     "gate_id", gateId,
