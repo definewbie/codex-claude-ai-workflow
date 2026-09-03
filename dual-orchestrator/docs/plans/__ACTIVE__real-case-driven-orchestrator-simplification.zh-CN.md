@@ -2488,3 +2488,10 @@ Gate 测试字段级断言可更细，不影响 production 边界或提交。
 
 当前 active step：选择性提交 change-scope violation repair checkpoint，明确排除旧 OKX recovery Gate；提交后不恢复
 当前失败样本，下一步只允许评估是否需要为 fresh real-case 起草最小 Verification Gate。
+
+change-scope violation repair checkpoint 已提交为 `22ae064`。当前 OKX 样本保持 FAIL，不迁移、不 retry；旧 recovery Gate
+仍为未跟踪且明确排除。该修复当前成熟度为 `ENFORCED / NOT REAL-CASE PROVEN`。
+
+当前 active step：停止继续扩展 harness。下一步应回到主目标，选择一个 fresh real-case，用最小 Gate 验证新路径能够在真实
+scope violation 时进入人工 repair，并在 revise 后重新 validation PASS；若新任务没有自然触发 violation，不得人为制造问题，
+只验证正常路径无回归。

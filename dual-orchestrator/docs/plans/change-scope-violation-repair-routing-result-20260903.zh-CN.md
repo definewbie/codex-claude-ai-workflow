@@ -3,6 +3,8 @@
 日期：2026-09-03  
 状态：`IMPLEMENTED / INDEPENDENT DIFF REVIEW PASS`
 
+Implementation checkpoint：`22ae064`
+
 ## 1. 结果
 
 本 checkpoint 将已验证的 `CHANGE_SCOPE_VIOLATION` 从不可恢复的 execution recovery，收敛到定义明确的
