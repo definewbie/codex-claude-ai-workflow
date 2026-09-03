@@ -2511,3 +2511,8 @@ iteration 和后续 scope PASS 后，才可把 scope-repair 从 `ENFORCED` 提�
 当前 active step：完成 Gate 机械复核与 docs-only checkpoint，fresh package、workflow/identity/workspace preflight 和 standing-authorized
 minimal probes 全部 PASS 后，以 `start`（不带 `--run`）创建唯一 workstream，并分段运行到每个人工 Gate。禁止使用会自动批准
 human gate 的 `run-real-case.sh` autorun 路径；旧 `ws-20260829T122452Z-9BZG` 与旧 recovery Gate 继续封存。
+
+前置实测发现本机全局 Codex 默认模型已变为 `gpt-5.6-sol`，冻结的 `codex-acp 0.16.0` 不识别该 metadata 并在 minimal probe
+返回 internal error；显式 `gpt-5.4` 与 isolated `CODEX_HOME` 两次 probe 均通过。该问题在 workstream 创建前被截获，不计业务
+样本失败。为避免修改用户全局配置，本 real-case 固定使用临时 isolated `CODEX_HOME / gpt-5.4`；结束后删除。该运行 pin 已写回
+Gate，不修改 workflow identity 或 Dual production code。
