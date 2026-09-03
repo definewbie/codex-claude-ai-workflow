@@ -2324,6 +2324,21 @@ command 与 credential deny。该发现未消耗 provider，也未修改 product
 SDK 类型契约。按 P2 补充了失败解释边界：self bind FAIL 只能证明 option+managed 合并路径不可用，不能外推 runtime 完全不
 支持。用户既有 provider tool-turn 预授权明确覆盖本次唯一 SDK query；不增加通用 adjudicator 或 IP/DNS 探针。
 
+### 2026-09-03 OKX Recovery 与 Revision-limit Gate Source
+
+S2 implement local binding 已在 OKX self-test occurrence 中自然证明：本地 listener 与 HTTP stub 可用。测试随后暴露
+`CandleSyncService` 自代理初始化导致的真实产品缺陷，typed outcome 为 `SELF_TEST_INCOMPLETE`。
+
+checkpoint `a44532d` 已让 revision limit 优先消费 workflow 声明的唯一 `BLOCKED -> human gate` route。真实恢复运行证明
+路由成功进入 `gate.human_implementation_repair` 且未调用 provider，但 Gate packet consumer 仍把 runtime 提升后的
+`BLOCKED` 错当成 Agent 必须原样输出的 decision，导致 packet 生成失败。
+
+follow-up 仅闭合该同一事实链：RoutingEngine 将 revision-limit disposition 写入新 Gate node 的已有 result；
+HumanReviewGateHandler 在 packet 写入前把该 disposition 与原 Agent sidecar 严格互证。普通 BLOCKED 规则不变，无新 action、
+schema、workflow node 或 recovery path。focused `115/0/0/0`，full reactor `1304/0/0/0`。独立 diff review 已
+`PASS（P0=0 / P1=0 / P2=3）`，允许选择性提交。提交 fresh JAR 后，由 operator 对既有在途 Gate 直接作 `revise`
+决定并继续 OKX 产品修复。
+
 ### 2026-09-03 S2 SDK Local Binding 实测结果
 
 唯一 SDK query 已完成，机械判定为 `PASS / HOST_REACHABLE / OPERATOR DECISION REQUIRED`。冻结 SDK `0.3.232`

@@ -50,10 +50,31 @@ public final class HumanReviewGateHandler implements GateHandler {
             return;
         }
         var decision = latestAgentDecision(context).decision();
-        if (!"BLOCKED".equals(decision)) {
+        if (!"BLOCKED".equals(decision) && !matchesRevisionLimitEscalation(context, decision)) {
             throw new IllegalStateException(
                     "BLOCKED gate source does not match the validated reviewer decision");
         }
+    }
+
+    private boolean matchesRevisionLimitEscalation(GateContext context, String decision) {
+        var result = context.instance().result();
+        if (!"revision_limit_reached".equals(text(result.get("reason")))
+                || decision.isBlank()
+                || !decision.equals(text(result.get("revision_limit_original_outcome")))) {
+            return false;
+        }
+        var maxRevisions = integralValue(result.get("max_revisions"));
+        var currentRevisionCount = integralValue(result.get("current_revision_count"));
+        return maxRevisions >= 0 && currentRevisionCount >= maxRevisions;
+    }
+
+    private long integralValue(Object value) {
+        if (!(value instanceof Number number)) {
+            return -1;
+        }
+        var asDouble = number.doubleValue();
+        var asLong = number.longValue();
+        return Double.isFinite(asDouble) && asDouble == asLong ? asLong : -1;
     }
 
     private String reviewPacketRef(GateContext context, String extension) {
@@ -79,6 +100,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("stageId", context.instance().stageId());
         packet.put("iterationId", context.instance().iterationId());
         packet.put("sourceOutcome", context.sourceOutcome());
+        packet.put("runtimeDisposition", runtimeDisposition(context));
         packet.put("allowedActions", allowedActions);
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("inputArtifacts", inputArtifactSummaries(context));
@@ -105,6 +127,10 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("- Stage: ").append(context.instance().stageId()).append("\n");
         builder.append("- Iteration: ").append(context.instance().iterationId()).append("\n");
         builder.append("- Source Outcome: ").append(context.sourceOutcome()).append("\n");
+        var runtimeDisposition = runtimeDisposition(context);
+        if (!runtimeDisposition.isEmpty()) {
+            builder.append("- Runtime Disposition: ").append(runtimeDisposition).append("\n");
+        }
         builder.append("- Allowed Actions: ").append(String.join(", ", allowedActions)).append("\n\n");
 
         appendOperatorGuidance(builder, context, allowedActions);
@@ -173,6 +199,18 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendList(builder, "Missing Evidence", decision.missingEvidence());
         appendList(builder, "Open Risks", decision.openRisks());
         builder.append("\n");
+    }
+
+    private Map<String, Object> runtimeDisposition(GateContext context) {
+        if (!"revision_limit_reached".equals(text(context.instance().result().get("reason")))) {
+            return Map.of();
+        }
+        var result = new LinkedHashMap<String, Object>();
+        result.put("reason", "revision_limit_reached");
+        result.put("originalOutcome", text(context.instance().result().get("revision_limit_original_outcome")));
+        result.put("maxRevisions", context.instance().result().get("max_revisions"));
+        result.put("currentRevisionCount", context.instance().result().get("current_revision_count"));
+        return Map.copyOf(result);
     }
 
     private void appendTaskContract(StringBuilder builder, GateContext context) {

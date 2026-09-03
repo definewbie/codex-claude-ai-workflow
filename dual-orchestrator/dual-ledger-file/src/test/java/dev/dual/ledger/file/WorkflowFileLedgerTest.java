@@ -669,6 +669,10 @@ class WorkflowFileLedgerTest {
         var repairGate = activeNode(incompletePaths);
         assertEquals("gate.human_implementation_repair", repairGate.nodeDefinitionId());
         assertEquals(List.of("self-test-2.json"), repairGate.inputRefs());
+        assertEquals("revision_limit_reached", repairGate.result().get("reason"));
+        assertEquals("SELF_TEST_INCOMPLETE", repairGate.result().get("revision_limit_original_outcome"));
+        assertEquals(1, repairGate.result().get("max_revisions"));
+        assertEquals(1, repairGate.result().get("current_revision_count"));
         var repairGateDocument = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules()
                 .readValue(incompletePaths.gateJson(
                         incompleteLedger.loadCurrent(incompletePaths).openGateIds().getFirst()).toFile(), GateDocument.class);

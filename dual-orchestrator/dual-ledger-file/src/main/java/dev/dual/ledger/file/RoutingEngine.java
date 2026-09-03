@@ -108,6 +108,7 @@ final class RoutingEngine {
 
         var effectiveOutcome = outcome;
         var effectiveResult = result;
+        Map<String, Object> gateSourceResult = Map.of();
         var lastEventId = current.lastEventId();
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
@@ -162,6 +163,12 @@ final class RoutingEngine {
 
             effectiveOutcome = "BLOCKED";
             effectiveResult = blockedResult;
+            gateSourceResult = Map.of(
+                    "reason", "revision_limit_reached",
+                    "revision_limit_original_outcome", outcome,
+                    "max_revisions", maxRevisions,
+                    "current_revision_count", currentRevisionCount
+            );
             matchingTransitions = blockedRoute;
             jsonWriter.write(paths.nodeJson(nodeInstanceId), new NodeInstanceDocument(
                     finished.schemaVersion(),
@@ -259,7 +266,7 @@ final class RoutingEngine {
                     outputRefs,
                     transitionAttributes,
                     List.of(),
-                    Map.of(),
+                    nextDefinition.kind() == NodeKind.GATE ? gateSourceResult : Map.of(),
                     null,
                     "",
                     null,

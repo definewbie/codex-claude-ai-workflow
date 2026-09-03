@@ -181,6 +181,99 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void humanGateAcceptsTypedRevisionLimitEscalationMatchingLatestDecision() throws Exception {
+        var inputRef = writeOutput("self-test.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "implement.claude_self_test_report",
+                  "decision": "SELF_TEST_INCOMPLETE",
+                  "summary": "integration tests still fail"
+                }
+                """);
+        var gateNode = node(
+                "gate.human_implementation_repair",
+                NodeKind.GATE,
+                "human.review",
+                List.of(inputRef),
+                Map.of(
+                        "reason", "revision_limit_reached",
+                        "revision_limit_original_outcome", "SELF_TEST_INCOMPLETE",
+                        "max_revisions", 1,
+                        "current_revision_count", 1));
+
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                tempDir, "ws", gateDefinition(), gateNode, "BLOCKED"));
+
+        assertEquals(NodeStatus.WAITING, result.status());
+        var packet = Files.readString(tempDir.resolve(
+                ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json"));
+        assertTrue(packet.contains("\"runtimeDisposition\""));
+        assertTrue(packet.contains("\"reason\" : \"revision_limit_reached\""));
+        assertTrue(packet.contains("\"originalOutcome\" : \"SELF_TEST_INCOMPLETE\""));
+    }
+
+    @Test
+    void humanGateStillAcceptsOrdinaryBlockedAgentDecisionWithoutRuntimeEscalation() throws Exception {
+        var inputRef = writeOutput("blocked-review.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "design.codex_arch_review",
+                  "decision": "BLOCKED",
+                  "summary": "repository constraints block the proposed design"
+                }
+                """);
+        var gateNode = node(
+                "gate.human_design_approval", NodeKind.GATE, "human.review", List.of(inputRef));
+
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
+                tempDir, "ws", gateDefinition(), gateNode, "BLOCKED"));
+
+        assertEquals(NodeStatus.WAITING, result.status());
+    }
+
+    @Test
+    void humanGateRejectsForgedOrIncompleteRevisionLimitEscalation() throws Exception {
+        var inputRef = writeOutput("self-test.contract.json", """
+                {
+                  "artifact_type": "agent_output_contract",
+                  "node_id": "implement.claude_self_test_report",
+                  "decision": "SELF_TEST_INCOMPLETE",
+                  "summary": "integration tests still fail"
+                }
+                """);
+        var invalidResults = List.<Map<String, Object>>of(
+                Map.of(),
+                Map.of(
+                        "reason", "revision_limit_reached",
+                        "revision_limit_original_outcome", "BLOCKED",
+                        "max_revisions", 1,
+                        "current_revision_count", 1),
+                Map.of(
+                        "reason", "revision_limit_reached",
+                        "revision_limit_original_outcome", "SELF_TEST_INCOMPLETE",
+                        "max_revisions", 2,
+                        "current_revision_count", 1),
+                Map.of(
+                        "reason", "revision_limit_reached",
+                        "revision_limit_original_outcome", "SELF_TEST_INCOMPLETE",
+                        "max_revisions", "1",
+                        "current_revision_count", 1));
+
+        for (var invalidResult : invalidResults) {
+            var gateNode = node(
+                    "gate.human_implementation_repair",
+                    NodeKind.GATE,
+                    "human.review",
+                    List.of(inputRef),
+                    invalidResult);
+            assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                    new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode, "BLOCKED")));
+        }
+        assertFalse(Files.exists(tempDir.resolve(
+                ".agent/workstreams/ws/reviews/node-gate-human_implementation_repair.json")));
+    }
+
+    @Test
     void humanGateReviewPacketSummarizesContractDecisionEvidenceAndDelivery() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
         var artifactsDir = workstreamDir.resolve("artifacts");
@@ -2146,6 +2239,16 @@ class BuiltinHandlerTest {
     }
 
     private static NodeInstance node(String id, NodeKind kind, String handlerType, List<String> inputRefs) {
+        return node(id, kind, handlerType, inputRefs, Map.of());
+    }
+
+    private static NodeInstance node(
+            String id,
+            NodeKind kind,
+            String handlerType,
+            List<String> inputRefs,
+            Map<String, Object> result
+    ) {
         return new NodeInstance(
                 "node-" + id.replace('.', '-'),
                 id,
@@ -2156,7 +2259,7 @@ class BuiltinHandlerTest {
                 "iter-001",
                 inputRefs,
                 List.of(),
-                Map.of(),
+                result,
                 null,
                 null,
                 null
