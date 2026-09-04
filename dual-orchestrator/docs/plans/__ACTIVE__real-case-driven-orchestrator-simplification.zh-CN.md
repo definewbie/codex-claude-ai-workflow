@@ -2549,3 +2549,18 @@ P1 closure 后 full reactor `1325/0/0/0`，`git diff --check` clean。当前 act
 CC 独立 delta review 已 PASS（P0=0/P1=0，P2=3 均不阻塞），确认上轮 P1 的 prompt 过度投影与 validator 绕过均已关闭，
 允许按限定文件集选择性提交。当前 active step：提交该 contract-boundary checkpoint；提交后仍不恢复
 `ws-20260903T225544Z-HHZL`，是否启动下一 fresh real-case 必须先另立 Gate。
+
+contract-boundary checkpoint 已提交为 `509248e4`。新的精简 Verification Gate 位于
+`docs/testing/verification-gates/20260904-okx-fresh-remediation-routing-and-e2e.md`。它以完整 OKX 产品 E2E 为唯一主 PASS，
+只新增一条 remediation sentinel：非 acceptance failure-bearing result 必须保持 `verification_remediation=NONE`；若 product review
+自然要求 revision，必须通过既有 typed decision/obligation 和 intake revision edge 路由，不得误入 failure/recovery/implementation repair。
+
+fresh package 已在宿主权限下通过，JAR SHA-256 为
+`c11b8a1477bb46d45c4b9cbafbaeabfc239a91b358c34e053854e943f386406b`。受限沙箱内首次 package 因进程树测试无法读取系统
+进程而判为 INVALID preflight，未计作代码失败；宿主原样重跑全部通过。当前 active step：对该 docs-only Gate 做一次简短独立评审；
+评审 P0/P1 清零前不启动 provider、不创建 workstream。旧 `20260903-okx-s2-recovery-and-terminal-completion.md` 继续排除。
+
+Gate 独立评审已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=3）`。P2 的显式 end-to-end invariant、JAR 内嵌 class
+sentinel 与 Codex pin 观测依据已吸收，不新增机制或判定目标。当前 active step：选择性提交 Gate + active plan；随后执行 source-side
+identity/workspace preflight 和 standing-authorized Claude/Codex minimal probes，全部通过后才创建唯一 fresh workstream。旧失败样本与旧
+S2 Gate 继续封存。
