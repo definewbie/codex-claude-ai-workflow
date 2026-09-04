@@ -2516,3 +2516,36 @@ human gate 的 `run-real-case.sh` autorun 路径；旧 `ws-20260829T122452Z-9BZG
 返回 internal error；显式 `gpt-5.4` 与 isolated `CODEX_HOME` 两次 probe 均通过。该问题在 workstream 创建前被截获，不计业务
 样本失败。为避免修改用户全局配置，本 real-case 固定使用临时 isolated `CODEX_HOME / gpt-5.4`；结束后删除。该运行 pin 已写回
 Gate，不修改 workflow identity 或 Dual production code。
+
+fresh workstream `ws-20260903T225544Z-HHZL` 已在全部前置 PASS 后创建并开始第一段。Claude intake occurrence
+`run-1788476211201` 正常完成；Codex product-review occurrence `run-1788476621271` 在 initial 与唯一 correction 中都把业务修订
+动作 `REVISE_PROPOSAL` 写入只允许 `NONE / EVIDENCE_COLLECTION / TEST_CODE_CHANGE` 的
+`result.failure.verification_remediation`。validator 正确 fail-closed，current 为 `WAITING_FOR_RECOVERY`。同一 blocker 已重复两次，
+Gate stop-loss 生效：不 retry、不改 ledger、不创建第二样本；本轮尚未到 scope validation，不能声称 scope-repair real-case 结果。
+
+结果记录见 `docs/testing/real-case-reports/20260904-okx-fresh-normal-path-contract-enum-failure.md`。共性根因是
+`AgentResultPromptContract` 只投影 decision enum，未投影 verification-remediation enum；correction 虽修复 JSON 前导文字，却没有足够
+契约信息修正枚举。当前 active step：实施一个最小 contract-projection checkpoint，从 authoritative enum 向 initial/correction prompt
+投影完整允许值，保持 parser/validator fail-closed；focused/full reactor 和独立 diff review PASS 后提交。当前失败样本不恢复。
+
+最小 contract-projection 修复已实施：`AgentResultPromptContract` 从 authoritative
+`AgentResultEnvelope.VerificationRemediation` enum 动态投影完整允许值，initial 与 correction 共用同一投影；parser/validator、
+workflow、recovery 均未放宽。renderer、contract prompt 与真实 correction prompt 三层测试在位。focused `73/0/0/0`，full reactor
+`1324/0/0/0`，diff-check clean；边界自审 PASS，无第二 enum owner、无 OKX 特判、无 scope/workflow 变更。
+
+当前 active step：该 checkpoint 可进入独立 diff review/选择性提交。`ws-20260903T225544Z-HHZL` 继续保持
+`WAITING_FOR_RECOVERY` 的 FAIL 证据，不 retry、不用新 JAR 续跑；scope-repair 仍为 `ENFORCED / NOT REAL-CASE PROVEN`。下一次
+fresh normal-path 验证必须另起 Gate，不把本次失败解释为部分成功。
+
+首次独立 diff review 发现一项 P1：把完整三值枚举投影给所有 failure-bearing 节点会错误广告 acceptance 专属语义，且原 validator
+只在 `AcceptanceReviewResult` 上限制非 `NONE`，product review/plan 的合法但越权值可通过。修复已收窄为节点适用投影：acceptance
+保留三值，其他节点仅 `NONE`；validator 同步拒绝非 acceptance result 的非 `NONE`。product review 与 plan 的越权反证均在位，
+focused `74/0/0/0`。同时把 Codex probe 记录从未经证实的“不兼容”因果改为可复核观测。当前 active step：运行 full reactor 与
+diff-check，随后由 CC 做一次简短独立 delta review；通过前不提交、不启动 provider、不创建新 real-case。
+
+P1 closure 后 full reactor `1325/0/0/0`，`git diff --check` clean。当前 active step：等待 CC 独立 delta review；仅核对
+节点适用 prompt 投影、非 acceptance validator 守卫、product-review/plan 反证与文档归因，不重开设计范围。
+
+CC 独立 delta review 已 PASS（P0=0/P1=0，P2=3 均不阻塞），确认上轮 P1 的 prompt 过度投影与 validator 绕过均已关闭，
+允许按限定文件集选择性提交。当前 active step：提交该 contract-boundary checkpoint；提交后仍不恢复
+`ws-20260903T225544Z-HHZL`，是否启动下一 fresh real-case 必须先另立 Gate。

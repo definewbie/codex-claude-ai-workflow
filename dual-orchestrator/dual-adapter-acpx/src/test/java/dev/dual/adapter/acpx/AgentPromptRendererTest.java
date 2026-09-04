@@ -551,6 +551,8 @@ class AgentPromptRendererTest {
                 .render(tempDir, "ws-test", "acceptance.codex_verifier_review", "acceptance-codex-review", List.of());
 
         assertTrue(prompt.contains("Allowed `result.decision` values:"));
+        assertTrue(prompt.contains("Allowed `result.failure.verification_remediation` values for this node: "
+                + "[EVIDENCE_COLLECTION, NONE, TEST_CODE_CHANGE]"));
         assertTrue(prompt.contains("ACCEPT"));
         assertTrue(prompt.contains("ACCEPT_WITH_NOTES"));
         assertTrue(prompt.contains("REJECT"));

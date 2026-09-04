@@ -141,6 +141,7 @@ public final class AgentResultEnvelopeValidator {
                 requiredList(output.rereadReasons(), "result.reread_reasons", false, errors);
                 validateRereadReasons(output.rereadReasons(), errors);
                 validateReviewObligations(nodeId, output, errors);
+                validateNoVerificationRemediation(output.failure(), errors);
             }
             case AgentResultEnvelope.PlanResult plan -> {
                 validateEvidencePayload(
@@ -159,6 +160,7 @@ public final class AgentResultEnvelopeValidator {
                     requiredList(plan.plan().knownRisks(), "result.plan.known_risks", true, errors);
                     requiredList(plan.plan().humanReviewChecklist(), "result.plan.human_review_checklist", true, errors);
                 }
+                validateNoVerificationRemediation(plan.failure(), errors);
             }
             case AgentResultEnvelope.SelfTestResult selfTest -> {
                 requiredText(selfTest.lifecycleStatus(), "result.lifecycle_status", errors);
@@ -409,6 +411,17 @@ public final class AgentResultEnvelopeValidator {
         if (!rejectWithMissingTests && remediation != null
                 && remediation != AgentResultEnvelope.VerificationRemediation.NONE) {
             errors.reject("result.failure.verification_remediation is only allowed when REJECT lists missing_tests");
+        }
+    }
+
+    private static void validateNoVerificationRemediation(
+            AgentResultEnvelope.Failure failure,
+            ValidationErrors errors
+    ) {
+        if (failure != null
+                && failure.verificationRemediation() != null
+                && failure.verificationRemediation() != AgentResultEnvelope.VerificationRemediation.NONE) {
+            errors.reject("result.failure.verification_remediation must be NONE outside acceptance review");
         }
     }
 

@@ -168,9 +168,54 @@ class AgentResultPromptContractTest {
                 "ws-1", "run-1", "acceptance.codex_verifier_review",
                 "REJECT", Set.of("ACCEPT", "ACCEPT_WITH_NOTES", "REJECT"));
 
+        assertTrue(acceptance.contains(
+                "Allowed `result.failure.verification_remediation` values for this node: "
+                        + "[EVIDENCE_COLLECTION, NONE, TEST_CODE_CHANGE]"));
         assertTrue(acceptance.contains("verification_remediation"));
         assertTrue(acceptance.contains("EVIDENCE_COLLECTION"));
         assertTrue(acceptance.contains("TEST_CODE_CHANGE"));
+    }
+
+    @Test
+    void productReviewAllowsOnlyNoVerificationRemediation() {
+        var review = AgentResultPromptContract.render(
+                "ws-1", "run-1", "intake.codex_product_review",
+                "NEEDS_REVISION", Set.of("BLOCKED", "NEEDS_REVISION", "READY_FOR_PRODUCT_REVIEW"));
+
+        assertTrue(review.contains(
+                "Allowed `result.failure.verification_remediation` values for this node: [NONE]"));
+        assertTrue(review.contains("`result.failure.verification_remediation` must remain `NONE`"));
+        assertFalse(review.contains("REVISE_PROPOSAL"));
+    }
+
+    @Test
+    void nonAcceptanceResultsRejectKnownButUnauthorizedVerificationRemediation() throws Exception {
+        var objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var nodes = Map.of(
+                "intake.codex_product_review", "NEEDS_REVISION",
+                "plan.claude_plan", "READY_FOR_PLAN_REVIEW");
+
+        nodes.forEach((nodeId, decision) -> {
+            try {
+                var prompt = AgentResultPromptContract.render(
+                        "ws-1", "run-1", nodeId, decision, Set.of(decision));
+                var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(
+                        prompt.substring(prompt.indexOf('{')));
+                ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.path("result").path("failure"))
+                        .put("verification_remediation", "TEST_CODE_CHANGE");
+
+                var parsed = parser.parse(objectMapper.writeValueAsString(envelope));
+                assertTrue(parsed.valid(), parsed.message());
+                var validation = validator.validate(
+                        parsed.envelope(), "ws-1", "run-1", ContractRegistry.forNode(nodeId));
+
+                assertFalse(validation.valid());
+                assertTrue(validation.errors().contains(
+                        "result.failure.verification_remediation must be NONE outside acceptance review"));
+            } catch (Exception failure) {
+                throw new AssertionError(nodeId, failure);
+            }
+        });
     }
 
     @Test

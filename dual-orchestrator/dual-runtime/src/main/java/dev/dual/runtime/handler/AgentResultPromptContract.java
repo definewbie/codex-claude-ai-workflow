@@ -37,12 +37,13 @@ public final class AgentResultPromptContract {
             Set<String> allowedDecisions,
             ProposalEmissionContext proposalContext
     ) {
+        var exampleResult = exampleResult(nodeId, decisionExample, proposalContext);
         var envelope = new AgentResultEnvelope(
                 1,
                 workstreamId,
                 runId,
                 nodeId,
-                exampleResult(nodeId, decisionExample, proposalContext)
+                exampleResult
         );
         try {
             return """
@@ -54,12 +55,14 @@ public final class AgentResultPromptContract {
                     %s
                     %s
                     %s
+                    %s
 
                     %s
                     """.formatted(
                             allowedDecisions.stream().sorted().toList(),
+                            verificationRemediationAllowedValues(exampleResult),
                             rereadReasonInstruction(nodeId),
-                            verificationRemediationInstruction(nodeId),
+                            verificationRemediationInstruction(nodeId, exampleResult),
                             contractRevisionInstruction(nodeId, proposalContext),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
@@ -171,14 +174,39 @@ public final class AgentResultPromptContract {
         }
     }
 
-    private static String verificationRemediationInstruction(String nodeId) {
-        if (!"acceptance.codex_verifier_review".equals(nodeId)) {
+    private static String verificationRemediationAllowedValues(AgentResultEnvelope.AgentResult result) {
+        if (!hasVerificationRemediation(result)) {
             return "";
+        }
+        var allowed = result instanceof AgentResultEnvelope.AcceptanceReviewResult
+                ? java.util.Arrays.stream(AgentResultEnvelope.VerificationRemediation.values())
+                        .map(Enum::name)
+                        .sorted()
+                        .toList()
+                : List.of(AgentResultEnvelope.VerificationRemediation.NONE.name());
+        return "Allowed `result.failure.verification_remediation` values for this node: " + allowed;
+    }
+
+    private static String verificationRemediationInstruction(
+            String nodeId,
+            AgentResultEnvelope.AgentResult result
+    ) {
+        if (!hasVerificationRemediation(result)) {
+            return "";
+        }
+        if (!"acceptance.codex_verifier_review".equals(nodeId)) {
+            return "For this node, `result.failure.verification_remediation` must remain `NONE`.";
         }
         return "For a REJECT with non-empty `result.failure.missing_tests`, set "
                 + "`result.failure.verification_remediation` to `EVIDENCE_COLLECTION` only when "
                 + "existing test/verification evidence must be collected, or `TEST_CODE_CHANGE` when "
                 + "a test source change is required. Do not infer this from prose in downstream nodes.";
+    }
+
+    private static boolean hasVerificationRemediation(AgentResultEnvelope.AgentResult result) {
+        return result instanceof AgentResultEnvelope.AgentOutputResult
+                || result instanceof AgentResultEnvelope.PlanResult
+                || result instanceof AgentResultEnvelope.AcceptanceReviewResult;
     }
 
     private static AgentResultEnvelope.AgentResult exampleResult(
