@@ -595,7 +595,8 @@ class WorkflowFileLedgerTest {
         var secondGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, secondGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
-                "note", "Second revision should stop."
+                "human_action", "revise",
+                "note", "A caller-provided human action must not bypass the revision limit."
         ));
 
         var current = ledger.loadCurrent(paths);

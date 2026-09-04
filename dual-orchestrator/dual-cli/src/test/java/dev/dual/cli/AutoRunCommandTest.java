@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -47,6 +48,22 @@ class AutoRunCommandTest {
     @Test
     void autorunCompletesFinalNextStageGate() {
         assertEquals("complete", AutoRunCommand.gateActionFor("gate.human_next_stage_approval"));
+    }
+
+    @Test
+    void autorunGateActionsCannotAuthorizeRevision() {
+        var automaticActions = List.of(
+                AutoRunCommand.gateActionFor("gate.human_requirement_review"),
+                AutoRunCommand.gateActionFor("gate.contract_review"),
+                AutoRunCommand.gateActionFor("gate.human_design_approval"),
+                AutoRunCommand.gateActionFor("gate.human_plan_approval"),
+                AutoRunCommand.gateActionFor("gate.human_acceptance"),
+                AutoRunCommand.gateActionFor("gate.human_next_stage_approval"),
+                AutoRunCommand.gateActionFor("gate.unknown_future_gate")
+        );
+
+        assertTrue(automaticActions.stream().allMatch(Set.of("approve", "complete")::contains));
+        assertFalse(automaticActions.contains("revise"));
     }
 
     @Test

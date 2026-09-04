@@ -69,7 +69,7 @@ class SmallWorkflowProfileGateIntegrationTest {
     }
 
     @Test
-    void humanPlanRevisionUsesOnlyTheGateOwnedBudget() throws Exception {
+    void humanPlanRevisionMayContinueBeyondTheAutomaticBudget() throws Exception {
         var workspace = tempDir.resolve("revise-workspace");
         var state = initializeAtPlan(workspace, "ws-small-revise");
 
@@ -90,12 +90,15 @@ class SmallWorkflowProfileGateIntegrationTest {
                 workspace, state.paths().workstreamId().value(), "run-plan-revise-4");
         routePlanToGate(state, fourthEvidence.refs(), "completed");
         state.ledger().resolveOpenGate(
-                state.paths(), state.definition(), "revise", "Human plan revision 4 exceeds the budget");
+                state.paths(), state.definition(), "revise", "Human explicitly authorizes plan revision 4");
 
-        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, state.ledger().loadCurrent(state.paths()).status());
+        assertEquals(WorkflowStatus.RUNNING, state.ledger().loadCurrent(state.paths()).status());
+        var fourthRevision = state.ledger().loadNode(
+                state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
+        assertEquals("plan.claude_plan", fourthRevision.nodeDefinitionId());
+        assertEquals("iter-005", fourthRevision.iterationId());
         var events = Files.readString(state.paths().eventsJsonl());
-        assertTrue(events.contains("revision_limit_reached"));
-        assertTrue(events.contains("gate.human_plan_approval"));
+        assertFalse(events.contains("revision_limit_reached"));
         assertFalse(events.contains("plan.decision"));
     }
 

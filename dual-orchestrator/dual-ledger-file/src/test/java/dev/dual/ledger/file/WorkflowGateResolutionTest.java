@@ -65,7 +65,7 @@ class WorkflowGateResolutionTest {
     }
 
     @Test
-    void advisoryRevisionWaitsForHumanAndOnlyNotedHumanRevisionConsumesBudget() throws Exception {
+    void advisoryRevisionWaitsForHumanAndNotedHumanRevisionMayExceedAutomaticBudget() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-advisory-design-review"));
         Files.createDirectories(paths.workstreamDir());
         var definition = advisoryDesignDefinition();
@@ -98,13 +98,21 @@ class WorkflowGateResolutionTest {
         ledger.completeAndRoute(paths, definition, revisedDesign.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("design-v2.contract.json"), Map.of());
         var secondGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
-        ledger.resolveOpenGate(paths, definition, "revise", "A second revision exceeds this test budget.");
+        var beforeAuthorizedOverride = ledger.loadCurrent(paths);
+        assertThrows(java.io.IOException.class,
+                () -> ledger.resolveOpenGate(paths, definition, "revise", ""));
+        assertEquals(beforeAuthorizedOverride, ledger.loadCurrent(paths));
+        ledger.resolveOpenGate(paths, definition, "revise", "A human authorizes another bounded revision.");
 
-        assertEquals(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY,
+        assertEquals(dev.dual.core.workflow.WorkflowStatus.RUNNING,
                 ledger.loadCurrent(paths).status());
-        assertEquals(NodeStatus.BLOCKED, ledger.loadNode(paths, secondGate.nodeInstanceId()).status());
-        assertFalse(Files.exists(paths.iterationJson("iter-003")));
-        assertTrue(Files.readString(paths.eventsJsonl()).contains("revision_limit_reached"));
+        var secondRevision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        assertEquals(NodeStatus.COMPLETED, ledger.loadNode(paths, secondGate.nodeInstanceId()).status());
+        assertEquals("design.claude_design", secondRevision.nodeDefinitionId());
+        assertEquals("iter-003", secondRevision.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-003"))
+                .contains("A human authorizes another bounded revision."));
+        assertFalse(Files.readString(paths.eventsJsonl()).contains("revision_limit_reached"));
     }
 
     @Test

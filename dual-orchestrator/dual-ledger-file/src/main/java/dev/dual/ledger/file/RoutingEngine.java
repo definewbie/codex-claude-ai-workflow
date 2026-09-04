@@ -61,6 +61,19 @@ final class RoutingEngine {
             List<String> outputRefs,
             Map<String, Object> result
     ) throws IOException {
+        completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result, false);
+    }
+
+    private void completeAndRoute(
+            WorkstreamPaths paths,
+            WorkflowDefinition definition,
+            String nodeInstanceId,
+            NodeStatus completedStatus,
+            String outcome,
+            List<String> outputRefs,
+            Map<String, Object> result,
+            boolean humanAuthorizedRevision
+    ) throws IOException {
         var current = loadCurrent(paths);
         if (!current.activeNodeInstanceIds().contains(nodeInstanceId)) {
             throw new IOException("node is not active: " + nodeInstanceId);
@@ -124,6 +137,9 @@ final class RoutingEngine {
                     nextDefinition.id()
             );
             if (maxRevisions < 0 || currentRevisionCount < maxRevisions) {
+                continue;
+            }
+            if (humanAuthorizedRevision) {
                 continue;
             }
 
@@ -232,7 +248,9 @@ final class RoutingEngine {
                         node.nodeDefinitionId(),
                         nextDefinition.id()
                 );
-                if (maxRevisions >= 0 && currentRevisionCount >= maxRevisions) {
+                if (!humanAuthorizedRevision
+                        && maxRevisions >= 0
+                        && currentRevisionCount >= maxRevisions) {
                     revisionTracker.blockOnRevisionLimit(paths, current, node, outputRefs, effectiveResult,
                             effectiveOutcome, maxRevisions, currentRevisionCount);
                     return;
@@ -459,11 +477,15 @@ final class RoutingEngine {
             throw new IOException("a decision note is required to revise a design");
         }
         resolveGateDocument(paths, gate, canonicalAction, note);
-        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction, node.inputRefs(), Map.of(
-                "human_action", canonicalAction,
-                "requested_action", action,
-                "note", note == null ? "" : note
-        ));
+        var humanAuthorizedRevision = "revise".equals(canonicalAction)
+                && note != null
+                && !note.isBlank();
+        completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction,
+                node.inputRefs(), Map.of(
+                        "human_action", canonicalAction,
+                        "requested_action", action,
+                        "note", note == null ? "" : note
+                ), humanAuthorizedRevision);
     }
 
     private GateDocument requireOpenGate(
