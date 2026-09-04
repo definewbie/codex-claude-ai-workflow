@@ -2564,3 +2564,35 @@ Gate 独立评审已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=3）`。P2 的�
 sentinel 与 Codex pin 观测依据已吸收，不新增机制或判定目标。当前 active step：选择性提交 Gate + active plan；随后执行 source-side
 identity/workspace preflight 和 standing-authorized Claude/Codex minimal probes，全部通过后才创建唯一 fresh workstream。旧失败样本与旧
 S2 Gate 继续封存。
+
+前一 fresh 样本随后在 design revision 连续消耗自动 revision budget 后，被送入 recovery。对此仅实施并提交了最小 human-authority
+修复 `425abf25`：真实 `resolveOpenGate` 中带非空 note 的 human `revise` 每次可越过自动 budget 一次；直接调用、伪造 result、Agent
+自动 revision 与 autorun 均不可越权。没有为旧 workstream 增加兼容重放；`ws-20260904T040052Z-3B2P` 与更早失败样本均终止为证据。
+
+复盘确认长期问题不在单个 if/else，而在过去 review 常只证明局部 step，没有先证明完整状态转移。根目录 `AGENTS.md` 已加入
+End-to-End State Transition Closure Principle，要求边界改动必须先列完整 transition table、durable-write failure slices、
+retry/resume/abort/replay/cold-start 行为与六维 invariant；若连续局部修补仍不能闭合，Agent 必须主动止损并回到全链分析。
+
+当前唯一 active step：对
+`docs/testing/verification-gates/20260904-okx-fresh-e2e-after-human-revision-authority.md` 做独立只读评审。新 Gate 只以完整 OKX
+E2E `COMPLETED` 与产品测试为主目标；remediation、自然 scope violation 与 human revise 仅作条件性哨兵，不要求触发、不人为造错，
+不重开 recovery/E1/S2 或平台化设计。评审 P0/P1 清零前不调用 provider、不创建 workstream。
+
+首次 Gate 评审覆盖了冻结身份、完整 workflow 拓扑、PASS/FAIL/INVALID、stop-loss、旧样本排除和非目标，确认主目标没有退化为
+局部哨兵，也未重开 recovery/E1/S2；但它把“独立评审证据未作为文件落盘”误判为“425abf25 未经独立评审”。实际 checkpoint
+提交前已有独立 diff review `PASS（P0=0/P1=0）`，focused `5+49+4`、full reactor `1326/0/0/0`、diff-check clean；证据已补录到
+`docs/plans/human-noted-revise-budget-override-review-evidence-20260904.zh-CN.md`。
+
+评审指出的 empty-note 判定歧义成立于部分非 `BLOCKED`、非 design、非 implementation-repair Gate：这类 `revise` 可以合法执行，
+但不会获得 budget override。Gate 的 FAIL 判据已收窄为“带非空 note、按当前语义应产生新 iteration 的 human revise 被错误送入
+recovery”，不再把未获授权的 empty-note revise 误判为缺陷。
+
+同时保留其指出的真实深度边界：425abf25 只证明 human authority 的逻辑路由，不关闭 R1 已知 file-ledger multi-write crash
+consistency。Gate 已把该项从错误的“sequence tests 已守住”改为显式 residual；自然 ledger 写入失败在业务开始后判 `FAIL` 并停止，
+不原地修补、不 resume。其余文字 delta 已钉死 provider runtime 口径、Codex pin、effective-workspace 测试位置、candidate 与
+apply/finalize 边界、acpx identity。当前 active step：只对上述 delta 做简短独立复审，不重开 production 架构或完整 Gate 设计。
+
+delta 复审已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=2）`，确认补录证据、empty-note/nonblank-note 边界、R1 residual、
+identity/runtime/test/delivery 口径与完整 E2E 主目标均准确。两项 P2 已吸收：补录原评审其余 P2 的处置；冻结 Dual identity 改为
+code checkpoint 必须是执行时 clean HEAD 的祖先，间隔只允许本轮 docs-only checkpoint，JAR SHA 保持绑定。当前 active step：
+选择性提交 Gate、补录和 active plan，继续排除旧 S2 recovery Gate；提交后执行 non-provider preflight 与既有预授权 minimal probes。
