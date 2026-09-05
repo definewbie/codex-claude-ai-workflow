@@ -10,6 +10,7 @@ import dev.dual.core.execution.AgentExecutionAttempt;
 import dev.dual.core.execution.AgentExecutionAttemptStatus;
 import dev.dual.core.execution.AgentExecutionProcessStatus;
 import dev.dual.core.execution.ProcessResult;
+import dev.dual.runtime.handler.AgentRunGovernanceContext;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -167,6 +168,7 @@ final class AgentRunMetadataWriter {
             SessionCompactionMeta compactionMeta,
             AgentResultAcquisitionDocument agentResultAcquisition,
             RepositoryFactBinding.Verified repositoryFactBinding,
+            AgentRunGovernanceContext.PreparedContext governanceContext,
             ClaudeExecutionPolicy.Binding executionPolicy
     ) throws IOException {
         var compaction = compactionMeta == null ? SessionCompactionMeta.off() : compactionMeta;
@@ -184,7 +186,10 @@ final class AgentRunMetadataWriter {
                 agent,
                 stdoutPath,
                 toolUsage,
-                result.adapterSignals()
+                result.adapterSignals(),
+                governanceContext == null ? java.util.Optional.empty() : governanceContext.qualifiedTaskContract(),
+                governanceContext == null ? "" : governanceContext.taskContractRef(),
+                governanceContext == null ? "" : governanceContext.taskContractSha256()
         );
         writePromptDebugIfEnabled(promptPath);
         var governanceReportPath = governanceActualReportWriter.write(
@@ -357,7 +362,7 @@ final class AgentRunMetadataWriter {
     ) throws IOException {
         writeCompleted(workspaceRoot, workstreamId, nodeId, agent, session, promptTemplate, runId, runDir,
                 promptPath, stdoutPath, stderrPath, transcriptPath, result, runTimeline, usage, sessionMeta,
-                compactionMeta, agentResultAcquisition, repositoryFactBinding, null);
+                compactionMeta, agentResultAcquisition, repositoryFactBinding, null, null);
     }
 
     private static Map<String, Object> executionAuthority(ClaudeExecutionPolicy.Binding policy) {

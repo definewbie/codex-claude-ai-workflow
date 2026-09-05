@@ -339,6 +339,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     compactionMeta,
                     acquisitionDocument,
                     governanceContext.repositoryFactBinding(),
+                    governanceContext,
                     executionPolicy
             );
             return authoritySnapshot.enforce(NodeResult.completed(

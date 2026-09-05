@@ -46,6 +46,7 @@ public final class WorkstreamMemoryProjection {
      */
     public static void appendAgentHandoff(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
+        var qualification = qualificationStatus(memory, workstreamDir, workspaceRoot);
         var decidedScope = strings(memory.get("decidedScope"));
         var nonGoals = strings(memory.get("nonGoals"));
         var reads = list(memory.get("readFiles"));
@@ -56,6 +57,7 @@ public final class WorkstreamMemoryProjection {
                 || !openIssues.isEmpty() || !decisions.isEmpty() || !lastOutcome.isEmpty();
 
         builder.append("Orchestrator-owned memory for this workstream. Reuse it instead of re-reading files or re-deriving scope.\n\n");
+        builder.append("TaskContract projection: ").append(qualification).append("\n\n");
 
         appendBullets(builder, "Decided scope", decidedScope, MAX_OPEN_ISSUES);
         appendBullets(builder, "Non-goals", nonGoals, MAX_OPEN_ISSUES);
@@ -83,21 +85,21 @@ public final class WorkstreamMemoryProjection {
      */
     public static void appendReviewEvidenceBrief(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
-        var contract = readContract(workstreamDir);
+        var qualification = qualificationStatus(memory, workstreamDir, workspaceRoot);
         var verdicts = list(memory.get("priorVerdicts"));
         var openIssues = openIssues(list(memory.get("openIssues")));
-        var acceptance = strings(contract.get("acceptance_criteria"));
+        var acceptance = List.<String>of();
         var changedFiles = readChangedFiles(workstreamDir);
         var reusablePaths = reusableReadPaths(memory);
 
         var hasAny = !verdicts.isEmpty() || !openIssues.isEmpty() || !acceptance.isEmpty()
                 || !changedFiles.isEmpty() || !reusablePaths.isEmpty();
 
+        builder.append("TaskContract projection: ").append(qualification).append("\n\n");
+
         if (!hasAny) {
             builder.append("(no cumulative review verdict recorded; no open issues, changed files, or reusable memory recorded yet) Evidence: ")
                     .append(ref(workspaceRoot, workstreamDir.resolve("memory/workstream-memory.json")))
-                    .append("; ")
-                    .append(ref(workspaceRoot, workstreamDir.resolve("artifacts/task-contract.json")))
                     .append(".\n\n");
             return;
         }
@@ -248,9 +250,17 @@ public final class WorkstreamMemoryProjection {
     private static void appendEvidenceRefs(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
         var refs = map(memory.get("refs"));
+        var qualification = map(memory.get("qualifiedTaskContract"));
         builder.append("Evidence refs:\n");
         builder.append("- Memory: ").append(ref(workspaceRoot, workstreamDir.resolve("memory/workstream-memory.json"))).append("\n");
-        builder.append("- Scope source: ").append(ref(workspaceRoot, workstreamDir.resolve("artifacts/task-contract.json"))).append("\n");
+        var contractRef = text(qualification.get("ref"));
+        var contractSha = text(qualification.get("sha256"));
+        if (!contractRef.isBlank() && !contractSha.isBlank()) {
+            builder.append("- Qualified scope source: ").append(contractRef)
+                    .append(" @ ").append(contractSha).append("\n");
+        } else {
+            builder.append("- Qualified scope source: unavailable\n");
+        }
         var readReuseRef = text(refs.get("readReuseContract"));
         if (!readReuseRef.isBlank()) {
             builder.append("- Read-reuse contract: ").append(readReuseRef).append("\n");
@@ -262,10 +272,6 @@ public final class WorkstreamMemoryProjection {
         return readJson(workstreamDir.resolve("memory/workstream-memory.json"));
     }
 
-    private static Map<String, Object> readContract(Path workstreamDir) {
-        return readJson(workstreamDir.resolve("artifacts/task-contract.json"));
-    }
-
     private static Map<String, Object> readJson(Path path) {
         if (!Files.isRegularFile(path)) {
             return Map.of();
@@ -275,6 +281,28 @@ public final class WorkstreamMemoryProjection {
         } catch (IOException | RuntimeException ignored) {
             return Map.of();
         }
+    }
+
+    private static String qualificationStatus(
+            Map<String, Object> memory,
+            Path workstreamDir,
+            Path workspaceRoot
+    ) {
+        var projected = map(memory.get("qualifiedTaskContract"));
+        var projectedRef = text(projected.get("ref"));
+        var projectedSha = text(projected.get("sha256"));
+        if (projectedRef.isBlank() || projectedSha.isBlank()) {
+            return "unavailable";
+        }
+        var workstreamId = workstreamDir.getFileName().toString();
+        var current = TaskContractProjectionVerifier.resolve(workspaceRoot, workstreamId);
+        if (current.failure() != null || current.qualified().isEmpty()) {
+            return "stale_projection";
+        }
+        var qualified = current.qualified().orElseThrow();
+        return projectedRef.equals(qualified.contractRef()) && projectedSha.equals(qualified.sha256())
+                ? "qualified_projection"
+                : "stale_projection";
     }
 
     private static List<String> readChangedFiles(Path workstreamDir) {

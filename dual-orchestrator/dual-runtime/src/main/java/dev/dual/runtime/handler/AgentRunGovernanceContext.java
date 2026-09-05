@@ -3,6 +3,7 @@ package dev.dual.runtime.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,16 +40,25 @@ public final class AgentRunGovernanceContext {
         var workstreamDir = workspaceRoot.resolve(".agent")
                 .resolve("workstreams")
                 .resolve(context.workstreamId());
-        var contractResolution = TaskContractProjectionVerifier.resolveRoutedAcceptance(
-                workspaceRoot,
-                context.workstreamId(),
-                context.definition().id(),
-                context.instance().inputRefs());
+        var expectedArtifact = String.valueOf(
+                context.definition().config().getOrDefault("expected_artifact", "")).trim();
+        var requiresQualification = requiresApprovedTaskContract(context);
+        var contractResolution = requiresQualification || "acceptance_review".equals(expectedArtifact)
+                ? ("acceptance_review".equals(expectedArtifact)
+                        ? TaskContractProjectionVerifier.resolveRoutedAcceptance(
+                                workspaceRoot,
+                                context.workstreamId(),
+                                context.definition().id(),
+                                context.instance().inputRefs())
+                        : TaskContractProjectionVerifier.resolve(workspaceRoot, context.workstreamId()))
+                : TaskContractProjectionVerifier.Resolution.absent();
         if (contractResolution.failure() != null) {
             throw qualificationFailure(contractResolution.failure());
         }
-        var expectedArtifact = String.valueOf(
-                context.definition().config().getOrDefault("expected_artifact", "")).trim();
+        if (requiresQualification && contractResolution.qualified().isEmpty()) {
+            throw new QualificationException(TaskContractProjectionVerifier.FAILURE_OUTCOME
+                    + ": APPROVAL_BINDING_MISSING: node requires an approved task contract");
+        }
         if ("acceptance_review".equals(expectedArtifact) && contractResolution.qualified().isEmpty()) {
             throw new QualificationException(TaskContractProjectionVerifier.FAILURE_OUTCOME
                     + ": CONTEXT_BINDING_MISSING: acceptance agent has no routed task contract binding");
@@ -82,7 +92,10 @@ public final class AgentRunGovernanceContext {
         return new PreparedContext(
                 workspaceRoot.relativize(packagePath).toString(),
                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::wrappedPayload),
-                governance.repositoryFactBinding());
+                governance.repositoryFactBinding(),
+                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contract),
+                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contractRef).orElse(""),
+                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::sha256).orElse(""));
     }
 
     public static Optional<String> trustedTaskContractPayload(
@@ -100,6 +113,17 @@ public final class AgentRunGovernanceContext {
                 + ": " + failure.reason() + ": " + failure.message());
     }
 
+    public static boolean requiresApprovedTaskContract(TaskHandler.TaskContext context) {
+        var configured = context.definition().config().get("requires_approved_task_contract");
+        if (configured == null) {
+            return false;
+        }
+        if (!(configured instanceof Boolean required)) {
+            throw new IllegalArgumentException("requires_approved_task_contract must be a boolean");
+        }
+        return required;
+    }
+
     public static final class QualificationException extends IOException {
         QualificationException(String message) {
             super(message);
@@ -109,7 +133,10 @@ public final class AgentRunGovernanceContext {
     public record PreparedContext(
             String contextRef,
             Optional<String> trustedTaskContractPayload,
-            RepositoryFactBinding.Verified repositoryFactBinding
+            RepositoryFactBinding.Verified repositoryFactBinding,
+            Optional<TaskContract> qualifiedTaskContract,
+            String taskContractRef,
+            String taskContractSha256
     ) {
     }
 

@@ -1,6 +1,8 @@
 package dev.dual.adapter.acpx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.runtime.handler.AgentOutputContractSidecar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,7 +21,7 @@ class WorkstreamMemoryUpdaterTest {
     @TempDir
     Path tempDir;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Test
     void updatesReadFilesFromTypedToolUsageOnly() throws Exception {
@@ -120,8 +122,13 @@ class WorkstreamMemoryUpdaterTest {
                 """, StandardCharsets.UTF_8);
 
         var updater = new WorkstreamMemoryUpdater();
+        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
+        var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
         updater.updateMemory(tempDir, "ws-scope", "run-1", "implement.claude_implement",
-                "implement", "claude", null, AcpxToolUsage.empty(), null);
+                "implement", "claude", null, AcpxToolUsage.empty(), null,
+                java.util.Optional.of(contract),
+                ".agent/workstreams/ws-scope/artifacts/task-contract.json",
+                "a".repeat(64));
 
         var memory = objectMapper.readValue(updater.memoryPath(tempDir, "ws-scope").toFile(), Map.class);
         assertEquals(List.of("src/login.js", "src/refreshToken.js"), memory.get("decidedScope"));
@@ -244,12 +251,17 @@ class WorkstreamMemoryUpdaterTest {
         Files.writeString(tempDir.resolve("docs/auth.md"), "# Auth\n\nThe refresh token on expiry runs here.\n");
         Files.writeString(tempDir.resolve("test/auth.test.js"), "describe('Auth', () => { it('refreshes token', () => {}); });\n");
 
+        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
+        var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
         new WorkstreamMemoryUpdater().updateMemory(tempDir, "ws-summary", "run-1", "intake.claude_brainstorm",
                 "intake", "claude", null,
                 new AcpxToolUsage(1, 3, 3, 0, 0, 0, Map.of("Read", 3),
                         List.of("Read"),
                         List.of("src/auth.js", "docs/auth.md", "test/auth.test.js"), List.of(), List.of(), List.of()),
-                null);
+                null,
+                java.util.Optional.of(contract),
+                ".agent/workstreams/ws-summary/artifacts/task-contract.json",
+                "b".repeat(64));
 
         var memory = objectMapper.readValue(new WorkstreamMemoryUpdater().memoryPath(tempDir, "ws-summary").toFile(), Map.class);
         var summaries = new java.util.HashMap<String, String>();

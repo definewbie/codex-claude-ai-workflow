@@ -103,9 +103,6 @@ class ContextTaskContractSectionTest {
         mapper.writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
         TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
 
-        // Also create events.jsonl for ledger_pointers availability
-        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
-
         // Also create git evidence for the acceptance profile
         var evidenceDir = wsDir.resolve("artifacts/git-evidence");
         Files.createDirectories(evidenceDir);

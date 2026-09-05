@@ -407,7 +407,8 @@ final class AgentPromptRenderer {
                     builder.append("\n```\n\n");
                     appendVerifiedRevisionBaseline(
                             builder, workspaceRoot, workstreamId, nodeId, document);
-                } else if (isCanonicalDirectInputRef(workspaceRoot, workstreamId, inputRef)) {
+                } else if (isCanonicalDirectInputRef(workspaceRoot, workstreamId, inputRef)
+                        && !(trustedTaskContractPayload != null && isStableContractProjectionRef(inputRef))) {
                     builder.append("\n```text\n");
                     builder.append(readContextPreview(workspaceRoot, path));
                     builder.append("\n```\n\n");
@@ -481,6 +482,14 @@ final class AgentPromptRenderer {
                 && !segments[1].isBlank()
                 && "prompts".equals(segments[2])
                 && "session-compaction-seed.md".equals(segments[3]);
+    }
+
+    private boolean isStableContractProjectionRef(String inputRef) {
+        var normalized = inputRef == null ? "" : inputRef.replace('\\', '/');
+        return normalized.endsWith("/artifacts/task-contract.json")
+                || normalized.endsWith("/artifacts/task-contract.md")
+                || normalized.endsWith("/artifacts/contract-resolution.json")
+                || normalized.endsWith("/artifacts/contract-resolution.md");
     }
 
     private boolean isCanonicalContextPackageRef(Path workspaceRoot, String workstreamId, String inputRef) {

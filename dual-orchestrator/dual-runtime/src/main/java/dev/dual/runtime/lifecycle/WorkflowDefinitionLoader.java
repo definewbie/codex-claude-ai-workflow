@@ -12,8 +12,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class WorkflowDefinitionLoader {
     private static final String FULL_WORKFLOW_RESOURCE = "/dev/dual/runtime/lifecycle/agent-lifecycle.full.json";
@@ -153,13 +156,93 @@ public final class WorkflowDefinitionLoader {
     }
 
     private static WorkflowDefinition toWorkflowDefinition(WorkflowDefinitionSource source) {
-        return new WorkflowDefinition(
+        var definition = new WorkflowDefinition(
                 source.workflowId(),
                 source.version(),
                 source.entryNodeId(),
                 applyDefaults(source.nodes(), source.defaults()),
                 source.edges()
         );
+        validateApprovedTaskContractRequirements(definition);
+        return definition;
+    }
+
+    private static void validateApprovedTaskContractRequirements(WorkflowDefinition definition) {
+        var contractGates = definition.nodes().stream()
+                .filter(node -> "contract".equals(text(node.config().get("gate_purpose"))))
+                .toList();
+        if (contractGates.isEmpty()) {
+            return;
+        }
+        if (contractGates.size() != 1) {
+            throw new IllegalArgumentException("workflow must declare exactly one contract-purpose gate");
+        }
+        var contractGate = contractGates.getFirst();
+        var approvedEdges = definition.edgesFrom(contractGate.id()).stream()
+                .filter(edge -> "approved".equals(edge.on()))
+                .toList();
+        if (approvedEdges.size() != 1) {
+            throw new IllegalArgumentException("contract-purpose gate must declare exactly one approved successor");
+        }
+        var approvedEdge = approvedEdges.getFirst();
+        var negotiation = reachable(definition, definition.entryNodeId(), approvedEdge);
+        if (negotiation.contains(approvedEdge.to())) {
+            throw new IllegalArgumentException("contract approved successor overlaps the pre-approval negotiation region");
+        }
+        var contractGatePredecessors = definition.edges().stream()
+                .filter(edge -> contractGate.id().equals(edge.to()))
+                .map(EdgeDefinition::from)
+                .filter(negotiation::contains)
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        var postContract = new HashSet<String>();
+        var queue = new ArrayDeque<String>();
+        queue.add(approvedEdge.to());
+        while (!queue.isEmpty()) {
+            var nodeId = queue.removeFirst();
+            if (negotiation.contains(nodeId)) {
+                if (!contractGatePredecessors.contains(nodeId)) {
+                    throw new IllegalArgumentException(
+                            "post-contract region overlaps the pre-approval negotiation region: " + nodeId);
+                }
+                continue;
+            }
+            if (!postContract.add(nodeId)) {
+                continue;
+            }
+            definition.edgesFrom(nodeId).forEach(edge -> queue.addLast(edge.to()));
+        }
+        for (var node : definition.nodes()) {
+            var configured = node.config().get("requires_approved_task_contract");
+            if (postContract.contains(node.id())) {
+                if (!Boolean.TRUE.equals(configured)) {
+                    throw new IllegalArgumentException(
+                            "post-contract node must declare requires_approved_task_contract=true: " + node.id());
+                }
+            } else if (negotiation.contains(node.id()) && configured != null && !Boolean.FALSE.equals(configured)) {
+                throw new IllegalArgumentException(
+                        "pre-approval negotiation node cannot require an approved task contract: " + node.id());
+            }
+        }
+    }
+
+    private static Set<String> reachable(
+            WorkflowDefinition definition,
+            String start,
+            EdgeDefinition excludedEdge
+    ) {
+        var reached = new HashSet<String>();
+        var queue = new ArrayDeque<String>();
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            var nodeId = queue.removeFirst();
+            if (!reached.add(nodeId)) {
+                continue;
+            }
+            definition.edgesFrom(nodeId).stream()
+                    .filter(edge -> !edge.equals(excludedEdge))
+                    .forEach(edge -> queue.addLast(edge.to()));
+        }
+        return Set.copyOf(reached);
     }
 
     private record WorkflowDefinitionSource(

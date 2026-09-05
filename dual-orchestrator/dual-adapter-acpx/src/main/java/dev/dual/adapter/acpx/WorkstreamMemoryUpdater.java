@@ -33,7 +33,7 @@ import java.util.function.Function;
  *
  * <p>This is the single writer for orchestrator-owned semantic memory. It
  * consumes only typed sources: {@link AcpxToolUsage#readFiles()} for reads,
- * {@code artifacts/task-contract.json} for decided scope / non-goals, and the
+ * the current run's qualified contract snapshot for decided scope / non-goals, and the
  * run's validated {@code agent_output_contract} sidecar for decisions / verdicts / open
  * issues / stage outcome, plus the classified failure for prior failures. It
  * does not parse agent prose, stdout, or markdown summaries as fact. The memory
@@ -73,17 +73,18 @@ final class WorkstreamMemoryUpdater {
             String agent,
             Path outputPath,
             AcpxToolUsage toolUsage,
-            List<AdapterSignal> adapterSignals
+            List<AdapterSignal> adapterSignals,
+            Optional<TaskContract> qualifiedTaskContract,
+            String taskContractRef,
+            String taskContractSha256
     ) throws IOException {
         if (workspaceRoot == null || workstreamId == null || workstreamId.isBlank()) {
             return;
         }
         var memoryPath = memoryPath(workspaceRoot, workstreamId);
         var memory = readExisting(memoryPath, workstreamId);
-        var workstreamDir = workspaceRoot.resolve(".agent").resolve("workstreams").resolve(workstreamId);
-
-        var taskContract = readContract(workstreamDir);
-        mergeContractScope(memory, taskContract);
+        var taskContract = qualifiedTaskContract == null ? Optional.<TaskContract>empty() : qualifiedTaskContract;
+        mergeContractScope(memory, taskContract, taskContractRef, taskContractSha256);
         var keywords = contractKeywords(taskContract);
 
         var readFiles = byPath(memory.get("readFiles"));
@@ -115,13 +116,26 @@ final class WorkstreamMemoryUpdater {
             String stage,
             AcpxToolUsage toolUsage
     ) throws IOException {
-        updateMemory(workspaceRoot, workstreamId, runId, nodeId, stage, "", null, toolUsage, null);
+        updateMemory(workspaceRoot, workstreamId, runId, nodeId, stage, "", null, toolUsage, null,
+                Optional.empty(), "", "");
     }
 
-    private void mergeContractScope(Map<String, Object> memory, Optional<TaskContract> contract) {
+    private void mergeContractScope(
+            Map<String, Object> memory,
+            Optional<TaskContract> contract,
+            String contractRef,
+            String contractSha256
+    ) {
         if (contract.isEmpty()) {
             memory.putIfAbsent("decidedScope", List.of());
             memory.putIfAbsent("nonGoals", List.of());
+            if (memory.containsKey("qualifiedTaskContract")) {
+                var stale = new LinkedHashMap<String, Object>(mapValue(memory.get("qualifiedTaskContract")));
+                stale.put("status", "stale_projection");
+                memory.put("qualifiedTaskContract", stale);
+            } else {
+                memory.put("qualifiedTaskContract", Map.of("status", "unavailable"));
+            }
             return;
         }
         var document = contract.orElseThrow();
@@ -132,18 +146,27 @@ final class WorkstreamMemoryUpdater {
                         .toList();
         memory.put("decidedScope", decidedScope);
         memory.put("nonGoals", document.nonGoals());
+        memory.put("qualifiedTaskContract", Map.of(
+                "status", "qualified_projection",
+                "contractId", document.id(),
+                "contractVersion", document.version(),
+                "ref", text(contractRef),
+                "sha256", text(contractSha256)));
     }
 
-    private Optional<TaskContract> readContract(Path workstreamDir) {
-        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
-        if (!Files.isRegularFile(contractPath)) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(objectMapper.readValue(contractPath.toFile(), TaskContract.class));
-        } catch (IOException ignored) {
-            return Optional.empty();
-        }
+    void updateMemory(
+            Path workspaceRoot,
+            String workstreamId,
+            String runId,
+            String nodeId,
+            String stage,
+            String agent,
+            Path outputPath,
+            AcpxToolUsage toolUsage,
+            List<AdapterSignal> adapterSignals
+    ) throws IOException {
+        updateMemory(workspaceRoot, workstreamId, runId, nodeId, stage, agent, outputPath, toolUsage,
+                adapterSignals, Optional.empty(), "", "");
     }
 
     private static Set<String> contractKeywords(Optional<TaskContract> contract) {

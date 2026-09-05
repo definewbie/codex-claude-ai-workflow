@@ -51,6 +51,18 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void configuredHumanGateFailsBeforePublishingPacketWithoutContractQualification() {
+        var definition = new NodeDefinition(
+                "gate.human_design_approval", NodeKind.GATE, "human.review",
+                Map.of("requires_approved_task_contract", true));
+        var gate = node("gate.human_design_approval", NodeKind.GATE, "human.review");
+
+        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
+                new GateHandler.GateContext(tempDir, "ws", definition, gate, "READY")));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/reviews")));
+    }
+
+    @Test
     void humanGateUsesLedgerCompatibleFallbackForMissingEmptyAndNonListActions() throws Exception {
         var definitions = List.of(
                 new NodeDefinition("gate.missing", NodeKind.GATE, "human.review", Map.of()),
@@ -362,7 +374,7 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("## Operator Guidance"));
         assertTrue(markdown.contains("Recommended Action: approve"));
         assertTrue(markdown.contains("Improve treatment record empty state"));
-        assertTrue(markdown.contains("## Contract Resolution"));
+        assertTrue(markdown.contains("## Requirement Resolution"));
         assertTrue(markdown.contains("Should review be mandatory?"));
         assertTrue(markdown.contains("Yes, mandatory review was approved."));
         assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
@@ -375,7 +387,7 @@ class BuiltinHandlerTest {
         var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
         var json = Files.readString(tempDir.resolve(packetJsonRef), StandardCharsets.UTF_8);
         assertTrue(json.contains("\"taskContract\""));
-        assertTrue(json.contains("\"contractResolution\""));
+        assertTrue(json.contains("\"requirementResolution\""));
         assertTrue(json.contains("\"latestAgentDecision\""));
         assertTrue(json.contains("\"gitEvidence\""));
         assertTrue(json.contains("\"delivery\""));
@@ -1417,6 +1429,32 @@ class BuiltinHandlerTest {
         assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
         assertEquals("UNAVAILABLE", result.result().get("change_scope_status"));
         assertTrue(result.errorMessage().contains("TaskContract artifact is missing"));
+    }
+
+    @Test
+    void configuredControlHandlersFailBeforeEvidenceSideEffectsWithoutContractQualification() throws Exception {
+        var artifactDefinition = new NodeDefinition(
+                "implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                Map.of("requires_approved_task_contract", true));
+        var artifactResult = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
+                tempDir, "ws", artifactDefinition,
+                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")));
+
+        assertEquals(NodeStatus.FAILED, artifactResult.status());
+        assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, artifactResult.outcome());
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/artifacts/git-evidence")));
+
+        var failureDefinition = new NodeDefinition(
+                "acceptance.failure_classify", NodeKind.TASK, "acceptance.failure_classify",
+                Map.of("requires_approved_task_contract", true));
+        var failureResult = new FailureClassifyHandler().execute(new TaskHandler.TaskContext(
+                tempDir, "ws", failureDefinition,
+                node("acceptance.failure_classify", NodeKind.TASK, "acceptance.failure_classify")));
+
+        assertEquals(NodeStatus.FAILED, failureResult.status());
+        assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, failureResult.outcome());
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/artifacts/failure-classification.json")));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/recovery/current-failure.md")));
     }
 
     @Test

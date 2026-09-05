@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
-import dev.dual.core.contract.TaskContractValidator;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.ledger.file.WorkstreamPaths;
@@ -17,6 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class ArtifactValidateHandler implements TaskHandler {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
@@ -30,6 +30,10 @@ public final class ArtifactValidateHandler implements TaskHandler {
 
     @Override
     public NodeResult execute(TaskContext context) throws Exception {
+        var qualified = qualifiedContract(context);
+        if (qualified.failure() != null) {
+            return qualificationFailure(qualified.failure());
+        }
         var evidenceDir = context.workspaceRoot()
                 .resolve(".agent")
                 .resolve("workstreams")
@@ -40,7 +44,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
 
         var evidence = collectEvidence(context.workspaceRoot(), context.workstreamId(), evidenceDir);
         writeEvidenceJson(evidenceDir.resolve("git-evidence.json"), evidence);
-        var evaluation = evaluateChangeScope(context.workspaceRoot(), context.workstreamId(), evidence);
+        var evaluation = evaluateChangeScope(evidence, qualified.contract());
         var evaluationPath = evidenceDir.resolve("change-scope-evaluation.json");
         OBJECT_MAPPER.writeValue(evaluationPath.toFile(), evaluation);
         var occurrence = ChangeScopeEvaluationArtifact.publish(
@@ -486,9 +490,8 @@ public final class ArtifactValidateHandler implements TaskHandler {
     }
 
     private static ChangeScopeEvaluation evaluateChangeScope(
-            Path workspaceRoot,
-            String workstreamId,
-            GitEvidence evidence
+            GitEvidence evidence,
+            TaskContract contract
     ) {
         if (!evidence.available()) {
             return ChangeScopeEvaluation.unavailable("Git evidence is unavailable");
@@ -496,24 +499,51 @@ public final class ArtifactValidateHandler implements TaskHandler {
         if (evidence.comparisonRange() == null || evidence.comparisonRange().isBlank()) {
             return ChangeScopeEvaluation.unavailable("Workspace base commit is unavailable");
         }
-        var contractPath = workspaceRoot.resolve(".agent")
-                .resolve("workstreams")
-                .resolve(workstreamId)
-                .resolve("artifacts")
-                .resolve("task-contract.json");
-        if (!Files.isRegularFile(contractPath)) {
+        if (contract == null) {
             return ChangeScopeEvaluation.unavailable("TaskContract artifact is missing");
         }
-        try {
-            var contract = OBJECT_MAPPER.readValue(contractPath.toFile(), TaskContract.class);
-            var errors = TaskContractValidator.validate(contract);
-            if (!errors.isEmpty()) {
-                return ChangeScopeEvaluation.unavailable("TaskContract is invalid: " + String.join("; ", errors));
+        return ChangeScopeEvaluator.evaluate(contract, evidence.actualChanges());
+    }
+
+    private static QualifiedContract qualifiedContract(TaskContext context) {
+        if (!AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
+            var legacy = TaskContractProjectionVerifier.readLegacyProjection(
+                    context.workspaceRoot(), context.workstreamId());
+            if (legacy.projection().isPresent()
+                    && legacy.projection().orElseThrow().contract() != null) {
+                var contract = legacy.projection().orElseThrow().contract();
+                var errors = dev.dual.core.contract.TaskContractValidator.validate(contract);
+                if (!errors.isEmpty()) {
+                    return new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
+                            "CONTRACT_INVALID", String.join("; ", errors)));
+                }
             }
-            return ChangeScopeEvaluator.evaluate(contract, evidence.actualChanges());
-        } catch (Exception exception) {
-            return ChangeScopeEvaluation.unavailable("TaskContract cannot be read: " + exception.getMessage());
+            return legacy.failure() != null
+                    ? new QualifiedContract(null, legacy.failure())
+                    : new QualifiedContract(
+                            legacy.projection().map(TaskContractProjectionVerifier.LegacyProjection::contract).orElse(null),
+                            null);
         }
+        var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+        if (resolution.failure() != null) {
+            return new QualifiedContract(null, resolution.failure());
+        }
+        return resolution.qualified()
+                .map(value -> new QualifiedContract(value.contract(), null))
+                .orElseGet(() -> new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
+                        "APPROVAL_BINDING_MISSING", "change-scope validation requires an approved task contract")));
+    }
+
+    private static NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
+        return new NodeResult(
+                TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                NodeStatus.FAILED,
+                List.of(),
+                Map.of(
+                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                        "reason", failure.reason(),
+                        "error", failure.message()),
+                failure.message());
     }
 
     private static String toWorkspaceRef(Path workspaceRoot, Path path) {
@@ -534,6 +564,9 @@ public final class ArtifactValidateHandler implements TaskHandler {
     }
 
     private record CommandResult(int exitCode, String output) {
+    }
+
+    private record QualifiedContract(TaskContract contract, TaskContractProjectionVerifier.Failure failure) {
     }
 
     private static String textOrNull(String value) {

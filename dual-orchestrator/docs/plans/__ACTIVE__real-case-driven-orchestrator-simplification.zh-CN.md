@@ -2596,3 +2596,122 @@ delta 复审已 `PASS / EXECUTION READY（P0=0 / P1=0 / P2=2）`，确认补录�
 identity/runtime/test/delivery 口径与完整 E2E 主目标均准确。两项 P2 已吸收：补录原评审其余 P2 的处置；冻结 Dual identity 改为
 code checkpoint 必须是执行时 clean HEAD 的祖先，间隔只允许本轮 docs-only checkpoint，JAR SHA 保持绑定。当前 active step：
 选择性提交 Gate、补录和 active plan，继续排除旧 S2 recovery Gate；提交后执行 non-provider preflight 与既有预授权 minimal probes。
+
+fresh workstream `ws-20260904T131724Z-PNBV` 的 human design revision 自然验证了 `425abf25`：多次带 nonblank note 的真实
+human `revise` 均创建新 iteration，没有被自动 revision budget 错送 recovery。但 design candidate 出现 A/B 振荡：修复事务边界时
+引入未授权路径，修复 scope 后又恢复解析前写库，再次修事务后又生成另一组越界路径。Codex reviewer 每轮均正确 fail closed，未进入实现。
+Gate 的“同一 blocker 无新证据重复两次” stop-loss 已触发；PNBV 保持在 human gate，不再 approve/revise，不作为部分成功继续消耗。
+
+全链取证确认主要根因不是 OKX 设计复杂：initial design prompt 收到 canonical TaskContract 四个 refs 与完整 scope；后三次 revision
+node input refs 只剩上一轮 Codex review 工件，prompt 中 TaskContract/完整 scope 为零命中。与此同时 `design-claude` 要求 complete
+replacement，`AgentRunGovernanceContext` 又只从当前 routed refs 解析 contract，非 acceptance 节点缺失时不 fail closed；design 仍使用
+generic `agent_output_contract`，全部候选 `changed_files=[]`，真实文件计划藏在 prose 中，无法 deterministic 校验。
+
+统一解决方案已起草于
+`docs/plans/post-contract-authority-continuity-and-semantic-revision-convergence-bounded-comparison-20260904.zh-CN.md`。它不是 design
+节点局部 prompt 修复，而是三层边界：approved TaskContract binding 贯穿全部 post-contract sibling；design/plan authored scope typed
+化并在 reviewer/implementation 前机械拒绝；human semantic revision 绑定 parent candidate、review、human decision 与累计 obligations，
+用 sequence replay 防止 A/B 回退。明确排除规则平台、workflow 新节点、OKX 特判和旧样本恢复。
+
+当前 active step：只对该 bounded comparison 做 CC 独立架构评审。评审必须覆盖 contract approval→design/plan revision→implementation/
+self-test→acceptance 的 end-to-end invariant、三个 bundled workflow sibling、是否存在更小方案或第二 SoT；完成 producer/consumer sweep
+前 Implementation READY 必须保持 NO，不修改 production、不调用 provider。
+
+CC 独立架构评审结论为 `WARN / NOT READY（P0=0/P1=3/P2=4）`。评审完整复算了 PNBV 的 initial/revision refs、prompt、
+generic design artifact 与振荡证据，并发现三项必须修正：real-case 使用的 small-plan-human-review experiment 漏出 sibling 矩阵；新资格链与
+revision baseline 缺 durable-write failure slice/cold-start replay；原方案未比较复用既有 `TaskContractProjectionVerifier` 与 contract gate
+事实的更小路径。
+
+bounded comparison 已据此改为推荐 Candidate E：resolved `gate.contract_review` 本身拥有批准事实，在既有 gate result 中绑定 contract/ref/SHA
+与 compile occurrence；统一 verifier 按 ledger event order 消费，退役 `latest compile by finishedAt` 的 owner 身份，并折叠 acceptance 的 routed
+binding。只有 sweep 证明既有 gate write 无法原子承载时才允许新增独立 binding artifact。四个 workflow、durable-write/cold-start、
+recompile/reapprove/no-fallback、baseline 冷重建测试均已加入；exact-set 推测性扩张已删除，obligation id 已固定。
+
+当前 active step：对上述 delta 做 CC 独立复审。Implementation READY 仍为 NO；复审必须重点确认 Candidate E 是否真为唯一且最小 authority、
+gate resolution 的 crash/restart 语义是否可闭合、四 workflow sibling 与 D2/D3/D4 下游链是否完整。继续不修改 production、不调用 provider、
+不恢复 PNBV。
+
+CC delta 复审确认上轮全部 P1/P2 已真实关闭，Candidate E 比新增 binding artifact 更小，四 workflow 与 durable-write/cold-start 方向成立；
+但进一步发现 stable `task-contract.json` 的直接读取面不只 agent/context：failure classification、memory、governance、manifest 与 prompt projection
+仍可能绕过 qualification。bounded comparison 已将规则改为按用途而非节点类型：任何控制路径必须经唯一 resolver；所有 projection 只能消费
+qualified result 或显式 unavailable。`contract-resolution.json` 的批准字段同步降级为历史 projection，不得成为第二批准事实；plan baseline parity
+与 design responsibility 非 enforcement 边界也已补入。
+
+当前 active step：执行实施前 producer/consumer/sibling sweep，并把 stable contract/resolution 的每个 reader 分为 authority/control、projection、
+revision-history 三类，锁定统一 resolver 的最小 API 与 gate durable-write 顺序。sweep 完成并独立评审前 Implementation READY 仍为 NO；不改 production、
+不调用 provider、不恢复 PNBV。
+
+producer/consumer/sibling sweep 已完成并写入
+`docs/plans/post-contract-authority-continuity-producer-consumer-sweep-20260905.zh-CN.md`。除评审点名的 readers 外，又确认
+`ArtifactValidateHandler`、`HumanReviewGateHandler`、`ReportGenerateFinalHandler` 直接读取 stable contract；全部已按 control/projection
+分类。`contract-resolution.json` 被精确定义为 requirement-negotiation history，不再与 compiled-contract approval 混淆。
+
+sweep 同时发现同一 authority-continuity 缺陷的下游 sibling：human design approve 后 plan 没有显式 approved-design identity，human plan
+approve 后 implementation/self-test 也没有显式 approved-plan identity。首版 sweep 曾误判 stable canonical plan 无 production reader；后续评审发现
+metrics projection reader，最终处置见下方 delta。方案限定新增 design/plan authored-stage lineage resolver，复用
+gate→reviewer→context→candidate 的现有 occurrence refs，不建通用 artifact 平台。
+
+E1 的最小落点进一步锁定为：gate 创建时持久化通用 `source_node_instance_id`，compile result 增加 resolution SHA，现有 verifier 按 event order
+验证 resolved gate/source compile/stable bytes；不新增 binding artifact。partial gate multi-write 只 fail closed 到既有 recovery 域，不冒充修复 R1
+自动恢复。当前 active step：对 sweep 做 CC 独立架构评审；P0/P1 清零前 Implementation READY 保持 NO，不改 production、不调用 provider、
+不恢复 PNBV。
+
+sweep 自检补获 plan-stage 的 topology sibling：三个 bundled workflow 同时存在 reviewer-driven
+`plan.decision NEEDS_REVISION → plan.claude_plan` 与 human-gate revise；small-plan experiment 没有 plan reviewer，plan candidate 直接进入 human gate。
+authored-stage resolver 已改为严格匹配 frozen workflow 的 reviewed/direct predecessor：不得假设总有 reviewer，也不得给自动 revision 伪造 human note。
+对应三类 plan sequence tests 已列入，范围仍限定 design/plan authored artifacts。
+
+sweep 首轮 CC 评审为 `WARN / NOT READY（P0=0/P1=1/P2=4）`。评审正确发现 canonical
+`artifacts/plan/plan_artifact.json` 仍由 `ArtifactContractValidator` latest-wins 写入并被 `MetricsProjectionWriter` 读取；独立复核同时校正其因果：
+该文件不直接给 Agent 的 `ReadReusePolicy` 授权，而是把重复读取治理指标改成 `plan_authorized`、掩盖缺失理由。delta 采用更小的 owner 收敛：
+删除 canonical writer 与 metrics 豁免，重复读取只由 occurrence 事实和显式 `reread_reasons` 判定；approved plan 只拥有 implementation context。
+
+其余评审发现也已吸收：补 clarify→recompile→re-approve 的正向 authority 切换；覆盖 initial/self-test/human-repair/acceptance reject/human-acceptance
+revise 的全部 implementation re-entry；显式记录 reviewer 继续使用既有 decision/must_fix、不新增逐 obligation assessment schema；四 workflow 通过
+`requires_approved_task_contract=true` 机械声明 semantic consumers，禁止 node-id 字符串推断。当前 active step：只做 sweep delta 的 CC 独立复审；
+P0/P1 清零前 Implementation READY 仍为 NO，不进入 E1 production、不调用 provider、不恢复 PNBV。
+
+sweep delta 独立复审为 `PASS / IMPLEMENTATION READY（P0=0/P1=0/P2=3）`。复审确认 canonical plan reader 的真实影响与删除方案、
+qualification config 的非-authority 属性、re-approve/plan topology/全部 implementation re-entry 覆盖均成立。三项 P2 已归位：E1 loader
+按 contract gate 后继图可达性校验 custom definition 不得漏声明；E3 human gate packet 展示 active obligations 与 candidate responses；测试明确点名
+`REJECT_VERIFICATION_INSUFFICIENT → implement.claude_self_test_report`。当前 active step：制定 E1 Contract qualification 的最小 implementation
+plan 并做独立架构评审；不把 E2/E3/E4 提前混入，不修改 production、不调用 provider、不恢复 PNBV。
+
+E1 implementation plan 已写入
+`docs/plans/post-contract-authority-continuity-e1-contract-qualification-implementation-plan-20260905.zh-CN.md`。范围严格限定为：gate source
+occurrence identity、compile contract/resolution 双 SHA、event-order qualification resolver、四 workflow + custom definition 图可达声明校验，以及
+stable contract/resolution direct consumers 收敛到同一 immutable snapshot。明确不做 E2/E3 typed design/plan 与 obligations、不删除 canonical plan、
+不修 R1 liveness。当前 active step：对 E1 计划做 CC 独立架构评审；P0/P1 清零前不改 production、不调用 provider、不恢复 PNBV。
+
+E1 计划首轮独立评审为 `WARN / NOT READY（P0=1/P1=0/P2=3）`。P0 实证四个 workflow 都有 acceptance contract-gap/ambiguity
+回流到 `contract.compile`，朴素“approved successor 全图可达都 require”会把 pre-contract 区误标并令定义无法加载。delta 改为纯图算法：移除
+contract-purpose gate 的 approved edge 后从 entry 计算 negotiation region；从 approved successor 遍历时重新进入该区域即停止 qualification
+传播，新 contract 仍必须经下一次完整 approval 才恢复 post-contract authority。无 node-id/stage/handler 字符串白名单。
+
+三项 P2 已吸收：旧 gate ledger 缺 source identity 明确 fail closed；memory 只存派生 scope/non-goals + qualified identity，禁止复制全文和回流；
+contract-resolution 在 context/prompt/gate 统一标为 Requirement Resolution。当前 active step：只做 E1 plan delta 的 CC 独立复审；P0/P1 清零前
+不改 production、不调用 provider、不恢复 PNBV。
+
+E1 plan delta 复审为 `PASS / IMPLEMENTATION READY（P0=0/P1=0/P2=2）`。区域算法、回流/re-approval、legacy fail-closed、memory 非 authority
+与 Requirement Resolution 重标注均通过。两项 P2 已写回：negotiation/post-contract 区域重叠必须 load failure；resolved contract gate 的
+clarify/reject 必须拒绝且不得回退。当前 active step：按 failing-tests-first 实施 E1 单一 checkpoint；不进入 E2-E4、不调用 provider、不恢复 PNBV。
+
+E1 Contract qualification 已完成实现并写入
+`docs/plans/post-contract-authority-continuity-e1-contract-qualification-result-20260905.zh-CN.md`。resolved contract gate、source compile、
+contract/resolution refs 与 SHA 由唯一 event-order resolver 重建为 immutable snapshot；四个 workflow 的 post-contract 区域由 loader 图不变量强制声明，
+agent/context/control/memory/report consumers 均已收敛。configured qualification 缺失时，provider、Git evidence、classification、review packet 与
+final report 的 zero-side-effect 反证已加入。
+
+验证结果：focused `98/0/0/0`；CLI dependency reactor（`mvn -pl dual-cli -am test`）在受控权限外原样复跑 `1272/0/0/0`；package 成功；三个 bundled workflow 由新 JAR validate
+通过；stable direct-reader sweep 只剩 writer、唯一 verifier、pre-approval revision history 与 adapter path protection/filter；`git diff --check`
+clean。首次 sandbox 内 full run 的两个 error 仅来自 macOS ProcessHandle 系统读取权限，未修改测试后原命令复跑全绿。
+
+实施中通过全链回归关闭三类局部评审盲点：legacy validation 不得全局收紧、完整 contract 不得复制进 bounded context package、从 workflow 中段起跑的
+synthetic fixture 不得反向削弱 production qualification。当前成熟度为 `CONTRACT QUALIFICATION ENFORCED / REAL-CASE NOT PROVEN`。
+当前 active step 仅为独立代码级 diff review；P0/P1 清零前不提交、不进入 E2-E4、不调用 provider、不恢复 PNBV。
+
+E1 独立 Diff Review 为 `PASS（P0=0/P1=0/P2=2）`，六维 invariant 与四 workflow sibling 均通过，允许选择性提交。
+P2 已关闭：原 1272 是 CLI dependency reactor，未包含 server 的 65 项；独立评审全模块复跑与提交前 154 份 XML 聚合均为
+`1337/0/0/0`。workflow validation 补齐 experiment，共四个通过。结果文档同步修正统计与验证范围。
+当前 active step：选择性提交 E1 checkpoint；随后起草 E2 最小实施计划并独立评审。整体 authority continuity 与 semantic revision convergence
+仍需 E2/E3/E4，E1 PASS 只证明 contract qualification；PNBV 保持停止，不消耗 provider。旧 S2 recovery Gate 继续排除。

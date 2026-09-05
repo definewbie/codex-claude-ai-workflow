@@ -68,6 +68,20 @@ class ReportGenerateFinalHandlerTest {
     }
 
     @Test
+    void configuredReportFailsBeforePublishingWithoutContractQualification() throws Exception {
+        var definition = new NodeDefinition(
+                "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
+                Map.of("requires_approved_task_contract", true));
+
+        var result = new ReportGenerateFinalHandler().execute(new TaskHandler.TaskContext(
+                tempDir, "ws-rpt-qualified", definition, emptyReportNode("ws-rpt-qualified")));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, result.outcome());
+        assertFalse(Files.exists(workstreamDir("ws-rpt-qualified").resolve("reports")));
+    }
+
+    @Test
     void nonFinalGoalFailsWithoutBeingRelabeledAsCorruption() throws Exception {
         var fixture = prepare("ws-rpt-not-final");
         var goalPath = workstreamDir("ws-rpt-not-final").resolve("domain/goal-satisfaction.json");
@@ -164,7 +178,7 @@ class ReportGenerateFinalHandlerTest {
 
         var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-resolution", fixture));
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
-        assertTrue(report.contains("## Contract Resolution"));
+        assertTrue(report.contains("## Requirement Resolution"));
         assertTrue(report.contains("Should review be mandatory?"));
         assertTrue(report.contains("Existing shortcut is intentionally removed."));
     }

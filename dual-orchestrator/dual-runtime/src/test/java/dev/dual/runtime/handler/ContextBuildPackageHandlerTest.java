@@ -1392,7 +1392,6 @@ class ContextBuildPackageHandlerTest {
                   "source": {"raw_request_ref": "requirement.md", "created_by": "dual"}
                 }
                 """, StandardCharsets.UTF_8);
-        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
         Files.writeString(wsDir.resolve("artifacts/contract-resolution.json"), """
                 {
                   "schema_version": 1,
@@ -1411,13 +1410,14 @@ class ContextBuildPackageHandlerTest {
                   "created_at": "2026-06-06T00:00:00Z"
                 }
                 """, StandardCharsets.UTF_8);
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
 
         var result = handler.execute(ctx("acceptance", List.of()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("TaskContract"));
-        assertTrue(markdown.contains("Contract Resolution"));
+        assertTrue(markdown.contains("Requirement Resolution"));
         assertTrue(markdown.contains("Should review be mandatory?"));
         assertTrue(markdown.contains("Yes, mandatory review was approved."));
     }
@@ -2260,11 +2260,13 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains(objective), "the complete qualified contract must survive the soft ceiling");
-        assertEquals(1, occurrences(markdown, TypedContextPayloadBoundary.START),
-                "typed marker index=" + markdown.indexOf("dual:typed")
-                        + ", objective index=" + markdown.indexOf(objective));
+        assertEquals(0, occurrences(markdown, TypedContextPayloadBoundary.START),
+                "context package is a bounded projection; the agent run receives the separately verified typed payload");
         var metadata = objectMapper.readTree(
                 tempDir.resolve((String) result.result().get("context_package_metadata")).toFile());
+        assertEquals(TaskContractArtifactWriter.sha256(wsDir.resolve("artifacts/task-contract.json")),
+                metadata.path("taskContractSha256").asText());
+        assertTrue(metadata.path("taskContractCompileNodeRef").asText().contains("node-contract-compile"));
         assertTrue(metadata.path("budgetWarnings").toString().contains("task_contract"));
         assertTrue(metadata.path("sections").toString().contains("softBudgetExceeded"));
     }

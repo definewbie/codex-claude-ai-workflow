@@ -2,8 +2,6 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.dual.core.contract.TaskContract;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +43,7 @@ final class ContextStateEvidenceBoundaryRenderer {
         var routedEvidence = AgentEvidenceIndex.fromRefs(
                 context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper);
         appendCurrentRepairObjective(builder, workstreamDir, objectMapper, routedEvidence);
-        appendHumanDecisions(builder, workstreamDir, objectMapper);
+        appendHumanDecisions(builder, qualifiedContract);
         appendAgentProposedStates(builder, routedEvidence);
         appendPendingGaps(builder, workstreamDir, objectMapper);
     }
@@ -57,14 +55,13 @@ final class ContextStateEvidenceBoundaryRenderer {
             Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
         builder.append("### Trusted Harness Facts\n\n");
-        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
-        if (qualifiedContract.isPresent() || Files.exists(contractPath)) {
-            var contract = qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contract)
-                    .orElseGet(() -> readContract(contractPath, objectMapper));
+        if (qualifiedContract.isPresent()) {
+            var snapshot = qualifiedContract.orElseThrow();
+            var contract = snapshot.contract();
             builder.append("- TaskContract: ").append(contract.status()).append(" - ")
-                    .append(contract.objective()).append(" (").append(toDisplayRef(contractPath)).append(")\n");
+                    .append(contract.objective()).append(" (").append(snapshot.contractRef()).append(")\n");
         } else {
-            builder.append("- TaskContract: not generated yet\n");
+            builder.append("- TaskContract qualification: not available\n");
         }
 
         var gitEvidencePath = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
@@ -78,14 +75,6 @@ final class ContextStateEvidenceBoundaryRenderer {
             builder.append(" (").append(toDisplayRef(gitEvidencePath)).append(")\n");
         } else {
             builder.append("- Git Evidence: not generated yet\n");
-        }
-    }
-
-    private static TaskContract readContract(Path path, ObjectMapper objectMapper) {
-        try {
-            return objectMapper.readValue(path.toFile(), TaskContract.class);
-        } catch (IOException failure) {
-            throw new IllegalStateException("cannot read task contract", failure);
         }
     }
 
@@ -137,19 +126,22 @@ final class ContextStateEvidenceBoundaryRenderer {
                 && ("REJECT".equals(document.decision()) || "REJECTED".equals(document.canonicalStageOutcome()));
     }
 
-    private static void appendHumanDecisions(StringBuilder builder, Path workstreamDir, ObjectMapper objectMapper) {
+    private static void appendHumanDecisions(
+            StringBuilder builder,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) {
         builder.append("\n### Human Decisions\n\n");
-        var resolutionPath = workstreamDir.resolve("artifacts/contract-resolution.json");
-        if (Files.exists(resolutionPath)) {
-            var resolution = readJsonUnchecked(resolutionPath, objectMapper);
-            builder.append("- Contract Resolution: ").append(text(resolution.get("decision")))
+        if (qualifiedContract.isPresent()) {
+            var snapshot = qualifiedContract.orElseThrow();
+            var resolution = snapshot.resolutionDocument();
+            builder.append("- Requirement Resolution: ").append(text(resolution.get("decision")))
                     .append(" by ").append(text(resolution.get("approved_by")))
-                    .append(" (").append(toDisplayRef(resolutionPath)).append(")\n");
+                    .append(" (").append(snapshot.resolutionRef()).append(")\n");
             for (var item : resolvedQuestionTexts(resolution.get("resolved_questions")).stream().limit(3).toList()) {
                 builder.append("  - ").append(item).append("\n");
             }
         } else {
-            builder.append("- Contract Resolution: not available\n");
+            builder.append("- Requirement Resolution: not available\n");
         }
     }
 

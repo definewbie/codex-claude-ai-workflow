@@ -110,6 +110,10 @@ public final class ContractCompileHandler implements TaskHandler {
         TaskContractArtifactWriter.writeMarkdown(contract, artifactsDir);
         var contractSha256 = TaskContractArtifactWriter.sha256(artifactsDir.resolve("task-contract.json"));
         var resolutionRefs = writeContractResolutionArtifacts(context, artifactsDir, resolutionResult.resolution());
+        var resolutionPath = artifactsDir.resolve("contract-resolution.json");
+        var resolutionSha256 = Files.isRegularFile(resolutionPath)
+                ? TaskContractArtifactWriter.sha256(resolutionPath)
+                : "";
 
         var now = Instant.now();
         var result = new LinkedHashMap<String, Object>();
@@ -117,6 +121,7 @@ public final class ContractCompileHandler implements TaskHandler {
         result.put("contract_status", contract.status().name());
         result.put("contract_version", contract.version());
         result.put("task_contract_sha256", contractSha256);
+        result.put("contract_resolution_sha256", resolutionSha256);
         result.put("compilation_pass", contract.compilationPass());
         var outputRefs = new ArrayList<String>();
         outputRefs.add(".agent/workstreams/" + context.workstreamId() + "/artifacts/task-contract.json");

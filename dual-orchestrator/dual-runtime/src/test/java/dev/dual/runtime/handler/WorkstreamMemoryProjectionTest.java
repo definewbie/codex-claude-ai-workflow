@@ -58,7 +58,7 @@ class WorkstreamMemoryProjectionTest {
         assertTrue(text.contains("handle edge"), text);
         assertTrue(text.toLowerCase().contains("reuse"), text);
         assertFalse(text.contains("(no stage handoff evidence yet)"), text);
-        assertTrue(text.contains("task-contract.json"), text);
+        assertTrue(text.contains("Qualified scope source: unavailable"), text);
     }
 
     @Test
@@ -100,7 +100,8 @@ class WorkstreamMemoryProjectionTest {
         assertTrue(text.contains("Prior verdict") && text.contains("REJECTED"), text);
         assertTrue(text.contains("fix token race"), text);
         assertTrue(text.contains("verify refresh"), text);
-        assertTrue(text.contains("tokens refreshed"), text);
+        assertTrue(text.contains("TaskContract projection: unavailable"), text);
+        assertFalse(text.contains("tokens refreshed"), text);
         assertTrue(text.contains("src/auth.py"), text);
         assertTrue(text.toLowerCase().contains("incremental"), text);
         assertTrue(text.contains("changed-files.txt"), text);
@@ -153,8 +154,9 @@ class WorkstreamMemoryProjectionTest {
                 builder, workstreamDir("ws-contract-only"), tempDir);
         var text = builder.toString();
 
-        assertTrue(text.contains("No cumulative review verdict recorded"), text);
-        assertTrue(text.contains("OTP remains single-use"), text);
+        assertTrue(text.contains("no cumulative review verdict recorded"), text);
+        assertTrue(text.contains("TaskContract projection: unavailable"), text);
+        assertFalse(text.contains("OTP remains single-use"), text);
         assertFalse(text.contains("Incremental acceptance from orchestrator memory"), text);
         assertFalse(text.contains("Prior must-fix"), text);
     }

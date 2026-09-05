@@ -40,11 +40,26 @@ public final class FailureClassifyHandler implements TaskHandler {
         var workstreamDir = context.workspaceRoot()
                 .resolve(".agent/workstreams").resolve(context.workstreamId());
 
-        // Read TaskContract artifact
-        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
         TaskContract taskContract = null;
-        if (Files.exists(contractPath)) {
-            taskContract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
+        if (AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
+            var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+            if (resolution.failure() != null || resolution.qualified().isEmpty()) {
+                var failure = resolution.failure() == null
+                        ? TaskContractProjectionVerifier.Failure.of(
+                                "APPROVAL_BINDING_MISSING", "failure classification requires an approved task contract")
+                        : resolution.failure();
+                return qualificationFailure(failure);
+            }
+            taskContract = resolution.qualified().orElseThrow().contract();
+        } else {
+            var legacy = TaskContractProjectionVerifier.readLegacyProjection(
+                    context.workspaceRoot(), context.workstreamId());
+            if (legacy.failure() != null) {
+                throw new IOException(legacy.failure().message());
+            }
+            taskContract = legacy.projection()
+                    .map(TaskContractProjectionVerifier.LegacyProjection::contract)
+                    .orElse(null);
         }
 
         var evidenceRead = AgentEvidenceIndex.latestDecisionFromRefs(context.workspaceRoot(),
@@ -116,6 +131,18 @@ public final class FailureClassifyHandler implements TaskHandler {
         result.put("failure_summary_ref", summaryRef);
 
         return NodeResult.completed(outcome, outputRefs, result);
+    }
+
+    private NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
+        return new NodeResult(
+                TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                NodeStatus.FAILED,
+                List.of(),
+                Map.of(
+                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                        "reason", failure.reason(),
+                        "error", failure.message()),
+                failure.message());
     }
 
     private NodeResult failedEvidence(String outcome, String message, TaskContext context,

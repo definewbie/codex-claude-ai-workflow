@@ -283,7 +283,8 @@ final class RepoScopeGovernance {
             GitTrackedPathInventory trackedInventory,
             String trackedInventoryRef
     ) throws IOException {
-        var contractScope = contractScopePaths(workstreamDir, objectMapper, qualifiedContract);
+        var contractScope = contractScopePaths(
+                context.workspaceRoot(), workstreamDir, qualifiedContract);
         var candidates = new LinkedHashSet<String>();
         candidates.addAll(contractScope);
         addGitChangedFiles(candidates, workstreamDir);
@@ -647,19 +648,19 @@ final class RepoScopeGovernance {
     }
 
     private static List<String> contractScopePaths(
+            Path workspaceRoot,
             Path workstreamDir,
-            ObjectMapper objectMapper,
             Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
         if (qualifiedContract.isPresent()) {
             return contractScopePaths(qualifiedContract.get().contract());
         }
-        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
-        if (!Files.isRegularFile(contractPath)) {
-            return List.of();
-        }
-        var contract = objectMapper.readValue(contractPath.toFile(), TaskContract.class);
-        return contractScopePaths(contract);
+        return TaskContractProjectionVerifier.readLegacyProjection(
+                        workspaceRoot, workstreamDir.getFileName().toString())
+                .projection()
+                .map(TaskContractProjectionVerifier.LegacyProjection::contract)
+                .map(RepoScopeGovernance::contractScopePaths)
+                .orElseGet(List::of);
     }
 
     private static List<String> contractScopePaths(TaskContract contract) {

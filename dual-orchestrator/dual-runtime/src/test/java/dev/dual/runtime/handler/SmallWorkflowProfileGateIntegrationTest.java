@@ -159,8 +159,18 @@ class SmallWorkflowProfileGateIntegrationTest {
             WorkflowDefinition loaded
     ) throws Exception {
         Files.createDirectories(workspace);
+        // This fixture starts at plan and tests gate routing only; contract qualification has separate lifecycle tests.
+        var nodes = loaded.nodes().stream().map(node -> {
+            if (!"gate.human_plan_approval".equals(node.id())) {
+                return node;
+            }
+            var config = new java.util.LinkedHashMap<>(node.config());
+            config.remove("requires_approved_task_contract");
+            return new dev.dual.core.workflow.NodeDefinition(
+                    node.id(), node.kind(), node.handlerType(), Map.copyOf(config));
+        }).toList();
         var definition = new WorkflowDefinition(
-                loaded.workflowId(), loaded.version(), "plan.claude_plan", loaded.nodes(), loaded.edges());
+                loaded.workflowId(), loaded.version(), "plan.claude_plan", nodes, loaded.edges());
         var paths = new WorkstreamPaths(workspace, new DualId(workstreamId));
         var ledger = new WorkflowFileLedger();
         ledger.initialize(paths, "workflow-" + workstreamId, definition);

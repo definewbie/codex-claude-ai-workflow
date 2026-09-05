@@ -30,6 +30,19 @@ final class ContextPackageSectionRenderer {
 
     static void appendTaskContract(StringBuilder builder, Path contractPath) throws IOException {
         var contract = OBJECT_MAPPER.readValue(contractPath.toFile(), TaskContract.class);
+        appendTaskContract(builder, contract);
+    }
+
+    static void appendLegacyTaskContract(
+            StringBuilder builder,
+            TaskContractProjectionVerifier.LegacyProjection legacy
+    ) {
+        if (legacy.contract() != null) {
+            appendTaskContract(builder, legacy.contract());
+        }
+    }
+
+    private static void appendTaskContract(StringBuilder builder, TaskContract contract) {
         builder.append("**Objective:** ").append(contract.objective()).append("\n\n");
         builder.append("**Status:** ").append(contract.status()).append("\n\n");
         if (contract.scope() != null) {
@@ -54,15 +67,33 @@ final class ContextPackageSectionRenderer {
             StringBuilder builder,
             TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract
     ) {
-        builder.append(qualifiedContract.wrappedPayload()).append("\n\n");
+        appendTaskContract(builder, qualifiedContract.contract());
     }
 
-    static void appendContractResolution(StringBuilder builder, Path resolutionPath) throws IOException {
+    static void appendRequirementResolution(StringBuilder builder, Path resolutionPath) throws IOException {
         if (!Files.exists(resolutionPath)) {
             return;
         }
         var json = OBJECT_MAPPER.readValue(resolutionPath.toFile(), MAP_TYPE);
-        builder.append("**Contract Resolution:**\n");
+        appendRequirementResolution(builder, json);
+    }
+
+    static void appendQualifiedRequirementResolution(
+            StringBuilder builder,
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract
+    ) {
+        appendRequirementResolution(builder, qualifiedContract.resolutionDocument());
+    }
+
+    static void appendLegacyRequirementResolution(
+            StringBuilder builder,
+            TaskContractProjectionVerifier.LegacyProjection legacy
+    ) {
+        appendRequirementResolution(builder, legacy.resolutionDocument());
+    }
+
+    private static void appendRequirementResolution(StringBuilder builder, Map<String, Object> json) {
+        builder.append("**Requirement Resolution**\n");
         builder.append("- Decision: ").append(text(json.get("decision"))).append("\n");
         builder.append("- Approved By: ").append(text(json.get("approved_by"))).append("\n");
         builder.append("- Gate Ref: ").append(text(json.get("gate_ref"))).append("\n");

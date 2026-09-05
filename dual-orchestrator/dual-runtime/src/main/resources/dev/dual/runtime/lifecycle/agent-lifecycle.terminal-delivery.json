@@ -110,6 +110,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
@@ -127,6 +128,7 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
+        "requires_approved_task_contract": true,
         "target_node": "design.codex_arch_review",
         "profile": "architecture_review",
         "purpose": "Package Claude design and prior review context for Codex architecture review."
@@ -137,6 +139,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
@@ -154,13 +157,16 @@
       "id": "design.decision",
       "kind": "DECISION",
       "handlerType": "review.decision",
-      "config": {}
+      "config": {
+        "requires_approved_task_contract": true
+      }
     },
     {
       "id": "gate.human_design_approval",
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
+        "requires_approved_task_contract": true,
         "terminal_gate": false,
         "allowed_actions": [
           "approve",
@@ -175,6 +181,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
@@ -192,6 +199,7 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
+        "requires_approved_task_contract": true,
         "target_node": "plan.codex_plan_review",
         "profile": "plan_review",
         "purpose": "Package Claude plan and design context for Codex plan review."
@@ -202,6 +210,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
@@ -220,6 +229,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
+        "requires_approved_task_contract": true,
         "max_revisions": 3
       }
     },
@@ -228,6 +238,7 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
+        "requires_approved_task_contract": true,
         "terminal_gate": false,
         "allowed_actions": [
           "approve",
@@ -242,6 +253,7 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
+        "requires_approved_task_contract": true,
         "target_node": "implement.claude_implement",
         "profile": "implementation",
         "purpose": "Package approved plan and review history for Claude implementation."
@@ -252,6 +264,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "approve_all": true,
         "permission_profile": "implement",
         "prompt_template": "implement-claude",
@@ -270,6 +283,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "approve_all": true,
         "permission_profile": "implement",
         "prompt_template": "implement-claude-self-test",
@@ -289,6 +303,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
+        "requires_approved_task_contract": true,
         "max_revisions": 1
       }
     },
@@ -297,6 +312,7 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
+        "requires_approved_task_contract": true,
         "allowed_actions": [
           "revise"
         ],
@@ -309,6 +325,7 @@
       "kind": "TASK",
       "handlerType": "artifact.validate",
       "config": {
+        "requires_approved_task_contract": true,
         "route_scope_violation": true
       }
     },
@@ -317,6 +334,7 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
+        "requires_approved_task_contract": true,
         "target_node": "acceptance.codex_verifier_review",
         "profile": "acceptance",
         "required_agent_evidence": {
@@ -332,6 +350,7 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
+        "requires_approved_task_contract": true,
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
@@ -352,6 +371,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
+        "requires_approved_task_contract": true,
         "max_revisions": 1
       }
     },
@@ -359,25 +379,32 @@
       "id": "acceptance.classify_failure",
       "kind": "TASK",
       "handlerType": "acceptance.failure_classify",
-      "config": {}
+      "config": {
+        "requires_approved_task_contract": true
+      }
     },
     {
       "id": "acceptance.generate_final_report",
       "kind": "TASK",
       "handlerType": "report.generate_final",
-      "config": {}
+      "config": {
+        "requires_approved_task_contract": true
+      }
     },
     {
       "id": "delivery.prepare_pr",
       "kind": "TASK",
       "handlerType": "delivery.prepare_pr",
-      "config": {}
+      "config": {
+        "requires_approved_task_contract": true
+      }
     },
     {
       "id": "gate.human_acceptance",
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
+        "requires_approved_task_contract": true,
         "terminal_gate": true,
         "allowed_actions": [
           "approve",

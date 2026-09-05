@@ -216,6 +216,29 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void configuredPostContractNodeWithoutQualificationFailsBeforeTransportInvocation() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-unqualified");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved change.\n");
+        var transport = new CountingAcceptanceTransport();
+        var handler = new AcpxAgentTaskHandler(transport, false);
+        var definition = new NodeDefinition(
+                "design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude",
+                "session", "claude-main",
+                "permission_profile", "observe",
+                "prompt_template", "design-claude",
+                "requires_approved_task_contract", true));
+        var instance = readyInstance(definition.id());
+
+        var result = handler.execute(taskContext(tempDir, "ws-unqualified", definition, instance));
+
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED", result.outcome());
+        assertEquals(0, transport.calls);
+    }
+
+    @Test
     void prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-correction");
         Files.createDirectories(workstreamDir);
@@ -2635,7 +2658,10 @@ class AcpxAgentTaskHandlerTest {
                 readyInstance("design.codex_arch_review")));
 
         var memory = Files.readString(workstreamDir.resolve("memory/workstream-memory.json"));
-        assertTrue(memory.contains("src/tokenRefresh.js"), "decidedScope must come from task-contract: " + memory);
+        assertTrue(memory.contains("\"status\" : \"unavailable\""),
+                "unqualified stable contract must not enter semantic memory: " + memory);
+        assertFalse(memory.contains("src/tokenRefresh.js"),
+                "unqualified stable contract must not define decidedScope: " + memory);
         assertFalse(memory.contains("NEEDS_REVISION"), "unvalidated decision must not enter memory: " + memory);
         assertFalse(memory.contains("refresh token on expiry"), "unvalidated issue must not enter memory: " + memory);
     }

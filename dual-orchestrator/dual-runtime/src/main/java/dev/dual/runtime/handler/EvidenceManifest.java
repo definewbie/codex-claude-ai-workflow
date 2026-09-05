@@ -124,16 +124,32 @@ final class EvidenceManifest {
             List<EvidenceItem> items,
             Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
     ) throws IOException {
-        var taskContractPath = workstreamDir.resolve("artifacts/task-contract.json");
         if (qualifiedContract.isPresent()) {
             items.add(itemFromJson(
-                    workspaceRoot, workstreamDir, taskContractPath, "task_contract",
+                    workspaceRoot, workstreamDir, workspaceRoot.resolve(qualifiedContract.get().contractRef()), "task_contract",
                     qualifiedContract.get().document()));
+            items.add(itemFromJson(
+                    workspaceRoot,
+                    workstreamDir,
+                    workspaceRoot.resolve(qualifiedContract.get().resolutionRef()),
+                    "requirement_resolution",
+                    qualifiedContract.get().resolutionDocument()));
         } else {
-            addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items, taskContractPath, "task_contract");
+            var legacy = TaskContractProjectionVerifier.readLegacyProjection(
+                    workspaceRoot, workstreamDir.getFileName().toString()).projection();
+            if (legacy.isPresent()) {
+                if (legacy.get().contract() != null) {
+                    items.add(itemFromJson(
+                            workspaceRoot, workstreamDir, workspaceRoot.resolve(legacy.get().contractRef()),
+                            "task_contract", legacy.get().document()));
+                }
+                if (!legacy.get().resolutionDocument().isEmpty()) {
+                    items.add(itemFromJson(
+                            workspaceRoot, workstreamDir, workspaceRoot.resolve(legacy.get().resolutionRef()),
+                            "requirement_resolution", legacy.get().resolutionDocument()));
+                }
+            }
         }
-        addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,
-                workstreamDir.resolve("artifacts/contract-resolution.json"), "contract_resolution");
         addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,
                 workstreamDir.resolve("artifacts/next-stage/handoff.json"), "stage_handoff");
         addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,

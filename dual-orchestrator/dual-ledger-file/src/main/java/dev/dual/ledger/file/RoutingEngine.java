@@ -238,6 +238,11 @@ final class RoutingEngine {
             var eventNum = LedgerUtils.currentEventNumber(lastEventId) + 1;
             var nextNodeInstanceId = LedgerUtils.nodeInstanceId(nextDefinition.id(), eventNum);
             var nextStatus = nextDefinition.kind() == NodeKind.GATE ? NodeStatus.WAITING : NodeStatus.READY;
+            var nextGateResult = new LinkedHashMap<String, Object>();
+            if (nextDefinition.kind() == NodeKind.GATE) {
+                nextGateResult.putAll(gateSourceResult);
+                nextGateResult.put("source_node_instance_id", node.nodeInstanceId());
+            }
             var nextIterationId = node.iterationId();
             var iterationStartedPayload = Map.<String, Object>of();
             if (nextDefinition.kind() != NodeKind.GATE
@@ -284,7 +289,7 @@ final class RoutingEngine {
                     outputRefs,
                     transitionAttributes,
                     List.of(),
-                    nextDefinition.kind() == NodeKind.GATE ? gateSourceResult : Map.of(),
+                    nextDefinition.kind() == NodeKind.GATE ? Map.copyOf(nextGateResult) : Map.of(),
                     null,
                     "",
                     null,
@@ -308,20 +313,24 @@ final class RoutingEngine {
                         null,
                         Map.of(
                                 "subject_input_refs", List.copyOf(outputRefs),
-                                "source_outcome", effectiveOutcome
+                                "source_outcome", effectiveOutcome,
+                                "source_node_instance_id", node.nodeInstanceId()
                         )
                     ));
             }
 
             lastEventId = LedgerUtils.nextEventId(lastEventId);
-            eventLog.appendEvent(paths, lastEventId, "node_routed", Map.of(
-                    "from", node.nodeDefinitionId(),
-                    "outcome", effectiveOutcome,
-                    "to", nextDefinition.id(),
-                    "node_instance_id", nextNodeInstanceId,
-                    "gate_id", gateId,
-                    "transition", transitionAttributes
-            ));
+            var routedPayload = new LinkedHashMap<String, Object>();
+            routedPayload.put("from", node.nodeDefinitionId());
+            routedPayload.put("outcome", effectiveOutcome);
+            routedPayload.put("to", nextDefinition.id());
+            routedPayload.put("node_instance_id", nextNodeInstanceId);
+            routedPayload.put("gate_id", gateId);
+            routedPayload.put("transition", transitionAttributes);
+            if (nextDefinition.kind() == NodeKind.GATE) {
+                routedPayload.put("source_node_instance_id", node.nodeInstanceId());
+            }
+            eventLog.appendEvent(paths, lastEventId, "node_routed", Map.copyOf(routedPayload));
             if (!iterationStartedPayload.isEmpty()) {
                 lastEventId = LedgerUtils.nextEventId(lastEventId);
                 eventLog.appendEvent(paths, lastEventId, "iteration_started", iterationStartedPayload);
@@ -480,12 +489,12 @@ final class RoutingEngine {
         var humanAuthorizedRevision = "revise".equals(canonicalAction)
                 && note != null
                 && !note.isBlank();
+        var resolvedNodeResult = new LinkedHashMap<String, Object>(node.result());
+        resolvedNodeResult.put("human_action", canonicalAction);
+        resolvedNodeResult.put("requested_action", action);
+        resolvedNodeResult.put("note", note == null ? "" : note);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction,
-                node.inputRefs(), Map.of(
-                        "human_action", canonicalAction,
-                        "requested_action", action,
-                        "note", note == null ? "" : note
-                ), humanAuthorizedRevision);
+                node.inputRefs(), Map.copyOf(resolvedNodeResult), humanAuthorizedRevision);
     }
 
     private GateDocument requireOpenGate(

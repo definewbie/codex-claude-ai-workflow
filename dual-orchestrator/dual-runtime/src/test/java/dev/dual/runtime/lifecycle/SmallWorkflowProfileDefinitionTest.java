@@ -95,11 +95,11 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        assertEquals("8e636007fe0cac843d14a3fc0b37dd61e0841191bc1369e8d1ddb36efcbe2103",
+        assertEquals("e6a468cf6930af320b02ae35f4851a50a2c198f3260d6b6c94b4cf997e5dc0ca",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("c8fff7d2f07aaf777eadc4d3aadb7ce0dc65ac422c84b39ee492760de58a9672",
+        assertEquals("b7a26003a5d32762b30ebdf609860f0aaa5b93c99ab03953a63e88aa9d7023b0",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("bd4122f8db60615f25d5908adcd728efe3104c91647082ee0d04e27eafb2c762",
+        assertEquals("6c4fb9a0c6ddac83569654937e765fbaaad906d68f35407269ec4a7cd5a3f540",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 

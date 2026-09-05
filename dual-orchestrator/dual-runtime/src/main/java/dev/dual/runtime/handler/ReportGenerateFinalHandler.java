@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class ReportGenerateFinalHandler implements TaskHandler {
     private static final int MAX_SNIPPET_CHARS = 4_000;
@@ -24,6 +25,10 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
 
     @Override
     public NodeResult execute(TaskContext context) throws IOException {
+        var qualifiedContract = qualifiedContract(context);
+        if (qualifiedContract.failure() != null) {
+            return qualificationFailure(qualifiedContract.failure());
+        }
         var evidence = CompletionEvidenceLineageResolver.resolveForReport(
                 context.workspaceRoot(), context.workstreamId(), context.instance());
         if (evidence.status() != CompletionEvidenceLineageResolver.Status.AVAILABLE) {
@@ -51,7 +56,7 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         var iterationId = context.instance().iterationId();
         var reportPath = reportsDir.resolve(iterationId + "-final-report.md");
         var latestPath = reportsDir.resolve("latest-final-report.md");
-        var markdown = renderReport(context, workstreamDir, evidence);
+        var markdown = renderReport(context, workstreamDir, evidence, qualifiedContract.contract());
         Files.writeString(reportPath, markdown, StandardCharsets.UTF_8);
         Files.writeString(latestPath, markdown, StandardCharsets.UTF_8);
 
@@ -68,7 +73,8 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
     private static String renderReport(
             TaskContext context,
             Path workstreamDir,
-            CompletionEvidenceLineageResolver.Resolution evidence
+            CompletionEvidenceLineageResolver.Resolution evidence,
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract
     ) throws IOException {
         var builder = new StringBuilder();
         builder.append("# Dual Final Report\n\n");
@@ -83,8 +89,12 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         builder.append(readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)")).append("\n\n");
 
         builder.append("## TaskContract\n\n");
-        appendTaskContractSection(builder, workstreamDir);
-        appendContractResolutionSection(builder, workstreamDir);
+        var legacyContract = qualifiedContract == null
+                ? TaskContractProjectionVerifier.readLegacyProjection(
+                        context.workspaceRoot(), context.workstreamId()).projection().orElse(null)
+                : null;
+        appendTaskContractSection(builder, qualifiedContract, legacyContract);
+        appendRequirementResolutionSection(builder, qualifiedContract, legacyContract);
 
         appendFailureClassificationSection(builder, workstreamDir);
 
@@ -112,54 +122,100 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         return builder.toString();
     }
 
-    private static void appendTaskContractSection(StringBuilder builder, Path workstreamDir) throws IOException {
-        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
-        if (!Files.exists(contractPath)) {
+    private static void appendTaskContractSection(
+            StringBuilder builder,
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract,
+            TaskContractProjectionVerifier.LegacyProjection legacyContract
+    ) {
+        if (qualifiedContract == null && (legacyContract == null || legacyContract.contract() == null)) {
             builder.append("(no TaskContract — legacy workflow)\n\n");
             return;
         }
-        var mapper = new com.fasterxml.jackson.databind.ObjectMapper()
-                .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-        try {
-            var contract = mapper.readValue(contractPath.toFile(), dev.dual.core.contract.TaskContract.class);
-            builder.append("- **Contract ID:** ").append(contract.id()).append("\n");
-            builder.append("- **Objective:** ").append(contract.objective()).append("\n");
-            builder.append("- **Status:** ").append(contract.status()).append("\n");
-            builder.append("- **Scope Included:** ").append(contract.scope().included().isEmpty()
-                    ? "(none)"
-                    : contract.scope().included().stream()
-                            .map(item -> item.operation() + ": " + item.path())
-                            .collect(java.util.stream.Collectors.joining(", "))).append("\n");
-            builder.append("- **Scope Excluded:** ").append(contract.scope().excluded().isEmpty() ? "(none)" : String.join(", ", contract.scope().excluded())).append("\n");
-            builder.append("- **Acceptance Criteria:** ").append(contract.acceptanceCriteria().size()).append(" items").append("\n");
-            builder.append("- **Non-Goals:** ").append(contract.nonGoals().isEmpty() ? "(none)" : String.join(", ", contract.nonGoals())).append("\n");
-            builder.append("- **Contract Gaps Found:** 0\n");
-            builder.append("- **Out-of-scope Changes:** 0\n");
-            builder.append("\n");
-        } catch (Exception e) {
-            builder.append("(error reading TaskContract: ").append(e.getMessage()).append(")\n\n");
+        var contract = qualifiedContract == null
+                ? legacyContract.contract()
+                : qualifiedContract.contract();
+        builder.append("- **Contract ID:** ").append(contract.id()).append("\n");
+        builder.append("- **Objective:** ").append(contract.objective()).append("\n");
+        builder.append("- **Status:** ").append(contract.status()).append("\n");
+        if (qualifiedContract != null) {
+            builder.append("- **Contract Ref:** ").append(qualifiedContract.contractRef()).append("\n");
+            builder.append("- **Contract SHA-256:** ").append(qualifiedContract.sha256()).append("\n");
+            builder.append("- **Approval Gate:** ").append(qualifiedContract.approvalGateRef()).append("\n");
+        } else {
+            builder.append("- **Authority:** legacy unqualified projection\n");
         }
+        builder.append("- **Scope Included:** ").append(contract.scope().included().isEmpty()
+                ? "(none)"
+                : contract.scope().included().stream()
+                        .map(item -> item.operation() + ": " + item.path())
+                        .collect(java.util.stream.Collectors.joining(", "))).append("\n");
+        builder.append("- **Scope Excluded:** ").append(contract.scope().excluded().isEmpty() ? "(none)" : String.join(", ", contract.scope().excluded())).append("\n");
+        builder.append("- **Acceptance Criteria:** ").append(contract.acceptanceCriteria().size()).append(" items").append("\n");
+        builder.append("- **Non-Goals:** ").append(contract.nonGoals().isEmpty() ? "(none)" : String.join(", ", contract.nonGoals())).append("\n");
+        builder.append("- **Contract Gaps Found:** 0\n");
+        builder.append("- **Out-of-scope Changes:** 0\n\n");
     }
 
-    private static void appendContractResolutionSection(StringBuilder builder, Path workstreamDir) throws IOException {
-        var resolutionPath = workstreamDir.resolve("artifacts/contract-resolution.json");
-        if (!Files.exists(resolutionPath)) {
+    private static void appendRequirementResolutionSection(
+            StringBuilder builder,
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract,
+            TaskContractProjectionVerifier.LegacyProjection legacyContract
+    ) {
+        if (qualifiedContract == null
+                && (legacyContract == null || legacyContract.resolutionDocument().isEmpty())) {
             return;
         }
-        builder.append("## Contract Resolution\n\n");
-        builder.append("- Source: ").append(toDisplayRef(resolutionPath)).append("\n");
-        try {
-            var json = OBJECT_MAPPER.readTree(resolutionPath.toFile());
-            appendJsonField(builder, "Decision", json.path("decision").asText(""));
-            appendJsonField(builder, "Approved By", json.path("approved_by").asText(""));
-            appendJsonField(builder, "Gate Ref", json.path("gate_ref").asText(""));
-            appendResolvedQuestions(builder, json.path("resolved_questions"));
-            appendJsonList(builder, "Assumptions", json.path("assumptions"));
-            appendJsonList(builder, "Accepted Risks", json.path("accepted_risks"));
-        } catch (Exception e) {
-            builder.append("- Error reading contract resolution: ").append(e.getMessage()).append("\n");
+        builder.append("## Requirement Resolution\n\n");
+        builder.append("- Source: ").append(qualifiedContract == null
+                ? legacyContract.resolutionRef()
+                : qualifiedContract.resolutionRef()).append("\n");
+        if (qualifiedContract != null) {
+            builder.append("- SHA-256: ").append(qualifiedContract.resolutionSha256()).append("\n");
+        } else {
+            builder.append("- Authority: requirement history only\n");
         }
+        var json = qualifiedContract == null
+                ? OBJECT_MAPPER.valueToTree(legacyContract.resolutionDocument())
+                : OBJECT_MAPPER.valueToTree(qualifiedContract.resolutionDocument());
+        appendJsonField(builder, "Decision", json.path("decision").asText(""));
+        appendJsonField(builder, "Approved By", json.path("approved_by").asText(""));
+        appendJsonField(builder, "Gate Ref", json.path("gate_ref").asText(""));
+        appendResolvedQuestions(builder, json.path("resolved_questions"));
+        appendJsonList(builder, "Assumptions", json.path("assumptions"));
+        appendJsonList(builder, "Accepted Risks", json.path("accepted_risks"));
         builder.append("\n");
+    }
+
+    private static QualifiedContract qualifiedContract(TaskContext context) {
+        if (!AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
+            return new QualifiedContract(null, null);
+        }
+        var resolved = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+        if (resolved.failure() != null) {
+            return new QualifiedContract(null, resolved.failure());
+        }
+        return resolved.qualified()
+                .map(value -> new QualifiedContract(value, null))
+                .orElseGet(() -> new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
+                        "APPROVAL_BINDING_MISSING", "final report requires an approved task contract")));
+    }
+
+    private static NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
+        return new NodeResult(
+                TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                dev.dual.core.workflow.NodeStatus.FAILED,
+                List.of(),
+                Map.of(
+                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
+                        "reason", failure.reason(),
+                        "error", failure.message()),
+                failure.message());
+    }
+
+    private record QualifiedContract(
+            TaskContractProjectionVerifier.QualifiedTaskContract contract,
+            TaskContractProjectionVerifier.Failure failure
+    ) {
     }
 
     private static void appendResolvedQuestions(StringBuilder builder, JsonNode node) {

@@ -61,12 +61,17 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     null);
         }
         var qualifiedContract = Optional.<TaskContractProjectionVerifier.QualifiedTaskContract>empty();
-        if ("acceptance".equals(profileName)) {
+        var requiresQualification = AgentRunGovernanceContext.requiresApprovedTaskContract(context);
+        if (requiresQualification || "acceptance".equals(profileName)) {
             var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
             if (resolution.failure() != null) {
                 return qualificationFailure(resolution.failure());
             }
             qualifiedContract = resolution.qualified();
+            if (requiresQualification && qualifiedContract.isEmpty()) {
+                return qualificationFailure(TaskContractProjectionVerifier.Failure.of(
+                        "APPROVAL_BINDING_MISSING", "node requires an approved task contract"));
+            }
         }
         var requiredInputArtifact = configText(context, "required_input_artifact", "");
         if (!requiredInputArtifact.isBlank() && !"task_contract_proposal".equals(requiredInputArtifact)) {
@@ -213,7 +218,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         // Phase 2: Resolve section availability
         var resolved = new ArrayList<ResolvedSection>();
         for (var req : budget.sections()) {
-            var available = checkAvailability(req, context, workstreamDir);
+            var available = checkAvailability(req, context, workstreamDir, qualifiedContract);
             if (req.missingPolicy() == MissingPolicy.FAIL && !available) {
                 return new NodeResult("failed", NodeStatus.FAILED, List.of(), Map.of("error", "required section '" + req.section() + "' data not found"), null);
             }
@@ -458,7 +463,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         metadata.put("requiredTypedSubjectTokens", Map.copyOf(requiredTypedSubjectTokens));
         qualifiedContract.ifPresent(contract -> {
             metadata.put("taskContractSha256", contract.sha256());
+            metadata.put("taskContractRef", contract.contractRef());
             metadata.put("taskContractCompileNodeRef", contract.compileNodeRef());
+            metadata.put("taskContractResolutionRef", contract.resolutionRef());
+            metadata.put("taskContractResolutionSha256", contract.resolutionSha256());
+            metadata.put("taskContractApprovalGateRef", contract.approvalGateRef());
         });
         metadata.put("generatedAt", Instant.now().toString());
         metadata.put("sections", sections.stream()
@@ -508,7 +517,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         return filename.endsWith(".md") ? filename.substring(0, filename.length() - 3) : filename;
     }
 
-    private static boolean checkAvailability(SectionRequirement req, TaskContext context, Path workstreamDir) {
+    private static boolean checkAvailability(
+            SectionRequirement req,
+            TaskContext context,
+            Path workstreamDir,
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+    ) {
         return switch (req.section()) {
             case "requirement" -> Files.exists(workstreamDir.resolve("requirement.md"));
             case "input_artifacts" -> !context.instance().inputRefs().isEmpty();
@@ -517,7 +531,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "recent_agent_outputs" -> Files.exists(workstreamDir.resolve("runs"));
             case "git_evidence" -> Files.exists(workstreamDir.resolve("artifacts/git-evidence"));
             case "ledger_pointers" -> Files.exists(workstreamDir.resolve("events.jsonl"));
-            case "task_contract" -> Files.exists(workstreamDir.resolve("artifacts/task-contract.json"));
+            case "task_contract" -> qualifiedContract.isPresent()
+                    || (!AgentRunGovernanceContext.requiresApprovedTaskContract(context)
+                            && TaskContractProjectionVerifier.readLegacyProjection(
+                                    context.workspaceRoot(), context.workstreamId()).projection()
+                                    .map(TaskContractProjectionVerifier.LegacyProjection::contract)
+                                    .isPresent());
             case "working_memory", "review_evidence" -> Files.exists(workstreamDir.resolve("memory/workstream-memory.json"));
             default -> false;
         };
@@ -713,15 +732,18 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 builder.append("- Agent runs directory: ").append(toDisplayRef(workstreamDir.resolve("runs"))).append("\n\n");
             }
             case "task_contract" -> {
-                var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
                 if (qualifiedContract.isPresent()) {
                     ContextPackageSectionRenderer.appendQualifiedTaskContract(builder, qualifiedContract.get());
-                    ContextPackageSectionRenderer.appendContractResolution(builder, workstreamDir.resolve("artifacts/contract-resolution.json"));
-                } else if (Files.exists(contractPath)) {
-                    ContextPackageSectionRenderer.appendTaskContract(builder, contractPath);
-                    ContextPackageSectionRenderer.appendContractResolution(builder, workstreamDir.resolve("artifacts/contract-resolution.json"));
+                    ContextPackageSectionRenderer.appendQualifiedRequirementResolution(builder, qualifiedContract.get());
                 } else {
-                    builder.append("(task-contract.json not found)\n\n");
+                    var legacy = TaskContractProjectionVerifier.readLegacyProjection(
+                            context.workspaceRoot(), context.workstreamId()).projection();
+                    if (legacy.isPresent()) {
+                        ContextPackageSectionRenderer.appendLegacyTaskContract(builder, legacy.get());
+                        ContextPackageSectionRenderer.appendLegacyRequirementResolution(builder, legacy.get());
+                    } else {
+                        builder.append("(task-contract.json not found)\n\n");
+                    }
                 }
             }
             default -> builder.append("(unknown section)\n\n");

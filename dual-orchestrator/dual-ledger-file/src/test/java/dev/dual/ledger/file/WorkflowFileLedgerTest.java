@@ -129,6 +129,12 @@ class WorkflowFileLedgerTest {
         assertEquals("iter-001", nextNode.iterationId());
         assertEquals(List.of("first-output.md"), nextNode.inputRefs());
         assertTrue(Files.exists(paths.gateJson("gate-" + nextNode.nodeInstanceId())));
+        assertEquals(node.nodeInstanceId(), nextNode.result().get("source_node_instance_id"));
+        var gate = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().readValue(
+                paths.gateJson("gate-" + nextNode.nodeInstanceId()).toFile(), GateDocument.class);
+        assertEquals(node.nodeInstanceId(), gate.result().get("source_node_instance_id"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains(
+                "\"source_node_instance_id\":\"" + node.nodeInstanceId() + "\""));
     }
 
     @Test
@@ -167,6 +173,7 @@ class WorkflowFileLedgerTest {
         assertTrue(gateJson.contains("\"human_action\" : \"approved\""));
         assertTrue(gateJson.contains("\"note\" : \"mandatory review confirmed\""));
         assertTrue(gateJson.contains("\"subject_input_refs\" : [ \"first-output.md\" ]"));
+        assertTrue(gateJson.contains("\"source_node_instance_id\" : \"" + first.nodeInstanceId() + "\""));
         assertTrue(gateJson.contains("\"resolvedAt\""));
     }
 

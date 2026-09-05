@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public final class HumanReviewGateHandler implements GateHandler {
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -35,10 +34,11 @@ public final class HumanReviewGateHandler implements GateHandler {
     public NodeResult openOrInspect(GateContext context) throws Exception {
         assertBlockedSourceMatchesReview(context);
         assertChangeScopeViolationSource(context);
+        var contractView = contractView(context);
         var allowedActions = HumanGateActionSemantics.allowedActions(context.definition());
         var packetRef = reviewPacketRef(context, ".md");
         var packetJsonRef = reviewPacketRef(context, ".json");
-        writeReviewPacket(context, allowedActions, packetRef, packetJsonRef);
+        writeReviewPacket(context, allowedActions, packetRef, packetJsonRef, contractView);
 
         return NodeResult.waiting("open", Map.of(
                 "allowed_actions", allowedActions,
@@ -95,7 +95,8 @@ public final class HumanReviewGateHandler implements GateHandler {
             GateContext context,
             List<String> allowedActions,
             String packetRef,
-            String packetJsonRef
+            String packetJsonRef,
+            GateContractView contractView
     ) throws Exception {
         var packetPath = context.workspaceRoot().resolve(packetRef);
         var packetJsonPath = context.workspaceRoot().resolve(packetJsonRef);
@@ -114,8 +115,8 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("inputArtifacts", inputArtifactSummaries(context));
         packet.put("reviewPacketPath", packetRef);
-        packet.put("taskContract", taskContractSummary(context));
-        packet.put("contractResolution", contractResolutionSummary(context));
+        packet.put("taskContract", taskContractSummary(context, contractView));
+        packet.put("requirementResolution", requirementResolutionSummary(context, contractView));
         packet.put("latestAgentDecision", latestAgentDecision(context).toReviewPacketMap());
         packet.put("reviewSubject", latestReviewSubject(context));
         packet.put("gitEvidence", gitEvidenceSummary(context));
@@ -124,10 +125,14 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("createdAt", Instant.now().toString());
 
         objectMapper.writeValue(packetJsonPath.toFile(), packet);
-        Files.writeString(packetPath, renderMarkdown(context, allowedActions), StandardCharsets.UTF_8);
+        Files.writeString(packetPath, renderMarkdown(context, allowedActions, contractView), StandardCharsets.UTF_8);
     }
 
-    private String renderMarkdown(GateContext context, List<String> allowedActions) throws Exception {
+    private String renderMarkdown(
+            GateContext context,
+            List<String> allowedActions,
+            GateContractView contractView
+    ) throws Exception {
         var builder = new StringBuilder();
         builder.append("# Human Review Packet\n\n");
         builder.append("- Workstream: ").append(context.workstreamId()).append("\n");
@@ -149,9 +154,9 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("- Use `approve` only when the current gate is good enough to continue.\n");
         builder.append("- Use `revise` when the agent should address concrete feedback first.\n\n");
 
-        appendReviewSummary(builder, context);
-        appendTaskContract(builder, context);
-        appendContractResolution(builder, context);
+        appendReviewSummary(builder, context, contractView);
+        appendTaskContract(builder, context, contractView);
+        appendRequirementResolution(builder, context, contractView);
         appendLatestAgentDecision(builder, context);
         appendReviewSubject(builder, context);
         appendGitEvidence(builder, context);
@@ -195,9 +200,13 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("\n");
     }
 
-    private void appendReviewSummary(StringBuilder builder, GateContext context) {
+    private void appendReviewSummary(
+            StringBuilder builder,
+            GateContext context,
+            GateContractView contractView
+    ) {
         builder.append("## Review Summary\n\n");
-        var contract = taskContractSummary(context);
+        var contract = taskContractSummary(context, contractView);
         var decision = latestAgentDecision(context);
         appendField(builder, "Objective", text(contract.get("objective")));
         appendField(builder, "Stage Outcome", decision.stageOutcome());
@@ -222,8 +231,12 @@ public final class HumanReviewGateHandler implements GateHandler {
         return Map.copyOf(result);
     }
 
-    private void appendTaskContract(StringBuilder builder, GateContext context) {
-        var contract = taskContractSummary(context);
+    private void appendTaskContract(
+            StringBuilder builder,
+            GateContext context,
+            GateContractView contractView
+    ) {
+        var contract = taskContractSummary(context, contractView);
         if (contract.isEmpty()) {
             return;
         }
@@ -238,12 +251,16 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("\n");
     }
 
-    private void appendContractResolution(StringBuilder builder, GateContext context) {
-        var resolution = contractResolutionSummary(context);
+    private void appendRequirementResolution(
+            StringBuilder builder,
+            GateContext context,
+            GateContractView contractView
+    ) {
+        var resolution = requirementResolutionSummary(context, contractView);
         if (resolution.isEmpty()) {
             return;
         }
-        builder.append("## Contract Resolution\n\n");
+        builder.append("## Requirement Resolution\n\n");
         appendField(builder, "Decision", text(resolution.get("decision")));
         appendField(builder, "Approved By", text(resolution.get("approvedBy")));
         appendField(builder, "Gate Ref", text(resolution.get("gateRef")));
@@ -302,14 +319,12 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("\n");
     }
 
-    private Map<String, Object> taskContractSummary(GateContext context) {
-        var path = workstreamDir(context).resolve("artifacts/task-contract.json");
-        var contract = readTaskContract(path);
-        if (contract.isEmpty()) {
+    private Map<String, Object> taskContractSummary(GateContext context, GateContractView contractView) {
+        if (contractView.contract() == null) {
             return Map.of();
         }
         var summary = new LinkedHashMap<String, Object>();
-        var document = contract.get();
+        var document = contractView.contract();
         summary.put("objective", document.objective());
         summary.put("status", text(document.status()));
         summary.put("includedScope", document.scope() == null
@@ -323,41 +338,91 @@ public final class HumanReviewGateHandler implements GateHandler {
         summary.put("acceptanceCriteria", document.acceptanceCriteria());
         summary.put("testRequirements", document.testRequirements());
         summary.put("constraints", document.constraints());
-        summary.put("path", displayRef(context.workspaceRoot(), path));
+        summary.put("path", contractView.contractRef());
+        summary.put("authority", contractView.authority());
+        if (contractView.qualified()) {
+            summary.put("sha256", contractView.contractSha256());
+        }
         return summary;
     }
 
-    private Optional<TaskContract> readTaskContract(Path path) {
-        if (!Files.isRegularFile(path)) {
-            return Optional.empty();
+    private Map<String, Object> requirementResolutionSummary(
+            GateContext context,
+            GateContractView contractView
+    ) {
+        if (contractView.resolution().isEmpty()) {
+            return Map.of();
         }
-        try {
-            return Optional.of(objectMapper.readValue(path.toFile(), TaskContract.class));
-        } catch (Exception e) {
-            return Optional.empty();
+        var tree = contractView.resolution();
+        var summary = new LinkedHashMap<String, Object>();
+        summary.put("decision", text(tree.get("decision")));
+        summary.put("approvedBy", text(tree.get("approved_by")));
+        summary.put("gateRef", text(tree.get("gate_ref")));
+        summary.put("resolvedQuestions", resolvedQuestionTexts(tree.get("resolved_questions")));
+        summary.put("assumptions", stringList(tree.get("assumptions")));
+        summary.put("acceptedRisks", stringList(tree.get("accepted_risks")));
+        summary.put("path", contractView.resolutionRef());
+        summary.put("authority", contractView.qualified() ? "qualified_approval" : "requirement_history");
+        if (contractView.qualified()) {
+            summary.put("sha256", contractView.resolutionSha256());
         }
+        return summary;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> contractResolutionSummary(GateContext context) {
-        var path = workstreamDir(context).resolve("artifacts/contract-resolution.json");
-        if (!Files.isRegularFile(path)) {
-            return Map.of();
+    private GateContractView contractView(GateContext context) {
+        if ("contract".equals(gatePurpose(context))) {
+            return stableContractView(context, "unapproved_candidate");
         }
-        try {
-            var tree = objectMapper.readValue(path.toFile(), Map.class);
-            var summary = new LinkedHashMap<String, Object>();
-            summary.put("decision", text(tree.get("decision")));
-            summary.put("approvedBy", text(tree.get("approved_by")));
-            summary.put("gateRef", text(tree.get("gate_ref")));
-            summary.put("resolvedQuestions", resolvedQuestionTexts(tree.get("resolved_questions")));
-            summary.put("assumptions", stringList(tree.get("assumptions")));
-            summary.put("acceptedRisks", stringList(tree.get("accepted_risks")));
-            summary.put("path", displayRef(context.workspaceRoot(), path));
-            return summary;
-        } catch (Exception ignored) {
-            return Map.of();
+        if (!requiresApprovedTaskContract(context)) {
+            return stableContractView(context, "legacy_unqualified_projection");
         }
+        var resolved = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+        if (resolved.failure() != null || resolved.qualified().isEmpty()) {
+            var failure = resolved.failure() == null
+                    ? TaskContractProjectionVerifier.Failure.of(
+                            "APPROVAL_BINDING_MISSING", "human gate requires an approved task contract")
+                    : resolved.failure();
+            throw new IllegalStateException(TaskContractProjectionVerifier.FAILURE_OUTCOME
+                    + ": " + failure.reason() + ": " + failure.message());
+        }
+        var qualified = resolved.qualified().orElseThrow();
+        return new GateContractView(
+                qualified.contract(),
+                qualified.resolutionDocument(),
+                qualified.contractRef(),
+                qualified.resolutionRef(),
+                qualified.sha256(),
+                qualified.resolutionSha256(),
+                true,
+                "qualified_approval");
+    }
+
+    private GateContractView stableContractView(GateContext context, String authority) {
+        var legacy = TaskContractProjectionVerifier.readLegacyProjection(
+                context.workspaceRoot(), context.workstreamId()).projection();
+        if (legacy.isEmpty()) {
+            return new GateContractView(null, Map.of(), "", "", "", "", false, authority);
+        }
+        return new GateContractView(
+                legacy.get().contract(),
+                legacy.get().resolutionDocument(),
+                legacy.get().contractRef(),
+                legacy.get().resolutionRef(),
+                "",
+                "",
+                false,
+                authority);
+    }
+
+    private boolean requiresApprovedTaskContract(GateContext context) {
+        var configured = context.definition().config().get("requires_approved_task_contract");
+        if (configured == null) {
+            return false;
+        }
+        if (!(configured instanceof Boolean required)) {
+            throw new IllegalArgumentException("requires_approved_task_contract must be a boolean");
+        }
+        return required;
     }
 
     private List<String> resolvedQuestionTexts(Object value) {
@@ -772,5 +837,20 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     private String text(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
+    }
+
+    private record GateContractView(
+            TaskContract contract,
+            Map<String, Object> resolution,
+            String contractRef,
+            String resolutionRef,
+            String contractSha256,
+            String resolutionSha256,
+            boolean qualified,
+            String authority
+    ) {
+        private static GateContractView empty() {
+            return new GateContractView(null, Map.of(), "", "", "", "", false, "unavailable");
+        }
     }
 }

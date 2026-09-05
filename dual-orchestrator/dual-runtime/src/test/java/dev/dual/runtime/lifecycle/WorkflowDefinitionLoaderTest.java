@@ -281,4 +281,79 @@ class WorkflowDefinitionLoaderTest {
 
         assertTrue(error.getMessage().contains("entry node does not exist"));
     }
+
+    @Test
+    void rejectsContractWorkflowWhoseApprovedSuccessorIsReachableBeforeApproval() throws Exception {
+        var path = tempDir.resolve("overlap.json");
+        Files.writeString(path, contractWorkflow("""
+                {"from":"entry","on":"bypass","to":"post"},
+                {"from":"entry","on":"completed","to":"contract-gate"},
+                {"from":"contract-gate","on":"approved","to":"post"}
+                """, "true"));
+
+        var error = assertThrows(Exception.class, () -> new WorkflowDefinitionLoader().load(path));
+
+        assertTrue(error.getMessage().contains("overlaps"), error.getMessage());
+    }
+
+    @Test
+    void rejectsDeeperPostContractNodeThatIsAlsoReachableBeforeApproval() throws Exception {
+        var path = tempDir.resolve("deep-overlap.json");
+        Files.writeString(path, """
+                {
+                  "workflowId":"contract-boundary-test","version":1,"entryNodeId":"entry",
+                  "nodes":[
+                    {"id":"entry","kind":"TASK","handlerType":"noop.task","config":{}},
+                    {"id":"contract-gate","kind":"GATE","handlerType":"human.review",
+                     "config":{"gate_purpose":"contract","allowed_actions":["approve"]}},
+                    {"id":"post-one","kind":"TASK","handlerType":"noop.task",
+                     "config":{"requires_approved_task_contract":true}},
+                    {"id":"post-two","kind":"TASK","handlerType":"noop.task",
+                     "config":{"requires_approved_task_contract":true}}
+                  ],
+                  "edges":[
+                    {"from":"entry","on":"bypass","to":"post-two"},
+                    {"from":"entry","on":"completed","to":"contract-gate"},
+                    {"from":"contract-gate","on":"approved","to":"post-one"},
+                    {"from":"post-one","on":"completed","to":"post-two"}
+                  ]
+                }
+                """);
+
+        var error = assertThrows(Exception.class, () -> new WorkflowDefinitionLoader().load(path));
+
+        assertTrue(error.getMessage().contains("overlaps"), error.getMessage());
+        assertTrue(error.getMessage().contains("post-two"), error.getMessage());
+    }
+
+    @Test
+    void rejectsMissingOrNonBooleanPostContractQualificationDeclaration() throws Exception {
+        for (var value : java.util.List.of("null", "\"true\"")) {
+            var path = tempDir.resolve("invalid-qualification-" + value.hashCode() + ".json");
+            Files.writeString(path, contractWorkflow("""
+                    {"from":"entry","on":"completed","to":"contract-gate"},
+                    {"from":"contract-gate","on":"approved","to":"post"}
+                    """, value));
+
+            assertThrows(Exception.class, () -> new WorkflowDefinitionLoader().load(path));
+        }
+    }
+
+    private static String contractWorkflow(String edges, String qualificationValue) {
+        var postConfig = "null".equals(qualificationValue)
+                ? "{}"
+                : "{\"requires_approved_task_contract\":" + qualificationValue + "}";
+        return """
+                {
+                  "workflowId":"contract-boundary-test","version":1,"entryNodeId":"entry",
+                  "nodes":[
+                    {"id":"entry","kind":"TASK","handlerType":"noop.task","config":{}},
+                    {"id":"contract-gate","kind":"GATE","handlerType":"human.review",
+                     "config":{"gate_purpose":"contract","allowed_actions":["approve"]}},
+                    {"id":"post","kind":"TASK","handlerType":"noop.task","config":%s}
+                  ],
+                  "edges":[%s]
+                }
+                """.formatted(postConfig, edges);
+    }
 }
