@@ -2715,3 +2715,30 @@ P2 已关闭：原 1272 是 CLI dependency reactor，未包含 server 的 65 项
 `1337/0/0/0`。workflow validation 补齐 experiment，共四个通过。结果文档同步修正统计与验证范围。
 当前 active step：选择性提交 E1 checkpoint；随后起草 E2 最小实施计划并独立评审。整体 authority continuity 与 semantic revision convergence
 仍需 E2/E3/E4，E1 PASS 只证明 contract qualification；PNBV 保持停止，不消耗 provider。旧 S2 recovery Gate 继续排除。
+
+E1 已按独立评审范围提交为 `306a555d`。用户授权继续 E2-E4，并要求设计和实施前由实现者主动评估通用性。
+E2 计划已写入 `post-contract-authority-continuity-e2-typed-design-scope-implementation-plan-20260905.zh-CN.md`，包含设计前通用性评估、
+两类无关业务的替换/反证测试、registered design stage 的适用限制，以及 E3/E4 的事实接口和后续评估前置。
+当前 active step：E2 计划独立架构评审。生产实现前再次 sweep result/sidecar/context 消费链并确认通用性；实施后自行验证，再交独立 diff review。
+E2 只处理 typed design scope；E3 保持 revision/approval owner，E4 保持 downstream subtraction/parity。整体闭环仍需全链测试与自然 real-case。
+
+E2 架构评审 PASS（P0=0/P1=0/P2=3）后，实现者再次独立核查通用性，结论为：跨业务规则成立，适用范围为仓库文件交付与现有注册 design stage；
+不外推任意 custom node、非文件副作用或业务语义正确性。计划已吸收 EvidenceManifest default 分支、memory 字段 reader 测试、E3 human gate
+planned_files 投影归属，并补获 architecture context `findFirst` 的候选歧义风险，要求唯一 occurrence、歧义拒绝。
+当前 active step：按更新计划进入 E2 failing tests 与实施；实施后必须自行提供跨业务替换、真实 reader 保真和突变反证，再交独立 diff review。
+READY 只表示设计可实施，不能替代实现通用性或整体 E1-E4 收敛证明。
+
+E2 实现与自身通用性验证已完成，结果见 `post-contract-authority-continuity-e2-typed-design-scope-result-20260905.zh-CN.md`。
+typed design 在 sidecar 发布前消费 E1 唯一 qualification；architecture context 只接受唯一有效 routed design occurrence，完整投影 planned files。
+双业务与一致重命名测试、真实 runtime 零 reviewer 调用反例/合法完成正例、manifest/memory reader 保真均通过；移除范围守卫导致 5 项失败，
+删除 planned-files 投影导致 2 项失败，均已恢复。全 reactor（含 server）155 份 XML = `1348/0/0/0`；fresh package 与四 workflow validation
+通过；diff-check clean。没有调用 provider、恢复 real-case 或提交代码。
+
+自身结论：`TYPED DESIGN SCOPE ENFORCED / REAL-CASE NOT PROVEN`；业务无关规则成立，适用面仍为仓库文件交付与既有注册 design stage，
+不冒充业务语义正确或任意 custom node 支持。E3 revision obligations/approved version 与 E4 downstream subtraction 尚未完成。
+当前 active step：E2 独立代码级 diff review；通过后选择性提交，再起草 E3 并先评估通用性。旧 S2 recovery Gate 保持排除。
+
+E2 独立 diff review PASS（P0=0/P1=0/P2=2），允许选择性提交；独立 full reactor `1348/0/0/0`、四 workflow validation 与 diff-check
+复现一致。报告的 TypedDesignScopeTest 数量按源码勘误为 8（非 9），不影响总数。E3 必须同时交付 human gate 的 planned_files/ref/SHA
+与 obligations/responses 展示；projector 的非空 operation 前置保持由 validator 唯一守住，不新增 fallback。
+当前 active step：选择性提交 E2，随后进入 E3 计划与实现前通用性判断；不恢复 real-case，不把 E2 PASS 当作整体修订收敛。

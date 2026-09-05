@@ -59,12 +59,12 @@ class ArtifactContractValidatorTest {
     @Test
     void repeatedReusableReadsDoNotInvalidateAnOtherwiseValidArtifact() throws Exception {
         var outputRef = write(".agent/workstreams/ws-1/runs/run-1/outputs/design.json",
-                envelope("design.claude_design", reviewResult()));
+                envelope("design.codex_arch_review", reviewResult()));
         var runRef = ".agent/workstreams/ws-1/runs/run-1/run.json";
         write(runRef, JSON.writeValueAsString(Map.of(
                 "toolUsage", Map.of("readFiles", List.of("REQUIREMENT.md", "VERIFICATION-GATE.md")))));
         write(".agent/workstreams/ws-1/memory/read-reuse-contract.json", JSON.writeValueAsString(Map.of(
-                "targetNodeDefinitionId", "design.claude_design",
+                "targetNodeDefinitionId", "design.codex_arch_review",
                 "reusableReadFiles", List.of(
                         Map.of("path", "REQUIREMENT.md"),
                         Map.of("path", "VERIFICATION-GATE.md")),
@@ -72,7 +72,7 @@ class ArtifactContractValidatorTest {
                 "allowedRereadFiles", List.of())));
 
         var validated = validator.validate(
-                tempDir, "ws-1", "node-design", node("design.claude_design"),
+                tempDir, "ws-1", "node-design", node("design.codex_arch_review"),
                 NodeResult.completed("completed", List.of(outputRef), Map.of(
                         "run_id", "run-1",
                         "run_metadata", runRef)));

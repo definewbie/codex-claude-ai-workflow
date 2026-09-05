@@ -919,12 +919,18 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (!requiresArchitectureReviewSubject(context)) {
             return Optional.empty();
         }
-        return AgentEvidenceIndex.fromRefs(
+        var candidates = AgentEvidenceIndex.fromRefs(
                         context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
                 .recent(Math.max(1, context.instance().inputRefs().size()))
                 .stream()
                 .filter(entry -> "design.claude_design".equals(entry.document().nodeId()))
-                .findFirst();
+                .toList();
+        if (candidates.size() != 1
+                || !"design_result".equals(candidates.getFirst().document().sourceArtifactType())
+                || !candidates.getFirst().document().hasRequiredTypedPayload()) {
+            return Optional.empty();
+        }
+        return Optional.of(candidates.getFirst());
     }
 
     private static boolean requiresArchitectureReviewSubject(TaskContext context) {

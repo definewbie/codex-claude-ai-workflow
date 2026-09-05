@@ -143,6 +143,18 @@ public final class AgentResultEnvelopeValidator {
                 validateReviewObligations(nodeId, output, errors);
                 validateNoVerificationRemediation(output.failure(), errors);
             }
+            case AgentResultEnvelope.DesignResult design -> {
+                requiredText(design.lifecycleStatus(), "result.lifecycle_status", errors);
+                requiredList(design.checks(), "result.checks", false, errors);
+                requiredList(design.evidence(), "result.evidence", false, errors);
+                requiredList(design.missingEvidence(), "result.missing_evidence", false, errors);
+                requiredList(design.mustFix(), "result.must_fix", false, errors);
+                requiredList(design.openRisks(), "result.open_risks", false, errors);
+                requiredText(design.verificationSummary(), "result.verification_summary", errors);
+                for (var error : DesignScopeValidator.shapeErrors(design.design())) {
+                    errors.reject(error);
+                }
+            }
             case AgentResultEnvelope.PlanResult plan -> {
                 validateEvidencePayload(
                         plan.lifecycleStatus(), plan.checks(), plan.evidence(), plan.missingEvidence(),

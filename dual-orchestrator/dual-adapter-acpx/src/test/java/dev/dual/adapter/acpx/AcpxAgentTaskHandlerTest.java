@@ -240,6 +240,7 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes() throws Exception {
+        DesignContractFixture.approve(tempDir, "ws-correction");
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Document the existing transition validation.\n");
@@ -1258,6 +1259,7 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact() throws Exception {
+        DesignContractFixture.approve(tempDir, "ws-test");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1325,6 +1327,7 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings() throws Exception {
+        DesignContractFixture.approve(tempDir, "ws-non-zero-correction");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-non-zero-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1379,6 +1382,7 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings() throws Exception {
+        DesignContractFixture.approve(tempDir, "ws-root-closure-warning");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-root-closure-warning");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");

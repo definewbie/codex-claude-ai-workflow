@@ -4,6 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.runtime.handler.AgentOutputContractSidecar;
+import dev.dual.runtime.handler.AgentResultPromptContract;
+import dev.dual.runtime.handler.ArtifactContractValidator;
+import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.NodeStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -22,6 +28,28 @@ class WorkstreamMemoryUpdaterTest {
     Path tempDir;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    @Test
+    void typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope() throws Exception {
+        DesignContractFixture.approve(tempDir, "ws-design");
+        var output = tempDir.resolve(".agent/workstreams/ws-design/runs/run-1/outputs/design.json");
+        Files.createDirectories(output.getParent());
+        var prompt = AgentResultPromptContract.render("ws-design", "run-1", "design.claude_design",
+                "READY_FOR_ARCH_REVIEW", java.util.Set.of("READY_FOR_ARCH_REVIEW"));
+        Files.writeString(output, prompt.substring(prompt.indexOf('{')).replace("one short sentence", "Document conversion design"));
+        var validated = new ArtifactContractValidator().validate(tempDir, "ws-design", "node-design",
+                new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of()),
+                NodeResult.completed("completed", List.of(tempDir.relativize(output).toString()), Map.of("run_id", "run-1")));
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+        var updater = new WorkstreamMemoryUpdater();
+        updater.updateMemory(tempDir, "ws-design", "run-1", "design.claude_design",
+                "design", "claude", output, AcpxToolUsage.empty(), null);
+        var memory = objectMapper.readTree(updater.memoryPath(tempDir, "ws-design").toFile());
+        assertTrue(memory.toString().contains("READY_FOR_ARCH_REVIEW"));
+        assertTrue(memory.toString().contains("Document conversion design"));
+        assertFalse(memory.toString().contains("planned_files"));
+        assertFalse(memory.toString().contains("repo/relative/new.ext"));
+    }
 
     @Test
     void updatesReadFilesFromTypedToolUsageOnly() throws Exception {

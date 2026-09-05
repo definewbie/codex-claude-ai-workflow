@@ -100,6 +100,7 @@ final class EvidenceManifest {
                         "task_contract",
                         "contract_resolution",
                         "agent_output_contract",
+                        "design_result",
                         "self_test_report",
                         "acceptance_review",
                         "git_evidence",
@@ -173,6 +174,7 @@ final class EvidenceManifest {
                 workspaceRoot, workstreamId, routedRefs, objectMapper).recent(Integer.MAX_VALUE)) {
             var document = entry.document();
             var type = switch (document.sourceArtifactType()) {
+                case "design_result" -> "design_result";
                 case "self_test_report" -> "self_test_report";
                 case "acceptance_review" -> "acceptance_review";
                 case "stage_handoff" -> "stage_handoff";

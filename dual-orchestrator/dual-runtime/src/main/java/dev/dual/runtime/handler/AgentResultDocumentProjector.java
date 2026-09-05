@@ -70,6 +70,18 @@ final class AgentResultDocumentProjector {
                         .toList());
                 document.put("reread_reasons", output.rereadReasons().stream().map(this::rereadReason).toList());
             }
+            case AgentResultEnvelope.DesignResult design -> {
+                document.put("lifecycle_status", design.lifecycleStatus());
+                document.put("checks", design.checks());
+                document.put("evidence", design.evidence());
+                document.put("missing_evidence", design.missingEvidence());
+                document.put("must_fix", design.mustFix());
+                document.put("open_risks", design.openRisks());
+                document.put("verification_summary", design.verificationSummary());
+                document.put("design", Map.of("planned_files", design.design().plannedFiles().stream()
+                        .map(file -> Map.of("path", file.path(), "operation", file.operation().name(),
+                                "responsibility", file.responsibility())).toList()));
+            }
             case AgentResultEnvelope.PlanResult plan -> {
                 evidenceFields(
                         document, plan.lifecycleStatus(), plan.blocking(), plan.checks(), plan.evidence(),

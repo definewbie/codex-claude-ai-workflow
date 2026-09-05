@@ -51,7 +51,8 @@ public record AgentOutputContractDocument(
         TaskContractProposal taskContractProposal,
         RepositoryFactBinding.Reference repositoryFactBinding,
         ProposalDerivation proposalDerivation,
-        PlanArtifactDocument planArtifact
+        PlanArtifactDocument planArtifact,
+        AgentResultEnvelope.Design design
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -97,7 +98,8 @@ public record AgentOutputContractDocument(
                 taskContractProposal(objectMap(document.get("task_contract_proposal"))),
                 RepositoryFactBinding.Reference.fromMap(objectMap(document.get("repository_fact_binding"))),
                 ProposalDerivation.from(objectMap(document.get("proposal_derivation"))),
-                planArtifact(objectMap(document.get("plan_artifact")))
+                planArtifact(objectMap(document.get("plan_artifact"))),
+                design(objectMap(document.get("design")))
         );
     }
 
@@ -181,6 +183,9 @@ public record AgentOutputContractDocument(
     }
 
     public boolean hasRequiredTypedPayload() {
+        if ("design_result".equals(sourceArtifactType)) {
+            return DesignScopeValidator.shapeErrors(design).isEmpty();
+        }
         if (!"plan_result".equals(sourceArtifactType)) {
             return true;
         }
@@ -192,6 +197,26 @@ public record AgentOutputContractDocument(
 
     private static PlanArtifactDocument planArtifact(Map<String, Object> document) {
         return document.isEmpty() ? null : PlanArtifactDocument.from(document);
+    }
+
+    private static AgentResultEnvelope.Design design(Map<String, Object> document) {
+        if (!(document.get("planned_files") instanceof List<?> files)) {
+            return null;
+        }
+        var planned = new ArrayList<AgentResultEnvelope.PlannedFile>();
+        for (var value : files) {
+            var file = objectMap(value);
+            TaskContract.ScopeOperation operation = null;
+            try {
+                operation = TaskContract.ScopeOperation.valueOf(text(file.get("operation")));
+            } catch (IllegalArgumentException ignored) {
+                // Invalid operations remain invalid, never inferred from the path.
+            }
+            planned.add(new AgentResultEnvelope.PlannedFile(
+                    file.get("path") instanceof String path ? path : null,
+                    operation, file.get("responsibility") instanceof String responsibility ? responsibility : null));
+        }
+        return new AgentResultEnvelope.Design(List.copyOf(planned));
     }
 
     private static TaskContractProposal taskContractProposal(Map<String, Object> document) {

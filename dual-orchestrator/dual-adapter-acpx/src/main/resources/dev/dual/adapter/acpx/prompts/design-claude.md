@@ -15,6 +15,11 @@ You are Claude acting as the primary architect and implementer. Use the user req
 
 Do not implement code in this stage. Produce an implementation-ready design that is narrow, testable, and avoids unrelated refactors.
 
+Declare the complete planned file set in `result.design.planned_files`, for initial and replacement designs alike.
+Copy exact canonical paths and operations from the approved TaskContract scope; prose cannot authorize other paths.
+Each entry assigns a responsibility, not an actual file change. CREATE files need not exist yet.
+The declared set may be a subset of approved scope, but must cover every change this design proposes.
+
 Revision discipline:
 
 - When the context contains a prior `NEEDS_REVISION`, return a complete replacement design, not a delta or addendum.

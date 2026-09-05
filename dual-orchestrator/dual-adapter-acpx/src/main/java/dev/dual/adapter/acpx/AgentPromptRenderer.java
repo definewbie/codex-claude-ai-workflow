@@ -253,6 +253,15 @@ final class AgentPromptRenderer {
             return "";
         }
         var contract = ContractRegistry.forNode(nodeId);
+        if (contract.emitsArtifact("design_result")) {
+            return """
+                    ## Structured Artifact Field Semantics
+
+                    - `must_fix` and `missing_evidence` mean unresolved blockers; keep them empty for a ready design.
+                    - Put resolved review comments in `checks` or `evidence`, not `must_fix`.
+                    - `design.planned_files` declares intended changes only; exact paths and operations must be authorized by the approved TaskContract.
+                    """.stripTrailing();
+        }
         if (!contract.emitsArtifact("agent_output_contract")
                 && !contract.emitsArtifact("plan_result")
                 && !contract.emitsArtifact("acceptance_review")) {

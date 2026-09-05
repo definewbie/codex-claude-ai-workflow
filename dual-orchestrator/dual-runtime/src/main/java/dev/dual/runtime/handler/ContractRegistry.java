@@ -26,7 +26,7 @@ public final class ContractRegistry {
             Set.of("decision", "summary"),
             Set.of("READY_FOR_ARCH_REVIEW"),
             Set.of(),
-            Set.of("agent_output_contract")
+            Set.of("design_result")
     );
     private static final NodeOutputContract DESIGN_ARCH_REVIEW = new NodeOutputContract(
             "design.codex_arch_review",

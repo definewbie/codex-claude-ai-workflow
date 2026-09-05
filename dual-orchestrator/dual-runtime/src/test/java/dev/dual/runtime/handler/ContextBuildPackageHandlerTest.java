@@ -703,6 +703,11 @@ class ContextBuildPackageHandlerTest {
                 "must_fix", List.of(),
                 "open_risks", List.of("Stale PENDING must be recoverable"),
                 "verification_summary", "Lifecycle matrix reviewed"));
+        var typed = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(sidecar.toFile());
+        typed.put("source_artifact_type", "design_result");
+        typed.putObject("design").putArray("planned_files").addObject()
+                .put("path", "src/design.ext").put("operation", "CREATE").put("responsibility", "Lifecycle ownership");
+        objectMapper.writeValue(sidecar.toFile(), typed);
         publishSidecar(sidecar);
 
         var result = handler.execute(ctx("architecture_review", List.of(
@@ -712,6 +717,7 @@ class ContextBuildPackageHandlerTest {
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("## Required Architecture Review Subject"));
+        assertTrue(markdown.contains("CREATE `src/design.ext`: Lifecycle ownership"));
         assertTrue(markdown.contains("CONCURRENCY_BOUNDARY"));
         assertTrue(markdown.contains("CRASH_RESTART_BOUNDARY"));
         assertTrue(markdown.contains("ROLLBACK_CONFLICT_EVIDENCE"));

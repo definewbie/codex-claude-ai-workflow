@@ -13,6 +13,18 @@ class AgentResultPromptContractTest {
     private final AgentResultEnvelopeValidator validator = new AgentResultEnvelopeValidator();
 
     @Test
+    void designDeclaresPlannedFilesInsteadOfGenericOutput() {
+        var prompt = AgentResultPromptContract.render(
+                "ws-1", "run-1", "design.claude_design",
+                "READY_FOR_ARCH_REVIEW", Set.of("READY_FOR_ARCH_REVIEW"));
+        var parsed = parser.parse(prompt.substring(prompt.indexOf('{')));
+        assertTrue(parsed.valid(), parsed.message());
+        assertTrue("design_result".equals(parsed.envelope().result().artifactType()));
+        assertTrue(prompt.contains("planned_files"));
+        assertFalse(prompt.contains("revision_responses"));
+    }
+
+    @Test
     void everyAgentNodePromptExampleIsStrictAndMatchesItsNodeContract() {
         var decisions = Map.ofEntries(
                 Map.entry("intake.claude_brainstorm", "READY_FOR_PRODUCT_REVIEW"),
@@ -96,7 +108,6 @@ class AgentResultPromptContractTest {
     @Test
     void nonIntakeAgentOutputPromptsKeepReviewObligationsEmpty() {
         var decisions = Map.of(
-                "design.claude_design", "READY_FOR_ARCH_REVIEW",
                 "design.codex_arch_review", "READY_FOR_ARCH_REVIEW",
                 "plan.codex_plan_review", "READY_TO_IMPLEMENT",
                 "implement.claude_implement", "IMPLEMENTED"

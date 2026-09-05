@@ -314,6 +314,12 @@ final class ContextPackageSectionRenderer {
     ) {
         builder.append("## Required Architecture Review Subject\n\n");
         appendAgentContractFields(builder, subject.document(), subject.path(), true);
+        builder.append("### Declared Planned Files\n\n");
+        for (var file : subject.document().design().plannedFiles()) {
+            builder.append("- ").append(file.operation()).append(" `").append(file.path())
+                    .append("`: ").append(file.responsibility()).append('\n');
+        }
+        builder.append('\n');
     }
 
     static void appendInputArtifacts(StringBuilder builder, TaskHandler.TaskContext context, int maxSnippetChars) throws IOException {

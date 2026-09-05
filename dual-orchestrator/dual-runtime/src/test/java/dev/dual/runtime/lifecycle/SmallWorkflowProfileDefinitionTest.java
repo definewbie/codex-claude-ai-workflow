@@ -95,11 +95,11 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        assertEquals("e6a468cf6930af320b02ae35f4851a50a2c198f3260d6b6c94b4cf997e5dc0ca",
+        assertEquals("97a070b3fa7f79431d1d1f73eb8f83121fad5d320816af82bb83b1d1adfc08fc",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("b7a26003a5d32762b30ebdf609860f0aaa5b93c99ab03953a63e88aa9d7023b0",
+        assertEquals("6e11c36060d889f9f54a727cde4a8dbb55ea443dcf129e3b1673824f974cbaf4",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("6c4fb9a0c6ddac83569654937e765fbaaad906d68f35407269ec4a7cd5a3f540",
+        assertEquals("0dc87fab245e10eba90e2c5cc3dc8730ff13407406ae8b9c6ca5b928d6023a43",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 
@@ -121,6 +121,24 @@ class SmallWorkflowProfileDefinitionTest {
                             "source_artifact_type", "self_test_report",
                             "decision", "SELF_TEST_COMPLETE"),
                     context.config().get("required_agent_evidence"), definition.workflowId());
+        }
+    }
+
+    @Test
+    void allDesignProfilesDeclareTypedDesignAndTheSameReviewConsumer() throws Exception {
+        for (var definition : List.of(
+                new LifecycleWorkflowDefinitionFactory().forVariant("full"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("contract"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery"), loadExperiment())) {
+            var producer = definition.node("design.claude_design");
+            assertEquals("design_result", producer.config().get("expected_artifact"));
+            assertEquals(true, producer.config().get("requires_approved_task_contract"));
+            assertEquals(java.util.Set.of("design_result"),
+                    dev.dual.runtime.handler.ContractRegistry.forNode(producer.id()).outputArtifactTypes());
+            var consumer = definition.node("context.design_codex_arch_review");
+            assertEquals("architecture_review", consumer.config().get("profile"));
+            assertEquals("design.codex_arch_review", consumer.config().get("target_node"));
+            assertEquals("context.design_codex_arch_review", definition.edgesFrom(producer.id()).getFirst().to());
         }
     }
 

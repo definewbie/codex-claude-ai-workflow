@@ -384,8 +384,9 @@ class AcpxAgentResultAcquirerTest {
         var writtenCorrectionPrompt = Files.readString(requests.correction().promptPath());
         assertTrue(writtenCorrectionPrompt
                 .contains("Return exactly one JSON object as the final assistant message."));
-        assertTrue(writtenCorrectionPrompt.contains(
-                "Allowed `result.failure.verification_remediation` values for this node: [NONE]"));
+        assertTrue(writtenCorrectionPrompt.contains("design_result"));
+        assertTrue(writtenCorrectionPrompt.contains("planned_files"));
+        assertFalse(writtenCorrectionPrompt.contains("verification_remediation"));
         assertTrue(writtenCorrectionPrompt.contains("REVISION_MODE_SENTINEL base_sha256=" + "a".repeat(64)),
                 "bounded correction must reuse the exact contract selected before initial dispatch");
     }

@@ -186,7 +186,7 @@ class ContractRegistryTest {
         var expected = Map.of(
                 "intake.claude_brainstorm", "task_contract_proposal",
                 "intake.codex_product_review", "agent_output_contract",
-                "design.claude_design", "agent_output_contract",
+                "design.claude_design", "design_result",
                 "design.codex_arch_review", "agent_output_contract",
                 "plan.claude_plan", "plan_result",
                 "plan.codex_plan_review", "agent_output_contract",

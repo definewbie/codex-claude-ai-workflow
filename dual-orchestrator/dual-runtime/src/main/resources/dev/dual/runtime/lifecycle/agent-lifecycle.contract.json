@@ -115,7 +115,7 @@
         "session": "claude-main",
         "permission_profile": "observe",
         "prompt_template": "design-claude",
-        "expected_artifact": "agent_output_contract",
+        "expected_artifact": "design_result",
         "artifact_compiler": "agent_output_contract_compiler",
         "allowed_stage_outcomes": [
           "READY",

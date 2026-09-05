@@ -109,6 +109,14 @@ public final class ArtifactContractValidator {
                 lastSourceRef = ref;
                 break;
             }
+            if (parsed.envelope().result() instanceof AgentResultEnvelope.DesignResult design) {
+                var errors = DesignScopeValidator.validate(root, workstreamId, design.design());
+                if (!errors.isEmpty()) {
+                    return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
+                            parsed.envelope(), ContractViolation.of("DESIGN_SCOPE_INVALID",
+                                    "Design is not within the approved contract", Map.of("errors", errors)));
+                }
+            }
             var repositoryFactBinding = resolveRepositoryFactBinding(
                     root, workstreamId, nodeInstanceId, expectedRunId, result);
             var proposalResolution = resolveProposalCandidate(

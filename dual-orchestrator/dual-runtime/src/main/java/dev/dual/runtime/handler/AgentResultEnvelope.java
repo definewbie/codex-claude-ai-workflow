@@ -2,6 +2,7 @@ package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import dev.dual.core.contract.TaskContract;
 import java.util.List;
 
 /** Strict, lineage-bound workflow result emitted as the final ACP assistant message. */
@@ -22,6 +23,7 @@ public record AgentResultEnvelope(
             @JsonSubTypes.Type(value = TaskContractProposalResult.class, name = "task_contract_proposal"),
             @JsonSubTypes.Type(value = TaskContractRevisionPatchResult.class, name = "task_contract_revision_patch"),
             @JsonSubTypes.Type(value = AgentOutputResult.class, name = "agent_output_contract"),
+            @JsonSubTypes.Type(value = DesignResult.class, name = "design_result"),
             @JsonSubTypes.Type(value = PlanResult.class, name = "plan_result"),
             @JsonSubTypes.Type(value = SelfTestResult.class, name = "self_test_report"),
             @JsonSubTypes.Type(value = AcceptanceReviewResult.class, name = "acceptance_review"),
@@ -31,6 +33,7 @@ public record AgentResultEnvelope(
             TaskContractProposalResult,
             TaskContractRevisionPatchResult,
             AgentOutputResult,
+            DesignResult,
             PlanResult,
             SelfTestResult,
             AcceptanceReviewResult,
@@ -40,6 +43,27 @@ public record AgentResultEnvelope(
         String decision();
 
         String summary();
+    }
+
+    public record DesignResult(
+            String artifactType,
+            String decision,
+            String summary,
+            String lifecycleStatus,
+            List<String> checks,
+            List<String> evidence,
+            List<String> missingEvidence,
+            List<String> mustFix,
+            List<String> openRisks,
+            String verificationSummary,
+            Design design
+    ) implements AgentResult {
+    }
+
+    public record Design(List<PlannedFile> plannedFiles) {
+    }
+
+    public record PlannedFile(String path, TaskContract.ScopeOperation operation, String responsibility) {
     }
 
     public record TaskContractProposalResult(

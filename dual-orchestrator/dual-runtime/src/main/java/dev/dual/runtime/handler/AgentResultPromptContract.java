@@ -257,6 +257,13 @@ public final class AgentResultPromptContract {
                     List.of(),
                     List.of()
             );
+            case "design.claude_design" -> new AgentResultEnvelope.DesignResult(
+                    "design_result", decision, "one short sentence", "READY",
+                    List.of("read the approved contract"), List.of("design evidence"),
+                    List.of(), List.of(), List.of(), "Design only; no implementation performed.",
+                    new AgentResultEnvelope.Design(List.of(new AgentResultEnvelope.PlannedFile(
+                            "repo/relative/new.ext", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE,
+                            "responsibility assigned within the approved scope"))));
             case "plan.claude_plan" -> new AgentResultEnvelope.PlanResult(
                     "plan_result",
                     decision,
