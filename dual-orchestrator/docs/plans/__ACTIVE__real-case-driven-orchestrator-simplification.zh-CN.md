@@ -8,8 +8,36 @@ E1-E4 deterministic checkpoint 已收口，最新代码 `ffe9347f`。CC 整体�
 只观察自然 revision/scope repair，不造错；不恢复旧样本、不重开网络或增加平台。
 本轮仅 Gate/active plan 文档及非 provider 前置检查；不创建 workstream、不代用户审批。
 P2-1 冻结参照标注及四条 P3 澄清已吸收；用户转交的是既有评审重申，不冒称新一轮复跑。
-选择性提交文档后进入前置检查；唯一 fresh workstream 另待用户执行授权。
+文档 checkpoint `414d3044` 已提交；非 provider 前置检查通过（记录见下），minimal probes 尚未执行。
+唯一 fresh workstream 另待用户执行授权；effective-workspace capture/verify 须在 start(no-run) 后完成。
 以下早期“当前”段落均为历史阶段记录，不覆盖本入口；自然 E2E 仍 NOT PROVEN。
+
+### 2026-09-06 非 Provider Preflight 记录
+
+- 检查时 execution HEAD/tree：`414d3044cd2371381ad1d3e5b4ee6df9a6f2393c` / `a79fd18cb4c40685e6bcc5e473a71b41ab77a933`。
+  相对 `ffe9347f` 仅 Gate 与 active plan 两份文档；tracked clean；旧 S2 Gate/output 未跟踪且未纳入提交。
+- JAR/workflow/REQUIREMENT/check 四 SHA 与 Gate §6 逐字相同；target HEAD/tree 相同且含 untracked 检查为 clean。
+- 使用 Gate 三环境变量执行 `java -jar dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar doctor`，exit 0，关键原始输出：
+
+```text
+[OK]   acpx version - 0.13.2
+[OK]   E1 policy transport - upstream=fd173f04aa1b56f9e3f5ca5190c034ddcae28792, patch=41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c
+[OK]   acpx claude adapter - /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0
+[OK]   acpx codex adapter - npx -y @zed-industries/codex-acp-darwin-arm64@0.16.0
+Result: OK
+```
+
+- 同一 JAR 的 selected workflow validate exit 0：`Workflow definition is valid.`，`Nodes: 28` / `Edges: 47`。
+- isolated home 的 config 仅选读 model 字段：`model = "gpt-5.4"`；这是配置核验，不是实际 provider model proof。
+- source checkout 原样 `bash scripts/verify-workspace.sh`：受限工具环境 exit 6，原始输出
+  `curl: (6) Could not resolve host: www.okx.com`；获工具权限后在宿主网络执行同一命令 exit 0，
+  原始输出 `workspace preflight passed`。没有修改脚本/需求/代理，没有创建样本；前者是工具环境前置失败，
+  不冒充宿主环境不可达，也不算 provider/业务失败或第二 real-case 样本。
+- `git diff ffe9347f HEAD --check` 通过。未重建 JAR、未调用 provider、未创建/恢复 workstream、未执行 capture/verify。
+  本记录提交只改变文档，后续 execution HEAD 应按 Gate 祖先规则另行记录，不能与上述检查时 HEAD 混淆。
+
+当前停点：source-side 前置已通过；minimal probes 与 effective-workspace 前置未完成，整体 Gate 尚未执行，
+不能声明产品 PASS 或新样本已就绪。本轮不再扩展修复或重复评审。
 
 ## 总体目标
 
