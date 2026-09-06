@@ -78,12 +78,15 @@ export DUAL_ACPX_COMMAND_TIMEOUT_SECONDS=1200
 下列 Dual code HEAD/tree 是代码 checkpoint 的固定参照，不要求文档提交后的 execution HEAD/tree 与其相等；运行时按 §5.2 验证祖先关系、区间仅文档变更及 JAR SHA 不变，并另行记录实际 execution HEAD/tree。
 
 ```text
-Dual code HEAD: ffe9347f13fa330c08ad76b1630ca140978cbec7
-Dual code tree: b307b55c4948a4b2dafd2ee5113f9ad328846a45
+Dual code HEAD: 38982c40abbe08669a53fe719d1c6cd64f0331d8
+Dual code tree: c401d82131f3d08f0ee7f78dbd85739afbed43cf
 E1/E2/E3/E4: 306a555d / a4e38ffe / 1e9723ad / ffe9347f
 JAR: dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar
-JAR SHA256: 6a28fcce8b94f95f87cd7d39887f716f55a81cfbe1b79977088032af0e9e4a18
-Package evidence: E4 checkpoint; 162 XML, 1397/0/0/0 (implementation-side run, not CC full-reactor reproduction)
+JAR SHA256: 6ff7a946a109633bde0dcba6b15e3198fb8d0f49b962f4c1111a28258352bff2
+Package evidence: maintained Codex adapter checkpoint; 162 XML, 1398/0/0/0 (implementation-side run)
+Codex adapter: @agentclientprotocol/codex-acp@1.10.0
+Resolved Codex runtime: @openai/codex@0.153.4
+Runtime file SHA evidence: output/real-cases/20260906-native-codex-adapter-preflight/runtime-files.sha256 and codex-binary.sha256
 Workflow: dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
 Workflow SHA256: 5aa17a2be27e68f22b9c27e9994f64cfdbcd0002f0574023bfe32d5b69382575
 Workflow: 28 nodes / 47 edges / 8 agent_run definitions / 6 gate definitions (not occurrence counts)
@@ -120,3 +123,5 @@ acpx policy: claude_execution_policy.v2
 用户转交的 CC 评审重申：基线 ffe9347f，P0/P1 无，Execution READY；这是既有只读评审的重申，不算新增独立复跑。P2-1 已以 §6 固定参照标注关闭；四条 P3 仅澄清中文约定、计时来源、intake 消费链与会话中断，不改变产品需求、授权或新增机制。文档提交后进入前置检查；fresh workstream 仍待用户执行授权。
 
 2026-09-06 配置 delta：旧隔离 home 的 gpt-5.4 health 被拒，证据目录 20260906T123313Z-okx-e1-e4 保持不变并判 INVALID，未创建业务样本。用户随后明确要求读取正常 Codex 配置并授权确认后直接继续 E2E，无需再次询问启动权限。本轮仅撤销 operator 命令中的旧 home 选择；生产 transport 未固定模型，也不新增模型解析/兼容层。新 health/业务证据另存新目录，不覆盖旧失败、不增加第二业务样本；human gates 仍由用户本人决定。官方配置来源说明：https://learn.chatgpt.com/docs/config-file/config-basic 。
+
+随后正常 home 的 probe 已读到 gpt-6-astra，但旧 adapter 内嵌 Codex 0.137.0 被服务端要求升级；该目录 20260906T124829Z-okx-native-config 同样关闭为 INVALID，未创建业务样本。必要升级已收口于 38982c4：只改 installer/Doctor/test，使用上游维护的新包；E1-E4 的 runtime/ledger/workflow/权限代码未变。§6 已显式重冻结，之前 JAR 6a28fcce 保留为历史证据，不再混用。新 adapter 的单 health 按 `../../plans/codex-native-config-and-maintained-adapter-20260906.zh-CN.md` 的前置边界执行，成功后直接继续本 Gate；这不是 CC 对 adapter delta 的独立评审，也不是 E2E 已通过。

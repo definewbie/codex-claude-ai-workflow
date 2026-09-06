@@ -15,6 +15,10 @@ P2-1 冻结参照标注及四条 P3 澄清已吸收；用户转交的是既有�
 配置观测 `gpt-6-astra` / `medium`；后续由 Codex 原生读取有效配置，不复制/解析成第二 owner，也不传固定 --model。
 旧 INVALID 原始证据不变，新目录执行新 health；成功后按用户授权直接 start(no-run)/capture/verify/首段 run，
 不重复询问 provider/start 权限，不代用户做 human gate 决定，不放宽原 Gate 的正确性/止损约束。
+正常 home 已实证返回 gpt-6-astra，但旧 codex-acp 内嵌 0.137.0 被服务端要求升级；第二 health 同样 INVALID 并关闭。
+最小维护升级 `38982c4` 已 full package 1398/0/0/0、Doctor/workflow validate 通过：installer/Doctor 改为
+@agentclientprotocol/codex-acp@1.10.0，实际 Codex 0.153.4，模型仍由原生配置拥有；未改 runtime/workflow/fork。
+Gate 已重冻结 JAR 6ff7a946；当前动作是新 adapter 单 health 成功后直接创建唯一业务样本。前两失败证据不覆盖。
 以下早期“当前”段落均为历史阶段记录，不覆盖本入口；自然 E2E 仍 NOT PROVEN。
 
 ### 2026-09-06 非 Provider Preflight 记录
