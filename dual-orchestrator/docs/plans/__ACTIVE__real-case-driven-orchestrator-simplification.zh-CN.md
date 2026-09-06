@@ -2,14 +2,19 @@
 
 ## 当前执行入口（2026-09-06，优先于下方历史记录）
 
-E1-E4 deterministic checkpoint 已收口，最新代码 `ffe9347f`。CC 整体评审已 PASS；当前唯一动作：文档收口及前置检查
+E1-E4 deterministic checkpoint 已收口，最新代码 `ffe9347f`。CC 整体评审已 PASS；用户已授权配置修正后直接继续 fresh E2E
 `../testing/verification-gates/20260906-okx-fresh-e2e-after-post-contract-authority.md`。
 主目标为未改需求的 fresh OKX 产品 E2E；四项 authority 修复必须由真实下游组合消费，不以局部测试替代产品验收。
 只观察自然 revision/scope repair，不造错；不恢复旧样本、不重开网络或增加平台。
-本轮仅 Gate/active plan 文档及非 provider 前置检查；不创建 workstream、不代用户审批。
+用户授权后的 health 已执行：Claude PASS，Codex gpt-5.4 请求被服务端 HTTP 400 拒绝；两会话均已关闭。
+未创建/恢复 workstream，未执行 capture/verify 或业务 run，不代用户审批。
 P2-1 冻结参照标注及四条 P3 澄清已吸收；用户转交的是既有评审重申，不冒称新一轮复跑。
-文档 checkpoint `414d3044` 已提交；非 provider 前置检查通过（记录见下），minimal probes 尚未执行。
-唯一 fresh workstream 另待用户执行授权；effective-workspace capture/verify 须在 start(no-run) 后完成。
+文档 checkpoint `414d3044`、前置记录 `54b68a2`；非 provider 前置通过，但 health 合取失败，不能启动样本。
+证据见 `../testing/real-case-reports/20260906-okx-e1-e4-preflight-model-rejection.md`。
+确认根因在 operator 选择的旧隔离 home，不是 Dual 生产模型常量。当前正常 home 为 `/Users/kriswang/.codex`，
+配置观测 `gpt-6-astra` / `medium`；后续由 Codex 原生读取有效配置，不复制/解析成第二 owner，也不传固定 --model。
+旧 INVALID 原始证据不变，新目录执行新 health；成功后按用户授权直接 start(no-run)/capture/verify/首段 run，
+不重复询问 provider/start 权限，不代用户做 human gate 决定，不放宽原 Gate 的正确性/止损约束。
 以下早期“当前”段落均为历史阶段记录，不覆盖本入口；自然 E2E 仍 NOT PROVEN。
 
 ### 2026-09-06 非 Provider Preflight 记录

@@ -1,7 +1,7 @@
 # OKX Fresh E2E After Post-Contract Authority Verification Gate
 
 日期：2026-09-06
-状态：`INDEPENDENT REVIEW PASS / PREFLIGHT PENDING / PROVIDER NOT STARTED`
+状态：`INDEPENDENT REVIEW PASS / USER-AUTHORIZED CONFIG DELTA / BUSINESS NOT STARTED`
 
 ## 1. 目标与范围
 
@@ -60,13 +60,13 @@ operator 会话中断后先重读磁盘 current、gate、execution 与已归档�
 1. 本 Gate + active plan 先交 CC 独立整体评审，P0/P1 清零后选择性提交文档；本轮只起草，不创建 workstream、不调用 provider。
 2. 执行前复算 §6：code checkpoint 为 clean execution HEAD 祖先，其间仅本 Gate/评审/记录等文档；确认已 package 的 JAR SHA、workflow validate 与 Doctor。若需重新 package 导致 JAR 字节变化，先更新冻结身份并核对 code 来源，不能静默换包运行。
 3. 在 source checkout 执行原有 `scripts/verify-workspace.sh`。它已经用 curl 直连 OKX 并校验响应，不新增网络评估层。Shadowsocks 为宿主既有环境，保持不变；连接失败按环境前置失败归档，不临时改脚本/代理重跑样本。
-4. 用下列统一环境完成 minimal probes 并立即关闭；它们沿用 standing authorization。确认 Codex 模型为 gpt-5.4，记录实际 metadata，不把历史不同环境 probe 结果说成模型不兼容。
+4. 用下列统一环境完成 minimal probes 并立即关闭；它们沿用 standing authorization。模型由 Codex 自身有效配置解析，Dual 不传固定 --model、不复制一份模型配置；记录 config 来源及 ACP 实际 model metadata，成功 health 才证明当前调用可用。业务沿用同一 home/config，运行中不静默换模型。当前配置观测为 gpt-6-astra/medium，此值是本轮快照，不是 harness 默认常量。
 5. 唯一 fresh workstream 的 start/capture/verify/首段 run 须用户执行授权；使用 `start` 不带 `--run`，通过持久化 workstream→workspace 链定位 effectiveWorkdir，复用既有 workspace preflight capture/verify（两者均 passed）后才启动业务。source check 不能替代该 cwd 检查。
 6. 每段停在 human gate，先读当前 packet/typed sources 再由用户本人批准或给 note；不 autorun、不由 CC/本 agent 代批。后续命令一律保持以下三个环境变量，不复制 CLI 中省略环境的裸命令。
 7. 到终态完成 §3/§4 核验，关闭测试应用/health sessions，归档结果及按相对路径排序的 SHA manifest。FAIL/INVALID 均不改代码继续当前样本、不创建第二样本；返回原因与下一决策。
 
 ```sh
-export CODEX_HOME=/private/tmp/dual-okx-codex-home
+export CODEX_HOME=/Users/kriswang/.codex
 export DUAL_ACPX_EXECUTABLE=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx
 export DUAL_ACPX_COMMAND_TIMEOUT_SECONDS=1200
 ```
@@ -118,3 +118,5 @@ acpx policy: claude_execution_policy.v2
 ## 8. 独立评审收口
 
 用户转交的 CC 评审重申：基线 ffe9347f，P0/P1 无，Execution READY；这是既有只读评审的重申，不算新增独立复跑。P2-1 已以 §6 固定参照标注关闭；四条 P3 仅澄清中文约定、计时来源、intake 消费链与会话中断，不改变产品需求、授权或新增机制。文档提交后进入前置检查；fresh workstream 仍待用户执行授权。
+
+2026-09-06 配置 delta：旧隔离 home 的 gpt-5.4 health 被拒，证据目录 20260906T123313Z-okx-e1-e4 保持不变并判 INVALID，未创建业务样本。用户随后明确要求读取正常 Codex 配置并授权确认后直接继续 E2E，无需再次询问启动权限。本轮仅撤销 operator 命令中的旧 home 选择；生产 transport 未固定模型，也不新增模型解析/兼容层。新 health/业务证据另存新目录，不覆盖旧失败、不增加第二业务样本；human gates 仍由用户本人决定。官方配置来源说明：https://learn.chatgpt.com/docs/config-file/config-basic 。
