@@ -239,7 +239,7 @@ class MetricsProjectionWriterTest {
     }
 
     @Test
-    void repeatedReadAuthorizedByCanonicalPlanIsNotMissing() throws Exception {
+    void canonicalPlanReferenceFileCannotExcuseMissingRereadReason() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan"));
         var jsonWriter = new AtomicJsonWriter();
         var mapper = jsonWriter.objectMapper();
@@ -258,12 +258,13 @@ class MetricsProjectionWriterTest {
         var repeated = list(toolMetrics.get("repeatedReadFiles"));
 
         assertEquals("README.md", repeated.get(0).get("path"));
-        assertEquals("plan_authorized", repeated.get(0).get("rereadReasonStatus"));
-        assertEquals(0, number(toolMetrics.get("missingRereadReasonCount")));
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+        assertFalse(repeated.get(0).containsKey("planAuthorized"));
     }
 
     @Test
-    void repeatedReadAuthorizedByCanonicalPlanEditFileIsNotMissing() throws Exception {
+    void canonicalPlanEditFileCannotExcuseMissingRereadReason() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan-edit"));
         var jsonWriter = new AtomicJsonWriter();
         var mapper = jsonWriter.objectMapper();
@@ -281,8 +282,9 @@ class MetricsProjectionWriterTest {
         var toolMetrics = map(metrics.get("toolMetrics"));
         var repeated = list(toolMetrics.get("repeatedReadFiles"));
 
-        assertEquals("plan_authorized", repeated.get(0).get("rereadReasonStatus"));
-        assertEquals(0, number(toolMetrics.get("missingRereadReasonCount")));
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+        assertFalse(repeated.get(0).containsKey("planAuthorized"));
     }
 
     @Test
@@ -306,6 +308,36 @@ class MetricsProjectionWriterTest {
 
         assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
         assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+    }
+
+    @Test
+    void stablePlanBytesCannotAffectRecordedMissingOrNotRequiredReadFacts() throws Exception {
+        for (var expected : List.of("missing", "recorded", "not_required")) {
+            var paths = new WorkstreamPaths(tempDir.resolve(expected), new DualId("ws-stable-plan"));
+            var writer = new AtomicJsonWriter();
+            var mapper = writer.objectMapper();
+            setupRereadFixture(paths, writer, mapper, expected.equals("recorded")
+                    ? List.of(Map.of("path", "README.md", "reason", "check current bytes")) : null);
+            if (expected.equals("not_required")) writeReadReuseContract(paths, mapper, List.of());
+            var projection = new MetricsProjectionWriter(writer, mapper);
+            projection.write(paths);
+            var baseline = map(mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class).get("toolMetrics"));
+            var repeated = list(baseline.get("repeatedReadFiles"));
+            assertEquals(expected, repeated.getFirst().get("rereadReasonStatus"));
+            assertFalse(repeated.getFirst().containsKey("planAuthorized"));
+            var stable = paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json");
+            Files.createDirectories(stable.getParent());
+            for (var bytes : List.of("{\"edit_files\":[\"README.md\"]}",
+                    "{\"reference_files\":[\"README.md\"]}", "{", "{\"edit_files\":[\"unrelated\"]}")) {
+                Files.writeString(stable, bytes);
+                projection.write(paths);
+                var actual = map(mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class).get("toolMetrics"));
+                assertEquals(baseline, actual, "unapproved or damaged stable candidates must not change telemetry");
+            }
+            Files.delete(stable);
+            projection.write(paths);
+            assertEquals(baseline, map(mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class).get("toolMetrics")));
+        }
     }
 
     private void setupRereadFixture(

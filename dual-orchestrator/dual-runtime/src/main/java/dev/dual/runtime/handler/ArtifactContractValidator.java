@@ -12,7 +12,6 @@ import dev.dual.core.workflow.NodeStatus;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -115,6 +114,14 @@ public final class ArtifactContractValidator {
                     return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
                             parsed.envelope(), ContractViolation.of("DESIGN_SCOPE_INVALID",
                                     "Design is not within the approved contract", Map.of("errors", errors)));
+                }
+            }
+            if (parsed.envelope().result() instanceof AgentResultEnvelope.PlanResult plan) {
+                var errors = PlanScopeValidator.validate(root, workstreamId, plan.plan());
+                if (!errors.isEmpty()) {
+                    return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
+                            parsed.envelope(), ContractViolation.of("PLAN_SCOPE_INVALID",
+                                    "Plan is not within the approved contract", Map.of("errors", errors)));
                 }
             }
             var repositoryFactBinding = resolveRepositoryFactBinding(
@@ -336,7 +343,7 @@ public final class ArtifactContractValidator {
         }
 
         var planArtifactRef = writePlanArtifactSidecars(
-                root, workstreamId, nodeInstanceId, envelope, outputPath, outputRef);
+                root, envelope, outputPath);
         planArtifactRef.ifPresent(ref -> {
             if (!outputRefs.contains(ref)) {
                 outputRefs.add(ref);
@@ -402,11 +409,8 @@ public final class ArtifactContractValidator {
 
     private Optional<String> writePlanArtifactSidecars(
             Path root,
-            String workstreamId,
-            String nodeInstanceId,
             AgentResultEnvelope envelope,
-            Path outputPath,
-            String outputRef
+            Path outputPath
     ) throws Exception {
         if (!(envelope.result() instanceof AgentResultEnvelope.PlanResult planResult)) {
             return Optional.empty();
@@ -416,25 +420,7 @@ public final class ArtifactContractValidator {
         Files.writeString(sidecarPath,
                 OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
                 StandardCharsets.UTF_8);
-        if (workstreamId != null && !workstreamId.isBlank()) {
-            var canonicalPath = canonicalPlanArtifactPath(root, workstreamId);
-            Files.createDirectories(canonicalPath.getParent());
-            var canonical = new LinkedHashMap<String, Object>(document);
-            canonical.put("workstream_id", workstreamId);
-            canonical.put("node_instance_id", nodeInstanceId == null ? "" : nodeInstanceId);
-            canonical.put("source_output_ref", outputRef == null ? "" : outputRef);
-            canonical.put("generated_at", Instant.now().toString());
-            canonical.put("canonical_source", "plan.claude_plan");
-            Files.writeString(canonicalPath,
-                    OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(canonical) + "\n",
-                    StandardCharsets.UTF_8);
-        }
         return Optional.of(root.relativize(sidecarPath).toString());
-    }
-
-    private static Path canonicalPlanArtifactPath(Path root, String workstreamId) {
-        return root.resolve(".agent/workstreams").resolve(workstreamId)
-                .resolve("artifacts/plan/plan_artifact.json").normalize();
     }
 
     private static List<String> stringList(Object value) {

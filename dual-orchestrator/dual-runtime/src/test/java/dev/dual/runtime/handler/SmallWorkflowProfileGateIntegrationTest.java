@@ -200,6 +200,9 @@ class SmallWorkflowProfileGateIntegrationTest {
         var prompt = AgentResultPromptContract.render(workstreamId, runId, "plan.claude_plan",
                 "READY_FOR_PLAN_REVIEW", java.util.Set.of("READY_FOR_PLAN_REVIEW"));
         var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(prompt.substring(prompt.indexOf('{')));
+        var editFiles = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.at("/result/plan")).putArray("edit_files");
+        TaskContractProjectionVerifier.resolve(workspace, workstreamId).qualified().orElseThrow().contract()
+                .scope().included().forEach(entry -> editFiles.add(entry.path()));
         var responses = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).putArray("revision_responses");
         snapshot.obligations().forEach(obligation -> responses.addObject().put("obligation_id", obligation.id())
                 .put("disposition", "ADDRESSED").put("evidence", "Plan revised with the human note"));

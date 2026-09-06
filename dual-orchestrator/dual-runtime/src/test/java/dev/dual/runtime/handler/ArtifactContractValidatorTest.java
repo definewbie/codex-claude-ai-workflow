@@ -137,7 +137,7 @@ class ArtifactContractValidatorTest {
     }
 
     @Test
-    void planResultProducesOneValidatedOutputAndCanonicalPlanProjection() throws Exception {
+    void planResultProducesOccurrenceProjectionWithoutCanonicalPlan() throws Exception {
         var plan = new AgentResultEnvelope.PlanResult(
                 "plan_result", "READY_FOR_PLAN_REVIEW", "Plan is ready.", "READY", false,
                 List.of("reviewed design"), List.of("scoped plan"), List.of(), List.of(), List.of(),
@@ -156,7 +156,7 @@ class ArtifactContractValidatorTest {
         assertTrue(contract.planArtifact() != null);
         assertEquals(List.of("edit the target"), contract.planArtifact().implementationSteps());
         assertTrue(contract.hasRequiredTypedPayload());
-        assertTrue(Files.isRegularFile(tempDir.resolve(".agent/workstreams/ws-1/artifacts/plan/plan_artifact.json")));
+        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-1/artifacts/plan/plan_artifact.json")));
     }
 
     @Test

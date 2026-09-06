@@ -2826,3 +2826,35 @@ E4/provider/real-case/提交仍停止，详情见 E3 计划 §18。
 浏览器与 diff-check 全通过，五个 reviewed production SHA 不变。CC 本轮未亲跑套件，此处数值为实施方复跑。
 E3 CHECKPOINT COMPLETE，按已授权范围选择性提交 43 文件，排除 output/ 与旧 OKX Gate。
 本 step 到此停止，不自动进入 E4/provider/real-case；真实业务收敛仍 NOT PROVEN。
+
+2026-09-06 用户授权 E4 最小设计与通用性评估：已只读核对 plan 发布、E1/E3 下游和 metrics 读写链，
+设计见 `post-contract-authority-continuity-e4-plan-scope-subtraction-implementation-plan-20260906.zh-CN.md`。
+范围仅 plan.edit_files 的 qualified contract 子集守卫，以及 canonical plan writer/metrics 豁免删除；
+保留 occurrence sidecar、E3 approved-plan resolver 与 Git 实际 scope owner，不新增状态/schema/恢复/平台。
+独立通用性判断为 PROCEED WITH GUARDS：规则与业务无关，但须双业务对称反证、改名正例及完整消费序列证明。
+明确 metrics 删除 planAuthorized 字段/tag 的展示变化；不将它误称为运行时读取权限修复。
+当前 active step：CC 独立设计评审。本轮仅文档，未实施、未运行测试/provider、未创建或恢复 real-case；
+E1-E4 真实业务收敛仍 NOT PROVEN。旧 OKX Gate 与 output/ 不在本次范围。
+
+2026-09-06 E4 CC 独立设计评审 PASS：P0/P1 无，Implementation READY；已吸收 F1（plan scope shape
+必须 reject/NOT_REPAIRABLE，且测试断言不启动 correction）与 F2（未批准候选已能覆写 metrics 豁免来源）。
+本轮自行核对既有 correction 分类代码，仅修订计划与本记录，无 production/test/provider 改动。
+当前 active step：设计收口，下一步按 E4 §8 从 failing tests 实施；不扩展生产文件面，不恢复历史 case。
+
+2026-09-06 17:43 +08:00 E4 实施完成，等待独立 diff review：五处生产改动严格保持计划范围，
+plan shape reject/NOT_REPAIRABLE、发布期 qualified contract 子集、canonical writer/metrics 豁免减法已落地。
+测试先复现越界计划可入 gate 与旧指标豁免；两处旧 small-workflow 测试仅修正候选路径为真实合同路径，未放宽守卫。
+四个独立突变全部断言红灯，恢复后五生产文件 SHA 与突变前一致；双业务/三 plan 拓扑、冷 JVM、真实写入失败、
+实际 Git 越界、correction 零调用、stable 文件缺失/替换/损坏不影响 telemetry 已验证。
+最终完整 package + 162 XML `1397/0/0/0`，四 workflow validate、subtraction sweep、diff-check 通过。
+详细控制链与验收映射见 `post-contract-authority-continuity-e4-plan-scope-subtraction-checkpoint-20260906.zh-CN.md`。
+当前 active step：提供 CC 简短独立 diff review prompt；不提交、不启动 provider、不恢复旧样本。
+E1-E4 自然业务收敛仍 NOT PROVEN，后续 fresh real-case 必须另走整体 E2E Gate，不把本地序列测试冒充产品完成。
+
+2026-09-06 E4 CC 独立 diff review PASS，P0/P1 无，允许提交。CC 独立复跑 7+21+28 项均绿，
+复核五生产 SHA 与零残留，并沿发布/审批/实施/自测/实际 Git 校验和冷读失败切面确认六维成立。
+完整 1397 和四 workflow validate 为实施方实跑；基线明确取 E3 §20 最终 1388，而非 §19.4 中间值 1381。
+仅补评审记录，行为代码不变；按原子 checkpoint 选择性提交 E4 五生产、五测试、计划/结果及本 active 增量，
+排除旧 OKX Gate 与 output/。E4 CHECKPOINT COMPLETE，E1-E4 已声明边界的 deterministic enforcement 链收口。
+当前 active step：等待下一自然 fresh E2E Gate 决策；不自动起草新机制、不启动 provider、不恢复历史样本。
+REAL-CASE NOT PROVEN 与业务语义收敛未证明的限定维持。

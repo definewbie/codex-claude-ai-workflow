@@ -336,7 +336,6 @@ final class MetricsProjectionWriter {
         var runs = new ArrayList<Map<String, Object>>();
         var evidenceFiles = evidenceFiles(paths);
         var readReusePolicy = readReusePolicy(paths);
-        var planAuthorizedFiles = planAuthorizedFiles(paths);
         long runCount = 0;
         try (var stream = Files.list(paths.runsDir())) {
             for (var runDir : stream.filter(Files::isDirectory).sorted(Comparator.comparing(path -> path.getFileName().toString())).toList()) {
@@ -360,8 +359,7 @@ final class MetricsProjectionWriter {
                     }
                     readFiles.computeIfAbsent(normalized, ReadFileMetric::new)
                             .accept(runId, nodeId, agent, evidenceFiles.contains(normalized),
-                                    readReusePolicy.requiresReason(normalized), declaredRereadPaths.contains(normalized),
-                                    planAuthorizedFiles.contains(normalized));
+                                    readReusePolicy.requiresReason(normalized), declaredRereadPaths.contains(normalized));
                 }
                 var item = new LinkedHashMap<String, Object>();
                 item.put("runId", runId);
@@ -978,28 +976,6 @@ final class MetricsProjectionWriter {
         return new ReadReusePolicy(reusableFiles, textList(document.get("allowedRepeatedReadReasons")));
     }
 
-    private Set<String> planAuthorizedFiles(WorkstreamPaths paths) throws IOException {
-        var plan = paths.workstreamDir().resolve("artifacts").resolve("plan").resolve("plan_artifact.json");
-        if (!Files.isRegularFile(plan)) {
-            return Set.of();
-        }
-        var document = objectMapper.readValue(plan.toFile(), MAP_TYPE);
-        var files = new LinkedHashSet<String>();
-        for (var file : textList(document.get("edit_files"))) {
-            var normalized = normalizePath(file);
-            if (!normalized.isBlank()) {
-                files.add(normalized);
-            }
-        }
-        for (var file : textList(document.get("reference_files"))) {
-            var normalized = normalizePath(file);
-            if (!normalized.isBlank()) {
-                files.add(normalized);
-            }
-        }
-        return Set.copyOf(files);
-    }
-
     private Set<String> evidenceFiles(WorkstreamPaths paths) throws IOException {
         var manifest = paths.workstreamDir().resolve("memory").resolve("evidence-manifest.json");
         if (!Files.isRegularFile(manifest)) {
@@ -1605,21 +1581,19 @@ final class MetricsProjectionWriter {
         private boolean evidenceKnown;
         private boolean rereadReasonRequired;
         private boolean reasonDeclared;
-        private boolean planAuthorized;
 
         private ReadFileMetric(String path) {
             this.path = path;
         }
 
         void accept(String runId, String nodeId, String agent, boolean evidenceKnown,
-                    boolean rereadReasonRequired, boolean reasonDeclared, boolean planAuthorized) {
+                    boolean rereadReasonRequired, boolean reasonDeclared) {
             runIds.add(runId);
             nodes.add(nodeId);
             agents.add(agent);
             this.evidenceKnown = this.evidenceKnown || evidenceKnown;
             this.rereadReasonRequired = this.rereadReasonRequired || rereadReasonRequired;
             this.reasonDeclared = this.reasonDeclared || reasonDeclared;
-            this.planAuthorized = this.planAuthorized || planAuthorized;
         }
 
         boolean isRepeated() {
@@ -1639,15 +1613,12 @@ final class MetricsProjectionWriter {
         }
 
         boolean rereadReasonMissing() {
-            return isRepeated() && rereadReasonRequired && !reasonDeclared && !planAuthorized;
+            return isRepeated() && rereadReasonRequired && !reasonDeclared;
         }
 
         String rereadReasonStatus() {
             if (!isRepeated() || !rereadReasonRequired) {
                 return "not_required";
-            }
-            if (planAuthorized) {
-                return "plan_authorized";
             }
             return reasonDeclared ? "recorded" : "missing";
         }
@@ -1662,7 +1633,6 @@ final class MetricsProjectionWriter {
             map.put("evidenceKnown", evidenceKnown);
             map.put("rereadReasonRequired", rereadReasonRequired);
             map.put("rereadReasonStatus", rereadReasonStatus());
-            map.put("planAuthorized", planAuthorized);
             return map;
         }
     }

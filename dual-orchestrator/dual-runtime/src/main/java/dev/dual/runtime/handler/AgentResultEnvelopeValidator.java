@@ -167,6 +167,7 @@ public final class AgentResultEnvelopeValidator {
                 } else {
                     requiredList(plan.plan().implementationSteps(), "result.plan.implementation_steps", true, errors);
                     requiredList(plan.plan().editFiles(), "result.plan.edit_files", true, errors);
+                    PlanScopeValidator.shapeErrors(plan.plan()).forEach(errors::reject);
                     requiredList(plan.plan().referenceFiles(), "result.plan.reference_files", false, errors);
                     requiredList(plan.plan().fileLevelChanges(), "result.plan.file_level_changes", true, errors);
                     requiredList(plan.plan().validationPlan(), "result.plan.validation_plan", true, errors);

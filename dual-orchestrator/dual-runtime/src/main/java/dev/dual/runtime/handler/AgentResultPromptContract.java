@@ -79,6 +79,10 @@ public final class AgentResultPromptContract {
                 + "disposition (ADDRESSED or NOT_ADDRESSED), and non-empty evidence. "
                 + "Use NOT_ADDRESSED when unresolved; ADDRESSED is a claim for review, not an approval or closure. "
                 + "Preserve all previously required behavior and the approved contract while making this revision."
+                + (result instanceof AgentResultEnvelope.PlanResult
+                    ? "\nedit_files must contain unique canonical paths within the approved TaskContract scope. "
+                        + CANONICAL_SCOPE_PATH_REQUIREMENT + "A subset is allowed; reference_files do not authorize edits. "
+                    : "")
                 + closedItemFields("result.revision_responses", new AgentResultEnvelope.AuthoredRevisionResponse(
                         "sha256:" + "0".repeat(64) + "#human-note:0",
                         AgentResultEnvelope.AuthoredRevisionDisposition.NOT_ADDRESSED, "Explain what remains unresolved"));

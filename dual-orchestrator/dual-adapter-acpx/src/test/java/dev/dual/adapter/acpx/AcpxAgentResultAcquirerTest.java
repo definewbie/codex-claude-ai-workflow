@@ -740,6 +740,31 @@ class AcpxAgentResultAcquirerTest {
     }
 
     @Test
+    void planScopeShapeNeverStartsCorrectionOrWritesACorrectionPrompt() throws Exception {
+        var json = new com.fasterxml.jackson.databind.ObjectMapper();
+        for (var edits : List.of(List.of("../escape"), List.of("src/a", "src/a"), List.<String>of())) {
+            var candidate = (com.fasterxml.jackson.databind.node.ObjectNode)
+                    json.readTree(strictEnvelope("plan.claude_plan", "run-1"));
+            var plan = (com.fasterxml.jackson.databind.node.ObjectNode) candidate.at("/result/plan");
+            var files = plan.putArray("edit_files");
+            edits.forEach(files::add);
+            var transport = new ScriptedTransport(validResult("request-1", candidate.toString(), 0));
+            var requests = requests("plan-shape");
+            var contract = correctionPrompt("plan.claude_plan", "run-1");
+            assertTrue(contract.contains("edit_files must contain unique canonical paths within the approved TaskContract scope"));
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                    "claude", requests.initial(), requests.correction(), contract,
+                    "ws-test", "run-1", ContractRegistry.forNode("plan.claude_plan"));
+            assertFalse(acquisition.initialValidation().valid());
+            assertEquals(AgentResultEnvelopeValidator.CorrectionDisposition.NOT_REPAIRABLE,
+                    acquisition.initialValidation().correctionDisposition());
+            assertFalse(acquisition.correctionAttempted());
+            assertEquals(1, transport.calls);
+            assertFalse(Files.exists(requests.correction().promptPath()));
+        }
+    }
+
+    @Test
     void explicitUnsupportedSchemaVersionDoesNotStartCorrection() throws Exception {
         var invalid = strictEnvelope("design.claude_design", "run-1")
                 .replace("\"schema_version\" : 1", "\"schema_version\" : 2");
