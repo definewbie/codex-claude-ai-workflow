@@ -2742,3 +2742,87 @@ E2 独立 diff review PASS（P0=0/P1=0/P2=2），允许选择性提交；独立 
 复现一致。报告的 TypedDesignScopeTest 数量按源码勘误为 8（非 9），不影响总数。E3 必须同时交付 human gate 的 planned_files/ref/SHA
 与 obligations/responses 展示；projector 的非空 operation 前置保持由 validator 唯一守住，不新增 fallback。
 当前 active step：选择性提交 E2，随后进入 E3 计划与实现前通用性判断；不恢复 real-case，不把 E2 PASS 当作整体修订收敛。
+
+E2 已提交为 `a4e38ffe`。用户授权开始 E3 设计与通用性评估，本轮重新只读核查四 workflow、iteration/gate/action、candidate/sidecar、
+execution prompt manifest 与 CLI/API/console/mgt 消费路径。E3 计划写入
+`post-contract-authority-continuity-e3-authored-revision-approval-implementation-plan-20260905.zh-CN.md`。
+自身设计判断：在已注册 design/plan 仓库文件交付域内跨业务成立，三种 revision 拓扑必须分别验证；不外推任意 custom artifact graph 或业务语义自动正确。
+
+E3 将同批闭合累计义务/回应、唯一批准版本、实际 execution 输入与 human packet；补获 plan revise 非空 note 的 ledger 对称性、
+当前 reviewer 新发现与历史回应的时间差，以及 ref/SHA 不能替代实际 prompt 正文三个消费缺口。输入留痕复用既有 manifest，
+不新建独立 binding 权威文件、不改预算/网络/recovery、不代做 E4 canonical-plan 减法。
+当前 active step：E3 独立架构评审；Implementation READY 待评审，尚未修改 production 或运行测试/provider/real-case。
+
+E3 独立架构评审 PASS / IMPLEMENTATION READY（P0=0/P1=0/P2=3）。已核对并吸收三项非阻塞意见：memory 不新增义务/回应/批准副本；
+AgentRunMetadataWriter prepared/completed 继续使用同一 promptManifestPath，E1 contract→memory 接线保持；manifest 读回校验增加独立突变反证。
+澄清评审“双向引用”措辞：本次 sidecar 单向引用输入 manifest，后者只指向前序来源，不引用本次输出，不产生 SHA 循环。
+当前 active step：E3 failing sequence tests 与同批实施；本轮仅完成计划修订和实施前 metadata/memory 只读核查，production/测试尚未改动。
+实现后仍须自身通用性复核与独立 diff review，不能以计划 PASS 代替完整执行链证明；旧 S2 Gate 保持排除，无 provider/real-case 消耗。
+
+2026-09-05 E3 已进入同批实施，当前为 `IMPLEMENTATION IN PROGRESS / NOT READY FOR COMMIT`。已落 typed responses、
+authored lineage/批准解析、manifest required 输入留痕与读回、发布前复验、gate 同源投影及 loader 一致性。三种 plan 拓扑与两业务
+runtime 序列、adapter 错误 manifest/缺正文 provider=0、E2 scope 回归和四 definition 检查分别通过；不能合并叙述成完整 E3 证明。
+全量回归尚未通过，完整再入/epoch/retry/correction/冷审计/呈现 sibling 覆盖仍待完成，详情见 E3 实施计划 §13。
+不提交半闭环、不进入 E4、不调用 provider、不恢复 PNBV/其他 real-case；已评审的设计 READY 不等同代码 READY。
+最新 full reactor（2026-09-05 22:02 +08:00）失败：runtime 607 项中 12 failure / 4 error，adapter/CLI/server 被依赖失败跳过。
+当前优先任务是关闭这 16 项回归并补齐 E3 全链测试，不增加其他功能，不把失败解释为整体收口。
+
+2026-09-05 用户纠偏：E3 先减法，不把原先实现的历史递归审计作为需要补齐的目标。当前范围以 E3 计划 §14 为准。
+本次仅改 AuthoredExecutionContext、既有序列测试与两份计划：直接候选消费保留 sidecar/manifest SHA 和身份校验，
+删除祖先 prompt 的递归重放与历史 run.json locator 依赖；本轮 provider 前与 sidecar 发布前完整输入守卫不变。
+新增两项序列先在旧实现红灯，再在减法后通过；聚焦 52/0/0/0。full reactor（22:20 +08:00）仍失败：
+runtime 609 / 12 failure / 4 error，原六类回归未消除；adapter/CLI/server 因依赖失败跳过。diff-check clean。
+当前决定：停止扩展 E3；后续只处理合法路径回归与现有边界验证，不造新历史审计机制。不进入 E4、不提交、不更新 JAR、不调用 provider/real-case。
+AGENTS/计划中的“停止”仍是对 coding agent 的指令，不冒称 Codex 已有机械 scope enforcement；本次不另造治理平台。
+
+2026-09-05 合法路径回归迁移：本轮只改测试，复用真实 runtime/ledger 前序补齐合同、批准链和 execution manifest，
+保留原有断言，删除 small-workflow 测试对 human plan gate qualification 的绕过。runtime 原 16 项回归已全部关闭，
+完整 runtime 为 `609/0/0/0`。full reactor 于 22:36 +08:00 结束，adapter 新暴露 22 项失败
+（AcpxAgentTaskHandlerTest 15 failure / 6 error，WorkstreamMemoryUpdaterTest 1 failure）；CLI/server 仍未执行。
+完整构建仍失败，E3 仍 NOT READY FOR COMMIT；不得把 runtime 通过当作整体闭合。
+当前 active step：逐项定位 adapter 现有合法路径回归，区分缺执行前提的 fixture 与真实生产回归，再继续全量验证。
+不放宽守卫、不反转正例、不新增测试平台或 production 机制；E4/provider/real-case/提交仍停止。详情见 E3 计划 §15。
+
+2026-09-05 23:28 +08:00：adapter 22 项回归已关闭，逐项清单与修复依据见 E3 计划 §16。本轮仅修改 adapter 测试与文档：
+合法前序复用现有 runtime/validator/gate，测试替身从 prompt 精确读取一个 JSON 对象，metrics 在前序后设置，
+memory 用例区分 pre-contract 未批准合同和 qualified authored review 的未发布输出；补后一种正向可执行路径的排除断言。
+完整 `mvn -fae test` BUILD SUCCESS，160 份 XML 聚合 `1367/0/0/0`（runtime 609、adapter 357、CLI 80、server 65 均全绿）；
+diff-check clean。生产守卫未放宽、无依赖/平台增量、没有 provider/real-case/提交。
+当前 active step：核对既定 E3 全链验收与已有证明的覆盖，再进入独立 diff review；全量回归绿色不替代该核对，
+不据此声称完整 E3 ENFORCED 或提前进入 E4。§15 的 22 项红灯状态已被本记录取代。
+
+2026-09-06 E3 既定验收覆盖核对完成（只读代码，文档记录见 E3 计划 §17）。没有增加 production/测试机制，也未重跑上一轮全量。
+已按 provider 输入、sidecar 发布、gate 创建/决定、下游消费列出真实写入顺序和失败切面；正常序列与现有反证成立，
+但批准期切换/全部再入、E3 retry/correction 身份、写入间故障与冷进程、actual packet/UI 行为仍缺完整证明。
+Boundary Review WARN，未获提交许可；不把 1367 项回归通过提升为完整 E3 闭环。
+当前 active step：独立 diff review 检查完整控制链和最小必要覆盖缺口，不预填 PASS、不加框架、不做历史样本 rescue。
+仍不进入 E4/provider/real-case；若发现需要新增机制，先判必要性，不直接开工。
+
+2026-09-06 CC 独立 diff review 后：D1 两个 resolver 入口漏接 IAE、D2 物理写入 IOException 被改标为 authored 违约，
+均已以红灯反例复现并做最小修复（两个 catch 对齐、写入移出校验 catch）。本 delta 仅三个既有 production 文件、
+两个既有测试文件和计划记录，零新机制。聚焦序列与 adapter 测试 `15/0/0/0`，包含非 authored sibling 的同一 IO 故障。
+gate 的 catch 仅归一异常诊断，不宣称新增 persisted recovery 路由；自定义图支持面未变化。
+完整 E3 仍 WARN / NO COMMIT，不接受评审中“部分证据即可提交”的建议降低既定门槛。
+完整回归于 09:32 +08:00 完成：`mvn -fae test` BUILD SUCCESS，160 份 XML 聚合 `1371/0/0/0`，diff-check clean。
+当前 active step：在既有测试内补 §17.2 的必要序列证明；不新增平台、不恢复历史样本。
+E4/provider/real-case/提交仍停止，详情见 E3 计划 §18。
+
+2026-09-06 14:03 +08:00：按用户“不可降标项直接补齐”完成 E3 §10 的必要补证，详见计划 §19。
+新增真实 runtime 再入/同 bytes 新批准期/旧 retry 拒绝与新链完成/漏回应拒绝/14 个失败切面/
+两有效候选歧义/冷 JVM 正反/abort-terminal、correction 完整正文和实际 packet 透传测试。
+七条 implementation + direct self-test 的正常/拒绝矩阵使用真实声明边，不用 provider 替身冒称业务分类正确。
+六项独立守卫突变均取得断言红灯，恢复后五个生产文件 SHA 与实验前一致。
+真实浏览器覆盖两个 packet、两个 production renderer、历史 mgt 只读/转义/不溢出；
+仅额外修一处 console 证据栏长 ID 换行，先红后绿，不加新机制。
+最终完整 package exit 0，161 XML 聚合 `1381/0/0/0`；新 JAR 四 workflow validate 全通过，diff-check clean。
+当前 active step：给 CC 简短独立 delta review prompt，要求自行验证完整控制链和失败切面，非局部计数审查。
+未提交、不调用 provider、不进入 E4、不恢复或创建 real-case。后续既定验收缺口直接补齐，不建议降标；
+若需要新增机制才可闭合，仍须先判断必要性，不能用本次授权扩大范围。R1 liveness/历史恢复/真实业务收敛不冒称已证明。
+
+2026-09-06 15:11 +08:00 E3 收口：CC Delta Review 确认 D1/D2 与核心证据缺口关闭、六维成立，允许补齐
+双业务对称拒绝/一致路径重命名后提交。已选择“不降标”，仅两个测试文件参数化并增加一致改名正例；
+两业务各执行 14 类损坏、有效多候选拒绝，且各自删除两条历史回应之一均不能发布或启动下游。
+聚焦两类 `26/0/0/0`；完整 package 及 161 XML 聚合 `1388/0/0/0`；四 workflow validate、
+浏览器与 diff-check 全通过，五个 reviewed production SHA 不变。CC 本轮未亲跑套件，此处数值为实施方复跑。
+E3 CHECKPOINT COMPLETE，按已授权范围选择性提交 43 文件，排除 output/ 与旧 OKX Gate。
+本 step 到此停止，不自动进入 E4/provider/real-case；真实业务收敛仍 NOT PROVEN。

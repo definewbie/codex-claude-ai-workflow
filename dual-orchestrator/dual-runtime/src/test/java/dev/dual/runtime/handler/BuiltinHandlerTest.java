@@ -1618,6 +1618,8 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageIncludesRequirementInputArtifactAndGitEvidencePointers() throws Exception {
+        var reviewer = AuthoredInputFixture.before(tempDir, "ws", "design.codex_arch_review", "run-review");
+        var designRef = AuthoredExecutionContext.prepare(reviewer, "run-review").orElseThrow().subject().sidecar().ref();
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var input = workstreamDir.resolve("runs/run-001/outputs/design.md");
         var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
@@ -1639,7 +1641,7 @@ class BuiltinHandlerTest {
                         "context.design_codex_arch_review",
                         NodeKind.TASK,
                         "context.build_package",
-                        List.of(".agent/workstreams/ws/runs/run-001/outputs/design.md")
+                        List.of(".agent/workstreams/ws/runs/run-001/outputs/design.md", designRef)
                 )
         ));
 
@@ -1661,6 +1663,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageIncludesRoutedAgentOutputAfterHumanGate() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.json");
         Files.createDirectories(planOutput.getParent());
@@ -1686,6 +1689,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageUsesProfileToKeepImplementationContextFocused() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.json");
         var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
@@ -1756,6 +1760,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageIncludesHumanGateFeedbackFromNodeResult() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var nodesDir = workstreamDir.resolve("nodes");
         Files.createDirectories(nodesDir);
@@ -1801,6 +1806,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageIncludesRecentWorkflowIterationHistory() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var iterationsDir = workstreamDir.resolve("iterations");
         Files.createDirectories(iterationsDir);

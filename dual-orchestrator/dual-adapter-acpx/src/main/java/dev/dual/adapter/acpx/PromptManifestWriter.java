@@ -24,7 +24,7 @@ import java.util.Map;
  * bytes/estimatedTokens/sha256 plus source metadata so memory optimizations can
  * be verified without re-parsing prompt text.</p>
  */
-final class PromptManifestWriter {
+class PromptManifestWriter {
 
     static Path manifestPathFor(Path promptPath) {
         return promptPath.resolveSibling(promptPath.getFileName() + ".manifest.json");
@@ -40,6 +40,12 @@ final class PromptManifestWriter {
                String promptTemplate,
                Path promptPath,
                List<AgentPromptRenderer.PromptSection> sections) throws IOException {
+        write(manifestPath, workstreamId, runId, nodeId, agent, promptTemplate, promptPath, sections, null);
+    }
+
+    void write(Path manifestPath, String workstreamId, String runId, String nodeId, String agent,
+               String promptTemplate, Path promptPath, List<AgentPromptRenderer.PromptSection> sections,
+               dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot authoredContext) throws IOException {
         Files.createDirectories(manifestPath.getParent());
         var sectionEntries = new ArrayList<Map<String, Object>>();
         for (var section : sections) {
@@ -68,6 +74,7 @@ final class PromptManifestWriter {
         manifest.put("totalBytes", promptBytes.length);
         manifest.put("totalEstimatedTokens", estimatedTokens(promptBytes.length));
         manifest.put("sections", sectionEntries);
+        if (authoredContext != null) manifest.put("authoredContext", authoredContext);
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(manifestPath.toFile(), manifest);
     }
 

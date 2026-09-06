@@ -231,7 +231,7 @@ class AcpxAgentTaskHandlerTest {
                 "requires_approved_task_contract", true));
         var instance = readyInstance(definition.id());
 
-        var result = handler.execute(taskContext(tempDir, "ws-unqualified", definition, instance));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-unqualified", definition, instance));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED", result.outcome());
@@ -240,7 +240,6 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes() throws Exception {
-        DesignContractFixture.approve(tempDir, "ws-correction");
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Document the existing transition validation.\n");
@@ -365,6 +364,14 @@ class AcpxAgentTaskHandlerTest {
         var acquisition = metadata.path("agentResultAcquisition");
         assertTrue(acquisition.path("correctionAttempted").asBoolean());
         assertEquals("SCHEMA_FAILURE", acquisition.path("correctionReason").asText());
+        var authoredManifest = OBJECT_MAPPER.readTree(tempDir.resolve(metadata.path("promptManifestPath").asText()).toFile());
+        var authoredSnapshot = OBJECT_MAPPER.treeToValue(authoredManifest.get("authoredContext"),
+                dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot.class);
+        var requiredBody = authoredSnapshot.render(tempDir);
+        assertTrue(authoredSnapshot.approvedPlan() != null);
+        assertTrue(transport.initialPrompt.contains(requiredBody));
+        assertTrue(transport.correctionPrompt.contains(requiredBody.stripTrailing()),
+                "correction must receive the same approved body (its renderer strips trailing whitespace), not just refs");
         assertEquals("ATTEMPTED", acquisition.path("correctionDisposition").asText());
         assertEquals(2, acquisition.path("occurrences").size());
         assertTrue(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
@@ -503,7 +510,6 @@ class AcpxAgentTaskHandlerTest {
                       ]
                     }
                     """);
-            writeCompactionMetrics("ws-cache-aware", 1_500_000, 0);
 
             var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
             var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
@@ -527,7 +533,9 @@ class AcpxAgentTaskHandlerTest {
                     null
             );
 
-            var result = handler.execute(taskContext(tempDir, "ws-cache-aware", definition, instance));
+            var context = taskContext(tempDir, "ws-cache-aware", definition, instance);
+            writeCompactionMetrics("ws-cache-aware", 1_500_000, 0);
+            var result = handler.execute(context);
             var runMetadataPath = tempDir.resolve((String) result.result().get("run_metadata"));
             var runMetadata = Files.readString(runMetadataPath);
             assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-cache-aware-compact-implement.claude_implement\""));
@@ -1163,13 +1171,13 @@ class AcpxAgentTaskHandlerTest {
                 base.stageId(), base.iterationId(), base.inputRefs(), base.outputRefs(),
                 Map.of("permission_approval", approval), base.runRef(), base.startedAt(), base.finishedAt());
 
-        new AcpxAgentTaskHandler(transport, false).execute(taskContext(tempDir, "ws-test", definition, approved));
+        var execution = new AcpxAgentTaskHandler(transport, false).execute(taskContext(tempDir, "ws-test", definition, approved));
 
         assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("WebSearch"));
         assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebFetch"));
         assertTrue(transport.lastPermissionProfile.escalateKinds().contains("fetch"));
-        var prompt = Files.readString(Files.list(workstreamDir.resolve("runs"))
-                .findFirst().orElseThrow().resolve("prompts/design-codex-review.md"));
+        var prompt = Files.readString(tempDir.resolve((String) execution.result().get("run_metadata"))
+                .getParent().resolve("prompts/design-codex-review.md"));
         assertTrue(prompt.contains("WebSearch is operator-approved"));
         assertTrue(prompt.contains("Never use WebFetch"));
     }
@@ -1259,7 +1267,6 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact() throws Exception {
-        DesignContractFixture.approve(tempDir, "ws-test");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1327,7 +1334,6 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings() throws Exception {
-        DesignContractFixture.approve(tempDir, "ws-non-zero-correction");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-non-zero-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1382,7 +1388,6 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings() throws Exception {
-        DesignContractFixture.approve(tempDir, "ws-root-closure-warning");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-root-closure-warning");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -2226,6 +2231,8 @@ class AcpxAgentTaskHandlerTest {
         private int calls;
         private AcpxPermissionProfile correctionProfile;
         private String initialArtifact;
+        private String initialPrompt;
+        private String correctionPrompt;
 
         private SchemaContractCorrectionTransport() {
             this(true);
@@ -2242,6 +2249,7 @@ class AcpxAgentTaskHandlerTest {
             prepareLogs(request);
             initialArtifact = completionJson(request, "SELF_TEST_COMPLETE")
                     .replace("    \"missing_evidence\" : [ ],\n", "");
+            initialPrompt = Files.readString(request.promptPath());
             var now = Instant.parse("2026-07-26T00:00:00Z");
             return fixtureResult(
                     0,
@@ -2261,6 +2269,7 @@ class AcpxAgentTaskHandlerTest {
             correctionProfile = request.permissionProfile();
             prepareLogs(request);
             var corrected = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(initialArtifact);
+            correctionPrompt = Files.readString(request.promptPath());
             if (repairSecondOccurrence) {
                 ((com.fasterxml.jackson.databind.node.ObjectNode) corrected.path("result"))
                         .putArray("missing_evidence");
@@ -2655,11 +2664,12 @@ class AcpxAgentTaskHandlerTest {
                 """);
 
         var handler = new AcpxAgentTaskHandler(new RejectionEnvelopeTransport(), false);
-        var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
-                "agent", "codex", "session", "codex-main", "prompt_template", "design-codex-review"
+        // An unqualified contract is only a legal input before the contract gate.
+        var definition = new NodeDefinition("intake.codex_product_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "codex", "session", "codex-main", "prompt_template", "intake-codex-product-review"
         ));
         handler.execute(taskContext(tempDir, "ws-sem-run", definition,
-                readyInstance("design.codex_arch_review")));
+                readyInstance(definition.id())));
 
         var memory = Files.readString(workstreamDir.resolve("memory/workstream-memory.json"));
         assertTrue(memory.contains("\"status\" : \"unavailable\""),
@@ -2668,6 +2678,22 @@ class AcpxAgentTaskHandlerTest {
                 "unqualified stable contract must not define decidedScope: " + memory);
         assertFalse(memory.contains("NEEDS_REVISION"), "unvalidated decision must not enter memory: " + memory);
         assertFalse(memory.contains("refresh token on expiry"), "unvalidated issue must not enter memory: " + memory);
+    }
+
+    @Test
+    void qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory() throws Exception {
+        var ws = "ws-qualified-memory";
+        var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "codex", "session", "codex-main", "prompt_template", "design-codex-review",
+                "requires_approved_task_contract", true));
+        var context = taskContext(tempDir, ws, definition, readyInstance(definition.id()));
+        var candidate = new AcpxAgentTaskHandler(new RejectionEnvelopeTransport(), false).execute(context);
+        assertEquals(NodeStatus.COMPLETED, candidate.status(), candidate.result().toString());
+        // The adapter acquired an envelope; ArtifactContractValidator has not published it yet.
+        var memory = Files.readString(tempDir.resolve(".agent/workstreams/" + ws + "/memory/workstream-memory.json"));
+        assertTrue(memory.contains("repo/relative/new.ext"), "qualified contract scope remains available");
+        assertFalse(memory.contains("NEEDS_REVISION"), "unpublished reviewer decision must not enter memory");
+        assertFalse(memory.contains("refresh token on expiry"), "unpublished issue must not enter memory");
     }
 
     private static NodeInstance readyInstance(String definitionId) {
@@ -2693,7 +2719,7 @@ class AcpxAgentTaskHandlerTest {
             String workstreamId,
             NodeDefinition definition,
             NodeInstance instance
-    ) throws IOException {
+    ) throws Exception {
         if ("intake.claude_brainstorm".equals(definition.id())) {
             var iterationsDir = workspaceRoot.resolve(".agent/workstreams")
                     .resolve(workstreamId)
@@ -2704,7 +2730,12 @@ class AcpxAgentTaskHandlerTest {
             new ObjectMapper().registerModule(new JavaTimeModule()).writerWithDefaultPrettyPrinter()
                     .writeValue(iterationsDir.resolve(instance.iterationId() + ".json").toFile(), iteration);
         }
-        return new TaskHandler.TaskContext(workspaceRoot, workstreamId, definition, instance);
+        var context = new TaskHandler.TaskContext(workspaceRoot, workstreamId, definition, instance);
+        if (java.util.Set.of("design.claude_design", "design.codex_arch_review", "plan.claude_plan",
+                "plan.codex_plan_review", "implement.claude_implement", "implement.claude_self_test_report").contains(definition.id())) {
+            return AuthoredAdapterFixture.before(context);
+        }
+        return context;
     }
 
     private void writeCompactionMetrics(String workstreamId, long claudeCachedReadTokens, long codexCachedReadTokens)
@@ -2743,7 +2774,8 @@ class AcpxAgentTaskHandlerTest {
                   "id":"task-test","version":1,"created_at":"2026-07-26T00:00:00Z",
                   "objective":"Implement the approved change.","status":"READY_FOR_REVIEW",
                   "scope":{"included":[{"path":"README.md","operation":"MODIFY"}],"excluded":[]},
-                  "acceptance_criteria":[],"test_requirements":[],"constraints":[],
+                  "acceptance_criteria":["approved change works","scope stays fixed"],
+                  "test_requirements":["run tests"],"constraints":["only approved files"],
                   "non_goals":[],"risk_areas":[],"ambiguity_notes":[],"human_questions":[],
                   "compilation_pass":1
                 }
@@ -3269,7 +3301,9 @@ class AcpxAgentTaskHandlerTest {
         if (start < 0) {
             throw new AssertionError("strict AgentResultEnvelope example missing from prompt");
         }
-        return prompt.substring(start).strip()
+        // Read one JSON example, not the authored-input instructions following it.
+        var example = OBJECT_MAPPER.readTree(prompt.substring(start));
+        return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(example)
                 .replace("<one allowed decision>", decision);
     }
 }

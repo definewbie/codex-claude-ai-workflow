@@ -164,6 +164,7 @@ public final class WorkflowDefinitionLoader {
                 source.edges()
         );
         validateApprovedTaskContractRequirements(definition);
+        dev.dual.runtime.handler.AuthoredExecutionContext.validateDefinition(definition);
         return definition;
     }
 

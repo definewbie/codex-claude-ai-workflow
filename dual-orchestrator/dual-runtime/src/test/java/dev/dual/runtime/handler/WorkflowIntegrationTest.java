@@ -247,6 +247,7 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain3_activeProfileBudgetExcludesDuplicateRequirement() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws-int", "implement.claude_implement", "run-implement");
         var largeRequirement = "A".repeat(8_000) + "\n";
         fixture.writeRequirement(largeRequirement);
         fixture.writeGitEvidence("M src/Foo.java\nM src/Bar.java", "2 files changed, 400 insertions(+)", null);
@@ -291,6 +292,7 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain4_explicitFullProfileCompressesOversizedRequirement() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws-int", "implement.claude_implement", "run-implement");
         var oversizedRequirement = "R".repeat(25_000) + "\n";
         fixture.writeRequirement(oversizedRequirement);
 

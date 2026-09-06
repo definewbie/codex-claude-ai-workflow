@@ -36,7 +36,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     // closer used by workflow recovery, so both paths replay the same durable execution facts.
     private final AgentExecutionAttemptReconciler attemptReconciler =
             new AgentExecutionAttemptReconciler(new AgentExecutionAttemptTimeoutPolicy().timeout());
-    private final PromptManifestWriter promptManifestWriter = new PromptManifestWriter();
+    private final PromptManifestWriter promptManifestWriter;
     private final SessionCompactionPolicy sessionCompactionPolicy = new SessionCompactionPolicy();
     private final SessionCompactionSeedWriter sessionCompactionSeedWriter = new SessionCompactionSeedWriter();
 
@@ -45,6 +45,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     }
 
     AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly, AcpxUsageReader usageReader) {
+        this(transport, prepareOnly, usageReader, new PromptManifestWriter());
+    }
+
+    AcpxAgentTaskHandler(AcpxAgentTransport transport, boolean prepareOnly, AcpxUsageReader usageReader,
+                         PromptManifestWriter promptManifestWriter) {
         if (transport == null) {
             throw new IllegalArgumentException("transport is required");
         }
@@ -56,6 +61,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         this.promptRenderer = new AgentPromptRenderer();
         this.metadataWriter = new AgentRunMetadataWriter();
         this.usageReader = usageReader;
+        this.promptManifestWriter = java.util.Objects.requireNonNull(promptManifestWriter);
     }
 
     @Override
@@ -156,6 +162,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     List.of(),
                     Map.of("error", failure.getMessage()),
                     failure.getMessage());
+        } catch (AgentRunGovernanceContext.AuthoredContextException failure) {
+            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
         }
         if (seedPath != null) {
             inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
@@ -185,17 +194,35 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                 agentResultContract,
                 governanceContext.trustedTaskContractPayload().orElse(null)
         ), effectivePermissionProfile);
+        var authored = governanceContext.authoredContext().orElse(null);
+        try {
+            if (authored != null) {
+                var body = authored.render(context.workspaceRoot());
+                var sections = new ArrayList<>(rendered.sections());
+                sections.add(new AgentPromptRenderer.PromptSection(
+                        dev.dual.runtime.handler.AuthoredExecutionContext.SECTION_NAME, "typed_authored_context",
+                        context.instance().nodeInstanceId(), body, "required approved and revision inputs", true));
+                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + body, List.copyOf(sections));
+                agentResultContract += "\n\n" + body;
+            }
+        } catch (java.io.IOException | IllegalArgumentException failure) {
+            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+        }
+        // Storage failures retain the ordinary adapter IO path, not evidence-violation semantics.
         Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
         promptManifestWriter.write(
-                PromptManifestWriter.manifestPathFor(promptPath),
-                context.workstreamId(),
-                runId,
-                context.definition().id(),
-                agent,
-                promptTemplate,
-                promptPath,
-                rendered.sections()
-        );
+                PromptManifestWriter.manifestPathFor(promptPath), context.workstreamId(), runId,
+                context.definition().id(), agent, promptTemplate, promptPath, rendered.sections(), authored);
+        try {
+            if (authored != null) {
+                dev.dual.runtime.handler.AuthoredExecutionContext.verifyManifest(context.workspaceRoot(),
+                        PromptManifestWriter.manifestPathFor(promptPath), authored);
+            }
+        } catch (java.io.IOException | IllegalArgumentException failure) {
+            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+        }
 
         if (prepareOnly) {
             metadataWriter.writePrepared(

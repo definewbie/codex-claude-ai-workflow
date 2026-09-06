@@ -56,7 +56,8 @@ public record AgentResultEnvelope(
             List<String> mustFix,
             List<String> openRisks,
             String verificationSummary,
-            Design design
+            Design design,
+            List<AuthoredRevisionResponse> revisionResponses
     ) implements AgentResult {
     }
 
@@ -64,6 +65,13 @@ public record AgentResultEnvelope(
     }
 
     public record PlannedFile(String path, TaskContract.ScopeOperation operation, String responsibility) {
+    }
+
+    public record AuthoredRevisionResponse(String obligationId, AuthoredRevisionDisposition disposition, String evidence) {
+    }
+
+    public enum AuthoredRevisionDisposition {
+        ADDRESSED, NOT_ADDRESSED
     }
 
     public record TaskContractProposalResult(
@@ -195,7 +203,8 @@ public record AgentResultEnvelope(
             List<String> changedFiles,
             String verificationSummary,
             Failure failure,
-            Plan plan
+            Plan plan,
+            List<AuthoredRevisionResponse> revisionResponses
     ) implements AgentResult {
     }
 

@@ -50,6 +50,12 @@ class ReviewShowCommandTest {
                 ## Review Focus
 
                 Read the Codex review.
+
+                ## Authored Stage
+
+                candidate: runs/run-current/outputs/result.contract.json
+                active obligation: human-note-1 / Preserve behavior
+                revision response: human-note-1 / NOT_ADDRESSED / Requires human decision
                 """, StandardCharsets.UTF_8);
 
         var command = new ReviewShowCommand();
@@ -70,5 +76,6 @@ class ReviewShowCommandTest {
         assertTrue(printed.contains("gate.human_design_approval"));
         assertTrue(printed.contains(packetRef));
         assertTrue(printed.contains("Read the Codex review."));
+        assertTrue(printed.contains(Files.readString(packetPath)), "CLI must not strip authored content from the packet");
     }
 }

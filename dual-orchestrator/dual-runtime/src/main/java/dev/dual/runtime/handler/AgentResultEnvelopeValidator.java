@@ -144,6 +144,7 @@ public final class AgentResultEnvelopeValidator {
                 validateNoVerificationRemediation(output.failure(), errors);
             }
             case AgentResultEnvelope.DesignResult design -> {
+                AuthoredRevisionValidator.shapeErrors(design.revisionResponses()).forEach(errors::reject);
                 requiredText(design.lifecycleStatus(), "result.lifecycle_status", errors);
                 requiredList(design.checks(), "result.checks", false, errors);
                 requiredList(design.evidence(), "result.evidence", false, errors);
@@ -156,6 +157,7 @@ public final class AgentResultEnvelopeValidator {
                 }
             }
             case AgentResultEnvelope.PlanResult plan -> {
+                AuthoredRevisionValidator.shapeErrors(plan.revisionResponses()).forEach(errors::reject);
                 validateEvidencePayload(
                         plan.lifecycleStatus(), plan.checks(), plan.evidence(), plan.missingEvidence(),
                         plan.mustFix(), plan.acceptanceNotes(), plan.openRisks(), plan.changedFiles(),

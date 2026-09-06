@@ -859,6 +859,23 @@ function renderReviewStructured(packet) {
     reviewList("Suggested Checks", guidance.suggestedChecks),
   ]);
 
+  if (packet.authoredStage) {
+    const authored = packet.authoredStage;
+    const candidate = authored.candidate || {};
+    appendGateEvidenceSection("Authored Candidate And Revision History", [
+      reviewKeyValue("Candidate", candidate.sidecar?.ref),
+      reviewKeyValue("SHA", candidate.sidecar?.sha256),
+      reviewKeyValue("Run", candidate.runId),
+      reviewKeyValue("Contract Approval", authored.contract?.approvalGateRef),
+      reviewKeyValue("Design Approval", authored.approvedDesign?.gate?.ref),
+      reviewList("Planned Files", (authored.plannedFiles?.planned_files || []).map((file) => `${file.operation} ${file.path}: ${file.responsibility}`)),
+      reviewList("Edit Files", authored.plan?.edit_files),
+      reviewList("Active Historical Obligations", (authored.activeObligations || []).map((item) => `${item.id}: ${item.text} (${item.source?.ref || "-"})`)),
+      reviewList("Candidate Responses", (authored.revisionResponses || []).map((item) => `${item.obligation_id}: ${item.disposition} - ${item.evidence}`)),
+      reviewList("New Must Fix (Not Yet Responded)", authored.newMustFix),
+    ]);
+  }
+
   appendGateEvidenceSection("Task Contract", [
     reviewKeyValue("Status", contract.status),
     reviewList("Included Scope", contract.includedScope),

@@ -116,11 +116,21 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     null);
         }
 
+        String authoredBody = "";
+        if (AuthoredStageLineageResolver.participates(configText(context, "target_node", ""))) {
+            try {
+                authoredBody = new AuthoredStageLineageResolver(context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
+                        .contextBody(context);
+            } catch (IOException | IllegalArgumentException failure) {
+                return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+                        Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+            }
+        }
         Files.createDirectories(contextDir);
 
         if (ContextProfiles.hasProfile(profileName) && !hasSectionOverride) {
             return executeGoverned(context, workstreamDir, packagePath, profileName,
-                    reviewSubject, architectureReviewSubject, qualifiedContract);
+                    reviewSubject, architectureReviewSubject, qualifiedContract, authoredBody);
         }
 
         var requestedSections = effectiveSections(context);
@@ -134,6 +144,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                 : null;
         var markdown = renderPackage(context, workstreamDir, manifest, governance,
                 reviewSubject, architectureReviewSubject);
+        if (!authoredBody.isEmpty()) markdown += "\n\n" + authoredBody;
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
         var requiredTypedSubjectTokens = requiredTypedSubjectTokens(reviewSubject, architectureReviewSubject);
         var metadataPath = writeContextPackageMetadata(
@@ -200,7 +211,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             String profileName,
             Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject,
             Optional<AgentEvidenceIndex.Entry> architectureReviewSubject,
-            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract
+            Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract,
+            String authoredBody
     ) throws IOException {
         var rawBudget = ContextProfiles.budgetFor(profileName);
         var budget = effectiveBudget(rawBudget);
@@ -330,6 +342,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         // Required typed evidence is never dropped; report its cost instead of hiding it behind the soft budget.
         builder.replace(0, builder.indexOf("\n## Context Governance"),
                 rebuildGovernedHeader(context, budget, sorted, requiredTypedSubjectTokens));
+        if (!authoredBody.isEmpty()) builder.append("\n\n").append(authoredBody);
         var markdown = builder.toString();
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
         var declaredSections = budget.sections().stream()

@@ -63,12 +63,25 @@ public final class AgentResultPromptContract {
                             verificationRemediationAllowedValues(exampleResult),
                             rereadReasonInstruction(nodeId),
                             verificationRemediationInstruction(nodeId, exampleResult),
-                            contractRevisionInstruction(nodeId, proposalContext),
+                            contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
         } catch (Exception failure) {
             throw new IllegalStateException("failed to render AgentResultEnvelope prompt contract", failure);
         }
+    }
+
+    private static String authoredRevisionInstruction(AgentResultEnvelope.AgentResult result) {
+        if (!(result instanceof AgentResultEnvelope.DesignResult) && !(result instanceof AgentResultEnvelope.PlanResult)) return "";
+        return "\n`result.revision_responses` is required: return [] when there are no active authored obligations. "
+                + "Otherwise cover every active obligation_id from Required Authored Context exactly once; "
+                + "do not add unknown IDs or omit unresolved obligations. Each entry has exactly obligation_id, "
+                + "disposition (ADDRESSED or NOT_ADDRESSED), and non-empty evidence. "
+                + "Use NOT_ADDRESSED when unresolved; ADDRESSED is a claim for review, not an approval or closure. "
+                + "Preserve all previously required behavior and the approved contract while making this revision."
+                + closedItemFields("result.revision_responses", new AgentResultEnvelope.AuthoredRevisionResponse(
+                        "sha256:" + "0".repeat(64) + "#human-note:0",
+                        AgentResultEnvelope.AuthoredRevisionDisposition.NOT_ADDRESSED, "Explain what remains unresolved"));
     }
 
     private static String contractRevisionInstruction(String nodeId, ProposalEmissionContext context) {
@@ -263,7 +276,7 @@ public final class AgentResultPromptContract {
                     List.of(), List.of(), List.of(), "Design only; no implementation performed.",
                     new AgentResultEnvelope.Design(List.of(new AgentResultEnvelope.PlannedFile(
                             "repo/relative/new.ext", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE,
-                            "responsibility assigned within the approved scope"))));
+                            "responsibility assigned within the approved scope"))), List.of());
             case "plan.claude_plan" -> new AgentResultEnvelope.PlanResult(
                     "plan_result",
                     decision,
@@ -288,7 +301,7 @@ public final class AgentResultPromptContract {
                             "rollback approach",
                             List.of("None identified."),
                             List.of("review item")
-                    )
+                    ), List.of()
             );
             case "implement.claude_self_test_report" -> new AgentResultEnvelope.SelfTestResult(
                     "self_test_report",

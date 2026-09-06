@@ -461,6 +461,7 @@ function renderEvidence(status) {
       ["Codex 结论", decision.decision || "-"],
       ["原因", guidance.reason || decision.summary || "-"],
     ], [
+      ...authoredStageEvidence(packet.authoredStage),
       ...(asList(decision.mustFix).map((item) => `Must Fix：${item}`)),
       ...(asList(guidance.suggestedChecks).map((item) => `建议检查：${item}`)),
     ]);
@@ -489,6 +490,22 @@ function renderEvidence(status) {
     els.tokenSummary.innerHTML = tokenCard(tokens);
   }
   els.evidence.innerHTML = left;
+}
+
+function authoredStageEvidence(authored) {
+  if (!authored) return [];
+  const candidate = authored.candidate || {};
+  return [
+    `候选：${candidate.sidecar?.ref || "-"}`,
+    `SHA：${candidate.sidecar?.sha256 || "-"} · Run：${candidate.runId || "-"}`,
+    `合同批准：${authored.contract?.approvalGateRef || "-"}`,
+    ...(authored.approvedDesign ? [`设计批准：${authored.approvedDesign.gate?.ref || "-"}`] : []),
+    ...asList(authored.plannedFiles?.planned_files).map((file) => `${file.operation} ${file.path}：${file.responsibility}`),
+    ...asList(authored.plan?.edit_files).map((path) => `计划文件：${path}`),
+    ...asList(authored.activeObligations).map((item) => `历史意见 ${item.id}：${item.text}（${item.source?.ref || "-"}）`),
+    ...asList(authored.revisionResponses).map((item) => `回应 ${item.obligation_id}：${item.disposition} · ${item.evidence}`),
+    ...asList(authored.newMustFix).map((item) => `本轮新发现（尚未回应）：${item}`),
+  ];
 }
 
 function renderLoopHistory() {

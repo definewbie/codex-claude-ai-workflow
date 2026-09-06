@@ -247,6 +247,7 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void planReviewRendersTypedPlanFromValidatedAgentEvidence() throws Exception {
+        var author = AuthoredInputFixture.before(tempDir, "ws-ctx", "plan.claude_plan", "run-plan");
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Add a small application API.", StandardCharsets.UTF_8);
         var output = wsDir.resolve("runs/run-plan/outputs/plan-claude.json");
@@ -274,7 +275,7 @@ class ContextBuildPackageHandlerTest {
                   }
                 }
                 """, StandardCharsets.UTF_8);
-        publishSidecar(sidecar);
+        AuthoredInputFixture.publish(author, output, "run-plan");
         var derivedPlan = PlanArtifactSidecar.pathFor(output);
         Files.writeString(derivedPlan, """
                 {
@@ -679,12 +680,11 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget() throws Exception {
+        var author = AuthoredInputFixture.before(tempDir, "ws-ctx", "design.claude_design", "run-design");
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Review the complete design.", StandardCharsets.UTF_8);
         Files.createDirectories(wsDir.resolve("iterations"));
         Files.createDirectories(wsDir.resolve("nodes"));
-        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
-
         var output = wsDir.resolve("runs/run-design/outputs/design-claude.md");
         Files.createDirectories(output.getParent());
         Files.writeString(output, "UNVALIDATED_RAW_TRANSCRIPT_MUST_STAY_OUT", StandardCharsets.UTF_8);
@@ -708,10 +708,10 @@ class ContextBuildPackageHandlerTest {
         typed.putObject("design").putArray("planned_files").addObject()
                 .put("path", "src/design.ext").put("operation", "CREATE").put("responsibility", "Lifecycle ownership");
         objectMapper.writeValue(sidecar.toFile(), typed);
-        publishSidecar(sidecar);
+        AuthoredInputFixture.publish(author, output, "run-design");
 
         var result = handler.execute(ctx("architecture_review", List.of(
-                ".agent/workstreams/ws-ctx/runs/run-design/outputs/design-claude.md"),
+                ".agent/workstreams/ws-ctx/runs/run-design/outputs/design-claude.md", relative(tempDir, sidecar)),
                 "design.codex_arch_review"));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -2188,6 +2188,7 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void implementTargetDoesNotReceiveTypedSourceRereadAllowance() throws Exception {
+        AuthoredInputFixture.before(tempDir, "ws-ctx", "implement.claude_implement", "run-implement");
         System.setProperty("dual.context.governance.enabled", "true");
         Files.createDirectories(wsDir.resolve("memory"));
         Files.writeString(wsDir.resolve("requirement.md"), "Implement source change.", StandardCharsets.UTF_8);

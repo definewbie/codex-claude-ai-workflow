@@ -485,6 +485,10 @@ final class RoutingEngine {
                 && (note == null || note.isBlank())) {
             throw new IOException("a decision note is required to revise a design");
         }
+        if ("plan".equals(gatePurpose) && "revise".equals(canonicalAction)
+                && (note == null || note.isBlank())) {
+            throw new IOException("a decision note is required to revise a plan");
+        }
         resolveGateDocument(paths, gate, canonicalAction, note);
         var humanAuthorizedRevision = "revise".equals(canonicalAction)
                 && note != null

@@ -71,6 +71,7 @@ final class AgentResultDocumentProjector {
                 document.put("reread_reasons", output.rereadReasons().stream().map(this::rereadReason).toList());
             }
             case AgentResultEnvelope.DesignResult design -> {
+                document.put("revision_responses", authoredResponses(design.revisionResponses()));
                 document.put("lifecycle_status", design.lifecycleStatus());
                 document.put("checks", design.checks());
                 document.put("evidence", design.evidence());
@@ -83,6 +84,7 @@ final class AgentResultDocumentProjector {
                                 "responsibility", file.responsibility())).toList()));
             }
             case AgentResultEnvelope.PlanResult plan -> {
+                document.put("revision_responses", authoredResponses(plan.revisionResponses()));
                 evidenceFields(
                         document, plan.lifecycleStatus(), plan.blocking(), plan.checks(), plan.evidence(),
                         plan.missingEvidence(), plan.mustFix(), plan.acceptanceNotes(), plan.openRisks(),
@@ -198,6 +200,11 @@ final class AgentResultDocumentProjector {
 
     private static <T> List<T> safeList(List<T> values) {
         return values == null ? List.of() : values;
+    }
+
+    private List<Map<String, String>> authoredResponses(List<AgentResultEnvelope.AuthoredRevisionResponse> responses) {
+        return responses.stream().map(response -> Map.of("obligation_id", response.obligationId(),
+                "disposition", response.disposition().name(), "evidence", response.evidence())).toList();
     }
 
     Map<String, Object> planArtifact(AgentResultEnvelope.PlanResult result) {

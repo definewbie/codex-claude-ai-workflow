@@ -80,13 +80,17 @@ class ArtifactContractFixtureRegressionTest {
     }
 
     private String validate(String nodeId, AgentResultEnvelope.AgentResult result) throws Exception {
+        var instanceId = "node-fixture";
+        if (AuthoredStageLineageResolver.participates(nodeId)) {
+            instanceId = AuthoredInputFixture.before(root, "ws-fixture", nodeId, "run-fixture").instance().nodeInstanceId();
+        }
         var output = root.resolve(nodeId.replace('.', '-') + ".json");
         var envelope = new AgentResultEnvelope(1, "ws-fixture", "run-fixture", nodeId, result);
         Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
         var nodeResult = NodeResult.completed("completed", List.of(output.getFileName().toString()),
                 Map.of("run_id", "run-fixture"));
 
-        var validated = validator.validate(root, "ws-fixture", "node-fixture", agentNode(nodeId), nodeResult);
+        var validated = validator.validate(root, "ws-fixture", instanceId, agentNode(nodeId), nodeResult);
 
         assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         var sidecar = AgentOutputContractSidecar.pathFor(output);

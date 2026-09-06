@@ -52,7 +52,9 @@ public record AgentOutputContractDocument(
         RepositoryFactBinding.Reference repositoryFactBinding,
         ProposalDerivation proposalDerivation,
         PlanArtifactDocument planArtifact,
-        AgentResultEnvelope.Design design
+        AgentResultEnvelope.Design design,
+        List<AgentResultEnvelope.AuthoredRevisionResponse> authoredRevisionResponses,
+        AuthoredExecutionContext.Reference authoredContext
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -99,7 +101,9 @@ public record AgentOutputContractDocument(
                 RepositoryFactBinding.Reference.fromMap(objectMap(document.get("repository_fact_binding"))),
                 ProposalDerivation.from(objectMap(document.get("proposal_derivation"))),
                 planArtifact(objectMap(document.get("plan_artifact"))),
-                design(objectMap(document.get("design")))
+                design(objectMap(document.get("design"))),
+                authoredResponses(document.get("revision_responses")),
+                authoredReference(document.get("authored_context"))
         );
     }
 
@@ -183,6 +187,8 @@ public record AgentOutputContractDocument(
     }
 
     public boolean hasRequiredTypedPayload() {
+        if (("design_result".equals(sourceArtifactType) || "plan_result".equals(sourceArtifactType))
+                && !AuthoredRevisionValidator.shapeErrors(authoredRevisionResponses).isEmpty()) return false;
         if ("design_result".equals(sourceArtifactType)) {
             return DesignScopeValidator.shapeErrors(design).isEmpty();
         }
@@ -197,6 +203,22 @@ public record AgentOutputContractDocument(
 
     private static PlanArtifactDocument planArtifact(Map<String, Object> document) {
         return document.isEmpty() ? null : PlanArtifactDocument.from(document);
+    }
+
+    private static AuthoredExecutionContext.Reference authoredReference(Object value) {
+        if (value == null) return null;
+        return AuthoredExecutionContext.JSON.convertValue(value, AuthoredExecutionContext.Reference.class);
+    }
+
+    private static List<AgentResultEnvelope.AuthoredRevisionResponse> authoredResponses(Object value) {
+        if (!(value instanceof List<?> values)) return null;
+        var result = new ArrayList<AgentResultEnvelope.AuthoredRevisionResponse>();
+        for (var entry : values) {
+            var map = objectMap(entry);
+            result.add(new AgentResultEnvelope.AuthoredRevisionResponse(text(map.get("obligation_id")),
+                    AgentResultEnvelope.AuthoredRevisionDisposition.valueOf(text(map.get("disposition"))), text(map.get("evidence"))));
+        }
+        return List.copyOf(result);
     }
 
     private static AgentResultEnvelope.Design design(Map<String, Object> document) {

@@ -32,13 +32,16 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     @Override
     public NodeResult openOrInspect(GateContext context) throws Exception {
-        assertBlockedSourceMatchesReview(context);
+        var authored = authoredGate(context);
+        var decision = latestAgentDecision(context, authored);
+        var subject = latestReviewSubject(context, authored);
+        assertBlockedSourceMatchesReview(context, decision);
         assertChangeScopeViolationSource(context);
         var contractView = contractView(context);
         var allowedActions = HumanGateActionSemantics.allowedActions(context.definition());
         var packetRef = reviewPacketRef(context, ".md");
         var packetJsonRef = reviewPacketRef(context, ".json");
-        writeReviewPacket(context, allowedActions, packetRef, packetJsonRef, contractView);
+        writeReviewPacket(context, allowedActions, packetRef, packetJsonRef, contractView, authored, decision, subject);
 
         return NodeResult.waiting("open", Map.of(
                 "allowed_actions", allowedActions,
@@ -47,11 +50,11 @@ public final class HumanReviewGateHandler implements GateHandler {
         ));
     }
 
-    private void assertBlockedSourceMatchesReview(GateContext context) {
+    private void assertBlockedSourceMatchesReview(GateContext context, AgentDecisionSummary review) {
         if (!"BLOCKED".equals(context.sourceOutcome())) {
             return;
         }
-        var decision = latestAgentDecision(context).decision();
+        var decision = review.decision();
         if (!"BLOCKED".equals(decision) && !matchesRevisionLimitEscalation(context, decision)) {
             throw new IllegalStateException(
                     "BLOCKED gate source does not match the validated reviewer decision");
@@ -96,7 +99,10 @@ public final class HumanReviewGateHandler implements GateHandler {
             List<String> allowedActions,
             String packetRef,
             String packetJsonRef,
-            GateContractView contractView
+            GateContractView contractView,
+            AuthoredStageLineageResolver.GateView authored,
+            AgentDecisionSummary decision,
+            Map<String, Object> subject
     ) throws Exception {
         var packetPath = context.workspaceRoot().resolve(packetRef);
         var packetJsonPath = context.workspaceRoot().resolve(packetJsonRef);
@@ -117,21 +123,25 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("reviewPacketPath", packetRef);
         packet.put("taskContract", taskContractSummary(context, contractView));
         packet.put("requirementResolution", requirementResolutionSummary(context, contractView));
-        packet.put("latestAgentDecision", latestAgentDecision(context).toReviewPacketMap());
-        packet.put("reviewSubject", latestReviewSubject(context));
+        packet.put("latestAgentDecision", decision.toReviewPacketMap());
+        packet.put("reviewSubject", subject);
+        if (authored != null) packet.put("authoredStage", authored.projection());
         packet.put("gitEvidence", gitEvidenceSummary(context));
         packet.put("delivery", deliverySummary(context));
-        packet.put("operatorGuidance", operatorGuidance(context, allowedActions));
+        packet.put("operatorGuidance", operatorGuidance(context, allowedActions, decision));
         packet.put("createdAt", Instant.now().toString());
 
         objectMapper.writeValue(packetJsonPath.toFile(), packet);
-        Files.writeString(packetPath, renderMarkdown(context, allowedActions, contractView), StandardCharsets.UTF_8);
+        Files.writeString(packetPath, renderMarkdown(context, allowedActions, contractView, authored, decision, subject), StandardCharsets.UTF_8);
     }
 
     private String renderMarkdown(
             GateContext context,
             List<String> allowedActions,
-            GateContractView contractView
+            GateContractView contractView,
+            AuthoredStageLineageResolver.GateView authored,
+            AgentDecisionSummary decision,
+            Map<String, Object> subject
     ) throws Exception {
         var builder = new StringBuilder();
         builder.append("# Human Review Packet\n\n");
@@ -147,18 +157,25 @@ public final class HumanReviewGateHandler implements GateHandler {
         }
         builder.append("- Allowed Actions: ").append(String.join(", ", allowedActions)).append("\n\n");
 
-        appendOperatorGuidance(builder, context, allowedActions);
+        appendOperatorGuidance(builder, context, allowedActions, decision);
 
         builder.append("## Review Focus\n\n");
         builder.append("- Read the complete referenced design and review sidecars before approving; the packet summary is not a substitute.\n");
         builder.append("- Use `approve` only when the current gate is good enough to continue.\n");
         builder.append("- Use `revise` when the agent should address concrete feedback first.\n\n");
 
-        appendReviewSummary(builder, context, contractView);
+        appendReviewSummary(builder, context, contractView, decision);
         appendTaskContract(builder, context, contractView);
         appendRequirementResolution(builder, context, contractView);
-        appendLatestAgentDecision(builder, context);
-        appendReviewSubject(builder, context);
+        appendLatestAgentDecision(builder, decision);
+        if (authored != null) {
+            builder.append("## Authored Candidate And Revision History\n\n")
+                    .append("Historical obligations remain active until approval. Responses are claims, not verified closure. ")
+                    .append("New must-fix items were raised after this candidate and enter its next revision.\n\n")
+                    .append("```json\n").append(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(authored.projection()))
+                    .append("\n```\n\n");
+        }
+        if (authored == null) appendReviewSubject(builder, subject);
         appendGitEvidence(builder, context);
         appendDelivery(builder, context);
 
@@ -188,8 +205,9 @@ public final class HumanReviewGateHandler implements GateHandler {
         }
     }
 
-    private void appendOperatorGuidance(StringBuilder builder, GateContext context, List<String> allowedActions) {
-        var guidance = operatorGuidance(context, allowedActions);
+    private void appendOperatorGuidance(StringBuilder builder, GateContext context, List<String> allowedActions,
+                                       AgentDecisionSummary decision) {
+        var guidance = operatorGuidance(context, allowedActions, decision);
         if (guidance.isEmpty()) {
             return;
         }
@@ -203,11 +221,11 @@ public final class HumanReviewGateHandler implements GateHandler {
     private void appendReviewSummary(
             StringBuilder builder,
             GateContext context,
-            GateContractView contractView
+            GateContractView contractView,
+            AgentDecisionSummary decision
     ) {
         builder.append("## Review Summary\n\n");
         var contract = taskContractSummary(context, contractView);
-        var decision = latestAgentDecision(context);
         appendField(builder, "Objective", text(contract.get("objective")));
         appendField(builder, "Stage Outcome", decision.stageOutcome());
         appendField(builder, "Latest Decision", decision.decision());
@@ -270,8 +288,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         builder.append("\n");
     }
 
-    private void appendLatestAgentDecision(StringBuilder builder, GateContext context) {
-        var decision = latestAgentDecision(context);
+    private void appendLatestAgentDecision(StringBuilder builder, AgentDecisionSummary decision) {
         if (decision.isEmpty()) {
             return;
         }
@@ -442,7 +459,19 @@ public final class HumanReviewGateHandler implements GateHandler {
         return List.copyOf(result);
     }
 
-    private AgentDecisionSummary latestAgentDecision(GateContext context) {
+    private AuthoredStageLineageResolver.GateView authoredGate(GateContext context) {
+        var purpose = String.valueOf(context.definition().config().getOrDefault("gate_purpose", ""));
+        if (!purpose.equals("design") && !purpose.equals("plan")) return null;
+        try {
+            return new AuthoredStageLineageResolver(context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
+                    .gateView(context.instance().nodeInstanceId());
+        } catch (java.io.IOException | IllegalArgumentException failure) {
+            throw new IllegalStateException("AUTHORED_GATE_LINEAGE_INVALID: " + failure.getMessage(), failure);
+        }
+    }
+
+    private AgentDecisionSummary latestAgentDecision(GateContext context, AuthoredStageLineageResolver.GateView authored) {
+        if (authored != null) return AgentDecisionSummary.from(authored.decision(), authored.sidecarRef());
         var fromRefs = AgentEvidenceIndex.latestFromRefs(
                         context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
                 .map(entry -> agentDecisionFromSidecar(context, entry));
@@ -452,7 +481,8 @@ public final class HumanReviewGateHandler implements GateHandler {
         return AgentDecisionSummary.empty();
     }
 
-    private Map<String, Object> latestReviewSubject(GateContext context) {
+    private Map<String, Object> latestReviewSubject(GateContext context, AuthoredStageLineageResolver.GateView authored) {
+        if (authored != null) return authored.projection();
         return AgentEvidenceIndex.latestFromRefs(
                         context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
                 .map(entry -> entry.document().reviewSubject())
@@ -461,8 +491,7 @@ public final class HumanReviewGateHandler implements GateHandler {
                 .orElse(Map.of());
     }
 
-    private void appendReviewSubject(StringBuilder builder, GateContext context) {
-        var subject = latestReviewSubject(context);
+    private void appendReviewSubject(StringBuilder builder, Map<String, Object> subject) {
         if (subject.isEmpty()) {
             return;
         }
@@ -663,8 +692,8 @@ public final class HumanReviewGateHandler implements GateHandler {
         summary.put("openRisks", document.openRisks());
     }
 
-    private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions) {
-        var decision = latestAgentDecision(context);
+    private Map<String, Object> operatorGuidance(GateContext context, List<String> allowedActions,
+                                               AgentDecisionSummary decision) {
         var decisionText = decision.decision();
         var blocking = decision.blocking();
         var mustFix = decision.mustFix();

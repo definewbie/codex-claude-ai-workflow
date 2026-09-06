@@ -159,22 +159,10 @@ class SmallWorkflowProfileGateIntegrationTest {
             WorkflowDefinition loaded
     ) throws Exception {
         Files.createDirectories(workspace);
-        // This fixture starts at plan and tests gate routing only; contract qualification has separate lifecycle tests.
-        var nodes = loaded.nodes().stream().map(node -> {
-            if (!"gate.human_plan_approval".equals(node.id())) {
-                return node;
-            }
-            var config = new java.util.LinkedHashMap<>(node.config());
-            config.remove("requires_approved_task_contract");
-            return new dev.dual.core.workflow.NodeDefinition(
-                    node.id(), node.kind(), node.handlerType(), Map.copyOf(config));
-        }).toList();
-        var definition = new WorkflowDefinition(
-                loaded.workflowId(), loaded.version(), "plan.claude_plan", nodes, loaded.edges());
-        var paths = new WorkstreamPaths(workspace, new DualId(workstreamId));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "workflow-" + workstreamId, definition);
-        return new TestState(paths, ledger, definition);
+        var fixture = new AuthoredStageSequenceTest.Fixture(workspace, "src/Main.java",
+                AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, workstreamId, loaded);
+        fixture.before("plan.claude_plan");
+        return new TestState(fixture.paths, fixture.ledger, fixture.ledger.loadDefinition(fixture.paths));
     }
 
     private WorkflowDefinition loadExperiment() throws Exception {
@@ -186,7 +174,8 @@ class SmallWorkflowProfileGateIntegrationTest {
     private void routePlanToGate(TestState state, List<String> evidenceRefs, String outcome) throws Exception {
         var plan = state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst();
         state.ledger().completeAndRoute(
-                state.paths(), state.definition(), plan, NodeStatus.COMPLETED, outcome, evidenceRefs, Map.of());
+                state.paths(), state.definition(), plan, NodeStatus.COMPLETED, outcome, evidenceRefs,
+                state.ledger().loadNode(state.paths(), plan).result());
         var gate = state.ledger().loadNode(
                 state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
         assertEquals("gate.human_plan_approval", gate.nodeDefinitionId());
@@ -202,7 +191,25 @@ class SmallWorkflowProfileGateIntegrationTest {
 
     private PlanEvidence publishPlanSidecar(Path workspace, String workstreamId, String runId) throws Exception {
         var evidence = writePlanSidecar(workspace, workstreamId, runId);
-        AgentOutputLineageFixture.publish(workspace, workstreamId, workspace.resolve(evidence.sidecarRef()));
+        var paths = new WorkstreamPaths(workspace, new DualId(workstreamId));
+        var ledger = new WorkflowFileLedger();
+        var node = ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var context = new TaskHandler.TaskContext(workspace, workstreamId, ledger.loadDefinition(paths).node(node.nodeDefinitionId()), node);
+        AuthoredInputFixture.record(context, runId);
+        var snapshot = AuthoredExecutionContext.prepare(context, runId).orElseThrow();
+        var prompt = AgentResultPromptContract.render(workstreamId, runId, "plan.claude_plan",
+                "READY_FOR_PLAN_REVIEW", java.util.Set.of("READY_FOR_PLAN_REVIEW"));
+        var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(prompt.substring(prompt.indexOf('{')));
+        var responses = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).putArray("revision_responses");
+        snapshot.obligations().forEach(obligation -> responses.addObject().put("obligation_id", obligation.id())
+                .put("disposition", "ADDRESSED").put("evidence", "Plan revised with the human note"));
+        objectMapper.writeValue(workspace.resolve(evidence.outputRef()).toFile(), envelope);
+        var result = new ArtifactContractValidator().validate(workspace, workstreamId, node.nodeInstanceId(),
+                context.definition(), dev.dual.core.workflow.NodeResult.completed("completed", List.of(evidence.outputRef()),
+                        Map.of("run_id", runId)));
+        assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
+        AgentOutputLineageFixture.publish(workspace, workstreamId, workspace.resolve(evidence.sidecarRef()),
+                node.iterationId(), node.inputRefs());
         return evidence;
     }
 

@@ -681,7 +681,7 @@ class WorkstreamApiControllerTest {
         Files.createDirectories(packetPath.getParent());
         Files.writeString(packetPath, "# Human Review Packet\n\nRead this before approval.\n", StandardCharsets.UTF_8);
         Files.writeString(paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".json"),
-                "{\"allowedActions\":[\"approve\",\"revise\"]}", StandardCharsets.UTF_8);
+                "{\"allowedActions\":[\"approve\",\"revise\"],\"authoredStage\":{\"candidate\":{\"runId\":\"run-current\"},\"activeObligations\":[{\"id\":\"source-1\",\"text\":\"Keep scope\"}],\"revisionResponses\":[{\"obligation_id\":\"source-1\",\"disposition\":\"NOT_ADDRESSED\",\"evidence\":\"Needs decision\"}]}}", StandardCharsets.UTF_8);
         var controller = controller();
 
         var response = controller.currentReview(fixture.workstreamId(), tempDir.toString());
@@ -691,6 +691,9 @@ class WorkstreamApiControllerTest {
         assertEquals(".agent/workstreams/" + fixture.workstreamId() + "/reviews/" + activeNodeId + ".md",
                 response.get("packetPath"));
         assertEquals(true, response.get("packetMarkdown").toString().contains("Read this before approval."));
+        var expectedPacket = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".json").toFile());
+        assertEquals(expectedPacket, new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(response.get("packet")));
     }
 
     @Test
@@ -713,6 +716,9 @@ class WorkstreamApiControllerTest {
         assertEquals(activeNodeId, response.get("gateNodeInstanceId"));
         assertEquals("review.gate", response.get("gateNodeDefinitionId"));
         assertEquals(true, response.get("packetMarkdown").toString().contains("Visible from timeline."));
+        var expectedPacket = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".json").toFile());
+        assertEquals(expectedPacket, new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(response.get("packet")));
     }
 
     @Test

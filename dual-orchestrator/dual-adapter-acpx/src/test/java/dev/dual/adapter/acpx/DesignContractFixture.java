@@ -24,7 +24,7 @@ final class DesignContractFixture {
             Files.createDirectories(dir.resolve(child));
         }
         var contract = dir.resolve("artifacts/task-contract.json");
-        Files.writeString(contract, """
+        if (!Files.exists(contract)) Files.writeString(contract, """
                 {"id":"tc-design","version":1,"created_at":"2026-09-05T00:00:00Z",
                  "objective":"Design a file conversion tool","status":"READY_FOR_REVIEW",
                  "scope":{"included":[{"path":"repo/relative/new.ext","operation":"CREATE"}],"excluded":[]},
@@ -33,6 +33,7 @@ final class DesignContractFixture {
                  "ambiguity_notes":[],"human_questions":[],"compilation_pass":1,
                  "source":{"raw_request_ref":"requirement.md","created_by":"test"}}
                 """);
+        var contractJson = JSON.readTree(contract.toFile());
         var resolution = dir.resolve("artifacts/contract-resolution.json");
         Files.writeString(resolution, "{\"decision\":\"approved\"}");
         var refs = List.of(root.relativize(contract).toString(), root.relativize(resolution).toString());
@@ -43,7 +44,7 @@ final class DesignContractFixture {
         JSON.writeValue(dir.resolve("nodes/" + source + ".json").toFile(), new NodeInstanceDocument(
                 1, source, "contract.compile", NodeKind.TASK, "contract.compile", NodeStatus.COMPLETED,
                 "contract", "iter-001", List.of(), Map.of(), refs, Map.of(
-                        "contract_id", "tc-design", "contract_version", 1, "contract_status", "READY_FOR_REVIEW",
+                        "contract_id", contractJson.path("id").asText(), "contract_version", contractJson.path("version").asInt(), "contract_status", "READY_FOR_REVIEW",
                         "task_contract_sha256", sha(contract), "contract_resolution_sha256", sha(resolution)),
                 null, "", now, now));
         var result = Map.<String, Object>of("source_node_instance_id", source, "human_action", "approved", "note", "reviewed");

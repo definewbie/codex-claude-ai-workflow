@@ -46,9 +46,13 @@ class TypedDesignScopeTest {
                         new NodeDefinition("ctx.design", NodeKind.TASK, "context.build_package", Map.of(
                                 "profile", "architecture_review", "target_node", "design.codex_arch_review",
                                 "requires_approved_task_contract", true)),
-                        new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                        new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of()),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                        new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of("gate_purpose", "contract"))),
                 List.of(new dev.dual.core.workflow.EdgeDefinition("design.claude_design", "completed", "ctx.design"),
-                        new dev.dual.core.workflow.EdgeDefinition("ctx.design", "completed", "design.codex_arch_review")));
+                        new dev.dual.core.workflow.EdgeDefinition("ctx.design", "completed", "design.codex_arch_review"),
+                        new dev.dual.core.workflow.EdgeDefinition("contract.compile", "completed", "gate.contract_review"),
+                        new dev.dual.core.workflow.EdgeDefinition("gate.contract_review", "approved", "design.claude_design")));
         var ledger = new dev.dual.ledger.file.WorkflowFileLedger();
         ledger.initialize(paths, "workflow-design", definition);
         if (approved) {
@@ -64,6 +68,8 @@ class TypedDesignScopeTest {
             public String type() { return "acpx.agent_run"; }
             public NodeResult execute(TaskContext context) throws Exception {
                 calls.add(context.definition().id());
+                if (approved) AuthoredInputFixture.record(context,
+                        "design.codex_arch_review".equals(context.definition().id()) ? "run-review" : "run-runtime");
                 if ("design.codex_arch_review".equals(context.definition().id())) {
                     var ref = ".agent/workstreams/" + WS + "/runs/run-review/outputs/review.json";
                     var prompt = AgentResultPromptContract.render(WS, "run-review", context.definition().id(),
@@ -115,7 +121,7 @@ class TypedDesignScopeTest {
             assertFalse(Files.exists(root.resolve(path)), "CREATE must not require an existing file");
             var sidecarRef = result.outputRefs().stream().filter(ref -> ref.endsWith(".contract.json")).findFirst().orElseThrow();
             var sidecar = root.resolve(sidecarRef);
-            AgentOutputLineageFixture.publish(root, WS, sidecar);
+            AgentOutputLineageFixture.publish(root, WS, sidecar, "iter-001");
             var doc = AgentEvidenceIndex.validatedDocument(root, WS, sidecarRef, JSON).orElseThrow();
             assertEquals(path, doc.design().plannedFiles().getFirst().path());
             assertTrue(doc.changedFiles().isEmpty(), "planned files must not become actual changes");
@@ -169,8 +175,8 @@ class TypedDesignScopeTest {
         var second = publish("second", "src/approved.ext", "CREATE");
         var a = first.outputRefs().stream().filter(ref -> ref.endsWith(".contract.json")).findFirst().orElseThrow();
         var b = second.outputRefs().stream().filter(ref -> ref.endsWith(".contract.json")).findFirst().orElseThrow();
-        AgentOutputLineageFixture.publish(root, WS, root.resolve(a));
-        AgentOutputLineageFixture.publish(root, WS, root.resolve(b));
+        AgentOutputLineageFixture.publish(root, WS, root.resolve(a), "iter-001");
+        AgentOutputLineageFixture.publish(root, WS, root.resolve(b), "iter-001");
         assertEquals(NodeStatus.COMPLETED, context(List.of(a, a)).status());
         assertEquals(NodeStatus.FAILED, context(List.of(a, b)).status());
         assertEquals(NodeStatus.FAILED, context(List.of(b, a)).status());
@@ -191,7 +197,7 @@ class TypedDesignScopeTest {
         candidate.put("node_id", "design.claude_design");
         assertRejected(publish("generic", candidate), "artifact_type");
         var typed = candidate("closed", "src/file.ext", "CREATE");
-        ((ObjectNode) typed.get("result")).putArray("revision_responses");
+        ((ObjectNode) typed.get("result")).putArray("undeclared_responses");
         assertFalse(new AgentResultEnvelopeParser().parse(typed.toString()).valid());
     }
 
@@ -203,6 +209,8 @@ class TypedDesignScopeTest {
         var ref = ".agent/workstreams/" + WS + "/runs/" + run + "/outputs/design.json";
         Files.createDirectories(root.resolve(ref).getParent());
         JSON.writeValue(root.resolve(ref).toFile(), candidate);
+        if (TaskContractProjectionVerifier.resolve(root, WS).qualified().isPresent())
+            AuthoredInputFixture.initialDesign(root, WS, "node-" + run, run);
         return new ArtifactContractValidator().validate(root, WS, "node-" + run,
                 new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run",
                         Map.of("expected_artifact", "design_result", "requires_approved_task_contract", true)),

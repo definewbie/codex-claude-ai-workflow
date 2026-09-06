@@ -1261,6 +1261,10 @@ a {
   line-height: 1.5;
 }
 
+#evidence .clean li {
+  overflow-wrap: anywhere;
+}
+
 .clean li::before {
   content: "";
   position: absolute;

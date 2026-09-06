@@ -21,7 +21,8 @@ class AgentResultPromptContractTest {
         assertTrue(parsed.valid(), parsed.message());
         assertTrue("design_result".equals(parsed.envelope().result().artifactType()));
         assertTrue(prompt.contains("planned_files"));
-        assertFalse(prompt.contains("revision_responses"));
+        assertTrue(prompt.contains("\"revision_responses\" : [ ]"));
+        assertTrue(prompt.contains("NOT_ADDRESSED"));
     }
 
     @Test

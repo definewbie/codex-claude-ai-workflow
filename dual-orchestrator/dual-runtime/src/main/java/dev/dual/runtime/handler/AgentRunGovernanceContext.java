@@ -65,6 +65,12 @@ public final class AgentRunGovernanceContext {
         }
         Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract =
                 contractResolution.qualified();
+        final Optional<AuthoredExecutionContext.Snapshot> authoredContext;
+        try {
+            authoredContext = AuthoredExecutionContext.prepare(context, runId);
+        } catch (IOException failure) {
+            throw new AuthoredContextException(failure.getMessage(), failure);
+        }
 
         var contextDir = workstreamDir.resolve("context");
         Files.createDirectories(contextDir);
@@ -95,7 +101,8 @@ public final class AgentRunGovernanceContext {
                 governance.repositoryFactBinding(),
                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contract),
                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contractRef).orElse(""),
-                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::sha256).orElse(""));
+                qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::sha256).orElse(""),
+                authoredContext);
     }
 
     public static Optional<String> trustedTaskContractPayload(
@@ -136,8 +143,13 @@ public final class AgentRunGovernanceContext {
             RepositoryFactBinding.Verified repositoryFactBinding,
             Optional<TaskContract> qualifiedTaskContract,
             String taskContractRef,
-            String taskContractSha256
+            String taskContractSha256,
+            Optional<AuthoredExecutionContext.Snapshot> authoredContext
     ) {
+    }
+
+    public static final class AuthoredContextException extends IOException {
+        AuthoredContextException(String message, Throwable cause) { super(message, cause); }
     }
 
     private static String safeFileName(String value) {

@@ -31,18 +31,26 @@ class WorkstreamMemoryUpdaterTest {
 
     @Test
     void typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope() throws Exception {
-        DesignContractFixture.approve(tempDir, "ws-design");
-        var output = tempDir.resolve(".agent/workstreams/ws-design/runs/run-1/outputs/design.json");
+        var definition = new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "fixture", "prompt_template", "design-claude"));
+        var context = AuthoredAdapterFixture.before(new dev.dual.runtime.handler.TaskHandler.TaskContext(
+                tempDir, "ws-design", definition, new dev.dual.core.workflow.NodeInstance(
+                "node-design", definition.id(), NodeKind.TASK, definition.handlerType(), NodeStatus.READY,
+                "design", "iter-001", List.of(), List.of(), Map.of(), null, null, null)));
+        var prepared = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true).execute(context);
+        assertEquals(NodeStatus.COMPLETED, prepared.status(), prepared.result().toString());
+        var run = (String) prepared.result().get("run_id");
+        var output = tempDir.resolve(".agent/workstreams/ws-design/runs/" + run + "/outputs/design.json");
         Files.createDirectories(output.getParent());
-        var prompt = AgentResultPromptContract.render("ws-design", "run-1", "design.claude_design",
+        var prompt = AgentResultPromptContract.render("ws-design", run, "design.claude_design",
                 "READY_FOR_ARCH_REVIEW", java.util.Set.of("READY_FOR_ARCH_REVIEW"));
         Files.writeString(output, prompt.substring(prompt.indexOf('{')).replace("one short sentence", "Document conversion design"));
         var validated = new ArtifactContractValidator().validate(tempDir, "ws-design", "node-design",
-                new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of()),
-                NodeResult.completed("completed", List.of(tempDir.relativize(output).toString()), Map.of("run_id", "run-1")));
+                definition,
+                NodeResult.completed("completed", List.of(tempDir.relativize(output).toString()), Map.of("run_id", run)));
         assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         var updater = new WorkstreamMemoryUpdater();
-        updater.updateMemory(tempDir, "ws-design", "run-1", "design.claude_design",
+        updater.updateMemory(tempDir, "ws-design", run, "design.claude_design",
                 "design", "claude", output, AcpxToolUsage.empty(), null);
         var memory = objectMapper.readTree(updater.memoryPath(tempDir, "ws-design").toFile());
         assertTrue(memory.toString().contains("READY_FOR_ARCH_REVIEW"));

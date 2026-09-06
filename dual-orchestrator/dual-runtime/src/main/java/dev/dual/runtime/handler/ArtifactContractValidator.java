@@ -303,6 +303,16 @@ public final class ArtifactContractValidator {
         }
 
         var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
+        if (AuthoredStageLineageResolver.participates(nodeDefinition.id())) {
+            try {
+                var authoredRef = AuthoredExecutionContext.validatePublication(root, workstreamId, nodeInstanceId,
+                        envelope.runId(), envelope.result());
+                document.put("authored_context", Map.of("ref", authoredRef.ref(), "sha256", authoredRef.sha256()));
+            } catch (java.io.IOException | IllegalArgumentException failure) {
+                return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                        envelope, ContractViolation.of("AUTHORED_CONTEXT_INVALID", failure.getMessage(), Map.of()));
+            }
+        }
         Files.writeString(sidecarPath,
                 OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
                 StandardCharsets.UTF_8);

@@ -34,6 +34,7 @@ class ArtifactContractValidatorTest {
     Path tempDir;
 
     private final ArtifactContractValidator validator = new ArtifactContractValidator();
+    private String validatedNodeInstanceId;
 
     @Test
     void validEnvelopeWritesSidecarAndRoutesTypedDecision() throws Exception {
@@ -49,7 +50,7 @@ class ArtifactContractValidatorTest {
         var sidecar = AgentOutputContractDocument.read(tempDir.resolve("review.contract.json"), new ObjectMapper()).orElseThrow();
         assertEquals("ws-1", sidecar.workstreamId());
         assertEquals("run-1", sidecar.runId());
-        assertEquals("node-instance-1", sidecar.nodeInstanceId());
+        assertEquals(validatedNodeInstanceId, sidecar.nodeInstanceId());
         assertEquals("review.json", sidecar.sourceOutputRef());
         assertEquals("design.codex_arch_review", sidecar.nodeId());
         assertEquals("Architecture is ready.", sidecar.summary());
@@ -58,11 +59,13 @@ class ArtifactContractValidatorTest {
 
     @Test
     void repeatedReusableReadsDoNotInvalidateAnOtherwiseValidArtifact() throws Exception {
+        var context = AuthoredInputFixture.before(tempDir, "ws-1", "design.codex_arch_review", "run-1");
         var outputRef = write(".agent/workstreams/ws-1/runs/run-1/outputs/design.json",
                 envelope("design.codex_arch_review", reviewResult()));
         var runRef = ".agent/workstreams/ws-1/runs/run-1/run.json";
-        write(runRef, JSON.writeValueAsString(Map.of(
-                "toolUsage", Map.of("readFiles", List.of("REQUIREMENT.md", "VERIFICATION-GATE.md")))));
+        var metadata = (com.fasterxml.jackson.databind.node.ObjectNode) LEDGER_JSON.readTree(tempDir.resolve(runRef).toFile());
+        metadata.set("toolUsage", LEDGER_JSON.valueToTree(Map.of("readFiles", List.of("REQUIREMENT.md", "VERIFICATION-GATE.md"))));
+        LEDGER_JSON.writeValue(tempDir.resolve(runRef).toFile(), metadata);
         write(".agent/workstreams/ws-1/memory/read-reuse-contract.json", JSON.writeValueAsString(Map.of(
                 "targetNodeDefinitionId", "design.codex_arch_review",
                 "reusableReadFiles", List.of(
@@ -72,7 +75,7 @@ class ArtifactContractValidatorTest {
                 "allowedRereadFiles", List.of())));
 
         var validated = validator.validate(
-                tempDir, "ws-1", "node-design", node("design.codex_arch_review"),
+                tempDir, "ws-1", context.instance().nodeInstanceId(), node("design.codex_arch_review"),
                 NodeResult.completed("completed", List.of(outputRef), Map.of(
                         "run_id", "run-1",
                         "run_metadata", runRef)));
@@ -142,7 +145,7 @@ class ArtifactContractValidatorTest {
                 new AgentResultEnvelope.Plan(
                         List.of("edit the target"), List.of("src/Main.java"), List.of("README.md"),
                         List.of("src/Main.java: implement"), List.of("mvn test"), "revert commit",
-                        List.of("integration risk"), List.of("review scope")));
+                        List.of("integration risk"), List.of("review scope")), List.of());
         var ref = write("plan.json", envelope("plan.claude_plan", plan));
         var validated = validate("plan.claude_plan", ref, "run-1");
 
@@ -570,6 +573,10 @@ class ArtifactContractValidatorTest {
     }
 
     private NodeResult validate(String nodeId, String outputRef, String runId) throws Exception {
+        validatedNodeInstanceId = "node-instance-1";
+        if (AuthoredStageLineageResolver.participates(nodeId)) {
+            validatedNodeInstanceId = AuthoredInputFixture.before(tempDir, "ws-1", nodeId, runId).instance().nodeInstanceId();
+        }
         RepositoryFactBinding.Verified binding = null;
         if ("intake.claude_brainstorm".equals(nodeId)) {
             binding = writeInitialIntakeLineage("node-instance-1", "iter-001", runId);
@@ -584,7 +591,7 @@ class ArtifactContractValidatorTest {
             facts.put("repository_fact_binding_sha256", binding.sha256());
         }
         return validator.validate(
-                tempDir, "ws-1", "node-instance-1", node(nodeId),
+                tempDir, "ws-1", validatedNodeInstanceId, node(nodeId),
                 NodeResult.completed("completed", List.copyOf(outputRefs), Map.copyOf(facts)));
     }
 
