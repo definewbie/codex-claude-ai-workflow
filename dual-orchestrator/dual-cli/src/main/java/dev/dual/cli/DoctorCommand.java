@@ -29,7 +29,7 @@ public final class DoctorCommand implements Callable<Integer> {
     static final String EXPECTED_ACPX_PATCH_SHA256 = ReviewedAcpxBuildIdentity.PATCH_SHA256;
     static final String EXPECTED_ACPX_POLICY_SCHEMA = ReviewedAcpxBuildIdentity.POLICY_SCHEMA;
     static final String EXPECTED_CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp@0.70.0";
-    static final String EXPECTED_CODEX_ACP_VERSION = "0.16.0";
+    static final String EXPECTED_CODEX_ACP_VERSION = "1.10.0";
 
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
@@ -154,22 +154,7 @@ public final class DoctorCommand implements Callable<Integer> {
     }
 
     static String expectedCodexAcpPackage() {
-        return "@zed-industries/codex-acp-" + codexPlatformSuffix() + "@" + EXPECTED_CODEX_ACP_VERSION;
-    }
-
-    private static String codexPlatformSuffix() {
-        var os = System.getProperty("os.name", "").toLowerCase();
-        var arch = System.getProperty("os.arch", "").toLowerCase();
-        if (os.contains("mac") || os.contains("darwin")) {
-            return arch.contains("aarch64") || arch.contains("arm64") ? "darwin-arm64" : "darwin-x64";
-        }
-        if (os.contains("linux")) {
-            return arch.contains("aarch64") || arch.contains("arm64") ? "linux-arm64" : "linux-x64";
-        }
-        if (os.contains("win")) {
-            return arch.contains("aarch64") || arch.contains("arm64") ? "win32-arm64" : "win32-x64";
-        }
-        return "unsupported-" + arch;
+        return "@agentclientprotocol/codex-acp@" + EXPECTED_CODEX_ACP_VERSION;
     }
 
     static PinCheck evaluateClaudeEnvironmentBridge(
@@ -284,6 +269,8 @@ public final class DoctorCommand implements Callable<Integer> {
 
     private static boolean looksLikeLocalAcpAdapter(String command, String binaryName) {
         return command.contains(binaryName)
+                && !command.contains("@zed-industries/")
+                && !command.contains("@agentclientprotocol/")
                 && !command.contains("@latest")
                 && !command.matches(".*@[\\^~].*");
     }

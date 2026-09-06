@@ -10,7 +10,7 @@
 # Usage:
 #   ./scripts/configure-acpx.sh
 #   DUAL_CLAUDE_ACP_COMMAND='npx -y @agentclientprotocol/claude-agent-acp@0.70.0' ./scripts/configure-acpx.sh
-#   DUAL_CODEX_ACP_COMMAND='npx -y @zed-industries/codex-acp-darwin-arm64@0.16.0' ./scripts/configure-acpx.sh
+#   DUAL_CODEX_ACP_COMMAND='npx -y @agentclientprotocol/codex-acp@1.10.0' ./scripts/configure-acpx.sh
 #
 
 set -euo pipefail
@@ -36,22 +36,6 @@ log() {
 
 require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
-}
-
-codex_platform_package() {
-  local os arch suffix
-  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-  arch="$(uname -m)"
-  case "$os:$arch" in
-    darwin:arm64) suffix="darwin-arm64" ;;
-    darwin:x86_64) suffix="darwin-x64" ;;
-    linux:arm64|linux:aarch64) suffix="linux-arm64" ;;
-    linux:x86_64) suffix="linux-x64" ;;
-    *)
-      fail "Unsupported platform for @zed-industries/codex-acp binary: $os/$arch"
-      ;;
-  esac
-  printf '@zed-industries/codex-acp-%s@0.16.0' "$suffix"
 }
 
 check_acpx_version() {
@@ -99,7 +83,7 @@ NODE
 main() {
   require_command node
   [[ -x "$ACPX_EXECUTABLE" ]] || fail "Patched acpx is missing: $ACPX_EXECUTABLE. Run ./scripts/install-acpx-e1.sh"
-  CODEX_ACP_COMMAND="${DUAL_CODEX_ACP_COMMAND:-npx -y $(codex_platform_package)}"
+  CODEX_ACP_COMMAND="${DUAL_CODEX_ACP_COMMAND:-npx -y @agentclientprotocol/codex-acp@1.10.0}"
   check_acpx_version
   check_acpx_build_identity
   write_config

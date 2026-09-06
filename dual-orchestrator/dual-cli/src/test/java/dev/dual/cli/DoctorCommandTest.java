@@ -16,7 +16,7 @@ class DoctorCommandTest {
                     }
                   }
                 }
-                """.formatted(DoctorCommand.expectedCodexAcpPackage()));
+                """.formatted("@agentclientprotocol/codex-acp@1.10.0"));
 
         assertEquals(DoctorCommand.PinLevel.OK, result.level());
     }
@@ -33,6 +33,17 @@ class DoctorCommandTest {
 
         assertEquals(DoctorCommand.PinLevel.FAIL, result.level());
         assertTrue(result.message().contains("missing agents.codex.command"));
+    }
+
+    @Test
+    void rejectsLegacyEmbeddedCodexAndKeepsInstallerPinAligned() throws Exception {
+        var result = DoctorCommand.evaluateCodexAdapterPin("""
+                {"agents":{"codex":{"command":"npx -y @zed-industries/codex-acp-darwin-arm64@0.16.0"}}}
+                """);
+        assertEquals(DoctorCommand.PinLevel.FAIL, result.level());
+        var script = java.nio.file.Files.readString(java.nio.file.Path.of("../scripts/configure-acpx.sh"));
+        assertTrue(script.contains("npx -y " + DoctorCommand.expectedCodexAcpPackage()));
+        assertTrue(!script.contains("--model") && !script.contains("CODEX_HOME="));
     }
 
     @Test
