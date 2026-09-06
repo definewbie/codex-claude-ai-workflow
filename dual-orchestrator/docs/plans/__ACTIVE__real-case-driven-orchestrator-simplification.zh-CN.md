@@ -1,5 +1,16 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## 当前执行入口（2026-09-06，优先于下方历史记录）
+
+E1-E4 deterministic checkpoint 已收口，最新代码 `ffe9347f`。CC 整体评审已 PASS；当前唯一动作：文档收口及前置检查
+`../testing/verification-gates/20260906-okx-fresh-e2e-after-post-contract-authority.md`。
+主目标为未改需求的 fresh OKX 产品 E2E；四项 authority 修复必须由真实下游组合消费，不以局部测试替代产品验收。
+只观察自然 revision/scope repair，不造错；不恢复旧样本、不重开网络或增加平台。
+本轮仅 Gate/active plan 文档及非 provider 前置检查；不创建 workstream、不代用户审批。
+P2-1 冻结参照标注及四条 P3 澄清已吸收；用户转交的是既有评审重申，不冒称新一轮复跑。
+选择性提交文档后进入前置检查；唯一 fresh workstream 另待用户执行授权。
+以下早期“当前”段落均为历史阶段记录，不覆盖本入口；自然 E2E 仍 NOT PROVEN。
+
 ## 总体目标
 
 1. 简化 Dual Orchestrator。
