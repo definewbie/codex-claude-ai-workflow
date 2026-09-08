@@ -36,6 +36,12 @@ class StaticConsoleProjectionBoundaryTest {
         assertTrue(console.contains("assessment.allowedActions"));
         assertTrue(console.contains("approve_public_websearch"));
         assertTrue(console.contains("/recovery/approve-websearch"));
+        assertTrue(console.contains("network.canApprove === true"));
+        assertTrue(console.contains("network.canCancel === true"));
+        assertTrue(console.contains("network.status === \"INVALID\""));
+        assertTrue(console.contains("warning.textContent = `网络授权不可用：${network.reason"));
+        assertTrue(console.contains("/recovery/network?workdir="));
+        assertTrue(console.contains("asList(network.targets).includes(target)"));
         assertFalse(console.contains("assessment.classification === \"agent_permission_approval_required\""),
                 "console must consume allowedActions instead of reinterpreting recovery classification");
         assertTrue(console.contains("delivery.canFinalize"));

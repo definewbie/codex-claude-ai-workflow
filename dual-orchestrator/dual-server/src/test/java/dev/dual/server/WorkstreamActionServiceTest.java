@@ -112,6 +112,25 @@ class WorkstreamActionServiceTest {
     }
 
     @Test
+    void networkApprovalUsesLedgerWithoutRunningOrChangingGateDecisions() throws Exception {
+        var definition = new WorkflowDefinition("custom", 1, "verify.tests", List.of(
+                new NodeDefinition("verify.tests", NodeKind.TASK, "acpx.agent_run", Map.of("agent", "claude", "permission_profile", "implement"))), List.of());
+        var paths = createWorkstream("ws-network", definition);
+        var ledger = new WorkflowFileLedger();
+        var node = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, node, NodeStatus.FAILED, "failed", List.of(), Map.of());
+        var before = Files.readString(paths.workflowCurrentJson());
+        var service = new WorkstreamActionService(ledger, () -> command -> { throw new AssertionError("approval must not start execution"); });
+        var result = service.networkAuthority(tempDir, "ws-network", "verify.tests", List.of("packages.example.org"), "approved test prerequisites", false);
+        assertEquals(true, result.get("canCancel"));
+        assertEquals(before, Files.readString(paths.workflowCurrentJson()));
+        assertThrows(Exception.class, () -> service.networkAuthority(tempDir, "ws-network", "verify.tests", List.of("*.example.org"), "invalid", false));
+        var cancelled = service.networkAuthority(tempDir, "ws-network", null, null, null, true);
+        assertEquals(false, cancelled.get("canCancel"));
+        assertEquals(before, Files.readString(paths.workflowCurrentJson()));
+    }
+
+    @Test
     void approveCompletesTerminalHumanGateWithoutApprovedEdge() throws Exception {
         var paths = createWorkstream("ws-terminal-approve", completeGateDefinition());
         var ledger = new WorkflowFileLedger();

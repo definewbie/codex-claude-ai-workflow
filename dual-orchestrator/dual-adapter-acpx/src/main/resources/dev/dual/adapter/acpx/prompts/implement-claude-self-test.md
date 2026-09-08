@@ -19,7 +19,7 @@ Run or inspect whatever validation is appropriate for the repository and change 
 
 Self-test boundary:
 
-- Do not install, upgrade, or fetch dependencies in this node unless the task explicitly requires dependency changes as part of the deliverable.
+- You own normal test preparation: resolve or fetch dependencies already declared in the approved repository configuration, using the repository's normal build/test commands and the active execution permissions. This does not authorize adding dependencies, changing versions, upgrading the toolchain, or bypassing network/filesystem restrictions. Stop and report a missing prerequisite when the active permissions prevent this preparation.
 - If required tooling is unavailable because dependencies are missing, record the command under `Checks Skipped` and explain the missing prerequisite under `Missing Evidence`.
 - Prefer targeted checks that use already-available repository tooling. Avoid long-running services unless they are necessary for the changed behavior and already configured locally.
 - A skipped build or typecheck is acceptable only when the reason is explicit; Codex verifier will judge whether the evidence is sufficient.

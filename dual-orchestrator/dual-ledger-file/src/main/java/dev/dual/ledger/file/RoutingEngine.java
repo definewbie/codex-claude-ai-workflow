@@ -125,7 +125,8 @@ final class RoutingEngine {
         var lastEventId = current.lastEventId();
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
-            var transitionAttributes = effectiveTransitionAttributes(node, transition.attributes());
+            var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
+                    effectiveTransitionAttributes(node, transition.attributes()));
             if (nextDefinition.kind() == NodeKind.GATE
                     || !startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
                 continue;
@@ -223,7 +224,8 @@ final class RoutingEngine {
 
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
-            var transitionAttributes = effectiveTransitionAttributes(node, transition.attributes());
+            var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
+                    effectiveTransitionAttributes(node, transition.attributes()));
             if (!joinReady(paths, current, nodeInstanceId, transitionAttributes)) {
                 lastEventId = LedgerUtils.nextEventId(lastEventId);
                 eventLog.appendEvent(paths, lastEventId, "join_deferred", Map.of(

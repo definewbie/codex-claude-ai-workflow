@@ -5,6 +5,17 @@
 
 ## 1. 目标与范围
 
+执行授权修订（SPM9 implement-042 timeout 后，用户“修复并继续吧”）：允许完成最小 progress/deadline 修复并验证后，对当前节点进行一次人工授权 retry。
+原 run-1788703780643 的 TIMEOUT 与原冻结 JAR 保留；后续单列 fix-and-continue 阶段及新 JAR SHA，不再称无中断 fresh PASS。
+此阶段命令使用 `DUAL_ACPX_COMMAND_TIMEOUT_SECONDS=0`，先核对 acpx effective config 无额外 timeout；既有无进展检测与错误边界保留。
+累计时长只作为成本观测，不独立判模型失败或取消仍有进展的执行，取代本文件原 120 分钟时间项；其他语义/权限/产品止损仍有效。
+原不修改 harness/事故后不 retry 的限制仅对上述一次修复与 retry 例外；不改需求、workflow、产品源码，不重建样本、不恢复其他 case、不合并 target。
+
+执行授权修订（2026-09-06，SPM9 contract gate 前）：用户明确授权本 agent 在逐门读取证据后选择并执行 approve/clarify/revise 等合法动作，无需用户重复运行命令。
+该最新授权替代本文历史“用户本人逐门决定/禁止代理审批”限制；需求、技术栈、范围与止损不变，不使用 autorun。
+每次代理决定记录来源、理由与当前 gate；扩大需求、额外风险、事故 retry 或触发止损仍停止交用户裁定。
+结论须区分用户本人批准与用户授权的代理批准，不再声称本样本证明“全部 gate 由真人逐次审批”。不授权向原 target apply/commit/finalize。
+
 在 E1-E4 checkpoint 后，用未变更的 OKX 产品需求完成一个 fresh workstream：从 intake 到用户验收、workflow COMPLETED、可审计的 accepted delivery candidate，以及可运行的产品。不是再分别证明四个局部 validator。
 
 本文件的 E1-E4 指 contract qualification、typed design scope、authored revision/approval、plan scope/subtraction；不是历史网络 E1。不重开网络、模型适配、迁移框架或历史样本恢复。继续使用 small workflow，不以 8-call、零 revision 或某个错误必然发生为成功条件。

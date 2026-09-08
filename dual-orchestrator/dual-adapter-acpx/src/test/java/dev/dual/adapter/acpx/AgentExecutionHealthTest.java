@@ -121,6 +121,23 @@ class AgentExecutionHealthTest {
         assertNull(assessment.signal());
     }
 
+    @Test
+    void processSilentFromLaunchDoesNotWaitForeverWithoutTotalDeadline() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(30), Duration.ofSeconds(5));
+        assertEquals(AgentExecutionHealth.Status.UNKNOWN, health.assess(Duration.ofSeconds(4)).status());
+        assertEquals(AdapterSignalType.PROCESS_STALLED, health.assess(Duration.ofSeconds(5)).signal().type());
+    }
+
+    @Test
+    void continuedThoughtsRemainHealthyBeyondFormerTotalDeadline() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(30), Duration.ofSeconds(600));
+        for (int i = 0; i <= 30; i++) {
+            var elapsed = Duration.ofSeconds(i * 100L);
+            health.observe(streamEvent(i, "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"update\":{\"sessionUpdate\":\"agent_thought_chunk\",\"content\":{\"text\":\"working\"}}}}"), elapsed);
+            assertEquals(AgentExecutionHealth.Status.HEALTHY, health.assess(elapsed.plusSeconds(99)).status());
+        }
+    }
+
     /** Transport-level cannot-bypass: ordinary ongoing output that mentions
      * quota / rate limit / is_error=false must never raise a recoverable signal
      * (so {@code waitForExitOrRecoverableSignal} does not terminate/cancel) and

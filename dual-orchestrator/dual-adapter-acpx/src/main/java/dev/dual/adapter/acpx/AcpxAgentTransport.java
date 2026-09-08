@@ -28,8 +28,7 @@ public class AcpxAgentTransport {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final long STDERR_SIGNAL_POLL_SECONDS = 2;
     private static final long DEFAULT_RECOVERABLE_SIGNAL_GRACE_SECONDS = 30;
-    private static final long DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS = 600;
-    private static final long DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS = DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS;
+    private static final long DEFAULT_AGENT_PROGRESS_TIMEOUT_SECONDS = 600;
     private static final long DEFAULT_QUEUE_TTL_SECONDS = 1800;
     private static final long DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS = 45;
     private static final String RECOVERABLE_SIGNAL_GRACE_ENV = "DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS";
@@ -123,8 +122,8 @@ public class AcpxAgentTransport {
         if (sessionCommandTimeout == null || sessionCommandTimeout.isNegative() || sessionCommandTimeout.isZero()) {
             throw new IllegalArgumentException("sessionCommandTimeout must be positive");
         }
-        if (commandTimeout == null || commandTimeout.isNegative() || commandTimeout.isZero()) {
-            throw new IllegalArgumentException("commandTimeout must be positive");
+        if (commandTimeout == null || commandTimeout.isNegative()) {
+            throw new IllegalArgumentException("commandTimeout must be non-negative");
         }
         this.acpxExecutable = acpxExecutable;
         this.recoverableSignalGrace = recoverableSignalGrace;
@@ -246,8 +245,11 @@ public class AcpxAgentTransport {
     private AcpxRunResult run(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
         var command = new ArrayList<String>();
         command.add(acpxExecutable);
-        command.add("--timeout");
-        command.add(Long.toString(commandTimeout.toSeconds()));
+        // A total deadline is an explicit operator budget, not a test of agent progress.
+        if (!commandTimeout.isZero()) {
+            command.add("--timeout");
+            command.add(Long.toString(commandTimeout.toSeconds()));
+        }
         command.add("--ttl");
         command.add(Long.toString(queueTtl.toSeconds()));
         addPermissionArguments(command, request);
@@ -1074,16 +1076,16 @@ public class AcpxAgentTransport {
 
     static Duration configuredCommandTimeout(String value) {
         if (value == null || value.isBlank()) {
-            return Duration.ofSeconds(DEFAULT_ACPX_COMMAND_TIMEOUT_SECONDS);
+            return Duration.ZERO;
         }
         try {
             var seconds = Long.parseLong(value.trim());
-            if (seconds <= 0) {
-                throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + " must be a positive integer");
+            if (seconds < 0) {
+                throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + " must be a non-negative integer");
             }
             return Duration.ofSeconds(seconds);
         } catch (NumberFormatException failure) {
-            throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + " must be a positive integer", failure);
+            throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + " must be a non-negative integer", failure);
         }
     }
 

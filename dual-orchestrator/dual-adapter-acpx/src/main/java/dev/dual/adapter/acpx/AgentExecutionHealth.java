@@ -18,7 +18,7 @@ import java.util.List;
  */
 final class AgentExecutionHealth {
     private static final String STALLED_AGENT_OUTPUT =
-            "agent accepted the prompt but produced no trusted progress before the progress timeout";
+            "agent process produced no observed progress before the progress timeout";
 
     private final AcpxFailureSignalCatalog signalCatalog;
     private final Duration recoverableSignalGrace;
@@ -102,8 +102,7 @@ final class AgentExecutionHealth {
             }
             return new Assessment(Status.RECOVERING, currentAdapterSignal, signals());
         }
-        if (lastProgressSequence >= 0
-                && elapsed.minus(lastProgressAt).compareTo(progressStallTimeout) >= 0) {
+        if (elapsed.minus(lastProgressAt).compareTo(progressStallTimeout) >= 0) {
             var stalled = new AdapterSignal(
                     AdapterSignalType.PROCESS_STALLED,
                     STALLED_AGENT_OUTPUT,

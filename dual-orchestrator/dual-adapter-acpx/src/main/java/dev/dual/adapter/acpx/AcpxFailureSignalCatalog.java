@@ -79,12 +79,13 @@ final class AcpxFailureSignalCatalog {
                         "agent_output_interrupted",
                         AcpxFailureReason.AGENT_OUTPUT_INTERRUPTED,
                         86,
-                        "agent accepted the prompt but stopped producing trusted progress; rebuild or retry the agent session",
+                        "agent process stopped producing observed progress; inspect execution evidence before retrying",
                         true,
                         true,
                         "reason=RECOVERABLE_AGENT_OUTPUT_INTERRUPTED",
                         "recoverable_agent_output_interrupted",
-                        "agent accepted the prompt but produced no trusted progress"
+                        "agent accepted the prompt but produced no trusted progress",
+                        "agent process produced no observed progress before the progress timeout"
                 ),
                 signal(
                         "session_bootstrap_failed",

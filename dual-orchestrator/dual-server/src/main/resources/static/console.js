@@ -428,6 +428,14 @@ function renderRevisionBox(status) {
 function renderPrimaryActions(status) {
   els.primaryActions.innerHTML = "";
   const actions = allowedActions(status);
+  const network = state.overview?.networkAuthority || {};
+  if (network.status === "INVALID") {
+    const warning = document.createElement("span");
+    warning.textContent = `网络授权不可用：${network.reason || "授权记录无效"}`;
+    els.primaryActions.appendChild(warning);
+  }
+  if (network.canApprove === true) actions.push({ label: "授权网络", kind: "ghost", onClick: approveNetwork });
+  if (network.canCancel === true) actions.push({ label: "取消网络授权", kind: "ghost", onClick: cancelNetwork });
   for (const action of actions) {
     const button = document.createElement("button");
     button.type = "button";
@@ -1237,6 +1245,27 @@ function approvePublicWebSearch() {
     `/api/workstreams/${encodeURIComponent(state.selectedId)}/recovery/approve-websearch?workdir=${selectedWorkdirParam()}`,
     { note: note.trim(), publicRepositoryAttested: true }
   );
+}
+
+function approveNetwork() {
+  const network = state.overview?.networkAuthority || {};
+  if (network.canApprove !== true) return;
+  const target = window.prompt(`执行节点：\n${asList(network.targets).join("\n")}`, "");
+  if (!asList(network.targets).includes(target)) return;
+  const input = window.prompt("授权域名（逗号分隔，不含 URL 或通配符）：", "");
+  if (!input) return;
+  const note = window.prompt("授权理由：", "");
+  if (!note?.trim()) return;
+  const domains = input.split(",").map(value => value.trim());
+  if (!window.confirm(`批准 ${target} 下一次执行访问：\n${domains.join("\n")}\n\n域名授权不限于 GET 或只读请求。不会批准业务 gate 或立即运行。`)) return;
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/recovery/network?workdir=${selectedWorkdirParam()}`,
+    { target, domains, note: note.trim() });
+}
+
+function cancelNetwork() {
+  if (state.overview?.networkAuthority?.canCancel !== true) return;
+  if (!window.confirm("取消尚未消费的网络授权？工作流保持当前等待状态。")) return;
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/recovery/network?workdir=${selectedWorkdirParam()}`, { cancel: true });
 }
 
 function mergeDelivery() {

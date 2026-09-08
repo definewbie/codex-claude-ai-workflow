@@ -33,6 +33,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -1183,6 +1185,61 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry() throws Exception {
+        var root = tempDir.toRealPath();
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(root, new dev.dual.core.id.DualId("ws-network"));
+        var nodeDefinition = new NodeDefinition("custom.implementation", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "permission_profile", "implement",
+                "prompt_template", "implement-claude"));
+        var definition = new dev.dual.core.workflow.WorkflowDefinition("custom", 1, nodeDefinition.id(), List.of(nodeDefinition), List.of());
+        var ledger = new dev.dual.ledger.file.WorkflowFileLedger();
+        ledger.initialize(paths, "wf-network", definition);
+        Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Validate approved dependencies.\n");
+        var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "failed", List.of(), Map.of());
+        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore();
+        var ref = store.approve(paths, nodeDefinition.id(), List.of("packages.example.org"), "approved dependency resolution");
+        ledger.retryActiveNode(paths, "retry with operator grant");
+        ledger.markRunning(paths, nodeId, 1);
+        var transport = new CapturingApprovalTransport();
+        transport.uncontracted = true;
+        var pendingBytes = Files.readString(root.resolve(ref));
+        var prepared = new AcpxAgentTaskHandler(transport, true).execute(new TaskHandler.TaskContext(
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+        assertNull(transport.lastExecutionPolicy, "prepare-only must not call the provider");
+        assertEquals(pendingBytes, Files.readString(root.resolve(ref)), "prepare-only cannot consume authority");
+        var preparedMetadata = new ObjectMapper().readTree(root.resolve((String) prepared.result().get("run_metadata")).toFile());
+        var preparedPolicy = root.resolve(preparedMetadata.path("executionAuthority").path("policyRef").asText());
+        assertTrue(new ObjectMapper().readTree(preparedPolicy.toFile()).path("sandbox").path("network").path("allowed_domains").isEmpty());
+        Thread.sleep(2L);
+        new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+        var granted = transport.lastExecutionPolicy;
+        assertNotNull(granted);
+        granted.verify(root);
+        var policy = new ObjectMapper().readTree(root.resolve(granted.ref()).toFile());
+        assertEquals("packages.example.org", policy.path("sandbox").path("network").path("allowed_domains").get(0).asText());
+        assertEquals(ref, granted.networkGrant().ref());
+        assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebFetch"));
+        var metadata = new ObjectMapper().readTree(paths.runsDir().resolve(granted.runId()).resolve("run.json").toFile());
+        assertEquals(ref, metadata.path("executionAuthority").path("networkGrant").path("grantRef").asText());
+
+        ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "failed", List.of(), Map.of());
+        ledger.retryActiveNode(paths, "a second retry is not a second approval");
+        ledger.markRunning(paths, nodeId, 1);
+        new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+        var ungranted = transport.lastExecutionPolicy;
+        assertNull(ungranted.networkGrant());
+        assertTrue(new ObjectMapper().readTree(root.resolve(ungranted.ref()).toFile())
+                .path("sandbox").path("network").path("allowed_domains").isEmpty());
+        assertThrows(IOException.class, () -> ClaudeExecutionPolicy.write(root, "ws-network", nodeId,
+                granted.runId(), paths.runsDir().resolve(granted.runId()), AcpxPermissionProfile.review(), granted.networkGrant()));
+        Files.writeString(root.resolve(ref), "{}");
+        assertThrows(IOException.class, () -> granted.verify(root));
+    }
+
+    @Test
     void implementationAgentCannotRewriteTaskContractAuthority() throws Exception {
         writeChangeBoundaryControlFacts("ws-test");
         var handler = new AcpxAgentTaskHandler(
@@ -1926,7 +1983,7 @@ class AcpxAgentTaskHandlerTest {
                 #!/bin/sh
                 if [ "$1" = "build-info" ]; then
                   cat <<'EOF'
-                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c","policy_schema":"claude_execution_policy.v2"}
+                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"__PATCH_SHA__","policy_schema":"claude_execution_policy.v2"}
                 EOF
                   exit 0
                 fi
@@ -1969,6 +2026,7 @@ class AcpxAgentTaskHandlerTest {
                 exit 0
                 """
                 .replace("__SESSIONS__", sessionsDir.toString())
+                .replace("__PATCH_SHA__", ReviewedAcpxBuildIdentity.PATCH_SHA256)
                 .replace("__TEST_HOME__", sessionsDir.getParent().getParent().toString())
                 .replace("__WORKDIR__", sessionsDir.getParent().getParent().toString())
                 .replace("__STRICT_FIXTURE__", strictResultFixture.toString()), StandardCharsets.UTF_8);
@@ -2792,9 +2850,12 @@ class AcpxAgentTaskHandlerTest {
     private static final class CapturingApprovalTransport extends AcpxAgentTransport {
         Boolean lastApproveAll;
         AcpxPermissionProfile lastPermissionProfile;
+        ClaudeExecutionPolicy.Binding lastExecutionPolicy;
+        boolean uncontracted;
 
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            lastExecutionPolicy = request.claudeExecutionPolicy();
             lastApproveAll = request.approveAll();
             lastPermissionProfile = request.permissionProfile();
             Files.createDirectories(request.stdoutPath().getParent());
@@ -2813,6 +2874,8 @@ class AcpxAgentTaskHandlerTest {
                     """);
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
+            if (uncontracted) return fixtureResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"), List.of(), null,
+                    new AcpxPromptCompletion("fixture", "end_turn", "{}"));
             return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
 

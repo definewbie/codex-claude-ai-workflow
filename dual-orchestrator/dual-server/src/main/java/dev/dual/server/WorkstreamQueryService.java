@@ -79,6 +79,7 @@ public class WorkstreamQueryService {
                     "updatedAt", current.updatedAt()
             ));
             response.put("agentTasks", agentTasks);
+            response.put("networkAuthority", new dev.dual.ledger.file.ExecutionNetworkGrantStore().view(paths));
         } else {
             response.put("status", legacy.workstream().status());
             response.put("statusSource", "legacy_initial");
@@ -238,6 +239,8 @@ public class WorkstreamQueryService {
         response.put("completionAudit", completionAudit);
         response.put("deliveryView", deliveryView);
         response.put("recoveryAssessment", recoveryAssessment);
+        response.put("networkAuthority", current == null ? Map.of("canApprove", false, "canCancel", false)
+                : new dev.dual.ledger.file.ExecutionNetworkGrantStore().view(paths));
         return response;
     }
 

@@ -112,6 +112,22 @@ public class WorkstreamActionService {
                 "public WebSearch approved for one retry");
     }
 
+    public Map<String, Object> networkAuthority(Path workspaceRoot, String workstreamId,
+                                                String target, java.util.List<String> domains, String note, boolean cancel) throws Exception {
+        var root = normalize(workspaceRoot).toRealPath();
+        var paths = paths(root, workstreamId);
+        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore();
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api network authority"))) {
+            if (cancel) {
+                if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval fields");
+                store.cancel(paths);
+            } else {
+                store.approve(paths, target, domains, note);
+            }
+            return store.view(paths);
+        }
+    }
+
     public Map<String, Object> recoverStaleRunning(Path workspaceRoot, String workstreamId, String note) throws Exception {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);

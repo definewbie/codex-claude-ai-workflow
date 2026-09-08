@@ -1,35 +1,3 @@
- src/acp/agent-command.ts               |  28 ++-
- src/acp/auth-env.ts                    |  22 ++
- src/acp/claude-execution-policy.ts     | 367 +++++++++++++++++++++++++++++++++
- src/acp/client.ts                      |  31 ++-
- src/cli-core.ts                        |   5 +
- src/cli/build-info-command.ts          |  28 +++
- src/cli/command-handlers.ts            |  16 +-
- src/cli/flags.ts                       |  38 ++++
- src/cli/queue/messages.ts              |  31 +++
- src/cli/queue/owner-env.ts             |  26 +++
- src/cli/session/queue-owner-runtime.ts |   4 +-
- src/cli/session/runtime.ts             |  22 ++
- src/e1-build-info.generated.ts         |   3 +
- src/flows/cli.ts                       |   2 +
- src/runtime/engine/manager.ts          |   4 +
- src/runtime/engine/reconnect.ts        |   6 +
- src/runtime/engine/session-options.ts  |  52 ++++-
- src/session/conversation-model.ts      |   6 +
- src/session/persistence/parse.ts       |  21 ++
- src/types.ts                           |   4 +
- test/build-info-command.test.ts        |  13 ++
- test/claude-execution-policy.test.ts   | 202 ++++++++++++++++++
- test/client.test.ts                    | 253 +++++++++++++++++++++++
- test/connect-load.test.ts              |  19 ++
- test/prompt-runner.test.ts             |  92 +++++++++
- test/queue-messages.test.ts            |  17 ++
- test/queue-owner-env.test.ts           |  19 ++
- test/queue-owner-lifecycle.test.ts     |  49 +++++
- test/runtime-manager.test.ts           | 120 +++++++++++
- test/spawn-options.test.ts             |  33 +++
- 30 files changed, 1515 insertions(+), 18 deletions(-)
-
 diff --git a/src/acp/agent-command.ts b/src/acp/agent-command.ts
 index 873283378748a19208987fd6d042f792bc4c31ee..5d8a81261b1b4503e1c1d2abf6a4472ef0b743b6 100644
 --- a/src/acp/agent-command.ts
@@ -124,10 +92,10 @@ index 35d20301573ca8255d5426e4bae1398afce2e414..63c4b54b62f8b923273c1a6e287268a7
  }
 diff --git a/src/acp/claude-execution-policy.ts b/src/acp/claude-execution-policy.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..49cc8ccbfa6325c75d258d53ab6e34cda188c2fb
+index 0000000000000000000000000000000000000000..1d91458626768f7640bf05c7a5afb76aacfcbc98
 --- /dev/null
 +++ b/src/acp/claude-execution-policy.ts
-@@ -0,0 +1,367 @@
+@@ -0,0 +1,383 @@
 +import { createHash } from "node:crypto";
 +import fs from "node:fs";
 +import path from "node:path";
@@ -166,7 +134,7 @@ index 0000000000000000000000000000000000000000..49cc8ccbfa6325c75d258d53ab6e34cd
 +  "ANTHROPIC_AUTH_TOKEN",
 +  "ANTHROPIC_BASE_URL",
 +] as const;
-+const DOMAIN_PATTERN = /^(?:\*\.)?[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
++const DOMAIN_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
 +const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 +const SECRET_LIKE_PATTERN =
 +  /(?:bearer\s+|sk-[a-z0-9]|ghp_[a-z0-9]|-----begin [^-]*private key-----)/i;
@@ -181,7 +149,7 @@ index 0000000000000000000000000000000000000000..49cc8ccbfa6325c75d258d53ab6e34cd
 +export type ClaudeExecutionPolicyOptions = {
 +  settingSources: [];
 +  sandbox: JsonObject;
-+  managedSettings: { sandbox: JsonObject };
++  managedSettings: { sandbox: JsonObject; permissions: { deny: string[] } };
 +};
 +
 +export function loadClaudeExecutionPolicy(
@@ -216,7 +184,13 @@ index 0000000000000000000000000000000000000000..49cc8ccbfa6325c75d258d53ab6e34cd
 +  return {
 +    settingSources: [],
 +    sandbox: sdkSandbox,
-+    managedSettings: { sandbox: managedSandboxOptions(sdkSandbox) },
++    managedSettings: {
++      sandbox: managedSandboxOptions(sdkSandbox),
++      permissions: {
++        deny: (requireObject(sdkSandbox.filesystem, "filesystem").denyWrite as string[])
++          .flatMap((entry) => [`Edit(/${entry})`, `Edit(/${entry}/**)`]),
++      },
++    },
 +  };
 +}
 +
@@ -251,7 +225,10 @@ index 0000000000000000000000000000000000000000..49cc8ccbfa6325c75d258d53ab6e34cd
 +  assertEmptyArray(network.allow_unix_sockets, "sandbox.network.allow_unix_sockets");
 +  const allowedDomains = requireStringArray(network.allowed_domains, "allowed_domains");
 +  if (
-+    allowedDomains.some((domain) => domain !== domain.toLowerCase() || !DOMAIN_PATTERN.test(domain))
++    allowedDomains.length > 32 || allowedDomains.some((domain) => domain !== domain.toLowerCase()
++      || domain.length > 253 || !DOMAIN_PATTERN.test(domain) || /^[0-9.]+$/.test(domain)
++      || domain.endsWith(".localhost") || domain.endsWith(".local")
++      || domain.split(".").some((label) => label.length > 63))
 +  ) {
 +    throw new Error("sandbox.network.allowed_domains contains a non-canonical domain");
 +  }
@@ -384,18 +361,25 @@ index 0000000000000000000000000000000000000000..49cc8ccbfa6325c75d258d53ab6e34cd
 +  if (paths.some((entry) => !path.isAbsolute(entry) || path.normalize(entry) !== entry)) {
 +    throw new Error(`${label} contains a non-canonical absolute path`);
 +  }
++  if (label === "sandbox.filesystem.deny_write" && paths.some((entry) => /[\[\]{}()*?\\\n\r]/.test(entry))) {
++    throw new Error("protected filesystem paths must not contain permission-pattern metacharacters");
++  }
 +  return paths;
 +}
 +
-+function containsSecretLikeValue(value: unknown): boolean {
++function containsSecretLikeValue(value: unknown, field = ""): boolean {
++  // This field has already passed domain validation; token-prefix heuristics reject valid DNS names.
++  if (field === "sandbox.network.allowed_domains") return false;
 +  if (typeof value === "string") {
 +    return SECRET_LIKE_PATTERN.test(value);
 +  }
 +  if (Array.isArray(value)) {
-+    return value.some(containsSecretLikeValue);
++    return value.some((entry) => containsSecretLikeValue(entry, field));
 +  }
 +  if (value && typeof value === "object") {
-+    return Object.values(value as JsonObject).some(containsSecretLikeValue);
++    return Object.entries(value as JsonObject).some(([key, entry]) =>
++      containsSecretLikeValue(entry, field ? `${field}.${key}` : key),
++    );
 +  }
 +  return false;
 +}
@@ -1230,10 +1214,10 @@ index 0000000000000000000000000000000000000000..8544c568301576486c223a0283570396
 +});
 diff --git a/test/claude-execution-policy.test.ts b/test/claude-execution-policy.test.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..3aa220a8707613072fbb802e49272ecb58086fcd
+index 0000000000000000000000000000000000000000..043601ab22d5a8a21bcf5fee2018196dce4e1276
 --- /dev/null
 +++ b/test/claude-execution-policy.test.ts
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,223 @@
 +import assert from "node:assert/strict";
 +import { createHash } from "node:crypto";
 +import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
@@ -1302,6 +1286,27 @@ index 0000000000000000000000000000000000000000..3aa220a8707613072fbb802e49272ecb
 +    ]),
 +    true,
 +  );
++});
++
++test("validated DNS names are not mistaken for token prefixes", async () => {
++  const fixture = await policyFixture((raw) => raw.replace('"example.com"', '"task-api.example.org"'));
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++  assert.deepEqual((options.sandbox.network as { allowedDomains: string[] }).allowedDomains, ["task-api.example.org"]);
++  const invalid = await policyFixture((raw) => raw.replace('"example.com"', '"https://sk-a.example.org"'));
++  assert.throws(() => loadClaudeExecutionPolicy(invalid.root, invalid.binding), /non-canonical domain/);
++});
++
++test("control file protection covers sandbox processes and native file tools", async () => {
++  const fixture = await policyFixture((raw) => raw.replace('"deny_write":[]', '"deny_write":["/control/nodes","/control/execution-authority"]'));
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++  assert.deepEqual((options.sandbox.filesystem as { denyWrite: string[] }).denyWrite, ["/control/nodes", "/control/execution-authority"]);
++  assert.deepEqual(options.managedSettings.permissions.deny, [
++    "Edit(//control/nodes)", "Edit(//control/nodes/**)",
++    "Edit(//control/execution-authority)", "Edit(//control/execution-authority/**)",
++  ]);
++  const meta = buildClaudeCodeOptionsMeta({claudeExecutionPolicyRef: fixture.binding.ref,
++    claudeExecutionPolicySha256: fixture.binding.sha256}, true, fixture.root);
++  assert.deepEqual((meta?.claudeCode as {options: unknown}).options, options);
 +});
 +
 +test("Claude ACP metadata consumes the fixed policy while other agents reject it", async () => {

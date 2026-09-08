@@ -11,6 +11,16 @@ class AcpxFailureSignalCatalogTest {
     private final AcpxFailureSignalCatalog catalog = new AcpxFailureSignalCatalog();
 
     @Test
+    void oldAndCurrentProgressDiagnosticsHaveTheSameFailureOwner() {
+        for (var message : List.of(
+                "agent accepted the prompt but produced no trusted progress before the progress timeout",
+                "agent process produced no observed progress before the progress timeout")) {
+            assertEquals("agent_output_interrupted",
+                    catalog.match(new AcpxFailureEvidence("", message, 4)).orElseThrow().id());
+        }
+    }
+
+    @Test
     void matchesRateLimitSignalsAcrossStdoutAndLanguages() {
         var evidence = new AcpxFailureEvidence(
                 "[error] RUNTIME: API Error: Request rejected (429) 已达到 5 小时的使用上限",

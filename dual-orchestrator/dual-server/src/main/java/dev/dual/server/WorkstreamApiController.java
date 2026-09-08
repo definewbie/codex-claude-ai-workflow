@@ -172,6 +172,13 @@ public class WorkstreamApiController {
                 request.publicRepositoryAttested());
     }
 
+    @PostMapping("/{workstreamId}/recovery/network")
+    public Map<String, Object> networkAuthority(@PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir, @RequestBody NetworkApprovalRequest request) throws Exception {
+        if (request == null) throw new IllegalArgumentException("network authority request is required");
+        return actionService.networkAuthority(workdirPath(workdir), workstreamId, request.target(), request.domains(), request.note(), request.cancel());
+    }
+
     @PostMapping("/{workstreamId}/recovery/close-mistaken-iteration")
     public Map<String, Object> closeMistakenIteration(
             @PathVariable String workstreamId,
@@ -280,6 +287,8 @@ public class WorkstreamApiController {
 
     public record PublicWebSearchApprovalRequest(String note, boolean publicRepositoryAttested) {
     }
+
+    public record NetworkApprovalRequest(String target, java.util.List<String> domains, String note, boolean cancel) { }
 
     public record ReviewReviseRequest(String feedback) {
     }

@@ -175,6 +175,11 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             throw new IllegalStateException(
                     "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
         }
+        var networkGrant = e1Enabled && !prepareOnly
+                ? new dev.dual.ledger.file.ExecutionNetworkGrantStore().claimIfPresent(
+                        new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot().toRealPath(),
+                                new dev.dual.core.id.DualId(context.workstreamId())), context.instance().nodeInstanceId(), runId)
+                : null;
         var executionPolicy = e1Enabled
                 ? ClaudeExecutionPolicy.write(
                         context.workspaceRoot(),
@@ -182,7 +187,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                         context.instance().nodeInstanceId(),
                         runId,
                         runDir,
-                        effectivePermissionProfile)
+                        effectivePermissionProfile, networkGrant)
                 : null;
         var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
                 context.workspaceRoot(),

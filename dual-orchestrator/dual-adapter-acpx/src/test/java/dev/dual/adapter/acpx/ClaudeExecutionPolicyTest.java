@@ -48,6 +48,9 @@ class ClaudeExecutionPolicyTest {
         assertEquals(List.of(), network.get("allowed_domains"));
         assertEquals(false, network.get("allow_local_binding"));
         assertEquals(List.of(), network.get("allow_unix_sockets"));
+        assertEquals(List.of(tempDir.toRealPath().resolve(".agent/workstreams/ws-1/nodes").toString(),
+                        tempDir.toRealPath().resolve(".agent/workstreams/ws-1/execution-authority").toString()),
+                map(sandbox.get("filesystem")).get("deny_write"));
         var serialized = Files.readString(tempDir.resolve(binding.ref()));
         assertFalse(serialized.contains("secret-value"));
         assertTrue(serialized.contains("ANTHROPIC_AUTH_TOKEN"));

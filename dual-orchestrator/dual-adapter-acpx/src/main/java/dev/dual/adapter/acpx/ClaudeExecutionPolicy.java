@@ -16,6 +16,9 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import dev.dual.core.id.DualId;
+import dev.dual.ledger.file.ExecutionNetworkGrantStore;
+import dev.dual.ledger.file.WorkstreamPaths;
 
 final class ClaudeExecutionPolicy {
     static final String SCHEMA = "claude_execution_policy.v2";
@@ -39,7 +42,7 @@ final class ClaudeExecutionPolicy {
             String runId,
             Path runDir
     ) throws IOException {
-        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, false);
+        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, false, null);
     }
 
     static Binding write(
@@ -59,7 +62,17 @@ final class ClaudeExecutionPolicy {
                 nodeInstanceId,
                 runId,
                 runDir,
-                permissionProfile.allowsLocalBinding());
+                permissionProfile.allowsLocalBinding(), null);
+    }
+
+    static Binding write(Path workspaceRoot, String workstreamId, String nodeInstanceId, String runId,
+                         Path runDir, AcpxPermissionProfile profile, ExecutionNetworkGrantStore.Claim claim) throws IOException {
+        if (profile == null || claim != null && !profile.allowsLocalBinding()) {
+            throw new IOException("network grant requires implement profile");
+        }
+        if (claim != null) new ExecutionNetworkGrantStore().verifyClaim(
+                new WorkstreamPaths(workspaceRoot.toRealPath(), new DualId(workstreamId)), claim, nodeInstanceId, runId);
+        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, profile.allowsLocalBinding(), claim);
     }
 
     private static Binding write(
@@ -68,7 +81,8 @@ final class ClaudeExecutionPolicy {
             String nodeInstanceId,
             String runId,
             Path runDir,
-            boolean allowLocalBinding
+            boolean allowLocalBinding,
+            ExecutionNetworkGrantStore.Claim claim
     ) throws IOException {
         var root = workspaceRoot.toRealPath();
         var realRunDir = runDir.toRealPath();
@@ -81,7 +95,7 @@ final class ClaudeExecutionPolicy {
 
         var network = new LinkedHashMap<String, Object>();
         network.put("strict_allowlist", true);
-        network.put("allowed_domains", List.of());
+        network.put("allowed_domains", claim == null ? List.of() : claim.domains());
         network.put("allow_local_binding", allowLocalBinding);
         network.put("allow_unix_sockets", List.of());
 
@@ -89,7 +103,9 @@ final class ClaudeExecutionPolicy {
         filesystem.put("allow_read", List.of(root.toString(), scratch.toString()));
         filesystem.put("allow_write", List.of(root.toString(), scratch.toString()));
         filesystem.put("deny_read", List.of());
-        filesystem.put("deny_write", List.of());
+        var controlRoot = root.resolve(".agent/workstreams").resolve(requireIdentifier(workstreamId, "workstreamId"));
+        filesystem.put("deny_write", List.of(controlRoot.resolve("nodes").toString(),
+                controlRoot.resolve("execution-authority").toString()));
 
         var sandbox = new LinkedHashMap<String, Object>();
         sandbox.put("enabled", true);
@@ -113,7 +129,7 @@ final class ClaudeExecutionPolicy {
         var bytes = MAPPER.writeValueAsBytes(document);
         writeAtomically(policyPath, bytes);
         var ref = root.relativize(policyPath.toRealPath()).toString();
-        var binding = new Binding(ref, sha256(bytes), workstreamId, nodeInstanceId, runId);
+        var binding = new Binding(ref, sha256(bytes), workstreamId, nodeInstanceId, runId, claim);
         binding.verify(root);
         return binding;
     }
@@ -123,8 +139,12 @@ final class ClaudeExecutionPolicy {
             String sha256,
             String workstreamId,
             String nodeInstanceId,
-            String runId
+            String runId,
+            ExecutionNetworkGrantStore.Claim networkGrant
     ) {
+        Binding(String ref, String sha256, String workstreamId, String nodeInstanceId, String runId) {
+            this(ref, sha256, workstreamId, nodeInstanceId, runId, null);
+        }
         Binding {
             requireText(ref, "policy ref");
             if (!sha256.matches("[a-f0-9]{64}")) {
@@ -156,15 +176,19 @@ final class ClaudeExecutionPolicy {
             requireEquals(document, "node_instance_id", nodeInstanceId);
             requireEquals(document, "run_id", runId);
             requireEquals(document, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
+            if (networkGrant != null) new ExecutionNetworkGrantStore().verifyClaim(
+                    new WorkstreamPaths(root, new DualId(workstreamId)), networkGrant, nodeInstanceId, runId);
         }
 
         Map<String, Object> metadata(String disposition) {
-            return Map.of(
+            var metadata = new LinkedHashMap<String, Object>(Map.of(
                     "schema", SCHEMA,
                     "policyRef", ref,
                     "policySha256", sha256,
                     "transportDisposition", disposition
-            );
+            ));
+            if (networkGrant != null) metadata.put("networkGrant", networkGrant.metadata());
+            return Map.copyOf(metadata);
         }
     }
 

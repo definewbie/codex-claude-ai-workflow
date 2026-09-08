@@ -57,9 +57,11 @@ class AcpxAgentTransportTest {
 
     @Test
     void commandTimeoutConfigurationIsExplicitAndBounded() {
-        assertEquals(Duration.ofSeconds(600), AcpxAgentTransport.configuredCommandTimeout(null));
+        assertEquals(Duration.ZERO, AcpxAgentTransport.configuredCommandTimeout(null));
+        assertEquals(Duration.ZERO, AcpxAgentTransport.configuredCommandTimeout(" "));
+        assertEquals(Duration.ZERO, AcpxAgentTransport.configuredCommandTimeout("0"));
         assertEquals(Duration.ofSeconds(1200), AcpxAgentTransport.configuredCommandTimeout("1200"));
-        assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("0"));
+        assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("-1"));
         assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("invalid"));
     }
 
@@ -235,11 +237,12 @@ class AcpxAgentTransportTest {
                 echo "$@" >> "__LOG__"
                 if [ "$1" = "build-info" ]; then
                   cat <<'EOF'
-                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c","policy_schema":"claude_execution_policy.v2"}
+                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"__PATCH_SHA__","policy_schema":"claude_execution_policy.v2"}
                 EOF
                 fi
                 exit 0
-                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+                """.replace("__LOG__", invocationLog.toString())
+                        .replace("__PATCH_SHA__", ReviewedAcpxBuildIdentity.PATCH_SHA256), StandardCharsets.UTF_8);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
@@ -349,6 +352,65 @@ class AcpxAgentTransportTest {
                 AcpxPermissionProfile.observe()));
 
         assertTrue(Files.readString(invocationLog).contains("--timeout 1200"));
+    }
+
+    @Test
+    void activeClaudeCodexAndCorrectionOutliveProgressWindowWithoutTotalDeadline() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-active.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                case " $* " in
+                  *" sessions "*|*" cancel "*) exit 0 ;;
+                  *" --timeout "*) exit 99 ;;
+                esac
+                i=0
+                while [ "$i" -lt 6 ]; do
+                  echo "[thinking] working $i"
+                  sleep 1
+                  i=$((i + 1))
+                done
+                echo "ACPX_DONE"
+                """);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("active-prompt.md");
+        Files.writeString(prompt, "# Prompt\n");
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30),
+                Duration.ofSeconds(4), Duration.ofSeconds(5), Duration.ZERO);
+        for (var mode : List.of("claude", "codex", "correction")) {
+            var request = new AcpxRunRequest(tempDir, mode + "-active", prompt,
+                    tempDir.resolve(mode + ".stdout"), tempDir.resolve(mode + ".stderr"),
+                    AcpxPermissionProfile.observe());
+            var result = switch (mode) {
+                case "claude" -> transport.runClaudeDesign(request);
+                case "codex" -> transport.runCodexDesignReview(request);
+                default -> transport.runAgentResultCorrection("claude", request);
+            };
+            assertEquals(0, result.exitCode(), mode);
+            assertFalse(result.command().contains("--timeout"), mode);
+            assertTrue(Files.readString(request.stdoutPath()).contains("ACPX_DONE"), mode);
+            assertTrue(result.activeAdapterSignals().isEmpty(), mode);
+        }
+    }
+
+    @Test
+    void silentProcessIsStoppedWithoutTotalDeadline() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-silent.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                case " $* " in *" sessions "*|*" cancel "*) exit 0 ;; esac
+                sleep 20
+                echo "MUST_NOT_COMPLETE"
+                """);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("silent-prompt.md");
+        Files.writeString(prompt, "# Prompt\n");
+        var request = new AcpxRunRequest(tempDir, "silent", prompt,
+                tempDir.resolve("silent.stdout"), tempDir.resolve("silent.stderr"), AcpxPermissionProfile.observe());
+        var result = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30),
+                Duration.ofSeconds(1), Duration.ofSeconds(5), Duration.ZERO).runClaudeDesign(request);
+        assertEquals(4, result.exitCode());
+        assertTrue(result.activeAdapterSignals().stream().anyMatch(signal -> signal.type() == AdapterSignalType.PROCESS_STALLED));
+        assertFalse(Files.readString(request.stdoutPath()).contains("MUST_NOT_COMPLETE"));
     }
 
     @Test

@@ -14,13 +14,14 @@ import picocli.CommandLine.Command;
                 RecoveryStaleCommand.class,
                 RecoveryReplayClassificationCommand.class,
                 RecoveryCloseMistakenIterationCommand.class,
-                RecoveryApproveWebSearchCommand.class
+                RecoveryApproveWebSearchCommand.class,
+                RecoveryNetworkCommand.class
         }
 )
 public final class RecoveryCommand implements Runnable {
     @Override
     public void run() {
         System.out.println("Use recovery show, recovery stale, recovery abort, recovery replay-classification, "
-                + "recovery close-mistaken-iteration, or recovery approve-websearch.");
+                + "recovery close-mistaken-iteration, recovery approve-websearch, or recovery network.");
     }
 }
