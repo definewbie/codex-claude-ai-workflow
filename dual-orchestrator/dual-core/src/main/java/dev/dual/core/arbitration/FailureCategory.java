@@ -1,9 +1,8 @@
 package dev.dual.core.arbitration;
 
 /**
- * Semantic failure categories classified by FailureArbiter.
- * Priority-ordered: CONTRACT_GAP > CONTRACT_AMBIGUITY > IMPLEMENTATION_BUG >
- * CONTEXT_INSUFFICIENT > VERIFICATION_INSUFFICIENT > TOOL_LIMITATION > REVIEW_NOISE.
+ * Canonical explicit acceptance failure categories consumed by FailureArbiter.
+ * Declaration order has no routing priority.
  */
 public enum FailureCategory {
     CONTRACT_GAP,

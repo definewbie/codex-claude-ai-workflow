@@ -1,6 +1,8 @@
 package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.dual.core.arbitration.FailureCategory;
+import dev.dual.core.arbitration.FailureClassification;
 import dev.dual.core.contract.ContractStatus;
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeDefinition;
@@ -1002,6 +1004,7 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void productReviewContextProjectsCompleteProposalFromValidatedReference() throws Exception {
+        publishInitialProposalIteration();
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Review the proposal.", StandardCharsets.UTF_8);
         var sidecar = wsDir.resolve("runs/run-proposal/outputs/intake-claude-brainstorm.contract.json");
@@ -1043,7 +1046,7 @@ class ContextBuildPackageHandlerTest {
         var result = handler.execute(ctx("product_review", List.of(
                 relative(tempDir, sidecar), published.referenceRef()), "intake.codex_product_review"));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(NodeStatus.COMPLETED, result.status(), () -> result.result().toString());
         assertTrue(result.outputRefs().contains(published.referenceRef()));
         assertFalse(result.outputRefs().contains(relative(tempDir, sidecar)));
         assertEquals(2, result.outputRefs().size(), "only context package and typed proposal ref may cross");
@@ -1305,6 +1308,78 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
+    void phase5StopsAfterEnoughTrimmingAndPreservesHumanFeedback() throws Exception {
+        assertMinimalBudgetTrimming("implementation");
+    }
+
+    @Test
+    void acceptanceAlsoPreservesFeedbackAfterEnoughTrimming() throws Exception {
+        assertMinimalBudgetTrimming("acceptance");
+    }
+
+    private void assertMinimalBudgetTrimming(String profile) throws Exception {
+        Files.createDirectories(wsDir.resolve("nodes"));
+        objectMapper.findAndRegisterModules().writeValue(wsDir.resolve("nodes/human.json").toFile(),
+                new dev.dual.ledger.file.NodeInstanceDocument(1, "node-human", "gate.review", NodeKind.GATE,
+                        "human.review", NodeStatus.COMPLETED, "review", "iter-001", List.of(), Map.of(),
+                        List.of(), Map.of("human_action", "revise", "note", "Keep the approved API unchanged."),
+                        null, "", Instant.EPOCH, Instant.EPOCH));
+        Files.writeString(wsDir.resolve("events.jsonl"), "");
+        var diagnostic = wsDir.resolve("artifacts/contract-failures/diagnostic.json");
+        Files.createDirectories(diagnostic.getParent());
+        objectMapper.writeValue(diagnostic.toFile(), Map.of("recovery_hint", ""));
+
+        var baseline = handler.execute(ctx(profile, List.of()));
+        assertEquals(NodeStatus.COMPLETED, baseline.status(), baseline.result().toString());
+        var before = objectMapper.readTree(tempDir.resolve(
+                (String) baseline.result().get("context_package_metadata")).toFile());
+        for (var section : before.path("sections")) {
+            assertFalse(section.path("dropped").asBoolean(), "baseline must not require trimming");
+        }
+        var budget = ContextProfiles.budgetFor(profile).totalBudget();
+        // Add fixed boundary content so removing the low-priority pointers alone is enough.
+        var paddingTokens = budget - before.path("estimatedTokens").asInt() + 100;
+        assertTrue(paddingTokens > 0);
+        objectMapper.writeValue(diagnostic.toFile(), Map.of("recovery_hint", "x".repeat(paddingTokens * 4)));
+
+        var result = handler.execute(ctx(profile, List.of()));
+        assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
+        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        var metadata = objectMapper.readTree(tempDir.resolve(
+                (String) result.result().get("context_package_metadata")).toFile());
+        assertTrue(metadata.path("withinBudget").asBoolean(), metadata.toPrettyString());
+        assertEquals(TokenEstimator.defaultEstimator().estimate(markdown), metadata.path("estimatedTokens").asInt());
+        int dropped = 0;
+        for (var section : metadata.path("sections")) {
+            if (section.path("dropped").asBoolean()) {
+                dropped++;
+                assertEquals("ledger_pointers", section.path("name").asText());
+                assertEquals(0, section.path("renderedTokens").asInt());
+            }
+            if (section.path("name").asText().equals("human_feedback")) {
+                assertFalse(section.path("dropped").asBoolean());
+                assertTrue(section.path("renderedTokens").asInt() > 0);
+            }
+        }
+        assertEquals(1, dropped, metadata.toPrettyString());
+        assertTrue(markdown.contains("Keep the approved API unchanged."));
+        assertFalse(markdown.contains("## Ledger Pointers"));
+        assertEquals(markdown.indexOf("## Context Governance"), markdown.lastIndexOf("## Context Governance"));
+    }
+
+    @Test
+    void nonDroppableBoundaryOverflowFailsWithoutPublishingPackage() throws Exception {
+        var diagnostic = wsDir.resolve("artifacts/contract-failures/diagnostic.json");
+        Files.createDirectories(diagnostic.getParent());
+        objectMapper.writeValue(diagnostic.toFile(), Map.of("recovery_hint", "x".repeat(30_000)));
+        var result = handler.execute(ctx("implementation", List.of()));
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertTrue(result.result().get("error").toString().startsWith("budget exceeded:"));
+        assertTrue(result.outputRefs().isEmpty());
+        assertFalse(result.result().containsKey("context_package"));
+    }
+
+    @Test
     void budgetOverflowDropsOptionalSectionsInPhase5() throws Exception {
         Files.createDirectories(wsDir);
         // Write a massive requirement to push actual rendered content past 24k budget
@@ -1485,13 +1560,11 @@ class ContextBuildPackageHandlerTest {
         Files.createDirectories(wsDir.resolve("artifacts"));
         Files.createDirectories(wsDir.resolve("runs/run-004/outputs"));
         Files.writeString(wsDir.resolve("requirement.md"), "Repair objective test.", StandardCharsets.UTF_8);
-        Files.writeString(wsDir.resolve("artifacts/failure-classification.json"), """
-                {
-                  "category": "CONTRACT_GAP",
-                  "reasoning": "The accepted implementation missed exact ledger wording.",
-                  "suggestedAction": "Repair the contract gap before continuing."
-                }
-                """, StandardCharsets.UTF_8);
+        objectMapper.findAndRegisterModules().writeValue(wsDir.resolve("artifacts/failure-classification.json").toFile(),
+                new FailureClassification(FailureCategory.CONTRACT_GAP,
+                        "The accepted implementation missed exact ledger wording.",
+                        "Repair the contract gap before continuing.", "deterministic", Instant.EPOCH,
+                        1, "REJECT", List.of()));
         Files.writeString(wsDir.resolve("runs/run-004/outputs/acceptance-codex-review.contract.json"), """
                 {
                   "artifact_type": "agent_output_contract",
@@ -1529,6 +1602,7 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Current Repair Objective"));
         assertTrue(markdown.contains("Category: CONTRACT_GAP"));
+        assertTrue(markdown.contains("Suggested Action: Repair the contract gap before continuing."));
         assertTrue(markdown.contains("Update README to point to .agent/workstreams/ exactly."));
         assertTrue(markdown.contains("Remove the misleading statement"));
         assertTrue(markdown.contains("Implementation does not satisfy the accepted TaskContract."));
@@ -1555,10 +1629,11 @@ class ContextBuildPackageHandlerTest {
                   "lifecycle_status": "REJECTED",
                   "must_fix": ["Add routed verification evidence."],
                   "failure": {
-                    "category_hint": "VERIFICATION_GAP",
-                    "contract_gaps": ["Routed acceptance lacks proof."],
+                    "category_hint": "VERIFICATION_INSUFFICIENT",
+                    "contract_gaps": [],
                     "out_of_scope_files": [],
-                    "missing_tests": [],
+                    "missing_tests": ["Routed acceptance lacks proof."],
+                    "verification_remediation": "EVIDENCE_COLLECTION",
                     "context_gaps": [],
                     "reason": "Routed rejection must drive repair."
                   },
@@ -2139,6 +2214,7 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void reviewTargetReceivesTypedSourceRereadAllowance() throws Exception {
+        publishInitialProposalIteration();
         System.setProperty("dual.context.governance.enabled", "true");
         Files.createDirectories(wsDir.resolve("memory"));
         Files.writeString(wsDir.resolve("requirement.md"), "Review source evidence.", StandardCharsets.UTF_8);
@@ -2173,7 +2249,7 @@ class ContextBuildPackageHandlerTest {
         var result = handler.execute(ctx(
                 "product_review", List.of(proposalRef), "intake.codex_product_review"));
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(NodeStatus.COMPLETED, result.status(), () -> result.result().toString());
         var readReuse = objectMapper.readValue(occurrenceArtifact(wsDir, "read-reuse-contract.json").toFile(), Map.class);
         assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed
                         && allowed.stream().anyMatch(item -> String.valueOf(item).contains("src/api.js"))
@@ -2308,7 +2384,18 @@ class ContextBuildPackageHandlerTest {
     }
 
     private void publishSidecar(Path sidecar) throws Exception {
-        AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-ctx", sidecar);
+        AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-ctx", sidecar, "iter-001", List.of());
+    }
+
+    private void publishInitialProposalIteration() throws Exception {
+        Files.createDirectories(wsDir.resolve("iterations"));
+        Files.writeString(wsDir.resolve("iterations/iter-001.json"), """
+                {"schemaVersion":1,"iterationId":"iter-001","parentIterationId":"",
+                 "number":1,"stageId":"stage-intake","status":"active",
+                 "triggerNodeInstanceId":"","triggerAction":"workflow_started",
+                 "targetNodeDefinitionId":"intake.claude_brainstorm","reason":"fixture",
+                 "createdAt":"2026-09-08T00:00:00Z"}
+                """, StandardCharsets.UTF_8);
     }
 
     private String publishProposalReference(String runId, String objective) throws Exception {

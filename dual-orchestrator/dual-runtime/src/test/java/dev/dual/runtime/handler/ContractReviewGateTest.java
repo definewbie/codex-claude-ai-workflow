@@ -1,8 +1,6 @@
 package dev.dual.runtime.handler;
 
-import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeInstance;
-import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.NodeStatus;
 
 import org.junit.jupiter.api.Test;
@@ -10,8 +8,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,14 +20,17 @@ class ContractReviewGateTest {
     @Test
     void humanReviewGateSupportsContractReviewActions() throws Exception {
         var handler = new HumanReviewGateHandler();
+        var f = new AcceptanceRepairSequenceTest.Fixture(tempDir, "CONTRACT_GAP", "tool.py");
+        f.until("gate.human_requirement_review"); f.approve(); f.until("gate.contract_review");
+        var node = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
         var result = handler.openOrInspect(new GateHandler.GateContext(
                 tempDir,
-                "ws",
-                new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of(
-                        "allowed_actions", List.of("approve", "clarify", "reject")
-                )),
-                node("gate.contract_review", NodeKind.GATE, "human.review"),
-                "READY"
+                f.ws,
+                f.ledger.loadDefinition(f.paths).node(node.nodeDefinitionId()),
+                new NodeInstance(node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(),
+                        node.status(), node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(), node.result(),
+                        node.runRef(), node.startedAt(), node.finishedAt()),
+                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString()
         ));
 
         assertEquals(NodeStatus.WAITING, result.status());
@@ -61,21 +60,4 @@ class ContractReviewGateTest {
         assertFalse(contract.allowedDecisions().contains("APPROVED_DRAFT"));
     }
 
-    private static NodeInstance node(String id, NodeKind kind, String handlerType) {
-        return new NodeInstance(
-                "node-" + id.replace('.', '-'),
-                id,
-                kind,
-                handlerType,
-                NodeStatus.READY,
-                "stage-test",
-                "iter-001",
-                List.of(),
-                List.of(),
-                Map.of(),
-                null,
-                null,
-                null
-        );
-    }
 }

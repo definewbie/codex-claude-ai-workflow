@@ -128,7 +128,7 @@ class FailureClassificationTest {
         // Below range
         assertThrows(IllegalArgumentException.class, () -> sampleClassification(
                 FailureCategory.IMPLEMENTATION_BUG, "reasoning", "action", "source",
-                Instant.now(), 0, "REJECT", List.of()
+                Instant.now(), -1, "REJECT", List.of()
         ));
         // Above range
         assertThrows(IllegalArgumentException.class, () -> sampleClassification(

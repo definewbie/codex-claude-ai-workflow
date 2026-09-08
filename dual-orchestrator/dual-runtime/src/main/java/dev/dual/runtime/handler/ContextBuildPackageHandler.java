@@ -116,6 +116,18 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     null);
         }
 
+        String revisionBody = "";
+        if (reviewSubject.isPresent()) {
+            try {
+                revisionBody = renderContractRevision(contractRevisionProjection(
+                        context.workspaceRoot(), context.workstreamId(), context.instance().iterationId(),
+                        reviewSubject.get().reference()));
+            } catch (IOException | IllegalArgumentException failure) {
+                return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+                        Map.of("failure_code", "CONTRACT_REVISION_CONTEXT_INVALID", "error", failure.getMessage()),
+                        failure.getMessage());
+            }
+        }
         String authoredBody = "";
         if (AuthoredStageLineageResolver.participates(configText(context, "target_node", ""))) {
             try {
@@ -130,7 +142,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         if (ContextProfiles.hasProfile(profileName) && !hasSectionOverride) {
             return executeGoverned(context, workstreamDir, packagePath, profileName,
-                    reviewSubject, architectureReviewSubject, qualifiedContract, authoredBody);
+                    reviewSubject, architectureReviewSubject, qualifiedContract, authoredBody, revisionBody);
         }
 
         var requestedSections = effectiveSections(context);
@@ -145,8 +157,11 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var markdown = renderPackage(context, workstreamDir, manifest, governance,
                 reviewSubject, architectureReviewSubject);
         if (!authoredBody.isEmpty()) markdown += "\n\n" + authoredBody;
+        markdown += revisionBody;
         Files.writeString(packagePath, markdown, StandardCharsets.UTF_8);
-        var requiredTypedSubjectTokens = requiredTypedSubjectTokens(reviewSubject, architectureReviewSubject);
+        var requiredTypedSubjectTokens = new LinkedHashMap<>(
+                requiredTypedSubjectTokens(reviewSubject, architectureReviewSubject));
+        if (!revisionBody.isEmpty()) requiredTypedSubjectTokens.put("contract_revision", tokenCount(revisionBody));
         var metadataPath = writeContextPackageMetadata(
                 context,
                 packagePath,
@@ -212,7 +227,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             Optional<TaskContractProposalReference.ResolvedProposal> reviewSubject,
             Optional<AgentEvidenceIndex.Entry> architectureReviewSubject,
             Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract,
-            String authoredBody
+            String authoredBody,
+            String revisionBody
     ) throws IOException {
         var rawBudget = ContextProfiles.budgetFor(profileName);
         var budget = effectiveBudget(rawBudget);
@@ -282,6 +298,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
 
         // Phase 5: Validate total budget (token-based)
+        builder.replace(0, builder.indexOf("## State & Evidence Boundary"),
+                rebuildGovernedHeader(context, budget, sorted, Map.of()));
         if (tokenCount(builder.toString()) > budget.totalBudget()) {
             for (int i = sorted.size() - 1; i >= 0; i--) {
                 if (tokenCount(builder.toString()) <= budget.totalBudget()) break;
@@ -292,26 +310,30 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     continue;
                 }
                 rs.dropped = true;
-            }
-            builder.setLength(0);
-            appendGovernedHeader(builder, context, budget, sorted);
-            ContextStateEvidenceBoundaryRenderer.append(
-                    builder, context, workstreamDir, OBJECT_MAPPER, qualifiedContract);
-            RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot(), compactGovernance(budget));
-            for (var rs : sorted) {
-                if (rs.dropped || !rs.available) {
-                    if (rs.req.missingPolicy() == MissingPolicy.PLACEHOLDER) {
-                        builder.append("## ").append(sectionTitle(rs.req.section())).append("\n\n");
-                        builder.append("(not available)\n\n");
+                rs.renderedChars = 0;
+                // Re-measure the actual package after each removal before considering higher priorities.
+                builder.setLength(0);
+                appendGovernedHeader(builder, context, budget, sorted);
+                ContextStateEvidenceBoundaryRenderer.append(
+                        builder, context, workstreamDir, OBJECT_MAPPER, qualifiedContract);
+                RepoScopeGovernance.appendMarkdownGuidance(builder, governance, context.workspaceRoot(), compactGovernance(budget));
+                for (var remaining : sorted) {
+                    if (remaining.dropped || !remaining.available) {
+                        if (remaining.req.missingPolicy() == MissingPolicy.PLACEHOLDER) {
+                            builder.append("## ").append(sectionTitle(remaining.req.section())).append("\n\n");
+                            builder.append("(not available)\n\n");
+                        }
+                        continue;
                     }
-                    continue;
+                    var section = renderGovernedSectionOrFailure(
+                            remaining, context, workstreamDir, handoff, manifest, budget, qualifiedContract);
+                    if (section.failure() != null) {
+                        return section.failure();
+                    }
+                    builder.append(section.content());
                 }
-                var section = renderGovernedSectionOrFailure(
-                        rs, context, workstreamDir, handoff, manifest, budget, qualifiedContract);
-                if (section.failure() != null) {
-                    return section.failure();
-                }
-                builder.append(section.content());
+                builder.replace(0, builder.indexOf("## State & Evidence Boundary"),
+                        rebuildGovernedHeader(context, budget, sorted, Map.of()));
             }
             var governedTokens = tokenCount(builder.toString());
             var preservedTokens = sorted.stream()
@@ -339,8 +361,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             requiredTypedSubjectTokens.put(
                     "required_architecture_review_subject", tokenCount(builder.substring(start)));
         }
+        if (!revisionBody.isEmpty()) {
+            builder.append(revisionBody);
+            requiredTypedSubjectTokens.put("contract_revision", tokenCount(revisionBody));
+        }
         // Required typed evidence is never dropped; report its cost instead of hiding it behind the soft budget.
-        builder.replace(0, builder.indexOf("\n## Context Governance"),
+        builder.replace(0, builder.indexOf("## State & Evidence Boundary"),
                 rebuildGovernedHeader(context, budget, sorted, requiredTypedSubjectTokens));
         if (!authoredBody.isEmpty()) builder.append("\n\n").append(authoredBody);
         var markdown = builder.toString();
@@ -949,6 +975,37 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     private static boolean requiresArchitectureReviewSubject(TaskContext context) {
         return "architecture_review".equals(profile(context))
                 && "design.codex_arch_review".equals(configText(context, "target_node", ""));
+    }
+
+    static Map<String, Object> contractRevisionProjection(
+            Path root, String workstreamId, String iterationId, TaskContractProposalReference candidate
+    ) throws IOException {
+        var resolved = new TaskContractRevisionContextResolver().resolveForProposal(root, workstreamId, candidate);
+        if (!resolved.valid()) throw new IOException("CONTRACT_REVISION_CONTEXT_INVALID: " + resolved.errors());
+        var revision = resolved.context();
+        if (!iterationId.equals(revision.iteration().iterationId())) {
+            throw new IOException("CONTRACT_REVISION_CONTEXT_INVALID: candidate belongs to another iteration");
+        }
+        if (revision.lateRoot() == null) return Map.of();
+        var proposal = candidate.resolveVerifiedProposal(root, workstreamId, OBJECT_MAPPER)
+                .orElseThrow(() -> new IOException("CONTRACT_REVISION_CONTEXT_INVALID: candidate is unverified"));
+        var projection = new LinkedHashMap<String, Object>();
+        projection.put("candidate", candidate.toMap());
+        projection.put("direct_parent", revision.previousReference().toMap());
+        projection.put("late_root", revision.lateRoot());
+        projection.put("obligations", revision.obligations());
+        projection.put("revision_responses", proposal.revisionResponses());
+        return projection;
+    }
+
+    static String renderContractRevision(Map<String, Object> projection) throws IOException {
+        if (projection.isEmpty()) return "";
+        return "\n\n## Contract Revision Obligations And Candidate Responses\n\n"
+                + "Cumulative obligations at candidate generation remain visible with their sources. "
+                + "Candidate responses are claims, not verified closure or approval. "
+                + "The current review is shown separately; newly raised findings enter the next revision.\n\n"
+                + "```json\n" + OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(projection)
+                + "\n```\n\n";
     }
 
     private static Map<String, Integer> requiredTypedSubjectTokens(

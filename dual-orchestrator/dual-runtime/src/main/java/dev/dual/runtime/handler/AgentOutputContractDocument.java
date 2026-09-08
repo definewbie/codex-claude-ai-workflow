@@ -297,7 +297,7 @@ public record AgentOutputContractDocument(
     ) {
         static FailureFields from(Map<String, Object> document) {
             return new FailureFields(
-                    text(document.get("category_hint")),
+                    document.get("category_hint") instanceof String category ? category : "",
                     verificationRemediation(document.get("verification_remediation")),
                     stringList(document.get("contract_gaps")),
                     stringList(document.get("out_of_scope_files")),
@@ -337,14 +337,14 @@ public record AgentOutputContractDocument(
         }
 
         private static AgentResultEnvelope.VerificationRemediation verificationRemediation(Object value) {
-            var text = text(value);
-            if (text.isBlank()) {
+            var text = value == null ? "" : String.valueOf(value);
+            if (text.isEmpty()) {
                 return null;
             }
             try {
                 return AgentResultEnvelope.VerificationRemediation.valueOf(text);
-            } catch (IllegalArgumentException ignored) {
-                return null;
+            } catch (IllegalArgumentException invalid) {
+                throw new IllegalArgumentException("Unknown verification_remediation: " + text, invalid);
             }
         }
     }

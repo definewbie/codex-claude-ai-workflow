@@ -1,528 +1,267 @@
 package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.dual.core.contract.ContractStatus;
-import dev.dual.core.contract.TaskContract;
-import dev.dual.core.workflow.NodeDefinition;
-import dev.dual.core.workflow.NodeInstance;
-import dev.dual.core.workflow.NodeKind;
-import dev.dual.core.workflow.NodeResult;
-import dev.dual.core.workflow.NodeStatus;
-
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.dual.core.arbitration.FailureCategory;
+import dev.dual.core.workflow.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FailureClassifyHandlerTest {
+    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final String WS = "ws-classification";
+    private static final String REVIEW = "acceptance.codex_verifier_review";
+    @TempDir Path root;
 
-    @TempDir
-    Path tempDir;
-    private TestLedgerFixture fixture;
-    private Path artifactsDir;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        fixture = new TestLedgerFixture(tempDir, "ws-fc");
-        fixture.init();
-        artifactsDir = tempDir.resolve(".agent/workstreams/ws-fc/artifacts");
-        Files.createDirectories(artifactsDir);
-    }
-
-    @Test
-    void handlerType() {
-        var handler = new FailureClassifyHandler();
-        assertEquals("acceptance.failure_classify", handler.type());
-    }
-
-    @Test
-    void legacyInstanceResultCannotReplaceMissingAcceptanceSidecar() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of(
-                        "decision", "REJECT",
-                        "summary", "Legacy result must not classify.",
-                        "contract_gaps", List.of("legacy gap")
-                ),
-                List.of()
-        ));
-
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
-        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
-    }
-
-    @Test
-    void invalidAcceptanceSidecarFailsClosedBeforeClassification() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-        var sidecarRef = writeAcceptanceSidecar(Map.of(
-                "summary", "A decision is required before failure classification."
-        ));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(Map.of(), List.of(sidecarRef)));
-
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
-        assertEquals("CONTRACT_SIDECAR_MISSING_DECISION",
-                ((Map<?, ?>) result.result().get("parse_error")).get("code"));
-        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
-    }
-
-    @Test
-    void acceptedSidecarCannotBeReclassifiedByLegacyRejectResult() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-        var sidecarRef = writeAcceptanceSidecar(Map.of(
-                "decision", "ACCEPT_WITH_NOTES",
-                "summary", "Published review contains only non-blocking notes.",
-                "failure", Map.of("category_hint", "REVIEW_NOISE")
-        ));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of(
-                        "decision", "REJECT",
-                        "summary", "Legacy result tries to override the review.",
-                        "contract_gaps", List.of("legacy gap")
-                ),
-                List.of(sidecarRef)
-        ));
-
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", result.outcome());
-        assertEquals("ACCEPT_WITH_NOTES", result.result().get("review_decision"));
-        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
-        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")));
-    }
-
-    @Test
-    void classifyReject_producesRejectOutcome() throws Exception {
-        writeMinimalContract();
-        writeGitEvidence("M src/A.java\nM src/B.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT",
-                        "summary", "Bad implementation",
-                        "failure", Map.of(
-                                "contract_gaps", List.of("missing scope definition")))
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertTrue(result.outcome().startsWith("REJECT_"));
-        assertEquals("REJECT_CONTRACT_GAP", result.outcome());
-        assertTrue(result.outputRefs().stream()
-                .anyMatch(ref -> ref.endsWith("failure-classification.json")));
-    }
-
-    @Test
-    void acceptWithNotesCannotProduceFailureClassificationArtifacts() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "ACCEPT_WITH_NOTES",
-                        "summary", "Mostly good but unclear tests",
-                        "failure", Map.of(
-                                "out_of_scope_files", List.of("src/extra/File.java")))
-        ));
-
-        assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", result.outcome());
-        assertEquals("ACCEPT_WITH_NOTES", result.result().get("review_decision"));
-        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
-        assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md")));
-    }
-
-    @Test
-    void classifyReadsContextGapsFromInputContractSidecar() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
-        Files.createDirectories(outputDir);
-        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "REJECT",
-                  "summary": "Verifier cannot finish acceptance.",
-                  "failure": {
-                    "category_hint": "CONTEXT_INSUFFICIENT",
-                    "contract_gaps": [],
-                    "out_of_scope_files": [],
-                    "missing_tests": [],
-                    "context_gaps": ["Missing API usage artifact for treatment event status updates"],
-                    "reason": "Required context artifact was absent"
-                  }
-                }
-                """, StandardCharsets.UTF_8);
-        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of(),
-                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("REJECT_CONTEXT_INSUFFICIENT", result.outcome());
-        assertEquals("CONTEXT_INSUFFICIENT", result.result().get("category"));
-    }
-
-    @Test
-    void artifactWritten() throws Exception {
-        writeMinimalContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        handler.execute(taskContext(
-                Map.of("decision", "REJECT", "summary", "Implementation has issues")
-        ));
-
-        var classificationPath = artifactsDir.resolve("failure-classification.json");
-        assertTrue(Files.exists(classificationPath));
-
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        var json = mapper.readTree(classificationPath.toFile());
-        assertTrue(json.has("category"));
-        assertTrue(json.has("reasoning"));
-        assertTrue(json.has("matched_rule"));
-    }
-
-    @Test
-    void outcomeStringFormat() throws Exception {
-        writeMinimalContract();
-        writeCleanContract();
-        // No git evidence → changedFileCount = -1
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT",
-                        "summary", "minor stylistic issue",
-                        "failure", Map.of(
-                                "category_hint", "REVIEW_NOISE"))
-        ));
-
-        // REVIEW_NOISE is now reserved for explicit non-blocking review noise signals.
-        assertEquals("REJECT_REVIEW_NOISE", result.outcome());
-        assertEquals("REVIEW_NOISE", result.result().get("category"));
-    }
-
-    @Test
-    void toolLimitationWhenZeroChangedFiles() throws Exception {
-        writeCleanContract();
-        // Empty git evidence → 0 changed files
-        writeGitEvidence("", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT", "summary", "Nothing was changed")
-        ));
-
-        assertEquals("REJECT_TOOL_LIMITATION", result.outcome());
-        assertEquals("TOOL_LIMITATION", result.result().get("category"));
-    }
-
-    @Test
-    void resultMapContainsExpectedFields() throws Exception {
-        writeMinimalContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT",
-                        "summary", "Has issues",
-                        "failure", Map.of(
-                                "contract_gaps", List.of("gap-1")))
-        ));
-
-        assertNotNull(result.result().get("category"));
-        assertNotNull(result.result().get("reasoning"));
-        assertNotNull(result.result().get("suggested_action"));
-        assertNotNull(result.result().get("matched_rule"));
-        assertNotNull(result.result().get("review_decision"));
-        assertNotNull(result.result().get("stage_outcome"));
-        assertNotNull(result.result().get("classification_ref"));
-
-        assertEquals("REJECT", result.result().get("review_decision"));
-        assertEquals("REJECTED", result.result().get("stage_outcome"));
-        assertTrue(((String) result.result().get("classification_ref"))
-                .contains("failure-classification.json"));
-    }
-
-    @Test
-    void classifyPreservesInsufficientEvidenceStageOutcomeFromAcceptanceSidecar() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
-        Files.createDirectories(outputDir);
-        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "REJECT",
-                  "stage_outcome": "INSUFFICIENT_EVIDENCE",
-                  "lifecycle_status": "INSUFFICIENT_EVIDENCE",
-                  "summary": "Generated evidence does not prove the implementation.",
-                  "failure": {
-                    "category_hint": "insufficient_verification",
-                    "missing_tests": ["manual walkthrough evidence"],
-                    "reason": "Verification evidence is incomplete."
-                  }
-                }
-                """, StandardCharsets.UTF_8);
-        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of(),
-                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
-        ));
-
-        assertEquals("REJECT", result.result().get("review_decision"));
-        assertEquals("INSUFFICIENT_EVIDENCE", result.result().get("stage_outcome"));
-        assertEquals("REJECT_VERIFICATION_INSUFFICIENT", result.outcome());
-        assertEquals("VERIFICATION_INSUFFICIENT", result.result().get("category"));
-    }
-
-    @Test
-    void explicitMissingTestsRouteToSelfTestEvenWhenReviewerAlsoReportsContextGap() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
-        Files.createDirectories(outputDir);
-        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "REJECT",
-                  "summary": "Self-test evidence is not visible.",
-                  "failure": {
-                    "category_hint": "MISSING_TEST_EVIDENCE",
-                    "missing_tests": ["node --test"],
-                    "context_gaps": ["self-test report is absent from review context"],
-                    "reason": "Verification evidence is incomplete."
-                  }
-                }
-                """, StandardCharsets.UTF_8);
-        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of(),
-                List.of(".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json")
-        ));
-
-        assertEquals("REJECT_VERIFICATION_INSUFFICIENT", result.outcome());
-        assertEquals("VERIFICATION_INSUFFICIENT", result.result().get("category"));
-        assertEquals(4, result.result().get("matched_rule"));
-    }
-
-    @Test
-    void typedTestCodeChangeRoutesToImplementationAndPreservesValidatedReviewSidecar() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("M backend/tests/test_chemo.py\n", null, null);
-
-        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
-        Files.createDirectories(outputDir);
-        Files.writeString(outputDir.resolve("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "REJECT",
-                  "summary": "Implementation is correct except for one missing regression test.",
-                  "failure": {
-                    "category_hint": "VERIFICATION_INSUFFICIENT",
-                    "verification_remediation": "TEST_CODE_CHANGE",
-                    "contract_gaps": ["The implementation violates an existing acceptance criterion"],
-                    "missing_tests": ["Add the equal-date cycle-number tie-breaker test in backend/tests/test_chemo.py"],
-                    "reason": "The test source must change; collecting existing evidence is insufficient."
-                  }
-                }
-                """, StandardCharsets.UTF_8);
-        var sidecarRef = ".agent/workstreams/ws-fc/runs/run-acceptance/outputs/acceptance-codex-review.contract.json";
-        publishSidecar(outputDir.resolve("acceptance-codex-review.contract.json"));
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(Map.of(), List.of(sidecarRef)));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("REJECT_IMPLEMENTATION_BUG", result.outcome());
-        assertEquals("IMPLEMENTATION_BUG", result.result().get("category"));
-        assertEquals(4, result.result().get("matched_rule"));
-        assertTrue(result.outputRefs().contains(sidecarRef),
-                "the code-repair context must retain the validated acceptance review, not only its classification");
-        assertTrue(result.outputRefs().stream().anyMatch(ref -> ref.endsWith("failure-classification.json")));
-    }
-
-    @Test
-    void rejectContractGapWritesCalibrationCandidate() throws Exception {
-        writeMinimalContract();
-        writeGitEvidence("M src/A.java\n", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT",
-                        "summary", "Missing acceptance coverage",
-                        "failure", Map.of(
-                                "contract_gaps",
-                                List.of("A6 source/status preservation was not explicit")))
-        ));
-
-        var candidatesDir = tempDir.resolve(".agent/workstreams/ws-fc/calibration/candidates");
-        assertTrue(Files.exists(candidatesDir));
-        List<Path> candidateFiles;
-        try (var stream = Files.list(candidatesDir)) {
-            candidateFiles = stream
-                    .filter(path -> path.getFileName().toString().endsWith(".json"))
-                    .toList();
+    private ObjectNode envelope(FailureCategory category) throws Exception {
+        var prompt = AgentResultPromptContract.render(WS, "run-review", REVIEW, "ACCEPT",
+                ContractRegistry.forNode(REVIEW).allowedDecisions());
+        for (var value : FailureCategory.values()) assertTrue(prompt.contains(value.name()));
+        var tree = (ObjectNode) JSON.readTree(prompt.substring(prompt.indexOf("{")));
+        var result = (ObjectNode) tree.get("result");
+        result.put("decision", "REJECT");
+        result.put("lifecycle_status", "REJECTED");
+        var failure = (ObjectNode) result.get("failure");
+        failure.put("category_hint", category.name());
+        switch (category) {
+            case CONTRACT_GAP, CONTRACT_AMBIGUITY -> failure.putArray("contract_gaps").add("Specify the service retention contract");
+            case IMPLEMENTATION_BUG -> result.putArray("must_fix").add("Repair site/README.md or service/main.py");
+            case VERIFICATION_INSUFFICIENT -> {
+                failure.putArray("missing_tests").add("Run the Java tool test suite");
+                failure.put("verification_remediation", "EVIDENCE_COLLECTION");
+            }
+            case CONTEXT_INSUFFICIENT -> failure.putArray("context_gaps").add("Provide the deployment input");
+            case TOOL_LIMITATION, REVIEW_NOISE -> failure.put("reason", "Explicit prerequisite or reviewer reevaluation needed");
         }
-        assertEquals(1, candidateFiles.size());
+        return tree;
+    }
 
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        var json = mapper.readTree(candidateFiles.get(0).toFile());
-        assertEquals(1, json.get("schemaVersion").asInt());
-        assertEquals("ws-fc", json.get("sourceWorkstreamId").asText());
-        assertEquals("acceptance.classify_failure", json.get("sourceNodeId").asText());
-        assertEquals("CONTRACT_GAP", json.get("failureCategory").asText());
-        assertEquals("REJECT", json.get("reviewDecision").asText());
-        assertEquals("CONTRACT_TEMPLATE", json.get("proposedUpdateType").asText());
-        assertEquals("DRAFT", json.get("status").asText());
-        assertTrue(result.outputRefs().stream()
-                .anyMatch(ref -> ref.contains("/calibration/candidates/")));
-        assertTrue(result.result().containsKey("calibration_candidate_ref"));
+    private NodeResult publish(ObjectNode tree) throws Exception {
+        String ref = ".agent/workstreams/" + WS + "/runs/run-review/outputs/review.json";
+        Files.createDirectories(root.resolve(ref).getParent());
+        JSON.writeValue(root.resolve(ref).toFile(), tree);
+        return new ArtifactContractValidator().validate(root, WS, "node-review", new NodeDefinition(
+                REVIEW, NodeKind.TASK, "acpx.agent_run", Map.of()), NodeResult.completed(
+                "completed", List.of(ref), Map.of("run_id", "run-review")));
+    }
+
+    private Path sidecar() { return root.resolve(".agent/workstreams/" + WS + "/runs/run-review/outputs/review.contract.json"); }
+    private String sidecarRef() { return root.relativize(sidecar()).toString(); }
+    private Path classification() { return root.resolve(".agent/workstreams/" + WS + "/artifacts/failure-classification.json"); }
+
+    private NodeResult classify() throws Exception {
+        var instance = new NodeInstance("node-classify", "acceptance.classify_failure", NodeKind.TASK,
+                "acceptance.failure_classify", NodeStatus.READY, "stage-acceptance", "iter-001",
+                List.of(sidecarRef()), List.of(), Map.of(), "", Instant.now(), null);
+        return new FailureClassifyHandler().execute(new TaskHandler.TaskContext(root, WS,
+                new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of()),
+                instance));
     }
 
     @Test
-    void rejectWritesCurrentFailureSummary() throws Exception {
-        writeCleanContract();
-        writeGitEvidence("", null, null);
-
-        var handler = new FailureClassifyHandler();
-        var result = handler.execute(taskContext(
-                Map.of("decision", "REJECT", "summary", "Nothing was changed")
-        ));
-
-        var summaryPath = tempDir.resolve(".agent/workstreams/ws-fc/recovery/current-failure.md");
-        assertTrue(Files.exists(summaryPath));
-        var summary = Files.readString(summaryPath, StandardCharsets.UTF_8);
-        assertTrue(summary.contains("# Current Failure"));
-        assertTrue(summary.contains("acceptance.classify_failure"));
-        assertTrue(summary.contains("REJECT"));
-        assertTrue(summary.contains("TOOL_LIMITATION"));
-        assertTrue(summary.contains("failure-classification.json"));
-        assertEquals(".agent/workstreams/ws-fc/recovery/current-failure.md",
-                result.result().get("failure_summary_ref"));
+    void renderParsePublishColdReadClassifyEveryCategory() throws Exception {
+        for (var category : FailureCategory.values()) {
+            Files.deleteIfExists(classification());
+            var tree = envelope(category);
+            var parsed = new AgentResultEnvelopeParser().parse(tree.toString());
+            assertNotNull(parsed.envelope(), category.name());
+            assertTrue(new AgentResultEnvelopeValidator().validate(parsed.envelope(), WS, "run-review",
+                    ContractRegistry.forNode(REVIEW)).valid(), category.name());
+            var published = publish(tree);
+            assertEquals(NodeStatus.COMPLETED, published.status(), published.toString());
+            AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+            var cold = AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), new ObjectMapper());
+            assertNotNull(cold.entry(), cold.toString());
+            assertEquals(category.name(), cold.entry().document().failure().categoryHint());
+            var classified = classify();
+            if (category == FailureCategory.CONTRACT_GAP || category == FailureCategory.CONTRACT_AMBIGUITY) {
+                assertEquals("ACCEPTANCE_REWORK_BASELINE_INVALID", classified.outcome());
+                assertFalse(Files.exists(classification()), "no contract classification writes without approved baseline");
+            } else {
+                assertEquals("REJECT_" + category, classified.outcome(), classified.toString());
+                assertEquals(category.name(), JSON.readTree(classification().toFile()).path("category").asText());
+                assertTrue(classified.outputRefs().contains(sidecarRef()), "retain original mixed evidence");
+            }
+        }
     }
 
-    // --- Helpers ---
-
-    private void writeMinimalContract() throws Exception {
-        var contract = new TaskContract(
-                "tc-test", 1, Instant.parse("2026-05-30T10:00:00Z"),
-                "Test objective",
-                new TaskContract.Scope(
-                        List.of(new TaskContract.ScopeEntry(
-                                "src/", TaskContract.ScopeOperation.MODIFY)),
-                        List.of()),
-                List.of("AC1"),  // Only 1 AC → triggers CONTRACT_AMBIGUITY (Rule 2) when no gaps
-                List.of(), List.of(), List.of(), List.of(),
-                List.of("ambiguous requirement"),  // ambiguity notes → also Rule 2
-                List.of(),
-                ContractStatus.READY_FOR_REVIEW, 1,
-                new TaskContract.Source("req.md", "test")
-        );
-        writeContract(contract);
+    @Test
+    void mixedProductRepairCannotBeOverriddenByMissingVerification() throws Exception {
+        var tree = envelope(FailureCategory.IMPLEMENTATION_BUG);
+        var result = (ObjectNode) tree.get("result");
+        var failure = (ObjectNode) result.get("failure");
+        failure.putArray("missing_tests").add("Collect existing test output");
+        failure.put("verification_remediation", "EVIDENCE_COLLECTION");
+        result.putArray("missing_evidence").add("Desktop UI record");
+        assertEquals(NodeStatus.COMPLETED, publish(tree).status());
+        AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+        var classified = classify();
+        assertEquals("REJECT_IMPLEMENTATION_BUG", classified.outcome());
+        var evidence = JSON.readTree(classification().toFile()).path("evidence").toString();
+        assertTrue(evidence.contains("Desktop UI record"));
+        assertTrue(evidence.contains("Collect existing test output"));
     }
 
-    private void writeCleanContract() throws Exception {
-        var contract = new TaskContract(
-                "tc-clean", 1, Instant.parse("2026-05-30T10:00:00Z"),
-                "Clean objective",
-                new TaskContract.Scope(
-                        List.of(new TaskContract.ScopeEntry(
-                                "src/", TaskContract.ScopeOperation.MODIFY)),
-                        List.of()),
-                List.of("AC1: must work", "AC2: no regressions"),  // 2 AC items — no ambiguity
-                List.of(), List.of(), List.of(), List.of(),
-                List.of(),  // no ambiguity notes
-                List.of(),
-                ContractStatus.READY_FOR_REVIEW, 1,
-                new TaskContract.Source("req.md", "test")
-        );
-        writeContract(contract);
+    @Test
+    void mechanicalCombinationMatrixAgreesAtEnvelopePublicationAndColdRead() throws Exception {
+        // Columns: category, contract gaps, must-fix, out-of-scope, missing tests,
+        // context gaps, reason, missing evidence, remediation, expected validity.
+        var rows = List.of(
+                "CONTRACT_GAP|1|1|1|1|1|1|1|TEST_CODE_CHANGE|true",
+                "CONTRACT_AMBIGUITY|1|1|1|1|1|1|1|EVIDENCE_COLLECTION|true",
+                "CONTRACT_GAP|0|1|0|0|0|0|0|NONE|false",
+                "IMPLEMENTATION_BUG|0|1|0|0|0|0|0|NONE|true",
+                "IMPLEMENTATION_BUG|0|0|1|0|0|0|0|NONE|true",
+                "IMPLEMENTATION_BUG|0|0|0|1|0|0|0|TEST_CODE_CHANGE|true",
+                "IMPLEMENTATION_BUG|0|1|0|1|0|0|1|EVIDENCE_COLLECTION|true",
+                "IMPLEMENTATION_BUG|0|0|0|1|0|1|1|EVIDENCE_COLLECTION|false",
+                "IMPLEMENTATION_BUG|1|1|0|0|0|0|0|NONE|false",
+                "VERIFICATION_INSUFFICIENT|0|0|0|0|0|0|1|NONE|true",
+                "VERIFICATION_INSUFFICIENT|0|1|0|1|0|0|0|EVIDENCE_COLLECTION|true",
+                "VERIFICATION_INSUFFICIENT|0|0|0|1|0|0|0|TEST_CODE_CHANGE|false",
+                "VERIFICATION_INSUFFICIENT|0|0|1|1|0|0|0|EVIDENCE_COLLECTION|false",
+                "VERIFICATION_INSUFFICIENT|0|0|0|1|1|0|0|EVIDENCE_COLLECTION|false",
+                "VERIFICATION_INSUFFICIENT|0|0|0|0|0|1|0|NONE|false",
+                "CONTEXT_INSUFFICIENT|0|0|0|1|1|0|1|EVIDENCE_COLLECTION|true",
+                "CONTEXT_INSUFFICIENT|0|0|0|0|0|1|0|NONE|false",
+                "CONTEXT_INSUFFICIENT|0|0|1|0|1|1|0|NONE|false",
+                "CONTEXT_INSUFFICIENT|0|0|0|1|1|1|0|TEST_CODE_CHANGE|false",
+                "TOOL_LIMITATION|0|0|0|1|0|1|1|EVIDENCE_COLLECTION|true",
+                "TOOL_LIMITATION|0|0|0|0|0|0|0|NONE|false",
+                "TOOL_LIMITATION|0|0|1|0|0|1|0|NONE|false",
+                "TOOL_LIMITATION|0|0|0|1|0|1|0|TEST_CODE_CHANGE|false",
+                "REVIEW_NOISE|0|0|0|0|0|1|0|NONE|true",
+                "REVIEW_NOISE|0|1|0|0|0|1|0|NONE|false",
+                "REVIEW_NOISE|0|0|0|0|0|1|1|NONE|false",
+                "REVIEW_NOISE|0|0|0|1|0|1|0|EVIDENCE_COLLECTION|false",
+                "REVIEW_NOISE|0|0|0|0|1|1|0|NONE|false",
+                "IMPLEMENTATION_BUG|0|1|0|1|0|0|0|NONE|false",
+                "IMPLEMENTATION_BUG|0|1|0|0|0|0|0|TEST_CODE_CHANGE|false");
+        for (var row : rows) {
+            var values = row.split("\\|");
+            var tree = envelope(FailureCategory.valueOf(values[0]));
+            var result = (ObjectNode) tree.get("result");
+            var failure = (ObjectNode) result.get("failure");
+            String[] keys = {"contract_gaps", "must_fix", "out_of_scope_files", "missing_tests",
+                    "context_gaps", "reason", "missing_evidence"};
+            for (int i = 0; i < keys.length; i++) {
+                var owner = i == 1 || i == 6 ? result : failure;
+                if (i == 5) owner.put(keys[i], values[i + 1].equals("1") ? "Explicit reason" : "");
+                else {
+                    var list = owner.putArray(keys[i]);
+                    if (values[i + 1].equals("1")) list.add("A concrete fact, not a routing keyword");
+                }
+            }
+            failure.put("verification_remediation", values[8]);
+            boolean expected = Boolean.parseBoolean(values[9]);
+            var parsed = new AgentResultEnvelopeParser().parse(tree.toString());
+            assertNotNull(parsed.envelope(), row);
+            assertEquals(expected, new AgentResultEnvelopeValidator().validate(parsed.envelope(), WS,
+                    "run-review", ContractRegistry.forNode(REVIEW)).valid(), row);
+            Files.deleteIfExists(sidecar());
+            assertEquals(expected ? NodeStatus.COMPLETED : NodeStatus.FAILED, publish(tree).status(), row);
+            if (expected) {
+                AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+                assertNotNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry(), row);
+            } else assertFalse(Files.exists(sidecar()), row);
+        }
     }
 
-    private void writeContract(TaskContract contract) throws Exception {
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        mapper.writerWithDefaultPrettyPrinter()
-                .writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
+    @Test
+    void legacyUnknownAndContradictoryCategoryFailBeforePublicationAndOnColdReread() throws Exception {
+        for (String category : List.of("", "implementation_bug", "IMPLEMENTATION_BUG ", "MISSING_TEST", "UNKNOWN",
+                "CONTRACT_GAP", "REVIEW_NOISE", "VERIFICATION_INSUFFICIENT")) {
+            var invalid = envelope(FailureCategory.IMPLEMENTATION_BUG);
+            ((ObjectNode) invalid.path("result").path("failure")).put("category_hint", category);
+            Files.deleteIfExists(sidecar());
+            Files.deleteIfExists(classification());
+            assertEquals(NodeStatus.FAILED, publish(invalid).status(), category);
+            assertFalse(Files.exists(sidecar()), category);
+
+            assertEquals(NodeStatus.COMPLETED, publish(envelope(FailureCategory.IMPLEMENTATION_BUG)).status());
+            var persisted = (ObjectNode) JSON.readTree(sidecar().toFile());
+            ((ObjectNode) persisted.get("failure")).put("category_hint", category);
+            JSON.writeValue(sidecar().toFile(), persisted);
+            // Give invalid historical bytes a valid lineage: semantic checks must still reject.
+            AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+            assertNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry(), category);
+            assertEquals(NodeStatus.FAILED, classify().status(), category);
+            assertFalse(Files.exists(classification()), category);
+        }
     }
 
-    private void writeGitEvidence(String statusShort, String diffStat, String diffPatch)
-            throws Exception {
-        fixture.writeGitEvidence(statusShort, diffStat, diffPatch);
+    @Test
+    void unknownRemediationCannotDisappearDuringSidecarParsing() throws Exception {
+        assertEquals(NodeStatus.COMPLETED, publish(envelope(FailureCategory.IMPLEMENTATION_BUG)).status());
+        var persisted = (ObjectNode) JSON.readTree(sidecar().toFile());
+        ((ObjectNode) persisted.get("failure")).put("verification_remediation", "GUESS");
+        JSON.writeValue(sidecar().toFile(), persisted);
+        AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+        assertNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry());
+        assertEquals(NodeStatus.FAILED, classify().status());
+        assertFalse(Files.exists(classification()));
     }
 
-    private void publishSidecar(Path sidecar) throws Exception {
-        AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-fc", sidecar);
+    @Test
+    void successKeepsExistingStageOutcomeGuardAndRejectsFailureCategory() throws Exception {
+        var tree = envelope(FailureCategory.REVIEW_NOISE);
+        var result = (ObjectNode) tree.get("result");
+        result.put("decision", "ACCEPT_WITH_NOTES");
+        result.put("lifecycle_status", "ACCEPTED_WITH_NOTES");
+        assertEquals(NodeStatus.FAILED, publish(tree).status());
+        ((ObjectNode) result.get("failure")).put("category_hint", "");
+        result.put("blocking", true);
+        assertEquals(NodeStatus.FAILED, publish(tree).status());
+        result.put("blocking", false);
+        result.putArray("must_fix").add("Unresolved issue");
+        assertEquals(NodeStatus.FAILED, publish(tree).status());
+        result.putArray("must_fix");
+        result.putArray("missing_evidence").add("Optional follow-up");
+        assertEquals(NodeStatus.COMPLETED, publish(tree).status(), "notes may retain optional evidence");
+        AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+        assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", classify().outcome());
     }
 
-    private TaskHandler.TaskContext taskContext(Map<String, Object> reviewDocument) throws Exception {
-        return taskContext(Map.of(), List.of(writeAcceptanceSidecar(reviewDocument)));
+    @Test
+    void acceptedSidecarAllowsAbsentRemediationButRejectsUnknownRemediation() throws Exception {
+        var tree = envelope(FailureCategory.REVIEW_NOISE);
+        var result = (ObjectNode) tree.get("result");
+        result.put("decision", "ACCEPT");
+        result.put("lifecycle_status", "ACCEPTED");
+        var failure = (ObjectNode) result.get("failure");
+        failure.put("category_hint", "");
+        failure.put("reason", "");
+        assertEquals(NodeStatus.COMPLETED, publish(tree).status());
+        var persisted = (ObjectNode) JSON.readTree(sidecar().toFile());
+        ((ObjectNode) persisted.get("failure")).remove("verification_remediation");
+        JSON.writeValue(sidecar().toFile(), persisted);
+        AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+        assertNotNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry());
+        assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", classify().outcome());
+
+        ((ObjectNode) persisted.get("failure")).put("verification_remediation", "UNKNOWN");
+        JSON.writeValue(sidecar().toFile(), persisted);
+        AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+        assertNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry());
+        assertEquals(NodeStatus.FAILED, classify().status());
+        assertFalse(Files.exists(classification()));
     }
 
-    private String writeAcceptanceSidecar(Map<String, Object> reviewDocument) throws Exception {
-        var outputDir = tempDir.resolve(".agent/workstreams/ws-fc/runs/run-acceptance/outputs");
-        Files.createDirectories(outputDir);
-        var sidecar = outputDir.resolve("acceptance-codex-review.contract.json");
-        var document = new LinkedHashMap<String, Object>(reviewDocument);
-        document.putIfAbsent("node_id", "acceptance.codex_verifier_review");
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), document);
-        publishSidecar(sidecar);
-        return ".agent/workstreams/ws-fc/runs/run-acceptance/outputs/"
-                + sidecar.getFileName();
-    }
-
-    private TaskHandler.TaskContext taskContext(Map<String, Object> instanceResult, List<String> inputRefs) {
-        return new TaskHandler.TaskContext(
-                tempDir,
-                "ws-fc",
-                new NodeDefinition("acceptance.classify_failure", NodeKind.TASK,
-                        "acceptance.failure_classify", Map.of()),
-                new NodeInstance(
-                        "node-classify-001",
-                        "acceptance.classify_failure",
-                        NodeKind.TASK,
-                        "acceptance.failure_classify",
-                        NodeStatus.READY,
-                        "stage-acceptance",
-                        "iter-001",
-                        inputRefs,
-                        List.of(),
-                        instanceResult,
-                        "run-001",
-                        Instant.now(),
-                        null
-                )
-        );
+    @Test
+    void missingOrTamperedSidecarNeverProducesClassification() throws Exception {
+        assertEquals(NodeStatus.FAILED, classify().status());
+        assertEquals(NodeStatus.COMPLETED, publish(envelope(FailureCategory.IMPLEMENTATION_BUG)).status());
+        AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+        Files.writeString(sidecar(), Files.readString(sidecar()) + " ");
+        assertEquals(NodeStatus.FAILED, classify().status());
+        assertFalse(Files.exists(classification()));
     }
 }

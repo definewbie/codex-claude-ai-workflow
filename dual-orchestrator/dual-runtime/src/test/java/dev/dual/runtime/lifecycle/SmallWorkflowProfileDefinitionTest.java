@@ -95,11 +95,12 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        assertEquals("97a070b3fa7f79431d1d1f73eb8f83121fad5d320816af82bb83b1d1adfc08fc",
+        // Baseline includes approved F2 proposal re-entry and F5 classifier revision limits.
+        assertEquals("c3c6cd4fdcce18a91b566ba71dabd6045ad5016c5331772ab3419f3b344c888f",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("6e11c36060d889f9f54a727cde4a8dbb55ea443dcf129e3b1673824f974cbaf4",
+        assertEquals("8f92a4769c4e5330d77421f3836de2026cd460419ff59a979e8e5cb23a345efe",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("0dc87fab245e10eba90e2c5cc3dc8730ff13407406ae8b9c6ca5b928d6023a43",
+        assertEquals("6be8efbfae86ec52de348f1512b25bf2c342b4172dd54ba6feee65172fa78850",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 

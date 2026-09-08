@@ -380,7 +380,8 @@
       "kind": "TASK",
       "handlerType": "acceptance.failure_classify",
       "config": {
-        "requires_approved_task_contract": true
+        "requires_approved_task_contract": true,
+        "max_revisions": 3
       }
     },
     {
@@ -1027,7 +1028,7 @@
     {
       "from": "acceptance.classify_failure",
       "on": "REJECT_CONTRACT_GAP",
-      "to": "contract.compile",
+      "to": "context.intake_claude_brainstorm",
       "condition": null,
       "metadata": {
         "transitionType": "loop",
@@ -1041,7 +1042,7 @@
     {
       "from": "acceptance.classify_failure",
       "on": "REJECT_CONTRACT_AMBIGUITY",
-      "to": "contract.compile",
+      "to": "context.intake_claude_brainstorm",
       "condition": null,
       "metadata": {
         "transitionType": "loop",

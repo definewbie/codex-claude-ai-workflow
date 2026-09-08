@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.arbitration.FailureClassification;
 import dev.dual.core.arbitration.FailureCategory;
-import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
@@ -40,7 +39,7 @@ public final class FailureClassifyHandler implements TaskHandler {
         var workstreamDir = context.workspaceRoot()
                 .resolve(".agent/workstreams").resolve(context.workstreamId());
 
-        TaskContract taskContract = null;
+        TaskContractProjectionVerifier.QualifiedTaskContract qualified = null;
         if (AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
             var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
             if (resolution.failure() != null || resolution.qualified().isEmpty()) {
@@ -50,16 +49,13 @@ public final class FailureClassifyHandler implements TaskHandler {
                         : resolution.failure();
                 return qualificationFailure(failure);
             }
-            taskContract = resolution.qualified().orElseThrow().contract();
+            qualified = resolution.qualified().orElseThrow();
         } else {
             var legacy = TaskContractProjectionVerifier.readLegacyProjection(
                     context.workspaceRoot(), context.workstreamId());
             if (legacy.failure() != null) {
                 throw new IOException(legacy.failure().message());
             }
-            taskContract = legacy.projection()
-                    .map(TaskContractProjectionVerifier.LegacyProjection::contract)
-                    .orElse(null);
         }
 
         var evidenceRead = AgentEvidenceIndex.latestDecisionFromRefs(context.workspaceRoot(),
@@ -77,24 +73,53 @@ public final class FailureClassifyHandler implements TaskHandler {
         }
 
         var reviewMetadata = evidenceRead.entry().document();
+        if (!"acceptance_review".equals(reviewMetadata.sourceArtifactType())) {
+            return new NodeResult("ACCEPTANCE_CLASSIFICATION_INVALID", NodeStatus.FAILED, List.of(),
+                    Map.of("reason", "ACCEPTANCE_CLASSIFICATION_INVALID"), "An acceptance_review sidecar is required");
+        }
+        var semanticViolation = AgentContractSemantics.validateOutputContract(reviewMetadata);
+        if (semanticViolation.isPresent()) {
+            var invalid = semanticViolation.get();
+            return new NodeResult(invalid.errorCode(), NodeStatus.FAILED, List.of(),
+                    Map.of("reason", invalid.errorCode(), "error", invalid.message()), invalid.message());
+        }
         var reviewDecision = reviewMetadata.decision();
         if (!"REJECT".equals(reviewDecision)) {
             return failedDecision(reviewDecision, context, evidenceRead.entry().path());
         }
-        var reviewSummary = reviewMetadata.summary();
         var stageOutcome = reviewMetadata.canonicalStageOutcome().isBlank()
                 ? StageOutcome.fromDecision(reviewDecision).name()
                 : reviewMetadata.canonicalStageOutcome();
         var failure = reviewMetadata.failure();
 
-        int changedFileCount = readChangedFileCount(workstreamDir);
-
-        var classification = arbiter.classify(
-                failure.contractGaps(), failure.outOfScopeFiles(),
-                failure.missingTests(), failure.contextGaps(),
-                reviewSummary, taskContract, changedFileCount, reviewDecision,
-                failure.categoryHint(), failure.verificationRemediation()
-        );
+        final FailureCategory category;
+        try {
+            category = FailureCategory.valueOf(failure.categoryHint());
+        } catch (IllegalArgumentException invalid) {
+            return new NodeResult("ACCEPTANCE_CLASSIFICATION_INVALID", NodeStatus.FAILED, List.of(),
+                    Map.of("reason", "ACCEPTANCE_CLASSIFICATION_INVALID"), "Canonical acceptance category is required");
+        }
+        var supportingEvidence = new ArrayList<String>();
+        supportingEvidence.addAll(failure.contractGaps());
+        supportingEvidence.addAll(reviewMetadata.mustFix());
+        supportingEvidence.addAll(failure.outOfScopeFiles());
+        supportingEvidence.addAll(failure.missingTests());
+        supportingEvidence.addAll(reviewMetadata.missingEvidence());
+        supportingEvidence.addAll(failure.contextGaps());
+        if (!failure.reason().isBlank()) supportingEvidence.add(failure.reason());
+        var classification = arbiter.classify(category, supportingEvidence);
+        Map<String, Object> baseline = Map.of();
+        if (category == FailureCategory.CONTRACT_GAP || category == FailureCategory.CONTRACT_AMBIGUITY) {
+            try {
+                if (qualified == null) throw new IOException("contract repair requires a qualified contract");
+                baseline = TaskContractRevisionContextResolver.captureAcceptanceReworkBaseline(
+                        context.workspaceRoot(), context.workstreamId(), qualified, evidenceRead.entry());
+            } catch (IOException invalid) {
+                return new NodeResult("ACCEPTANCE_REWORK_BASELINE_INVALID", NodeStatus.FAILED, List.of(),
+                        Map.of("reason", "ACCEPTANCE_REWORK_BASELINE_INVALID", "error", invalid.getMessage()),
+                        invalid.getMessage());
+            }
+        }
 
         var artifactsDir = workstreamDir.resolve("artifacts");
         Files.createDirectories(artifactsDir);
@@ -110,6 +135,7 @@ public final class FailureClassifyHandler implements TaskHandler {
                 .relativize(evidenceRead.entry().path()).toString());
         outputRefs.add(classificationRef);
         var result = new LinkedHashMap<String, Object>();
+        result.putAll(baseline);
         result.put("category", classification.category().name());
         result.put("reasoning", classification.reasoning());
         result.put("suggested_action", classification.suggestedAction());
@@ -175,30 +201,6 @@ public final class FailureClassifyHandler implements TaskHandler {
         ), message);
     }
 
-    private int readChangedFileCount(Path workstreamDir) throws IOException {
-        // Try git-evidence/changed-files.txt first (from TestLedgerFixture pattern)
-        var changedFilesPath = workstreamDir.resolve("artifacts")
-                .resolve("git-evidence").resolve("changed-files.txt");
-        if (Files.exists(changedFilesPath)) {
-            return (int) Files.readString(changedFilesPath, StandardCharsets.UTF_8)
-                    .lines()
-                    .filter(line -> !line.isBlank())
-                    .count();
-        }
-
-        // Fallback: git-evidence.txt (simple format)
-        var gitEvidencePath = workstreamDir.resolve("git-evidence.txt");
-        if (Files.exists(gitEvidencePath)) {
-            var content = Files.readString(gitEvidencePath, StandardCharsets.UTF_8);
-            return (int) content.lines()
-                    .map(String::trim)
-                    .filter(line -> !line.isBlank())
-                    .filter(line -> !line.isEmpty() && Character.isLetter(line.charAt(0)))
-                    .count();
-        }
-
-        return -1;
-    }
 
     private String writeCalibrationCandidateIfNeeded(
             TaskContext context,

@@ -191,7 +191,13 @@ public final class AgentResultEnvelopeValidator {
                         review.lifecycleStatus(), review.checks(), review.evidence(), review.missingEvidence(),
                         review.mustFix(), review.acceptanceNotes(), review.openRisks(), review.changedFiles(),
                         review.verificationSummary(), review.failure(), errors);
-                validateVerificationRemediation(review, errors);
+                if (review.failure() != null) {
+                    var failure = review.failure();
+                    AgentContractSemantics.validateAcceptanceClassification(review.decision(), failure.categoryHint(),
+                            failure.verificationRemediation(), failure.contractGaps(), failure.outOfScopeFiles(),
+                            failure.missingTests(), failure.contextGaps(), failure.reason(),
+                            review.mustFix(), review.missingEvidence()).ifPresent(v -> errors.reject(v.message()));
+                }
             }
             case AgentResultEnvelope.StageHandoffResult handoff -> {
                 requiredText(handoff.lifecycleStatus(), "result.lifecycle_status", errors);
@@ -408,26 +414,6 @@ public final class AgentResultEnvelopeValidator {
         requiredList(failure.contextGaps(), "result.failure.context_gaps", false, errors);
     }
 
-    private static void validateVerificationRemediation(
-            AgentResultEnvelope.AcceptanceReviewResult review,
-            ValidationErrors errors
-    ) {
-        if (review.failure() == null) {
-            return;
-        }
-        var remediation = review.failure().verificationRemediation();
-        var rejectWithMissingTests = "REJECT".equals(review.decision())
-                && review.failure().missingTests() != null
-                && !review.failure().missingTests().isEmpty();
-        if (rejectWithMissingTests
-                && (remediation == null || remediation == AgentResultEnvelope.VerificationRemediation.NONE)) {
-            errors.reject("result.failure.verification_remediation is required when REJECT lists missing_tests");
-        }
-        if (!rejectWithMissingTests && remediation != null
-                && remediation != AgentResultEnvelope.VerificationRemediation.NONE) {
-            errors.reject("result.failure.verification_remediation is only allowed when REJECT lists missing_tests");
-        }
-    }
 
     private static void validateNoVerificationRemediation(
             AgentResultEnvelope.Failure failure,

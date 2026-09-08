@@ -40,11 +40,25 @@ class ArtifactContractFixtureRegressionTest {
     }
 
     @Test
+    void acceptanceNotesMayStillRecordNonBlockingMissingEvidence() throws Exception {
+        var result = new AgentResultEnvelope.AcceptanceReviewResult(
+                "acceptance_review", "ACCEPT_WITH_NOTES", "accepted with optional follow-up", "ACCEPTED_WITH_NOTES",
+                false, List.of("reviewed diff"), List.of("tests passed"), List.of("optional visual inspection"),
+                List.of(), List.of("non-blocking follow-up"), List.of(), List.of(), "verified", emptyFailure());
+        var sidecar = validate("acceptance.codex_verifier_review", result);
+        assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
+        assertTrue(sidecar.contains("\"stage_outcome\" : \"ACCEPTED_WITH_NOTES\""));
+    }
+
+    @Test
     void acceptsRejectedReviewWithBlockingEvidence() throws Exception {
         var result = new AgentResultEnvelope.AcceptanceReviewResult(
                 "acceptance_review", "REJECT", "evidence missing", "REJECTED", true,
                 List.of("reviewed tests"), List.of(), List.of("test output"), List.of("run tests"),
-                List.of(), List.of("unverified behavior"), List.of(), "not verified", emptyFailure());
+                List.of(), List.of("unverified behavior"), List.of(), "not verified",
+                new AgentResultEnvelope.Failure("VERIFICATION_INSUFFICIENT",
+                        AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(),
+                        List.of(), List.of(), "Collect the missing test output"));
 
         var sidecar = validate("acceptance.codex_verifier_review", result);
 

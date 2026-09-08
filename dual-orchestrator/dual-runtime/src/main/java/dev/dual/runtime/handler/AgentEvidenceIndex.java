@@ -203,6 +203,11 @@ public final class AgentEvidenceIndex {
                     "routed agent evidence lineage is invalid: " + violation.get()
             );
         }
+        var semanticViolation = AgentContractSemantics.isAcceptanceReview(document.get())
+                ? AgentContractSemantics.validateOutputContract(document.get()) : java.util.Optional.<ContractViolation>empty();
+        if (semanticViolation.isPresent()) {
+            return EntryRead.invalid(semanticViolation.get().errorCode(), semanticViolation.get().message());
+        }
         return EntryRead.valid(new Entry(path.toAbsolutePath().normalize(), document.get(), lastModified(path)));
     }
 

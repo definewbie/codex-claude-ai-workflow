@@ -113,7 +113,7 @@ final class ContextStateEvidenceBoundaryRenderer {
         if (!contract.failure().reason().isBlank()) {
             builder.append("- Failure Reason: ").append(contract.failure().reason()).append("\n");
         }
-        var suggestedAction = text(classification.get("suggestedAction"));
+        var suggestedAction = text(classification.get("suggested_action"));
         if (!suggestedAction.isBlank()) {
             builder.append("- Suggested Action: ").append(suggestedAction).append("\n");
         }

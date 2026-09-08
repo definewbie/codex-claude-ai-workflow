@@ -234,7 +234,7 @@ class AgentResultEnvelopeParserTest {
                     "changed_files": ["backend/tests/test_chemo.py"],
                     "verification_summary": "A test source change is required.",
                     "failure": {
-                      "category_hint": "VERIFICATION_INSUFFICIENT",
+                      "category_hint": "IMPLEMENTATION_BUG",
                       "verification_remediation": "%s",
                       "contract_gaps": [],
                       "out_of_scope_files": [],

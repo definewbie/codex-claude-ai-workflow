@@ -13,8 +13,8 @@ import java.util.List;
  * @param suggestedAction recommended recovery action (never blank)
  * @param source          classification origin: "deterministic" for MVP
  * @param classifiedAt    timestamp of classification
- * @param matchedRule     which rule number matched (1-based, 8 for fallback)
- * @param reviewDecision  the original decision that triggered classification (REJECT or ACCEPT_WITH_NOTES)
+ * @param matchedRule     0 for explicit classification; 1-8 retained for reading historical results
+ * @param reviewDecision  the original decision that triggered classification
  * @param evidence        supporting evidence snippets (may be empty)
  */
 public record FailureClassification(
@@ -46,8 +46,8 @@ public record FailureClassification(
         if (reviewDecision == null || reviewDecision.isBlank()) {
             throw new IllegalArgumentException("reviewDecision is required");
         }
-        if (matchedRule < 1 || matchedRule > 8) {
-            throw new IllegalArgumentException("matchedRule must be 1-8");
+        if (matchedRule < 0 || matchedRule > 8) {
+            throw new IllegalArgumentException("matchedRule must be 0-8");
         }
         evidence = evidence == null ? List.of() : List.copyOf(evidence);
     }

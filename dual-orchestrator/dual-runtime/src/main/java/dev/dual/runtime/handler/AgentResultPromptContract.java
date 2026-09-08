@@ -62,7 +62,7 @@ public final class AgentResultPromptContract {
                             allowedDecisions.stream().sorted().toList(),
                             verificationRemediationAllowedValues(exampleResult),
                             rereadReasonInstruction(nodeId),
-                            verificationRemediationInstruction(nodeId, exampleResult),
+                            verificationRemediationInstruction(nodeId, exampleResult) + acceptanceClassificationInstruction(exampleResult),
                             contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
@@ -96,6 +96,10 @@ public final class AgentResultPromptContract {
                         + "` and sha256 `" + context.baseProposalSha256() + "`. "
                         + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
                         + json(context.obligations())
+                        + (context.acceptanceEvidence().isEmpty() ? "" :
+                            ". Original verified acceptance evidence (retain non-contract defects as evidence; "
+                            + "do not reinterpret them as contract obligations or approval): "
+                            + context.acceptanceEvidence())
                         + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
@@ -218,6 +222,23 @@ public final class AgentResultPromptContract {
                 + "`result.failure.verification_remediation` to `EVIDENCE_COLLECTION` only when "
                 + "existing test/verification evidence must be collected, or `TEST_CODE_CHANGE` when "
                 + "a test source change is required. Do not infer this from prose in downstream nodes.";
+    }
+
+    private static String acceptanceClassificationInstruction(AgentResultEnvelope.AgentResult result) {
+        if (!(result instanceof AgentResultEnvelope.AcceptanceReviewResult)) return "";
+        return "\nFor REJECT, failure.category_hint is required and must be exactly one of "
+                + AgentContractSemantics.acceptanceCategories()
+                + ". No aliases or case normalization. For accepted decisions leave category_hint empty. "
+                + "Choose the repair owner: IMPLEMENTATION_BUG for product, documentation or test changes within the "
+                + "existing contract, including mixed repair and missing evidence; VERIFICATION_INSUFFICIENT only for "
+                + "collecting existing evidence. Contract categories require contract_gaps; all other categories forbid "
+                + "contract_gaps (existing-contract violations belong in must_fix). IMPLEMENTATION_BUG requires must_fix, "
+                + "out_of_scope_files or TEST_CODE_CHANGE. VERIFICATION_INSUFFICIENT requires missing_tests or missing_evidence "
+                + "and forbids context_gaps, out_of_scope_files and TEST_CODE_CHANGE. CONTEXT_INSUFFICIENT requires context_gaps; "
+                + "TOOL_LIMITATION requires failure.reason; both forbid out_of_scope_files and TEST_CODE_CHANGE. REVIEW_NOISE "
+                + "requires failure.reason, empty failure lists, empty must_fix/missing_evidence and NONE remediation. "
+                + "Contract categories may retain mixed issues. EVIDENCE_COLLECTION never overrides the category. "
+                + "TEST_CODE_CHANGE permits only implementation or contract categories.";
     }
 
     private static boolean hasVerificationRemediation(AgentResultEnvelope.AgentResult result) {
@@ -381,7 +402,8 @@ public final class AgentResultPromptContract {
                 EmissionMode.REVISION_PATCH,
                 context.previousReference().proposalId(),
                 context.previousReference().sha256(),
-                List.copyOf(context.obligations()));
+                List.copyOf(context.obligations()),
+                context.lateRoot() == null ? "" : json(context.lateRoot()));
     }
 
     public enum EmissionMode {
@@ -394,10 +416,17 @@ public final class AgentResultPromptContract {
             EmissionMode mode,
             String baseProposalId,
             String baseProposalSha256,
-            List<AgentResultEnvelope.ReviewObligation> obligations
+            List<AgentResultEnvelope.ReviewObligation> obligations,
+            String acceptanceEvidence
     ) {
         public ProposalEmissionContext {
             obligations = obligations == null ? List.of() : List.copyOf(obligations);
+            acceptanceEvidence = acceptanceEvidence == null ? "" : acceptanceEvidence;
+        }
+
+        public ProposalEmissionContext(EmissionMode mode, String baseProposalId, String baseProposalSha256,
+                                       List<AgentResultEnvelope.ReviewObligation> obligations) {
+            this(mode, baseProposalId, baseProposalSha256, obligations, "");
         }
 
         public static ProposalEmissionContext initial() {

@@ -165,7 +165,8 @@ public final class ContractCompileHandler implements TaskHandler {
                         "validated sidecar does not contain task_contract_proposal",
                         List.of(sourcePath.get().toString())));
             }
-            var errors = proposalValidator.validate(proposal, context.workspaceRoot().toAbsolutePath().normalize());
+            var errors = proposalValidator.validate(proposal, context.workspaceRoot().toAbsolutePath().normalize(),
+                    revisionContext.approvedScopeBaseline(), revisionContext.originalBaseCommit());
             if (!errors.isEmpty()) {
                 return new ProposalCompileResult(null, proposal, proposalFailure(
                         "TASK_CONTRACT_PROPOSAL_INVALID",
@@ -309,7 +310,8 @@ public final class ContractCompileHandler implements TaskHandler {
                     new RevisionContext(
                             resolved.context().revision(),
                             resolved.context().previousProposal(),
-                            resolved.context().obligations()), null);
+                            resolved.context().obligations(), resolved.context().approvedScopeBaseline(),
+                            resolved.context().originalBaseCommit()), null);
         } catch (Exception failure) {
             return revisionContextFailure("revision iteration lineage could not be resolved",
                     List.of(failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage()));
@@ -577,7 +579,9 @@ public final class ContractCompileHandler implements TaskHandler {
     private record RevisionContext(
             boolean revision,
             TaskContractProposal previousProposal,
-            List<AgentResultEnvelope.ReviewObligation> obligations
+            List<AgentResultEnvelope.ReviewObligation> obligations,
+            TaskContractProposal approvedScopeBaseline,
+            String originalBaseCommit
     ) {}
 
     private record RevisionContextResult(RevisionContext context, NodeResult failed) {}

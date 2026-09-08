@@ -408,6 +408,7 @@ class BuiltinHandlerTest {
                   "node_id": "acceptance.codex_verifier_review",
                   "decision": "REJECT",
                   "summary": "Acceptance failed.",
+                  "failure": {"category_hint": "IMPLEMENTATION_BUG"},
                   "must_fix": ["Restore the required empty state copy."],
                   "open_risks": [],
                   "changed_files": ["miniprogram/src/pages/record/index.vue"],
@@ -473,14 +474,15 @@ class BuiltinHandlerTest {
         var inputRef = writeOutput("acceptance-codex-review.md", """
                 # Codex Acceptance
 
-                Decision: ACCEPT_WITH_NOTES
+                Decision: REJECT
                 """);
         var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
         Files.writeString(sidecar, """
                 {
                   "node_id": "acceptance.codex_verifier_review",
-                  "decision": "ACCEPT_WITH_NOTES",
+                  "decision": "REJECT",
                   "summary": "Acceptance needs one more evidence pass.",
+                  "failure": {"category_hint": "VERIFICATION_INSUFFICIENT"},
                   "blocking": true,
                   "must_fix": [],
                   "missing_evidence": ["No build output was attached."],
@@ -557,14 +559,17 @@ class BuiltinHandlerTest {
         var inputRef = writeOutput("acceptance-codex-review.md", """
                 # Codex Acceptance
 
-                Decision: REJECT_CONTEXT_INSUFFICIENT
+                Decision: REJECT
                 """);
         var sidecar = tempDir.resolve(inputRef.replace(".md", ".contract.json"));
         Files.writeString(sidecar, """
                 {
                   "node_id": "acceptance.codex_verifier_review",
-                  "decision": "REJECT_CONTEXT_INSUFFICIENT",
+                  "decision": "REJECT",
                   "summary": "The routed context is insufficient.",
+                  "failure": {"category_hint": "CONTEXT_INSUFFICIENT",
+                    "context_gaps": ["The routed context is insufficient."],
+                    "reason": "The routed context is insufficient."},
                   "blocking": false,
                   "must_fix": [],
                   "missing_evidence": [],

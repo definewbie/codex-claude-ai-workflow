@@ -94,7 +94,8 @@ final class TaskContractProposalRevisionMerger {
         for (var obligationPatch : patch.obligationPatches()) {
             var scopeAdditions = safe(obligationPatch.scopeAdditions());
             if (!scopeAdditions.isEmpty()) {
-                var resolvedScope = scopeResolver.resolve(scopeAdditions, workspaceRoot);
+                var resolvedScope = scopeResolver.resolve(scopeAdditions, workspaceRoot,
+                        context.approvedScopeBaseline() == null ? null : context.originalBaseCommit());
                 if (!resolvedScope.valid()) {
                     errors.addAll(resolvedScope.errors());
                     continue;

@@ -220,12 +220,12 @@ class AgentEvidenceIndexTest {
                     "missing_evidence_count": 0
                   },
                   "failure": {
-                    "category_hint": "",
+                    "category_hint": "%s",
                     "contract_gaps": [],
                     "out_of_scope_files": [],
                     "missing_tests": [],
                     "context_gaps": [],
-                    "reason": ""
+                    "reason": "%s"
                   }
                 }
                 """.formatted(
@@ -234,6 +234,8 @@ class AgentEvidenceIndexTest {
                 nodeInstanceId,
                 workspace.relativize(source).toString().replace("\\", "\\\\"),
                 decision,
-                decision), StandardCharsets.UTF_8);
+                decision,
+                "REJECT".equals(decision) ? "REVIEW_NOISE" : "",
+                "REJECT".equals(decision) ? "Reevaluate the review evidence" : ""), StandardCharsets.UTF_8);
     }
 }

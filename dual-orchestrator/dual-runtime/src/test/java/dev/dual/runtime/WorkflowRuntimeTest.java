@@ -1,6 +1,7 @@
 package dev.dual.runtime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.dual.core.contract.ContractStatus;
@@ -18,6 +19,7 @@ import dev.dual.ledger.file.NodeExecutionStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
 import dev.dual.runtime.handler.AgentOutputLineageFixture;
+import dev.dual.runtime.handler.AgentResultEnvelope;
 import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.ArtifactValidateHandler;
 import dev.dual.runtime.handler.FailureClassifyHandler;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorkflowRuntimeTest {
@@ -75,7 +78,7 @@ class WorkflowRuntimeTest {
     }
 
     @Test
-    void historicalRejectSidecarRoutesCurrentClassificationWorkflowToVerificationRepair() throws Exception {
+    void historicalRejectWithNoncanonicalCategoryCannotEnterCurrentClassification() throws Exception {
         var workstreamId = "ws-replay-acceptance-reject";
         var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
         Files.createDirectories(paths.workstreamDir());
@@ -160,20 +163,11 @@ class WorkflowRuntimeTest {
 
         runtime.resume(new WorkflowCommand(tempDir, workstreamId));
         var classifierCurrent = ledger.loadCurrent(paths);
-        assertEquals("acceptance.classify_failure", ledger.loadNode(
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, classifierCurrent.status());
+        assertEquals("acceptance.decision", ledger.loadNode(
                 paths, classifierCurrent.activeNodeInstanceIds().get(0)).nodeDefinitionId());
-
-        runtime.resume(new WorkflowCommand(tempDir, workstreamId));
-        var current = ledger.loadCurrent(paths);
-        var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
-        assertEquals("implement.claude_self_test_report", repair.nodeDefinitionId());
-        assertEquals("iter-002", repair.iterationId());
-        assertTrue(Files.exists(paths.iterationJson("iter-002")));
-
-        var classification = mapper.readTree(
-                artifactsDir.resolve("failure-classification.json").toFile());
-        assertEquals("VERIFICATION_INSUFFICIENT", classification.path("category").asText());
-        assertEquals("REJECT", classification.path("review_decision").asText());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+        assertFalse(Files.exists(artifactsDir.resolve("failure-classification.json")));
     }
 
     @Test
@@ -385,6 +379,8 @@ class WorkflowRuntimeTest {
                   "source_artifact_type": "acceptance_review",
                   "decision": "REJECT",
                   "summary": "acceptance failed",
+                  "must_fix": ["Repair the implementation"],
+                  "failure": {"category_hint": "IMPLEMENTATION_BUG"},
                   "control": {
                     "decision": "REJECT",
                     "summary": "acceptance failed"
@@ -419,6 +415,57 @@ class WorkflowRuntimeTest {
 
         assertEquals(WorkflowStatus.RUNNING, result.status());
         assertEquals("implement.claude_implement", result.activeNode());
+    }
+
+    @Test
+    void contradictoryAcceptanceCannotPublishOrReachSuccessConsumersEvenAfterColdResume() throws Exception {
+        for (var decision : List.of("ACCEPT", "ACCEPT_WITH_NOTES")) {
+            for (boolean blocking : List.of(true, false)) {
+                var workstreamId = "ws-contradiction-" + decision.toLowerCase() + "-" + blocking;
+                var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
+                Files.createDirectories(paths.workstreamDir());
+                var review = new AgentResultEnvelope.AcceptanceReviewResult(
+                        "acceptance_review", decision, "claimed success",
+                        decision.equals("ACCEPT") ? "ACCEPTED" : "ACCEPTED_WITH_NOTES", blocking,
+                        List.of("reviewed diff"), List.of("tests passed"), List.of(),
+                        blocking ? List.of() : List.of("repair the implementation"), List.of(), List.of(),
+                        List.of(), "verified", new AgentResultEnvelope.Failure("",
+                        AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(), List.of(), List.of(), ""));
+                var mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+                var output = writeOutput(workstreamId, "acceptance.json", mapper.writeValueAsString(
+                        new AgentResultEnvelope(1, workstreamId, "run-001", "acceptance.codex_verifier_review", review)));
+                var definition = new WorkflowDefinition("acceptance-guard", 1, "acceptance.codex_verifier_review",
+                        List.of(
+                                new NodeDefinition("acceptance.codex_verifier_review", NodeKind.TASK, "acpx.agent_run", Map.of("output_ref", output)),
+                                new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                                new NodeDefinition("report.generate_final", NodeKind.TASK, "fake.task", Map.of()),
+                                new NodeDefinition("delivery.prepare_pr", NodeKind.TASK, "fake.task", Map.of())),
+                        List.of(
+                                new EdgeDefinition("acceptance.codex_verifier_review", "completed", "acceptance.decision"),
+                                new EdgeDefinition("acceptance.decision", decision, "report.generate_final"),
+                                new EdgeDefinition("report.generate_final", "completed", "delivery.prepare_pr")));
+                var ledger = new WorkflowFileLedger();
+                ledger.initialize(paths, "wf-acceptance-guard", definition);
+                var registry = new HandlerRegistry(List.of(new AgentOutputTask(), new FakeTask()),
+                        List.of(new ReviewDecisionHandler()), List.of());
+                var result = new WorkflowRuntime(ledger, registry).resume(new WorkflowCommand(tempDir, workstreamId));
+                assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
+                var failed = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+                assertEquals(NodeStatus.FAILED, failed.status());
+                assertTrue(failed.result().toString().contains(decision.equals("ACCEPT")
+                        ? "FINAL_ACCEPTANCE_EVIDENCE_CONFLICT" : "NOTES_STATUS_BLOCKING_CONFLICT"), failed.result().toString());
+                assertFalse(Files.exists(tempDir.resolve(output.replace(".json", ".contract.json"))));
+                assertFalse(Files.exists(paths.goalSatisfactionJson()));
+                try (var nodes = Files.list(paths.nodesDir())) {
+                    assertEquals(1, nodes.count(), "no decision/report/delivery successor may be created");
+                }
+                var coldResult = new WorkflowRuntime(new WorkflowFileLedger(), registry)
+                        .resume(new WorkflowCommand(tempDir, workstreamId));
+                assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, coldResult.status());
+                assertEquals(0, fakeTaskExecutions, "report/delivery consumers must never execute");
+                assertEquals(1, ledger.readAgentTasks(paths).size(), "cold resume must not retry invalid acceptance");
+            }
+        }
     }
 
     @Test

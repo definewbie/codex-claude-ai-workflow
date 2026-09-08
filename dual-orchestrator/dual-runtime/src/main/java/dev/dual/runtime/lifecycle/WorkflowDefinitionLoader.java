@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.dual.core.workflow.EdgeDefinition;
 import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.WorkflowDefinition;
 import dev.dual.ledger.file.EdgeConditionModule;
 
@@ -169,10 +170,14 @@ public final class WorkflowDefinitionLoader {
     }
 
     private static void validateApprovedTaskContractRequirements(WorkflowDefinition definition) {
+        var contractRepairEdges = validateContractRepairEdges(definition);
         var contractGates = definition.nodes().stream()
                 .filter(node -> "contract".equals(text(node.config().get("gate_purpose"))))
                 .toList();
         if (contractGates.isEmpty()) {
+            if (!contractRepairEdges.isEmpty()) {
+                throw new IllegalArgumentException("acceptance contract repair requires a contract-purpose gate");
+            }
             return;
         }
         if (contractGates.size() != 1) {
@@ -190,27 +195,26 @@ public final class WorkflowDefinitionLoader {
         if (negotiation.contains(approvedEdge.to())) {
             throw new IllegalArgumentException("contract approved successor overlaps the pre-approval negotiation region");
         }
-        var contractGatePredecessors = definition.edges().stream()
-                .filter(edge -> contractGate.id().equals(edge.to()))
-                .map(EdgeDefinition::from)
-                .filter(negotiation::contains)
-                .collect(java.util.stream.Collectors.toUnmodifiableSet());
         var postContract = new HashSet<String>();
         var queue = new ArrayDeque<String>();
         queue.add(approvedEdge.to());
         while (!queue.isEmpty()) {
             var nodeId = queue.removeFirst();
             if (negotiation.contains(nodeId)) {
-                if (!contractGatePredecessors.contains(nodeId)) {
-                    throw new IllegalArgumentException(
-                            "post-contract region overlaps the pre-approval negotiation region: " + nodeId);
-                }
-                continue;
+                throw new IllegalArgumentException(
+                        "post-contract region overlaps the pre-approval negotiation region: " + nodeId);
             }
             if (!postContract.add(nodeId)) {
                 continue;
             }
-            definition.edgesFrom(nodeId).forEach(edge -> queue.addLast(edge.to()));
+            definition.edgesFrom(nodeId).stream()
+                    .filter(edge -> !contractRepairEdges.contains(edge))
+                    .forEach(edge -> queue.addLast(edge.to()));
+        }
+        for (var edge : contractRepairEdges) {
+            if (!postContract.contains(edge.from()) || !negotiation.contains(edge.to())) {
+                throw new IllegalArgumentException("acceptance contract repair must cross from post-contract to negotiation");
+            }
         }
         for (var node : definition.nodes()) {
             var configured = node.config().get("requires_approved_task_contract");
@@ -224,6 +228,52 @@ public final class WorkflowDefinitionLoader {
                         "pre-approval negotiation node cannot require an approved task contract: " + node.id());
             }
         }
+    }
+
+    private static Set<EdgeDefinition> validateContractRepairEdges(WorkflowDefinition definition) {
+        var repairs = new HashSet<EdgeDefinition>();
+        for (var edge : definition.edges()) {
+            if (!Set.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY").contains(edge.on())) {
+                continue;
+            }
+            var source = definition.node(edge.from());
+            var context = definition.node(edge.to());
+            if (!"acceptance.classify_failure".equals(source.id())
+                    || source.kind() != NodeKind.TASK
+                    || !"acceptance.failure_classify".equals(source.handlerType())
+                    || !Boolean.TRUE.equals(source.config().get("requires_approved_task_contract"))
+                    || !"context.intake_claude_brainstorm".equals(context.id())
+                    || context.kind() != NodeKind.TASK
+                    || !"context.build_package".equals(context.handlerType())
+                    || !"intake.claude_brainstorm".equals(context.config().get("target_node"))
+                    || !"loop".equals(edge.metadata().transitionType())
+                    || !edge.metadata().branchGroupId().isBlank()
+                    || !edge.metadata().required()
+                    || !"unconditional".equals(edge.condition().type())) {
+                throw new IllegalArgumentException("invalid acceptance contract repair edge: " + edge.from()
+                        + " / " + edge.on() + " / " + edge.to());
+            }
+            var successors = definition.edgesFrom(context.id());
+            if (successors.size() != 1
+                    || !"completed".equals(successors.getFirst().on())
+                    || !"intake.claude_brainstorm".equals(successors.getFirst().to())
+                    || !"normal".equals(successors.getFirst().metadata().transitionType())
+                    || !"unconditional".equals(successors.getFirst().condition().type())) {
+                throw new IllegalArgumentException("acceptance contract repair context must lead only to proposal producer");
+            }
+            var producer = definition.node(successors.getFirst().to());
+            if (producer.kind() != NodeKind.TASK
+                    || !"acpx.agent_run".equals(producer.handlerType())
+                    || !"task_contract_proposal".equals(producer.config().get("expected_artifact"))
+                    || !"task_contract_proposal_compiler".equals(producer.config().get("artifact_compiler"))) {
+                throw new IllegalArgumentException("acceptance contract repair requires the typed proposal producer");
+            }
+            if (definition.edgesFrom(source.id()).stream().filter(other -> edge.on().equals(other.on())).count() != 1) {
+                throw new IllegalArgumentException("acceptance contract repair must have exactly one successor per outcome");
+            }
+            repairs.add(edge);
+        }
+        return Set.copyOf(repairs);
     }
 
     private static Set<String> reachable(

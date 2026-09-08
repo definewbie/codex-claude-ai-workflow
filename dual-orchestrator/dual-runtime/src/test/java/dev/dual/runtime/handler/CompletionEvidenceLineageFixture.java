@@ -108,10 +108,12 @@ final class CompletionEvidenceLineageFixture {
                   "summary": "%s",
                   "verification_summary": "All checks green.",
                   "evidence": ["diff matches contract"],
-                  "missing_evidence": ["No physical device validation."],
+                  "missing_evidence": %s,
                   "acceptance_notes": ["Run visual smoke before release."]
                 }
-                """.formatted(acceptanceDecision, acceptanceSummary));
+                """.formatted(acceptanceDecision, acceptanceSummary,
+                        "ACCEPT_WITH_NOTES".equals(acceptanceDecision)
+                                ? "[\"No physical device validation.\"]" : "[]"));
         AgentOutputLineageFixture.completeAndPublish(
                 root, workstreamId, acceptanceSidecar, iterationId, List.of(packageRef, metadataRef));
         var acceptanceNodeId = MAPPER.readTree(acceptanceSidecar.toFile()).path("node_instance_id").asText();

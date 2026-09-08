@@ -22,7 +22,20 @@ final class TaskContractProposalValidator {
     };
 
     List<String> validate(TaskContractProposal proposal, Path workspaceRoot) {
+        return validate(proposal, workspaceRoot, null, null);
+    }
+
+    List<String> validate(TaskContractProposal proposal, Path workspaceRoot,
+                          TaskContractProposal approvedScopeBaseline, String originalBaseCommit) {
         var errors = new ArrayList<String>();
+        java.util.Set<String> originalPaths = java.util.Set.of();
+        if (approvedScopeBaseline != null) {
+            try {
+                originalPaths = TaskContractScopeResolver.originalPaths(workspaceRoot, originalBaseCommit);
+            } catch (IOException failure) {
+                return List.of("approved scope workspace base is invalid: " + failure.getMessage());
+            }
+        }
         if (!"task_contract_proposal".equals(proposal.artifactType())) {
             errors.add("artifact_type must be task_contract_proposal");
         }
@@ -39,7 +52,15 @@ final class TaskContractProposalValidator {
             validateList("scope.excluded", proposal.scope().excluded(), false, errors);
             if (proposal.scope().included() != null) {
                 for (var ref : proposal.scope().included()) {
-                    validateWorkspacePathRef(ref, workspaceRoot, errors);
+                    var inheritedCreate = ref != null && ref.operation() == TaskContract.ScopeOperation.CREATE
+                            && approvedScopeBaseline != null
+                            && approvedScopeBaseline.scope().included().contains(ref);
+                    validateWorkspacePathRef(ref, workspaceRoot, inheritedCreate, errors);
+                    if (approvedScopeBaseline != null && ref != null
+                            && ref.operation() == TaskContract.ScopeOperation.MODIFY
+                            && !originalPaths.contains(ref.path())) {
+                        errors.add("scope.included MODIFY path is absent from original workspace base: " + ref.path());
+                    }
                 }
             }
             validateScopeOverlap(proposal.scope(), errors);
@@ -420,6 +441,7 @@ final class TaskContractProposalValidator {
     private static void validateWorkspacePathRef(
             TaskContract.ScopeEntry ref,
             Path workspaceRoot,
+            boolean inheritedCreate,
             List<String> errors
     ) {
         if (ref == null || isBlank(ref.path())) {
@@ -451,7 +473,7 @@ final class TaskContractProposalValidator {
         if (ref.operation() == TaskContract.ScopeOperation.MODIFY && !Files.exists(path)) {
             errors.add("scope.included MODIFY path does not exist: " + ref.path());
         }
-        if (ref.operation() == TaskContract.ScopeOperation.CREATE && Files.exists(path)) {
+        if (ref.operation() == TaskContract.ScopeOperation.CREATE && Files.exists(path) && !inheritedCreate) {
             errors.add("scope.included CREATE path already exists: " + ref.path());
         }
     }

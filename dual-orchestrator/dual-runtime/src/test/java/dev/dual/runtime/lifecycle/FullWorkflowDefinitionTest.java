@@ -104,7 +104,7 @@ class FullWorkflowDefinitionTest {
     }
 
     @Test
-    void fullVariantRejectContractGapRoutesToContractCompile() {
+    void fullVariantRejectContractGapRoutesToProposalContext() {
         WorkflowDefinition wf = factory.forVariant("full");
 
         var edges = wf.edgesFrom("acceptance.classify_failure").stream()
@@ -113,7 +113,7 @@ class FullWorkflowDefinitionTest {
 
         assertEquals(1, edges.size(),
                 "Expected exactly one edge from acceptance.classify_failure on 'REJECT_CONTRACT_GAP'");
-        assertEquals("contract.compile", edges.get(0).to());
+        assertEquals("context.intake_claude_brainstorm", edges.get(0).to());
     }
 
     @Test
