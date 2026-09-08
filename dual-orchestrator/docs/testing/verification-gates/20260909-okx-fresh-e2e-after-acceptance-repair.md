@@ -1,6 +1,10 @@
 # OKX Fresh E2E After Acceptance Repair
 
-状态：SOURCE PREFLIGHT PASS / USER AUTHORIZED，workspace capture/verify后激活业务。2026-09-09。由主agent起草和自查，不冒称独立评审。
+状态：EXECUTED / BOUNDARY STOP（Gate FAIL，workflow仍WAITING_FOR_HUMAN）。2026-09-09。由主agent起草和自查，不冒称独立评审。
+
+执行：ws-20260908T170320Z-6KVE；前置完成，四次有效业务调用及自然修订后停于requirement gate011。
+intake read/search/no-terminal声明下实际成功执行Bash，按authority停止条件不再批准；无产品写入。
+详见`../real-case-reports/20260909-okx-6kve-e2e-start-and-boundary-stop.md`。以下为冻结执行标准，非待执行授权。
 
 ## 目标与非目标
 

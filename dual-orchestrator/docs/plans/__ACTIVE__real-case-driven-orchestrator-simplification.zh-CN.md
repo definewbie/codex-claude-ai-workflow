@@ -1,5 +1,16 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## 6KVE E2E 已启动并止损（2026-09-09）
+
+用户授权的剩余前置已完成，唯一fresh ws-20260908T170320Z-6KVE已真实运行。
+四次业务调用成功且ARC valid：DeepSeek提案→Codex NEEDS_REVISION→DeepSeek修订→Codex READY。
+当前WAITING_FOR_HUMAN / requirement gate011 / evt11，runner exit0；没有批准或改账本。
+发现intake只声明read/search/no-terminal，实际两轮分别成功执行4/1次Bash，product Git clean。
+绑定policy仍auto_allow_sandboxed_bash=true；权限组合原因待最小核对，不归因DeepSeek协议不兼容。
+Gate停止、不继续消耗、不创建第二样本，不新增model平台。执行及证据见
+`../testing/real-case-reports/20260909-okx-6kve-e2e-start-and-boundary-stop.md`。
+先前“下一步start”已由本段覆盖；后续路径NOT EXERCISED，不宣称E2E完成。
+
 ## E2E准备（2026-09-09）
 
 用户授权继续，并要求模型兼容问题先评估是否由既有adapter或最小model契约承担，不扩平台。
