@@ -1,6 +1,173 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## E2E准备（2026-09-09）
+
+用户授权继续，并要求模型兼容问题先评估是否由既有adapter或最小model契约承担，不扩平台。
+当前DeepSeek-V4-Pro配置经两项真实检查通过：无工具ACP JSON health，及production policy/transport
+单Read随机nonce→精确JSON，session关闭；无生产修改、无模型特判。见20260909-deepseek-acp-preflight。
+新JAR package成功、Doctor OK；用户明确授权完成前置并启动，不重复询问。
+执行环境/Phase A已收口3f1f157；验收返工A/B收口ee72c65，production tracked clean。
+Codex health回报gpt-6-astra并通过；source OKX curl和workflow validation通过。
+下一步唯一fresh start→workspace capture/verify→首段运行，不新增model层、不恢复SPM9、不开agent。
+禁止把1425离线测试或两端health当产品E2E。新Gate见20260909-okx-fresh-e2e-after-acceptance-repair。
+
+## 当前实施中（2026-09-08，批次B）
+
+用户授权进入批次B：按已评审最小设计同批实施F1显式分类、F2重新提案与两级批准、F5既有累计预算。
+目标仍为P0验收返工整链稳定性；不重开网络Phase B、不恢复SPM9、不创建真实样本、不调用provider。
+源事实分别为validated acceptance、固定在classifier result中的历史批准引用、iteration/gate/compile；
+不新增binding文档或批准机制。旧070状态不是本批生产恢复目标。
+当前实现与整链离线集成验证完成：只读自查发现的审批正文身份P1与非空修订序列P2已修复。
+2026-09-08 20:52–20:57在最终代码上完整reactor退出0，171份本次XML为1425/0/0/0，
+运行前后源码指纹一致；初次与晚期合同审批均验证并展示同一compile SHA快照，未新增批准机制。
+最终增量由主agent自查，未完成最终独立评审；CC只读评审入口已放入批次B checkpoint。
+用户要求停止多agent委派，已收回结果，不新增或追加agent任务；对应执行约束已写入AGENTS.md。
+不得据此用于真实续行或宣称E2E PROVEN，详情见批次B checkpoint。
+批次A测试结果见下；现有Phase A/transport等未提交变更保留，不混入本批结论。
+
+## 当前进度（2026-09-08，覆盖下方设计快照）
+
+验收返工批次A已实施并通过独立只读diff review，尚未提交。F4按实际包逐节裁剪且足额即停，
+同时去除重复治理header；F6消费真实suggested_action；F3仅补publication/runtime保持性测试。
+范围为2个production文件+3个测试文件，未叠写批次B或其它未提交改动。
+聚焦80/0/0/0；裁剪停止条件突变使两个profile反例均失败，已恢复；全仓离线测试退出0，
+164份XML聚合1418/0/0/0。首次沙箱进程枚举权限错误后完整复跑，未跳过测试。
+结果与独立评审边界见 `acceptance-repair-batch-a-checkpoint-20260908.zh-CN.md`。
+下一步为批次B整体实施F1/F2/F5，不重开F3。未调用provider、未恢复SPM9、未package，
+现CLI JAR尚不包含本批修复；不得据此直接恢复旧样本或宣称验收返工整链已修好。
+
+## 当前实施入口（2026-09-07，覆盖下方阶段快照）
+
+最新设计入口：用户授权进入最小设计，见 `acceptance-repair-minimal-design-20260907.zh-CN.md`。
+本轮只设计及独立只读评审，不实施、不恢复SPM9、不调用provider。F1复用既有FailureCategory，
+F2复用proposal patch与两道批准，必须同批处理loader回流、固定修订基线及已批准CREATE继承。
+首次独立整链评审NOT READY保留于 `acceptance-repair-minimal-design-review-20260907.zh-CN.md`。
+2026-09-08设计delta：§4.1分开直接patch父/批准scope基线并列明多轮义务重建；§5.1按真实
+run/approve/retry/abort入口列出中断切片，不再泛称可进入recovery。原评审者已完成增量复核：
+Boundary Design / Implementation Entry READY，无剩余P1，见
+`acceptance-repair-minimal-design-delta-review-20260908.zh-CN.md`。历史clarify改沿当次compile输入
+及唯一批准gate重建，context/两道packet同源消费已写入设计；未实施，不宣称ENFORCED。
+下一步按既定批次A修F4/F6并补F3保持性测试，再批次B整体实施F1/F2/F5；不扩建原子恢复平台。
+重要勘误：下段报告原F3已撤回；publication已有StageOutcomeCompiler阻止notes+blocking/must_fix。
+主线程调用真实ArtifactContractValidator返回FAILED/NOTES_STATUS_BLOCKING_CONFLICT，不能将
+此前envelope局部探针当成功链旁路。当前确认四类主流程缺口F1/F2/F4/F5与F6投影错误。
+不新增F3生产守卫，保留其端到端回归证明。下段“五类”计数为勘误前记录，以本段与报告勘误为准。
+
+最新评估：`harness-review-blind-spots-assessment-20260907.zh-CN.md` 已完成漏评复盘与
+拒绝/修复/成功链 sibling 核对。确认五类主流程缺口：混合缺陷误分类、合同返工缺批准
+producer、矛盾验收可进入成功链、预算裁剪过度删除反馈、拒绝循环缺持久累计止损；
+另有 suggested_action 投影键不匹配。前两类包含既知事故，不能将六项都称为新发现。
+既有聚焦测试74/0/0/0；离线反例复现混合分类和矛盾验收，其他项经源码/工件核实。
+本轮只评估和更新文档，未实施、未调用provider、未续SPM9。下一步须先收敛最小修复
+方案并验证真实下一消费者，不只改分类优先级；历史070恢复另行比较，不默认增加救援机制。
+纠正前述归因：冻结需求/合同确含移动端要求，用户最新取消尚未变成持久化合同修订；
+宿主测试证据未进入验收输入也有operator交接遗漏，不能全归为harness缺陷。
+下文“下一步只分析分类”由本段的同边界完整评估覆盖；当前停点仍为evt71/070 READY。
+
+正式续行最新停点：self-test063/run-1788786861736 有效 SELF_TEST_COMPLETE，完整43项通过；
+decision064、scope065(41路径/零越界)、context066均通过。acceptance067/run-1788787438963
+有效 REJECT：README 新鲜度错误承诺需修正，并要求宿主原样测试与真实UI证据。
+宿主43+live1已有归档，真实桌面1440x1000/手机390x844截图及真实300根图表本轮已补充；
+但未绕过正式验收。review 把产品文档不符合既有合同误填 contract_gaps，classifier069规则1
+路由到contract.compile070 READY，current evt71/iter010。独立控制链评审确认此输入缺本轮
+获批proposal，执行compile将被批准前置拒绝。现停止，不故意触发必败compile，不手改账本，
+不重开合同/设计、不开发B、不新建样本。下一步只分析“验收产品缺陷分类及其下游可达性”
+的最小前向修复；历史样本恢复成本单列，不默认增加兼容救援机制。本轮没有quota耗尽；
+后续若出现quota，按用户要求通知切换模型后再决定resume/retry。
+以下evt63及其他停点均为历史快照，不是当前状态。
+
+最新结果：用户继续后，self-test057 如实 BLOCKED→decision058→repair059；新 note 只授权两测试。
+实现062/run-1788785003648 有效 IMPLEMENTED，42文件摘要仅两测试变化，独立差异评审 PASS。
+沙箱完整套件两次43/0/0/0；宿主原样 mvn test 43/0/0/0，mvn verify -Plive-smoke BUILD SUCCESS，
+真实 Java OKX live smoke 1/0/0/0，日志与7+1 XML已归档。未改业务/pom/依赖/harness。
+current evt63/self-test063 READY尚未provider；已具备继续正式自测/验收条件，不等待 B、不另建 fresh。
+不称 workflow终态/最终验收/交付完成，下方evt57与测试失败是本轮前的历史快照。
+
+最新停点：两步续作已结束，run-1788781080688 的有效业务结果为 BLOCKED；七条测试编译错误
+已消除，但完整测试带既有 javaagent 仍 43/1 failure/1 error/0 skipped。独立评审确认四文件
+delta 无断言弱化，UI 同一调用点的额外运行期修正作为小幅偏差接受并归档。
+current evt57/self-test057 READY 尚未 provider，grant PENDING。先明确剩余两测试的修复与
+Mockito 验证方式，不重复自测、不新建 fresh、不开发 B；无需再开发 harness 才能处理这些问题。
+Surefire XML 被 agent 清理，仅保留原始工具日志；不冒称默认测试通过或 E2E 完成。
+结果见 `../testing/real-case-reports/20260907-spm9-after-phase-a-readiness/README.zh-CN.md`。
+
+最新步骤：A 实际 slice 独立 PASS 后，SPM9 宿主原样 mvn test 已越过依赖解析，
+暴露四个测试文件的 7 条编译错误；42 产品文件未变，公网对照通过。独立恢复评审 READY，
+按现有 repair-053 做一次有新证据的修订，只运行 context+implementation 两步后核对，
+不新建 fresh、不开发 B、不自动运行 self-test/终态。后续 self-test grant 只对该 execution 生效。
+见 `../testing/verification-gates/20260907-spm9-after-phase-a-readiness.md`。
+以下“不恢复 SPM9”是 A slice 当时的边界，本次用户进入下一步与独立恢复复核后由本段覆盖。
+
+用户授权 Phase A 开发→独立 agent 评估→通过后 Phase B，不重复申请普通步骤授权。
+Phase A 已实现人工 exact-domain、指定 Claude implement 节点、单 execution claim、CLI/API/console 共用 ledger；
+自测正常解析已批准依赖，不修改依赖声明。网络授权不代替 gate 决定，不自动 retry。
+独立初评 FAIL 的消费记录可改写、合法域名误拒、INVALID 投影、历史 claim 审计均已修订；
+独立 delta 给 deterministic 实现 PASS，控制文件真实 sandbox slice 与域名恢复 real-case 仍 NOT PROVEN。
+fork 仅 policy loader/test 增量，patch `2313fe2d53e573dc0227a453fd1c4cbe6107373472a2027bb7ed3e2952038b63`，
+988/0/0 fork 全量通过；最终 Maven package exit 0，164 XML 聚合1413/0/0/0。
+两处旧 fake build-info SHA 已改为当前身份常量；新JAR cbbe03d801f7541fcc29aaa46a3a77fa6d830fb0f0fa67184fea8ce4c8294f70。
+详见 `operator-network-access-phase-a-20260907.zh-CN.md`。
+Phase B 已按顺序进入静态核实：冻结 SDK 明文 strictAllowlist 直接 deny 而非 prompt，
+不把 tool permission 回调当网络拒绝入口；不弱化 policy、不解析 Bash，停在接口缺口，见
+`network-request-phase-b-interface-assessment-20260907.zh-CN.md`。未调用 provider，未恢复 SPM9。
+当前结果：按用户最新决定，Phase A 最小实际效果 Gate 已执行一次并通过独立证据复核；
+授权域 200、未授权域明确 proxy deny，控制目录 Bash/Write/Edit 拒绝、正常产物可写，单次 grant 不复用。
+本次授权效果与控制文件保护 RUNTIME SLICE PROVEN；下一步核对原自测的恢复条件，不开发 B。
+见 `../testing/verification-gates/20260907-phase-a-network-grant-effect.md`。不恢复 SPM9，不开发 B。
+B 的结论仅为“自动请求入口尚未验证”，不是不存在或理论上不可获取。
+混合工作树未提交，实际测量冻结运行类/二进制身份；不得把 A 确定性 PASS 提升为产品 E2E 完成。
+
+## 当前评估入口（2026-09-07）
+
+用户要求完整链路评估，非授权实现新权限平台。见 `execution-permission-e2e-assessment-20260907.zh-CN.md`。
+已确认：空 managed 域名策略、Bash 网络拒绝未进入 WebSearch 审批、环境阻塞进入业务修复环，以及依赖准备职责不明确。
+独立评审后修订：Phase A 由 operator 显式发起域名授权，连同已批准依赖的正常解析职责进入最小实施计划；Phase B 自动捕获独立门控，不再阻塞 A。
+仍为 DESIGN GAP：gate 等待与 FAILED node 不是同一 retry 前态，计划必须钉死合法续作、grant 传递/claim/失效，不原样套 WebSearch 接口。最小目标是一次执行的合法授权与原任务恢复，不重开完整 E1 安全工程。
+本轮只读生产与 SPM9、只改文档；SPM9 仍 evt-000053 / WAITING_FOR_HUMAN，不 retry/revise，不新增 provider 调用。
+下方“只需宿主预缓存”是前阶段对当前 case 的环境处置建议，不代表已满足用户新增的通知/授权闭环诉求。
+
 ## 当前执行入口（2026-09-06，优先于下方历史记录）
+
+最新停点：SPM9 evt-000053 / WAITING_FOR_HUMAN / gate.human_implementation_repair（node-053，仅允许 revise）。
+恢复实现成功后，self-test-045 报缺 HtmlUnit 4.21.0 与沙箱出网限制；既有修复环 implement-049 未修改代码，
+self-test-050 再次同 blocker，revision budget=1 路由到声明 human gate。run 命令 exit 0，所有本次调用已返回。
+已按重复阻塞止损停止，无新事实不再次 revise。17 个主源码 Java25 离线编译通过，但测试编译/full test/live smoke 未通过，E2E NOT PROVEN。
+后续只需评估既有依赖的宿主机预缓存及 live smoke 的授权执行环境，不因这一环境问题继续扩建 harness，也不开放模型全部网络权限。
+
+SPM9 恢复实现 node-042 已 COMPLETED/IMPLEMENTED，run-1788706182287 约27分钟后 SUCCESS（含既有 correction），未再受旧1200秒取消。
+当前 evt-000045：self-test node-045 / run-1788707809621 RUNNING；仅实现恢复获得自然实证，产品测试与完整 E2E 尚未完成。
+
+修复验证已完成：1403/0/0/0、Doctor exit 0，新 JAR 937dacee97665e22b13ae089d3c670abedb15ebd25b2f252ebb6f22743d70e80。
+用户授权 retry 已经由 CLI 执行，evt-000044；SPM9 同实现 node-042 新 run-1788706182287 RUNNING，14:49:49Z prompt_accepted。
+真实 argv 无 --timeout，manifest 保持原合同/批准设计/批准计划 refs+SHA；未完成实现或 E2E。下面“尚未 retry”是前阶段快照。
+
+用户最新授权“修复并继续”：当前仅修复 adapter 默认总 deadline 与进展检测的冲突；沿用既有 health，不改 workflow/产品/权限。
+默认/显式 0 不注入总 timeout，显式正数仍为预算；完全静默从启动计无进展，持续活动续期。测试后构建新包、记录 identity，
+通过既有 retry CLI 继续 SPM9 implement-042 一次；旧 timeout 证据不覆盖。Gate 已记录有边界的 fix-and-continue 授权，非无中断 fresh PASS。
+设计与失败切面见 `agent-progress-and-explicit-deadline-20260906.zh-CN.md`；当前尚未执行 retry。
+
+当前最终停点：SPM9 implement-042 已因既有 --timeout 1200 自动取消，run-1788703780643 durationMs=1207686，
+executionOutcome=TIMEOUT/process_timed_out，current=WAITING_FOR_RECOVERY；53 工具调用、35 写操作，取消前仍在准备测试类。
+用户明确要求不以耗时认定模型失败；进程与新输出已证仍有活动，不把此次硬时限取消冒称 stall。
+recovery 的 AGENT_RESULT_MISSING 是未得到最终结果的校验事实，不覆盖底层 timeout。已保留产品文件、未 retry/回滚/改生产代码。
+代理逐门审批授权继续有效，但既定 Gate 的事故 retry/止损未被泛化放开；E2E NOT PROVEN。以下 RUNNING 均为历史快照。
+
+最新执行：SPM9 设计 gate-035 已批准（毫秒修正及原四问题均闭合）；计划 gate-037 经代理修订移除错误 clean 前提与破坏性回滚，
+修订计划 node-038 在 gate-040 获代理批准；当前 implement node-042 / run-1788703780643 RUNNING，尚无完成实现/测试证据。
+实现输入已同时绑定 compile-017/contract-gate-018、design-030/gate-035、plan-038/gate-040；E2E NOT PROVEN。
+
+最新授权与停点更新：用户已明确委托本 agent 逐门读取证据并执行 approve/revise，不再要求本人复制命令；
+Gate §1 已记录授权 delta，真人逐次审批不再是本样本的证明项，其他范围/止损不变，不启用 autorun、不合并原 target。
+SPM9：代理批准 contract-018；设计 gate-023 核实 AR-1..4 后 revise；gate-029 原四项复审通过，
+代理核对官方文档发现 KLineCharts 毫秒接口被写为秒，执行仅该项 revise；当前 author-030 RUNNING。
+自然 E2E 未完成，下面 requirement-gate 停点是历史快照。
+
+最新停点：唯一 fresh workstream `ws-20260906T130900Z-SPM9` 已正常完成首段（CLI exit 0），
+current=`WAITING_FOR_HUMAN`，`gate.human_requirement_review` / node-016 / iter-003 / evt-000016。
+两轮自然 intake 修订后，第三轮 typed review=`READY_FOR_PRODUCT_REVIEW`、must_fix=[]；未误入 recovery。
+新 adapter health 与业务 Codex 均实证 GPT-6-Astra，继承正常 CODEX_HOME；Claude 链实际 metadata 为 zhipu/glm-5.3，未替用户改其模型。
+execution HEAD `6784b66`；source/effective-workspace capture+verify 全通过。未代用户审批，未进入设计/实现，E2E NOT PROVEN。
+记录：`../testing/real-case-reports/20260906-okx-native-config-fresh-e2e.md`。以下 preflight 叙述保留为阶段历史，不覆盖本停点。
 
 E1-E4 deterministic checkpoint 已收口，最新代码 `ffe9347f`。CC 整体评审已 PASS；用户已授权配置修正后直接继续 fresh E2E
 `../testing/verification-gates/20260906-okx-fresh-e2e-after-post-contract-authority.md`。
