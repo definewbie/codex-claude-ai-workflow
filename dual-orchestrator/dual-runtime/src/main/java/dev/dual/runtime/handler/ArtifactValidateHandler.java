@@ -105,6 +105,10 @@ public final class ArtifactValidateHandler implements TaskHandler {
                     ? "actual Git changes do not satisfy TaskContract.scope"
                     : evaluation.error();
             if (evaluation.status() == ChangeScopeEvaluation.Status.FAIL && routesScopeViolation(context)) {
+                if (qualified.reference() != null) {
+                    result.putAll(TaskContractRevisionContextResolver.captureScopeReworkBaseline(
+                            context.workspaceRoot(), context.workstreamId(), qualified.reference(), occurrence));
+                }
                 result.put("change_scope_disposition", "CHANGE_SCOPE_VIOLATION");
                 result.put("change_scope_message", error);
                 return new NodeResult(outcome, NodeStatus.COMPLETED, outputRefs, result, null);
@@ -529,7 +533,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
             return new QualifiedContract(null, resolution.failure());
         }
         return resolution.qualified()
-                .map(value -> new QualifiedContract(value.contract(), null))
+                .map(value -> new QualifiedContract(value.contract(), null, value))
                 .orElseGet(() -> new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
                         "APPROVAL_BINDING_MISSING", "change-scope validation requires an approved task contract")));
     }
@@ -566,7 +570,11 @@ public final class ArtifactValidateHandler implements TaskHandler {
     private record CommandResult(int exitCode, String output) {
     }
 
-    private record QualifiedContract(TaskContract contract, TaskContractProjectionVerifier.Failure failure) {
+    private record QualifiedContract(TaskContract contract, TaskContractProjectionVerifier.Failure failure,
+                                     TaskContractProjectionVerifier.QualifiedTaskContract reference) {
+        QualifiedContract(TaskContract contract, TaskContractProjectionVerifier.Failure failure) {
+            this(contract, failure, null);
+        }
     }
 
     private static String textOrNull(String value) {

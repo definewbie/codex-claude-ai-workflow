@@ -338,6 +338,24 @@ public final class TaskContractRevisionContextResolver {
         var reviewRef = reader.relative(acceptance.path());
         var review = reader.acceptance(reviewRef, reader.sha(reviewRef));
         require(review.equals(acceptance.document()), "acceptance capture changed while reading");
+        var values = captureQualifiedBaseline(reader, qualified);
+        values.put("acceptance_ref", reviewRef);
+        values.put("acceptance_sha256", reader.sha(reviewRef));
+        return Map.of("acceptance_rework_baseline", Map.copyOf(values));
+    }
+
+    static Map<String, Object> captureScopeReworkBaseline(
+            Path root, String workstreamId, TaskContractProjectionVerifier.QualifiedTaskContract qualified,
+            ChangeScopeEvaluationArtifact.Reference evaluation) throws IOException {
+        var reader = new LateReader(root, workstreamId);
+        var values = captureQualifiedBaseline(reader, qualified);
+        values.put("evaluation_ref", evaluation.ref());
+        values.put("evaluation_sha256", evaluation.sha256());
+        return Map.of("scope_rework_baseline", Map.copyOf(values));
+    }
+
+    private static LinkedHashMap<String, Object> captureQualifiedBaseline(
+            LateReader reader, TaskContractProjectionVerifier.QualifiedTaskContract qualified) throws IOException {
         var compile = reader.node(qualified.compileNodeInstanceId());
         var baseline = reader.compiledBaseline(compile.nodeInstanceId());
         var approval = reader.gateByRef(qualified.approvalGateRef(), "approved");
@@ -357,8 +375,6 @@ public final class TaskContractRevisionContextResolver {
         var workspace = reader.workspace();
         var values = new LinkedHashMap<String, Object>();
         values.put("proposal_reference", baseline.previousReference().toMap());
-        values.put("acceptance_ref", reviewRef);
-        values.put("acceptance_sha256", reader.sha(reviewRef));
         var productReviewRef = reader.reviewRef(compile.inputRefs());
         values.put("proposal_review_ref", productReviewRef);
         values.put("proposal_review_sha256", reader.sha(productReviewRef));
@@ -372,14 +388,14 @@ public final class TaskContractRevisionContextResolver {
         values.put("requirement_gate_sha256", reader.sha(requirement.ref()));
         values.put("workspace_id", workspace.get(0));
         values.put("base_commit", workspace.get(1));
-        return Map.of("acceptance_rework_baseline", Map.copyOf(values));
+        return values;
     }
 
     private static boolean contractRework(String action) {
-        return Set.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY").contains(action);
+        return Set.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY", "request_scope_revision").contains(action);
     }
 
-    // Only the nearest acceptance root belongs to this negotiation. Initial negotiation stays unchanged.
+    // Only the nearest rework root belongs to this negotiation. Initial negotiation stays unchanged.
     private static List<WorkflowIterationDocument> lateAncestry(
             Path root, String ws, WorkflowIterationDocument current) throws IOException {
         var chain = new ArrayList<WorkflowIterationDocument>();
@@ -649,7 +665,7 @@ public final class TaskContractRevisionContextResolver {
             var id = workstream.path("primaryWorkspaceId").asText();
             require(id.matches("[A-Za-z0-9._-]+"), "primary workspace missing");
             var workspace = OBJECT_MAPPER.readTree(path(relative(dir.resolve("workspaces/" + id + ".json"))).toFile());
-            var workdir = workspace.path("workdir").asText();
+            var workdir = workspace.path("effectiveWorkdir").asText(workspace.path("workdir").asText());
             require(workdir.isBlank() || Path.of(workdir).toAbsolutePath().normalize().equals(root),
                     "original workspace directory changed");
             var base = workspace.path("baseCommit").asText();
@@ -660,27 +676,44 @@ public final class TaskContractRevisionContextResolver {
         Result resolve(List<WorkflowIterationDocument> chain) throws IOException {
             var first = chain.getFirst();
             var classifier = trigger(first);
-            completed(classifier, "acceptance.classify_failure");
+            var scopeRevision = "request_scope_revision".equals(first.triggerAction());
+            completed(classifier, scopeRevision ? "gate.human_implementation_repair" : "acceptance.classify_failure");
             require(first.targetNodeDefinitionId().equals("context.intake_claude_brainstorm"),
                     "late root target must be intake context");
             var rootEvent = iterationRoute(first, classifier);
-            require(classifier.result().get("acceptance_rework_baseline") instanceof Map<?, ?>,
-                    "fixed acceptance rework baseline missing");
-            var binding = OBJECT_MAPPER.convertValue(classifier.result().get("acceptance_rework_baseline"),
+            var baselineOwner = scopeRevision ? gate(classifier, "request_scope_revision").source() : classifier;
+            var baselineKey = scopeRevision ? "scope_rework_baseline" : "acceptance_rework_baseline";
+            require(baselineOwner.result().get(baselineKey) instanceof Map<?, ?>,
+                    "fixed contract rework baseline missing");
+            var binding = OBJECT_MAPPER.convertValue(baselineOwner.result().get(baselineKey),
                     new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
             var ref = TaskContractProposalReference.fromMap(OBJECT_MAPPER.convertValue(binding.get("proposal_reference"),
                     new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {})).orElseThrow(
                     () -> new IOException("fixed approved proposal reference missing"));
             var acceptanceRef = text(binding.get("acceptance_ref"));
             var acceptanceHash = text(binding.get("acceptance_sha256"));
-            var acceptance = acceptance(acceptanceRef, acceptanceHash);
-            require(classifier.inputRefs().contains(acceptanceRef) && classifier.outputRefs().contains(acceptanceRef)
+            AgentOutputContractDocument acceptance = null;
+            ChangeScopeEvaluationArtifact.Verified scopeEvidence = null;
+            if (scopeRevision) {
+                var scopeGate = gate(classifier, "request_scope_revision");
+                require("CHANGE_SCOPE_VIOLATION".equals(text(scopeGate.document().result().get("source_outcome")))
+                        && !text(classifier.result().get("note")).isBlank(), "scope revision source/note mismatch");
+                scopeEvidence = ChangeScopeEvaluationArtifact.verifyGateSource(root, ws, classifier.iterationId(),
+                        classifier.inputRefs());
+                require(scopeEvidence.ref().equals(text(binding.get("evaluation_ref")))
+                        && scopeEvidence.sha256().equals(text(binding.get("evaluation_sha256")))
+                        && scopeEvidence.document().sourceNodeInstanceId().equals(baselineOwner.nodeInstanceId()),
+                        "scope revision evaluation baseline mismatch");
+            } else {
+                acceptance = acceptance(acceptanceRef, acceptanceHash);
+                require(classifier.inputRefs().contains(acceptanceRef) && classifier.outputRefs().contains(acceptanceRef)
                     && node(acceptance.nodeInstanceId()).iterationId().equals(classifier.iterationId())
                     && first.triggerAction().equals("REJECT_" + text(classifier.result().get("category")))
                     && text(classifier.result().get("category")).equals(acceptance.failure().categoryHint()),
                     "classifier acceptance identity/category mismatch");
-            require(classifier.inputRefs().stream().filter(r -> r.endsWith(".contract.json")).count() == 1,
+                require(classifier.inputRefs().stream().filter(r -> r.endsWith(".contract.json")).count() == 1,
                     "classifier acceptance source is ambiguous");
+            }
             var compile = node(text(binding.get("compile_node_instance_id")));
             var base = compiledBaseline(compile.nodeInstanceId());
             require(base.previousReference().equals(ref), "frozen compile proposal mismatch");
@@ -706,11 +739,18 @@ public final class TaskContractRevisionContextResolver {
             require(workspace.equals(List.of(text(binding.get("workspace_id")), text(binding.get("base_commit")))),
                     "original workspace identity/base changed");
             var lateRoot = new LateRoot(classifier.nodeInstanceId(), first.iterationId(), ref,
-                    acceptanceRef, acceptanceHash, workspace.get(0), workspace.get(1), acceptance);
+                    acceptanceRef, acceptanceHash, workspace.get(0), workspace.get(1), acceptance,
+                    scopeEvidence == null ? "" : scopeEvidence.ref(), scopeEvidence == null ? "" : scopeEvidence.sha256());
+            var candidates = scopeEvidence == null ? List.<dev.dual.core.contract.TaskContract.ScopeEntry>of()
+                    : new TaskContractScopeResolver().reviewedCreateCandidates(root, workspace.get(1), scopeEvidence);
             var obligations = new LinkedHashMap<String, AgentResultEnvelope.ReviewObligation>();
-            for (int i = 0; i < acceptance.failure().contractGaps().size(); i++)
-                add(obligations, "sha256:" + acceptanceHash + "#contract-gap:" + i,
+            if (scopeRevision) {
+                add(obligations, "gate:" + classifier.nodeInstanceId() + "#scope-review", text(classifier.result().get("note")));
+            } else {
+                for (int i = 0; i < acceptance.failure().contractGaps().size(); i++)
+                    add(obligations, "sha256:" + acceptanceHash + "#contract-gap:" + i,
                         acceptance.failure().contractGaps().get(i));
+            }
             var direct = base;
             long through = rootEvent.sequence();
             for (int i = 1; i < chain.size(); i++) {
@@ -754,7 +794,7 @@ public final class TaskContractRevisionContextResolver {
                     throw new IOException("late revision crosses a newer approved contract epoch");
             }
             return new Result(new Context(chain.getLast(), true, direct.previousProposal(), direct.previousReference(),
-                    List.copyOf(obligations.values()), base.previousProposal(), lateRoot), List.of());
+                    List.copyOf(obligations.values()), base.previousProposal(), lateRoot, candidates), List.of());
         }
 
         NodeInstanceDocument trigger(WorkflowIterationDocument iteration) throws IOException {
@@ -882,8 +922,19 @@ public final class TaskContractRevisionContextResolver {
             TaskContractProposalReference previousReference,
             List<AgentResultEnvelope.ReviewObligation> obligations,
             TaskContractProposal approvedScopeBaseline,
-            LateRoot lateRoot
+            LateRoot lateRoot,
+            List<dev.dual.core.contract.TaskContract.ScopeEntry> scopeReviewCandidates
     ) {
+        public Context {
+            scopeReviewCandidates = List.copyOf(scopeReviewCandidates);
+        }
+        public Context(WorkflowIterationDocument iteration, boolean revision,
+                       TaskContractProposal previousProposal, TaskContractProposalReference previousReference,
+                       List<AgentResultEnvelope.ReviewObligation> obligations,
+                       TaskContractProposal approvedScopeBaseline, LateRoot lateRoot) {
+            this(iteration, revision, previousProposal, previousReference, obligations, approvedScopeBaseline,
+                    lateRoot, List.of());
+        }
         public Context(WorkflowIterationDocument iteration, boolean revision,
                        TaskContractProposal previousProposal, TaskContractProposalReference previousReference,
                        List<AgentResultEnvelope.ReviewObligation> obligations) {
@@ -891,13 +942,15 @@ public final class TaskContractRevisionContextResolver {
         }
 
         public String originalBaseCommit() { return lateRoot == null ? "" : lateRoot.baseCommit(); }
+        public boolean scopeRevision() { return lateRoot != null && !lateRoot.scopeEvaluationRef().isBlank(); }
     }
 
     public record LateRoot(String classifierNodeInstanceId, String iterationId,
                            TaskContractProposalReference approvedProposalReference,
                            String acceptanceRef, String acceptanceSha256,
                            String workspaceId, String baseCommit,
-                           AgentOutputContractDocument acceptanceEvidence) {}
+                           AgentOutputContractDocument acceptanceEvidence,
+                           String scopeEvaluationRef, String scopeEvaluationSha256) {}
 
     public record Result(Context context, List<String> errors) {
         public boolean valid() {

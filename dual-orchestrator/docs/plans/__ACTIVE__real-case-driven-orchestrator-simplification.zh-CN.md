@@ -1,5 +1,49 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## 人工批准合理新增文件（2026-09-09，覆盖下方部分修正）
+
+最新：完整批准链已接通，正向序列达到真实 delivery candidate；原范围修回、证据篡改零写入、
+第三路径/旧条款修改拒绝同步覆盖。最终 package 1440/0/0/0、Doctor/UI/diff-check通过；真实 E2E 未证明。
+baseline 的唯一捕获点为 validation completed result；gate 不持久化临时 NodeResult，不能当 owner。
+下方第一/第二批为历史记录，由本段与设计 §10 覆盖。用户已授权继续到 E2E 完成或缺陷止损，
+不另开 agent、不再要求逐步确认、不恢复 FZ8K。新 Gate 在最终构建/自查收口后冻结。
+
+第二批加入证据限定的 CREATE 候选检查，尚未接入生产批准链；不放宽现有 proposal validator。
+消费前重验 occurrence SHA、原 Git base、普通文件与路径，候选不是 scope 授权。
+七类聚焦测试 35/0/0/0，含既有返工序列/中断/冷读；本批未重跑全 reactor。
+下一步固定 scope gate 来源与原合同 baseline，接通 merger/publication/compile，再开放入口。
+
+第一批 implementation 已落地实例动作守卫（core/ledger/packet），新工作流入口尚未启用。
+旧实现被新增拒绝序列测试证伪，守卫后通过；完整批准/CREATE/Git续行仍待完成，不宣称闭环。
+完整 reactor 1428/0/0/0（171份本次XML），diff-check clean。首次受限进程枚举导致测试失败，
+允许测试自身进程操作后原样重跑通过；未放宽测试断言。尚未提交或更新真实运行 JAR。
+
+用户确认：仅允许修回原范围不足，必须覆盖“合理新增 -> 人工合法批准 -> 下游继续”。
+当前为分批实施，不是实施完成：复用 scope repair evidence 与合同修订批准链，不建平行 grant。
+发现现有晚期修订明确拒绝已落盘 addition，必须与新人工入口同批解决 CREATE/base 语义，
+否则只是转移失败点。方案与完整序列见 `20260909-human-reviewed-scope-additions-minimal-design.zh-CN.md`。
+保持已锁定 action/loader、返工 resolver、operation 校验范围；不恢复 FZ8K、不开 agent。
+
+## 普通 scope 偏离处置修正（2026-09-09，覆盖后续操作口径）
+
+用户选择最低成本修复：不放宽精确 scope、不新增权限模型；隔离工作区普通额外文件不立即 cancel，
+复用 artifact validation -> typed scope violation -> human repair -> 再校验。
+人工修复门仅支持 revise + note，不等于批准保留新路径；需保留时另走合法范围变更批准，不默许扩权。
+保护区/工作区外违规、只读能力违规及 authority 漂移仍立即停止。
+政策见 `../testing/verification-gates/20260909-scope-deviation-disposition-policy.zh-CN.md`。
+FZ8K 历史停止与证据不改，不因本政策自动 retry；后续执行 Gate 必须显式采用新口径。
+本轮不改 production、不启 provider/agent；只纠正操作层误把普通差异当作立即取消条件的问题。
+
+## FZ8K 实现止损（2026-09-09，覆盖下方开工记录）
+
+唯一 fresh 样本已完成需求/契约批准、一次设计修订及计划修订批准，进入实现。
+run-1788956758608 实际成功创建两个未批准路径 OkxHttpException.java / OkxParseException.java，
+主 agent 依 Gate 立即取消并关闭 session；当前 WAITING_FOR_RECOVERY / evt-000027，无活动 provider。
+Gate FAIL，产品 E2E NOT PROVEN。取消后 AGENT_RESULT_MISSING 不另报 JSON 缺陷，
+后置 scope validator 未运行，不冒称其失效；不删除文件、不扩 scope、不 retry、不建第二样本。
+下一步只核对现有 scope 检测/分类/人工修复出口与 Gate 停止要求是否一致，不先新增逐文件 sandbox。
+事实与证据见 `../testing/real-case-reports/20260909-okx-fz8k-implementation-boundary-stop.md`。
+
 ## 下一轮 fresh E2E（2026-09-09）
 
 用户授权进入下一步，profile/sandbox 修复已收口 e21c95d。新 Gate 为

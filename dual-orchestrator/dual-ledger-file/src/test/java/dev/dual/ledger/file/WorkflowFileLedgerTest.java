@@ -751,6 +751,48 @@ class WorkflowFileLedgerTest {
     }
 
     @Test
+    void scopeRevisionRequestCannotResolveWrongSourceMissingNoteOrMissingRoute() throws Exception {
+        for (int scenario = 0; scenario < 3; scenario++) {
+            var source = scenario == 0 ? "SELF_TEST_INCOMPLETE" : "CHANGE_SCOPE_VIOLATION";
+            var action = "request_scope_revision";
+            var edges = new java.util.ArrayList<EdgeDefinition>();
+            edges.add(new EdgeDefinition("source", source, "gate.human_implementation_repair"));
+            if (scenario != 2) {
+                edges.add(new EdgeDefinition("gate.human_implementation_repair", action, "next"));
+            }
+            var definition = new WorkflowDefinition("scope-request", 1, "source", List.of(
+                    new NodeDefinition("source", NodeKind.TASK, "noop.task", Map.of()),
+                    new NodeDefinition("gate.human_implementation_repair", NodeKind.GATE, "human.review",
+                            Map.of("gate_purpose", "implementation_repair", "allowed_actions", List.of(action))),
+                    new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())), edges);
+            var paths = initializedPaths("ws-request-" + scenario, definition);
+            var ledger = new WorkflowFileLedger();
+            ledger.completeAndRoute(paths, definition, activeNode(paths).nodeInstanceId(), NodeStatus.COMPLETED,
+                    source, List.of(), Map.of());
+            var gate = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                    .readValue(paths.gateJson("gate-" + activeNode(paths).nodeInstanceId()).toFile(), GateDocument.class);
+            assertEquals(scenario == 0 ? List.of() : List.of(action), gate.allowedActions());
+            var before = persistedState(paths);
+            var note = scenario == 1 ? "" : "Please retain the helper.";
+            var failure = assertThrows(IOException.class, () -> ledger.resolveOpenGate(paths, definition, action,
+                    note));
+            assertTrue(failure.getMessage().contains("scope revision"));
+            assertEquals(before, persistedState(paths), "rejection must precede every durable write");
+        }
+    }
+
+    private Map<String, String> persistedState(WorkstreamPaths paths) throws IOException {
+        var snapshot = new java.util.TreeMap<String, String>();
+        try (var files = Files.walk(paths.workstreamDir())) {
+            for (var path : files.filter(Files::isRegularFile).toList()) {
+                snapshot.put(paths.workstreamDir().relativize(path).toString(), Files.readString(path));
+            }
+        }
+        return snapshot;
+    }
+
+    @Test
     void ambiguousRevisionLimitBlockedRoutesFailClosed() throws Exception {
         var definition = new WorkflowDefinition(
                 "ambiguous-revision-limit",

@@ -45,6 +45,13 @@ final class TaskContractProposalRevisionMerger {
             }
         }
         errors.addAll(TaskContractRevisionPatchTargetValidator.validate(patch));
+        if (context.scopeRevision()) {
+            for (var change : safe(patch.obligationPatches())) {
+                if (!change.clauseChanges().isEmpty() || !change.evidenceRefAdditions().isEmpty()) {
+                    errors.add("scope review may only add bound candidate paths");
+                }
+            }
+        }
         for (var expected : expectedObligations) {
             if (!actualObligations.contains(expected)) {
                 errors.add("MISSING_REVISION_OBLIGATION: " + expected);
@@ -94,8 +101,10 @@ final class TaskContractProposalRevisionMerger {
         for (var obligationPatch : patch.obligationPatches()) {
             var scopeAdditions = safe(obligationPatch.scopeAdditions());
             if (!scopeAdditions.isEmpty()) {
-                var resolvedScope = scopeResolver.resolve(scopeAdditions, workspaceRoot,
-                        context.approvedScopeBaseline() == null ? null : context.originalBaseCommit());
+                var resolvedScope = context.scopeRevision()
+                        ? scopeResolver.resolveReviewedAdditions(scopeAdditions, context.scopeReviewCandidates())
+                        : scopeResolver.resolve(scopeAdditions, workspaceRoot,
+                            context.approvedScopeBaseline() == null ? null : context.originalBaseCommit());
                 if (!resolvedScope.valid()) {
                     errors.addAll(resolvedScope.errors());
                     continue;

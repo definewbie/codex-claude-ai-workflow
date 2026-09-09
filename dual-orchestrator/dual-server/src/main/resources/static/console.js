@@ -1150,9 +1150,11 @@ function allowedActions(status) {
     return [];
   }
   if (status === "WAITING_FOR_HUMAN") {
+    const actions = asList(state.review?.packet?.allowedActions);
     return [
-      { label: "批准并继续", kind: "primary", onClick: approveAndRun },
-      { label: "请求修改", kind: "ghost", onClick: reviseAndRun },
+      ...(actions.includes("approve") ? [{ label: "批准并继续", kind: "primary", onClick: approveAndRun }] : []),
+      ...(actions.includes("revise") ? [{ label: "请求修改", kind: "ghost", onClick: reviseAndRun }] : []),
+      ...(actions.includes("request_scope_revision") ? [{ label: "申请保留新增文件", kind: "ghost", onClick: requestScopeRevision }] : []),
     ];
   }
   if (["WAITING_FOR_RECOVERY", "FAILED", "BLOCKED"].includes(status)) {
@@ -1223,6 +1225,16 @@ function reviseAndRun() {
     return;
   }
   postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/revise?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`, { feedback });
+}
+
+function requestScopeRevision() {
+  const feedback = (els.revisionFeedback?.value || "").trim();
+  if (!feedback) {
+    renderFailure("缺少审议说明", "请说明新增文件的职责及保留理由；此操作仅发起合同修订，不会立即批准新增文件。");
+    els.revisionFeedback?.focus();
+    return;
+  }
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/request-scope-revision?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`, { feedback });
 }
 
 function retryCurrent() {

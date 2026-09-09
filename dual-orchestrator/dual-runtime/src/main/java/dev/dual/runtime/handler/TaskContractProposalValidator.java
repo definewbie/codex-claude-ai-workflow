@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import dev.dual.core.contract.TaskContract;
 import dev.dual.core.contract.TaskContractValidator;
@@ -27,7 +28,35 @@ final class TaskContractProposalValidator {
 
     List<String> validate(TaskContractProposal proposal, Path workspaceRoot,
                           TaskContractProposal approvedScopeBaseline, String originalBaseCommit) {
+        return validate(proposal, workspaceRoot, approvedScopeBaseline, originalBaseCommit, List.of());
+    }
+
+    List<String> validate(TaskContractProposal proposal, Path workspaceRoot,
+                          TaskContractProposal approvedScopeBaseline, String originalBaseCommit,
+                          List<TaskContract.ScopeEntry> scopeReviewCandidates) {
         var errors = new ArrayList<String>();
+        if (!scopeReviewCandidates.isEmpty()) {
+            if (approvedScopeBaseline == null) return List.of("scope review requires its approved baseline");
+            if (!Objects.equals(proposal.objective(), approvedScopeBaseline.objective())
+                    || !Objects.equals(proposal.acceptanceCriteria(), approvedScopeBaseline.acceptanceCriteria())
+                    || !Objects.equals(proposal.testRequirements(), approvedScopeBaseline.testRequirements())
+                    || !Objects.equals(proposal.constraints(), approvedScopeBaseline.constraints())
+                    || !Objects.equals(proposal.nonGoals(), approvedScopeBaseline.nonGoals())
+                    || !Objects.equals(proposal.riskAreas(), approvedScopeBaseline.riskAreas())
+                    || !Objects.equals(proposal.openQuestions(), approvedScopeBaseline.openQuestions())
+                    || !Objects.equals(proposal.evidenceRefs(), approvedScopeBaseline.evidenceRefs())
+                    || proposal.scope() == null
+                    || !Objects.equals(proposal.scope().excluded(), approvedScopeBaseline.scope().excluded())
+                    || proposal.scope().included() == null
+                    || !proposal.scope().included().containsAll(approvedScopeBaseline.scope().included())) {
+                errors.add("scope review must preserve the approved contract outside candidate additions");
+            } else {
+                for (var entry : proposal.scope().included()) {
+                    if (entry == null || (!approvedScopeBaseline.scope().included().contains(entry) && !scopeReviewCandidates.contains(entry)))
+                        errors.add("scope review addition is not in the bound evaluation: " + entry);
+                }
+            }
+        }
         java.util.Set<String> originalPaths = java.util.Set.of();
         if (approvedScopeBaseline != null) {
             try {
@@ -54,7 +83,8 @@ final class TaskContractProposalValidator {
                 for (var ref : proposal.scope().included()) {
                     var inheritedCreate = ref != null && ref.operation() == TaskContract.ScopeOperation.CREATE
                             && approvedScopeBaseline != null
-                            && approvedScopeBaseline.scope().included().contains(ref);
+                            && (approvedScopeBaseline.scope().included().contains(ref)
+                                || scopeReviewCandidates.contains(ref));
                     validateWorkspacePathRef(ref, workspaceRoot, inheritedCreate, errors);
                     if (approvedScopeBaseline != null && ref != null
                             && ref.operation() == TaskContract.ScopeOperation.MODIFY

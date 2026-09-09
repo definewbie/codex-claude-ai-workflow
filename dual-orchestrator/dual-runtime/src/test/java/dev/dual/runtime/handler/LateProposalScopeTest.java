@@ -19,6 +19,125 @@ class LateProposalScopeTest {
     private final TaskContractProposalValidator validator = new TaskContractProposalValidator();
 
     @Test
+    void reviewedExistingCandidatesRemainCreateWithoutAuthorizingTheContract() throws Exception {
+        var base = baseline();
+        var resolver = new TaskContractScopeResolver();
+        for (var path : List.of("docs/guide.md", "src/Tool.java", "service.py")) {
+            Files.createDirectories(root.resolve(path).getParent());
+            Files.writeString(root.resolve(path), "candidate\n");
+            var occurrence = additionEvidence(path);
+            assertEquals(List.of(new TaskContract.ScopeEntry(path, TaskContract.ScopeOperation.CREATE)),
+                    resolver.reviewedCreateCandidates(root, base, occurrence));
+            assertFalse(resolver.resolve(List.of(new AgentResultEnvelope.ProposalScopePath(path)), root, base).valid());
+            assertFalse(validator.validate(proposal(path, TaskContract.ScopeOperation.CREATE), root).isEmpty(),
+                    "being a review candidate does not approve an existing CREATE");
+        }
+    }
+
+    @Test
+    void candidateConsumptionRechecksEvidenceAndBase() throws Exception {
+        var base = baseline();
+        Files.writeString(root.resolve("extra.py"), "candidate\n");
+        var occurrence = additionEvidence("extra.py");
+        var resolver = new TaskContractScopeResolver();
+        git("add", "extra.py");
+        git("commit", "-m", "later tree");
+        assertThrows(java.io.IOException.class, () -> resolver.reviewedCreateCandidates(
+                root, git("rev-parse", "HEAD").trim(), occurrence));
+        assertEquals(TaskContract.ScopeOperation.CREATE,
+                resolver.reviewedCreateCandidates(root, base, occurrence).getFirst().operation());
+        Files.writeString(root.resolve(occurrence.ref()), "{}\n");
+        assertThrows(java.io.IOException.class, () -> resolver.reviewedCreateCandidates(root, base, occurrence));
+        Files.delete(root.resolve(occurrence.ref()));
+        assertThrows(java.io.IOException.class, () -> resolver.reviewedCreateCandidates(root, base, occurrence));
+    }
+
+    @Test
+    void reviewCandidatesRejectProtectedMissingDirectoryAndSymlinkPaths() throws Exception {
+        var base = baseline();
+        Files.createDirectories(root.resolve("folder"));
+        Files.writeString(root.resolve("ordinary.py"), "candidate\n");
+        Files.createSymbolicLink(root.resolve("alias.py"), Path.of("ordinary.py"));
+        Files.createSymbolicLink(root.resolve("alias-dir"), Path.of("folder"));
+        Files.writeString(root.resolve("folder/nested.py"), "candidate\n");
+        for (var path : List.of("README.md", "missing.py", "folder", "alias.py", "alias-dir/nested.py",
+                ".agent/private.json", ".git/config", "../outside.py")) {
+            var occurrence = additionEvidence(path);
+            assertThrows(java.io.IOException.class, () -> new TaskContractScopeResolver()
+                    .reviewedCreateCandidates(root, base, occurrence), path);
+        }
+    }
+
+    @Test
+    void reviewCandidatesRejectOtherOperationsAndInconsistentEvidence() throws Exception {
+        var base = baseline();
+        Files.writeString(root.resolve("extra.py"), "candidate\n");
+        for (var operation : ChangeScopeEvaluation.ActualOperation.values()) {
+            var actual = new ChangeScopeEvaluation.ActualChange("extra.py", operation, null, "?");
+            var violation = new ChangeScopeEvaluation.Violation("UNEXPECTED_ACTUAL_CHANGE", "extra.py",
+                    null, ChangeScopeEvaluation.ActualOperation.CREATE, null);
+            var evaluation = new ChangeScopeEvaluation(1, ChangeScopeEvaluation.Status.FAIL,
+                    operation == ChangeScopeEvaluation.ActualOperation.CREATE ? List.of() : List.of(actual),
+                    List.of(), List.of(), List.of(violation), null);
+            var occurrence = evidence(evaluation);
+            assertThrows(java.io.IOException.class, () -> new TaskContractScopeResolver()
+                    .reviewedCreateCandidates(root, base, occurrence));
+        }
+    }
+
+    @Test
+    void candidateSetCannotGrowFromLaterWorkspaceChangesOrMixedViolations() throws Exception {
+        var base = baseline();
+        Files.writeString(root.resolve("extra.py"), "candidate\n");
+        var occurrence = additionEvidence("extra.py");
+        Files.writeString(root.resolve("later.py"), "not in evidence\n");
+        var resolver = new TaskContractScopeResolver();
+        assertEquals(List.of("extra.py"), resolver.reviewedCreateCandidates(root, base, occurrence)
+                .stream().map(TaskContract.ScopeEntry::path).toList());
+        var valid = occurrence.document().evaluation();
+        for (var violation : List.of(
+                new ChangeScopeEvaluation.Violation("UNEXPECTED_ACTUAL_CHANGE", "extra.py", null,
+                        ChangeScopeEvaluation.ActualOperation.MODIFY, null),
+                new ChangeScopeEvaluation.Violation("OPERATION_MISMATCH", "extra.py",
+                        TaskContract.ScopeOperation.MODIFY, ChangeScopeEvaluation.ActualOperation.CREATE, null),
+                new ChangeScopeEvaluation.Violation("UNEXPECTED_ACTUAL_CHANGE", "extra.py", null,
+                        ChangeScopeEvaluation.ActualOperation.CREATE, "previous.py"),
+                valid.violations().getFirst())) {
+            var mixed = evidence(new ChangeScopeEvaluation(1, ChangeScopeEvaluation.Status.FAIL,
+                    valid.actualChanges(), List.of(), List.of(),
+                    List.of(valid.violations().getFirst(), violation), null));
+            assertThrows(java.io.IOException.class, () -> resolver.reviewedCreateCandidates(root, base, mixed));
+        }
+        assertThrows(java.io.IOException.class, () -> resolver.reviewedCreateCandidates(root, "missing", occurrence));
+        assertThrows(java.io.IOException.class, () -> resolver.reviewedCreateCandidates(root, base, null));
+    }
+
+    private ChangeScopeEvaluationArtifact.Verified additionEvidence(String path) throws Exception {
+        return evidence(new ChangeScopeEvaluation(1, ChangeScopeEvaluation.Status.FAIL,
+                List.of(new ChangeScopeEvaluation.ActualChange(path, ChangeScopeEvaluation.ActualOperation.CREATE,
+                        null, "A")), List.of(), List.of(),
+                List.of(new ChangeScopeEvaluation.Violation("UNEXPECTED_ACTUAL_CHANGE", path, null,
+                        ChangeScopeEvaluation.ActualOperation.CREATE, null)), null));
+    }
+
+    @Test
+    void scopeReviewRejectsMissingFieldsWithoutThrowing() throws Exception {
+        var base = baseline();
+        var approved = proposal("approved.py", TaskContract.ScopeOperation.CREATE);
+        var malformed = new TaskContractProposal("task_contract_proposal", TaskContractProposal.SCHEMA_VERSION,
+                null, new TaskContractProposal.Scope(null, null), null, null, null, null, null, null, null, null);
+        var candidates = List.of(new TaskContract.ScopeEntry("extra.py", TaskContract.ScopeOperation.CREATE));
+        var errors = assertDoesNotThrow(() -> validator.validate(malformed, root, approved, base, candidates));
+        assertTrue(errors.contains("scope review must preserve the approved contract outside candidate additions"));
+        assertTrue(errors.contains("scope.included must not be empty"));
+    }
+
+    private ChangeScopeEvaluationArtifact.Verified evidence(ChangeScopeEvaluation evaluation) throws Exception {
+        var reference = ChangeScopeEvaluationArtifact.publish(root, "ws", "node-validation", evaluation);
+        return ChangeScopeEvaluationArtifact.verify(root, "ws", "node-validation", reference.ref(), reference.sha256());
+    }
+
+    @Test
     void inheritedCreateRemainsCreateAgainstTheOriginalGitBase() throws Exception {
         var base = baseline();
         for (var path : List.of("docs/guide.md", "src/Tool.java", "service.py")) {

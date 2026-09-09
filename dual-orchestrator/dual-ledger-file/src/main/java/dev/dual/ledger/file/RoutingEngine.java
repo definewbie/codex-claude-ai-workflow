@@ -310,7 +310,7 @@ final class RoutingEngine {
                         nextNodeInstanceId,
                         nextDefinition.handlerType(),
                         "open",
-                        HumanGateActionSemantics.allowedActions(nextDefinition),
+                        HumanGateActionSemantics.allowedActions(nextDefinition, effectiveOutcome),
                         Instant.now(),
                         null,
                         Map.of(
@@ -473,6 +473,22 @@ final class RoutingEngine {
         }
         var gate = requireOpenGate(paths, current, node);
         var sourceOutcome = text(gate.result().get("source_outcome"));
+        if (HumanGateActionSemantics.REQUEST_SCOPE_REVISION.equals(canonicalAction)) {
+            var applicable = HumanGateActionSemantics.allowedActions(
+                    definition.node(node.nodeDefinitionId()), sourceOutcome).contains(canonicalAction);
+            if (!applicable || !hasEdge) {
+                throw new IOException("scope revision requires a declared scope-repair occurrence and route");
+            }
+            if (note == null || note.isBlank()) {
+                throw new IOException("a decision note is required for scope revision");
+            }
+            ScopeRevisionRequestGuard.verify(paths, node, gate, objectMapper);
+            var max = RevisionTracker.maxRevisions(definition.node(node.nodeDefinitionId()));
+            if (max >= 0 && revisionTracker.revisionCount(paths, node.nodeDefinitionId(),
+                    "context.intake_claude_brainstorm") >= max) {
+                throw new IOException("scope revision request budget exhausted; gate remains open");
+            }
+        }
         if ("BLOCKED".equals(sourceOutcome) && (note == null || note.isBlank())) {
             throw new IOException("a decision note is required for a BLOCKED human gate");
         }

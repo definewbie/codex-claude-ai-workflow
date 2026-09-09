@@ -43,8 +43,22 @@ final class ChangeScopeViolationRoutingSemantics {
             if (gate.kind() != NodeKind.GATE
                     || !"human.review".equals(gate.handlerType())
                     || !"implementation_repair".equals(String.valueOf(gate.config().get("gate_purpose")))
-                    || !List.of("revise").equals(HumanGateActionSemantics.allowedActions(gate))) {
-                throw new IllegalArgumentException(REPAIR_GATE + " must be a revise-only implementation repair gate");
+                    || !(List.of("revise").equals(HumanGateActionSemantics.allowedActions(gate))
+                        || List.of("revise", HumanGateActionSemantics.REQUEST_SCOPE_REVISION)
+                            .equals(HumanGateActionSemantics.allowedActions(gate)))) {
+                throw new IllegalArgumentException(REPAIR_GATE + " must declare only bounded implementation repair actions");
+            }
+            var scopeEdges = edges.stream().filter(candidate -> candidate.from().equals(REPAIR_GATE)
+                    && candidate.on().equals(HumanGateActionSemantics.REQUEST_SCOPE_REVISION)).toList();
+            var scopeEnabled = HumanGateActionSemantics.allowedActions(gate)
+                    .contains(HumanGateActionSemantics.REQUEST_SCOPE_REVISION);
+            if (scopeEdges.size() != (scopeEnabled ? 1 : 0)
+                    || (scopeEnabled && (!scopeEdges.getFirst().to().equals("context.intake_claude_brainstorm")
+                        || !scopeEdges.getFirst().condition().type().equals("unconditional")
+                        || !scopeEdges.getFirst().metadata().transitionType().equals("loop")
+                        || !scopeEdges.getFirst().metadata().required()
+                        || !scopeEdges.getFirst().metadata().branchGroupId().isBlank()))) {
+                throw new IllegalArgumentException("scope revision requires exactly one bounded intake loop");
             }
             var repairEdges = edges.stream()
                     .filter(candidate -> candidate.from().equals(REPAIR_GATE))

@@ -103,6 +103,34 @@ final class ChangeScopeEvaluationArtifact {
         return matcher.matches() ? matcher.group(2) : "";
     }
 
+    static Verified verifyGateSource(Path root, String workstreamId, String iterationId,
+                                     java.util.List<String> inputRefs) throws IOException {
+        var refs = inputRefs.stream().filter(ref -> isCanonicalRefForWorkstream(ref, workstreamId)).toList();
+        if (refs.size() != 1) {
+            throw new IOException("change-scope violation gate must receive exactly one occurrence evaluation");
+        }
+        var ref = refs.getFirst();
+        var sourceId = sourceNodeInstanceId(ref);
+        var sourcePath = resolveInside(root, ".agent/workstreams/" + workstreamId + "/nodes/" + sourceId + ".json");
+        var source = OBJECT_MAPPER.readValue(sourcePath.toFile(), dev.dual.ledger.file.NodeInstanceDocument.class);
+        if (!sourceId.equals(source.nodeInstanceId())
+                || !"implement.artifact_validation".equals(source.nodeDefinitionId())
+                || !"artifact.validate".equals(source.handlerType())
+                || source.status() != dev.dual.core.workflow.NodeStatus.COMPLETED
+                || !iterationId.equals(source.iterationId()) || !source.outputRefs().contains(ref)
+                || !"FAIL".equals(source.result().get("change_scope_status"))
+                || !"CHANGE_SCOPE_VIOLATION".equals(source.result().get("change_scope_disposition"))
+                || !ref.equals(source.result().get("change_scope_evaluation_ref"))) {
+            throw new IOException("change-scope evaluation producer lineage is invalid");
+        }
+        var verified = verify(root, workstreamId, sourceId, ref,
+                String.valueOf(source.result().get("change_scope_evaluation_sha256")));
+        if (verified.document().evaluation().status() != ChangeScopeEvaluation.Status.FAIL) {
+            throw new IOException("change-scope occurrence is not a failed evaluation");
+        }
+        return verified;
+    }
+
     static boolean isCanonicalRefForWorkstream(String ref, String workstreamId) {
         var matcher = REF.matcher(ref == null ? "" : ref);
         return matcher.matches() && workstreamId.equals(matcher.group(1));

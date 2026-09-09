@@ -26,6 +26,90 @@ class AcceptanceRepairSequenceTest {
     @TempDir Path root;
 
     @Test
+    void scopeRequestPreservesOldAuthorityUntilBothApprovalsThenPassesGitAgain() throws Exception {
+        var f = new Fixture(root, "SCOPE_ADDITION", "tool.py");
+        f.until("gate.human_implementation_repair");
+        var old = TaskContractProjectionVerifier.resolve(root, f.ws).qualified().orElseThrow();
+        var gate = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
+        assertTrue(Files.exists(root.resolve("helper.py")));
+        assertFalse(old.contract().scope().included().stream().anyMatch(e -> e.path().equals("helper.py")));
+        f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "request_scope_revision",
+                "Review retaining helper.py for the existing behavior; do not change other requirements");
+        f.until("gate.human_requirement_review");
+        assertEquals(old.sha256(), TaskContractProjectionVerifier.resolve(root, f.ws).qualified().orElseThrow().sha256());
+        assertEquals(1, Collections.frequency(f.calls, "implement.claude_implement"));
+        f.approve(); f.until("gate.contract_review");
+        assertTrue(TaskContractProjectionVerifier.resolve(root, f.ws).qualified().isEmpty());
+        f.approve();
+        var fresh = TaskContractProjectionVerifier.resolve(root, f.ws).qualified().orElseThrow();
+        assertTrue(fresh.contract().scope().included().contains(new dev.dual.core.contract.TaskContract.ScopeEntry(
+                "helper.py", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE)));
+        assertEquals(old.contract().acceptanceCriteria(), fresh.contract().acceptanceCriteria());
+        f.until("gate.human_acceptance");
+        assertEquals(2, Collections.frequency(f.calls, "implement.claude_implement"));
+        assertEquals(2, Collections.frequency(f.calls, "design.claude_design"));
+        var gateReloaded = f.ledger.loadNode(f.paths, gate.nodeInstanceId());
+        assertEquals("request_scope_revision", gateReloaded.result().get("human_action"));
+        var acceptanceGate = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
+        assertTrue(acceptanceGate.inputRefs().stream().anyMatch(ref -> ref.contains("/delivery/candidates/")));
+    }
+
+    @Test
+    void humanCanStillRequireRepairBackToTheOriginalScope() throws Exception {
+        var f = new Fixture(root, "SCOPE_ADDITION", "tool.py");
+        f.until("gate.human_implementation_repair");
+        var original = TaskContractProjectionVerifier.resolve(root, f.ws).qualified().orElseThrow();
+        f.removeScopeAddition = true;
+        f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "revise", "Remove the unapproved helper");
+        f.until("gate.human_acceptance");
+        assertFalse(Files.exists(root.resolve("helper.py")));
+        assertEquals(original.sha256(), TaskContractProjectionVerifier.resolve(root, f.ws).qualified().orElseThrow().sha256());
+        assertEquals(1, Collections.frequency(f.calls, "intake.claude_brainstorm"));
+        assertEquals(2, Collections.frequency(f.calls, "implement.claude_implement"));
+    }
+
+    @Test
+    void scopeRequestRejectsTamperedEvidenceBeforeAnyLedgerWrite() throws Exception {
+        var f = new Fixture(root, "SCOPE_ADDITION", "tool.py");
+        f.until("gate.human_implementation_repair");
+        var gate = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
+        var ref = gate.inputRefs().stream().filter(r -> r.contains("/occurrences/")
+                && r.contains("change-scope-evaluation-")).findFirst().orElseThrow();
+        Files.writeString(root.resolve(ref), "{}\n");
+        var before = snapshot(f.paths.workstreamDir());
+        assertThrows(java.io.IOException.class, () -> f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths),
+                "request_scope_revision", "Review the candidate"));
+        assertEquals(before, snapshot(f.paths.workstreamDir()));
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, new WorkflowFileLedger().loadCurrent(f.paths).status());
+    }
+
+    @Test
+    void scopePatchCannotSmuggleAThirdPathOrChangeApprovedClauses() throws Exception {
+        for (var mutation : List.of("path", "clause")) {
+            var f = new Fixture(root.resolve(mutation), "SCOPE_ADDITION", "tool.py");
+            f.until("gate.human_implementation_repair");
+            var before = TaskContractProjectionVerifier.resolve(f.root, f.ws).qualified().orElseThrow();
+            f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "request_scope_revision", "Review the helper");
+            f.until("intake.claude_brainstorm");
+            if (mutation.equals("path")) f.scopeRequestedPath = "third.py";
+            else f.replaceAcceptanceClause = true;
+            f.runtime.resume(new WorkflowCommand(f.root, f.ws));
+            assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
+            assertEquals(before.sha256(), TaskContractProjectionVerifier.resolve(f.root, f.ws).qualified().orElseThrow().sha256());
+            assertEquals(1, Collections.frequency(f.calls, "implement.claude_implement"));
+        }
+    }
+
+    private static Map<String, String> snapshot(Path dir) throws Exception {
+        var snapshot = new TreeMap<String, String>();
+        try (var paths = Files.walk(dir)) {
+            for (var file : paths.filter(Files::isRegularFile).toList())
+                snapshot.put(dir.relativize(file).toString(), Base64.getEncoder().encodeToString(Files.readAllBytes(file)));
+        }
+        return snapshot;
+    }
+
+    @Test
     void contractReworkMustProduceTwoNewApprovalsBeforeFreshAuthoredExecution() throws Exception {
         var f = new Fixture(root, "CONTRACT_GAP", "site/home.html");
         f.until("acceptance.classify_failure");
@@ -107,6 +191,8 @@ class AcceptanceRepairSequenceTest {
         int run;
         int acceptanceCount;
         boolean replaceAcceptanceClause;
+        String scopeRequestedPath = "helper.py";
+        boolean removeScopeAddition;
         final Map<String, String> consumedContracts = new java.util.LinkedHashMap<>();
 
         Fixture(Path root, String category, String business) throws Exception {
@@ -118,19 +204,35 @@ class AcceptanceRepairSequenceTest {
             git("add", "."); git("commit", "-m", "baseline");
             paths = new WorkstreamPaths(this.root, new DualId(ws));
             var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "contract");
+            if (category.equals("SCOPE_ADDITION") && definition.edgesFrom("gate.human_implementation_repair").stream()
+                    .noneMatch(edge -> edge.on().equals("request_scope_revision"))) {
+                var nodes = definition.nodes().stream().map(node -> {
+                    if (!node.id().equals("gate.human_implementation_repair")) return node;
+                    var config = new LinkedHashMap<>(node.config());
+                    config.put("allowed_actions", List.of("revise", "request_scope_revision"));
+                    return new NodeDefinition(node.id(), node.kind(), node.handlerType(), config);
+                }).toList();
+                var edges = new ArrayList<>(definition.edges());
+                edges.add(new EdgeDefinition("gate.human_implementation_repair", "request_scope_revision",
+                        "context.intake_claude_brainstorm", EdgeCondition.unconditional(), TransitionMetadata.loop("scope review")));
+                definition = new WorkflowDefinition(definition.workflowId(), definition.version(), definition.entryNodeId(), nodes, edges);
+            }
             ledger.initialize(paths, definition.workflowId(), definition);
             Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Build a bounded generic utility.");
-            JSON.writeValue(paths.workstreamDir().resolve("workstream.json").toFile(), Map.of("primaryWorkspaceId", "workspace-1"));
+            JSON.writeValue(paths.workstreamDir().resolve("workstream.json").toFile(), Map.of(
+                    "primaryWorkspaceId", "workspace-1", "workstreamId", ws, "title", "Generic utility"));
             Files.createDirectories(paths.workstreamDir().resolve("workspaces"));
             JSON.writeValue(paths.workstreamDir().resolve("workspaces/workspace-1.json").toFile(), Map.of(
-                    "baseCommit", git("rev-parse", "HEAD").trim(), "workdir", this.root.toString()));
+                    "baseCommit", git("rev-parse", "HEAD").trim(), "effectiveWorkdir", this.root.toString(),
+                    "workspaceId", "workspace-1", "workstreamId", ws));
             var provider = new TaskHandler() {
                 public String type() { return "acpx.agent_run"; }
                 public NodeResult execute(TaskContext context) throws Exception { return output(context); }
             };
             runtime = new WorkflowRuntime(ledger, new HandlerRegistry(
                     List.of(provider, new ContextBuildPackageHandler(), new ContractCompileHandler(),
-                            new ArtifactValidateHandler(), new FailureClassifyHandler()),
+                            new ArtifactValidateHandler(), new FailureClassifyHandler(),
+                            new ReportGenerateFinalHandler(), new DeliveryPrepareHandler()),
                     List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler())));
         }
 
@@ -146,7 +248,7 @@ class AcceptanceRepairSequenceTest {
                 case "plan.codex_plan_review" -> "READY_TO_IMPLEMENT";
                 case "implement.claude_implement" -> "IMPLEMENTED";
                 case "implement.claude_self_test_report" -> "SELF_TEST_COMPLETE";
-                case "acceptance.codex_verifier_review" -> ++acceptanceCount == 1 ? "REJECT" : "ACCEPT";
+                case "acceptance.codex_verifier_review" -> ++acceptanceCount == 1 && !category.equals("SCOPE_ADDITION") ? "REJECT" : "ACCEPT";
                 default -> "READY_FOR_ARCH_REVIEW";
             };
             var emission = AgentResultPromptContract.ProposalEmissionContext.initial();
@@ -173,6 +275,10 @@ class AcceptanceRepairSequenceTest {
                         var patch = patches.addObject().put("review_obligation_id", obligation.id());
                         patch.putArray("resolved_by_clause_ids").add("AC-1");
                         patch.putArray("clause_changes"); patch.putArray("scope_additions"); patch.putArray("evidence_ref_additions");
+                        if (revision.scopeRevision() && patches.size() == 1) {
+                            ((com.fasterxml.jackson.databind.node.ArrayNode) patch.get("scope_additions"))
+                                    .addObject().put("path", scopeRequestedPath);
+                        }
                         if (replaceAcceptanceClause && patches.size() == 1) {
                             ((com.fasterxml.jackson.databind.node.ArrayNode) patch.get("clause_changes")).addObject()
                                     .put("operation", "REPLACE").put("section", "ACCEPTANCE_CRITERIA")
@@ -187,6 +293,10 @@ class AcceptanceRepairSequenceTest {
                 implementContexts.add(context);
                 Files.createDirectories(root.resolve(business).getParent());
                 Files.writeString(root.resolve(business), "output\n");
+                if (category.equals("SCOPE_ADDITION")) {
+                    if (removeScopeAddition) Files.deleteIfExists(root.resolve("helper.py"));
+                    else Files.writeString(root.resolve("helper.py"), "helper\n");
+                }
             }
             if (id.equals("acceptance.codex_verifier_review") && decision.equals("REJECT")) {
                 result.put("lifecycle_status", "REJECTED").put("blocking", true);

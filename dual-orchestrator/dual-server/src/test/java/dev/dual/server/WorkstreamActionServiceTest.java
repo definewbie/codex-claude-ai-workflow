@@ -33,6 +33,21 @@ class WorkstreamActionServiceTest {
     Path tempDir;
 
     @Test
+    void scopeRevisionApiCannotBypassTheLedgerGateGuard() throws Exception {
+        var paths = createWorkstream("ws-scope-request", gateDefinition());
+        var ledger = new WorkflowFileLedger();
+        var definition = ledger.loadDefinition(paths);
+        ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
+                NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var before = ledger.loadCurrent(paths);
+        var service = new WorkstreamActionService(ledger, () -> command -> {
+            throw new AssertionError("unauthorized request must not resume a provider");
+        });
+        assertThrows(Exception.class, () -> service.requestScopeRevision(tempDir, "ws-scope-request", "retain files", true, 5));
+        assertEquals(before, ledger.loadCurrent(paths));
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void resumeRunsUntilPausedBoundary() throws Exception {
         createWorkstream("ws-run", simpleDefinition());

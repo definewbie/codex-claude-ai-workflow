@@ -70,6 +70,7 @@ const els = {
   retry: $("retry"),
   closeMistakenIteration: $("closeMistakenIteration"),
   revise: $("revise"),
+  requestScopeRevision: $("requestScopeRevision"),
   tick: $("tick"),
 };
 
@@ -233,6 +234,7 @@ async function loadSelected() {
   }
   await loadStatus();
   await Promise.all([loadOverview(), loadTimeline(), loadReviewPacket(), loadRecoverySummary()]);
+  if (state.status) updateActions(state.status);
   connectProgressStream();
 }
 
@@ -1120,15 +1122,18 @@ function updateActions(data) {
   const nextStageGate = activeDefinition.includes("next_stage");
   const staleRunning = hasRuntimeRecoveryAttention(data);
   const recoveryActionVisible = ["FAILED", "BLOCKED", "WAITING_FOR_RECOVERY"].includes(status);
+  const packet = state.currentReview?.packet;
+  const gateActions = packet?.gateNodeInstanceId === activeNode.nodeInstanceId ? (packet.allowedActions || []) : [];
 
   setActionVisibility({
     resume: status === "RUNNING" && !staleRunning,
-    approve: status === "WAITING_FOR_HUMAN" && !nextStageGate,
-    complete: status === "WAITING_FOR_HUMAN" && nextStageGate,
+    approve: status === "WAITING_FOR_HUMAN" && gateActions.includes("approve"),
+    complete: status === "WAITING_FOR_HUMAN" && gateActions.includes("complete"),
     recoverStaleRunning: status === "RUNNING" && staleRunning,
     retry: recoveryActionVisible,
     closeMistakenIteration: canCloseMistakenIteration(),
-    revise: status === "WAITING_FOR_HUMAN",
+    revise: status === "WAITING_FOR_HUMAN" && gateActions.includes("revise"),
+    requestScopeRevision: status === "WAITING_FOR_HUMAN" && gateActions.includes("request_scope_revision"),
     tick: status === "RUNNING" || !state.selectedId,
   });
   applyDecisionLabels(status, nextStageGate);
@@ -1222,6 +1227,7 @@ function setActionVisibility(visible) {
   els.recoveryActions.classList.toggle("hidden",
     !visible.recoverStaleRunning && !visible.retry && !visible.closeMistakenIteration);
   els.revise.classList.toggle("hidden", !visible.revise);
+  els.requestScopeRevision.classList.toggle("hidden", !visible.requestScopeRevision);
   els.tick.disabled = !visible.tick;
 }
 
@@ -1328,6 +1334,12 @@ $("closeMistakenIteration").addEventListener("click", () => postAction(
 $("revise").addEventListener("click", () => {
   const feedback = els.feedback.value.trim();
   postAction(`${selectedBase()}/review/revise?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`, { feedback });
+});
+
+$("requestScopeRevision").addEventListener("click", () => {
+  const feedback = els.feedback.value.trim();
+  if (!feedback) { setResponse({ error: "请填写保留新增文件的理由；此操作仅申请合同修订。" }); return; }
+  postAction(`${selectedBase()}/review/request-scope-revision?workdir=${workdirParam()}&run=true&maxSteps=${maxSteps()}`, { feedback });
 });
 
 refreshList();

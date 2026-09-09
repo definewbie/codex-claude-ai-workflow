@@ -166,7 +166,7 @@ public final class ContractCompileHandler implements TaskHandler {
                         List.of(sourcePath.get().toString())));
             }
             var errors = proposalValidator.validate(proposal, context.workspaceRoot().toAbsolutePath().normalize(),
-                    revisionContext.approvedScopeBaseline(), revisionContext.originalBaseCommit());
+                    revisionContext.approvedScopeBaseline(), revisionContext.originalBaseCommit(), revisionContext.scopeReviewCandidates());
             if (!errors.isEmpty()) {
                 return new ProposalCompileResult(null, proposal, proposalFailure(
                         "TASK_CONTRACT_PROPOSAL_INVALID",
@@ -311,7 +311,7 @@ public final class ContractCompileHandler implements TaskHandler {
                             resolved.context().revision(),
                             resolved.context().previousProposal(),
                             resolved.context().obligations(), resolved.context().approvedScopeBaseline(),
-                            resolved.context().originalBaseCommit()), null);
+                            resolved.context().originalBaseCommit(), resolved.context().scopeReviewCandidates()), null);
         } catch (Exception failure) {
             return revisionContextFailure("revision iteration lineage could not be resolved",
                     List.of(failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage()));
@@ -581,7 +581,8 @@ public final class ContractCompileHandler implements TaskHandler {
             TaskContractProposal previousProposal,
             List<AgentResultEnvelope.ReviewObligation> obligations,
             TaskContractProposal approvedScopeBaseline,
-            String originalBaseCommit
+            String originalBaseCommit,
+            List<dev.dual.core.contract.TaskContract.ScopeEntry> scopeReviewCandidates
     ) {}
 
     private record RevisionContextResult(RevisionContext context, NodeResult failed) {}

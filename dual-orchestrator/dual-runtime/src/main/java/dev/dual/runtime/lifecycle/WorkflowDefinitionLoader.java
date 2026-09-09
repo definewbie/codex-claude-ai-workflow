@@ -3,6 +3,7 @@ package dev.dual.runtime.lifecycle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.dual.core.workflow.EdgeDefinition;
+import dev.dual.core.workflow.HumanGateActionSemantics;
 import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeKind;
 import dev.dual.core.workflow.WorkflowDefinition;
@@ -233,14 +234,19 @@ public final class WorkflowDefinitionLoader {
     private static Set<EdgeDefinition> validateContractRepairEdges(WorkflowDefinition definition) {
         var repairs = new HashSet<EdgeDefinition>();
         for (var edge : definition.edges()) {
-            if (!Set.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY").contains(edge.on())) {
+            if (!Set.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY", "request_scope_revision").contains(edge.on())) {
                 continue;
             }
             var source = definition.node(edge.from());
             var context = definition.node(edge.to());
-            if (!"acceptance.classify_failure".equals(source.id())
-                    || source.kind() != NodeKind.TASK
-                    || !"acceptance.failure_classify".equals(source.handlerType())
+            var sourceValid = edge.on().equals("request_scope_revision")
+                    ? source.id().equals("gate.human_implementation_repair") && source.kind() == NodeKind.GATE
+                        && source.handlerType().equals("human.review")
+                        && "implementation_repair".equals(source.config().get("gate_purpose"))
+                        && HumanGateActionSemantics.allowedActions(source).contains("request_scope_revision")
+                    : source.id().equals("acceptance.classify_failure") && source.kind() == NodeKind.TASK
+                        && source.handlerType().equals("acceptance.failure_classify");
+            if (!sourceValid
                     || !Boolean.TRUE.equals(source.config().get("requires_approved_task_contract"))
                     || !"context.intake_claude_brainstorm".equals(context.id())
                     || context.kind() != NodeKind.TASK

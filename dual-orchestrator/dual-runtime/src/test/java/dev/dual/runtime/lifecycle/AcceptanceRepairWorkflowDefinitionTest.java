@@ -24,6 +24,13 @@ class AcceptanceRepairWorkflowDefinitionTest {
         for (var variant : RESOURCES) {
             var definition = loadResource(root, variant);
             assertEquals(3, definition.node("acceptance.classify_failure").config().get("max_revisions"));
+            var scope = definition.edgesFrom("gate.human_implementation_repair").stream()
+                    .filter(edge -> edge.on().equals("request_scope_revision")).toList();
+            assertEquals(1, scope.size());
+            assertEquals("context.intake_claude_brainstorm", scope.getFirst().to());
+            assertEquals("loop", scope.getFirst().metadata().transitionType());
+            assertEquals(List.of("revise", "request_scope_revision"), definition.node("gate.human_implementation_repair")
+                    .config().get("allowed_actions"));
             for (var outcome : List.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY")) {
                 var edges = definition.edgesFrom("acceptance.classify_failure").stream()
                         .filter(edge -> outcome.equals(edge.on())).toList();
@@ -38,6 +45,18 @@ class AcceptanceRepairWorkflowDefinitionTest {
             assertFalse(Boolean.TRUE.equals(definition.node("context.intake_claude_brainstorm")
                     .config().get("requires_approved_task_contract")));
         }
+    }
+
+    @Test
+    void scopeRequestCannotUseAnotherSourceOrSkipProposalReview() throws Exception {
+        for (var target : List.of("intake.claude_brainstorm", "contract.compile", "context.implement_claude")) {
+            var json = resource("full");
+            edge(json, "gate.human_implementation_repair", "request_scope_revision").put("to", target);
+            assertThrows(IOException.class, () -> load(json));
+        }
+        var json = resource("full");
+        edge(json, "gate.human_implementation_repair", "request_scope_revision").put("from", "gate.human_plan_approval");
+        assertThrows(IOException.class, () -> load(json));
     }
 
     @Test

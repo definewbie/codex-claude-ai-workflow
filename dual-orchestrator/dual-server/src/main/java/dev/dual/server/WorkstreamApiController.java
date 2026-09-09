@@ -229,6 +229,18 @@ public class WorkstreamApiController {
         return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), run, maxSteps);
     }
 
+    @PostMapping("/{workstreamId}/review/request-scope-revision")
+    public Map<String, Object> requestScopeRevision(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestParam(defaultValue = "false") boolean run,
+            @RequestParam(defaultValue = "20") int maxSteps,
+            @RequestBody(required = false) ReviewReviseRequest request
+    ) throws Exception {
+        return actionService.requestScopeRevision(workdirPath(workdir), workstreamId,
+                request == null ? "" : request.feedback(), run, maxSteps);
+    }
+
     private static Path workdirPath(String workdir) {
         if (workdir == null || workdir.isBlank()) {
             return Path.of(System.getProperty("user.dir"));

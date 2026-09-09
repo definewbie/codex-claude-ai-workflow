@@ -221,7 +221,7 @@ public final class ArtifactContractValidator {
 
         var proposalValidator = new TaskContractProposalValidator();
         var errors = proposalValidator.validate(proposal, root,
-                context.approvedScopeBaseline(), context.originalBaseCommit());
+                context.approvedScopeBaseline(), context.originalBaseCommit(), context.scopeReviewCandidates());
         if (!errors.isEmpty()) {
             return ProposalResolution.failure(ContractViolation.of(
                     "TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED",

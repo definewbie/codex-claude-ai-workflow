@@ -62,7 +62,7 @@ class SmallWorkflowProfileDefinitionTest {
         assertEquals(expectedEdges, experiment.edges());
         assertTrue(directEdgeAdded);
         assertEquals(28, experiment.nodes().size());
-        assertEquals(47, experiment.edges().size());
+        assertEquals(48, experiment.edges().size());
         assertEquals(8, experiment.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -95,12 +95,12 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        // Baseline includes approved F2 proposal re-entry and F5 classifier revision limits.
-        assertEquals("c3c6cd4fdcce18a91b566ba71dabd6045ad5016c5331772ab3419f3b344c888f",
+        // Baseline includes bounded human scope revision on all lifecycle variants.
+        assertEquals("4364f663cd80e1a4ba4eafe3dcf8f6d1bfecdd00ac11dddcd3c7122d6bcb24cb",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("8f92a4769c4e5330d77421f3836de2026cd460419ff59a979e8e5cb23a345efe",
+        assertEquals("f97a7f48015f367d10dea7976f772d1a70563a28c209bc3927267f674b838b3b",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("6be8efbfae86ec52de348f1512b25bf2c342b4172dd54ba6feee65172fa78850",
+        assertEquals("e17efde4c54bf5dd6753b55a083a3768c9d166e6da9cc94f741a9c27099fc542",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 

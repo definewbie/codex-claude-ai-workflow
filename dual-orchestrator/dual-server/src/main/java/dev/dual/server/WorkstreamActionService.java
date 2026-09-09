@@ -196,6 +196,19 @@ public class WorkstreamActionService {
         return actionResponse("review.revise", workstreamId, "human gate revision requested");
     }
 
+    public Map<String, Object> requestScopeRevision(Path workspaceRoot, String workstreamId, String note,
+                                                    boolean runImmediately, int maxSteps) throws Exception {
+        var root = normalize(workspaceRoot);
+        resolveGate(root, workstreamId, "request_scope_revision", note);
+        if (runImmediately) {
+            var response = resume(root, workstreamId, maxSteps);
+            response.put("action", "review.request_scope_revision.run");
+            return response;
+        }
+        return actionResponse("review.request_scope_revision", workstreamId,
+                "scope revision requested; the existing contract remains authoritative until approval");
+    }
+
     private void resolveGate(Path root, String workstreamId, String action, String note) throws Exception {
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api review " + action))) {

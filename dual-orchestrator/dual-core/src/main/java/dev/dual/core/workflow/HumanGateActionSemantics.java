@@ -4,6 +4,7 @@ import java.util.List;
 
 /** Shared definition and runtime semantics for human gate actions. */
 public final class HumanGateActionSemantics {
+    public static final String REQUEST_SCOPE_REVISION = "request_scope_revision";
     private static final List<String> DEFAULT_ACTIONS = List.of("approve", "revise");
 
     private HumanGateActionSemantics() {
@@ -27,6 +28,18 @@ public final class HumanGateActionSemantics {
         var hasApproveEdge = outgoingEdges.stream().anyMatch(edge -> "approve".equals(edge.on()));
         var hasApprovedEdge = outgoingEdges.stream().anyMatch(edge -> "approved".equals(edge.on()));
         return !hasApproveEdge && hasApprovedEdge ? "approved" : requestedAction;
+    }
+
+    /** Definition declares possible actions; the source occurrence narrows their applicability. */
+    public static List<String> allowedActions(NodeDefinition definition, String sourceOutcome) {
+        var scopeRepair = definition.kind() == NodeKind.GATE
+                && "human.review".equals(definition.handlerType())
+                && "gate.human_implementation_repair".equals(definition.id())
+                && "implementation_repair".equals(definition.config().get("gate_purpose"))
+                && "CHANGE_SCOPE_VIOLATION".equals(sourceOutcome);
+        return allowedActions(definition).stream()
+                .filter(action -> !REQUEST_SCOPE_REVISION.equals(action) || scopeRepair)
+                .toList();
     }
 
     static void validateVisibility(List<NodeDefinition> nodes, List<EdgeDefinition> edges) {

@@ -314,7 +314,8 @@
       "config": {
         "requires_approved_task_contract": true,
         "allowed_actions": [
-          "revise"
+          "revise",
+          "request_scope_revision"
         ],
         "max_revisions": 1,
         "gate_purpose": "implementation_repair"
@@ -925,6 +926,20 @@
         "purpose": "Apply the operator's explicit repair decision.",
         "joinStrategy": "",
         "loopReason": "Human authorized implementation repair"
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "request_scope_revision",
+      "to": "context.intake_claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Request review of bound new-file candidates, not scope approval.",
+        "joinStrategy": "",
+        "loopReason": "Human requested scope revision"
       }
     },
     {

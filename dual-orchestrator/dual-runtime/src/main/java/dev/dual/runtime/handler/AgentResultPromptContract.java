@@ -97,7 +97,7 @@ public final class AgentResultPromptContract {
                         + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
                         + json(context.obligations())
                         + (context.acceptanceEvidence().isEmpty() ? "" :
-                            ". Original verified acceptance evidence (retain non-contract defects as evidence; "
+                            ". Original verified rework evidence (retain non-contract defects as evidence; "
                             + "do not reinterpret them as contract obligations or approval): "
                             + context.acceptanceEvidence())
                         + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
@@ -403,7 +403,13 @@ public final class AgentResultPromptContract {
                 context.previousReference().proposalId(),
                 context.previousReference().sha256(),
                 List.copyOf(context.obligations()),
-                context.lateRoot() == null ? "" : json(context.lateRoot()));
+                context.lateRoot() == null ? "" : json(context.lateRoot())
+                        + (context.scopeRevision() ? "\nSCOPE REVIEW ONLY: add only a subset of these bound CREATE candidates: "
+                            + json(context.scopeReviewCandidates())
+                            + ". Do not change clauses, evidence refs, objective, exclusions or any existing scope entry. "
+                            + "These files already exist but remain CREATE relative to the original Git base. "
+                            + "Respond to obligations using existing clause ids; keep clause_changes and evidence_ref_additions empty."
+                            : ""));
     }
 
     public enum EmissionMode {

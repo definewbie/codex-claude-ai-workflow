@@ -11,6 +11,71 @@ import java.util.List;
 
 /** Resolves Agent-declared path intent into deterministic durable scope operations. */
 final class TaskContractScopeResolver {
+    Resolution resolveReviewedAdditions(List<AgentResultEnvelope.ProposalScopePath> additions,
+                                        List<TaskContract.ScopeEntry> candidates) {
+        var entries = new ArrayList<TaskContract.ScopeEntry>();
+        var errors = new ArrayList<String>();
+        for (var addition : additions) {
+            var entry = addition == null ? null : new TaskContract.ScopeEntry(addition.path(), TaskContract.ScopeOperation.CREATE);
+            if (entry == null || !candidates.contains(entry) || entries.contains(entry)) {
+                errors.add("scope review addition is missing, duplicate or outside bound candidates");
+            } else entries.add(entry);
+        }
+        return new Resolution(List.copyOf(entries), List.copyOf(errors));
+    }
+
+    /** Review candidates are not scope authorization; callers must still complete contract approval. */
+    List<TaskContract.ScopeEntry> reviewedCreateCandidates(
+            Path workspaceRoot, String originalBaseCommit,
+            ChangeScopeEvaluationArtifact.Verified occurrence
+    ) throws java.io.IOException {
+        if (occurrence == null) {
+            throw new java.io.IOException("scope review requires an occurrence evaluation");
+        }
+        // Re-read the bound bytes: an earlier verification is not authority after deletion or tampering.
+        var document = occurrence.document();
+        var verified = ChangeScopeEvaluationArtifact.verify(workspaceRoot, document.workstreamId(),
+                document.sourceNodeInstanceId(), occurrence.ref(), occurrence.sha256());
+        var evaluation = verified.document().evaluation();
+        if (evaluation.schemaVersion() != 1 || evaluation.status() != ChangeScopeEvaluation.Status.FAIL
+                || evaluation.error() != null || evaluation.violations().isEmpty()) {
+            throw new java.io.IOException("scope review requires a failed path evaluation");
+        }
+        var root = workspaceRoot.toRealPath();
+        var original = originalPaths(root, originalBaseCommit);
+        var candidates = new ArrayList<TaskContract.ScopeEntry>();
+        var seen = new HashSet<String>();
+        for (var violation : evaluation.violations()) {
+            var relative = violation.path();
+            if (!"UNEXPECTED_ACTUAL_CHANGE".equals(violation.code())
+                    || violation.actualOperation() != ChangeScopeEvaluation.ActualOperation.CREATE
+                    || violation.declaredOperation() != null || violation.previousPath() != null
+                    || !TaskContractValidator.isCanonicalPath(relative)
+                    || original.contains(relative) || !seen.add(relative)) {
+                throw new java.io.IOException("scope review only accepts ordinary new file violations: " + relative);
+            }
+            var actual = evaluation.actualChanges().stream()
+                    .filter(change -> relative.equals(change.path())).toList();
+            if (actual.size() != 1 || actual.getFirst().operation() != ChangeScopeEvaluation.ActualOperation.CREATE
+                    || actual.getFirst().previousPath() != null) {
+                throw new java.io.IOException("scope review violation does not match actual change: " + relative);
+            }
+            var path = root;
+            for (var segment : Path.of(relative)) {
+                path = path.resolve(segment);
+                if (Files.isSymbolicLink(path)) {
+                    throw new java.io.IOException("scope review cannot adopt a symbolic link: " + relative);
+                }
+            }
+            if (!Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                    || !path.toRealPath().startsWith(root)) {
+                throw new java.io.IOException("scope review candidate is not an existing workspace file: " + relative);
+            }
+            candidates.add(new TaskContract.ScopeEntry(relative, TaskContract.ScopeOperation.CREATE));
+        }
+        return List.copyOf(candidates);
+    }
+
     Resolution resolve(List<AgentResultEnvelope.ProposalScopePath> declaredPaths, Path workspaceRoot) {
         return resolve(declaredPaths, workspaceRoot, null);
     }
