@@ -1,5 +1,13 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## 下一轮 fresh E2E（2026-09-09）
+
+用户授权进入下一步，profile/sandbox 修复已收口 e21c95d。新 Gate 为
+`../testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md`。
+目标回到完整产品交付；不把未触发 Bash 拒绝当作新缺陷或阻塞，也不冒称已证明。
+保留只读成功 Bash 立即停止的 sentinel，前置通过才创建唯一 fresh 样本，6KVE 不恢复。
+不开额外 agent，不新增 model/权限机制；逐门依用户既有授权审阅，不使用 autorun。
+
 ## Profile / sandbox 最小修复（2026-09-09）
 
 用户授权的单次真实验证已完成：Read nonce成功，实际session/new携带false+Bash deny，
