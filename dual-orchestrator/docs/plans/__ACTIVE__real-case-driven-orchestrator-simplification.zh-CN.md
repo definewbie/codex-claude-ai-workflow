@@ -1,5 +1,18 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## Profile / sandbox 最小修复（2026-09-09）
+
+用户授权的单次真实验证已完成：Read nonce成功，实际session/new携带false+Bash deny，
+单prompt/exit0/session已关闭；Bash调用为0。模型称不可用不是独立工具清单证据，
+故拒绝路径NOT EXERCISED，Gate为INVALID_DENIAL_NOT_EXERCISED，不升级runtime拒绝成熟度。
+未启动第二样本，未恢复6KVE。见 `../testing/verification-gates/20260909-readonly-bash-denial.md`。
+
+用户要求不新增 model 层。已按既有 profile 的 execute + Bash 权限派生 sandbox auto-allow，
+非执行 profile 同时投影 managed Bash deny；implement 正常执行及现有网络/文件隔离不变。
+未改 workflow/ledger/产品，也未启动额外 agent 或 provider。6KVE 保持止损，不恢复。
+范围、session/correction 继承边界、测试与成熟度见 `20260909-profile-sandbox-bash-alignment.md`。
+不能把 SDK option 装配测试当作 pinned runtime 拒绝效果或完整 E2E 证明。
+
 ## 6KVE E2E 已启动并止损（2026-09-09）
 
 用户授权的剩余前置已完成，唯一fresh ws-20260908T170320Z-6KVE已真实运行。

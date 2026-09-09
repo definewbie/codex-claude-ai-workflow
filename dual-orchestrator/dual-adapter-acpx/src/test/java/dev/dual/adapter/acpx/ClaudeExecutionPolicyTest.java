@@ -42,7 +42,7 @@ class ClaudeExecutionPolicyTest {
         assertEquals(true, sandbox.get("enabled"));
         assertEquals(true, sandbox.get("fail_if_unavailable"));
         assertEquals(false, sandbox.get("allow_unsandboxed_commands"));
-        assertEquals(true, sandbox.get("auto_allow_sandboxed_bash"));
+        assertEquals(false, sandbox.get("auto_allow_sandboxed_bash"));
         var network = map(sandbox.get("network"));
         assertEquals(true, network.get("strict_allowlist"));
         assertEquals(List.of(), network.get("allowed_domains"));
@@ -56,6 +56,24 @@ class ClaudeExecutionPolicyTest {
         assertTrue(serialized.contains("ANTHROPIC_AUTH_TOKEN"));
         assertFalse(serialized.contains("HTTP_PROXY"));
         assertFalse(serialized.contains("\"subprocess_denied_env_names\""));
+    }
+
+    @Test
+    void sandboxBashApprovalFollowsExecuteCapabilityNotTerminalOrWebSearch() throws Exception {
+        var profiles = List.of(AcpxPermissionProfile.contractDiscovery(), AcpxPermissionProfile.observe(),
+                AcpxPermissionProfile.review(), AcpxPermissionProfile.contractCorrection(),
+                AcpxPermissionProfile.review().withAutoApprovedTool("WebSearch"),
+                AcpxPermissionProfile.implement());
+        for (int i = 0; i < profiles.size(); i++) {
+            var profile = profiles.get(i);
+            var run = "run-profile-" + i;
+            var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/" + run));
+            var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", run, runDir, profile);
+            binding.verify(tempDir);
+            var document = MAPPER.readTree(tempDir.resolve(binding.ref()).toFile());
+            assertEquals(profile.autoApproveKinds().contains("execute") && !profile.denyAll(),
+                    document.path("sandbox").path("auto_allow_sandboxed_bash").booleanValue(), profile.name());
+        }
     }
 
     @Test

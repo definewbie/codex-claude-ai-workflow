@@ -9,7 +9,7 @@ import java.util.Map;
 public final class ReviewedAcpxBuildIdentity {
     public static final String VERSION = "0.13.2";
     public static final String UPSTREAM_COMMIT = "fd173f04aa1b56f9e3f5ca5190c034ddcae28792";
-    public static final String PATCH_SHA256 = "2313fe2d53e573dc0227a453fd1c4cbe6107373472a2027bb7ed3e2952038b63";
+    public static final String PATCH_SHA256 = "4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e";
     public static final String POLICY_SCHEMA = "claude_execution_policy.v2";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();

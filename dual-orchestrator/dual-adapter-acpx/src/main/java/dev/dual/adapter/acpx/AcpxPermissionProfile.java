@@ -142,6 +142,11 @@ record AcpxPermissionProfile(
         return "implement".equals(name);
     }
 
+    boolean autoAllowsSandboxedBash() {
+        return !denyAll && !approveAll && autoApproveKinds.contains("execute")
+                && autoApprovedTools.contains("Bash");
+    }
+
     AcpxPermissionProfile withAutoApprovedTool(String tool) {
         if (tool == null || tool.isBlank() || autoApprovedTools.contains(tool)) {
             return this;

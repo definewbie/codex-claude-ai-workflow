@@ -92,10 +92,10 @@ index 35d20301573ca8255d5426e4bae1398afce2e414..63c4b54b62f8b923273c1a6e287268a7
  }
 diff --git a/src/acp/claude-execution-policy.ts b/src/acp/claude-execution-policy.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..1d91458626768f7640bf05c7a5afb76aacfcbc98
+index 0000000000000000000000000000000000000000..8ee3e4bd853207f13f3f5812bb8aaa6f123fbf1d
 --- /dev/null
 +++ b/src/acp/claude-execution-policy.ts
-@@ -0,0 +1,383 @@
+@@ -0,0 +1,387 @@
 +import { createHash } from "node:crypto";
 +import fs from "node:fs";
 +import path from "node:path";
@@ -187,8 +187,12 @@ index 0000000000000000000000000000000000000000..1d91458626768f7640bf05c7a5afb76a
 +    managedSettings: {
 +      sandbox: managedSandboxOptions(sdkSandbox),
 +      permissions: {
-+        deny: (requireObject(sdkSandbox.filesystem, "filesystem").denyWrite as string[])
-+          .flatMap((entry) => [`Edit(/${entry})`, `Edit(/${entry}/**)`]),
++        deny: [
++          // Disabling auto-allow alone still permits Claude Code's read-only shell shortcuts.
++          ...(sdkSandbox.autoAllowBashIfSandboxed ? [] : ["Bash"]),
++          ...(requireObject(sdkSandbox.filesystem, "filesystem").denyWrite as string[])
++            .flatMap((entry) => [`Edit(/${entry})`, `Edit(/${entry}/**)`]),
++        ],
 +      },
 +    },
 +  };
@@ -200,7 +204,7 @@ index 0000000000000000000000000000000000000000..1d91458626768f7640bf05c7a5afb76a
 +  assertBoolean(sandbox, "enabled", true);
 +  assertBoolean(sandbox, "fail_if_unavailable", true);
 +  assertBoolean(sandbox, "allow_unsandboxed_commands", false);
-+  assertBoolean(sandbox, "auto_allow_sandboxed_bash", true);
++  const autoAllowBashIfSandboxed = requireBoolean(sandbox, "auto_allow_sandboxed_bash");
 +
 +  const network = validatedNetworkOptions(sandbox.network);
 +  const filesystem = validatedFilesystemOptions(sandbox.filesystem);
@@ -208,7 +212,7 @@ index 0000000000000000000000000000000000000000..1d91458626768f7640bf05c7a5afb76a
 +    enabled: true,
 +    failIfUnavailable: true,
 +    allowUnsandboxedCommands: false,
-+    autoAllowBashIfSandboxed: true,
++    autoAllowBashIfSandboxed,
 +    network,
 +    filesystem,
 +    credentials: {
@@ -1214,10 +1218,10 @@ index 0000000000000000000000000000000000000000..8544c568301576486c223a0283570396
 +});
 diff --git a/test/claude-execution-policy.test.ts b/test/claude-execution-policy.test.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..043601ab22d5a8a21bcf5fee2018196dce4e1276
+index 0000000000000000000000000000000000000000..a8f74465e48edfe2e65977dde4f5c27bf5f74db3
 --- /dev/null
 +++ b/test/claude-execution-policy.test.ts
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,245 @@
 +import assert from "node:assert/strict";
 +import { createHash } from "node:crypto";
 +import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
@@ -1232,6 +1236,28 @@ index 0000000000000000000000000000000000000000..043601ab22d5a8a21bcf5fee2018196d
 +  "ANTHROPIC_AUTH_TOKEN",
 +  "ANTHROPIC_BASE_URL",
 +];
++
++test("non-execute policy denies Bash in managed permissions and forwarded metadata", async () => {
++  const fixture = await policyFixture((raw) => raw.replace('"auto_allow_sandboxed_bash":true', '"auto_allow_sandboxed_bash":false'));
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++  assert.equal(options.sandbox.autoAllowBashIfSandboxed, false);
++  assert.equal(options.managedSettings.sandbox.autoAllowBashIfSandboxed, false);
++  assert.ok(options.managedSettings.permissions.deny.includes("Bash"));
++  const meta = buildClaudeCodeOptionsMeta({ claudeExecutionPolicyRef: fixture.binding.ref,
++    claudeExecutionPolicySha256: fixture.binding.sha256 }, true, fixture.root);
++  assert.deepEqual((meta?.claudeCode as { options: unknown }).options, options);
++  const execute = await policyFixture();
++  const executeOptions = loadClaudeExecutionPolicy(execute.root, execute.binding);
++  assert.equal(executeOptions.sandbox.autoAllowBashIfSandboxed, true);
++  assert.ok(!executeOptions.managedSettings.permissions.deny.includes("Bash"));
++});
++
++test("Bash approval must be a boolean rather than a truthy permission", async () => {
++  for (const value of ['"false"', 'null', '1']) {
++    const fixture = await policyFixture((raw) => raw.replace('"auto_allow_sandboxed_bash":true', `"auto_allow_sandboxed_bash":${value}`));
++    assert.throws(() => loadClaudeExecutionPolicy(fixture.root, fixture.binding), /auto_allow_sandboxed_bash must be a boolean/);
++  }
++});
 +
 +test("Claude execution policy separates local binding option from managed restrictions", async () => {
 +  const fixture = await policyFixture((raw) =>
@@ -1442,7 +1468,7 @@ index 0000000000000000000000000000000000000000..043601ab22d5a8a21bcf5fee2018196d
 +  };
 +}
 diff --git a/test/client.test.ts b/test/client.test.ts
-index b813e216fde20c4f0c677098d217a7158a415997..36df4187c7dbb85e6056672c48b0fdcc35fbdf7c 100644
+index b813e216fde20c4f0c677098d217a7158a415997..c40641f113c9486e00471c79f583d36fb29009ff 100644
 --- a/test/client.test.ts
 +++ b/test/client.test.ts
 @@ -1,5 +1,9 @@
@@ -1463,11 +1489,12 @@ index b813e216fde20c4f0c677098d217a7158a415997..36df4187c7dbb85e6056672c48b0fdcc
    selectAuthMethod?: (methods: Array<{ id: string }>) =>
      | {
          methodId: string;
-@@ -813,6 +818,157 @@ test("AcpClient createSession forwards claudeCode options in _meta", async () =>
+@@ -813,6 +818,161 @@ test("AcpClient createSession forwards claudeCode options in _meta", async () =>
    });
  });
 
-+test("AcpClient createSession forwards a bound Claude execution policy in _meta", async () => {
++for (const autoAllowBash of [true, false]) {
++test(`AcpClient createSession forwards bound Bash capability ${autoAllowBash} in _meta`, async () => {
 +  const cwd = await mkdtemp(path.join(os.tmpdir(), "acpx-client-e1-policy-"));
 +  const policyDir = path.join(cwd, "runs", "run-1", "execution-authority");
 +  await mkdir(policyDir, { recursive: true });
@@ -1482,7 +1509,7 @@ index b813e216fde20c4f0c677098d217a7158a415997..36df4187c7dbb85e6056672c48b0fdcc
 +      enabled: true,
 +      fail_if_unavailable: true,
 +      allow_unsandboxed_commands: false,
-+      auto_allow_sandboxed_bash: true,
++      auto_allow_sandboxed_bash: autoAllowBash,
 +      network: {
 +        strict_allowlist: true,
 +        allowed_domains: ["example.com"],
@@ -1544,7 +1571,10 @@ index b813e216fde20c4f0c677098d217a7158a415997..36df4187c7dbb85e6056672c48b0fdcc
 +    undefined,
 +  );
 +  assert.equal(options.env, undefined);
++  assert.equal((options.sandbox as { autoAllowBashIfSandboxed?: boolean }).autoAllowBashIfSandboxed, autoAllowBash);
++  assert.equal((options.managedSettings as { permissions: { deny: string[] } }).permissions.deny.includes("Bash"), !autoAllowBash);
 +});
++}
 +
 +test("AcpClient rejects incomplete or non-Claude policy bindings before launch", async () => {
 +  const incomplete = makeClient({
@@ -1621,7 +1651,7 @@ index b813e216fde20c4f0c677098d217a7158a415997..36df4187c7dbb85e6056672c48b0fdcc
  test("AcpClient creates built-in Claude sessions without user settings by default", async () => {
    const cwd = path.resolve("/tmp/acpx-client-claude-settings");
    const client = makeClient({
-@@ -1506,6 +1662,103 @@ test("AcpClient close resets in-memory state and shuts down terminal manager", a
+@@ -1506,6 +1666,103 @@ test("AcpClient close resets in-memory state and shuts down terminal manager", a
    assert.equal(internals.closing, true);
  });
 

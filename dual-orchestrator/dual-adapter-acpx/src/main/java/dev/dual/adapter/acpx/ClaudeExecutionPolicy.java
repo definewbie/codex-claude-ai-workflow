@@ -42,7 +42,7 @@ final class ClaudeExecutionPolicy {
             String runId,
             Path runDir
     ) throws IOException {
-        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, false, null);
+        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, false, false, null);
     }
 
     static Binding write(
@@ -62,7 +62,7 @@ final class ClaudeExecutionPolicy {
                 nodeInstanceId,
                 runId,
                 runDir,
-                permissionProfile.allowsLocalBinding(), null);
+                permissionProfile.allowsLocalBinding(), permissionProfile.autoAllowsSandboxedBash(), null);
     }
 
     static Binding write(Path workspaceRoot, String workstreamId, String nodeInstanceId, String runId,
@@ -72,7 +72,8 @@ final class ClaudeExecutionPolicy {
         }
         if (claim != null) new ExecutionNetworkGrantStore().verifyClaim(
                 new WorkstreamPaths(workspaceRoot.toRealPath(), new DualId(workstreamId)), claim, nodeInstanceId, runId);
-        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, profile.allowsLocalBinding(), claim);
+        return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir,
+                profile.allowsLocalBinding(), profile.autoAllowsSandboxedBash(), claim);
     }
 
     private static Binding write(
@@ -82,6 +83,7 @@ final class ClaudeExecutionPolicy {
             String runId,
             Path runDir,
             boolean allowLocalBinding,
+            boolean autoAllowSandboxedBash,
             ExecutionNetworkGrantStore.Claim claim
     ) throws IOException {
         var root = workspaceRoot.toRealPath();
@@ -111,7 +113,7 @@ final class ClaudeExecutionPolicy {
         sandbox.put("enabled", true);
         sandbox.put("fail_if_unavailable", true);
         sandbox.put("allow_unsandboxed_commands", false);
-        sandbox.put("auto_allow_sandboxed_bash", true);
+        sandbox.put("auto_allow_sandboxed_bash", autoAllowSandboxedBash);
         sandbox.put("network", network);
         sandbox.put("filesystem", filesystem);
 
