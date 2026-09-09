@@ -34,7 +34,7 @@
 - REQUIREMENT: `9ac1544b1216eca575456e1b4c639b3d716d6eb9b89693991222192a5a2ac33a`。
 - scripts/verify-workspace.sh: `c9401ad2933920406ff643fc39f8c4078a3624e537a09264ba0928d00aa28f23`。
 - Fork upstream/patch/schema: fd173f04 / `4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e` / v2；Claude ACP 0.70.0，Codex ACP 1.10.0。
-- Claude 配置观测：api.deepseek.com / DeepSeek-V4-Pro，凭据只记 presence；Codex 使用 `/Users/kriswang/.codex` 的当前配置。
+- Claude 配置观测更新：open.bigmodel.cn；Sonnet/Opus=glm-5.3，Haiku=glm-4.7-air，ANTHROPIC_MODEL/CLAUDE_CODE_MODEL 未设置。凭据只记 presence；Codex 使用 `/Users/kriswang/.codex` 的当前配置。
 - 已完成离线验证：Dual 1426/0/0/0，fork 991 PASS；不冒充完整自然 E2E。
 
 ## 执行与闭环
@@ -48,3 +48,12 @@ DUAL_ACPX_COMMAND_TIMEOUT_SECONDS=0。start 不带 --run；capture 使用 effect
 verify 后分段 run。用户已授权主 agent 逐门审阅并作合法决定；不使用 autorun，实质新需求或额外风险才请用户裁定。
 交付止于 effective workspace 与 accepted candidate，不 apply/commit/finalize 原 target。
 证据目录：output/real-cases/20260909-okx-profile-aligned-e2e。
+
+## 配置变化前置补充（业务 start 前）
+
+前置核验发现用户配置已由 DeepSeek 切到上述 GLM 映射；不沿用旧 Read 结果。
+按既有换模型授权，用已冻结的 DeepSeekReadProbe.java（名称为历史命名，代码无模型分支）
+在当前 production classes/新 policy/fork 上执行一次纯 Read nonce 检查，不请求 Bash。
+该项 Target=Read nonce往返；SoT=实际工具及结果/transport/closure；PASS=恰一Read、nonce匹配、
+exit0、零active信号、session关闭；失败停止前置不start，quota通知用户，无自动重跑。
+不新增权限探针/模型层。Codex无工具health已退出0/end_turn，响应模型gpt-6-astra，待归档机械核验。
