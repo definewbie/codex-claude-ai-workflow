@@ -1,6 +1,8 @@
 # OKX Fresh E2E With Human-Reviewed Scope Additions
 
-状态：PREFLIGHT PASS / AUTHORIZED TO START。主 agent 自查；用户已授权执行到 E2E 完成或缺陷止损，不启动额外 agent。
+状态：FAIL / EVIDENCE-COLLECTION CONTINUATION GAP（2026-09-10）。继续执行后验收已无源码 must-fix，但补证据失败第二跳重新进入实现，已在零工具调用时取消止损；workflow 为 WAITING_FOR_RECOVERY，非 E2E 完成。此前设计阶段原 FAIL 裁定的撤回保持有效，本次为新观察到的路由缺口。唯一样本 BXWV；完整事实及最终 §21 详见
+../real-case-reports/20260909-okx-bxwv-e2e.md。不启动第二样本，不改变冻结工件或验收标准。
+主 agent 自查；用户已授权执行到 E2E 完成或缺陷止损，不启动额外 agent。
 
 ## Verification Gate
 
@@ -61,3 +63,22 @@ code HEAD/tree 只记录实施 checkpoint；后续仅文档提交不视为漂移
 为 exit0/end_turn、adapterSignals空、nonce往返，session已关闭；codex-health.jsonl为
 end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，adapter/profile本批零改动，
 复用该证据不另消耗重复探针。workspace capture/verify仍必须在新workstream上执行，不能复用旧样本。
+
+## 2026-09-10 复用执行：人工补证据源码基准
+
+本节为用户再次授权后的新执行记录，复用上述产品目标、PASS/FAIL/INVALID、权限和止损规则。
+开头 FAIL 与原冻结身份只属于 BXWV 历史样本，不恢复、不覆盖其证据；本轮允许一个新的 fresh 样本。
+不重做 Gate，不新增验证平台、不启动额外 agent。状态：PREFLIGHT，业务 provider 尚未启动。
+
+唯一新增分支判据：若自然进入 collect_evidence，人工批准时必须持久化源码基准；
+续作前后与发布前均强制复验，漂移不得进入验收。再次补采继承原基准；
+未触发记 NOT EXERCISED，不人为制造。submit_evidence 未实现，若必须使用则停止，不手改账本。
+
+本轮身份替代旧运行值：
+- code checkpoint：88107d4；全 reactor 1465/0/0/0，随后离线 package 成功。
+- JAR SHA：3000796d67b9ee64675dbe834b269a9612b664515cd6877cc0198823e419d878。
+- external small workflow：dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json；SHA f9a29ddc9967b89d25e26f4311dfca39679dd5baab4bc336d7e21985f25b88d7，28 nodes / 50 edges，CLI validation PASS。不切换为 34 节点 bundled full/contract。
+- target/requirement/check 与上次保持一致，原 source check 本次 PASS；effective workspace 仍须新 capture/verify。
+- reviewed fork/schema、Claude GLM-5.3 与 Codex gpt-6-astra 配置未变，Doctor OK；本次重新运行最小 health 并关闭 session，不扩大探针。
+- 三环境变量沿用；timeout=0，不以耗时作为失败。只提交本轮代码和相关文档，其他未提交文档/输出不参与执行身份。
+- 本轮证据目录：output/real-cases/20260910-okx-evidence-continuation-e2e。启动前后记录实际 workstream 与结论，不预填成功。
