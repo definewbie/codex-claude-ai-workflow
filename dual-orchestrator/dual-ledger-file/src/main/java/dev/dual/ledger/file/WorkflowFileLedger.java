@@ -374,9 +374,23 @@ public final class WorkflowFileLedger {
         return execution;
     }
 
+    public Map<String, Object> requestAction(WorkstreamPaths paths, HumanActionRequest request) throws IOException {
+        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(),
+                LockOwner.currentProcess(paths.workstreamId().value(), "request action"))) {
+            return routingEngine.requestAction(paths, loadDefinition(paths), request);
+        }
+    }
+
     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
             throws IOException {
         routingEngine.resolveOpenGate(paths, definition, action, note);
+        refreshProjections(paths);
+    }
+
+    /** Caller holds the workstream lock and supplies a freshly captured machine baseline. */
+    public void collectEvidence(WorkstreamPaths paths, WorkflowDefinition definition, String note,
+                                EvidenceCollectionBaseline baseline) throws IOException {
+        routingEngine.resolveOpenGate(paths, definition, "collect_evidence", note, baseline);
         refreshProjections(paths);
     }
 

@@ -318,7 +318,8 @@ public final class WorkflowRuntime {
 
         var node = ledger.loadCoreNode(paths, nodeDoc.nodeInstanceId());
         try {
-            var result = executeNode(command, nodeDefinition, node);
+            var result = dev.dual.runtime.handler.EvidenceCollection.execute(command.workspaceRoot(),
+                    command.workstreamId(), nodeDoc, () -> executeNode(command, nodeDefinition, node));
             result = artifactContractValidator.validate(
                     command.workspaceRoot(),
                     command.workstreamId(),

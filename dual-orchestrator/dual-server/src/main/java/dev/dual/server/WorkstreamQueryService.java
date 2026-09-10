@@ -295,6 +295,8 @@ public class WorkstreamQueryService {
         response.put("gateNodeDefinitionId", nodeDefinitionId);
         response.put("packetPath", packetRef);
         response.put("packetMarkdown", Files.readString(packetPath, StandardCharsets.UTF_8));
+        response.put("actionRequests", workflowLedger.loadNode(paths, nodeInstanceId).result()
+                .getOrDefault("action_requests", List.of()));
         if (packetJsonPath.startsWith(root) && Files.exists(packetJsonPath)) {
             response.put("packet", objectMapper.readValue(packetJsonPath.toFile(), MAP_TYPE));
         }

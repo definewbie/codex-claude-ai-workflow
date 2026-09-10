@@ -54,13 +54,18 @@ public final class ArtifactContractValidator {
             List<String> inputRefs,
             NodeResult result
     ) throws Exception {
-        if (!"acpx.agent_run".equals(nodeDefinition.handlerType())) {
+        if (EvidenceCollection.FAILURE.equals(result.outcome())) return result;
+        if (!"acpx.agent_run".equals(nodeDefinition.handlerType()) || Boolean.TRUE.equals(result.result().get("prepared"))) {
             return result;
+        }
+        try {
+            EvidenceCollection.verify(workspaceRoot, workstreamId, nodeInstanceId);
+        } catch (java.io.IOException | IllegalArgumentException invalid) {
+            return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
+                    Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())),
+                    invalid.getMessage());
         }
         if (!ContractRegistry.hasContract(nodeDefinition.id())) {
-            return result;
-        }
-        if (Boolean.TRUE.equals(result.result().get("prepared"))) {
             return result;
         }
         return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result);

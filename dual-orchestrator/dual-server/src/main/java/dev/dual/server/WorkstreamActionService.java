@@ -209,11 +209,26 @@ public class WorkstreamActionService {
                 "scope revision requested; the existing contract remains authoritative until approval");
     }
 
+    public Map<String, Object> requestAction(Path workspaceRoot, String workstreamId,
+                                            dev.dual.ledger.file.HumanActionRequest request) throws Exception {
+        var record = ledger.requestAction(paths(normalize(workspaceRoot), workstreamId), request);
+        return Map.of("action", "review.request_action", "request", record,
+                "message", "Action need recorded; gate remains waiting and no execution is authorized");
+    }
+
+    public Map<String, Object> collectEvidence(Path workspaceRoot, String workstreamId, String note,
+                                               boolean runImmediately, int maxSteps) throws Exception {
+        var root = normalize(workspaceRoot);
+        resolveGate(root, workstreamId, "collect_evidence", note);
+        if (runImmediately) return resume(root, workstreamId, maxSteps);
+        return actionResponse("review.collect_evidence", workstreamId, "Evidence collection approved against source baseline");
+    }
+
     private void resolveGate(Path root, String workstreamId, String action, String note) throws Exception {
         var paths = paths(root, workstreamId);
         try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api review " + action))) {
             assertNotCompleted(paths, "review " + action);
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, note);
+            dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, ledger.loadDefinition(paths), action, note);
         }
     }
 

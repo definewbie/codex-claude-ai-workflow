@@ -11,6 +11,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ChangeScopeEvaluationTest {
     @Test
+    void approvedFileModificationIsNotProofOfEvidenceOnlyImmutability() {
+        var result = ChangeScopeEvaluator.evaluate(
+                contract(entry("src/Service.java", TaskContract.ScopeOperation.MODIFY)),
+                List.of(new ChangeScopeEvaluation.ActualChange(
+                        "src/Service.java", ChangeScopeEvaluation.ActualOperation.MODIFY, null, "M")));
+        assertEquals(ChangeScopeEvaluation.Status.PASS, result.status(),
+                "scope authorizes paths/operations; it cannot certify unchanged source bytes");
+        assertEquals(List.of("src/Service.java"), result.matchedPaths());
+    }
+
+    @Test
     void parsesGitNameStatusIntoTypedActualChanges() {
         var changes = ChangeScopeEvaluator.parseNameStatus(
                 "A\0new.txt\0"

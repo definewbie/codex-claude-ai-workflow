@@ -29,7 +29,8 @@ public final class CompletionEvidenceLineageResolver {
     public static final String CONTEXT_INVALID = "COMPLETION_CONTEXT_LINEAGE_INVALID";
     public static final String SELF_TEST_INVALID = "COMPLETION_SELF_TEST_LINEAGE_INVALID";
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule())
+            .registerModule(new dev.dual.ledger.file.EdgeConditionModule());
 
     private CompletionEvidenceLineageResolver() {
     }

@@ -98,6 +98,7 @@ final class AgentResultDocumentProjector {
                 document.put("checks_skipped", selfTest.checksSkipped());
                 document.put("evidence", selfTest.evidence());
                 document.put("missing_evidence", selfTest.missingEvidence());
+                document.put("must_fix", selfTest.mustFix());
                 document.put("acceptance_notes", selfTest.acceptanceNotes());
                 document.put("verification_summary", selfTest.verificationSummary());
                 evidenceDefaultsIfAbsent(document);

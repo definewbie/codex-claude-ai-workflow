@@ -229,6 +229,7 @@ public record AgentResultEnvelope(
             List<String> checksSkipped,
             List<String> evidence,
             List<String> missingEvidence,
+            List<String> mustFix,
             List<String> acceptanceNotes,
             String verificationSummary
     ) implements AgentResult {

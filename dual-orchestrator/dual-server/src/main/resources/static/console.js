@@ -471,6 +471,7 @@ function renderEvidence(status) {
     ], [
       ...authoredStageEvidence(packet.authoredStage),
       ...(asList(decision.mustFix).map((item) => `Must Fix：${item}`)),
+      ...(asList(state.review?.actionRequests).map((item) => `待处理动作需求：${item.content?.expected_result || ""}`)),
       ...(asList(guidance.suggestedChecks).map((item) => `建议检查：${item}`)),
     ]);
   } else if (["WAITING_FOR_RECOVERY", "FAILED", "BLOCKED"].includes(status)) {
@@ -1155,6 +1156,8 @@ function allowedActions(status) {
       ...(actions.includes("approve") ? [{ label: "批准并继续", kind: "primary", onClick: approveAndRun }] : []),
       ...(actions.includes("revise") ? [{ label: "请求修改", kind: "ghost", onClick: reviseAndRun }] : []),
       ...(actions.includes("request_scope_revision") ? [{ label: "申请保留新增文件", kind: "ghost", onClick: requestScopeRevision }] : []),
+      ...(actions.includes("request_action") ? [{ label: "登记动作需求", kind: "ghost", onClick: requestUnmetAction }] : []),
+      ...(actions.includes("collect_evidence") ? [{ label: "批准补证据", kind: "ghost", onClick: collectEvidence }] : []),
     ];
   }
   if (["WAITING_FOR_RECOVERY", "FAILED", "BLOCKED"].includes(status)) {
@@ -1225,6 +1228,33 @@ function reviseAndRun() {
     return;
   }
   postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/revise?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`, { feedback });
+}
+
+function collectEvidence() {
+  const note = (els.revisionFeedback?.value || "").trim();
+  if (!note) {
+    renderFailure("缺少批准说明", "请说明要补充的证据；补采不得改变当前产品源码。");
+    return;
+  }
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/collect-evidence?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`, { note });
+}
+
+function requestUnmetAction() {
+  const reason = (els.revisionFeedback?.value || "").trim();
+  if (!reason) {
+    renderFailure("缺少说明", "请说明现有动作为什么不足；登记不会启动执行。");
+    return;
+  }
+  const expectedResult = window.prompt("期望得到什么结果？");
+  if (!expectedResult?.trim()) return;
+  const content = { gateNodeInstanceId: state.review.gateNodeInstanceId,
+    sourceRefs: asList(state.review.packet?.inputRefs), expectedResult: expectedResult.trim(),
+    whyExistingActionsInsufficient: reason };
+  if (JSON.stringify(state.actionRequestDraft?.content) !== JSON.stringify(content)) {
+    state.actionRequestDraft = { content, requestId: crypto.randomUUID() };
+  }
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/review/request-action?workdir=${selectedWorkdirParam()}`,
+    { ...content, requestId: state.actionRequestDraft.requestId });
 }
 
 function requestScopeRevision() {

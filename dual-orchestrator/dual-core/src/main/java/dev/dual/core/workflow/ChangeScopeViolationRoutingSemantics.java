@@ -40,12 +40,14 @@ final class ChangeScopeViolationRoutingSemantics {
                 throw new IllegalArgumentException("CHANGE_SCOPE_VIOLATION must route unconditionally to " + REPAIR_GATE);
             }
             var gate = node(nodes, REPAIR_GATE);
+            var resolvingActions = HumanGateActionSemantics.allowedActions(gate, "CHANGE_SCOPE_VIOLATION").stream()
+                    .filter(action -> !HumanGateActionSemantics.REQUEST_ACTION.equals(action)).toList();
             if (gate.kind() != NodeKind.GATE
                     || !"human.review".equals(gate.handlerType())
                     || !"implementation_repair".equals(String.valueOf(gate.config().get("gate_purpose")))
-                    || !(List.of("revise").equals(HumanGateActionSemantics.allowedActions(gate))
+                    || !(List.of("revise").equals(resolvingActions)
                         || List.of("revise", HumanGateActionSemantics.REQUEST_SCOPE_REVISION)
-                            .equals(HumanGateActionSemantics.allowedActions(gate)))) {
+                            .equals(resolvingActions))) {
                 throw new IllegalArgumentException(REPAIR_GATE + " must declare only bounded implementation repair actions");
             }
             var scopeEdges = edges.stream().filter(candidate -> candidate.from().equals(REPAIR_GATE)

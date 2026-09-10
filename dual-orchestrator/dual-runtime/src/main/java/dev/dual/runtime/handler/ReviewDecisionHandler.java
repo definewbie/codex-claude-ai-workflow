@@ -5,6 +5,7 @@ import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,11 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                     allowedDecisions(context.definition().id()), read);
         }
         var document = read.entry().document();
+        if ("implement.self_test_decision".equals(context.definition().id())
+                && !"self_test_report".equals(document.sourceArtifactType())) {
+            return failed("INVALID_CONTRACT_SIDECAR", "self-test decision requires a self_test_report",
+                    context, allowedDecisions(context.definition().id()), read);
+        }
         var allowed = allowedDecisions(context.definition().id());
         var decision = document.decision().trim();
         if (decision.isBlank()) {
@@ -45,10 +51,25 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                     "Unsupported decision for " + context.definition().id() + ": " + decision,
                     context, allowed, read);
         }
-        var facts = Map.<String, Object>of(
+        var facts = new LinkedHashMap<String, Object>(Map.of(
                 "decision", decision,
                 "source", "contract-sidecar",
-                "summary", document.summary());
+                "summary", document.summary()));
+        if ("self_test_report".equals(document.sourceArtifactType())) {
+            if ("SELF_TEST_COMPLETE".equals(decision)) {
+                var violation = AgentContractSemantics.validateOutputContract(document);
+                if (violation.isPresent()) {
+                    return failed("INVALID_CONTRACT_SIDECAR", violation.get().message(), context, allowed, read);
+                }
+            }
+            facts.put("continuation_kind", switch (decision) {
+                case "SELF_TEST_COMPLETE" -> "COMPLETE";
+                case "SELF_TEST_INCOMPLETE" -> document.mustFix().isEmpty()
+                        ? "HUMAN_REVIEW" : "IMPLEMENTATION_REPAIR";
+                case "BLOCKED" -> "HUMAN_REVIEW";
+                default -> throw new IllegalStateException("unsupported self-test decision: " + decision);
+            });
+        }
         return NodeResult.completed(decision, context.instance().inputRefs(), facts);
     }
 

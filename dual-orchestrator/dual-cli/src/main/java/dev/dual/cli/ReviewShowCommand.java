@@ -55,6 +55,9 @@ public final class ReviewShowCommand implements Callable<Integer> {
         System.out.println("Packet: " + packetRef);
         System.out.println();
         System.out.println(Files.readString(packetPath, StandardCharsets.UTF_8));
+        System.out.println("Recorded action needs (advisory, not authorization):");
+        System.out.println(new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter()
+                .writeValueAsString(node.result().getOrDefault("action_requests", java.util.List.of())));
         return 0;
     }
 }

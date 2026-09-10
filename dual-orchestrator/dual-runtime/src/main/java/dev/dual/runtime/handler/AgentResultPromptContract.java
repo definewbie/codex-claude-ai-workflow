@@ -63,12 +63,22 @@ public final class AgentResultPromptContract {
                             verificationRemediationAllowedValues(exampleResult),
                             rereadReasonInstruction(nodeId),
                             verificationRemediationInstruction(nodeId, exampleResult) + acceptanceClassificationInstruction(exampleResult),
-                            contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult),
+                            contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult)
+                                    + selfTestInstruction(exampleResult),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
         } catch (Exception failure) {
             throw new IllegalStateException("failed to render AgentResultEnvelope prompt contract", failure);
         }
+    }
+
+    private static String selfTestInstruction(AgentResultEnvelope.AgentResult result) {
+        if (!(result instanceof AgentResultEnvelope.SelfTestResult)) return "";
+        return "\n`result.must_fix` is required. List concrete product/test code defects there, not missing "
+                + "permissions, tools, or external verification records. Use missing_evidence for missing proof. "
+                + "Both lists may be non-empty when code defects and missing proof coexist. "
+                + "SELF_TEST_COMPLETE requires both lists empty; otherwise use SELF_TEST_INCOMPLETE or BLOCKED. "
+                + "Do not invent code changes to resolve an environment or evidence-only blocker.";
     }
 
     private static String authoredRevisionInstruction(AgentResultEnvelope.AgentResult result) {
@@ -336,6 +346,7 @@ public final class AgentResultPromptContract {
                     List.of("command or inspection performed"),
                     List.of(),
                     List.of("specific result evidence"),
+                    List.of(),
                     List.of(),
                     List.of(),
                     "short verification adequacy summary"

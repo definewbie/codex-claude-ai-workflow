@@ -183,6 +183,12 @@ public final class AgentResultEnvelopeValidator {
                 requiredList(selfTest.checksSkipped(), "result.checks_skipped", false, errors);
                 requiredList(selfTest.evidence(), "result.evidence", false, errors);
                 requiredList(selfTest.missingEvidence(), "result.missing_evidence", false, errors);
+                requiredList(selfTest.mustFix(), "result.must_fix", false, errors);
+                if ("SELF_TEST_COMPLETE".equals(selfTest.decision())
+                        && ((selfTest.mustFix() != null && !selfTest.mustFix().isEmpty())
+                        || (selfTest.missingEvidence() != null && !selfTest.missingEvidence().isEmpty()))) {
+                    errors.reject("SELF_TEST_COMPLETE cannot include must_fix or missing_evidence");
+                }
                 requiredList(selfTest.acceptanceNotes(), "result.acceptance_notes", false, errors);
                 requiredText(selfTest.verificationSummary(), "result.verification_summary", errors);
             }

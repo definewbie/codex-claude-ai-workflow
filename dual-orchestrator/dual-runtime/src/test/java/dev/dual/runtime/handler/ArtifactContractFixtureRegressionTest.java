@@ -72,7 +72,7 @@ class ArtifactContractFixtureRegressionTest {
         var result = new AgentResultEnvelope.SelfTestResult(
                 "self_test_report", "SELF_TEST_COMPLETE", "tests complete", "READY",
                 List.of("mvn test"), List.of(), List.of("all tests passed"), List.of(),
-                List.of("focused suite"), "adequate");
+                List.of(), List.of("focused suite"), "adequate");
 
         var sidecar = validate("implement.claude_self_test_report", result);
 

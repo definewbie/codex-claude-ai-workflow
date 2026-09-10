@@ -22,7 +22,7 @@ class TerminalDeliveryWorkflowDefinitionTest {
 
         assertEquals("agent-lifecycle-terminal-delivery", terminal.workflowId());
         assertEquals(31, terminal.nodes().size());
-        assertEquals(53, terminal.edges().size());
+        assertEquals(55, terminal.edges().size());
         assertEquals(9, terminal.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -39,14 +39,19 @@ class TerminalDeliveryWorkflowDefinitionTest {
                 .to());
         assertEquals(true, terminal.node("gate.human_acceptance").config().get("terminal_gate"));
         assertEquals(1, terminal.node("implement.self_test_decision").config().get("max_revisions"));
-        assertEquals(java.util.List.of("revise", "request_scope_revision"),
+        assertEquals(java.util.List.of("revise", "request_scope_revision", "request_action", "collect_evidence"),
                 terminal.node("gate.human_implementation_repair").config().get("allowed_actions"));
         assertEquals(java.util.Map.of(
                         "SELF_TEST_COMPLETE", "implement.artifact_validation",
                         "SELF_TEST_INCOMPLETE", "context.implement_claude",
                         "BLOCKED", "gate.human_implementation_repair"),
                 terminal.edgesFrom("implement.self_test_decision").stream()
+                        .filter(edge -> edge.condition().evaluate(java.util.Map.of(
+                                "continuation_kind", "IMPLEMENTATION_REPAIR")))
                         .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())));
+        assertEquals("gate.human_implementation_repair", terminal.edgesFrom("implement.self_test_decision",
+                "SELF_TEST_INCOMPLETE", java.util.Map.of("continuation_kind", "HUMAN_REVIEW"))
+                .getFirst().to());
 
         for (var node : full.nodes()) {
             if (OMITTED_TAIL_NODES.contains(node.id()) || "gate.human_acceptance".equals(node.id())) {
@@ -60,7 +65,9 @@ class TerminalDeliveryWorkflowDefinitionTest {
                 .filter(edge -> !("gate.human_acceptance".equals(edge.from())
                         && "approved".equals(edge.on())))
                 .toList();
-        assertEquals(expectedEdges, terminal.edges());
+        var json = new com.fasterxml.jackson.databind.ObjectMapper()
+                .registerModule(new dev.dual.ledger.file.EdgeConditionModule());
+        assertEquals(json.valueToTree(expectedEdges), json.valueToTree(terminal.edges()));
 
         assertFalse(Boolean.TRUE.equals(full.node("gate.human_acceptance").config().get("terminal_gate")));
         assertEquals("stage.claude_handoff", full.edgesFrom("gate.human_acceptance").stream()

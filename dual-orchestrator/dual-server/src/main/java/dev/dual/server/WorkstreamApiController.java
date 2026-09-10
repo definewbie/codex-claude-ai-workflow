@@ -229,6 +229,22 @@ public class WorkstreamApiController {
         return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), run, maxSteps);
     }
 
+    @PostMapping("/{workstreamId}/review/request-action")
+    public Map<String, Object> requestAction(@PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody dev.dual.ledger.file.HumanActionRequest request) throws Exception {
+        return actionService.requestAction(workdirPath(workdir), workstreamId, request);
+    }
+
+    @PostMapping("/{workstreamId}/review/collect-evidence")
+    public Map<String, Object> collectEvidence(@PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestParam(defaultValue = "false") boolean run,
+            @RequestParam(defaultValue = "20") int maxSteps,
+            @RequestBody ReviewApproveRequest request) throws Exception {
+        return actionService.collectEvidence(workdirPath(workdir), workstreamId, request.note(), run, maxSteps);
+    }
+
     @PostMapping("/{workstreamId}/review/request-scope-revision")
     public Map<String, Object> requestScopeRevision(
             @PathVariable String workstreamId,

@@ -642,8 +642,13 @@ class WorkflowFileLedgerTest {
                         new EdgeDefinition("implement.self_test_decision", "SELF_TEST_COMPLETE",
                                 "implement.artifact_validation"),
                         new EdgeDefinition("implement.self_test_decision", "SELF_TEST_INCOMPLETE",
-                                "context.implement_claude", null,
+                                "context.implement_claude", dev.dual.core.workflow.EdgeCondition.configEquals(
+                                        "continuation_kind", "IMPLEMENTATION_REPAIR"),
                                 new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "self-test incomplete")),
+                        new EdgeDefinition("implement.self_test_decision", "SELF_TEST_INCOMPLETE",
+                                "gate.human_implementation_repair", dev.dual.core.workflow.EdgeCondition.configEquals(
+                                        "continuation_kind", "HUMAN_REVIEW"),
+                                dev.dual.core.workflow.TransitionMetadata.normal()),
                         new EdgeDefinition("implement.self_test_decision", "BLOCKED",
                                 "gate.human_implementation_repair"),
                         new EdgeDefinition("context.implement_claude", "completed",
@@ -663,7 +668,8 @@ class WorkflowFileLedgerTest {
         var incompletePaths = initializedPaths("ws-self-test-incomplete", definition);
         var incompleteDecision = activeNode(incompletePaths);
         new WorkflowFileLedger().completeAndRoute(incompletePaths, definition, incompleteDecision.nodeInstanceId(),
-                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test.json"), Map.of());
+                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test.json"),
+                Map.of("continuation_kind", "IMPLEMENTATION_REPAIR"));
         var repair = activeNode(incompletePaths);
         assertEquals("context.implement_claude", repair.nodeDefinitionId());
         assertEquals("iter-002", repair.iterationId());
@@ -672,7 +678,8 @@ class WorkflowFileLedgerTest {
                 NodeStatus.COMPLETED, "completed", List.of("implementation.json"), Map.of());
         var repeatedDecision = activeNode(incompletePaths);
         incompleteLedger.completeAndRoute(incompletePaths, definition, repeatedDecision.nodeInstanceId(),
-                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test-2.json"), Map.of());
+                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test-2.json"),
+                Map.of("continuation_kind", "IMPLEMENTATION_REPAIR"));
         assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, incompleteLedger.loadCurrent(incompletePaths).status());
         var repairGate = activeNode(incompletePaths);
         assertEquals("gate.human_implementation_repair", repairGate.nodeDefinitionId());

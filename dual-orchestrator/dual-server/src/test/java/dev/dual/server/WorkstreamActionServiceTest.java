@@ -48,6 +48,47 @@ class WorkstreamActionServiceTest {
     }
 
     @Test
+    void collectionWithoutQualifiedBaselineCannotResolveOrRun() throws Exception {
+        var definition = new WorkflowDefinition("collect", 1, "start", List.of(
+                new NodeDefinition("start", NodeKind.TASK, "noop.task", Map.of()),
+                new NodeDefinition("repair", NodeKind.GATE, "human.review", Map.of("gate_purpose", "implementation_repair",
+                        "allowed_actions", List.of("collect_evidence"))),
+                new NodeDefinition("collect", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "self_test_report"))),
+                List.of(new EdgeDefinition("start", "completed", "repair"), new EdgeDefinition("repair", "collect_evidence", "collect")));
+        var paths = createWorkstream("ws-api-collect", definition);
+        var ledger = new WorkflowFileLedger();
+        ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
+                NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var before = ledger.loadCurrent(paths);
+        var service = new WorkstreamActionService(ledger, () -> command -> { throw new AssertionError("must not resume"); });
+        assertThrows(java.io.IOException.class, () -> service.collectEvidence(tempDir, "ws-api-collect", "Collect evidence", true, 5));
+        assertEquals(before, ledger.loadCurrent(paths));
+    }
+
+    @Test
+    void actionRequestApiRecordsWithoutCallingTheResumer() throws Exception {
+        var base = gateDefinition();
+        var nodes = base.nodes().stream().map(node -> node.kind() == NodeKind.GATE
+                ? new NodeDefinition(node.id(), node.kind(), node.handlerType(),
+                Map.of("gate_purpose", "implementation_repair", "allowed_actions", List.of("approve", "revise", "request_action")))
+                : node).toList();
+        var paths = createWorkstream("ws-action-request", new WorkflowDefinition(base.workflowId(), base.version(),
+                base.entryNodeId(), nodes, base.edges()));
+        var ledger = new WorkflowFileLedger();
+        ledger.completeAndRoute(paths, ledger.loadDefinition(paths), ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
+                NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var before = ledger.loadCurrent(paths);
+        var service = new WorkstreamActionService(ledger, () -> command -> {
+            throw new AssertionError("registering a need must never execute an agent");
+        });
+        var request = new dev.dual.ledger.file.HumanActionRequest("r1", before.activeNodeInstanceIds().getFirst(),
+                List.of(), "Device evidence", "No available device");
+        assertEquals("review.request_action", service.requestAction(tempDir, "ws-action-request", request).get("action"));
+        assertEquals(before, ledger.loadCurrent(paths));
+        assertEquals(1, ((List<?>) ledger.loadNode(paths, request.gateNodeInstanceId()).result().get("action_requests")).size());
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void resumeRunsUntilPausedBoundary() throws Exception {
         createWorkstream("ws-run", simpleDefinition());

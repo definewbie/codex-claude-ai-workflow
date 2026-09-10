@@ -59,10 +59,12 @@ class SmallWorkflowProfileDefinitionTest {
         assertEquals(1, experiment.version());
         assertEquals(baseline.entryNodeId(), experiment.entryNodeId());
         assertEquals(expectedNodes, experiment.nodes());
-        assertEquals(expectedEdges, experiment.edges());
+        var json = new com.fasterxml.jackson.databind.ObjectMapper()
+                .registerModule(new dev.dual.ledger.file.EdgeConditionModule());
+        assertEquals(json.valueToTree(expectedEdges), json.valueToTree(experiment.edges()));
         assertTrue(directEdgeAdded);
         assertEquals(28, experiment.nodes().size());
-        assertEquals(48, experiment.edges().size());
+        assertEquals(50, experiment.edges().size());
         assertEquals(8, experiment.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -95,12 +97,12 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        // Baseline includes bounded human scope revision on all lifecycle variants.
-        assertEquals("4364f663cd80e1a4ba4eafe3dcf8f6d1bfecdd00ac11dddcd3c7122d6bcb24cb",
+        // Baseline includes conditional self-test continuation on all lifecycle variants.
+        assertEquals("4b67e62b929284f380a7e0c4e46037a3c65dc5321d54813f3d7c4f194b7017d1",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("f97a7f48015f367d10dea7976f772d1a70563a28c209bc3927267f674b838b3b",
+        assertEquals("c88486f1a5f07bba717baec7852873b1437c7676c295e15bc6fe793e4a23a384",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("e17efde4c54bf5dd6753b55a083a3768c9d166e6da9cc94f741a9c27099fc542",
+        assertEquals("c19629e8cffa92cbf589711ba90ee0eed31c937adb2533e246c282bc6d743170",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 

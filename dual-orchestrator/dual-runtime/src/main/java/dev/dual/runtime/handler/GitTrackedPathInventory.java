@@ -40,11 +40,11 @@ record GitTrackedPathInventory(String head, String sha256, List<String> paths) {
         return new GitTrackedPathInventory("", "", List.of());
     }
 
-    private static String command(Path root, String... args) throws IOException {
+    static String command(Path root, String... args) throws IOException {
         return new String(commandBytes(root, args), StandardCharsets.UTF_8);
     }
 
-    private static byte[] commandBytes(Path root, String... args) throws IOException {
+    static byte[] commandBytes(Path root, String... args) throws IOException {
         var command = new ArrayList<String>();
         command.add("git");
         command.addAll(List.of(args));
@@ -65,7 +65,7 @@ record GitTrackedPathInventory(String head, String sha256, List<String> paths) {
         return stdout;
     }
 
-    private static List<String> parseNulPaths(byte[] raw) throws IOException {
+    static List<String> parseNulPaths(byte[] raw) throws IOException {
         var paths = new ArrayList<String>();
         var start = 0;
         for (var index = 0; index < raw.length; index++) {

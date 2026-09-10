@@ -10,6 +10,34 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StaticConsoleProjectionBoundaryTest {
     @Test
+    void collectionRequiresDeclaredActionAndSendsOnlyTheHumanNote() throws Exception {
+        var console = Files.readString(Path.of("src/main/resources/static/console.js"));
+        assertTrue(console.contains("actions.includes(\"collect_evidence\")"));
+        var action = console.substring(console.indexOf("function collectEvidence()"), console.indexOf("function requestUnmetAction()"));
+        assertTrue(action.contains("if (!note)"));
+        assertTrue(action.contains("/review/collect-evidence?workdir="));
+        assertTrue(action.contains("{ note }"));
+        assertFalse(action.contains("sourceSha256"));
+        assertFalse(action.contains("/review/revise"));
+    }
+
+    @Test
+    void actionRequestUsesLedgerProjectionAndNeverStartsExecution() throws Exception {
+        var console = Files.readString(Path.of("src/main/resources/static/console.js"));
+        assertTrue(console.contains("actions.includes(\"request_action\")"));
+        assertTrue(console.contains("asList(state.review?.actionRequests)"));
+        var request = console.substring(console.indexOf("function requestUnmetAction()"),
+                console.indexOf("function requestScopeRevision()"));
+        assertTrue(request.contains("/review/request-action?workdir="));
+        assertTrue(request.contains("gateNodeInstanceId: state.review.gateNodeInstanceId"));
+        assertTrue(request.contains("sourceRefs: asList(state.review.packet?.inputRefs)"));
+        assertTrue(request.contains("state.actionRequestDraft.requestId"));
+        assertFalse(request.contains("run=true"));
+        assertFalse(request.contains("/resume"));
+        assertFalse(request.contains("/retry"));
+    }
+
+    @Test
     void staticConsolesDoNotInferPrimaryAttentionFromWorkflowStatus() throws Exception {
         var console = Files.readString(Path.of("src/main/resources/static/console.js"));
         var mgt = Files.readString(Path.of("src/main/resources/static/mgt/app.js"));

@@ -272,6 +272,17 @@ class AuthoredBoundarySequenceTest {
                         if (edges.get(i).path("from").asText().equals(entry.from()) && edges.get(i).path("on").asText().equals("approved")) edges.remove(i);
                 }
                 edges.add(JSON.valueToTree(entry));
+                if (full.node(entry.from()).kind() == NodeKind.GATE) {
+                    // Preserve the copied gate's declared but unused collection action in this repair slice.
+                    full.edgesFrom(entry.from()).stream().filter(edge -> edge.on().equals("collect_evidence"))
+                            .forEach(edge -> edges.add(JSON.valueToTree(edge)));
+                }
+                if (entry.from().equals("implement.self_test_decision")) {
+                    // Keep the unused human branch valid in this implementation-entry slice.
+                    edges.add(JSON.valueToTree(new EdgeDefinition(entry.from(), "SELF_TEST_INCOMPLETE",
+                            "gate.human_plan_approval", dev.dual.core.workflow.EdgeCondition.configEquals(
+                            "continuation_kind", "HUMAN_REVIEW"), TransitionMetadata.normal())));
+                }
                 edges.addObject().put("from", "context.implement_claude").put("on", "completed").put("to", "implement.claude_implement");
             });
             var initial = f.before("implement.claude_implement");
@@ -285,7 +296,8 @@ class AuthoredBoundarySequenceTest {
                 if (full.node(entry.from()).kind() == NodeKind.GATE)
                     f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "revise", "Repair within the approved plan");
                 else f.ledger.completeAndRoute(f.paths, f.ledger.loadDefinition(f.paths), sourceId,
-                        NodeStatus.COMPLETED, entry.on(), initial.instance().inputRefs(), Map.of("decision", entry.on()));
+                        NodeStatus.COMPLETED, entry.on(), initial.instance().inputRefs(),
+                        Map.of("decision", entry.on(), "continuation_kind", "IMPLEMENTATION_REPAIR"));
             }
             if (damaged) Files.delete(f.runDir(expected.approvedPlan().candidate().runId()).resolve("prompts/prompt.md.manifest.json"));
             f.advanceToGate();

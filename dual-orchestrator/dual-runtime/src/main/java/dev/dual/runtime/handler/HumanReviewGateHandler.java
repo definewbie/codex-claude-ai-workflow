@@ -120,6 +120,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("iterationId", context.instance().iterationId());
         packet.put("sourceOutcome", context.sourceOutcome());
         packet.put("runtimeDisposition", runtimeDisposition(context));
+        packet.put("actionRequests", context.instance().result().getOrDefault("action_requests", List.of()));
         packet.put("allowedActions", allowedActions);
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("inputArtifacts", inputArtifactSummaries(context));

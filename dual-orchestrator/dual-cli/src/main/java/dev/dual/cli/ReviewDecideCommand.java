@@ -43,7 +43,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
             var ledger = CliLedgerFactory.create();
             var definition = ledger.loadDefinition(paths);
             resolvedAction = requireAction(action);
-            ledger.resolveOpenGate(paths, definition, resolvedAction, note);
+            dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, definition, resolvedAction, note);
         }
         System.out.println("Human gate decided");
         System.out.println("Workstream: " + workstreamId);

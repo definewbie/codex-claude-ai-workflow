@@ -21,7 +21,8 @@ import dev.dual.ledger.file.WorkflowDefinitionDocument;
 
 /** Resolves the exact typed baseline and obligations for one intake revision. */
 public final class TaskContractRevisionContextResolver {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule())
+            .registerModule(new dev.dual.ledger.file.EdgeConditionModule());
 
     public Result resolveForNode(
             Path workspaceRoot,

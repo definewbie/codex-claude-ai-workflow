@@ -772,6 +772,30 @@ class BuiltinHandlerTest {
     }
 
     @Test
+    void selfTestContinuationDistinguishesEvidenceOnlyFromMixedProductWork() throws Exception {
+        for (var needsCode : List.of(false, true)) {
+            var output = writeOutput("self-test-" + needsCode + ".contract.json", """
+                    {
+                      "artifact_type": "agent_output_contract",
+                      "node_id": "implement.claude_self_test_report",
+                      "source_artifact_type": "self_test_report",
+                      "decision": "SELF_TEST_INCOMPLETE",
+                      "summary": "Verification is incomplete.",
+                      "must_fix": %s,
+                      "missing_evidence": ["External device verification record"]
+                    }
+                    """.formatted(needsCode ? "[\"Correct transaction rollback\"]" : "[]"));
+            var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
+                    tempDir, "ws", decisionDefinition("implement.self_test_decision"),
+                    node("implement.self_test_decision", NodeKind.DECISION, "review.decision", List.of(output))));
+            assertEquals(NodeStatus.COMPLETED, result.status());
+            assertEquals(needsCode ? "IMPLEMENTATION_REPAIR" : "HUMAN_REVIEW",
+                    result.result().get("continuation_kind"));
+            assertEquals(List.of(output), result.outputRefs());
+        }
+    }
+
+    @Test
     void selfTestDecisionConsumesTypedIncompleteEvidence() throws Exception {
         var output = writeOutput("implement-claude-self-test.contract.json", """
                 {

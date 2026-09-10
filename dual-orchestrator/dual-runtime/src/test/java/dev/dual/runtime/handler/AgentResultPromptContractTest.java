@@ -13,6 +13,23 @@ class AgentResultPromptContractTest {
     private final AgentResultEnvelopeValidator validator = new AgentResultEnvelopeValidator();
 
     @Test
+    void selfTestRequiresExplicitProductIssuesWithoutAcceptanceFailureSchema() throws Exception {
+        var prompt = AgentResultPromptContract.render("ws-1", "run-1",
+                "implement.claude_self_test_report", "SELF_TEST_COMPLETE", Set.of("SELF_TEST_COMPLETE"));
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(
+                prompt.substring(prompt.indexOf('{')));
+        var result = (com.fasterxml.jackson.databind.node.ObjectNode) envelope.path("result");
+        assertTrue(result.has("must_fix"));
+        assertFalse(result.has("failure"));
+        result.putArray("missing_evidence").add("External verification missing");
+        var parsed = parser.parse(mapper.writeValueAsString(envelope));
+        assertTrue(parsed.valid(), parsed.message());
+        assertFalse(validator.validate(parsed.envelope(), "ws-1", "run-1",
+                ContractRegistry.forNode("implement.claude_self_test_report")).valid());
+    }
+
+    @Test
     void designDeclaresPlannedFilesInsteadOfGenericOutput() {
         var prompt = AgentResultPromptContract.render(
                 "ws-1", "run-1", "design.claude_design",

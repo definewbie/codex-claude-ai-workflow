@@ -315,7 +315,9 @@
         "requires_approved_task_contract": true,
         "allowed_actions": [
           "revise",
-          "request_scope_revision"
+          "request_scope_revision",
+          "request_action",
+          "collect_evidence"
         ],
         "max_revisions": 1,
         "gate_purpose": "implementation_repair"
@@ -890,14 +892,34 @@
       "from": "implement.self_test_decision",
       "on": "SELF_TEST_INCOMPLETE",
       "to": "context.implement_claude",
-      "condition": null,
+      "condition": {
+        "type": "config_equals",
+        "params": { "key": "continuation_kind", "value": "IMPLEMENTATION_REPAIR" }
+      },
       "metadata": {
         "transitionType": "loop",
         "branchGroupId": "",
         "required": true,
         "purpose": "Return incomplete self-test evidence to bounded implementation repair.",
         "joinStrategy": "",
-        "loopReason": "Self-test evidence proves the implementation is incomplete"
+        "loopReason": "Self-test identifies concrete product changes"
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "SELF_TEST_INCOMPLETE",
+      "to": "gate.human_implementation_repair",
+      "condition": {
+        "type": "config_equals",
+        "params": { "key": "continuation_kind", "value": "HUMAN_REVIEW" }
+      },
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Evidence-only blockers require an explicit human disposition.",
+        "joinStrategy": "",
+        "loopReason": ""
       }
     },
     {
@@ -926,6 +948,20 @@
         "purpose": "Apply the operator's explicit repair decision.",
         "joinStrategy": "",
         "loopReason": "Human authorized implementation repair"
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "collect_evidence",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Collect evidence against the human-approved source baseline.",
+        "joinStrategy": "",
+        "loopReason": ""
       }
     },
     {

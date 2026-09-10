@@ -214,6 +214,16 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
                     Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
         }
+        var collectionInstruction = dev.dual.runtime.handler.EvidenceCollection.promptInstruction(
+                context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
+        if (collectionInstruction.isPresent()) {
+            var instruction = collectionInstruction.orElseThrow();
+            var sections = new ArrayList<>(rendered.sections());
+            sections.add(new AgentPromptRenderer.PromptSection("Evidence collection boundary", "human_collection",
+                    context.instance().nodeInstanceId(), instruction, "source-preserving evidence collection", true));
+            rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + instruction, List.copyOf(sections));
+            agentResultContract += "\n\n" + instruction;
+        }
         // Storage failures retain the ordinary adapter IO path, not evidence-violation semantics.
         Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
         promptManifestWriter.write(

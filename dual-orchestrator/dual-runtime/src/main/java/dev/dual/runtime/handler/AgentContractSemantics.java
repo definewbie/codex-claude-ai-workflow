@@ -42,6 +42,12 @@ public final class AgentContractSemantics {
     }
 
     static Optional<ContractViolation> validateOutputContract(AgentOutputContractDocument document) {
+        if ("self_test_report".equals(document.sourceArtifactType())
+                && "SELF_TEST_COMPLETE".equals(document.decision())
+                && (!document.mustFix().isEmpty() || !document.missingEvidence().isEmpty())) {
+            return violation("SELF_TEST_COMPLETION_CONFLICT",
+                    "SELF_TEST_COMPLETE cannot include must_fix or missing_evidence", Map.of());
+        }
         if (isAcceptanceReview(document)) {
             var failure = document.failure();
             var classification = validateAcceptanceClassification(document.decision(), failure.categoryHint(),

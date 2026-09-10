@@ -16,6 +16,12 @@
     <dependencies>
         <dependency>
             <groupId>dev.dual</groupId>
+            <artifactId>dual-flow-liteflow</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.dual</groupId>
             <artifactId>dual-core</artifactId>
             <version>${project.version}</version>
         </dependency>

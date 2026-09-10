@@ -5,6 +5,7 @@ import dev.dual.core.flow.FlowExecutionSnapshot;
 import dev.dual.core.flow.FlowOrchestrationKernel;
 import dev.dual.core.flow.FlowSignal;
 import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeDefinition;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.workflow.HumanGateActionSemantics;
 import dev.dual.core.workflow.WorkflowDefinition;
@@ -80,6 +81,9 @@ final class RoutingEngine {
         }
 
         var node = loadNode(paths, nodeInstanceId);
+        if (completedStatus == NodeStatus.COMPLETED) {
+            dev.dual.core.workflow.SelfTestContinuationSemantics.validateResult(node.nodeDefinitionId(), outcome, result);
+        }
         var finishedAt = Instant.now();
         var finished = new NodeInstanceDocument(
                 node.schemaVersion(),
@@ -126,7 +130,7 @@ final class RoutingEngine {
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
             var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
-                    effectiveTransitionAttributes(node, transition.attributes()));
+                    collectionTransition(paths, finished, nextDefinition, effectiveTransitionAttributes(node, transition.attributes())));
             if (nextDefinition.kind() == NodeKind.GATE
                     || !startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
                 continue;
@@ -225,7 +229,7 @@ final class RoutingEngine {
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
             var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
-                    effectiveTransitionAttributes(node, transition.attributes()));
+                    collectionTransition(paths, finished, nextDefinition, effectiveTransitionAttributes(node, transition.attributes())));
             if (!joinReady(paths, current, nodeInstanceId, transitionAttributes)) {
                 lastEventId = LedgerUtils.nextEventId(lastEventId);
                 eventLog.appendEvent(paths, lastEventId, "join_deferred", Map.of(
@@ -400,6 +404,28 @@ final class RoutingEngine {
         return true;
     }
 
+    private Map<String, Object> collectionTransition(WorkstreamPaths paths, NodeInstanceDocument source, NodeDefinition target,
+                                                       Map<String, Object> attributes) throws IOException {
+        var result = new LinkedHashMap<>(attributes);
+        if (source.kind() == NodeKind.GATE) {
+            if ("collect_evidence".equals(source.result().get("human_action"))) {
+                if (!source.result().containsKey("evidence_collection_baseline"))
+                    throw new IOException("missing evidence collection approval baseline");
+                result.put("evidence_collection_gate", source.nodeInstanceId());
+                try {
+                    result.put("evidence_collection_gate_sha256", java.util.HexFormat.of().formatHex(
+                            java.security.MessageDigest.getInstance("SHA-256")
+                                    .digest(Files.readAllBytes(paths.nodeJson(source.nodeInstanceId())))));
+                } catch (java.security.NoSuchAlgorithmException impossible) { throw new IOException(impossible); }
+            }
+        } else if (!"loop".equals(attributes.get("transition_type"))
+                || "self_test_report".equals(target.config().get("expected_artifact"))) {
+            inheritIfMissing(result, source.inputTransition(), "evidence_collection_gate");
+            inheritIfMissing(result, source.inputTransition(), "evidence_collection_gate_sha256");
+        }
+        return Map.copyOf(result);
+    }
+
     private static Map<String, Object> effectiveTransitionAttributes(
             NodeInstanceDocument sourceNode,
             Map<String, Object> transitionAttributes
@@ -448,6 +474,14 @@ final class RoutingEngine {
 
     void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
             throws IOException {
+        resolveOpenGate(paths, definition, action, note, null);
+    }
+
+    void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
+                         EvidenceCollectionBaseline collection) throws IOException {
+        if ("request_action".equals(action == null ? "" : action.trim())) {
+            throw new IOException("request_action does not resolve a gate; use the action request API");
+        }
         if (action == null || action.isBlank()) {
             throw new IOException("human gate action is required");
         }
@@ -473,6 +507,19 @@ final class RoutingEngine {
         }
         var gate = requireOpenGate(paths, current, node);
         var sourceOutcome = text(gate.result().get("source_outcome"));
+        if (HumanGateActionSemantics.COLLECT_EVIDENCE.equals(canonicalAction)) {
+            if (collection == null || !collection.gateNodeInstanceId().equals(node.nodeInstanceId())
+                    || current.status() != WorkflowStatus.WAITING_FOR_HUMAN
+                    || !current.activeNodeInstanceIds().equals(List.of(node.nodeInstanceId()))
+                    || note == null || note.isBlank() || !hasEdge
+                    || !HumanGateActionSemantics.allowedActions(definition.node(node.nodeDefinitionId()), sourceOutcome)
+                    .contains(canonicalAction)
+                    || !node.inputRefs().equals(gate.result().get("subject_input_refs"))) {
+                throw new IOException("collect_evidence requires a bound source baseline and explicit human note");
+            }
+        } else if (collection != null) {
+            throw new IOException("source baseline is only valid for collect_evidence");
+        }
         if (HumanGateActionSemantics.REQUEST_SCOPE_REVISION.equals(canonicalAction)) {
             var applicable = HumanGateActionSemantics.allowedActions(
                     definition.node(node.nodeDefinitionId()), sourceOutcome).contains(canonicalAction);
@@ -515,8 +562,55 @@ final class RoutingEngine {
         resolvedNodeResult.put("human_action", canonicalAction);
         resolvedNodeResult.put("requested_action", action);
         resolvedNodeResult.put("note", note == null ? "" : note);
+        if (collection != null) resolvedNodeResult.put("evidence_collection_baseline", collection);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction,
                 node.inputRefs(), Map.copyOf(resolvedNodeResult), humanAuthorizedRevision);
+    }
+
+    Map<String, Object> requestAction(WorkstreamPaths paths, WorkflowDefinition definition, HumanActionRequest request)
+            throws IOException {
+        var current = loadCurrent(paths);
+        if (current.status() != WorkflowStatus.WAITING_FOR_HUMAN
+                || !current.activeNodeInstanceIds().equals(List.of(request.gateNodeInstanceId()))) {
+            throw new IOException("action request requires the current waiting gate occurrence");
+        }
+        var node = loadNode(paths, request.gateNodeInstanceId());
+        var gate = requireOpenGate(paths, current, node);
+        if (node.kind() != NodeKind.GATE || !HumanGateActionSemantics.allowedActions(
+                definition.node(node.nodeDefinitionId()), text(gate.result().get("source_outcome")))
+                .contains("request_action")) throw new IOException("action request is not available at this gate");
+        if (!node.inputRefs().equals(request.sourceRefs())
+                || !node.inputRefs().equals(gate.result().get("subject_input_refs"))) {
+            throw new IOException("action request source references do not match the current gate");
+        }
+        var content = Map.<String, Object>of("request_id", request.requestId(),
+                "gate_node_instance_id", request.gateNodeInstanceId(), "source_refs", request.sourceRefs(),
+                "expected_result", request.expectedResult(),
+                "why_existing_actions_insufficient", request.whyExistingActionsInsufficient());
+        var requests = new java.util.ArrayList<Object>();
+        var existing = node.result().get("action_requests");
+        if (existing != null && !(existing instanceof List<?>)) throw new IOException("invalid action request ledger");
+        if (existing instanceof List<?> list) requests.addAll(list);
+        for (var entry : requests) {
+            if (!(entry instanceof Map<?, ?> item)) throw new IOException("invalid action request ledger");
+            if (request.requestId().equals(item.get("request_id"))) {
+                if (!content.equals(item.get("content"))) throw new IOException("request id already has different content");
+                return objectMapper.convertValue(item, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
+            }
+        }
+        var record = Map.<String, Object>of("request_id", request.requestId(), "content", content,
+                "recorded_at", Instant.now().toString());
+        requests.add(record);
+        var result = new LinkedHashMap<>(node.result());
+        result.put("action_requests", List.copyOf(requests));
+        jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), new NodeInstanceDocument(node.schemaVersion(),
+                node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(), node.status(),
+                node.stageId(), node.iterationId(), node.inputRefs(), node.inputTransition(), node.outputRefs(),
+                result, node.runRef(), node.latestExecutionId(), node.startedAt(), node.finishedAt()));
+        // The node is authoritative even if appending this derived audit event fails.
+        eventLog.appendEvent(paths, "human-action-" + java.util.UUID.randomUUID(), "human_action_requested",
+                Map.of("node_instance_id", node.nodeInstanceId(), "request_id", request.requestId()));
+        return record;
     }
 
     private GateDocument requireOpenGate(
