@@ -68,7 +68,7 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 
 本节为用户再次授权后的新执行记录，复用上述产品目标、PASS/FAIL/INVALID、权限和止损规则。
 开头 FAIL 与原冻结身份只属于 BXWV 历史样本，不恢复、不覆盖其证据；本轮允许一个新的 fresh 样本。
-不重做 Gate，不新增验证平台、不启动额外 agent。状态：PREFLIGHT，业务 provider 尚未启动。
+不重做 Gate，不新增验证平台、不启动额外 agent。状态：FAIL / REQUIRED EXTERNAL EVIDENCE CONTINUATION NOT IMPLEMENTED（2026-09-11）。唯一样本245D停在human repair gate-050，must_fix为空，但沙箱无法启动Chromium，必需的submit_evidence链未实现，按本节约定止损；workflow仍WAITING_FOR_HUMAN，非COMPLETED。详见[执行记录](../real-case-reports/20260910-okx-evidence-continuation-e2e.md)。源码基准分支NOT EXERCISED，不提升其自然验证成熟度。
 
 唯一新增分支判据：若自然进入 collect_evidence，人工批准时必须持久化源码基准；
 续作前后与发布前均强制复验，漂移不得进入验收。再次补采继承原基准；
@@ -82,3 +82,22 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 - reviewed fork/schema、Claude GLM-5.3 与 Codex gpt-6-astra 配置未变，Doctor OK；本次重新运行最小 health 并关闭 session，不扩大探针。
 - 三环境变量沿用；timeout=0，不以耗时作为失败。只提交本轮代码和相关文档，其他未提交文档/输出不参与执行身份。
 - 本轮证据目录：output/real-cases/20260910-okx-evidence-continuation-e2e。启动前后记录实际 workstream 与结论，不预填成功。
+
+## 2026-09-12 复用执行：外部材料完整续作
+
+状态：PREFLIGHT / NOT STARTED。用户已授权继续；本节只允许一个新的 fresh 样本，245D、BXWV及更早样本保持只读。复用本页主目标、产品验收、授权和止损规则；不新建 Gate，不启动额外 agent。之前 FAIL 与“submit_evidence 未实现”的文字仅属于对应历史运行。
+
+本次代码 checkpoint 为 `b197ce90`，独立 diff review 无 P0/P1；全模块1476/0/0/0，加强后的完整链聚焦15/0/0/0。JAR已重新打包、两个新CLI入口检查通过。
+
+- JAR SHA：`c8584379a5115b7e2249da4ac57d4452084162349ed72fbb5aaee961e8aebfe1`。
+- external small workflow仍为原路径，SHA `3ea9ea6c567608f4593bfef65f5868d7cbbd1be0925315c650abd8ec3f1896d5`；28 nodes / 51 edges / 8 agent_run / 6 gates，新增边仅为submit_evidence到既有self-test。
+- target HEAD/tree、REQUIREMENT/check SHA沿上次冻结值，当前只读复算一致且target clean。原verify-workspace是空项目启动前检查（含pom/src不存在），只在source/effective workspace开工前运行，不拿它拦截实现后正常脏工作树，也不要求为它提前提交产品。
+- reviewed fork `4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e` / v2；Doctor OK；adapter固定Claude ACP0.70.0、Codex ACP1.10.0。当前配置为Claude GLM-5.3、Codex gpt-6-astra，仍从配置读取，不修改或写死模型。
+- 三环境变量同上，timeout=0；运行前各一次既有最小health并关闭session，不扩展探针。配置身份与运行完成事实分别记录，不输出凭据。
+- 执行证据目录：`output/real-cases/20260912-okx-external-evidence-e2e`。文档后代不构成代码漂移；执行前核对ancestry、零production diff和JAR字节。
+
+必需出口逐项核对：默认测试由agent执行；若浏览器/公网只在宿主可用，使用已经实现的prepare/submit路径；依赖获取仍使用既有Phase A；源码/合同缺陷走既有typed修复。宿主能力检查仅限需求必需且尚未证明的启动/连通性，不建立新矩阵。开始前各出口必须可执行，否则保留前置失败而不消耗fresh样本。
+
+自然进入材料分支时：读当前typed gate -> prepare并保存源码/合同基准 -> 在同一工作区做真实验证（日志/XML/截图写非源码目录）-> submit复制材料并绑定ref/SHA -> self-test核验 -> context -> acceptance引用同一manifest及材料ref。外部声明不自动变成测试通过；失败材料如实处理，缺证据且无must_fix不得回实现。任何源码或材料漂移必须拒绝，不能重抓基准洗掉变化。未触发的分支记NOT EXERCISED，不人为制造。
+
+执行顺序：源端身份/check、CLI定义验证、必要环境可用性及最小health全通过 -> start不带run -> 新workspace capture/verify -> 分段run及逐门审阅 -> 按原PASS/FAIL/INVALID归档。quota按用户要求暂停并提示切换，不自动重试；其余缺陷止损后不改输入重跑、不创建第二样本。本节不授权原target apply/commit/push，交付仍止于accepted candidate。
