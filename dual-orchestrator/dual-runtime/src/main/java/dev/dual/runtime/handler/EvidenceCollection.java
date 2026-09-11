@@ -21,13 +21,20 @@ public final class EvidenceCollection {
             ledger.resolveOpenGate(paths, definition, action, note);
             return;
         }
+        if (note == null || note.isBlank()) throw new IOException("collection requires an explicit note");
+        var baseline = captureBaseline(ledger, paths, definition, action);
+        ledger.collectEvidence(paths, definition, note, baseline);
+    }
+
+    static EvidenceCollectionBaseline captureBaseline(WorkflowFileLedger ledger, WorkstreamPaths paths,
+                                                       WorkflowDefinition definition, String action) throws IOException {
         var current = ledger.loadCurrent(paths);
         if (current.status() != WorkflowStatus.WAITING_FOR_HUMAN || current.activeNodeInstanceIds().size() != 1
-                || note == null || note.isBlank()) throw new IOException("collection requires a waiting human gate and note");
+                ) throw new IOException("collection requires a waiting human gate");
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
         var gate = ledger.loadOpenGateForNode(paths, node.nodeInstanceId());
         if (gate == null || !HumanGateActionSemantics.allowedActions(definition.node(node.nodeDefinitionId()),
-                String.valueOf(gate.result().get("source_outcome"))).contains(HumanGateActionSemantics.COLLECT_EVIDENCE))
+                String.valueOf(gate.result().get("source_outcome"))).contains(action))
             throw new IOException("collection is not available at this gate");
         var resolution = TaskContractProjectionVerifier.resolve(paths.workspaceRoot(), paths.workstreamId().value());
         var qualified = resolution.qualified().orElseThrow(() -> new IOException(
@@ -37,7 +44,7 @@ public final class EvidenceCollection {
         var baseline = new EvidenceCollectionBaseline(node.nodeInstanceId(), qualified.contractRef(), qualified.sha256(),
                 source.head(), source.indexSha256(), source.sha256(), source.paths());
         verifySource(paths.workspaceRoot(), baseline);
-        ledger.collectEvidence(paths, definition, note, baseline);
+        return baseline;
     }
 
     @FunctionalInterface public interface Execution { NodeResult run() throws Exception; }
@@ -47,10 +54,32 @@ public final class EvidenceCollection {
         var file = new WorkstreamPaths(root, new DualId(workstreamId)).nodeJson(nodeId);
         if (!Files.isRegularFile(file)
                 || !MAPPER.readTree(file.toFile()).path("inputTransition").has("evidence_collection_gate")) return Optional.empty();
+        var refs = requiredReferences(root, workstreamId, nodeId);
         return Optional.of("This occurrence collects evidence against a human-approved source baseline. "
                 + "Do not modify product source, tests, dependencies, or Git state. "
                 + "Write evidence only to the designated run artifacts. If verification needs a code change, "
-                + "report the concrete must_fix or missing_evidence instead of implementing it.");
+                + "report the concrete must_fix or missing_evidence instead of implementing it."
+                + (refs.isEmpty() ? "" : "\nExternal verification materials (operator-declared execution, not automatic proof of success):\n"
+                + String.join("\n", refs) + "\nRead these exact files. Include each exact ref as a separate string in result.evidence. "
+                + "Assess their relevance and sufficiency; missing or failed verification must remain incomplete/rejected. "
+                + "Do not replace refs with summaries or treat a submission as approval."));
+    }
+
+    static List<String> requiredReferences(Path root, String workstreamId, String nodeId) throws IOException {
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        if (!Files.isRegularFile(paths.nodeJson(nodeId))) return List.of();
+        var guard = open(root, workstreamId, MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class));
+        return guard == null || guard.submission() == null ? List.of() : ExternalVerificationEvidence.refs(paths, guard.submission());
+    }
+
+    static void verifyResult(Path root, String workstreamId, String nodeId, AgentResultEnvelope.AgentResult result) throws IOException {
+        var refs = requiredReferences(root, workstreamId, nodeId);
+        if (refs.isEmpty()) return;
+        List<String> evidence = result instanceof AgentResultEnvelope.SelfTestResult self ? self.evidence()
+                : result instanceof AgentResultEnvelope.AcceptanceReviewResult acceptance ? acceptance.evidence() : null;
+        if ((result instanceof AgentResultEnvelope.SelfTestResult || result instanceof AgentResultEnvelope.AcceptanceReviewResult)
+                && (evidence == null || !evidence.containsAll(refs)))
+            throw new IOException("result.evidence must contain every exact bound material ref");
     }
 
     public static NodeResult execute(Path root, String workstreamId, NodeInstanceDocument node, Execution execution)
@@ -113,28 +142,33 @@ public final class EvidenceCollection {
         var approval = MAPPER.readValue(file.toFile(), NodeInstanceDocument.class);
         if (!gateId.equals(approval.nodeInstanceId()) || approval.kind() != NodeKind.GATE
                 || approval.status() != NodeStatus.COMPLETED
-                || !"collect_evidence".equals(approval.result().get("human_action"))
+                || !("collect_evidence".equals(approval.result().get("human_action"))
+                || "submit_evidence".equals(approval.result().get("human_action")))
                 || !(approval.result().get("note") instanceof String note) || note.isBlank())
             throw new IOException("collection approval is not a completed human decision");
         var gateFile = paths.gateJson("gate-" + gateId);
         requireCanonical(root, gateFile);
         var gate = MAPPER.readValue(gateFile.toFile(), GateDocument.class);
         if (!"resolved".equals(gate.status()) || !gateId.equals(gate.nodeInstanceId())
-                || !"collect_evidence".equals(gate.result().get("human_action"))
+                || !Objects.equals(approval.result().get("human_action"), gate.result().get("human_action"))
                 || !Objects.equals(gate.result().get("note"), approval.result().get("note"))
                 || !Objects.equals(gate.result().get("subject_input_refs"), approval.inputRefs()))
             throw new IOException("collection gate resolution is missing");
         var baseline = MAPPER.convertValue(approval.result().get("evidence_collection_baseline"), EvidenceCollectionBaseline.class);
         if (baseline == null || !gateId.equals(baseline.gateNodeInstanceId()))
             throw new IOException("collection source baseline is missing");
+        var submission = MAPPER.convertValue(approval.result().get("external_evidence"), EvidenceSubmission.class);
+        if ("submit_evidence".equals(approval.result().get("human_action")) != (submission != null)
+                || (submission != null && !baseline.equals(submission.baseline())))
+            throw new IOException("missing or inconsistent external material binding");
         var guard = new Guard(root, paths, file, hash, gateFile, TaskContractArtifactWriter.sha256(gateFile),
-                node.nodeInstanceId(), baseline);
+                node.nodeInstanceId(), baseline, submission);
         guard.verify();
         return guard;
     }
 
     record Guard(Path root, WorkstreamPaths paths, Path approvalFile, String approvalSha, Path gateFile,
-                 String gateSha, String nodeId, EvidenceCollectionBaseline baseline) {
+                 String gateSha, String nodeId, EvidenceCollectionBaseline baseline, EvidenceSubmission submission) {
         void verify() throws IOException {
             requireCanonical(root, approvalFile);
             if (!approvalSha.equals(TaskContractArtifactWriter.sha256(approvalFile)))
@@ -149,10 +183,15 @@ public final class EvidenceCollection {
             if (!baseline.contractRef().equals(".agent/workstreams/" + paths.workstreamId().value() + "/artifacts/task-contract.json"))
                 throw new IOException("collection contract belongs to another workstream");
             verifySource(root, baseline);
+            if (submission != null) {
+                var manifest = ExternalVerificationEvidence.verify(paths, submission);
+                var approval = MAPPER.readValue(approvalFile.toFile(), NodeInstanceDocument.class);
+                if (!manifest.note().equals(approval.result().get("note"))) throw new IOException("material note mismatch");
+            }
         }
     }
 
-    private static void verifySource(Path root, EvidenceCollectionBaseline baseline) throws IOException {
+    static void verifySource(Path root, EvidenceCollectionBaseline baseline) throws IOException {
         var contract = root.resolve(baseline.contractRef());
         requireCanonical(root, contract);
         if (!baseline.contractSha256().equals(TaskContractArtifactWriter.sha256(contract)))

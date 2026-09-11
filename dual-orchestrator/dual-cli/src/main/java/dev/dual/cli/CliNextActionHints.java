@@ -30,8 +30,7 @@ final class CliNextActionHints {
         ReviewPacketCliHints.packetPath(workspaceRoot, workstreamId).ifPresent(packet ->
                 out.println("     packet: " + packet));
         out.println("  2. Choose one action after review:");
-        out.println("     dualctl approve --workdir " + workspaceRoot + " --run " + workstreamId);
-        out.println("     dualctl revise --workdir " + workspaceRoot + " --run --feedback-file feedback.md " + workstreamId);
+        ReviewPacketCliHints.printActions(out, workspaceRoot, workstreamId);
     }
 
     private static void printRecovery(PrintStream out, Path workspaceRoot, String workstreamId) {

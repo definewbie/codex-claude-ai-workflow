@@ -213,7 +213,7 @@ class WorkflowDefinitionLoaderTest {
         assertEquals(5, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
         assertEquals(31, definition.nodes().size());
-        assertEquals(55, definition.edges().size());
+        assertEquals(56, definition.edges().size());
     }
 
     @Test

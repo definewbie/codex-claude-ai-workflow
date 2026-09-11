@@ -274,7 +274,7 @@ class AuthoredBoundarySequenceTest {
                 edges.add(JSON.valueToTree(entry));
                 if (full.node(entry.from()).kind() == NodeKind.GATE) {
                     // Preserve the copied gate's declared but unused collection action in this repair slice.
-                    full.edgesFrom(entry.from()).stream().filter(edge -> edge.on().equals("collect_evidence"))
+                    full.edgesFrom(entry.from()).stream().filter(edge -> List.of("collect_evidence", "submit_evidence").contains(edge.on()))
                             .forEach(edge -> edges.add(JSON.valueToTree(edge)));
                 }
                 if (entry.from().equals("implement.self_test_decision")) {

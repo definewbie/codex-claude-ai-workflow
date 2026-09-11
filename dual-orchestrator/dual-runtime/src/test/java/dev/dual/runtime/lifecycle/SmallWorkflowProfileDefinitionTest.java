@@ -64,7 +64,7 @@ class SmallWorkflowProfileDefinitionTest {
         assertEquals(json.valueToTree(expectedEdges), json.valueToTree(experiment.edges()));
         assertTrue(directEdgeAdded);
         assertEquals(28, experiment.nodes().size());
-        assertEquals(50, experiment.edges().size());
+        assertEquals(51, experiment.edges().size());
         assertEquals(8, experiment.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -97,12 +97,12 @@ class SmallWorkflowProfileDefinitionTest {
 
     @Test
     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        // Baseline includes conditional self-test continuation on all lifecycle variants.
-        assertEquals("4b67e62b929284f380a7e0c4e46037a3c65dc5321d54813f3d7c4f194b7017d1",
+        // Baseline includes explicit external evidence submission on all lifecycle variants.
+        assertEquals("eda35075ae4e69e3471ec8d5bbf4043a03762c30ecdba6458fbb5da5b09324f7",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("c88486f1a5f07bba717baec7852873b1437c7676c295e15bc6fe793e4a23a384",
+        assertEquals("76e33816e6b1fe68661bec9f0ac9601cdf4ff7d83f13d0f67e064245ccf30a60",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("c19629e8cffa92cbf589711ba90ee0eed31c937adb2533e246c282bc6d743170",
+        assertEquals("2097297b76c2e1426b56e70b7f4e241071b72fadf3fe2b2e2dfebcc5a7c197b7",
                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
     }
 

@@ -470,6 +470,7 @@ function renderEvidence(status) {
       ["原因", guidance.reason || decision.summary || "-"],
     ], [
       ...authoredStageEvidence(packet.authoredStage),
+      ...(packet.externalEvidenceInstructions ? [packet.externalEvidenceInstructions] : []),
       ...(asList(decision.mustFix).map((item) => `Must Fix：${item}`)),
       ...(asList(state.review?.actionRequests).map((item) => `待处理动作需求：${item.content?.expected_result || ""}`)),
       ...(asList(guidance.suggestedChecks).map((item) => `建议检查：${item}`)),

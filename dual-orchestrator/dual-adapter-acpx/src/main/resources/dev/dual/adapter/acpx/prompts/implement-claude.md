@@ -30,7 +30,7 @@ Repository hygiene:
 - Clean up self-test byproducts before finishing. Examples include `__pycache__/`, `.pytest_cache/`, temporary logs, generated scratch files, local coverage files, and build outputs that are not intentionally part of the task.
 - If a generated file is intentionally part of the deliverable, mention why in your output.
 - Do not hide relevant business-code changes; only remove byproducts created by your own validation or scratch work.
-- If you accidentally create an output/report file for this run, delete it before finishing and put the report content in stdout instead.
+- Before deleting generated test reports or logs, preserve cited evidence in the designated run artifacts and reference the saved paths. Never delete submitted materials under .agent/workstreams/*/artifacts/verification/. Remove only redundant scratch output; the structured result still belongs in stdout.
 
 ## User Request
 

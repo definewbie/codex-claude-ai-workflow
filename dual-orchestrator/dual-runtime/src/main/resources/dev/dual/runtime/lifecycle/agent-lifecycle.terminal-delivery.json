@@ -317,7 +317,8 @@
           "revise",
           "request_scope_revision",
           "request_action",
-          "collect_evidence"
+          "collect_evidence",
+          "submit_evidence"
         ],
         "max_revisions": 1,
         "gate_purpose": "implementation_repair"
@@ -910,6 +911,12 @@
       }
     },
     {
+      "from": "gate.human_implementation_repair",
+      "on": "submit_evidence",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": { "transitionType": "normal" }
+    }, {
       "from": "gate.human_implementation_repair",
       "on": "collect_evidence",
       "to": "implement.claude_self_test_report",

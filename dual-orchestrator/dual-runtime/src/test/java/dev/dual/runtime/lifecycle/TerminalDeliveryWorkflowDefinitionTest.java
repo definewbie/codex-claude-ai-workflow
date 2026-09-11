@@ -22,7 +22,7 @@ class TerminalDeliveryWorkflowDefinitionTest {
 
         assertEquals("agent-lifecycle-terminal-delivery", terminal.workflowId());
         assertEquals(31, terminal.nodes().size());
-        assertEquals(55, terminal.edges().size());
+        assertEquals(56, terminal.edges().size());
         assertEquals(9, terminal.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -39,7 +39,7 @@ class TerminalDeliveryWorkflowDefinitionTest {
                 .to());
         assertEquals(true, terminal.node("gate.human_acceptance").config().get("terminal_gate"));
         assertEquals(1, terminal.node("implement.self_test_decision").config().get("max_revisions"));
-        assertEquals(java.util.List.of("revise", "request_scope_revision", "request_action", "collect_evidence"),
+        assertEquals(java.util.List.of("revise", "request_scope_revision", "request_action", "collect_evidence", "submit_evidence"),
                 terminal.node("gate.human_implementation_repair").config().get("allowed_actions"));
         assertEquals(java.util.Map.of(
                         "SELF_TEST_COMPLETE", "implement.artifact_validation",

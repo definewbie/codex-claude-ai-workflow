@@ -29,7 +29,7 @@ class AcceptanceRepairWorkflowDefinitionTest {
             assertEquals(1, scope.size());
             assertEquals("context.intake_claude_brainstorm", scope.getFirst().to());
             assertEquals("loop", scope.getFirst().metadata().transitionType());
-            assertEquals(List.of("revise", "request_scope_revision", "request_action", "collect_evidence"), definition.node("gate.human_implementation_repair")
+            assertEquals(List.of("revise", "request_scope_revision", "request_action", "collect_evidence", "submit_evidence"), definition.node("gate.human_implementation_repair")
                     .config().get("allowed_actions"));
             for (var outcome : List.of("REJECT_CONTRACT_GAP", "REJECT_CONTRACT_AMBIGUITY")) {
                 var edges = definition.edgesFrom("acceptance.classify_failure").stream()

@@ -122,6 +122,8 @@ public final class HumanReviewGateHandler implements GateHandler {
         packet.put("runtimeDisposition", runtimeDisposition(context));
         packet.put("actionRequests", context.instance().result().getOrDefault("action_requests", List.of()));
         packet.put("allowedActions", allowedActions);
+        if (allowedActions.contains("submit_evidence")) packet.put("externalEvidenceInstructions",
+                "CLI only: review prepare-evidence before verification, then review submit-evidence with preparation ref/SHA, explicit files and execution declaration. Submission continues to self-test; it is not acceptance.");
         packet.put("inputRefs", context.instance().inputRefs());
         packet.put("inputArtifacts", inputArtifactSummaries(context));
         packet.put("reviewPacketPath", packetRef);
@@ -163,6 +165,9 @@ public final class HumanReviewGateHandler implements GateHandler {
             builder.append("- Runtime Disposition: ").append(runtimeDisposition).append("\n");
         }
         builder.append("- Allowed Actions: ").append(String.join(", ", allowedActions)).append("\n\n");
+        if (allowedActions.contains("submit_evidence")) builder.append(
+                "External evidence: use `review prepare-evidence` before testing unchanged source, then `review submit-evidence --help`. "
+                + "CLI-only ingestion; submitted materials must still pass self-test and acceptance.\n\n");
 
         appendOperatorGuidance(builder, context, allowedActions, decision);
 

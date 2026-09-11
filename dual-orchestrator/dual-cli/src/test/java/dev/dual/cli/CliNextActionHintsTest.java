@@ -41,8 +41,8 @@ class CliNextActionHintsTest {
         assertTrue(printed.contains("Next actions:"));
         assertTrue(printed.contains("dualctl review show --workdir " + tempDir + " " + workstreamId));
         assertTrue(printed.contains("packet: " + tempDir.resolve(".agent/workstreams/" + workstreamId + "/reviews/node-gate-human_design_approval-002.md")));
-        assertTrue(printed.contains("dualctl approve --workdir " + tempDir + " --run " + workstreamId));
-        assertTrue(printed.contains("dualctl revise --workdir " + tempDir + " --run --feedback-file feedback.md " + workstreamId));
+        assertTrue(printed.contains("dualctl approve --run --workdir " + tempDir + " " + workstreamId));
+        assertTrue(printed.contains("dualctl revise --feedback-file feedback.md --run --workdir " + tempDir + " " + workstreamId));
     }
 
     @Test

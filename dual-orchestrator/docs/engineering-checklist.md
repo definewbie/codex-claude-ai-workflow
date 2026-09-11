@@ -303,6 +303,9 @@ source-of-truth model, projection behavior, and regression tests to agree.
 
 ## Tests
 
+- Before a complete real-case starts, map every required verification to an executable exit: agent verification, or an implemented human prepare/submit/self-test/acceptance path. An action name or a future plan is not an available exit. Do not start a fresh E2E when any necessary exit is missing.
+- Reuse verified environment evidence when its identity is unchanged. Check only requirement-mandated capabilities whose actual execution environment is still unproven; do not expand this into a general capability matrix. A delivery-only tracked-clean check is not an implementation-stage prerequisite.
+
 - Add a focused regression test for every new boundary rule.
 - For runtime adapter changes, test stdout and stderr variants.
 - When a real-case run exposes new provider wording, add the captured wording to

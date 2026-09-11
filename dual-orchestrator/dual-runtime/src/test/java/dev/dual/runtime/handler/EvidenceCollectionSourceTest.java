@@ -55,4 +55,22 @@ class EvidenceCollectionSourceTest {
         GitTrackedPathInventory.command(root, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
                 "commit", "-m", "baseline");
     }
+
+    @Test void dirtyAndUntrackedContentsChangeWithoutChangingHeadIndexOrPorcelain() throws Exception {
+        initialize();
+        Files.writeString(root.resolve("source.java"), "dirty A");
+        Files.writeString(root.resolve("new file.txt"), "untracked A");
+        var before = EvidenceCollectionSource.capture(root, List.of());
+        var status = GitTrackedPathInventory.command(root, "status", "--porcelain", "--untracked-files=all");
+        for (var path : List.of("source.java", "new file.txt")) {
+            Files.writeString(root.resolve(path), "different bytes B");
+            var after = EvidenceCollectionSource.capture(root, before.paths());
+            assertEquals(before.head(), after.head());
+            assertEquals(before.indexSha256(), after.indexSha256());
+            assertEquals(before.paths(), after.paths());
+            assertEquals(status, GitTrackedPathInventory.command(root, "status", "--porcelain", "--untracked-files=all"));
+            assertNotEquals(before.sha256(), after.sha256(), path);
+            Files.writeString(root.resolve(path), path.equals("source.java") ? "dirty A" : "untracked A");
+        }
+    }
 }

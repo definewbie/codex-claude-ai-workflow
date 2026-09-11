@@ -249,7 +249,7 @@
     "handlerType" : "human.review",
     "config" : {
       "requires_approved_task_contract": true,
-      "allowed_actions" : [ "revise", "request_scope_revision", "request_action", "collect_evidence" ],
+      "allowed_actions" : [ "revise", "request_scope_revision", "request_action", "collect_evidence", "submit_evidence" ],
       "max_revisions" : 1,
       "gate_purpose" : "implementation_repair"
     }
@@ -817,6 +817,12 @@
       "joinStrategy" : "",
       "loopReason" : "Human authorized implementation repair"
     }
+  }, {
+    "from" : "gate.human_implementation_repair",
+    "on" : "submit_evidence",
+    "to" : "implement.claude_self_test_report",
+    "condition" : null,
+    "metadata" : { "transitionType" : "normal" }
   }, {
     "from" : "gate.human_implementation_repair",
     "on" : "collect_evidence",

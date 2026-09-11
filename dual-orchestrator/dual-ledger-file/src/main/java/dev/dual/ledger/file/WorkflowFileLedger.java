@@ -394,6 +394,13 @@ public final class WorkflowFileLedger {
         refreshProjections(paths);
     }
 
+    /** Caller holds the lock and has verified the prepared source and copied material identities. */
+    public void submitEvidence(WorkstreamPaths paths, WorkflowDefinition definition, String note,
+                               EvidenceSubmission submission) throws IOException {
+        routingEngine.resolveOpenGate(paths, definition, "submit_evidence", note, submission.baseline(), submission);
+        refreshProjections(paths);
+    }
+
     public NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
         var node = nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
         refreshProjections(paths);

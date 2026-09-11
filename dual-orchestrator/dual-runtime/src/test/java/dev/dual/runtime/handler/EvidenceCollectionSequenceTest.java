@@ -177,18 +177,20 @@ class EvidenceCollectionSequenceTest {
                     ? loader.load(Path.of(getClass().getResource("/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json").toURI()))
                     : loader.loadOrDefault(null, variant);
             var gate = definition.node("gate.human_implementation_repair");
-            var collection = definition.edgesFrom(gate.id()).stream().filter(edge -> edge.on().equals("collect_evidence")).toList();
+          for (var action : List.of("collect_evidence", "submit_evidence")) {
+            var collection = definition.edgesFrom(gate.id()).stream().filter(edge -> edge.on().equals(action)).toList();
             assertEquals(1, collection.size());
             assertEquals("self_test_report", definition.node(collection.getFirst().to()).config().get("expected_artifact"));
-            assertFalse(HumanGateActionSemantics.allowedActions(gate, "CHANGE_SCOPE_VIOLATION").contains("collect_evidence"));
-            for (var changed : List.of(new EdgeDefinition(gate.id(), "collect_evidence", "context.implement_claude"),
-                    new EdgeDefinition(gate.id(), "collect_evidence", collection.getFirst().to(), null, TransitionMetadata.loop("bad")))) {
+            assertFalse(HumanGateActionSemantics.allowedActions(gate, "CHANGE_SCOPE_VIOLATION").contains(action));
+            for (var changed : List.of(new EdgeDefinition(gate.id(), action, "context.implement_claude"),
+                    new EdgeDefinition(gate.id(), action, collection.getFirst().to(), null, TransitionMetadata.loop("bad")))) {
                 var edges = new ArrayList<>(definition.edges());
                 edges.remove(collection.getFirst());
                 edges.add(changed);
                 assertThrows(IllegalArgumentException.class, () -> new WorkflowDefinition(definition.workflowId(), definition.version(),
                         definition.entryNodeId(), definition.nodes(), edges));
             }
+          }
         }
     }
 
@@ -198,7 +200,7 @@ class EvidenceCollectionSequenceTest {
         }
     }
 
-    private WorkstreamPaths waiting(String name) throws Exception {
+    WorkstreamPaths waiting(String name) throws Exception {
         var root = temp.resolve(name);
         Files.createDirectories(root);
         GitTrackedPathInventory.command(root, "init");
@@ -209,11 +211,12 @@ class EvidenceCollectionSequenceTest {
         var definition = new WorkflowDefinition("collection", 1, "start", List.of(
                 new NodeDefinition("start", NodeKind.TASK, "noop.task", Map.of()),
                 new NodeDefinition("repair", NodeKind.GATE, "human.review", Map.of("gate_purpose", "implementation_repair",
-                        "allowed_actions", List.of("revise", "collect_evidence"))),
+                        "allowed_actions", List.of("revise", "collect_evidence", "submit_evidence"))),
                 new NodeDefinition("collect", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "self_test_report")),
                 new NodeDefinition("verify", NodeKind.TASK, "noop.task", Map.of()),
                 new NodeDefinition("implementation", NodeKind.TASK, "noop.task", Map.of())), List.of(
                 new EdgeDefinition("start", "completed", "repair"), new EdgeDefinition("repair", "collect_evidence", "collect"),
+                new EdgeDefinition("repair", "submit_evidence", "collect"),
                 new EdgeDefinition("repair", "revise", "verify"), new EdgeDefinition("collect", "completed", "verify"),
                 new EdgeDefinition("verify", "more_evidence", "collect", null, TransitionMetadata.loop("collect more evidence")),
                 new EdgeDefinition("verify", "repair_product", "implementation", null, TransitionMetadata.loop("specific product repair"))));

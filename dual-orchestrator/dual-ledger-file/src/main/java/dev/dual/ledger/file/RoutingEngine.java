@@ -408,7 +408,8 @@ final class RoutingEngine {
                                                        Map<String, Object> attributes) throws IOException {
         var result = new LinkedHashMap<>(attributes);
         if (source.kind() == NodeKind.GATE) {
-            if ("collect_evidence".equals(source.result().get("human_action"))) {
+            if ("collect_evidence".equals(source.result().get("human_action"))
+                    || "submit_evidence".equals(source.result().get("human_action"))) {
                 if (!source.result().containsKey("evidence_collection_baseline"))
                     throw new IOException("missing evidence collection approval baseline");
                 result.put("evidence_collection_gate", source.nodeInstanceId());
@@ -479,6 +480,13 @@ final class RoutingEngine {
 
     void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
                          EvidenceCollectionBaseline collection) throws IOException {
+        resolveOpenGate(paths, definition, action, note, collection, null);
+    }
+
+    void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
+                         EvidenceCollectionBaseline collection, EvidenceSubmission submission) throws IOException {
+        if ("submit_evidence".equals(action) != (submission != null))
+            throw new IOException("submit_evidence requires the typed material submission API");
         if ("request_action".equals(action == null ? "" : action.trim())) {
             throw new IOException("request_action does not resolve a gate; use the action request API");
         }
@@ -507,7 +515,8 @@ final class RoutingEngine {
         }
         var gate = requireOpenGate(paths, current, node);
         var sourceOutcome = text(gate.result().get("source_outcome"));
-        if (HumanGateActionSemantics.COLLECT_EVIDENCE.equals(canonicalAction)) {
+        if (HumanGateActionSemantics.COLLECT_EVIDENCE.equals(canonicalAction)
+                || HumanGateActionSemantics.SUBMIT_EVIDENCE.equals(canonicalAction)) {
             if (collection == null || !collection.gateNodeInstanceId().equals(node.nodeInstanceId())
                     || current.status() != WorkflowStatus.WAITING_FOR_HUMAN
                     || !current.activeNodeInstanceIds().equals(List.of(node.nodeInstanceId()))
@@ -563,6 +572,7 @@ final class RoutingEngine {
         resolvedNodeResult.put("requested_action", action);
         resolvedNodeResult.put("note", note == null ? "" : note);
         if (collection != null) resolvedNodeResult.put("evidence_collection_baseline", collection);
+        if (submission != null) resolvedNodeResult.put("external_evidence", submission);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction,
                 node.inputRefs(), Map.copyOf(resolvedNodeResult), humanAuthorizedRevision);
     }

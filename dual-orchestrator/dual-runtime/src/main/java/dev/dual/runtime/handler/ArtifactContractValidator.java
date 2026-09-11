@@ -113,6 +113,12 @@ public final class ArtifactContractValidator {
                 lastSourceRef = ref;
                 break;
             }
+            try {
+                EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, parsed.envelope().result());
+            } catch (java.io.IOException | IllegalArgumentException invalid) {
+                return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
+                        Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage());
+            }
             if (parsed.envelope().result() instanceof AgentResultEnvelope.DesignResult design) {
                 var errors = DesignScopeValidator.validate(root, workstreamId, design.design());
                 if (!errors.isEmpty()) {
@@ -325,6 +331,12 @@ public final class ArtifactContractValidator {
                 return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
                         envelope, ContractViolation.of("AUTHORED_CONTEXT_INVALID", failure.getMessage(), Map.of()));
             }
+        }
+        try {
+            EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, envelope.result());
+        } catch (java.io.IOException | IllegalArgumentException invalid) {
+            return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
+                    Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage());
         }
         Files.writeString(sidecarPath,
                 OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
