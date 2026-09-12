@@ -783,6 +783,74 @@ class AcpxAgentResultAcquirerTest {
         assertEquals(1, transport.calls);
     }
 
+    @Test
+    void malformedAuthoredReferencesUseOneSameSessionSchemaCorrectionForBothAuthors() throws Exception {
+        var id = "sha256:" + "a".repeat(64) + "#human-note:0";
+        for (var node : List.of("design.claude_design", "plan.claude_plan")) {
+            var valid = authoredEnvelope(node, id);
+            var invalid = authoredEnvelope(node, id + ".old");
+            var transport = new ScriptedTransport(validResult("initial", invalid, 0), validResult("correction", valid, 0));
+            var requests = requests("authored-same-session");
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire("claude", requests.initial(), requests.correction(),
+                    correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node), List.of(id));
+            assertEquals(2, transport.calls);
+            assertEquals(List.of("authored-same-session", "authored-same-session"), transport.sessions);
+            assertEquals(AcpxAgentResultAcquirer.CorrectionReason.SCHEMA_FAILURE, acquisition.correctionReason());
+            assertTrue(acquisition.initialValidation().correctsAuthoredReferences());
+            assertTrue(acquisition.correctionValidation().valid(), acquisition.correctionValidation().errors().toString());
+            assertEquals(invalid, acquisition.initialCandidate());
+            assertEquals(valid, acquisition.finalCandidate());
+            var prompt = Files.readString(requests.correction().promptPath());
+            assertTrue(prompt.contains("result.revision_responses.0.obligation_id"));
+            assertTrue(prompt.contains("Keep every already valid ID"));
+            assertTrue(prompt.contains("Do not re-run the task, use tools"));
+        }
+    }
+
+    @Test
+    void failedReferenceCorrectionNeverStartsAThirdPrompt() throws Exception {
+        var id = "sha256:" + "a".repeat(64) + "#human-note:0";
+        var stale = "sha256:" + "b".repeat(64) + "#human-note:0";
+        for (var node : List.of("design.claude_design", "plan.claude_plan")) {
+            for (var returned : List.of(authoredEnvelope(node, id + ".old"), authoredEnvelope(node, stale),
+                    authoredEnvelope(node, id).replace("Frozen response", "Changed response"))) {
+                var transport = new ScriptedTransport(validResult("initial", authoredEnvelope(node, id + ".old"), 0),
+                        validResult("correction", returned, 0));
+                var requests = requests("single-correction");
+                var acquisition = new AcpxAgentResultAcquirer(transport).acquire("claude", requests.initial(), requests.correction(),
+                        correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node), List.of(id));
+                assertEquals(2, transport.calls);
+                assertFalse(acquisition.correctionValidation().valid(), returned);
+                assertTrue(acquisition.correctionAttempted());
+            }
+        }
+    }
+
+    @Test
+    void noActiveSnapshotAndNonAuthoredSiblingsDoNotAcquireReferenceCorrection() throws Exception {
+        var id = "sha256:" + "a".repeat(64) + "#human-note:0";
+        for (var node : List.of("design.claude_design", "plan.claude_plan", "implement.claude_implement", "implement.claude_self_test_report")) {
+            var author = node.startsWith("design") || node.startsWith("plan");
+            var transport = new ScriptedTransport(validResult("initial", author
+                    ? authoredEnvelope(node, id + ".old") : strictEnvelope(node, "run-1"), 0));
+            var requests = requests("no-reference-correction");
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire("claude", requests.initial(), requests.correction(),
+                    correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node),
+                    author ? List.of() : List.of(id));
+            assertEquals(1, transport.calls);
+            assertFalse(acquisition.correctionAttempted());
+            assertFalse(acquisition.initialValidation().correctsAuthoredReferences());
+        }
+    }
+
+    private static String authoredEnvelope(String node, String id) throws Exception {
+        var json = new com.fasterxml.jackson.databind.ObjectMapper();
+        var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(strictEnvelope(node, "run-1"));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).putArray("revision_responses")
+                .addObject().put("obligation_id", id).put("disposition", "ADDRESSED").put("evidence", "Frozen response");
+        return envelope.toString();
+    }
+
     private Requests requests(String session) throws Exception {
         var initialPrompt = tempDir.resolve("prompts/design.md");
         var correctionPrompt = tempDir.resolve("prompts/design.contract-correction.md");

@@ -322,7 +322,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     runId,
                     ContractRegistry.hasContract(context.definition().id())
                             ? ContractRegistry.forNode(context.definition().id())
-                            : null
+                            : null,
+                    authored == null ? List.of() : authored.obligations().stream()
+                            .map(dev.dual.runtime.handler.AuthoredExecutionContext.Obligation::id).toList()
             );
             var finalResult = acquisition.finalResult();
             var runTimeline = new ArrayList<>(acquisition.executionTimeline());
@@ -384,7 +386,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     governanceContext,
                     executionPolicy
             );
-            return authoritySnapshot.enforce(NodeResult.completed(
+            var candidate = NodeResult.completed(
                     "completed",
                     evidenceOutputRefs(
                             context,
@@ -403,7 +405,12 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                             outputComplete,
                             governanceContext.repositoryFactBinding()
                     )
-            ));
+            );
+            if (acquisition.correctionValidation() != null && !acquisition.correctionValidation().valid()) {
+                candidate = dev.dual.runtime.handler.AgentExecutionResultFacts.rejectAgentResult(candidate,
+                        String.join("; ", acquisition.correctionValidation().errors()));
+            }
+            return authoritySnapshot.enforce(candidate);
         } catch (Exception failure) {
             // If the transport persisted evidence and completion writing failed, replay that
             // evidence to a typed terminal disposition before propagating the handler failure.

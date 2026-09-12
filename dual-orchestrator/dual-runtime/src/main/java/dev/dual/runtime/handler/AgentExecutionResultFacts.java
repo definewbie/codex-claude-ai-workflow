@@ -3,18 +3,26 @@ package dev.dual.runtime.handler;
 import dev.dual.core.execution.ArtifactContractResult;
 import dev.dual.core.execution.AgentResultContractResult;
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.core.workflow.NodeStatus;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class AgentExecutionResultFacts {
+public final class AgentExecutionResultFacts {
     static final String AGENT_RESULT_CONTRACT = "agent_execution_result_contract";
     static final String ARTIFACT_CONTRACT_RESULTS = "agent_execution_artifact_contract_results";
     static final String REREAD_REASONS = "reread_reasons";
 
     private AgentExecutionResultFacts() {
+    }
+
+    /** Carry an acquisition rejection to publication using the existing terminal contract fact. */
+    public static NodeResult rejectAgentResult(NodeResult result, String message) {
+        return attach(new NodeResult("AGENT_OUTPUT_CONTRACT_VIOLATION", NodeStatus.FAILED,
+                        result.outputRefs(), result.result(), message),
+                AgentResultContractResult.invalid(message), List.of(), null);
     }
 
     static NodeResult attach(

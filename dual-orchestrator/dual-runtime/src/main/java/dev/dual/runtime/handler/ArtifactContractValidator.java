@@ -68,6 +68,13 @@ public final class ArtifactContractValidator {
         if (!ContractRegistry.hasContract(nodeDefinition.id())) {
             return result;
         }
+        var acquisitionContract = AgentExecutionResultFacts.agentResultContract(result);
+        if (acquisitionContract.present() && !acquisitionContract.valid()) {
+            // Re-parsing a well-formed final candidate must not erase the acquisition's stricter diff rejection.
+            return contractViolation(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, result,
+                    ContractRegistry.forNode(nodeDefinition.id()), "", null,
+                    ContractViolation.of("AGENT_RESULT_CONTRACT_VIOLATION", acquisitionContract.validationError(), Map.of()));
+        }
         return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result);
     }
 

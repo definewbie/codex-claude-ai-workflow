@@ -1,6 +1,7 @@
 package dev.dual.runtime.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.IntNode;
@@ -21,6 +22,16 @@ public final class AgentResultEnvelopeValidator {
             String expectedWorkstreamId,
             String expectedRunId,
             NodeOutputContract contract
+    ) {
+        return validate(envelope, expectedWorkstreamId, expectedRunId, contract, List.of());
+    }
+
+    public ValidationResult validate(
+            AgentResultEnvelope envelope,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract,
+            List<String> activeObligationIds
     ) {
         var errors = new ValidationErrors();
         if (envelope == null) {
@@ -65,7 +76,7 @@ public final class AgentResultEnvelopeValidator {
             if (envelope.result().summary() == null || envelope.result().summary().isBlank()) {
                 errors.reject("result.summary is required");
             }
-            validatePayload(envelope.result(), contract.nodeId(), errors);
+            validatePayload(envelope.result(), contract.nodeId(), errors, activeObligationIds);
         }
         return errors.result();
     }
@@ -78,6 +89,18 @@ public final class AgentResultEnvelopeValidator {
             NodeOutputContract contract,
             ValidationResult originalValidation
     ) {
+        return validateCorrection(original, corrected, expectedWorkstreamId, expectedRunId, contract, originalValidation, List.of());
+    }
+
+    public ValidationResult validateCorrection(
+            AgentResultEnvelope original,
+            AgentResultEnvelope corrected,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract,
+            ValidationResult originalValidation,
+            List<String> activeObligationIds
+    ) {
         var correctedValidation = validate(corrected, expectedWorkstreamId, expectedRunId, contract);
         if (!correctedValidation.valid()) {
             return correctedValidation;
@@ -85,11 +108,27 @@ public final class AgentResultEnvelopeValidator {
         if (original == null || originalValidation == null || !originalValidation.schemaCorrectionAllowed()) {
             return ValidationResult.rejected("schema correction has no repairable original candidate");
         }
+        if (originalValidation.correctsAuthoredReferences()) {
+            if (!originalValidation.equals(validate(original, expectedWorkstreamId, expectedRunId, contract, activeObligationIds)))
+                return ValidationResult.rejected("authored reference correction targets do not match the original candidate");
+            var coverageErrors = AuthoredRevisionValidator.validate(authoredResponses(corrected.result()), activeObligationIds);
+            if (!coverageErrors.isEmpty()) return ValidationResult.rejected(String.join("; ", coverageErrors));
+        }
         var expected = OBJECT_MAPPER.valueToTree(original);
         if (!(expected instanceof ObjectNode expectedObject)) {
             return ValidationResult.rejected("schema correction baseline is not an object");
         }
         for (var target : originalValidation.correctionTargets()) {
+            if (target.value() == CorrectionValue.ACTIVE_OBLIGATION_ID) {
+                // Only malformed slots selected from the original can change. All other JSON values remain frozen.
+                var pointer = JsonPointer.compile("/" + target.path().replace('.', '/'));
+                var replacement = OBJECT_MAPPER.valueToTree(corrected).at(pointer);
+                if (!replacement.isTextual() || !activeObligationIds.contains(replacement.asText())
+                        || !(expectedObject.at(pointer.head()) instanceof ObjectNode response))
+                    return ValidationResult.rejected("authored reference correction target is invalid: " + target.path());
+                response.set("obligation_id", replacement);
+                continue;
+            }
             if (!applyExpectedValue(
                     expectedObject,
                     target,
@@ -109,7 +148,8 @@ public final class AgentResultEnvelopeValidator {
     private static void validatePayload(
             AgentResultEnvelope.AgentResult result,
             String nodeId,
-            ValidationErrors errors
+            ValidationErrors errors,
+            List<String> activeObligationIds
     ) {
         switch (result) {
             case AgentResultEnvelope.TaskContractProposalResult proposal -> {
@@ -144,7 +184,7 @@ public final class AgentResultEnvelopeValidator {
                 validateNoVerificationRemediation(output.failure(), errors);
             }
             case AgentResultEnvelope.DesignResult design -> {
-                AuthoredRevisionValidator.shapeErrors(design.revisionResponses()).forEach(errors::reject);
+                validateAuthoredResponses(design.revisionResponses(), activeObligationIds, errors);
                 requiredText(design.lifecycleStatus(), "result.lifecycle_status", errors);
                 requiredList(design.checks(), "result.checks", false, errors);
                 requiredList(design.evidence(), "result.evidence", false, errors);
@@ -157,7 +197,7 @@ public final class AgentResultEnvelopeValidator {
                 }
             }
             case AgentResultEnvelope.PlanResult plan -> {
-                AuthoredRevisionValidator.shapeErrors(plan.revisionResponses()).forEach(errors::reject);
+                validateAuthoredResponses(plan.revisionResponses(), activeObligationIds, errors);
                 validateEvidencePayload(
                         plan.lifecycleStatus(), plan.checks(), plan.evidence(), plan.missingEvidence(),
                         plan.mustFix(), plan.acceptanceNotes(), plan.openRisks(), plan.changedFiles(),
@@ -215,6 +255,26 @@ public final class AgentResultEnvelopeValidator {
                 requiredText(handoff.recommendedNextStage(), "result.recommended_next_stage", errors);
                 requiredText(handoff.suggestedNextPrompt(), "result.suggested_next_prompt", errors);
             }
+        }
+    }
+
+    private static List<AgentResultEnvelope.AuthoredRevisionResponse> authoredResponses(AgentResultEnvelope.AgentResult result) {
+        return switch (result) {
+            case AgentResultEnvelope.DesignResult design -> design.revisionResponses();
+            case AgentResultEnvelope.PlanResult plan -> plan.revisionResponses();
+            default -> null;
+        };
+    }
+
+    private static void validateAuthoredResponses(List<AgentResultEnvelope.AuthoredRevisionResponse> responses,
+                                                List<String> activeIds, ValidationErrors errors) {
+        var indexes = AuthoredRevisionValidator.repairableReferenceIndexes(responses, activeIds);
+        if (indexes.isEmpty()) {
+            AuthoredRevisionValidator.shapeErrors(responses).forEach(errors::reject);
+        } else {
+            for (int index : indexes) errors.repairable("result.revision_responses." + index + ".obligation_id",
+                    CorrectionValue.ACTIVE_OBLIGATION_ID,
+                    AuthoredRevisionValidator.invalidIdMessage(index, responses.get(index).obligationId()));
         }
     }
 
@@ -483,7 +543,9 @@ public final class AgentResultEnvelopeValidator {
             case RUN_ID -> TextNode.valueOf(expectedRunId);
             case NODE_ID -> TextNode.valueOf(expectedNodeId);
             case EMPTY_LIST -> new ArrayNode(OBJECT_MAPPER.getNodeFactory());
+            case ACTIVE_OBLIGATION_ID -> null;
         };
+        if (value == null) return false;
         var segments = target.path().split("\\.");
         ObjectNode parent = root;
         for (int index = 0; index < segments.length - 1; index++) {
@@ -508,7 +570,8 @@ public final class AgentResultEnvelopeValidator {
         WORKSTREAM_ID,
         RUN_ID,
         NODE_ID,
-        EMPTY_LIST
+        EMPTY_LIST,
+        ACTIVE_OBLIGATION_ID
     }
 
     public record CorrectionTarget(String path, CorrectionValue value) {
@@ -536,6 +599,10 @@ public final class AgentResultEnvelopeValidator {
         public boolean schemaCorrectionAllowed() {
             return correctionDisposition == CorrectionDisposition.SCHEMA_REPAIRABLE;
         }
+
+        public boolean correctsAuthoredReferences() {
+            return correctionTargets.stream().anyMatch(target -> target.value() == CorrectionValue.ACTIVE_OBLIGATION_ID);
+        }
     }
 
     private static final class ValidationErrors {
@@ -557,7 +624,9 @@ public final class AgentResultEnvelopeValidator {
             if (messages.isEmpty()) {
                 return ValidationResult.pass();
             }
-            var disposition = !correctionTargets.isEmpty() && !rejected
+            var referenceOnly = correctionTargets.stream().noneMatch(target -> target.value() == CorrectionValue.ACTIVE_OBLIGATION_ID)
+                    || correctionTargets.stream().allMatch(target -> target.value() == CorrectionValue.ACTIVE_OBLIGATION_ID);
+            var disposition = !correctionTargets.isEmpty() && !rejected && referenceOnly
                     ? CorrectionDisposition.SCHEMA_REPAIRABLE
                     : CorrectionDisposition.NOT_REPAIRABLE;
             return new ValidationResult(

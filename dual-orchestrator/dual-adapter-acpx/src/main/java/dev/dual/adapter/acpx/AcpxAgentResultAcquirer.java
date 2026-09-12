@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayDeque;
 import java.util.HexFormat;
+import java.util.List;
 
 /** Acquires one strict agent-result candidate, with at most one same-session contract correction. */
 final class AcpxAgentResultAcquirer {
@@ -41,12 +42,27 @@ final class AcpxAgentResultAcquirer {
             String expectedRunId,
             NodeOutputContract contract
     ) throws IOException, InterruptedException {
+        return acquire(agent, initialRequest, correctionRequest, contractPrompt, expectedWorkstreamId, expectedRunId,
+                contract, List.of());
+    }
+
+    Acquisition acquire(
+            String agent,
+            AcpxRunRequest initialRequest,
+            AcpxRunRequest correctionRequest,
+            String contractPrompt,
+            String expectedWorkstreamId,
+            String expectedRunId,
+            NodeOutputContract contract,
+            List<String> activeObligationIds
+    ) throws IOException, InterruptedException {
+        activeObligationIds = List.copyOf(activeObligationIds);
         var initialResult = executeInitial(agent, initialRequest);
         var initialParsedPresentation = parsePresentation(presentationCandidate(
                 initialResult.promptCompletion().finalAssistantMessage()));
         var initialPresentation = initialParsedPresentation.presentation();
         var initialParse = initialParsedPresentation.parsed();
-        var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract);
+        var initialValidation = validate(initialParse, expectedWorkstreamId, expectedRunId, contract, activeObligationIds);
         var correctionReason = correctionReason(initialParse, initialValidation);
         var correctionDisposition = correctionDisposition(
                 initialResult,
@@ -88,7 +104,8 @@ final class AcpxAgentResultAcquirer {
                 correctionParse,
                 expectedWorkstreamId,
                 expectedRunId,
-                contract
+                contract,
+                activeObligationIds
         );
         return new Acquisition(
                 initialResult,
@@ -160,12 +177,13 @@ final class AcpxAgentResultAcquirer {
             AgentResultEnvelopeParser.ParseResult parsed,
             String expectedWorkstreamId,
             String expectedRunId,
-            NodeOutputContract contract
+            NodeOutputContract contract,
+            List<String> activeObligationIds
     ) {
         if (!parsed.valid() || contract == null) {
             return null;
         }
-        return validator.validate(parsed.envelope(), expectedWorkstreamId, expectedRunId, contract);
+        return validator.validate(parsed.envelope(), expectedWorkstreamId, expectedRunId, contract, activeObligationIds);
     }
 
     private AgentResultEnvelopeValidator.ValidationResult validateCorrection(
@@ -175,7 +193,8 @@ final class AcpxAgentResultAcquirer {
             AgentResultEnvelopeParser.ParseResult correctionParse,
             String expectedWorkstreamId,
             String expectedRunId,
-            NodeOutputContract contract
+            NodeOutputContract contract,
+            List<String> activeObligationIds
     ) {
         if (!correctionParse.valid() || contract == null) {
             return null;
@@ -194,7 +213,8 @@ final class AcpxAgentResultAcquirer {
                 expectedWorkstreamId,
                 expectedRunId,
                 contract,
-                initialValidation
+                initialValidation,
+                activeObligationIds
         );
     }
 
@@ -246,6 +266,16 @@ final class AcpxAgentResultAcquirer {
         var evidence = reason == CorrectionReason.SCHEMA_FAILURE && validation != null
                 ? validation.errors()
                 : java.util.List.of(parsed.errorCode());
+        if (validation != null && validation.correctsAuthoredReferences()) {
+            correctionPolicy = """
+                    Only correct the malformed obligation_id slots listed below, using the canonical active obligations
+                    in Required Authored Context. Keep every already valid ID, array count/order, disposition,
+                    evidence string, design/plan content, and every other field unchanged.
+                    Return the complete JSON object. Do not re-run the task, use tools, explain, or use Markdown.
+                    This is the only contract-correction attempt; it does not grant an approval or close an obligation.
+                    Repairable slots: %s
+                    """.formatted(validation.correctionTargets()).stripTrailing();
+        }
         return """
                 Typed correction reason: %s
                 Validation errors: %s
