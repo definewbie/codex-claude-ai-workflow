@@ -1,6 +1,6 @@
 # Authored 引用形状错误的单次纠错
 
-状态：IMPLEMENTED / INDEPENDENT DIFF REVIEW PASS / READY TO COMMIT；provider 未运行，GCTW 保持只读。
+状态：COMMITTED / INDEPENDENT DIFF REVIEW PASS / PACKAGE VERIFIED；代码提交 `10cd2fbe`，provider 未运行，GCTW 保持只读。
 
 ## 目标与裁定
 
@@ -74,7 +74,7 @@ Declared：既有 active Snapshot + 仅坏 ID 的 typed targets。Proven：双�
 
 首次全量运行在执行沙箱中遇到两项既有进程树测试的 `sysctl` 权限错误（AgentExecutionAttemptReconcilerTest、StaleRunningRecoveryTest）；未跳过或改动这两项测试，在获准宿主进程权限后原样重跑整个 reactor，结果如上。没有以聚焦测试代替全量通过。
 
-本次只执行 test，未 package。冻结 CLI JAR SHA 仍为 `c8584379a5115b7e2249da4ac57d4452084162349ed72fbb5aaee961e8aebfe1`，**不包含本次修复**，不得用它宣称新能力或启动验证。
+独立评审前只执行 test，未 package；当时冻结 CLI JAR SHA 为 `c8584379a5115b7e2249da4ac57d4452084162349ed72fbb5aaee961e8aebfe1`，**不包含本次修复**。评审后重建结果见下，不得继续用该旧 JAR 宣称新能力。
 
 ## 自查与下一步
 
@@ -88,4 +88,6 @@ Declared：既有 active Snapshot + 仅坏 ID 的 typed targets。Proven：双�
 
 五项 P3 保留为边界说明而非新增开发：语义配对仍归 reviewer/human；合法但错误的 ID 不在本轮 correction 范围；既有 invalid fact 后续生产者同受发布约束；AgentExecutionResultFacts 的最小公共 API 为跨模块接线所需；真实模型纠错是否成功仍待自然样本。独立评审允许按上述六生产文件、两测试修改、新序列测试及本文选择性提交，排除其他工作树变更。
 
-下一步：选择性提交及重建 JAR → 按既有可复用 Gate 更新运行身份与前置检查后验证。GCTW 保持只读，不做兼容救援。未启动额外 agent、未消耗 provider、未恢复/新建 real-case。
+评审后收口：已选择性提交 `10cd2fbe20a434f53c62a45830644edf61b91459`（10 文件），随后 `mvn -q -o package` exit 0，178 份 XML 再次聚合 **1493/0/0/0**。新 JAR SHA 为 `38d49979291909696b429d76f678f74db09b58388aa3ca01c332f8ce0b48b448`；直接读取 JAR 内嵌 runtime/adapter 模块的六个改动 class，与本次 target/classes 逐字节比对，6/6 一致。Doctor OK、external small workflow validation 28/51 通过、原 target source check PASS；生产源码无未提交变更，其他既存文档/output 保留未纳入。
+
+已在[可复用 Gate](../testing/verification-gates/20260909-okx-human-reviewed-scope-fresh-e2e.md)追加本次身份及前置记录，不新建 Gate 或改变产品验收。下一步依既有顺序补齐运行时 health 核验并创建一次 fresh workspace，再 capture/verify 后进入业务执行；本次收口尚未执行这些动作。GCTW 保持只读，不做兼容救援。未启动额外 agent、未消耗 provider、未恢复/新建 real-case。

@@ -101,3 +101,19 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 自然进入材料分支时：读当前typed gate -> prepare并保存源码/合同基准 -> 在同一工作区做真实验证（日志/XML/截图写非源码目录）-> submit复制材料并绑定ref/SHA -> self-test核验 -> context -> acceptance引用同一manifest及材料ref。外部声明不自动变成测试通过；失败材料如实处理，缺证据且无must_fix不得回实现。任何源码或材料漂移必须拒绝，不能重抓基准洗掉变化。未触发的分支记NOT EXERCISED，不人为制造。
 
 执行顺序：源端身份/check、CLI定义验证、必要环境可用性及最小health全通过 -> start不带run -> 新workspace capture/verify -> 分段run及逐门审阅 -> 按原PASS/FAIL/INVALID归档。quota按用户要求暂停并提示切换，不自动重试；其余缺陷止损后不改输入重跑、不创建第二样本。本节不授权原target apply/commit/push，交付仍止于accepted candidate。
+
+## 2026-09-12 引用纠错修复后：工件与源端前置
+
+状态：PACKAGE / SOURCE PREFLIGHT PASS；PROVIDER NOT RUN；新 workstream 尚未创建。前节 GCTW 的 FAIL 不改判、不恢复；本节是后续 fresh 执行准备记录，不是自然 E2E 成功声明。继续复用本页产品目标、完整消费链、权限、PASS/FAIL/INVALID 和止损约定，不另起 Gate。
+
+- code checkpoint：`10cd2fbe20a434f53c62a45830644edf61b91459`，tree `4b6d779f38c4cfd8743342c981d3909861dbe918`（提交引用，后续仅文档后代按 ancestry + 零 production diff 判定）。独立 diff review 无 P0/P1，选择性提交10文件。
+- 提交后离线完整 package exit 0；178份 surefire XML 聚合1493/0/0/0。JAR SHA：`38d49979291909696b429d76f678f74db09b58388aa3ca01c332f8ce0b48b448`。内嵌六个改动 class 与本次编译输出逐字节相同，确认引用纠错和拒绝发布接线均已入包。
+- external small workflow 路径不变，SHA仍为 `3ea9ea6c567608f4593bfef65f5868d7cbbd1be0925315c650abd8ec3f1896d5`，28/51/8/6；新 JAR CLI validation PASS。
+- target HEAD/tree、REQUIREMENT/check SHA仍与前节相同，target clean。原 source check 本次实跑 PASS（含原 curl 行情接口请求），未新增网络检测器。
+- reviewed fork upstream/patch/schema仍为 fd173f04 / `4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e` / v2。新 JAR Doctor OK，Claude ACP0.70.0 / Codex ACP1.10.0。
+- 当前 Claude 配置仍为 open.bigmodel.cn、Sonnet/Opus glm-5.3、Haiku glm-4.7-air，未设置 ANTHROPIC_MODEL/CLAUDE_CODE_MODEL；Codex配置为gpt-6-astra/medium，无工作流模型硬编码。仅记录配置身份，不输出凭据。Claude settings SHA `653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97`；Codex config SHA `d7efe838f7ac0a0191eca7f6901d796d19b68f18e5deefff34d018e51586733d`。此处是配置核对，不冒充 provider health。
+- 三环境变量及 timeout=0 沿用；尚未执行新的 provider health、workspace start/capture/verify，业务运行前仍须按上述顺序完成或按既有同日未变身份规则核证复用，不能以本次离线测试替代。
+
+唯一新增自然观测：若 design/plan 自然出现完整回应中的形状损坏引用，检查原始/纠错双候选、同 run/session 的最多一次无工具 correction、仅坏槽位可变、精确 active 集及发布前重验。格式合法但偷改其他字段的纠错必须 typed 拒绝，不得进入 reviewer。未触发记 NOT EXERCISED，不人为制造；纠错失败仍按既有止损，不自动 retry 或在原失败样本换 JAR 续作。完整产品 E2E 和外部材料链仍是主目标，不能用本项通过替代。
+
+本次提交/打包/源端核验不授权原 target apply、commit、push；未修改旧 ledger，未启动额外 agent。后续执行结果另记实际 fresh workstream 与证据目录，不覆盖任何旧样本。
