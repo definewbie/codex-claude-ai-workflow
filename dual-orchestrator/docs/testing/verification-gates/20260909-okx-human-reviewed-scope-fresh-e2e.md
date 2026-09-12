@@ -104,7 +104,7 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 
 ## 2026-09-12 引用纠错修复后：工件与源端前置
 
-状态：PACKAGE / SOURCE PREFLIGHT PASS；PROVIDER NOT RUN；新 workstream 尚未创建。前节 GCTW 的 FAIL 不改判、不恢复；本节是后续 fresh 执行准备记录，不是自然 E2E 成功声明。继续复用本页产品目标、完整消费链、权限、PASS/FAIL/INVALID 和止损约定，不另起 Gate。
+状态：FAIL / DESIGN_SCOPE_INVALID；唯一样本 `ws-20260912T081920Z-KPPZ` 已通过需求/合同批准，但首版设计返回8项文件计划而非自称的34项，含未授权“okx 占位”路径，发布前被拒。workflow为WAITING_FOR_RECOVERY / evt-000015，无sidecar/设计reviewer后继/产品源码写入。原始stream与保存候选相同、exit0/end_turn，非超时/quota；未触发引用纠错。已关闭全部样本session，不retry、不创建第二样本。前节GCTW的FAIL不改判、不恢复；完整E2E与自然引用纠错/外部材料/交付均未证明。沿用本页判据归档，详见[本轮报告](../real-case-reports/20260912-okx-authored-correction-e2e.md)。
 
 - code checkpoint：`10cd2fbe20a434f53c62a45830644edf61b91459`，tree `4b6d779f38c4cfd8743342c981d3909861dbe918`（提交引用，后续仅文档后代按 ancestry + 零 production diff 判定）。独立 diff review 无 P0/P1，选择性提交10文件。
 - 提交后离线完整 package exit 0；178份 surefire XML 聚合1493/0/0/0。JAR SHA：`38d49979291909696b429d76f678f74db09b58388aa3ca01c332f8ce0b48b448`。内嵌六个改动 class 与本次编译输出逐字节相同，确认引用纠错和拒绝发布接线均已入包。
@@ -112,8 +112,8 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 - target HEAD/tree、REQUIREMENT/check SHA仍与前节相同，target clean。原 source check 本次实跑 PASS（含原 curl 行情接口请求），未新增网络检测器。
 - reviewed fork upstream/patch/schema仍为 fd173f04 / `4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e` / v2。新 JAR Doctor OK，Claude ACP0.70.0 / Codex ACP1.10.0。
 - 当前 Claude 配置仍为 open.bigmodel.cn、Sonnet/Opus glm-5.3、Haiku glm-4.7-air，未设置 ANTHROPIC_MODEL/CLAUDE_CODE_MODEL；Codex配置为gpt-6-astra/medium，无工作流模型硬编码。仅记录配置身份，不输出凭据。Claude settings SHA `653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97`；Codex config SHA `d7efe838f7ac0a0191eca7f6901d796d19b68f18e5deefff34d018e51586733d`。此处是配置核对，不冒充 provider health。
-- 三环境变量及 timeout=0 沿用；尚未执行新的 provider health、workspace start/capture/verify，业务运行前仍须按上述顺序完成或按既有同日未变身份规则核证复用，不能以本次离线测试替代。
+- 三环境变量及 timeout=0 沿用；已按同日未变身份规则核证并归档health复用，未新增重复probe；workspace start/capture/verify已完成且通过后才进入业务执行，未以离线测试替代真实健康和workspace前置。
 
 唯一新增自然观测：若 design/plan 自然出现完整回应中的形状损坏引用，检查原始/纠错双候选、同 run/session 的最多一次无工具 correction、仅坏槽位可变、精确 active 集及发布前重验。格式合法但偷改其他字段的纠错必须 typed 拒绝，不得进入 reviewer。未触发记 NOT EXERCISED，不人为制造；纠错失败仍按既有止损，不自动 retry 或在原失败样本换 JAR 续作。完整产品 E2E 和外部材料链仍是主目标，不能用本项通过替代。
 
-本次提交/打包/源端核验不授权原 target apply、commit、push；未修改旧 ledger，未启动额外 agent。后续执行结果另记实际 fresh workstream 与证据目录，不覆盖任何旧样本。
+本次提交/打包/源端核验不授权原 target apply、commit、push；未修改旧 ledger，未启动额外 agent。本轮证据目录 `output/real-cases/20260912-okx-authored-correction-e2e`；同日health依据未变配置/执行链及真实完成/closed记录复用，来源SHA已归档。不覆盖任何旧样本。
