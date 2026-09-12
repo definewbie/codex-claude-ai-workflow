@@ -85,7 +85,7 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 
 ## 2026-09-12 复用执行：外部材料完整续作
 
-状态：PREFLIGHT / NOT STARTED。用户已授权继续；本节只允许一个新的 fresh 样本，245D、BXWV及更早样本保持只读。复用本页主目标、产品验收、授权和止损规则；不新建 Gate，不启动额外 agent。之前 FAIL 与“submit_evidence 未实现”的文字仅属于对应历史运行。
+状态：FAIL / AUTHORED_RESPONSE_ID_INVALID。全部前置通过后启动唯一样本 `ws-20260911T231749Z-GCTW`（UTC命名，本地2026-09-12），第三次设计修订中模型将human-note身份的64位SHA抄为65位，发布前正确拒绝；账本WAITING_FOR_RECOVERY / evt-000038，未进入实现，无自动correction或retry。材料自然分支NOT EXERCISED，NATURAL E2E NOT PROVEN；完整证据与归因见[本轮报告](../real-case-reports/20260912-okx-external-evidence-e2e.md)。不创建第二样本，245D、BXWV及更早样本保持只读。复用本页主目标、产品验收、授权和止损规则；不新建 Gate，不启动额外 agent。之前 FAIL 与“submit_evidence 未实现”的文字仅属于对应历史运行。
 
 本次代码 checkpoint 为 `b197ce90`，独立 diff review 无 P0/P1；全模块1476/0/0/0，加强后的完整链聚焦15/0/0/0。JAR已重新打包、两个新CLI入口检查通过。
 
