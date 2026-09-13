@@ -117,3 +117,36 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 唯一新增自然观测：若 design/plan 自然出现完整回应中的形状损坏引用，检查原始/纠错双候选、同 run/session 的最多一次无工具 correction、仅坏槽位可变、精确 active 集及发布前重验。格式合法但偷改其他字段的纠错必须 typed 拒绝，不得进入 reviewer。未触发记 NOT EXERCISED，不人为制造；纠错失败仍按既有止损，不自动 retry 或在原失败样本换 JAR 续作。完整产品 E2E 和外部材料链仍是主目标，不能用本项通过替代。
 
 本次提交/打包/源端核验不授权原 target apply、commit、push；未修改旧 ledger，未启动额外 agent。本轮证据目录 `output/real-cases/20260912-okx-authored-correction-e2e`；同日health依据未变配置/执行链及真实完成/closed记录复用，来源SHA已归档。不覆盖任何旧样本。
+
+## 2026-09-13 复用执行：人工retry诊断输入完整性
+
+状态：SOURCE PREFLIGHT PASS / HEALTH PENDING / BUSINESS NOT STARTED。
+用户“进入下一步”沿既有逐门操作委托继续；本轮允许一个fresh样本，不恢复KPPZ/GCTW或
+任何之前终止的样本，不启动额外agent。复用本页原产品主目标、完整消费链、PASS/FAIL/INVALID、
+quota处置与交付边界，不重新设计Gate，不简化任务/验收，不为触发修复制造错误。
+
+- code checkpoint：`6df47cff3ed1bfc97719d36360f128d56eacb90b`；独立评审允许提交，双方全量测试均1508/0/0/0。
+- 已在该提交执行离线`mvn -o -DskipTests package`成功；这是使用已通过全量测试的源码重新打包，
+  不是本轮又复跑1508项。JAR SHA：`b9147829d793dc79d5c3f4c60daa12a4b894b53536c25bd8e4a6f9149ff0aa26`。
+  内嵌NodeStateWriter、AcpxAgentTaskHandler class与本次编译输出逐字节一致，均含retry_failure_context。
+- workflow仍为external small原路径及SHA `3ea9ea6c567608f4593bfef65f5868d7cbbd1be0925315c650abd8ec3f1896d5`，28 nodes / 51 edges；新JAR validate通过。
+- target HEAD/tree、REQUIREMENT/check SHA、Claude settings/Codex config SHA与前节一致，target clean；
+  本次原source check实跑PASS（含curl公开行情API），不是仅引用旧连通性。Doctor OK，reviewed fork/两adapter固定版本不变。
+- 配置仍为Claude GLM-5.3映射、Codex gpt-6-astra/medium，由用户配置读取；三环境变量及timeout=0沿用。
+  新日期不冒充同日health复用：各执行一次既有最小health；Claude复用DeepSeekReadProbe原源码
+  在新编译classpath上的单Read nonce测试，Codex无工具exec精确JSON。记录工具结果/exit/end_turn/关闭状态，
+  不扩展Bash或网络矩阵。任何不满足即停前置；quota提示用户，不自动重试或切模型。
+- 宿主浏览器启动能力沿20260912同身份证据复用；真实产品浏览器/API验证仍必须在新样本进行。
+  必需出口已存在：agent自测、Phase A grant、prepare/submit外部材料→自测→acceptance；无未实现必需出口。
+- 全部前置通过后start不带run；独立effective workspace capture/verify通过后才业务run。
+  证据目录：`output/real-cases/20260913-okx-retry-diagnostic-e2e`，不得覆盖旧目录/样本。
+
+唯一新增自然观察：若同节点自然发生发布前合同拒绝，先冷读FAILED/WFR、结构化parse_error
+及当前批准输入。已有委托下主agent可作一次有理由的普通人工retry决定（非autorun），保持任务
+和批准范围不变；检查READY快照、实际新prompt/manifest、原校验和reviewer/gate后继。
+错误scope/义务/批准身份不得因诊断放行。不是所有失败都可retry，不改变quota/权限/部分写入出口。
+同blocker无新证据连续两轮仍立即止损，不以重复retry替代真正修复。没有合同拒绝则记
+NOT EXERCISED，不为证明诊断收益人为制造。acquisition拒绝尚无新增组合序列，若它成为
+验证目标先停下来核对，不能拿scope序列代证。运行中不得修改harness/输入或换JAR救样本。
+
+本节只是新执行绑定，历史FAIL不改判。即使自然诊断分支通过，也不替代原完整产品E2E合取目标。
