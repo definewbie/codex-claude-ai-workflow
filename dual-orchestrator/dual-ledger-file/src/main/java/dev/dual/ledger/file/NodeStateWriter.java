@@ -219,6 +219,16 @@ final class NodeStateWriter {
         var retryResult = new LinkedHashMap<String, Object>();
         retryResult.put("retry_of_status", node.status().name());
         retryResult.put("retry_note", note == null ? "" : note);
+        if ("node_retry_requested".equals(eventType)
+                && node.status() == NodeStatus.FAILED
+                && "acpx.agent_run".equals(node.handlerType())
+                && "AGENT_OUTPUT_CONTRACT_VIOLATION".equals(node.result().get("reason"))) {
+            if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY) {
+                throw new IOException("contract diagnostic retry requires WAITING_FOR_RECOVERY");
+            }
+            // Copy advisory data with READY in one write; never dereference a mutable diagnostic file.
+            retryResult.put("retry_failure_context", retryFailureContext(node));
+        }
         retryResult.putAll(additionalResult);
         var retry = new NodeInstanceDocument(
                 node.schemaVersion(),
@@ -266,6 +276,35 @@ final class NodeStateWriter {
         );
         jsonWriter.write(paths.workflowCurrentJson(), resumed);
         eventLog.writeInstanceFromCurrent(paths, resumed, now);
+    }
+
+    private Map<String, Object> retryFailureContext(NodeInstanceDocument node) throws IOException {
+        if (!(node.result().get("parse_error") instanceof Map<?, ?> error)
+                || !(error.get("code") instanceof String code) || code.isBlank()
+                || !(error.get("message") instanceof String message) || message.isBlank()
+                || !(error.get("details") instanceof Map<?, ?> details)) {
+            throw new IOException("contract diagnostic retry requires a structured parse_error");
+        }
+        var diagnostic = new LinkedHashMap<String, Object>();
+        diagnostic.put("code", code);
+        diagnostic.put("message", message);
+        diagnostic.put("details", details);
+        var full = objectMapper.writeValueAsString(diagnostic);
+        int end = 0;
+        int bytes = 0;
+        while (end < full.length()) {
+            int point = full.codePointAt(end);
+            int size = point <= 0x7f ? 1 : point <= 0x7ff ? 2 : point <= 0xffff ? 3 : 4;
+            if (bytes + size > 8192) break;
+            bytes += size;
+            end += Character.charCount(point);
+        }
+        return Map.of(
+                "schema_version", 1,
+                "diagnostic_text", full.substring(0, end),
+                "truncated", end < full.length(),
+                "source_run_id", node.result().get("run_id") instanceof String id ? id : "",
+                "source_execution_id", node.latestExecutionId());
     }
 
     private PermissionEscalation publicWebSearchEscalation(WorkstreamPaths paths, NodeInstanceDocument node)

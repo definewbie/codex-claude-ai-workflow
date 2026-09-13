@@ -1196,7 +1196,9 @@ class AcpxAgentTaskHandlerTest {
         ledger.initialize(paths, "wf-network", definition);
         Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Validate approved dependencies.\n");
         var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
-        ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "failed", List.of(), Map.of());
+        ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(),
+                Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION", "parse_error",
+                        Map.of("code", "INVALID_OUTPUT", "message", "Provide the required checks", "details", Map.of())));
         var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore();
         var ref = store.approve(paths, nodeDefinition.id(), List.of("packages.example.org"), "approved dependency resolution");
         ledger.retryActiveNode(paths, "retry with operator grant");
@@ -1208,6 +1210,40 @@ class AcpxAgentTaskHandlerTest {
                 root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
         assertNull(transport.lastExecutionPolicy, "prepare-only must not call the provider");
         assertEquals(pendingBytes, Files.readString(root.resolve(ref)), "prepare-only cannot consume authority");
+        assertTrue(Files.readString(root.resolve((String) prepared.result().get("run_metadata"))
+                .getParent().resolve("prompts/implement-claude.md")).contains("Previous rejected execution"));
+        // A damaged advisory snapshot must fail before claiming even an already approved grant.
+        var nodeBytes = Files.readAllBytes(paths.nodeJson(nodeId));
+        var damaged = new ObjectMapper().readTree(nodeBytes);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) damaged.path("result").path("retry_failure_context"))
+                .put("schema_version", 2);
+        new ObjectMapper().writeValue(paths.nodeJson(nodeId).toFile(), damaged);
+        var rejected = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+        assertEquals(NodeStatus.FAILED, rejected.status());
+        assertEquals("RETRY_FAILURE_CONTEXT_INVALID", rejected.result().get("failure_code"));
+        assertNull(transport.lastExecutionPolicy);
+        assertEquals(pendingBytes, Files.readString(root.resolve(ref)), "invalid input must not consume authority");
+        Files.write(paths.nodeJson(nodeId), nodeBytes);
+        var currentBytes = Files.readAllBytes(paths.workflowCurrentJson());
+        try {
+            for (var fault : List.of("status", "active", "gate")) {
+                var invalidCurrent = (com.fasterxml.jackson.databind.node.ObjectNode) new ObjectMapper().readTree(currentBytes);
+                switch (fault) {
+                    case "status" -> invalidCurrent.put("status", "WAITING_FOR_RECOVERY");
+                    case "active" -> invalidCurrent.putArray("activeNodeInstanceIds");
+                    case "gate" -> invalidCurrent.putArray("openGateIds").add("unfinished-gate");
+                }
+                new ObjectMapper().writeValue(paths.workflowCurrentJson().toFile(), invalidCurrent);
+                var invalidState = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
+                        root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+                assertEquals("RETRY_FAILURE_CONTEXT_INVALID", invalidState.result().get("failure_code"), fault);
+                assertNull(transport.lastExecutionPolicy, fault);
+                assertEquals(pendingBytes, Files.readString(root.resolve(ref)), fault);
+            }
+        } finally {
+            Files.write(paths.workflowCurrentJson(), currentBytes);
+        }
         var preparedMetadata = new ObjectMapper().readTree(root.resolve((String) prepared.result().get("run_metadata")).toFile());
         var preparedPolicy = root.resolve(preparedMetadata.path("executionAuthority").path("policyRef").asText());
         assertTrue(new ObjectMapper().readTree(preparedPolicy.toFile()).path("sandbox").path("network").path("allowed_domains").isEmpty());
@@ -1226,6 +1262,8 @@ class AcpxAgentTaskHandlerTest {
 
         ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "failed", List.of(), Map.of());
         ledger.retryActiveNode(paths, "a second retry is not a second approval");
+        assertFalse(ledger.loadNode(paths, nodeId).result().containsKey("retry_failure_context"),
+                "a subsequent process failure must not retain the older contract diagnostic");
         ledger.markRunning(paths, nodeId, 1);
         new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
                 root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));

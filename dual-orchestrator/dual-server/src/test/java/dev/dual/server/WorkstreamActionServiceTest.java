@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -302,6 +303,30 @@ class WorkstreamActionServiceTest {
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         assertEquals(NodeStatus.READY, node.status());
         assertEquals("try again", node.result().get("retry_note"));
+    }
+
+    @Test
+    void retryPreservesContractDiagnosticThroughSharedLedgerWithoutRunningProvider() throws Exception {
+        var definition = new WorkflowDefinition("retry-diagnostic", 1, "author",
+                List.of(new NodeDefinition("author", NodeKind.TASK, "acpx.agent_run", Map.of())), List.of());
+        var paths = createWorkstream("ws-api-retry-diagnostic", definition);
+        var ledger = new WorkflowFileLedger();
+        var id = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, id, NodeStatus.FAILED, "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(),
+                Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION", "parse_error",
+                        Map.of("code", "SCOPE_INVALID", "message", "Outside scope", "details", Map.of())));
+        var before = ledger.loadNode(paths, id);
+        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+            throw new AssertionError("retry must not itself launch a provider");
+        });
+        service.retry(tempDir, paths.workstreamId().value(), "Retry the same task");
+        var after = ledger.loadNode(paths, id);
+        assertEquals(NodeStatus.READY, after.status());
+        assertEquals(before.inputRefs(), after.inputRefs());
+        assertEquals(before.iterationId(), after.iterationId());
+        assertTrue(((Map<?, ?>) after.result().get("retry_failure_context"))
+                .get("diagnostic_text").toString().contains("SCOPE_INVALID"));
+        assertFalse(after.result().containsKey("permission_approval"));
     }
 
     @Test
