@@ -120,7 +120,12 @@ end_turn/gpt-6-astra。当前 settings模型映射与Codex config仍相同，ada
 
 ## 2026-09-13 复用执行：人工retry诊断输入完整性
 
-状态：SOURCE PREFLIGHT PASS / HEALTH PENDING / BUSINESS NOT STARTED。
+状态：FAIL / LEGAL HUMAN REQUIREMENT REVISE REJECTED BEFORE PROVIDER（唯一样本`ws-20260913T004742Z-6NX5`）。
+初始提案与一次模型评审修订正常完成；主agent根据用户委托在需求门011收回TR-9的全局网络拦截扩张时，
+合法revise被resolver的BLOCKED-only条件拒绝，尚未调用provider。随后该上下文失败又被发布校验误写为
+AGENT_RESULT_MISSING。workflow停在WAITING_FOR_RECOVERY / evt-000014；无产品源码变更、无retry、无第二样本。
+三个业务session已关闭，完整E2E与新增retry诊断自然分支均未证明。
+见[本轮执行报告](../real-case-reports/20260913-okx-retry-diagnostic-e2e.md)。
 用户“进入下一步”沿既有逐门操作委托继续；本轮允许一个fresh样本，不恢复KPPZ/GCTW或
 任何之前终止的样本，不启动额外agent。复用本页原产品主目标、完整消费链、PASS/FAIL/INVALID、
 quota处置与交付边界，不重新设计Gate，不简化任务/验收，不为触发修复制造错误。
@@ -150,3 +155,8 @@ NOT EXERCISED，不为证明诊断收益人为制造。acquisition拒绝尚无�
 验证目标先停下来核对，不能拿scope序列代证。运行中不得修改harness/输入或换JAR救样本。
 
 本节只是新执行绑定，历史FAIL不改判。即使自然诊断分支通过，也不替代原完整产品E2E合取目标。
+
+实际前置：Claude单Read nonce结果匹配、exit0/end_turn、adapterSignals空、session closed；
+Codex无工具exec精确health JSON、exit0/end_turn。fresh workspace capture/verify均passed，
+本次workspace内原curl同样通过。证据见本轮目录health-check.json、glm-session.json与
+workspace-check/workspace-preflight.json。2026-09-13 08:47 +08:00创建上述唯一样本，随后启动首段。
